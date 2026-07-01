@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  EXAMPLES_MIN_H,
   NODE_UI_SCALE,
-  PROBLEM_MIN_H,
   STRUDEL_NODE_W,
   vizText,
   vizPad,
@@ -15,8 +13,6 @@ describe('design/tokens', () => {
   it('re-exports canvas, node, and viz tokens', () => {
     expect(STRUDEL_NODE_W).toBe(400);
     expect(NODE_UI_SCALE).toBe(1.25);
-    expect(PROBLEM_MIN_H).toBe(188);
-    expect(EXAMPLES_MIN_H).toBe(113);
     expect(FIT_VIEW_DURATION_MS).toBe(400);
     expect(MIN_VIEWPORT_HEIGHT).toBe(280);
     expect(CANVAS_MARGIN).toBe(12);

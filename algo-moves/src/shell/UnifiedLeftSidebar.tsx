@@ -19,13 +19,12 @@ import {
 } from 'lucide-react';
 import { catalog, browseBreadcrumbForItem, getSiblingItems, categoryIdForItem, trackForCategory, type ItemStatus } from '../content';
 import { useProgress, statFor } from '../lib/progress';
-import { useWorkspace, type CanvasZoomApi } from '../lib/workspace';
+import { useWorkspace } from '../lib/workspace';
 import { cn } from '../lib/cn';
 import { chromeText } from './chromeUi';
 import { CatalogTree } from './CatalogTree';
 import { nodeIcon, panelAccent } from './canvas/PanelNode';
 import { Label } from './canvas/nodeui';
-import { SidebarZoomControls } from './canvas/CanvasFloatingHud';
 import { CATEGORY_ORDER, nodeCategory } from './canvas/layout';
 import { SIDEBAR_W, SidebarSection, CHROME_BTN_MD, SECTION_MAX, MobileDrawer } from './SidebarShell';
 
@@ -96,8 +95,6 @@ function CollapsedRail({
   onOpenCatalog,
   onOpenProblems,
   onOpenAdd,
-  zoomApi,
-  onTidy,
 }: {
   onHome: () => void;
   onExpand: () => void;
@@ -107,8 +104,6 @@ function CollapsedRail({
   onOpenCatalog: () => void;
   onOpenProblems: () => void;
   onOpenAdd: () => void;
-  zoomApi?: CanvasZoomApi;
-  onTidy?: () => void;
 }) {
   const btn =
     `grid ${CHROME_BTN_MD} place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink`;
@@ -144,11 +139,6 @@ function CollapsedRail({
           <Plus className="h-3 w-3" />
         </button>
       )}
-      {zoomApi && onTidy && (
-        <div className="mt-auto flex flex-col items-center pb-0.5">
-          <SidebarZoomControls zoomApi={zoomApi} onTidy={onTidy} />
-        </div>
-      )}
     </div>
   );
 }
@@ -167,9 +157,6 @@ export function UnifiedLeftSidebar() {
     setActiveCategoryId,
     goHome,
     canvasAdd,
-    canvasZoom,
-    canvasHud,
-    mode,
     isMobile,
   } = useWorkspace();
   const progress = useProgress();
@@ -260,8 +247,6 @@ export function UnifiedLeftSidebar() {
         onOpenCatalog={() => expand('catalog')}
         onOpenProblems={() => expand('problems')}
         onOpenAdd={() => expand('add')}
-        zoomApi={mode === 'visualize' ? canvasZoom ?? undefined : undefined}
-        onTidy={canvasHud?.onTidy}
       />
     );
   }
@@ -502,11 +487,6 @@ export function UnifiedLeftSidebar() {
         </div>
       </div>
 
-      {mode === 'visualize' && canvasZoom && canvasHud?.onTidy && (
-        <div className="flex shrink-0 justify-center border-t border-edge px-[var(--hpad)] py-1.5">
-          <SidebarZoomControls zoomApi={canvasZoom} onTidy={canvasHud.onTidy} vertical={false} />
-        </div>
-      )}
     </div>
   );
 

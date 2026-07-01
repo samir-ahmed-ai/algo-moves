@@ -1,3 +1,5 @@
+import { readStorageJson, writeStorageJson } from './storage';
+
 /**
  * Persisted canvas layouts (#73). Per `${pluginId}:${mode}` key we store dragged
  * positions/resizes and which panels were trash-removed, so a tweaked canvas
@@ -18,19 +20,9 @@ export interface LayoutEntry {
 const KEY = 'algo-moves:layouts';
 
 export function loadLayouts(): Record<string, LayoutEntry> {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as Record<string, LayoutEntry>;
-  } catch {
-    // ignore corrupt/blocked storage
-  }
-  return {};
+  return readStorageJson(KEY, {});
 }
 
 export function saveLayouts(data: Record<string, LayoutEntry>) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(data));
-  } catch {
-    // ignore quota/private-mode failures
-  }
+  writeStorageJson(KEY, data);
 }

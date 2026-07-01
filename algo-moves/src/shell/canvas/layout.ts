@@ -9,6 +9,7 @@ import {
   panelTitle,
 } from '../../core/panelRegistry';
 import type { PanelFlowNode } from './PanelNode';
+import { getMeasuredHeight } from './measuredCache';
 import {
   CANVAS_MARGIN,
   CANVAS_NODE_SEP,
@@ -402,13 +403,18 @@ export function layoutVisualizeCanvas(
     const { nodes: colNodes } = layoutLeftColumn(problem, examples, colX, stackY);
 
     const vizX = colX + colW + wireGap;
+    // The visualizer hugs its board + rail (measured) rather than stretching to
+    // the full viewport height, so it no longer leaves a tall empty node.
+    // Centre it against the same span as the left column.
+    const vizH = Math.min(availH, viz.measured?.height ?? getMeasuredHeight(viz.id) ?? nodeH(viz));
+    const vizY = colY + Math.max(0, (availH - vizH) / 2);
     const positioned: PanelFlowNode[] = [
       ...colNodes,
       rowHandles({
         ...viz,
-        position: { x: vizX, y: colY },
+        position: { x: vizX, y: vizY },
         width: availW,
-        height: availH,
+        height: vizH,
       }),
     ];
 

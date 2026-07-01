@@ -120,10 +120,9 @@ html {
   --node-fs-title: var(--fs-title);
   --chrome-left: 32px;
   --chrome-right: 32px;
-  --chrome-bottom: 24px; /* BOTTOM_RAIL_H */
+  --chrome-bottom: 0px;
   --chrome-top: 0px;
-  --bottom-rail-h: 24px; /* BOTTOM_RAIL_H */
-  --default-dock-h: 112px; /* DEFAULT_DOCK_H */
+  --bottom-rail-h: 24px; /* BOTTOM_RAIL_H — transport clearance when visible */
 }
 
 /* Mobile overlay drawers — sidebars slide over the canvas on phones. */

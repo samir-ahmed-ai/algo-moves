@@ -36,6 +36,8 @@ export function HeaderExamplesNav() {
   const idx = exampleInputIndex(inputs, inputId);
   const active = inputs[idx] ?? inputs[0];
   const label = active?.label ?? '';
+  const prev = idx > 0 ? inputs[idx - 1] : undefined;
+  const next = idx < inputs.length - 1 ? inputs[idx + 1] : undefined;
 
   return (
     <>
@@ -43,24 +45,27 @@ export function HeaderExamplesNav() {
         {idx + 1}/{inputs.length}
         {label ? ` · ${label}` : ''}
       </PanelHeaderMeta>
+      <PanelHeaderMeta className="mr-0.5 hidden max-w-[100px] truncate text-[length:var(--node-fs-2xs,0.5625rem)] text-ink3 md:inline-flex">
+        {prev ? `← ${prev.label}` : '← Start'}
+      </PanelHeaderMeta>
       <PanelHeaderAction
         variant="ghost"
-        title="Previous example"
+        title={prev ? `Previous example: ${prev.label}` : 'Previous example'}
         disabled={idx === 0}
         onClick={() => {
-          const next = stepExampleInput(inputs, inputId, -1);
-          if (next) setInputId(next.id);
+          const previous = stepExampleInput(inputs, inputId, -1);
+          if (previous) setInputId(previous.id);
         }}
       >
         <ChevronLeft className={nodeIconGlyph} />
       </PanelHeaderAction>
       <PanelHeaderAction
         variant="ghost"
-        title="Next example"
+        title={next ? `Next example: ${next.label}` : 'Next example'}
         disabled={idx === inputs.length - 1}
         onClick={() => {
-          const next = stepExampleInput(inputs, inputId, 1);
-          if (next) setInputId(next.id);
+          const upcoming = stepExampleInput(inputs, inputId, 1);
+          if (upcoming) setInputId(upcoming.id);
         }}
       >
         <ChevronRight className={nodeIconGlyph} />

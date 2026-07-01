@@ -8,9 +8,18 @@ function useFreezeIfReducedMotion(ref: React.RefObject<SVGSVGElement | null>) {
   useEffect(() => {
     const svg = ref.current;
     if (!svg) return;
+    const query = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       svg.pauseAnimations?.();
     }
+
+    if (!query) return;
+    const onChange = () => {
+      if (query.matches) svg.pauseAnimations?.();
+      else svg.unpauseAnimations?.();
+    };
+    query.addEventListener?.('change', onChange);
+    return () => query.removeEventListener?.('change', onChange);
   }, [ref]);
 }
 

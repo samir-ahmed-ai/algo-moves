@@ -7,10 +7,10 @@ import type {
   CanvasAddPanel,
   CanvasHudProps,
   CanvasProjectApi,
-  CanvasZoomApi,
   Density,
   LayoutDir,
   Palette,
+  RightSidebarTab,
   Theme,
   Tweaks,
 } from './workspace';
@@ -45,10 +45,8 @@ export interface WorkspaceCtx {
   setMode: (m: CanvasMode) => void;
   sidePanelTab: string | null;
   setSidePanelTab: (id: string | null) => void;
-  bottomDockOpen: boolean;
-  setBottomDockOpen: (b: boolean) => void;
-  bottomDockHeight: number;
-  setBottomDockHeight: (h: number) => void;
+  rightTab: RightSidebarTab;
+  setRightTab: (tab: RightSidebarTab) => void;
   activeItemId: string;
   /** Low-level item id setter — prefer {@link openProblem} when opening a problem from UI. */
   setActiveItemId: (id: string) => void;
@@ -70,14 +68,14 @@ export interface WorkspaceCtx {
   openProblem: (id: string) => void;
   /** Enter the full-screen mobile swipe deck; pass a category id to open that category directly. */
   enterMobile: (categoryId?: string, itemId?: string) => void;
+  /** Enter the Vim Dojo maze trainer; pass a level id to open that level directly. */
+  enterVim: (levelId?: string) => void;
   canvasAdd: CanvasAddPanel | null;
   setCanvasAdd: (v: CanvasAddPanel | null) => void;
   canvasProject: CanvasProjectApi | null;
   setCanvasProject: (v: CanvasProjectApi | null) => void;
   canvasHud: CanvasHudProps | null;
   setCanvasHud: (v: CanvasHudProps | null) => void;
-  canvasZoom: CanvasZoomApi | null;
-  setCanvasZoom: (v: CanvasZoomApi | null) => void;
   settingsOpen: boolean;
   setSettingsOpen: (b: boolean) => void;
   tracePreviewOpen: boolean;

@@ -3,7 +3,7 @@ import { catalog } from '../../../../content';
 import { useProgress, statFor } from '../../../../lib/progress';
 import { cn } from '../../../../lib/cn';
 import { useCanvasActions } from '../../CanvasContext';
-import { Meter, Pill, Section, nodeText } from '../../nodeui';
+import { Meter, Pill, Section, nodeText, nodeTextWrap } from '../../nodeui';
 
 /** #60 Badges: award a badge per course when all its problems are mastered. */
 export function BadgesPanelBody() {
@@ -23,7 +23,7 @@ export function BadgesPanelBody() {
             <div key={c.id} className="flex items-center gap-2">
               <Award className="h-4 w-4 shrink-0" style={{ color: c.done ? 'var(--ring)' : 'var(--text-3)', opacity: c.done ? 1 : 0.5 }} />
               <div className="min-w-0 flex-1">
-                <div className={cn('truncate text-ink', nodeText.sm)}>{c.title}</div>
+                <div className={cn('text-ink', nodeTextWrap, nodeText.sm)}>{c.title}</div>
                 <div className="mt-1">
                   <Meter value={c.mastered} max={c.total || 1} tone={c.done ? 'accent' : 'good'} height={5} />
                 </div>

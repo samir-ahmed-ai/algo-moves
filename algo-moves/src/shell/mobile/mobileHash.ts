@@ -19,25 +19,25 @@ export interface MobileHashTarget {
  * - `#mobile/topic/{topicId}/item/{itemId}` (legacy)
  */
 export function parseMobileHash(hash: string): MobileHashTarget | null {
-  if (!hash.startsWith('#mobile')) return null;
-  const rest = hash.slice('#mobile'.length);
+  if (!isMobileHash(hash)) return null;
+  const rest = hash.slice(MOBILE_HASH_PREFIX.length);
   if (!rest) return {};
   const parts = rest.split('/').filter(Boolean);
 
   if (parts[0] === 'track' && parts[1]) {
-    const target: MobileHashTarget = { trackId: decodeURIComponent(parts[1]) as TrackId };
+    const target: MobileHashTarget = { trackId: decodeRoutePart(parts[1]) as TrackId };
     if (parts[2] === 'category' && parts[3]) {
-      target.categoryId = decodeURIComponent(parts[3]);
-      if (parts[4] === 'item' && parts[5]) target.itemId = decodeURIComponent(parts[5]);
+      target.categoryId = decodeRoutePart(parts[3]);
+      if (parts[4] === 'item' && parts[5]) target.itemId = decodeRoutePart(parts[5]);
     }
     return target;
   }
 
   if (parts[0] === 'topic' && parts[1]) {
-    const topicId = decodeURIComponent(parts[1]);
+    const topicId = decodeRoutePart(parts[1]);
     const target: MobileHashTarget = { topicId };
     if (topicId.startsWith('browse-')) target.categoryId = topicId.slice('browse-'.length);
-    if (parts[2] === 'item' && parts[3]) target.itemId = decodeURIComponent(parts[3]);
+    if (parts[2] === 'item' && parts[3]) target.itemId = decodeRoutePart(parts[3]);
     return target;
   }
 
@@ -54,11 +54,15 @@ export function buildMobileModeUrl(): string {
 export function writeMobileHash(target?: MobileHashTarget | null, opts?: { replace?: boolean }) {
   if (typeof location === 'undefined') return;
   let hash = '#mobile';
-  if (target?.trackId && target?.categoryId) {
-    hash += `/track/${encodeURIComponent(target.trackId)}/category/${encodeURIComponent(target.categoryId)}`;
+  const trackId = target?.trackId;
+  const categoryId = target?.categoryId;
+  const defaultTrack: TrackId = 'interview-prep';
+
+  if (trackId && categoryId) {
+    hash += `/track/${encodeURIComponent(trackId)}/category/${encodeURIComponent(categoryId)}`;
     if (target.itemId) hash += `/item/${encodeURIComponent(target.itemId)}`;
-  } else if (target?.categoryId) {
-    hash += `/track/interview-prep/category/${encodeURIComponent(target.categoryId)}`;
+  } else if (categoryId) {
+    hash += `/track/${encodeURIComponent(trackId ?? defaultTrack)}/category/${encodeURIComponent(categoryId)}`;
     if (target.itemId) hash += `/item/${encodeURIComponent(target.itemId)}`;
   } else if (target?.trackId) {
     hash += `/track/${encodeURIComponent(target.trackId)}`;
@@ -69,4 +73,19 @@ export function writeMobileHash(target?: MobileHashTarget | null, opts?: { repla
   const url = `${location.pathname}${location.search}${hash}`;
   if (opts?.replace !== false) history.replaceState(null, '', url);
   else history.pushState(null, '', url);
+}
+
+export const MOBILE_HASH_PREFIX = '#mobile';
+
+/** Fast check for the mobile route family. */
+export function isMobileHash(hash: string): boolean {
+  return hash.startsWith(MOBILE_HASH_PREFIX);
+}
+
+function decodeRoutePart(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }

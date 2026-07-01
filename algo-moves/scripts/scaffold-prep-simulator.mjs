@@ -51,7 +51,7 @@ import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface ${pascal}Input {
-  // TODO: sample input shape
+  [key: string]: unknown;
 }
 
 interface ${pascal}State {

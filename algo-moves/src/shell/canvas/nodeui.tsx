@@ -40,6 +40,9 @@ export const nodeText = {
   label: 'text-[length:var(--node-fs-xs,0.75rem)] font-medium uppercase tracking-[0.05em] leading-[var(--lh-tight,1.25)]',
 } as const;
 
+/** Wrap prose/labels inside bounded node width — use on text only, not chrome. */
+export const nodeTextWrap = 'min-w-0 break-words [overflow-wrap:anywhere]';
+
 /** Inner SVG sizing for node header/body icons — scales with `--node-icon`. */
 export const nodeIconGlyph = 'size-[var(--node-icon-glyph)]';
 
@@ -773,7 +776,8 @@ export function PanelHeaderTitle({
   return (
     <span
       className={cn(
-        'min-w-0 flex-1 cursor-grab truncate font-semibold text-ink active:cursor-grabbing',
+        'min-w-0 flex-1 cursor-grab font-semibold text-ink active:cursor-grabbing',
+        nodeTextWrap,
         HEADER_TITLE[density],
         className,
       )}
@@ -927,11 +931,8 @@ export function PanelHeaderMenu({
   );
 }
 
-const VIZ_FIT_PAD = 16;
-// Cap upscaling so small boards (e.g. a 7-cell array) render at a comfortable,
-// readable size centered in the node instead of being stretched to billboard
-// proportions. Hero boards still fill the node; tiny ones stay compact + crisp.
-const VIZ_FIT_MAX_UPSCALE = 2;
+const VIZ_FIT_PAD = 4;
+const VIZ_FIT_MAX_UPSCALE = Number.POSITIVE_INFINITY;
 
 const VIZ_MEASURE_SELECTOR =
   '.board-area, .grid-board, .bars, .arow, .queue-tape, svg[role="img"]';
@@ -967,29 +968,62 @@ export function computeVizFitLayout(
 function measureIntrinsic(el: HTMLElement): { w: number; h: number } {
   const prevWidth = el.style.width;
   const prevHeight = el.style.height;
+  const prevMaxWidth = el.style.maxWidth;
+  const mains = el.classList.contains('viz-stage')
+    ? [...el.querySelectorAll<HTMLElement>('.viz-stage-main')]
+    : [];
+  const mainPrevMaxWidths = mains.map((m) => m.style.maxWidth);
+
   el.style.width = 'max-content';
   el.style.height = 'max-content';
+  el.style.maxWidth = 'none';
+  for (const main of mains) main.style.maxWidth = 'none';
+
   const w = el.scrollWidth;
   const h = el.scrollHeight;
+
   el.style.width = prevWidth;
   el.style.height = prevHeight;
+  el.style.maxWidth = prevMaxWidth;
+  mains.forEach((main, i) => {
+    main.style.maxWidth = mainPrevMaxWidths[i] ?? '';
+  });
+
   return { w, h };
 }
 
-function resolveMeasureSize(
+/** Stage width + main animation height (rail must not inflate vertical footprint). */
+export function resolveVizStageMeasureSize(stageWidth: number, mainHeight: number): { w: number; h: number } {
+  return { w: stageWidth, h: mainHeight };
+}
+
+/** Exported for VizFitBox measurement tests. */
+export function resolveMeasureSize(
   target: HTMLElement,
   containerWidth: number,
-): { w: number; h: number } {
+): { w: number; h: number; boxH: number } {
   const intrinsic = measureIntrinsic(target);
   let nw = target.scrollWidth;
   let nh = target.scrollHeight;
+  // `boxH` is the full content height used to size the fit box; `h` is the
+  // height the *scale* is derived from. They differ for a staged board: the
+  // scale follows the main animation (rail-independent, so the board never
+  // rescales as the rail grows), while the box grows to fit the full stage
+  // (main + rail) so the rail stays visible.
+  let boxH = nh;
 
-  if (target.classList.contains('board-area')) {
+  if (target.classList.contains('board-area') || target.classList.contains('viz-stage')) {
     nw = intrinsic.w;
     nh = intrinsic.h;
+    boxH = intrinsic.h;
+    const main = target.querySelector<HTMLElement>('.viz-stage-main');
+    if (main) {
+      nh = measureIntrinsic(main).h;
+    }
   } else if (nw === 0 || nh === 0) {
     nw = intrinsic.w;
     nh = intrinsic.h;
+    boxH = intrinsic.h;
   }
 
   const hasPrimitive = target.matches(VIZ_PRIMITIVE_SELECTOR)
@@ -1002,9 +1036,10 @@ function resolveMeasureSize(
   ) {
     nw = intrinsic.w;
     nh = intrinsic.h;
+    boxH = intrinsic.h;
   }
 
-  return { w: nw, h: nh };
+  return { w: nw, h: nh, boxH: Math.max(boxH, nh) };
 }
 
 /** Scales viz board content to fit its panel column (visualize mode). */
@@ -1012,20 +1047,27 @@ export function VizFitBox({
   children,
   className,
   remeasureKey,
+  layout: layoutMode = 'fill',
+  measureRef,
 }: {
   children: ReactNode;
   className?: string;
   /** Bumps remeasure when viz frame/step changes. */
   remeasureKey?: string | number;
+  /** `fill` expands to the flex slot; `hug` shrink-wraps to scaled board size. */
+  layout?: 'fill' | 'hug';
+  /** Flex-area element used for fit math when `layout="hug"`. */
+  measureRef?: RefObject<HTMLElement | null>;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const selfRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState({ scale: 1, w: 0, h: 0, nw: 0, nh: 0 });
+  const hug = layoutMode === 'hug';
 
   useLayoutEffect(() => {
-    const container = containerRef.current;
+    const measureEl = hug && measureRef?.current ? measureRef.current : selfRef.current;
     const content = contentRef.current;
-    if (!container || !content) return;
+    if (!measureEl || !content) return;
 
     const measureTarget = () => {
       const board = content.querySelector<HTMLElement>('.board-area');
@@ -1036,39 +1078,52 @@ export function VizFitBox({
     };
 
     const sync = () => {
-      const cw = container.clientWidth;
-      const ch = container.clientHeight;
+      const cw = measureEl.clientWidth;
+      // In `hug` the node auto-heights to this box, so reading the parent's
+      // clientHeight would feed back into the scale (runaway shrink). Bind the
+      // fit to width and cap by the viewport so tall boards still fit.
+      const ch = hug ? Math.max(1, window.innerHeight - VIZ_FIT_PAD * 2) : measureEl.clientHeight;
       if (cw === 0 || ch === 0) {
         requestAnimationFrame(sync);
         return;
       }
 
       const target = measureTarget();
-      const { w: nw, h: nh } = resolveMeasureSize(target, cw);
+      const { w: nw, h: nh, boxH } = resolveMeasureSize(target, cw);
       if (nw === 0 || nh === 0) {
         requestAnimationFrame(sync);
         return;
       }
 
-      setLayout(computeVizFitLayout(nw, nh, cw, ch));
+      // Scale is derived from the main animation height (`nh`); the box is sized
+      // to the full stage (`boxH`) so a growing rail extends the box downward
+      // without ever rescaling the board.
+      const fit = computeVizFitLayout(nw, nh, cw, ch);
+      setLayout({ scale: fit.scale, w: fit.w, h: boxH * fit.scale, nw, nh: boxH });
     };
 
     const ro = new ResizeObserver(() => requestAnimationFrame(sync));
-    ro.observe(container);
+    ro.observe(measureEl);
     ro.observe(content);
     sync();
     return () => ro.disconnect();
-  }, [children, remeasureKey]);
+  }, [children, remeasureKey, hug, measureRef]);
 
   const scaled = layout.scale !== 1 && layout.nw > 0 && layout.nh > 0;
+  const hugSize =
+    hug && layout.w > 0 && layout.h > 0
+      ? { width: layout.w + VIZ_FIT_PAD * 2, height: layout.h + VIZ_FIT_PAD * 2, maxWidth: '100%' }
+      : undefined;
 
   return (
     <div
-      ref={containerRef}
+      ref={selfRef}
       className={cn(
-        'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden',
+        'relative flex items-center justify-center overflow-hidden',
+        hug ? 'viz-board-col--hug shrink-0' : 'min-h-0 flex-1',
         className,
       )}
+      style={hugSize}
     >
       <div
         style={{
@@ -1135,7 +1190,7 @@ export function ControlsAccordion({
         className={cn('nodrag flex w-full items-center gap-1 py-1 font-mono text-ink3 transition-colors hover:text-ink2', nodeText.xs)}
       >
         {accent && <span className="h-1 w-1 shrink-0 rounded-full" style={{ background: accent }} aria-hidden />}
-        <span className="min-w-0 flex-1 truncate text-left">{title}</span>
+        <span className={cn('min-w-0 flex-1 text-left', nodeTextWrap)}>{title}</span>
         {right}
         <ChevronDown className={cn('ml-auto shrink-0 transition-transform', nodeIconGlyph, !open && '-rotate-90')} />
       </button>

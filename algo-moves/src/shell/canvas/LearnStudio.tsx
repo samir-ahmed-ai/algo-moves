@@ -21,6 +21,7 @@ import { cn } from '../../lib/cn';
 import { computeInputFrameCounts } from '../../lib/inputFrameCounts';
 import { useWorkspace } from '../../lib/workspace';
 import { useIsMobile } from '../../lib/useMediaQuery';
+import { readStorageText, writeStorageText } from '../../lib/storage';
 import { ChromeLabel, chromeText } from '../chromeUi';
 import { Btn, Chip, EmptyState } from './nodeui';
 import {
@@ -117,12 +118,7 @@ export function LearnStudio({
 }
 
 function initialTab(itemId: string, avail: StudioTab[]): string {
-  let saved: string | null = null;
-  try {
-    saved = localStorage.getItem(`${STUDIO_TAB_PERSIST}:${itemId}`);
-  } catch {
-    /* storage unavailable */
-  }
+  const saved = readStorageText(`${STUDIO_TAB_PERSIST}:${itemId}`, null);
   if (saved && avail.some((t) => t.id === saved)) return saved;
   const prefer = avail.find((t) => t.id === 'quiz') ?? avail.find((t) => t.id === 'pattern') ?? avail[0];
   return prefer?.id ?? 'pattern';
@@ -147,11 +143,7 @@ function StudioShell() {
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(`${STUDIO_TAB_PERSIST}:${item.id}`, activeId);
-    } catch {
-      /* storage unavailable */
-    }
+    writeStorageText(`${STUDIO_TAB_PERSIST}:${item.id}`, activeId);
   }, [item.id, activeId]);
 
   const active = avail.find((t) => t.id === activeId) ?? avail[0];

@@ -1,17 +1,11 @@
+import { readStorageText, writeStorageText } from '../../lib/storage';
+
 const KEY = 'algo-moves:swipe-qr-dismissed';
 
 export function isSwipeQrPromoDismissed(): boolean {
-  try {
-    return localStorage.getItem(KEY) === '1';
-  } catch {
-    return false;
-  }
+  return readStorageText(KEY) === '1';
 }
 
 export function markSwipeQrPromoDismissed() {
-  try {
-    localStorage.setItem(KEY, '1');
-  } catch {
-    /* storage blocked */
-  }
+  writeStorageText(KEY, '1');
 }

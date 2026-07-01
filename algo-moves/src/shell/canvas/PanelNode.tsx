@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Handle, NodeResizer, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { useWorkspace } from '../../lib/workspace';
 import { cn } from '../../lib/cn';
-import { layoutCap, layoutEstimate, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from './layout';
-import { nodeTier, panelMinHeight } from './nodeTokens';
+import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from './layout';
+import { nodeTier } from './nodeTokens';
 import { handleDotClass, portHandleStyle } from './canvasHandles';
 import { useConnectedComponentsOptional } from '../../lib/ConnectedComponentsContext';
 import { panelBorderRadius, panelFill, panelOpacity, panelStroke } from './panelStyle';
@@ -32,11 +32,11 @@ export { ReplayContent } from './panels/ReplayPanelBody';
 export { MetricsBody } from './panels/MetricsPanelBody';
 export { PanelBody } from './panels/PanelBodyRouter';
 
-export function PanelNode({ id, data, selected, width, height }: NodeProps<PanelFlowNode>) {
+export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode>) {
   const nodeStyle = data.style;
   const kindAccent = panelAccent(data.kind);
   const accent = panelStroke(nodeStyle, data.accent ?? kindAccent);
-  const { dir, mode, density, sidePanelTab, setSidePanelTab, bottomDockOpen, setBottomDockOpen } = useWorkspace();
+  const { dir, mode, density, sidePanelTab, setSidePanelTab, setRightOpen, setRightTab } = useWorkspace();
   const { plugin } = useCanvasStatic();
   const isViz = data.kind === 'viz';
   const isReassemble = data.kind === 'reassemble';
@@ -49,19 +49,10 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const showSourceHandle = !collapsed;
   const locked = !!data.locked;
   const headerDensity: HeaderDensity = density === 'spacious' ? 'spacious' : density === 'ultra' ? 'ultra' : 'compact';
-  const fixedWidthKind = layoutFixedWidth(data.kind ?? id) != null;
-  const fitNodeWidth = !isCode && !fixedWidthKind;
-  const minPanelW = layoutEstimate(data.kind ?? id).w;
-  const fixedW = layoutFixedWidth(data.kind ?? id);
+  const maxPanelW = layoutFixedWidth(data.kind ?? id);
   const bodyCap = layoutCap(data.kind ?? id);
   const narrowBody = nodeTier(data.kind ?? id) === 'narrow';
-  const panelRef = useFitContentSize(
-    id,
-    data.kind ?? id,
-    collapsed,
-    fitNodeWidth,
-    !(isViz && mode === 'visualize'),
-  );
+  const panelRef = useFitContentSize(id, data.kind ?? id, collapsed, true);
   const [showBigO, setShowBigO] = useState(false);
   const { setNodes } = useReactFlow();
   const cc = useConnectedComponentsOptional();
@@ -88,11 +79,17 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
 
   const sideTabs = sidePanelTabs(plugin, mode);
   const sideOpen = sidePanelTab != null && sideTabs.some((t) => t.id === sidePanelTab);
-  const toggleSide = () => setSidePanelTab(sideOpen ? null : sideTabs[0]?.id ?? null);
+  const toggleSide = () => {
+    if (sideOpen) setSidePanelTab(null);
+    else {
+      setSidePanelTab(sideTabs[0]?.id ?? null);
+      setRightOpen(true);
+      setRightTab('analysis');
+    }
+  };
   const isQuiz = data.kind === 'quiz';
   const showSideToggle = sideTabs.length > 0 && (isProblem || isViz || isCode || isQuiz);
   const sideLabel = sideTabs[0]?.label ?? 'panel';
-  const showDockToggle = isProblem && mode === 'visualize';
   const targetPos = mode === 'visualize' ? Position.Left : mode === 'learn' ? Position.Top : dir === 'LR' ? Position.Left : Position.Top;
   const sourcePos = mode === 'visualize' ? Position.Right : mode === 'learn' ? Position.Bottom : dir === 'LR' ? Position.Right : Position.Bottom;
   const handleCls = handleDotClass;
@@ -114,10 +111,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
     sideOpen,
     sideLabel,
     onToggleSide: toggleSide,
-    showDockToggle,
     showSideToggle,
-    bottomDockOpen,
-    onToggleDock: () => setBottomDockOpen(!bottomDockOpen),
     headerClassName: visualizeFlush ? 'border-b border-edge/60' : undefined,
   };
 
@@ -127,8 +121,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
       className={cn(
         'panel-node relative flex h-auto flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
         isCode && !collapsed && 'min-h-0 flex-1',
-        fitNodeWidth && !vizCanvas ? 'w-max' : 'w-full',
-        vizCanvas && 'h-full min-h-0',
+        'w-full',
         selected && 'selected',
         chainTint && `ring-1 ${chainTint}`,
         'hover:ring-1 hover:ring-[color-mix(in_srgb,var(--ring)_25%,transparent)]',
@@ -138,18 +131,14 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
         borderRadius: panelBorderRadius(nodeStyle?.corners),
         opacity: nodeStyle?.opacity != null ? panelOpacity(nodeStyle) : locked ? 0.95 : undefined,
         backgroundColor: panelFill(nodeStyle),
-        minWidth: fixedW ?? minPanelW,
-        ...(vizCanvas && width ? { width } : {}),
-        ...(vizCanvas && height ? { height } : {}),
+        ...(width != null ? { width } : {}),
       }}
     >
       {!collapsed && !locked && (
         <NodeResizer
           color="var(--accent)"
           isVisible={selected}
-          minWidth={fixedW ?? minPanelW}
-          maxWidth={fixedW}
-          minHeight={panelMinHeight(data.kind ?? id)}
+          {...(maxPanelW != null ? { maxWidth: maxPanelW } : {})}
           handleClassName="!h-2 !w-2 !rounded-sm !border-accent !bg-panel"
         />
       )}
@@ -162,7 +151,6 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
             : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
           isCode && !collapsed && 'min-h-0 flex-1 overflow-hidden',
           !vizCanvas && 'overflow-hidden',
-          vizCanvas && 'h-full flex-1',
         )}
       >
         {!collapsed && isCode ? (
@@ -196,7 +184,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
             {!collapsed && (
               <PanelBodyShell
                 density={headerDensity}
-                fill={isViz}
+                fill={isViz && !vizCanvas}
                 flush={flushBody}
                 narrow={narrowBody}
                 style={!isViz && bodyCap ? { maxWidth: bodyCap } : undefined}

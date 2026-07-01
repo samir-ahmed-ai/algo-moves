@@ -9,7 +9,7 @@ import { ShareUrlPopover } from '../ShareUrlPopover';
 import { SaveProjectDialog } from '../SaveProjectDialog';
 import { cn } from '../../../lib/cn';
 import { CHROME_BTN } from '../../chrome';
-import { Btn, EmptyState, Field, nodeIconGlyph, Row, Section, TextInput, Pill, nodeText, RADIUS_CTRL } from '../nodeui';
+import { Btn, EmptyState, Field, nodeIconGlyph, Row, Section, TextInput, Pill, nodeText, nodeTextWrap, RADIUS_CTRL } from '../nodeui';
 
 /** Projects: save/load named workspace snapshots with full canvas state when available. */
 export function ProjectsPanelBody() {
@@ -77,7 +77,7 @@ export function ProjectsPanelBody() {
           <div className="flex flex-col">
             {names.map((n) => (
               <Row key={n} className="justify-between gap-1.5 border-t border-edge py-1.5 first:border-t-0">
-                <span className={cn('min-w-0 flex-1 truncate text-ink', nodeText.sm)}>{n}</span>
+                <span className={cn('min-w-0 flex-1 text-ink', nodeTextWrap, nodeText.sm)}>{n}</span>
                 <Btn variant="ghost" size="xs" onClick={() => apply(projects[n])}>
                   Load
                 </Btn>

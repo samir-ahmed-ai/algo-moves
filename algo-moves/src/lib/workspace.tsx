@@ -10,12 +10,13 @@ import type { ProjectState } from './projectState';
 import type { CanvasToolsProps } from '../shell/canvas/CanvasTools';
 import type { BgVariant, EdgeOpts, LayoutPreset } from '../shell/canvas/layout';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
+import { readStorageText, writeStorageJson } from './storage';
 
 export type Theme = 'dark' | 'light';
 export type Density = 'compact' | 'ultra' | 'spacious';
 export type Palette = 'default' | 'cb';
 /** Which top-level surface is showing: home launchpad, canvas workspace, or the mobile swipe deck. */
-export type AppRoute = 'home' | 'workspace' | 'mobile';
+export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim';
 export type { ThemePreset, LayoutPreset };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 
@@ -30,18 +31,17 @@ export interface WorkspaceDefaults {
 export { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 
 export function saveDefaults(d: WorkspaceDefaults) {
-  localStorage.setItem(DEFAULTS_KEY, JSON.stringify(d));
+  writeStorageJson(DEFAULTS_KEY, d);
 }
 
 export function readLastItemId(): string | null {
-  try {
-    return localStorage.getItem(LAST_ITEM_KEY);
-  } catch {
-    return null;
-  }
+  return readStorageText(LAST_ITEM_KEY, null);
 }
 
 export type LayoutDir = 'TB' | 'LR';
+
+/** Active tab in the unified right sidebar. */
+export type RightSidebarTab = 'analysis' | 'canvas' | 'selection' | 'more';
 
 /** Live canvas snapshot + apply hook registered by CanvasStage. */
 export interface CanvasProjectApi {
@@ -58,15 +58,6 @@ export interface CanvasAddPanel {
   effectDndKey?: string;
   onAddKind: (kind: string) => void;
   onAddEffect?: (effectId: string) => void;
-}
-
-/** Live zoom controls registered by CanvasStage (React Flow must stay on canvas). */
-export interface CanvasZoomApi {
-  zoom: number;
-  zoomIn: () => void;
-  zoomOut: () => void;
-  onFit: () => void;
-  onResetZoom: () => void;
 }
 
 /** Canvas chrome registered by CanvasStage for the unified right sidebar. */

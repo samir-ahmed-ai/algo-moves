@@ -74,16 +74,26 @@ export function MobileDeck({
   const [quizRunSeed, setQuizRunSeed] = useState(() => newQuizRunSeed());
   const [quizAttempt, setQuizAttempt] = useState(0);
   const [quizNavLocked, setQuizNavLocked] = useState(false);
+  const done = pIdx >= blocks.length;
+  const block = done ? null : blocks[pIdx];
+  const card = block?.cards[cIdx];
+  const deckStats = useMemo(() => {
+    let totalCards = 0;
+    const startsByProblem = blocks.map((b) => {
+      const start = totalCards;
+      totalCards += b.cards.length;
+      return start;
+    });
+    return { totalCards, startsByProblem };
+  }, [blocks]);
+  const problemStartIdx = deckStats.startsByProblem[pIdx] ?? 0;
+  const globalCardIndex = done ? deckStats.totalCards : problemStartIdx + cIdx + 1;
 
   // Fresh shuffle per problem so Q1 order does not repeat across the deck.
   useEffect(() => {
     setQuizRunSeed(newQuizRunSeed());
     setQuizAttempt(0);
   }, [pIdx]);
-
-  const done = pIdx >= blocks.length;
-  const block = done ? null : blocks[pIdx];
-  const card = block?.cards[cIdx];
 
   useEffect(() => {
     if (done) {
@@ -212,19 +222,35 @@ export function MobileDeck({
           </button>
           <div className="min-w-0 flex-1">
             <div className="truncate text-[13px] font-semibold text-ink">{topic.title}</div>
-            <div className="text-[11px] text-ink3">{done ? 'Complete' : `Problem ${pIdx + 1} of ${blocks.length}`}</div>
+            <div className="text-[11px] text-ink3">{done ? 'Topic complete' : `Problem ${pIdx + 1} of ${blocks.length}`}</div>
+            {!done && (
+              <div className="text-[10px] text-ink3">
+                Card {globalCardIndex} of {deckStats.totalCards} · {block?.cards[cIdx]?.kind ?? 'card'}
+              </div>
+            )}
           </div>
           {headerRight}
         </div>
         {!done && block && (
           <div className="mt-2 flex items-center gap-1" role="progressbar" aria-valuenow={cIdx + 1} aria-valuemin={1} aria-valuemax={block.cards.length} aria-label={`Step ${cIdx + 1} of ${block.cards.length}`}>
             {block.cards.map((c, i) => (
-              <span key={c.key} className="h-1 flex-1 overflow-hidden rounded-full bg-panel2">
+              <span
+                key={c.key}
+                className={cn(
+                  'mobile-progress-step-wrap h-1 flex-1 overflow-hidden rounded-full',
+                  c.kind === 'quiz' ? 'mobile-progress-step-wrap--quiz' : undefined,
+                  i === cIdx ? 'animate' : undefined,
+                )}
+              >
                 <span
-                  className="block h-full rounded-full transition-all duration-300"
+                  className={cn(
+                    'mobile-progress-step block h-full rounded-full transition-all duration-300',
+                    i === cIdx ? 'mobile-progress-step--active' : '',
+                    c.kind === 'quiz' ? 'mobile-progress-step--quiz' : '',
+                  )}
                   style={{
                     width: i < cIdx ? '100%' : i === cIdx ? '60%' : '0%',
-                    background: i <= cIdx ? 'var(--accent)' : 'transparent',
+                    background: i <= cIdx ? (c.kind === 'quiz' ? 'var(--good)' : 'var(--accent)') : 'transparent',
                   }}
                 />
               </span>

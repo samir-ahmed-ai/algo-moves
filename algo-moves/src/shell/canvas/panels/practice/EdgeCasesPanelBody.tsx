@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useCanvasStatic } from '../../CanvasContext';
+import { readStorageJson, writeStorageJson } from '../../../../lib/storage';
 import { CheckRow, Hint, Meter, Pill } from '../../nodeui';
 
 /** #58 Edge-case finder: a checklist of cases that break naive solutions. */
@@ -16,28 +17,25 @@ export function EdgeCasesPanelBody() {
     'Minimum & maximum bounds',
     'No valid answer exists',
   ];
+  const isEdgeCaseMap = (value: unknown): value is Record<string, boolean> => {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      Object.values(value).every((v) => typeof v === 'boolean')
+    );
+  };
+
   const [done, setDone] = useState<Record<string, boolean>>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(k) ?? '{}');
-    } catch {
-      return {};
-    }
+    return readStorageJson(k, {}, isEdgeCaseMap);
   });
   useEffect(() => {
-    try {
-      setDone(JSON.parse(localStorage.getItem(k) ?? '{}'));
-    } catch {
-      setDone({});
-    }
+    setDone(readStorageJson(k, {}, isEdgeCaseMap));
   }, [k]);
   const toggle = (c: string) => {
     setDone((d) => {
       const next = { ...d, [c]: !d[c] };
-      try {
-        localStorage.setItem(k, JSON.stringify(next));
-      } catch {
-        // ignore
-      }
+      writeStorageJson(k, next);
       return next;
     });
   };

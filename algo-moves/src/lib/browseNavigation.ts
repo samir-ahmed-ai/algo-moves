@@ -1,6 +1,7 @@
 import { catalog } from '../content';
 import { parseMobileHash } from '../shell/mobile/mobileHash';
 import type { TrackId } from '../content';
+import { isMobileHash } from '../shell/mobile/mobileHash';
 
 export interface BrowseNavigationState {
   trackId: TrackId | null;
@@ -19,7 +20,7 @@ export function initialBrowseFromHash(
   if (sharedItem && catalog.getItem(sharedItem)) {
     return { trackId: null, categoryId: null, topicId: null };
   }
-  if (!hash.startsWith('#mobile')) {
+  if (!isMobileHash(hash)) {
     return { trackId: null, categoryId: null, topicId: null };
   }
   const parsed = parseMobileHash(hash);

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../lib/cn';
 import { CodeBlueprintPanel, type CodeBlueprintPanelProps } from './CodeBlueprintPanel';
+import { isEditableTarget } from '../lib/keyboard';
 
 export type CodeBlueprintOverlayProps = Omit<CodeBlueprintPanelProps, 'inline' | 'closeRef'>;
 
@@ -15,8 +16,8 @@ export function CodeBlueprintOverlay({ pieces, lang, wrap = false, onClose }: Co
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      const target = e.target;
+      if (isEditableTarget(target)) return;
       if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') {
         e.preventDefault();
         onClose();

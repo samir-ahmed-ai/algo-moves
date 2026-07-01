@@ -1,3 +1,4 @@
+import { readStorageJson, readStorageText, removeStorageValue, writeStorageJson } from './storage';
 export type CodeStudioPhase = 'quiz' | 'reassemble' | 'recall';
 
 /** Which optional phases exist for the current problem + language variant. */
@@ -53,74 +54,65 @@ function quizKey(itemId: string, langIdx: number) {
   return `algo-moves:code-quiz:${itemId}:${langIdx}`;
 }
 
+function isPhase(value: unknown): value is CodeStudioPhase {
+  return value === 'quiz' || value === 'reassemble' || value === 'recall';
+}
+
+function isReassembleProgress(value: unknown): value is ReassembleProgress {
+  const candidate = value as Partial<ReassembleProgress>;
+  return (
+    candidate &&
+    typeof candidate === 'object' &&
+    Array.isArray(candidate.placedIds) &&
+    Array.isArray(candidate.trayIds) &&
+    typeof candidate.mistakes === 'number'
+  );
+}
+
+function isQuizProgress(value: unknown): value is QuizProgress {
+  const candidate = value as Partial<QuizProgress>;
+  return (
+    !!candidate &&
+    typeof candidate === 'object' &&
+    typeof candidate.index === 'number' &&
+    typeof candidate.score === 'number' &&
+    typeof candidate.done === 'boolean' &&
+    (candidate.answered === undefined || candidate.answered === null || typeof candidate.answered === 'number')
+  );
+}
+
 /** Resume the saved phase if it still exists for this problem, else the first phase. */
 export function loadPhase(itemId: string, langIdx: number, av: PhaseAvailability): CodeStudioPhase {
   const seq = phaseSequence(av);
-  try {
-    const raw = localStorage.getItem(phaseKey(itemId, langIdx)) as CodeStudioPhase | null;
-    if (raw && seq.includes(raw)) return raw;
-  } catch {
-    /* ignore */
-  }
+  const raw = readStorageText(phaseKey(itemId, langIdx));
+  if (raw && isPhase(raw) && seq.includes(raw)) return raw;
   return seq[0];
 }
 
 export function savePhase(itemId: string, langIdx: number, phase: CodeStudioPhase) {
-  try {
-    localStorage.setItem(phaseKey(itemId, langIdx), phase);
-  } catch {
-    /* ignore */
-  }
+  if (isPhase(phase)) writeStorageJson(phaseKey(itemId, langIdx), phase);
 }
 
 export function loadReassembleProgress(itemId: string, langIdx: number): ReassembleProgress | null {
-  try {
-    const raw = localStorage.getItem(progressKey(itemId, langIdx));
-    if (!raw) return null;
-    return JSON.parse(raw) as ReassembleProgress;
-  } catch {
-    return null;
-  }
+  return readStorageJson(progressKey(itemId, langIdx), null, isReassembleProgress);
 }
 
 export function saveReassembleProgress(itemId: string, langIdx: number, progress: ReassembleProgress) {
-  try {
-    localStorage.setItem(progressKey(itemId, langIdx), JSON.stringify(progress));
-  } catch {
-    /* ignore */
-  }
+  writeStorageJson(progressKey(itemId, langIdx), progress);
 }
 
 export function clearReassembleProgress(itemId: string, langIdx: number) {
-  try {
-    localStorage.removeItem(progressKey(itemId, langIdx));
-  } catch {
-    /* ignore */
-  }
+  removeStorageValue(progressKey(itemId, langIdx));
 }
 
 export function loadQuizProgress(itemId: string, langIdx: number): QuizProgress | null {
-  try {
-    const raw = localStorage.getItem(quizKey(itemId, langIdx));
-    if (!raw) return null;
-    return JSON.parse(raw) as QuizProgress;
-  } catch {
-    return null;
-  }
+  return readStorageJson(quizKey(itemId, langIdx), null, isQuizProgress);
 }
 
 export function saveQuizProgress(itemId: string, langIdx: number, progress: QuizProgress) {
-  try {
-    localStorage.setItem(quizKey(itemId, langIdx), JSON.stringify(progress));
-  } catch {
-    /* ignore */
-  }
+  writeStorageJson(quizKey(itemId, langIdx), progress);
 }
 
 export function clearQuizProgress(itemId: string, langIdx: number) {
-  try {
-    localStorage.removeItem(quizKey(itemId, langIdx));
-  } catch {
-    /* ignore */
-  }
+  removeStorageValue(quizKey(itemId, langIdx));
 }

@@ -334,6 +334,7 @@ export function QuizCardView({
   const [picked, setPicked] = useState<number | null>(null);
   const answered = picked !== null;
   const isCorrect = picked === answer;
+  const attempt = Math.max(1, quizAttempt + 1);
   const timer = useRef<number | null>(null);
   const aliveRef = useRef(true);
   const pickedRef = useRef(false); // synchronous lock — blocks rapid double-taps before re-render
@@ -401,7 +402,11 @@ export function QuizCardView({
       {answered && isCorrect && <Confetti />}
       <div className="flex items-center gap-2">
         <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink3">{item.title}</span>
-        <span className="ml-auto inline-flex items-center gap-1.5" aria-label={`Question ${card.qIndex} of ${card.qCount}`}>
+        <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5 text-[10px] text-ink3" aria-label={`Question ${card.qIndex} of ${card.qCount}`}>
+          <span className="inline-flex items-center gap-1 rounded-full bg-panel2 px-2 py-0.5 font-semibold">
+            Q {card.qIndex}/{card.qCount}
+          </span>
+          {quizAttempt > 0 && <span className="inline-flex items-center rounded-full bg-panel2 px-2 py-0.5 font-medium">Attempt {attempt}</span>}
           {Array.from({ length: card.qCount }, (_, i) => {
             const active = i === card.qIndex - 1;
             return (
@@ -412,7 +417,11 @@ export function QuizCardView({
                 onClick={() => onGoToQuestion(i + 1)}
                 aria-label={`Go to question ${i + 1}`}
                 aria-current={active ? 'step' : undefined}
-                className="rounded-full transition-all"
+                className={cn(
+                  'rounded-full transition-all',
+                  i < card.qIndex - 1 && 'mobile-progress-step',
+                  active && 'mobile-progress-step mobile-progress-step--active',
+                )}
                 style={{
                   width: active ? 16 : 6,
                   height: 6,
@@ -445,9 +454,9 @@ export function QuizCardView({
               className={cn(
                 'mobile-choice flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition-all',
                 !answered && 'border-edge bg-panel active:scale-[0.99]',
-                showCorrect && 'border-good bg-goodbg',
-                showWrong && 'border-bad bg-badbg',
-                answered && !showCorrect && !showWrong && 'border-edge opacity-45',
+                showCorrect && 'mobile-choice-correct border-good bg-goodbg',
+                showWrong && 'mobile-choice-wrong border-bad bg-badbg',
+                answered && !showCorrect && !showWrong && 'mobile-choice-dim border-edge/70',
               )}
             >
               <span
@@ -469,7 +478,15 @@ export function QuizCardView({
       </div>
 
       {answered && (
-        <div className="mobile-explain mt-4 rounded-2xl border border-edge bg-panel2/60 px-3.5 py-3" role="status" aria-live="polite">
+        <div
+          key={`explain-${picked}`}
+          className={cn(
+            'mobile-explain mt-4 rounded-2xl border px-3.5 py-3',
+            isCorrect ? 'mobile-choice-correct border-good bg-goodbg/50' : 'mobile-choice-wrong border-bad bg-badbg/45',
+          )}
+          role="status"
+          aria-live="polite"
+        >
           <div className={cn('flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide', isCorrect ? 'text-good' : 'text-bad')}>
             {isCorrect ? <Check className="h-3.5 w-3.5" /> : <Lightbulb className="h-3.5 w-3.5" />}
             {isCorrect ? 'Correct' : 'Start over — here’s why'}

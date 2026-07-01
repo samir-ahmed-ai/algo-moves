@@ -4,7 +4,7 @@ import { useWorkspace } from '../../../../lib/workspace';
 import { useProgress, statFor } from '../../../../lib/progress';
 import { cn } from '../../../../lib/cn';
 import { useCanvasStatic } from '../../CanvasContext';
-import { Chip, Hint, Meter, nodeIconGlyph, Pill, Row } from '../../nodeui';
+import { Chip, Hint, Meter, nodeIconGlyph, nodeTextWrap, Pill, Row } from '../../nodeui';
 
 /** #62 Learning path: ordered sequence with mastery + jump-to. */
 export function PathPanelBody() {
@@ -39,7 +39,7 @@ export function PathPanelBody() {
             >
               <Pill>{i + 1}</Pill>
               <span
-                className={cn('min-w-0 flex-1 truncate', locked && 'opacity-60')}
+                className={cn('min-w-0 flex-1', nodeTextWrap, locked && 'opacity-60')}
                 title={locked ? `Suggested first: ${unmet.map((p) => catalog.getItem(p)?.title ?? p).join(', ')}` : undefined}
               >
                 {it.title}

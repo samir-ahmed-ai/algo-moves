@@ -20,7 +20,7 @@ export default defineConfig({
   build: {
     // Split the big, rarely-changing vendor libs into their own long-cached
     // chunks so the entry is smaller and the 500kB warning is meaningful again.
-    // Unrelated to layout breakpoints (e.g. UnifiedBottomDock uses 900px viewport width).
+    // Unrelated to layout breakpoints (e.g. sidebar tab bar uses compact labels below 900px).
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {

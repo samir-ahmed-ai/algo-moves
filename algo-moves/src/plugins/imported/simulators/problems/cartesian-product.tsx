@@ -92,9 +92,7 @@ function View({ frame }: PluginViewProps<CartesianState>) {
           return (
             <div key={i} className="flex items-center gap-2">
               <span className={cn('w-12 shrink-0 text-ink3', vizText.xs)}>list {i}</span>
-              <div className="min-w-0 max-w-full">
-                <ArrayRow values={list} cellTone={tone} pointers={pointers} />
-              </div>
+              <ArrayRow values={list} cellTone={tone} pointers={pointers} />
             </div>
           );
         })}

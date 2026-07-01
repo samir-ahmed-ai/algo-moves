@@ -43,8 +43,8 @@ import {
 import { matchScore } from '../../lib/codeDiff';
 import { useEditorPrefs } from '../../lib/editorPrefs';
 import { parseComplexity } from '../../lib/parseComplexity';
+import { readStorageText, writeStorageText } from '../../lib/storage';
 import { recordAttempt, useProgress, statFor } from '../../lib/progress';
-import { useIsMobile } from '../../lib/useMediaQuery';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
@@ -188,11 +188,7 @@ export function CodeStudioProvider({
 
   const loadDraft = useCallback(() => {
     if (!reference) return '';
-    try {
-      return localStorage.getItem(draftKey) ?? skeleton;
-    } catch {
-      return skeleton;
-    }
+    return readStorageText(draftKey, skeleton) ?? '';
   }, [draftKey, skeleton, reference]);
 
   const [draft, setDraft] = useState(loadDraft);
@@ -208,11 +204,7 @@ export function CodeStudioProvider({
   const persistDraft = useCallback(
     (v: string) => {
       setDraft(v);
-      try {
-        localStorage.setItem(draftKey, v);
-      } catch {
-        /* ignore */
-      }
+      writeStorageText(draftKey, v);
     },
     [draftKey],
   );
@@ -417,20 +409,12 @@ function RecallToolbarInline({
   setBlind,
   peek,
   setPeek,
-  score,
-  timerRunning,
-  setTimerRunning,
-  timerLabel,
   overflowItems,
 }: {
   blind: boolean;
   setBlind: (v: boolean | ((b: boolean) => boolean)) => void;
   peek: boolean;
   setPeek: (v: boolean) => void;
-  score: number;
-  timerRunning: boolean;
-  setTimerRunning: (v: boolean | ((r: boolean) => boolean)) => void;
-  timerLabel: string;
   overflowItems: { label: string; icon?: ReactNode; onClick: () => void }[];
 }) {
   return (
@@ -451,27 +435,6 @@ function RecallToolbarInline({
           </PanelHeaderAction>
         </span>
       )}
-      <span
-        className={cn('nodrag grid h-6 min-w-[2rem] place-items-center rounded-md bg-panel2 px-1 font-mono text-ink2', chromeText.sm)}
-        title={`${score}% match`}
-      >
-        {score}%
-      </span>
-      <div className="nodrag flex items-center gap-0.5">
-        <PanelHeaderAction
-          variant="toggle"
-          active={timerRunning}
-          onClick={() => setTimerRunning((r) => !r)}
-          title={timerRunning ? 'Stop recall timer' : 'Start recall timer'}
-        >
-          <Timer className={nodeIconGlyph} />
-        </PanelHeaderAction>
-        {timerRunning && (
-          <span className={cn('rounded-md bg-panel2 px-1.5 py-0.5 font-mono tabular-nums text-ink2', chromeText.sm)}>
-            {timerLabel}
-          </span>
-        )}
-      </div>
       {overflowItems.length > 0 && <PanelHeaderMenu title="More actions" items={overflowItems} />}
     </>
   );
@@ -479,7 +442,6 @@ function RecallToolbarInline({
 
 /** Inline header controls — icon-only with tooltips. */
 export function CodeStudioToolbar() {
-  const isMobile = useIsMobile();
   const {
     variants,
     active,
@@ -496,8 +458,6 @@ export function CodeStudioToolbar() {
     setEditorPrefs,
     timerRunning,
     setTimerRunning,
-    timerLabel,
-    score,
     phase,
     phaseSeq,
     goToPhase,
@@ -531,6 +491,15 @@ export function CodeStudioToolbar() {
         icon: <WrapText className={nodeIconGlyph} />,
         onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
       },
+      ...(phase === 'recall'
+        ? [
+            {
+              label: timerRunning ? 'Stop recall timer' : 'Start recall timer',
+              icon: <Timer className={nodeIconGlyph} />,
+              onClick: () => setTimerRunning((r) => !r),
+            },
+          ]
+        : []),
     ];
     return (
       <>
@@ -541,10 +510,6 @@ export function CodeStudioToolbar() {
             setBlind={setBlind}
             peek={peek}
             setPeek={setPeek}
-            score={score}
-            timerRunning={timerRunning}
-            setTimerRunning={setTimerRunning}
-            timerLabel={timerLabel}
             overflowItems={recallOverflow}
           />
         ) : (
@@ -561,49 +526,73 @@ export function CodeStudioToolbar() {
     );
   }
 
-  const overflowItems =
-    phase === 'recall'
+  const recallOverflow = [
+    {
+      label: copied ? 'Copied reference' : 'Copy reference',
+      icon: copied ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />,
+      onClick: () => void copyRef(),
+    },
+    {
+      label: 'Reset to skeleton (⌘⇧R)',
+      icon: <RotateCcw className={nodeIconGlyph} />,
+      onClick: () => persistDraft(skeleton),
+    },
+    {
+      label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
+      icon: <Keyboard className={nodeIconGlyph} />,
+      onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
+    },
+    {
+      label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
+      icon: <WrapText className={nodeIconGlyph} />,
+      onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
+    },
+    {
+      label: timerRunning ? 'Stop recall timer' : 'Start recall timer',
+      icon: <Timer className={nodeIconGlyph} />,
+      onClick: () => setTimerRunning((r) => !r),
+    },
+    ...(hasReassemble
       ? [
           {
-            label: copied ? 'Copied reference' : 'Copy reference',
-            icon: copied ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />,
-            onClick: () => void copyRef(),
-          },
-          {
-            label: 'Reset to skeleton (⌘⇧R)',
+            label: 'Restart structure phase',
             icon: <RotateCcw className={nodeIconGlyph} />,
-            onClick: () => persistDraft(skeleton),
+            onClick: resetReassemble,
           },
-          {
-            label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
-            icon: <Keyboard className={nodeIconGlyph} />,
-            onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
-          },
-          {
-            label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
-            icon: <WrapText className={nodeIconGlyph} />,
-            onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
-          },
-          ...(hasReassemble
-            ? [
-                {
-                  label: 'Restart structure phase',
-                  icon: <RotateCcw className={nodeIconGlyph} />,
-                  onClick: resetReassemble,
-                },
-              ]
-            : []),
-          ...(hasQuiz
-            ? [
-                {
-                  label: 'Retake the quiz',
-                  icon: <RotateCcw className={nodeIconGlyph} />,
-                  onClick: () => goToPhase('quiz'),
-                },
-              ]
-            : []),
         ]
-      : [];
+      : []),
+    ...(hasQuiz
+      ? [
+          {
+            label: 'Retake the quiz',
+            icon: <RotateCcw className={nodeIconGlyph} />,
+            onClick: () => goToPhase('quiz'),
+          },
+        ]
+      : []),
+  ];
+
+  const structureOverflow = [
+    {
+      label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
+      icon: <Keyboard className={nodeIconGlyph} />,
+      onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
+    },
+    {
+      label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
+      icon: <WrapText className={nodeIconGlyph} />,
+      onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
+    },
+    ...(hasQuiz
+      ? [
+          {
+            label: 'Retake the quiz',
+            icon: <RotateCcw className={nodeIconGlyph} />,
+            onClick: () => goToPhase('quiz'),
+          },
+        ]
+      : []),
+  ];
 
   const showStepper = phaseSeq.length > 1;
 
@@ -618,27 +607,25 @@ export function CodeStudioToolbar() {
           setBlind={setBlind}
           peek={peek}
           setPeek={setPeek}
-          score={score}
-          timerRunning={timerRunning}
-          setTimerRunning={setTimerRunning}
-          timerLabel={timerLabel}
-          overflowItems={overflowItems}
+          overflowItems={recallOverflow}
         />
       ) : (
         <>
           <ToolbarDivider />
-          <button
-            type="button"
-            className={cn('nodrag flex h-6 shrink-0 items-center gap-1 rounded-[calc(var(--radius)-2px)] px-2 text-ink2 hover:bg-panel2 hover:text-ink', chromeText.sm)}
-            onClick={(e) => {
-              e.stopPropagation();
-              advance();
-            }}
-            title={`Skip to ${nextLabel}`}
-          >
+          <PanelHeaderAction variant="ghost" title={`Skip to ${nextLabel}`} onClick={() => advance()}>
             <SkipForward className={nodeIconGlyph} />
-            {isMobile ? 'Skip' : `Skip to ${nextLabel}`}
-          </button>
+          </PanelHeaderAction>
+          {hasReassemble && (
+            <PanelHeaderAction variant="ghost" title="Restart structure" onClick={resetReassemble}>
+              <RotateCcw className={nodeIconGlyph} />
+            </PanelHeaderAction>
+          )}
+          {!hasReassemble && hasQuiz && (
+            <PanelHeaderAction variant="ghost" title="Retake the quiz" onClick={() => goToPhase('quiz')}>
+              <RotateCcw className={nodeIconGlyph} />
+            </PanelHeaderAction>
+          )}
+          <PanelHeaderMenu title="More actions" items={structureOverflow} />
         </>
       )}
     </>
@@ -735,11 +722,24 @@ const PHASE_HINT: Record<CodeStudioPhase, string> = {
 };
 
 export function CodeStudioFooter() {
-  const { stat, timeLabel, spaceLabel, phase } = useCodeStudio();
+  const { stat, timeLabel, spaceLabel, phase, score, timerRunning, timerLabel } = useCodeStudio();
 
   return (
     <div className="nodrag flex shrink-0 flex-wrap items-center gap-2 border-t border-edge/60 px-2 py-1.5">
       <span className={cn('text-ink3', chromeText.sm)}>{PHASE_HINT[phase]}</span>
+      {phase === 'recall' && (
+        <span
+          className={cn('rounded-md bg-panel2 px-2 py-0.5 font-mono text-ink2', chromeText.sm)}
+          title={`${score}% match`}
+        >
+          {score}% match
+        </span>
+      )}
+      {phase === 'recall' && timerRunning && (
+        <span className={cn('rounded-md bg-panel2 px-2 py-0.5 font-mono tabular-nums text-ink2', chromeText.sm)}>
+          {timerLabel}
+        </span>
+      )}
       {stat.streak > 0 && (
         <span className={cn('rounded-md bg-goodbg px-2 py-0.5 text-good', chromeText.sm)}>streak {stat.streak}</span>
       )}

@@ -7,6 +7,7 @@ import {
   Eye,
   Flame,
   GraduationCap,
+  Keyboard,
   LayoutGrid,
   Moon,
   Play,
@@ -26,6 +27,7 @@ import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import { glyphFor } from '../../content/problemShape';
 import { Chip } from '../canvas/nodeui';
 import { TrackGrid } from '../browse/TrackGrid';
+import { VimHeroPreview } from '../vim/ui/VimHeroPreview';
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`;
 
@@ -344,6 +346,7 @@ export function LandingPage() {
     density,
     enterWorkspace,
     enterMobile,
+    enterVim,
     setActiveTrackId,
     setActiveCategoryId,
     setMode,
@@ -413,6 +416,15 @@ export function LandingPage() {
             >
               <Contrast />
             </IconButton>
+            <button
+              type="button"
+              title="Vim Dojo"
+              onClick={() => enterVim()}
+              className="hidden items-center gap-1.5 rounded-md border border-edge px-2.5 py-1.5 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink sm:inline-flex"
+            >
+              <Keyboard className="h-3.5 w-3.5" />
+              Vim Dojo
+            </button>
             <button
               type="button"
               title="Open workspace"
@@ -491,6 +503,28 @@ export function LandingPage() {
             />
           </SplitMedia>
         </LandingSplit>
+      </LandingSection>
+
+      {/* vim dojo — compact promo */}
+      <LandingSection tone="muted" className="!py-8 sm:!py-10">
+        <button
+          type="button"
+          onClick={() => enterVim()}
+          className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)] sm:gap-5 sm:p-5"
+        >
+          <VimHeroPreview />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Keyboard mastery</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink sm:text-2xl">Vim Dojo</h2>
+            <p className="mt-1.5 text-sm leading-snug text-ink2">
+              Maze puzzles that teach h/j/k/l, words, finds, and jumps — no mouse.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent">
+              Enter the Dojo
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </div>
+        </button>
       </LandingSection>
 
       {/* mobile preview */}
@@ -594,7 +628,7 @@ export function LandingPage() {
           title="Three ways to study"
           description="Visualize on the canvas, learn in the studio, or drill in Swipe mode on your phone."
         />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-stretch">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-stretch lg:grid-cols-4">
           <FeatureCard
             icon={<Eye />}
             title="Visualize"
@@ -615,6 +649,13 @@ export function LandingPage() {
             body="Swipe through animate, quiz, and rebuild cards."
             cta="Open Swipe mode"
             onClick={() => enterMobile()}
+          />
+          <FeatureCard
+            icon={<Keyboard />}
+            title="Vim Dojo"
+            body="Master Vim motions in a keyboard-only maze."
+            cta="Enter the Dojo"
+            onClick={() => enterVim()}
           />
         </div>
       </LandingSection>

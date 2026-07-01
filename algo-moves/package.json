@@ -19,7 +19,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --incremental false",
     "new-problem": "node scripts/new-problem.mjs",
     "new-effect": "node scripts/new-effect.mjs",
     "import-prep": "node scripts/import-prep.mjs",

@@ -3,6 +3,7 @@ import { FileQuestion } from 'lucide-react';
 import { getPlugin, usePlayer } from '../core';
 import { catalog } from '../content';
 import { useWorkspace, normalizeThemePreset } from '../lib/workspace';
+import { isEditableTarget } from '../lib/keyboard';
 import { cn } from '../lib/cn';
 import { buildShareUrl, readShareFromUrl, writeShareToUrl } from '../lib/shareState';
 import { loadProjectFromUrl } from '../lib/projectState';
@@ -151,15 +152,7 @@ export function Workspace() {
         return;
       }
       const t = e.target;
-      if (
-        t instanceof HTMLElement &&
-        (t.tagName === 'INPUT' ||
-          t.tagName === 'TEXTAREA' ||
-          t.tagName === 'SELECT' ||
-          t.isContentEditable ||
-          t.closest('.cm-editor'))
-      )
-        return;
+      if (isEditableTarget(t)) return;
       // The Learn Studio owns its own navigation keys and its trace views carry
       // on-screen transport, so the global transport shortcuts would only drive
       // hidden canvas playback there — skip them in learn mode.

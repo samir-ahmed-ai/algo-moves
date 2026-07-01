@@ -1,7 +1,7 @@
 import { cn } from '../../../lib/cn';
 import { inputFrameCount } from '../../../lib/inputFrameCounts';
 import { useCanvasStatic } from '../CanvasContext';
-import { Code, ControlsAccordion, nodeText, Row } from '../nodeui';
+import { Code, ControlsAccordion, nodeText, nodeTextWrap, Row } from '../nodeui';
 
 /** Compact preview of a sample input value. */
 function formatInputPreview(value: unknown): string {
@@ -20,15 +20,41 @@ export function ExamplesPanelBody() {
   const { plugin, inputId, setInputId, inputFrameCounts } = useCanvasStatic();
   const active = plugin.inputs.find((i) => i.id === inputId) ?? plugin.inputs[0];
   const preview = active ? formatInputPreview(active.value) : '';
+  const totalInputs = plugin.inputs.length;
+  const activeIdx = active ? plugin.inputs.findIndex((i) => i.id === active.id) : -1;
 
   return (
     <div className="flex flex-col gap-[var(--node-gap,6px)]">
-      <div className="nodrag flex flex-col">
-        {plugin.inputs.map((i) => {
+      {totalInputs > 1 && (
+        <div className="flex items-center gap-1.5 text-[11px] text-ink3">
+          <span className="inline-flex items-center rounded-full border border-edge bg-panel2 px-2 py-0.5 text-ink3">
+            sample {activeIdx + 1} / {totalInputs}
+          </span>
+        </div>
+      )}
+      <div className="nodrag flex flex-col" role="radiogroup" aria-label="sample inputs">
+        {plugin.inputs.map((i, idx) => {
           const on = i.id === inputId;
           const ops = inputFrameCount(inputFrameCounts, i.id);
           return (
-            <Row key={i.id} active={on} onClick={() => setInputId(i.id)} className={nodeText.base}>
+            <Row
+              key={i.id}
+              active={on}
+              onClick={() => setInputId(i.id)}
+              className={cn(nodeText.base, on ? '' : 'text-ink2')}
+            >
+              <span
+                className={cn(
+                  'grid size-[17px] shrink-0 place-items-center rounded-full border',
+                  on ? 'border-accent bg-accentbg text-accent' : 'border-edge bg-panel2/60 text-ink3',
+                )}
+              >
+                {idx + 1}
+              </span>
+              <span className={cn('min-w-0 flex-1', nodeTextWrap)}>{i.label}</span>
+              <span className="shrink-0 rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[10px] tabular-nums text-ink3">
+                {ops > 0 ? `${ops} step${ops === 1 ? '' : 's'}` : '0'}
+              </span>
               <input
                 type="radio"
                 name={`input-${plugin.meta.id}`}
@@ -37,10 +63,6 @@ export function ExamplesPanelBody() {
                 className="size-[calc(var(--node-icon,16px)*0.875)] shrink-0 accent-[var(--accent)]"
                 tabIndex={-1}
               />
-              <span className="min-w-0 flex-1 leading-snug">{i.label}</span>
-              {ops > 0 && (
-                <span className={cn('shrink-0 font-mono tabular-nums text-ink3', nodeText.xs)}>{ops}</span>
-              )}
             </Row>
           );
         })}

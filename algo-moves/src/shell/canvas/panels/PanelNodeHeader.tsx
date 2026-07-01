@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from 'react';
+import { Children, type ReactNode, useMemo } from 'react';
 import {
   ChevronsDownUp,
   Code2,
@@ -9,14 +9,12 @@ import {
   Lock,
   LockOpen,
   Palette,
-  PanelBottomOpen,
   PanelRightOpen,
   Puzzle,
   Trash2,
   TrendingUp,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
-import { cn } from '../../../lib/cn';
 import { useWorkspace } from '../../../lib/workspace';
 import { traceOutputForPanel } from '../../../lib/trace';
 import { resolveCodePieces } from '../../../lib/codePieces';
@@ -40,24 +38,13 @@ import { panelAccent, panelKindIcon } from './panelIcons';
 import { HeaderPlay, HeaderStep } from './PanelHeaderControls';
 import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../CanvasContext';
 
-function VizSpawnBtn({
-  label,
-  title,
-  disabled,
-  icon,
-  onClick,
-}: {
-  label: string;
-  title: string;
-  disabled?: boolean;
-  icon: ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <PanelHeaderAction variant="ghost" label={label} title={title} disabled={disabled} onClick={onClick}>
-      {icon}
-    </PanelHeaderAction>
-  );
+/** Renders at most two header action buttons; dev-only warning if exceeded. */
+function HeaderActionSlots({ children }: { children: ReactNode }) {
+  const slots = Children.toArray(children).filter(Boolean);
+  if (import.meta.env.DEV && slots.length > 2) {
+    console.warn(`PanelNodeHeader: expected at most 2 action buttons, got ${slots.length}`);
+  }
+  return <>{slots.slice(0, 2)}</>;
 }
 
 export function PanelNodeHeader({
@@ -74,9 +61,6 @@ export function PanelNodeHeader({
   sideOpen,
   sideLabel,
   onToggleSide,
-  showDockToggle,
-  bottomDockOpen,
-  onToggleDock,
   inlineToolbar,
   headerClassName,
 }: {
@@ -93,9 +77,6 @@ export function PanelNodeHeader({
   sideOpen: boolean;
   sideLabel: string;
   onToggleSide: () => void;
-  showDockToggle: boolean;
-  bottomDockOpen: boolean;
-  onToggleDock: () => void;
   inlineToolbar?: ReactNode;
   headerClassName?: string;
 }) {
@@ -106,8 +87,6 @@ export function PanelNodeHeader({
   const { plugin } = useCanvasStatic();
   const locked = !!data.locked;
   const isViz = data.kind === 'viz';
-  const isProblem = data.kind === 'problem';
-  const inVisualize = mode === 'visualize';
   const hasCode = !!plugin.code;
   const hasReassemble = useMemo(() => {
     const reference = plugin.code?.text ?? '';
@@ -189,7 +168,7 @@ export function PanelNodeHeader({
           },
         ]
       : []),
-    ...(isViz && mode === 'visualize' && showSideToggle
+    ...(showSideToggle
       ? [
           {
             label: sideOpen ? `Hide ${sideLabel} panel` : `Show ${sideLabel} panel`,
@@ -207,7 +186,7 @@ export function PanelNodeHeader({
     },
   ];
 
-  const inlineSideToggle = showSideToggle && !(isViz && mode === 'visualize');
+  const showInlineSideToggle = showSideToggle && !isViz;
 
   return (
     <PanelHeader selected={selected} collapsed={collapsed} locked={locked} density={density} className={headerClassName}>
@@ -222,17 +201,15 @@ export function PanelNodeHeader({
 
       <PanelHeaderActions>
         {collapsed ? (
-          <>
-            {isViz && <HeaderStep />}
+          <HeaderActionSlots>
             <PanelHeaderAction variant="ghost" title="Restore panel" onClick={minimize}>
               <ChevronsDownUp className={nodeIconGlyph} />
             </PanelHeaderAction>
-          </>
+          </HeaderActionSlots>
         ) : (
-          <>
+          <HeaderActionSlots>
             {isViz && mode !== 'visualize' && (
               <>
-                <HeaderStep />
                 <PanelHeaderAction
                   variant="toggle"
                   active={showBigO}
@@ -245,60 +222,16 @@ export function PanelNodeHeader({
               </>
             )}
             {isViz && mode === 'visualize' && (
-              <>
-                <VizSpawnBtn
-                  label="Code Studio"
-                  disabled={!hasCode}
-                  title={hasCode ? 'Add Code Studio — quiz, structure, and recall' : 'No source code for this problem'}
-                  icon={<Code2 className={cn(nodeIconGlyph, 'shrink-0')} />}
-                  onClick={() => spawnConnectedPanel('code', id)}
-                />
-                <VizSpawnBtn
-                  label="Structure"
-                  disabled={!hasReassemble}
-                  title={hasReassemble ? 'Add Structure — reassemble code blocks' : 'No code blocks for this problem'}
-                  icon={<Puzzle className={cn(nodeIconGlyph, 'shrink-0')} />}
-                  onClick={() => spawnConnectedPanel('reassemble', id)}
-                />
-                <VizSpawnBtn
-                  label="Recall"
-                  disabled={!hasCode}
-                  title={hasCode ? 'Add Recall — rebuild solution from memory' : 'No source code for this problem'}
-                  icon={<Keyboard className={cn(nodeIconGlyph, 'shrink-0')} />}
-                  onClick={() => spawnConnectedPanel('recall', id)}
-                />
-                <HeaderStep />
-                <PanelHeaderAction
-                  variant="toggle"
-                  active={showBigO}
-                  title={showBigO ? 'Hide Big-O cost' : 'Show Big-O cost'}
-                  onClick={onToggleBigO}
-                >
-                  <TrendingUp className={nodeIconGlyph} />
-                </PanelHeaderAction>
-              </>
-            )}
-            {isProblem && inVisualize && (
-              <>
-                <PanelHeaderAction variant="ghost" title="Focus panel" onClick={focus}>
-                  <Crosshair className={nodeIconGlyph} />
-                </PanelHeaderAction>
-                <PanelHeaderAction variant="ghost" title="Minimize panel" onClick={minimize}>
-                  <ChevronsDownUp className={nodeIconGlyph} />
-                </PanelHeaderAction>
-              </>
-            )}
-            {showDockToggle && (
               <PanelHeaderAction
                 variant="toggle"
-                active={bottomDockOpen}
-                title={bottomDockOpen ? 'Hide Replay · Inspector · Metrics dock' : 'Show Replay · Inspector · Metrics dock'}
-                onClick={onToggleDock}
+                active={showBigO}
+                title={showBigO ? 'Hide Big-O cost' : 'Show Big-O cost'}
+                onClick={onToggleBigO}
               >
-                <PanelBottomOpen className={nodeIconGlyph} />
+                <TrendingUp className={nodeIconGlyph} />
               </PanelHeaderAction>
             )}
-            {inlineSideToggle && (
+            {showInlineSideToggle && (
               <PanelHeaderAction
                 variant="toggle"
                 active={sideOpen}
@@ -308,18 +241,9 @@ export function PanelNodeHeader({
                 <PanelRightOpen className={nodeIconGlyph} />
               </PanelHeaderAction>
             )}
-            {locked && (
-              <PanelHeaderAction variant="ghost" active title="Panel locked" disabled>
-                <Lock className={nodeIconGlyph} />
-              </PanelHeaderAction>
-            )}
-            {!locked && (
-              <PanelHeaderAction variant="ghost" title="Remove panel" onClick={remove}>
-                <Trash2 className={nodeIconGlyph} />
-              </PanelHeaderAction>
-            )}
-          </>
+          </HeaderActionSlots>
         )}
+        {isViz && <HeaderStep />}
         <PanelHeaderMenu items={menuItems} />
       </PanelHeaderActions>
     </PanelHeader>

@@ -34,6 +34,16 @@ export function normalizeShareState(s: ShareState): ShareState {
   return next === s.item ? s : { ...s, item: next };
 }
 
+function getHashParam(hash: string, key: string): string | null {
+  if (!hash) return null;
+  const raw = hash.startsWith('#') ? hash.slice(1) : hash;
+  const prefix = `${key}=`;
+  for (const part of raw.split('&')) {
+    if (part.startsWith(prefix)) return part.slice(prefix.length);
+  }
+  return null;
+}
+
 export function encodeShare(s: ShareState): string {
   try {
     return btoa(encodeURIComponent(JSON.stringify(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -58,8 +68,7 @@ export function decodeShare(raw: string): ShareState | null {
 
 export function readShareFromUrl(): ShareState | null {
   if (typeof location === 'undefined') return null;
-  const m = location.hash.match(/[#&]s=([^&]+)/);
-  const raw = m?.[1];
+  const raw = getHashParam(location.hash, 's');
   if (!raw) return null;
   const decoded = decodeShare(raw);
   return decoded ? normalizeShareState(decoded) : null;

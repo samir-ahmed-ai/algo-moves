@@ -1,4 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react';
+import { readStorageJson, writeStorageJson } from './storage';
 
 export interface EditorPrefs {
   vim: boolean;
@@ -17,20 +18,15 @@ export function clampSplitPct(pct: number): number {
 }
 
 function load(): EditorPrefs {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<EditorPrefs>;
-      return {
-        vim: !!parsed.vim,
-        wrap: !!parsed.wrap,
-        splitPct: clampSplitPct(typeof parsed.splitPct === 'number' ? parsed.splitPct : DEFAULTS.splitPct),
-      };
-    }
-  } catch {
-    /* ignore */
-  }
-  return DEFAULTS;
+  const data = readStorageJson(KEY, null as Partial<EditorPrefs> | null, (value): value is Partial<EditorPrefs> => {
+    return value !== null && typeof value === 'object';
+  });
+  if (!data) return DEFAULTS;
+  return {
+    vim: Boolean(data.vim),
+    wrap: Boolean(data.wrap),
+    splitPct: clampSplitPct(typeof data.splitPct === 'number' ? data.splitPct : DEFAULTS.splitPct),
+  };
 }
 
 let prefs: EditorPrefs = load();
@@ -38,11 +34,7 @@ const listeners = new Set<() => void>();
 
 function commit(next: EditorPrefs) {
   prefs = next;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    /* ignore */
-  }
+  writeStorageJson(KEY, next);
   listeners.forEach((l) => l());
 }
 

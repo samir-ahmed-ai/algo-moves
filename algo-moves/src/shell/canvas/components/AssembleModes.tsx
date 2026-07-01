@@ -18,6 +18,7 @@ import { useCodeStudio } from '../CodeStudio';
 import { useCanvasStatic } from '../CanvasContext';
 import type { CodePiece } from '../../../lib/codePieces';
 import { blockKind, BLOCK_META } from '../../../lib/codePieceRoles';
+import { readStorageText, writeStorageText } from '../../../lib/storage';
 
 /* ----------------------------- shared helpers ----------------------------- */
 
@@ -374,7 +375,7 @@ function RushMode() {
   const [elapsed, setElapsed] = useState(0);
   const [done, setDone] = useState(false);
   const [best, setBest] = useState<number | null>(() => {
-    const v = Number(localStorage.getItem(bestKey));
+    const v = Number(readStorageText(bestKey, null));
     return Number.isFinite(v) && v > 0 ? v : null;
   });
   const start = useRef(Date.now());
@@ -398,11 +399,7 @@ function RushMode() {
     setElapsed(secs);
     if (best === null || secs < best) {
       setBest(secs);
-      try {
-        localStorage.setItem(bestKey, String(secs));
-      } catch {
-        /* storage unavailable */
-      }
+      writeStorageText(bestKey, String(secs));
     }
   };
 

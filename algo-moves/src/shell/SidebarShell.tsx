@@ -7,13 +7,10 @@ import { CHROME_BTN_MD } from './chrome';
 
 export {
   BOTTOM_RAIL_H,
-  DEFAULT_DOCK_H,
-  MIN_DOCK_H,
   CHROME_BTN,
   CHROME_BTN_MD,
   CHROME_ICON,
   CSS_CHROME_BOTTOM_RAIL,
-  CSS_CHROME_BOTTOM_DOCK,
 } from './chrome';
 
 export const SIDEBAR_W = 192;
@@ -142,6 +139,35 @@ export function SidebarSection({
         </div>
       )}
     </section>
+  );
+}
+
+export function SidebarTabBar<T extends string>({
+  tabs,
+  active,
+  onTab,
+}: {
+  tabs: { id: T; label: string; icon?: ReactNode }[];
+  active: T;
+  onTab: (id: T) => void;
+}) {
+  return (
+    <div className="sidebar-tab-bar flex shrink-0 border-b border-edge">
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          type="button"
+          onClick={() => onTab(t.id)}
+          className={cn(
+            'flex min-h-[var(--row)] flex-1 items-center justify-center gap-0.5 px-0.5 py-0 transition-colors',
+            active === t.id ? 'border-b-2 border-accent text-accent' : 'text-ink3 hover:text-ink2',
+          )}
+        >
+          {t.icon}
+          <ChromeLabel className={cn('truncate normal-case', active === t.id && 'text-accent')}>{t.label}</ChromeLabel>
+        </button>
+      ))}
+    </div>
   );
 }
 

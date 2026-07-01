@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PanelFlowNode, PanelNodeData } from './PanelNode';
-import { CANVAS_MARGIN, CANVAS_NODE_SEP, layoutVisualizeCanvas } from './layout';
+import { CANVAS_MARGIN, CANVAS_NODE_SEP, layoutSize, layoutVisualizeCanvas } from './layout';
+import { vizMinWidth, vizWireGap } from './canvasTokens';
 
 function panel(
   kind: string,
@@ -100,14 +101,29 @@ describe('layoutVisualizeCanvas', () => {
     expectCenteredAgainstViz(tallerProblem, 240 + CANVAS_NODE_SEP + 96, problem, examples);
   });
 
-  it('top-aligns the visualizer to the canvas margin', () => {
-    const laid = layoutVisualizeCanvas(
-      [panel('problem'), panel('examples'), panel('viz')],
-      { viewport: { width: 1200, height: 800 } },
-    );
+  it('hugs the visualizer to its content height and centers it in the viewport', () => {
+    const nodes = [panel('problem'), panel('examples'), panel('viz', { height: 320 })];
+    const availH = 800 - CANVAS_MARGIN * 2;
+    const laid = layoutVisualizeCanvas(nodes, { viewport: { width: 1200, height: 800 } });
     const viz = laid.find((n) => n.data.kind === 'viz')!;
 
-    expect(viz.position.y).toBe(CANVAS_MARGIN);
-    expect(viz.height).toBe(800 - CANVAS_MARGIN * 2);
+    // Height follows the board's content (320), not the full viewport span…
+    expect(viz.height).toBe(320);
+    // …and the node is centered vertically against the viewport.
+    expect(viz.position.y).toBeCloseTo(CANVAS_MARGIN + (availH - 320) / 2, 0);
+  });
+
+  it('expands the visualizer to fill remaining viewport width', () => {
+    const viewport = { width: 1200, height: 800 };
+    const laid = layoutVisualizeCanvas(
+      [panel('problem'), panel('examples'), panel('viz', { width: 400 })],
+      { viewport },
+    );
+    const viz = laid.find((n) => n.data.kind === 'viz')!;
+    const colW = layoutSize('problem', viewport).w;
+    const wireGap = vizWireGap(colW);
+    const availW = Math.max(vizMinWidth(colW), viewport.width - CANVAS_MARGIN * 2 - colW - wireGap);
+
+    expect(viz.width).toBe(availW);
   });
 });

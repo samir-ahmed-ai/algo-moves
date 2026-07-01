@@ -1,4 +1,5 @@
 import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '../shell/canvas/layout';
+import { readStorageJson, writeStorageJson } from './storage';
 
 export interface CanvasPrefs {
   edgeOpts: EdgeOpts;
@@ -12,24 +13,23 @@ const DEFAULTS: CanvasPrefs = {
   bg: 'dots',
 };
 
+interface StoredCanvasPrefs {
+  edgeOpts?: Partial<EdgeOpts>;
+  bg?: BgVariant;
+}
+
 export function loadCanvasPrefs(): CanvasPrefs {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return DEFAULTS;
-    const parsed = JSON.parse(raw) as Partial<CanvasPrefs>;
-    return {
-      edgeOpts: { ...DEFAULTS.edgeOpts, ...parsed.edgeOpts },
-      bg: parsed.bg ?? DEFAULTS.bg,
-    };
-  } catch {
-    return DEFAULTS;
-  }
+  const raw = readStorageJson<StoredCanvasPrefs | CanvasPrefs | null>(KEY, null, (value): value is StoredCanvasPrefs | CanvasPrefs => {
+    if (!value || typeof value !== 'object') return false;
+    return typeof (value as StoredCanvasPrefs).bg === 'string' || !!(value as StoredCanvasPrefs).edgeOpts;
+  });
+  if (!raw) return DEFAULTS;
+  return {
+    edgeOpts: { ...DEFAULTS.edgeOpts, ...(raw.edgeOpts ?? {}) },
+    bg: raw.bg ?? DEFAULTS.bg,
+  };
 }
 
 export function saveCanvasPrefs(p: CanvasPrefs) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(p));
-  } catch {
-    /* ignore */
-  }
+  writeStorageJson(KEY, p);
 }

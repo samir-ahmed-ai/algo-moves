@@ -23,8 +23,8 @@ export interface PanelConfigEntry {
   optional?: boolean;
   /** Per-mode default when builtin/optional differ across modes. */
   modeFlags?: Partial<Record<CanvasMode, 'builtin' | 'optional'>>;
-  /** Lives in bottom dock only (visualize). */
-  dockOnly?: boolean;
+  /** Sidebar-only in visualize — not spawned as canvas nodes. */
+  sidebarOnly?: boolean;
 }
 
 function panelModeRole(p: PanelConfigEntry, mode: CanvasMode): 'builtin' | 'optional' | null {
@@ -54,9 +54,9 @@ export const panelsConfig: PanelConfigEntry[] = [
   { id: 'examples', title: 'Example input', category: 'Problem', modes: ['visualize'], builtin: true },
   { id: 'problem', title: 'Problem', category: 'Problem', modes: ['visualize'], builtin: true },
   { id: 'viz', title: 'Visualizer', category: 'Visualize', modes: ['visualize'], builtin: true },
-  { id: 'replay', title: 'Replay', category: 'Visualize', modes: ['visualize'], dockOnly: true },
-  { id: 'inspector', title: 'Inspector', category: 'Visualize', modes: ['visualize'], dockOnly: true },
-  { id: 'metrics', title: 'Metrics', category: 'Visualize', modes: ['visualize'], dockOnly: true },
+  { id: 'replay', title: 'Replay', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },
+  { id: 'inspector', title: 'Inspector', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },
+  { id: 'metrics', title: 'Metrics', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },
   { id: 'bigo', title: 'Cost (Big-O)', category: 'Visualize', modes: ['visualize'], optional: true },
   { id: 'bookmarks', title: 'Bookmarks', category: 'Workspace', modes: ['visualize'], optional: true },
   { id: 'editor', title: 'Input editor', category: 'Code', modes: ['visualize'], optional: true },
@@ -89,7 +89,18 @@ export const panelsConfig: PanelConfigEntry[] = [
   { id: 'scratch', title: 'Scratchpad', category: 'Code', modes: ['learn'], optional: true },
 ];
 
-const byId = new Map(panelsConfig.map((p) => [p.id, p]));
+const byId = new Map<string, PanelConfigEntry>();
+for (const p of panelsConfig) {
+  if (byId.has(p.id)) {
+    if (import.meta.env.DEV) {
+      console.warn(`[panelRegistry] Duplicate panel id "${p.id}" kept only first occurrence`);
+    }
+    continue;
+  }
+  byId.set(p.id, p);
+}
+
+const panelConfigs = Array.from(byId.values());
 
 export function getPanelConfig(id: string): PanelConfigEntry | undefined {
   return byId.get(id);
@@ -104,16 +115,19 @@ export function panelCategory(id: string): PanelCategory {
 }
 
 export function modeBuiltins(mode: CanvasMode): string[] {
-  return panelsConfig.filter((p) => panelModeRole(p, mode) === 'builtin').map((p) => p.id);
+  return panelConfigs.filter((p) => panelModeRole(p, mode) === 'builtin').map((p) => p.id);
 }
 
 export function modeOptional(mode: CanvasMode): string[] {
-  return panelsConfig.filter((p) => panelModeRole(p, mode) === 'optional').map((p) => p.id);
+  return panelConfigs.filter((p) => panelModeRole(p, mode) === 'optional').map((p) => p.id);
 }
 
-export const DOCK_ONLY_PANELS = new Set(
-  panelsConfig.filter((p) => p.dockOnly).map((p) => p.id),
+export const SIDEBAR_ONLY_PANELS = new Set(
+  panelConfigs.filter((p) => p.sidebarOnly).map((p) => p.id),
 );
+
+/** @deprecated Use {@link SIDEBAR_ONLY_PANELS} */
+export const DOCK_ONLY_PANELS = SIDEBAR_ONLY_PANELS;
 
 let panelCounter = 0;
 

@@ -15,6 +15,21 @@ export interface ProjectState {
   speed?: number;
 }
 
+function isShareState(value: unknown): value is ShareState {
+  return value != null && typeof value === 'object';
+}
+
+function isProjectState(value: unknown): value is ProjectState {
+  const candidate = value as Partial<ProjectState>;
+  return (
+    !!candidate &&
+    candidate.version === 1 &&
+    isShareState(candidate.share) &&
+    Array.isArray(candidate.nodes) &&
+    Array.isArray(candidate.edges)
+  );
+}
+
 export function encodeProjectState(state: ProjectState): string {
   return compressToBase64(JSON.stringify(state));
 }
@@ -23,7 +38,8 @@ export function decodeProjectState(encoded: string): ProjectState | null {
   try {
     const json = decompressFromBase64(encoded);
     if (!json) return null;
-    return JSON.parse(json) as ProjectState;
+    const parsed = JSON.parse(json);
+    return isProjectState(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -72,7 +88,8 @@ export function projectStateToJson(state: ProjectState): string {
 
 export function projectStateFromJson(json: string): ProjectState | null {
   try {
-    return JSON.parse(json) as ProjectState;
+    const parsed = JSON.parse(json);
+    return isProjectState(parsed) ? parsed : null;
   } catch {
     return null;
   }

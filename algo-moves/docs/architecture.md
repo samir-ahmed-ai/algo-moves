@@ -7,7 +7,6 @@ flowchart TB
   subgraph shell [Shell]
     Workspace
     Sidebars["UnifiedLeftSidebar / RightSidebar"]
-    Dock["UnifiedBottomDock"]
   end
   subgraph canvas [Canvas]
     PanelNode["PanelNode — routing shell"]

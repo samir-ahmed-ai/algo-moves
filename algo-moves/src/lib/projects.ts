@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import type { ShareState } from './shareState';
+import { readStorageJson, writeStorageJson } from './storage';
 
 /**
  * Named saved workspaces (#87). A project is just a ShareState snapshot stored in
@@ -8,13 +9,7 @@ import type { ShareState } from './shareState';
 const KEY = 'algo-moves:projects';
 
 function load(): Record<string, ShareState> {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as Record<string, ShareState>;
-  } catch {
-    // ignore
-  }
-  return {};
+  return readStorageJson<Record<string, ShareState>>(KEY, {});
 }
 
 let data: Record<string, ShareState> = load();
@@ -22,11 +17,7 @@ const listeners = new Set<() => void>();
 
 function commit(next: Record<string, ShareState>) {
   data = next;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(data));
-  } catch {
-    // ignore quota/private-mode failures
-  }
+  writeStorageJson(KEY, data);
   listeners.forEach((l) => l());
 }
 

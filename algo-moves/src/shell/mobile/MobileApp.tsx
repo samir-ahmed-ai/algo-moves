@@ -4,7 +4,7 @@ import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from
 import { useWorkspace } from '../../lib/workspace';
 import { MobileBrowse } from './MobileBrowse';
 import { MobileDeck } from './MobileDeck';
-import { parseMobileHash, writeMobileHash } from './mobileHash';
+import { isMobileHash, parseMobileHash, writeMobileHash } from './mobileHash';
 
 interface DeckTarget {
   topic: Topic;
@@ -95,7 +95,7 @@ export function MobileApp() {
         if (browse.trackId) setActiveTrackId(browse.trackId as typeof activeTrackId);
         if (browse.categoryId !== undefined) setActiveCategoryId(browse.categoryId ?? null);
         setActiveTopicId(null);
-      } else if (location.hash.startsWith('#mobile')) {
+      } else if (isMobileHash(location.hash)) {
         setActiveTopicId(null);
         setActiveTrackId(null);
         setActiveCategoryId(null);

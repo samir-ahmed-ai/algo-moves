@@ -1,3 +1,5 @@
+import { readStorageJson, removeStorageValue, writeStorageJson } from '../../lib/storage';
+
 const KEY = 'algo-moves:mobile-session';
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -9,35 +11,33 @@ export interface MobileSession {
   updatedAt: number;
 }
 
+function isMobileSession(value: unknown): value is MobileSession {
+  const candidate = value as Partial<MobileSession>;
+  if (!candidate || typeof candidate !== 'object') return false;
+  return (
+    typeof candidate.topicId === 'string' &&
+    typeof candidate.pIdx === 'number' &&
+    typeof candidate.cIdx === 'number' &&
+    typeof candidate.updatedAt === 'number' &&
+    Number.isFinite(candidate.updatedAt)
+  );
+}
+
 export function loadMobileSession(): MobileSession | null {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    const session = JSON.parse(raw) as MobileSession;
-    if (!session.topicId || typeof session.pIdx !== 'number' || typeof session.cIdx !== 'number') return null;
-    if (Date.now() - session.updatedAt > TTL_MS) {
-      localStorage.removeItem(KEY);
-      return null;
-    }
-    return session;
-  } catch {
+  const session = readStorageJson<MobileSession | null>(KEY, null, isMobileSession);
+  if (!session) return null;
+  if (Date.now() - session.updatedAt > TTL_MS) {
+    removeStorageValue(KEY);
     return null;
   }
+  return session;
 }
 
 export function saveMobileSession(session: Omit<MobileSession, 'updatedAt'>) {
-  try {
-    const next: MobileSession = { ...session, updatedAt: Date.now() };
-    localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    /* storage blocked */
-  }
+  const next: MobileSession = { ...session, updatedAt: Date.now() };
+  writeStorageJson(KEY, next);
 }
 
 export function clearMobileSession() {
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* ignore */
-  }
+  removeStorageValue(KEY);
 }

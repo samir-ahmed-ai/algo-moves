@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { X, Copy, Check } from 'lucide-react';
-import { CSS_CHROME_BOTTOM_DOCK } from '../chrome';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
@@ -39,7 +38,7 @@ export function TracePreviewPanel() {
   };
 
   return (
-    <div className={`pointer-events-none fixed inset-x-0 bottom-[calc(${CSS_CHROME_BOTTOM_DOCK}+48px)] z-40 flex justify-end px-3 pb-1.5`}>
+    <div className="pointer-events-none fixed inset-x-0 bottom-12 z-40 flex justify-end px-3 pb-1.5">
       <div className="pointer-events-auto w-[min(50vw,560px)] overflow-hidden rounded-lg border border-edge bg-panel/95 shadow-[var(--shadow-xl)] backdrop-blur">
         <header className="flex items-center gap-1.5 border-b border-edge px-2 py-1">
           <Label className="flex-1 truncate">{header}</Label>

@@ -1,5 +1,6 @@
 import type { LayoutPreset } from '../shell/canvas/layout';
 import type { CanvasMode } from '../core';
+import { readStorageText, writeStorageText } from '../lib/storage';
 
 /** Built-in workflow presets — layout + mode actions (no encoded blob required). */
 export interface WorkflowPresetAction {
@@ -48,19 +49,11 @@ export const WORKFLOW_PRESET_ACTIONS: WorkflowPresetAction[] = [
 const DEMO_KEY = 'algo-moves:demo-workflow';
 
 export function hasSeenDemoWorkflow(): boolean {
-  try {
-    return localStorage.getItem(DEMO_KEY) === '1';
-  } catch {
-    return true;
-  }
+  return readStorageText(DEMO_KEY) === '1';
 }
 
 export function markDemoWorkflowSeen(): void {
-  try {
-    localStorage.setItem(DEMO_KEY, '1');
-  } catch {
-    /* ignore */
-  }
+  writeStorageText(DEMO_KEY, '1');
 }
 
 /** Default first-visit workflow preset id. */

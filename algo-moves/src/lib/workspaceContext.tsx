@@ -4,33 +4,30 @@ import { normalizeCanvasMode, type CanvasMode } from '../core';
 import { normalizeThemePreset, type ThemePreset } from '../styles/themes/registry';
 import { readShareFromUrl } from './shareState';
 import { useIsMobile } from './useMediaQuery';
-import { writeMobileHash } from '../shell/mobile/mobileHash';
+import { isMobileHash, writeMobileHash } from '../shell/mobile/mobileHash';
+import { isVimHash, writeVimHash } from '../shell/vim/engine/vimHash';
 import { initialBrowseFromHash } from './browseNavigation';
 import type { LayoutPreset } from '../shell/canvas/layout';
-import { BOTTOM_RAIL_H, DEFAULT_DOCK_H, SIDEBAR_RAIL_W, SIDEBAR_W, SIDEBAR_WIDE_W } from '../shell/SidebarShell';
+import { BOTTOM_RAIL_H, SIDEBAR_RAIL_W, SIDEBAR_W, SIDEBAR_WIDE_W } from '../shell/SidebarShell';
 import type {
   AppRoute,
   CanvasAddPanel,
   CanvasHudProps,
   CanvasProjectApi,
-  CanvasZoomApi,
   Density,
   LayoutDir,
   Palette,
+  RightSidebarTab,
   Theme,
   Tweaks,
   WorkspaceDefaults,
 } from './workspace';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 import { WorkspaceContext } from './workspaceContextStore';
+import { readStorageJson, writeStorageText } from './storage';
 
 function loadDefaults(): Partial<WorkspaceDefaults> {
-  try {
-    const raw = localStorage.getItem(DEFAULTS_KEY);
-    return raw ? (JSON.parse(raw) as Partial<WorkspaceDefaults>) : {};
-  } catch {
-    return {};
-  }
+  return readStorageJson(DEFAULTS_KEY, {});
 }
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
@@ -60,8 +57,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [dir, setDir] = useState<LayoutDir>(shared?.dir === 'TB' ? 'TB' : 'LR');
   const [mode, setMode] = useState<CanvasMode>(() => normalizeCanvasMode(shared?.mode));
   const [sidePanelTab, setSidePanelTab] = useState<string | null>(null);
-  const [bottomDockOpen, setBottomDockOpen] = useState(false);
-  const [bottomDockHeight, setBottomDockHeight] = useState(DEFAULT_DOCK_H);
+  const [rightTab, setRightTab] = useState<RightSidebarTab>('analysis');
   const [activeItemId, setActiveItemId] = useState(
     shared?.item && catalog.getItem(shared.item) ? shared.item : catalog.firstItemId,
   );
@@ -77,7 +73,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     if (shared?.item && catalog.getItem(shared.item)) return 'workspace';
     if (typeof location !== 'undefined') {
       const hash = location.hash;
-      if (hash.startsWith('#mobile')) return 'mobile';
+      if (isMobileHash(hash)) return 'mobile';
+      if (isVimHash(hash)) return 'vim';
       if (hash === '#home') return 'home';
       if (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches) return 'mobile';
     }
@@ -86,7 +83,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [canvasAdd, setCanvasAdd] = useState<CanvasAddPanel | null>(null);
   const [canvasProject, setCanvasProject] = useState<CanvasProjectApi | null>(null);
   const [canvasHud, setCanvasHud] = useState<CanvasHudProps | null>(null);
-  const [canvasZoom, setCanvasZoom] = useState<CanvasZoomApi | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [tracePreviewOpen, setTracePreviewOpen] = useState(false);
   const [mobileTransportOpen, setMobileTransportOpen] = useState(false);
@@ -127,13 +123,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     writeMobileHash(categoryId ? { categoryId, itemId } : null);
   }, []);
 
+  const enterVim = useCallback((levelId?: string) => {
+    setRoute('vim');
+    writeVimHash(levelId ? { levelId } : null);
+  }, []);
+
   const toggleFocusCanvas = useCallback(() => {
     setFocusCanvas((f) => {
       const next = !f;
       if (next) {
         setLeftOpen(false);
         setRightOpen(false);
-        setBottomDockOpen(false);
       }
       requestFitCanvas();
       return next;
@@ -143,11 +143,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Remember the last problem opened in the workspace for the home page's "Continue".
   useEffect(() => {
     if (route === 'workspace' && activeItemId) {
-      try {
-        localStorage.setItem(LAST_ITEM_KEY, activeItemId);
-      } catch {
-        /* storage blocked — Continue simply won't persist */
-      }
+      writeStorageText(LAST_ITEM_KEY, activeItemId);
     }
   }, [route, activeItemId]);
 
@@ -179,18 +175,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     if (!isMobile && rightOpen && !focusCanvas) {
       right = `${rightWide ? SIDEBAR_WIDE_W : SIDEBAR_W}px`;
     }
-    const bottom =
-      mode === 'visualize'
-        ? bottomDockOpen && !focusCanvas
-          ? `${bottomDockHeight}px`
-          : `${BOTTOM_RAIL_H}px`
-        : '0px';
     root.style.setProperty('--chrome-left', left);
     root.style.setProperty('--chrome-right', right);
-    root.style.setProperty('--chrome-bottom', bottom);
+    root.style.setProperty('--chrome-bottom', '0px');
     root.style.setProperty('--bottom-rail-h', `${BOTTOM_RAIL_H}px`);
-    root.style.setProperty('--default-dock-h', `${bottomDockHeight}px`);
-  }, [present, leftOpen, rightOpen, rightWide, bottomDockOpen, bottomDockHeight, focusCanvas, mode, isMobile]);
+  }, [present, leftOpen, rightOpen, rightWide, focusCanvas, isMobile]);
 
   const toggleTweak = (k: keyof Tweaks) => setTweaks((t) => ({ ...t, [k]: !t[k] }));
 
@@ -226,10 +215,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setMode,
         sidePanelTab,
         setSidePanelTab,
-        bottomDockOpen,
-        setBottomDockOpen,
-        bottomDockHeight,
-        setBottomDockHeight,
+        rightTab,
+        setRightTab,
         activeItemId,
         setActiveItemId,
         activeTopicId,
@@ -243,14 +230,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         enterWorkspace,
         openProblem,
         enterMobile,
+        enterVim,
         canvasAdd,
         setCanvasAdd,
         canvasProject,
         setCanvasProject,
         canvasHud,
         setCanvasHud,
-        canvasZoom,
-        setCanvasZoom,
         settingsOpen,
         setSettingsOpen,
         tracePreviewOpen,

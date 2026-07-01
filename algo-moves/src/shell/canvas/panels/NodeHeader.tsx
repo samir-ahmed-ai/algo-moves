@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
-import { nodeText } from '../nodeui';
+import { nodeText, nodeTextWrap } from '../nodeui';
 
 /** Composable panel header primitives (Strudel node-header pattern). */
 
@@ -19,7 +19,7 @@ export function NodeHeader({ children, className }: { children: ReactNode; class
 
 export function NodeHeaderTitle({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={cn('min-w-0 flex-1 truncate font-semibold text-ink', nodeText.title, className)}>{children}</span>
+    <span className={cn('min-w-0 flex-1 font-semibold text-ink', nodeTextWrap, nodeText.title, className)}>{children}</span>
   );
 }
 

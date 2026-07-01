@@ -1,5 +1,6 @@
 import { cn } from '../../lib/cn';
 import { computeInputFrameCounts } from '../../lib/inputFrameCounts';
+import { isEditableTarget } from '../../lib/keyboard';
 import { chromeText } from '../chromeUi';
 import { onReactFlowError } from './canvasFlowErrors';
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
@@ -15,7 +16,6 @@ import {
   useEdgesState,
   useNodesState,
   useNodesInitialized,
-  useOnSelectionChange,
   useReactFlow,
   type Connection,
   type ConnectionLineComponentProps,
@@ -37,9 +37,7 @@ import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from '
 import { CanvasProblemNav } from './CanvasProblemNav';
 import { RemovableEdge } from './RemovableEdge';
 import { ContextMenu, LaserPointer, type MenuItem } from './CanvasTools';
-import { UnifiedBottomDock } from './UnifiedBottomDock';
-import { CanvasFloatingHud, CanvasZoomBridge } from './CanvasFloatingHud';
-import { CanvasToolsPanel } from './CanvasToolsPanel';
+import { CanvasFloatingHud } from './CanvasFloatingHud';
 import { TracePreviewPanel } from './TracePreviewPanel';
 import { EffectNode, createEffectByType } from './EffectNode';
 import { ConnectedComponentsProvider } from '../../lib/ConnectedComponentsContext';
@@ -71,7 +69,6 @@ import {
   FIT_PADDING_VIEW,
   edgesForKind,
   kindTitle,
-  layoutEstimate,
   layoutFixedWidth,
   layoutGraph,
   layoutLearnCanvas,
@@ -114,7 +111,25 @@ function minimapNodeColor(n: Node): string {
 }
 
 function snapNodeWidth(n: PanelFlowNode): number | undefined {
-  return layoutFixedWidth(n.data.kind ?? n.id) ?? n.width ?? undefined;
+  return n.width ?? undefined;
+}
+
+/** Persist position + width; viz width is layout-owned in visualize mode. */
+function snapNodeLayout(n: PanelFlowNode): { position: { x: number; y: number }; width?: number } {
+  const kind = (n.data as PanelNodeData | undefined)?.kind ?? n.id;
+  const entry: { position: { x: number; y: number }; width?: number } = { position: n.position };
+  if (kind !== 'viz') {
+    const w = snapNodeWidth(n);
+    if (w != null) entry.width = w;
+  }
+  return entry;
+}
+
+function restoreNodeWidth(kind: string, savedWidth: number | undefined, layoutWidth: number | undefined): number | undefined {
+  const raw = savedWidth ?? layoutWidth;
+  const maxW = layoutFixedWidth(kind);
+  if (raw == null) return raw;
+  return maxW != null ? Math.min(raw, maxW) : raw;
 }
 
 /** Drop retired shell edges; restore required wires unless the user removed them. */
@@ -296,8 +311,6 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     layoutPreset,
     setLayoutPreset,
     setSidePanelTab,
-    bottomDockOpen,
-    setBottomDockOpen,
     setCanvasAdd,
     setCanvasProject,
     setCanvasHud,
@@ -311,6 +324,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     setPresent,
     rightOpen,
     setRightOpen,
+    rightTab,
+    setRightTab,
   } = useWorkspace();
   const pluginId = plugin.meta.id;
   const key = `${pluginId}:${mode}`;
@@ -393,8 +408,10 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
         nodes = nodes.map((n) => {
           if (!saved[n.id]) return n;
           const kind = n.data.kind ?? n.id;
-          const fixedW = layoutFixedWidth(kind);
-          const width = fixedW ?? saved[n.id].width ?? n.width;
+          const width =
+            m === 'visualize' && kind === 'viz'
+              ? n.width
+              : restoreNodeWidth(kind, saved[n.id].width, n.width);
           // Visualize / Learn: keep canonical stacked layout; restore widths only.
           if (m === 'visualize' || m === 'learn') {
             return { ...n, position: n.position, width };
@@ -402,7 +419,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
           return {
             ...n,
             position: saved[n.id].position,
-            width: fixedW ?? (Math.max(saved[n.id].width ?? 0, layoutEstimate(kind).w) || n.width),
+            width,
           };
         });
       }
@@ -505,7 +522,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     const presentIds = new Set(present.map((n) => n.id));
     const snap: Saved = {};
     present.forEach((n) => {
-      snap[n.id] = { position: n.position, width: snapNodeWidth(n) };
+      snap[n.id] = snapNodeLayout(n);
     });
     layoutRef.current[prevKeyRef.current] = snap;
     removedRef.current[prevKeyRef.current] = new Set(
@@ -547,7 +564,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     if (nodes.some((n) => n.dragging)) return;
     const snap: Saved = {};
     nodes.forEach((n) => {
-      snap[n.id] = { position: n.position, width: snapNodeWidth(n) };
+      snap[n.id] = snapNodeLayout(n);
     });
     layoutRef.current[key] = snap;
     const presentIds = new Set(nodes.map((n) => n.id));
@@ -647,7 +664,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     }
     const id = requestAnimationFrame(() => fitCanvas(200));
     return () => cancelAnimationFrame(id);
-  }, [fitCanvasSignal, bottomDockOpen, layoutPreset, fitCanvas, mode, setNodes, layoutOpts]);
+  }, [fitCanvasSignal, rightOpen, rightTab, layoutPreset, fitCanvas, mode, setNodes, layoutOpts]);
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -689,7 +706,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
       setEdges(built.edges);
       persist();
       if (preset === 'Theater' || preset === 'Demo') {
-        setBottomDockOpen(true);
+        setRightOpen(true);
+        setRightTab('canvas');
       }
       if (preset === 'Demo') {
         setPresent(true);
@@ -697,14 +715,14 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
       requestFitCanvas();
       requestAnimationFrame(() => fitCanvas());
     },
-    [plugin, mode, key, buildFor, setNodes, setEdges, persist, fitCanvas, setLayoutPreset, setBottomDockOpen, setPresent, requestFitCanvas],
+    [plugin, mode, key, buildFor, setNodes, setEdges, persist, fitCanvas, setLayoutPreset, setRightOpen, setRightTab, setPresent, requestFitCanvas],
   );
 
   // Keyboard: Ctrl/⌘+Z undo, Ctrl/⌘+Shift+Z or Ctrl/⌘+Y redo (#82); plain 'z' zoom-to-fit/selection (#77).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target;
-      const inField = t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || t.closest('.cm-editor'));
+      const inField = isEditableTarget(t);
       const mod = e.metaKey || e.ctrlKey;
       if (mod && (e.key === 'z' || e.key === 'Z')) {
         e.preventDefault();
@@ -1045,9 +1063,9 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     (e: React.MouseEvent, n: Node) => {
       const t = e.target as HTMLElement;
       if (t.closest('.nodrag') || t.closest('button, input, textarea, .cm-editor')) return;
-      ensureAndFocusPanel(n.id);
+      setNodes((nds) => nds.map((node) => ({ ...node, selected: node.id === n.id })));
     },
-    [ensureAndFocusPanel],
+    [setNodes],
   );
 
   const canvasActions = useMemo(
@@ -1137,7 +1155,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target;
-      if (t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || t.closest('.cm-editor'))) return;
+      if (isEditableTarget(t)) return;
       if ((e.metaKey || e.ctrlKey) && (e.key === 'a' || e.key === 'A')) {
         e.preventDefault();
         setNodes((nds) => nds.map((n) => ({ ...n, selected: true })));
@@ -1195,16 +1213,6 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   );
 
   const onError = useCallback(onReactFlowError, []);
-
-  // Figma-style: selecting a single panel reveals the properties inspector.
-  const selCountRef = useRef(0);
-  useOnSelectionChange({
-    onChange: ({ nodes: sel }) => {
-      const panels = sel.filter((n) => n.type === 'panel').length;
-      if (panels === 1 && selCountRef.current !== 1 && !present && !rightOpen) setRightOpen(true);
-      selCountRef.current = panels;
-    },
-  });
 
   return (
     <CanvasStaticProvider value={staticValue}>
@@ -1282,17 +1290,15 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
             <MiniMap
               pannable
               zoomable
-              position="bottom-left"
+              position="bottom-right"
               nodeColor={minimapNodeColor}
               nodeStrokeWidth={2}
               maskColor="color-mix(in srgb, var(--bg) 62%, transparent)"
               bgColor="color-mix(in srgb, var(--surface) 88%, transparent)"
-              className="!bottom-2 !left-2 !m-0 hidden overflow-hidden rounded-md border border-edge shadow-[var(--shadow-md)] lg:block"
+              className="!bottom-[calc(var(--chrome-bottom,0px)+8px)] !right-2 !m-0 hidden overflow-hidden rounded-md border border-edge shadow-[var(--shadow-md)] lg:block"
               style={{ width: 132, height: 92 }}
             />
             {!present && <CanvasProblemNav />}
-            <CanvasZoomBridge onFit={() => fitCanvas()} />
-            <CanvasToolsPanel />
             <CanvasFloatingHud />
           </ReactFlow>
           </ConnectedComponentsProvider>
@@ -1318,7 +1324,6 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
             </div>
           )}
         </div>
-        {!present && mode === 'visualize' && <UnifiedBottomDock />}
         </div>
         {!present && <UnifiedRightSidebar />}
         </div>
