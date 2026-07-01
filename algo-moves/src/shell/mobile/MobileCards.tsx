@@ -14,7 +14,10 @@ import {
 import type { Item } from '../../content';
 import { recordAttempt, logMistake } from '../../lib/progress';
 import { cn } from '../../lib/cn';
+import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { ReassemblePane } from '../../components/ReassemblePane';
+import { quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
+import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '../../lib/quizConstants';
 import { correctIndex, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
 import { MobileVizShell } from './MobileVizShell';
 
@@ -132,24 +135,32 @@ export function AnimateCardView({
 
 /* -------------------------------------------------------------------- quiz */
 
-const CORRECT_MS = 850;
-const WRONG_MS = 1900;
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export function QuizCardView({
   card,
   block,
+  quizRunSeed,
+  quizAttempt,
   onAnswered,
   onAdvance,
+  onRestartQuiz,
 }: {
   card: QuizCardData;
   block: ProblemBlock;
+  quizRunSeed: number;
+  quizAttempt: number;
   onAnswered: (correct: boolean) => void;
   onAdvance: () => void;
+  onRestartQuiz: () => void;
 }) {
   const { item } = block;
   const { question } = card;
-  const answer = correctIndex(question);
+  const q = useMemo(
+    () => shuffleQuizQuestion(question, quizQuestionSeed(quizRunSeed, card.qIndex, quizAttempt)),
+    [question, card.qIndex, quizRunSeed, quizAttempt],
+  );
+  const answer = correctIndex(q);
   const [picked, setPicked] = useState<number | null>(null);
   const answered = picked !== null;
   const isCorrect = picked === answer;
@@ -166,7 +177,7 @@ export function QuizCardView({
       aliveRef.current = false;
       if (timer.current) window.clearTimeout(timer.current);
     };
-  }, [card.key]);
+  }, [card.key, quizRunSeed, quizAttempt]);
 
   const choose = (idx: number) => {
     if (pickedRef.current || answered) return;
@@ -179,20 +190,23 @@ export function QuizCardView({
         problemId: item.id,
         problemTitle: item.title,
         prompt: question.prompt,
-        picked: question.choices[idx]?.label ?? '',
-        answer: question.choices[answer]?.label ?? '',
+        picked: q.choices[idx]?.label ?? '',
+        answer: q.choices[answer]?.label ?? '',
       });
     }
     onAnswered(correct);
     timer.current = window.setTimeout(() => {
-      if (aliveRef.current) onAdvance();
-    }, correct ? CORRECT_MS : WRONG_MS);
+      if (!aliveRef.current) return;
+      if (correct) onAdvance();
+      else onRestartQuiz();
+    }, correct ? QUIZ_CORRECT_MS : QUIZ_WRONG_MS);
   };
 
   const skipWait = () => {
     if (!answered) return;
     if (timer.current) window.clearTimeout(timer.current);
-    onAdvance();
+    if (isCorrect) onAdvance();
+    else onRestartQuiz();
   };
 
   return (
@@ -222,9 +236,10 @@ export function QuizCardView({
       </div>
 
       <div className="mt-5 flex flex-col gap-2.5">
-        {question.choices.map((c, i) => {
+        {q.choices.map((c, i) => {
           const showCorrect = answered && i === answer;
           const showWrong = answered && i === picked && i !== answer;
+          const choiceState = showCorrect ? 'correct' : showWrong ? 'wrong' : answered ? 'dim' : 'idle';
           return (
             <button
               key={i}
@@ -249,8 +264,8 @@ export function QuizCardView({
               >
                 {showCorrect ? <Check className="h-4 w-4" /> : showWrong ? <X className="h-4 w-4" /> : LETTERS[i]}
               </span>
-              <span className={cn('min-w-0 flex-1 text-[14.5px] leading-snug', showCorrect ? 'text-good' : showWrong ? 'text-bad' : 'text-ink')}>
-                {c.label}
+              <span className="min-w-0 flex-1">
+                <QuizChoiceLabel label={c.label} size="mobile" state={choiceState} />
               </span>
             </button>
           );
@@ -261,7 +276,7 @@ export function QuizCardView({
         <div className="mobile-explain mt-4 rounded-2xl border border-edge bg-panel2/60 px-3.5 py-3" role="status" aria-live="polite">
           <div className={cn('flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide', isCorrect ? 'text-good' : 'text-bad')}>
             {isCorrect ? <Check className="h-3.5 w-3.5" /> : <Lightbulb className="h-3.5 w-3.5" />}
-            {isCorrect ? 'Correct' : 'Here’s why'}
+            {isCorrect ? 'Correct' : 'Start over — here’s why'}
           </div>
           <p className="mt-1 text-[13.5px] leading-relaxed text-ink2">{question.explain}</p>
         </div>
@@ -274,7 +289,7 @@ export function QuizCardView({
           onClick={skipWait}
           className="mb-5 mt-3 inline-flex items-center justify-center gap-1.5 self-center rounded-full bg-accent px-5 py-2.5 text-[14px] font-semibold text-white"
         >
-          Next
+          {isCorrect ? 'Next' : 'Try again'}
           <ChevronRight className="h-4 w-4" />
         </button>
       )}
@@ -299,7 +314,7 @@ export function ReassembleCardView({
 }) {
   const { item } = block;
   return (
-    <div className="mobile-card-shell flex flex-1 flex-col px-4 pt-4">
+    <div className="mobile-card-shell mobile-reassemble-card flex min-h-0 flex-1 flex-col px-2 pt-4">
       <div className="flex items-center gap-2">
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-accentbg text-accent">
           <Sparkles className="h-4 w-4" />
@@ -317,11 +332,16 @@ export function ReassembleCardView({
           Skip
         </button>
       </div>
-      <p className="mt-2 text-[12.5px] leading-snug text-ink3">Tap or drag the blocks into the right order.</p>
-
       {/* The pane owns its own drag/drop, so shield it from the deck's swipe gesture. */}
       <div className="practice mobile-reassemble mt-3 flex min-h-0 flex-1 flex-col" data-noswipe>
-        <ReassemblePane key={card.key} pieces={card.pieces} onComplete={onComplete} />
+        <ReassemblePane
+          key={card.key}
+          pieces={card.pieces}
+          lang={block.code?.lang ?? 'go'}
+          variant="mobile"
+          resetOnWrong
+          onComplete={onComplete}
+        />
       </div>
     </div>
   );

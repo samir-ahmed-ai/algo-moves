@@ -7,17 +7,17 @@ export const bundle: PracticeBundle = {
       "prompt": "How does `btPermStr` differ from a typical backtracking approach that builds a new path string?",
       "choices": [
         {
-          "label": "It operates directly on a shared byte slice, swapping bytes in place and restoring them after each recursive call",
+          "label": "It operates directly on a shared — swapping bytes in",
           "correct": true
         },
         {
-          "label": "It converts each character to an integer and backtracks over integer indices"
+          "label": "It converts each character — an integer and backtracks over"
         },
         {
-          "label": "It uses a visited boolean array to mark characters already chosen for the prefix"
+          "label": "It uses a visited boolean — array to mark characters already"
         },
         {
-          "label": "It sorts the byte slice lexicographically before each recursion level"
+          "label": "It sorts the byte slice — lexicographically before each"
         }
       ],
       "explain": "`btPermStr` works on a single `[]byte` (from `[]byte(str)`), swapping `path[low]` with `path[i]` to select a character, recursing, and swapping back. No separate path-building string or `used` array is needed."
@@ -27,17 +27,17 @@ export const bundle: PracticeBundle = {
       "prompt": "The base case in `btPermStr` is `low == high`. What does this condition mean?",
       "choices": [
         {
-          "label": "Only one position remains unfixed, so the full permutation is determined and can be recorded",
+          "label": "Only one position remains — low tracks the first unfixed position",
           "correct": true
         },
         {
-          "label": "The slice has been reversed, signaling that all permutations have been generated"
+          "label": "The slice has been reversed — signaling that all permutations have"
         },
         {
-          "label": "`low` and `high` cross each other, indicating the search space is exhausted"
+          "label": "`low` and `high` cross — indicating the search space is"
         },
         {
-          "label": "The two pointers meet at the midpoint, so the string is a palindrome"
+          "label": "The two pointers meet — so the string is a"
         }
       ],
       "explain": "`low` tracks the first unfixed position and `high` is the last index. When `low == high`, every position before `low` is already committed, and only one character (at `path[high]`) remains — the permutation is complete."
@@ -47,14 +47,14 @@ export const bundle: PracticeBundle = {
       "prompt": "The loop body swaps `path[low]` and `path[i]`, recurses, then swaps them back. What would break if the restore swap were omitted?",
       "choices": [
         {
-          "label": "Subsequent iterations of the loop would see a mutated `path`, causing wrong characters to be selected and duplicate or missing permutations",
+          "label": "Subsequent iterations of the loop — would see a mutated `path`, causing",
           "correct": true
         },
         {
-          "label": "The recursion would terminate early because `low` would equal `high` sooner"
+          "label": "The recursion would terminate early — because `low` would equal `high`"
         },
         {
-          "label": "Go's garbage collector would reclaim the byte slice between calls"
+          "label": "Go's garbage collector would reclaim — the byte slice between calls"
         },
         {
           "label": "Nothing — each recursive frame gets its own copy of `path`"
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "`permString` converts the input string to `[]byte` before passing it to `btPermStr`. Why?",
       "choices": [
         {
-          "label": "Go strings are immutable; a `[]byte` slice allows in-place character swaps",
+          "label": "Go strings are immutable; — `[]byte` slice allows in-place",
           "correct": true
         },
         {
-          "label": "A byte slice has a lower memory overhead than a string for ASCII characters"
+          "label": "A byte slice — lower memory overhead than a string"
         },
         {
-          "label": "`string` type does not support index assignment, so Go requires a byte slice for sorting"
+          "label": "`string` type does not support — index assignment, so Go requires a"
         },
         {
-          "label": "The conversion normalizes Unicode code points to single bytes"
+          "label": "The conversion normalizes Unicode — points to single bytes"
         }
       ],
       "explain": "In Go, strings are read-only. `s[i] = x` on a string is a compile error. Converting to `[]byte` gives a mutable buffer where individual bytes can be swapped without allocating a new string per level."
@@ -87,17 +87,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Time complexity is `O(s · s!)`. If the input string has `s` characters, where does the `s!` come from?",
       "choices": [
         {
-          "label": "There are `s!` distinct permutations of `s` characters, and each takes `O(s)` to convert to a string at the leaf",
+          "label": "There are `s!` distinct permutations — of `s` characters, and each takes",
           "correct": true
         },
         {
-          "label": "The loop at each of `s` levels runs `s` times, giving `s^s` which simplifies to `s!`"
+          "label": "The loop at each of `s` levels runs — giving"
         },
         {
-          "label": "`s!` is the number of swap operations needed to enumerate all arrangements"
+          "label": "`s!` is the number — swap operations needed to enumerate"
         },
         {
-          "label": "Sorting the byte slice at each level costs `O(s log s)`, and there are `s!` levels"
+          "label": "Sorting the byte slice — and"
         }
       ],
       "explain": "The recursion tree has `s!` leaves — one per permutation. At each leaf, `string(path)` allocates and copies an `O(s)`-length string. The leaf cost dominates the swap operations, giving `O(s · s!)` total."
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "The initial call is `btPermStr(path, 0, len(path)-1, &res)`. What is the role of passing `len(path)-1` rather than `len(path)` as `high`?",
       "choices": [
         {
-          "label": "`high` is an inclusive index; `len(path)-1` is the last valid byte position in the slice",
+          "label": "`high` is an inclusive index; — `len(path)-1` is the last valid byte",
           "correct": true
         },
         {
-          "label": "`high` marks the exclusive upper bound used by Go slice expressions `path[:high]`"
+          "label": "`high` marks the exclusive upper — bound used by Go slice expressions"
         },
         {
-          "label": "Passing `len(path)` would cause the base case `low==high` to trigger immediately"
+          "label": "Passing `len(path)` would cause — base case `low==high` to trigger"
         },
         {
-          "label": "It reserves the last position for a null terminator byte"
+          "label": "It reserves the last position — for a null terminator byte"
         }
       ],
       "explain": "The loop `for i := low; i <= high; i++` uses `<=`, treating `high` as an inclusive boundary. `len(path)-1` is the index of the last character. Passing `len(path)` would make the loop access `path[len(path)]`, causing an out-of-bounds panic."

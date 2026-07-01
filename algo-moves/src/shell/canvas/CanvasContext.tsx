@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { Frame, Player, ProblemPlugin } from '../../core';
-import type { Item } from '../../content';
+import type { Item } from '../../content/types';
 import type { LayoutVisualizeOptions } from './layout';
 
 /**

@@ -7,17 +7,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What core technique does `maxLength` use to represent each string's characters?",
       "choices": [
         {
-          "label": "A 26-bit integer bitmask where each bit represents a letter",
+          "label": "A 26-bit integer bitmask — each bit represents a letter",
           "correct": true
         },
         {
-          "label": "A sorted character array to detect duplicates"
+          "label": "A sorted character array — detect duplicates"
         },
         {
-          "label": "A hash set of runes built per string"
+          "label": "A hash set of runes — built per string"
         },
         {
-          "label": "A frequency array of length 26"
+          "label": "A frequency array of length — 26"
         }
       ],
       "explain": "The preprocessing loop sets `bit := uint(1) << (s[i]-'a')` and ORs it into `mask`. Each of the 26 bits represents one lowercase letter — this is a bitmask encoding that makes overlap detection a single AND operation."
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Why does `maxLength` skip strings with internal duplicate characters before backtracking?",
       "choices": [
         {
-          "label": "A string with repeated letters can never be part of a valid all-unique concatenation, so it is safe to discard early",
+          "label": "A string with repeated letters — can never be part of a valid",
           "correct": true
         },
         {
-          "label": "Such strings cause integer overflow in the 26-bit mask"
+          "label": "Such strings cause integer overflow — in the 26-bit mask"
         },
         {
-          "label": "The bitmask cannot represent duplicate characters"
+          "label": "The bitmask cannot represent — characters"
         },
         {
-          "label": "They would cause the backtracking recursion to loop infinitely"
+          "label": "They would cause the backtracking — recursion to loop infinitely"
         }
       ],
       "explain": "If a string already has a repeated character, no concatenation including it can have all unique characters. Filtering them out before backtracking shrinks the candidate set and avoids wasted branches."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "When does `btMaxLength` update `*res`?",
       "choices": [
         {
-          "label": "At every recursive call, if `bits.OnesCount(path)` exceeds the current best",
+          "label": "At every recursive call — if `bits.OnesCount(path)` exceeds the",
           "correct": true
         },
         {
-          "label": "Only at leaf nodes when all masks have been considered"
+          "label": "Only at leaf nodes — all masks have been considered"
         },
         {
-          "label": "Only when `path & masks[i] == 0` is true"
+          "label": "Only when `path & masks[i] — == 0` is true"
         },
         {
-          "label": "Only when `idx == len(masks)`"
+          "label": "Only when `idx == len(masks)` — The first two lines of"
         }
       ],
       "explain": "The first two lines of `btMaxLength` compute `cnt := bits.OnesCount(path)` and update `*res` if `cnt > *res`. This happens at every call — not just leaves — so any partial combination that beats the best is recorded immediately."
@@ -87,17 +87,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the time complexity of `maxLength(arr)`?",
       "choices": [
         {
-          "label": "O(2^n) where n is the number of valid (non-duplicate) strings in `arr`",
+          "label": "O(2^n) where n — number of valid (non-duplicate)",
           "correct": true
         },
         {
-          "label": "O(n · 26)"
+          "label": "O(n · 26) — The backtracking explores"
         },
         {
-          "label": "O(n^2)"
+          "label": "O(n^2) — The backtracking explores"
         },
         {
-          "label": "O(n · 2^26)"
+          "label": "O(n · 2^26) — The backtracking explores"
         }
       ],
       "explain": "The backtracking explores subsets of the filtered mask list. In the worst case all n strings are valid, and there are 2^n subsets. The `bits.OnesCount` call is O(1), so total work is O(2^n). The O(n) space is for the recursion stack."
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Why does the code use `bits.OnesCount(path)` to measure the concatenated string length?",
       "choices": [
         {
-          "label": "Each set bit represents one unique character, so the popcount equals the number of distinct characters in the concatenation",
+          "label": "Each set bit represents one — unique character, so the popcount",
           "correct": true
         },
         {
-          "label": "It counts the number of strings combined so far"
+          "label": "It counts the number — strings combined so far"
         },
         {
-          "label": "It computes the sum of ASCII values of selected characters"
+          "label": "It computes the sum — ASCII values of selected characters"
         },
         {
-          "label": "It checks whether the mask fits in 26 bits"
+          "label": "It checks whether the mask — fits in 26 bits"
         }
       ],
       "explain": "Because each mask bit represents one unique character and the backtracking only allows non-overlapping masks, every set bit in `path` corresponds to exactly one character in the concatenated string. The popcount therefore equals the total length."

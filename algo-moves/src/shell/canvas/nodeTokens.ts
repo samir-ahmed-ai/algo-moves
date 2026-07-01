@@ -8,13 +8,33 @@ export type PanelSize = { w: number; estH: number; cap?: number };
 /** Strudel Flow standard node width (~25% above legacy w-80). */
 export const STRUDEL_NODE_W = 400;
 
+/** Legacy canvas node width (Tailwind `w-80`). */
+export const LEGACY_STRUDEL_NODE_W = 320;
+
+/** Uniform UI scale for Strudel-sized narrow panels — typography, padding, min heights. */
+export const NODE_UI_SCALE = STRUDEL_NODE_W / LEGACY_STRUDEL_NODE_W;
+
+export const PROBLEM_MIN_H = Math.round(150 * NODE_UI_SCALE);
+export const EXAMPLES_MIN_H = Math.round(90 * NODE_UI_SCALE);
+
+/** ResizeObserver / NodeResizer floor for a panel kind. */
+export function panelMinHeight(kind: string): number {
+  if (kind === 'examples') return EXAMPLES_MIN_H;
+  if (kind === 'problem') return PROBLEM_MIN_H;
+  return PROBLEM_MIN_H;
+}
+
+function scaleEstH(base: number): number {
+  return Math.round(base * NODE_UI_SCALE);
+}
+
 /**
  * Per-panel sizing. `w` is the floor a node shrink-wraps down to; `cap` is the max
  * body width; `estH` is the initial dagre height before ResizeObserver measures.
  */
 const SIZE: Record<string, PanelSize> = {
-  examples: { w: STRUDEL_NODE_W, estH: 150, cap: STRUDEL_NODE_W },
-  problem: { w: STRUDEL_NODE_W, estH: 275, cap: STRUDEL_NODE_W },
+  examples: { w: STRUDEL_NODE_W, estH: scaleEstH(150), cap: STRUDEL_NODE_W },
+  problem: { w: STRUDEL_NODE_W, estH: scaleEstH(275), cap: STRUDEL_NODE_W },
   viz: { w: STRUDEL_NODE_W, estH: 550 },
   replay: { w: STRUDEL_NODE_W, estH: 450, cap: STRUDEL_NODE_W },
   inspector: { w: STRUDEL_NODE_W, estH: 525, cap: 450 },

@@ -1,12 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Compartment, EditorState, RangeSetBuilder } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
-import { StreamLanguage, type LanguageSupport } from '@codemirror/language';
-import { go } from '@codemirror/legacy-modes/mode/go';
-import { javascript } from '@codemirror/legacy-modes/mode/javascript';
-import { python } from '@codemirror/legacy-modes/mode/python';
 import { coreEditorExtensions, vimExtensions, wrapExtensions } from '../lib/editorSetup';
 import { buildEditorTheme } from '../lib/editorTheme';
+import { languageExtension } from '../lib/languageExtension';
 
 export interface CodeMirrorEditorProps {
   value: string;
@@ -26,24 +23,6 @@ export interface CodeMirrorEditorProps {
   /** Called when the editor view mounts/unmounts (sync-scroll wiring). */
   onView?: (view: EditorView | null) => void;
   className?: string;
-}
-
-/** Map a plugin's language id to a CodeMirror language extension (extend as plugins need). */
-function languageExtension(lang?: string): StreamLanguage<unknown> | LanguageSupport | null {
-  switch ((lang ?? '').toLowerCase()) {
-    case 'go':
-      return StreamLanguage.define(go);
-    case 'js':
-    case 'javascript':
-    case 'ts':
-    case 'typescript':
-      return StreamLanguage.define(javascript);
-    case 'py':
-    case 'python':
-      return StreamLanguage.define(python);
-    default:
-      return null; // plain text
-  }
 }
 
 function buildLineDecorations(state: EditorState, lines: Map<number, string>) {

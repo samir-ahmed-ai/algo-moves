@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { catalog } from '../../content';
 import { getPlugin } from '../../core';
+import { parseQuizChoiceLabel } from '../../lib/quizChoiceFormat';
 import { buildDeck, deckSummary } from './deckModel';
 
 describe('deckModel', () => {
@@ -50,5 +51,17 @@ describe('deckModel', () => {
     const summary = deckSummary(topic);
     expect(summary.problems).toBeGreaterThan(0);
     expect(summary.totalQuiz).toBeGreaterThan(0);
+  });
+
+  it('n-queens quiz choices parse with headline and detail', () => {
+    const quiz = getPlugin('n-queens')?.quiz ?? [];
+    expect(quiz.length).toBeGreaterThan(0);
+    for (const q of quiz) {
+      for (const c of q.choices) {
+        const parsed = parseQuizChoiceLabel(c.label);
+        expect(parsed.headline.length).toBeGreaterThan(0);
+        expect(parsed.detail?.length ?? 0).toBeGreaterThan(0);
+      }
+    }
   });
 });

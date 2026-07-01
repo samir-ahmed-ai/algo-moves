@@ -31,13 +31,13 @@ export const bundle: PracticeBundle = {
           "correct": true
         },
         {
-          "label": "Iterates all edges and counts occurrences of v"
+          "label": "Iterates all edges and counts — occurrences of v"
         },
         {
-          "label": "Returns `len(adj[v]) / 2` to avoid double-counting"
+          "label": "Returns `len(adj[v]) / 2` — avoid double-counting"
         },
         {
-          "label": "Sums in-degree and out-degree from two separate lists"
+          "label": "Sums in-degree and out-degree — two separate lists"
         }
       ],
       "explain": "In an undirected adjacency-list representation each neighbor of v appears once in `adj[v]`, so the length of that slice is exactly the degree. No division or iteration is needed."
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "How does `findDegreeOfVertexDirected` define 'degree' for a directed graph?",
       "choices": [
         {
-          "label": "in-degree + out-degree: `len(in[v]) + len(out[v])`",
+          "label": "in-degree + out-degree: `len(in[v]) — len(out[v])`",
           "correct": true
         },
         {
-          "label": "Only out-degree: `len(out[v])`"
+          "label": "Only out-degree: `len(out[v])` — For directed graphs, degree is"
         },
         {
-          "label": "Only in-degree: `len(in[v])`"
+          "label": "Only in-degree: `len(in[v])` — For directed graphs, degree is"
         },
         {
-          "label": "The product of in-degree and out-degree"
+          "label": "The product of in-degree — out-degree"
         }
       ],
       "explain": "For directed graphs, degree is conventionally the sum of in-degree and out-degree. The code uses separate `in` and `out` adjacency lists and adds their lengths."
@@ -94,10 +94,10 @@ export const bundle: PracticeBundle = {
           "label": "1 — a self-loop is implied for isolated vertices"
         },
         {
-          "label": "It panics because `adj[v]` is nil"
+          "label": "It panics because `adj[v]` — nil"
         },
         {
-          "label": "-1, indicating the vertex is disconnected"
+          "label": "-1 — indicating the vertex is disconnected"
         }
       ],
       "explain": "An isolated vertex has no neighbors, so its adjacency list is empty (length 0). In Go, `len(nil)` and `len([]int{})` both return 0, so no panic occurs."

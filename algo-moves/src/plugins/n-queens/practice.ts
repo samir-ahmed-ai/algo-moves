@@ -7,9 +7,9 @@ export const quiz: QuizQuestion[] = [
     prompt: 'Which technique does N-Queens showcase?',
     choices: [
       { label: 'Backtracking — try a choice, recurse, undo on failure', correct: true },
-      { label: 'Dynamic programming over a table' },
-      { label: 'Greedy: place each queen in the first free column forever' },
-      { label: 'Breadth-first search with a queue' },
+      { label: 'Dynamic programming — table over states' },
+      { label: 'Greedy first column — not optimal' },
+      { label: 'BFS with queue — wrong technique' },
     ],
     explain:
       'It builds a partial solution row by row and abandons (undoes) any placement that cannot be completed — the defining shape of backtracking.',
@@ -18,10 +18,10 @@ export const quiz: QuizQuestion[] = [
     id: 'one-per-row',
     prompt: 'Why does the search place exactly one queen per row?',
     choices: [
-      { label: 'Two queens in the same row always attack, so it removes that whole conflict class up front', correct: true },
-      { label: 'It makes the board square' },
-      { label: 'To sort the columns' },
-      { label: 'Rows are cheaper to index than columns' },
+      { label: 'One queen per row — kills row conflicts', correct: true },
+      { label: 'Square board — unrelated constraint' },
+      { label: 'Sort columns — not the reason' },
+      { label: 'Row indexing — not the insight' },
     ],
     explain:
       'Fixing one queen per row means we never even consider same-row conflicts, shrinking the search from choosing n cells anywhere to choosing one column per row.',
@@ -30,10 +30,10 @@ export const quiz: QuizQuestion[] = [
     id: 'safe',
     prompt: 'What does safe(row, col) check against the already-placed queens?',
     choices: [
-      { label: 'Same column, or same diagonal via abs(c-col) == abs(r-row)', correct: true },
-      { label: 'Only the same column' },
-      { label: 'Adjacent cells only' },
-      { label: 'Whether the cell is white or black' },
+      { label: 'Column or diagonal — abs(c-col)==abs(r-row)', correct: true },
+      { label: 'Column only misses diagonals — both diags must be clear too' },
+      { label: 'Adjacent cells — too local' },
+      { label: 'Square color — irrelevant' },
     ],
     explain:
       'Same-row is impossible by construction. A diagonal attack means the row-distance equals the column-distance, i.e. abs(c-col) == abs(r-row).',
@@ -42,10 +42,10 @@ export const quiz: QuizQuestion[] = [
     id: 'backtrack',
     prompt: 'When does the algorithm backtrack?',
     choices: [
-      { label: 'When a row has no safe column left — it undoes the previous row’s queen', correct: true },
-      { label: 'After every single placement' },
-      { label: 'Only once, at the very end' },
-      { label: 'When two queens are on the same colour square' },
+      { label: 'No safe column — undo previous row', correct: true },
+      { label: 'After every placement — too often' },
+      { label: 'Once at end — too late' },
+      { label: 'Same color square — wrong rule' },
     ],
     explain:
       'If the for-loop over columns finishes without a safe placement, the call returns false; the caller then erases its queen and tries its next column.',
@@ -54,10 +54,10 @@ export const quiz: QuizQuestion[] = [
     id: 'prune',
     prompt: 'How does backtracking beat brute force here?',
     choices: [
-      { label: 'It prunes: the moment a partial board conflicts, the whole subtree is skipped', correct: true },
-      { label: 'It memoises board states' },
-      { label: 'It uses a faster sorting step' },
-      { label: 'It checks all n^n boards but in parallel' },
+      { label: 'It prunes: the moment — a partial board conflicts, the whole sub', correct: true },
+      { label: 'Memoise states — not used here' },
+      { label: 'Faster sorting — unrelated' },
+      { label: 'All n^n boards — brute force' },
     ],
     explain:
       'Brute force would test all column assignments. Backtracking rejects a bad prefix early, so entire branches of placements are never explored.',
@@ -67,9 +67,9 @@ export const quiz: QuizQuestion[] = [
     prompt: 'What is the worst-case time complexity?',
     choices: [
       { label: 'O(n!) — branching narrows each deeper row', correct: true },
-      { label: 'O(n²)' },
-      { label: 'O(2^n)' },
-      { label: 'O(n log n)' },
+      { label: 'O(n²) — far too optimistic' },
+      { label: 'O(2^n) — subset not placement shape' },
+      { label: 'O(n log n) — sorting cost' },
     ],
     explain:
       'Row 0 has n choices, row 1 at most n-1 compatible columns, and so on — bounded by n! placements, far below the naïve n^n.',

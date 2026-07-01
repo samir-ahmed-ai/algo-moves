@@ -157,6 +157,9 @@ interface WorkspaceCtx {
   setActiveItemId: (id: string) => void;
   activeTopicId: string | null;
   setActiveTopicId: (id: string | null) => void;
+  /** When set, the workspace shows every problem in the course grid (not a single topic). */
+  activeCourseId: string | null;
+  setActiveCourseId: (id: string | null) => void;
   /** Top-level view: 'home' = landing launchpad, 'workspace' = canvas/studio. */
   route: AppRoute;
   /** Return to the home launchpad (writes #home). */
@@ -230,6 +233,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     if (typeof location === 'undefined') return null;
     return parseMobileHash(location.hash)?.topicId ?? null;
   });
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [route, setRoute] = useState<AppRoute>(() => {
     if (shared?.item && catalog.getItem(shared.item)) return 'workspace';
     if (typeof location !== 'undefined') {
@@ -265,6 +269,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     if (itemId) {
       setActiveItemId(itemId);
       setActiveTopicId(null);
+      setActiveCourseId(null);
     }
     setRoute('workspace');
   }, []);
@@ -384,6 +389,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveItemId,
         activeTopicId,
         setActiveTopicId,
+        activeCourseId,
+        setActiveCourseId,
         route,
         goHome,
         enterWorkspace,

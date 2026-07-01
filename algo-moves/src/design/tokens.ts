@@ -1,5 +1,11 @@
 export * from '../shell/canvas/canvasTokens';
-export { STRUDEL_NODE_W } from '../shell/canvas/nodeTokens';
+export {
+  EXAMPLES_MIN_H,
+  LEGACY_STRUDEL_NODE_W,
+  NODE_UI_SCALE,
+  PROBLEM_MIN_H,
+  STRUDEL_NODE_W,
+} from '../shell/canvas/nodeTokens';
 export { vizText, vizPad } from '../plugins/_shared/vizTokens';
 
 export type SpaceScale = 1 | 2 | 3 | 4 | 5 | 6;

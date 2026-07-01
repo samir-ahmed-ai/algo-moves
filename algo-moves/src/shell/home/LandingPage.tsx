@@ -25,6 +25,8 @@ import { courseIcon } from '../courseIcon';
 import { glyphFor } from '../problemShape';
 import { Chip, Meter } from '../canvas/nodeui';
 
+const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`;
+
 /* ----------------------------------------------------------------- helpers */
 
 const DIFFS: Difficulty[] = ['Easy', 'Medium', 'Hard'];
@@ -249,7 +251,7 @@ function WorkspacePreview({ featured }: { featured: Item[] }) {
 /* ----------------------------------------------------------------- landing */
 
 export function LandingPage() {
-  const { theme, setTheme, palette, setPalette, density, enterWorkspace, enterMobile, setActiveTopicId, setMode } =
+  const { theme, setTheme, palette, setPalette, density, enterWorkspace, enterMobile, setActiveCourseId, setActiveTopicId, setMode } =
     useWorkspace();
   const progress = useProgress();
 
@@ -277,8 +279,8 @@ export function LandingPage() {
 
   const openItem = (id: string) => enterWorkspace(id);
   const browseCourse = (course: Course) => {
-    const topicId = course.topics[0]?.id;
-    if (topicId) setActiveTopicId(topicId);
+    setActiveCourseId(course.id);
+    setActiveTopicId(null);
     enterWorkspace();
   };
   const startIn = (mode: 'visualize' | 'learn') => {
@@ -335,22 +337,23 @@ export function LandingPage() {
               'radial-gradient(60% 60% at 75% 0%, var(--accent-bg) 0%, transparent 60%)',
           }}
         />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:py-10">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-edge bg-panel/60 px-3 py-1 text-xs font-medium text-ink2">
               <Sparkles className="h-3 w-3 text-accent" />
               Interview-ready algorithm practice
             </span>
-            <h1 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-ink sm:text-5xl">
+            <h1 className="mt-3 text-4xl font-semibold leading-[1.1] tracking-tight text-ink sm:text-5xl">
               See every algorithm
               <br />
               <span className="text-accent">move&nbsp;by&nbsp;move.</span>
             </h1>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-ink2">
+            <p className="mt-3 max-w-md text-base leading-relaxed text-ink2">
               Step through {problems.length}+ classic interview problems as a replay on a live canvas —
-              then learn the pattern, practise recall, and master it.
+              then learn the pattern, practise recall, and master it. Miss a step? The deck resets — you run
+              it again until it sticks.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
@@ -359,14 +362,19 @@ export function LandingPage() {
                 <Play className="h-4 w-4" />
                 {lastItem ? 'Resume learning' : 'Start learning'}
               </button>
-              <button
-                type="button"
-                onClick={() => enterMobile()}
-                className="inline-flex items-center gap-2 rounded-md border border-edge bg-panel/60 px-5 py-2.5 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
-              >
-                <Smartphone className="h-4 w-4" />
-                Swipe mode
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => enterMobile()}
+                  className="inline-flex items-center gap-2 rounded-md border border-accent/40 bg-panel/60 px-5 py-2.5 font-medium text-ink transition-colors hover:border-accent hover:bg-accentbg hover:text-accent"
+                >
+                  <Smartphone className="h-4 w-4 animate-pulse" />
+                  Swipe mode
+                </button>
+                <span className="pointer-events-none absolute -right-2 -top-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+                  Recommended
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() =>
@@ -378,7 +386,14 @@ export function LandingPage() {
                 Browse courses
               </button>
             </div>
-            <div className="mt-6 flex items-center gap-1.5 text-xs text-ink3">
+            <p className="mt-2 flex max-w-md items-start gap-1.5 text-xs leading-relaxed text-ink3">
+              <Smartphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
+              <span>
+                Best on your phone — tap <strong className="font-medium text-ink2">Swipe mode</strong> or add
+                to your home screen. The app opens there by default.
+              </span>
+            </p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-ink3">
               <kbd className="rounded border border-edge bg-panel2 px-1.5 py-0.5 font-mono">⌘K</kbd>
               <span>opens the command palette anywhere in the workspace</span>
             </div>
@@ -387,7 +402,100 @@ export function LandingPage() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
+      {/* philosophy */}
+      <section className="border-b border-edge bg-panel/30">
+        <div className="mx-auto grid max-w-6xl items-center gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[1fr_1.1fr]">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-ink">Learn like AI trains</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink2">
+              Models improve by trying, getting feedback, and repeating. Algo Moves uses the same loop for
+              humans — test your brain, learn from mistakes, rebuild memory through honest repetition.
+            </p>
+            <ul className="mt-4 space-y-2 text-sm text-ink2">
+              <li className="flex gap-2.5">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accentbg text-[11px] font-semibold text-accent">
+                  1
+                </span>
+                <span>
+                  <strong className="font-medium text-ink">Test yourself</strong> — quiz each move, complexity,
+                  and key line.
+                </span>
+              </li>
+              <li className="flex gap-2.5">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accentbg text-[11px] font-semibold text-accent">
+                  2
+                </span>
+                <span>
+                  <strong className="font-medium text-ink">Wrong answer → restart</strong> — the full run
+                  resets; no skipping past the gap.
+                </span>
+              </li>
+              <li className="flex gap-2.5">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accentbg text-[11px] font-semibold text-accent">
+                  3
+                </span>
+                <span>
+                  <strong className="font-medium text-ink">Shuffle + streak</strong> — choices reorder each
+                  retry; three in a row marks mastered.
+                </span>
+              </li>
+            </ul>
+            <button
+              type="button"
+              onClick={() => enterMobile()}
+              className="mt-4 inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            >
+              <Smartphone className="h-4 w-4" />
+              Open Swipe mode
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <img
+            src={asset('learning-loop.svg')}
+            alt="The learning loop: watch, quiz, restart on wrong, master"
+            className="w-full max-w-lg justify-self-center rounded-[var(--radius)] border border-edge bg-panel/60 shadow-[var(--shadow-md)] lg:max-w-none"
+            width={800}
+            height={420}
+            loading="lazy"
+          />
+        </div>
+      </section>
+
+      {/* mobile callout */}
+      <section className="border-b border-edge">
+        <div className="mx-auto grid max-w-6xl items-center gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <img
+            src={asset('mobile-swipe-deck.svg')}
+            alt="Swipe mode mobile deck for algorithm drilling"
+            className="order-2 w-full max-w-md justify-self-center rounded-[var(--radius)] border border-edge bg-panel/60 shadow-[var(--shadow-md)] lg:order-1 lg:max-w-none"
+            width={800}
+            height={420}
+            loading="lazy"
+          />
+          <div className="order-1 lg:order-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accentbg px-3 py-1 text-xs font-medium text-accent">
+              <Smartphone className="h-3 w-3" />
+              Best on mobile
+            </span>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-ink">Take Swipe mode on the go</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink2">
+              The PWA opens directly in Swipe mode. Pick a topic, swipe through problems, and drill the same
+              restart-on-wrong loop — no sidebars, no clutter, just focused repetition.
+            </p>
+            <button
+              type="button"
+              onClick={() => enterMobile()}
+              className="mt-4 inline-flex items-center gap-2 rounded-md border border-accent/40 bg-panel/60 px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:border-accent hover:bg-accentbg hover:text-accent"
+            >
+              <Smartphone className="h-4 w-4" />
+              Open Swipe mode
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
         {/* stats */}
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <StatCard icon={<BookOpen />} value={catalog.courses.length} label="Courses" />
@@ -400,7 +508,7 @@ export function LandingPage() {
 
         {/* continue */}
         {lastItem && (
-          <section className="mt-10">
+          <section className="mt-8">
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink3">Continue where you left off</h2>
             <button
               type="button"
@@ -440,8 +548,8 @@ export function LandingPage() {
         )}
 
         {/* courses */}
-        <section id="courses" className="mt-12 scroll-mt-20">
-          <div className="mb-4 flex items-end justify-between gap-3">
+        <section id="courses" className="mt-8 scroll-mt-16">
+          <div className="mb-3 flex items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-ink">Courses</h2>
               <p className="text-sm text-ink3">Pick a track — each opens its problem grid.</p>
@@ -455,8 +563,8 @@ export function LandingPage() {
         </section>
 
         {/* how it works */}
-        <section className="mt-12">
-          <h2 className="mb-4 text-lg font-semibold text-ink">Three ways to study every problem</h2>
+        <section className="mt-8">
+          <h2 className="mb-3 text-lg font-semibold text-ink">Three ways to study every problem</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <FeatureCard
               icon={<Eye />}
@@ -473,22 +581,25 @@ export function LandingPage() {
               onClick={() => startIn('learn')}
             />
             <FeatureCard
-              icon={<Target />}
+              icon={<Smartphone />}
               title="Practice"
-              body="Predict each step, simulate inputs, and build a mastery streak that sticks."
-              cta="Start practising"
-              onClick={() => startIn('learn')}
+              body="Swipe mode drills each topic — animate, quiz, rebuild. Miss one? The deck restarts until your streak sticks."
+              cta="Open Swipe mode"
+              onClick={() => enterMobile()}
             />
           </div>
+          <p className="mt-3 text-center text-xs text-ink3">
+            Restart-on-wrong is built into every quiz surface — mobile deck, Code Studio, and canvas panels.
+          </p>
         </section>
       </main>
 
       {/* footer */}
       <footer className="border-t border-edge">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-sm text-ink3 sm:flex-row sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-4 text-sm text-ink3 sm:flex-row sm:px-8">
           <span className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
-            Algo Moves — a plugin-based algorithm workspace.
+            Algo Moves — learn the way AI learns.
           </span>
           <span className="flex items-center gap-1.5">
             <Command className="h-3.5 w-3.5" />

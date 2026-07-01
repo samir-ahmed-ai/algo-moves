@@ -777,6 +777,7 @@ export function CodeStudioBody() {
           <ReassemblePane
             key={reassembleKey}
             pieces={pieces}
+            lang={code?.lang ?? 'go'}
             initialPlacedIds={savedReassembleProgress?.placedIds}
             initialTrayIds={savedReassembleProgress?.trayIds}
             initialMistakes={savedReassembleProgress?.mistakes}

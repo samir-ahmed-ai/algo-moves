@@ -7,17 +7,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Which algorithmic pattern does `btOps` implement?",
       "choices": [
         {
-          "label": "Divide-and-conquer with memoization",
+          "label": "Divide-and-conquer with btOps — token slice at every",
           "correct": true
         },
         {
-          "label": "Pure backtracking without caching"
+          "label": "Pure backtracking without caching — btOps splits the token slice at"
         },
         {
-          "label": "Bottom-up dynamic programming over a table"
+          "label": "Bottom-up dynamic programming — table"
         },
         {
-          "label": "BFS across operator positions"
+          "label": "BFS across operator positions — btOps splits the token slice at"
         }
       ],
       "explain": "`btOps` splits the token slice at every position (divide), solves left and right subproblems recursively (conquer), and caches results in a `memo` map. There is no iterative DP table or BFS queue."
@@ -54,10 +54,10 @@ export const bundle: PracticeBundle = {
           "label": "`if a != 0` — division is skipped when the left operand is zero"
         },
         {
-          "label": "No guard; integer division by zero is allowed in Go"
+          "label": "No guard; integer division — zero is allowed in Go"
         },
         {
-          "label": "`if len(right) > 0` — division is skipped when the right sub-result is empty"
+          "label": "`if len(right) > 0` division — is skipped when the right sub-result"
         }
       ],
       "explain": "The code appends `a/b` only inside `if b != 0`, preventing a divide-by-zero panic. `a` (the left operand) can be zero without issue."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Why does `btOps` use a string key built from the token slice content rather than the slice indices `(start, end)`?",
       "choices": [
         {
-          "label": "The function receives a re-sliced sub-slice, so indices are relative; the serialized content uniquely identifies the subproblem",
+          "label": "The function receives a re-sliced — sub-slice, so indices are relative;",
           "correct": true
         },
         {
-          "label": "String keys are faster to look up in Go maps than integer pairs"
+          "label": "String keys are faster — look up in Go maps than integer pairs"
         },
         {
-          "label": "The token slice is modified in place, so indices would become stale"
+          "label": "The token slice is modified — in place, so indices would become"
         },
         {
-          "label": "Go does not allow composite keys in maps, so a string is required"
+          "label": "Go does not allow composite — keys in maps, so a string is required"
         }
       ],
       "explain": "`btOps` is called with `t[:i]` and `t[i:]` — sub-slices whose indices always start at 0 from the callee's view. Storing `(start, end)` would require threading those bounds through every call. Serializing the actual values into a string identifies the subproblem regardless of how the slice was derived. (Go does allow array/struct keys, so option D is false.)"
@@ -87,7 +87,7 @@ export const bundle: PracticeBundle = {
       "prompt": "The comments state time and space are both `O(C_n^2)`. What does `C_n` represent here?",
       "choices": [
         {
-          "label": "The n-th Catalan number — the count of distinct parenthesizations grows as the Catalan numbers",
+          "label": "The n-th Catalan number — count of distinct parenthesizations",
           "correct": true
         },
         {
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "The split loop is `for i := 1; i < len(t); i++`. What would happen if it started at `i := 0` instead?",
       "choices": [
         {
-          "label": "It would recurse on an empty left slice `t[:0]`, which hits neither the `len==1` base case nor the memo and breaks the recurrence",
+          "label": "It would recurse on an empty left — which hits",
           "correct": true
         },
         {
-          "label": "It would include the first number twice, producing duplicate results"
+          "label": "It would include the first number — producing duplicate"
         },
         {
           "label": "Nothing changes — the base case `len(t)==1` already covers that path"
         },
         {
-          "label": "Go slicing panics on `t[:0]`, so the program would crash"
+          "label": "Go slicing panics on `t[:0]` — so the program would crash"
         }
       ],
       "explain": "Starting at `i=0` passes an empty `t[:0]` to a recursive call. That call has `len(t)==0`, which matches neither the base case (`len==1`) nor any memo entry, and falls through to an empty `res` — corrupting the combine step. Starting at `i=1` guarantees the left sub-slice always has at least one element. (Go does not panic on `t[:0]`; it returns an empty slice.)"

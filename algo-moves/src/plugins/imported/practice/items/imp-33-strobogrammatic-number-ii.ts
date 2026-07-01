@@ -7,17 +7,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Which pattern does `genStroboNums` follow?",
       "choices": [
         {
-          "label": "Two-pointer backtracking filling outer pairs inward",
+          "label": "Two-pointer backtracking filling — inward",
           "correct": true
         },
         {
-          "label": "BFS expanding strings layer by layer"
+          "label": "BFS expanding strings layer — layer"
         },
         {
-          "label": "Dynamic programming building shorter results into longer ones"
+          "label": "Dynamic programming building — into longer ones"
         },
         {
-          "label": "Bitmask enumeration over valid digit sets"
+          "label": "Bitmask enumeration over valid digit — sets"
         }
       ],
       "explain": "`btStrobo` advances `low` and retreats `high` in each recursive call, placing mirror-symmetric digit pairs from the outside in. That is a classic two-pointer backtracking approach, not BFS or DP."
@@ -27,7 +27,7 @@ export const bundle: PracticeBundle = {
       "prompt": "Which set of outer digit pairs does `btStrobo` use, and why not `{6,6}` or `{9,9}`?",
       "choices": [
         {
-          "label": "{00, 11, 88, 69, 96} — only these map to themselves or each other under 180° rotation",
+          "label": "{00, 11, 88, 69, 96} — only these map to themselves or each",
           "correct": true
         },
         {
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Why does `btStrobo` skip the pair `{'0','0'}` when `low == 0`?",
       "choices": [
         {
-          "label": "It would produce numbers with a leading zero, which are invalid (e.g., \"010\")",
+          "label": "It would produce numbers — which are invalid",
           "correct": true
         },
         {
-          "label": "Zero is not strobogrammatic"
+          "label": "Zero is not strobogrammatic — The outermost position (low =="
         },
         {
-          "label": "The slice is pre-initialized to '0' so it would double-count"
+          "label": "The slice is pre-initialized — '0' so it would double-count"
         },
         {
-          "label": "It would cause an index out-of-range panic"
+          "label": "It would cause an index — out-of-range panic"
         }
       ],
       "explain": "The outermost position (`low == 0`) is the most-significant digit. Placing '0' there creates strings like \"00\" or \"0110\", which have leading zeros and are not valid n-digit numbers. The guard `if low == 0 && pair[0] == '0' { continue }` skips these."
@@ -74,7 +74,7 @@ export const bundle: PracticeBundle = {
           "label": "'0', '1', '6', '8', '9' — all strobogrammatic digits"
         },
         {
-          "label": "'1', '8' only — '0' is excluded as a center digit"
+          "label": "'1' — '8' only '0' is excluded as a center"
         },
         {
           "label": "'6' and '9' — since they pair with each other at the center"
@@ -87,17 +87,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the time complexity of `genStroboNums(n)`?",
       "choices": [
         {
-          "label": "O(n · 5^(n/2))",
+          "label": "O(n · 5^(n/2)) — At each of the ~n/2 levels of",
           "correct": true
         },
         {
-          "label": "O(n · 2^n)"
+          "label": "O(n · 2^n) — At each of the ~n/2 levels of"
         },
         {
-          "label": "O(5^n)"
+          "label": "O(5^n) — At each of the ~n/2 levels of"
         },
         {
-          "label": "O(n^2)"
+          "label": "O(n^2) — At each of the ~n/2 levels of"
         }
       ],
       "explain": "At each of the ~n/2 levels of recursion there are at most 5 pair choices (4 for outermost since '00' is excluded, 5 thereafter), giving roughly 5^(n/2) strings. Each string has length n, so total work is O(n · 5^(n/2)), which the problem states as O(n · 5^n) using a loose bound."
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What happens when `low > high` in `btStrobo`?",
       "choices": [
         {
-          "label": "The current `path` (a complete strobogrammatic number) is appended to `res`",
+          "label": "The current `path` (a complete — strobogrammatic number) is appended",
           "correct": true
         },
         {
-          "label": "The function returns without recording anything — recording happens only at `low == high`"
+          "label": "The function returns — recording happens only at"
         },
         {
-          "label": "It signals an invalid state and the call is discarded"
+          "label": "It signals an invalid state — and the call is discarded"
         },
         {
-          "label": "The path is reversed and then appended"
+          "label": "The path is reversed — then appended"
         }
       ],
       "explain": "`low > high` means all positions have been filled (even-length numbers cross over; odd-length numbers hit `low == high` first for the center). At this point `path` is fully constructed and is copied into `res` via `string(path)`."

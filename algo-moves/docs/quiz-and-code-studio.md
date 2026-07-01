@@ -1,0 +1,154 @@
+# Quiz & Code Studio
+
+Teaching UX shared across **mobile deck**, **Learn-mode panels**, and **Code Studio** (quiz → reassemble → recall).
+
+---
+
+## Quiz choice format
+
+Every multiple-choice label uses **headline — detail**:
+
+```
+O(n!) — branching narrows each deeper row
+Save curr.next — tail link is lost otherwise
+```
+
+| Part | Rules |
+|------|--------|
+| **Headline** | The answer itself — Big-O, formula, keyword, or short phrase (≤ ~40 chars) |
+| **Separator** | Em dash `—` (not hyphen-minus) |
+| **Detail** | One short hint (≤ 60 chars, total label ≤ 72) |
+
+Author in `practice.ts` (native plugins) or `imported/practice/items/*.ts` (progress library). Prep simulators without hand-authored quiz get labels from [`defaultPrepQuiz()`](../src/plugins/imported/prepQuiz.ts).
+
+### Rendering
+
+[`QuizChoiceLabel`](../src/components/QuizChoiceLabel.tsx) parses labels via [`parseQuizChoiceLabel()`](../src/lib/quizChoiceFormat.ts) and styles:
+
+- **Big-O** headlines → mono + accent
+- **Code** headlines (indices, formulas) → mono pill
+- **Concept** headlines → semibold ink
+- **Detail** → muted, truncated second line
+
+### Shuffle & scoring
+
+Choice order is shuffled **by default** on every quiz surface (`QUIZ_SHUFFLE_BY_DEFAULT = true` in [`quizConstants.ts`](../src/lib/quizConstants.ts)).
+
+[`shuffleQuizQuestion()`](../src/lib/shuffleQuizQuestion.ts) reorders choices with a seeded PRNG. [`quizQuestionSeed()`](../src/lib/shuffleQuizQuestion.ts) derives a stable per-question seed from:
+
+- a random **run seed** (`newQuizRunSeed()`) — new each session / retry
+- the **question index** within the run
+- the **attempt** counter after a wrong answer (mobile deck)
+
+Mobile also refreshes the run seed when advancing to the next problem so Q1 order does not repeat across a category deck.
+
+**Restart-on-wrong:** one incorrect pick resets the full run — question 1, score 0, reshuffled choices. Timing constants live in [`quizConstants.ts`](../src/lib/quizConstants.ts):
+
+| Constant | Value | Use |
+|----------|-------|-----|
+| `QUIZ_SHUFFLE_BY_DEFAULT` | `true` | Shuffle MCQ options on display (opt out via `QuizConfig.shuffle`) |
+| `QUIZ_CORRECT_MS` | 850 ms | Mobile auto-advance after correct |
+| `QUIZ_WRONG_MS` | 1900 ms | Wrong feedback before auto-restart (mobile, Code Studio, canvas quiz panel) |
+
+Surfaces:
+
+| Surface | File | Restart-on-wrong |
+|---------|------|------------------|
+| Mobile deck | `shell/mobile/MobileCards.tsx` + `MobileDeck.tsx` | Auto (`QUIZ_WRONG_MS`) |
+| Code Studio quiz phase | `shell/canvas/CodeStudioQuiz.tsx` | Auto |
+| Canvas quiz panel | `plugins/_shared/practice.tsx` → `makeQuizPanel` | Auto |
+| Complexity panel | `shell/canvas/panels/practice/ComplexityPanelBody.tsx` | Manual shuffle (single-round UX) |
+
+Practice tab quiz and Code Studio quiz share one data source (`plugin.quiz` / `practice.quiz`) — edit once, both stay in sync.
+
+### Quality guardrails
+
+[`quizLabelIssues()`](../src/lib/quizChoiceFormat.ts) (rules in [`quizLabelRules.ts`](../src/lib/quizLabelRules.ts)) enforces format in [`integrity.test.ts`](../src/plugins/integrity.test.ts) for all registered plugins and `defaultPrepQuiz()` output.
+
+Rejected patterns:
+
+- Missing em-dash detail clause
+- Label longer than 72 characters
+- Truncated headline (`…` before the dash)
+- Comma-split headlines (`, —` or headline ending on a stop word)
+- Mid-word ellipsis cuts
+- Generic filler details (`plausible distractor`, `wrong approach here`, etc.)
+
+Shared Big-O hints live in [`complexityHints.ts`](../src/lib/complexityHints.ts) (used by complexity panel and prep fallback quizzes).
+
+CI:
+
+```bash
+npm run check:quiz-labels   # quizChoiceFormat + integrity label tests
+npm run check:all           # includes check:quiz-labels
+```
+
+To repair bulk-imported labels:
+
+```bash
+npm run repair-quiz-labels
+```
+
+Draft starter quizzes from recorder captions (human review required):
+
+```bash
+npm run draft-quiz-from-frames imp-44-word-search
+```
+
+---
+
+## Code Studio — reassemble & highlighting
+
+Code Studio runs three gated phases: **quiz → reassemble → recall**. Reassemble shows shuffled [`CodePiece`](../src/lib/codePieces.ts) blocks the learner orders into a working solution.
+
+### Syntax highlighting (read-only pieces)
+
+[`HighlightedCode`](../src/components/HighlightedCode.tsx) wraps [`highlightSnippet()`](../src/lib/highlightSnippet.tsx):
+
+- Keywords, strings, numbers per language (Go, JS/TS, Python)
+- **Entry function** lines (`hl-line-entry`) vs nested helpers (`hl-line-func`)
+- Signature name emphasis (`hl-sig-name`, `hl-sig-kw`)
+
+Styles live in `src/styles/theme.css` under `.code-studio-reassemble`.
+
+### Tray layout
+
+[`balanceTrayColumns()`](../src/lib/trayLayout.ts) packs code pieces into balanced masonry columns by estimated row height (long lines wrap at ~32 cols). Used by [`ReassemblePane`](../src/components/ReassemblePane.tsx).
+
+### CodeMirror editor
+
+[`languageExtension()`](../src/lib/languageExtension.ts) picks the CodeMirror language mode; [`editorTheme.ts`](../src/lib/editorTheme.ts) aligns editor chrome with design tokens. Recall phase uses the full editor; reassemble uses highlighted read-only snippets.
+
+### Haptic feedback
+
+[`haptic.ts`](../src/lib/haptic.ts) fires light taps on correct/wrong piece placement in reassemble (where supported).
+
+### Solution blueprint overlay
+
+During reassemble, the **ScanEye** toolbar button (or **`B`**) opens the solution blueprint:
+
+- **Desktop** — full-page overlay via [`CodeBlueprintOverlay`](../src/components/CodeBlueprintOverlay.tsx)
+- **Mobile deck** — compact in-card panel via [`CodeBlueprintPanel`](../src/components/CodeBlueprintPanel.tsx) (shares space with the block tray; code wraps to fit the screen)
+
+Both use [`CodePieceOverview`](../src/components/CodePieceOverview.tsx) with role tints from [`codePieceRoles.ts`](../src/lib/codePieceRoles.ts). Close with **X**, **`Esc`**, or **`B`**.
+
+---
+
+## Adding quiz content to a plugin
+
+```ts
+// practice.ts
+export const quiz: QuizQuestion[] = [
+  {
+    id: 'invariant',
+    prompt: 'What holds after each pass?',
+    choices: [
+      { label: 'Prefix sorted — values[0..i] ordered', correct: true },
+      { label: 'Whole array sorted — not yet' },
+    ],
+    explain: 'Insertion sort only guarantees the prefix …',
+  },
+];
+```
+
+Wire via `wireTeachingStack({ practice: { quiz, … } })` — see [`src/plugins/README.md`](../src/plugins/README.md).

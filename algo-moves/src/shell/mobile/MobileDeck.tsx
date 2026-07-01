@@ -6,6 +6,7 @@ import { cn } from '../../lib/cn';
 import { buildDeck } from './deckModel';
 import { clearMobileSession, loadMobileSession, saveMobileSession } from './mobileSession';
 import { useSwipe } from './useSwipe';
+import { newQuizRunSeed } from '../../lib/shuffleQuizQuestion';
 import { AnimateCardView, CompleteScreen, QuizCardView, ReassembleCardView } from './MobileCards';
 
 function initialIndices(
@@ -64,6 +65,14 @@ export function MobileDeck({
   const [pIdx, setPIdx] = useState(start.pIdx);
   const [cIdx, setCIdx] = useState(start.cIdx);
   const [dir, setDir] = useState<1 | -1>(1);
+  const [quizRunSeed, setQuizRunSeed] = useState(() => newQuizRunSeed());
+  const [quizAttempt, setQuizAttempt] = useState(0);
+
+  // Fresh shuffle per problem so Q1 order does not repeat across the deck.
+  useEffect(() => {
+    setQuizRunSeed(newQuizRunSeed());
+    setQuizAttempt(0);
+  }, [pIdx]);
 
   const done = pIdx >= blocks.length;
   const block = done ? null : blocks[pIdx];
@@ -103,6 +112,17 @@ export function MobileDeck({
     }
   }, [blocks, cIdx, pIdx]);
 
+  const restartQuiz = useCallback(() => {
+    const b = blocks[pIdx];
+    if (!b) return;
+    const firstQuiz = b.cards.findIndex((c) => c.kind === 'quiz');
+    if (firstQuiz < 0) return;
+    setDir(1);
+    setCIdx(firstQuiz);
+    setQuizRunSeed(newQuizRunSeed());
+    setQuizAttempt((n) => n + 1);
+  }, [blocks, pIdx]);
+
   const onAnswered = useCallback((_correct: boolean) => {
     // QuizCardView calls recordAttempt internally; hook kept for future session stats.
   }, []);
@@ -111,6 +131,8 @@ export function MobileDeck({
     setDir(1);
     setPIdx(0);
     setCIdx(0);
+    setQuizRunSeed(newQuizRunSeed());
+    setQuizAttempt(0);
   }, []);
 
   const handleFinishExit = useCallback(() => {
@@ -213,7 +235,15 @@ export function MobileDeck({
           ) : block && card?.kind === 'animate' ? (
             <AnimateCardView block={block} problemIndex={pIdx} problemCount={blocks.length} onContinue={advance} onOpenStudio={openStudio} />
           ) : block && card?.kind === 'quiz' ? (
-            <QuizCardView card={card} block={block} onAnswered={onAnswered} onAdvance={advance} />
+            <QuizCardView
+              card={card}
+              block={block}
+              quizRunSeed={quizRunSeed}
+              quizAttempt={quizAttempt}
+              onAnswered={onAnswered}
+              onAdvance={advance}
+              onRestartQuiz={restartQuiz}
+            />
           ) : block && card?.kind === 'reassemble' ? (
             <ReassembleCardView card={card} block={block} onComplete={advance} onSkip={advance} onOpenStudio={openStudio} />
           ) : null}

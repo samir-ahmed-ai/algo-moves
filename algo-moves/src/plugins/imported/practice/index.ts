@@ -1,5 +1,5 @@
 import type { PracticeBundle } from '../../_shared/pluginKit';
-import { codePiecesFromSource } from '../../_shared/pluginKit';
+import { splitCodeIntoPieces } from '../../../lib/codePieces';
 import { IMPORTED_PRACTICE } from './bundles';
 import { MIGRATED_BUNDLES } from './migrated';
 import { EXTRA_CASE_BUNDLES } from './extraCases';
@@ -36,7 +36,7 @@ export function resolvePracticeBundle(manifestId: string, goSource: string): Pra
   }
 
   if (bundle && !bundle.codePieces) {
-    const generated = codePiecesFromSource(goSource);
+    const generated = splitCodeIntoPieces(goSource) ?? undefined;
     if (generated) bundle = { ...bundle, codePieces: generated };
   }
 

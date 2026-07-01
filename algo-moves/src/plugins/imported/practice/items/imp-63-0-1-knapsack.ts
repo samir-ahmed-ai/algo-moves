@@ -27,17 +27,17 @@ export const bundle: PracticeBundle = {
       "prompt": "The inner capacity loop runs `for c := capacity; c >= w; c--`. Why does it iterate right-to-left (high to low)?",
       "choices": [
         {
-          "label": "To ensure each item is considered at most once per outer iteration",
+          "label": "To ensure each item — considered at most once per outer",
           "correct": true
         },
         {
-          "label": "To avoid array index out-of-bounds when accessing dp[c-w]"
+          "label": "To avoid array index out-of-bounds — when accessing dp[c-w]"
         },
         {
-          "label": "To fill base cases before dependent cells"
+          "label": "To fill base cases — dependent cells"
         },
         {
-          "label": "Left-to-right would give the same result; direction is arbitrary"
+          "label": "Left-to-right would give — result; direction is arbitrary"
         }
       ],
       "explain": "If we iterated left-to-right, dp[c-w] would already reflect the current item being added, allowing the item to be used multiple times in a single pass. Right-to-left guarantees dp[c-w] still holds the state from BEFORE this item was considered."
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What does `dp[c] = dp[c-w] + v` represent?",
       "choices": [
         {
-          "label": "Take this item: the best value at capacity c-w plus this item's value",
+          "label": "Take this item: the best — value at capacity c-w plus this",
           "correct": true
         },
         {
-          "label": "Skip this item: carry forward the best value seen so far"
+          "label": "Skip this item: carry forward — the best value seen so far"
         },
         {
-          "label": "The total value of all items with weight ≤ c"
+          "label": "The total value — items with weight ≤ c"
         },
         {
-          "label": "The maximum weight used when filling capacity c"
+          "label": "The maximum weight used — filling capacity c"
         }
       ],
       "explain": "`dp[c-w] + v` says: if we use this item (costing weight `w`, gaining value `v`), the remaining capacity is `c-w`, and we inherit the best value already stored there. The `if` guard only updates when this is better than skipping."
@@ -67,11 +67,11 @@ export const bundle: PracticeBundle = {
       "prompt": "The solution allocates `dp := make([]int, capacity+1)`. What space complexity does this achieve, compared to a naive 2D DP table?",
       "choices": [
         {
-          "label": "O(capacity) instead of O(n * capacity)",
+          "label": "O(capacity) instead of O(n * — capacity)",
           "correct": true
         },
         {
-          "label": "O(n) instead of O(n * capacity)"
+          "label": "O(n) instead of O(n * — capacity)"
         },
         {
           "label": "O(1) — only a few variables are needed"
@@ -87,17 +87,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the time complexity of this solution?",
       "choices": [
         {
-          "label": "O(n * capacity)",
+          "label": "O(n * capacity) — The outer loop iterates over n items",
           "correct": true
         },
         {
-          "label": "O(n²)"
+          "label": "O(n²) — The outer loop iterates over n"
         },
         {
-          "label": "O(capacity²)"
+          "label": "O(capacity²) — The outer loop iterates over n"
         },
         {
-          "label": "O(n * capacity²)"
+          "label": "O(n * capacity²) — The outer loop iterates over n"
         }
       ],
       "explain": "The outer loop iterates over `n` items and the inner loop over up to `capacity` values, giving O(n * capacity). This is pseudo-polynomial — it depends on the numeric value of capacity, not just the input length."
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the base case for this DP, and how is it established?",
       "choices": [
         {
-          "label": "dp[0..capacity] = 0: make([]int, capacity+1) zero-initializes the slice",
+          "label": "dp[0..capacity] = 0: make([]int — the slice",
           "correct": true
         },
         {
-          "label": "dp[0] = 1: a knapsack of zero capacity holds one empty set"
+          "label": "dp[0] = 1: a knapsack — of zero capacity holds one empty set"
         },
         {
-          "label": "dp[0] = infinity: no items fit, so value is undefined"
+          "label": "dp[0] = infinity: no items — fit, so value is undefined"
         },
         {
-          "label": "dp[i][0] = 0: an explicit row for zero items must be set"
+          "label": "dp[i][0] = 0: an explicit — row for zero items must be set"
         }
       ],
       "explain": "Go's `make([]int, capacity+1)` zero-initializes all entries, encoding the base case: a knapsack of any capacity with no items considered yet has value 0. No explicit loop is needed."

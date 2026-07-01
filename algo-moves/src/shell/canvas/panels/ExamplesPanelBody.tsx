@@ -21,7 +21,7 @@ export function ExamplesPanelBody() {
   const preview = active ? formatInputPreview(active.value) : '';
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-[var(--node-gap,6px)]">
       <div className="nodrag flex flex-col">
         {plugin.inputs.map((i) => {
           const on = i.id === inputId;
@@ -32,13 +32,13 @@ export function ExamplesPanelBody() {
             ops = null;
           }
           return (
-            <Row key={i.id} active={on} onClick={() => setInputId(i.id)} className={cn('py-1', nodeText.base)}>
+            <Row key={i.id} active={on} onClick={() => setInputId(i.id)} className={nodeText.base}>
               <input
                 type="radio"
                 name={`input-${plugin.meta.id}`}
                 checked={on}
                 onChange={() => setInputId(i.id)}
-                className="h-3.5 w-3.5 shrink-0 accent-[var(--accent)]"
+                className="size-[calc(var(--node-icon,16px)*0.875)] shrink-0 accent-[var(--accent)]"
                 tabIndex={-1}
               />
               <span className="min-w-0 flex-1 leading-snug">{i.label}</span>

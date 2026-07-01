@@ -27,17 +27,17 @@ export const bundle: PracticeBundle = {
       "prompt": "In `coursesOrder`, how is the adjacency list `adj` built from the `prerequisites` input `[course, pre]`?",
       "choices": [
         {
-          "label": "`adj[pre]` appends `course` — an edge from prerequisite to the course that depends on it",
+          "label": "`adj[pre]` → `course` — prerequisite points to dependent",
           "correct": true
         },
         {
-          "label": "`adj[course]` appends `pre` — an edge from each course to its prerequisite"
+          "label": "`adj[course]` → `pre` — reversed edge direction"
         },
         {
-          "label": "Both directions are stored to make the graph undirected"
+          "label": "Both directions stored — makes graph undirected"
         },
         {
-          "label": "`adj[course]` appends `course` to track self-loops"
+          "label": "`adj[course]` → self — tracks self-loops only"
         }
       ],
       "explain": "The edge direction must go from `pre` to `course` so that decrementing `indeg[course]` when `pre` is processed is correct. Reversing it would give wrong in-degrees."
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What happens inside the BFS loop when `indeg[nb]` is decremented to 0?",
       "choices": [
         {
-          "label": "`nb` is appended to `q`, making it ready to process in a future iteration",
+          "label": "`nb` is appended to `q` — making it ready to process in a",
           "correct": true
         },
         {
-          "label": "`nb` is immediately appended to `order` without being enqueued"
+          "label": "`nb` is immediately appended — `order` without being enqueued"
         },
         {
-          "label": "A cycle is reported and the function returns nil"
+          "label": "A cycle is reported — the function returns nil"
         },
         {
-          "label": "All neighbors of `nb` have their in-degrees reset to 0"
+          "label": "All neighbors of `nb` — their in-degrees reset to 0"
         }
       ],
       "explain": "When removing a node from the graph eliminates a prerequisite, its dependent courses may reach in-degree 0. Enqueuing them ensures they are eventually processed in topological order."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "How does the code detect an impossible schedule (cycle in prerequisite graph)?",
       "choices": [
         {
-          "label": "`len(order) != numCourses` — courses in a cycle never reach in-degree 0, so they're never added to `order`",
+          "label": "`len(order) != numCourses` — cycle leaves nodes stuck",
           "correct": true
         },
         {
-          "label": "It checks whether `q` is non-empty after the loop ends"
+          "label": "Empty queue after loop — queue can drain with a cycle"
         },
         {
-          "label": "It explicitly tracks back edges using a `visiting` boolean array"
+          "label": "Back-edge in DFS colors — code uses Kahn BFS not DFS"
         },
         {
-          "label": "It returns nil when `indeg` still contains values greater than 1"
+          "label": "`indeg` still > 1 — in-degree not the cycle signal here"
         }
       ],
       "explain": "Nodes stuck in a cycle keep non-zero in-degrees throughout BFS and never enter the queue. If `order` ends up shorter than `numCourses`, a cycle must exist."
@@ -87,7 +87,7 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the time and space complexity of `coursesOrder`?",
       "choices": [
         {
-          "label": "Time O(V+E), Space O(V) — each node and edge is visited once; adj and indeg are size V",
+          "label": "Time O(V+E) — Space O(V) each node and edge is",
           "correct": true
         },
         {
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What does `coursesOrder` return if there are no prerequisites (empty `prerequisites` slice)?",
       "choices": [
         {
-          "label": "A slice containing all courses 0..numCourses-1 in arbitrary order",
+          "label": "A slice containing all courses — 0..numCourses-1 in arbitrary order",
           "correct": true
         },
         {
-          "label": "nil, because no ordering can be determined"
+          "label": "nil — because no ordering can be determined"
         },
         {
-          "label": "An empty slice, because no edges exist"
+          "label": "An empty slice — because no edges exist"
         },
         {
-          "label": "It panics due to an empty adjacency list"
+          "label": "It panics due — empty adjacency list"
         }
       ],
       "explain": "With no prerequisites every course starts at in-degree 0 and is immediately enqueued. The BFS processes all of them, so `order` ends up containing every course and `len(order)==numCourses` passes."

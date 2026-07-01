@@ -6,10 +6,10 @@ export const quiz: QuizQuestion[] = [
     id: 'what-is-trie',
     prompt: 'What is a trie (prefix tree)?',
     choices: [
-      { label: 'A tree where each path from the root spells a string, one character per edge', correct: true },
-      { label: 'A balanced binary search tree keyed by whole strings' },
-      { label: 'A hash table that stores words in buckets' },
-      { label: 'A heap ordered by string length' },
+      { label: 'Prefix tree — one char per edge', correct: true },
+      { label: 'BST on strings — compares whole keys', },
+      { label: 'Hash buckets — whole-key lookup', },
+      { label: 'Heap by length — wrong structure', },
     ],
     explain:
       'Each node represents a prefix; following edges from the root spells out words one character at a time. Common prefixes share the same nodes near the top of the tree.',
@@ -18,10 +18,10 @@ export const quiz: QuizQuestion[] = [
     id: 'why-over-hashset',
     prompt: 'Why use a trie instead of a hash set for prefix queries like "does any word start with car"?',
     choices: [
-      { label: 'A trie answers prefix questions by walking one path; a hash set only knows whole keys', correct: true },
-      { label: 'A trie uses less memory than a hash set in every case' },
-      { label: 'A hash set cannot store strings' },
-      { label: 'A trie keeps the words sorted, which a hash set cannot do' },
+      { label: 'Prefix walk — hash needs full key', correct: true },
+      { label: 'Always less memory — not guaranteed', },
+      { label: 'Hash cannot store strings — false', },
+      { label: 'Keeps sorted — not primary reason', },
     ],
     explain:
       'A hash set hashes the entire key, so it can only answer "is this exact word present?" To find all words sharing a prefix you would scan every key. A trie reaches the prefix node in O(L) and every descendant under it is a match.',
@@ -30,10 +30,10 @@ export const quiz: QuizQuestion[] = [
     id: 'node-children',
     prompt: 'How does each trie node connect to the next character?',
     choices: [
-      { label: 'A map (or array) from a character to the child node for that character', correct: true },
-      { label: 'A single pointer to the next node regardless of character' },
-      { label: 'A linked list of every word that passes through it' },
-      { label: 'A back-pointer to its parent only' },
+      { label: 'Char → child map — per-letter edges', correct: true },
+      { label: 'Single next pointer — loses branching', },
+      { label: 'Word list — not trie shape', },
+      { label: 'Parent only cannot descend — need child edges per character' },
     ],
     explain:
       'Each node holds children keyed by character (children map[rune]*node). To follow a character you look it up among the children; a missing key means that path does not exist.',
@@ -42,10 +42,10 @@ export const quiz: QuizQuestion[] = [
     id: 'end-flag',
     prompt: 'What does the end-of-word flag (isEnd) distinguish?',
     choices: [
-      { label: 'A node that completes a stored word from a node that is only a prefix of one', correct: true },
-      { label: 'A leaf node from an internal node' },
-      { label: 'The root from every other node' },
-      { label: 'Whether a node has more than one child' },
+      { label: 'Complete word — vs prefix-only node', correct: true },
+      { label: 'Leaf vs internal — insufficient', },
+      { label: 'Root vs others — wrong flag', },
+      { label: 'Branching count — unrelated', },
     ],
     explain:
       'Without the flag you could not tell that "cat" is stored but "ca" is not. A word can also end on an internal node (e.g. "in" inside "inn"), so being a leaf is neither necessary nor sufficient — only isEnd marks a complete word.',
@@ -54,10 +54,10 @@ export const quiz: QuizQuestion[] = [
     id: 'search-vs-startswith',
     prompt: 'How do search(word) and startsWith(prefix) differ at the end of the walk?',
     choices: [
-      { label: 'Both walk the path; search also requires the final node to have isEnd set', correct: true },
-      { label: 'startsWith requires isEnd; search does not' },
-      { label: 'search walks edges but startsWith hashes the prefix instead' },
-      { label: 'They are identical and always return the same answer' },
+      { label: 'search needs isEnd — prefix just exists', correct: true },
+      { label: 'startsWith needs isEnd — reversed', },
+      { label: 'startsWith hashes — still walks', },
+      { label: 'Identical — differ on isEnd', },
     ],
     explain:
       'startsWith only needs the path to exist, so reaching the prefix node is enough. search additionally checks isEnd on that node — the path can exist as a prefix without a complete word ending there.',
@@ -66,10 +66,10 @@ export const quiz: QuizQuestion[] = [
     id: 'complexity',
     prompt: 'Why is searching a trie O(L) in the word length, independent of how many words are stored?',
     choices: [
-      { label: 'Each character follows exactly one child lookup, so you touch L nodes regardless of the dictionary size', correct: true },
-      { label: 'Because the trie is rebalanced after every insert' },
-      { label: 'Because it binary-searches the sorted words' },
-      { label: 'Because every word is hashed once up front' },
+      { label: 'O(L) — one lookup per character', correct: true },
+      { label: 'Rebalanced each insert — false', },
+      { label: 'Binary search words — not trie', },
+      { label: 'Pre-hash all words — hash set', },
     ],
     explain:
       'A search of a word of length L performs L child lookups (each O(1) for a fixed alphabet), one per character — it never scans the other stored words. Space, however, scales with the total number of characters across all inserted words.',

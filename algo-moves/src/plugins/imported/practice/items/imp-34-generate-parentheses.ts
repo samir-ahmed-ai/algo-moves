@@ -14,10 +14,10 @@ export const bundle: PracticeBundle = {
           "label": "Generate-and-filter — build all 2^(2n) strings then discard invalid ones"
         },
         {
-          "label": "BFS level-order parenthesis expansion"
+          "label": "BFS level-order parenthesis — The two if guards (open < n and"
         },
         {
-          "label": "Dynamic programming on bracket balance"
+          "label": "Dynamic programming on bracket — The two if guards (open < n and"
         }
       ],
       "explain": "The two `if` guards (`open < n` and `close < open`) prune the search tree so only valid-prefix paths are explored. No invalid string is ever completed, unlike a generate-and-filter approach."
@@ -27,7 +27,7 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the exact pruning condition that prevents `)` from being added?",
       "choices": [
         {
-          "label": "`close < open` — a closing bracket is only added when there is an unmatched opening bracket",
+          "label": "`close < open` a closing — bracket is only added when there is",
           "correct": true
         },
         {
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "When does `btParen` record a result?",
       "choices": [
         {
-          "label": "When `len(path) == 2*n`",
+          "label": "When `len(path) == 2*n` — The base case is len(path) == 2*n",
           "correct": true
         },
         {
-          "label": "When `open == n && close == n`"
+          "label": "When `open == n && — close == n`"
         },
         {
-          "label": "When neither `if` branch can fire"
+          "label": "When neither `if` branch — fire"
         },
         {
-          "label": "When `open == close == n/2`"
+          "label": "When `open == close == — n/2`"
         }
       ],
       "explain": "The base case is `len(path) == 2*n`. At that point `open == n` and `close == n` are also true (due to the invariants), but the code checks length directly. Checking `open == n && close == n` would be equivalent here but is not what the code does."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the time complexity of `genValidParen(n)`?",
       "choices": [
         {
-          "label": "O(n · C_n) where C_n is the nth Catalan number",
+          "label": "O(n · C_n) where C_n — is the nth Catalan number",
           "correct": true
         },
         {
-          "label": "O(2^(2n))"
+          "label": "O(2^(2n)) — The number of valid"
         },
         {
-          "label": "O(n^2)"
+          "label": "O(n^2) — The number of valid"
         },
         {
-          "label": "O(n · 2^n)"
+          "label": "O(n · 2^n) — The number of valid"
         }
       ],
       "explain": "The number of valid parenthesizations is the nth Catalan number C_n ≈ 4^n / (n^(3/2) · √π). Each string has length 2n, so total output work is O(n · C_n). O(2^(2n)) is the size of the unfiltered search space, not the pruned one."
@@ -87,17 +87,17 @@ export const bundle: PracticeBundle = {
       "prompt": "At any recursive call, what invariant holds about the partial string `path`?",
       "choices": [
         {
-          "label": "Every prefix of `path` has at least as many '(' as ')'",
+          "label": "Every prefix of `path` — at least as many '(' as ')'",
           "correct": true
         },
         {
-          "label": "The number of '(' always equals the number of ')' in `path`"
+          "label": "The number of '(' always — equals the number of ')' in `path`"
         },
         {
-          "label": "`path` always has an even length"
+          "label": "`path` always — length"
         },
         {
-          "label": "`open + close == n`"
+          "label": "`open + close == n` — Because ) is only added when"
         }
       ],
       "explain": "Because `)` is only added when `close < open`, we always have `open >= close` at every point — meaning every prefix has non-negative balance. This is precisely the invariant that makes every completed string a valid parenthesization."
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What does `genValidParen(1)` return?",
       "choices": [
         {
-          "label": "[\"()\"]",
+          "label": "[\"()\"] — With n=1, open < 1 allows one (, then",
           "correct": true
         },
         {
-          "label": "[\"\"]"
+          "label": "[\"\"] — With n=1, open < 1 allows one (,"
         },
         {
-          "label": "[\"(\", \")\"]"
+          "label": "[\"(\", \")\"] — With n=1, open < 1 allows one (,"
         },
         {
-          "label": "nil"
+          "label": "nil — With n=1, open < 1 allows one (,"
         }
       ],
       "explain": "With n=1, `open < 1` allows one `(`, then `close < open` (0 < 1) allows one `)`. The path `\"()\"` has length 2 = 2*1, so it is recorded. That is the only valid sequence."

@@ -6,10 +6,10 @@ export const quiz: QuizQuestion[] = [
     id: 'orders',
     prompt: 'What distinguishes pre-order, in-order, and post-order traversals?',
     choices: [
-      { label: 'When the node itself is visited relative to its two subtrees', correct: true },
-      { label: 'Which subtree (left or right) is skipped' },
-      { label: 'Whether recursion or a loop is used' },
-      { label: 'The direction the tree is drawn' },
+      { label: 'Visit timing — node vs subtrees', correct: true },
+      { label: 'Skip a subtree — none skip', },
+      { label: 'Recursion vs loop — both can iterate', },
+      { label: 'Draw direction — unrelated', },
     ],
     explain:
       'All three recurse left then right; they differ only in WHERE the node is emitted: pre = node before subtrees, in = node between them, post = node after both.',
@@ -18,10 +18,10 @@ export const quiz: QuizQuestion[] = [
     id: 'inorder-bst',
     prompt: 'Which traversal of a binary SEARCH tree yields the keys in sorted order?',
     choices: [
-      { label: 'In-order (left, node, right)', correct: true },
-      { label: 'Pre-order (node, left, right)' },
-      { label: 'Post-order (left, right, node)' },
-      { label: 'Level-order (BFS)' },
+      { label: 'In-order — left, node, right', correct: true },
+      { label: 'Pre-order — node before children', },
+      { label: 'Post-order — node after children', },
+      { label: 'Level-order — BFS by depth', },
     ],
     explain:
       'In a BST every left descendant is smaller and every right descendant larger, so visiting left, then node, then right emits keys in ascending order.',
@@ -30,10 +30,10 @@ export const quiz: QuizQuestion[] = [
     id: 'levelorder',
     prompt: 'How is level-order traversal implemented?',
     choices: [
-      { label: 'BFS: a queue — dequeue a node, emit it, then enqueue its children', correct: true },
-      { label: 'DFS with a stack, visiting the right child first' },
-      { label: 'Sort all node values, then print them' },
-      { label: 'Recurse to the deepest leaf, then unwind' },
+      { label: 'BFS queue — dequeue, emit, enqueue kids', correct: true },
+      { label: 'DFS stack — depth-first order', },
+      { label: 'Sort values — loses structure', },
+      { label: 'Deepest leaf first not level-order — DFS post-order is not BFS' },
     ],
     explain:
       'Level-order is breadth-first: a FIFO queue holds the current frontier, so nodes come out depth by depth, left to right.',
@@ -42,10 +42,10 @@ export const quiz: QuizQuestion[] = [
     id: 'postorder-use',
     prompt: 'Which order is the natural fit for freeing a tree or computing subtree sums?',
     choices: [
-      { label: 'Post-order — a node is processed only after both its children', correct: true },
-      { label: 'Pre-order — the node is processed before its children' },
-      { label: 'In-order — the node is processed between its children' },
-      { label: 'Level-order — nodes are processed by depth' },
+      { label: 'Post-order — children done first', correct: true },
+      { label: 'Pre-order — parent before children', },
+      { label: 'In-order — between children', },
+      { label: 'Level-order — by depth layers', },
     ],
     explain:
       'Post-order guarantees both subtrees are done before the node, so child results (sizes, sums, frees) are ready when the parent is handled.',
@@ -54,10 +54,10 @@ export const quiz: QuizQuestion[] = [
     id: 'iterative',
     prompt: 'How can a recursive DFS traversal be rewritten iteratively?',
     choices: [
-      { label: 'With an explicit stack that mimics the call stack', correct: true },
-      { label: 'With a queue, which gives the identical order' },
-      { label: 'It cannot be done without recursion' },
-      { label: 'By sorting the nodes first' },
+      { label: 'Explicit stack — mimics call stack', correct: true },
+      { label: 'Queue — gives BFS instead', },
+      { label: 'Impossible — recursion required', },
+      { label: 'Sort nodes — wrong approach', },
     ],
     explain:
       'Recursion uses the call stack implicitly; an explicit LIFO stack reproduces the same depth-first order. (A queue instead would give BFS / level-order.)',
@@ -66,10 +66,10 @@ export const quiz: QuizQuestion[] = [
     id: 'complexity',
     prompt: 'What are the time and space complexities of these traversals on n nodes?',
     choices: [
-      { label: 'O(n) time; O(h) space for DFS (h = height), O(w) for the BFS queue', correct: true },
-      { label: 'O(n log n) time; O(1) space' },
-      { label: 'O(n²) time; O(n²) space' },
-      { label: 'O(log n) time; O(n) space' },
+      { label: 'O(n) time — O(h) DFS, O(w) BFS', correct: true },
+      { label: 'O(n log n) — O(1) space', },
+      { label: 'O(n²) — quadratic work', },
+      { label: 'O(log n) — too fast', },
     ],
     explain:
       'Every node is visited once → O(n) time. DFS recursion depth is the tree height h; the BFS queue holds at most one level, the max width w.',

@@ -6,10 +6,10 @@ export const quiz: QuizQuestion[] = [
     id: 'precondition',
     prompt: 'What must be true about the array before binary search works?',
     choices: [
-      { label: 'It must be sorted (monotonic) on the key you compare', correct: true },
-      { label: 'It must contain no duplicates' },
-      { label: 'Its length must be a power of two' },
-      { label: 'It must be stored as a linked list' },
+      { label: 'Sorted on key — enables halving', correct: true },
+      { label: 'No duplicates — not required', },
+      { label: 'Power-of-two length — not required', },
+      { label: 'Linked list — wrong structure', },
     ],
     explain:
       'Binary search relies on a monotonic order: once mid is too small (or too big) you can discard a whole half. On an unsorted array that inference is invalid, so sorting is a hard precondition.',
@@ -18,10 +18,10 @@ export const quiz: QuizQuestion[] = [
     id: 'mid',
     prompt: 'How is mid computed each step?',
     choices: [
-      { label: 'mid = lo + (hi - lo) / 2 — the midpoint of the live window, overflow-safe', correct: true },
-      { label: 'mid = (lo + hi) * 2' },
-      { label: 'mid = a random index in [lo, hi]' },
-      { label: 'mid = hi - lo' },
+      { label: 'lo + (hi−lo)/2 — overflow-safe midpoint', correct: true },
+      { label: '(lo + hi) × 2 — wrong formula', },
+      { label: 'Random index — not deterministic', },
+      { label: 'hi − lo — not the midpoint', },
     ],
     explain:
       'mid is the middle of the current [lo, hi] window. Writing it as lo + (hi - lo) / 2 is equivalent to (lo + hi) / 2 but avoids integer overflow when lo + hi exceeds the int range.',
@@ -30,10 +30,10 @@ export const quiz: QuizQuestion[] = [
     id: 'discard',
     prompt: 'When values[mid] < target, which half is discarded and why?',
     choices: [
-      { label: 'The left half — everything ≤ mid is too small, so set lo = mid + 1', correct: true },
-      { label: 'The right half — set hi = mid - 1' },
-      { label: 'Neither; you restart from index 0' },
-      { label: 'Both halves; you check mid again' },
+      { label: 'Left half — all ≤ mid too small', correct: true },
+      { label: 'Right half — wrong direction', },
+      { label: 'Restart at 0 — loses progress', },
+      { label: 'Both halves — mid still one cell', },
     ],
     explain:
       'Sorted order means every element at or left of mid is ≤ values[mid] < target, so none can equal the target. They are pruned by moving lo to mid + 1.',
@@ -42,10 +42,10 @@ export const quiz: QuizQuestion[] = [
     id: 'loop',
     prompt: 'What is the loop condition, and why that exact form?',
     choices: [
-      { label: 'while lo <= hi — when lo == hi the window still holds one cell to check', correct: true },
-      { label: 'while lo < hi — stop as soon as they meet' },
-      { label: 'while mid != target' },
-      { label: 'while lo != 0' },
+      { label: 'lo ≤ hi — single-cell window still valid', correct: true },
+      { label: 'lo < hi — skips last candidate', },
+      { label: 'mid ≠ target — may never converge', },
+      { label: 'lo ≠ 0 — arbitrary bound', },
     ],
     explain:
       'lo <= hi keeps a single-element window [lo, lo] alive so that last candidate is compared. Using lo < hi would skip it and miss targets that sit there.',
@@ -54,10 +54,10 @@ export const quiz: QuizQuestion[] = [
     id: 'absent',
     prompt: 'What does the function return when the target is not present?',
     choices: [
-      { label: '-1, after lo passes hi and the window is empty', correct: true },
-      { label: 'The index where the target would be inserted' },
-      { label: '0, the first index' },
-      { label: 'It throws / panics' },
+      { label: '−1 — window emptied, no match', correct: true },
+      { label: 'Insert index — not standard here', },
+      { label: '0 — not a sentinel', },
+      { label: 'Panic — returns quietly', },
     ],
     explain:
       'If no mid ever equals the target, the pointers eventually cross (lo > hi), the loop exits, and the function returns the sentinel -1 to signal "absent".',
@@ -66,10 +66,10 @@ export const quiz: QuizQuestion[] = [
     id: 'complexity',
     prompt: 'Why is binary search O(log n)?',
     choices: [
-      { label: 'Each comparison halves the remaining window, so it takes ~log2(n) steps', correct: true },
-      { label: 'It scans every element once, so it is O(n)' },
-      { label: 'It sorts the array first, so it is O(n log n)' },
-      { label: 'It compares all pairs, so it is O(n²)' },
+      { label: 'O(log n) — halve window each step', correct: true },
+      { label: 'O(n) — scans every element', },
+      { label: 'O(n log n) — sorts first', },
+      { label: 'O(n²) — all pairs', },
     ],
     explain:
       'Starting from n candidates, one comparison leaves n/2, then n/4, … The number of halvings before the window is empty is log2(n), giving O(log n) time and O(1) extra space.',

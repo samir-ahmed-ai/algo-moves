@@ -537,7 +537,10 @@ circle {
   height: 100%;
   border-radius: 999px;
   background: var(--accent);
-  transition: width 0.2s ease;
+  transition: width 0.2s ease, background 0.2s ease;
+}
+.code-studio-reassemble .reassemble-progress-fill.reassemble-progress-done {
+  background: var(--good);
 }
 .code-studio-reassemble .progress-count {
   font-family: var(--mono);
@@ -641,9 +644,125 @@ circle {
   font-family: var(--mono);
   font-size: var(--node-fs-tight, 11px);
   line-height: 1.45;
-  white-space: pre;
   margin: 0;
+}
+.code-studio-reassemble .piece-code {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  display: block;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--text);
+  white-space: pre;
   overflow-x: auto;
+}
+.code-studio-reassemble .piece-code-wrap {
+  white-space: normal;
+  overflow-x: hidden;
+  word-break: break-word;
+}
+.code-studio-reassemble .piece-code-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.code-studio-reassemble .tray-piece .piece-code {
+  flex: none;
+  min-height: auto;
+  overflow-x: auto;
+}
+.code-studio-reassemble .piece-code .hl-keyword {
+  color: var(--accent);
+}
+.code-studio-reassemble .piece-code .hl-string {
+  color: var(--good);
+}
+.code-studio-reassemble .piece-code .hl-comment {
+  color: var(--text-3);
+  font-style: italic;
+}
+.code-studio-reassemble .piece-code .hl-number {
+  color: var(--edge-active);
+}
+.code-studio-reassemble .piece-code .hl-punct {
+  color: var(--text-2);
+}
+.code-studio-reassemble .piece-code-line.hl-line-entry {
+  border-left: 2px solid var(--team2-stroke);
+  padding-left: 4px;
+  margin-left: -2px;
+}
+.code-studio-reassemble .piece-code-line.hl-line-func {
+  border-left: 1px solid var(--team1-stroke);
+  padding-left: 4px;
+  margin-left: -1px;
+}
+.code-studio-reassemble .piece-code .hl-sig-kw {
+  color: var(--text-3);
+  font-weight: 500;
+}
+.code-studio-reassemble .piece-code .hl-sig-name {
+  color: var(--team2-stroke);
+  font-weight: 700;
+}
+.code-studio-reassemble .piece-code .hl-sig-name-func {
+  color: var(--team1-stroke);
+  font-weight: 600;
+}
+.code-studio-reassemble .tray-piece-signature-entry {
+  border-color: color-mix(in srgb, var(--team2-stroke) 55%, var(--border-strong));
+}
+.code-studio-reassemble .piece.placed-enter {
+  animation: piecePlacedEnter 0.22s ease-out;
+}
+@keyframes piecePlacedEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.code-studio-reassemble .next-slot-text {
+  animation: nextSlotPulse 2s ease-in-out infinite;
+}
+@keyframes nextSlotPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+.code-studio-reassemble .assembled-empty-chevron {
+  display: inline-block;
+  animation: emptyChevronBounce 1.6s ease-in-out infinite;
+}
+@keyframes emptyChevronBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+.code-studio-reassemble .reassemble-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .code-studio-reassemble .piece.placed {
   display: flex;
@@ -707,6 +826,165 @@ circle {
   padding: var(--space-1) var(--space-2);
   margin-bottom: var(--space-2);
 }
+
+/* Full-page blueprint overlay (portaled to document.body). */
+.code-blueprint-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3);
+  animation: codeBlueprintIn 0.2s ease-out;
+}
+@keyframes codeBlueprintIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.code-blueprint-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: hsl(0 0% 0% / 0.52);
+  backdrop-filter: blur(2px);
+  cursor: default;
+}
+.code-blueprint-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  border: 0.5px solid var(--border-strong);
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--surface);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+.code-blueprint-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  border-bottom: 0.5px solid var(--border-strong);
+  background: var(--surface-2);
+}
+.code-blueprint-title-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.code-blueprint-title-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent);
+}
+.code-blueprint-title {
+  margin: 0;
+  font-size: var(--node-fs-sm, 13px);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.code-blueprint-subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: var(--node-fs-tight, 11px);
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.code-blueprint-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 0.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-2);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.code-blueprint-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.code-blueprint-close:hover {
+  background: var(--panel2, var(--surface-2));
+  color: var(--text);
+  border-color: var(--accent);
+}
+.code-blueprint-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+.code-blueprint-panel .code-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+.code-blueprint-panel .code-overview-section {
+  border-left: 3px solid var(--section-stroke, var(--border-strong));
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in srgb, var(--section-bg, var(--surface)) 72%, transparent);
+  padding: var(--space-2);
+}
+.code-blueprint-panel .code-overview-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-1);
+}
+.code-blueprint-panel .code-overview-index {
+  flex-shrink: 0;
+  width: 1.25rem;
+  font-family: var(--mono);
+  font-size: var(--node-fs-2xs, 9px);
+  font-weight: 600;
+  text-align: right;
+}
+.code-blueprint-panel .code-overview-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: var(--node-fs-2xs, 9px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 0.5px solid;
+  border-radius: calc(var(--radius) - 4px);
+  padding: 1px var(--space-1);
+}
+.code-blueprint-panel .code-overview-kind-icon {
+  width: 10px;
+  height: 10px;
+}
+.code-blueprint-panel .code-overview-caption {
+  flex: 1;
+  min-width: 12rem;
+  font-size: var(--node-fs-tight, 11px);
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
 .code-studio-reassemble .shake-wrong {
   animation: shake 0.35s;
   border-color: var(--bad) !important;
@@ -744,6 +1022,10 @@ circle {
 /* Code Studio quiz phase. */
 .code-studio-quiz {
   overflow-y: auto;
+}
+.quiz-choice-headline {
+  min-width: 0;
+  flex: 0 1 auto;
 }
 /* Each question / the results screen fades in (covers restart + question advance). */
 .code-studio-quiz-step {
@@ -1059,6 +1341,8 @@ circle {
 
 /* ---- React Flow canvas (algo-canvas) ---- */
 .algo-canvas {
+  /* Keep in sync with NODE_UI_SCALE in nodeTokens.ts (STRUDEL_NODE_W / 320). */
+  --node-ui-scale: 1.25;
   --node-fs: var(--fs);
   --node-fs-sm: var(--fs-sm);
   --node-fs-xs: var(--fs-xs);
@@ -1071,6 +1355,21 @@ circle {
   --edge-stroke-width-active: 2.5;
   --xy-edge-stroke-default: var(--edge);
   --xy-attribution-background-color-default: transparent;
+}
+/* Problem + Example input — scale all in-node chrome to match Strudel node width (400 vs 320). */
+.algo-canvas .panel-node.panel-node--ui-scale {
+  --node-fs: calc(var(--fs) * var(--node-ui-scale));
+  --node-fs-sm: calc(var(--fs-sm) * var(--node-ui-scale));
+  --node-fs-xs: calc(var(--fs-xs) * var(--node-ui-scale));
+  --node-fs-2xs: calc(var(--fs-2xs) * var(--node-ui-scale));
+  --node-fs-tight: calc(var(--fs-tight) * var(--node-ui-scale));
+  --node-fs-title: calc(var(--fs-title) * var(--node-ui-scale));
+  --node-px: calc(var(--node-px, 10px) * var(--node-ui-scale));
+  --node-py: calc(var(--node-py, 7px) * var(--node-ui-scale));
+  --node-gap: calc(var(--node-gap, 6px) * var(--node-ui-scale));
+  --node-icon: calc(var(--node-icon, 16px) * var(--node-ui-scale));
+  --node-handle: calc(18px * var(--node-ui-scale));
+  --node-handle-offset: calc(10px * var(--node-ui-scale));
 }
 .algo-canvas .react-flow__controls {
   border-radius: var(--radius);
@@ -1257,6 +1556,16 @@ circle {
 }
 @media (prefers-reduced-motion: reduce) {
   .bp-note {
+    animation: none;
+  }
+  .code-blueprint-overlay {
+    animation: none;
+  }
+  .code-studio-reassemble .piece.placed-enter,
+  .code-studio-reassemble .next-slot-text,
+  .code-studio-reassemble .assembled-empty-chevron,
+  .code-studio-reassemble .assembled-complete-flash,
+  .code-studio-reassemble .shake-wrong {
     animation: none;
   }
 }

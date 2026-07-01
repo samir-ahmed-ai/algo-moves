@@ -7,17 +7,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Which traversal strategy does `depthSum` use?",
       "choices": [
         {
-          "label": "DFS recursion, increasing depth at each nested list",
+          "label": "DFS recursion — increasing depth at each nested list",
           "correct": true
         },
         {
-          "label": "BFS with a queue, processing one depth level per iteration"
+          "label": "BFS with a queue, processing — one depth level per iteration"
         },
         {
-          "label": "Iterative stack-based DFS"
+          "label": "Iterative stack-based DFS — btDepthSum calls itself"
         },
         {
-          "label": "Dynamic programming on depth levels"
+          "label": "Dynamic programming on depth levels — btDepthSum calls itself"
         }
       ],
       "explain": "`btDepthSum` calls itself recursively with `depth+1` when it encounters a nested list. This is DFS — the call stack encodes the nesting depth. BFS would require an explicit queue and process all items at one depth before moving deeper."
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What stops the recursion in `btDepthSum`?",
       "choices": [
         {
-          "label": "When `item.Integer` is true the function does not recurse — it accumulates the value and moves on",
+          "label": "When `item.Integer` is true — function does not recurse it",
           "correct": true
         },
         {
-          "label": "When `depth > maxDepth` a sentinel value is returned"
+          "label": "When `depth > maxDepth` — sentinel value is returned"
         },
         {
-          "label": "When the list slice is nil"
+          "label": "When the list slice — nil"
         },
         {
-          "label": "When `item.Val == 0`"
+          "label": "When `item.Val == 0` — There is no explicit depth-limit"
         }
       ],
       "explain": "There is no explicit depth-limit base case. Recursion stops naturally when every element in a list is an integer (not a nested list), because the `else` branch (which recurses) is never taken. An empty list also terminates the loop immediately."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Why does `depthSum` call `btDepthSum(list, 1)` with depth 1, not 0?",
       "choices": [
         {
-          "label": "The outermost list is at depth 1 per the problem definition; depth 0 would make top-level integers contribute 0",
+          "label": "The outermost list — depth 1 per the problem definition;",
           "correct": true
         },
         {
-          "label": "Depth 0 would cause integer overflow"
+          "label": "Depth 0 would cause integer — overflow"
         },
         {
-          "label": "The recursion decrements depth, so starting at 1 gives a maximum nesting of 1"
+          "label": "The recursion decrements — LeetCode #339 defines the"
         },
         {
-          "label": "Starting at 0 would skip the first element"
+          "label": "Starting at 0 would skip — the first element"
         }
       ],
       "explain": "LeetCode #339 defines the outermost list as depth 1. If depth started at 0, top-level integers would be multiplied by 0 and contribute nothing to the sum, giving a wrong answer."
@@ -87,17 +87,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What are the time and space complexities of `depthSum`?",
       "choices": [
         {
-          "label": "Time O(N), Space O(N) where N is the total number of NestedInteger nodes",
+          "label": "Time O(N) — Space O(N) where N is the total",
           "correct": true
         },
         {
-          "label": "Time O(N · D), Space O(D) where D is the maximum depth"
+          "label": "Time O(N · D), Space — O(D) where D is the maximum depth"
         },
         {
-          "label": "Time O(N^2), Space O(N)"
+          "label": "Time O(N^2), Space O(N) — Every NestedInteger node is"
         },
         {
-          "label": "Time O(N), Space O(1)"
+          "label": "Time O(N), Space O(1) — Every NestedInteger node is"
         }
       ],
       "explain": "Every NestedInteger node is visited exactly once, giving O(N) time. Space is O(N) in the worst case because the recursion stack can be as deep as N (a fully nested structure like `[[[[[1]]]]]` has depth N)."
@@ -114,7 +114,7 @@ export const bundle: PracticeBundle = {
           "label": "1 — the initial depth value"
         },
         {
-          "label": "A panic due to nil dereference"
+          "label": "A panic due to nil — dereference"
         },
         {
           "label": "-1 — a sentinel for empty input"

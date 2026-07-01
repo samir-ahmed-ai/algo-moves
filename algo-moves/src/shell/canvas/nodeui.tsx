@@ -21,6 +21,7 @@ import {
   type TextareaHTMLAttributes,
 } from 'react';
 import { ChevronDown, GripVertical, MoreVertical, Search } from 'lucide-react';
+import { getTag, type TagKind } from '../../content/tags';
 import { cn } from '../../lib/cn';
 
 export type HeaderDensity = 'compact' | 'ultra' | 'spacious';
@@ -231,6 +232,32 @@ const TONE_CHIP: Record<Tone, string> = {
   muted: 'bg-panel2 text-ink3',
 };
 
+const TAG_KIND_COLOR: Record<TagKind, string> = {
+  pattern: 'var(--accent)',
+  structure: 'var(--good)',
+  skill: 'var(--team2-stroke)',
+  meta: 'var(--text-3)',
+};
+
+/** Tag pill using canvas node tokens (scales with `.panel-node--ui-scale`). */
+export function NodeTagChip({ id }: { id: string }) {
+  const t = getTag(id);
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded bg-panel2 px-[calc(var(--node-px,10px)*0.5)] py-[calc(var(--node-py,7px)*0.35)] text-ink2',
+        nodeText.xs,
+      )}
+    >
+      <span
+        className="size-[calc(var(--node-icon,16px)*0.4)] shrink-0 rounded-full"
+        style={{ background: TAG_KIND_COLOR[t.kind] }}
+      />
+      {t.label}
+    </span>
+  );
+}
+
 export function Chip({
   children,
   tone = 'default',
@@ -245,7 +272,7 @@ export function Chip({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium leading-none',
+        'inline-flex items-center gap-1 rounded-full px-[calc(var(--node-px,10px)*0.5)] py-[calc(var(--node-py,7px)*0.35)] font-medium leading-none',
         nodeText.xs,
         mono && 'font-mono tabular-nums',
         TONE_CHIP[tone],
@@ -502,7 +529,7 @@ export function Row({
   children: ReactNode;
 }) {
   const cls = cn(
-    'flex items-center gap-2 border-l-2 px-2 py-1.5 text-left transition-colors',
+    'flex items-center gap-[var(--node-gap,6px)] border-l-2 px-[var(--node-px,10px)] py-[calc(var(--node-py,7px)*0.75)] text-left transition-colors',
     nodeText.sm,
     active ? 'border-l-accent bg-accentbg/60 text-accent' : 'border-l-transparent text-ink2',
     onClick && !active && 'hover:bg-panel2 hover:text-ink',
@@ -702,11 +729,19 @@ export function PanelHeaderGrip({ density = 'compact' }: { density?: HeaderDensi
     <span
       className={cn(
         'grid shrink-0 cursor-grab place-items-center text-ink3 active:cursor-grabbing',
-        density === 'spacious' ? 'h-4 w-3' : 'h-3.5 w-3',
+        density === 'spacious'
+          ? 'h-[calc(var(--node-icon,16px)*1.1)] w-[calc(var(--node-icon,16px)*0.65)]'
+          : 'h-[var(--node-icon,16px)] w-[calc(var(--node-icon,16px)*0.65)]',
       )}
       aria-hidden
     >
-      <GripVertical className={cn(density === 'spacious' ? 'h-3.5 w-3.5' : 'h-3 w-3')} />
+      <GripVertical
+        className={cn(
+          density === 'spacious'
+            ? 'h-[calc(var(--node-icon,16px)*1.1)] w-[calc(var(--node-icon,16px)*1.1)]'
+            : 'h-[var(--node-icon,16px)] w-[var(--node-icon,16px)]',
+        )}
+      />
     </span>
   );
 }
@@ -817,8 +852,11 @@ export function PanelHeaderAction({
       className={cn(
         'nodrag place-items-center rounded-[calc(var(--radius)-2px)] p-0.5 transition-colors disabled:opacity-30',
         label
-          ? cn('flex h-auto min-h-[18px] w-auto items-center gap-1 px-1.5', nodeText.xs)
-          : 'grid h-[18px] w-[18px]',
+          ? cn(
+              'flex h-auto min-h-[var(--node-icon,16px)] w-auto items-center gap-1 px-[calc(var(--node-px,10px)*0.5)]',
+              nodeText.xs,
+            )
+          : 'grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)]',
         variant === 'primary' &&
           (active ? 'bg-accent text-ink' : 'text-ink3 hover:bg-panel2 hover:text-ink'),
         variant === 'toggle' &&

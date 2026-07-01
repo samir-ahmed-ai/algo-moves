@@ -165,6 +165,7 @@ export function UnifiedLeftSidebar() {
     setActiveItemId,
     setSelectedNode,
     setActiveTopicId,
+    setActiveCourseId,
     goHome,
     canvasAdd,
     canvasZoom,
@@ -240,6 +241,7 @@ export function UnifiedLeftSidebar() {
     setActiveItemId(id);
     setSelectedNode(null);
     setActiveTopicId(null);
+    setActiveCourseId(null);
   };
 
   const expand = (focus?: 'catalog' | 'problems' | 'add') => {
@@ -371,7 +373,10 @@ export function UnifiedLeftSidebar() {
             {!searching && (
               <button
                 type="button"
-                onClick={() => setActiveTopicId(topic!.id)}
+                onClick={() => {
+                  setActiveCourseId(null);
+                  setActiveTopicId(topic!.id);
+                }}
                 title="Open the topic grid"
                 className={cn('mx-1 mt-1.5 flex min-h-[var(--row)] w-[calc(100%-8px)] items-center gap-1.5 rounded-md px-2 py-0 text-ink3 transition-colors hover:bg-panel2 hover:text-ink', chromeText.sm)}
               >

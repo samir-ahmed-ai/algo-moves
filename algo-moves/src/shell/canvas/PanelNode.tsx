@@ -3,7 +3,7 @@ import { Handle, NodeResizer, Position, useReactFlow, useUpdateNodeInternals, ty
 import { useWorkspace } from '../../lib/workspace';
 import { cn } from '../../lib/cn';
 import { layoutCap, layoutEstimate, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from './layout';
-import { nodeTier } from './nodeTokens';
+import { nodeTier, panelMinHeight } from './nodeTokens';
 import { handleDotClass, portHandleStyle } from './canvasHandles';
 import { useConnectedComponentsOptional } from '../../lib/ConnectedComponentsContext';
 import { panelBorderRadius, panelFill, panelOpacity, panelStroke } from './panelStyle';
@@ -44,6 +44,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const isCode = data.kind === 'code' || data.kind === 'scratch' || isReassemble || isRecall;
   const isProblem = data.kind === 'problem';
   const isExamples = data.kind === 'examples';
+  const uiScale = isProblem || isExamples;
   const showTargetHandle = !isProblem && !isExamples;
   const collapsed = !!data.collapsed;
   const showSourceHandle = !collapsed;
@@ -126,6 +127,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
       ref={panelRef}
       className={cn(
         'panel-node relative flex h-auto flex-col overflow-visible rounded-[var(--radius)] border bg-panel text-ink transition-[box-shadow,ring-color]',
+        uiScale && 'panel-node--ui-scale',
         isCode && !collapsed && 'min-h-0 flex-1',
         fitNodeWidth && !vizCanvas ? 'w-max' : 'w-full',
         vizCanvas && 'h-full min-h-0',
@@ -150,7 +152,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
           isVisible={selected}
           minWidth={fixedW ?? minPanelW}
           maxWidth={fixedW}
-          minHeight={150}
+          minHeight={panelMinHeight(data.kind ?? id)}
           handleClassName="!h-2 !w-2 !rounded-sm !border-accent !bg-panel"
         />
       )}

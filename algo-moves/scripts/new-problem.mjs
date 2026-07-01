@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Scaffold a new ProblemPlugin (#96).  Usage:
+// Scaffold a new ProblemPlugin. Usage:
 //   npm run new-problem -- <kebab-id> "Title" [--difficulty Easy|Medium|Hard] [--dry-run]
 // Creates src/plugins/<id>/index.tsx from a template and prints the two
 // registration steps. See src/plugins/README.md for the full contract.

@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Check, Lightbulb, RotateCcw, X } from 'lucide-react';
 import type { QuizQuestion } from '../../core/types';
 import type { QuizProgress } from '../../lib/codeStudioPhase';
+import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { cn } from '../../lib/cn';
+import { QUIZ_WRONG_MS } from '../../lib/quizConstants';
+import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
 import { chromeText } from '../chromeUi';
 
 export interface CodeStudioQuizProps {
@@ -61,13 +64,17 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
   const [done, setDone] = useState(() => initial?.done ?? false);
   const [picked, setPicked] = useState<number | null>(() => initial?.answered ?? null);
   const [marks, setMarks] = useState<boolean[]>([]);
+  const [shuffleSeed, setShuffleSeed] = useState(() => newQuizRunSeed());
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const q = quiz[i];
+  const rawQ = quiz[i];
+  const q = useMemo(
+    () => (rawQ ? shuffleQuizQuestion(rawQ, quizQuestionSeed(shuffleSeed, i)) : rawQ),
+    [rawQ, shuffleSeed, i],
+  );
   const answered = picked !== null;
   const isCorrect = answered && !!q?.choices[picked]?.correct;
   const last = i === total - 1;
-  const correctIdx = useMemo(() => (q ? q.choices.findIndex((c) => c.correct) : -1), [q]);
 
   const persist = useCallback(
     (next: Partial<QuizProgress>) => {
@@ -115,8 +122,21 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
     setDone(false);
     setPicked(null);
     setMarks([]);
+    setShuffleSeed(newQuizRunSeed());
     onProgress({ index: 0, score: 0, done: false, answered: null });
   }, [onProgress]);
+
+  const afterAnswer = useCallback(() => {
+    if (isCorrect) advance();
+    else restart();
+  }, [isCorrect, advance, restart]);
+
+  // Wrong answer: flash feedback, then restart the full run (same as mobile).
+  useEffect(() => {
+    if (!answered || isCorrect || done) return;
+    const t = window.setTimeout(restart, QUIZ_WRONG_MS);
+    return () => window.clearTimeout(t);
+  }, [answered, isCorrect, done, restart]);
 
   // Keep the panel focused so its keyboard shortcuts work without a click, and
   // recover focus after a choice button disables itself (which blurs to <body>).
@@ -159,12 +179,12 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
         }
       } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
         e.preventDefault();
-        advance();
+        afterAnswer();
       }
     };
     el.addEventListener('keydown', onKey);
     return () => el.removeEventListener('keydown', onKey);
-  }, [answered, done, q, pick, advance, onContinue, score, restart]);
+  }, [answered, done, q, pick, afterAnswer, onContinue, score, restart]);
 
   if (total === 0 || !q) return null;
 
@@ -266,7 +286,9 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
                         letter
                       )}
                     </span>
-                    <span className={cn('min-w-0 flex-1 leading-snug', chromeText.tight)}>{c.label}</span>
+                    <span className={cn('min-w-0 flex-1 leading-snug', chromeText.tight)}>
+                      <QuizChoiceLabel label={c.label} size="studio" state={state} />
+                    </span>
                   </button>
                 );
               })}
@@ -286,7 +308,7 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-bad">
-                      <X className="h-3 w-3" /> Not quite — {String.fromCharCode(65 + correctIdx)} is right
+                      <X className="h-3 w-3" /> Start over — get them all right
                     </span>
                   )}
                 </div>
@@ -296,10 +318,10 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
                 </p>
                 <button
                   type="button"
-                  onClick={advance}
+                  onClick={afterAnswer}
                   className={cn('nodrag mt-0.5 inline-flex w-fit items-center gap-0.5 self-end rounded-md bg-accent px-2.5 py-1 font-medium text-white transition-opacity hover:opacity-90', chromeText.sm)}
                 >
-                  {last ? 'See score' : 'Next'}
+                  {isCorrect ? (last ? 'See score' : 'Next') : 'Try again'}
                   <ArrowRight className="h-3 w-3" />
                 </button>
               </div>

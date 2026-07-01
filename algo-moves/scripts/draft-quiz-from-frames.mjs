@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// TODO #53 (partial): draft multiple-choice questions from frame captions + manifest meta.
+// Draft multiple-choice questions from frame captions + manifest meta (starter output only).
 // Human review required — output is a starter JSON, not wired to production.
 //
 // Usage:

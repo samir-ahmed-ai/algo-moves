@@ -16,6 +16,9 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { Check, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
+import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '../../lib/quizConstants';
+import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
 import { vizText } from './vizTokens';
 import { useCanvasActions } from '../../shell/canvas/CanvasContext';
 import { VizFitBox, MiniTabs } from '../../shell/canvas/nodeui';
@@ -25,17 +28,20 @@ import type { Frame, PluginViewProps, QuizQuestion, SampleInput } from '../../co
 
 export type { QuizChoice, QuizQuestion } from '../../core/types';
 
-const CORRECT_ADVANCE_MS = 450;
+const CORRECT_ADVANCE_MS = QUIZ_CORRECT_MS;
 const FINISH_FOCUS_MS = 700;
 
 export interface QuizConfig {
   /** Panel id used to focus self / advance the practice chain. Default 'quiz'. */
   id?: string;
+  /** Shuffle choice order on display. Default follows `QUIZ_SHUFFLE_BY_DEFAULT`. */
+  shuffle?: boolean;
 }
 
 /** Build a self-contained multiple-choice quiz panel from question data. */
 export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
   const panelId = config.id ?? 'quiz';
+  const shuffleChoices = config.shuffle ?? QUIZ_SHUFFLE_BY_DEFAULT;
 
   return function QuizPanel() {
     const { focusPanel, advancePractice } = useCanvasActions();
@@ -43,14 +49,27 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
     const [picked, setPicked] = useState<number | null>(null);
     const [score, setScore] = useState(0);
     const [done, setDone] = useState(false);
+    const [shuffleSeed, setShuffleSeed] = useState(() => newQuizRunSeed());
 
-    const q = quiz[i];
+    const rawQ = quiz[i];
+    const q = useMemo(
+      () => (rawQ ? shuffleQuizQuestion(rawQ, quizQuestionSeed(shuffleSeed, i), shuffleChoices) : rawQ),
+      [rawQ, shuffleSeed, i, shuffleChoices],
+    );
     const answered = picked !== null;
-    const correct = answered && picked !== null && q.choices[picked].correct;
+    const correct = answered && picked !== null && !!q?.choices[picked]?.correct;
     const last = i === quiz.length - 1;
 
+    const restartRun = () => {
+      setI(0);
+      setPicked(null);
+      setScore(0);
+      setDone(false);
+      setShuffleSeed(newQuizRunSeed());
+    };
+
     const pick = (idx: number) => {
-      if (answered) return;
+      if (answered || !q) return;
       focusPanel(panelId);
       setPicked(idx);
       if (q.choices[idx].correct) setScore((s) => s + 1);
@@ -65,8 +84,13 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
       setPicked(null);
     };
 
+    const afterAnswer = () => {
+      if (correct) next();
+      else restartRun();
+    };
+
     useEffect(() => {
-      if (picked === null || !q.choices[picked].correct) return;
+      if (picked === null || !q?.choices[picked]?.correct) return;
       const t = window.setTimeout(() => {
         if (i === quiz.length - 1) setDone(true);
         else {
@@ -75,7 +99,13 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
         }
       }, CORRECT_ADVANCE_MS);
       return () => window.clearTimeout(t);
-    }, [picked, i, q.choices]);
+    }, [picked, i, q?.choices]);
+
+    useEffect(() => {
+      if (picked === null || correct) return;
+      const t = window.setTimeout(restartRun, QUIZ_WRONG_MS);
+      return () => window.clearTimeout(t);
+    }, [picked, correct]);
 
     useEffect(() => {
       if (!done) return;
@@ -84,13 +114,10 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
     }, [done, advancePractice]);
 
     const restart = () => {
-      setI(0);
-      setPicked(null);
-      setScore(0);
-      setDone(false);
+      restartRun();
     };
 
-    if (done) {
+    if (done || !q) {
       const perfect = score === quiz.length;
       return (
         <div className="flex flex-col items-center gap-1.5 py-1">
@@ -168,21 +195,23 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
                     letter
                   )}
                 </span>
-                <span className={cn('min-w-0 flex-1 leading-snug', vizText.sm)}>{c.label}</span>
+                <span className={cn('min-w-0 flex-1 leading-snug', vizText.sm)}>
+                  <QuizChoiceLabel label={c.label} size="studio" state={state} />
+                </span>
               </button>
             );
           })}
         </div>
 
         {answered && !correct && (
-          <div className="flex items-end gap-1.5 border-l-2 border-accent pl-2">
+          <div className="flex items-end gap-1.5 border-l-2 border-bad pl-2">
             <p className={cn('min-w-0 flex-1 leading-snug text-ink2', vizText.xs)}>{q.explain}</p>
             <button
               type="button"
-              onClick={next}
+              onClick={afterAnswer}
               className={cn('inline-flex shrink-0 items-center gap-0.5 rounded-md bg-accent px-2 py-0.5 font-medium text-white hover:opacity-90', vizText['2xs'])}
             >
-              {last ? 'Score' : 'Next'}
+              Try again
               <ChevronRight className="h-3 w-3" />
             </button>
           </div>

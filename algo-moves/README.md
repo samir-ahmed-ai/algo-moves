@@ -9,11 +9,23 @@ Plugin-driven visual learning environment for coding interview prep. Each proble
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 
-**Contents:** [Why](#why-algo-moves) · [Problem library](#problem-library) · [Attribution](#references--attribution) · [Stack](#technology-stack) · [Quick start](#quick-start) · [Scripts](#npm-scripts) · [Architecture](#plugin-architecture) · [New plugin](#add-a-new-problem-plugin) · [Folder map](#folder-map)
+**Contents:** [Why](#why-algo-moves) · [Problem library](#problem-library) · [Attribution](#references--attribution) · [Stack](#technology-stack) · [Quick start](#quick-start) · [Scripts](#npm-scripts) · [Architecture](#plugin-architecture) · [New plugin](#add-a-new-problem-plugin) · [Folder map](#folder-map) · [Docs](#documentation)
 
 ---
 
+## Documentation
+
+| Guide | Description |
+|-------|-------------|
+| [**Plugin authoring**](src/plugins/README.md) | `ProblemPlugin` contract, vizKit, teaching stack |
+| [**Worked example**](src/plugins/EXAMPLE.md) | Native + imported plugin end-to-end |
+| [**Quiz & Code Studio**](docs/quiz-and-code-studio.md) | Choice labels, shuffle/restart, syntax highlighting, reassemble |
+| [**Design tokens**](src/design/README.md) | Typography and layout token hierarchy |
+| [**Future ideas**](TODO.md) | Trimmed roadmap — not yet built |
+
 ## Why Algo Moves?
+
+**Philosophy:** Algo Moves treats study like reinforcement learning — try, get feedback, repeat until correct. A wrong quiz answer restarts the full run (reshuffled choices); mastery unlocks at a 3-streak. See the [project README](../README.md#learn-the-way-ai-learns) for the full story and visuals.
 
 Most visualizers show you the *answer*. Algo Moves shows you the **process** — every pointer move, every push/pop, every relaxation — as a first-class move transcript you can replay, share, and drill.
 
@@ -76,7 +88,7 @@ Built as a modern React SPA with a strict plugin contract and a token-driven des
 | **Code editing** | CodeMirror 6 (+ `@replit/codemirror-vim`), autocomplete, One Dark theme |
 | **Graph canvas** | `@xyflow/react`, `@dagrejs/dagre` for layout |
 | **Utilities** | `html-to-image` (export), `lz-string` (compact share URLs) |
-| **Testing & CI scripts** | Vitest; `check:all` runs simulator coverage, typography lint, and token guards |
+| **Testing & CI scripts** | Vitest; `check:all` runs simulator coverage, typography lint, token guards, and quiz label quality |
 | **Reference solutions** | Go (`solution.go` embedded in generated manifests) |
 
 ---
@@ -90,7 +102,7 @@ npm run dev          # http://localhost:4321
 npm run typecheck    # tsc --noEmit
 npm run build        # production bundle
 npm test             # vitest + orphan check
-npm run check:all    # simulators, prep coverage, typography, tokens
+npm run check:all    # simulators, prep coverage, typography, tokens, quiz labels
 ```
 
 ### Import & scaffold scripts
@@ -113,7 +125,10 @@ npm run new-problem -- two-sum "Two Sum"         # scaffold a native plugin
 | `preview` | Preview production build |
 | `typecheck` | `tsc --noEmit` |
 | `test` | Vitest + orphan plugin check |
-| `check:all` | Simulators, prep coverage, typography, tokens |
+| `check:all` | Simulators, prep coverage, typography, tokens, quiz labels |
+| `check:quiz-labels` | Quiz choice format + integrity label tests |
+| `repair-quiz-labels` | Bulk-repair imported practice quiz labels |
+| `draft-quiz-from-frames -- <id>` | Draft quiz from recorder captions |
 | `import-prep` | Regenerate `prepManifest.ts` |
 | `scaffold-prep-sim -- <slug>` | Stub a new prep simulator |
 | `check-prep-sim-coverage` | Fail if any prep id lacks a simulator |
@@ -123,6 +138,8 @@ npm run new-problem -- two-sum "Two Sum"         # scaffold a native plugin
 | `check-plugin-typography` | Lint plugin UI for hardcoded font sizes |
 | `check:tokens` | Design-token guard |
 | `generate-themes` | Regenerate theme CSS from token source |
+| `repair-quiz-labels` | Fix imported quiz choice labels (`headline — detail` format) |
+| `migrate-viz-kit` | Batch-migrate plugin views to vizKit |
 
 ---
 

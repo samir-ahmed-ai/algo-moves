@@ -1,5 +1,5 @@
 import { Trophy, Boxes } from 'lucide-react';
-import { catalog, type Difficulty, type Item, type Topic } from '../content';
+import { catalog, type Course, type Difficulty, type Item, type Topic } from '../content';
 import { useWorkspace } from '../lib/workspace';
 import { useProgress, statFor } from '../lib/progress';
 import { cn } from '../lib/cn';
@@ -19,8 +19,8 @@ const RAIL: Record<Difficulty | 'unrated', string> = {
 
 /* ------------------------------------------------------------------ board */
 
-export function CategoryBoard({ topic }: { topic: Topic }) {
-  const { setActiveItemId, setActiveTopicId, setSelectedNode } = useWorkspace();
+export function CategoryBoard({ topic, course: courseProp }: { topic?: Topic; course?: Course }) {
+  const { setActiveItemId, setActiveTopicId, setActiveCourseId, setSelectedNode } = useWorkspace();
   const progress = useProgress();
 
   // Opening a problem from the grid also stages its topic so the top-left
@@ -28,11 +28,17 @@ export function CategoryBoard({ topic }: { topic: Topic }) {
   const openItem = (id: string) => {
     setActiveItemId(id);
     setActiveTopicId(null);
+    setActiveCourseId(null);
     setSelectedNode(null);
   };
 
-  const course = catalog.courses.find((c) => c.id === topic.courseId);
-  const flat = topic.items;
+  const course =
+    courseProp ?? (topic ? catalog.courses.find((c) => c.id === topic.courseId) : undefined);
+  const flat = courseProp
+    ? courseProp.topics.flatMap((t) => t.items).filter((i) => i.pluginId)
+    : (topic?.items ?? []);
+  const heading = courseProp?.title ?? topic?.title ?? '';
+  const blurb = courseProp?.summary ?? topic?.summary;
   const total = flat.length;
   const mastered = flat.filter((it) => statFor(progress, it.id).mastered).length;
   const easy = flat.filter((it) => it.difficulty === 'Easy').length;
@@ -135,8 +141,8 @@ export function CategoryBoard({ topic }: { topic: Topic }) {
             <Label className="font-mono tracking-[0.12em]">
               {course ? `${course.title} · ` : ''}{total} {total === 1 ? 'PROBLEM' : 'PROBLEMS'}
             </Label>
-            <h2 className={cn('truncate font-medium text-ink', chromeText.base)}>{topic.title}</h2>
-            {topic.summary && <p className={cn('mt-0.5 line-clamp-1 text-ink2', chromeText.tight)}>{topic.summary}</p>}
+            <h2 className={cn('truncate font-medium text-ink', chromeText.base)}>{heading}</h2>
+            {blurb && <p className={cn('mt-0.5 line-clamp-1 text-ink2', chromeText.tight)}>{blurb}</p>}
           </div>
           {total > 0 && (
             <div className="relative ml-auto flex shrink-0 items-center gap-2">

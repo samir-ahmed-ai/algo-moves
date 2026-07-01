@@ -1,6 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getPlugin } from '../core/registry';
 import { plugins } from './index';
+import { quizLabelIssues } from '../lib/quizChoiceFormat';
+import { defaultPrepQuiz } from './imported/prepQuiz';
+import { PREP_DATA } from './imported/prepManifest';
 import { curatedCourses } from '../content/courses';
 import { buildCatalog } from '../content/catalog';
 import { mergeCourses } from '../content/mergeCourses';
@@ -204,6 +207,36 @@ describe('visualizer View structure', () => {
   it('SceneView fallback uses board-area', () => {
     expect(prepSceneSource).toBeDefined();
     expect(prepSceneSource!).toMatch(/className="board-area/);
+  });
+});
+
+describe('quiz choice labels use headline — detail format', () => {
+  const bad: string[] = [];
+  for (const plugin of plugins) {
+    for (const q of plugin.quiz ?? []) {
+      for (const c of q.choices) {
+        const issue = quizLabelIssues(c.label);
+        if (issue) bad.push(`${plugin.meta.id} · ${q.id}: ${c.label} (${issue.reason})`);
+      }
+    }
+  }
+  it('every plugin quiz choice has quality headline — detail labels', () => {
+    expect(bad, bad.slice(0, 12).join('\n')).toEqual([]);
+  });
+});
+
+describe('defaultPrepQuiz labels', () => {
+  const bad: string[] = [];
+  for (const p of PREP_DATA) {
+    for (const q of defaultPrepQuiz(p)) {
+      for (const c of q.choices) {
+        const issue = quizLabelIssues(c.label);
+        if (issue) bad.push(`${p.id} · ${q.id}: ${c.label} (${issue.reason})`);
+      }
+    }
+  }
+  it('auto-generated prep quiz choices meet label quality rules', () => {
+    expect(bad, bad.slice(0, 8).join('\n')).toEqual([]);
   });
 });
 

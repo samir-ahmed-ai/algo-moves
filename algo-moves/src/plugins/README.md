@@ -51,6 +51,8 @@ to shell built-ins. **Code Studio** reads the same `quiz` and `codePieces` for i
 
 The **Practice tab quiz** and **Code Studio quiz phase** share one data source (`plugin.quiz` / `practice.quiz`) but serve different UX: the tab is inline multiple-choice with immediate feedback; Code Studio runs the same questions as a gated phase before reassemble/recall. Edit `practice.ts` (or imported `practice/items/<id>.ts`) once — both surfaces stay in sync.
 
+**Quiz label format:** use `headline — short detail` on every choice (e.g. `O(n!) — branching narrows each deeper row`). See [`docs/quiz-and-code-studio.md`](../../docs/quiz-and-code-studio.md) for rendering, shuffle, restart-on-wrong, and integrity rules.
+
 ## Shared teaching factories
 
 | Module | Role |

@@ -30,8 +30,11 @@
     "check-plugin-typography": "node scripts/lint-plugin-typography.mjs",
     "check-simulators": "node scripts/check-simulators.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
-    "check:all": "npm run check-simulators && npm run check-prep-sim-coverage && npm run check-plugin-typography && npm run check:tokens",
+    "check:quiz-labels": "vitest run src/lib/quizChoiceFormat.test.ts src/plugins/integrity.test.ts",
+    "check:all": "npm run check-simulators && npm run check-prep-sim-coverage && npm run check-plugin-typography && npm run check:tokens && npm run check:quiz-labels",
     "migrate-viz-kit": "node scripts/migrate-viz-kit.mjs",
+    "repair-quiz-labels": "node scripts/repair-quiz-labels.mjs",
+    "draft-quiz-from-frames": "node scripts/draft-quiz-from-frames.mjs",
     "test": "vitest run && npm run check-orphans"
   },
   "dependencies": {

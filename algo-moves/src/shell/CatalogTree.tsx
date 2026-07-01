@@ -14,17 +14,18 @@ function matchesSearch(query: string, ...fields: (string | undefined)[]): boolea
 }
 
 export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
-  const { activeItemId, activeTopicId, setActiveTopicId } = useWorkspace();
+  const { activeItemId, activeTopicId, activeCourseId, setActiveTopicId, setActiveCourseId } = useWorkspace();
 
   // Highlight the topic that owns the open problem even when no grid is open.
   const currentTopicId = activeTopicId ?? catalog.breadcrumb(activeItemId).topic?.id ?? '';
-  const activeCourseId =
+  const activeCourseFromTopic =
     catalog.topics.find((t) => t.id === currentTopicId)?.courseId ?? catalog.courses[0]?.id ?? '';
-  const [openCourseId, setOpenCourseId] = useState(activeCourseId);
+  const openCourseId = activeCourseId ?? activeCourseFromTopic;
+  const [expandedCourseId, setExpandedCourseId] = useState(openCourseId);
 
   useEffect(() => {
-    if (activeCourseId) setOpenCourseId(activeCourseId);
-  }, [activeCourseId]);
+    if (openCourseId) setExpandedCourseId(openCourseId);
+  }, [openCourseId]);
 
   const searching = !!searchQuery.trim();
 
@@ -71,7 +72,10 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
                 <button
                   key={topic.id}
                   type="button"
-                  onClick={() => setActiveTopicId(topic.id)}
+                  onClick={() => {
+                    setActiveCourseId(null);
+                    setActiveTopicId(topic.id);
+                  }}
                   title={`Open the ${topic.title} grid`}
                   className={cn(
                     'group/topic flex w-full min-h-[var(--row)] items-center gap-2 py-0 pl-[26px] pr-[var(--hpad)] text-left transition-colors',
@@ -113,8 +117,8 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
     <Accordion.Root
       type="single"
       collapsible
-      value={openCourseId}
-      onValueChange={(v) => setOpenCourseId(v)}
+      value={expandedCourseId}
+      onValueChange={(v) => setExpandedCourseId(v)}
       className="py-1"
     >
       {courseItems}

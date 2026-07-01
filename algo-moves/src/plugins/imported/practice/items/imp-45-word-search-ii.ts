@@ -7,17 +7,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Word Search II combines two core techniques. Which pair best describes this solution?",
       "choices": [
         {
-          "label": "Trie + DFS backtracking on the board",
+          "label": "Trie + DFS backtracking — the board",
           "correct": true
         },
         {
-          "label": "Hash set + BFS level-order traversal"
+          "label": "Hash set + BFS level-order — traversal"
         },
         {
-          "label": "Trie + dynamic programming over substrings"
+          "label": "Trie + dynamic programming — substrings"
         },
         {
-          "label": "Binary search + greedy cell selection"
+          "label": "Binary search + greedy cell — selection"
         }
       ],
       "explain": "The code builds a `trieNode` trie from the word list and then runs DFS (`btWordSearchII`) from every cell, using the trie to prune paths that can't complete any word. BFS or DP would not naturally handle the 4-directional path constraint."
@@ -27,7 +27,7 @@ export const bundle: PracticeBundle = {
       "prompt": "In `btWordSearchII`, the current cell is in bounds and not yet visited. Which trie-based condition then makes the DFS return immediately, before marking the cell or recursing into neighbors?",
       "choices": [
         {
-          "label": "`child == nil` — the trie has no node for the current character, so no word continues this prefix",
+          "label": "`child == nil` the trie — has no node for the current",
           "correct": true
         },
         {
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "After a word is added to `res`, the code sets `child.word = \"\"`. What is the purpose of this step?",
       "choices": [
         {
-          "label": "Prevents the same word from being added to results more than once",
+          "label": "Prevents the same word — being added to results more than once",
           "correct": true
         },
         {
-          "label": "Frees memory by removing the word from the trie"
+          "label": "Frees memory by removing — word from the trie"
         },
         {
-          "label": "Signals to the caller that this node is now a dead end"
+          "label": "Signals to the caller — this node is now a dead end"
         },
         {
-          "label": "Resets the trie so a second DFS pass starts clean"
+          "label": "Resets the trie — second DFS pass starts clean"
         }
       ],
       "explain": "The same word could be found via different starting cells or paths. Clearing `child.word` after the first match ensures `*res = append(*res, child.word)` is only triggered once. The trie structure itself (children pointers) is not removed."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "How does the code mark a cell as visited during a single DFS path, and how is the mark undone?",
       "choices": [
         {
-          "label": "Sets `board[r][c] = '#'` before recursing; restores `board[r][c] = ch` after all four recursive calls return",
+          "label": "Sets `board[r][c] = '#'` — recursing; restores `board[r][c] =",
           "correct": true
         },
         {
-          "label": "Stores `(r,c)` in a separate visited set; removes it after returning"
+          "label": "Stores `(r,c)` in a separate — visited set; removes it after"
         },
         {
-          "label": "Sets `board[r][c] = 0`; restores it with the saved `ch` value"
+          "label": "Sets `board[r][c] = 0`; restores — it with the saved `ch` value"
         },
         {
-          "label": "Passes a boolean visited matrix and flips the bit before and after recursion"
+          "label": "Passes a boolean visited matrix — and flips the bit before and after"
         }
       ],
       "explain": "The in-place sentinel `'#'` (saved character -> overwrite -> recurse -> restore) avoids allocating an extra visited structure. Using `0` instead of `'#'` would work only if `'0'` is not a valid board character, but the actual code explicitly uses `'#'`."
@@ -87,17 +87,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What is the time complexity of `findWords` as annotated in the problem?",
       "choices": [
         {
-          "label": "O(m·n·3^L) where L is the length of the longest word",
+          "label": "O(m·n·3^L) where L — length of the longest word",
           "correct": true
         },
         {
-          "label": "O(m·n·4^L)"
+          "label": "O(m·n·4^L) — The factor is 3^L, not 4^L,"
         },
         {
-          "label": "O(W·L + m·n·L) where W is the number of words"
+          "label": "O(W·L + m·n·L) where W — is the number of words"
         },
         {
-          "label": "O((m·n)^2)"
+          "label": "O((m·n)^2) — The factor is 3^L, not 4^L,"
         }
       ],
       "explain": "The factor is 3^L, not 4^L, because at each DFS step the cell we came from is already marked `'#'`, so at most 3 (not 4) neighbors are valid. O(4^L) is a tempting overcount that ignores this backtracking constraint."
@@ -114,10 +114,10 @@ export const bundle: PracticeBundle = {
           "label": "`child.children` is all-nil — a leaf node with no children"
         },
         {
-          "label": "A separate boolean `isEnd` field on `trieNode`"
+          "label": "A separate boolean `isEnd` field — on `trieNode`"
         },
         {
-          "label": "The node's depth equals the expected word length"
+          "label": "The node's depth equals — expected word length"
         }
       ],
       "explain": "The `trieNode` struct has no `isEnd` bool; the code repurposes the `word` field itself: non-empty means a word ends here. Leaf detection (no children) would fail for words that are prefixes of other words."

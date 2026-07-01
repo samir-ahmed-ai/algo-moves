@@ -2,15 +2,13 @@ import { useLayoutEffect, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { useWorkspace } from '../../../lib/workspace';
 import { useCanvasActions } from '../CanvasContext';
-import { layoutEstimate, layoutVisualizeCanvas } from '../layout';
+import { layoutVisualizeCanvas } from '../layout';
+import { layoutEstimate, panelMinHeight } from '../nodeTokens';
 import { setMeasuredHeight } from '../measuredCache';
 import type { PanelFlowNode } from './panelTypes';
 
-const FIT_MIN_H = 150;
-const FIT_MIN_H_EXAMPLES = 90;
-
 function fitMinHeight(kind: string): number {
-  return kind === 'examples' ? FIT_MIN_H_EXAMPLES : FIT_MIN_H;
+  return panelMinHeight(kind);
 }
 
 export function useFitContentSize(id: string, kind: string, collapsed: boolean, fitWidth: boolean, enabled: boolean) {

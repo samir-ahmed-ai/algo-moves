@@ -7,17 +7,17 @@ export const bundle: PracticeBundle = {
       "prompt": "Which technique does Clone Graph use to traverse and copy the graph?",
       "choices": [
         {
-          "label": "DFS recursion with a memoization map",
+          "label": "DFS recursion with a memoization — map",
           "correct": true
         },
         {
-          "label": "BFS with a queue and a visited set"
+          "label": "BFS with a queue — a visited set"
         },
         {
-          "label": "Iterative DFS with an explicit stack"
+          "label": "Iterative DFS with an explicit — stack"
         },
         {
-          "label": "Topological sort via Kahn's algorithm"
+          "label": "Topological sort via Kahn's — btCloneGraph calls itself"
         }
       ],
       "explain": "`btCloneGraph` calls itself recursively on each neighbor — that is DFS. The `memo` map prevents reprocessing and cycles, playing the role that a visited set does in iterative BFS."
@@ -27,17 +27,17 @@ export const bundle: PracticeBundle = {
       "prompt": "In `btCloneGraph`, when is the new copy node stored in `memo`?",
       "choices": [
         {
-          "label": "Immediately after allocating the copy, before recursing into neighbors",
+          "label": "Immediately after allocating — recursing into neighbors",
           "correct": true
         },
         {
-          "label": "After all neighbors have been recursively cloned"
+          "label": "After all neighbors — recursively cloned"
         },
         {
-          "label": "At the start of the function, before allocating the copy"
+          "label": "At the start of the function — before allocating the copy"
         },
         {
-          "label": "Only when the node has no neighbors"
+          "label": "Only when the node — no neighbors"
         }
       ],
       "explain": "`memo[n] = copy` appears right after `copy := &GraphNode{Label: n.Label}` and before the neighbor loop. Storing it early is critical — it breaks cycles by returning the already-created copy when the same node is encountered again."
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What prevents infinite recursion on a graph with cycles?",
       "choices": [
         {
-          "label": "The `if c, ok := memo[n]; ok { return c }` check at the top",
+          "label": "The `if c, ok := — memo[n]; ok { return c }` check at",
           "correct": true
         },
         {
-          "label": "The `if src == nil { return nil }` nil guard in `cloneGraph`"
+          "label": "The `if src == nil — { return nil }` nil guard in"
         },
         {
-          "label": "The range over `n.Neighbors` terminates once all neighbors are visited"
+          "label": "The range over `n.Neighbors` — once all neighbors are visited"
         },
         {
-          "label": "Go's garbage collector automatically breaks reference cycles"
+          "label": "Go's garbage collector — reference cycles"
         }
       ],
       "explain": "On the second visit to any node, `memo[n]` already holds its clone and is returned immediately, cutting the recursion short. Without this check, two mutually-referring nodes would recurse infinitely."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What does the `memo` map store?",
       "choices": [
         {
-          "label": "A mapping from original *GraphNode pointer to its cloned *GraphNode",
+          "label": "A mapping from original *GraphNode — pointer to its cloned *GraphNode",
           "correct": true
         },
         {
-          "label": "A mapping from node Label (int) to its cloned *GraphNode"
+          "label": "A mapping from node Label — (int) to its cloned *GraphNode"
         },
         {
-          "label": "A set of already-visited original node pointers"
+          "label": "A set of already-visited original — node pointers"
         },
         {
-          "label": "A mapping from node Label to a boolean visited flag"
+          "label": "A mapping from node Label — to a boolean visited flag"
         }
       ],
       "explain": "The map is typed `map[*GraphNode]*GraphNode`, keyed by the original pointer so two nodes with the same label are never confused. Keying by label would be wrong for graphs where labels aren't unique."
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "How does the clone preserve each node's neighbor relationships?",
       "choices": [
         {
-          "label": "It appends `btCloneGraph(nb, memo)` for each original neighbor `nb`, in the same order",
+          "label": "It appends — The loop for _, nb := range n",
           "correct": true
         },
         {
-          "label": "It copies the original `Neighbors` slice header directly into the copy"
+          "label": "It copies the original `Neighbors` — slice header directly into the copy"
         },
         {
-          "label": "It sorts neighbors by Label before linking them"
+          "label": "It sorts neighbors by Label — before linking them"
         },
         {
-          "label": "It links neighbors only after the entire graph is cloned in a second pass"
+          "label": "It links neighbors — the entire graph is cloned in a"
         }
       ],
       "explain": "The loop `for _, nb := range n.Neighbors { copy.Neighbors = append(copy.Neighbors, btCloneGraph(nb, memo)) }` builds the copy's neighbor list by recursively cloning each original neighbor in order, so the cloned graph mirrors the original's structure."

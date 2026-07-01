@@ -25,6 +25,7 @@ export function Workspace() {
     activeItemId,
     setActiveItemId,
     activeTopicId,
+    activeCourseId,
     mode,
     setMode,
     theme,
@@ -120,8 +121,9 @@ export function Workspace() {
   const frame = baseFrames[player.index] ?? baseFrames[0];
   const ready = !!plugin && !!frame;
 
-  // A topic click in the explorer opens its overview grid instead of the single-problem canvas.
-  const boardTopic = activeTopicId ? catalog.getTopic(activeTopicId) : undefined;
+  // A course or topic click in the explorer opens its problem grid instead of the single-problem canvas.
+  const boardCourse = activeCourseId ? catalog.courses.find((c) => c.id === activeCourseId) : undefined;
+  const boardTopic = !boardCourse && activeTopicId ? catalog.getTopic(activeTopicId) : undefined;
 
   // Keyboard transport: ← / → step, space play/pause, Home/End jump.
   useEffect(() => {
@@ -241,7 +243,9 @@ export function Workspace() {
       {!present && <UnifiedLeftSidebar />}
 
       <div className="relative min-h-0 min-w-0 flex-1 h-full">
-        {boardTopic ? (
+        {boardCourse ? (
+          <CategoryBoard course={boardCourse} />
+        ) : boardTopic ? (
           <CategoryBoard topic={boardTopic} />
         ) : ready ? (
           mode === 'learn' ? (

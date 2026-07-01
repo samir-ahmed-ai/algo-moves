@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
+import { QuizChoiceLabel } from '../../../../components/QuizChoiceLabel';
+import { COMPLEXITY_POOL, formatComplexityChoice } from '../../../../lib/complexityHints';
 import { patternsForTags } from '../../../../content';
 import { useCanvasStatic } from '../../CanvasContext';
 import { Btn, EmptyState, Hint, Option, Section } from '../../nodeui';
@@ -12,28 +14,29 @@ export function ComplexityPanelBody() {
   const answer = cards.map((c) => c.complexity.match(/O\([^)]*\)/)?.[0]).find(Boolean) ?? null;
   const [round, setRound] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
-  const POOL = ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)', 'O(n²)', 'O(2ⁿ)', 'O(V+E)'];
   const choices = useMemo(() => {
     if (!answer) return [];
-    const distract = shuffleSeeded(POOL.filter((p) => p !== answer), round).slice(0, 3);
-    return shuffleSeeded([answer, ...distract], round + 1);
+    const distract = shuffleSeeded(COMPLEXITY_POOL.filter((p) => p !== answer), round).slice(0, 3);
+    return shuffleSeeded([answer, ...distract], round + 1).map(formatComplexityChoice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answer, round]);
+  const formattedAnswer = answer ? formatComplexityChoice(answer) : null;
   if (!answer) {
     return (
       <EmptyState icon={<TrendingUp className="h-5 w-5" />} title="No complexity data" hint="This problem's tags have no pattern card yet." />
     );
   }
   const answered = picked !== null;
+  const wrong = answered && picked !== formattedAnswer;
   return (
     <div className="nodrag flex flex-col gap-2">
       <Section title={`Complexity of ${item.title}`} bordered={false}>
         <div className="flex flex-col gap-1.5">
           {choices.map((c) => {
-            const state = !answered ? 'idle' : c === answer ? 'correct' : c === picked ? 'wrong' : 'dim';
+            const state = !answered ? 'idle' : c === formattedAnswer ? 'correct' : c === picked ? 'wrong' : 'dim';
             return (
-              <Option key={c} state={state} disabled={answered} onClick={() => setPicked(c)}>
-                {c}
+              <Option key={c} state={state} disabled={answered} mono={false} onClick={() => setPicked(c)}>
+                <QuizChoiceLabel label={c} size="studio" state={state} />
               </Option>
             );
           })}
@@ -42,6 +45,7 @@ export function ComplexityPanelBody() {
       {answered && (
         <div className="flex flex-col gap-2">
           <Hint>{cards.find((c) => c.complexity.includes(answer))?.complexity}</Hint>
+          {wrong && <p className="text-[12px] text-bad">Start over — pick the right complexity.</p>}
           <Btn
             variant="primary"
             size="sm"
@@ -51,7 +55,7 @@ export function ComplexityPanelBody() {
             }}
             className="self-start"
           >
-            Shuffle ›
+            {wrong ? 'Try again ›' : 'Shuffle ›'}
           </Btn>
         </div>
       )}

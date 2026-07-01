@@ -27,17 +27,17 @@ export const bundle: PracticeBundle = {
       "prompt": "In `makeChange`, why is the outer loop over coins and the inner loop over amounts (not vice versa)?",
       "choices": [
         {
-          "label": "To count combinations (not permutations) — each coin denomination is fixed before filling amounts",
+          "label": "To count combinations — coin denomination is fixed",
           "correct": true
         },
         {
-          "label": "Because it produces the minimum number of coins rather than all combinations"
+          "label": "Because it produces the minimum — number of coins rather than all"
         },
         {
-          "label": "Loop order doesn't matter; both give the same count"
+          "label": "Loop order doesn't matter; — give the same count"
         },
         {
-          "label": "To handle the unbounded property; 0/1 knapsack would use the opposite order"
+          "label": "To handle the unbounded property; — 0/1 knapsack would use the opposite"
         }
       ],
       "explain": "With outer=coins, each coin is 'considered once' before moving on. This prevents counting [1,2] and [2,1] as different. Swapping the loops would count ordered sequences (permutations), giving a larger wrong answer."
@@ -47,17 +47,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What does `dp[i] += dp[i-coin]` mean in the context of counting combinations?",
       "choices": [
         {
-          "label": "Every combination that sums to i-coin can be extended by one more `coin` to reach i",
+          "label": "Every combination that sums — i-coin can be extended by one more",
           "correct": true
         },
         {
-          "label": "dp[i] becomes the minimum of dp[i] and dp[i-coin]+1"
+          "label": "dp[i] becomes the minimum — dp[i] and dp[i-coin]+1"
         },
         {
-          "label": "dp[i-coin] is subtracted from dp[i] to avoid double-counting"
+          "label": "dp[i-coin] is subtracted from dp[i] — to avoid double-counting"
         },
         {
-          "label": "The coin is removed from the set after being used once"
+          "label": "The coin is removed — the set after being used once"
         }
       ],
       "explain": "Adding one copy of `coin` to every arrangement counted in `dp[i-coin]` gives new arrangements for `dp[i]`. Accumulating with `+=` sums all such contributions across coins."
@@ -67,17 +67,17 @@ export const bundle: PracticeBundle = {
       "prompt": "The code sets `dp[0] = 1` before the loops. What does this represent?",
       "choices": [
         {
-          "label": "There is exactly one way to make amount 0: use no coins",
+          "label": "There is exactly one way — to make amount 0: use no coins",
           "correct": true
         },
         {
-          "label": "The first coin always contributes one combination"
+          "label": "The first coin always contributes — one combination"
         },
         {
-          "label": "It prevents division-by-zero in the recurrence"
+          "label": "It prevents division-by-zero — recurrence"
         },
         {
-          "label": "It accounts for the empty-string edge case when n == 0"
+          "label": "It accounts for the empty-string — edge case when n == 0"
         }
       ],
       "explain": "`dp[0] = 1` is the combinatorial base case: the empty selection sums to 0. Without it, every `dp[i]` would start at 0 and remain 0 — nothing could bootstrap."
@@ -97,7 +97,7 @@ export const bundle: PracticeBundle = {
           "label": "`len(coins) == 0` — iterating an empty slice causes a nil panic"
         },
         {
-          "label": "All three are equally necessary"
+          "label": "All three are equally necessary — In Go, make([]int, n+1) with"
         }
       ],
       "explain": "In Go, `make([]int, n+1)` with n=-1 gives length 0 and then `dp[0] = 1` would panic (index out of range). The `n==0` return is a shortcut but the loop would correctly return dp[0]=1 anyway; `len(coins)==0` just skips the loop returning dp[n]=0 correctly."
@@ -107,17 +107,17 @@ export const bundle: PracticeBundle = {
       "prompt": "What are the time and space complexities of `makeChange`?",
       "choices": [
         {
-          "label": "O(amount * len(coins)) time, O(amount) space",
+          "label": "O(amount * len(coins)) time space — Two nested loops: outer runs",
           "correct": true
         },
         {
-          "label": "O(amount²) time, O(amount²) space"
+          "label": "O(amount²) time, O(amount²) space — Two nested loops: outer runs"
         },
         {
-          "label": "O(2^len(coins)) time, O(len(coins)) space"
+          "label": "O(2^len(coins)) time, O(len(coins)) — Two nested loops: outer runs"
         },
         {
-          "label": "O(amount * len(coins)) time, O(amount * len(coins)) space"
+          "label": "O(amount * len(coins)) time * — len(coins)) space"
         }
       ],
       "explain": "Two nested loops: outer runs len(coins) times, inner runs up to amount times each. The dp array has size n+1 = O(amount). No 2-D table is needed."

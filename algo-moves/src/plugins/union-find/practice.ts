@@ -6,10 +6,10 @@ export const quiz: QuizQuestion[] = [
     id: 'category',
     prompt: 'What data structure powers this algorithm?',
     choices: [
-      { label: 'A disjoint-set (union-find) tracking which nodes are connected', correct: true },
-      { label: 'A min-heap of edges keyed by weight' },
-      { label: 'An adjacency matrix scanned every step' },
-      { label: 'A hash map from node to its full component list' },
+      { label: 'Union-find — tracks connected components', correct: true },
+      { label: 'Min-heap — sorts edges by weight', },
+      { label: 'Adjacency matrix — rescans every step', },
+      { label: 'Full component lists — heavy updates', },
     ],
     explain:
       "Kruskal sorts edges by weight, but the connectivity test — \"are these two endpoints already joined?\" — is answered by a disjoint-set forest, which is what union-find is.",
@@ -18,10 +18,10 @@ export const quiz: QuizQuestion[] = [
     id: 'find-returns',
     prompt: 'What does find(x) return?',
     choices: [
-      { label: 'The representative root of the set that x belongs to', correct: true },
-      { label: 'The direct parent stored in parent[x]' },
-      { label: 'The number of nodes in x’s set' },
-      { label: 'True if x has been visited' },
+      { label: 'Set root — canonical representative', correct: true },
+      { label: 'Direct parent — one hop only', },
+      { label: 'Set size — different query', },
+      { label: 'Visited flag — not what find returns', },
     ],
     explain:
       'find follows parent pointers up to the node that is its own parent — the canonical representative. Two nodes are in the same set exactly when their roots are equal.',
@@ -30,10 +30,10 @@ export const quiz: QuizQuestion[] = [
     id: 'union-does',
     prompt: 'What does union(a, b) actually do?',
     choices: [
-      { label: 'Finds both roots and, if different, points one root at the other', correct: true },
-      { label: 'Sets parent[a] = b unconditionally' },
-      { label: 'Merges the two adjacency lists' },
-      { label: 'Deletes one of the two nodes' },
+      { label: 'Link roots — merge if different', correct: true },
+      { label: 'parent[a]=b — skips find step', },
+      { label: 'Merge adj lists — wrong structure', },
+      { label: 'Delete a node — not union', },
     ],
     explain:
       'Only the roots are linked, not the original nodes. If the roots are already equal the sets are merged already, so union does nothing.',
@@ -42,10 +42,10 @@ export const quiz: QuizQuestion[] = [
     id: 'cycle-detect',
     prompt: 'How does Kruskal detect that an edge (u, v) would create a cycle?',
     choices: [
-      { label: 'find(u) == find(v) — both endpoints already share a root before union', correct: true },
-      { label: 'The edge weight is larger than every edge in the MST so far' },
-      { label: 'The MST already has n edges' },
-      { label: 'u and v are adjacent in the original graph' },
+      { label: 'find(u)==find(v) — already connected', correct: true },
+      { label: 'Weight too large — not cycle test', },
+      { label: 'n edges in MST — stop rule only', },
+      { label: 'Adjacent in graph — not sufficient', },
     ],
     explain:
       'If two endpoints are already in the same set, a path between them exists, so adding the edge closes a cycle. union returns false (or is skipped) in that case.',
@@ -54,10 +54,10 @@ export const quiz: QuizQuestion[] = [
     id: 'optimisations',
     prompt: 'What do path compression and union by rank buy you?',
     choices: [
-      { label: 'They keep the trees nearly flat so find stays fast', correct: true },
-      { label: 'They sort the edges faster' },
-      { label: 'They remove the need to store edge weights' },
-      { label: 'They make union O(log E) but find O(1)' },
+      { label: 'Flat trees — fast find/union', correct: true },
+      { label: 'Faster edge sort — unrelated', },
+      { label: 'Drop edge weights — still needed', },
+      { label: 'find O(1) strict — amortized only', },
     ],
     explain:
       'Compression re-points nodes toward the root during find; union by rank attaches the shorter tree under the taller one. Together they bound tree height, keeping operations near-constant.',
@@ -66,10 +66,10 @@ export const quiz: QuizQuestion[] = [
     id: 'complexity',
     prompt: 'With both optimisations, what is the amortized cost of find / union?',
     choices: [
-      { label: 'O(α(n)) — inverse Ackermann, effectively constant', correct: true },
-      { label: 'O(log n) per operation' },
-      { label: 'O(n) per operation' },
-      { label: 'O(1) in the strict (non-amortized) sense' },
+      { label: 'O(α(n)) — effectively constant', correct: true },
+      { label: 'O(log n) — too pessimistic', },
+      { label: 'O(n) — naive linking', },
+      { label: 'O(1) strict — needs amortized analysis', },
     ],
     explain:
       'Path compression plus union by rank gives an amortized bound of the inverse Ackermann function α(n), which is ≤ 4 for any input you will ever run — so it behaves as constant. Sorting the edges, O(E log E), still dominates Kruskal overall.',

@@ -49,3 +49,8 @@ export function buildEditorTheme(_isDark: boolean): Extension[] {
 
   return [chrome, syntaxHighlighting(buildSyntaxHighlight())];
 }
+
+/** Syntax token colors only — for read-only inline snippets (no editor chrome). */
+export function syntaxHighlightExtension(): Extension {
+  return syntaxHighlighting(buildSyntaxHighlight());
+}
