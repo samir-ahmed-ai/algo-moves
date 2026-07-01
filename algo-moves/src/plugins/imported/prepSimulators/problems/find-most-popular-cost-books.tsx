@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
@@ -28,23 +29,12 @@ interface BooksState {
 function record({ books }: BooksInput): Frame<BooksState>[] {
   const costs = books.map((b) => b.cost);
   const ids = books.map((b) => b.id);
-  const frames: Frame<BooksState>[] = [];
-
   const costCount = new Map<number, number>();
   let bestCost = 0;
   let bestCnt = 0;
   const result: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<BooksState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<BooksState>(() => ({
         costs,
         ids,
         i: null,
@@ -54,10 +44,8 @@ function record({ books }: BooksInput): Frame<BooksState>[] {
         bestCnt,
         consideredCost: null,
         result: [...result],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

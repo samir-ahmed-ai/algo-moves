@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import { cn } from '../../../../lib/cn';
@@ -24,18 +25,7 @@ const PAIRS: Record<string, string> = { '0': '0', '1': '1', '6': '9', '8': '8', 
 
 function record({ s }: StroboInput): Frame<StroboState>[] {
   const digits = s.split('');
-  const frames: Frame<StroboState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<StroboState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<StroboState>(() => ({
         digits,
         lo: null,
         hi: null,
@@ -43,10 +33,8 @@ function record({ s }: StroboInput): Frame<StroboState>[] {
         b: null,
         bad: [],
         done: false,
-        answer: null,
-        ...st,
-      },
-    });
+        answer: null
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
@@ -18,55 +19,28 @@ interface LeavesState {
   done: boolean;
 }
 
-function record({ tree }: LeavesInput): Frame<LeavesState>[] {
-  const frames: Frame<LeavesState>[] = [];
-  const height = new Array<number | null>(tree.length).fill(null);
+function record({ tree }: LeavesInput): Frame<LeavesState>[] {  const height = new Array<number | null>(tree.length).fill(null);
   const visited: number[] = [];
   const layers: number[][] = [];
 
-  const snap = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    removedLayer: number | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        active,
+  const { emit, frames } = createRecorder<LeavesState>(() => ({
+        tree: tree,
         visited: visited.slice(),
         height: height.slice(),
         layers: layers.map((l) => l.slice()),
-        removedLayer,
-        done,
-      },
-    });
+        active: null,
+        removedLayer: null,
+        done: false
+      }));
+  // renamed from snap
 
-  snap(
-    'INIT',
-    `${visited.length} placed`,
-    `Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height].`,
-    null,
-    null,
-    false,
-  );
+  emit('INIT', `${visited.length} placed`, `Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height].`, { active: null, removedLayer: null, done: false });
 
   // dfs returns the height of node index i, or -1 for a missing node (mirrors Go's nil -> -1).
   const dfs = (i: number): number => {
     if (i >= tree.length || tree[i] == null) return -1;
 
-    snap(
-      'ENTER',
-      `node ${tree[i]}`,
-      `Descend into node ${tree[i]}. Before we can place it we must know how tall its subtrees are, so recurse left then right first (post-order).`,
-      i,
-      null,
-      false,
-    );
+    emit('ENTER', `node ${tree[i]}`, `Descend into node ${tree[i]}. Before we can place it we must know how tall its subtrees are, so recurse left then right first (post-order).`, { active: i, removedLayer: null, done: false });
 
     const left = dfs(2 * i + 1);
     const right = dfs(2 * i + 2);
@@ -77,32 +51,16 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
     height[i] = h;
     visited.push(i);
 
-    snap(
-      'PLACE',
-      `h=${h}`,
-      `Node ${tree[i]}: left height ${left}, right height ${right}, so its height is max(${left}, ${right}) + 1 = ${h}. It joins layer ${h}${h === 0 ? ' (a leaf)' : ''}, which now reads [${layers[h].join(', ')}].`,
-      i,
-      h,
-      false,
-      h === 0 ? 'good' : undefined,
-    );
+    emit('PLACE', `h=${h}`, `Node ${tree[i]}: left height ${left}, right height ${right}, so its height is max(${left}, ${right}) + 1 = ${h}. It joins layer ${h}${h === 0 ? ' (a leaf)' : ''}, which now reads [${layers[h].join(', ')}].`, { active: i, removedLayer: h, done: false });
 
     return h;
   };
 
   dfs(0);
 
-  snap(
-    'DONE',
-    `${layers.length} layers`,
-    `Every node is placed. The result peels the tree leaf-layer by leaf-layer: ${layers
+  emit('DONE', `${layers.length} layers`, `Every node is placed. The result peels the tree leaf-layer by leaf-layer: ${layers
       .map((l, idx) => `layer ${idx} = [${l.join(', ')}]`)
-      .join(', ')}.`,
-    null,
-    null,
-    true,
-    'good',
-  );
+      .join(', ')}.`, { active: null, removedLayer: null, done: true }, 'good');
 
   return frames;
 }

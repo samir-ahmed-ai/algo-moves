@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -25,18 +26,13 @@ function toPairs(nums: number[]): [number, number][] {
   return pairs;
 }
 
-function record({ nums1, nums2 }: SparseInput): Frame<SparseState>[] {
-  const frames: Frame<SparseState>[] = [];
-  const pairs1 = toPairs(nums1);
+function record({ nums1, nums2 }: SparseInput): Frame<SparseState>[] {  const pairs1 = toPairs(nums1);
   const pairs2 = toPairs(nums2);
   let i = 0;
   let j = 0;
   let acc = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<SparseState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SparseState>(() => ({
         pairs1: [...pairs1],
         pairs2: [...pairs2],
         i,
@@ -44,10 +40,8 @@ function record({ nums1, nums2 }: SparseInput): Frame<SparseState>[] {
         acc,
         op: '',
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

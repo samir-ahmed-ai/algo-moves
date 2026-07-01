@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -34,21 +35,10 @@ function childrenOf(tree: (number | null)[], i: number): number[] {
   return out;
 }
 
-function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
-  const frames: Frame<LcaState>[] = [];
-  const visited: number[] = [];
+function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {  const visited: number[] = [];
   const stack: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LcaState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LcaState>(() => ({
         tree,
         a,
         b,
@@ -57,10 +47,8 @@ function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
         onPath: [...stack],
         count: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText, ExprToken } from '../../../_shared/vizKit';
 
@@ -16,42 +17,19 @@ interface ParensState {
   done: boolean;
 }
 
-function record({ expr }: ParensInput): Frame<ParensState>[] {
-  const frames: Frame<ParensState>[] = [];
-  const results: number[] = [];
+function record({ expr }: ParensInput): Frame<ParensState>[] {  const results: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    span: string,
-    op: string,
-    left: string,
-    right: string,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        expr,
-        span,
-        op,
-        left,
-        right,
+  const { emit, frames } = createRecorder<ParensState>(() => ({
+        expr: expr,
         results: results.slice(),
-        done: type === 'DONE',
-      },
-    });
+        span: '',
+        op: '',
+        left: '',
+        right: '',
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `"${expr}"`,
-    `Compute every value "${expr}" can take by parenthesizing it differently. Divide and conquer: at each operator, recursively evaluate the left and right substrings, then combine every left result with every right result.`,
-    expr,
-    '',
-    '',
-    '',
-  );
+  emit('INIT', `"${expr}"`, `Compute every value "${expr}" can take by parenthesizing it differently. Divide and conquer: at each operator, recursively evaluate the left and right substrings, then combine every left result with every right result.`, { span: expr, op: '', left: '', right: '' });
 
   const apply = (a: number, op: string, b: number): number =>
     op === '+' ? a + b : op === '-' ? a - b : a * b;
@@ -66,15 +44,7 @@ function record({ expr }: ParensInput): Frame<ParensState>[] {
         isNumber = false;
         const lStr = s.slice(0, i);
         const rStr = s.slice(i + 1);
-        emit(
-          'SPLIT',
-          `split @ ${c}`,
-          `Split "${s}" at the '${c}' between "${lStr}" and "${rStr}". Recurse on each side, then combine with '${c}'.`,
-          s,
-          c,
-          lStr,
-          rStr,
-        );
+        emit('SPLIT', `split @ ${c}`, `Split "${s}" at the '${c}' between "${lStr}" and "${rStr}". Recurse on each side, then combine with '${c}'.`, { span: s, op: c, left: lStr, right: rStr });
         const left = solve(lStr);
         const right = solve(rStr);
         for (const a of left) {
@@ -83,16 +53,7 @@ function record({ expr }: ParensInput): Frame<ParensState>[] {
             out.push(v);
             if (s === expr) {
               results.push(v);
-              emit(
-                'COMBINE',
-                `${a}${c}${b}=${v}`,
-                `Top-level combine: ${a} ${c} ${b} = ${v}. Record ${v} (${results.length} value${results.length === 1 ? '' : 's'} so far).`,
-                s,
-                c,
-                lStr,
-                rStr,
-                'good',
-              );
+              emit('COMBINE', `${a}${c}${b}=${v}`, `Top-level combine: ${a} ${c} ${b} = ${v}. Record ${v} (${results.length} value${results.length === 1 ? '' : 's'} so far).`, { span: s, op: c, left: lStr, right: rStr }, 'good');
             }
           }
         }
@@ -100,15 +61,7 @@ function record({ expr }: ParensInput): Frame<ParensState>[] {
     }
     if (isNumber) {
       const v = parseInt(s, 10);
-      emit(
-        'LEAF',
-        `${s}=${v}`,
-        `"${s}" has no operator — it evaluates to the single value ${v}.`,
-        s,
-        '',
-        '',
-        '',
-      );
+      emit('LEAF', `${s}=${v}`, `"${s}" has no operator — it evaluates to the single value ${v}.`, { span: s, op: '', left: '', right: '' });
       return [v];
     }
     return out;
@@ -116,16 +69,7 @@ function record({ expr }: ParensInput): Frame<ParensState>[] {
 
   solve(expr);
   const sorted = results.slice().sort((a, b) => a - b);
-  emit(
-    'DONE',
-    `${results.length} values`,
-    `Every parenthesization explored — "${expr}" can evaluate to ${results.length} value${results.length === 1 ? '' : 's'}: [${sorted.join(', ')}].`,
-    expr,
-    '',
-    '',
-    '',
-    'good',
-  );
+  emit('DONE', `${results.length} values`, `Every parenthesization explored — "${expr}" can evaluate to ${results.length} value${results.length === 1 ? '' : 's'}: [${sorted.join(', ')}].`, { span: expr, op: '', left: '', right: '' , done: true }, 'good');
   return frames;
 }
 

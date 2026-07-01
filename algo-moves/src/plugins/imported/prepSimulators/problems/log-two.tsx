@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -33,28 +34,15 @@ function highestSetIndex(bits: number[]): number | null {
 }
 
 function record({ n }: LogTwoInput): Frame<LogTwoState>[] {
-  const frames: Frame<LogTwoState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LogTwoState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LogTwoState>(() => ({
         original: n,
         bits: toBits(Math.max(n, 0)),
         current: n,
         count: 0,
         msb: null,
         done: false,
-        invalid: false,
-        ...s,
-      },
-    });
+        invalid: false
+      }));
 
   if (n <= 0) {
     emit(

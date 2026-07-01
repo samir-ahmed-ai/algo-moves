@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -30,30 +31,17 @@ const has = (t: TreeArr, i: number): boolean => val(t, i) !== null;
 const L = (i: number) => 2 * i + 1;
 const R = (i: number) => 2 * i + 2;
 
-function record({ root, sub }: SubtreeInput): Frame<SubtreeState>[] {
-  const frames: Frame<SubtreeState>[] = [];
-  const visited: number[] = [];
+function record({ root, sub }: SubtreeInput): Frame<SubtreeState>[] {  const visited: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SubtreeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SubtreeState>(() => ({
         root,
         sub,
         anchor: null,
         active: null,
         visited: [...visited],
         found: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   // sameTree(a, b): does the root subtree anchored at index `a` equal the
   // pattern subtree anchored at index `b`? Emits a frame per comparison.

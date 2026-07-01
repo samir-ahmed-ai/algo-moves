@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -29,18 +30,7 @@ function toBits(n: number, width: number): string[] {
 }
 
 function record({ nums }: SingleNumberInput): Frame<SingleNumberState>[] {
-  const frames: Frame<SingleNumberState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SingleNumberState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SingleNumberState>(() => ({
         nums,
         i: null,
         prevAcc: null,
@@ -48,10 +38,8 @@ function record({ nums }: SingleNumberInput): Frame<SingleNumberState>[] {
         acc: 0,
         bits: BITS,
         done: false,
-        answer: null,
-        ...s,
-      },
-    });
+        answer: null
+      }));
 
   let acc = 0;
 

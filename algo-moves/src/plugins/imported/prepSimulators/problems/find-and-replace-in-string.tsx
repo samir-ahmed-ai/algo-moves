@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,9 +28,7 @@ interface FindReplaceState {
   done: boolean;
 }
 
-function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindReplaceState>[] {
-  const frames: Frame<FindReplaceState>[] = [];
-  const m = new Map<number, Op>();
+function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindReplaceState>[] {  const m = new Map<number, Op>();
   for (let k = 0; k < indices.length; k++) {
     m.set(indices[k], { src: sources[k], tgt: targets[k] });
   }
@@ -38,16 +37,7 @@ function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindR
 
   let result = '';
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    partial: Partial<FindReplaceState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FindReplaceState>(() => ({
         s,
         map: mapEntries(),
         i: null,
@@ -55,10 +45,8 @@ function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindR
         matched: null,
         op: null,
         result,
-        done: false,
-        ...partial,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

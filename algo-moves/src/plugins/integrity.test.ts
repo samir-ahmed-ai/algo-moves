@@ -8,6 +8,7 @@ import { curatedCourses } from '../content/courses';
 import { buildCatalog } from '../content/catalog';
 import { mergeCourses } from '../content/mergeCourses';
 import { importedCourses } from './imported';
+import { prepCourses } from './imported/prep';
 import { IMPORTED_DATA } from './imported/manifest';
 import { resolveSimulator } from './imported/simulators';
 import { SIMULATED_CATEGORIES } from './imported/factory';
@@ -40,7 +41,7 @@ function panelIds(plugin: (typeof plugins)[0]): Set<string> {
 }
 
 describe('catalog ↔ registry integrity', () => {
-  const catalog = buildCatalog(mergeCourses(curatedCourses, importedCourses));
+  const catalog = buildCatalog([...mergeCourses(curatedCourses, importedCourses), ...prepCourses]);
 
   it('every curated catalog pluginId resolves in the registry', () => {
     for (const id of curatedPluginIds()) {

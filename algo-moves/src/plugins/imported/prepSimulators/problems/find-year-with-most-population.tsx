@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,9 +22,7 @@ interface PopulationState {
   phase: 'build' | 'sweep' | 'done';
 }
 
-function record({ years }: PopulationInput): Frame<PopulationState>[] {
-  const frames: Frame<PopulationState>[] = [];
-  const delta = new Map<number, number>();
+function record({ years }: PopulationInput): Frame<PopulationState>[] {  const delta = new Map<number, number>();
 
   // We keep yearKeys / prefix stable across frames so the axis does not jump.
   // They are computed once the delta map is fully built; before that the
@@ -31,16 +30,7 @@ function record({ years }: PopulationInput): Frame<PopulationState>[] {
   const deltaEntries = (): [number, number][] =>
     [...delta.entries()].sort((a, b) => a[0] - b[0]);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PopulationState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PopulationState>(() => ({
         intervals: years,
         delta: deltaEntries(),
         yearKeys: [],
@@ -50,10 +40,8 @@ function record({ years }: PopulationInput): Frame<PopulationState>[] {
         pop: 0,
         bestPop: 0,
         bestYear: null,
-        phase: 'build',
-        ...s,
-      },
-    });
+        phase: 'build'
+      }));
 
   emit(
     'INIT',

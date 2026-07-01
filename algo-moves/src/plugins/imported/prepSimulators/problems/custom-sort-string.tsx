@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,9 +28,7 @@ interface CustomSortState {
 
 const idx = (ch: string) => ch.charCodeAt(0) - 97;
 
-function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {
-  const frames: Frame<CustomSortState>[] = [];
-  const cnt = new Array<number>(26).fill(0);
+function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {  const cnt = new Array<number>(26).fill(0);
   // Stable display order of distinct chars: order chars first, then any leftover chars from s.
   const display: string[] = [];
   const seen = new Set<string>();
@@ -50,27 +49,18 @@ function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {
 
   let result = '';
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s2: Partial<CustomSortState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        order,
-        s,
-        counts: snapshotCounts(),
+  const { emit, frames } = createRecorder<CustomSortState>(() => ({
+        order: order,
+        s: s,
         phase: 'count',
         orderIdx: null,
         takeChar: null,
-        result,
-        done: false,
-        ...s2,
-      },
-    });
+        result: result,
+        counts: snapshotCounts(),
+        done: false
+      }), {
+    merge: (base, partial) => ({ ...base, counts: snapshotCounts(), ...partial }),
+  });
 
   emit(
     'INIT',

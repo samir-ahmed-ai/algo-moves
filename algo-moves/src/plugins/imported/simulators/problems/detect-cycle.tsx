@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -24,69 +25,42 @@ interface DCState {
 function record({ adj, pos }: DCInput): Frame<DCState>[] {
   const n = adj.length;
   const color = new Array<number>(n).fill(0);
-  const stack: number[] = [];
-  const frames: Frame<DCState>[] = [];
-  let cycle = false;
+  const stack: number[] = [];  let cycle = false;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    backEdge: [number, number] | null,
-    tone?: 'good' | 'bad',
-  ): void => {
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
+  const { emit, frames } = createRecorder<DCState>(() => ({
+        adj: adj,
+        pos: pos,
         color: color.slice(),
-        active,
         stack: stack.slice(),
-        backEdge,
-        cycle,
-        done: type === 'DONE',
-      },
-    });
-  };
+        cycle: cycle,
+        active: null,
+        backEdge: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    'all white',
-    'Directed cycle detection by 3-colour DFS. White nodes are untouched, grey nodes sit on the current recursion stack, and black nodes are fully explored. An edge into a grey node is a back edge — that closes a cycle.',
-    null,
-    null,
-  );
+  emit('INIT', 'all white', 'Directed cycle detection by 3-colour DFS. White nodes are untouched, grey nodes sit on the current recursion stack, and black nodes are fully explored. An edge into a grey node is a back edge — that closes a cycle.', { active: null, backEdge: null });
 
   const dfs = (v: number): boolean => {
     color[v] = 1; // grey: now on the recursion stack
     stack.push(v);
-    emit('ENTER', `enter ${v} (grey)`, `Enter node ${v} and colour it grey — it is now on the recursion stack.`, v, null);
+    emit('ENTER', `enter ${v} (grey)`, `Enter node ${v} and colour it grey — it is now on the recursion stack.`, { active: v, backEdge: null });
 
     for (const nb of adj[v]) {
       if (color[nb] === 1) {
         cycle = true;
-        emit(
-          'BACK',
-          `back edge ${v}→${nb}`,
-          `Edge ${v} → ${nb} points at grey node ${nb}, which is still on the stack. That is a back edge, so the directed graph has a cycle.`,
-          v,
-          [v, nb],
-          'bad',
-        );
+        emit('BACK', `back edge ${v}→${nb}`, `Edge ${v} → ${nb} points at grey node ${nb}, which is still on the stack. That is a back edge, so the directed graph has a cycle.`, { active: v, backEdge: [v, nb] }, 'bad');
         return true;
       }
       if (color[nb] === 0) {
-        emit('WALK', `walk ${v}→${nb}`, `From node ${v}, follow the edge to white neighbour ${nb} and recurse.`, v, [v, nb]);
+        emit('WALK', `walk ${v}→${nb}`, `From node ${v}, follow the edge to white neighbour ${nb} and recurse.`, { active: v, backEdge: [v, nb] });
         if (dfs(nb)) return true;
-        emit('RESUME', `resume ${v}`, `Back at node ${v} after exploring the subtree rooted at ${nb}; continue with its remaining edges.`, v, null);
+        emit('RESUME', `resume ${v}`, `Back at node ${v} after exploring the subtree rooted at ${nb}; continue with its remaining edges.`, { active: v, backEdge: null });
       }
     }
 
     color[v] = 2; // black: done
     stack.pop();
-    emit('LEAVE', `leave ${v} (black)`, `Node ${v} has no unexplored edges — colour it black, pop it off the stack, and back out.`, v, null);
+    emit('LEAVE', `leave ${v} (black)`, `Node ${v} has no unexplored edges — colour it black, pop it off the stack, and back out.`, { active: v, backEdge: null });
     return false;
   };
 
@@ -97,9 +71,9 @@ function record({ adj, pos }: DCInput): Frame<DCState>[] {
   }
 
   if (cycle) {
-    emit('DONE', 'cycle: true', 'A back edge was found, so the directed graph contains a cycle. Answer: true.', null, null, 'bad');
+    emit('DONE', 'cycle: true', 'A back edge was found, so the directed graph contains a cycle. Answer: true.', { active: null, backEdge: null , done: true }, 'bad');
   } else {
-    emit('DONE', 'cycle: false', 'Every node turned black with no back edge along the way, so the directed graph is acyclic. Answer: false.', null, null, 'good');
+    emit('DONE', 'cycle: false', 'Every node turned black with no back edge along the way, so the directed graph is acyclic. Answer: false.', { active: null, backEdge: null , done: true }, 'good');
   }
   return frames;
 }

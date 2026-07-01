@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 import { cn } from '../../../../lib/cn';
@@ -25,9 +26,7 @@ interface PowerValueState {
   done: boolean;
 }
 
-function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {
-  const frames: Frame<PowerValueState>[] = [];
-  const memo = new Map<number, number>();
+function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {  const memo = new Map<number, number>();
 
   const power = (n: number): number => {
     if (n === 1) return 0;
@@ -42,16 +41,7 @@ function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {
   for (let i = lo; i <= hi; i++) values.push(i);
   const powers = values.map((v) => power(v));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PowerValueState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PowerValueState>(() => ({
         lo,
         hi,
         k,
@@ -62,10 +52,8 @@ function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {
         cursor: null,
         inserted: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

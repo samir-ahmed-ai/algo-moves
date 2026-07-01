@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -26,27 +27,14 @@ interface DeleteNodeState {
 }
 
 function record({ list, target }: DeleteNodeInput): Frame<DeleteNodeState>[] {
-  const frames: Frame<DeleteNodeState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DeleteNodeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DeleteNodeState>(() => ({
         chain: list.slice(),
         node: null,
         next: null,
         copied: false,
         removed: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   // Work on a mutable copy so the View can show the chain shrinking.
   const chain = list.slice();

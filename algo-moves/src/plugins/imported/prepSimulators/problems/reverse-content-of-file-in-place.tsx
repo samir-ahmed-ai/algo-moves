@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -16,22 +17,15 @@ interface ReverseFileState {
 }
 
 function record({ content }: ReverseFileInput): Frame<ReverseFileState>[] {
-  const bytes = content.split('');
-  const frames: Frame<ReverseFileState>[] = [];
-  let i = 0;
+  const bytes = content.split('');  let i = 0;
   let j = bytes.length - 1;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ReverseFileState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { bytes: bytes.slice(), i, j, done: false, ...s },
-    });
+  const { emit, frames } = createRecorder<ReverseFileState>(() => ({
+        bytes: bytes.slice(),
+        i,
+        j,
+        done: false
+      }));
 
   emit(
     'READ',

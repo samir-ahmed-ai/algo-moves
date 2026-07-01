@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,32 +23,19 @@ interface IsCompleteState {
 // The Go solution enqueues node.Left and node.Right (which may be nil). We mirror
 // that by enqueuing child *indices* into the level-order array; a child slot that
 // is out of range or holds null becomes a `null` queue entry (the "nil" marker).
-function record({ tree }: IsCompleteInput): Frame<IsCompleteState>[] {
-  const frames: Frame<IsCompleteState>[] = [];
-  const visited: number[] = [];
+function record({ tree }: IsCompleteInput): Frame<IsCompleteState>[] {  const visited: number[] = [];
   let queue: (number | null)[] = [];
   let end = false;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<IsCompleteState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<IsCompleteState>(() => ({
         tree,
         queue: [...queue],
         visited: [...visited],
         current: null,
         end,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (tree.length === 0 || tree[0] == null) {
     emit(

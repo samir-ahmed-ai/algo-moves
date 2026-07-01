@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,22 +25,11 @@ interface KthState {
   done: boolean;
 }
 
-function record({ nums, k }: KthInput): Frame<KthState>[] {
-  const frames: Frame<KthState>[] = [];
-  const a = nums.slice();
+function record({ nums, k }: KthInput): Frame<KthState>[] {  const a = nums.slice();
   const n = a.length;
   const target = n - k;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<KthState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<KthState>(() => ({
         a: a.slice(),
         k,
         target,
@@ -51,10 +41,8 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
         store: null,
         p: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

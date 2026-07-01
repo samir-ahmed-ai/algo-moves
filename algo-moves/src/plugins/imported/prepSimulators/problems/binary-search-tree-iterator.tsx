@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/TreeBoard';
@@ -21,71 +22,39 @@ interface BstState {
 const L = (i: number) => 2 * i + 1;
 const R = (i: number) => 2 * i + 2;
 
-function record({ tree }: BstInput): Frame<BstState>[] {
-  const frames: Frame<BstState>[] = [];
-  const stack: number[] = [];
+function record({ tree }: BstInput): Frame<BstState>[] {  const stack: number[] = [];
   const done: number[] = [];
   const output: number[] = [];
 
   const val = (i: number): number => tree[i] as number;
   const exists = (i: number): boolean => i >= 0 && i < tree.length && tree[i] != null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        stack: stack.slice(),
-        active,
-        done: done.slice(),
-        output: output.slice(),
-        hasNext: stack.length > 0,
-        finished: type === 'FINISHED',
-      },
-    });
+  const { emit, frames } = createRecorder<BstState>(() => ({
+    tree,
+    stack: stack.slice(),
+    active: null,
+    done: done.slice(),
+    output: output.slice(),
+    hasNext: stack.length > 0,
+    finished: false,
+  }));
 
   // pushLeft(node): push node and every left descendant, emitting a frame per push.
   const pushLeft = (start: number) => {
     let node = start;
     if (!exists(node)) {
-      emit(
-        'PUSH_NONE',
-        'null spine',
-        `pushLeft on an empty subtree: nothing to push. The left-spine walk stops immediately.`,
-        null,
-      );
+      emit('PUSH_NONE', 'null spine', `pushLeft on an empty subtree: nothing to push. The left-spine walk stops immediately.`, { active: null });
       return;
     }
     while (exists(node)) {
       stack.push(node);
-      emit(
-        'PUSH',
-        `push ${val(node)}`,
-        `pushLeft: push node ${val(node)} onto the stack, then follow its LEFT child. This buries larger ancestors under their smaller left descendants so the smallest sits on top.`,
-        node,
-      );
+      emit('PUSH', `push ${val(node)}`, `pushLeft: push node ${val(node)} onto the stack, then follow its LEFT child. This buries larger ancestors under their smaller left descendants so the smallest sits on top.`, { active: node });
       node = L(node);
     }
-    emit(
-      'SPINE_DONE',
-      'left spine done',
-      `Reached a null left child, so the left spine is fully on the stack. The stack top is now the next-smallest unvisited value.`,
-      stack[stack.length - 1] ?? null,
-    );
+    emit('SPINE_DONE', 'left spine done', `Reached a null left child, so the left spine is fully on the stack. The stack top is now the next-smallest unvisited value.`, { active: stack[stack.length - 1] ?? null });
   };
 
-  emit(
-    'INIT',
-    'build iterator',
-    `BST Iterator: an in-order walk driven by an explicit stack of the left spine. Constructor calls pushLeft(root); each Next() pops the top, then pushLeft(top.Right).`,
-    exists(0) ? 0 : null,
-  );
+  emit('INIT', 'build iterator', `BST Iterator: an in-order walk driven by an explicit stack of the left spine. Constructor calls pushLeft(root); each Next() pops the top, then pushLeft(top.Right).`, { active: exists(0) ? 0 : null });
 
   // Constructor: pushLeft(root)
   pushLeft(0);
@@ -93,34 +62,17 @@ function record({ tree }: BstInput): Frame<BstState>[] {
   // Drive the iterator: HasNext() / Next() until the stack drains.
   while (stack.length > 0) {
     const top = stack[stack.length - 1];
-    emit(
-      'HASNEXT',
-      'hasNext = true',
-      `HasNext(): the stack is non-empty, so there is another value to yield. The top of the stack, ${val(top)}, is the next smallest.`,
-      top,
-    );
+    emit('HASNEXT', 'hasNext = true', `HasNext(): the stack is non-empty, so there is another value to yield. The top of the stack, ${val(top)}, is the next smallest.`, { active: top });
     // Next(): pop top
     stack.pop();
     done.push(top);
     output.push(val(top));
-    emit(
-      'NEXT',
-      `yield ${val(top)}`,
-      `Next(): pop ${val(top)} and emit it — the in-order sequence so far is [${output.join(', ')}]. Now open its RIGHT subtree.`,
-      top,
-      'good',
-    );
+    emit('NEXT', `yield ${val(top)}`, `Next(): pop ${val(top)} and emit it — the in-order sequence so far is [${output.join(', ')}]. Now open its RIGHT subtree.`, { active: top }, 'good');
     // pushLeft(top.Right)
     pushLeft(R(top));
   }
 
-  emit(
-    'FINISHED',
-    `[${output.join(', ')}]`,
-    `HasNext() is now false and the stack is empty. The iterator produced the full sorted order [${output.join(', ')}] using only O(h) stack space.`,
-    null,
-    'good',
-  );
+  emit('FINISHED', `[${output.join(', ')}]`, `HasNext() is now false and the stack is empty. The iterator produced the full sorted order [${output.join(', ')}] using only O(h) stack space.`, { active: null }, 'good');
   return frames;
 }
 

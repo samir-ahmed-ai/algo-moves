@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -62,22 +63,10 @@ function layout(
 function record({ parent, s }: LongestPathInput): Frame<LongestPathState>[] {
   const n = parent.length;
   const adj: number[][] = Array.from({ length: n }, () => []);
-  for (let i = 1; i < n; i++) adj[parent[i]].push(i);
-
-  const frames: Frame<LongestPathState>[] = [];
-  const done: number[] = [];
+  for (let i = 1; i < n; i++) adj[parent[i]].push(i);  const done: number[] = [];
   let res = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<LongestPathState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LongestPathState>(() => ({
         parent,
         s,
         node: null,
@@ -86,10 +75,8 @@ function record({ parent, s }: LongestPathInput): Frame<LongestPathState>[] {
         max2: null,
         through: null,
         res,
-        finished: false,
-        ...patch,
-      },
-    });
+        finished: false
+      }));
 
   emit(
     'INIT',

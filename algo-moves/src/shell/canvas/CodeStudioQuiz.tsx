@@ -6,11 +6,13 @@ import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { cn } from '../../lib/cn';
 import { QUIZ_WRONG_MS } from '../../lib/quizConstants';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
+import { recordAttempt } from '../../lib/progress';
 import { useIsMobile } from '../../lib/useMediaQuery';
 import { chromeText } from '../chromeUi';
 
 export interface CodeStudioQuizProps {
   quiz: QuizQuestion[];
+  itemId: string;
   initial?: QuizProgress | null;
   /** Label of the phase the quiz hands off to, e.g. "Structure" or "Recall". */
   nextLabel: string;
@@ -58,7 +60,7 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
   );
 }
 
-export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinue }: CodeStudioQuizProps) {
+export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, onContinue }: CodeStudioQuizProps) {
   const isMobile = useIsMobile();
   const total = quiz.length;
   const [i, setI] = useState(() => Math.min(initial?.index ?? 0, Math.max(total - 1, 0)));
@@ -95,6 +97,7 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
         copy[i] = isC;
         return copy;
       });
+      recordAttempt(itemId, isC);
       if (isC) {
         const ns = score + 1;
         setScore(ns);
@@ -103,7 +106,7 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
         persist({ answered: idx });
       }
     },
-    [answered, done, q, i, score, persist],
+    [answered, done, q, i, score, persist, itemId],
   );
 
   const advance = useCallback(() => {

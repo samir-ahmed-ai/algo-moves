@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -28,9 +29,7 @@ function pieces(ribbons: number[], len: number): number {
   return cnt;
 }
 
-function record({ ribbons, k }: RibInput): Frame<RibState>[] {
-  const frames: Frame<RibState>[] = [];
-  const max = Math.max(...ribbons);
+function record({ ribbons, k }: RibInput): Frame<RibState>[] {  const max = Math.max(...ribbons);
   // index i represents candidate length L = i + 1, so values = [1..max]
   const values = Array.from({ length: max }, (_, i) => i + 1);
   const dead = new Array<boolean>(max).fill(false);
@@ -38,26 +37,27 @@ function record({ ribbons, k }: RibInput): Frame<RibState>[] {
   let hi = max - 1; // length max
   let result: number | null = null;
 
-  const emit = (
+  const { emit, frames } = createRecorder<RibState>(() => ({
+        values: values,
+        ribbons: ribbons,
+        k: k,
+        lo: lo,
+        hi: hi,
+        result: result,
+        dead: dead.slice(),
+        mid: null,
+        count: null,
+        done: false
+      }));
+  const emitDone = (
     type: string,
     note: string,
     caption: string,
-    mid: number | null,
-    count: number | null,
+    partial: Partial<RibState>,
     tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { values, ribbons, k, lo, hi, mid, count, result, dead: dead.slice(), done: tone != null },
-    });
+  ) => emit(type, note, caption, { ...partial, done: true }, tone);
 
-  emit(
-    'INIT',
-    `1..${max}`,
-    `Binary-search the answer: the cut length L. A length L is feasible when the ribbons ${ribbons.join(' + ')} yield ⌊r/L⌋ pieces summing to at least k = ${k}. Longer L means fewer pieces, so feasibility is monotone — search [1..${max}] for the largest feasible L.`,
-    null,
-    null,
-  );
+  emit('INIT', `1..${max}`, `Binary-search the answer: the cut length L. A length L is feasible when the ribbons ${ribbons.join(' + ')} yield ⌊r/L⌋ pieces summing to at least k = ${k}. Longer L means fewer pieces, so feasibility is monotone — search [1..${max}] for the largest feasible L.`, { mid: null, count: null });
 
   while (lo <= hi) {
     const mid = lo + ((hi - lo) >> 1);
@@ -67,37 +67,18 @@ function record({ ribbons, k }: RibInput): Frame<RibState>[] {
       // feasible → record and reach for a longer length
       result = len;
       lo = mid + 1;
-      emit(
-        'RIGHT',
-        `lo=L${len + 1}`,
-        `L = ${len} is feasible: ${ribbons.map((r) => Math.floor(r / len)).join(' + ')} = ${count} pieces ≥ ${k}. Record ${len} and try a longer cut: move lo past it.`,
-        mid,
-        count,
-      );
+      emit('RIGHT', `lo=L${len + 1}`, `L = ${len} is feasible: ${ribbons.map((r) => Math.floor(r / len)).join(' + ')} = ${count} pieces ≥ ${k}. Record ${len} and try a longer cut: move lo past it.`, { mid: mid, count: count });
     } else {
       // infeasible → this length and everything longer is too few; kill [mid..hi]
       for (let i = mid; i <= hi; i++) dead[i] = true;
       hi = mid - 1;
-      emit(
-        'LEFT',
-        `hi=L${len - 1}`,
-        `L = ${len} is infeasible: ${ribbons.map((r) => Math.floor(r / len)).join(' + ')} = ${count} pieces < ${k}. Lengths ≥ ${len} are all too few — discard them and set hi below ${len}.`,
-        mid,
-        count,
-      );
+      emit('LEFT', `hi=L${len - 1}`, `L = ${len} is infeasible: ${ribbons.map((r) => Math.floor(r / len)).join(' + ')} = ${count} pieces < ${k}. Lengths ≥ ${len} are all too few — discard them and set hi below ${len}.`, { mid: mid, count: count });
     }
   }
 
-  emit(
-    'DONE',
-    `L=${result ?? 0}`,
-    result !== null
+  emitDone('DONE', `L=${result ?? 0}`, result !== null
       ? `Largest feasible cut length is L = ${result}: it splits the ribbons into ≥ ${k} pieces while no longer cut can. Answer ${result}.`
-      : `No length cuts ${k} pieces — answer 0.`,
-    null,
-    null,
-    'good',
-  );
+      : `No length cuts ${k} pieces — answer 0.`, { mid: null, count: null }, 'good');
   return frames;
 }
 

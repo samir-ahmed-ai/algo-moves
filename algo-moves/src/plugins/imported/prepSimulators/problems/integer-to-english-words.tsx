@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -64,8 +65,6 @@ function numberToWords(num: number): string {
 }
 
 function record({ num }: WordsInput): Frame<WordsState>[] {
-  const frames: Frame<WordsState>[] = [];
-
   // Pre-split into 3-digit chunks so the board can show every group at once.
   const chunks: Chunk[] = [];
   {
@@ -80,26 +79,15 @@ function record({ num }: WordsInput): Frame<WordsState>[] {
     if (chunks.length === 0) chunks.push({ value: 0, scale: '', words: '' });
   }
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<WordsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<WordsState>(() => ({
         num,
         chunks,
         active: null,
         remaining: num,
         parts: [],
         result: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -18,54 +19,29 @@ interface DecodeState {
   done: boolean;
 }
 
-function record({ s }: DecodeInput): Frame<DecodeState>[] {
-  const frames: Frame<DecodeState>[] = [];
-  const cntStack: number[] = [];
+function record({ s }: DecodeInput): Frame<DecodeState>[] {  const cntStack: number[] = [];
   const strStack: string[] = [];
   let cur = '';
   let num = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    c: string | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        s,
-        i,
-        c,
-        num,
-        cur,
+  const { emit, frames } = createRecorder<DecodeState>(() => ({
+        s: s,
+        num: num,
+        cur: cur,
         cntStack: cntStack.slice(),
         strStack: strStack.slice(),
-        done: type === 'DONE',
-      },
-    });
+        i: null,
+        c: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `decode "${s}"`,
-    `Decode String: expand a pattern like k[...] into k copies of the inner string. We use two stacks — one for the repeat counts, one for the strings built so far — plus a running number "num" and the current string "cur".`,
-    null,
-    null,
-  );
+  emit('INIT', `decode "${s}"`, `Decode String: expand a pattern like k[...] into k copies of the inner string. We use two stacks — one for the repeat counts, one for the strings built so far — plus a running number "num" and the current string "cur".`, { i: null, c: null });
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     if (c >= '0' && c <= '9') {
       num = num * 10 + (c.charCodeAt(0) - 48);
-      emit(
-        'DIGIT',
-        `num=${num}`,
-        `'${c}' is a digit, so fold it into the running count: num = num*10 + ${c} = ${num}. This is how multi-digit repeat counts like "12[a]" are built.`,
-        i,
-        c,
-      );
+      emit('DIGIT', `num=${num}`, `'${c}' is a digit, so fold it into the running count: num = num*10 + ${c} = ${num}. This is how multi-digit repeat counts like "12[a]" are built.`, { i: i, c: c });
     } else if (c === '[') {
       cntStack.push(num);
       strStack.push(cur);
@@ -73,13 +49,7 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
       const pushedCur = cur;
       num = 0;
       cur = '';
-      emit(
-        '[',
-        `push ${pushedNum}, "${pushedCur}"`,
-        `'[' opens a new group. Push the count ${pushedNum} onto the count stack and the string-so-far "${pushedCur || '∅'}" onto the string stack, then reset num=0 and cur="" to start collecting the inner string.`,
-        i,
-        c,
-      );
+      emit('[', `push ${pushedNum}, "${pushedCur}"`, `'[' opens a new group. Push the count ${pushedNum} onto the count stack and the string-so-far "${pushedCur || '∅'}" onto the string stack, then reset num=0 and cur="" to start collecting the inner string.`, { i: i, c: c });
     } else if (c === ']') {
       const k = cntStack[cntStack.length - 1];
       cntStack.pop();
@@ -87,33 +57,14 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
       strStack.pop();
       const inner = cur;
       cur = prev + inner.repeat(k);
-      emit(
-        ']',
-        `repeat ${k}×`,
-        `']' closes the group. Pop count ${k} and the saved prefix "${prev || '∅'}", then set cur = "${prev || '∅'}" + ("${inner}" × ${k}) = "${cur}".`,
-        i,
-        c,
-      );
+      emit(']', `repeat ${k}×`, `']' closes the group. Pop count ${k} and the saved prefix "${prev || '∅'}", then set cur = "${prev || '∅'}" + ("${inner}" × ${k}) = "${cur}".`, { i: i, c: c });
     } else {
       cur += c;
-      emit(
-        'CHAR',
-        `cur="${cur}"`,
-        `'${c}' is a plain letter, so append it to the current string: cur = "${cur}".`,
-        i,
-        c,
-      );
+      emit('CHAR', `cur="${cur}"`, `'${c}' is a plain letter, so append it to the current string: cur = "${cur}".`, { i: i, c: c });
     }
   }
 
-  emit(
-    'DONE',
-    `"${cur}"`,
-    `End of input. Both stacks are empty and cur holds the fully decoded string: "${cur}".`,
-    null,
-    null,
-    'good',
-  );
+  emit('DONE', `"${cur}"`, `End of input. Both stacks are empty and cur holds the fully decoded string: "${cur}".`, { i: null, c: null , done: true }, 'good');
   return frames;
 }
 

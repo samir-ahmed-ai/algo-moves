@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -47,20 +48,9 @@ function renderLeft(parts: string[], maxWidth: number): string {
   return out;
 }
 
-function record({ words, maxWidth }: JustifyInput): Frame<JustifyState>[] {
-  const frames: Frame<JustifyState>[] = [];
-  const result: string[] = [];
+function record({ words, maxWidth }: JustifyInput): Frame<JustifyState>[] {  const result: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<JustifyState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<JustifyState>(() => ({
         words,
         maxWidth,
         i: null,
@@ -68,10 +58,8 @@ function record({ words, maxWidth }: JustifyInput): Frame<JustifyState>[] {
         lineChars: [],
         lastLine: false,
         result: [...result],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

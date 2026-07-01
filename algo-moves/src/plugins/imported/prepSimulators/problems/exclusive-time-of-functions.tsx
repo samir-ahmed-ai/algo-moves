@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -18,26 +19,19 @@ interface ExclState {
   done: boolean;
 }
 
-function record({ n, logs }: ExclInput): Frame<ExclState>[] {
-  const frames: Frame<ExclState>[] = [];
-  const res = new Array(n).fill(0);
+function record({ n, logs }: ExclInput): Frame<ExclState>[] {  const res = new Array(n).fill(0);
   const stack: number[] = [];
   let prev = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<ExclState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ExclState>(() => ({
         n,
         res: res.slice(),
         stack: stack.slice(),
         prev,
         op: '',
         log: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

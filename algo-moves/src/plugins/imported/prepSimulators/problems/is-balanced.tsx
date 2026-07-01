@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,22 +26,11 @@ interface BalancedState {
 
 const has = (tree: Cell[], i: number) => i >= 0 && i < tree.length && tree[i] != null;
 
-function record({ tree }: BalancedInput): Frame<BalancedState>[] {
-  const frames: Frame<BalancedState>[] = [];
-  const done: number[] = [];
+function record({ tree }: BalancedInput): Frame<BalancedState>[] {  const done: number[] = [];
   const heights: Record<number, number> = {};
   let bad: number | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<BalancedState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<BalancedState>(() => ({
         tree,
         visiting: null,
         current: null,
@@ -49,10 +39,8 @@ function record({ tree }: BalancedInput): Frame<BalancedState>[] {
         l: null,
         r: null,
         bad,
-        answer: null,
-        ...s,
-      },
-    });
+        answer: null
+      }));
 
   emit(
     'INIT',

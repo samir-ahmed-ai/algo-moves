@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -27,37 +28,16 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
   const n = grid.length;
   const reachTime = Array.from({ length: n }, () => new Array<number>(n).fill(-1));
   const vis = Array.from({ length: n }, () => new Array<boolean>(n).fill(false));
-  const frames: Frame<SwimState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    res: number,
-    answer: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        grid,
+  const { emit, frames } = createRecorder<SwimState>(() => ({
+        grid: grid,
         reachTime: reachTime.map((row) => row.slice()),
-        cur,
-        res,
-        answer,
-        done: type === 'DONE',
-      },
-    });
+        cur: null,
+        res: 0,
+        answer: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${n}×${n} grid`,
-    `Water rises over time; at time t every cell with elevation ≤ t is flooded and swimmable. Cost to reach a cell = the maximum elevation along the best path. Dijkstra-style: always settle the unvisited frontier cell of lowest elevation. Answer = the least time to reach (${n - 1}, ${n - 1}) from (0, 0).`,
-    null,
-    0,
-    null,
-  );
+  emit('INIT', `${n}×${n} grid`, `Water rises over time; at time t every cell with elevation ≤ t is flooded and swimmable. Cost to reach a cell = the maximum elevation along the best path. Dijkstra-style: always settle the unvisited frontier cell of lowest elevation. Answer = the least time to reach (${n - 1}, ${n - 1}) from (0, 0).`, { cur: null, res: 0, answer: null });
 
   // min-heap over [elevation, r, c]
   const heap: [number, number, number][] = [[grid[0][0], 0, 0]];
@@ -78,16 +58,9 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
     if (elev > res) res = elev;
     reachTime[r][c] = res;
     const isTarget = r === n - 1 && c === n - 1;
-    emit(
-      isTarget ? 'TARGET' : 'SETTLE',
-      `(${r},${c}) elev ${elev} · time ${res}`,
-      isTarget
+    emit(isTarget ? 'TARGET' : 'SETTLE', `(${r},${c}) elev ${elev} · time ${res}`, isTarget
         ? `Reached the target (${r}, ${c}) with elevation ${elev}. The highest elevation crossed on the best path is ${res} — that is the least time needed.`
-        : `Settle the lowest frontier cell (${r}, ${c}), elevation ${elev}. Best time to reach it = max elevation so far = ${res}.`,
-      [r, c],
-      res,
-      null,
-    );
+        : `Settle the lowest frontier cell (${r}, ${c}), elevation ${elev}. Best time to reach it = max elevation so far = ${res}.`, { cur: [r, c], res: res, answer: null });
     if (isTarget) {
       answer = res;
       break;
@@ -102,15 +75,7 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
     }
   }
 
-  emit(
-    'DONE',
-    `answer = ${answer ?? res}`,
-    `Least time to swim from (0, 0) to (${n - 1}, ${n - 1}) = ${answer ?? res}.`,
-    [n - 1, n - 1],
-    answer ?? res,
-    answer ?? res,
-    'good',
-  );
+  emit('DONE', `answer = ${answer ?? res}`, `Least time to swim from (0, 0) to (${n - 1}, ${n - 1}) = ${answer ?? res}.`, { cur: [n - 1, n - 1], res: answer ?? res, answer: answer ?? res , done: true }, 'good');
   return frames;
 }
 

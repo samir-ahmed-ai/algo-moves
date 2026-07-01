@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -38,20 +39,9 @@ function applyOp(a: number, b: number, op: string): number {
   }
 }
 
-function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
-  const frames: Frame<PostfixState>[] = [];
-  const stack: number[] = [];
+function record({ tokens }: PostfixInput): Frame<PostfixState>[] {  const stack: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PostfixState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PostfixState>(() => ({
         tokens,
         ti: null,
         stack: stack.slice(),
@@ -61,10 +51,8 @@ function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
         pushed: null,
         highlight: [],
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

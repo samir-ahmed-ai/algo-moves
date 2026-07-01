@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,8 +28,6 @@ interface PrefixScoresState {
 }
 
 function record({ words }: PrefixScoresInput): Frame<PrefixScoresState>[] {
-  const frames: Frame<PrefixScoresState>[] = [];
-
   // Trie stored as a flat node pool so state snapshots stay plain data.
   const pool: TrieNode[] = [{ ch: new Array<number | null>(26).fill(null), count: 0 }];
   const newNode = (): number => {
@@ -38,16 +37,7 @@ function record({ words }: PrefixScoresInput): Frame<PrefixScoresState>[] {
 
   const res: (number | null)[] = words.map(() => null);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PrefixScoresState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PrefixScoresState>(() => ({
         words,
         phase: 'build',
         wi: null,
@@ -56,10 +46,8 @@ function record({ words }: PrefixScoresInput): Frame<PrefixScoresState>[] {
         count: null,
         running: null,
         res: res.slice(),
-        answer: null,
-        ...s,
-      },
-    });
+        answer: null
+      }));
 
   emit(
     'INIT',

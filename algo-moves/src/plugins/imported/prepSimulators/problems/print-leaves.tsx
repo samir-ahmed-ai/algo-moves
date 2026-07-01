@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -18,32 +19,19 @@ interface LeavesState {
   done: boolean;
 }
 
-function record({ tree }: LeavesInput): Frame<LeavesState>[] {
-  const frames: Frame<LeavesState>[] = [];
-  const n = tree.length;
+function record({ tree }: LeavesInput): Frame<LeavesState>[] {  const n = tree.length;
   const visited: number[] = [];
   const leaves: number[] = [];
   const out: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LeavesState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LeavesState>(() => ({
         tree,
         current: null,
         visited: [...visited],
         leaves: [...leaves],
         out: [...out],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const has = (i: number) => i >= 0 && i < n && tree[i] != null;
   const leftOf = (i: number) => 2 * i + 1;

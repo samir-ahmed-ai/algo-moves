@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,21 +20,10 @@ interface RemoveOnesState {
   done: boolean;
 }
 
-function record({ grid }: RemoveOnesInput): Frame<RemoveOnesState>[] {
-  const frames: Frame<RemoveOnesState>[] = [];
-  const m = grid.length;
+function record({ grid }: RemoveOnesInput): Frame<RemoveOnesState>[] {  const m = grid.length;
   const n = grid[0].length;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RemoveOnesState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RemoveOnesState>(() => ({
         grid,
         row: null,
         col: null,
@@ -41,10 +31,8 @@ function record({ grid }: RemoveOnesInput): Frame<RemoveOnesState>[] {
         inv: true,
         clearedRows: [],
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

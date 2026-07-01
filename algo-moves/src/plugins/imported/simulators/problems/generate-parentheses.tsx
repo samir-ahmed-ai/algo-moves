@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, PathDisplay } from '../../../_shared/vizKit';
 
@@ -15,81 +16,37 @@ interface ParenState {
   done: boolean;
 }
 
-function record({ n }: ParenInput): Frame<ParenState>[] {
-  const frames: Frame<ParenState>[] = [];
-  const results: string[] = [];
+function record({ n }: ParenInput): Frame<ParenState>[] {  const results: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    path: string,
-    open: number,
-    close: number,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { n, path, open, close, results: results.slice(), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<ParenState>(() => ({
+        n: n,
+        results: results.slice(),
+        path: '',
+        open: 0,
+        close: 0,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `n=${n}`,
-    `Build every valid string of ${n} pairs of parentheses. Two choices at each step: add '(' while open < ${n}, or add ')' while close < open (closing only what is already open keeps the string valid). There are C(${n}) = Catalan(${n}) results.`,
-    '',
-    0,
-    0,
-  );
+  emit('INIT', `n=${n}`, `Build every valid string of ${n} pairs of parentheses. Two choices at each step: add '(' while open < ${n}, or add ')' while close < open (closing only what is already open keeps the string valid). There are C(${n}) = Catalan(${n}) results.`, { path: '', open: 0, close: 0 });
 
   const bt = (path: string, open: number, close: number) => {
     if (path.length === 2 * n) {
       results.push(path);
-      emit(
-        'RECORD',
-        `+"${path}"`,
-        `Length reached ${2 * n} with open=close=${n} — record the valid string "${path}" (${results.length} so far).`,
-        path,
-        open,
-        close,
-        'good',
-      );
+      emit('RECORD', `+"${path}"`, `Length reached ${2 * n} with open=close=${n} — record the valid string "${path}" (${results.length} so far).`, { path: path, open: open, close: close }, 'good');
       return;
     }
     if (open < n) {
-      emit(
-        'OPEN',
-        `add '('`,
-        `open=${open} < ${n}, so we may add '('. Now open=${open + 1}, close=${close}. path = "${path}(".`,
-        path + '(',
-        open + 1,
-        close,
-      );
+      emit('OPEN', `add '('`, `open=${open} < ${n}, so we may add '('. Now open=${open + 1}, close=${close}. path = "${path}(".`, { path: path + '(', open: open + 1, close: close });
       bt(path + '(', open + 1, close);
     }
     if (close < open) {
-      emit(
-        'CLOSE',
-        `add ')'`,
-        `close=${close} < open=${open}, so we may add ')' to match an open bracket. Now open=${open}, close=${close + 1}. path = "${path})".`,
-        path + ')',
-        open,
-        close + 1,
-      );
+      emit('CLOSE', `add ')'`, `close=${close} < open=${open}, so we may add ')' to match an open bracket. Now open=${open}, close=${close + 1}. path = "${path})".`, { path: path + ')', open: open, close: close + 1 });
       bt(path + ')', open, close + 1);
     }
   };
 
   bt('', 0, 0);
-  emit(
-    'DONE',
-    `${results.length} strings`,
-    `All branches explored — ${results.length} valid parenthesizations of ${n} pairs.`,
-    '',
-    0,
-    0,
-    'good',
-  );
+  emit('DONE', `${results.length} strings`, `All branches explored — ${results.length} valid parenthesizations of ${n} pairs.`, { path: '', open: 0, close: 0 , done: true }, 'good');
   return frames;
 }
 

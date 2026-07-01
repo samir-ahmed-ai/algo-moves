@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -30,23 +31,12 @@ const parentOf = (i: number): number | null => {
   return (i - 1) >> 1;
 };
 
-function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
-  const frames: Frame<LcaState>[] = [];
-  const visitedA: number[] = [];
+function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {  const visitedA: number[] = [];
   const visitedB: number[] = [];
 
   const valAt = (i: number | null) => (i !== null && tree[i] != null ? (tree[i] as number) : '·');
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LcaState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LcaState>(() => ({
         tree,
         p,
         q,
@@ -55,10 +45,8 @@ function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
         visitedA: visitedA.slice(),
         visitedB: visitedB.slice(),
         answer: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   let a: number | null = p;
   let b: number | null = q;

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -29,21 +30,10 @@ const NEG_INF = -(2 ** 31);
 const leftChild = (i: number) => 2 * i + 1;
 const rightChild = (i: number) => 2 * i + 2;
 
-function record({ tree }: PathSumInput): Frame<PathSumState>[] {
-  const frames: Frame<PathSumState>[] = [];
-  const visited: number[] = [];
+function record({ tree }: PathSumInput): Frame<PathSumState>[] {  const visited: number[] = [];
   let best = NEG_INF;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PathSumState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PathSumState>(() => ({
         tree,
         active: null,
         visited: visited.slice(),
@@ -53,10 +43,8 @@ function record({ tree }: PathSumInput): Frame<PathSumState>[] {
         best,
         gain: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const present = (i: number) => i >= 0 && i < tree.length && tree[i] != null;
 

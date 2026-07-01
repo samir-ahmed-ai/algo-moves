@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -32,9 +33,7 @@ interface DetectLoopState {
  * The list is a value array; `next(i)` follows the chain, wrapping the tail
  * back to `loopAt` when a loop exists, else returning null past the end.
  */
-function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
-  const frames: Frame<DetectLoopState>[] = [];
-  const n = values.length;
+function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {  const n = values.length;
 
   const next = (i: number | null): number | null => {
     if (i === null) return null;
@@ -43,16 +42,7 @@ function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
     return loopAt >= 0 ? loopAt : null;
   };
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DetectLoopState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DetectLoopState>(() => ({
         values,
         loopAt,
         slow: null,
@@ -60,10 +50,8 @@ function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
         phase: 'init',
         entry: null,
         hasLoop: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (n === 0) {
     emit('INIT', 'empty', 'The list is empty, so there is nothing to traverse — no loop.', {

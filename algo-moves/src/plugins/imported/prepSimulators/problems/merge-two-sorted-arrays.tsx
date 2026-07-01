@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -26,20 +27,9 @@ interface MergeState {
 }
 
 function record({ a, m, b, n }: MergeInput): Frame<MergeState>[] {
-  const work = a.slice();
-  const frames: Frame<MergeState>[] = [];
-  const filled = new Array<boolean>(work.length).fill(false);
+  const work = a.slice();  const filled = new Array<boolean>(work.length).fill(false);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MergeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MergeState>(() => ({
         a: work.slice(),
         b,
         m,
@@ -49,10 +39,8 @@ function record({ a, m, b, n }: MergeInput): Frame<MergeState>[] {
         k: null,
         filled: filled.slice(),
         chose: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   let i = m - 1;
   let j = n - 1;

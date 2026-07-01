@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,34 +26,21 @@ function fmt(iv: Interval): string {
 }
 
 function record({ intervals }: MergeInput): Frame<MergeState>[] {
-  const frames: Frame<MergeState>[] = [];
-
   // Sort by start time (faithful to sort.Slice in the Go solution).
   const sorted: Interval[] = intervals.map((iv) => [iv[0], iv[1]] as Interval);
   sorted.sort((a, b) => a[0] - b[0]);
 
   const res: Interval[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MergeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MergeState>(() => ({
         sorted: sorted.map((iv) => [iv[0], iv[1]] as Interval),
         res: res.map((iv) => [iv[0], iv[1]] as Interval),
         i: null,
         lastIdx: null,
         overlap: null,
         extended: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'SORT',

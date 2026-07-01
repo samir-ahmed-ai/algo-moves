@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -26,8 +27,6 @@ interface Bucket {
 }
 
 function record({ s }: MinDelInput): Frame<MinDelState>[] {
-  const frames: Frame<MinDelState>[] = [];
-
   // 1) Count frequencies over 26 letters (Space O(1)).
   const freq = new Array<number>(26).fill(0);
   for (let i = 0; i < s.length; i++) {
@@ -49,85 +48,42 @@ function record({ s }: MinDelInput): Frame<MinDelState>[] {
   const used = new Set<number>();
   let dels = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        s,
+  const { emit, frames } = createRecorder<MinDelState>(() => ({
+        s: s,
         bars: bars.slice(),
-        letters,
-        active,
+        letters: letters,
         used: [...used].sort((a, b) => a - b),
-        dels,
-        done: type === 'DONE',
-      },
-    });
+        dels: dels,
+        active: null,
+        done: false
+      }));
 
   const freqList = buckets.map((b) => `${b.letter}:${b.freq}`).join(', ') || '(none)';
-  emit(
-    'INIT',
-    `${buckets.length} letters`,
-    `Minimum Deletions: every distinct letter's frequency must be unique. We count each letter's frequency and sort the counts ascending — ${freqList} — then process the tallest bars first, shrinking any count that collides with one we've already claimed.`,
-    null,
-  );
+  emit('INIT', `${buckets.length} letters`, `Minimum Deletions: every distinct letter's frequency must be unique. We count each letter's frequency and sort the counts ascending — ${freqList} — then process the tallest bars first, shrinking any count that collides with one we've already claimed.`, { active: null });
 
   // 2) Walk the sorted bars from the largest (rightmost) to the smallest. For
   //    each, while its count is positive and already claimed, delete one
   //    occurrence (decrement) and bump the deletion counter; then claim it.
   for (let i = bars.length - 1; i >= 0; i--) {
     const letter = letters[i];
-    emit(
-      'VISIT',
-      `${letter} = ${bars[i]}`,
-      `Process letter '${letter}' with frequency ${bars[i]}. It is the largest count not yet handled, so it gets first pick — any earlier bar must dodge whatever count this one keeps.`,
-      i,
-    );
+    emit('VISIT', `${letter} = ${bars[i]}`, `Process letter '${letter}' with frequency ${bars[i]}. It is the largest count not yet handled, so it gets first pick — any earlier bar must dodge whatever count this one keeps.`, { active: i });
 
     while (bars[i] > 0 && used.has(bars[i])) {
       const before = bars[i];
       bars[i]--;
       dels++;
-      emit(
-        'DELETE',
-        `${letter} ${before}→${bars[i]}`,
-        `Count ${before} is already taken by another letter, so delete one '${letter}': ${before} → ${bars[i]}. That is +1 deletion (total ${dels}). Keep shrinking until '${letter}' lands on a free count (or 0).`,
-        i,
-        'bad',
-      );
+      emit('DELETE', `${letter} ${before}→${bars[i]}`, `Count ${before} is already taken by another letter, so delete one '${letter}': ${before} → ${bars[i]}. That is +1 deletion (total ${dels}). Keep shrinking until '${letter}' lands on a free count (or 0).`, { active: i }, 'bad');
     }
 
     if (bars[i] > 0) {
       used.add(bars[i]);
-      emit(
-        'CLAIM',
-        `claim ${bars[i]}`,
-        `Frequency ${bars[i]} for '${letter}' is free, so claim it — no other letter may use ${bars[i]} now.`,
-        i,
-        'good',
-      );
+      emit('CLAIM', `claim ${bars[i]}`, `Frequency ${bars[i]} for '${letter}' is free, so claim it — no other letter may use ${bars[i]} now.`, { active: i }, 'good');
     } else {
-      emit(
-        'ZERO',
-        `${letter} → 0`,
-        `'${letter}' shrank all the way to 0, meaning every occurrence was deleted. A count of 0 needs no claim — the letter simply disappears.`,
-        i,
-      );
+      emit('ZERO', `${letter} → 0`, `'${letter}' shrank all the way to 0, meaning every occurrence was deleted. A count of 0 needs no claim — the letter simply disappears.`, { active: i });
     }
   }
 
-  emit(
-    'DONE',
-    `${dels} deletions`,
-    `All counts are now unique. The minimum number of deletions to make every character frequency unique is ${dels}.`,
-    null,
-    'good',
-  );
+  emit('DONE', `${dels} deletions`, `All counts are now unique. The minimum number of deletions to make every character frequency unique is ${dels}.`, { active: null , done: true }, 'good');
 
   return frames;
 }

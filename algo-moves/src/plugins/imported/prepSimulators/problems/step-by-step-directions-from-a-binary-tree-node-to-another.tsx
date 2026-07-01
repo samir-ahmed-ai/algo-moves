@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -30,8 +31,6 @@ interface DirectionsState {
 }
 
 function record({ tree, startValue, destValue }: DirectionsInput): Frame<DirectionsState>[] {
-  const frames: Frame<DirectionsState>[] = [];
-
   let phase: Phase = 'find-start';
   let startPathNodes: number[] = [];
   let destPathNodes: number[] = [];
@@ -40,16 +39,7 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
   let lcaLen: number | null = null;
   let answer: string | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DirectionsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DirectionsState>(() => ({
         tree,
         startValue,
         destValue,
@@ -62,10 +52,8 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
         found: [],
         lcaLen,
         answer,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

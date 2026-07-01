@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -17,9 +18,7 @@ interface TraversalState {
   done: boolean;
 }
 
-function record({ tree }: TraversalInput): Frame<TraversalState>[] {
-  const frames: Frame<TraversalState>[] = [];
-  const n = tree.length;
+function record({ tree }: TraversalInput): Frame<TraversalState>[] {  const n = tree.length;
   const left = (i: number) => 2 * i + 1;
   const right = (i: number) => 2 * i + 2;
   const exists = (i: number) => i >= 0 && i < n && tree[i] !== null;
@@ -30,29 +29,16 @@ function record({ tree }: TraversalInput): Frame<TraversalState>[] {
   const out: number[] = [];
   let cur: number | null = exists(0) ? 0 : null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        cur,
+  const { emit, frames } = createRecorder<TraversalState>(() => ({
+        tree: tree,
+        cur: cur,
         stack: stack.slice(),
         visited: visited.slice(),
         out: out.slice(),
-        done: type === 'DONE',
-      },
-    });
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    'iterative in-order',
-    `In-order traversal without recursion: use an explicit stack. Repeatedly push the entire left spine, then pop a node to visit it and dive into its right subtree. Time O(n), Space O(h).`,
-  );
+  emit('INIT', 'iterative in-order', `In-order traversal without recursion: use an explicit stack. Repeatedly push the entire left spine, then pop a node to visit it and dive into its right subtree. Time O(n), Space O(h).`, {});
 
   // for cur != nil || len(stack) > 0
   while (cur !== null || stack.length > 0) {
@@ -60,11 +46,7 @@ function record({ tree }: TraversalInput): Frame<TraversalState>[] {
     while (cur !== null) {
       stack.push(cur);
       const c = cur;
-      emit(
-        'PUSH',
-        `push ${val(c)}`,
-        `cur is node ${val(c)} — push it onto the stack, then walk to its left child. We keep diving left, remembering each node so we can come back to it.`,
-      );
+      emit('PUSH', `push ${val(c)}`, `cur is node ${val(c)} — push it onto the stack, then walk to its left child. We keep diving left, remembering each node so we can come back to it.`, {});
       cur = exists(left(c)) ? left(c) : null;
     }
 
@@ -73,30 +55,16 @@ function record({ tree }: TraversalInput): Frame<TraversalState>[] {
     cur = top;
     out.push(val(top));
     visited.push(top);
-    emit(
-      'VISIT',
-      `visit ${val(top)}`,
-      `Left is exhausted, so pop node ${val(top)} and visit it — append ${val(top)} to the output. In-order visits the left subtree, then the node, then the right subtree.`,
-      'good',
-    );
+    emit('VISIT', `visit ${val(top)}`, `Left is exhausted, so pop node ${val(top)} and visit it — append ${val(top)} to the output. In-order visits the left subtree, then the node, then the right subtree.`, {}, 'good');
 
     // cur = cur.Right — dive into the right subtree next.
     cur = exists(right(top)) ? right(top) : null;
-    emit(
-      'RIGHT',
-      cur !== null ? `go right → ${val(cur)}` : 'no right child',
-      cur !== null
+    emit('RIGHT', cur !== null ? `go right → ${val(cur)}` : 'no right child', cur !== null
         ? `Now move to node ${val(top)}'s right child (${val(cur)}) and repeat: its left spine gets pushed next.`
-        : `Node ${val(top)} has no right child, so cur becomes null. Next loop we pop the stack again (or stop if it is empty).`,
-    );
+        : `Node ${val(top)} has no right child, so cur becomes null. Next loop we pop the stack again (or stop if it is empty).`, {});
   }
 
-  emit(
-    'DONE',
-    `[${out.join(', ')}]`,
-    `Both cur and the stack are empty, so every node is visited. The in-order sequence is [${out.join(', ')}].`,
-    'good',
-  );
+  emit('DONE', `[${out.join(', ')}]`, `Both cur and the stack are empty, so every node is visited. The in-order sequence is [${out.join(', ')}].`, { done: true }, 'good');
   return frames;
 }
 

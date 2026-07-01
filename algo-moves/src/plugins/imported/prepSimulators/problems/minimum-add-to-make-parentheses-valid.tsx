@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -18,30 +19,17 @@ interface MinAddState {
 }
 
 function record({ s }: MinAddInput): Frame<MinAddState>[] {
-  const chars = s.split('');
-  const frames: Frame<MinAddState>[] = [];
-  let open = 0;
+  const chars = s.split('');  let open = 0;
   let close = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<MinAddState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MinAddState>(() => ({
         chars,
         i: null,
         open,
         close,
         action: null,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

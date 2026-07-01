@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -33,33 +34,20 @@ const right = (i: number) => 2 * i + 2;
 const exists = (tree: (number | null)[], i: number) => i >= 0 && i < tree.length && tree[i] != null;
 const val = (tree: (number | null)[], i: number) => (exists(tree, i) ? tree[i] : '·');
 
-function record({ tree, p, q }: DistInput): Frame<DistState>[] {
-  const frames: Frame<DistState>[] = [];
-  const visited: number[] = [];
+function record({ tree, p, q }: DistInput): Frame<DistState>[] {  const visited: number[] = [];
 
-  const emit = (
-    phase: Phase,
-    note: string,
-    caption: string,
-    s: Partial<DistState> = {},
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type: phase, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DistState>(() => ({
         tree,
         p,
         q,
-        phase,
+        phase: 'INIT',
         active: null,
         visited: visited.slice(),
         lca: null,
         depthP: null,
         depthQ: null,
-        answer: null,
-        ...s,
-      },
-    });
+        answer: null
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -34,21 +35,10 @@ function manhattan(a: Cell, b: Cell): number {
 
 function record({ grid: rows }: NearestBikesInput): Frame<NearestBikesState>[] {
   const grid = rows.map((row) => row.split(''));
-  const frames: Frame<NearestBikesState>[] = [];
-
   const bikes: Cell[] = [];
   const workers: Cell[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<NearestBikesState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<NearestBikesState>(() => ({
         grid,
         bikes: bikes.map((b) => ({ ...b })),
         workers: workers.map((w) => ({ ...w })),
@@ -58,10 +48,8 @@ function record({ grid: rows }: NearestBikesInput): Frame<NearestBikesState>[] {
         bike: null,
         pairDist: null,
         best: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

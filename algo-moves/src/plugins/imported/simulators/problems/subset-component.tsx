@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, RailGroup, RailResult, RailStat, VizStage } from '../../../_shared/vizKit';
@@ -21,79 +22,43 @@ interface SCState {
 
 function record({ adj, pos }: SCInput): Frame<SCState>[] {
   const n = adj.length;
-  const color = new Array<number>(n).fill(0);
-  const frames: Frame<SCState>[] = [];
-  let components = 0;
+  const color = new Array<number>(n).fill(0);  let components = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    inspect: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { adj, pos, color: color.slice(), active, inspect, components, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<SCState>(() => ({
+        adj: adj,
+        pos: pos,
+        color: color.slice(),
+        components: components,
+        active: null,
+        inspect: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    'count components',
-    'Count the connected components: walk over every node, and whenever we hit an unvisited one we launch a DFS that paints its whole component a single colour. Adjacent components alternate team-1 / team-2 so they stay distinct.',
-    null,
-    null,
-  );
+  emit('INIT', 'count components', 'Count the connected components: walk over every node, and whenever we hit an unvisited one we launch a DFS that paints its whole component a single colour. Adjacent components alternate team-1 / team-2 so they stay distinct.', { active: null, inspect: null });
 
   for (let start = 0; start < n; start++) {
     if (color[start] !== 0) continue;
     components += 1;
     const teamColor = components % 2 === 1 ? 1 : 2;
 
-    emit(
-      'NEW',
-      `component #${components}`,
-      `Node ${start} is unvisited — start component #${components}. DFS from here, painting every reachable node team-${teamColor}.`,
-      start,
-      null,
-    );
+    emit('NEW', `component #${components}`, `Node ${start} is unvisited — start component #${components}. DFS from here, painting every reachable node team-${teamColor}.`, { active: start, inspect: null });
 
     const stack: number[] = [start];
     color[start] = teamColor;
     while (stack.length > 0) {
       const v = stack.pop() as number;
-      emit(
-        'VISIT',
-        `visit ${v}`,
-        `DFS reaches node ${v} and paints it team-${teamColor} as part of component #${components}.`,
-        v,
-        null,
-      );
+      emit('VISIT', `visit ${v}`, `DFS reaches node ${v} and paints it team-${teamColor} as part of component #${components}.`, { active: v, inspect: null });
       for (const nb of adj[v]) {
         if (color[nb] === 0) {
           color[nb] = teamColor;
           stack.push(nb);
-          emit(
-            'PUSH',
-            `claim ${nb}`,
-            `Neighbour ${nb} of node ${v} is unvisited — it belongs to component #${components}, so paint it team-${teamColor} and push it.`,
-            v,
-            nb,
-          );
+          emit('PUSH', `claim ${nb}`, `Neighbour ${nb} of node ${v} is unvisited — it belongs to component #${components}, so paint it team-${teamColor} and push it.`, { active: v, inspect: nb });
         }
       }
     }
   }
 
-  emit(
-    'DONE',
-    `${components} components`,
-    `Every node is painted. The graph has ${components} connected component${components === 1 ? '' : 's'}.`,
-    null,
-    null,
-    'good',
-  );
+  emit('DONE', `${components} components`, `Every node is painted. The graph has ${components} connected component${components === 1 ? '' : 's'}.`, { active: null, inspect: null , done: true }, 'good');
   return frames;
 }
 

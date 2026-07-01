@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -30,54 +31,29 @@ function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
   const n = grid[0].length;
   const total = Array.from({ length: m }, () => new Array<number>(n).fill(0));
   const reach = Array.from({ length: m }, () => new Array<number>(n).fill(0));
-  const frames: Frame<BuildingsState>[] = [];
-
   let buildingsTotal = 0;
   for (let r = 0; r < m; r++) for (let c = 0; c < n; c++) if (grid[r][c] === 1) buildingsTotal++;
 
   let buildingsSeen = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    answer: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        grid,
+  const { emit, frames } = createRecorder<BuildingsState>(() => ({
+        grid: grid,
         total: total.map((row) => row.slice()),
         reach: reach.map((row) => row.slice()),
-        cur,
-        buildingsSeen,
-        buildingsTotal,
-        answer,
-        done: type === 'DONE',
-      },
-    });
+        buildingsSeen: buildingsSeen,
+        buildingsTotal: buildingsTotal,
+        cur: null,
+        answer: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${m}×${n} grid · ${buildingsTotal} buildings`,
-    `Reach every empty land cell (0) from all ${buildingsTotal} buildings (1); walls (2) block movement. From each building, BFS outward and add its distance into total[r][c], counting how many buildings reached each cell. Answer = the smallest total over cells reached by every building, or -1.`,
-    null,
-    null,
-  );
+  emit('INIT', `${m}×${n} grid · ${buildingsTotal} buildings`, `Reach every empty land cell (0) from all ${buildingsTotal} buildings (1); walls (2) block movement. From each building, BFS outward and add its distance into total[r][c], counting how many buildings reached each cell. Answer = the smallest total over cells reached by every building, or -1.`, { cur: null, answer: null });
 
   for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
       if (grid[r][c] !== 1) continue;
       buildingsSeen++;
-      emit(
-        'BUILDING',
-        `building #${buildingsSeen} at (${r},${c})`,
-        `Building #${buildingsSeen} at (${r}, ${c}): run BFS outward, adding each empty cell's distance from here into total.`,
-        [r, c],
-        null,
-      );
+      emit('BUILDING', `building #${buildingsSeen} at (${r},${c})`, `Building #${buildingsSeen} at (${r}, ${c}): run BFS outward, adding each empty cell's distance from here into total.`, { cur: [r, c], answer: null });
 
       const vis = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
       vis[r][c] = true;
@@ -95,13 +71,7 @@ function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
               total[nr][nc] += dist;
               reach[nr][nc]++;
               next.push([nr, nc]);
-              emit(
-                'REACH',
-                `(${nr},${nc}) +${dist} → total ${total[nr][nc]}`,
-                `Cell (${nr}, ${nc}) is ${dist} step${dist === 1 ? '' : 's'} from building #${buildingsSeen}; total[${nr}][${nc}] becomes ${total[nr][nc]}, reached by ${reach[nr][nc]} building${reach[nr][nc] === 1 ? '' : 's'} so far.`,
-                [nr, nc],
-                null,
-              );
+              emit('REACH', `(${nr},${nc}) +${dist} → total ${total[nr][nc]}`, `Cell (${nr}, ${nc}) is ${dist} step${dist === 1 ? '' : 's'} from building #${buildingsSeen}; total[${nr}][${nc}] becomes ${total[nr][nc]}, reached by ${reach[nr][nc]} building${reach[nr][nc] === 1 ? '' : 's'} so far.`, { cur: [nr, nc], answer: null });
             }
           }
         }
@@ -119,16 +89,9 @@ function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
   const answer = res === Infinity ? -1 : res;
 
   if (answer === -1) {
-    emit('DONE', 'no reachable cell', `No empty cell is reachable by all ${buildingsTotal} buildings. Answer = -1.`, null, -1, 'bad');
+    emit('DONE', 'no reachable cell', `No empty cell is reachable by all ${buildingsTotal} buildings. Answer = -1.`, { cur: null, answer: -1 , done: true }, 'bad');
   } else {
-    emit(
-      'DONE',
-      `min total = ${answer}`,
-      `Smallest total travel distance over cells reached by all ${buildingsTotal} buildings = ${answer}.`,
-      null,
-      answer,
-      'good',
-    );
+    emit('DONE', `min total = ${answer}`, `Smallest total travel distance over cells reached by all ${buildingsTotal} buildings = ${answer}.`, { cur: null, answer: answer , done: true }, 'good');
   }
   return frames;
 }

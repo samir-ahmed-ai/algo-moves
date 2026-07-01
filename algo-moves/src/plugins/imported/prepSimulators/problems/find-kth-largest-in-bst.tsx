@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,32 +21,19 @@ interface KthLargestState {
   done: boolean;
 }
 
-function record({ tree, k }: KthLargestInput): Frame<KthLargestState>[] {
-  const frames: Frame<KthLargestState>[] = [];
-  const visited: number[] = [];
+function record({ tree, k }: KthLargestInput): Frame<KthLargestState>[] {  const visited: number[] = [];
   let kLeft = k;
   let ans: number | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<KthLargestState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<KthLargestState>(() => ({
         tree,
         k,
         kLeft,
         active: null,
         visited: visited.slice(),
         ans,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import { cn } from '../../../../lib/cn';
@@ -26,21 +27,10 @@ function readDigit(list: number[], pos: number): number | null {
   return pos < list.length ? list[pos] : null;
 }
 
-function record({ l1, l2 }: AddTwoInput): Frame<AddTwoState>[] {
-  const frames: Frame<AddTwoState>[] = [];
-  const result: number[] = [];
+function record({ l1, l2 }: AddTwoInput): Frame<AddTwoState>[] {  const result: number[] = [];
   let carry = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<AddTwoState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<AddTwoState>(() => ({
         l1,
         l2,
         pos: null,
@@ -48,10 +38,8 @@ function record({ l1, l2 }: AddTwoInput): Frame<AddTwoState>[] {
         sum: null,
         digit: null,
         result: result.slice(),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

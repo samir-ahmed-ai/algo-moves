@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -72,16 +73,11 @@ function insertSorted(avail: number[], id: number): number[] {
   return a;
 }
 
-function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {
-  const frames: Frame<SrvState>[] = [];
-  let busy: BusyItem[] = [];
+function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {  let busy: BusyItem[] = [];
   let avail = Array.from({ length: k }, (_, i) => i);
   const cnt = new Array(k).fill(0);
 
-  const emit = (type: string, note: string, caption: string, s: Partial<SrvState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SrvState>(() => ({
         k,
         avail: avail.slice(),
         busy: busy.map((b) => ({ ...b })),
@@ -90,10 +86,8 @@ function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {
         assigned: null,
         op: '',
         result: [],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -18,34 +19,21 @@ interface PalinState {
   done: boolean;
 }
 
-function record({ n: input }: PalinInput): Frame<PalinState>[] {
-  const frames: Frame<PalinState>[] = [];
-  const digits = Math.abs(input).toString().split('');
+function record({ n: input }: PalinInput): Frame<PalinState>[] {  const digits = Math.abs(input).toString().split('');
   if (input < 0) digits.unshift('-');
 
   let n = input;
   let rev = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PalinState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PalinState>(() => ({
         original: input,
         n,
         rev,
         digits,
         frontCount: n < 0 ? digits.length : n.toString().length,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

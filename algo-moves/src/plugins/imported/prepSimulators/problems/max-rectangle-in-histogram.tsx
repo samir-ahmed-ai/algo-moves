@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,22 +22,11 @@ interface HistogramState {
   done: boolean;
 }
 
-function record({ heights }: HistogramInput): Frame<HistogramState>[] {
-  const frames: Frame<HistogramState>[] = [];
-  const stack: number[] = [];
+function record({ heights }: HistogramInput): Frame<HistogramState>[] {  const stack: number[] = [];
   let best = 0;
   let bestIdx: number | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<HistogramState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<HistogramState>(() => ({
         heights,
         i: null,
         h: null,
@@ -46,10 +36,8 @@ function record({ heights }: HistogramInput): Frame<HistogramState>[] {
         area: null,
         best,
         bestIdx,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -30,21 +31,10 @@ interface TopKState {
   phase: 'scan' | 'count' | 'sort' | 'done';
 }
 
-function record({ tweets, now, window, k }: TopKInput): Frame<TopKState>[] {
-  const frames: Frame<TopKState>[] = [];
-  const counts = new Map<string, number>();
+function record({ tweets, now, window, k }: TopKInput): Frame<TopKState>[] {  const counts = new Map<string, number>();
   const lo = now - window;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<TopKState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<TopKState>(() => ({
         tweets,
         now,
         window,
@@ -55,10 +45,8 @@ function record({ tweets, now, window, k }: TopKInput): Frame<TopKState>[] {
         counts: [...counts.entries()],
         ranked: null,
         result: null,
-        phase: 'scan',
-        ...s,
-      },
-    });
+        phase: 'scan'
+      }));
 
   emit(
     'INIT',

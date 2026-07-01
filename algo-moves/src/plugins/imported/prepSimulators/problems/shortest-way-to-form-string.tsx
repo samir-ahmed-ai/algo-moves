@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,18 +23,7 @@ interface ShortestWayState {
 }
 
 function record({ source, target }: ShortestWayInput): Frame<ShortestWayState>[] {
-  const frames: Frame<ShortestWayState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ShortestWayState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ShortestWayState>(() => ({
         source,
         target,
         i: null,
@@ -42,10 +32,8 @@ function record({ source, target }: ShortestWayInput): Frame<ShortestWayState>[]
         passStart: null,
         matchedInPass: false,
         answer: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   let res = 0;
   let j = 0;

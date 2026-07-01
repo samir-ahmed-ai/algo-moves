@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,21 +20,10 @@ interface MissingState {
   done: boolean;
 }
 
-function record({ nums }: MissingInput): Frame<MissingState>[] {
-  const frames: Frame<MissingState>[] = [];
-  const n = nums.length;
+function record({ nums }: MissingInput): Frame<MissingState>[] {  const n = nums.length;
   let xorAll = n;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MissingState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MissingState>(() => ({
         nums,
         n,
         i: null,
@@ -41,10 +31,8 @@ function record({ nums }: MissingInput): Frame<MissingState>[] {
         prev: xorAll,
         contrib: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

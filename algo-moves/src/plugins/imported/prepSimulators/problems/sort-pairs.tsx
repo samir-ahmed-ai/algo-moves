@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,25 +22,14 @@ interface SortPairsState {
   done: boolean;
 }
 
-function record({ pairs }: SortPairsInput): Frame<SortPairsState>[] {
-  const frames: Frame<SortPairsState>[] = [];
-  const inputMap = new Map<string, string>(pairs);
+function record({ pairs }: SortPairsInput): Frame<SortPairsState>[] {  const inputMap = new Map<string, string>(pairs);
   const keys = pairs.map(([k]) => k);
 
   let dest: string[] = [];
   let start: string | null = null;
   let route: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SortPairsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SortPairsState>(() => ({
         pairs,
         keys,
         dest: [...dest],
@@ -48,10 +38,8 @@ function record({ pairs }: SortPairsInput): Frame<SortPairsState>[] {
         cur: null,
         next: null,
         route: [...route],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,21 +23,10 @@ interface RepeatedSubsState {
 }
 
 function record({ s, k }: RepeatedSubsInput): Frame<RepeatedSubsState>[] {
-  const chars = s.split('');
-  const frames: Frame<RepeatedSubsState>[] = [];
-  const seen = new Map<string, number>();
+  const chars = s.split('');  const seen = new Map<string, number>();
   const out: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<RepeatedSubsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RepeatedSubsState>(() => ({
         chars,
         k,
         i: null,
@@ -45,10 +35,8 @@ function record({ s, k }: RepeatedSubsInput): Frame<RepeatedSubsState>[] {
         seen: [...seen.entries()],
         out: out.slice(),
         justEmitted: false,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

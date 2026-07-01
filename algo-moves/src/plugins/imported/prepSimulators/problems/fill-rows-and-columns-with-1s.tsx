@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -31,74 +32,43 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
   const mat = clone(input);
   const m = mat.length;
   const n = m > 0 ? mat[0].length : 0;
-  const frames: Frame<FillState>[] = [];
-
   let row0 = false;
   let col0 = false;
   const marked: [number, number][] = [];
   const filled: [number, number][] = [];
   const border: [number, number][] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    phase: Phase,
-    active: [number, number] | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FillState>(() => ({
         mat: clone(mat),
-        m,
-        n,
-        phase,
-        row0,
-        col0,
-        active,
+        m: m,
+        n: n,
+        row0: row0,
+        col0: col0,
         marked: marked.map((p) => [p[0], p[1]] as [number, number]),
         filled: filled.map((p) => [p[0], p[1]] as [number, number]),
         border: border.map((p) => [p[0], p[1]] as [number, number]),
-        done: type === 'DONE',
-      },
-    });
+        phase: 'init',
+        active: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${m}x${n}`,
-    `Goal: for every cell that holds a 1, set its whole row and whole column to 1. We do it in O(1) extra space by reusing row 0 and column 0 as marker lanes — but first we must remember whether they already contained a 1 of their own.`,
-    'init',
-    null,
-  );
+  emit('INIT', `${m}x${n}`, `Goal: for every cell that holds a 1, set its whole row and whole column to 1. We do it in O(1) extra space by reusing row 0 and column 0 as marker lanes — but first we must remember whether they already contained a 1 of their own.`, { phase: 'init', active: null });
 
   if (m === 0 || n === 0) {
-    emit('DONE', 'empty', `The matrix is empty, so there is nothing to fill.`, 'done', null, 'good');
+    emit('DONE', 'empty', `The matrix is empty, so there is nothing to fill.`, { phase: 'done', active: null , done: true }, 'good');
     return frames;
   }
 
   // Pass 1a: flag whether the original first row has a 1.
   for (let j = 0; j < n; j++) {
     if (mat[0][j] === 1) row0 = true;
-    emit(
-      'SCAN_ROW0',
-      `row0=${row0}`,
-      `Scanning the first row to record its own state before we overwrite it. mat[0][${j}] = ${mat[0][j]}. row0 is now ${row0}${row0 ? ' — the top row already had a 1, so we must rebuild it fully at the end.' : '.'}`,
-      'scan-row0',
-      [0, j],
-    );
+    emit('SCAN_ROW0', `row0=${row0}`, `Scanning the first row to record its own state before we overwrite it. mat[0][${j}] = ${mat[0][j]}. row0 is now ${row0}${row0 ? ' — the top row already had a 1, so we must rebuild it fully at the end.' : '.'}`, { phase: 'scan-row0', active: [0, j] });
   }
 
   // Pass 1b: flag whether the original first column has a 1.
   for (let i = 0; i < m; i++) {
     if (mat[i][0] === 1) col0 = true;
-    emit(
-      'SCAN_COL0',
-      `col0=${col0}`,
-      `Scanning the first column to record its own state before we overwrite it. mat[${i}][0] = ${mat[i][0]}. col0 is now ${col0}${col0 ? ' — the left column already had a 1, so we must rebuild it fully at the end.' : '.'}`,
-      'scan-col0',
-      [i, 0],
-    );
+    emit('SCAN_COL0', `col0=${col0}`, `Scanning the first column to record its own state before we overwrite it. mat[${i}][0] = ${mat[i][0]}. col0 is now ${col0}${col0 ? ' — the left column already had a 1, so we must rebuild it fully at the end.' : '.'}`, { phase: 'scan-col0', active: [i, 0] });
   }
 
   // Pass 2: mark from the interior. A 1 at (i,j) records itself in row0 and col0.
@@ -109,21 +79,9 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
         mat[0][j] = 1;
         marked.push([i, 0]);
         marked.push([0, j]);
-        emit(
-          'MARK',
-          `mark ${i},${j}`,
-          `Interior cell mat[${i}][${j}] = 1, so this row and column must become all 1s. We record that by setting the markers mat[${i}][0] = 1 and mat[0][${j}] = 1 in the marker lanes.`,
-          'mark',
-          [i, j],
-        );
+        emit('MARK', `mark ${i},${j}`, `Interior cell mat[${i}][${j}] = 1, so this row and column must become all 1s. We record that by setting the markers mat[${i}][0] = 1 and mat[0][${j}] = 1 in the marker lanes.`, { phase: 'mark', active: [i, j] });
       } else {
-        emit(
-          'MARK',
-          `skip ${i},${j}`,
-          `Interior cell mat[${i}][${j}] = 0 — nothing to mark for this cell.`,
-          'mark',
-          [i, j],
-        );
+        emit('MARK', `skip ${i},${j}`, `Interior cell mat[${i}][${j}] = 0 — nothing to mark for this cell.`, { phase: 'mark', active: [i, j] });
       }
     }
   }
@@ -135,21 +93,9 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
         const already = mat[i][j] === 1;
         mat[i][j] = 1;
         if (!already) filled.push([i, j]);
-        emit(
-          'APPLY',
-          `fill ${i},${j}`,
-          `mat[${i}][0] = ${mat[i][0]} or mat[0][${j}] = ${mat[0][j]} flags this cell, so set mat[${i}][${j}] = 1${already ? ' (it was already 1).' : '.'}`,
-          'apply',
-          [i, j],
-        );
+        emit('APPLY', `fill ${i},${j}`, `mat[${i}][0] = ${mat[i][0]} or mat[0][${j}] = ${mat[0][j]} flags this cell, so set mat[${i}][${j}] = 1${already ? ' (it was already 1).' : '.'}`, { phase: 'apply', active: [i, j] });
       } else {
-        emit(
-          'APPLY',
-          `keep ${i},${j}`,
-          `Neither marker fires for mat[${i}][${j}] (row marker ${mat[i][0]}, column marker ${mat[0][j]}), so it stays 0.`,
-          'apply',
-          [i, j],
-        );
+        emit('APPLY', `keep ${i},${j}`, `Neither marker fires for mat[${i}][${j}] (row marker ${mat[i][0]}, column marker ${mat[0][j]}), so it stays 0.`, { phase: 'apply', active: [i, j] });
       }
     }
   }
@@ -160,13 +106,7 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
       const already = mat[0][j] === 1;
       mat[0][j] = 1;
       if (!already) border.push([0, j]);
-      emit(
-        'BORDER',
-        `row0 ${j}`,
-        `Because the original top row contained a 1 (row0 = true), the entire first row becomes 1: set mat[0][${j}] = 1.`,
-        'borders',
-        [0, j],
-      );
+      emit('BORDER', `row0 ${j}`, `Because the original top row contained a 1 (row0 = true), the entire first row becomes 1: set mat[0][${j}] = 1.`, { phase: 'borders', active: [0, j] });
     }
   }
   if (col0) {
@@ -174,25 +114,12 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
       const already = mat[i][0] === 1;
       mat[i][0] = 1;
       if (!already) border.push([i, 0]);
-      emit(
-        'BORDER',
-        `col0 ${i}`,
-        `Because the original left column contained a 1 (col0 = true), the entire first column becomes 1: set mat[${i}][0] = 1.`,
-        'borders',
-        [i, 0],
-      );
+      emit('BORDER', `col0 ${i}`, `Because the original left column contained a 1 (col0 = true), the entire first column becomes 1: set mat[${i}][0] = 1.`, { phase: 'borders', active: [i, 0] });
     }
   }
 
   const ones = mat.reduce((acc, row) => acc + row.reduce((a, v) => a + v, 0), 0);
-  emit(
-    'DONE',
-    `${ones} ones`,
-    `Every row and column that originally held a 1 is now completely filled, using only row 0 and column 0 as scratch space. The matrix now has ${ones} ones.`,
-    'done',
-    null,
-    'good',
-  );
+  emit('DONE', `${ones} ones`, `Every row and column that originally held a 1 is now completely filled, using only row 0 and column 0 as scratch space. The matrix now has ${ones} ones.`, { phase: 'done', active: null , done: true }, 'good');
   return frames;
 }
 

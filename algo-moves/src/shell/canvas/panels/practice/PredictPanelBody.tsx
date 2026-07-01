@@ -60,6 +60,20 @@ export function PredictPanelBody() {
     return () => clearTimeout(id);
   }, [timed, picked, timeLeft, round, answer, cur, item, focusPanel]);
 
+  useEffect(() => {
+    if (picked === null || picked !== answer) return;
+    const s = statFor(progress, item.id);
+    const delay = s.streak >= 3 ? PREDICT_MASTERY_FOCUS_MS : PREDICT_CORRECT_MS;
+    const t = window.setTimeout(() => {
+      if (statFor(progress, item.id).streak >= 3) advancePractice('predict');
+      else {
+        setPicked(null);
+        setRound((r) => r + 1);
+      }
+    }, delay);
+    return () => window.clearTimeout(t);
+  }, [picked, answer, progress, item.id, advancePractice]);
+
   if (frames.length < 2 || !answer) {
     return (
       <EmptyState icon={<Lightbulb className="h-5 w-5" />} title="Too short to predict" hint="Pick a longer problem." />
@@ -88,20 +102,6 @@ export function PredictPanelBody() {
       });
     }
   };
-
-  useEffect(() => {
-    if (picked === null || picked !== answer) return;
-    const s = statFor(progress, item.id);
-    const delay = s.streak >= 3 ? PREDICT_MASTERY_FOCUS_MS : PREDICT_CORRECT_MS;
-    const t = window.setTimeout(() => {
-      if (statFor(progress, item.id).streak >= 3) advancePractice('predict');
-      else {
-        setPicked(null);
-        setRound((r) => r + 1);
-      }
-    }, delay);
-    return () => window.clearTimeout(t);
-  }, [picked, answer, progress, item.id, advancePractice]);
 
   return (
     <div className="nodrag flex flex-col gap-2">

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,21 +26,10 @@ interface ReverseWordsState {
 const SP = '·';
 const show = (c: string) => (c === ' ' ? SP : c);
 
-function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
-  const frames: Frame<ReverseWordsState>[] = [];
-  // Work on a mutable char array, mirroring Go's []byte(s).
+function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {  // Work on a mutable char array, mirroring Go's []byte(s).
   let b = s.split('');
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<ReverseWordsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ReverseWordsState>(() => ({
         chars: b.map(show),
         phase: 'init',
         l: null,
@@ -47,10 +37,8 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
         wordStart: null,
         wordEnd: null,
         done: false,
-        result: null,
-        ...st,
-      },
-    });
+        result: null
+      }));
 
   emit(
     'INIT',

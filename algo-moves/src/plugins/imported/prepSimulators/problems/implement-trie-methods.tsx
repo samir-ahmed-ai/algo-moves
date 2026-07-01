@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
@@ -31,8 +32,6 @@ interface TrieState {
 }
 
 function record({ ops }: TrieInput): Frame<TrieState>[] {
-  const frames: Frame<TrieState>[] = [];
-
   // Growing trie. Node 0 is the root. Each node has a 26-way child map keyed by
   // letter; we also keep a drawing-order children list for the board.
   const labels: string[] = ['•'];
@@ -53,30 +52,18 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
     ...over,
   });
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    over: Partial<TrieState>,
-    tone?: 'good' | 'bad',
-  ) => frames.push({ move: { type, note, caption, tone }, state: snapshot(over) });
+  const { emit, frames } = createRecorder<TrieState>(() => ({
+        ...snapshot({})
+      }), {
+    merge: (_base, partial) => snapshot(partial),
+  });
 
-  emit(
-    'INIT',
-    `${ops.length} ops`,
-    `Implement a trie (prefix tree). Every node has up to 26 children, one per lowercase letter; an isEnd flag marks where a full word ends. insert creates missing nodes, search walks then checks isEnd, startsWith only walks.`,
-    { active: 0 },
-  );
+  emit('INIT', `${ops.length} ops`, `Implement a trie (prefix tree). Every node has up to 26 children, one per lowercase letter; an isEnd flag marks where a full word ends. insert creates missing nodes, search walks then checks isEnd, startsWith only walks.`, { active: 0 });
 
   const insert = (word: string) => {
     let node = 0;
     const path = [0];
-    emit(
-      'OP',
-      `insert("${word}")`,
-      `insert("${word}"): start at the root and descend one letter at a time, creating a child node whenever the branch is missing.`,
-      { active: 0, matched: [0], op: `insert("${word}")` },
-    );
+    emit('OP', `insert("${word}")`, `insert("${word}"): start at the root and descend one letter at a time, creating a child node whenever the branch is missing.`, { active: 0, matched: [0], op: `insert("${word}")` });
     for (let i = 0; i < word.length; i++) {
       const ch = word[i];
       if (childMap[node][ch] === undefined) {
@@ -89,32 +76,15 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
         drawKids[node].push(created);
         node = created;
         path.push(node);
-        emit(
-          'CREATE',
-          `+'${ch}'`,
-          `No '${ch}' edge existed under this node, so create a new node for '${ch}' and move onto it. This is why insert can add nodes.`,
-          { active: node, edge: node, matched: path.slice(), op: `insert("${word}")` },
-          'good',
-        );
+        emit('CREATE', `+'${ch}'`, `No '${ch}' edge existed under this node, so create a new node for '${ch}' and move onto it. This is why insert can add nodes.`, { active: node, edge: node, matched: path.slice(), op: `insert("${word}")` }, 'good');
       } else {
         node = childMap[node][ch];
         path.push(node);
-        emit(
-          'WALK',
-          `→'${ch}'`,
-          `A '${ch}' edge already exists (shared prefix), so just walk onto the existing node — no new node needed.`,
-          { active: node, edge: node, matched: path.slice(), op: `insert("${word}")` },
-        );
+        emit('WALK', `→'${ch}'`, `A '${ch}' edge already exists (shared prefix), so just walk onto the existing node — no new node needed.`, { active: node, edge: node, matched: path.slice(), op: `insert("${word}")` });
       }
     }
     isEnd[node] = true;
-    emit(
-      'END',
-      `isEnd("${word}")`,
-      `Reached the last letter of "${word}". Mark this node isEnd = true so a later search knows a full word ends here.`,
-      { active: node, matched: path.slice(), op: `insert("${word}")` },
-      'good',
-    );
+    emit('END', `isEnd("${word}")`, `Reached the last letter of "${word}". Mark this node isEnd = true so a later search knows a full word ends here.`, { active: node, matched: path.slice(), op: `insert("${word}")` }, 'good');
   };
 
   const walk = (word: string): { node: number; path: number[]; fell: boolean } => {
@@ -136,58 +106,30 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
     const label = `${kind}("${word}")`;
     let node = 0;
     const path = [0];
-    emit(
-      'OP',
-      label,
-      `${label}: walk the trie letter by letter from the root. ${
+    emit('OP', label, `${label}: walk the trie letter by letter from the root. ${
         kind === 'search'
           ? 'If any edge is missing, or the final node is not isEnd, the word is not present.'
           : 'We only need every letter to exist — isEnd does not matter for a prefix.'
-      }`,
-      { active: 0, matched: [0], op: label },
-    );
+      }`, { active: 0, matched: [0], op: label });
     for (let i = 0; i < word.length; i++) {
       const ch = word[i];
       const next = childMap[node][ch];
       if (next === undefined) {
-        emit(
-          'MISS',
-          `no '${ch}'`,
-          `There is no '${ch}' edge under the current node, so the walk fails immediately. ${label} returns false.`,
-          { active: node, matched: path.slice(), op: label, result: false, done: false },
-          'bad',
-        );
+        emit('MISS', `no '${ch}'`, `There is no '${ch}' edge under the current node, so the walk fails immediately. ${label} returns false.`, { active: node, matched: path.slice(), op: label, result: false, done: false }, 'bad');
         return false;
       }
       node = next;
       path.push(node);
-      emit(
-        'WALK',
-        `→'${ch}'`,
-        `Matched '${ch}' — step onto its node and keep walking. The confirmed prefix so far is "${word.slice(0, i + 1)}".`,
-        { active: node, edge: node, matched: path.slice(), op: label },
-      );
+      emit('WALK', `→'${ch}'`, `Matched '${ch}' — step onto its node and keep walking. The confirmed prefix so far is "${word.slice(0, i + 1)}".`, { active: node, edge: node, matched: path.slice(), op: label });
     }
     if (kind === 'startsWith') {
-      emit(
-        'HIT',
-        `true`,
-        `Every letter of the prefix "${word}" exists in the trie, so startsWith returns true — regardless of whether this node is isEnd.`,
-        { active: node, matched: path.slice(), op: label, result: true },
-        'good',
-      );
+      emit('HIT', `true`, `Every letter of the prefix "${word}" exists in the trie, so startsWith returns true — regardless of whether this node is isEnd.`, { active: node, matched: path.slice(), op: label, result: true }, 'good');
       return true;
     }
     const ok = isEnd[node];
-    emit(
-      ok ? 'HIT' : 'MISS',
-      ok ? 'true' : 'not isEnd',
-      ok
+    emit(ok ? 'HIT' : 'MISS', ok ? 'true' : 'not isEnd', ok
         ? `All letters matched and this node is isEnd = true, so "${word}" was inserted as a full word. search returns true.`
-        : `All letters matched, but this node is isEnd = false — "${word}" is only a prefix of some word, not a full word. search returns false.`,
-      { active: node, matched: path.slice(), op: label, result: ok },
-      ok ? 'good' : 'bad',
-    );
+        : `All letters matched, but this node is isEnd = false — "${word}" is only a prefix of some word, not a full word. search returns false.`, { active: node, matched: path.slice(), op: label, result: ok });
     return ok;
   };
 
@@ -206,13 +148,7 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
     finalLabel = `${lastOp.kind}("${lastOp.word}") = ${finalResult}`;
   }
 
-  emit(
-    'DONE',
-    finalLabel,
-    `All operations complete. insert is O(s) time and space; search and startsWith are O(s) time and O(1) extra space, where s is the length of the word/prefix.`,
-    { active: 0, result: finalResult, op: finalLabel, done: true },
-    'good',
-  );
+  emit('DONE', finalLabel, `All operations complete. insert is O(s) time and space; search and startsWith are O(s) time and O(1) extra space, where s is the length of the word/prefix.`, { active: 0, result: finalResult, op: finalLabel, done: true }, 'good');
 
   return frames;
 }

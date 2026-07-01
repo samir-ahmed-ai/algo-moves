@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -53,41 +54,21 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
     }
     return x;
   };
-
-  const frames: Frame<SSGState>[] = [];
-  const snapshot = (
-    type: string,
-    note: string,
-    caption: string,
-    pair: [number, number] | null,
-    diffs: number | null,
-    united: boolean,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SSGState>(() => ({
         parent: parent.slice(),
         size: size.slice(),
-        strs,
+        strs: strs,
         adj: adj.map((row) => row.slice()),
-        pos,
-        pair,
-        diffs,
-        united,
-        groups,
-        done: type === 'DONE',
-      },
-    });
+        pos: pos,
+        groups: groups,
+        pair: null,
+        diffs: null,
+        united: false,
+        done: false
+      }));
+  // renamed from snapshot
 
-  snapshot(
-    'INIT',
-    `${n} strings`,
-    `Similar String Groups: each of the ${n} strings starts in its own group. Two strings are "similar" when they differ in exactly 0 or 2 positions; we compare every pair and union the similar ones. The answer is the final number of groups.`,
-    null,
-    null,
-    false,
-  );
+  emit('INIT', `${n} strings`, `Similar String Groups: each of the ${n} strings starts in its own group. Two strings are "similar" when they differ in exactly 0 or 2 positions; we compare every pair and union the similar ones. The answer is the final number of groups.`, { pair: null, diffs: null, united: false });
 
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
@@ -100,14 +81,7 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
       const ri = find(i);
       const rj = find(j);
       if (ri === rj) {
-        snapshot(
-          'COMPARE',
-          `"${strs[i]}"~"${strs[j]}"`,
-          `Compare "${strs[i]}" and "${strs[j]}": they differ in ${diffs} positions, so they are similar — but already in the same group, so the group count stays ${groups}.`,
-          [i, j],
-          diffs,
-          false,
-        );
+        emit('COMPARE', `"${strs[i]}"~"${strs[j]}"`, `Compare "${strs[i]}" and "${strs[j]}": they differ in ${diffs} positions, so they are similar — but already in the same group, so the group count stays ${groups}.`, { pair: [i, j], diffs: diffs, united: false });
         adj[i].push(j);
         adj[j].push(i);
         continue;
@@ -124,26 +98,11 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
       parent[small] = big;
       size[big] += size[small];
       groups -= 1;
-      snapshot(
-        'UNION',
-        `"${strs[i]}"~"${strs[j]}"`,
-        `Compare "${strs[i]}" and "${strs[j]}": they differ in exactly ${diffs} positions, so they are similar — union their groups. The group count drops to ${groups}.`,
-        [i, j],
-        diffs,
-        true,
-      );
+      emit('UNION', `"${strs[i]}"~"${strs[j]}"`, `Compare "${strs[i]}" and "${strs[j]}": they differ in exactly ${diffs} positions, so they are similar — union their groups. The group count drops to ${groups}.`, { pair: [i, j], diffs: diffs, united: true });
     }
   }
 
-  snapshot(
-    'DONE',
-    `${groups} groups`,
-    `Every pair has been compared. The strings collapse into ${groups} similar ${groups === 1 ? 'group' : 'groups'}.`,
-    null,
-    null,
-    false,
-    'good',
-  );
+  emit('DONE', `${groups} groups`, `Every pair has been compared. The strings collapse into ${groups} similar ${groups === 1 ? 'group' : 'groups'}.`, { pair: null, diffs: null, united: false , done: true }, 'good');
 
   return frames;
 }

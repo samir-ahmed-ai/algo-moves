@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -48,43 +49,26 @@ function evaluate(s: string): number {
   return res;
 }
 
-function record({ s }: CalcInput): Frame<CalcState>[] {
-  const frames: Frame<CalcState>[] = [];
-  const stack: number[] = [];
+function record({ s }: CalcInput): Frame<CalcState>[] {  const stack: number[] = [];
   let res = 0;
   let sign = 1;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        s,
-        i,
-        res,
-        sign,
+  const { emit, frames } = createRecorder<CalcState>(() => ({
+        s: s,
+        res: res,
+        sign: sign,
         stack: stack.slice(),
-        done: type === 'DONE',
-        answer: type === 'DONE' ? res : null,
-      },
-    });
+        answer: null,
+        i: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `"${s}"`,
-    `Basic Calculator: evaluate "${s}" with +, −, parentheses and spaces. Keep a running res and a sign (+1 or −1). On '(' we push res and sign onto a stack and reset; on ')' we fold the inner result back into the saved outer state.`,
-    null,
-  );
+  emit('INIT', `"${s}"`, `Basic Calculator: evaluate "${s}" with +, −, parentheses and spaces. Keep a running res and a sign (+1 or −1). On '(' we push res and sign onto a stack and reset; on ')' we fold the inner result back into the saved outer state.`, { i: null });
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     if (c === ' ') {
-      emit('SKIP', `skip space`, `Index ${i} is a space — ignore it and keep res = ${res}, sign = ${sign}.`, i);
+      emit('SKIP', `skip space`, `Index ${i} is a space — ignore it and keep res = ${res}, sign = ${sign}.`, { i: i });
       continue;
     }
     if (c >= '0' && c <= '9') {
@@ -97,45 +81,30 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
       i--;
       const span = start === i ? `digit at ${start}` : `digits ${start}..${i}`;
       res += sign * num;
-      emit(
-        'NUM',
-        `+${sign > 0 ? '' : '−'}${num}`,
-        `Read the number ${num} (${span}). Apply the current sign ${sign > 0 ? '+' : '−'} and add it: res = ${res - sign * num} ${sign > 0 ? '+' : '−'} ${num} = ${res}.`,
-        i,
-      );
+      emit('NUM', `+${sign > 0 ? '' : '−'}${num}`, `Read the number ${num} (${span}). Apply the current sign ${sign > 0 ? '+' : '−'} and add it: res = ${res - sign * num} ${sign > 0 ? '+' : '−'} ${num} = ${res}.`, { i: i });
     } else if (c === '+') {
       sign = 1;
-      emit('SIGN', `sign = +1`, `Saw '+', so the next number is added: set sign = +1. res stays ${res}.`, i);
+      emit('SIGN', `sign = +1`, `Saw '+', so the next number is added: set sign = +1. res stays ${res}.`, { i: i });
     } else if (c === '-') {
       sign = -1;
-      emit('SIGN', `sign = −1`, `Saw '−', so the next number is subtracted: set sign = −1. res stays ${res}.`, i);
+      emit('SIGN', `sign = −1`, `Saw '−', so the next number is subtracted: set sign = −1. res stays ${res}.`, { i: i });
     } else if (c === '(') {
       stack.push(res, sign);
       const savedRes = res;
       const savedSign = sign;
       res = 0;
       sign = 1;
-      emit(
-        'PUSH',
-        `push ${savedRes},${savedSign > 0 ? '+1' : '−1'}`,
-        `Open paren: push the outer res=${savedRes} and sign=${savedSign > 0 ? '+1' : '−1'} onto the stack, then reset res=0, sign=+1 to start evaluating the sub-expression fresh.`,
-        i,
-      );
+      emit('PUSH', `push ${savedRes},${savedSign > 0 ? '+1' : '−1'}`, `Open paren: push the outer res=${savedRes} and sign=${savedSign > 0 ? '+1' : '−1'} onto the stack, then reset res=0, sign=+1 to start evaluating the sub-expression fresh.`, { i: i });
     } else if (c === ')') {
       const prevSign = stack.pop()!;
       const prevRes = stack.pop()!;
       const inner = res;
       res = prevRes + prevSign * inner;
-      emit(
-        'POP',
-        `fold ${prevRes}${prevSign > 0 ? '+' : '−'}(${inner})`,
-        `Close paren: the inner expression evaluated to ${inner}. Pop the saved sign ${prevSign > 0 ? '+1' : '−1'} and res ${prevRes}, then fold: res = ${prevRes} ${prevSign > 0 ? '+' : '−'} ${inner} = ${res}.`,
-        i,
-      );
+      emit('POP', `fold ${prevRes}${prevSign > 0 ? '+' : '−'}(${inner})`, `Close paren: the inner expression evaluated to ${inner}. Pop the saved sign ${prevSign > 0 ? '+1' : '−1'} and res ${prevRes}, then fold: res = ${prevRes} ${prevSign > 0 ? '+' : '−'} ${inner} = ${res}.`, { i: i });
     }
   }
 
-  emit('DONE', `= ${res}`, `Reached the end of the string. The fully evaluated expression "${s}" = ${res}.`, null, 'good');
+  emit('DONE', `= ${res}`, `Reached the end of the string. The fully evaluated expression "${s}" = ${res}.`, { i: null, done: true, answer: res }, 'good');
   return frames;
 }
 

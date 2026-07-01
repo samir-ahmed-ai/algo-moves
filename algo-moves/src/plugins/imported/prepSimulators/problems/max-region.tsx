@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { GridBoard } from '../../../../components/GridBoard';
@@ -33,42 +34,22 @@ const DIRS: [number, number][] = [
   [-1, -1],
 ];
 
-function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
-  const frames: Frame<MaxRegionState>[] = [];
-  const m = mat.length;
+function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {  const m = mat.length;
   const n = m > 0 ? mat[0].length : 0;
   // grid mirrors mat but uses the richer 0..3 encoding for the view.
   const grid: number[][] = mat.map((row) => row.map((v) => (v === 1 ? LAND : WATER)));
 
   let best = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: [number, number] | null,
-    area: number,
-    done = false,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MaxRegionState>(() => ({
         grid: grid.map((row) => row.slice()),
-        active,
-        area,
-        best,
-        done,
-      },
-    });
+        best: best,
+        active: null,
+        area: 0,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${m}×${n} grid`,
-    `Max Region: find the largest blob of connected 1s, where connectivity counts all 8 neighbours (orthogonal AND diagonal). Scan the grid; every time we hit an unclaimed 1 we flood-fill its whole region and measure its area, keeping the biggest. Time O(m·n), Space O(m·n) for the recursion stack.`,
-    null,
-    0,
-  );
+  emit('INIT', `${m}×${n} grid`, `Max Region: find the largest blob of connected 1s, where connectivity counts all 8 neighbours (orthogonal AND diagonal). Scan the grid; every time we hit an unclaimed 1 we flood-fill its whole region and measure its area, keeping the biggest. Time O(m·n), Space O(m·n) for the recursion stack.`, { active: null, area: 0 });
 
   // Iterative 8-direction DFS so the simulator can emit a frame per visited cell,
   // faithfully reproducing the recursive Go `dfs` (area = 1 + sum over 8 dirs).
@@ -76,13 +57,7 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
     for (let j = 0; j < n; j++) {
       if (grid[i][j] !== LAND) continue;
 
-      emit(
-        'SEED',
-        `region at (${i},${j})`,
-        `Found an unclaimed 1 at (${i}, ${j}). Start a new region here and flood-fill outward to every 8-directionally connected 1.`,
-        [i, j],
-        0,
-      );
+      emit('SEED', `region at (${i},${j})`, `Found an unclaimed 1 at (${i}, ${j}). Start a new region here and flood-fill outward to every 8-directionally connected 1.`, { active: [i, j], area: 0 });
 
       let area = 0;
       const stack: [number, number][] = [[i, j]];
@@ -91,13 +66,7 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
       while (stack.length > 0) {
         const [ci, cj] = stack.pop()!;
         area += 1;
-        emit(
-          'VISIT',
-          `area=${area}`,
-          `Visit (${ci}, ${cj}) — it is part of this region, so add 1. Region area is now ${area}. Next, look at all 8 neighbours and queue any that are still unclaimed land.`,
-          [ci, cj],
-          area,
-        );
+        emit('VISIT', `area=${area}`, `Visit (${ci}, ${cj}) — it is part of this region, so add 1. Region area is now ${area}. Next, look at all 8 neighbours and queue any that are still unclaimed land.`, { active: [ci, cj], area: area });
 
         for (const [di, dj] of DIRS) {
           const ni = ci + di;
@@ -117,29 +86,13 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
       }
       const improved = area > best;
       if (improved) best = area;
-      emit(
-        improved ? 'BEST' : 'CLOSE',
-        improved ? `best=${best}` : `area=${area}`,
-        improved
+      emit(improved ? 'BEST' : 'CLOSE', improved ? `best=${best}` : `area=${area}`, improved
           ? `Region complete with area ${area}. That beats the previous best, so best = ${best}.`
-          : `Region complete with area ${area}. The best so far (${best}) is still larger, so leave it unchanged.`,
-        null,
-        area,
-        false,
-        improved ? 'good' : undefined,
-      );
+          : `Region complete with area ${area}. The best so far (${best}) is still larger, so leave it unchanged.`, { active: null, area: area, done: false });
     }
   }
 
-  emit(
-    'DONE',
-    `max = ${best}`,
-    `Every cell has been scanned. The largest 8-connected region has area ${best}.`,
-    null,
-    best,
-    true,
-    'good',
-  );
+  emit('DONE', `max = ${best}`, `Every cell has been scanned. The largest 8-connected region has area ${best}.`, { active: null, area: best, done: true }, 'good');
 
   return frames;
 }

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,31 +26,18 @@ function prec(c: string): number {
 }
 
 function record({ exp }: InfixInput): Frame<InfixState>[] {
-  const tokens = exp.split('').filter((c) => c !== ' ');
-  const frames: Frame<InfixState>[] = [];
-  const ops: string[] = [];
+  const tokens = exp.split('').filter((c) => c !== ' ');  const ops: string[] = [];
   const out: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<InfixState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<InfixState>(() => ({
         exp,
         tokens,
         i: null,
         ops: ops.slice(),
         out: out.slice(),
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

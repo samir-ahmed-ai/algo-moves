@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -26,21 +27,10 @@ const INT_MIN = -2147483648;
 function record({ s }: AtoiInput): Frame<AtoiState>[] {
   const chars = [...s];
   const n = chars.length;
-  const frames: Frame<AtoiState>[] = [];
-
   let sign: 1 | -1 = 1;
   let result = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<AtoiState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<AtoiState>(() => ({
         chars,
         i: null,
         sign,
@@ -48,10 +38,8 @@ function record({ s }: AtoiInput): Frame<AtoiState>[] {
         digit: null,
         clamped: false,
         answer: null,
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

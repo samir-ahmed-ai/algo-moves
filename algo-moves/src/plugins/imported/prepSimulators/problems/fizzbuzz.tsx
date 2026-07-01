@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,20 +20,9 @@ interface FizzBuzzState {
   done: boolean;
 }
 
-function record({ n }: FizzBuzzInput): Frame<FizzBuzzState>[] {
-  const frames: Frame<FizzBuzzState>[] = [];
-  const out = new Array<string>(n).fill('');
+function record({ n }: FizzBuzzInput): Frame<FizzBuzzState>[] {  const out = new Array<string>(n).fill('');
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<FizzBuzzState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FizzBuzzState>(() => ({
         n,
         out: out.slice(),
         i: null,
@@ -40,10 +30,8 @@ function record({ n }: FizzBuzzInput): Frame<FizzBuzzState>[] {
         by3: null,
         by5: null,
         picked: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

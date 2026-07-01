@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -88,18 +89,7 @@ function buildChain(input: IntersectInput): {
 
 function record(input: IntersectInput): Frame<IntersectState>[] {
   const { cells, headA, headB, nextOf, junctionStart, lenA } = buildChain(input);
-  const frames: Frame<IntersectState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<IntersectState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<IntersectState>(() => ({
         cells,
         lenA,
         junctionStart,
@@ -107,10 +97,8 @@ function record(input: IntersectInput): Frame<IntersectState>[] {
         pb: null,
         steps: 0,
         resultId: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const idAt = (idx: number | null): number | null => (idx === null ? null : cells[idx].id);
   const label = (idx: number | null) => (idx === null ? 'nil' : `node ${cells[idx].val}`);

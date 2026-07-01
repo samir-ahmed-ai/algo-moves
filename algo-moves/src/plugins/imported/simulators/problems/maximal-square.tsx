@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -21,38 +22,27 @@ interface MSState {
 function record({ matrix }: MSInput): Frame<MSState>[] {
   const m = matrix.length;
   const n = matrix[0].length;
-  const dp: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(-1));
-  const frames: Frame<MSState>[] = [];
-  let best = 0;
+  const dp: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(-1));  let best = 0;
   let bestCell: [number, number] | null = null;
 
-  const emit = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MSState>(() => ({
         matrix: matrix.map((r) => r.slice()),
-        m,
-        n,
+        m: m,
+        n: n,
         dp: dp.map((r) => r.slice()),
-        cur,
-        best,
+        best: best,
         bestCell: bestCell ? [bestCell[0], bestCell[1]] : null,
-        done: type === 'DONE',
-      },
-    });
+        cur: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${m}×${n}`,
-    `Maximal Square: find the largest square of all '1's in the binary matrix. dp[i][j] is the side length of the largest all-1 square whose bottom-right corner is cell (i, j); the answer is (max side)².`,
-    null,
-  );
+  emit('INIT', `${m}×${n}`, `Maximal Square: find the largest square of all '1's in the binary matrix. dp[i][j] is the side length of the largest all-1 square whose bottom-right corner is cell (i, j); the answer is (max side)².`, { cur: null });
 
   for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
       if (matrix[r][c] !== '1') {
         dp[r][c] = 0;
-        emit('ZERO', `dp[${r}][${c}]=0`, `Cell (${r}, ${c}) holds '0', so no square can end here: dp[${r}][${c}] = 0.`, [r, c]);
+        emit('ZERO', `dp[${r}][${c}]=0`, `Cell (${r}, ${c}) holds '0', so no square can end here: dp[${r}][${c}] = 0.`, { cur: [r, c] });
         continue;
       }
       if (r === 0 || c === 0) {
@@ -62,7 +52,7 @@ function record({ matrix }: MSInput): Frame<MSState>[] {
           best = dp[r][c];
           bestCell = [r, c];
         }
-        emit('EDGE', `dp[${r}][${c}]=1`, `Cell (${r}, ${c}) holds '1' and ${why}, so the largest square ending here is just itself: dp[${r}][${c}] = 1.`, [r, c]);
+        emit('EDGE', `dp[${r}][${c}]=1`, `Cell (${r}, ${c}) holds '1' and ${why}, so the largest square ending here is just itself: dp[${r}][${c}] = 1.`, { cur: [r, c] });
         continue;
       }
       const up = dp[r - 1][c];
@@ -74,23 +64,12 @@ function record({ matrix }: MSInput): Frame<MSState>[] {
         best = side;
         bestCell = [r, c];
       }
-      emit(
-        'FILL',
-        `dp[${r}][${c}]=${side}`,
-        `Cell (${r}, ${c}) holds '1'. A square ending here is limited by its three neighbours: up (${r - 1}, ${c}) = ${up}, left (${r}, ${c - 1}) = ${left}, diagonal (${r - 1}, ${c - 1}) = ${diag}. Take min(${up}, ${left}, ${diag}) + 1 = ${Math.min(up, left, diag)} + 1 = ${side}.`,
-        [r, c],
-      );
+      emit('FILL', `dp[${r}][${c}]=${side}`, `Cell (${r}, ${c}) holds '1'. A square ending here is limited by its three neighbours: up (${r - 1}, ${c}) = ${up}, left (${r}, ${c - 1}) = ${left}, diagonal (${r - 1}, ${c - 1}) = ${diag}. Take min(${up}, ${left}, ${diag}) + 1 = ${Math.min(up, left, diag)} + 1 = ${side}.`, { cur: [r, c] });
     }
   }
 
   const area = best * best;
-  emit(
-    'DONE',
-    `area ${area}`,
-    `The table is full. The largest side is ${best}${bestCell ? ` (ending at cell (${bestCell[0]}, ${bestCell[1]}))` : ''}, so the maximal square area is ${best}² = ${area}.`,
-    bestCell,
-    'good',
-  );
+  emit('DONE', `area ${area}`, `The table is full. The largest side is ${best}${bestCell ? ` (ending at cell (${bestCell[0]}, ${bestCell[1]}))` : ''}, so the maximal square area is ${best}² = ${area}.`, { cur: bestCell , done: true }, 'good');
   return frames;
 }
 

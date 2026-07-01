@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,8 +26,6 @@ interface SubsetWordsState {
 }
 
 function record({ text, words }: SubsetWordsInput): Frame<SubsetWordsState>[] {
-  const frames: Frame<SubsetWordsState>[] = [];
-
   const cnt = new Map<string, number>();
   for (const c of text) cnt.set(c, (cnt.get(c) ?? 0) + 1);
   const pile = (): [string, number][] =>
@@ -34,16 +33,7 @@ function record({ text, words }: SubsetWordsInput): Frame<SubsetWordsState>[] {
 
   const result: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SubsetWordsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SubsetWordsState>(() => ({
         text,
         cnt: pile(),
         words,
@@ -55,10 +45,8 @@ function record({ text, words }: SubsetWordsInput): Frame<SubsetWordsState>[] {
         avail: 0,
         fits: null,
         result: [...result],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

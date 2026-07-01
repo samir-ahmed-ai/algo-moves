@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -44,8 +45,6 @@ function digitsFor(m: number, s: number): number[] {
 }
 
 function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput): Frame<CookingTimeState>[] {
-  const frames: Frame<CookingTimeState>[] = [];
-
   const base: CookingTimeState = {
     startAt,
     moveCost,
@@ -64,52 +63,26 @@ function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput
     done: false,
   };
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<CookingTimeState>,
-    tone?: 'good' | 'bad',
-  ) => {
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { ...base, ...(carry as Partial<CookingTimeState>), ...s },
-    });
-  };
-
-  // `carry` holds facts that persist across frames (finished candidate costs).
   const carry: Partial<CookingTimeState> = {};
+
+  const { emit, frames } = createRecorder<CookingTimeState>(() => ({ ...base, ...carry }), {
+    merge: (b, partial) => ({ ...b, ...carry, ...partial }),
+  });
 
   const m = Math.floor(targetSeconds / 60);
   const s = targetSeconds % 60;
 
-  emit(
-    'INIT',
-    `${targetSeconds}s`,
-    `Minimum Cost to Set Cooking Time: a microwave shows mm:ss. We type ${targetSeconds} seconds as digits. Each keypress costs pushCost=${pushCost}; moving the finger to a different key costs moveCost=${moveCost}. The finger starts on digit ${startAt}. We try two ways to split the time and keep the cheaper one.`,
-    { cand: null },
-  );
+  emit('INIT', `${targetSeconds}s`, `Minimum Cost to Set Cooking Time: a microwave shows mm:ss. We type ${targetSeconds} seconds as digits. Each keypress costs pushCost=${pushCost}; moving the finger to a different key costs moveCost=${moveCost}. The finger starts on digit ${startAt}. We try two ways to split the time and keep the cheaper one.`, { cand: null });
 
   // Simulate one candidate, emitting a frame per digit. Returns its cost.
   const simulate = (candM: number, candS: number, tag: 'A' | 'B'): number => {
     if (candM < 0 || candM > 99 || candS < 0 || candS > 99) {
-      emit(
-        tag === 'A' ? 'CAND_A' : 'CAND_B',
-        `${tag}: invalid`,
-        `Candidate ${tag} = ${candM} min ${candS} s is out of range (each of minutes and seconds must be 0..99), so it cannot be typed. Its cost is treated as ∞.`,
-        { cand: tag, candM, candS, digits: [], i: null, pos: startAt, cost: INVALID },
-        'bad',
-      );
+      emit(tag === 'A' ? 'CAND_A' : 'CAND_B', `${tag}: invalid`, `Candidate ${tag} = ${candM} min ${candS} s is out of range (each of minutes and seconds must be 0..99), so it cannot be typed. Its cost is treated as ∞.`, { cand: tag, candM, candS, digits: [], i: null, pos: startAt, cost: INVALID }, 'bad');
       return INVALID;
     }
 
     const digits = digitsFor(candM, candS);
-    emit(
-      tag === 'A' ? 'CAND_A' : 'CAND_B',
-      `${tag}: ${candM}m ${candS}s`,
-      `Candidate ${tag}: represent the time as ${candM} minute(s) and ${candS} second(s). Typed as digits [${digits.join(', ')}]. Start with the finger on ${startAt} and cost 0.`,
-      { cand: tag, candM, candS, digits, i: null, pos: startAt, cost: 0 },
-    );
+    emit(tag === 'A' ? 'CAND_A' : 'CAND_B', `${tag}: ${candM}m ${candS}s`, `Candidate ${tag}: represent the time as ${candM} minute(s) and ${candS} second(s). Typed as digits [${digits.join(', ')}]. Start with the finger on ${startAt} and cost 0.`, { cand: tag, candM, candS, digits, i: null, pos: startAt, cost: 0 });
 
     let cost = 0;
     let pos = startAt;
@@ -119,28 +92,13 @@ function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput
         const from = pos;
         cost += moveCost;
         pos = d;
-        emit(
-          'MOVE',
-          `move ${from}→${d} (+${moveCost})`,
-          `Digit ${k + 1} is ${d}, but the finger is on ${from}. Move it to key ${d}: cost += moveCost (${moveCost}). Running cost = ${cost}.`,
-          { cand: tag, candM, candS, digits, i: k, pos, cost },
-        );
+        emit('MOVE', `move ${from}→${d} (+${moveCost})`, `Digit ${k + 1} is ${d}, but the finger is on ${from}. Move it to key ${d}: cost += moveCost (${moveCost}). Running cost = ${cost}.`, { cand: tag, candM, candS, digits, i: k, pos, cost });
       }
       cost += pushCost;
-      emit(
-        'PUSH',
-        `push ${d} (+${pushCost})`,
-        `Press key ${d}: cost += pushCost (${pushCost}). Running cost = ${cost}. The finger stays on ${pos}.`,
-        { cand: tag, candM, candS, digits, i: k, pos, cost },
-      );
+      emit('PUSH', `push ${d} (+${pushCost})`, `Press key ${d}: cost += pushCost (${pushCost}). Running cost = ${cost}. The finger stays on ${pos}.`, { cand: tag, candM, candS, digits, i: k, pos, cost });
     }
 
-    emit(
-      tag === 'A' ? 'DONE_A' : 'DONE_B',
-      `${tag} cost=${cost}`,
-      `Candidate ${tag} fully typed: total cost = ${cost}.`,
-      { cand: tag, candM, candS, digits, i: null, pos, cost },
-    );
+    emit(tag === 'A' ? 'DONE_A' : 'DONE_B', `${tag} cost=${cost}`, `Candidate ${tag} fully typed: total cost = ${cost}.`, { cand: tag, candM, candS, digits, i: null, pos, cost });
     return cost;
   };
 
@@ -152,13 +110,7 @@ function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput
 
   const best = Math.min(costA, costB);
   const winner = costA <= costB ? 'A' : 'B';
-  emit(
-    'RESULT',
-    `min=${best}`,
-    `Compare the two candidates: A = ${costA === INVALID ? '∞' : costA}, B = ${costB === INVALID ? '∞' : costB}. The cheaper one is candidate ${winner} with cost ${best}. That is the minimum cost.`,
-    { cand: null, best, done: true },
-    'good',
-  );
+  emit('RESULT', `min=${best}`, `Compare the two candidates: A = ${costA === INVALID ? '∞' : costA}, B = ${costB === INVALID ? '∞' : costB}. The cheaper one is candidate ${winner} with cost ${best}. That is the minimum cost.`, { cand: null, best, done: true }, 'good');
 
   return frames;
 }

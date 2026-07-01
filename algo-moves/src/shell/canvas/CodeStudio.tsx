@@ -348,8 +348,8 @@ export function CodeStudioProvider({
   );
 
   const savedQuizProgress = useMemo(
-    () => (phase === 'quiz' ? loadQuizProgress(item.id, active) : null),
-    [phase, item.id, active],
+    () => loadQuizProgress(item.id, active),
+    [item.id, active],
   );
 
   if (variants.length === 0) {
@@ -686,6 +686,7 @@ export function CodeStudioBody() {
           <CodeStudioQuiz
             key={`quiz-${item.id}-${active}`}
             quiz={quiz}
+            itemId={item.id}
             initial={savedQuizProgress}
             nextLabel={nextLabel}
             onProgress={onQuizProgress}

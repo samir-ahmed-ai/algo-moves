@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -33,31 +34,18 @@ function checkPalindromeInStream(chars: string[]): boolean {
 }
 
 function record({ chars: raw }: PalStreamInput): Frame<PalStreamState>[] {
-  const stream = raw.split('');
-  const frames: Frame<PalStreamState>[] = [];
-  const stack: string[] = [];
+  const stream = raw.split('');  const stack: string[] = [];
   let ok = true;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PalStreamState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PalStreamState>(() => ({
         stream,
         idx: null,
         stack: stack.slice(),
         matched: false,
         ok,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

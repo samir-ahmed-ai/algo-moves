@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -25,9 +26,7 @@ interface EqualSumState {
 
 const FULL = 6; // a six-sided die: values 1..6
 
-function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
-  const frames: Frame<EqualSumState>[] = [];
-  // contrib is always shown as 6 buckets (indices 0..5); slot c holds dice that
+function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {  // contrib is always shown as 6 buckets (indices 0..5); slot c holds dice that
   // can shift the gap by exactly c. We snapshot a copy in every frame.
   const buildContrib = (smaller: number[], larger: number[]): number[] => {
     const c = new Array<number>(FULL).fill(0);
@@ -38,20 +37,20 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
     return c;
   };
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: EqualSumState,
-    tone?: 'good' | 'bad',
-  ) => {
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { ...s, contrib: s.contrib.slice() },
-    });
-  };
-
   const sumOf = (a: number[]) => a.reduce((t, x) => t + x, 0);
+
+  const { emit, frames } = createRecorder<EqualSumState>(() => ({
+        contrib: new Array<number>(FULL).fill(0),
+        c: null,
+        diff: 0,
+        ops: 0,
+        taken: 0,
+        sum1: sumOf(nums1),
+        sum2: sumOf(nums2),
+        result: null,
+        failed: false,
+        done: false,
+      }));
 
   // Base state used before contributions are computed.
   let st: EqualSumState = {

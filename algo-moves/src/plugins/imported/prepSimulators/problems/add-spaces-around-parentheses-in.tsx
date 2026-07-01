@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -38,30 +39,17 @@ function addSpacesAroundParenthesesIn(s: string): string {
 }
 
 function record({ s }: AddSpacesInput): Frame<AddSpacesState>[] {
-  const chars = s.split('');
-  const frames: Frame<AddSpacesState>[] = [];
-  let out = '';
+  const chars = s.split('');  let out = '';
   let prevSpace = true;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<AddSpacesState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<AddSpacesState>(() => ({
         chars,
         i: null,
         prevSpace,
         out,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

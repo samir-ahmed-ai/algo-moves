@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,21 +20,10 @@ interface Base26State {
   done: boolean;
 }
 
-function record({ n }: Base26Input): Frame<Base26State>[] {
-  const frames: Frame<Base26State>[] = [];
-  const digits: string[] = [];
+function record({ n }: Base26Input): Frame<Base26State>[] {  const digits: string[] = [];
   let cur = n;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<Base26State>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<Base26State>(() => ({
         n0: n,
         n: cur,
         digits: digits.slice(),
@@ -41,10 +31,8 @@ function record({ n }: Base26Input): Frame<Base26State>[] {
         letter: null,
         reversed: false,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

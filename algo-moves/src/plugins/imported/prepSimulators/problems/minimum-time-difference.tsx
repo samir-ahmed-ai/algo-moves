@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -37,51 +38,33 @@ function fmt(m: number): string {
 }
 
 function record({ timePoints }: MtdInput): Frame<MtdState>[] {
-  const frames: Frame<MtdState>[] = [];
+  const raw = timePoints.map(toMinutes);
+  const mins = raw.slice().sort((a, b) => a - b);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    mins: number[],
-    sorted: boolean,
-    s: Partial<MtdState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MtdState>(() => ({
         timePoints,
         mins: mins.slice(),
-        sorted,
+        sorted: false,
         i: null,
         prev: null,
         wrap: false,
         best: null,
         bestPair: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
-  const raw = timePoints.map(toMinutes);
   emit(
     'INIT',
     `n=${timePoints.length}`,
     `Minimum Time Difference: find the smallest gap (in minutes) between any two clock times on a 24h circle. First convert each "HH:MM" to minutes since midnight.`,
-    raw,
-    false,
-    {},
+    { mins: raw.slice() },
   );
 
-  const mins = raw.slice().sort((a, b) => a - b);
   emit(
     'SORT',
     'sort ↑',
     `Sort the minute values ascending: [${mins.map(fmt).join(', ')}]. Once sorted, the closest pair must be adjacent — except for the pair that wraps past midnight.`,
-    mins,
-    true,
-    {},
+    { mins: mins.slice(), sorted: true },
   );
 
   // Wrap-around candidate: last time to first time across midnight.
@@ -92,9 +75,7 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
     'WRAP',
     `${best}m`,
     `The wrap-around gap crosses midnight: from ${fmt(mins[last])} forward to ${fmt(mins[0])} is 1440 − ${mins[last]} + ${mins[0]} = ${best} min. Seed the best answer with this.`,
-    mins,
-    true,
-    { i: last, prev: 0, wrap: true, best, bestPair },
+    { mins: mins.slice(), sorted: true, i: last, prev: 0, wrap: true, best, bestPair },
   );
 
   for (let i = 1; i < mins.length; i++) {
@@ -106,9 +87,7 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
         'FILL',
         `${d}m ✓`,
         `Adjacent gap ${fmt(mins[i - 1])} → ${fmt(mins[i])} = ${mins[i]} − ${mins[i - 1]} = ${d} min. That beats the previous best, so the new minimum is ${best} min.`,
-        mins,
-        true,
-        { i, prev: i - 1, best, bestPair },
+        { mins: mins.slice(), sorted: true, i, prev: i - 1, best, bestPair },
         'good',
       );
     } else {
@@ -116,9 +95,7 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
         'SCAN',
         `${d}m`,
         `Adjacent gap ${fmt(mins[i - 1])} → ${fmt(mins[i])} = ${d} min. That is not smaller than the current best (${best} min), so the best stays put.`,
-        mins,
-        true,
-        { i, prev: i - 1, best, bestPair },
+        { mins: mins.slice(), sorted: true, i, prev: i - 1, best, bestPair },
       );
     }
   }
@@ -127,9 +104,7 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
     'DONE',
     `${best}m`,
     `All adjacent gaps and the wrap-around are checked. The minimum time difference is ${best} minute${best === 1 ? '' : 's'}.`,
-    mins,
-    true,
-    { best, bestPair, done: true, i: bestPair[1], prev: bestPair[0] },
+    { mins: mins.slice(), sorted: true, best, bestPair, done: true, i: bestPair[1], prev: bestPair[0] },
     'good',
   );
 

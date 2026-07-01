@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -17,29 +18,16 @@ interface LcpState {
   done: boolean;
 }
 
-function record({ strs }: LcpInput): Frame<LcpState>[] {
-  const frames: Frame<LcpState>[] = [];
-  const base = strs.length > 0 ? strs[0] : '';
+function record({ strs }: LcpInput): Frame<LcpState>[] {  const base = strs.length > 0 ? strs[0] : '';
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LcpState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LcpState>(() => ({
         strs,
         col: null,
         row: null,
         matched: 0,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

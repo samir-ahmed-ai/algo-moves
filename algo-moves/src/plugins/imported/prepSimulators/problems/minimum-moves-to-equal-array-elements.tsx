@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,18 +23,7 @@ interface MinMovesState {
 }
 
 function record({ nums }: MinMovesInput): Frame<MinMovesState>[] {
-  const frames: Frame<MinMovesState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MinMovesState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MinMovesState>(() => ({
         nums,
         i: null,
         sum: 0,
@@ -43,10 +33,8 @@ function record({ nums }: MinMovesInput): Frame<MinMovesState>[] {
         contribution: null,
         moves: 0,
         scanning: true,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

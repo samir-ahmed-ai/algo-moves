@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -32,9 +33,7 @@ function reverseNumber(input: number): number {
   return neg ? -rev : rev;
 }
 
-function record({ n: input }: ReverseInput): Frame<ReverseState>[] {
-  const frames: Frame<ReverseState>[] = [];
-  const neg = input < 0;
+function record({ n: input }: ReverseInput): Frame<ReverseState>[] {  const neg = input < 0;
   const magnitude = Math.abs(input);
   const digits = String(magnitude).split('');
   const total = digits.length;
@@ -42,16 +41,7 @@ function record({ n: input }: ReverseInput): Frame<ReverseState>[] {
   let n = magnitude;
   let rev = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ReverseState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ReverseState>(() => ({
         original: input,
         neg,
         digits,
@@ -60,10 +50,8 @@ function record({ n: input }: ReverseInput): Frame<ReverseState>[] {
         popped: null,
         consumed: 0,
         done: false,
-        answer: null,
-        ...s,
-      },
-    });
+        answer: null
+      }));
 
   emit(
     'INIT',

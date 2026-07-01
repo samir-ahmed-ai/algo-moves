@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -18,30 +19,17 @@ interface SumOfNodesState {
   done: boolean;
 }
 
-function record({ tree }: SumOfNodesInput): Frame<SumOfNodesState>[] {
-  const frames: Frame<SumOfNodesState>[] = [];
-  const visited: number[] = [];
+function record({ tree }: SumOfNodesInput): Frame<SumOfNodesState>[] {  const visited: number[] = [];
   let total = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SumOfNodesState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SumOfNodesState>(() => ({
         tree,
         current: null,
         visited: visited.slice(),
         total,
         lastSubtree: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

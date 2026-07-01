@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -21,59 +22,30 @@ const EMPTY = -1;
 function record({ s }: DecodeInput): Frame<DecodeState>[] {
   const n = s.length;
   const dp = new Array<number>(n + 1).fill(EMPTY);
-  const frames: Frame<DecodeState>[] = [];
+  const { emit, frames } = createRecorder<DecodeState>(() => ({
+        s: s,
+        dp: dp.slice(),
+        i: null,
+        one: null,
+        two: null,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    one: number | null,
-    two: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { s, dp: dp.slice(), i, one, two, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `s="${s}"`,
-    `Decode Ways: 'A'..'Z' map to "1".."26", so we count how many ways the digit string "${s}" decodes. dp[i] = number of ways to decode the first i characters, built up from i = 0.`,
-    null,
-    null,
-    null,
-  );
+  emit('INIT', `s="${s}"`, `Decode Ways: 'A'..'Z' map to "1".."26", so we count how many ways the digit string "${s}" decodes. dp[i] = number of ways to decode the first i characters, built up from i = 0.`, { i: null, one: null, two: null });
 
   // Empty string decodes one way (the empty decoding).
   dp[0] = 1;
-  emit('BASE', 'dp[0]=1', `Base case: the empty prefix decodes exactly one way (decode nothing). dp[0] = 1.`, 0, null, null);
+  emit('BASE', 'dp[0]=1', `Base case: the empty prefix decodes exactly one way (decode nothing). dp[0] = 1.`, { i: 0, one: null, two: null });
 
   // A leading '0' kills everything: no letter maps to 0.
   if (n === 0 || s[0] === '0') {
     dp.fill(0, 1);
-    emit(
-      'DONE',
-      '0 ways',
-      `The string starts with '0', and no letter maps to "0", so "${s}" cannot be decoded at all. The answer is 0.`,
-      null,
-      null,
-      null,
-      'bad',
-    );
+    emit('DONE', '0 ways', `The string starts with '0', and no letter maps to "0", so "${s}" cannot be decoded at all. The answer is 0.`, { i: null, one: null, two: null , done: true }, 'bad');
     return frames;
   }
 
   dp[1] = 1;
-  emit(
-    'BASE',
-    'dp[1]=1',
-    `The first character s[0]='${s[0]}' is not '0', so the single character decodes one way. dp[1] = 1.`,
-    1,
-    null,
-    null,
-  );
+  emit('BASE', 'dp[1]=1', `The first character s[0]='${s[0]}' is not '0', so the single character decodes one way. dp[1] = 1.`, { i: 1, one: null, two: null });
 
   for (let i = 2; i <= n; i++) {
     const cur = s[i - 1];
@@ -99,26 +71,11 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
       parts.length === 0
         ? `Neither '${cur}' alone (it's '0') nor the pair "${prevCh}${cur}" (=${two}) is a valid letter, so dp[${i}] = 0 — this prefix is undecodable.`
         : `For the first ${i} chars we can ${parts.join(' and ')}, summing to dp[${i}] = ${ways}.`;
-    emit(
-      ways === 0 ? 'DEAD' : 'FILL',
-      `dp[${i}]=${ways}`,
-      reason,
-      i,
-      cur !== '0' ? i - 1 : null,
-      two >= 10 && two <= 26 ? i - 2 : null,
-    );
+    emit(ways === 0 ? 'DEAD' : 'FILL', `dp[${i}]=${ways}`, reason, { i: i, one: cur !== '0' ? i - 1 : null, two: two >= 10 && two <= 26 ? i - 2 : null });
   }
 
   const answer = dp[n];
-  emit(
-    'DONE',
-    `${answer} ways`,
-    `The table is full. dp[${n}] = ${answer}, so "${s}" decodes in ${answer} way${answer === 1 ? '' : 's'}.`,
-    n,
-    null,
-    null,
-    answer > 0 ? 'good' : 'bad',
-  );
+  emit('DONE', `${answer} ways`, `The table is full. dp[${n}] = ${answer}, so "${s}" decodes in ${answer} way${answer === 1 ? '' : 's'}.`, { i: n, one: null, two: null , done: true });
   return frames;
 }
 

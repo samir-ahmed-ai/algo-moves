@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -26,21 +27,10 @@ interface QueueMaxState {
   done: boolean;
 }
 
-function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
-  const frames: Frame<QueueMaxState>[] = [];
-  const queue: number[] = [];
+function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {  const queue: number[] = [];
   const maxDQ: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<QueueMaxState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<QueueMaxState>(() => ({
         queue: queue.slice(),
         maxDQ: maxDQ.slice(),
         highlightQueueBack: false,
@@ -48,10 +38,8 @@ function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
         currentMax: maxDQ.length > 0 ? maxDQ[0] : null,
         output: null,
         opLabel: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

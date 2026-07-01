@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -26,8 +27,6 @@ interface MinWindowState {
 // char in t is covered (formed === required), then shrink l to the smallest
 // covering window, recording the best. Time O(n), Space O(1) (bounded alphabet).
 function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
-  const frames: Frame<MinWindowState>[] = [];
-
   const need = new Map<string, number>();
   for (const ch of t) need.set(ch, (need.get(ch) ?? 0) + 1);
   const required = need.size;
@@ -38,16 +37,7 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
   let bestL = 0;
   let bestLen = Number.MAX_SAFE_INTEGER;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<MinWindowState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MinWindowState>(() => ({
         s,
         t,
         l: null,
@@ -57,10 +47,8 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
         window: null,
         best: bestLen === Number.MAX_SAFE_INTEGER ? null : [bestL, bestL + bestLen - 1],
         result: null,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -31,82 +32,33 @@ function lowestSetIndex(value: number, width: number): number | null {
 }
 
 function record({ n, width }: CountBitsInput): Frame<CountBitsState>[] {
-  const frames: Frame<CountBitsState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: number,
-    lowIndex: number | null,
-    count: number,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        width,
+  const { emit, frames } = createRecorder<CountBitsState>(() => ({
+        width: width,
         original: n,
-        bits: toBitStrings(cur, width),
-        cur,
-        lowIndex,
-        count,
-        done,
-      },
-    });
+        bits: toBitStrings(n, width),
+        cur: n,
+        lowIndex: null,
+        count: 0,
+        done: false
+      }));
 
   let cur = n;
   let count = 0;
 
-  emit(
-    'INIT',
-    `n=${n}`,
-    `Count the set (1) bits in ${n} using Brian Kernighan's trick: n & (n − 1) clears the lowest set bit. Each time we do that, we've removed exactly one 1, so we count one loop per set bit.`,
-    cur,
-    lowestSetIndex(cur, width),
-    count,
-    false,
-  );
+  emit('INIT', `n=${n}`, `Count the set (1) bits in ${n} using Brian Kernighan's trick: n & (n − 1) clears the lowest set bit. Each time we do that, we've removed exactly one 1, so we count one loop per set bit.`, { bits: toBitStrings(cur, width), lowIndex: lowestSetIndex(cur, width), count: count, done: false });
 
   // for n != 0 { n &= n - 1; count++ }
   while (cur !== 0) {
     const low = lowestSetIndex(cur, width);
-    emit(
-      'SELECT',
-      `low bit @2^${width - 1 - (low ?? 0)}`,
-      `n = ${cur} is not 0, so at least one bit is set. Its lowest 1 is the highlighted bit. Applying n &= n − 1 will flip exactly that bit to 0.`,
-      cur,
-      low,
-      count,
-      false,
-    );
+    emit('SELECT', `low bit @2^${width - 1 - (low ?? 0)}`, `n = ${cur} is not 0, so at least one bit is set. Its lowest 1 is the highlighted bit. Applying n &= n − 1 will flip exactly that bit to 0.`, { bits: toBitStrings(cur, width), lowIndex: low, count: count, done: false });
 
     const next = cur & (cur - 1);
     count++;
-    emit(
-      'CLEAR',
-      `n=${next}, count=${count}`,
-      `n & (n − 1) = ${cur} & ${cur - 1} = ${next}: the lowest 1 is gone. Increment count to ${count}. Continue while n is still non-zero.`,
-      next,
-      lowestSetIndex(next, width),
-      count,
-      false,
-      'good',
-    );
+    emit('CLEAR', `n=${next}, count=${count}`, `n & (n − 1) = ${cur} & ${cur - 1} = ${next}: the lowest 1 is gone. Increment count to ${count}. Continue while n is still non-zero.`, { bits: toBitStrings(next, width), lowIndex: lowestSetIndex(next, width), count: count, done: false }, 'good');
     cur = next;
   }
 
-  emit(
-    'DONE',
-    `${count} set bits`,
-    `n has reached 0, so every 1 bit has been cleared and counted. ${n} has ${count} set bit${count === 1 ? '' : 's'}. Time O(bits set), Space O(1).`,
-    0,
-    null,
-    count,
-    true,
-    'good',
-  );
+  emit('DONE', `${count} set bits`, `n has reached 0, so every 1 bit has been cleared and counted. ${n} has ${count} set bit${count === 1 ? '' : 's'}. Time O(bits set), Space O(1).`, { bits: toBitStrings(0, width), lowIndex: null, count: count, done: true }, 'good');
 
   return frames;
 }

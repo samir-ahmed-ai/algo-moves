@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,24 +22,13 @@ interface DiameterState {
   done: boolean;
 }
 
-function record({ tree }: DiameterInput): Frame<DiameterState>[] {
-  const frames: Frame<DiameterState>[] = [];
-  const visited: number[] = [];
+function record({ tree }: DiameterInput): Frame<DiameterState>[] {  const visited: number[] = [];
   let best = 0;
   let bestNode: number | null = null;
 
   const has = (i: number) => i >= 0 && i < tree.length && tree[i] != null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DiameterState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DiameterState>(() => ({
         tree,
         active: null,
         visited: visited.slice(),
@@ -47,10 +37,8 @@ function record({ tree }: DiameterInput): Frame<DiameterState>[] {
         best,
         height: null,
         bestNode,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

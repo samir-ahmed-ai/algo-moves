@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -23,21 +24,10 @@ interface LpsState {
 function record({ s }: LpsInput): Frame<LpsState>[] {
   const chars = s.split('');
   const n = chars.length;
-  const frames: Frame<LpsState>[] = [];
-
   let start = 0;
   let maxLen = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<LpsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LpsState>(() => ({
         chars,
         l: null,
         r: null,
@@ -46,10 +36,8 @@ function record({ s }: LpsInput): Frame<LpsState>[] {
         start,
         maxLen,
         best: s.slice(start, start + maxLen),
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -23,24 +24,13 @@ interface RecoverState {
 function record({ tree }: RecoverInput): Frame<RecoverState>[] {
   const values = tree.slice();
   const n = values.length;
-  const frames: Frame<RecoverState>[] = [];
-
   // Mutable traversal bookkeeping mirroring the Go closure vars.
   let first: number | null = null;
   let second: number | null = null;
   let prev: number | null = null;
   const visited: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RecoverState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RecoverState>(() => ({
         tree: values.slice(),
         visited: visited.slice(),
         cur: null,
@@ -48,10 +38,8 @@ function record({ tree }: RecoverInput): Frame<RecoverState>[] {
         first,
         second,
         swapped: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

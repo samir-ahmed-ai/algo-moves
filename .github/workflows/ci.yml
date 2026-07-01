@@ -22,3 +22,5 @@ jobs:
       - run: npm test
       - run: npm run typecheck
       - run: npm run check:all
+      - run: npm run check-mobile-decks
+      - run: npm run build

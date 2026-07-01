@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import { QueueTape } from '../../../../components/QueueTape';
 import type { ProblemSimulator } from '../types';
@@ -19,33 +20,20 @@ interface BuildingsState {
   done: boolean;
 }
 
-function record({ heights }: BuildingsInput): Frame<BuildingsState>[] {
-  const frames: Frame<BuildingsState>[] = [];
-  const n = heights.length;
+function record({ heights }: BuildingsInput): Frame<BuildingsState>[] {  const n = heights.length;
   const view = new Array<boolean>(n).fill(false);
   const resRev: number[] = [];
   let maxH = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<BuildingsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<BuildingsState>(() => ({
         heights,
         i: null,
         maxH,
         view: view.slice(),
         resRev: resRev.slice(),
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

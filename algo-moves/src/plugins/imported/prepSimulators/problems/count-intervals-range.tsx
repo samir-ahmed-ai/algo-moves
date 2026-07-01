@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,21 +26,10 @@ interface CountRangeState {
   done: boolean;
 }
 
-function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {
-  const frames: Frame<CountRangeState>[] = [];
-  const sorted = intervals.slice().sort((a, b) => a.start - b.start);
+function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {  const sorted = intervals.slice().sort((a, b) => a.start - b.start);
   const merged: [number, number][] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<CountRangeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<CountRangeState>(() => ({
         sorted,
         i: null,
         j: null,
@@ -48,10 +38,8 @@ function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {
         merged: merged.map((m) => [m[0], m[1]] as [number, number]),
         rangeSum: 0,
         lastSpan: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const fmt = (iv: Interval) => `[${iv.start},${iv.end}]`;
 

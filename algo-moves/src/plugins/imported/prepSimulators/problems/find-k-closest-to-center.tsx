@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -31,23 +32,12 @@ function fmtPt(p: Point): string {
   return `(${p[0]},${p[1]})`;
 }
 
-function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {
-  const frames: Frame<KClosestState>[] = [];
-  const order: Point[] = pairs.map((p) => [p[0], p[1]] as Point);
+function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {  const order: Point[] = pairs.map((p) => [p[0], p[1]] as Point);
   const dist = order.map(distSq);
   const n = order.length;
   const kClamped = Math.min(k, n);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<KClosestState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<KClosestState>(() => ({
         k: kClamped,
         order: order.map((p) => [p[0], p[1]] as Point),
         dist: dist.slice(),
@@ -56,10 +46,8 @@ function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {
         j: null,
         best: null,
         resultUpto: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

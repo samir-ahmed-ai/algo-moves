@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,31 +20,18 @@ interface StepsState {
 }
 
 function record({ s }: StepsInput): Frame<StepsState>[] {
-  const chars = s.split('');
-  const frames: Frame<StepsState>[] = [];
-  let steps = 0;
+  const chars = s.split('');  let steps = 0;
   let carry = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<StepsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<StepsState>(() => ({
         chars,
         i: null,
         bit: null,
         carry,
         val: null,
         steps,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

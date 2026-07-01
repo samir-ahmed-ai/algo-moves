@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -23,20 +24,9 @@ function isOp(c: string): boolean {
   return c === '+' || c === '-' || c === '*' || c === '/';
 }
 
-function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {
-  const frames: Frame<PreToPostState>[] = [];
-  const stack: string[] = [];
+function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {  const stack: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PreToPostState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PreToPostState>(() => ({
         exp,
         i: null,
         stack: stack.slice(),
@@ -45,10 +35,8 @@ function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {
         op: null,
         pushed: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

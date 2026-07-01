@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,45 +25,30 @@ function fields(s: string): string[] {
 }
 
 function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
-  const frames: Frame<ReverseWordsState>[] = [];
+  const words = fields(s);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    words: string[],
-    st: Partial<ReverseWordsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ReverseWordsState>(() => ({
         s,
         words: words.slice(),
         l: null,
         r: null,
         swapped: null,
         result: null,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',
     `"${s}"`,
     `Reverse Words in a String: we want the words in reverse order, collapsing any extra spaces. The plan is Split + Reverse — first cut the string into words, then reverse the list of words with two pointers.`,
-    [],
-    {},
+    { words: [] },
   );
 
-  const words = fields(s);
   emit(
     'SPLIT',
     `${words.length} words`,
     `Split on whitespace (like strings.Fields), dropping empty gaps. We get ${words.length} word${words.length === 1 ? '' : 's'}: [${words.map((w) => `"${w}"`).join(', ')}]. Now reverse this list in place.`,
-    words,
-    {},
+    { words: words.slice() },
   );
 
   let l = 0;
@@ -72,8 +58,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
       'SKIP',
       'nothing to swap',
       `With ${words.length} word${words.length === 1 ? '' : 's'} the pointers already meet, so there is no pair to swap — the list is its own reverse.`,
-      words,
-      { l: words.length ? l : null, r: words.length ? r : null },
+      { words: words.slice(), l: words.length ? l : null, r: words.length ? r : null },
     );
   }
 
@@ -82,8 +67,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
       'COMPARE',
       `swap ${l} & ${r}`,
       `l = ${l} points at "${words[l]}" and r = ${r} points at "${words[r]}". Since l < r, exchange these two words so the ends move toward the middle.`,
-      words,
-      { l, r },
+      { words: words.slice(), l, r },
     );
 
     const tmp = words[l];
@@ -94,8 +78,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
       'SWAP',
       `[${l}]↔[${r}]`,
       `Swapped: "${words[r]}" ↔ "${words[l]}". The word list is now [${words.map((w) => `"${w}"`).join(', ')}]. Advance l→${l + 1} and pull r→${r - 1}.`,
-      words,
-      { l, r, swapped: [l, r] },
+      { words: words.slice(), l, r, swapped: [l, r] },
     );
 
     l++;
@@ -107,8 +90,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
     'DONE',
     `"${result}"`,
     `The pointers crossed, so the list is fully reversed. Join the words with single spaces to get the answer: "${result}".`,
-    words,
-    { result, done: true },
+    { words: words.slice(), result, done: true },
     'good',
   );
   return frames;

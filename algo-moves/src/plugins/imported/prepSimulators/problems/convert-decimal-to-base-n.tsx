@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,20 +26,9 @@ interface ConvertState {
   done: boolean;
 }
 
-function record({ n, base }: ConvertInput): Frame<ConvertState>[] {
-  const frames: Frame<ConvertState>[] = [];
-  const collected: string[] = [];
+function record({ n, base }: ConvertInput): Frame<ConvertState>[] {  const collected: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ConvertState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ConvertState>(() => ({
         n,
         base,
         neg: n < 0,
@@ -49,10 +39,8 @@ function record({ n, base }: ConvertInput): Frame<ConvertState>[] {
         reversing: false,
         swap: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

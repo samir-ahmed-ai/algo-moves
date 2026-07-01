@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -23,22 +24,11 @@ interface RandState {
   done: boolean;
 }
 
-function record({ maxVal, blocked, k }: RandInput): Frame<RandState>[] {
-  const frames: Frame<RandState>[] = [];
-  const blockedSet = new Set<number>(blocked);
+function record({ maxVal, blocked, k }: RandInput): Frame<RandState>[] {  const blockedSet = new Set<number>(blocked);
   const uniq = [...blockedSet].sort((a, b) => a - b);
   const isBlocked = (x: number) => blockedSet.has(x);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RandState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RandState>(() => ({
         maxVal,
         blocked,
         blockedSet: uniq,
@@ -47,10 +37,8 @@ function record({ maxVal, blocked, k }: RandInput): Frame<RandState>[] {
         v: null,
         kLeft: null,
         answer: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

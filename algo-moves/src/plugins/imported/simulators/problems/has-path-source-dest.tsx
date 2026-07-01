@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -26,37 +27,36 @@ interface HPState {
 function record({ adj, pos, src, dst }: HPInput): Frame<HPState>[] {
   const n = adj.length;
   const color = new Array<number>(n).fill(0);
-  const queue: number[] = [];
-  const frames: Frame<HPState>[] = [];
-  let found = false;
+  const queue: number[] = [];  let found = false;
 
-  const emit = (type: string, note: string, caption: string, active: number | null, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { adj, pos, src, dst, color: color.slice(), active, queue: queue.slice(), found, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<HPState>(() => ({
+        adj: adj,
+        pos: pos,
+        src: src,
+        dst: dst,
+        color: color.slice(),
+        queue: queue.slice(),
+        found: found,
+        active: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${src} → ${dst}?`,
-    `Reachability from ${src} to ${dst} by BFS. We flood outward from the source one node at a time; the answer is true the moment ${dst} turns up as a neighbour, and false if the queue drains without ever seeing it.`,
-    null,
-  );
+  emit('INIT', `${src} → ${dst}?`, `Reachability from ${src} to ${dst} by BFS. We flood outward from the source one node at a time; the answer is true the moment ${dst} turns up as a neighbour, and false if the queue drains without ever seeing it.`, { active: null });
 
   if (src === dst) {
     found = true;
-    emit('DONE', `true`, `Source and destination are the same node (${src}), so a path trivially exists. Answer: true.`, src, 'good');
+    emit('DONE', `true`, `Source and destination are the same node (${src}), so a path trivially exists. Answer: true.`, { active: src , done: true }, 'good');
     return frames;
   }
 
   color[src] = 2;
   queue.push(src);
-  emit('SEED', `queue [${src}]`, `Seed the queue with the source ${src} and mark it queued.`, src);
+  emit('SEED', `queue [${src}]`, `Seed the queue with the source ${src} and mark it queued.`, { active: src });
 
   while (queue.length > 0) {
     const v = queue.shift() as number;
     color[v] = 1;
-    emit('VISIT', `visit ${v}`, `Dequeue node ${v} and mark it visited; now scan its neighbours.`, v);
+    emit('VISIT', `visit ${v}`, `Dequeue node ${v} and mark it visited; now scan its neighbours.`, { active: v });
 
     let hit = false;
     for (const nb of adj[v]) {
@@ -64,22 +64,22 @@ function record({ adj, pos, src, dst }: HPInput): Frame<HPState>[] {
         found = true;
         hit = true;
         color[dst] = 1;
-        emit('REACH', `found ${dst}`, `Neighbour ${dst} of ${v} is the destination — a path exists. Stop the search.`, dst, 'good');
+        emit('REACH', `found ${dst}`, `Neighbour ${dst} of ${v} is the destination — a path exists. Stop the search.`, { active: dst }, 'good');
         break;
       }
       if (color[nb] === 0) {
         color[nb] = 2;
         queue.push(nb);
-        emit('ENQUEUE', `enqueue ${nb}`, `Neighbour ${nb} of ${v} is unvisited — mark it queued and push it. Queue is now [${queue.join(', ')}].`, v);
+        emit('ENQUEUE', `enqueue ${nb}`, `Neighbour ${nb} of ${v} is unvisited — mark it queued and push it. Queue is now [${queue.join(', ')}].`, { active: v });
       }
     }
     if (hit) break;
   }
 
   if (!found) {
-    emit('DONE', `false`, `Queue empty and ${dst} was never reached from ${src} — no path exists. Answer: false.`, null, 'bad');
+    emit('DONE', `false`, `Queue empty and ${dst} was never reached from ${src} — no path exists. Answer: false.`, { active: null , done: true }, 'bad');
   } else {
-    emit('DONE', `true`, `Destination ${dst} was reached from ${src} — a path exists. Answer: true.`, dst, 'good');
+    emit('DONE', `true`, `Destination ${dst} was reached from ${src} — a path exists. Answer: true.`, { active: dst , done: true }, 'good');
   }
   return frames;
 }

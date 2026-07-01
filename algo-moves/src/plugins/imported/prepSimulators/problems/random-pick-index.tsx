@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -21,16 +22,11 @@ interface PickIdxState {
   done: boolean;
 }
 
-function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>[] {
-  const frames: Frame<PickIdxState>[] = [];
-  let cnt = 0;
+function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>[] {  let cnt = 0;
   let res = 0;
   let drawIdx = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<PickIdxState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PickIdxState>(() => ({
         nums: [...nums],
         target,
         i: 0,
@@ -38,10 +34,8 @@ function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>
         res,
         op: '',
         picked: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

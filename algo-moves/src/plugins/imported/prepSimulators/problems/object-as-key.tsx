@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -42,31 +43,18 @@ function gradesToMap(entries: [Student, number][]): Map<string, number> {
   return m;
 }
 
-function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>[] {
-  const frames: Frame<ObjectAsKeyState>[] = [];
-  const gmap = gradesToMap(grades);
+function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>[] {  const gmap = gradesToMap(grades);
   const result: ResultEntry[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ObjectAsKeyState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ObjectAsKeyState>(() => ({
         students,
         grades,
         i: null,
         probeKey: null,
         found: null,
         result: result.map((e) => ({ student: e.student, grade: e.grade })),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

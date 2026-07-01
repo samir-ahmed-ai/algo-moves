@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -26,8 +27,6 @@ interface SkylineState {
 }
 
 function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
-  const frames: Frame<SkylineState>[] = [];
-
   // Build start/end events: start=-h, end=+h (so within an x, starts sort first).
   const events: SkyEvent[] = [];
   for (const b of buildings) {
@@ -43,26 +42,15 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
   const snapHeights = (): [number, number][] =>
     [...heights.entries()].sort((a, c) => c[0] - a[0]);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SkylineState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SkylineState>(() => ({
         events,
         cur: null,
         heights: snapHeights(),
         currMax,
         newMax: null,
         result: result.map((p) => [p[0], p[1]]),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

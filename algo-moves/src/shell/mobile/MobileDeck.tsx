@@ -17,21 +17,27 @@ function initialIndices(
   resumeCIdx?: number,
 ) {
   const clampP = (p: number) => Math.min(Math.max(0, p), Math.max(0, blocks.length - 1));
+  const clampC = (pIdx: number, c: number) => {
+    const max = blocks[pIdx]?.cards.length ?? 1;
+    return Math.min(Math.max(0, c), Math.max(0, max - 1));
+  };
   if (resumePIdx != null && resumeCIdx != null) {
-    return { pIdx: clampP(resumePIdx), cIdx: Math.max(0, resumeCIdx) };
+    const pIdx = clampP(resumePIdx);
+    return { pIdx, cIdx: clampC(pIdx, resumeCIdx) };
   }
   if (startItemId) {
     const i = blocks.findIndex((b) => b.item.id === startItemId);
     const pIdx = i >= 0 ? i : 0;
     const session = loadMobileSession();
     if (session?.topicId === topicId && session.itemId === startItemId) {
-      return { pIdx, cIdx: Math.max(0, session.cIdx) };
+      return { pIdx, cIdx: clampC(pIdx, session.cIdx) };
     }
     return { pIdx, cIdx: 0 };
   }
   const session = loadMobileSession();
   if (session?.topicId === topicId) {
-    return { pIdx: clampP(session.pIdx), cIdx: Math.max(0, session.cIdx) };
+    const pIdx = clampP(session.pIdx);
+    return { pIdx, cIdx: clampC(pIdx, session.cIdx) };
   }
   return { pIdx: 0, cIdx: 0 };
 }
@@ -67,6 +73,7 @@ export function MobileDeck({
   const [dir, setDir] = useState<1 | -1>(1);
   const [quizRunSeed, setQuizRunSeed] = useState(() => newQuizRunSeed());
   const [quizAttempt, setQuizAttempt] = useState(0);
+  const [quizNavLocked, setQuizNavLocked] = useState(false);
 
   // Fresh shuffle per problem so Q1 order does not repeat across the deck.
   useEffect(() => {
@@ -157,9 +164,10 @@ export function MobileDeck({
     enterWorkspace(block.item.id);
   }, [block, topic.id, pIdx, cIdx, enterWorkspace]);
 
-  const swipe = useSwipe({ onNext: advance, onPrev: back, enabled: !done });
+  const swipe = useSwipe({ onNext: advance, onPrev: back, enabled: !done && !quizNavLocked });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (quizNavLocked) return;
       const t = e.target;
       if (
         t instanceof HTMLElement &&
@@ -177,7 +185,7 @@ export function MobileDeck({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [advance, back, onExit]);
+  }, [advance, back, onExit, quizNavLocked]);
 
   const course = catalog.courses.find((c) => c.id === topic.courseId);
   const tIdx = course ? course.topics.findIndex((t) => t.id === topic.id) : -1;
@@ -256,6 +264,7 @@ export function MobileDeck({
               onAnswered={onAnswered}
               onAdvance={advance}
               onRestartQuiz={restartQuiz}
+              onNavLockChange={setQuizNavLocked}
               onPrev={back}
               onNext={advance}
               canPrev={pIdx > 0 || cIdx > 0}

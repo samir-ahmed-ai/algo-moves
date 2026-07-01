@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -18,31 +19,18 @@ interface FactorialState {
   done: boolean;
 }
 
-function record({ n }: FactorialInput): Frame<FactorialState>[] {
-  const frames: Frame<FactorialState>[] = [];
-  const factors: number[] = [];
+function record({ n }: FactorialInput): Frame<FactorialState>[] {  const factors: number[] = [];
   for (let i = 2; i <= n; i++) factors.push(i);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<FactorialState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FactorialState>(() => ({
         n,
         factors,
         i: null,
         idx: null,
         before: null,
         result: 1,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (n < 0) {
     emit(

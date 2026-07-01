@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -28,20 +29,9 @@ interface IsBinaryState {
   done: boolean;
 }
 
-function record({ n }: IsBinaryInput): Frame<IsBinaryState>[] {
-  const frames: Frame<IsBinaryState>[] = [];
-  const nBits = bitsOf(n < 0 ? 0 : n);
+function record({ n }: IsBinaryInput): Frame<IsBinaryState>[] {  const nBits = bitsOf(n < 0 ? 0 : n);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<IsBinaryState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<IsBinaryState>(() => ({
         n,
         sign: -1,
         nBits,
@@ -49,10 +39,8 @@ function record({ n }: IsBinaryInput): Frame<IsBinaryState>[] {
         andBits: new Array<number>(BITS).fill(-1),
         i: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

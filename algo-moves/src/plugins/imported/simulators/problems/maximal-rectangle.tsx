@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -41,52 +42,30 @@ function record({ matrix }: MRInput): Frame<MRState>[] {
   const rows = matrix.length;
   const cols = matrix[0].length;
   const heights: number[][] = Array.from({ length: rows }, () => new Array<number>(cols).fill(-1));
-  const frames: Frame<MRState>[] = [];
-
   let answer = 0;
   let best: MRState['best'] = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        matrix,
-        rows,
-        cols,
+  const { emit, frames } = createRecorder<MRState>(() => ({
+        matrix: matrix,
+        rows: rows,
+        cols: cols,
         heights: heights.map((r) => r.slice()),
-        cur,
-        best,
-        answer,
-        done: type === 'DONE',
-      },
-    });
+        best: best,
+        answer: answer,
+        cur: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${rows}×${cols}`,
-    `Maximal Rectangle: find the largest all-1s rectangle. We build a heights table row by row — heights[i][j] is the number of consecutive 1s ending at (i, j) going up — then read off the biggest rectangle as a histogram per row.`,
-    null,
-  );
+  emit('INIT', `${rows}×${cols}`, `Maximal Rectangle: find the largest all-1s rectangle. We build a heights table row by row — heights[i][j] is the number of consecutive 1s ending at (i, j) going up — then read off the biggest rectangle as a histogram per row.`, { cur: null });
 
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       const isOne = matrix[i][j] === '1';
       const prev = i > 0 ? heights[i - 1][j] : 0;
       heights[i][j] = isOne ? prev + 1 : 0;
-      emit(
-        isOne ? 'FILL' : 'ZERO',
-        `h[${i}][${j}]=${heights[i][j]}`,
-        isOne
+      emit(isOne ? 'FILL' : 'ZERO', `h[${i}][${j}]=${heights[i][j]}`, isOne
           ? `matrix[${i}][${j}] is '1', so the column of 1s grows: heights[${i}][${j}] = heights[${i - 1 < 0 ? 0 : i - 1}][${j}] (${prev}) + 1 = ${heights[i][j]}.`
-          : `matrix[${i}][${j}] is '0', so the column of 1s breaks here: heights[${i}][${j}] resets to 0.`,
-        [i, j],
-      );
+          : `matrix[${i}][${j}] is '0', so the column of 1s breaks here: heights[${i}][${j}] resets to 0.`, { cur: [i, j] });
     }
     // After completing a row, evaluate its histogram.
     const r = largestRect(heights[i]);
@@ -97,13 +76,7 @@ function record({ matrix }: MRInput): Frame<MRState>[] {
   }
 
   const span = best ? `columns ${best.left}–${best.right} of row ${best.row}, ${best.height} tall` : 'none';
-  emit(
-    'DONE',
-    `area ${answer}`,
-    `The heights table is complete. The largest histogram rectangle spans ${span}, giving the maximal rectangle area = ${answer}.`,
-    best ? [best.row, best.left] : null,
-    'good',
-  );
+  emit('DONE', `area ${answer}`, `The heights table is complete. The largest histogram rectangle spans ${span}, giving the maximal rectangle area = ${answer}.`, { cur: best ? [best.row, best.left] : null , done: true }, 'good');
   return frames;
 }
 

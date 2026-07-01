@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,20 +21,9 @@ interface AnagramState {
   done: boolean;
 }
 
-function record({ s, t }: AnagramInput): Frame<AnagramState>[] {
-  const frames: Frame<AnagramState>[] = [];
-  const cnt = new Map<string, number>();
+function record({ s, t }: AnagramInput): Frame<AnagramState>[] {  const cnt = new Map<string, number>();
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<AnagramState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<AnagramState>(() => ({
         s,
         t,
         i: null,
@@ -41,10 +31,8 @@ function record({ s, t }: AnagramInput): Frame<AnagramState>[] {
         lenOk: s.length === t.length,
         checkKey: null,
         result: null,
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

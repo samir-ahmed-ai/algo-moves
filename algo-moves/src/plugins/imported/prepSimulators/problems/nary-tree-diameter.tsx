@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -35,25 +36,14 @@ interface DiaState {
 }
 
 // ---- Faithful re-implementation of the Go solution, instrumented to emit frames.
-function record({ tree }: TreeInput): Frame<DiaState>[] {
-  const frames: Frame<DiaState>[] = [];
-  const n = tree.length;
+function record({ tree }: TreeInput): Frame<DiaState>[] {  const n = tree.length;
   const kids = (i: number) => [2 * i + 1, 2 * i + 2].filter((c) => c < n && tree[c] != null);
 
   const heights = new Map<number, number>(); // index -> getHeight(index)
   const done: number[] = [];
   let best = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DiaState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DiaState>(() => ({
         tree,
         active: null,
         done: [...done],
@@ -62,10 +52,8 @@ function record({ tree }: TreeInput): Frame<DiaState>[] {
         top2: null,
         through: null,
         best,
-        finished: false,
-        ...s,
-      },
-    });
+        finished: false
+      }));
 
   // getHeight(i): -1 for a null slot, else 1 + max child height. Memoized so the
   // View can show every resolved height; results match the Go getHeight exactly.

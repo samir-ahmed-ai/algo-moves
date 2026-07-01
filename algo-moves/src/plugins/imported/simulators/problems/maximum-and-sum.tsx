@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -57,36 +58,17 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
   const masks = dpFull.map((v, i) => ({ v, i })).filter((o) => o.v !== NEG).map((o) => o.i);
   const maskValue = new Map(masks.map((m) => [m, dpFull[m]]));
   const visible = new Array<number>(masks.length).fill(NEG);
-
-  const frames: Frame<AndState>[] = [];
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: number | null,
-    answer: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums,
-        numSlots,
+  const { emit, frames } = createRecorder<AndState>(() => ({
+        nums: nums,
+        numSlots: numSlots,
         masks: masks.slice(),
         dp: visible.slice(),
-        cur,
-        done: type === 'DONE',
-        answer,
-      },
-    });
+        cur: null,
+        answer: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${nums.length} nums, ${numSlots} slots`,
-    `Maximum AND Sum: assign every number in [${nums.join(', ')}] to one of ${numSlots} slots (each slot holds at most 2) to maximise Σ (num AND slotIndex). State = a base-2-per-slot mask of slot occupancy; dp[mask] = the best AND-sum once that many numbers are placed. Only reachable masks are shown; the index label is the slot-occupancy triple (slot1·slot2·…).`,
-    null,
-    null,
-  );
+  emit('INIT', `${nums.length} nums, ${numSlots} slots`, `Maximum AND Sum: assign every number in [${nums.join(', ')}] to one of ${numSlots} slots (each slot holds at most 2) to maximise Σ (num AND slotIndex). State = a base-2-per-slot mask of slot occupancy; dp[mask] = the best AND-sum once that many numbers are placed. Only reachable masks are shown; the index label is the slot-occupancy triple (slot1·slot2·…).`, { cur: null, answer: null });
 
   // Reveal each reachable mask in order. mask 0 (nothing placed) is the base.
   for (let k = 0; k < masks.length; k++) {
@@ -94,15 +76,9 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
     visible[k] = dpFull[mask];
     const cnt = assignedCount(mask, numSlots);
     if (mask === 0) {
-      emit('BASE', `dp[0]=0`, `Base case: no number assigned yet (occupancy ${occString(mask, numSlots)}), so dp = 0.`, k, null);
+      emit('BASE', `dp[0]=0`, `Base case: no number assigned yet (occupancy ${occString(mask, numSlots)}), so dp = 0.`, { cur: k, answer: null });
     } else {
-      emit(
-        'FILL',
-        `dp[${mask}]=${dpFull[mask]}`,
-        `Mask ${mask} (occupancy ${occString(mask, numSlots)}) means ${cnt} number${cnt === 1 ? '' : 's'} placed. The best AND-sum to reach this arrangement is dp = ${dpFull[mask]}.`,
-        k,
-        null,
-      );
+      emit('FILL', `dp[${mask}]=${dpFull[mask]}`, `Mask ${mask} (occupancy ${occString(mask, numSlots)}) means ${cnt} number${cnt === 1 ? '' : 's'} placed. The best AND-sum to reach this arrangement is dp = ${dpFull[mask]}.`, { cur: k, answer: null });
     }
   }
 
@@ -114,14 +90,7 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
       bestK = k;
     }
   });
-  emit(
-    'DONE',
-    `${best}`,
-    `Among masks that place all ${nums.length} numbers, the largest dp is ${best}. So the maximum AND sum is ${best}.`,
-    bestK,
-    best,
-    'good',
-  );
+  emit('DONE', `${best}`, `Among masks that place all ${nums.length} numbers, the largest dp is ${best}. So the maximum AND sum is ${best}.`, { cur: bestK, answer: best , done: true }, 'good');
   return frames;
 }
 

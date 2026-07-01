@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,18 +26,7 @@ interface NextPermState {
 function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
   const nums = input.slice();
   const n = nums.length;
-  const frames: Frame<NextPermState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<NextPermState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<NextPermState>(() => ({
         nums: nums.slice(),
         phase: 'find-dip',
         i: null,
@@ -45,10 +35,8 @@ function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
         lo: null,
         hi: null,
         reversed: [],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

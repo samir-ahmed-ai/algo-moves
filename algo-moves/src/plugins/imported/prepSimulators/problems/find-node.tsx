@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -18,19 +19,13 @@ interface FindNodeState {
 }
 
 function record({ list, val }: FindNodeInput): Frame<FindNodeState>[] {
-  const frames: Frame<FindNodeState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<FindNodeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { list, val, head: null, found: null, done: false, ...s },
-    });
+  const { emit, frames } = createRecorder<FindNodeState>(() => ({
+        list,
+        val,
+        head: null,
+        found: null,
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -19,102 +20,39 @@ interface IntersectState {
   done: boolean;
 }
 
-function record({ a, b }: IntersectInput): Frame<IntersectState>[] {
-  const frames: Frame<IntersectState>[] = [];
-  const out: number[] = [];
+function record({ a, b }: IntersectInput): Frame<IntersectState>[] {  const out: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    j: number | null,
-    takenA: number | null,
-    takenB: number | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        a,
-        b,
-        i,
-        j,
+  const { emit, frames } = createRecorder<IntersectState>(() => ({
+        a: a,
+        b: b,
         out: out.slice(),
-        takenA,
-        takenB,
-        done,
-      },
-    });
+        i: null,
+        j: null,
+        takenA: null,
+        takenB: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `|a|=${a.length}, |b|=${b.length}`,
-    `Find the intersection of two sorted arrays. Keep one pointer in each array; because both are sorted we never need to look back, so this runs in O(n+m) time and O(1) extra space.`,
-    0,
-    0,
-    null,
-    null,
-    false,
-  );
+  emit('INIT', `|a|=${a.length}, |b|=${b.length}`, `Find the intersection of two sorted arrays. Keep one pointer in each array; because both are sorted we never need to look back, so this runs in O(n+m) time and O(1) extra space.`, { i: 0, j: 0, takenA: null, takenB: null, done: false });
 
   let i = 0;
   let j = 0;
   while (i < a.length && j < b.length) {
     if (a[i] === b[j]) {
-      emit(
-        'MATCH',
-        `a[${i}]=b[${j}]=${a[i]}`,
-        `a[${i}] = b[${j}] = ${a[i]} — equal values, so this element is in both arrays. Append ${a[i]} to the result and advance BOTH pointers.`,
-        i,
-        j,
-        i,
-        j,
-        false,
-        'good',
-      );
+      emit('MATCH', `a[${i}]=b[${j}]=${a[i]}`, `a[${i}] = b[${j}] = ${a[i]} — equal values, so this element is in both arrays. Append ${a[i]} to the result and advance BOTH pointers.`, { i: i, j: j, takenA: i, takenB: j, done: false }, 'good');
       out.push(a[i]);
       i++;
       j++;
     } else if (a[i] < b[j]) {
-      emit(
-        'ADV_A',
-        `a[${i}]=${a[i]} < b[${j}]=${b[j]}`,
-        `a[${i}] = ${a[i]} is smaller than b[${j}] = ${b[j]}. The smaller value can never match anything further along in b, so advance i past it.`,
-        i,
-        j,
-        null,
-        null,
-        false,
-      );
+      emit('ADV_A', `a[${i}]=${a[i]} < b[${j}]=${b[j]}`, `a[${i}] = ${a[i]} is smaller than b[${j}] = ${b[j]}. The smaller value can never match anything further along in b, so advance i past it.`, { i: i, j: j, takenA: null, takenB: null, done: false });
       i++;
     } else {
-      emit(
-        'ADV_B',
-        `a[${i}]=${a[i]} > b[${j}]=${b[j]}`,
-        `b[${j}] = ${b[j]} is smaller than a[${i}] = ${a[i]}. The smaller value can never match anything further along in a, so advance j past it.`,
-        i,
-        j,
-        null,
-        null,
-        false,
-      );
+      emit('ADV_B', `a[${i}]=${a[i]} > b[${j}]=${b[j]}`, `b[${j}] = ${b[j]} is smaller than a[${i}] = ${a[i]}. The smaller value can never match anything further along in a, so advance j past it.`, { i: i, j: j, takenA: null, takenB: null, done: false });
       j++;
     }
   }
 
-  emit(
-    'DONE',
-    out.length ? `∩ = [${out.join(',')}]` : '∩ = []',
-    `One pointer reached the end of its array, so no more matches are possible. The intersection is [${out.join(', ')}].`,
-    i < a.length ? i : null,
-    j < b.length ? j : null,
-    null,
-    null,
-    true,
-    'good',
-  );
+  emit('DONE', out.length ? `∩ = [${out.join(',')}]` : '∩ = []', `One pointer reached the end of its array, so no more matches are possible. The intersection is [${out.join(', ')}].`, { i: i < a.length ? i : null, j: j < b.length ? j : null, takenA: null, takenB: null, done: true }, 'good');
   return frames;
 }
 

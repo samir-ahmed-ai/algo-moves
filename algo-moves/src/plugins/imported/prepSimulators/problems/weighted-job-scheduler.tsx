@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -51,22 +52,11 @@ function lastNotOverlap(
   return res;
 }
 
-function record({ jobs: rawJobs }: SchedulerInput): Frame<SchedulerState>[] {
-  const frames: Frame<SchedulerState>[] = [];
-  const jobs = [...rawJobs].sort((a, b) => a.end - b.end);
+function record({ jobs: rawJobs }: SchedulerInput): Frame<SchedulerState>[] {  const jobs = [...rawJobs].sort((a, b) => a.end - b.end);
   const n = jobs.length;
   const dp: (number | null)[] = new Array<number | null>(n).fill(null);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SchedulerState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SchedulerState>(() => ({
         jobs,
         dp: dp.slice(),
         i: null,
@@ -76,10 +66,8 @@ function record({ jobs: rawJobs }: SchedulerInput): Frame<SchedulerState>[] {
         mid: null,
         take: null,
         skip: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (n === 0) {
     emit('DONE', 'no jobs', 'There are no jobs to schedule, so the maximum profit is 0.', { done: true }, 'good');

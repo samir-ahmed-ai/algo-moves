@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,29 +22,16 @@ const PAIRS: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
 const OPENS = new Set(['(', '[', '{']);
 
 function record({ str }: ParensInput): Frame<ParensState>[] {
-  const chars = [...str];
-  const frames: Frame<ParensState>[] = [];
-  const stack: string[] = [];
+  const chars = [...str];  const stack: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ParensState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ParensState>(() => ({
         chars,
         i: null,
         stack: stack.slice(),
         matchAt: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

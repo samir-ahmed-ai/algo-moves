@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,20 +25,9 @@ function wildcard(word: string, col: number): string {
   return word.slice(0, col) + '*' + word.slice(col + 1);
 }
 
-function record({ dict }: DifferInput): Frame<DifferState>[] {
-  const frames: Frame<DifferState>[] = [];
-  const L = dict.length === 0 ? 0 : dict[0].length;
+function record({ dict }: DifferInput): Frame<DifferState>[] {  const L = dict.length === 0 ? 0 : dict[0].length;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DifferState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DifferState>(() => ({
         dict,
         L,
         col: null,
@@ -46,10 +36,8 @@ function record({ dict }: DifferInput): Frame<DifferState>[] {
         seen: [],
         matchWord: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

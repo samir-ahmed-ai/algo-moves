@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -29,62 +30,28 @@ interface RankState {
 
 function record({ adj, pos }: RankInput): Frame<RankState>[] {
   const n = adj.length;
-  const degrees = new Array<number>(n).fill(0);
-  const frames: Frame<RankState>[] = [];
-  let best = 0;
+  const degrees = new Array<number>(n).fill(0);  let best = 0;
   let bestPair: [number, number] | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    scan: number | null,
-    a: number | null,
-    b: number | null,
-    edge: [number, number] | null,
-    pairRank: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
+  const { emit, frames } = createRecorder<RankState>(() => ({
+        adj: adj,
+        pos: pos,
         degrees: degrees.slice(),
-        scan,
-        a,
-        b,
-        edge,
-        pairRank,
-        best,
+        best: best,
         bestPair: bestPair ? [bestPair[0], bestPair[1]] : null,
-        done: type === 'DONE',
-      },
-    });
+        scan: null,
+        a: null,
+        b: null,
+        edge: null,
+        pairRank: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `network rank`,
-    `The network rank of a pair (a, b) is deg(a) + deg(b), minus 1 if a and b are directly connected (that shared road is counted once, not twice). We first count every degree, then test all pairs and keep the maximum rank.`,
-    null,
-    null,
-    null,
-    null,
-    null,
-  );
+  emit('INIT', `network rank`, `The network rank of a pair (a, b) is deg(a) + deg(b), minus 1 if a and b are directly connected (that shared road is counted once, not twice). We first count every degree, then test all pairs and keep the maximum rank.`, { scan: null, a: null, b: null, edge: null, pairRank: null });
 
   for (let v = 0; v < n; v++) {
     degrees[v] = adj[v].length;
-    emit(
-      'DEGREE',
-      `deg(${v})=${degrees[v]}`,
-      `Count the roads at city ${v}: it has ${degrees[v]} incident edge${degrees[v] === 1 ? '' : 's'}, so deg(${v}) = ${degrees[v]}.`,
-      v,
-      null,
-      null,
-      null,
-      null,
-    );
+    emit('DEGREE', `deg(${v})=${degrees[v]}`, `Count the roads at city ${v}: it has ${degrees[v]} incident edge${degrees[v] === 1 ? '' : 's'}, so deg(${v}) = ${degrees[v]}.`, { scan: v, a: null, b: null, edge: null, pairRank: null });
   }
 
   for (let a = 0; a < n; a++) {
@@ -94,45 +61,17 @@ function record({ adj, pos }: RankInput): Frame<RankState>[] {
       const note = connected
         ? `directly connected, so subtract 1: ${degrees[a]} + ${degrees[b]} − 1 = ${rank}.`
         : `not directly connected, so no subtraction: ${degrees[a]} + ${degrees[b]} = ${rank}.`;
-      emit(
-        'PAIR',
-        `(${a},${b})=${rank}`,
-        `Pair (${a}, ${b}): deg ${degrees[a]} and deg ${degrees[b]}; they are ${note}`,
-        null,
-        a,
-        b,
-        connected ? [a, b] : null,
-        rank,
-      );
+      emit('PAIR', `(${a},${b})=${rank}`, `Pair (${a}, ${b}): deg ${degrees[a]} and deg ${degrees[b]}; they are ${note}`, { scan: null, a: a, b: b, edge: connected ? [a, b] : null, pairRank: rank });
       if (rank > best) {
         best = rank;
         bestPair = [a, b];
-        emit(
-          'BEST',
-          `best ${best}`,
-          `Rank ${rank} beats the previous best — pair (${a}, ${b}) is now the leader with network rank ${best}.`,
-          null,
-          a,
-          b,
-          connected ? [a, b] : null,
-          rank,
-        );
+        emit('BEST', `best ${best}`, `Rank ${rank} beats the previous best — pair (${a}, ${b}) is now the leader with network rank ${best}.`, { scan: null, a: a, b: b, edge: connected ? [a, b] : null, pairRank: rank });
       }
     }
   }
 
   const pairText = bestPair ? `(${bestPair[0]}, ${bestPair[1]})` : 'none';
-  emit(
-    'DONE',
-    `max rank ${best}`,
-    `Every pair checked. The maximal network rank is ${best}, achieved by pair ${pairText}.`,
-    null,
-    bestPair ? bestPair[0] : null,
-    bestPair ? bestPair[1] : null,
-    null,
-    best,
-    'good',
-  );
+  emit('DONE', `max rank ${best}`, `Every pair checked. The maximal network rank is ${best}, achieved by pair ${pairText}.`, { scan: null, a: bestPair ? bestPair[0] : null, b: bestPair ? bestPair[1] : null, edge: null, pairRank: best , done: true }, 'good');
   return frames;
 }
 

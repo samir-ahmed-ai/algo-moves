@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -38,18 +39,7 @@ function record({ board: rows, word }: CrosswordInput): Frame<CrosswordState>[] 
   const m = board.length;
   const n = board[0]?.length ?? 0;
   const wLen = word.length;
-  const frames: Frame<CrosswordState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<CrosswordState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<CrosswordState>(() => ({
         board,
         word,
         seg: [],
@@ -59,10 +49,8 @@ function record({ board: rows, word }: CrosswordInput): Frame<CrosswordState>[] 
         bwdOk: null,
         placed: [],
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   // Tries a collected segment against `word`; returns the matching orientation or null.
   const tryMatch = (

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -63,48 +64,27 @@ function record({ recipes, ingredients, supplies }: RInput): Frame<RState>[] {
   for (const sv of supplyNodes) color[sv] = 2;
   const queue: number[] = supplyNodes.slice();
   const made: number[] = [];
-  const frames: Frame<RState>[] = [];
-
-  const emit = (type: string, note: string, caption: string, active: number | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
-        labels,
-        isRecipe,
+  const { emit, frames } = createRecorder<RState>(() => ({
+        adj: adj,
+        pos: pos,
+        labels: labels,
+        isRecipe: isRecipe,
         color: color.slice(),
-        active,
         queue: queue.slice(),
         indeg: indeg.slice(),
         made: made.slice(),
-        done: type === 'DONE',
-      },
-    });
+        active: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    'build graph',
-    `Model it as a DAG: draw an edge from each ingredient to every recipe that needs it, and set each recipe's in-degree to its ingredient count. A recipe is makeable once every ingredient pointing at it is available. Start a queue with the given supplies: [${supplies.join(', ')}].`,
-    null,
-  );
+  emit('INIT', 'build graph', `Model it as a DAG: draw an edge from each ingredient to every recipe that needs it, and set each recipe's in-degree to its ingredient count. A recipe is makeable once every ingredient pointing at it is available. Start a queue with the given supplies: [${supplies.join(', ')}].`, { active: null });
 
-  emit(
-    'SEED',
-    `available [${supplies.join(', ')}]`,
-    `The supplies [${supplies.join(', ')}] are available with nothing to wait on, so they seed the queue.`,
-    null,
-  );
+  emit('SEED', `available [${supplies.join(', ')}]`, `The supplies [${supplies.join(', ')}] are available with nothing to wait on, so they seed the queue.`, { active: null });
 
   while (queue.length > 0) {
     const v = queue.shift() as number;
     color[v] = 1;
-    emit(
-      'POP',
-      `have ${labels[v]}`,
-      `"${labels[v]}" is now available — release it to every recipe that depends on it.`,
-      v,
-    );
+    emit('POP', `have ${labels[v]}`, `"${labels[v]}" is now available — release it to every recipe that depends on it.`, { active: v });
 
     for (const nb of adj[v]) {
       indeg[nb]--;
@@ -112,31 +92,15 @@ function record({ recipes, ingredients, supplies }: RInput): Frame<RState>[] {
         color[nb] = 2;
         queue.push(nb);
         made.push(nb);
-        emit(
-          'MADE',
-          `make ${labels[nb]}`,
-          `"${labels[v]}" was the last ingredient "${labels[nb]}" was waiting on — all its inputs are ready, so "${labels[nb]}" is makeable. Add it to the answer and queue it as a new ingredient.`,
-          v,
-        );
+        emit('MADE', `make ${labels[nb]}`, `"${labels[v]}" was the last ingredient "${labels[nb]}" was waiting on — all its inputs are ready, so "${labels[nb]}" is makeable. Add it to the answer and queue it as a new ingredient.`, { active: v });
       } else {
-        emit(
-          'WAIT',
-          `${labels[nb]} needs ${indeg[nb]}`,
-          `"${labels[nb]}" still needs ${indeg[nb]} more ingredient${indeg[nb] === 1 ? '' : 's'} before it can be made.`,
-          nb,
-        );
+        emit('WAIT', `${labels[nb]} needs ${indeg[nb]}`, `"${labels[nb]}" still needs ${indeg[nb]} more ingredient${indeg[nb] === 1 ? '' : 's'} before it can be made.`, { active: nb });
       }
     }
   }
 
   const answer = made.map((m) => labels[m]);
-  emit(
-    'DONE',
-    `recipes ${answer.length}`,
-    `Queue drained — the makeable recipes are [${answer.join(', ')}].`,
-    null,
-    'good',
-  );
+  emit('DONE', `recipes ${answer.length}`, `Queue drained — the makeable recipes are [${answer.join(', ')}].`, { active: null , done: true }, 'good');
   return frames;
 }
 

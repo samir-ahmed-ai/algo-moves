@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,20 +20,9 @@ interface ChunksState {
   done: boolean;
 }
 
-function record({ arr }: ChunksInput): Frame<ChunksState>[] {
-  const frames: Frame<ChunksState>[] = [];
-  const stack: number[] = [];
+function record({ arr }: ChunksInput): Frame<ChunksState>[] {  const stack: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ChunksState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ChunksState>(() => ({
         arr,
         i: null,
         val: null,
@@ -40,10 +30,8 @@ function record({ arr }: ChunksInput): Frame<ChunksState>[] {
         stack: stack.slice(),
         poppedTop: null,
         pushedThisStep: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

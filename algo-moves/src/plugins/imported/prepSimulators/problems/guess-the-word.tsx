@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -25,15 +26,10 @@ function matchCount(a: string, b: string): number {
   return c;
 }
 
-function record({ secret, words }: GuessInput): Frame<GuessState>[] {
-  const frames: Frame<GuessState>[] = [];
-  let cands = [...words];
+function record({ secret, words }: GuessInput): Frame<GuessState>[] {  let cands = [...words];
   let found = false;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<GuessState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<GuessState>(() => ({
         secret,
         cands: cands.slice(),
         guess: '',
@@ -41,10 +37,8 @@ function record({ secret, words }: GuessInput): Frame<GuessState>[] {
         round: 0,
         found,
         op: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

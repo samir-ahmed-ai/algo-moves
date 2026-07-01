@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -16,23 +17,16 @@ interface CalState {
   done: boolean;
 }
 
-function record({ books }: CalInput): Frame<CalState>[] {
-  const frames: Frame<CalState>[] = [];
-  const events: [number, number][] = [];
+function record({ books }: CalInput): Frame<CalState>[] {  const events: [number, number][] = [];
 
-  const emit = (type: string, note: string, caption: string, s: Partial<CalState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<CalState>(() => ({
         events: events.map((e) => [...e] as [number, number]),
         op: '',
         start: null,
         end: null,
         allowed: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

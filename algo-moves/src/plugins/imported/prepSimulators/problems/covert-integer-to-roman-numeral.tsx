@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,21 +23,10 @@ interface RomanState {
 const VALUES = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
 const SYMBOLS = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
 
-function record({ num }: RomanInput): Frame<RomanState>[] {
-  const frames: Frame<RomanState>[] = [];
-  const original = num;
+function record({ num }: RomanInput): Frame<RomanState>[] {  const original = num;
   let out = '';
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RomanState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RomanState>(() => ({
         original,
         num,
         values: VALUES,
@@ -44,10 +34,8 @@ function record({ num }: RomanInput): Frame<RomanState>[] {
         i: null,
         emitted: null,
         out,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

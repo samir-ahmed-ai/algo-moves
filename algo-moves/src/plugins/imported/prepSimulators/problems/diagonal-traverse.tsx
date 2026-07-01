@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -19,9 +20,7 @@ interface DiagonalState {
 
 function record({ mat }: DiagonalInput): Frame<DiagonalState>[] {
   const m = mat.length;
-  const n = mat[0].length;
-  const frames: Frame<DiagonalState>[] = [];
-  const res: number[] = [];
+  const n = mat[0].length;  const res: number[] = [];
   const visited: boolean[][] = mat.map((row) => row.map(() => false));
 
   let r = 0;
@@ -31,40 +30,23 @@ function record({ mat }: DiagonalInput): Frame<DiagonalState>[] {
   const cloneVisited = () => visited.map((row) => row.slice());
   const dirName = (d: 1 | -1) => (d === 1 ? 'up-right ↗' : 'down-left ↙');
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        mat,
-        r,
-        c,
-        dir,
+  const { emit, frames } = createRecorder<DiagonalState>(() => ({
+        mat: mat,
+        r: r,
+        c: c,
+        dir: dir,
         res: res.slice(),
         visited: cloneVisited(),
-        done: type === 'DONE',
-      },
-    });
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${m}×${n}`,
-    `Diagonal Traverse: walk the ${m}×${n} matrix along its anti-diagonals in a zig-zag. Start at (0,0) heading ${dirName(dir)}. Each diagonal is read in alternating direction. Time O(m·n), O(1) extra.`,
-  );
+  emit('INIT', `${m}×${n}`, `Diagonal Traverse: walk the ${m}×${n} matrix along its anti-diagonals in a zig-zag. Start at (0,0) heading ${dirName(dir)}. Each diagonal is read in alternating direction. Time O(m·n), O(1) extra.`, {});
 
   for (let i = 0; i < m * n; i++) {
     // Append current cell.
     res.push(mat[r][c]);
     visited[r][c] = true;
-    emit(
-      'VISIT',
-      `take ${mat[r][c]}`,
-      `Read mat[${r}][${c}] = ${mat[r][c]} and append it to the output (now length ${res.length}). Current direction is ${dirName(dir)}.`,
-    );
+    emit('VISIT', `take ${mat[r][c]}`, `Read mat[${r}][${c}] = ${mat[r][c]} and append it to the output (now length ${res.length}). Current direction is ${dirName(dir)}.`, {});
 
     if (i === m * n - 1) break; // all cells collected; stop before moving off-grid
 
@@ -73,63 +55,34 @@ function record({ mat }: DiagonalInput): Frame<DiagonalState>[] {
       if (c === n - 1) {
         r++;
         dir = -1;
-        emit(
-          'TURN',
-          `→ down to (${r},${c})`,
-          `Moving up-right but already at the last column (c = ${c} = n−1), so we can't go right. Step DOWN to (${r},${c}) and flip direction to ${dirName(dir)}.`,
-        );
+        emit('TURN', `→ down to (${r},${c})`, `Moving up-right but already at the last column (c = ${c} = n−1), so we can't go right. Step DOWN to (${r},${c}) and flip direction to ${dirName(dir)}.`, {});
       } else if (r === 0) {
         c++;
         dir = -1;
-        emit(
-          'TURN',
-          `→ right to (${r},${c})`,
-          `Moving up-right but already on the top row (r = 0), so we can't go up. Step RIGHT to (${r},${c}) and flip direction to ${dirName(dir)}.`,
-        );
+        emit('TURN', `→ right to (${r},${c})`, `Moving up-right but already on the top row (r = 0), so we can't go up. Step RIGHT to (${r},${c}) and flip direction to ${dirName(dir)}.`, {});
       } else {
         r--;
         c++;
-        emit(
-          'STEP',
-          `↗ to (${r},${c})`,
-          `Continue up-right: r−1, c+1 → (${r},${c}). Still inside the grid, keep going ${dirName(dir)}.`,
-        );
+        emit('STEP', `↗ to (${r},${c})`, `Continue up-right: r−1, c+1 → (${r},${c}). Still inside the grid, keep going ${dirName(dir)}.`, {});
       }
     } else {
       if (r === m - 1) {
         c++;
         dir = 1;
-        emit(
-          'TURN',
-          `→ right to (${r},${c})`,
-          `Moving down-left but already on the last row (r = ${r} = m−1), so we can't go down. Step RIGHT to (${r},${c}) and flip direction to ${dirName(dir)}.`,
-        );
+        emit('TURN', `→ right to (${r},${c})`, `Moving down-left but already on the last row (r = ${r} = m−1), so we can't go down. Step RIGHT to (${r},${c}) and flip direction to ${dirName(dir)}.`, {});
       } else if (c === 0) {
         r++;
         dir = 1;
-        emit(
-          'TURN',
-          `→ down to (${r},${c})`,
-          `Moving down-left but already on the first column (c = 0), so we can't go left. Step DOWN to (${r},${c}) and flip direction to ${dirName(dir)}.`,
-        );
+        emit('TURN', `→ down to (${r},${c})`, `Moving down-left but already on the first column (c = 0), so we can't go left. Step DOWN to (${r},${c}) and flip direction to ${dirName(dir)}.`, {});
       } else {
         r++;
         c--;
-        emit(
-          'STEP',
-          `↙ to (${r},${c})`,
-          `Continue down-left: r+1, c−1 → (${r},${c}). Still inside the grid, keep going ${dirName(dir)}.`,
-        );
+        emit('STEP', `↙ to (${r},${c})`, `Continue down-left: r+1, c−1 → (${r},${c}). Still inside the grid, keep going ${dirName(dir)}.`, {});
       }
     }
   }
 
-  emit(
-    'DONE',
-    `[${res.join(',')}]`,
-    `Every one of the ${m * n} cells has been read exactly once. The diagonal order is [${res.join(', ')}].`,
-    'good',
-  );
+  emit('DONE', `[${res.join(',')}]`, `Every one of the ${m * n} cells has been read exactly once. The diagonal order is [${res.join(', ')}].`, { done: true }, 'good');
   return frames;
 }
 

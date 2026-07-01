@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -25,9 +26,7 @@ interface LineState {
   done: boolean;
 }
 
-function record({ mat }: LineInput): Frame<LineState>[] {
-  const frames: Frame<LineState>[] = [];
-  const m = mat.length;
+function record({ mat }: LineInput): Frame<LineState>[] {  const m = mat.length;
   const n = m > 0 ? mat[0].length : 0;
 
   // best[r][c] for the View — longest line ending at each visited cell.
@@ -37,36 +36,17 @@ function record({ mat }: LineInput): Frame<LineState>[] {
   let dp: DirLengths[] = Array.from({ length: n }, () => ({ hor: 0, ver: 0, diag: 0, anti: 0 }));
   let res = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    dirs: DirLengths | null,
-    bestDir: string,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        mat,
+  const { emit, frames } = createRecorder<LineState>(() => ({
+        mat: mat,
         best: best.map((row) => row.slice()),
-        cur,
-        dirs,
-        res,
-        bestDir,
-        done: type === 'DONE',
-      },
-    });
+        res: res,
+        cur: null,
+        dirs: null,
+        bestDir: '',
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${m}×${n} grid`,
-    `Longest Line of Consecutive One: find the longest run of 1s in any of 4 directions — horizontal →, vertical ↓, diagonal ↘, or anti-diagonal ↙. We sweep the matrix once, and for each 1 we extend the run from its neighbours, keeping only the previous row in memory.`,
-    null,
-    null,
-    '',
-  );
+  emit('INIT', `${m}×${n} grid`, `Longest Line of Consecutive One: find the longest run of 1s in any of 4 directions — horizontal →, vertical ↓, diagonal ↘, or anti-diagonal ↙. We sweep the matrix once, and for each 1 we extend the run from its neighbours, keeping only the previous row in memory.`, { cur: null, dirs: null, bestDir: '' });
 
   for (let i = 0; i < m; i++) {
     const nd: DirLengths[] = Array.from({ length: n }, () => ({ hor: 0, ver: 0, diag: 0, anti: 0 }));
@@ -95,38 +75,15 @@ function record({ mat }: LineInput): Frame<LineState>[] {
         const improved = local > res;
         if (improved) res = local;
 
-        emit(
-          improved ? 'GROW' : 'CELL',
-          `(${i},${j}) max=${local}`,
-          `Cell (${i},${j}) is a 1. Extend each direction from its neighbours: horizontal=${nd[j].hor}, vertical=${nd[j].ver}, diagonal=${nd[j].diag}, anti-diagonal=${nd[j].anti}. The longest line ending here is ${local} (${bestDir}).${improved ? ` That beats the old best, so res = ${res}.` : ` The best so far stays ${res}.`}`,
-          [i, j],
-          { ...nd[j] },
-          bestDir,
-          improved ? 'good' : undefined,
-        );
+        emit(improved ? 'GROW' : 'CELL', `(${i},${j}) max=${local}`, `Cell (${i},${j}) is a 1. Extend each direction from its neighbours: horizontal=${nd[j].hor}, vertical=${nd[j].ver}, diagonal=${nd[j].diag}, anti-diagonal=${nd[j].anti}. The longest line ending here is ${local} (${bestDir}).${improved ? ` That beats the old best, so res = ${res}.` : ` The best so far stays ${res}.`}`, { cur: [i, j], dirs: { ...nd[j] }, bestDir: bestDir });
       } else {
-        emit(
-          'ZERO',
-          `(${i},${j})=0`,
-          `Cell (${i},${j}) is a 0, so no line can pass through it. All four direction lengths reset to 0 here.`,
-          [i, j],
-          { hor: 0, ver: 0, diag: 0, anti: 0 },
-          '',
-        );
+        emit('ZERO', `(${i},${j})=0`, `Cell (${i},${j}) is a 0, so no line can pass through it. All four direction lengths reset to 0 here.`, { cur: [i, j], dirs: { hor: 0, ver: 0, diag: 0, anti: 0 }, bestDir: '' });
       }
     }
     dp = nd; // slide the window: this row becomes "previous" for the next one
   }
 
-  emit(
-    'DONE',
-    `${res}`,
-    `Sweep complete. The longest line of consecutive 1s in any direction is ${res}.`,
-    null,
-    null,
-    '',
-    'good',
-  );
+  emit('DONE', `${res}`, `Sweep complete. The longest line of consecutive 1s in any direction is ${res}.`, { cur: null, dirs: null, bestDir: '' , done: true }, 'good');
   return frames;
 }
 

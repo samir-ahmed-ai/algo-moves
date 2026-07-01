@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -37,20 +38,9 @@ function distED(a: GeoPoint, b: GeoPoint): number {
 
 const fmtPt = (p: GeoPoint) => `(${p.x},${p.y})`;
 
-function record({ stores, customers }: NearestInput): Frame<NearestState>[] {
-  const frames: Frame<NearestState>[] = [];
-  const res = new Array<number>(customers.length).fill(UNFILLED);
+function record({ stores, customers }: NearestInput): Frame<NearestState>[] {  const res = new Array<number>(customers.length).fill(UNFILLED);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<NearestState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<NearestState>(() => ({
         stores,
         customers,
         ci: null,
@@ -59,10 +49,8 @@ function record({ stores, customers }: NearestInput): Frame<NearestState>[] {
         best: UNFILLED,
         bestStore: null,
         res: res.slice(),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

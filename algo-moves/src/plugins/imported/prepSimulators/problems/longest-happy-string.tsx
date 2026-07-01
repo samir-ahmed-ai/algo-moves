@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,9 +26,7 @@ interface HappyState {
 
 const CHARS = ['a', 'b', 'c'] as const;
 
-function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
-  const frames: Frame<HappyState>[] = [];
-  const res: string[] = [];
+function record({ a, b, c }: HappyInput): Frame<HappyState>[] {  const res: string[] = [];
   // Mutable counts keyed by char; we re-sort a copy every round like the Go code.
   const counts: CountEntry[] = [
     { ch: 'a', cnt: a },
@@ -35,38 +34,17 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
     { ch: 'c', cnt: c },
   ];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    sorted: CountEntry[],
-    pickIdx: number | null,
-    skipIdx: number | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<HappyState>(() => ({
         res: res.slice(),
-        counts: sorted.map((e) => ({ ...e })),
-        pickIdx,
-        skipIdx,
-        done,
-      },
-    });
+        counts: [],
+        pickIdx: null,
+        skipIdx: null,
+        done: false
+      }));
 
   const sortedView = () => counts.slice().sort((x, y) => y.cnt - x.cnt);
 
-  emit(
-    'INIT',
-    `a=${a} b=${b} c=${c}`,
-    `Longest Happy String: build the longest string using a=${a} 'a', b=${b} 'b', c=${c} 'c' with no three of the same letter in a row. Greedily, each round we try the letter with the most remaining.`,
-    sortedView(),
-    null,
-    null,
-    false,
-  );
+  emit('INIT', `a=${a} b=${b} c=${c}`, `Longest Happy String: build the longest string using a=${a} 'a', b=${b} 'b', c=${c} 'c' with no three of the same letter in a row. Greedily, each round we try the letter with the most remaining.`, { counts: sortedView().map((e) => ({ ...e })), pickIdx: null, skipIdx: null, done: false });
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -86,32 +64,15 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
     }
 
     if (pick === -1) {
-      emit(
-        'DONE',
-        `len=${res.length}`,
-        `No letter can be appended — either everything is used up, or the only letters left would form three in a row. The happy string is "${res.join('')}" (length ${res.length}).`,
-        sorted,
-        null,
-        null,
-        true,
-        'good',
-      );
+      emit('DONE', `len=${res.length}`, `No letter can be appended — either everything is used up, or the only letters left would form three in a row. The happy string is "${res.join('')}" (length ${res.length}).`, { counts: sorted.map((e) => ({ ...e })), pickIdx: null, skipIdx: null, done: true }, 'good');
       break;
     }
 
     const chosen = sorted[pick].ch;
     if (skip !== null) {
-      emit(
-        'SKIP',
-        `skip ${sorted[skip].ch}`,
-        `The highest-remaining letter '${sorted[skip].ch}' already sits at the tail twice ("${res
+      emit('SKIP', `skip ${sorted[skip].ch}`, `The highest-remaining letter '${sorted[skip].ch}' already sits at the tail twice ("${res
           .slice(-2)
-          .join('')}"), so using it again would make three in a row. Skip it and drop to the next-best letter.`,
-        sorted,
-        pick,
-        skip,
-        false,
-      );
+          .join('')}"), so using it again would make three in a row. Skip it and drop to the next-best letter.`, { counts: sorted.map((e) => ({ ...e })), pickIdx: pick, skipIdx: skip, done: false });
     }
 
     // Append the chosen char and decrement its real count.
@@ -119,16 +80,8 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
     const real = counts.find((e) => e.ch === chosen)!;
     real.cnt--;
     const after = sortedView();
-    emit(
-      'PICK',
-      `+${chosen}`,
-      `Append '${chosen}' (the letter with the most remaining that is still legal here). It now has ${real.cnt} left. String so far: "${res.join('')}".`,
-      after,
-      // locate the chosen char in the freshly-sorted view for the pointer
-      after.findIndex((e) => e.ch === chosen),
-      null,
-      false,
-    );
+    emit('PICK', `+${chosen}`, `Append '${chosen}' (the letter with the most remaining that is still legal here). It now has ${real.cnt} left. String so far: "${res.join('')}".`, { counts: after.map((e) => ({ ...e })), pickIdx: // locate the chosen char in the freshly-sorted view for the pointer
+      after.findIndex((e) => e.ch === chosen), skipIdx: null, done: false });
   }
 
   return frames;

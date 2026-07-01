@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -30,18 +31,13 @@ function busyLess(a: BusyMeet, b: BusyMeet): boolean {
   return a.end < b.end;
 }
 
-function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
-  const frames: Frame<MeetState>[] = [];
-  const sorted = [...meetings].sort((a, b) => a[0] - b[0]);
+function record({ n, meetings }: MeetInput): Frame<MeetState>[] {  const sorted = [...meetings].sort((a, b) => a[0] - b[0]);
   let avail: number[] = [];
   for (let i = 0; i < n; i++) avail.push(i);
   let busy: BusyMeet[] = [];
   const cnt = new Array(n).fill(0);
 
-  const emit = (type: string, note: string, caption: string, s: Partial<MeetState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MeetState>(() => ({
         n,
         avail: avail.slice(),
         busy: busy.map((b) => ({ ...b })),
@@ -50,10 +46,8 @@ function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
         assigned: null,
         op: '',
         winner: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

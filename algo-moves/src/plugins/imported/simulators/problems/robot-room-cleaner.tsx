@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -31,25 +32,19 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
   const m = room.length;
   const n = room[0].length;
   const cleaned = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
-  const frames: Frame<RobotState>[] = [];
-
   // Robot's true position/facing in the room — the algorithm only knows relative moves.
   let pos: [number, number] = [start[0], start[1]];
   let dir = 0;
   let count = 0;
 
-  const emit = (type: string, note: string, caption: string, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        room,
+  const { emit, frames } = createRecorder<RobotState>(() => ({
+        room: room,
         cleaned: cleaned.map((r) => r.slice()),
         pos: [pos[0], pos[1]],
-        dir,
-        count,
-        done: type === 'DONE',
-      },
-    });
+        dir: dir,
+        count: count,
+        done: false
+      }));
 
   // Robot primitives the algorithm is allowed to use.
   const turnRight = () => {
@@ -63,11 +58,7 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
     return true;
   };
 
-  emit(
-    'INIT',
-    `${m}×${n} room`,
-    `Robot Room Cleaner: the robot starts facing up and can only move forward, turn, and clean — it never sees the whole room. DFS with backtracking visits every reachable open cell exactly once, using relative coordinates to remember where it has been.`,
-  );
+  emit('INIT', `${m}×${n} room`, `Robot Room Cleaner: the robot starts facing up and can only move forward, turn, and clean — it never sees the whole room. DFS with backtracking visits every reachable open cell exactly once, using relative coordinates to remember where it has been.`, {});
 
   // Visited set keyed by relative coordinates, exactly like the reference solution.
   const vis = new Set<string>();
@@ -76,7 +67,7 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
     vis.add(`${r},${c}`);
     cleaned[r][c] = true;
     count++;
-    emit('CLEAN', `clean (${r},${c})`, `Clean cell (${r}, ${c}) and mark it visited. Cells cleaned so far: ${count}. Now try each of the 4 directions from here.`);
+    emit('CLEAN', `clean (${r},${c})`, `Clean cell (${r}, ${c}) and mark it visited. Cells cleaned so far: ${count}. Now try each of the 4 directions from here.`, {});
 
     for (let i = 0; i < 4; i++) {
       const nd = (d + i) % 4;
@@ -87,7 +78,7 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
         // Aim the robot at direction nd, then probe with a real move.
         while (dir !== nd) turnRight();
         if (move()) {
-          emit('MOVE', `move ${ARROW[nd]}`, `From (${r}, ${c}) the robot faces ${ARROW[nd]} and moves into the open cell (${nr}, ${nc}) — recurse into it.`);
+          emit('MOVE', `move ${ARROW[nd]}`, `From (${r}, ${c}) the robot faces ${ARROW[nd]} and moves into the open cell (${nr}, ${nc}) — recurse into it.`, {});
           dfs(nr, nc, nd);
           // Backtrack: turn around, step back to (r,c), restore facing.
           turnRight();
@@ -95,9 +86,9 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
           move();
           turnRight();
           turnRight();
-          emit('BACKTRACK', `back to (${r},${c})`, `Done exploring from (${nr}, ${nc}); backtrack — turn around, step back to (${r}, ${c}), and turn around again to restore facing.`);
+          emit('BACKTRACK', `back to (${r},${c})`, `Done exploring from (${nr}, ${nc}); backtrack — turn around, step back to (${r}, ${c}), and turn around again to restore facing.`, {});
         } else {
-          emit('WALL', `wall ${ARROW[nd]}`, `Facing ${ARROW[nd]} from (${r}, ${c}) hits a wall (or the room edge) — can't move, skip this direction.`);
+          emit('WALL', `wall ${ARROW[nd]}`, `Facing ${ARROW[nd]} from (${r}, ${c}) hits a wall (or the room edge) — can't move, skip this direction.`, {});
         }
       }
       // Rotate to scan the next relative direction.
@@ -107,7 +98,7 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
 
   dfs(start[0], start[1], 0);
 
-  emit('DONE', `${count} cells cleaned`, `Every reachable open cell has been visited and cleaned. Total cells cleaned = ${count}.`, 'good');
+  emit('DONE', `${count} cells cleaned`, `Every reachable open cell has been visited and cleaned. Total cells cleaned = ${count}.`, { done: true }, 'good');
   return frames;
 }
 

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -23,35 +24,19 @@ function isDigit(c: string): boolean {
 
 function record({ s }: ValidNumberInput): Frame<ValidNumberState>[] {
   const chars = s.split('');
-  const frames: Frame<ValidNumberState>[] = [];
-
   let seenDigit = false;
   let seenDot = false;
   let seenExp = false;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    over: {
-      i?: number | null;
-      result?: boolean | null;
-      done?: boolean;
-    },
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        chars,
-        i: over.i ?? null,
-        seenDigit,
-        seenDot,
-        seenExp,
-        result: over.result ?? null,
-        done: over.done ?? false,
-      },
-    });
+  const { emit, frames } = createRecorder<ValidNumberState>(() => ({
+    chars,
+    i: null,
+    seenDigit,
+    seenDot,
+    seenExp,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',

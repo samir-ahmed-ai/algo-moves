@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -63,24 +64,13 @@ function buildSuffixTrie(s: string): { nodes: NaryNode[]; paths: string[] } {
   return { nodes, paths };
 }
 
-function record({ s }: PaliInput): Frame<PaliState>[] {
-  const frames: Frame<PaliState>[] = [];
-  const { nodes, paths } = buildSuffixTrie(s);
+function record({ s }: PaliInput): Frame<PaliState>[] {  const { nodes, paths } = buildSuffixTrie(s);
   const visited = new Array<boolean>(nodes.length).fill(false);
   const counted: number[] = [];
   const seen: string[] = [];
   let count = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    over: Partial<PaliState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PaliState>(() => ({
         s,
         nodes,
         path: paths,
@@ -92,10 +82,8 @@ function record({ s }: PaliInput): Frame<PaliState>[] {
         isNew: null,
         seen: seen.slice(),
         count,
-        done: false,
-        ...over,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

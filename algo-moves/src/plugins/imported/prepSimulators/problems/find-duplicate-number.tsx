@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,27 +21,14 @@ interface DupState {
 }
 
 function record({ nums }: DupInput): Frame<DupState>[] {
-  const frames: Frame<DupState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DupState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DupState>(() => ({
         nums,
         slow: 0,
         fast: 0,
         phase: 'init',
         meetAt: null,
-        result: null,
-        ...s,
-      },
-    });
+        result: null
+      }));
 
   // Treat each value as a "next index" pointer: i -> nums[i]. Because values are
   // in [1, n-1] and there are n entries, a duplicate forces a cycle, and the

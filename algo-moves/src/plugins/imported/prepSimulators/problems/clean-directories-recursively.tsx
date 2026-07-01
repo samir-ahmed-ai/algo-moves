@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,29 +28,16 @@ function countEntries(node: DirNode): number {
   return node.files.length + node.children.length;
 }
 
-function record({ root }: CleanDirsInput): Frame<CleanDirsState>[] {
-  const frames: Frame<CleanDirsState>[] = [];
-  const removed: string[] = [];
+function record({ root }: CleanDirsInput): Frame<CleanDirsState>[] {  const removed: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<CleanDirsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<CleanDirsState>(() => ({
         tree: root,
         path: [],
         activeDir: null,
         removed: removed.slice(),
         remaining: countEntries(root),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const walk = (node: DirNode, path: string[]) => {
     const fullPath = path.length ? path.join('/') : node.name;

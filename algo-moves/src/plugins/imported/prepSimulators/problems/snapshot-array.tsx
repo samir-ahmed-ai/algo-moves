@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -22,24 +23,17 @@ interface SnapState {
   done: boolean;
 }
 
-function record({ length, ops }: SnapInput): Frame<SnapState>[] {
-  const frames: Frame<SnapState>[] = [];
-  const snaps: [number, number][][] = Array.from({ length }, () => [[0, 0]]);
+function record({ length, ops }: SnapInput): Frame<SnapState>[] {  const snaps: [number, number][][] = Array.from({ length }, () => [[0, 0]]);
   let sid = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<SnapState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SnapState>(() => ({
         length,
         snaps: snaps.map((arr) => arr.map((x) => [...x] as [number, number])),
         sid,
         op: '',
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -21,9 +22,7 @@ interface ListToBstState {
   done: boolean;
 }
 
-function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
-  const frames: Frame<ListToBstState>[] = [];
-  const n = list.length;
+function record({ list }: ListToBstInput): Frame<ListToBstState>[] {  const n = list.length;
 
   // Map each build(l, r) call to a stable level-order tree slot so the whole
   // tree is laid out consistently as nodes get filled in. Root = slot 0,
@@ -33,28 +32,17 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
   const status: Status[] = new Array<Status>(capacity).fill('idle');
   const built: number[] = [];
 
-  let cur = 0; // head cursor: index into `list` (mirrors the Go `cur` pointer)
+  let cur = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ListToBstState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ListToBstState>(() => ({
         list,
         cur: cur < n ? cur : null,
         tree: tree.slice(),
         status: status.slice(),
         active: null,
         built: built.slice(),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -44,40 +45,25 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
   const n = mat[0].length;
   const visited: boolean[][] = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
   const path: [number, number][] = [];
-  const frames: Frame<PathState>[] = [];
-
   const cloneVisited = (): boolean[][] => visited.map((row) => row.slice());
   const clonePath = (): [number, number][] => path.map((p) => [p[0], p[1]] as [number, number]);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    extra: Partial<PathState> = {},
-    tone?: 'good' | 'bad',
-  ): void => {
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PathState>(() => ({
         mat,
         src: [sx, sy],
         dest: [dx, dy],
         visited: cloneVisited(),
         path: clonePath(),
-        cur,
+        cur: null,
         result: null,
-        done: false,
-        ...extra,
-      },
-    });
-  };
+        done: false
+      }));
 
   emit(
     'INIT',
     `(${sx},${sy}) → (${dx},${dy})`,
     `Find a path from the start cell (${sx},${sy}) to the destination (${dx},${dy}) through open cells (0). Cells marked 1 are walls. We run DFS in the order right, down, left, up, pushing each cell onto the path and backtracking (popping) when a branch dead-ends.`,
-    null,
+    {},
   );
 
   let found: [number, number][] | null = null;
@@ -88,7 +74,6 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
         'BLOCKED',
         `(${i},${j}) off-grid`,
         `Cell (${i},${j}) is outside the ${m}×${n} grid, so this direction fails. Return false and try the next direction.`,
-        null,
         {},
         'bad',
       );
@@ -99,8 +84,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
         'BLOCKED',
         `(${i},${j}) wall`,
         `Cell (${i},${j}) is a wall (value 1), so we cannot step here. Return false and try the next direction.`,
-        [i, j],
-        {},
+        { cur: [i, j] },
         'bad',
       );
       return false;
@@ -110,8 +94,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
         'BLOCKED',
         `(${i},${j}) seen`,
         `Cell (${i},${j}) is already on the explored path, so revisiting would loop. Return false and try the next direction.`,
-        [i, j],
-        {},
+        { cur: [i, j] },
         'bad',
       );
       return false;
@@ -122,7 +105,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
       'PUSH',
       `push (${i},${j})`,
       `Cell (${i},${j}) is open, so append it to the current path. Path length is now ${path.length}.`,
-      [i, j],
+      { cur: [i, j] },
     );
 
     if (i === dx && j === dy) {
@@ -131,8 +114,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
         'FOUND',
         `reached (${dx},${dy})`,
         `Cell (${i},${j}) is the destination. The whole path from start to here is the answer — unwind the recursion returning true.`,
-        [i, j],
-        { result: found, done: true },
+        { cur: [i, j], result: found, done: true },
         'good',
       );
       return true;
@@ -143,7 +125,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
       'VISIT',
       `visit (${i},${j})`,
       `Mark (${i},${j}) as explored, then probe its neighbours in the order right, down, left, up.`,
-      [i, j],
+      { cur: [i, j] },
     );
 
     for (const [dr, dc] of DIRS) {
@@ -153,7 +135,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
         'TRY',
         `${DIR_NAME(dr, dc)} → (${ni},${nj})`,
         `From (${i},${j}) try the ${DIR_NAME(dr, dc)} neighbour (${ni},${nj}).`,
-        [ni, nj],
+        { cur: [ni, nj] },
       );
       if (dfs(ni, nj)) return true;
     }
@@ -163,8 +145,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
       'POP',
       `backtrack (${i},${j})`,
       `Every direction out of (${i},${j}) dead-ended, so pop it off the path and backtrack to the previous cell.`,
-      [i, j],
-      {},
+      { cur: [i, j] },
       'bad',
     );
     return false;
@@ -176,8 +157,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
       'NONE',
       'no path',
       `DFS exhausted every reachable open cell without touching the destination, so no path exists between (${sx},${sy}) and (${dx},${dy}).`,
-      null,
-      { done: true },
+      { cur: null, done: true },
       'bad',
     );
   }

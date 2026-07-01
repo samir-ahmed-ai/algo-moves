@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, PathDisplay } from '../../../_shared/vizKit';
 
@@ -13,59 +14,31 @@ interface BinState {
   done: boolean;
 }
 
-function record({ n }: BinInput): Frame<BinState>[] {
-  const frames: Frame<BinState>[] = [];
-  const results: string[] = [];
+function record({ n }: BinInput): Frame<BinState>[] {  const results: string[] = [];
 
-  const emit = (type: string, note: string, caption: string, path: string, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { n, path, results: results.slice(), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<BinState>(() => ({
+        n: n,
+        results: results.slice(),
+        path: '',
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `n=${n}`,
-    `Generate every binary string of length ${n}. At each position there are no constraints — branch on '0' first, then '1', and record once the string reaches length ${n}. There are 2^${n} = ${2 ** n} strings.`,
-    '',
-  );
+  emit('INIT', `n=${n}`, `Generate every binary string of length ${n}. At each position there are no constraints — branch on '0' first, then '1', and record once the string reaches length ${n}. There are 2^${n} = ${2 ** n} strings.`, { path: '' });
 
   const bt = (path: string) => {
     if (path.length === n) {
       results.push(path);
-      emit(
-        'RECORD',
-        `+"${path}"`,
-        `Length reached ${n} — record the binary string "${path}" (${results.length} so far).`,
-        path,
-        'good',
-      );
+      emit('RECORD', `+"${path}"`, `Length reached ${n} — record the binary string "${path}" (${results.length} so far).`, { path: path }, 'good');
       return;
     }
-    emit(
-      'ZERO',
-      `add '0'`,
-      `Position ${path.length}: append '0' first and recurse. path = "${path}0".`,
-      path + '0',
-    );
+    emit('ZERO', `add '0'`, `Position ${path.length}: append '0' first and recurse. path = "${path}0".`, { path: path + '0' });
     bt(path + '0');
-    emit(
-      'ONE',
-      `add '1'`,
-      `Position ${path.length}: now append '1' and recurse. path = "${path}1".`,
-      path + '1',
-    );
+    emit('ONE', `add '1'`, `Position ${path.length}: now append '1' and recurse. path = "${path}1".`, { path: path + '1' });
     bt(path + '1');
   };
 
   bt('');
-  emit(
-    'DONE',
-    `${results.length} strings`,
-    `All branches explored — ${results.length} binary strings of length ${n}.`,
-    '',
-    'good',
-  );
+  emit('DONE', `${results.length} strings`, `All branches explored — ${results.length} binary strings of length ${n}.`, { path: '' , done: true }, 'good');
   return frames;
 }
 

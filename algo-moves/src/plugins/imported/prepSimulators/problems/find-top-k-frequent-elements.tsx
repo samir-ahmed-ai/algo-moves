@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,9 +25,7 @@ interface TopKState {
   done: boolean;
 }
 
-function record({ a, k }: TopKInput): Frame<TopKState>[] {
-  const frames: Frame<TopKState>[] = [];
-  const freq = new Map<number, number>();
+function record({ a, k }: TopKInput): Frame<TopKState>[] {  const freq = new Map<number, number>();
   const buckets: number[][] = Array.from({ length: a.length + 1 }, () => []);
   const result: number[] = [];
 
@@ -35,37 +34,24 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
       .map((vals, cnt) => [cnt, vals.slice()] as [number, number[]])
       .filter(([, vals]) => vals.length > 0);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    phase: Phase,
-    s: Partial<TopKState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<TopKState>(() => ({
         a,
         k,
-        phase,
+        phase: 'count',
         scan: null,
         freq: [...freq.entries()],
         buckets: bucketEntries(),
         bucketAt: null,
         pickValue: null,
         result: result.slice(),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',
     `k=${k}`,
     `Top K Frequent: return the ${k} values that appear most often in the array. Plan: count every value, drop each value into a bucket keyed by its count, then sweep buckets from highest count down — that is O(n) time and O(n) space, no sorting needed.`,
-    'count',
-    {},
+    { phase: 'count' },
   );
 
   // Phase 1 — frequency map.
@@ -77,8 +63,7 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
       'COUNT',
       `freq[${x}]=${next}`,
       `Read a[${i}] = ${x} and tally it: freq[${x}] is now ${next}. One linear pass fills the whole frequency map.`,
-      'count',
-      { scan: i },
+      { phase: 'count', scan: i },
     );
   }
 
@@ -89,8 +74,7 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
       'BUCKET',
       `bucket[${cnt}] += ${num}`,
       `Value ${num} occurs ${cnt} time(s), so place it in bucket ${cnt}. Index = frequency, so values that share a count land in the same bucket.`,
-      'bucket',
-      { bucketAt: cnt },
+      { phase: 'bucket', bucketAt: cnt },
     );
   }
 
@@ -101,8 +85,7 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
       'SWEEP',
       `bucket[${cnt}]`,
       `Sweeping from the top: bucket ${cnt} holds the values seen ${cnt} time(s). Anything here is at least as frequent as anything in lower buckets, so pull from it first.`,
-      'collect',
-      { bucketAt: cnt },
+      { phase: 'collect', bucketAt: cnt },
     );
     for (const num of buckets[cnt]) {
       result.push(num);
@@ -110,8 +93,7 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
         'PICK',
         `take ${num}`,
         `Take ${num} (count ${cnt}) into the answer — result is now [${result.join(', ')}], ${result.length}/${k}.`,
-        'collect',
-        { bucketAt: cnt, pickValue: num },
+        { phase: 'collect', bucketAt: cnt, pickValue: num },
         'good',
       );
       if (result.length === k) break;
@@ -122,8 +104,7 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
     'DONE',
     `[${result.join(',')}]`,
     `Collected ${k} value(s) from the densest buckets first, so the answer is [${result.join(', ')}] — the ${k} most frequent elements.`,
-    'collect',
-    { done: true },
+    { phase: 'collect', done: true },
     'good',
   );
 

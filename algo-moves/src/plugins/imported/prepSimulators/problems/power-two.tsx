@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -37,31 +38,18 @@ function lowestSetColumn(value: number, width: number): number | null {
   return null;
 }
 
-function record({ n }: PowerTwoInput): Frame<PowerTwoState>[] {
-  const frames: Frame<PowerTwoState>[] = [];
-  const width = WIDTH;
+function record({ n }: PowerTwoInput): Frame<PowerTwoState>[] {  const width = WIDTH;
   const rows: Row[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PowerTwoState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PowerTwoState>(() => ({
         n,
         width,
         rows: rows.map((r) => ({ label: r.label, bits: r.bits.slice() })),
         focusCol: null,
         lowestSet: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

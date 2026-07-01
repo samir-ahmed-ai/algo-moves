@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -20,42 +21,27 @@ function record({ s, p }: ReInput): Frame<ReState>[] {
   const m = s.length;
   const n = p.length;
   const dp: (boolean | null)[][] = Array.from({ length: m + 1 }, () => new Array<boolean | null>(n + 1).fill(null));
-  const frames: Frame<ReState>[] = [];
+  const { emit, frames } = createRecorder<ReState>(() => ({
+        s: s,
+        p: p,
+        dp: dp.map((r) => r.slice()),
+        cur: null,
+        done: false
+      }));
 
-  const emit = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { s, p, dp: dp.map((r) => r.slice()), cur, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `"${s}" ~ "${p}"`,
-    `Regular Expression Matching: does the whole string "${s}" match the pattern "${p}", where '.' matches any single char and '*' means zero-or-more of the preceding element? dp[i][j] is true when the first i chars of s match the first j chars of p.`,
-    null,
-  );
+  emit('INIT', `"${s}" ~ "${p}"`, `Regular Expression Matching: does the whole string "${s}" match the pattern "${p}", where '.' matches any single char and '*' means zero-or-more of the preceding element? dp[i][j] is true when the first i chars of s match the first j chars of p.`, { cur: null });
 
   dp[0][0] = true;
-  emit('BASE', `dp[0][0]=✓`, `Base case: an empty string matches an empty pattern, so dp[0][0] = true.`, [0, 0]);
+  emit('BASE', `dp[0][0]=✓`, `Base case: an empty string matches an empty pattern, so dp[0][0] = true.`, { cur: [0, 0] });
 
   // First row: empty string vs non-empty pattern. Only "x*" groups can match "".
   for (let j = 1; j <= n; j++) {
     if (p[j - 1] === '*') {
       dp[0][j] = dp[0][j - 2] ?? false;
-      emit(
-        'BASE',
-        `dp[0][${j}]=${dp[0][j] ? '✓' : '✗'}`,
-        `Empty string row: '${p[j - 1]}' lets the group "${p[j - 2]}*" match zero times, so dp[0][${j}] copies dp[0][${j - 2}] = ${dp[0][j - 2] ? 'true' : 'false'} → ${dp[0][j] ? 'true' : 'false'}.`,
-        [0, j],
-      );
+      emit('BASE', `dp[0][${j}]=${dp[0][j] ? '✓' : '✗'}`, `Empty string row: '${p[j - 1]}' lets the group "${p[j - 2]}*" match zero times, so dp[0][${j}] copies dp[0][${j - 2}] = ${dp[0][j - 2] ? 'true' : 'false'} → ${dp[0][j] ? 'true' : 'false'}.`, { cur: [0, j] });
     } else {
       dp[0][j] = false;
-      emit(
-        'BASE',
-        `dp[0][${j}]=✗`,
-        `Empty string row: pattern char '${p[j - 1]}' is not '*', so it must consume a char that the empty string lacks — dp[0][${j}] = false.`,
-        [0, j],
-      );
+      emit('BASE', `dp[0][${j}]=✗`, `Empty string row: pattern char '${p[j - 1]}' is not '*', so it must consume a char that the empty string lacks — dp[0][${j}] = false.`, { cur: [0, j] });
     }
   }
 
@@ -69,33 +55,17 @@ function record({ s, p }: ReInput): Frame<ReState>[] {
         const charMatches = prev === '.' || prev === sc;
         const more = charMatches ? (dp[i - 1][j] ?? false) : false;
         dp[i][j] = zero || more;
-        emit(
-          'FILL',
-          `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`,
-          `'*' on group "${prev}*": use it zero times → dp[${i}][${j - 2}] = ${zero}, OR (since '${prev}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}) consume '${sc}' and reuse the star → ${charMatches ? `dp[${i - 1}][${j}] = ${more}` : 'unavailable'}. dp[${i}][${j}] = ${dp[i][j]}.`,
-          [i, j],
-        );
+        emit('FILL', `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`, `'*' on group "${prev}*": use it zero times → dp[${i}][${j - 2}] = ${zero}, OR (since '${prev}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}) consume '${sc}' and reuse the star → ${charMatches ? `dp[${i - 1}][${j}] = ${more}` : 'unavailable'}. dp[${i}][${j}] = ${dp[i][j]}.`, { cur: [i, j] });
       } else {
         const charMatches = pc === '.' || pc === sc;
         dp[i][j] = charMatches ? (dp[i - 1][j - 1] ?? false) : false;
-        emit(
-          'FILL',
-          `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`,
-          `'${pc}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}: ${charMatches ? `carry the diagonal dp[${i - 1}][${j - 1}] = ${dp[i - 1][j - 1]}` : 'no match here'}. dp[${i}][${j}] = ${dp[i][j]}.`,
-          [i, j],
-        );
+        emit('FILL', `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`, `'${pc}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}: ${charMatches ? `carry the diagonal dp[${i - 1}][${j - 1}] = ${dp[i - 1][j - 1]}` : 'no match here'}. dp[${i}][${j}] = ${dp[i][j]}.`, { cur: [i, j] });
       }
     }
   }
 
   const ans = dp[m][n] ?? false;
-  emit(
-    'DONE',
-    ans ? 'match ✓' : 'no match ✗',
-    `The table is full. dp[${m}][${n}] = ${ans}, so "${s}" ${ans ? 'matches' : 'does not match'} "${p}".`,
-    [m, n],
-    'good',
-  );
+  emit('DONE', ans ? 'match ✓' : 'no match ✗', `The table is full. dp[${m}][${n}] = ${ans}, so "${s}" ${ans ? 'matches' : 'does not match'} "${p}".`, { cur: [m, n] , done: true }, 'good');
   return frames;
 }
 

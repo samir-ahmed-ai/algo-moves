@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -23,28 +24,15 @@ interface SelfExcludeState {
 function record({ nums }: SelfExcludeInput): Frame<SelfExcludeState>[] {
   const n = nums.length;
   const out = new Array<number | null>(n).fill(null);
-  const frames: Frame<SelfExcludeState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SelfExcludeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SelfExcludeState>(() => ({
         nums,
         out: out.slice(),
         phase: 'init',
         i: null,
         ref: null,
         suffix: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,18 +23,7 @@ interface RemoveDupState {
 function record({ nums }: RemoveDupInput): Frame<RemoveDupState>[] {
   const n = nums.length;
   const arr = nums.slice();
-  const frames: Frame<RemoveDupState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RemoveDupState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RemoveDupState>(() => ({
         nums: arr.slice(),
         n,
         w: 1,
@@ -41,10 +31,8 @@ function record({ nums }: RemoveDupInput): Frame<RemoveDupState>[] {
         prev: null,
         kept: null,
         length: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

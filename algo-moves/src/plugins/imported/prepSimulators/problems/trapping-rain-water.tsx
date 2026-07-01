@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import { cn } from '../../../../lib/cn';
@@ -21,24 +22,13 @@ interface RainState {
   done: boolean;
 }
 
-function record({ height }: RainInput): Frame<RainState>[] {
-  const frames: Frame<RainState>[] = [];
-  let l = 0;
+function record({ height }: RainInput): Frame<RainState>[] {  let l = 0;
   let r = height.length - 1;
   let maxL = 0;
   let maxR = 0;
   let water = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RainState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RainState>(() => ({
         height,
         l,
         r,
@@ -48,10 +38,8 @@ function record({ height }: RainInput): Frame<RainState>[] {
         side: null,
         filled: null,
         added: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

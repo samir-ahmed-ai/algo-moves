@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,23 +22,12 @@ interface RotateState {
   done: boolean;
 }
 
-function record({ s, goal }: RotateInput): Frame<RotateState>[] {
-  const frames: Frame<RotateState>[] = [];
-  const doubleStr = s + s;
+function record({ s, goal }: RotateInput): Frame<RotateState>[] {  const doubleStr = s + s;
   const double = doubleStr.split('');
   const goalArr = goal.split('');
   const n = goal.length;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<RotateState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RotateState>(() => ({
         double,
         goal: goalArr,
         n,
@@ -46,10 +36,8 @@ function record({ s, goal }: RotateInput): Frame<RotateState>[] {
         cmp: null,
         cmpOk: null,
         found: false,
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

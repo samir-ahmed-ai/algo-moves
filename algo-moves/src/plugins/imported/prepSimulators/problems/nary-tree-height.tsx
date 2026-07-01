@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -25,32 +26,19 @@ interface HeightState {
   answer: number | null;
 }
 
-function record({ nodes }: HeightInput): Frame<HeightState>[] {
-  const frames: Frame<HeightState>[] = [];
-  const n = nodes.length;
+function record({ nodes }: HeightInput): Frame<HeightState>[] {  const n = nodes.length;
   const best = new Array<number | null>(n).fill(null);
   const height = new Array<number | null>(n).fill(null);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<HeightState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<HeightState>(() => ({
         nodes,
         active: null,
         childIdx: null,
         best: best.slice(),
         height: height.slice(),
         done: false,
-        answer: null,
-        ...s,
-      },
-    });
+        answer: null
+      }));
 
   // Post-order DFS, faithful to the Go getHeight: nil -> 0; else 1 + max(child heights).
   const getHeight = (i: number): number => {

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -16,49 +17,45 @@ interface PermState {
   done: boolean;
 }
 
-function record({ nums }: PermInput): Frame<PermState>[] {
-  const frames: Frame<PermState>[] = [];
-  const used: boolean[] = nums.map(() => false);
+function record({ nums }: PermInput): Frame<PermState>[] {  const used: boolean[] = nums.map(() => false);
   const cur: number[] = [];
   const results: number[][] = [];
 
-  const emit = (type: string, note: string, caption: string, pick: number | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { nums: nums.slice(), used: used.slice(), cur: cur.slice(), pick, results: results.map((r) => r.slice()), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<PermState>(() => ({
+        nums: nums.slice(),
+        used: used.slice(),
+        cur: cur.slice(),
+        results: results.map((r) => r.slice()),
+        pick: null,
+        done: false
+      }));
 
   const fmt = (xs: number[]) => `[${xs.join(', ')}]`;
 
   const fact = (k: number): number => (k <= 1 ? 1 : k * fact(k - 1));
 
-  emit(
-    'INIT',
-    `${nums.length}! perms`,
-    `Generate every ordering of ${fmt(nums)}. A used[] flag marks elements already placed; at each position pick any unused element, recurse, then unmark it to free that branch. There are ${nums.length}! = ${fact(nums.length)} permutations.`,
-    null,
-  );
+  emit('INIT', `${nums.length}! perms`, `Generate every ordering of ${fmt(nums)}. A used[] flag marks elements already placed; at each position pick any unused element, recurse, then unmark it to free that branch. There are ${nums.length}! = ${fact(nums.length)} permutations.`, { pick: null });
 
   const btPerm = () => {
     if (cur.length === nums.length) {
       results.push(cur.slice());
-      emit('RECORD', `+${fmt(cur)}`, `All ${nums.length} positions filled — record the permutation ${fmt(cur)} (${results.length} so far).`, null, 'good');
+      emit('RECORD', `+${fmt(cur)}`, `All ${nums.length} positions filled — record the permutation ${fmt(cur)} (${results.length} so far).`, { pick: null }, 'good');
       return;
     }
     for (let i = 0; i < nums.length; i++) {
       if (used[i]) continue;
       used[i] = true;
       cur.push(nums[i]);
-      emit('CHOOSE', `place ${nums[i]}`, `Place nums[${i}] = ${nums[i]} at position ${cur.length - 1} and recurse on the remaining elements. cur = ${fmt(cur)}.`, i);
+      emit('CHOOSE', `place ${nums[i]}`, `Place nums[${i}] = ${nums[i]} at position ${cur.length - 1} and recurse on the remaining elements. cur = ${fmt(cur)}.`, { pick: i });
       btPerm();
       cur.pop();
       used[i] = false;
-      emit('BACKTRACK', `free ${nums[i]}`, `Backtrack: free nums[${i}] = ${nums[i]} so a different element can take position ${cur.length}. cur = ${fmt(cur)}.`, i);
+      emit('BACKTRACK', `free ${nums[i]}`, `Backtrack: free nums[${i}] = ${nums[i]} so a different element can take position ${cur.length}. cur = ${fmt(cur)}.`, { pick: i });
     }
   };
 
   btPerm();
-  emit('DONE', `${results.length} perms`, `All orderings explored — ${results.length} permutations of ${fmt(nums)}.`, null, 'good');
+  emit('DONE', `${results.length} perms`, `All orderings explored — ${results.length} permutations of ${fmt(nums)}.`, { pick: null , done: true }, 'good');
   return frames;
 }
 

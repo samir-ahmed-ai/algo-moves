@@ -21,6 +21,8 @@ import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '../../l
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
 import { vizText } from './vizTokens';
 import { useCanvasActions } from '../../lib/canvasActions';
+import { recordAttempt } from '../../lib/progress';
+import { useCanvasStatic } from '../../shell/canvas/CanvasContext';
 import { VizFitBox, MiniTabs } from '../../lib/canvasTeachingUi';
 import type { Frame, PluginViewProps, QuizQuestion, SampleInput } from '../../core/types';
 
@@ -45,6 +47,7 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
 
   return function QuizPanel() {
     const { focusPanel, advancePractice } = useCanvasActions();
+    const { item } = useCanvasStatic();
     const [i, setI] = useState(0);
     const [picked, setPicked] = useState<number | null>(null);
     const [score, setScore] = useState(0);
@@ -72,7 +75,9 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
       if (answered || !q) return;
       focusPanel(panelId);
       setPicked(idx);
-      if (q.choices[idx].correct) setScore((s) => s + 1);
+      const isC = !!q.choices[idx]?.correct;
+      recordAttempt(item.id, isC);
+      if (isC) setScore((s) => s + 1);
     };
 
     const next = () => {

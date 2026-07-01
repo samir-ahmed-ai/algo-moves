@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,20 +22,9 @@ interface LevelState {
   done: boolean;
 }
 
-function record({ nodes }: NaryInput): Frame<LevelState>[] {
-  const frames: Frame<LevelState>[] = [];
-  const tree = nodes ?? [];
+function record({ nodes }: NaryInput): Frame<LevelState>[] {  const tree = nodes ?? [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LevelState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LevelState>(() => ({
         nodes: tree,
         level: [],
         next: [],
@@ -42,10 +32,8 @@ function record({ nodes }: NaryInput): Frame<LevelState>[] {
         visited: [],
         res: [],
         depth: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (nodes === null || tree.length === 0) {
     emit(

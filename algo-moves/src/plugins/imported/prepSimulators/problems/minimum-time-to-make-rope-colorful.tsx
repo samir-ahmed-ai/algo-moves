@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,23 +22,12 @@ interface RopeState {
   done: boolean;
 }
 
-function record({ colors, neededTime }: RopeInput): Frame<RopeState>[] {
-  const frames: Frame<RopeState>[] = [];
-  let cost = 0;
+function record({ colors, neededTime }: RopeInput): Frame<RopeState>[] {  let cost = 0;
   let mx = neededTime[0];
   let sum = neededTime[0];
   let groupStart = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RopeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RopeState>(() => ({
         colors,
         neededTime,
         i: null,
@@ -46,10 +36,8 @@ function record({ colors, neededTime }: RopeInput): Frame<RopeState>[] {
         sum,
         mx,
         cost,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

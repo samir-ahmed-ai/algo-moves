@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -17,24 +18,17 @@ interface RleState {
   done: boolean;
 }
 
-function record({ encoding, calls }: RleInput): Frame<RleState>[] {
-  const frames: Frame<RleState>[] = [];
-  const enc = [...encoding];
+function record({ encoding, calls }: RleInput): Frame<RleState>[] {  const enc = [...encoding];
   let idx = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<RleState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RleState>(() => ({
         enc: enc.slice(),
         idx,
         op: '',
         n: 0,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -31,71 +32,32 @@ function record(input: FloydInput): Frame<FloydState>[] {
     Array.from({ length: n }, (_, j) => (i === j ? 0 : INF)),
   );
   for (const [u, v, w] of input.edges) dist[u][v] = w;
-
-  const frames: Frame<FloydState>[] = [];
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    k: number | null,
-    cell: [number, number] | null,
-    tone?: 'good',
-  ): void => {
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FloydState>(() => ({
         dist: dist.map((r) => r.slice()),
-        k,
-        cell,
         src: input.src,
         dst: input.dst,
-        done: type === 'DONE',
-      },
-    });
-  };
+        k: null,
+        cell: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${n}×${n} matrix`,
-    `Floyd-Warshall builds an ${n}×${n} all-pairs shortest-distance matrix. Start with the direct-edge weights (∞ where no edge, 0 on the diagonal), then for each intermediate node k let every pair (i, j) route through k if that is cheaper.`,
-    null,
-    null,
-  );
+  emit('INIT', `${n}×${n} matrix`, `Floyd-Warshall builds an ${n}×${n} all-pairs shortest-distance matrix. Start with the direct-edge weights (∞ where no edge, 0 on the diagonal), then for each intermediate node k let every pair (i, j) route through k if that is cheaper.`, { k: null, cell: null });
 
   for (let k = 0; k < n; k++) {
-    emit(
-      'PHASE',
-      `via k=${k}`,
-      `Open intermediate node k=${k}: test whether routing any pair i → ${k} → j is shorter than the best i → j found so far.`,
-      k,
-      null,
-    );
+    emit('PHASE', `via k=${k}`, `Open intermediate node k=${k}: test whether routing any pair i → ${k} → j is shorter than the best i → j found so far.`, { k: k, cell: null });
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         const through = dist[i][k] + dist[k][j];
         if (through < dist[i][j]) {
           const prev = dist[i][j];
           dist[i][j] = through;
-          emit(
-            'RELAX',
-            `(${i},${j})=${through}`,
-            `dist[${i}][${j}]: ${i}→${k}→${j} costs ${fmt(dist[i][k])}+${fmt(dist[k][j])}=${through}, beating the old ${fmt(prev)}. Update dist[${i}][${j}] to ${through}.`,
-            k,
-            [i, j],
-          );
+          emit('RELAX', `(${i},${j})=${through}`, `dist[${i}][${j}]: ${i}→${k}→${j} costs ${fmt(dist[i][k])}+${fmt(dist[k][j])}=${through}, beating the old ${fmt(prev)}. Update dist[${i}][${j}] to ${through}.`, { k: k, cell: [i, j] });
         }
       }
     }
   }
 
-  emit(
-    'DONE',
-    `dist[${input.src}][${input.dst}]=${fmt(dist[input.src][input.dst])}`,
-    `Matrix complete. The queried shortest distance from ${input.src} to ${input.dst} is ${fmt(dist[input.src][input.dst])}.`,
-    null,
-    [input.src, input.dst],
-    'good',
-  );
+  emit('DONE', `dist[${input.src}][${input.dst}]=${fmt(dist[input.src][input.dst])}`, `Matrix complete. The queried shortest distance from ${input.src} to ${input.dst} is ${fmt(dist[input.src][input.dst])}.`, { k: null, cell: [input.src, input.dst] , done: true }, 'good');
   return frames;
 }
 

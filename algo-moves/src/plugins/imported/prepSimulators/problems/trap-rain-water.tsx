@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,18 +22,7 @@ interface TrapState {
 }
 
 function record({ height }: TrapInput): Frame<TrapState>[] {
-  const frames: Frame<TrapState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<TrapState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<TrapState>(() => ({
         height,
         l: null,
         r: null,
@@ -41,10 +31,8 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
         moved: null,
         added: null,
         ans: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (height.length === 0) {
     emit('DONE', '0', 'The elevation map is empty, so no water can be trapped. Answer = 0.', { done: true }, 'good');

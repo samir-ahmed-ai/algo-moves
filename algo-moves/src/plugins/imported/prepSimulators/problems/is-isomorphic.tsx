@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -21,23 +22,12 @@ interface IsIsomorphicState {
   done: boolean;
 }
 
-function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {
-  const frames: Frame<IsIsomorphicState>[] = [];
-  const sc = [...s];
+function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {  const sc = [...s];
   const tc = [...t];
   const m1 = new Map<string, string>();
   const m2 = new Map<string, string>();
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<IsIsomorphicState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<IsIsomorphicState>(() => ({
         s: sc,
         t: tc,
         i: null,
@@ -47,10 +37,8 @@ function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {
         m2: [...m2.entries()],
         conflict: false,
         result: null,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

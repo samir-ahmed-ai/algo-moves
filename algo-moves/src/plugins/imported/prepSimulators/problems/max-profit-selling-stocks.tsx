@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import { cn } from '../../../../lib/cn';
@@ -21,24 +22,13 @@ interface StocksState {
 }
 
 function record({ prices }: StocksInput): Frame<StocksState>[] {
-  const frames: Frame<StocksState>[] = [];
-
   let minP = Number.POSITIVE_INFINITY;
   let minIdx: number | null = null;
   let best = 0;
   let bestBuyIdx: number | null = null;
   let bestSellIdx: number | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<StocksState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<StocksState>(() => ({
         prices,
         i: null,
         minIdx,
@@ -47,10 +37,8 @@ function record({ prices }: StocksInput): Frame<StocksState>[] {
         best,
         bestBuyIdx,
         bestSellIdx,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

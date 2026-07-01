@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -24,45 +25,23 @@ function letterFor(code: string): string | null {
   return String.fromCharCode(64 + n);
 }
 
-function record({ digits }: DecodeInput): Frame<DecodeState>[] {
-  const frames: Frame<DecodeState>[] = [];
-  const results: string[] = [];
+function record({ digits }: DecodeInput): Frame<DecodeState>[] {  const results: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    idx: number | null,
-    span: number | null,
-    path: string,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { digits, idx, span, path, results: results.slice(), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<DecodeState>(() => ({
+        digits: digits,
+        results: results.slice(),
+        idx: null,
+        span: null,
+        path: '',
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `"${digits}"`,
-    `Decode the digit string "${digits}" into letters where 1→A, 2→B, … 26→Z. At each position try taking 1 digit, then taking 2 digits (when 10–26), and recurse on the rest.`,
-    0,
-    null,
-    '',
-  );
+  emit('INIT', `"${digits}"`, `Decode the digit string "${digits}" into letters where 1→A, 2→B, … 26→Z. At each position try taking 1 digit, then taking 2 digits (when 10–26), and recurse on the rest.`, { idx: 0, span: null, path: '' });
 
   const decode = (idx: number, path: string) => {
     if (idx === digits.length) {
       results.push(path);
-      emit(
-        'RECORD',
-        `+"${path}"`,
-        `Reached the end of the string — record the decoding "${path}" (${results.length} so far).`,
-        null,
-        null,
-        path,
-        'good',
-      );
+      emit('RECORD', `+"${path}"`, `Reached the end of the string — record the decoding "${path}" (${results.length} so far).`, { idx: null, span: null, path: path }, 'good');
       return;
     }
     for (const len of [1, 2]) {
@@ -70,47 +49,17 @@ function record({ digits }: DecodeInput): Frame<DecodeState>[] {
       const code = digits.slice(idx, idx + len);
       const letter = letterFor(code);
       if (letter === null) {
-        emit(
-          'SKIP',
-          `${code} ✗`,
-          `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx}: ${code} is not in 1–26, so it maps to no letter — skip this branch.`,
-          idx,
-          len,
-          path,
-          'bad',
-        );
+        emit('SKIP', `${code} ✗`, `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx}: ${code} is not in 1–26, so it maps to no letter — skip this branch.`, { idx: idx, span: len, path: path }, 'bad');
         continue;
       }
-      emit(
-        'CHOOSE',
-        `${code}→${letter}`,
-        `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx} → "${letter}". Decoded prefix is now "${path + letter}"; recurse on the remaining "${digits.slice(idx + len) || '∅'}".`,
-        idx,
-        len,
-        path + letter,
-      );
+      emit('CHOOSE', `${code}→${letter}`, `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx} → "${letter}". Decoded prefix is now "${path + letter}"; recurse on the remaining "${digits.slice(idx + len) || '∅'}".`, { idx: idx, span: len, path: path + letter });
       decode(idx + len, path + letter);
-      emit(
-        'BACKTRACK',
-        `undo ${letter}`,
-        `Backtrack: drop "${letter}" so the next branch decodes position ${idx} differently. Prefix is back to "${path || '∅'}".`,
-        idx,
-        len,
-        path,
-      );
+      emit('BACKTRACK', `undo ${letter}`, `Backtrack: drop "${letter}" so the next branch decodes position ${idx} differently. Prefix is back to "${path || '∅'}".`, { idx: idx, span: len, path: path });
     }
   };
 
   decode(0, '');
-  emit(
-    'DONE',
-    `${results.length} decodings`,
-    `All branches explored — "${digits}" has ${results.length} decoding${results.length === 1 ? '' : 's'}: ${results.map((r) => `"${r}"`).join(', ')}.`,
-    null,
-    null,
-    '',
-    'good',
-  );
+  emit('DONE', `${results.length} decodings`, `All branches explored — "${digits}" has ${results.length} decoding${results.length === 1 ? '' : 's'}: ${results.map((r) => `"${r}"`).join(', ')}.`, { idx: null, span: null, path: '' , done: true }, 'good');
   return frames;
 }
 

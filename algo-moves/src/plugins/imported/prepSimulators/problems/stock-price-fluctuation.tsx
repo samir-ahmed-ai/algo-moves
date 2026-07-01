@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { DualHeapBoard } from '../../../_shared/dualHeapBoard';
@@ -31,17 +32,12 @@ interface StockState {
   done: boolean;
 }
 
-function record({ ops }: StockInput): Frame<StockState>[] {
-  const frames: Frame<StockState>[] = [];
-  const records: Record<number, number> = {};
+function record({ ops }: StockInput): Frame<StockState>[] {  const records: Record<number, number> = {};
   let latestTime = 0;
   let maxH: HeapEntry[] = [];
   let minH: HeapEntry[] = [];
 
-  const emit = (type: string, note: string, caption: string, s: Partial<StockState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<StockState>(() => ({
         records: { ...records },
         latestTime,
         maxH: maxH.map((x) => ({ ...x })),
@@ -50,10 +46,8 @@ function record({ ops }: StockInput): Frame<StockState>[] {
         result: null,
         highlightMax: false,
         highlightMin: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

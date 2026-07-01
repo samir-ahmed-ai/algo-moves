@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -36,23 +37,12 @@ const maskToLetters = (mask: number): string => {
   return out || '∅';
 };
 
-function record({ startWords, targetWords }: WordCountInput): Frame<WordCountState>[] {
-  const frames: Frame<WordCountState>[] = [];
-  const startMasks = startWords.map(toBitmask);
+function record({ startWords, targetWords }: WordCountInput): Frame<WordCountState>[] {  const startMasks = startWords.map(toBitmask);
   const set = new Set<number>(startMasks);
   const matched = new Array<boolean>(targetWords.length).fill(false);
   let count = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<WordCountState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<WordCountState>(() => ({
         startWords,
         targetWords,
         startMasks,
@@ -64,10 +54,8 @@ function record({ startWords, targetWords }: WordCountInput): Frame<WordCountSta
         hit: false,
         matched: matched.slice(),
         count,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { GridBoard } from '../../../../components/GridBoard';
 import { cn } from '../../../../lib/cn';
@@ -29,33 +30,20 @@ function record({ mat }: LipInput): Frame<LipState>[] {
   const m = mat.length;
   const n = mat[0].length;
   const memo: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
-  const frames: Frame<LipState>[] = [];
-
   let bestCell: [number, number] | null = null;
   let bestLen = 0;
 
   const snapshot = (): number[][] => memo.map((row) => row.slice());
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LipState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LipState>(() => ({
         mat,
         memo: snapshot(),
         cur: null,
         neighbor: null,
         bestCell,
         bestLen,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

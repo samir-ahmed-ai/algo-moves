@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -21,9 +22,7 @@ interface Read4State {
   done: boolean;
 }
 
-function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {
-  const frames: Frame<Read4State>[] = [];
-  let chunkIdx = 0;
+function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {  let chunkIdx = 0;
   let buf4 = '';
   let i4 = 0;
   let n4 = 0;
@@ -35,10 +34,7 @@ function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {
     return buf4.length;
   };
 
-  const emit = (type: string, note: string, caption: string, s: Partial<Read4State>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<Read4State>(() => ({
         chunks: [...chunks],
         chunkIdx,
         buf4,
@@ -47,10 +43,8 @@ function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {
         readN: 0,
         out: '',
         op: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

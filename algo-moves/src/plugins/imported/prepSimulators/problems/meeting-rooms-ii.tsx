@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,9 +21,7 @@ interface MeetingRoomsState {
   done: boolean;
 }
 
-function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {
-  const frames: Frame<MeetingRoomsState>[] = [];
-  const n = intervals.length;
+function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {  const n = intervals.length;
   const starts = intervals.map((v) => v[0]);
   const ends = intervals.map((v) => v[1]);
 
@@ -32,40 +31,23 @@ function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {
   let peak = 0;
   let decision: 'need' | 'reuse' | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        intervals,
+  const { emit, frames } = createRecorder<MeetingRoomsState>(() => ({
+        intervals: intervals,
         starts: starts.slice(),
         ends: ends.slice(),
-        i,
-        endIdx,
-        rooms,
-        peak,
-        decision,
-        done: type === 'DONE',
-      },
-    });
+        i: i,
+        endIdx: endIdx,
+        rooms: rooms,
+        peak: peak,
+        decision: decision,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${n} meetings`,
-    `Meeting Rooms II: find the maximum number of meetings overlapping at any instant — that is how many rooms we need. We split every interval into its start time and its end time and treat the two as independent sorted timelines.`,
-  );
+  emit('INIT', `${n} meetings`, `Meeting Rooms II: find the maximum number of meetings overlapping at any instant — that is how many rooms we need. We split every interval into its start time and its end time and treat the two as independent sorted timelines.`, {});
 
   starts.sort((a, b) => a - b);
   ends.sort((a, b) => a - b);
-  emit(
-    'SORT',
-    `sorted`,
-    `Sort the starts and the ends independently. starts = [${starts.join(', ')}], ends = [${ends.join(', ')}]. Now sweep the starts in order; endIdx tracks the earliest meeting that has not yet freed its room.`,
-  );
+  emit('SORT', `sorted`, `Sort the starts and the ends independently. starts = [${starts.join(', ')}], ends = [${ends.join(', ')}]. Now sweep the starts in order; endIdx tracks the earliest meeting that has not yet freed its room.`, {});
 
   for (let k = 0; k < n; k++) {
     i = k;
@@ -73,30 +55,17 @@ function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {
       rooms++;
       decision = 'need';
       if (rooms > peak) peak = rooms;
-      emit(
-        'NEED',
-        `rooms=${rooms}`,
-        `Meeting starting at ${starts[k]} begins before the earliest end ${ends[endIdx]} (${starts[k]} < ${ends[endIdx]}), so no room has freed up yet — allocate a new room. rooms = ${rooms}.`,
-      );
+      emit('NEED', `rooms=${rooms}`, `Meeting starting at ${starts[k]} begins before the earliest end ${ends[endIdx]} (${starts[k]} < ${ends[endIdx]}), so no room has freed up yet — allocate a new room. rooms = ${rooms}.`, {});
     } else {
       endIdx++;
       decision = 'reuse';
-      emit(
-        'REUSE',
-        `reuse`,
-        `Meeting starting at ${starts[k]} begins at or after the earliest end ${ends[endIdx - 1]} (${starts[k]} ≥ ${ends[endIdx - 1]}), so that meeting has finished — reuse its room. Advance endIdx to ${endIdx}; rooms stays ${rooms}.`,
-      );
+      emit('REUSE', `reuse`, `Meeting starting at ${starts[k]} begins at or after the earliest end ${ends[endIdx - 1]} (${starts[k]} ≥ ${ends[endIdx - 1]}), so that meeting has finished — reuse its room. Advance endIdx to ${endIdx}; rooms stays ${rooms}.`, {});
     }
   }
 
   i = null;
   decision = null;
-  emit(
-    'DONE',
-    `${peak} rooms`,
-    `Every start has been swept. The most rooms held simultaneously was ${peak}, so the answer is ${peak} meeting room${peak === 1 ? '' : 's'}.`,
-    'good',
-  );
+  emit('DONE', `${peak} rooms`, `Every start has been swept. The most rooms held simultaneously was ${peak}, so the answer is ${peak} meeting room${peak === 1 ? '' : 's'}.`, { done: true }, 'good');
   return frames;
 }
 

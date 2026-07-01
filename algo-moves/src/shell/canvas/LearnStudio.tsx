@@ -463,6 +463,7 @@ function QuizContent() {
     <CodeStudioQuiz
       key={`quiz-${item.id}-${cs.active}`}
       quiz={cs.quiz}
+      itemId={item.id}
       initial={cs.savedQuizProgress}
       nextLabel={cs.nextLabel}
       onProgress={cs.onQuizProgress}

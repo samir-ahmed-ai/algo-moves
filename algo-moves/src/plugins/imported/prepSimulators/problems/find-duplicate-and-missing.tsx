@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -31,25 +32,14 @@ interface DupMissState {
   done: boolean;
 }
 
-function record({ nums }: DupMissInput): Frame<DupMissState>[] {
-  const frames: Frame<DupMissState>[] = [];
-  const n = nums.length;
+function record({ nums }: DupMissInput): Frame<DupMissState>[] {  const n = nums.length;
 
   let xorAll = 0;
   let rightBit: number | null = null;
   let x = 0;
   let y = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DupMissState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DupMissState>(() => ({
         nums,
         n,
         phase: 'init',
@@ -63,10 +53,8 @@ function record({ nums }: DupMissInput): Frame<DupMissState>[] {
         bucketHasBit: null,
         dup: null,
         missing: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const bin = (v: number) => '0b' + v.toString(2);
 

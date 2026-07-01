@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage, vizText } from '../../../_shared/vizKit';
@@ -40,55 +41,36 @@ function flatten(list: Nested[], depth: number, lines: TreeLine[], next: { id: n
   }
 }
 
-function record({ list }: NestedInput): Frame<NestedState>[] {
-  const frames: Frame<NestedState>[] = [];
-  const lines: TreeLine[] = [];
+function record({ list }: NestedInput): Frame<NestedState>[] {  const lines: TreeLine[] = [];
   flatten(list, 1, lines, { id: 0 });
 
   let sum = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    activeId: number | null,
-    contribution: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { lines, activeId, sum, contribution, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<NestedState>(() => ({
+        lines: lines,
+        sum: sum,
+        activeId: null,
+        contribution: null,
+        done: false
+      }));
 
   const intCount = lines.filter((l) => l.kind === 'int').length;
-  emit(
-    'INIT',
-    `${intCount} integers`,
-    `Depth-first walk of the nested list. Each integer contributes value × depth (the outermost list is depth 1); descending into a sublist increases depth by 1. Sum the contributions of all ${intCount} integers.`,
-    null,
-    null,
-  );
+  emit('INIT', `${intCount} integers`, `Depth-first walk of the nested list. Each integer contributes value × depth (the outermost list is depth 1); descending into a sublist increases depth by 1. Sum the contributions of all ${intCount} integers.`, { activeId: null, contribution: null });
 
   // Walk the flattened lines in order; only integers add to the sum.
   for (const line of lines) {
     if (line.kind === 'open') {
-      emit('DESCEND', `→ depth ${line.depth + 1}`, `Enter a sublist — its elements live at depth ${line.depth + 1}.`, line.id, null);
+      emit('DESCEND', `→ depth ${line.depth + 1}`, `Enter a sublist — its elements live at depth ${line.depth + 1}.`, { activeId: line.id, contribution: null });
     } else if (line.kind === 'close') {
-      emit('ASCEND', `← depth ${line.depth}`, `Leave the sublist and return to depth ${line.depth}.`, line.id, null);
+      emit('ASCEND', `← depth ${line.depth}`, `Leave the sublist and return to depth ${line.depth}.`, { activeId: line.id, contribution: null });
     } else {
       const contribution = (line.value ?? 0) * line.depth;
       sum += contribution;
-      emit(
-        'ADD',
-        `+${line.value}×${line.depth}`,
-        `Integer ${line.value} sits at depth ${line.depth}, so it contributes ${line.value} × ${line.depth} = ${contribution}. Running weighted sum is now ${sum}.`,
-        line.id,
-        contribution,
-      );
+      emit('ADD', `+${line.value}×${line.depth}`, `Integer ${line.value} sits at depth ${line.depth}, so it contributes ${line.value} × ${line.depth} = ${contribution}. Running weighted sum is now ${sum}.`, { activeId: line.id, contribution: contribution });
     }
   }
 
-  emit('DONE', `sum = ${sum}`, `Every integer visited — the weighted depth sum is ${sum}.`, null, null, 'good');
+  emit('DONE', `sum = ${sum}`, `Every integer visited — the weighted depth sum is ${sum}.`, { activeId: null, contribution: null , done: true }, 'good');
   return frames;
 }
 

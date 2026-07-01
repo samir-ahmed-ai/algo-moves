@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -85,43 +86,21 @@ function record({ bombs }: DBInput): Frame<DBState>[] {
       best = count;
       bestStart = i;
     }
-  }
+  }  const detonated = new Array<boolean>(n).fill(false);
 
-  const frames: Frame<DBState>[] = [];
-  const detonated = new Array<boolean>(n).fill(false);
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    edge: [number, number] | null,
-    count: number,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
+  const { emit, frames } = createRecorder<DBState>(() => ({
+        adj: adj,
+        pos: pos,
         start: bestStart,
         detonated: detonated.slice(),
-        active,
-        edge,
-        count,
         answer: best,
-        done: type === 'DONE',
-      },
-    });
+        active: null,
+        edge: null,
+        count: 0,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `chain from ${bestStart}`,
-    `Bomb i triggers bomb j when j's centre lies inside i's blast radius, giving a directed graph. For each bomb we DFS its reachable set and keep the largest. The best starting bomb is ${bestStart}, so we animate that chain reaction.`,
-    null,
-    null,
-    0,
-  );
+  emit('INIT', `chain from ${bestStart}`, `Bomb i triggers bomb j when j's centre lies inside i's blast radius, giving a directed graph. For each bomb we DFS its reachable set and keep the largest. The best starting bomb is ${bestStart}, so we animate that chain reaction.`, { active: null, edge: null, count: 0 });
 
   // Replay the best chain as a DFS, emitting a frame per detonation.
   const visited = new Array<boolean>(n).fill(false);
@@ -130,31 +109,16 @@ function record({ bombs }: DBInput): Frame<DBState>[] {
     visited[u] = true;
     detonated[u] = true;
     count += 1;
-    emit(
-      via ? 'DETONATE' : 'IGNITE',
-      via ? `${via[0]}→${u}` : `ignite ${u}`,
-      via
+    emit(via ? 'DETONATE' : 'IGNITE', via ? `${via[0]}→${u}` : `ignite ${u}`, via
         ? `Bomb ${via[0]}'s blast reaches bomb ${u}: it detonates too. Chain size is now ${count}.`
-        : `Manually detonate bomb ${bestStart} to ignite the chain. Chain size is ${count}.`,
-      u,
-      via,
-      count,
-    );
+        : `Manually detonate bomb ${bestStart} to ignite the chain. Chain size is ${count}.`, { active: u, edge: via, count: count });
     for (const v of adj[u]) {
       if (!visited[v]) dfs(v, [u, v]);
     }
   };
   dfs(bestStart, null);
 
-  emit(
-    'DONE',
-    `max ${best}`,
-    `The chain starting at bomb ${bestStart} detonates ${best} bomb${best === 1 ? '' : 's'} — the maximum possible. Any other starting bomb detonates fewer.`,
-    null,
-    null,
-    count,
-    'good',
-  );
+  emit('DONE', `max ${best}`, `The chain starting at bomb ${bestStart} detonates ${best} bomb${best === 1 ? '' : 's'} — the maximum possible. Any other starting bomb detonates fewer.`, { active: null, edge: null, count: count , done: true }, 'good');
   return frames;
 }
 

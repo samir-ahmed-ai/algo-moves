@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -23,8 +24,6 @@ interface VerticalOrderState {
 }
 
 function record({ tree }: VerticalOrderInput): Frame<VerticalOrderState>[] {
-  const frames: Frame<VerticalOrderState>[] = [];
-
   // BFS bookkeeping mirrors the Go solution: a queue of (nodeIndex, col), a
   // map col -> values, and running min/max column. Root sits at column 0,
   // every left child is col-1, every right child is col+1.
@@ -36,16 +35,7 @@ function record({ tree }: VerticalOrderInput): Frame<VerticalOrderState>[] {
   const colEntries = (): [number, string][] =>
     [...cols.entries()].sort((a, b) => a[0] - b[0]).map(([c, vals]) => [c, vals.join(',')]);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<VerticalOrderState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<VerticalOrderState>(() => ({
         tree,
         visited: visited.slice(),
         current: null,
@@ -54,10 +44,8 @@ function record({ tree }: VerticalOrderInput): Frame<VerticalOrderState>[] {
         cols: colEntries(),
         currentCol: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (tree.length === 0 || tree[0] == null) {
     emit('DONE', 'empty', 'The tree is empty, so the vertical order traversal is an empty list.', { done: true }, 'bad');

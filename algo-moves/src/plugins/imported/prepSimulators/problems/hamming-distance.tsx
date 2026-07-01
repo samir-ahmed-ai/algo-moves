@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -40,9 +41,7 @@ function colOf(b: number, width: number): number {
   return width - 1 - b;
 }
 
-function record({ x, y }: HammingInput): Frame<HammingState>[] {
-  const frames: Frame<HammingState>[] = [];
-  const width = bitWidth(x, y);
+function record({ x, y }: HammingInput): Frame<HammingState>[] {  const width = bitWidth(x, y);
   const xBits = toBits(x, width);
   const yBits = toBits(y, width);
 
@@ -50,16 +49,7 @@ function record({ x, y }: HammingInput): Frame<HammingState>[] {
   let count = 0;
   const noXor: string[] = new Array<string>(width).fill('·');
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<HammingState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<HammingState>(() => ({
         x,
         y,
         width,
@@ -69,10 +59,8 @@ function record({ x, y }: HammingInput): Frame<HammingState>[] {
         scanned: null,
         clearAt: null,
         count,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

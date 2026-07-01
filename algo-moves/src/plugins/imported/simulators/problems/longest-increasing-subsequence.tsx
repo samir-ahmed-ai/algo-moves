@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -19,30 +20,16 @@ interface LISState {
 function record({ nums }: LISInput): Frame<LISState>[] {
   const n = nums.length;
   const dp = new Array<number>(n).fill(0);
-  const frames: Frame<LISState>[] = [];
+  const { emit, frames } = createRecorder<LISState>(() => ({
+        nums: nums,
+        dp: dp.slice(),
+        i: null,
+        from: null,
+        best: 0,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    from: number | null,
-    best: number,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { nums, dp: dp.slice(), i, from, best, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `n=${n}`,
-    `Longest Increasing Subsequence on nums = [${nums.join(', ')}]. dp[i] = the length of the longest increasing subsequence that ends at index i; the answer is the largest dp value.`,
-    null,
-    null,
-    0,
-  );
+  emit('INIT', `n=${n}`, `Longest Increasing Subsequence on nums = [${nums.join(', ')}]. dp[i] = the length of the longest increasing subsequence that ends at index i; the answer is the largest dp value.`, { i: null, from: null, best: 0 });
 
   let best = 0;
   for (let i = 0; i < n; i++) {
@@ -61,18 +48,10 @@ function record({ nums }: LISInput): Frame<LISState>[] {
       from === null
         ? `nums[${i}] = ${nums[i]}: no earlier element is smaller (or none extends past length 1), so it starts a new chain — dp[${i}] = 1.`
         : `nums[${i}] = ${nums[i]}: the best smaller predecessor is nums[${from}] = ${nums[from]} with dp[${from}] = ${dp[from]}, so dp[${i}] = dp[${from}] + 1 = ${cur}.`;
-    emit('FILL', `dp[${i}]=${cur}`, caption, i, from, best);
+    emit('FILL', `dp[${i}]=${cur}`, caption, { i: i, from: from, best: best });
   }
 
-  emit(
-    'DONE',
-    `LIS = ${best}`,
-    `Every cell is filled. The answer is max(dp) = ${best}, the length of the longest increasing subsequence in [${nums.join(', ')}].`,
-    null,
-    null,
-    best,
-    'good',
-  );
+  emit('DONE', `LIS = ${best}`, `Every cell is filled. The answer is max(dp) = ${best}, the length of the longest increasing subsequence in [${nums.join(', ')}].`, { i: null, from: null, best: best , done: true }, 'good');
   return frames;
 }
 

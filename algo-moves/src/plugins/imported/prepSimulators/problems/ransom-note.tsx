@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,21 +21,10 @@ interface RansomState {
   done: boolean;
 }
 
-function record({ note, magazine }: RansomInput): Frame<RansomState>[] {
-  const frames: Frame<RansomState>[] = [];
-  const noteChars = note.split('');
+function record({ note, magazine }: RansomInput): Frame<RansomState>[] {  const noteChars = note.split('');
   const cnt = new Map<string, number>();
 
-  const emit = (
-    type: string,
-    noteText: string,
-    caption: string,
-    s: Partial<RansomState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note: noteText, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RansomState>(() => ({
         note: noteChars,
         magazine,
         cnt: [...cnt.entries()],
@@ -42,10 +32,8 @@ function record({ note, magazine }: RansomInput): Frame<RansomState>[] {
         cur: null,
         available: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

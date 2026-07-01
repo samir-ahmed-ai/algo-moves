@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -19,23 +20,12 @@ interface BattleshipsState {
   done: boolean;
 }
 
-function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {
-  const frames: Frame<BattleshipsState>[] = [];
-  const counted: [number, number][] = [];
+function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {  const counted: [number, number][] = [];
   let count = 0;
   const rows = board.length;
   const cols = board[0]?.length ?? 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<BattleshipsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<BattleshipsState>(() => ({
         board,
         i: null,
         j: null,
@@ -43,10 +33,8 @@ function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {
         counted: counted.map((c): [number, number] => [c[0], c[1]]),
         isShip: false,
         isCorner: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

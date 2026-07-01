@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,30 +26,17 @@ interface DeleteKthState {
   done: boolean;
 }
 
-function record({ values, k }: DeleteKthInput): Frame<DeleteKthState>[] {
-  const frames: Frame<DeleteKthState>[] = [];
-  const deleted = new Set<number>();
+function record({ values, k }: DeleteKthInput): Frame<DeleteKthState>[] {  const deleted = new Set<number>();
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DeleteKthState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DeleteKthState>(() => ({
         k,
         values,
         deleted: [...deleted],
         cur: null,
         step: null,
         total: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

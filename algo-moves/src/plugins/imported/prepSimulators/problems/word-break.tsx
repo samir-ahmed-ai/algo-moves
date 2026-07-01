@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,22 +21,11 @@ interface WordBreakState {
   done: boolean;
 }
 
-function record({ s, wordDict }: WordBreakInput): Frame<WordBreakState>[] {
-  const frames: Frame<WordBreakState>[] = [];
-  const words = new Set<string>(wordDict);
+function record({ s, wordDict }: WordBreakInput): Frame<WordBreakState>[] {  const words = new Set<string>(wordDict);
   const n = s.length;
   const dp = new Array<boolean>(n + 1).fill(false);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<WordBreakState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<WordBreakState>(() => ({
         s,
         wordDict,
         dp: dp.slice(),
@@ -43,10 +33,8 @@ function record({ s, wordDict }: WordBreakInput): Frame<WordBreakState>[] {
         j: null,
         piece: null,
         pieceInDict: null,
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

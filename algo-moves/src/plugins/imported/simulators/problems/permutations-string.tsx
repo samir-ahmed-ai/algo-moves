@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -17,36 +18,37 @@ interface StrPermState {
 }
 
 function record({ s }: StrPermInput): Frame<StrPermState>[] {
-  const chars = s.split('');
-  const frames: Frame<StrPermState>[] = [];
-  const results: string[] = [];
+  const chars = s.split('');  const results: string[] = [];
 
-  const emit = (type: string, note: string, caption: string, swap: [number, number] | null, low: number, high: number, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { chars: chars.slice(), low, high, swap, results: results.slice(), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<StrPermState>(() => ({
+        chars: chars.slice(),
+        results: results.slice(),
+        swap: null,
+        low: 0,
+        high: 0,
+        done: false
+      }));
 
-  emit('INIT', `s="${s}"`, `Swap-backtracking on "${s}": fix position low, swap each candidate into place, recurse, then swap back.`, null, 0, chars.length - 1);
+  emit('INIT', `s="${s}"`, `Swap-backtracking on "${s}": fix position low, swap each candidate into place, recurse, then swap back.`, { swap: null, low: 0, high: chars.length - 1 });
 
   const bt = (low: number, high: number) => {
     if (low === high) {
       const perm = chars.join('');
       results.push(perm);
-      emit('RECORD', perm, `low == high — record permutation "${perm}" (${results.length} total).`, null, low, high, 'good');
+      emit('RECORD', perm, `low == high — record permutation "${perm}" (${results.length} total).`, { swap: null, low: low, high: high }, 'good');
       return;
     }
     for (let i = low; i <= high; i++) {
       [chars[low], chars[i]] = [chars[i], chars[low]];
-      emit('SWAP', `swap ${low}↔${i}`, `Swap chars[${low}] and chars[${i}] to try '${chars[low]}' at position ${low}.`, [low, i], low, high);
+      emit('SWAP', `swap ${low}↔${i}`, `Swap chars[${low}] and chars[${i}] to try '${chars[low]}' at position ${low}.`, { swap: [low, i], low: low, high: high });
       bt(low + 1, high);
       [chars[low], chars[i]] = [chars[i], chars[low]];
-      emit('UNDO', `undo ${low}↔${i}`, `Swap back to restore the slice before trying the next candidate at position ${low}.`, [low, i], low, high);
+      emit('UNDO', `undo ${low}↔${i}`, `Swap back to restore the slice before trying the next candidate at position ${low}.`, { swap: [low, i], low: low, high: high });
     }
   };
 
   bt(0, chars.length - 1);
-  emit('DONE', `${results.length} perms`, `All ${results.length} permutations of "${s}" collected.`, null, 0, chars.length - 1, 'good');
+  emit('DONE', `${results.length} perms`, `All ${results.length} permutations of "${s}" collected.`, { swap: null, low: 0, high: chars.length - 1 , done: true }, 'good');
   return frames;
 }
 

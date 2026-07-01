@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -39,8 +40,6 @@ const TRACK_LO = 0;
 const TRACK_HI = 10;
 
 function record({ p1, p2, q1, q2 }: OverlapInput): Frame<OverlapState>[] {
-  const frames: Frame<OverlapState>[] = [];
-
   const rxA: [number, number] = [p1.x, p2.x];
   const rxB: [number, number] = [q1.x, q2.x];
   const ryA: [number, number] = [p1.y, p2.y];
@@ -60,110 +59,43 @@ function record({ p1, p2, q1, q2 }: OverlapInput): Frame<OverlapState>[] {
     done: false,
   };
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<OverlapState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { ...base, ...s },
-    });
+  const { emit, frames } = createRecorder<OverlapState>(() => ({
+        ...base
+      }));
 
-  emit(
-    'INIT',
-    'two rectangles',
-    `Is Overlapped: two axis-aligned rectangles overlap (with positive area) only if their X projections intersect AND their Y projections intersect. Rectangle A spans X[${p1.x},${p2.x}] Y[${p1.y},${p2.y}]; rectangle B spans X[${q1.x},${q2.x}] Y[${q1.y},${q2.y}]. We test each axis separately.`,
-    {},
-  );
+  emit('INIT', 'two rectangles', `Is Overlapped: two axis-aligned rectangles overlap (with positive area) only if their X projections intersect AND their Y projections intersect. Rectangle A spans X[${p1.x},${p2.x}] Y[${p1.y},${p2.y}]; rectangle B spans X[${q1.x},${q2.x}] Y[${q1.y},${q2.y}]. We test each axis separately.`, {});
 
   // --- X axis ---
   const maxLeftX = Math.max(p1.x, q1.x);
   const minRightX = Math.min(p2.x, q2.x);
-  emit(
-    'AXIS_X',
-    'project on X',
-    `Project both rectangles onto the X axis. A covers [${p1.x},${p2.x}], B covers [${q1.x},${q2.x}]. The overlap test is min(rights) > max(lefts).`,
-    { axis: 'x' },
-  );
-  emit(
-    'EDGES_X',
-    `max(${p1.x},${q1.x})=${maxLeftX}`,
-    `Take the rightmost left edge: max(${p1.x}, ${q1.x}) = ${maxLeftX}. This is where any shared X range must start.`,
-    { axis: 'x', maxLeft: maxLeftX },
-  );
-  emit(
-    'EDGES_X',
-    `min(${p2.x},${q2.x})=${minRightX}`,
-    `Take the leftmost right edge: min(${p2.x}, ${q2.x}) = ${minRightX}. This is where any shared X range must end.`,
-    { axis: 'x', maxLeft: maxLeftX, minRight: minRightX },
-  );
+  emit('AXIS_X', 'project on X', `Project both rectangles onto the X axis. A covers [${p1.x},${p2.x}], B covers [${q1.x},${q2.x}]. The overlap test is min(rights) > max(lefts).`, { axis: 'x' });
+  emit('EDGES_X', `max(${p1.x},${q1.x})=${maxLeftX}`, `Take the rightmost left edge: max(${p1.x}, ${q1.x}) = ${maxLeftX}. This is where any shared X range must start.`, { axis: 'x', maxLeft: maxLeftX });
+  emit('EDGES_X', `min(${p2.x},${q2.x})=${minRightX}`, `Take the leftmost right edge: min(${p2.x}, ${q2.x}) = ${minRightX}. This is where any shared X range must end.`, { axis: 'x', maxLeft: maxLeftX, minRight: minRightX });
   const xPass = minRightX > maxLeftX;
-  emit(
-    xPass ? 'X_OK' : 'X_FAIL',
-    xPass ? `${minRightX} > ${maxLeftX}` : `${minRightX} ≤ ${maxLeftX}`,
-    xPass
+  emit(xPass ? 'X_OK' : 'X_FAIL', xPass ? `${minRightX} > ${maxLeftX}` : `${minRightX} ≤ ${maxLeftX}`, xPass
       ? `min(rights)=${minRightX} > max(lefts)=${maxLeftX}, so the X projections overlap on (${maxLeftX}, ${minRightX}). The X test passes — keep going to Y.`
-      : `min(rights)=${minRightX} is not greater than max(lefts)=${maxLeftX}, so the X projections do NOT overlap. With no shared X range the rectangles cannot overlap — answer is false.`,
-    { axis: 'x', maxLeft: maxLeftX, minRight: minRightX, xPass },
-    xPass ? 'good' : 'bad',
-  );
+      : `min(rights)=${minRightX} is not greater than max(lefts)=${maxLeftX}, so the X projections do NOT overlap. With no shared X range the rectangles cannot overlap — answer is false.`, { axis: 'x', maxLeft: maxLeftX, minRight: minRightX, xPass });
 
   if (!xPass) {
-    emit(
-      'DONE',
-      'no overlap',
-      `Because the X projections are disjoint, the rectangles are separated horizontally. isOverlapped = false.`,
-      { axis: 'x', maxLeft: maxLeftX, minRight: minRightX, xPass: false, result: false, done: true },
-      'bad',
-    );
+    emit('DONE', 'no overlap', `Because the X projections are disjoint, the rectangles are separated horizontally. isOverlapped = false.`, { axis: 'x', maxLeft: maxLeftX, minRight: minRightX, xPass: false, result: false, done: true }, 'bad');
     return frames;
   }
 
   // --- Y axis ---
   const maxLeftY = Math.max(p1.y, q1.y);
   const minRightY = Math.min(p2.y, q2.y);
-  emit(
-    'AXIS_Y',
-    'project on Y',
-    `X passed. Now project onto the Y axis. A covers [${p1.y},${p2.y}], B covers [${q1.y},${q2.y}]. Apply the same min(rights) > max(lefts) test.`,
-    { axis: 'y', xPass: true },
-  );
-  emit(
-    'EDGES_Y',
-    `max(${p1.y},${q1.y})=${maxLeftY}`,
-    `Rightmost bottom edge: max(${p1.y}, ${q1.y}) = ${maxLeftY}. Any shared Y range must start here.`,
-    { axis: 'y', xPass: true, maxLeft: maxLeftY },
-  );
-  emit(
-    'EDGES_Y',
-    `min(${p2.y},${q2.y})=${minRightY}`,
-    `Lowest top edge: min(${p2.y}, ${q2.y}) = ${minRightY}. Any shared Y range must end here.`,
-    { axis: 'y', xPass: true, maxLeft: maxLeftY, minRight: minRightY },
-  );
+  emit('AXIS_Y', 'project on Y', `X passed. Now project onto the Y axis. A covers [${p1.y},${p2.y}], B covers [${q1.y},${q2.y}]. Apply the same min(rights) > max(lefts) test.`, { axis: 'y', xPass: true });
+  emit('EDGES_Y', `max(${p1.y},${q1.y})=${maxLeftY}`, `Rightmost bottom edge: max(${p1.y}, ${q1.y}) = ${maxLeftY}. Any shared Y range must start here.`, { axis: 'y', xPass: true, maxLeft: maxLeftY });
+  emit('EDGES_Y', `min(${p2.y},${q2.y})=${minRightY}`, `Lowest top edge: min(${p2.y}, ${q2.y}) = ${minRightY}. Any shared Y range must end here.`, { axis: 'y', xPass: true, maxLeft: maxLeftY, minRight: minRightY });
   const yPass = minRightY > maxLeftY;
-  emit(
-    yPass ? 'Y_OK' : 'Y_FAIL',
-    yPass ? `${minRightY} > ${maxLeftY}` : `${minRightY} ≤ ${maxLeftY}`,
-    yPass
+  emit(yPass ? 'Y_OK' : 'Y_FAIL', yPass ? `${minRightY} > ${maxLeftY}` : `${minRightY} ≤ ${maxLeftY}`, yPass
       ? `min(rights)=${minRightY} > max(lefts)=${maxLeftY}, so the Y projections overlap on (${maxLeftY}, ${minRightY}). The Y test passes too.`
-      : `min(rights)=${minRightY} is not greater than max(lefts)=${maxLeftY}, so the Y projections are disjoint. The rectangles are separated vertically — answer is false.`,
-    { axis: 'y', xPass: true, maxLeft: maxLeftY, minRight: minRightY, yPass },
-    yPass ? 'good' : 'bad',
-  );
+      : `min(rights)=${minRightY} is not greater than max(lefts)=${maxLeftY}, so the Y projections are disjoint. The rectangles are separated vertically — answer is false.`, { axis: 'y', xPass: true, maxLeft: maxLeftY, minRight: minRightY, yPass });
 
   const result = xPass && yPass;
-  emit(
-    'DONE',
-    result ? 'overlap' : 'no overlap',
-    result
+  emit('DONE', result ? 'overlap' : 'no overlap', result
       ? `Both axes intersect, so the rectangles share a region of positive area. isOverlapped = true. (Time O(1), Space O(1).)`
-      : `The Y projections are disjoint, so despite overlapping in X the rectangles do not share area. isOverlapped = false. (Time O(1), Space O(1).)`,
-    { axis: 'y', xPass: true, yPass, maxLeft: maxLeftY, minRight: minRightY, result, done: true },
-    result ? 'good' : 'bad',
-  );
+      : `The Y projections are disjoint, so despite overlapping in X the rectangles do not share area. isOverlapped = false. (Time O(1), Space O(1).)`, { axis: 'y', xPass: true, yPass, maxLeft: maxLeftY, minRight: minRightY, result, done: true });
   return frames;
 }
 

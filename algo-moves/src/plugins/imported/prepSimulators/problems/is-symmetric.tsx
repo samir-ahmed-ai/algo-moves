@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -26,29 +27,16 @@ function valAt(tree: (number | null)[], i: number): number | null {
   return tree[i];
 }
 
-function record({ tree }: SymmetricInput): Frame<SymmetricState>[] {
-  const frames: Frame<SymmetricState>[] = [];
-  const visited: number[] = [];
+function record({ tree }: SymmetricInput): Frame<SymmetricState>[] {  const visited: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SymmetricState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SymmetricState>(() => ({
         tree,
         a: null,
         b: null,
         visited: visited.slice(),
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

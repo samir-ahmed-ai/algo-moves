@@ -27,6 +27,7 @@
     "scaffold-prep-sim": "node scripts/scaffold-prep-simulator.mjs",
     "check-prep-sim-coverage": "node scripts/check-prep-simulator-coverage.mjs",
     "check-mobile-decks": "node scripts/check-mobile-decks.mjs",
+    "verify-recorder-migration": "node scripts/verify-recorder-migration.mjs",
     "check-orphans": "node scripts/check-orphans.mjs",
     "generate-themes": "node scripts/generate-themes.mjs",
     "check-plugin-typography": "node scripts/lint-plugin-typography.mjs",

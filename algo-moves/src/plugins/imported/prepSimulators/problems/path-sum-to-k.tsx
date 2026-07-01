@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -23,22 +24,11 @@ interface PathSumState {
   done: boolean;
 }
 
-function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {
-  const frames: Frame<PathSumState>[] = [];
-  const cnt = new Map<number, number>([[0, 1]]);
+function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {  const cnt = new Map<number, number>([[0, 1]]);
   const visited: number[] = [];
   let ans = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PathSumState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PathSumState>(() => ({
         tree,
         k,
         node: null,
@@ -48,10 +38,8 @@ function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {
         hits: 0,
         cnt: [...cnt.entries()],
         ans,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

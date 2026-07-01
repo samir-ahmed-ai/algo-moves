@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,26 +21,13 @@ function record({ s }: SwapInput): Frame<SwapState>[] {
   const chars = s.split('');
   const n = chars.length;
   const swapped = new Array<boolean>(n).fill(false);
-  const frames: Frame<SwapState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<SwapState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SwapState>(() => ({
         chars: chars.slice(),
         i: null,
         j: null,
         swapped: swapped.slice(),
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

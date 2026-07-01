@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,32 +25,19 @@ function toDigits(v: number): string[] {
   return String(v).split('');
 }
 
-function record({ n }: SumOfDigitsInput): Frame<SumOfDigitsState>[] {
-  const frames: Frame<SumOfDigitsState>[] = [];
-  const original = n;
+function record({ n }: SumOfDigitsInput): Frame<SumOfDigitsState>[] {  const original = n;
   const abs = Math.abs(n);
   const digits = toDigits(abs);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SumOfDigitsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SumOfDigitsState>(() => ({
         original,
         digits,
         n: abs,
         digit: null,
         pos: null,
         sum: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

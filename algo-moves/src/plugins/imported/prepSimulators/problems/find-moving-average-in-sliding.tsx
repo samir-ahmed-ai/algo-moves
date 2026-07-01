@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -22,21 +23,10 @@ interface MovingAvgState {
 
 const round = (x: number) => Math.round(x * 1000) / 1000;
 
-function record({ size, stream }: MovingAvgInput): Frame<MovingAvgState>[] {
-  const frames: Frame<MovingAvgState>[] = [];
-  const window: number[] = [];
+function record({ size, stream }: MovingAvgInput): Frame<MovingAvgState>[] {  const window: number[] = [];
   let sum = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MovingAvgState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MovingAvgState>(() => ({
         size,
         window: window.slice(),
         sum,
@@ -44,10 +34,8 @@ function record({ size, stream }: MovingAvgInput): Frame<MovingAvgState>[] {
         evicted: null,
         average: null,
         step: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

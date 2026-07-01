@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -32,9 +33,7 @@ interface CopyListState {
   done: boolean;
 }
 
-function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {
-  const frames: Frame<CopyListState>[] = [];
-  const n = vals.length;
+function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {  const n = vals.length;
 
   // Build the interweaved slot model up front so the View always has a stable
   // array; passes mutate `slots[].random` and we snapshot per frame.
@@ -46,26 +45,15 @@ function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {
   // Original slot for original index i sits at 2*i; its clone at 2*i + 1.
   const cloneVals: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<CopyListState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<CopyListState>(() => ({
         slots: slots.map((sl) => ({ ...sl })),
         pass: 1,
         cur: null,
         ranSrc: null,
         ranDst: null,
         cloneVals: cloneVals.slice(),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

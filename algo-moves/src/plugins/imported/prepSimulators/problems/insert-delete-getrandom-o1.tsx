@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,25 +26,18 @@ interface RsState {
   done: boolean;
 }
 
-function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
-  const frames: Frame<RsState>[] = [];
-  const nums: number[] = [];
+function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {  const nums: number[] = [];
   const idx = new Map<number, number>();
 
-  const emit = (type: string, note: string, caption: string, s: Partial<RsState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RsState>(() => ({
         nums: nums.slice(),
         op: '',
         out: null,
         swapFrom: null,
         swapTo: null,
         active: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -43,46 +44,30 @@ function record({ sentence, rows, cols }: SSFInput): Frame<SSFState>[] {
   const w = sentence.length;
   const fit = new Array<number>(w).fill(-1);
   const next = new Array<number>(w).fill(-1);
-  const frames: Frame<SSFState>[] = [];
-
   let walkRow: number | null = null;
   let walkStart: number | null = null;
   let totalWords = 0;
 
-  const emit = (type: string, note: string, caption: string, cur: number | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        sentence,
-        rows,
-        cols,
+  const { emit, frames } = createRecorder<SSFState>(() => ({
+        sentence: sentence,
+        rows: rows,
+        cols: cols,
         fit: fit.slice(),
         next: next.slice(),
-        cur,
-        walkRow,
-        walkStart,
-        totalWords,
-        done: type === 'DONE',
-      },
-    });
+        walkRow: walkRow,
+        walkStart: walkStart,
+        totalWords: totalWords,
+        cur: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${rows}×${cols}`,
-    `Sentence Screen Fitting: how many times does [${sentence.map((x) => `"${x}"`).join(', ')}] fit on a ${rows}-row, ${cols}-column screen? First precompute fit[w] = words that fit on one row that starts at word w, then walk ${rows} rows and total the words placed.`,
-    null,
-  );
+  emit('INIT', `${rows}×${cols}`, `Sentence Screen Fitting: how many times does [${sentence.map((x) => `"${x}"`).join(', ')}] fit on a ${rows}-row, ${cols}-column screen? First precompute fit[w] = words that fit on one row that starts at word w, then walk ${rows} rows and total the words placed.`, { cur: null });
 
   for (let s = 0; s < w; s++) {
     const { count, next: nx } = measure(sentence, cols, s);
     fit[s] = count;
     next[s] = nx;
-    emit(
-      'FILL',
-      `fit[${s}]=${count}`,
-      `Starting at word ${s} ("${sentence[s]}"), ${count} word(s) fit in ${cols} columns; the next row then starts at word ${nx}. fit[${s}] = ${count}.`,
-      s,
-    );
+    emit('FILL', `fit[${s}]=${count}`, `Starting at word ${s} ("${sentence[s]}"), ${count} word(s) fit in ${cols} columns; the next row then starts at word ${nx}. fit[${s}] = ${count}.`, { cur: s });
   }
 
   // Counting phase: walk `rows` rows, accumulate words placed.
@@ -93,25 +78,14 @@ function record({ sentence, rows, cols }: SSFInput): Frame<SSFState>[] {
     const placed = fit[start];
     totalWords += placed;
     const nx = next[start];
-    emit(
-      'WALK',
-      `row ${r}: +${placed}`,
-      `Row ${r} starts at word ${start}, placing ${placed} word(s) — running total ${totalWords} word(s). The next row starts at word ${nx}.`,
-      start,
-    );
+    emit('WALK', `row ${r}: +${placed}`, `Row ${r} starts at word ${start}, placing ${placed} word(s) — running total ${totalWords} word(s). The next row starts at word ${nx}.`, { cur: start });
     start = nx;
   }
 
   const answer = Math.floor(totalWords / w);
   walkRow = null;
   walkStart = null;
-  emit(
-    'DONE',
-    `${answer}×`,
-    `Across ${rows} rows we placed ${totalWords} word(s); the sentence has ${w} word(s), so it fits floor(${totalWords} / ${w}) = ${answer} time(s).`,
-    null,
-    'good',
-  );
+  emit('DONE', `${answer}×`, `Across ${rows} rows we placed ${totalWords} word(s); the sentence has ${w} word(s), so it fits floor(${totalWords} / ${w}) = ${answer} time(s).`, { cur: null , done: true }, 'good');
   return frames;
 }
 

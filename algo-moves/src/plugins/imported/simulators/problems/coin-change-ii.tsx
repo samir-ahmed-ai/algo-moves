@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -19,44 +20,23 @@ interface CoinIIState {
 function record({ coins, amount }: CoinIIInput): Frame<CoinIIState>[] {
   const n = coins.length;
   const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(amount + 1).fill(-1));
-  const frames: Frame<CoinIIState>[] = [];
+  const { emit, frames } = createRecorder<CoinIIState>(() => ({
+        coins: coins,
+        amount: amount,
+        dp: dp.map((r) => r.slice()),
+        cur: null,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { coins, amount, dp: dp.map((r) => r.slice()), cur, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `${n} coins, amount ${amount}`,
-    `Coin Change II: count the number of ways to make amount ${amount} using coins {${coins.join(', ')}}, where each coin type can be used any number of times. dp[i][a] = the number of ways to make amount a using only the first i coin types. Rows are coin types; columns are amount 0..${amount}.`,
-    null,
-  );
+  emit('INIT', `${n} coins, amount ${amount}`, `Coin Change II: count the number of ways to make amount ${amount} using coins {${coins.join(', ')}}, where each coin type can be used any number of times. dp[i][a] = the number of ways to make amount a using only the first i coin types. Rows are coin types; columns are amount 0..${amount}.`, { cur: null });
 
   // Base column: there is exactly 1 way to make amount 0 (take nothing).
   for (let i = 0; i <= n; i++) dp[i][0] = 1;
-  emit(
-    'BASE',
-    'col 0 = 1',
-    `Base case: there is exactly 1 way to make amount 0 — pick no coins. So dp[i][0] = 1 for every row i.`,
-    [0, 0],
-  );
+  emit('BASE', 'col 0 = 1', `Base case: there is exactly 1 way to make amount 0 — pick no coins. So dp[i][0] = 1 for every row i.`, { cur: [0, 0] });
 
   // Base row: zero coin types → 0 ways for any positive amount.
   for (let a = 1; a <= amount; a++) dp[0][a] = 0;
-  emit(
-    'BASE',
-    'row 0 = 0',
-    `Base case: with 0 coin types there is no way to make any positive amount, so dp[0][a] = 0 for a from 1 to ${amount}.`,
-    [0, amount],
-  );
+  emit('BASE', 'row 0 = 0', `Base case: with 0 coin types there is no way to make any positive amount, so dp[0][a] = 0 for a from 1 to ${amount}.`, { cur: [0, amount] });
 
   for (let i = 1; i <= n; i++) {
     const coin = coins[i - 1];
@@ -65,32 +45,16 @@ function record({ coins, amount }: CoinIIInput): Frame<CoinIIState>[] {
       if (coin <= a) {
         const use = dp[i][a - coin];
         dp[i][a] = skip + use;
-        emit(
-          'FILL',
-          `dp[${i}][${a}]=${dp[i][a]}`,
-          `Amount ${a} with coin types up to ${coin}: skip coin ${coin} entirely for dp[${i - 1}][${a}] = ${skip} ways, or use one more ${coin} on top of dp[${i}][${a - coin}] = ${use} ways. dp[${i}][${a}] = ${skip} + ${use} = ${dp[i][a]}.`,
-          [i, a],
-        );
+        emit('FILL', `dp[${i}][${a}]=${dp[i][a]}`, `Amount ${a} with coin types up to ${coin}: skip coin ${coin} entirely for dp[${i - 1}][${a}] = ${skip} ways, or use one more ${coin} on top of dp[${i}][${a - coin}] = ${use} ways. dp[${i}][${a}] = ${skip} + ${use} = ${dp[i][a]}.`, { cur: [i, a] });
       } else {
         dp[i][a] = skip;
-        emit(
-          'FILL',
-          `dp[${i}][${a}]=${dp[i][a]}`,
-          `Coin ${coin} is larger than amount ${a}, so it can't help here: dp[${i}][${a}] = dp[${i - 1}][${a}] = ${skip}.`,
-          [i, a],
-        );
+        emit('FILL', `dp[${i}][${a}]=${dp[i][a]}`, `Coin ${coin} is larger than amount ${a}, so it can't help here: dp[${i}][${a}] = dp[${i - 1}][${a}] = ${skip}.`, { cur: [i, a] });
       }
     }
   }
 
   const ans = dp[n][amount];
-  emit(
-    'DONE',
-    `${ans} ways`,
-    `The table is full. dp[${n}][${amount}] = ${ans}, so there ${ans === 1 ? 'is' : 'are'} ${ans} way${ans === 1 ? '' : 's'} to make amount ${amount}.`,
-    [n, amount],
-    'good',
-  );
+  emit('DONE', `${ans} ways`, `The table is full. dp[${n}][${amount}] = ${ans}, so there ${ans === 1 ? 'is' : 'are'} ${ans} way${ans === 1 ? '' : 's'} to make amount ${amount}.`, { cur: [n, amount] , done: true }, 'good');
   return frames;
 }
 

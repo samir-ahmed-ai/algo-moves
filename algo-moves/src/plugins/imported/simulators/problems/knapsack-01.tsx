@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -21,35 +22,20 @@ interface KnapState {
 function record({ weights, values, capacity }: KnapInput): Frame<KnapState>[] {
   const n = weights.length;
   const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(capacity + 1).fill(-1));
-  const frames: Frame<KnapState>[] = [];
+  const { emit, frames } = createRecorder<KnapState>(() => ({
+        weights: weights,
+        values: values,
+        capacity: capacity,
+        dp: dp.map((r) => r.slice()),
+        cur: null,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { weights, values, capacity, dp: dp.map((r) => r.slice()), cur, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `${n} items, cap ${capacity}`,
-    `0/1 Knapsack: pick a subset of items (each used at most once) to maximize value within capacity ${capacity}. dp[i][w] = the best value using only the first i items within capacity w. Rows are items (weights {${weights.join(', ')}}, values {${values.join(', ')}}); columns are capacity 0..${capacity}.`,
-    null,
-  );
+  emit('INIT', `${n} items, cap ${capacity}`, `0/1 Knapsack: pick a subset of items (each used at most once) to maximize value within capacity ${capacity}. dp[i][w] = the best value using only the first i items within capacity w. Rows are items (weights {${weights.join(', ')}}, values {${values.join(', ')}}); columns are capacity 0..${capacity}.`, { cur: null });
 
   // Base row: zero items → value 0 for every capacity.
   for (let w = 0; w <= capacity; w++) dp[0][w] = 0;
-  emit(
-    'BASE',
-    'row 0 = 0',
-    `Base case: with 0 items there is nothing to pack, so dp[0][w] = 0 for every capacity w from 0 to ${capacity}.`,
-    [0, capacity],
-  );
+  emit('BASE', 'row 0 = 0', `Base case: with 0 items there is nothing to pack, so dp[0][w] = 0 for every capacity w from 0 to ${capacity}.`, { cur: [0, capacity] });
 
   for (let i = 1; i <= n; i++) {
     const wt = weights[i - 1];
@@ -60,32 +46,16 @@ function record({ weights, values, capacity }: KnapInput): Frame<KnapState>[] {
         const take = dp[i - 1][w - wt] + val;
         dp[i][w] = Math.max(skip, take);
         const tookIt = take >= skip;
-        emit(
-          'FILL',
-          `dp[${i}][${w}]=${dp[i][w]}`,
-          `Item ${i} (weight ${wt}, value ${val}) fits in capacity ${w}: skip it for dp[${i - 1}][${w}] = ${skip}, or take it for dp[${i - 1}][${w - wt}] + ${val} = ${take}. dp[${i}][${w}] = max(${skip}, ${take}) = ${dp[i][w]}${tookIt ? ' (take it)' : ' (skip it)'}.`,
-          [i, w],
-        );
+        emit('FILL', `dp[${i}][${w}]=${dp[i][w]}`, `Item ${i} (weight ${wt}, value ${val}) fits in capacity ${w}: skip it for dp[${i - 1}][${w}] = ${skip}, or take it for dp[${i - 1}][${w - wt}] + ${val} = ${take}. dp[${i}][${w}] = max(${skip}, ${take}) = ${dp[i][w]}${tookIt ? ' (take it)' : ' (skip it)'}.`, { cur: [i, w] });
       } else {
         dp[i][w] = skip;
-        emit(
-          'FILL',
-          `dp[${i}][${w}]=${dp[i][w]}`,
-          `Item ${i} (weight ${wt}) is too heavy for capacity ${w}, so we must skip it: dp[${i}][${w}] = dp[${i - 1}][${w}] = ${skip}.`,
-          [i, w],
-        );
+        emit('FILL', `dp[${i}][${w}]=${dp[i][w]}`, `Item ${i} (weight ${wt}) is too heavy for capacity ${w}, so we must skip it: dp[${i}][${w}] = dp[${i - 1}][${w}] = ${skip}.`, { cur: [i, w] });
       }
     }
   }
 
   const ans = dp[n][capacity];
-  emit(
-    'DONE',
-    `value ${ans}`,
-    `The table is full. dp[${n}][${capacity}] = ${ans}, so the best value we can pack within capacity ${capacity} is ${ans}.`,
-    [n, capacity],
-    'good',
-  );
+  emit('DONE', `value ${ans}`, `The table is full. dp[${n}][${capacity}] = ${ans}, so the best value we can pack within capacity ${capacity} is ${ans}.`, { cur: [n, capacity] , done: true }, 'good');
   return frames;
 }
 

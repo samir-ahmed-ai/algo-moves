@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -17,31 +18,18 @@ interface MinRemoveState {
   done: boolean;
 }
 
-function record({ s }: MinRemoveInput): Frame<MinRemoveState>[] {
-  const frames: Frame<MinRemoveState>[] = [];
-  const buf = s.split('');
+function record({ s }: MinRemoveInput): Frame<MinRemoveState>[] {  const buf = s.split('');
   const stack: number[] = [];
   const removed: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<MinRemoveState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MinRemoveState>(() => ({
         chars: buf.slice(),
         i: null,
         stack: stack.slice(),
         removed: removed.slice(),
         result: null,
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

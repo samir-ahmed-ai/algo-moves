@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,21 +22,10 @@ interface SideViewState {
   done: boolean;
 }
 
-function record({ tree }: SideViewInput): Frame<SideViewState>[] {
-  const frames: Frame<SideViewState>[] = [];
-  const visited: number[] = [];
+function record({ tree }: SideViewInput): Frame<SideViewState>[] {  const visited: number[] = [];
   const view: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SideViewState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SideViewState>(() => ({
         tree,
         queue: [],
         current: null,
@@ -44,10 +34,8 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {
         levelSize: null,
         visited: visited.slice(),
         view: view.slice(),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   // Empty tree (root is null / absent).
   if (tree.length === 0 || tree[0] == null) {

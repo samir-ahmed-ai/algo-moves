@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,9 +28,7 @@ interface VerticalState {
   done: boolean;
 }
 
-function record({ tree }: VerticalInput): Frame<VerticalState>[] {
-  const frames: Frame<VerticalState>[] = [];
-  const cols = new Map<number, number[]>();
+function record({ tree }: VerticalInput): Frame<VerticalState>[] {  const cols = new Map<number, number[]>();
   const visited: number[] = [];
   let minC = 0;
   let maxC = 0;
@@ -38,16 +37,7 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
   const colsSorted = (): [number, number[]][] =>
     [...cols.entries()].sort((a, b) => a[0] - b[0]).map(([c, v]) => [c, v.slice()]);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<VerticalState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<VerticalState>(() => ({
         tree,
         queue: queue.map((q) => ({ ...q })),
         visited: visited.slice(),
@@ -57,10 +47,8 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
         minC,
         maxC,
         out: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (tree.length === 0 || tree[0] == null) {
     emit('DONE', 'empty', 'The tree is empty, so there are no vertical columns to print.', { out: [], done: true }, 'bad');

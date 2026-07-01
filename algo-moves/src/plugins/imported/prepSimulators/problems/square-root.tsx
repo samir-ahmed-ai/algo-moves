@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,18 +28,7 @@ function candidateCount(x: number): number {
 }
 
 function record({ x }: SqrtInput): Frame<SqrtState>[] {
-  const frames: Frame<SqrtState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SqrtState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SqrtState>(() => ({
         x,
         lo: null,
         mid: null,
@@ -46,10 +36,8 @@ function record({ x }: SqrtInput): Frame<SqrtState>[] {
         ans: 1,
         check: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

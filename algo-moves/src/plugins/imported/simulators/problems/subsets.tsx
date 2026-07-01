@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -15,40 +16,35 @@ interface SubsetsState {
   done: boolean;
 }
 
-function record({ nums }: SubsetsInput): Frame<SubsetsState>[] {
-  const frames: Frame<SubsetsState>[] = [];
-  const cur: number[] = [];
+function record({ nums }: SubsetsInput): Frame<SubsetsState>[] {  const cur: number[] = [];
   const results: number[][] = [];
 
-  const emit = (type: string, note: string, caption: string, pick: number | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { nums: nums.slice(), cur: cur.slice(), pick, results: results.map((r) => r.slice()), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<SubsetsState>(() => ({
+        nums: nums.slice(),
+        cur: cur.slice(),
+        results: results.map((r) => r.slice()),
+        pick: null,
+        done: false
+      }));
 
   const fmt = (xs: number[]) => `[${xs.join(', ')}]`;
 
-  emit(
-    'INIT',
-    `2^${nums.length} subsets`,
-    `Generate every subset of ${fmt(nums)}. Start-index recursion: record the current path at every call, then for each later element include it and recurse. Undoing the last include explores the branch that skips it. There are 2^${nums.length} = ${2 ** nums.length} subsets.`,
-    null,
-  );
+  emit('INIT', `2^${nums.length} subsets`, `Generate every subset of ${fmt(nums)}. Start-index recursion: record the current path at every call, then for each later element include it and recurse. Undoing the last include explores the branch that skips it. There are 2^${nums.length} = ${2 ** nums.length} subsets.`, { pick: null });
 
   const btSubsets = (idx: number) => {
     results.push(cur.slice());
-    emit('RECORD', `+${fmt(cur)}`, `Every call records its path first — add the subset ${fmt(cur)} (${results.length} so far).`, null, 'good');
+    emit('RECORD', `+${fmt(cur)}`, `Every call records its path first — add the subset ${fmt(cur)} (${results.length} so far).`, { pick: null }, 'good');
     for (let i = idx; i < nums.length; i++) {
       cur.push(nums[i]);
-      emit('CHOOSE', `pick ${nums[i]}`, `Include nums[${i}] = ${nums[i]} and recurse on indices past ${i}. cur = ${fmt(cur)}.`, i);
+      emit('CHOOSE', `pick ${nums[i]}`, `Include nums[${i}] = ${nums[i]} and recurse on indices past ${i}. cur = ${fmt(cur)}.`, { pick: i });
       btSubsets(i + 1);
       cur.pop();
-      emit('BACKTRACK', `undo ${nums[i]}`, `Backtrack: drop nums[${i}] = ${nums[i]} so the next sibling can be included instead. cur = ${fmt(cur)}.`, i);
+      emit('BACKTRACK', `undo ${nums[i]}`, `Backtrack: drop nums[${i}] = ${nums[i]} so the next sibling can be included instead. cur = ${fmt(cur)}.`, { pick: i });
     }
   };
 
   btSubsets(0);
-  emit('DONE', `${results.length} subsets`, `All include/skip branches explored — ${results.length} subsets of ${fmt(nums)}.`, null, 'good');
+  emit('DONE', `${results.length} subsets`, `All include/skip branches explored — ${results.length} subsets of ${fmt(nums)}.`, { pick: null , done: true }, 'good');
   return frames;
 }
 

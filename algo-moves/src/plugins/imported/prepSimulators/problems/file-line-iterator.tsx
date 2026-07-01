@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -17,30 +18,17 @@ interface FileLineState {
 }
 
 function record({ content }: FileLineInput): Frame<FileLineState>[] {
-  const lines = content.split('\n');
-  const frames: Frame<FileLineState>[] = [];
-  const output: string[] = [];
+  const lines = content.split('\n');  const output: string[] = [];
   let lineIdx = -1;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<FileLineState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FileLineState>(() => ({
         lines,
         lineIdx: lineIdx >= 0 ? lineIdx : null,
         current: null,
         output: output.slice(),
         hasNext: lineIdx + 1 < lines.length,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

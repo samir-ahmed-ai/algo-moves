@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -24,50 +25,28 @@ interface RotateState {
 function record({ nums: input, k: rawK }: RotateInput): Frame<RotateState>[] {
   const nums = input.slice();
   const n = nums.length;
-  const frames: Frame<RotateState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    phase: Phase,
-    seg: [number, number] | null,
-    l: number | null,
-    r: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { nums: nums.slice(), k: rawK % (n || 1), rawK, phase, seg, l, r, done: phase === 'done' },
-    });
+  const { emit, frames } = createRecorder<RotateState>(() => ({
+        nums: nums.slice(),
+        k: rawK % (n || 1),
+        rawK: rawK,
+        phase: 'init',
+        seg: null,
+        l: null,
+        r: null,
+        done: false
+      }));
 
   if (n === 0) {
-    emit('DONE', 'empty', 'The array is empty, so there is nothing to rotate.', 'done', null, null, null, 'good');
+    emit('DONE', 'empty', 'The array is empty, so there is nothing to rotate.', { phase: 'done', seg: null, l: null, r: null , done: true }, 'good');
     return frames;
   }
 
   const k = ((rawK % n) + n) % n;
 
-  emit(
-    'INIT',
-    `k=${rawK} → ${k}`,
-    `Rotate right by ${rawK}. Since rotating by n returns the array to itself, only k % n = ${rawK} % ${n} = ${k} matters. We rotate in place with three reversals: reverse the whole array, then reverse the first k, then reverse the rest.`,
-    'init',
-    null,
-    null,
-    null,
-  );
+  emit('INIT', `k=${rawK} → ${k}`, `Rotate right by ${rawK}. Since rotating by n returns the array to itself, only k % n = ${rawK} % ${n} = ${k} matters. We rotate in place with three reversals: reverse the whole array, then reverse the first k, then reverse the rest.`, { phase: 'init', seg: null, l: null, r: null });
 
   const reverse = (lo: number, hi: number, phase: Phase, segLabel: string) => {
-    emit(
-      'SEG',
-      `${segLabel} [${lo}..${hi}]`,
-      `${segLabel}: reverse the segment from index ${lo} to ${hi} by swapping the ends and walking inward.`,
-      phase,
-      lo <= hi ? [lo, hi] : null,
-      null,
-      null,
-    );
+    emit('SEG', `${segLabel} [${lo}..${hi}]`, `${segLabel}: reverse the segment from index ${lo} to ${hi} by swapping the ends and walking inward.`, { phase: phase, seg: lo <= hi ? [lo, hi] : null, l: null, r: null });
     let l = lo;
     let r = hi;
     while (l < r) {
@@ -75,28 +54,12 @@ function record({ nums: input, k: rawK }: RotateInput): Frame<RotateState>[] {
       const b = nums[r];
       nums[l] = b;
       nums[r] = a;
-      emit(
-        'SWAP',
-        `swap ${l}↔${r}`,
-        `Swap nums[${l}] and nums[${r}]: ${a} and ${b} trade places, then move the left pointer right and the right pointer left.`,
-        phase,
-        [lo, hi],
-        l,
-        r,
-      );
+      emit('SWAP', `swap ${l}↔${r}`, `Swap nums[${l}] and nums[${r}]: ${a} and ${b} trade places, then move the left pointer right and the right pointer left.`, { phase: phase, seg: [lo, hi], l: l, r: r });
       l++;
       r--;
     }
     if (lo >= hi) {
-      emit(
-        'SKIP',
-        `${segLabel} trivial`,
-        `${segLabel} covers ${lo > hi ? 'no' : 'a single'} element, so there is nothing to swap — it is already reversed.`,
-        phase,
-        lo <= hi ? [lo, hi] : null,
-        null,
-        null,
-      );
+      emit('SKIP', `${segLabel} trivial`, `${segLabel} covers ${lo > hi ? 'no' : 'a single'} element, so there is nothing to swap — it is already reversed.`, { phase: phase, seg: lo <= hi ? [lo, hi] : null, l: null, r: null });
     }
   };
 
@@ -104,16 +67,7 @@ function record({ nums: input, k: rawK }: RotateInput): Frame<RotateState>[] {
   reverse(0, k - 1, 'first', 'Step 2');
   reverse(k, n - 1, 'rest', 'Step 3');
 
-  emit(
-    'DONE',
-    `rotated by ${k}`,
-    `All three reversals are complete. The array is now rotated right by ${k}: [${nums.join(', ')}].`,
-    'done',
-    null,
-    null,
-    null,
-    'good',
-  );
+  emit('DONE', `rotated by ${k}`, `All three reversals are complete. The array is now rotated right by ${k}: [${nums.join(', ')}].`, { phase: 'done', seg: null, l: null, r: null , done: true }, 'good');
   return frames;
 }
 

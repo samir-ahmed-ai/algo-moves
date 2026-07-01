@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -28,28 +29,15 @@ function toLower(ch: string): string {
 
 function record({ s }: PalindromeInput): Frame<PalindromeState>[] {
   const chars = s.split('');
-  const frames: Frame<PalindromeState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<PalindromeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PalindromeState>(() => ({
         chars,
         l: null,
         r: null,
         compared: null,
         matched: null,
         result: null,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   let l = 0;
   let r = chars.length - 1;

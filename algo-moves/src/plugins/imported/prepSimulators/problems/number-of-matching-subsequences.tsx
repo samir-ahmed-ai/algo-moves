@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -39,21 +40,10 @@ function snapshot(buckets: Buckets): Buckets {
   return out;
 }
 
-function record({ s, words }: MatchInput): Frame<MatchState>[] {
-  const frames: Frame<MatchState>[] = [];
-  const buckets: Buckets = {};
+function record({ s, words }: MatchInput): Frame<MatchState>[] {  const buckets: Buckets = {};
   const matched: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    partial: Partial<MatchState>,
-    tone?: 'good' | 'bad',
-  ) => {
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MatchState>(() => ({
         s,
         i: null,
         ch: null,
@@ -62,11 +52,8 @@ function record({ s, words }: MatchInput): Frame<MatchState>[] {
         active: null,
         matched: matched.slice(),
         count: matched.length,
-        done: false,
-        ...partial,
-      },
-    });
-  };
+        done: false
+      }));
 
   // Seed each word into the bucket keyed by its first character.
   for (const w of words) {

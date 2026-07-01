@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,9 +21,7 @@ interface BstState {
   finished: boolean;
 }
 
-function record({ nums }: BstInput): Frame<BstState>[] {
-  const frames: Frame<BstState>[] = [];
-  const tree: (number | null)[] = [];
+function record({ nums }: BstInput): Frame<BstState>[] {  const tree: (number | null)[] = [];
   const done: number[] = [];
 
   const setAt = (pos: number, val: number) => {
@@ -30,16 +29,7 @@ function record({ nums }: BstInput): Frame<BstState>[] {
     tree[pos] = val;
   };
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<BstState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<BstState>(() => ({
         nums,
         tree: tree.slice(),
         l: null,
@@ -47,10 +37,8 @@ function record({ nums }: BstInput): Frame<BstState>[] {
         m: null,
         pos: null,
         done: done.slice(),
-        finished: false,
-        ...s,
-      },
-    });
+        finished: false
+      }));
 
   emit(
     'INIT',

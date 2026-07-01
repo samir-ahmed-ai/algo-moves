@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -17,27 +18,20 @@ interface PaintState {
   done: boolean;
 }
 
-function record({ paint }: PaintInput): Frame<PaintState>[] {
-  const frames: Frame<PaintState>[] = [];
-  let maxR = 0;
+function record({ paint }: PaintInput): Frame<PaintState>[] {  let maxR = 0;
   for (const [, r] of paint) if (r > maxR) maxR = r;
   const jump = new Array(maxR + 1).fill(0);
   const results: number[] = [];
 
-  const emit = (type: string, note: string, caption: string, s: Partial<PaintState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PaintState>(() => ({
         maxR,
         jump: jump.slice(),
         results: results.slice(),
         day: 0,
         newCount: 0,
         op: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

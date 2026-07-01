@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -18,81 +19,53 @@ interface MissState {
   done: boolean;
 }
 
-function record({ nums }: MissInput): Frame<MissState>[] {
-  const frames: Frame<MissState>[] = [];
-  const raw = nums.slice();
+function record({ nums }: MissInput): Frame<MissState>[] {  const raw = nums.slice();
   const values = nums.slice().sort((a, b) => a - b);
   const base = values[0];
   let lo = 0;
   let hi = values.length - 1;
   let result: number | null = null;
 
-  const emit = (
+  const { emit, frames } = createRecorder<MissState>(() => ({
+        raw: raw,
+        values: values,
+        base: base,
+        lo: lo,
+        hi: hi,
+        result: result,
+        mid: null,
+        done: false
+      }));
+  const emitDone = (
     type: string,
     note: string,
     caption: string,
-    mid: number | null,
+    partial: Partial<MissState>,
     tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { raw, values, base, lo, hi, mid, result, done: tone != null },
-    });
+  ) => emit(type, note, caption, { ...partial, done: true }, tone);
 
-  emit(
-    'SORT',
-    `sorted [${values.join(',')}]`,
-    `Sort the input [${raw.join(',')}] to [${values.join(',')}]. In a complete run each values[i] would equal base+i (here base=${base}), so binary-search for the first index where that breaks.`,
-    null,
-  );
+  emit('SORT', `sorted [${values.join(',')}]`, `Sort the input [${raw.join(',')}] to [${values.join(',')}]. In a complete run each values[i] would equal base+i (here base=${base}), so binary-search for the first index where that breaks.`, { mid: null });
 
   while (lo <= hi) {
     const mid = lo + ((hi - lo) >> 1);
     const expected = base + mid;
-    emit(
-      'MID',
-      `mid=${mid} exp=${expected}`,
-      `Middle of the live window: mid=${mid}. Expected base+mid = ${base}+${mid} = ${expected}; actual values[${mid}] = ${values[mid]}.`,
-      mid,
-    );
+    emit('MID', `mid=${mid} exp=${expected}`, `Middle of the live window: mid=${mid}. Expected base+mid = ${base}+${mid} = ${expected}; actual values[${mid}] = ${values[mid]}.`, { mid: mid });
     if (mid > 0 && values[mid - 1] === base + mid - 1 && values[mid] !== expected) {
       result = expected;
-      emit(
-        'GAP',
-        `missing ${expected}`,
-        `values[${mid - 1}] = ${values[mid - 1]} is correct but values[${mid}] = ${values[mid]} skips past ${expected}, so the gap is exactly here — the missing number is ${expected}.`,
-        mid,
-        'good',
-      );
+      emitDone('GAP', `missing ${expected}`, `values[${mid - 1}] = ${values[mid - 1]} is correct but values[${mid}] = ${values[mid]} skips past ${expected}, so the gap is exactly here — the missing number is ${expected}.`, { mid: mid }, 'good');
       return frames;
     }
     if (values[mid] === expected) {
       lo = mid + 1;
-      emit(
-        'RIGHT',
-        `lo=${lo}`,
-        `values[${mid}] = ${expected} matches, so everything up to mid is intact — the gap must be to the right. Set lo = ${lo}.`,
-        mid,
-      );
+      emit('RIGHT', `lo=${lo}`, `values[${mid}] = ${expected} matches, so everything up to mid is intact — the gap must be to the right. Set lo = ${lo}.`, { mid: mid });
     } else {
       hi = mid - 1;
-      emit(
-        'LEFT',
-        `hi=${hi}`,
-        `values[${mid}] = ${values[mid]} ≠ ${expected}, so the gap is at or before mid — search the left half. Set hi = ${hi}.`,
-        mid,
-      );
+      emit('LEFT', `hi=${hi}`, `values[${mid}] = ${values[mid]} ≠ ${expected}, so the gap is at or before mid — search the left half. Set hi = ${hi}.`, { mid: mid });
     }
   }
 
   result = base + lo;
-  emit(
-    'DONE',
-    `missing ${result}`,
-    `The search settled at lo=${lo}, so the first missing value is base+lo = ${base}+${lo} = ${result}.`,
-    null,
-    'good',
-  );
+  emitDone('DONE', `missing ${result}`, `The search settled at lo=${lo}, so the first missing value is base+lo = ${base}+${lo} = ${result}.`, { mid: null }, 'good');
   return frames;
 }
 

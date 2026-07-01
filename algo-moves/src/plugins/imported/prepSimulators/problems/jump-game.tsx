@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -18,31 +19,18 @@ interface JumpGameState {
   done: boolean;
 }
 
-function record({ nums }: JumpGameInput): Frame<JumpGameState>[] {
-  const frames: Frame<JumpGameState>[] = [];
-  const last = nums.length - 1;
+function record({ nums }: JumpGameInput): Frame<JumpGameState>[] {  const last = nums.length - 1;
   let reach = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<JumpGameState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<JumpGameState>(() => ({
         nums,
         i: null,
         reach,
         candidate: null,
         extended: false,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

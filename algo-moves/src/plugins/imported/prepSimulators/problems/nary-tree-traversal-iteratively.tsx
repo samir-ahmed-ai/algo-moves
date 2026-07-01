@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
@@ -32,101 +33,50 @@ interface TraversalState {
   done: boolean;
 }
 
-function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {
-  const frames: Frame<TraversalState>[] = [];
-  const labels = nodes.map((n) => String(n.val));
+function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {  const labels = nodes.map((n) => String(n.val));
   const children = nodes.map((n) => n.children);
   const visited = new Array<boolean>(nodes.length).fill(false);
   const res: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    stack: number[],
-    curr: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        labels,
-        children,
-        stack: stack.slice(),
+  const { emit, frames } = createRecorder<TraversalState>(() => ({
+        labels: labels,
+        children: children,
         res: res.slice(),
-        curr,
         visited: visited.slice(),
-        done: type === 'DONE',
-      },
-    });
+        stack: [],
+        curr: null,
+        done: false
+      }));
 
   if (nodes.length === 0) {
-    emit('DONE', 'empty', 'The tree is empty, so pre-order traversal returns nothing.', [], null, 'bad');
+    emit('DONE', 'empty', 'The tree is empty, so pre-order traversal returns nothing.', { stack: [], curr: null , done: true }, 'bad');
     return frames;
   }
 
   const stack: number[] = [0];
-  emit(
-    'INIT',
-    'push root',
-    `Pre-order traversal with an explicit stack. Seed the stack with the root (node ${labels[0]}). We pop a node, emit its value, then push its children in reverse so the leftmost child is processed first.`,
-    stack,
-    null,
-  );
+  emit('INIT', 'push root', `Pre-order traversal with an explicit stack. Seed the stack with the root (node ${labels[0]}). We pop a node, emit its value, then push its children in reverse so the leftmost child is processed first.`, { stack: stack, curr: null });
 
   while (stack.length > 0) {
     const curr = stack.pop()!;
-    emit(
-      'POP',
-      `pop ${labels[curr]}`,
-      `Pop the top of the stack: node ${labels[curr]}. In pre-order we emit a node the moment we pop it.`,
-      stack,
-      curr,
-    );
+    emit('POP', `pop ${labels[curr]}`, `Pop the top of the stack: node ${labels[curr]}. In pre-order we emit a node the moment we pop it.`, { stack: stack, curr: curr });
 
     res.push(nodes[curr].val);
     visited[curr] = true;
-    emit(
-      'EMIT',
-      `emit ${labels[curr]}`,
-      `Append ${labels[curr]} to the result. Output so far: [${res.join(', ')}].`,
-      stack,
-      curr,
-      'good',
-    );
+    emit('EMIT', `emit ${labels[curr]}`, `Append ${labels[curr]} to the result. Output so far: [${res.join(', ')}].`, { stack: stack, curr: curr }, 'good');
 
     const kids = children[curr];
     if (kids.length === 0) {
-      emit(
-        'LEAF',
-        'no children',
-        `Node ${labels[curr]} is a leaf, so there is nothing to push. Continue with whatever is on top of the stack.`,
-        stack,
-        curr,
-      );
+      emit('LEAF', 'no children', `Node ${labels[curr]} is a leaf, so there is nothing to push. Continue with whatever is on top of the stack.`, { stack: stack, curr: curr });
     } else {
       for (let i = kids.length - 1; i >= 0; i--) {
         stack.push(kids[i]);
       }
       const pushedLabels = kids.map((c) => labels[c]);
-      emit(
-        'PUSH',
-        `push children`,
-        `Push node ${labels[curr]}'s children in reverse order (${[...pushedLabels].reverse().join(', ')}) so the first child ${pushedLabels[0]} lands on top and gets visited next. Stack top → bottom: [${stack.slice().reverse().map((i) => labels[i]).join(', ')}].`,
-        stack,
-        curr,
-      );
+      emit('PUSH', `push children`, `Push node ${labels[curr]}'s children in reverse order (${[...pushedLabels].reverse().join(', ')}) so the first child ${pushedLabels[0]} lands on top and gets visited next. Stack top → bottom: [${stack.slice().reverse().map((i) => labels[i]).join(', ')}].`, { stack: stack, curr: curr });
     }
   }
 
-  emit(
-    'DONE',
-    `${res.length} nodes`,
-    `Stack is empty — traversal complete. Pre-order result: [${res.join(', ')}].`,
-    [],
-    null,
-    'good',
-  );
+  emit('DONE', `${res.length} nodes`, `Stack is empty — traversal complete. Pre-order result: [${res.join(', ')}].`, { stack: [], curr: null , done: true }, 'good');
   return frames;
 }
 

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,35 +20,22 @@ interface ReverseState {
   done: boolean;
 }
 
-function record({ values }: ReverseInput): Frame<ReverseState>[] {
-  const frames: Frame<ReverseState>[] = [];
-  const n = values.length;
+function record({ values }: ReverseInput): Frame<ReverseState>[] {  const n = values.length;
   // Original forward links: node i → node i+1, last → nil.
   const next: (number | null)[] = values.map((_, i) => (i + 1 < n ? i + 1 : null));
 
   let prev: number | null = null;
   let head: number | null = n > 0 ? 0 : null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ReverseState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ReverseState>(() => ({
         values,
         next: next.slice(),
         prev,
         head,
         nextSaved: null,
         resultHead: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const name = (i: number | null) => (i === null ? 'nil' : `${values[i]}`);
 

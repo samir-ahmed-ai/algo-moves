@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -46,23 +47,16 @@ function treeLabel(n: ExprNode | null): string {
   return `(${treeLabel(n.left)} ${n.val} ${treeLabel(n.right)})`;
 }
 
-function record({ postfix }: ExprInput): Frame<ExprState>[] {
-  const frames: Frame<ExprState>[] = [];
-  const nodeStack: ExprNode[] = [];
+function record({ postfix }: ExprInput): Frame<ExprState>[] {  const nodeStack: ExprNode[] = [];
   const labelStack: string[] = [];
 
-  const emit = (type: string, note: string, caption: string, s: Partial<ExprState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ExprState>(() => ({
         stack: labelStack.slice(),
         tree: nodeStack[nodeStack.length - 1] ?? null,
         op: '',
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

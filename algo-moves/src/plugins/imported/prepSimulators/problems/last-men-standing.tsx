@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -21,109 +22,46 @@ interface LastMenState {
 }
 
 function record({ n, k }: LastMenInput): Frame<LastMenState>[] {
-  const frames: Frame<LastMenState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    ring: number[],
-    curIdx: number | null,
-    doomedIdx: number | null,
-    eliminated: number[],
-    survivor: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        n,
-        k,
-        ring: ring.slice(),
-        curIdx,
-        doomedIdx,
-        eliminated: eliminated.slice(),
-        survivor,
-        done: type === 'DONE',
-      },
-    });
+  const { emit, frames } = createRecorder<LastMenState>(() => ({
+        n: n,
+        k: k,
+        ring: [],
+        curIdx: null,
+        doomedIdx: null,
+        eliminated: [],
+        survivor: null,
+        done: false
+      }));
 
   // Build the initial circle 1..n (mirrors the linked-list construction in Go).
   const ring: number[] = [];
   for (let i = 1; i <= n; i++) ring.push(i);
   const eliminated: number[] = [];
 
-  emit(
-    'INIT',
-    `n=${n}, k=${k}`,
-    `Josephus circle: ${n} people stand in a ring numbered 1..${n}. Starting the count, every ${k}-th person is eliminated; repeat until one survivor remains. We simulate a circular linked list where cur walks k−1 steps then drops cur.Next.`,
-    ring,
-    null,
-    null,
-    eliminated,
-    null,
-  );
+  emit('INIT', `n=${n}, k=${k}`, `Josephus circle: ${n} people stand in a ring numbered 1..${n}. Starting the count, every ${k}-th person is eliminated; repeat until one survivor remains. We simulate a circular linked list where cur walks k−1 steps then drops cur.Next.`, { ring: ring, curIdx: null, doomedIdx: null, eliminated: eliminated, survivor: null });
 
   // Edge case from the Go: a single person is the survivor immediately.
   if (n === 1) {
-    emit(
-      'DONE',
-      'survivor 1',
-      `Only one person stands, so person 1 is the last one standing without any elimination.`,
-      ring,
-      0,
-      null,
-      eliminated,
-      1,
-      'good',
-    );
+    emit('DONE', 'survivor 1', `Only one person stands, so person 1 is the last one standing without any elimination.`, { ring: ring, curIdx: 0, doomedIdx: null, eliminated: eliminated, survivor: 1 , done: true }, 'good');
     return frames;
   }
 
   // cur starts at the head (person 1), index 0 in the ring array.
   let cur = 0;
-  emit(
-    'START',
-    'cur = 1',
-    `Place cur on person 1 (the head of the ring). Each round we advance cur by k−1 = ${k - 1} step(s), landing just before the victim, then splice out cur.Next.`,
-    ring,
-    cur,
-    null,
-    eliminated,
-    null,
-  );
+  emit('START', 'cur = 1', `Place cur on person 1 (the head of the ring). Each round we advance cur by k−1 = ${k - 1} step(s), landing just before the victim, then splice out cur.Next.`, { ring: ring, curIdx: cur, doomedIdx: null, eliminated: eliminated, survivor: null });
 
   // Loop while more than one person remains (Go: for cur.Next != cur).
   while (ring.length > 1) {
     // Advance cur by k-1 steps around the ring (Go inner loop i=1; i<k).
     for (let i = 1; i < k; i++) {
       cur = (cur + 1) % ring.length;
-      emit(
-        'WALK',
-        `step ${i}/${k - 1} → ${ring[cur]}`,
-        `Counting: advance cur one position to person ${ring[cur]} (step ${i} of ${k - 1}). After all k−1 steps, cur.Next will be the person we eliminate.`,
-        ring,
-        cur,
-        null,
-        eliminated,
-        null,
-      );
+      emit('WALK', `step ${i}/${k - 1} → ${ring[cur]}`, `Counting: advance cur one position to person ${ring[cur]} (step ${i} of ${k - 1}). After all k−1 steps, cur.Next will be the person we eliminate.`, { ring: ring, curIdx: cur, doomedIdx: null, eliminated: eliminated, survivor: null });
     }
 
     // cur.Next is the victim — the next person clockwise.
     const doomedIdx = (cur + 1) % ring.length;
     const victim = ring[doomedIdx];
-    emit(
-      'MARK',
-      `drop ${victim}`,
-      `cur is on person ${ring[cur]}; the very next person, ${victim}, is the k-th in this count and gets eliminated. In the list this is cur.Next = cur.Next.Next.`,
-      ring,
-      cur,
-      doomedIdx,
-      eliminated,
-      null,
-      'bad',
-    );
+    emit('MARK', `drop ${victim}`, `cur is on person ${ring[cur]}; the very next person, ${victim}, is the k-th in this count and gets eliminated. In the list this is cur.Next = cur.Next.Next.`, { ring: ring, curIdx: cur, doomedIdx: doomedIdx, eliminated: eliminated, survivor: null }, 'bad');
 
     // Splice the victim out (Go: cur.Next = cur.Next.Next).
     eliminated.push(victim);
@@ -132,30 +70,11 @@ function record({ n, k }: LastMenInput): Frame<LastMenState>[] {
     // unless it wrapped to index 0. Recompute cur's position by its label.
     cur = ring.indexOf(curLabelAfterSplice(ring, cur, doomedIdx));
 
-    emit(
-      'REMOVE',
-      `${ring.length} left`,
-      `Person ${victim} leaves the circle. ${ring.length} ${ring.length === 1 ? 'person remains' : 'people remain'}. Counting resumes from cur, which stays on its current person.`,
-      ring,
-      cur,
-      null,
-      eliminated,
-      ring.length === 1 ? ring[0] : null,
-    );
+    emit('REMOVE', `${ring.length} left`, `Person ${victim} leaves the circle. ${ring.length} ${ring.length === 1 ? 'person remains' : 'people remain'}. Counting resumes from cur, which stays on its current person.`, { ring: ring, curIdx: cur, doomedIdx: null, eliminated: eliminated, survivor: ring.length === 1 ? ring[0] : null });
   }
 
   const survivor = ring[0];
-  emit(
-    'DONE',
-    `survivor ${survivor}`,
-    `One person is left: person ${survivor} is the last one standing. With n=${n}, k=${k} the answer is ${survivor}.`,
-    ring,
-    0,
-    null,
-    eliminated,
-    survivor,
-    'good',
-  );
+  emit('DONE', `survivor ${survivor}`, `One person is left: person ${survivor} is the last one standing. With n=${n}, k=${k} the answer is ${survivor}.`, { ring: ring, curIdx: 0, doomedIdx: null, eliminated: eliminated, survivor: survivor , done: true }, 'good');
   return frames;
 }
 

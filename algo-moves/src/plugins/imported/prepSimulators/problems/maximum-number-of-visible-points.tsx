@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,8 +28,6 @@ interface VisibleState {
 // `same`, convert the rest to atan2 degrees, sort, duplicate the list shifted
 // by 360 to handle wrap-around, then slide a window whose span stays <= angle.
 function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[] {
-  const frames: Frame<VisibleState>[] = [];
-
   let same = 0;
   const angles: number[] = [];
   for (const p of points) {
@@ -45,16 +44,7 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
 
   const round1 = (x: number) => Math.round(x * 10) / 10;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<VisibleState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<VisibleState>(() => ({
         angle,
         location,
         same,
@@ -64,10 +54,8 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
         best: 0,
         bestRange: null,
         answer: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

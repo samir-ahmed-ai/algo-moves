@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -26,19 +27,14 @@ interface TttState {
   done: boolean;
 }
 
-function record({ n, moves }: TttInput): Frame<TttState>[] {
-  const frames: Frame<TttState>[] = [];
-  const board: (number | null)[][] = Array.from({ length: n }, () => Array(n).fill(null));
+function record({ n, moves }: TttInput): Frame<TttState>[] {  const board: (number | null)[][] = Array.from({ length: n }, () => Array(n).fill(null));
   const rows = new Array(n).fill(0);
   const cols = new Array(n).fill(0);
   let diag = 0;
   let antiDiag = 0;
   let winner: number | null = null;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<TttState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<TttState>(() => ({
         n,
         board: board.map((r) => r.slice()),
         rows: rows.slice(),
@@ -47,10 +43,8 @@ function record({ n, moves }: TttInput): Frame<TttState>[] {
         antiDiag,
         op: '',
         winner,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

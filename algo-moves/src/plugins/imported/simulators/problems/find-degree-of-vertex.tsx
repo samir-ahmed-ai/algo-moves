@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -29,89 +30,39 @@ interface DegState {
 
 function record({ adj, pos, query }: DegInput): Frame<DegState>[] {
   const n = adj.length;
-  const degrees = new Array<number>(n).fill(0);
-  const frames: Frame<DegState>[] = [];
-  let bestVertex = 0;
+  const degrees = new Array<number>(n).fill(0);  let bestVertex = 0;
   let bestDegree = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    current: number | null,
-    edge: [number, number] | null,
-    answer: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
-        query,
+  const { emit, frames } = createRecorder<DegState>(() => ({
+        adj: adj,
+        pos: pos,
+        query: query,
         degrees: degrees.slice(),
-        current,
-        edge,
-        bestVertex,
-        bestDegree,
-        answer,
-        done: type === 'DONE',
-      },
-    });
+        bestVertex: bestVertex,
+        bestDegree: bestDegree,
+        current: null,
+        edge: null,
+        answer: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `degree of ${query}`,
-    `In an undirected graph the degree of a vertex is the number of edges incident to it — equivalently, its neighbour count. We scan every vertex, count its incident edges, and report the degree of the queried vertex ${query}.`,
-    null,
-    null,
-    null,
-  );
+  emit('INIT', `degree of ${query}`, `In an undirected graph the degree of a vertex is the number of edges incident to it — equivalently, its neighbour count. We scan every vertex, count its incident edges, and report the degree of the queried vertex ${query}.`, { current: null, edge: null, answer: null });
 
   for (let v = 0; v < n; v++) {
-    emit(
-      'VERTEX',
-      `scan ${v}`,
-      `Move to vertex ${v}. Walk each of its incident edges, adding one to its degree per edge.`,
-      v,
-      null,
-      null,
-    );
+    emit('VERTEX', `scan ${v}`, `Move to vertex ${v}. Walk each of its incident edges, adding one to its degree per edge.`, { current: v, edge: null, answer: null });
     for (const u of adj[v]) {
       degrees[v] += 1;
-      emit(
-        'EDGE',
-        `${v}-${u}`,
-        `Edge ${v}–${u} is incident to vertex ${v}, so its degree rises to ${degrees[v]}.`,
-        v,
-        [v, u],
-        null,
-      );
+      emit('EDGE', `${v}-${u}`, `Edge ${v}–${u} is incident to vertex ${v}, so its degree rises to ${degrees[v]}.`, { current: v, edge: [v, u], answer: null });
     }
     if (degrees[v] > bestDegree) {
       bestDegree = degrees[v];
       bestVertex = v;
     }
-    emit(
-      'TALLY',
-      `deg(${v})=${degrees[v]}`,
-      `Vertex ${v} has degree ${degrees[v]}. Highest degree so far is ${bestDegree} at vertex ${bestVertex}.`,
-      v,
-      null,
-      null,
-    );
+    emit('TALLY', `deg(${v})=${degrees[v]}`, `Vertex ${v} has degree ${degrees[v]}. Highest degree so far is ${bestDegree} at vertex ${bestVertex}.`, { current: v, edge: null, answer: null });
   }
 
   const answer = degrees[query];
-  emit(
-    'DONE',
-    `deg(${query})=${answer}`,
-    `All degrees counted. The queried vertex ${query} has degree ${answer} (the highest-degree vertex overall is ${bestVertex} with degree ${bestDegree}).`,
-    query,
-    null,
-    answer,
-    'good',
-  );
+  emit('DONE', `deg(${query})=${answer}`, `All degrees counted. The queried vertex ${query} has degree ${answer} (the highest-degree vertex overall is ${bestVertex} with degree ${bestDegree}).`, { current: query, edge: null, answer: answer , done: true }, 'good');
   return frames;
 }
 

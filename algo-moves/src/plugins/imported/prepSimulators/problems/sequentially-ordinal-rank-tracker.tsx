@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -39,23 +40,16 @@ function insertSorted(locs: Loc[], name: string, score: number): Loc[] {
   return out;
 }
 
-function record({ ops }: SorInput): Frame<SorState>[] {
-  const frames: Frame<SorState>[] = [];
-  let locs: Loc[] = [];
+function record({ ops }: SorInput): Frame<SorState>[] {  let locs: Loc[] = [];
   let idx = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<SorState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SorState>(() => ({
         locs: locs.map((x) => ({ ...x })),
         idx,
         op: '',
         result: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

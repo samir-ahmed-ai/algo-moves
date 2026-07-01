@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -27,22 +28,11 @@ function digitProduct(num1: string, i: number, num2: string, j: number): number 
   return (num1.charCodeAt(i) - 48) * (num2.charCodeAt(j) - 48);
 }
 
-function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
-  const frames: Frame<MultiplyState>[] = [];
-  const m = num1.length;
+function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {  const m = num1.length;
   const n = num2.length;
   const result = new Array<number>(m + n).fill(0);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MultiplyState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MultiplyState>(() => ({
         num1,
         num2,
         result: result.slice(),
@@ -53,10 +43,8 @@ function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
         mul: null,
         sum: null,
         answer: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

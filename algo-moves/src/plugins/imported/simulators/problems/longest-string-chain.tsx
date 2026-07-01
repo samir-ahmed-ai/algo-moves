@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -24,32 +25,17 @@ function record({ words }: ChainInput): Frame<ChainState>[] {
   sorted.forEach((w, k) => indexOf.set(w, k));
 
   const dp = new Array<number>(n).fill(0);
-  const frames: Frame<ChainState>[] = [];
+  const { emit, frames } = createRecorder<ChainState>(() => ({
+        sorted: sorted,
+        dp: dp.slice(),
+        i: null,
+        from: null,
+        pred: null,
+        best: 0,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    from: number | null,
-    pred: string | null,
-    best: number,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { sorted, dp: dp.slice(), i, from, pred, best, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `n=${n}`,
-    `Longest String Chain. Sort the words by length → [${sorted.join(', ')}]. dp[w] = the longest chain ending at word w, built by deleting one character to find a shorter predecessor already seen.`,
-    null,
-    null,
-    null,
-    0,
-  );
+  emit('INIT', `n=${n}`, `Longest String Chain. Sort the words by length → [${sorted.join(', ')}]. dp[w] = the longest chain ending at word w, built by deleting one character to find a shorter predecessor already seen.`, { i: null, from: null, pred: null, best: 0 });
 
   let best = 0;
   for (let i = 0; i < n; i++) {
@@ -73,19 +59,10 @@ function record({ words }: ChainInput): Frame<ChainState>[] {
       pred === null
         ? `"${w}": deleting one character never yields an earlier word, so it starts a new chain — dp["${w}"] = 1.`
         : `"${w}": delete one character to reach "${pred}" (dp = ${dp[from as number]}), the best predecessor, so dp["${w}"] = ${dp[from as number]} + 1 = ${cur}.`;
-    emit('FILL', `dp["${w}"]=${cur}`, caption, i, from, pred, best);
+    emit('FILL', `dp["${w}"]=${cur}`, caption, { i: i, from: from, pred: pred, best: best });
   }
 
-  emit(
-    'DONE',
-    `chain = ${best}`,
-    `Every word is processed. The answer is max(dp) = ${best}, the length of the longest string chain.`,
-    null,
-    null,
-    null,
-    best,
-    'good',
-  );
+  emit('DONE', `chain = ${best}`, `Every word is processed. The answer is max(dp) = ${best}, the length of the longest string chain.`, { i: null, from: null, pred: null, best: best , done: true }, 'good');
   return frames;
 }
 

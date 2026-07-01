@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
@@ -22,23 +23,16 @@ function parseLevel(line: string): string | null {
   return level;
 }
 
-function record({ lines }: LogInput): Frame<LogState>[] {
-  const frames: Frame<LogState>[] = [];
-  let total = 0;
+function record({ lines }: LogInput): Frame<LogState>[] {  let total = 0;
   const byLevel: Record<string, number> = {};
 
-  const emit = (type: string, note: string, caption: string, s: Partial<LogState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LogState>(() => ({
         total,
         byLevel: { ...byLevel },
         lastLine: '',
         op: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

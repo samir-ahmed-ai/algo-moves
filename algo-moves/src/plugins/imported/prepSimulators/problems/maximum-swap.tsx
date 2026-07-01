@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -19,22 +20,11 @@ interface MaxSwapState {
   done: boolean;
 }
 
-function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {
-  const frames: Frame<MaxSwapState>[] = [];
-  const s = String(num).split('');
+function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {  const s = String(num).split('');
   const last: number[] = new Array<number>(10).fill(-1);
   for (let i = 0; i < s.length; i++) last[s[i].charCodeAt(0) - 48] = i;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<MaxSwapState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MaxSwapState>(() => ({
         digits: s.slice(),
         num,
         last: last.slice(),
@@ -42,10 +32,8 @@ function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {
         d: null,
         swapWith: null,
         result: null,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

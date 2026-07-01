@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { DpSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -31,30 +32,15 @@ function isValid(s: string): boolean {
 }
 
 function record({ s }: ParenInput): Frame<ParenState>[] {
-  const frames: Frame<ParenState>[] = [];
+  const { emit, frames } = createRecorder<ParenState>(() => ({
+        input: s,
+        removals: 0,
+        level: [],
+        results: [],
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    removals: number,
-    level: Candidate[],
-    results: string[],
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { input: s, removals, level: level.map((c) => ({ ...c })), results: results.slice(), done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `"${s}"`,
-    `Remove Invalid Parentheses: delete the fewest characters so the string is balanced. BFS by removal-count: level 0 is the original string. If any string on a level is valid, those are the answers; otherwise drop one more char from each and search the next level.`,
-    0,
-    [],
-    [],
-  );
+  emit('INIT', `"${s}"`, `Remove Invalid Parentheses: delete the fewest characters so the string is balanced. BFS by removal-count: level 0 is the original string. If any string on a level is valid, those are the answers; otherwise drop one more char from each and search the next level.`, { removals: 0, level: [], results: [] });
 
   const vis = new Set<string>([s]);
   let queue: string[] = [s];
@@ -66,25 +52,11 @@ function record({ s }: ParenInput): Frame<ParenState>[] {
     const level: Candidate[] = queue.map((str) => ({ str, valid: isValid(str) }));
     const valid = level.filter((c) => c.valid).map((c) => c.str);
 
-    emit(
-      'LEVEL',
-      `level ${removals} · ${level.length} candidate${level.length === 1 ? '' : 's'}`,
-      `Level ${removals} (${removals} char${removals === 1 ? '' : 's'} removed): ${level.length} candidate string${level.length === 1 ? '' : 's'}. Check each for balance.`,
-      removals,
-      level,
-      [],
-    );
+    emit('LEVEL', `level ${removals} · ${level.length} candidate${level.length === 1 ? '' : 's'}`, `Level ${removals} (${removals} char${removals === 1 ? '' : 's'} removed): ${level.length} candidate string${level.length === 1 ? '' : 's'}. Check each for balance.`, { removals: removals, level: level, results: [] });
 
     if (valid.length > 0) {
       answers = valid;
-      emit(
-        'FOUND',
-        `${valid.length} valid at level ${removals}`,
-        `Found ${valid.length} balanced string${valid.length === 1 ? '' : 's'} at level ${removals}. This is the minimum number of removals, so these are the answers — stop here.`,
-        removals,
-        level,
-        answers,
-      );
+      emit('FOUND', `${valid.length} valid at level ${removals}`, `Found ${valid.length} balanced string${valid.length === 1 ? '' : 's'} at level ${removals}. This is the minimum number of removals, so these are the answers — stop here.`, { removals: removals, level: level, results: answers });
       break;
     }
 
@@ -101,29 +73,14 @@ function record({ s }: ParenInput): Frame<ParenState>[] {
         }
       }
     }
-    emit(
-      'EXPAND',
-      `→ level ${removals + 1}`,
-      `Nothing balanced at level ${removals}. Remove one more parenthesis from each candidate, giving ${next.length} new string${next.length === 1 ? '' : 's'} for level ${removals + 1}.`,
-      removals,
-      level,
-      [],
-    );
+    emit('EXPAND', `→ level ${removals + 1}`, `Nothing balanced at level ${removals}. Remove one more parenthesis from each candidate, giving ${next.length} new string${next.length === 1 ? '' : 's'} for level ${removals + 1}.`, { removals: removals, level: level, results: [] });
     queue = next;
     removals++;
   }
 
-  emit(
-    'DONE',
-    answers.length ? `[${answers.map((a) => `"${a}"`).join(', ')}]` : 'no result',
-    answers.length
+  emit('DONE', answers.length ? `[${answers.map((a) => `"${a}"`).join(', ')}]` : 'no result', answers.length
       ? `Answer (fewest removals = ${removals}): ${answers.map((a) => `"${a}"`).join(', ')}.`
-      : `No balanced string was found.`,
-    removals,
-    [],
-    answers,
-    'good',
-  );
+      : `No balanced string was found.`, { removals: removals, level: [], results: answers , done: true }, 'good');
   return frames;
 }
 

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -20,76 +21,54 @@ interface LetterState {
   done: boolean;
 }
 
-function record({ letters, target }: LetterInput): Frame<LetterState>[] {
-  const frames: Frame<LetterState>[] = [];
-  const dead = new Array<boolean>(letters.length).fill(false);
+function record({ letters, target }: LetterInput): Frame<LetterState>[] {  const dead = new Array<boolean>(letters.length).fill(false);
   let lo = 0;
   let hi = letters.length - 1;
   let res: number | null = null;
   let result: string | null = null;
 
-  const emit = (
+  const { emit, frames } = createRecorder<LetterState>(() => ({
+        letters: letters,
+        target: target,
+        lo: lo,
+        hi: hi,
+        res: res,
+        result: result,
+        dead: dead.slice(),
+        mid: null,
+        done: false
+      }));
+  const emitDone = (
     type: string,
     note: string,
     caption: string,
-    mid: number | null,
+    partial: Partial<LetterState>,
     tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { letters, target, lo, hi, mid, res, result, dead: dead.slice(), done: tone != null },
-    });
+  ) => emit(type, note, caption, { ...partial, done: true }, tone);
 
-  emit(
-    'INIT',
-    `lo=0 hi=${hi}`,
-    `Upper-bound search over sorted letters for the smallest one strictly greater than '${target}'. Whenever letters[mid] > '${target}' we remember mid as a candidate and keep looking left for something even smaller.`,
-    null,
-  );
+  emit('INIT', `lo=0 hi=${hi}`, `Upper-bound search over sorted letters for the smallest one strictly greater than '${target}'. Whenever letters[mid] > '${target}' we remember mid as a candidate and keep looking left for something even smaller.`, { mid: null });
 
   while (lo <= hi) {
     const mid = lo + ((hi - lo) >> 1);
-    emit('MID', `mid=${mid}`, `Middle of the live window: mid=${mid}, letter '${letters[mid]}'.`, mid);
+    emit('MID', `mid=${mid}`, `Middle of the live window: mid=${mid}, letter '${letters[mid]}'.`, { mid: mid });
     if (letters[mid] > target) {
       res = mid;
       for (let i = mid; i <= hi; i++) dead[i] = true;
       hi = mid - 1;
-      emit(
-        'LEFT',
-        `res=${mid} hi=${hi}`,
-        `'${letters[mid]}' > '${target}', so it is a candidate — record res=${mid} and search the left half for an even smaller letter. Set hi = ${hi}.`,
-        mid,
-      );
+      emit('LEFT', `res=${mid} hi=${hi}`, `'${letters[mid]}' > '${target}', so it is a candidate — record res=${mid} and search the left half for an even smaller letter. Set hi = ${hi}.`, { mid: mid });
     } else {
       for (let i = lo; i <= mid; i++) dead[i] = true;
       lo = mid + 1;
-      emit(
-        'RIGHT',
-        `lo=${lo}`,
-        `'${letters[mid]}' ≤ '${target}', so nothing here or to the left can beat it — search the right half. Set lo = ${lo}.`,
-        mid,
-      );
+      emit('RIGHT', `lo=${lo}`, `'${letters[mid]}' ≤ '${target}', so nothing here or to the left can beat it — search the right half. Set lo = ${lo}.`, { mid: mid });
     }
   }
 
   if (res === null) {
     result = letters[0];
-    emit(
-      'WRAP',
-      `wrap → '${result}'`,
-      `No letter is greater than '${target}', so wrap around to the first letter '${result}'.`,
-      null,
-      'good',
-    );
+    emitDone('WRAP', `wrap → '${result}'`, `No letter is greater than '${target}', so wrap around to the first letter '${result}'.`, { mid: null }, 'good');
   } else {
     result = letters[res];
-    emit(
-      'DONE',
-      `'${result}'`,
-      `The smallest letter strictly greater than '${target}' is letters[${res}] = '${result}'.`,
-      res,
-      'good',
-    );
+    emitDone('DONE', `'${result}'`, `The smallest letter strictly greater than '${target}' is letters[${res}] = '${result}'.`, { mid: res }, 'good');
   }
   return frames;
 }

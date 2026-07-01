@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,21 +23,10 @@ interface MaxWindowState {
   done: boolean;
 }
 
-function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
-  const frames: Frame<MaxWindowState>[] = [];
-  const dq: number[] = [];
+function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {  const dq: number[] = [];
   const res: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MaxWindowState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MaxWindowState>(() => ({
         nums,
         k,
         i: null,
@@ -46,10 +36,8 @@ function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
         popped: null,
         dropped: null,
         recorded: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

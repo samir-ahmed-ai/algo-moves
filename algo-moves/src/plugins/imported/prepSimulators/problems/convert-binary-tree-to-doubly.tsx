@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
@@ -20,42 +21,23 @@ interface DoublyState {
   done: boolean;
 }
 
-function record({ tree }: DoublyInput): Frame<DoublyState>[] {
-  const frames: Frame<DoublyState>[] = [];
-  const status: NodeStatus[] = tree.map(() => 'idle');
+function record({ tree }: DoublyInput): Frame<DoublyState>[] {  const status: NodeStatus[] = tree.map(() => 'idle');
   const list: number[] = [];
 
   let prevIdx: number | null = null;
   let headVal: number | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
+  const { emit, frames } = createRecorder<DoublyState>(() => ({
+        tree: tree,
         status: status.slice(),
-        active,
         prev: prevIdx,
         list: list.slice(),
         head: headVal,
-        done,
-      },
-    });
+        active: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    'inorder',
-    `Convert a BST to a sorted doubly-linked list in place. An inorder walk (left → node → right) visits nodes in ascending order, and we stitch each visited node onto the tail of the list as we go.`,
-    null,
-    false,
-  );
+  emit('INIT', 'inorder', `Convert a BST to a sorted doubly-linked list in place. An inorder walk (left → node → right) visits nodes in ascending order, and we stitch each visited node onto the tail of the list as we go.`, { active: null, done: false });
 
   const dfs = (i: number) => {
     if (i >= tree.length || tree[i] == null) return;
@@ -64,13 +46,7 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
     const val = tree[i] as number;
 
     if (left < tree.length && tree[left] != null) {
-      emit(
-        'GO_LEFT',
-        `↙ ${val}`,
-        `At node ${val}: recurse left first so every smaller value is linked before ${val} itself.`,
-        i,
-        false,
-      );
+      emit('GO_LEFT', `↙ ${val}`, `At node ${val}: recurse left first so every smaller value is linked before ${val} itself.`, { active: i, done: false });
     }
     dfs(left);
 
@@ -78,33 +54,15 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
     status[i] = 'active';
     if (headVal === null) {
       headVal = val;
-      emit(
-        'HEAD',
-        `head=${val}`,
-        `${val} is the leftmost (smallest) node, so it becomes the head of the doubly-linked list. There is no previous node to link back to yet.`,
-        i,
-        false,
-      );
+      emit('HEAD', `head=${val}`, `${val} is the leftmost (smallest) node, so it becomes the head of the doubly-linked list. There is no previous node to link back to yet.`, { active: i, done: false });
     } else {
       const prevVal = tree[prevIdx as number] as number;
-      emit(
-        'LINK',
-        `${prevVal}↔${val}`,
-        `Link ${prevVal} and ${val}: set prev.Next = ${val} and ${val}.Prev = ${prevVal}. This appends ${val} to the tail of the list.`,
-        i,
-        false,
-      );
+      emit('LINK', `${prevVal}↔${val}`, `Link ${prevVal} and ${val}: set prev.Next = ${val} and ${val}.Prev = ${prevVal}. This appends ${val} to the tail of the list.`, { active: i, done: false });
     }
     list.push(val);
     prevIdx = i;
     status[i] = 'done';
-    emit(
-      'ADVANCE',
-      `prev=${val}`,
-      `${val} is now the tail. Set prev = ${val}, then recurse right to attach any larger values after it.`,
-      i,
-      false,
-    );
+    emit('ADVANCE', `prev=${val}`, `${val} is now the tail. Set prev = ${val}, then recurse right to attach any larger values after it.`, { active: i, done: false });
 
     dfs(right);
   };
@@ -112,14 +70,7 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
   dfs(0);
 
   const headLabel = headVal === null ? '(empty)' : String(headVal);
-  emit(
-    'DONE',
-    `head=${headLabel}`,
-    `Inorder walk complete. The nodes are now a sorted doubly-linked list: ${list.length ? list.join(' ↔ ') : '(empty)'}. The head is ${headLabel}. Time O(n), space O(h) for the recursion stack.`,
-    null,
-    true,
-    'good',
-  );
+  emit('DONE', `head=${headLabel}`, `Inorder walk complete. The nodes are now a sorted doubly-linked list: ${list.length ? list.join(' ↔ ') : '(empty)'}. The head is ${headLabel}. Time O(n), space O(h) for the recursion stack.`, { active: null, done: true }, 'good');
 
   return frames;
 }

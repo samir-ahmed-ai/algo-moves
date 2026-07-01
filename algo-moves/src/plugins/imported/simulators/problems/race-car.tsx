@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -19,31 +20,18 @@ const INF = 1 << 30;
 
 function record({ target }: RaceInput): Frame<RaceState>[] {
   const dp = new Array<number>(target + 1).fill(INF);
-  const frames: Frame<RaceState>[] = [];
+  const { emit, frames } = createRecorder<RaceState>(() => ({
+        target: target,
+        dp: dp.slice(),
+        t: null,
+        from: null,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    t: number | null,
-    from: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { target, dp: dp.slice(), t, from, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `target=${target}`,
-    `Race Car: starting at position 0 with speed +1, find the fewest A (accelerate) / R (reverse) instructions to land exactly on ${target}. dp[t] = fewest instructions to reach position t, built up from t = 0.`,
-    null,
-    null,
-  );
+  emit('INIT', `target=${target}`, `Race Car: starting at position 0 with speed +1, find the fewest A (accelerate) / R (reverse) instructions to land exactly on ${target}. dp[t] = fewest instructions to reach position t, built up from t = 0.`, { t: null, from: null });
 
   dp[0] = 0;
-  emit('BASE', 'dp[0]=0', `Base case: you already start at position 0, so dp[0] = 0 instructions.`, 0, null);
+  emit('BASE', 'dp[0]=0', `Base case: you already start at position 0, so dp[0] = 0 instructions.`, { t: 0, from: null });
 
   for (let t = 1; t <= target; t++) {
     let best = INF;
@@ -81,25 +69,12 @@ function record({ target }: RaceInput): Frame<RaceState>[] {
 
     dp[t] = best;
     const reused = dp[bestFrom as number];
-    emit(
-      'FILL',
-      `dp[${t}]=${best}`,
-      bestFrom === 0
+    emit('FILL', `dp[${t}]=${best}`, bestFrom === 0
         ? `Position ${t} = 2^${k} − 1 exactly, so ${k} accelerations (${'A'.repeat(k)}) land on it: dp[${t}] = ${best}.`
-        : `Best plan for position ${t}: a sequence of A/R moves reuses dp[${bestFrom}] (=${reused}); the extra instructions bring the total to dp[${t}] = ${best}.`,
-      t,
-      bestFrom,
-    );
+        : `Best plan for position ${t}: a sequence of A/R moves reuses dp[${bestFrom}] (=${reused}); the extra instructions bring the total to dp[${t}] = ${best}.`, { t: t, from: bestFrom });
   }
 
-  emit(
-    'DONE',
-    `${dp[target]} instructions`,
-    `The table is full. dp[${target}] = ${dp[target]}, so the fewest A/R instructions to reach ${target} is ${dp[target]}.`,
-    target,
-    null,
-    'good',
-  );
+  emit('DONE', `${dp[target]} instructions`, `The table is full. dp[${target}] = ${dp[target]}, so the fewest A/R instructions to reach ${target} is ${dp[target]}.`, { t: target, from: null , done: true }, 'good');
   return frames;
 }
 

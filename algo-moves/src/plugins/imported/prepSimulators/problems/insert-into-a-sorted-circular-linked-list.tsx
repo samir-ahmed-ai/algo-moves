@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,28 +23,15 @@ interface InsertState {
 }
 
 function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
-  const frames: Frame<InsertState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<InsertState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<InsertState>(() => ({
         chain: list,
         insertVal,
         prev: null,
         cur: null,
         reason: '',
         inserted: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   // Empty-list case: the new node points to itself.
   if (list.length === 0) {

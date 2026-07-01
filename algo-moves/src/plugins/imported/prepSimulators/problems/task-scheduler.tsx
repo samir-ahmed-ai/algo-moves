@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,21 +22,10 @@ interface TaskSchedulerState {
   done: boolean;
 }
 
-function record({ tasks, n }: TaskSchedulerInput): Frame<TaskSchedulerState>[] {
-  const frames: Frame<TaskSchedulerState>[] = [];
-  const freq = new Map<string, number>();
+function record({ tasks, n }: TaskSchedulerInput): Frame<TaskSchedulerState>[] {  const freq = new Map<string, number>();
   let maxF = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<TaskSchedulerState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<TaskSchedulerState>(() => ({
         tasks,
         n,
         i: null,
@@ -44,10 +34,8 @@ function record({ tasks, n }: TaskSchedulerInput): Frame<TaskSchedulerState>[] {
         cntMax: null,
         idle: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

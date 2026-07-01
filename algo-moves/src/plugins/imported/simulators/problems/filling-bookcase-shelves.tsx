@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -22,31 +23,19 @@ const INF = 1 << 30;
 function record({ books, shelfWidth }: ShelfInput): Frame<ShelfState>[] {
   const n = books.length;
   const dp = new Array<number>(n + 1).fill(INF);
-  const frames: Frame<ShelfState>[] = [];
+  const { emit, frames } = createRecorder<ShelfState>(() => ({
+        books: books,
+        shelfWidth: shelfWidth,
+        dp: dp.slice(),
+        i: null,
+        from: null,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    from: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { books, shelfWidth, dp: dp.slice(), i, from, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `${n} books, width ${shelfWidth}`,
-    `Filling Bookcase Shelves: place the ${n} books in order on shelves of width ${shelfWidth}, minimizing total height. dp[i] = the least total height to shelve the first i books, built up from i = 0.`,
-    null,
-    null,
-  );
+  emit('INIT', `${n} books, width ${shelfWidth}`, `Filling Bookcase Shelves: place the ${n} books in order on shelves of width ${shelfWidth}, minimizing total height. dp[i] = the least total height to shelve the first i books, built up from i = 0.`, { i: null, from: null });
 
   dp[0] = 0;
-  emit('BASE', 'dp[0]=0', `Base case: shelving 0 books needs no height. dp[0] = 0.`, 0, null);
+  emit('BASE', 'dp[0]=0', `Base case: shelving 0 books needs no height. dp[0] = 0.`, { i: 0, from: null });
 
   for (let i = 1; i <= n; i++) {
     let w = 0;
@@ -66,23 +55,10 @@ function record({ books, shelfWidth }: ShelfInput): Frame<ShelfState>[] {
     dp[i] = best;
     const start = (bestFrom as number) + 1; // first book index (1-based) on the last shelf
     const shelfH = best - dp[bestFrom as number];
-    emit(
-      'FILL',
-      `dp[${i}]=${best}`,
-      `Best for the first ${i} books: put books ${start}..${i} on the last shelf (height ${shelfH}) on top of dp[${bestFrom}] (=${dp[bestFrom as number]}), so dp[${i}] = ${dp[bestFrom as number]} + ${shelfH} = ${best}.`,
-      i,
-      bestFrom,
-    );
+    emit('FILL', `dp[${i}]=${best}`, `Best for the first ${i} books: put books ${start}..${i} on the last shelf (height ${shelfH}) on top of dp[${bestFrom}] (=${dp[bestFrom as number]}), so dp[${i}] = ${dp[bestFrom as number]} + ${shelfH} = ${best}.`, { i: i, from: bestFrom });
   }
 
-  emit(
-    'DONE',
-    `${dp[n]} height`,
-    `The table is full. dp[${n}] = ${dp[n]}, so the minimum total shelf height for all ${n} books is ${dp[n]}.`,
-    n,
-    null,
-    'good',
-  );
+  emit('DONE', `${dp[n]} height`, `The table is full. dp[${n}] = ${dp[n]}, so the minimum total shelf height for all ${n} books is ${dp[n]}.`, { i: n, from: null , done: true }, 'good');
   return frames;
 }
 

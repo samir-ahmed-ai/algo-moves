@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
@@ -34,66 +35,38 @@ function key(r: number, c: number): string {
 
 function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[] {
   const m = board.length;
-  const n = board[0].length;
-  const frames: Frame<WordSearchIIState>[] = [];
-  const onPath = new Set<string>();
+  const n = board[0].length;  const onPath = new Set<string>();
   const path: [number, number][] = [];
   const found: string[] = [];
   let word = '';
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: [number, number] | null,
-    done = false,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        board,
+  const { emit, frames } = createRecorder<WordSearchIIState>(() => ({
+        board: board,
         path: path.map((p) => [p[0], p[1]] as [number, number]),
-        cur,
         matched: path.length,
-        word,
+        word: word,
         found: found.slice(),
-        done,
-      },
-    });
+        cur: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `${m}×${n} board · ${words.length} words`,
-    `Find which of [${words.map((w) => `"${w}"`).join(', ')}] appear in the board. The real solution builds a trie and runs one trie-guided DFS; here we DFS each word in turn (same in-place marking) and collect the ones we can spell.`,
-    null,
-  );
+  emit('INIT', `${m}×${n} board · ${words.length} words`, `Find which of [${words.map((w) => `"${w}"`).join(', ')}] appear in the board. The real solution builds a trie and runs one trie-guided DFS; here we DFS each word in turn (same in-place marking) and collect the ones we can spell.`, { cur: null });
 
   const dfs = (r: number, c: number, idx: number): boolean => {
     if (r < 0 || r >= m || c < 0 || c >= n) return false;
     if (onPath.has(key(r, c))) return false;
     if (board[r][c] !== word[idx]) {
-      emit(
-        'MISMATCH',
-        `'${r >= 0 && r < m && c >= 0 && c < n ? board[r][c] : '·'}' ≠ '${word[idx]}'`,
-        `At (${r}, ${c}) the letter '${board[r][c]}' doesn't match '${word[idx]}' (position ${idx} of "${word}"). Prune.`,
-        [r, c],
-      );
+      emit('MISMATCH', `'${r >= 0 && r < m && c >= 0 && c < n ? board[r][c] : '·'}' ≠ '${word[idx]}'`, `At (${r}, ${c}) the letter '${board[r][c]}' doesn't match '${word[idx]}' (position ${idx} of "${word}"). Prune.`, { cur: [r, c] });
       return false;
     }
 
     onPath.add(key(r, c));
     path.push([r, c]);
-    emit(
-      'MATCH',
-      `'${board[r][c]}' == '${word[idx]}'`,
-      `At (${r}, ${c}) '${board[r][c]}' matches '${word[idx]}' (position ${idx} of "${word}"). Mark it — ${idx + 1}/${word.length} letters matched.`,
-      [r, c],
-    );
+    emit('MATCH', `'${board[r][c]}' == '${word[idx]}'`, `At (${r}, ${c}) '${board[r][c]}' matches '${word[idx]}' (position ${idx} of "${word}"). Mark it — ${idx + 1}/${word.length} letters matched.`, { cur: [r, c] });
 
     if (idx + 1 === word.length) {
       if (!found.includes(word)) found.push(word);
-      emit('FOUND', `found "${word}"`, `Whole word "${word}" spelled out — add it to the results.`, [r, c], false, 'good');
+      emit('FOUND', `found "${word}"`, `Whole word "${word}" spelled out — add it to the results.`, { cur: [r, c], done: false }, 'good');
       return true;
     }
 
@@ -103,12 +76,7 @@ function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[]
 
     onPath.delete(key(r, c));
     path.pop();
-    emit(
-      'BACKTRACK',
-      `undo (${r},${c})`,
-      `No neighbour of (${r}, ${c}) continued "${word}". Backtrack: unmark (${r}, ${c}) and return to position ${idx}.`,
-      [r, c],
-    );
+    emit('BACKTRACK', `undo (${r},${c})`, `No neighbour of (${r}, ${c}) continued "${word}". Backtrack: unmark (${r}, ${c}) and return to position ${idx}.`, { cur: [r, c] });
     return false;
   };
 
@@ -116,12 +84,12 @@ function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[]
     word = w;
     onPath.clear();
     path.length = 0;
-    emit('WORD', `search "${w}"`, `Now search the board for "${w}".`, null);
+    emit('WORD', `search "${w}"`, `Now search the board for "${w}".`, { cur: null });
     let hit = false;
     outer: for (let r = 0; r < m; r++) {
       for (let c = 0; c < n; c++) {
         if (board[r][c] === w[0]) {
-          emit('TRY', `start (${r},${c})`, `Try starting "${w}" at (${r}, ${c}) — '${board[r][c]}' matches first letter '${w[0]}'.`, [r, c]);
+          emit('TRY', `start (${r},${c})`, `Try starting "${w}" at (${r}, ${c}) — '${board[r][c]}' matches first letter '${w[0]}'.`, { cur: [r, c] });
           if (dfs(r, c, 0)) {
             hit = true;
             break outer;
@@ -132,19 +100,12 @@ function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[]
     onPath.clear();
     path.length = 0;
     if (!hit) {
-      emit('ABSENT', `no "${w}"`, `No starting cell could spell "${w}" — it is not in the board.`, null, false, 'bad');
+      emit('ABSENT', `no "${w}"`, `No starting cell could spell "${w}" — it is not in the board.`, { cur: null, done: false }, 'bad');
     }
   }
 
   word = '';
-  emit(
-    'DONE',
-    `${found.length} found`,
-    `All words checked. Present words = [${found.map((w) => `"${w}"`).join(', ')}].`,
-    null,
-    true,
-    'good',
-  );
+  emit('DONE', `${found.length} found`, `All words checked. Present words = [${found.map((w) => `"${w}"`).join(', ')}].`, { cur: null, done: true }, 'good');
   return frames;
 }
 

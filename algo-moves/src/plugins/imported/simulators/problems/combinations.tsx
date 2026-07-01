@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -17,43 +18,39 @@ interface CombState {
   done: boolean;
 }
 
-function record({ n, k }: CombInput): Frame<CombState>[] {
-  const frames: Frame<CombState>[] = [];
-  const cur: number[] = [];
+function record({ n, k }: CombInput): Frame<CombState>[] {  const cur: number[] = [];
   const results: number[][] = [];
 
-  const emit = (type: string, note: string, caption: string, pick: number | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { n, k, cur: cur.slice(), pick, results: results.map((r) => r.slice()), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<CombState>(() => ({
+        n: n,
+        k: k,
+        cur: cur.slice(),
+        results: results.map((r) => r.slice()),
+        pick: null,
+        done: false
+      }));
 
   const fmt = (xs: number[]) => `[${xs.join(', ')}]`;
 
-  emit(
-    'INIT',
-    `${n} choose ${k}`,
-    `Generate every combination of ${k} numbers from 1..${n}. Backtrack: pick numbers in increasing order, recurse, then undo the last pick to explore the next branch. There are C(${n},${k}) combinations.`,
-    null,
-  );
+  emit('INIT', `${n} choose ${k}`, `Generate every combination of ${k} numbers from 1..${n}. Backtrack: pick numbers in increasing order, recurse, then undo the last pick to explore the next branch. There are C(${n},${k}) combinations.`, { pick: null });
 
   const backtrack = (start: number) => {
     if (cur.length === k) {
       results.push(cur.slice());
-      emit('RECORD', `+${fmt(cur)}`, `cur has ${k} numbers — record the combination ${fmt(cur)} (${results.length} so far).`, null, 'good');
+      emit('RECORD', `+${fmt(cur)}`, `cur has ${k} numbers — record the combination ${fmt(cur)} (${results.length} so far).`, { pick: null }, 'good');
       return;
     }
     for (let v = start; v <= n; v++) {
       cur.push(v);
-      emit('CHOOSE', `pick ${v}`, `Pick ${v} and recurse on values greater than ${v}. cur = ${fmt(cur)}.`, v);
+      emit('CHOOSE', `pick ${v}`, `Pick ${v} and recurse on values greater than ${v}. cur = ${fmt(cur)}.`, { pick: v });
       backtrack(v + 1);
       cur.pop();
-      emit('BACKTRACK', `undo ${v}`, `Backtrack: remove ${v} so the next branch tries a different value. cur = ${fmt(cur)}.`, v);
+      emit('BACKTRACK', `undo ${v}`, `Backtrack: remove ${v} so the next branch tries a different value. cur = ${fmt(cur)}.`, { pick: v });
     }
   };
 
   backtrack(1);
-  emit('DONE', `${results.length} combos`, `All branches explored — ${results.length} combinations of ${k} from 1..${n}.`, null, 'good');
+  emit('DONE', `${results.length} combos`, `All branches explored — ${results.length} combinations of ${k} from 1..${n}.`, { pick: null , done: true }, 'good');
   return frames;
 }
 

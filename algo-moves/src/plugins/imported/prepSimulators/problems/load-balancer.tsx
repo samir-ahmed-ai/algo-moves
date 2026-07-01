@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -22,24 +23,17 @@ interface LbState {
   done: boolean;
 }
 
-function record({ servers: init, ops }: LbInput): Frame<LbState>[] {
-  const frames: Frame<LbState>[] = [];
-  let servers = [...init];
+function record({ servers: init, ops }: LbInput): Frame<LbState>[] {  let servers = [...init];
   let index = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<LbState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LbState>(() => ({
         servers: servers.slice(),
         index,
         op: '',
         result: '',
         ok: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

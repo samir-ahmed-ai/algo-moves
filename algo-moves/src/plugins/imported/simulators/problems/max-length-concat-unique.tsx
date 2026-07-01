@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -17,9 +18,7 @@ interface MaxLenState {
   done: boolean;
 }
 
-function record({ arr }: MaxLenInput): Frame<MaxLenState>[] {
-  const frames: Frame<MaxLenState>[] = [];
-  const selected: number[] = [];
+function record({ arr }: MaxLenInput): Frame<MaxLenState>[] {  const selected: number[] = [];
   let best = 0;
 
   // Eligibility: a string with internal duplicate chars can never be used.
@@ -27,36 +26,21 @@ function record({ arr }: MaxLenInput): Frame<MaxLenState>[] {
 
   const lenOf = () => selected.reduce((sum, i) => sum + arr[i].length, 0);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    consider: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        arr,
+  const { emit, frames } = createRecorder<MaxLenState>(() => ({
+        arr: arr,
         selected: selected.slice(),
-        consider,
         curLen: lenOf(),
-        best,
+        best: best,
         valid: valid.slice(),
-        done: type === 'DONE',
-      },
-    });
+        consider: null,
+        done: false
+      }));
 
   const dupList = arr
     .map((s, i) => (valid[i] ? null : `"${s}"`))
     .filter((x): x is string => x !== null);
 
-  emit(
-    'INIT',
-    `${arr.length} strings`,
-    `Build the longest concatenation of these strings whose combined characters are all unique. Backtrack: include a string only if its own chars are unique and disjoint from the current selection.${dupList.length ? ` (${dupList.join(', ')} ${dupList.length === 1 ? 'has' : 'have'} a repeated letter, so ${dupList.length === 1 ? 'it is' : 'they are'} never usable.)` : ''}`,
-    null,
-  );
+  emit('INIT', `${arr.length} strings`, `Build the longest concatenation of these strings whose combined characters are all unique. Backtrack: include a string only if its own chars are unique and disjoint from the current selection.${dupList.length ? ` (${dupList.join(', ')} ${dupList.length === 1 ? 'has' : 'have'} a repeated letter, so ${dupList.length === 1 ? 'it is' : 'they are'} never usable.)` : ''}`, { consider: null });
 
   const usedChars = (): Set<string> => {
     const set = new Set<string>();
@@ -69,61 +53,29 @@ function record({ arr }: MaxLenInput): Frame<MaxLenState>[] {
     const cur = lenOf();
     if (cur > best) {
       best = cur;
-      emit(
-        'BEST',
-        `best=${best}`,
-        `Selection ${fmt(selected, arr)} totals ${cur} unique chars — new best length ${best}.`,
-        null,
-        'good',
-      );
+      emit('BEST', `best=${best}`, `Selection ${fmt(selected, arr)} totals ${cur} unique chars — new best length ${best}.`, { consider: null }, 'good');
     }
     for (let i = start; i < arr.length; i++) {
       if (!valid[i]) {
-        emit(
-          'SKIP',
-          `skip "${arr[i]}"`,
-          `"${arr[i]}" repeats a letter, so it can never be part of a unique concatenation — skip it.`,
-          i,
-        );
+        emit('SKIP', `skip "${arr[i]}"`, `"${arr[i]}" repeats a letter, so it can never be part of a unique concatenation — skip it.`, { consider: i });
         continue;
       }
       const taken = usedChars();
       const overlap = [...arr[i]].filter((ch) => taken.has(ch));
       if (overlap.length > 0) {
-        emit(
-          'CONFLICT',
-          `clash "${arr[i]}"`,
-          `"${arr[i]}" shares '${overlap[0]}' with the current selection ${fmt(selected, arr)} — skip it.`,
-          i,
-        );
+        emit('CONFLICT', `clash "${arr[i]}"`, `"${arr[i]}" shares '${overlap[0]}' with the current selection ${fmt(selected, arr)} — skip it.`, { consider: i });
         continue;
       }
       selected.push(i);
-      emit(
-        'INCLUDE',
-        `+"${arr[i]}"`,
-        `"${arr[i]}" is disjoint from the selection — include it. Selection ${fmt(selected, arr)}, length ${lenOf()}.`,
-        i,
-      );
+      emit('INCLUDE', `+"${arr[i]}"`, `"${arr[i]}" is disjoint from the selection — include it. Selection ${fmt(selected, arr)}, length ${lenOf()}.`, { consider: i });
       bt(i + 1);
       selected.pop();
-      emit(
-        'BACKTRACK',
-        `−"${arr[i]}"`,
-        `Backtrack: drop "${arr[i]}" to explore other branches. Selection ${fmt(selected, arr)}.`,
-        i,
-      );
+      emit('BACKTRACK', `−"${arr[i]}"`, `Backtrack: drop "${arr[i]}" to explore other branches. Selection ${fmt(selected, arr)}.`, { consider: i });
     }
   };
 
   bt(0);
-  emit(
-    'DONE',
-    `max=${best}`,
-    `All subsets explored — the longest concatenation with all-unique characters has length ${best}.`,
-    null,
-    'good',
-  );
+  emit('DONE', `max=${best}`, `All subsets explored — the longest concatenation with all-unique characters has length ${best}.`, { consider: null , done: true }, 'good');
   return frames;
 }
 

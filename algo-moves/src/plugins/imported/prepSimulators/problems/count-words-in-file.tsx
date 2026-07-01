@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -20,21 +21,15 @@ function countWords(text: string): string[] {
 }
 
 function record({ text }: CountWordsInput): Frame<CountWordsState>[] {
-  const words = countWords(text);
-  const frames: Frame<CountWordsState>[] = [];
-  let count = 0;
+  const words = countWords(text);  let count = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<CountWordsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { text, words, wordIdx: null, count, done: false, ...s },
-    });
+  const { emit, frames } = createRecorder<CountWordsState>(() => ({
+        text,
+        words,
+        wordIdx: null,
+        count,
+        done: false
+      }));
 
   emit(
     'INIT',

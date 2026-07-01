@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -30,23 +31,12 @@ function signature(word: string): string {
   return word.split('').sort().join('');
 }
 
-function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {
-  const frames: Frame<GroupAnagramsState>[] = [];
-  const groups = new Map<string, string[]>();
+function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {  const groups = new Map<string, string[]>();
 
   const snapshotGroups = (): GroupEntry[] =>
     [...groups.entries()].map(([key, words]) => ({ key, words: [...words] }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<GroupAnagramsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<GroupAnagramsState>(() => ({
         strs,
         wi: null,
         word: '',
@@ -55,10 +45,8 @@ function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {
         groups: snapshotGroups(),
         hitKey: null,
         isNewGroup: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

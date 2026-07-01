@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -98,53 +99,30 @@ function layout(king: string, members: Map<string, Member>): {
 }
 
 function record({ lines }: MonarchyInput): Frame<MonarchyState>[] {
-  const frames: Frame<MonarchyState>[] = [];
   const { members, king } = buildMonarchy(lines);
+  const visited: number[] = [];
+  const order: string[] = [];
+  let tree: (string | null)[] = [];
+
+  const { emit, frames } = createRecorder<MonarchyState>(() => ({
+    tree,
+    active: null,
+    visited: visited.slice(),
+    stack: [],
+    order: order.slice(),
+    done: false,
+  }));
 
   if (king === null) {
-    frames.push({
-      move: {
-        type: 'DONE',
-        note: 'no monarch',
-        caption: 'No monarch could be parsed from the input lines, so the succession order is empty.',
-        tone: 'bad',
-      },
-      state: { tree: [], active: null, visited: [], stack: [], order: [], done: true },
-    });
+    emit('DONE', 'no monarch', 'No monarch could be parsed from the input lines, so the succession order is empty.', { tree: [], active: null, visited: [], stack: [], order: [], done: true }, 'bad');
     return frames;
   }
 
-  const { tree, indexOf } = layout(king, members);
-  const visited: number[] = [];
-  const order: string[] = [];
+  const laid = layout(king, members);
+  tree = laid.tree;
+  const { indexOf } = laid;
 
-  const snap = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    stack: string[],
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        active,
-        visited: visited.slice(),
-        stack: stack.slice(),
-        order: order.slice(),
-        done: type === 'DONE',
-      },
-    });
-
-  snap(
-    'INIT',
-    `monarch ${king}`,
-    `Monarchy succession: the parent→children lines are parsed into a family tree rooted at the monarch "${king}". An iterative pre-order walk lists each ruler before their descendants — a stack drives it, pushing successors in reverse so the eldest is popped first.`,
-    0,
-    [king],
-  );
+  emit('INIT', `monarch ${king}`, `Monarchy succession: the parent→children lines are parsed into a family tree rooted at the monarch "${king}". An iterative pre-order walk lists each ruler before their descendants — a stack drives it, pushing successors in reverse so the eldest is popped first.`, { active: 0, stack: [king] });
 
   // Iterative pre-order, mirroring preorderSuccessors: pop, emit, push successors reversed.
   const stack: string[] = [king];
@@ -155,40 +133,20 @@ function record({ lines }: MonarchyInput): Frame<MonarchyState>[] {
     visited.push(idx);
 
     const succ = members.get(curr)?.successors ?? [];
-    snap(
-      'VISIT',
-      curr,
-      `Pop "${curr}" off the stack and add it to the succession order (position ${order.length}). ${
+    emit('VISIT', curr, `Pop "${curr}" off the stack and add it to the succession order (position ${order.length}). ${
         succ.length === 0
           ? `"${curr}" has no successors, so nothing new is pushed.`
           : `Its successors are [${succ.join(', ')}] — push them in reverse so "${succ[0]}" ends up on top and is crowned next.`
-      }`,
-      idx,
-      stack,
-      'good',
-    );
+      }`, { active: idx, stack: stack }, 'good');
 
     for (let i = succ.length - 1; i >= 0; i--) stack.push(succ[i]);
 
     if (succ.length > 0) {
-      snap(
-        'PUSH',
-        `+${succ.length}`,
-        `After pushing the successors of "${curr}" reversed, the stack (top→bottom) is [${[...stack].reverse().join(', ')}]. The next pop takes the top, "${stack[stack.length - 1]}".`,
-        idx,
-        stack,
-      );
+      emit('PUSH', `+${succ.length}`, `After pushing the successors of "${curr}" reversed, the stack (top→bottom) is [${[...stack].reverse().join(', ')}]. The next pop takes the top, "${stack[stack.length - 1]}".`, { active: idx, stack: stack });
     }
   }
 
-  snap(
-    'DONE',
-    `${order.length} rulers`,
-    `The stack is empty — every member has been listed. The full line of succession is: ${order.join(' → ')}.`,
-    null,
-    [],
-    'good',
-  );
+  emit('DONE', `${order.length} rulers`, `The stack is empty — every member has been listed. The full line of succession is: ${order.join(' → ')}.`, { active: null, stack: [] , done: true }, 'good');
 
   return frames;
 }

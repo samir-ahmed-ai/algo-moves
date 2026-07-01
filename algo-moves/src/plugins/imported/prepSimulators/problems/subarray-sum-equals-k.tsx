@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -20,22 +21,11 @@ interface SubarraySumState {
   done: boolean;
 }
 
-function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {
-  const frames: Frame<SubarraySumState>[] = [];
-  const prefixMap = new Map<number, number>([[0, 1]]);
+function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {  const prefixMap = new Map<number, number>([[0, 1]]);
   let sum = 0;
   let cnt = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SubarraySumState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SubarraySumState>(() => ({
         nums,
         k,
         i: null,
@@ -44,10 +34,8 @@ function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {
         prefix: [...prefixMap.entries()],
         added: null,
         cnt,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

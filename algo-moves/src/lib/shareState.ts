@@ -36,7 +36,7 @@ export function normalizeShareState(s: ShareState): ShareState {
 
 export function encodeShare(s: ShareState): string {
   try {
-    return btoa(encodeURIComponent(JSON.stringify(s)));
+    return btoa(encodeURIComponent(JSON.stringify(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   } catch {
     return '';
   }
@@ -44,26 +44,45 @@ export function encodeShare(s: ShareState): string {
 
 export function decodeShare(raw: string): ShareState | null {
   try {
-    return JSON.parse(decodeURIComponent(atob(raw))) as ShareState;
+    const b64 = raw.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = b64.length % 4 === 0 ? '' : '='.repeat(4 - (b64.length % 4));
+    return JSON.parse(decodeURIComponent(atob(b64 + pad))) as ShareState;
   } catch {
-    return null;
+    try {
+      return JSON.parse(decodeURIComponent(atob(raw))) as ShareState;
+    } catch {
+      return null;
+    }
   }
 }
 
 export function readShareFromUrl(): ShareState | null {
   if (typeof location === 'undefined') return null;
   const m = location.hash.match(/[#&]s=([^&]+)/);
-  return m ? decodeShare(m[1]) : null;
+  const raw = m?.[1];
+  if (!raw) return null;
+  const decoded = decodeShare(raw);
+  return decoded ? normalizeShareState(decoded) : null;
 }
 
 export function buildShareUrl(s: ShareState): string {
   return `${location.origin}${location.pathname}#s=${encodeShare(s)}`;
 }
 
+/** Merge workspace share state into the current hash, preserving route segments like #mobile. */
+function mergeShareHash(currentHash: string, encoded: string): string {
+  const sharePart = `s=${encoded}`;
+  if (!currentHash || currentHash === '#') return `#${sharePart}`;
+  const raw = currentHash.startsWith('#') ? currentHash.slice(1) : currentHash;
+  const parts = raw.split('&').filter((p) => !p.startsWith('s='));
+  if (parts.length === 0 || (parts.length === 1 && parts[0].startsWith('s='))) return `#${sharePart}`;
+  return `#${parts.join('&')}&${sharePart}`;
+}
+
 /** Keep the URL hash in sync with workspace state (refresh restores the same view). */
 export function writeShareToUrl(s: ShareState) {
   if (typeof location === 'undefined') return;
-  const hash = `#s=${encodeShare(s)}`;
+  const hash = mergeShareHash(location.hash, encodeShare(s));
   const next = `${location.pathname}${location.search}${hash}`;
   const cur = `${location.pathname}${location.search}${location.hash}`;
   if (cur !== next) history.replaceState(null, '', next);

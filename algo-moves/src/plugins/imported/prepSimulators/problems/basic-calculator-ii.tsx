@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -26,23 +27,12 @@ function isOp(c: string): c is Op {
   return (OPS as readonly string[]).includes(c);
 }
 
-function record({ s }: CalcInput): Frame<CalcState>[] {
-  const frames: Frame<CalcState>[] = [];
-  const chars = s.split('');
+function record({ s }: CalcInput): Frame<CalcState>[] {  const chars = s.split('');
   const stack: number[] = [];
   let num = 0;
   let op: Op = '+';
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<CalcState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<CalcState>(() => ({
         chars,
         i: null,
         num,
@@ -50,10 +40,8 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
         stack: stack.slice(),
         applied: null,
         result: null,
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

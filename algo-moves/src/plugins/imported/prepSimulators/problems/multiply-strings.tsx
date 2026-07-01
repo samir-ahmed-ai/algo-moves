@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -23,22 +24,11 @@ interface MultiplyState {
   done: boolean;
 }
 
-function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
-  const frames: Frame<MultiplyState>[] = [];
-  const m = num1.length;
+function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {  const m = num1.length;
   const n = num2.length;
   const pos = new Array<number>(m + n).fill(0);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MultiplyState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MultiplyState>(() => ({
         num1,
         num2,
         pos: pos.slice(),
@@ -49,10 +39,8 @@ function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
         mul: null,
         sum: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

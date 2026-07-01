@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -47,9 +48,7 @@ function build(nodes: NodeSpec[]): MNode | null {
   return ms[0];
 }
 
-function record({ nodes }: FlattenInput): Frame<FlattenState>[] {
-  const frames: Frame<FlattenState>[] = [];
-  const head = build(nodes);
+function record({ nodes }: FlattenInput): Frame<FlattenState>[] {  const head = build(nodes);
 
   // The flattened order is exactly DFS preorder (node, then child subtree, then
   // the saved next). Precompute it so the View can show each value in its final
@@ -69,28 +68,20 @@ function record({ nodes }: FlattenInput): Frame<FlattenState>[] {
   const allVals = order.map((nd) => nd.val);
   const total = order.length;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<FlattenState>,
-    tone?: 'good' | 'bad',
-  ) => {
-    const linkedCount = s.linkedCount ?? 0;
-    const chain: (number | string)[] = allVals.map((v, i) => (i < linkedCount ? v : '·'));
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        chain,
+  const { emit, frames } = createRecorder<FlattenState>(() => ({
+        chain: allVals.map(() => '·'),
         prevPos: null,
         curPos: null,
-        linkedCount,
+        linkedCount: 0,
         descending: false,
-        done: false,
-        ...s,
-      },
-    });
-  };
+        done: false
+      }), {
+    merge: (base, partial) => {
+      const linkedCount = partial.linkedCount ?? base.linkedCount;
+      const chain = allVals.map((v, i) => (i < linkedCount ? v : '·'));
+      return { ...base, ...partial, chain, linkedCount };
+    },
+  });
 
   if (!head) {
     emit('DONE', 'empty', 'The list is empty, so the flattened list is also empty.', { done: true }, 'good');

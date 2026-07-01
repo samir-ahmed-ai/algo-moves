@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -21,32 +22,19 @@ interface PrimeState {
 // Faithful port of primeNumber(n int) bool:
 //   n<2 -> false; n even -> n==2; test odd i from 3 while i*i<=n; n%i==0 -> false; else true.
 function record({ n }: PrimeInput): Frame<PrimeState>[] {
-  const frames: Frame<PrimeState>[] = [];
-
   // Precompute the odd divisor candidates 3,5,7… while i*i<=n so the board can show them all.
   const divisors: number[] = [];
   for (let i = 3; i * i <= n; i += 2) divisors.push(i);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PrimeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PrimeState>(() => ({
         n,
         divisors,
         i: null,
         divisor: null,
         remainder: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

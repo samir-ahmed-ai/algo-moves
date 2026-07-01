@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -20,24 +21,19 @@ function record({ s, t }: DSInput): Frame<DSState>[] {
   const m = s.length;
   const n = t.length;
   const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(-1));
-  const frames: Frame<DSState>[] = [];
+  const { emit, frames } = createRecorder<DSState>(() => ({
+        s: s,
+        t: t,
+        dp: dp.map((r) => r.slice()),
+        cur: null,
+        done: false
+      }));
 
-  const emit = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { s, t, dp: dp.map((r) => r.slice()), cur, done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    `"${s}" / "${t}"`,
-    `Distinct Subsequences: count how many distinct subsequences of "${s}" equal "${t}". dp[i][j] is the number of ways the first i chars of "${s}" can form the first j chars of "${t}", built bottom-up.`,
-    null,
-  );
+  emit('INIT', `"${s}" / "${t}"`, `Distinct Subsequences: count how many distinct subsequences of "${s}" equal "${t}". dp[i][j] is the number of ways the first i chars of "${s}" can form the first j chars of "${t}", built bottom-up.`, { cur: null });
 
   for (let i = 0; i <= m; i++) {
     dp[i][0] = 1;
-    emit('BASE', `dp[${i}][0]=1`, `Base case: the empty target "" can always be formed exactly 1 way (pick nothing), so dp[${i}][0] = 1.`, [i, 0]);
+    emit('BASE', `dp[${i}][0]=1`, `Base case: the empty target "" can always be formed exactly 1 way (pick nothing), so dp[${i}][0] = 1.`, { cur: [i, 0] });
   }
 
   for (let i = 1; i <= m; i++) {
@@ -48,31 +44,15 @@ function record({ s, t }: DSInput): Frame<DSState>[] {
       if (cs === ct) {
         const take = dp[i - 1][j - 1];
         dp[i][j] = skip + take;
-        emit(
-          'FILL',
-          `dp[${i}][${j}]=${dp[i][j]}`,
-          `'${cs}' == '${ct}': either skip this '${cs}' (dp[${i - 1}][${j}]=${skip}) or use it to match (dp[${i - 1}][${j - 1}]=${take}). dp[${i}][${j}] = ${skip} + ${take} = ${dp[i][j]}.`,
-          [i, j],
-        );
+        emit('FILL', `dp[${i}][${j}]=${dp[i][j]}`, `'${cs}' == '${ct}': either skip this '${cs}' (dp[${i - 1}][${j}]=${skip}) or use it to match (dp[${i - 1}][${j - 1}]=${take}). dp[${i}][${j}] = ${skip} + ${take} = ${dp[i][j]}.`, { cur: [i, j] });
       } else {
         dp[i][j] = skip;
-        emit(
-          'FILL',
-          `dp[${i}][${j}]=${dp[i][j]}`,
-          `'${cs}' != '${ct}': this '${cs}' cannot match '${ct}', so just carry from above. dp[${i}][${j}] = dp[${i - 1}][${j}] = ${skip}.`,
-          [i, j],
-        );
+        emit('FILL', `dp[${i}][${j}]=${dp[i][j]}`, `'${cs}' != '${ct}': this '${cs}' cannot match '${ct}', so just carry from above. dp[${i}][${j}] = dp[${i - 1}][${j}] = ${skip}.`, { cur: [i, j] });
       }
     }
   }
 
-  emit(
-    'DONE',
-    `${dp[m][n]} ways`,
-    `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so "${s}" contains ${dp[m][n]} distinct subsequence(s) equal to "${t}".`,
-    [m, n],
-    'good',
-  );
+  emit('DONE', `${dp[m][n]} ways`, `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so "${s}" contains ${dp[m][n]} distinct subsequence(s) equal to "${t}".`, { cur: [m, n] , done: true }, 'good');
   return frames;
 }
 

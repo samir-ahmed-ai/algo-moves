@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -28,69 +29,36 @@ function record({ adj, pos, src, dest }: PPInput): Frame<PPState>[] {
   const visited = new Array<boolean>(n).fill(false);
   const path: number[] = [src];
   const results: number[][] = [];
-  const frames: Frame<PPState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    edge: [number, number] | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
-        src,
-        dest,
+  const { emit, frames } = createRecorder<PPState>(() => ({
+        adj: adj,
+        pos: pos,
+        src: src,
+        dest: dest,
         path: path.slice(),
         visited: visited.slice(),
-        edge,
         results: results.map((p) => p.slice()),
-        done: type === 'DONE',
-      },
-    });
+        edge: null,
+        done: false
+      }));
 
   visited[src] = true;
-  emit(
-    'INIT',
-    `start ${src}`,
-    `Enumerate every directed path from source ${src} to destination ${dest}. We do a depth-first search, pushing each node onto the current path and marking it visited; when we reach ${dest} we snapshot the path, then backtrack to explore other branches.`,
-    null,
-  );
+  emit('INIT', `start ${src}`, `Enumerate every directed path from source ${src} to destination ${dest}. We do a depth-first search, pushing each node onto the current path and marking it visited; when we reach ${dest} we snapshot the path, then backtrack to explore other branches.`, { edge: null });
 
   const dfs = (v: number): void => {
     if (v === dest) {
       results.push(path.slice());
-      emit(
-        'FOUND',
-        `path #${results.length}`,
-        `Reached destination ${dest}. Record the completed path [${path.join(' → ')}] — that is path #${results.length}.`,
-        null,
-        'good',
-      );
+      emit('FOUND', `path #${results.length}`, `Reached destination ${dest}. Record the completed path [${path.join(' → ')}] — that is path #${results.length}.`, { edge: null }, 'good');
       return;
     }
     for (const nb of adj[v]) {
       if (!visited[nb]) {
         visited[nb] = true;
         path.push(nb);
-        emit(
-          'ENTER',
-          `${v}→${nb}`,
-          `From node ${v}, follow the edge to unvisited neighbour ${nb}. The current path grows to [${path.join(' → ')}].`,
-          [v, nb],
-        );
+        emit('ENTER', `${v}→${nb}`, `From node ${v}, follow the edge to unvisited neighbour ${nb}. The current path grows to [${path.join(' → ')}].`, { edge: [v, nb] });
         dfs(nb);
         path.pop();
         visited[nb] = false;
-        emit(
-          'BACKTRACK',
-          `pop ${nb}`,
-          `Exhausted everything reachable through ${nb}; backtrack by popping it. The path shrinks back to [${path.join(' → ')}] and ${nb} becomes available again.`,
-          [v, nb],
-        );
+        emit('BACKTRACK', `pop ${nb}`, `Exhausted everything reachable through ${nb}; backtrack by popping it. The path shrinks back to [${path.join(' → ')}] and ${nb} becomes available again.`, { edge: [v, nb] });
       }
     }
   };
@@ -98,13 +66,7 @@ function record({ adj, pos, src, dest }: PPInput): Frame<PPState>[] {
   dfs(src);
 
   const list = results.map((p) => `[${p.join('→')}]`).join(', ');
-  emit(
-    'DONE',
-    `${results.length} paths`,
-    `Search complete. There are ${results.length} directed paths from ${src} to ${dest}: ${list}.`,
-    null,
-    'good',
-  );
+  emit('DONE', `${results.length} paths`, `Search complete. There are ${results.length} directed paths from ${src} to ${dest}: ${list}.`, { edge: null , done: true }, 'good');
   return frames;
 }
 

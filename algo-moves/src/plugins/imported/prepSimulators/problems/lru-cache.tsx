@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -27,9 +28,7 @@ interface LruState {
   done: boolean;
 }
 
-function record({ cap, ops }: LruInput): Frame<LruState>[] {
-  const frames: Frame<LruState>[] = [];
-  const cache = new Map<number, LruNode>();
+function record({ cap, ops }: LruInput): Frame<LruState>[] {  const cache = new Map<number, LruNode>();
   let list: LruNode[] = [];
 
   const remove = (n: LruNode) => {
@@ -40,20 +39,15 @@ function record({ cap, ops }: LruInput): Frame<LruState>[] {
     list.unshift(n);
   };
 
-  const emit = (type: string, note: string, caption: string, s: Partial<LruState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LruState>(() => ({
         cap,
         list: list.map((x) => ({ ...x })),
         op: '',
         out: null,
         evicted: null,
         touched: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

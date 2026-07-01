@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -66,23 +67,16 @@ function removeRange(intervals: [number, number][], left: number, right: number)
   return result;
 }
 
-function record({ ops }: RangeInput): Frame<RangeState>[] {
-  const frames: Frame<RangeState>[] = [];
-  let intervals: [number, number][] = [];
+function record({ ops }: RangeInput): Frame<RangeState>[] {  let intervals: [number, number][] = [];
 
-  const emit = (type: string, note: string, caption: string, s: Partial<RangeState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RangeState>(() => ({
         intervals: intervals.map((x) => [...x] as [number, number]),
         op: '',
         left: null,
         right: null,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -47,9 +48,7 @@ function labelOf(nodes: TrieNode[], i: number): string {
 
 const SENTINEL = '$';
 
-function record({ str }: LrsInput): Frame<LrsState>[] {
-  const frames: Frame<LrsState>[] = [];
-  const nodes: TrieNode[] = [
+function record({ str }: LrsInput): Frame<LrsState>[] {  const nodes: TrieNode[] = [
     { char: '', depth: 0, parent: -1, children: {}, visits: 0 },
   ];
 
@@ -64,26 +63,15 @@ function record({ str }: LrsInput): Frame<LrsState>[] {
   const snapshot = (): TrieNode[] =>
     nodes.map((n) => ({ ...n, children: { ...n.children } }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LrsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LrsState>(() => ({
         str,
         nodes: snapshot(),
         active: null,
         matchedPath: [],
         branchNode,
         answer,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

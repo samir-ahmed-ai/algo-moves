@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -22,21 +23,10 @@ interface IsBstState {
 
 const INF = null;
 
-function record({ tree }: IsBstInput): Frame<IsBstState>[] {
-  const frames: Frame<IsBstState>[] = [];
-  const visited: number[] = [];
+function record({ tree }: IsBstInput): Frame<IsBstState>[] {  const visited: number[] = [];
   let failed: number | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<IsBstState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<IsBstState>(() => ({
         tree,
         cur: null,
         lo: INF,
@@ -44,10 +34,8 @@ function record({ tree }: IsBstInput): Frame<IsBstState>[] {
         visited: [...visited],
         failed,
         done: false,
-        answer: null,
-        ...s,
-      },
-    });
+        answer: null
+      }));
 
   const bound = (v: number | null) => (v === null ? '∞' : `${v}`);
 

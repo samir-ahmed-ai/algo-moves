@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -20,20 +21,9 @@ interface MatrixState {
   done: boolean;
 }
 
-function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {
-  const frames: Frame<MatrixState>[] = [];
-  const visited: [number, number][] = [];
+function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {  const visited: [number, number][] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MatrixState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MatrixState>(() => ({
         mat,
         key,
         i: null,
@@ -41,10 +31,8 @@ function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {
         cur: null,
         visited: visited.map((p): [number, number] => [p[0], p[1]]),
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (mat.length === 0) {
     emit('DONE', 'empty', `The matrix is empty, so the key ${key} cannot be present. Return [-1, -1].`, { done: true }, 'bad');

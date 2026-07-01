@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -30,9 +31,7 @@ interface MeetState {
 
 // Faithful re-implementation of minDist1D from the Go solution, but emitting a
 // frame at each two-pointer step so the sweep can be animated.
-function record({ grid }: MeetInput): Frame<MeetState>[] {
-  const frames: Frame<MeetState>[] = [];
-  const rows = grid.length;
+function record({ grid }: MeetInput): Frame<MeetState>[] {  const rows = grid.length;
   const cols = grid[0]?.length ?? 0;
 
   // Collect every 1-cell, mirroring the row/col append loop in Go.
@@ -52,16 +51,7 @@ function record({ grid }: MeetInput): Frame<MeetState>[] {
   let rowDist = 0;
   let colDist = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MeetState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<MeetState>(() => ({
         grid,
         rows,
         cols,
@@ -76,10 +66,8 @@ function record({ grid }: MeetInput): Frame<MeetState>[] {
         rowDist,
         colDist,
         median: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

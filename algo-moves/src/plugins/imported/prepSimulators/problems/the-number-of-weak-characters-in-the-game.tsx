@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -36,18 +37,7 @@ function record({ properties }: WeakInput): Frame<WeakState>[] {
   const props: Pair[] = properties.map((p) => [p[0], p[1]] as Pair);
   const n = props.length;
   const weakIdx = new Array<boolean>(n).fill(false);
-  const frames: Frame<WeakState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<WeakState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<WeakState>(() => ({
         props: props.map((p) => [p[0], p[1]] as Pair),
         phase: 'sort',
         cmpA: null,
@@ -57,10 +47,8 @@ function record({ properties }: WeakInput): Frame<WeakState>[] {
         maxDef: 0,
         weakIdx: weakIdx.slice(),
         cnt: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

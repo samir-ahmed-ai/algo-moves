@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,21 +25,10 @@ interface NgeState {
 
 const INT32_MAX = 2147483647;
 
-function record({ n }: NgeInput): Frame<NgeState>[] {
-  const frames: Frame<NgeState>[] = [];
-  const s = String(n).split('');
+function record({ n }: NgeInput): Frame<NgeState>[] {  const s = String(n).split('');
   const k = s.length;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<NgeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<NgeState>(() => ({
         n,
         digits: s.slice(),
         i: null,
@@ -49,10 +39,8 @@ function record({ n }: NgeInput): Frame<NgeState>[] {
         hiR: null,
         result: null,
         done: false,
-        overflow: false,
-        ...patch,
-      },
-    });
+        overflow: false
+      }));
 
   emit(
     'INIT',

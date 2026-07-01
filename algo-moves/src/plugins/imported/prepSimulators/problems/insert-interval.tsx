@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -24,57 +25,29 @@ interface InsertState {
 
 const fmt = (iv: Interval) => `[${iv[0]},${iv[1]}]`;
 
-function record({ ins, x }: InsertInput): Frame<InsertState>[] {
-  const frames: Frame<InsertState>[] = [];
-  const res: Interval[] = [];
+function record({ ins, x }: InsertInput): Frame<InsertState>[] {  const res: Interval[] = [];
   // local mutable copy of x so we never mutate the input tuple
   let xs = x[0];
   let xe = x[1];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    phase: Phase,
-    placedAt: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        ins,
+  const { emit, frames } = createRecorder<InsertState>(() => ({
+        ins: ins,
         x: [xs, xe],
         res: res.map((r) => [r[0], r[1]] as Interval),
-        i,
-        phase,
-        placedAt,
-        done: phase === 'done',
-      },
-    });
+        i: null,
+        phase: 'init',
+        placedAt: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `insert ${fmt([xs, xe])}`,
-    `Insert Interval: the existing intervals ${ins.map(fmt).join(' ')} are sorted and non-overlapping. We splice in ${fmt([xs, xe])} using three segments — copy everything strictly before it, absorb every overlap into x, then copy everything after.`,
-    null,
-    'init',
-    null,
-  );
+  emit('INIT', `insert ${fmt([xs, xe])}`, `Insert Interval: the existing intervals ${ins.map(fmt).join(' ')} are sorted and non-overlapping. We splice in ${fmt([xs, xe])} using three segments — copy everything strictly before it, absorb every overlap into x, then copy everything after.`, { i: null, phase: 'init', placedAt: null });
 
   let i = 0;
 
   // Segment 1 — copy intervals that end before x starts (no overlap, left side).
   while (i < ins.length && ins[i][1] < xs) {
     res.push([ins[i][0], ins[i][1]]);
-    emit(
-      'BEFORE',
-      `copy ${fmt(ins[i])}`,
-      `ins[${i}] = ${fmt(ins[i])} ends at ${ins[i][1]}, which is below x.start = ${xs}, so it sits entirely to the left. Copy it straight into the result.`,
-      i,
-      'before',
-      null,
-    );
+    emit('BEFORE', `copy ${fmt(ins[i])}`, `ins[${i}] = ${fmt(ins[i])} ends at ${ins[i][1]}, which is below x.start = ${xs}, so it sits entirely to the left. Copy it straight into the result.`, { i: i, phase: 'before', placedAt: null });
     i++;
   }
 
@@ -83,53 +56,23 @@ function record({ ins, x }: InsertInput): Frame<InsertState>[] {
     const before: Interval = [xs, xe];
     if (ins[i][0] < xs) xs = ins[i][0];
     if (ins[i][1] > xe) xe = ins[i][1];
-    emit(
-      'MERGE',
-      `absorb ${fmt(ins[i])}`,
-      `ins[${i}] = ${fmt(ins[i])} starts at ${ins[i][0]} ≤ x.end = ${before[1]}, so it overlaps x. Absorb it: x grows from ${fmt(before)} to ${fmt([xs, xe])} by taking the min start and max end.`,
-      i,
-      'merge',
-      null,
-    );
+    emit('MERGE', `absorb ${fmt(ins[i])}`, `ins[${i}] = ${fmt(ins[i])} starts at ${ins[i][0]} ≤ x.end = ${before[1]}, so it overlaps x. Absorb it: x grows from ${fmt(before)} to ${fmt([xs, xe])} by taking the min start and max end.`, { i: i, phase: 'merge', placedAt: null });
     i++;
   }
 
   // Place the merged x.
   res.push([xs, xe]);
   const placed = res.length - 1;
-  emit(
-    'PLACE',
-    `place ${fmt([xs, xe])}`,
-    `No more overlaps. The fully merged interval ${fmt([xs, xe])} now goes into the result at position ${placed}.`,
-    null,
-    'place',
-    placed,
-    'good',
-  );
+  emit('PLACE', `place ${fmt([xs, xe])}`, `No more overlaps. The fully merged interval ${fmt([xs, xe])} now goes into the result at position ${placed}.`, { i: null, phase: 'place', placedAt: placed }, 'good');
 
   // Segment 3 — copy the remaining intervals (all to the right of x).
   while (i < ins.length) {
     res.push([ins[i][0], ins[i][1]]);
-    emit(
-      'AFTER',
-      `copy ${fmt(ins[i])}`,
-      `ins[${i}] = ${fmt(ins[i])} starts after x.end = ${xe}, so it belongs to the right segment. Copy it across unchanged.`,
-      i,
-      'after',
-      placed,
-    );
+    emit('AFTER', `copy ${fmt(ins[i])}`, `ins[${i}] = ${fmt(ins[i])} starts after x.end = ${xe}, so it belongs to the right segment. Copy it across unchanged.`, { i: i, phase: 'after', placedAt: placed });
     i++;
   }
 
-  emit(
-    'DONE',
-    `${res.length} intervals`,
-    `Done. The result ${res.map(fmt).join(' ')} stays sorted and non-overlapping. Time O(n), space O(n) for the output list.`,
-    null,
-    'done',
-    placed,
-    'good',
-  );
+  emit('DONE', `${res.length} intervals`, `Done. The result ${res.map(fmt).join(' ')} stays sorted and non-overlapping. Time O(n), space O(n) for the output list.`, { i: null, phase: 'done', placedAt: placed , done: true }, 'good');
 
   return frames;
 }

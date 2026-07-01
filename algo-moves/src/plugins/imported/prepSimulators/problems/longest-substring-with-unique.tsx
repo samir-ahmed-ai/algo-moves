@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,22 +21,11 @@ interface LongestUniqueState {
 }
 
 function record({ s }: LongestUniqueInput): Frame<LongestUniqueState>[] {
-  const chars = s.split('');
-  const frames: Frame<LongestUniqueState>[] = [];
-  const last = new Map<string, number>();
+  const chars = s.split('');  const last = new Map<string, number>();
   let l = 0;
   let best = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    st: Partial<LongestUniqueState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<LongestUniqueState>(() => ({
         chars,
         l,
         r: null,
@@ -43,10 +33,8 @@ function record({ s }: LongestUniqueInput): Frame<LongestUniqueState>[] {
         last: [...last.entries()],
         windowLen: null,
         best,
-        done: false,
-        ...st,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

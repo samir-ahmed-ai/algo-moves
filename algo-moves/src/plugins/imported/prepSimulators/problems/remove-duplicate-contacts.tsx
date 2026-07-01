@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,9 +25,7 @@ interface ContactsState {
   done: boolean;
 }
 
-function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
-  const frames: Frame<ContactsState>[] = [];
-  const ids = contacts.map((c) => c.id);
+function record({ contacts }: ContactsInput): Frame<ContactsState>[] {  const ids = contacts.map((c) => c.id);
   const idxOf = (id: number) => ids.indexOf(id);
 
   const parent = new Map<number, number>();
@@ -48,16 +47,7 @@ function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
   const emailOwner = new Map<string, number>();
   const byId = new Map<number, Contact>();
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ContactsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ContactsState>(() => ({
         ids,
         parent: [...parent.entries()],
         emailOwner: [...emailOwner.entries()],
@@ -65,10 +55,8 @@ function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
         owner: null,
         email: null,
         roots: [],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

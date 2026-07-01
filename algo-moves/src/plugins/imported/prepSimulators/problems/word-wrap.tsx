@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -31,22 +32,11 @@ function joinWords(words: string[]): string {
 }
 
 function record({ words, maxWidth }: WordWrapInput): Frame<WordWrapState>[] {
-  const n = words.length;
-  const frames: Frame<WordWrapState>[] = [];
-  const dp = new Array<number>(n + 1).fill(INF);
+  const n = words.length;  const dp = new Array<number>(n + 1).fill(INF);
   const next = new Array<number>(Math.max(n, 0)).fill(0);
-  dp[n] = 0; // one past the last word costs nothing to wrap
+  dp[n] = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<WordWrapState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<WordWrapState>(() => ({
         words,
         maxWidth,
         dp: dp.slice(),
@@ -56,10 +46,8 @@ function record({ words, maxWidth }: WordWrapInput): Frame<WordWrapState>[] {
         length: null,
         cost: null,
         lines: [],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

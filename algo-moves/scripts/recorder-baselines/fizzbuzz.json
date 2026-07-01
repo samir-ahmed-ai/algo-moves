@@ -1,0 +1,13 @@
+{
+  "slug": "fizzbuzz",
+  "input": "n = 5",
+  "sigs": [
+    "INIT|by15:null,by3:null,by5:null,done:false,i:null,n:5,out:[5],picked:null",
+    "NUM|by15:false,by3:false,by5:false,done:false,i:1,n:5,out:[5],picked:1",
+    "NUM|by15:false,by3:false,by5:false,done:false,i:2,n:5,out:[5],picked:2",
+    "FIZZ|by15:false,by3:true,by5:false,done:false,i:3,n:5,out:[5],picked:Fizz",
+    "NUM|by15:false,by3:false,by5:false,done:false,i:4,n:5,out:[5],picked:4",
+    "BUZZ|by15:false,by3:false,by5:true,done:false,i:5,n:5,out:[5],picked:Buzz",
+    "DONE|by15:null,by3:null,by5:null,done:true,i:null,n:5,out:[5],picked:null"
+  ]
+}

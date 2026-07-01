@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -27,9 +28,7 @@ const DIRS: [number, number][] = [
   [-1, 0],
 ];
 
-function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
-  const frames: Frame<WordSearchState>[] = [];
-  const m = board.length;
+function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {  const m = board.length;
   const n = board[0]?.length ?? 0;
   const visited: boolean[][] = board.map((row) => row.map(() => false));
 
@@ -43,16 +42,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
     return out;
   };
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<WordSearchState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<WordSearchState>(() => ({
         board,
         word,
         idx: 0,
@@ -60,10 +50,8 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
         path: pathCells(),
         fail: null,
         found: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

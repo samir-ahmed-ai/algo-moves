@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -34,8 +35,6 @@ interface CinemaState {
 }
 
 function record({ n, reservedSeats }: CinemaInput): Frame<CinemaState>[] {
-  const frames: Frame<CinemaState>[] = [];
-
   // Build one bitmask per row that has any reserved seat (mirrors the Go map).
   const rows = new Map<number, number>();
   for (const [r, seat] of reservedSeats) {
@@ -46,16 +45,7 @@ function record({ n, reservedSeats }: CinemaInput): Frame<CinemaState>[] {
   let res = 2 * n;
   const processed: [number, number][] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<CinemaState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<CinemaState>(() => ({
         n,
         row: null,
         mask: 0,
@@ -66,10 +56,8 @@ function record({ n, reservedSeats }: CinemaInput): Frame<CinemaState>[] {
         granted: [],
         res,
         processed: processed.map((p) => [p[0], p[1]] as [number, number]),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

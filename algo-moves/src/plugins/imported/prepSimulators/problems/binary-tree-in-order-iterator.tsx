@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, RailGroup, RailResult, RailStat, RailStack, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/TreeBoard';
@@ -21,96 +22,52 @@ interface BtInOrderState {
 const L = (i: number) => 2 * i + 1;
 const R = (i: number) => 2 * i + 2;
 
-function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {
-  const frames: Frame<BtInOrderState>[] = [];
-  const stack: number[] = [];
+function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {  const stack: number[] = [];
   const done: number[] = [];
   const output: number[] = [];
 
   const val = (i: number): number => tree[i] as number;
   const exists = (i: number): boolean => i >= 0 && i < tree.length && tree[i] != null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
+  const { emit, frames } = createRecorder<BtInOrderState>(() => ({
+        tree: tree,
         stack: stack.slice(),
-        active,
         done: done.slice(),
         output: output.slice(),
         hasNext: stack.length > 0,
-        finished: type === 'FINISHED',
-      },
-    });
+        finished: false,
+        active: null
+      }));
 
   const pushLeft = (start: number) => {
     let node = start;
     if (!exists(node)) {
-      emit('PUSH_NONE', 'null spine', `No right subtree — nothing to push onto the stack.`, null);
+      emit('PUSH_NONE', 'null spine', `No right subtree — nothing to push onto the stack.`, { active: null });
       return;
     }
     while (exists(node)) {
       stack.push(node);
-      emit(
-        'PUSH',
-        `push ${val(node)}`,
-        `Constructor / pushLeft: push node ${val(node)}, then follow LEFT until null. This stacks the left spine for in-order traversal.`,
-        node,
-      );
+      emit('PUSH', `push ${val(node)}`, `Constructor / pushLeft: push node ${val(node)}, then follow LEFT until null. This stacks the left spine for in-order traversal.`, { active: node });
       node = L(node);
     }
-    emit(
-      'SPINE_DONE',
-      'left spine done',
-      `Left spine fully stacked. Top of stack (${stack.length ? val(stack[stack.length - 1]) : '—'}) is the next in-order value.`,
-      stack[stack.length - 1] ?? null,
-    );
+    emit('SPINE_DONE', 'left spine done', `Left spine fully stacked. Top of stack (${stack.length ? val(stack[stack.length - 1]) : '—'}) is the next in-order value.`, { active: stack[stack.length - 1] ?? null });
   };
 
-  emit(
-    'INIT',
-    'build iterator',
-    `Binary tree in-order iterator: explicit stack holds the left spine. Constructor pushes all left nodes from root; each \`next()\` pops, yields, then pushLeft(right).`,
-    exists(0) ? 0 : null,
-  );
+  emit('INIT', 'build iterator', `Binary tree in-order iterator: explicit stack holds the left spine. Constructor pushes all left nodes from root; each \`next()\` pops, yields, then pushLeft(right).`, { active: exists(0) ? 0 : null });
 
   pushLeft(0);
 
   while (stack.length > 0) {
     const top = stack[stack.length - 1];
-    emit(
-      'HASNEXT',
-      'hasNext = true',
-      `\`hasNext()\`: stack non-empty — next value is ${val(top)} at stack top.`,
-      top,
-    );
+    emit('HASNEXT', 'hasNext = true', `\`hasNext()\`: stack non-empty — next value is ${val(top)} at stack top.`, { active: top });
     stack.pop();
     done.push(top);
     output.push(val(top));
-    emit(
-      'NEXT',
-      `yield ${val(top)}`,
-      `\`next()\`: pop ${val(top)}, emit it. In-order so far: [${output.join(', ')}]. Now pushLeft(node.right).`,
-      top,
-      'good',
-    );
+    emit('NEXT', `yield ${val(top)}`, `\`next()\`: pop ${val(top)}, emit it. In-order so far: [${output.join(', ')}]. Now pushLeft(node.right).`, { active: top }, 'good');
     pushLeft(R(top));
   }
 
-  emit(
-    'FINISHED',
-    `[${output.join(', ')}]`,
-    `Stack empty — iteration complete. Full in-order sequence: [${output.join(', ')}].`,
-    null,
-    'good',
-  );
+  emit('FINISHED', `[${output.join(', ')}]`, `Stack empty — iteration complete. Full in-order sequence: [${output.join(', ')}].`, { active: null }, 'good');
   return frames;
 }
 

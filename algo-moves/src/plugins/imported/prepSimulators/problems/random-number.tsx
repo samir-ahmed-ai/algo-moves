@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -33,31 +34,18 @@ function intn(seed: number, span: number): number {
 }
 
 function record({ minVal, maxVal, seed }: RandomNumberInput): Frame<RandomNumberState>[] {
-  const frames: Frame<RandomNumberState>[] = [];
-
   let lo = minVal;
   let hi = maxVal;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<RandomNumberState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<RandomNumberState>(() => ({
         lo,
         hi,
         span: null,
         offset: null,
         pick: null,
         swapped: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

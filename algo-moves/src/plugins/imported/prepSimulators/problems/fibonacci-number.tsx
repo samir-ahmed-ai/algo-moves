@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import { cn } from '../../../../lib/cn';
@@ -20,22 +21,11 @@ interface FibState {
   done: boolean;
 }
 
-function record({ n }: FibInput): Frame<FibState>[] {
-  const frames: Frame<FibState>[] = [];
-  // seq mirrors F(0..k) as we build it; used only for the visual, the algorithm
+function record({ n }: FibInput): Frame<FibState>[] {  // seq mirrors F(0..k) as we build it; used only for the visual, the algorithm
   // itself carries just prev/cur exactly like the Go solution.
   const seq: number[] = [0, 1];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<FibState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FibState>(() => ({
         n,
         seq: seq.slice(),
         i: null,
@@ -44,10 +34,8 @@ function record({ n }: FibInput): Frame<FibState>[] {
         prev: null,
         cur: null,
         answer: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

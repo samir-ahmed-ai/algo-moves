@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,22 +26,11 @@ interface SortListState {
   done: boolean;
 }
 
-function record({ list }: SortListInput): Frame<SortListState>[] {
-  const frames: Frame<SortListState>[] = [];
-  // We track values by a stable identity so the View can colour comparisons even
+function record({ list }: SortListInput): Frame<SortListState>[] {  // We track values by a stable identity so the View can colour comparisons even
   // though merge reorders the array. `chain` always shows the live left→right order.
   let chain = list.slice();
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SortListState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SortListState>(() => ({
         chain: chain.slice(),
         range: null,
         split: null,
@@ -48,10 +38,8 @@ function record({ list }: SortListInput): Frame<SortListState>[] {
         placed: [],
         result: null,
         depth: 0,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

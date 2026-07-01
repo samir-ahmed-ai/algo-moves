@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -22,32 +23,18 @@ function record({ nums }: PartInput): Frame<PartState>[] {
   const total = nums.reduce((acc, x) => acc + x, 0);
   const reach = new Array<boolean>(total + 1).fill(false);
   reach[0] = true;
-  const frames: Frame<PartState>[] = [];
+  const { emit, frames } = createRecorder<PartState>(() => ({
+        nums: nums,
+        total: total,
+        reach: reach.slice(),
+        processed: 0,
+        justAdded: null,
+        bestSum: null,
+        answer: null,
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    processed: number,
-    justAdded: number | null,
-    bestSum: number | null,
-    answer: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { nums, total, reach: reach.slice(), processed, justAdded, bestSum, done: type === 'DONE', answer },
-    });
-
-  emit(
-    'INIT',
-    `total=${total}`,
-    `Partition Array to Minimize Sum Difference: split [${nums.join(', ')}] into two groups so |sum(A) − sum(B)| is smallest. Core idea — subset-sum: reach[s] marks every sum a subset can hit. Then the best split puts a subset of sum s on one side, giving difference |${total} − 2s|. Start with reach[0] = ✓ (the empty subset).`,
-    0,
-    null,
-    null,
-    null,
-  );
+  emit('INIT', `total=${total}`, `Partition Array to Minimize Sum Difference: split [${nums.join(', ')}] into two groups so |sum(A) − sum(B)| is smallest. Core idea — subset-sum: reach[s] marks every sum a subset can hit. Then the best split puts a subset of sum s on one side, giving difference |${total} − 2s|. Start with reach[0] = ✓ (the empty subset).`, { processed: 0, justAdded: null, bestSum: null, answer: null });
 
   for (let k = 0; k < nums.length; k++) {
     const x = nums[k];
@@ -56,15 +43,7 @@ function record({ nums }: PartInput): Frame<PartState>[] {
       if (reach[s - x]) reach[s] = true;
     }
     const hits = reach.map((b, i) => (b ? i : -1)).filter((i) => i >= 0);
-    emit(
-      'FILL',
-      `+${x}`,
-      `Fold in ${x}: every previously reachable sum s also makes s + ${x} reachable. Reachable subset sums are now {${hits.join(', ')}}.`,
-      k + 1,
-      x,
-      null,
-      null,
-    );
+    emit('FILL', `+${x}`, `Fold in ${x}: every previously reachable sum s also makes s + ${x} reachable. Reachable subset sums are now {${hits.join(', ')}}.`, { processed: k + 1, justAdded: x, bestSum: null, answer: null });
   }
 
   // Minimise |total - 2s| over reachable s.
@@ -79,16 +58,7 @@ function record({ nums }: PartInput): Frame<PartState>[] {
       }
     }
   }
-  emit(
-    'DONE',
-    `diff ${best}`,
-    `Scan reachable sums for the one closest to half of ${total}: subset sum ${bestSum} gives |${total} − 2·${bestSum}| = ${best}. So the minimum partition difference is ${best}.`,
-    nums.length,
-    null,
-    bestSum,
-    best,
-    'good',
-  );
+  emit('DONE', `diff ${best}`, `Scan reachable sums for the one closest to half of ${total}: subset sum ${bestSum} gives |${total} − 2·${bestSum}| = ${best}. So the minimum partition difference is ${best}.`, { processed: nums.length, justAdded: null, bestSum: bestSum, answer: best , done: true }, 'good');
   return frames;
 }
 

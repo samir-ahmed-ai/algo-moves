@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -64,23 +65,16 @@ function suggest(root: TrieNode, prefix: string, limit: number): string[] {
   return out;
 }
 
-function record({ words, ops }: DictInput): Frame<DictState>[] {
-  const frames: Frame<DictState>[] = [];
-  const root = buildTrie(words);
+function record({ words, ops }: DictInput): Frame<DictState>[] {  const root = buildTrie(words);
 
-  const emit = (type: string, note: string, caption: string, s: Partial<DictState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DictState>(() => ({
         words: [...words],
         op: '',
         result: '',
         found: null,
         suggestions: [],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

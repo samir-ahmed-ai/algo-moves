@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -29,23 +30,12 @@ function shift(a: string, b: string): number {
   return (b.charCodeAt(0) - a.charCodeAt(0) + 26) % 26;
 }
 
-function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
-  const frames: Frame<GroupShiftedState>[] = [];
-  const groups = new Map<string, string[]>();
+function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {  const groups = new Map<string, string[]>();
 
   const snapshotGroups = (): GroupEntry[] =>
     [...groups.entries()].map(([k, v]) => [k, [...v]]);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<GroupShiftedState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<GroupShiftedState>(() => ({
         words,
         wi: null,
         chars: [],
@@ -55,10 +45,8 @@ function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
         groups: snapshotGroups(),
         assignedKey: null,
         done: false,
-        result: groups.size,
-        ...s,
-      },
-    });
+        result: groups.size
+      }));
 
   emit(
     'INIT',

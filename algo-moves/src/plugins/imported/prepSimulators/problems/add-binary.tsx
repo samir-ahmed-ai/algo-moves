@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,20 +25,9 @@ interface AddBinaryState {
 const digitAt = (s: string, idx: number): number =>
   idx >= 0 && idx < s.length ? s.charCodeAt(idx) - 48 : 0;
 
-function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {
-  const frames: Frame<AddBinaryState>[] = [];
-  const out: string[] = []; // collected LSB-first, reversed at the end
+function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {  const out: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<AddBinaryState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<AddBinaryState>(() => ({
         a,
         b,
         i: null,
@@ -46,10 +36,8 @@ function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {
         sum: null,
         bit: null,
         result: out.slice().reverse().join(''),
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   let i = a.length - 1;
   let j = b.length - 1;

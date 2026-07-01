@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -31,29 +32,16 @@ function formatSize(bytes: number): string {
   return `${bytes}B`;
 }
 
-function record({ entries }: FindLargeInput): Frame<FindLargeState>[] {
-  const frames: Frame<FindLargeState>[] = [];
-  const matches: string[] = [];
+function record({ entries }: FindLargeInput): Frame<FindLargeState>[] {  const matches: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<FindLargeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<FindLargeState>(() => ({
         entries,
         idx: null,
         limit: LIMIT,
         matches: matches.slice(),
         activePath: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

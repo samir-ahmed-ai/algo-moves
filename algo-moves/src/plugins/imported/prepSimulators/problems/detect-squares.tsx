@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -19,23 +20,16 @@ interface SqState {
 
 const key = (p: [number, number]) => `${p[0]},${p[1]}`;
 
-function record({ ops }: SqInput): Frame<SqState>[] {
-  const frames: Frame<SqState>[] = [];
-  const counts: Record<string, number> = {};
+function record({ ops }: SqInput): Frame<SqState>[] {  const counts: Record<string, number> = {};
   const pts: [number, number][] = [];
 
-  const emit = (type: string, note: string, caption: string, s: Partial<SqState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<SqState>(() => ({
         points: pts.map((p) => [...p] as [number, number]),
         counts: { ...counts },
         op: '',
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

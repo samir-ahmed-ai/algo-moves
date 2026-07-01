@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -24,22 +25,11 @@ const NONE = -1;
 function record({ s }: PalinInput): Frame<PalinState>[] {
   const chars = s.split('');
   const n = chars.length;
-  const frames: Frame<PalinState>[] = [];
-
   const dp: number[][] = Array.from({ length: Math.max(n, 1) }, () => new Array<number>(Math.max(n, 1)).fill(NONE));
 
   const cloneDp = (): number[][] => dp.map((row) => row.slice());
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    patch: Partial<PalinState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<PalinState>(() => ({
         chars,
         dp: cloneDp(),
         l: null,
@@ -47,10 +37,8 @@ function record({ s }: PalinInput): Frame<PalinState>[] {
         matched: null,
         lps: null,
         answer: null,
-        done: false,
-        ...patch,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

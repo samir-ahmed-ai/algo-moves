@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -25,21 +26,10 @@ interface KGroupState {
 
 const DUMMY = 'D';
 
-function record({ values, k }: KGroupInput): Frame<KGroupState>[] {
-  const frames: Frame<KGroupState>[] = [];
-  // chain holds the live order of node values; index 0 is the dummy.
+function record({ values, k }: KGroupInput): Frame<KGroupState>[] {  // chain holds the live order of node values; index 0 is the dummy.
   const chain: (number | string)[] = [DUMMY, ...values];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<KGroupState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<KGroupState>(() => ({
         chain: chain.slice(),
         k,
         groupPrev: null,
@@ -47,10 +37,8 @@ function record({ values, k }: KGroupInput): Frame<KGroupState>[] {
         groupNext: null,
         prev: null,
         cur: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -36,32 +37,18 @@ function insertTop3(top: number[], node: number, scores: number[]): number[] {
 
 function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
   const n = scores.length;
-  const frames: Frame<MSState>[] = [];
+  const { emit, frames } = createRecorder<MSState>(() => ({
+        scores: scores,
+        adj: adj,
+        pos: pos,
+        edge: null,
+        seq: [],
+        best: 0,
+        bestSeq: [],
+        done: false
+      }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    edge: [number, number] | null,
-    seq: number[],
-    best: number,
-    bestSeq: number[],
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { scores, adj, pos, edge, seq: seq.slice(), best, bestSeq: bestSeq.slice(), done: type === 'DONE' },
-    });
-
-  emit(
-    'INIT',
-    'top-3',
-    `We want a 4-node path a-u-v-b (all distinct) maximizing scores[a]+scores[u]+scores[v]+scores[b]. For each node we keep only its 3 highest-scoring neighbours — that is enough to dodge collisions — then for every edge (u, v) we try the best a near u and b near v.`,
-    null,
-    [],
-    -1,
-    [],
-  );
+  emit('INIT', 'top-3', `We want a 4-node path a-u-v-b (all distinct) maximizing scores[a]+scores[u]+scores[v]+scores[b]. For each node we keep only its 3 highest-scoring neighbours — that is enough to dodge collisions — then for every edge (u, v) we try the best a near u and b near v.`, { edge: null, seq: [], best: -1, bestSeq: [] });
 
   const top3: number[][] = Array.from({ length: n }, () => []);
   for (const [u, v] of edges) {
@@ -73,7 +60,7 @@ function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
   let bestSeq: number[] = [];
 
   for (const [u, v] of edges) {
-    emit('EDGE', `edge ${u}-${v}`, `Scan edge ${u}-${v} (scores ${scores[u]} and ${scores[v]}). Try each top-3 neighbour a of ${u} and b of ${v}, keeping all four distinct.`, [u, v], [], best, bestSeq);
+    emit('EDGE', `edge ${u}-${v}`, `Scan edge ${u}-${v} (scores ${scores[u]} and ${scores[v]}). Try each top-3 neighbour a of ${u} and b of ${v}, keeping all four distinct.`, { edge: [u, v], seq: [], best: best, bestSeq: bestSeq });
     for (const a of top3[u]) {
       if (a === v) continue;
       for (const b of top3[v]) {
@@ -83,16 +70,16 @@ function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
         if (s > best) {
           best = s;
           bestSeq = seq;
-          emit('IMPROVE', `score ${s}`, `Path ${a}-${u}-${v}-${b} scores ${scores[a]}+${scores[u]}+${scores[v]}+${scores[b]} = ${s}, a new best.`, [u, v], seq, best, bestSeq, undefined);
+          emit('IMPROVE', `score ${s}`, `Path ${a}-${u}-${v}-${b} scores ${scores[a]}+${scores[u]}+${scores[v]}+${scores[b]} = ${s}, a new best.`, { edge: [u, v], seq: seq, best: best, bestSeq: bestSeq });
         } else {
-          emit('TRY', `score ${s}`, `Path ${a}-${u}-${v}-${b} scores ${s}, not better than the current best ${best}.`, [u, v], seq, best, bestSeq);
+          emit('TRY', `score ${s}`, `Path ${a}-${u}-${v}-${b} scores ${s}, not better than the current best ${best}.`, { edge: [u, v], seq: seq, best: best, bestSeq: bestSeq });
         }
       }
     }
   }
 
   const ans = best < 0 ? '-1 (no valid 4-node path)' : `${best} via ${bestSeq.join('-')}`;
-  emit('DONE', `${best}`, `All edges scanned. Maximum score = ${ans}.`, null, bestSeq, best, bestSeq, 'good');
+  emit('DONE', `${best}`, `All edges scanned. Maximum score = ${ans}.`, { edge: null, seq: bestSeq, best: best, bestSeq: bestSeq , done: true }, 'good');
   return frames;
 }
 

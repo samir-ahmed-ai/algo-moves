@@ -303,6 +303,7 @@ export function QuizCardView({
   onAnswered,
   onAdvance,
   onRestartQuiz,
+  onNavLockChange,
   onPrev,
   onNext,
   canPrev,
@@ -316,6 +317,7 @@ export function QuizCardView({
   onAnswered: (correct: boolean) => void;
   onAdvance: () => void;
   onRestartQuiz: () => void;
+  onNavLockChange?: (locked: boolean) => void;
   onPrev: () => void;
   onNext: () => void;
   canPrev: boolean;
@@ -341,11 +343,13 @@ export function QuizCardView({
     aliveRef.current = true;
     pickedRef.current = false;
     setPicked(null);
+    onNavLockChange?.(false);
     return () => {
       aliveRef.current = false;
+      onNavLockChange?.(false);
       if (timer.current) window.clearTimeout(timer.current);
     };
-  }, [card.key, quizRunSeed, quizAttempt]);
+  }, [card.key, quizRunSeed, quizAttempt, onNavLockChange]);
 
   const choose = (idx: number) => {
     if (pickedRef.current || answered) return;
@@ -363,8 +367,10 @@ export function QuizCardView({
       });
     }
     onAnswered(correct);
+    if (!correct) onNavLockChange?.(true);
     timer.current = window.setTimeout(() => {
       if (!aliveRef.current) return;
+      onNavLockChange?.(false);
       if (correct) onAdvance();
       else onRestartQuiz();
     }, correct ? QUIZ_CORRECT_MS : QUIZ_WRONG_MS);
@@ -373,17 +379,20 @@ export function QuizCardView({
   const skipWait = () => {
     if (!answered) return;
     if (timer.current) window.clearTimeout(timer.current);
+    onNavLockChange?.(false);
     if (isCorrect) onAdvance();
     else onRestartQuiz();
   };
 
   const leaveQuestion = () => {
     if (timer.current) window.clearTimeout(timer.current);
+    onNavLockChange?.(false);
     onNext();
   };
 
   const goBack = () => {
     if (timer.current) window.clearTimeout(timer.current);
+    onNavLockChange?.(false);
     onPrev();
   };
 

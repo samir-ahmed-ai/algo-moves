@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage, vizText } from '../../../_shared/vizKit';
@@ -22,67 +23,48 @@ function validOctet(part: string): boolean {
   return Number(part) <= 255;
 }
 
-function record({ digits }: IPInput): Frame<IPState>[] {
-  const frames: Frame<IPState>[] = [];
-  const octets: string[] = [];
+function record({ digits }: IPInput): Frame<IPState>[] {  const octets: string[] = [];
   const results: string[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cursor: number,
-    consider: string | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        digits,
+  const { emit, frames } = createRecorder<IPState>(() => ({
+        digits: digits,
         octets: octets.slice(),
-        cursor,
-        consider,
         results: results.slice(),
-        done: type === 'DONE',
-      },
-    });
+        cursor: 0,
+        consider: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `"${digits}"`,
-    `Split the ${digits.length} digits of "${digits}" into 4 octets, each 0-255 with no leading zeros (except "0"). Try octet lengths 1-3, recurse on the rest, then backtrack to try the next length.`,
-    0,
-    null,
-  );
+  emit('INIT', `"${digits}"`, `Split the ${digits.length} digits of "${digits}" into 4 octets, each 0-255 with no leading zeros (except "0"). Try octet lengths 1-3, recurse on the rest, then backtrack to try the next length.`, { cursor: 0, consider: null });
 
   const backtrack = (start: number, depth: number) => {
     if (depth === 4) {
       if (start === digits.length) {
         const addr = octets.join('.');
         results.push(addr);
-        emit('RECORD', `+${addr}`, `All 4 octets placed and every digit used — record ${addr} (${results.length} so far).`, start, null, 'good');
+        emit('RECORD', `+${addr}`, `All 4 octets placed and every digit used — record ${addr} (${results.length} so far).`, { cursor: start, consider: null }, 'good');
       } else {
-        emit('PRUNE', 'leftover digits', `4 octets placed but ${digits.length - start} digit(s) remain unused — dead end, backtrack.`, start, null);
+        emit('PRUNE', 'leftover digits', `4 octets placed but ${digits.length - start} digit(s) remain unused — dead end, backtrack.`, { cursor: start, consider: null });
       }
       return;
     }
     for (let len = 1; len <= 3 && start + len <= digits.length; len++) {
       const part = digits.slice(start, start + len);
       if (!validOctet(part)) {
-        emit('REJECT', `✗ ${part}`, `Octet ${depth + 1}: "${part}" is invalid (${part.length > 1 && part[0] === '0' ? 'leading zero' : '> 255'}) — skip this length.`, start, part);
+        emit('REJECT', `✗ ${part}`, `Octet ${depth + 1}: "${part}" is invalid (${part.length > 1 && part[0] === '0' ? 'leading zero' : '> 255'}) — skip this length.`, { cursor: start, consider: part });
         if (part.length > 1 && part[0] === '0') break;
         continue;
       }
       octets.push(part);
-      emit('CHOOSE', `${part}`, `Octet ${depth + 1}: take "${part}" (valid, 0-255). Recurse on the remaining digits.`, start + len, part);
+      emit('CHOOSE', `${part}`, `Octet ${depth + 1}: take "${part}" (valid, 0-255). Recurse on the remaining digits.`, { cursor: start + len, consider: part });
       backtrack(start + len, depth + 1);
       octets.pop();
-      emit('BACKTRACK', `undo ${part}`, `Backtrack: drop octet "${part}" and try a longer slice for octet ${depth + 1}.`, start, part);
+      emit('BACKTRACK', `undo ${part}`, `Backtrack: drop octet "${part}" and try a longer slice for octet ${depth + 1}.`, { cursor: start, consider: part });
     }
   };
 
   backtrack(0, 0);
-  emit('DONE', `${results.length} address${results.length === 1 ? '' : 'es'}`, `All splits explored — ${results.length} valid IP address${results.length === 1 ? '' : 'es'} for "${digits}".`, digits.length, null, 'good');
+  emit('DONE', `${results.length} address${results.length === 1 ? '' : 'es'}`, `All splits explored — ${results.length} valid IP address${results.length === 1 ? '' : 'es'} for "${digits}".`, { cursor: digits.length, consider: null , done: true }, 'good');
   return frames;
 }
 

@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -20,29 +21,16 @@ interface ZerosState {
 }
 
 function record({ nums: input }: ZerosInput): Frame<ZerosState>[] {
-  const nums = input.slice();
-  const frames: Frame<ZerosState>[] = [];
-  let w = 0;
+  const nums = input.slice();  let w = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ZerosState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<ZerosState>(() => ({
         nums: nums.slice(),
         i: null,
         w,
         phase: 'rake',
         rakedUpTo: w,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

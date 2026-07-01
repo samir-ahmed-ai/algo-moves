@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -56,20 +57,9 @@ function denseRankSalaries(salaries: number[]): SalaryRank[] {
   }));
 }
 
-function record({ employees, departments }: DeptTopThreeInput): Frame<DeptTopThreeState>[] {
-  const frames: Frame<DeptTopThreeState>[] = [];
-  const results: ResultRow[] = [];
+function record({ employees, departments }: DeptTopThreeInput): Frame<DeptTopThreeState>[] {  const results: ResultRow[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DeptTopThreeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DeptTopThreeState>(() => ({
         employees,
         departments,
         phase: 'init',
@@ -81,10 +71,8 @@ function record({ employees, departments }: DeptTopThreeInput): Frame<DeptTopThr
         topSalarySet: [],
         empIdx: null,
         results: [...results],
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

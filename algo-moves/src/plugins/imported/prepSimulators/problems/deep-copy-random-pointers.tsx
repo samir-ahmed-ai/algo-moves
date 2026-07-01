@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -34,9 +35,7 @@ interface DeepCopyState {
   done: boolean;
 }
 
-function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
-  const frames: Frame<DeepCopyState>[] = [];
-  const vals = nodes.map((n) => n.val);
+function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {  const vals = nodes.map((n) => n.val);
   const next = nodes.map((n) => n.next);
   const random = nodes.map((n) => n.random);
   const cloned = new Array<boolean>(nodes.length).fill(false);
@@ -45,16 +44,7 @@ function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
 
   const label = (i: number | null) => (i === null ? 'nil' : `node ${i} (val ${vals[i]})`);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<DeepCopyState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<DeepCopyState>(() => ({
         vals,
         next,
         random,
@@ -64,10 +54,8 @@ function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
         cloned: cloned.slice(),
         seen: seenOrder.slice(),
         cacheHit: false,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   if (nodes.length === 0) {
     emit('DONE', 'empty', 'The list is empty (head is nil), so the deep copy is also nil. Nothing to clone.', { done: true }, 'good');

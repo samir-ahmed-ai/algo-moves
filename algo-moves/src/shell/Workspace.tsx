@@ -59,6 +59,9 @@ export function Workspace() {
   const [customInput, setCustomInput] = useState<unknown>(null);
   const shareHydratedRef = useRef(false);
   const canvasAppliedRef = useRef(false);
+  const pendingProjectHydration = useRef(
+    typeof location !== 'undefined' && !!loadProjectFromUrl()?.share,
+  );
 
   // Restore the sample input from the URL when the problem changes; default to first input.
   useEffect(() => {
@@ -89,7 +92,12 @@ export function Workspace() {
       if (s.palette) setPalette(s.palette === 'cb' ? 'cb' : 'default');
       if (s.themePreset) setThemePreset(normalizeThemePreset(s.themePreset));
       if (s.dir === 'TB' || s.dir === 'LR') setDir(s.dir);
-      if (s.input) setInputId(s.input);
+      if (s.input) {
+        const targetPlugin = s.item ? getPlugin(catalog.getItem(s.item)?.pluginId ?? '') : plugin;
+        const validInput =
+          targetPlugin && targetPlugin.inputs.some((i) => i.id === s.input) ? s.input : null;
+        if (validInput) setInputId(validInput);
+      }
     }
 
     if (canvasAppliedRef.current || !canvasProject) return;
@@ -102,6 +110,7 @@ export function Workspace() {
   // Persist problem, example, mode, and theme in the URL so refresh reopens the same view.
   useEffect(() => {
     if (!activeItemId) return;
+    if (pendingProjectHydration.current && !shareHydratedRef.current) return;
     writeShareToUrl({
       item: activeItemId,
       input: inputId || undefined,

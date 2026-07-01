@@ -1,0 +1,13 @@
+{
+  "slug": "find-single-number",
+  "input": "[4,1,2,1,2] → 4",
+  "sigs": [
+    "INIT|acc:0,answer:null,bits:5,done:false,i:null,nums:[5],prevAcc:null,v:null",
+    "XOR|acc:4,answer:null,bits:5,done:false,i:0,nums:[5],prevAcc:0,v:4",
+    "XOR|acc:5,answer:null,bits:5,done:false,i:1,nums:[5],prevAcc:4,v:1",
+    "XOR|acc:7,answer:null,bits:5,done:false,i:2,nums:[5],prevAcc:5,v:2",
+    "XOR|acc:6,answer:null,bits:5,done:false,i:3,nums:[5],prevAcc:7,v:1",
+    "XOR|acc:4,answer:null,bits:5,done:false,i:4,nums:[5],prevAcc:6,v:2",
+    "DONE|acc:4,answer:4,bits:5,done:true,i:null,nums:[5],prevAcc:null,v:null"
+  ]
+}

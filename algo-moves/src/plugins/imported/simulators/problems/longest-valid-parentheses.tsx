@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -18,35 +19,23 @@ interface LVPState {
 
 function record({ s }: LVPInput): Frame<LVPState>[] {
   const n = s.length;
-  const dp = new Array<number>(n).fill(-1);
-  const frames: Frame<LVPState>[] = [];
-  let best = 0;
+  const dp = new Array<number>(n).fill(-1);  let best = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    from: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { s, dp: dp.slice(), i, from, best, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<LVPState>(() => ({
+        s: s,
+        dp: dp.slice(),
+        best: best,
+        i: null,
+        from: null,
+        done: false
+      }));
 
-  emit(
-    'INIT',
-    `s="${s}"`,
-    `Longest Valid Parentheses: find the longest run of well-matched brackets in "${s}". dp[i] = the length of the longest valid substring that ENDS at index i, built left to right. dp[i] = 0 whenever s[i] is '('.`,
-    null,
-    null,
-  );
+  emit('INIT', `s="${s}"`, `Longest Valid Parentheses: find the longest run of well-matched brackets in "${s}". dp[i] = the length of the longest valid substring that ENDS at index i, built left to right. dp[i] = 0 whenever s[i] is '('.`, { i: null, from: null });
 
   for (let i = 0; i < n; i++) {
     if (s[i] === '(') {
       dp[i] = 0;
-      emit('OPEN', `dp[${i}]=0`, `s[${i}] is '(' — no valid substring can end on an open bracket, so dp[${i}] = 0.`, i, null);
+      emit('OPEN', `dp[${i}]=0`, `s[${i}] is '(' — no valid substring can end on an open bracket, so dp[${i}] = 0.`, { i: i, from: null });
       continue;
     }
     // s[i] === ')'
@@ -54,13 +43,7 @@ function record({ s }: LVPInput): Frame<LVPState>[] {
       const prior = i >= 2 ? dp[i - 2] : 0;
       dp[i] = prior + 2;
       best = Math.max(best, dp[i]);
-      emit(
-        'PAIR',
-        `dp[${i}]=${dp[i]}`,
-        `s[${i}]=')' closes the '(' right before it at ${i - 1}. That pair adds 2 on top of dp[${i - 2}] (=${prior}), so dp[${i}] = ${prior} + 2 = ${dp[i]}.`,
-        i,
-        i >= 2 ? i - 2 : null,
-      );
+      emit('PAIR', `dp[${i}]=${dp[i]}`, `s[${i}]=')' closes the '(' right before it at ${i - 1}. That pair adds 2 on top of dp[${i - 2}] (=${prior}), so dp[${i}] = ${prior} + 2 = ${dp[i]}.`, { i: i, from: i >= 2 ? i - 2 : null });
     } else {
       const j = i - dp[i - 1] - 1; // index that would hold the matching '('
       if (i >= 1 && dp[i - 1] > 0 && j >= 0 && s[j] === '(') {
@@ -68,30 +51,17 @@ function record({ s }: LVPInput): Frame<LVPState>[] {
         const outer = j >= 1 ? dp[j - 1] : 0;
         dp[i] = inner + 2 + outer;
         best = Math.max(best, dp[i]);
-        emit(
-          'NEST',
-          `dp[${i}]=${dp[i]}`,
-          `s[${i}]=')' wraps the valid block of length dp[${i - 1}]=${inner}, and the char at ${j} is its matching '('. Add that 2, plus whatever valid run sat before it (dp[${j - 1}]=${outer}): dp[${i}] = ${inner} + 2 + ${outer} = ${dp[i]}.`,
-          i,
-          i - 1,
-        );
+        emit('NEST', `dp[${i}]=${dp[i]}`, `s[${i}]=')' wraps the valid block of length dp[${i - 1}]=${inner}, and the char at ${j} is its matching '('. Add that 2, plus whatever valid run sat before it (dp[${j - 1}]=${outer}): dp[${i}] = ${inner} + 2 + ${outer} = ${dp[i]}.`, { i: i, from: i - 1 });
       } else {
         dp[i] = 0;
-        emit('UNMATCHED', `dp[${i}]=0`, `s[${i}]=')' has no matching '(' to close, so no valid substring ends here: dp[${i}] = 0.`, i, null);
+        emit('UNMATCHED', `dp[${i}]=0`, `s[${i}]=')' has no matching '(' to close, so no valid substring ends here: dp[${i}] = 0.`, { i: i, from: null });
       }
     }
   }
 
-  emit(
-    'DONE',
-    `${best}`,
-    n === 0
+  emit('DONE', `${best}`, n === 0
       ? `The string is empty, so the longest valid parentheses substring has length 0.`
-      : `The table is complete. The largest value in dp is ${best}, so the longest valid parentheses substring of "${s}" has length ${best}.`,
-    null,
-    null,
-    'good',
-  );
+      : `The table is complete. The largest value in dp is ${best}, so the longest valid parentheses substring of "${s}" has length ${best}.`, { i: null, from: null , done: true }, 'good');
   return frames;
 }
 

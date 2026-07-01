@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
@@ -29,20 +30,10 @@ interface MeetingsState {
 const fmt = (iv: Interval) => `[${iv.start},${iv.end}]`;
 
 function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
-  const frames: Frame<MeetingsState>[] = [];
+  const original = intervals.map((c) => ({ ...c }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cells: Interval[],
-    s: Partial<MeetingsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        cells: cells.map((c) => ({ ...c })),
+  const { emit, frames } = createRecorder<MeetingsState>(() => ({
+        cells: original.map((c) => ({ ...c })),
         sorted: false,
         i: null,
         prev: null,
@@ -50,17 +41,13 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
         curStart: null,
         conflict: false,
         result: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
-  const original = intervals.map((c) => ({ ...c }));
   emit(
     'INIT',
     `${original.length} meetings`,
     `Schedule meetings: can one person attend every meeting? They can if and only if no two intervals overlap. Strategy — sort by start time, then check each meeting against the one before it.`,
-    original,
     {},
   );
 
@@ -70,8 +57,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
       'DONE',
       'true',
       `With ${original.length} meeting${original.length === 1 ? '' : 's'} there is nothing to overlap, so all meetings can be attended.`,
-      original,
-      { sorted: true, result, done: true },
+      { cells: original.map((c) => ({ ...c })), sorted: true, result, done: true },
       'good',
     );
     return frames;
@@ -82,8 +68,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
     'SORT',
     'by start',
     `Sort the meetings by start time: ${sorted.map(fmt).join(' ')}. After sorting, an overlap can only happen between adjacent meetings, so a single left-to-right sweep is enough.`,
-    sorted,
-    { sorted: true },
+    { cells: sorted.map((c) => ({ ...c })), sorted: true },
   );
 
   let result = true;
@@ -94,8 +79,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
       'COMPARE',
       `${curStart} vs ${prevEnd}`,
       `Compare meeting ${fmt(sorted[i])} with the previous meeting ${fmt(sorted[i - 1])}: does it start (${curStart}) before the previous one ends (${prevEnd})?`,
-      sorted,
-      { sorted: true, i, prev: i - 1, prevEnd, curStart },
+      { cells: sorted.map((c) => ({ ...c })), sorted: true, i, prev: i - 1, prevEnd, curStart },
     );
 
     if (curStart < prevEnd) {
@@ -104,8 +88,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
         'CONFLICT',
         `${curStart} < ${prevEnd}`,
         `Overlap found: ${fmt(sorted[i])} starts at ${curStart}, which is before ${fmt(sorted[i - 1])} ends at ${prevEnd}. The two meetings collide, so not all meetings can be attended — return false.`,
-        sorted,
-        { sorted: true, i, prev: i - 1, prevEnd, curStart, conflict: true, result: false, done: true },
+        { cells: sorted.map((c) => ({ ...c })), sorted: true, i, prev: i - 1, prevEnd, curStart, conflict: true, result: false, done: true },
         'bad',
       );
       return frames;
@@ -115,8 +98,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
       'OK',
       `${curStart} ≥ ${prevEnd}`,
       `No overlap: ${fmt(sorted[i])} starts at ${curStart}, at or after ${fmt(sorted[i - 1])} ends at ${prevEnd}. These two are compatible — keep sweeping.`,
-      sorted,
-      { sorted: true, i, prev: i - 1, prevEnd, curStart },
+      { cells: sorted.map((c) => ({ ...c })), sorted: true, i, prev: i - 1, prevEnd, curStart },
       'good',
     );
   }
@@ -125,8 +107,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
     'DONE',
     'true',
     `Every adjacent pair was compatible — no meeting starts before the previous one ends. One person can attend all ${sorted.length} meetings.`,
-    sorted,
-    { sorted: true, result, done: true },
+    { cells: sorted.map((c) => ({ ...c })), sorted: true, result, done: true },
     'good',
   );
   return frames;

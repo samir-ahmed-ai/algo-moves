@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
@@ -34,26 +35,19 @@ function encodeID(id: number): string {
   return out.reverse().join('');
 }
 
-function record({ host, ops }: TinyInput): Frame<TinyState>[] {
-  const frames: Frame<TinyState>[] = [];
-  const toShort: Record<string, string> = {};
+function record({ host, ops }: TinyInput): Frame<TinyState>[] {  const toShort: Record<string, string> = {};
   const toLong: Record<string, string> = {};
   let nextID = 0;
 
-  const emit = (type: string, note: string, caption: string, s: Partial<TinyState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<TinyState>(() => ({
         host,
         toShort: { ...toShort },
         toLong: { ...toLong },
         nextID,
         op: '',
         result: '',
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   emit(
     'INIT',

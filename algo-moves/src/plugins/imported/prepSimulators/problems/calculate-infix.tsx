@@ -1,4 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import { cn } from '../../../../lib/cn';
@@ -40,22 +41,11 @@ function opPrec(op: string): number {
   return op === '+' || op === '-' ? 1 : 2;
 }
 
-function record({ exp }: InfixInput): Frame<InfixState>[] {
-  const frames: Frame<InfixState>[] = [];
-  const nums: number[] = [];
+function record({ exp }: InfixInput): Frame<InfixState>[] {  const nums: number[] = [];
   const ops: string[] = [];
   let lastApply: { a: number; b: number; op: string; result: number } | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<InfixState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
+  const { emit, frames } = createRecorder<InfixState>(() => ({
         exp,
         i: null,
         nums: nums.slice(),
@@ -65,10 +55,8 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
         applyOp: lastApply?.op ?? null,
         applyResult: lastApply?.result ?? null,
         answer: null,
-        done: false,
-        ...s,
-      },
-    });
+        done: false
+      }));
 
   const applyTop = () => {
     const op = ops.pop() as string;
