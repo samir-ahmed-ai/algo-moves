@@ -1,7 +1,7 @@
 import type { PracticeBundle } from '../../_shared/pluginKit';
 
 /** Teaching content migrated from native curated plugins (now imported-canonical). */
-export const MIGRATED_BUNDLES = {
+export const MIGRATED_BUNDLES: Record<string, PracticeBundle> = {
   "imp-58-climbing-stairs": {
     "codePieces": [
       {

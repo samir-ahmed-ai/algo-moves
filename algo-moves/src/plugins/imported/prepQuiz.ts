@@ -71,11 +71,11 @@ function buildChoices(
 export function defaultPrepQuiz(p: PrepProblem, siblings: PrepProblem[] = PREP_DATA): QuizQuestion[] {
   const seed = hashSeed(p.id);
   const topicPeers = siblings.filter((s) => s.topic === p.topic && s.id !== p.id);
-  const categoryPeers = siblings.filter((s) => s.category === p.category && s.id !== p.id);
+  const coursePeers = siblings.filter((s) => s.course === p.course && s.id !== p.id);
 
   const patternPool = uniqueNonEmpty([
     ...topicPeers.map((s) => s.pattern),
-    ...categoryPeers.map((s) => s.pattern),
+    ...coursePeers.map((s) => s.pattern),
   ]);
   const patternDistractors = pickDistractors(p.pattern, patternPool, 3, seed);
   const patternChoices = buildChoices(p.pattern, patternDistractors, fmtPattern);
