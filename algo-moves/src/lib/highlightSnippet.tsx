@@ -285,26 +285,31 @@ function tokenizeLine(line: string, keywords: Set<string> | null): Token[] {
   return tokens;
 }
 
+function renderCodeLine(line: string, lang: string, keywords: Set<string> | null): ReactNode {
+  const tone = funcLineTone(line.trim(), lang);
+  if (tone) return renderSignatureLine(line, tone, keywords);
+  return tokenizeLine(line, keywords).map((t, ti) => (
+    <span key={ti} className={t.className}>
+      {t.text}
+    </span>
+  ));
+}
+
 /** Static syntax-colored markup for small reassemble snippets. */
-export function highlightSnippet(code: string, lang = 'go'): ReactNode {
+export function highlightSnippet(code: string, lang = 'go', opts?: { gutter?: boolean }): ReactNode {
   const keywords = keywordsFor(lang);
   const lines = code.split('\n');
   return lines.map((line, li) => {
     const tone = funcLineTone(line.trim(), lang);
-    if (tone) {
-      return (
-        <div key={li} className={`piece-code-line ${tone}`}>
-          {renderSignatureLine(line, tone, keywords)}
-        </div>
-      );
-    }
+    const body = renderCodeLine(line, lang, keywords);
     return (
-      <div key={li} className="piece-code-line">
-        {tokenizeLine(line, keywords).map((t, ti) => (
-          <span key={ti} className={t.className}>
-            {t.text}
+      <div key={li} className={`piece-code-line${tone ? ` ${tone}` : ''}`}>
+        {opts?.gutter && (
+          <span className="piece-code-gutter" aria-hidden>
+            {li + 1}
           </span>
-        ))}
+        )}
+        <span className="piece-code-text">{body}</span>
       </div>
     );
   });

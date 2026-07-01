@@ -18,6 +18,12 @@ export function parseMobileHash(hash: string): MobileHashTarget | null {
   return {};
 }
 
+/** Full URL that opens Swipe mode on the current origin (for QR / copy link). */
+export function buildMobileModeUrl(): string {
+  if (typeof location === 'undefined') return '#mobile';
+  return `${location.origin}${location.pathname}${location.search || ''}#mobile`;
+}
+
 /** Write the mobile hash without a full page reload. */
 export function writeMobileHash(target?: MobileHashTarget | null, opts?: { replace?: boolean }) {
   if (typeof location === 'undefined') return;

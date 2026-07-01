@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { parseMobileHash } from './mobileHash';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { buildMobileModeUrl, parseMobileHash } from './mobileHash';
 
 describe('mobileHash', () => {
   it('parses bare mobile hash', () => {
@@ -19,5 +19,19 @@ describe('mobileHash', () => {
 
   it('returns null for non-mobile hash', () => {
     expect(parseMobileHash('#home')).toBeNull();
+  });
+});
+
+describe('buildMobileModeUrl', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('builds mobile mode URL from current location', () => {
+    vi.stubGlobal('location', {
+      origin: 'http://192.168.1.5:4321',
+      pathname: '/algo-moves/',
+    });
+    expect(buildMobileModeUrl()).toBe('http://192.168.1.5:4321/algo-moves/#mobile');
   });
 });

@@ -8,7 +8,7 @@ help: ## Show available targets
 install: ## Install dependencies
 	$(NPM) install
 
-dev: ## Start Vite dev server (http://localhost:4321)
+dev: ## Start Vite dev server (Network URL in terminal for phone QR scan)
 	$(NPM) run dev
 
 build: ## Typecheck and build for production

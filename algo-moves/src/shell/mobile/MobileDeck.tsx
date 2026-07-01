@@ -7,7 +7,7 @@ import { buildDeck } from './deckModel';
 import { clearMobileSession, loadMobileSession, saveMobileSession } from './mobileSession';
 import { useSwipe } from './useSwipe';
 import { newQuizRunSeed } from '../../lib/shuffleQuizQuestion';
-import { AnimateCardView, CompleteScreen, QuizCardView, ReassembleCardView } from './MobileCards';
+import { AnimateCardView, CompleteScreen, GistCardView, QuizCardView, ReassembleCardView } from './MobileCards';
 
 function initialIndices(
   topicId: string,
@@ -111,6 +111,17 @@ export function MobileDeck({
       setCIdx(Math.max(0, prev.cards.length - 1));
     }
   }, [blocks, cIdx, pIdx]);
+
+  const goToCard = useCallback(
+    (targetCIdx: number) => {
+      if (!block) return;
+      const clamped = Math.min(Math.max(0, targetCIdx), block.cards.length - 1);
+      if (clamped === cIdx) return;
+      setDir(clamped > cIdx ? 1 : -1);
+      setCIdx(clamped);
+    },
+    [block, cIdx],
+  );
 
   const restartQuiz = useCallback(() => {
     const b = blocks[pIdx];
@@ -232,6 +243,8 @@ export function MobileDeck({
               onNextCategory={nextTopic ? () => onGoTopic(nextTopic.id) : undefined}
               nextCategoryTitle={nextTopic?.title}
             />
+          ) : block && card?.kind === 'gist' ? (
+            <GistCardView card={card} block={block} problemIndex={pIdx} problemCount={blocks.length} onContinue={advance} />
           ) : block && card?.kind === 'animate' ? (
             <AnimateCardView block={block} problemIndex={pIdx} problemCount={blocks.length} onContinue={advance} onOpenStudio={openStudio} />
           ) : block && card?.kind === 'quiz' ? (
@@ -243,6 +256,14 @@ export function MobileDeck({
               onAnswered={onAnswered}
               onAdvance={advance}
               onRestartQuiz={restartQuiz}
+              onPrev={back}
+              onNext={advance}
+              canPrev={pIdx > 0 || cIdx > 0}
+              canNext={cIdx < block.cards.length - 1 || pIdx < blocks.length - 1}
+              onGoToQuestion={(qIndex) => {
+                const i = block.cards.findIndex((c) => c.kind === 'quiz' && c.qIndex === qIndex);
+                if (i >= 0) goToCard(i);
+              }}
             />
           ) : block && card?.kind === 'reassemble' ? (
             <ReassembleCardView card={card} block={block} onComplete={advance} onSkip={advance} onOpenStudio={openStudio} />

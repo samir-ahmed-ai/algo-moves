@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Brain,
   Check,
+  ChevronLeft,
   ChevronRight,
   LayoutGrid,
   Lightbulb,
@@ -18,7 +19,8 @@ import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { ReassemblePane } from '../../components/ReassemblePane';
 import { quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '../../lib/quizConstants';
-import { correctIndex, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
+import { correctIndex, type GistCard as GistCardData, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
+import { GistScene } from './gistScenes';
 import { MobileVizShell } from './MobileVizShell';
 
 /* ------------------------------------------------------------------ shared */
@@ -67,6 +69,171 @@ function Confetti() {
           style={{ left: b.left, background: b.hue, animationDelay: b.delay, animationDuration: b.dur }}
         />
       ))}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------- gist */
+
+const GIST_SECONDS = 10;
+
+/** Depleting ring that doubles as a pause toggle for the auto-advance. */
+function TimerRing({
+  remaining,
+  total,
+  paused,
+  onToggle,
+}: {
+  remaining: number;
+  total: number;
+  paused: boolean;
+  onToggle: () => void;
+}) {
+  const r = 15;
+  const circ = 2 * Math.PI * r;
+  const frac = Math.max(0, Math.min(1, remaining / total));
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      data-noswipe
+      aria-label={paused ? 'Resume auto-advance' : `Pause — starts in ${Math.ceil(remaining)}s`}
+      className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink2 transition-colors hover:text-ink"
+    >
+      <svg viewBox="0 0 40 40" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden>
+        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--border-strong)" strokeWidth="3" />
+        <circle
+          cx="20"
+          cy="20"
+          r={r}
+          fill="none"
+          stroke="var(--accent)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={circ * (1 - frac)}
+          style={{ transition: 'stroke-dashoffset 90ms linear' }}
+        />
+      </svg>
+      {paused ? (
+        <Play className="h-3.5 w-3.5" />
+      ) : (
+        <span className="text-[12px] font-semibold tabular-nums text-ink">{Math.ceil(remaining)}</span>
+      )}
+    </button>
+  );
+}
+
+/**
+ * Problem intro: a big creative scene + one concise "ask", then it jumps to the
+ * action after a 10s countdown (or the moment the student taps Start / Skip).
+ */
+export function GistCardView({
+  card,
+  block,
+  problemIndex,
+  problemCount,
+  onContinue,
+}: {
+  card: GistCardData;
+  block: ProblemBlock;
+  problemIndex: number;
+  problemCount: number;
+  onContinue: () => void;
+}) {
+  const { item } = block;
+  const tint = tintFor(item);
+  const [remaining, setRemaining] = useState(GIST_SECONDS);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const onContinueRef = useRef(onContinue);
+  onContinueRef.current = onContinue;
+
+  // One rAF loop per problem; pause freezes it without resetting the clock.
+  useEffect(() => {
+    pausedRef.current = false;
+    setPaused(false);
+    setRemaining(GIST_SECONDS);
+    let raf = 0;
+    let last = performance.now();
+    let acc = 0;
+    let done = false;
+    const tick = (now: number) => {
+      const dt = now - last;
+      last = now;
+      if (!pausedRef.current && document.visibilityState === 'visible') {
+        acc += dt;
+        const left = Math.max(0, GIST_SECONDS - acc / 1000);
+        setRemaining(left);
+        if (left <= 0 && !done) {
+          done = true;
+          onContinueRef.current();
+          return;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [card.key]);
+
+  const togglePause = () => {
+    const next = !pausedRef.current;
+    pausedRef.current = next;
+    setPaused(next);
+  };
+
+  return (
+    <div className="mobile-card-shell mobile-gist-card flex flex-1 flex-col px-5 pt-3">
+      <div className="flex shrink-0 items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink3">
+          Problem {problemIndex + 1} of {problemCount}
+        </span>
+        <TimerRing remaining={remaining} total={GIST_SECONDS} paused={paused} onToggle={togglePause} />
+      </div>
+
+      <div
+        className="mobile-gist-stage relative mt-2 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-3xl border border-edge/60 bg-panel2/40 text-ink2"
+        data-noswipe
+      >
+        <GistScene key={item.id} item={item} className="h-full w-full" />
+      </div>
+
+      <div className="shrink-0 pt-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {block.pattern && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+              <Sparkles className="h-3 w-3" />
+              {block.pattern}
+            </span>
+          )}
+          <DiffChip item={item} />
+        </div>
+        <h2 className="mobile-gist-ask mt-2 text-[20px] font-semibold leading-snug tracking-tight text-ink">
+          {card.gist}
+        </h2>
+        <p className="mt-1 text-[13px] text-ink3">{item.title}</p>
+      </div>
+
+      <div className="mt-4 flex shrink-0 flex-col gap-2 pb-1">
+        <button
+          type="button"
+          onClick={onContinue}
+          className="inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[15px] font-semibold text-white shadow-[var(--shadow-lg)]"
+          style={{ background: tint }}
+        >
+          Start
+          <ArrowRight className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onContinue}
+          className="inline-flex items-center justify-center gap-1 self-center rounded-full px-4 py-1.5 text-[12px] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
+        >
+          Skip intro
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -145,6 +312,11 @@ export function QuizCardView({
   onAnswered,
   onAdvance,
   onRestartQuiz,
+  onPrev,
+  onNext,
+  canPrev,
+  canNext,
+  onGoToQuestion,
 }: {
   card: QuizCardData;
   block: ProblemBlock;
@@ -153,6 +325,11 @@ export function QuizCardView({
   onAnswered: (correct: boolean) => void;
   onAdvance: () => void;
   onRestartQuiz: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+  canPrev: boolean;
+  canNext: boolean;
+  onGoToQuestion: (qIndex: number) => void;
 }) {
   const { item } = block;
   const { question } = card;
@@ -209,22 +386,41 @@ export function QuizCardView({
     else onRestartQuiz();
   };
 
+  const leaveQuestion = () => {
+    if (timer.current) window.clearTimeout(timer.current);
+    onNext();
+  };
+
+  const goBack = () => {
+    if (timer.current) window.clearTimeout(timer.current);
+    onPrev();
+  };
+
   return (
     <div className="mobile-card-shell ws-scroll relative flex flex-1 flex-col overflow-y-auto px-5 pt-4">
       {answered && isCorrect && <Confetti />}
       <div className="flex items-center gap-2">
         <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink3">{item.title}</span>
         <span className="ml-auto inline-flex items-center gap-1.5" aria-label={`Question ${card.qIndex} of ${card.qCount}`}>
-          {Array.from({ length: card.qCount }, (_, i) => (
-            <span
-              key={i}
-              className="h-1.5 rounded-full transition-all"
-              style={{
-                width: i === card.qIndex - 1 ? 16 : 6,
-                background: i < card.qIndex - 1 ? 'var(--good)' : i === card.qIndex - 1 ? 'var(--accent)' : 'var(--border-strong)',
-              }}
-            />
-          ))}
+          {Array.from({ length: card.qCount }, (_, i) => {
+            const active = i === card.qIndex - 1;
+            return (
+              <button
+                key={i}
+                type="button"
+                data-noswipe
+                onClick={() => onGoToQuestion(i + 1)}
+                aria-label={`Go to question ${i + 1}`}
+                aria-current={active ? 'step' : undefined}
+                className="rounded-full transition-all"
+                style={{
+                  width: active ? 16 : 6,
+                  height: 6,
+                  background: i < card.qIndex - 1 ? 'var(--good)' : active ? 'var(--accent)' : 'var(--border-strong)',
+                }}
+              />
+            );
+          })}
         </span>
       </div>
 
@@ -283,16 +479,27 @@ export function QuizCardView({
       )}
 
       <div className="mt-auto" />
-      {answered && (
+
+      <div className="sticky bottom-0 -mx-5 flex shrink-0 items-center gap-2 border-t border-edge/60 bg-panel/95 px-5 py-3 backdrop-blur-sm" data-noswipe>
         <button
           type="button"
-          onClick={skipWait}
-          className="mb-5 mt-3 inline-flex items-center justify-center gap-1.5 self-center rounded-full bg-accent px-5 py-2.5 text-[14px] font-semibold text-white"
+          onClick={goBack}
+          disabled={!canPrev}
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-edge bg-panel px-4 py-2.5 text-[13px] font-medium text-ink2 transition-colors hover:text-ink disabled:opacity-35"
         >
-          {isCorrect ? 'Next' : 'Try again'}
+          <ChevronLeft className="h-4 w-4" />
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={answered && !isCorrect ? skipWait : leaveQuestion}
+          disabled={!canNext && !(answered && !isCorrect)}
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-white disabled:opacity-35"
+        >
+          {answered && !isCorrect ? 'Try again' : answered ? 'Next' : 'Skip'}
           <ChevronRight className="h-4 w-4" />
         </button>
-      )}
+      </div>
     </div>
   );
 }

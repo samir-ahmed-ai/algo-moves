@@ -5,7 +5,7 @@ import type { CodePiece } from '../lib/codePieces';
 import { cn } from '../lib/cn';
 import { hapticError, hapticSuccess } from '../lib/haptic';
 import { pieceHasEntrySignature } from '../lib/highlightSnippet';
-import { balanceTrayColumns } from '../lib/trayLayout';
+import { balanceTrayColumns, dedentForDisplay } from '../lib/trayLayout';
 import { CodeBlueprintOverlay } from './CodeBlueprintOverlay';
 import { CodeBlueprintPanel } from './CodeBlueprintPanel';
 import { HighlightedCode } from './HighlightedCode';
@@ -83,8 +83,10 @@ function BarIconButton({
   );
 }
 
-function PieceCode({ code, lang, wrap }: { code: string; lang: string; wrap?: boolean }) {
-  return <HighlightedCode code={code} lang={lang} wrap={wrap} />;
+function PieceCode({ code, lang, wrap, gutter }: { code: string; lang: string; wrap?: boolean; gutter?: boolean }) {
+  const display = dedentForDisplay(code);
+  const showGutter = gutter && display.includes('\n');
+  return <HighlightedCode code={display} lang={lang} wrap={wrap} gutter={showGutter} />;
 }
 
 export function ReassemblePane({
@@ -395,7 +397,7 @@ export function ReassemblePane({
           {i < 9 ? i + 1 : '·'}
         </span>
       )}
-      <PieceCode code={p.code} lang={lang} wrap={mobileWrap} />
+      <PieceCode code={p.code} lang={lang} wrap={!mobileWrap} gutter={mobileWrap} />
     </div>
   );
 
@@ -518,7 +520,7 @@ export function ReassemblePane({
               <span className="piece-line-num" aria-hidden>
                 {i + 1}
               </span>
-              <PieceCode code={p.code} lang={lang} wrap={mobileWrap} />
+              <PieceCode code={p.code} lang={lang} wrap={!mobileWrap} gutter={mobileWrap} />
             </div>
           ))}
           {!done && expected && (
@@ -566,7 +568,7 @@ export function ReassemblePane({
             }}
             aria-hidden
           >
-            <PieceCode code={pointerGhost.piece.code} lang={lang} wrap={mobileWrap} />
+            <PieceCode code={pointerGhost.piece.code} lang={lang} wrap={!mobileWrap} gutter={mobileWrap} />
           </div>,
           document.body,
         )}

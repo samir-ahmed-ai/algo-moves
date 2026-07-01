@@ -5,13 +5,16 @@ import { parseQuizChoiceLabel } from '../../lib/quizChoiceFormat';
 import { buildDeck, deckSummary } from './deckModel';
 
 describe('deckModel', () => {
-  it('buildDeck puts animate first, then quiz, then reassemble', () => {
+  it('buildDeck puts gist first, then animate, then quiz, then reassemble', () => {
     const topic = catalog.getTopic('placement');
     expect(topic).toBeDefined();
     const deck = buildDeck(topic!);
     expect(deck.blocks.length).toBeGreaterThan(0);
     for (const block of deck.blocks) {
-      expect(block.cards[0]?.kind).toBe('animate');
+      expect(block.cards[0]?.kind).toBe('gist');
+      expect(block.cards[1]?.kind).toBe('animate');
+      const gist = block.cards[0];
+      expect(gist.kind === 'gist' && gist.gist.length).toBeGreaterThan(0);
       const kinds = block.cards.map((c) => c.kind);
       const quizIdx = kinds.indexOf('quiz');
       const asmIdx = kinds.indexOf('reassemble');
@@ -29,13 +32,13 @@ describe('deckModel', () => {
     expect(quizCards.length).toBe(hasQuiz ? getPlugin('n-queens')!.quiz!.length : 0);
   });
 
-  it('skips reassemble when fewer than four code pieces', () => {
+  it('skips reassemble when fewer than two code pieces', () => {
     const topic = catalog.getTopic('placement');
     const deck = buildDeck(topic!);
     for (const block of deck.blocks) {
       const asm = block.cards.some((c) => c.kind === 'reassemble');
       const pieces = block.cards.find((c) => c.kind === 'reassemble');
-      if (asm) expect(pieces && 'pieces' in pieces && pieces.pieces.length).toBeGreaterThanOrEqual(4);
+      if (asm) expect(pieces && 'pieces' in pieces && pieces.pieces.length).toBeGreaterThanOrEqual(2);
     }
   });
 

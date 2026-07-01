@@ -5,16 +5,22 @@
  */
 import { getPlugin } from '../../core';
 import type { CodePiece, PluginCode, ProblemPlugin, QuizQuestion } from '../../core/types';
-import { resolveCodePieces } from '../../lib/codePieces';
+import { resolveCodePieces, MIN_REASSEMBLE_PIECES } from '../../lib/codePieces';
 import type { Item, Topic } from '../../content';
+import { gistFor } from './gist';
 
-export type MobileCardKind = 'animate' | 'quiz' | 'reassemble';
+export type MobileCardKind = 'gist' | 'animate' | 'quiz' | 'reassemble';
 
 interface BaseCard {
   /** Stable key within the deck. */
   key: string;
 }
 
+export interface GistCard extends BaseCard {
+  kind: 'gist';
+  /** One concise statement of what the problem asks. */
+  gist: string;
+}
 export interface AnimateCard extends BaseCard {
   kind: 'animate';
 }
@@ -30,7 +36,7 @@ export interface ReassembleCard extends BaseCard {
   pieces: CodePiece[];
 }
 
-export type MobileCard = AnimateCard | QuizCard | ReassembleCard;
+export type MobileCard = GistCard | AnimateCard | QuizCard | ReassembleCard;
 
 /** One problem's worth of cards, plus the resolved metadata the cards render. */
 export interface ProblemBlock {
@@ -93,7 +99,10 @@ function blockFor(item: Item): ProblemBlock | null {
   const pieces = code?.text ? resolveCodePieces(code.text, plugin.codePieces) : null;
   const tags = item.tags ?? [];
 
-  const cards: MobileCard[] = [{ kind: 'animate', key: `${item.id}:anim` }];
+  const cards: MobileCard[] = [
+    { kind: 'gist', key: `${item.id}:gist`, gist: gistFor(item) },
+    { kind: 'animate', key: `${item.id}:anim` },
+  ];
 
   quiz.forEach((question, i) => {
     cards.push({
@@ -105,7 +114,7 @@ function blockFor(item: Item): ProblemBlock | null {
     });
   });
 
-  if (pieces && pieces.length >= 4) {
+  if (pieces && pieces.length >= MIN_REASSEMBLE_PIECES) {
     cards.push({ kind: 'reassemble', key: `${item.id}:asm`, pieces });
   }
 

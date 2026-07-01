@@ -1,11 +1,7 @@
 import type { CodePiece } from '../../core/types';
+import { mergeBraceOnlyPieces, stripPreamblePieces, MIN_REASSEMBLE_PIECES, assembleDraft } from '../../lib/codePieces';
 
 const MIN_PIECES = 4;
-
-function indentOf(line: string): number {
-  const m = line.match(/^(\s*)/);
-  return m ? m[1].length : 0;
-}
 
 function roleFromLine(line: string): string {
   const t = line.trim();
@@ -25,13 +21,12 @@ function stableId(index: number, firstLine: string): string {
   return `p${index}-${slug}`;
 }
 
-function isBoundary(trimmed: string, indent: number, prevIndent: number): boolean {
+function isBoundary(trimmed: string): boolean {
   if (/^func\s/.test(trimmed)) return true;
   if (/^for\s/.test(trimmed)) return true;
   if (/^if\s/.test(trimmed)) return true;
   if (/^else/.test(trimmed)) return true;
   if (/^return\s/.test(trimmed)) return true;
-  if (trimmed === '}' && indent <= prevIndent) return true;
   return false;
 }
 
@@ -49,18 +44,15 @@ function toPieces(rawBlocks: string[][]): CodePiece[] {
 function splitByBoundaries(lines: string[]): CodePiece[] | null {
   const rawBlocks: string[][] = [];
   let current: string[] = [];
-  let prevIndent = 0;
 
   for (const line of lines) {
     const trimmed = line.trim();
-    const indent = indentOf(line);
-    if (current.length > 0 && isBoundary(trimmed, indent, prevIndent)) {
+    if (current.length > 0 && isBoundary(trimmed)) {
       rawBlocks.push(current);
       current = [line];
     } else {
       current.push(line);
     }
-    prevIndent = indent;
   }
   if (current.length > 0) rawBlocks.push(current);
 
@@ -96,5 +88,10 @@ function splitEvenly(lines: string[]): CodePiece[] | null {
 export function prepCodePieces(source: string): CodePiece[] | null {
   const lines = source.split('\n');
   if (lines.filter((l) => l.trim()).length < MIN_PIECES) return null;
-  return splitByBoundaries(lines) ?? splitEvenly(lines);
+  const raw = splitByBoundaries(lines) ?? splitEvenly(lines);
+  if (!raw || raw.length < MIN_REASSEMBLE_PIECES) return null;
+  const stripped = stripPreamblePieces(mergeBraceOnlyPieces(raw));
+  if (stripped.length < MIN_REASSEMBLE_PIECES) return null;
+  if (assembleDraft(source, stripped).trimEnd() !== source.trimEnd()) return null;
+  return stripped;
 }
