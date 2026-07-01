@@ -1,5 +1,7 @@
 # Algo Moves
 
+**Live demo:** [samir-ahmed-ai.github.io/algo-moves](https://samir-ahmed-ai.github.io/algo-moves/) · **Best on mobile:** [Swipe mode ↗](https://samir-ahmed-ai.github.io/algo-moves/#mobile)
+
 **Step through algorithms like a chess transcript.**
 
 *Learn the way AI learns — test yourself, get feedback, repeat until it sticks.*
@@ -14,8 +16,6 @@ A plugin-driven visual learning app for coding interview prep. ~400 problems fro
 ```bash
 cd algo-moves && npm install && npm run dev   # → http://localhost:4321
 ```
-
-**Live demo:** [samir-ahmed-ai.github.io/algo-moves](https://samir-ahmed-ai.github.io/algo-moves/) · **Best on mobile:** [Swipe mode ↗](https://samir-ahmed-ai.github.io/algo-moves/#mobile)
 
 ---
 
@@ -40,48 +40,22 @@ That is not punishment. It is how memory forms: testing your brain over and over
 
 > **Built into the product:** wrong quiz answers trigger an automatic full restart (~1.9 s feedback, then back to Q1 with reshuffled choices). Mastery unlocks at a **3-streak**. See [Quiz & Code Studio](algo-moves/docs/quiz-and-code-studio.md) for the full rules.
 
----
-
-## Best on mobile — Swipe mode
-
-The app is designed for your phone. Add it to your home screen — the PWA opens directly in **Swipe mode** (`#mobile`).
-
-![Swipe mode mobile deck](algo-moves/docs/assets/mobile-swipe-deck.svg)
-
-| | |
-|---|---|
-| **Full-screen deck** | Swipe through a topic — no sidebars, no clutter |
-| **Animate → quiz → rebuild** | Watch moves, answer questions, reassemble code from pieces |
-| **Restart-on-wrong** | One wrong pick resets the deck run — same loop as desktop Code Studio |
-| **Open now** | [samir-ahmed-ai.github.io/algo-moves/#mobile](https://samir-ahmed-ai.github.io/algo-moves/#mobile) |
-
-On desktop? Use the workspace for deep study. On your phone? **Swipe mode** is the fastest path to mastery.
-
----
-
 ## Features
-
-| | |
-|---|---|
-| **Visualize** | Step player, move log, inspector, shareable replay URLs |
-| **Learn** | Cases · quiz · simulate-next-move · Code Studio (quiz → reassemble → recall) |
-| **Practice loop** | Wrong answer → full restart · shuffled choices · 3-streak mastery |
-| **Mobile deck** | Swipe deck for topic drilling — [`#mobile`](https://samir-ahmed-ai.github.io/algo-moves/#mobile) |
-| **~400 problems** | 271 prep + 91 progress imports + 18 hand-built plugins — all with step simulators |
-
-Built with React 18 · TypeScript 5 · Vite 5 · Tailwind · Radix UI · CodeMirror 6 · React Flow.
-
----
-
-## How it works
 
 Every problem is a **move transcript** you can scrub, replay, and drill:
 
-| Step | Mode | What you do |
-|------|------|-------------|
-| **1. Visualize** | Canvas | Replay the algorithm on graphs, grids, arrays, and trees — step by step |
-| **2. Learn** | Code Studio | Read the pattern, take the quiz, reassemble the solution from its pieces |
-| **3. Practice** | Swipe deck / quiz panels | Predict each step; miss and the run resets until the pattern sticks |
+| Mode | What you get |
+|------|--------------|
+| **Visualize** | Step player, move log, inspector, shareable replay URLs — replay algorithms on graphs, grids, arrays, and trees |
+| **Learn** | Cases · quiz · simulate-next-move · Code Studio (quiz → reassemble → blind recall) |
+| **Practice** | Wrong answer → full restart · shuffled choices · 3-streak mastery |
+| **Mobile** | Full-screen swipe deck — add the PWA to your home screen; it opens directly at `#mobile` |
+
+![Swipe mode mobile deck](algo-moves/docs/assets/mobile-swipe-deck.svg)
+
+Built with React 18 · TypeScript 5 · Vite 5 · Tailwind · Radix UI · CodeMirror 6 · React Flow.
+
+~400 problems: 271 prep + 91 progress imports + 18 hand-built plugins — all with step simulators.
 
 ---
 
@@ -95,15 +69,11 @@ Every problem is a **move transcript** you can scrub, replay, and drill:
 | [**Design tokens**](algo-moves/src/design/README.md) | Typography and layout token hierarchy |
 | [**Attributions**](algo-moves/ATTRIBUTIONS.md) | LeetCode, HackerRank, and third-party notices |
 
----
-
 ## Attribution
 
 Problem **statements** draw from LeetCode, HackerRank, and educational classics. All **solutions, simulators, quizzes, and visualizations** in this repository are original implementations for personal study.
 
 LeetCode and HackerRank are trademarks of their respective owners. This project is **not affiliated with either platform**. See [`algo-moves/ATTRIBUTIONS.md`](algo-moves/ATTRIBUTIONS.md) for the full notice.
-
----
 
 ## License
 
