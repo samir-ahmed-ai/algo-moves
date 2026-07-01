@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface ReInput {
   s: string;
@@ -124,7 +123,6 @@ function View({ frame }: PluginViewProps<ReState>) {
   const n = s.p.length;
   const display = buildDisplay(s);
   const final = s.dp[m][n];
-  const ans = final === null ? '…filling' : final ? 'match' : 'no match';
   const displayActive: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
@@ -132,14 +130,20 @@ function View({ frame }: PluginViewProps<ReState>) {
     const v = s.dp[r - 1][c - 1];
     return v === null ? '' : 'visited';
   };
+  const cellVal = s.cur ? s.dp[s.cur[0]][s.cur[1]] : null;
+  const cellStr = cellVal === null ? '—' : cellVal ? '✓' : '✗';
+  const ansDone = final !== null;
+  const ansLabel = final === null ? '…' : final ? 'match' : 'no match';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        <span className="font-mono text-ink">"{s.s}"</span> vs pattern <span className="font-mono text-ink">"{s.p}"</span>, result ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="cell">
+        <RailStat k="pos" v={s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—'} />
+        <RailStat k="val" v={cellStr} tone={cellVal === true ? 'good' : cellVal === false ? 'bad' : undefined} />
+      </RailGroup>
+      <RailResult label="answer" value={ansLabel} tone={ansDone ? (final ? 'good' : 'bad') : 'accent'} />
+    </>}>
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={36} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -166,7 +170,7 @@ function Inspector({ frame }: InspectorProps<ReState>) {
 export const manifestId = 'imp-82-regular-expression-matching';
 export const title = 'Regular Expression Matching';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'aa-astar', label: '"aa" ~ "a*"', value: { s: 'aa', p: 'a*' } },
     { id: 'ab-dotstar', label: '"ab" ~ ".*"', value: { s: 'ab', p: '.*' } },

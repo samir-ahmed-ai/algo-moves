@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface Point {
   x: number;
@@ -215,45 +214,27 @@ function View({ frame }: PluginViewProps<OverlapState>) {
   }
 
   const axisLabel = axis === 'x' ? 'X axis' : 'Y axis';
-  const verdictText =
-    s.result === null ? '…' : s.result ? 'OVERLAP' : 'no overlap';
+
+  const rail = (
+    <>
+      <RailGroup label={axisLabel}>
+        <RailStat k="max(L)" v={s.maxLeft ?? '—'} tone="warn" />
+        <RailStat k="min(R)" v={s.minRight ?? '—'} tone="accent" />
+      </RailGroup>
+      <RailGroup label="axes">
+        <RailStat k="X" v={s.xPass === null ? '…' : s.xPass ? '✓' : '✗'} tone={s.xPass === null ? undefined : s.xPass ? 'good' : 'bad'} />
+        <RailStat k="Y" v={s.yPass === null ? '…' : s.yPass ? '✓' : '✗'} tone={s.yPass === null ? undefined : s.yPass ? 'good' : 'bad'} />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="overlap" value={s.result ? 'true' : 'false'} tone={s.result ? 'good' : 'bad'} />
+      )}
+    </>
+  );
 
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {axisLabel} projection · A ={' '}
-        <span className="font-mono text-ink">
-          [{spanA[0]},{spanA[1]}]
-        </span>{' '}
-        B ={' '}
-        <span className="font-mono text-ink">
-          [{spanB[0]},{spanB[1]}]
-        </span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={track} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        max(lefts) ={' '}
-        <span className="text-ink">{s.maxLeft ?? '—'}</span>
-        {'  ·  '}min(rights) ={' '}
-        <span className="text-ink">{s.minRight ?? '—'}</span>
-      </div>
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        X: <span className="font-mono text-ink">{s.xPass === null ? '…' : s.xPass ? '✓' : '✗'}</span>
-        {'   '}Y:{' '}
-        <span className="font-mono text-ink">{s.yPass === null ? '…' : s.yPass ? '✓' : '✗'}</span>
-      </div>
-      {s.done && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result ? 'text-good' : 'text-bad',
-          )}
-        >
-          → {verdictText}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

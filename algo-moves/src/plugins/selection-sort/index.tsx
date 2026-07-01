@@ -5,6 +5,7 @@ import { createSelectionSortRecorder } from '../_shared/sortRecorder';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { SortInspector } from '../_shared/sortInspector';
+import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface SortInput {
   values: number[];
@@ -52,6 +53,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
 
 function View({ frame }: PluginViewProps<SortState>) {
   const s = frame.state;
+  const done = frame.move.type === 'DONE';
   const tone = (i: number): BarTone => {
     if (i < s.sortedUpto) return 'sorted';
     if (i === s.minIdx) return 'min';
@@ -59,9 +61,19 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <div className="board-area">
+    <VizStage rail={<>
+      <RailGroup label="round">
+        <RailStat k="min@" v={s.minIdx ?? '—'} tone="accent" />
+        <RailStat k="sorted" v={s.sortedUpto} tone={s.sortedUpto > 0 ? 'good' : undefined} />
+      </RailGroup>
+      <RailGroup label="stats">
+        <RailStat k="cmps" v={s.comparisons} />
+        <RailStat k="swaps" v={s.swaps} />
+      </RailGroup>
+      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+    </>}>
       <ArrayBars values={s.values} tone={tone} height={242} />
-    </div>
+    </VizStage>
   );
 }
 

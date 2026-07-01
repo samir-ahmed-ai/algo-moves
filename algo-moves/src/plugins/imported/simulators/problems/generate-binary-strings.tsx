@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, PathDisplay, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, PathDisplay } from '../../../_shared/vizKit';
 
 interface BinInput {
   n: number;
@@ -73,23 +72,15 @@ function record({ n }: BinInput): Frame<BinState>[] {
 function View({ frame }: PluginViewProps<BinState>) {
   const s = frame.state;
   return (
-    <div className="board-area board-area--text">
-      <div className={cn(vizText.sm, 'text-ink3')}>building binary strings · length {s.n}</div>
+    <VizStage rail={<>
+      <RailStack label="found" items={s.results} />
+      <RailGroup label="path">
+        <RailStat k="bits" v={`${s.path.length} / ${s.n}`} />
+      </RailGroup>
+      {s.done && <RailResult label="total" value={s.results.length} tone="good" />}
+    </>}>
       <PathDisplay value={s.path || '·'} />
-      <div className={cn(vizText.sm, 'text-ink2')}>
-        {s.done ? 'all strings generated' : `${s.path.length} / ${s.n} bits placed`}
-      </div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        binary strings found ({s.results.length})
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('chip font-mono text-ink', vizText.sm)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -109,7 +100,7 @@ function Inspector({ frame }: InspectorProps<BinState>) {
 export const manifestId = 'imp-32-generate-binary-strings';
 export const title = 'Generate Binary Strings';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'n3', label: 'n = 3', value: { n: 3 } },
     { id: 'n2', label: 'n = 2', value: { n: 2 } },

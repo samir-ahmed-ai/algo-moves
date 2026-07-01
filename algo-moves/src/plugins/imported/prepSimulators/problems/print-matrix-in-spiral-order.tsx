@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { GridBoard } from '../../../../components/GridBoard';
 
 interface SpiralInput {
@@ -185,23 +184,20 @@ function View({ frame }: PluginViewProps<SpiralState>) {
     if (s.visited[r]?.[c]) return 'visited';
     return 'land';
   };
+  const rail = (
+    <>
+      <RailGroup label="bounds">
+        <RailStat k="r" v={`${s.startR}..${s.endR}`} />
+        <RailStat k="c" v={`${s.startC}..${s.endC}`} />
+      </RailGroup>
+      <RailStack label="result" items={s.res.map(String)} />
+      {s.done && <RailResult label="spiral" value={`[${s.res.join(', ')}]`} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        bounds rows{' '}
-        <span className="font-mono text-ink">
-          [{s.startR}..{s.endR}]
-        </span>{' '}
-        · cols{' '}
-        <span className="font-mono text-ink">
-          [{s.startC}..{s.endC}]
-        </span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={s.mat} cellTone={cellTone} active={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
-        → [{s.res.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

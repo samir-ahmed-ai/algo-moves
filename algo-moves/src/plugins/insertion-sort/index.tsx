@@ -4,7 +4,7 @@ import { createInsertionSortRecorder } from '../_shared/sortRecorder';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
-import { InspectorRow } from '../_shared/vizKit';
+import { InspectorRow, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 import { SortInspector } from '../_shared/sortInspector';
 
 export interface SortInput {
@@ -88,6 +88,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
 
 function View({ frame }: PluginViewProps<SortState>) {
   const s = frame.state;
+  const done = frame.move.type === 'DONE';
   const tone = (i: number): BarTone => {
     if (i === s.keyIdx) return 'pivot';
     if (i === s.compare) return 'compare';
@@ -95,9 +96,21 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <div className="board-area">
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="key" v={s.key ?? '—'} tone="accent" />
+        <RailStat k="keyIdx" v={s.keyIdx ?? '—'} />
+        <RailStat k="compare" v={s.compare ?? '—'} />
+      </RailGroup>
+      <RailGroup label="progress">
+        <RailStat k="sorted" v={s.sortedUpto} tone={s.sortedUpto > 0 ? 'good' : undefined} />
+        <RailStat k="cmps" v={s.comparisons} />
+        <RailStat k="shifts" v={s.shifts} />
+      </RailGroup>
+      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+    </>}>
       <ArrayBars values={s.values} tone={tone} height={242} />
-    </div>
+    </VizStage>
   );
 }
 

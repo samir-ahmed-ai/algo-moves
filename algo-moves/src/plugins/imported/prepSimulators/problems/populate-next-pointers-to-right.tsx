@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 // The tree is a level-order array; children of i live at 2i+1 and 2i+2, and a
 // null marks an absent slot. The algorithm wires each node's `next` pointer to
@@ -27,31 +27,19 @@ const L = (i: number) => 2 * i + 1;
 const R = (i: number) => 2 * i + 2;
 
 function record({ tree }: PopulateInput): Frame<PopulateState>[] {
-  const frames: Frame<PopulateState>[] = [];
   const n = tree.length;
   const next = new Array<number | null>(n).fill(null);
   const present = (i: number) => i >= 0 && i < n && tree[i] != null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<PopulateState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        next: next.slice(),
-        leftmost: null,
-        cur: null,
-        wiredChild: null,
-        wiredTo: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<PopulateState>(() => ({
+    tree,
+    next: next.slice(),
+    leftmost: null,
+    cur: null,
+    wiredChild: null,
+    wiredTo: null,
+    done: false,
+  }));
 
   if (!present(0)) {
     emit('DONE', 'empty', 'The tree is empty, so there is nothing to connect.', { done: true }, 'bad');
@@ -142,7 +130,6 @@ function View({ frame }: PluginViewProps<PopulateState>) {
     return 'team-0';
   };
 
-  // Render the next-links as readable arrows so the invisible pointers show.
   const links: string[] = [];
   for (let i = 0; i < s.tree.length; i++) {
     if (s.tree[i] != null && s.next[i] !== null) {
@@ -151,26 +138,31 @@ function View({ frame }: PluginViewProps<PopulateState>) {
     }
   }
 
+  const label = (i: number | null) => (i !== null && s.tree[i] != null ? String(s.tree[i]) : '—');
+  const wired = s.next.filter((v) => v !== null).length;
+
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="leftmost" v={label(s.leftmost)} />
+        <RailStat k="cur" v={label(s.cur)} tone="accent" />
+      </RailGroup>
+      <RailStack
+        label="next links"
+        items={links}
+        highlightEnd="bottom"
+      />
+      <RailGroup label="progress">
+        <RailStat k="wired" v={wired} tone={wired > 0 ? 'good' : undefined} />
+      </RailGroup>
+      {s.done && <RailResult label="status" value="connected" tone="good" />}
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.done ? (
-          <>all levels connected</>
-        ) : s.cur !== null ? (
-          <>
-            wiring below node <span className="font-mono text-ink">{s.tree[s.cur]}</span>
-          </>
-        ) : (
-          <>connect each node to its right neighbour</>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <TreeBoard tree={cells} nodeClass={nodeClass} activeNode={s.cur} highlightChild={s.wiredChild} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        next {'{'}
-        {links.join(', ')}
-        {'}'}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

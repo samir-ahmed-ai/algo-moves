@@ -60,12 +60,3 @@ export function SortInspector<S extends SortInspectorState>({
     </VizInspector>
   );
 }
-
-/** Build a plugin Inspector from sort-inspector options. */
-export function makeSortInspector<S extends SortInspectorState>(
-  options: SortInspectorOptions<S> = {},
-): (props: InspectorProps<S>) => JSX.Element {
-  return function GeneratedSortInspector(props: InspectorProps<S>) {
-    return <SortInspector {...props} {...options} />;
-  };
-}

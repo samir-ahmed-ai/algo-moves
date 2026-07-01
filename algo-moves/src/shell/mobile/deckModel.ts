@@ -7,7 +7,7 @@ import { getPlugin } from '../../core';
 import type { CodePiece, PluginCode, ProblemPlugin, QuizQuestion } from '../../core/types';
 import { resolveCodePieces, MIN_REASSEMBLE_PIECES } from '../../lib/codePieces';
 import type { Item, Topic } from '../../content';
-import { gistFor } from './gist';
+import { gistFor } from '../../content/gists';
 
 export type MobileCardKind = 'gist' | 'animate' | 'quiz' | 'reassemble';
 

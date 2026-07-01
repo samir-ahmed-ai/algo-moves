@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LVPInput {
   s: string;
@@ -103,16 +102,22 @@ function View({ frame }: PluginViewProps<LVPState>) {
   if (s.i !== null) pointers.push({ i: s.i, label: `i='${s.s[s.i]}'`, tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: 'pulls', tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] > 0 ? 'match' : '');
-  const ans = s.done ? s.best : '…filling';
+  const dpI = s.i !== null && s.dp[s.i] >= 0 ? s.dp[s.i] : '—';
+  const dpFrom = s.from !== null && s.dp[s.from] >= 0 ? s.dp[s.from] : '—';
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i !== null ? `${s.i} ('${s.s[s.i]}')` : '—'} tone={s.i !== null ? 'accent' : undefined} />
+        <RailStat k="dp[i]" v={dpI} />
+        <RailStat k="pulls" v={dpFrom} tone={s.from !== null ? 'warn' : undefined} />
+      </RailGroup>
+      <RailResult label="best" value={s.done ? s.best : s.best > 0 ? s.best : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        s = <span className="font-mono text-ink">"{s.s}"</span>, longest valid ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => s.s[i]} />
-      <div className={cn(vizText.sm, 'text-ink3')}>cell = dp[i] (longest valid run ending at i); index shows the character</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -135,7 +140,7 @@ function Inspector({ frame }: InspectorProps<LVPState>) {
 export const manifestId = 'imp-69-longest-valid-parentheses';
 export const title = 'Longest Valid Parentheses';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'oop', label: 's = "(()"', value: { s: '(()' } },
     { id: 'closes', label: 's = ")()())"', value: { s: ')()())' } },

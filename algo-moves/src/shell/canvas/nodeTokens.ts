@@ -6,7 +6,10 @@ export type NodeTier = 'narrow' | 'standard' | 'wide' | 'board';
 export type PanelSize = { w: number; estH: number; cap?: number };
 
 /** Strudel Flow standard node width (~25% above legacy w-80). */
-export const STRUDEL_NODE_W = 400;
+export const NODE_W = 400;
+
+/** @deprecated Use NODE_W */
+export const STRUDEL_NODE_W = NODE_W;
 
 /** Legacy canvas node width (Tailwind `w-80`). */
 export const LEGACY_STRUDEL_NODE_W = 320;

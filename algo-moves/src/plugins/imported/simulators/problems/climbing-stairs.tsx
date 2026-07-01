@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface StairsInput {
   n: number;
@@ -87,16 +86,27 @@ function View({ frame }: PluginViewProps<StairsState>) {
   if (s.one !== null) pointers.push({ i: s.one, label: 'i−1', tone: 'good', place: 'below' });
   if (s.two !== null) pointers.push({ i: s.two, label: 'i−2', tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== EMPTY ? 'match' : '');
-  const ans = s.dp[s.n] === EMPTY ? '…filling' : s.dp[s.n];
+  const known = s.dp[s.n] !== EMPTY;
+  const cell = (i: number | null) =>
+    i !== null && i >= 0 && i < s.dp.length ? (s.dp[i] === EMPTY ? '·' : s.dp[i]) : '—';
+  const rail = (
+    <>
+      <RailGroup label="step">
+        <RailStat k="n" v={s.n} />
+        <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+      </RailGroup>
+      <RailGroup label="recurrence">
+        <RailStat k="dp[i−1]" v={cell(s.one)} tone="good" />
+        <RailStat k="dp[i−2]" v={cell(s.two)} tone="warn" />
+        <RailStat k="dp[i]" v={cell(s.i)} tone="accent" />
+      </RailGroup>
+      <RailResult label="answer" value={known ? `${s.dp[s.n]} ways` : '…'} tone={known ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        n = <span className="font-mono text-ink">{s.n}</span> steps, answer ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index = step, value = ways to reach it</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -121,7 +131,7 @@ function Inspector({ frame }: InspectorProps<StairsState>) {
 export const manifestId = 'imp-58-climbing-stairs';
 export const title = 'Climbing Stairs';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'cs6', label: 'n = 6', value: { n: 6 } },
     { id: 'cs5', label: 'n = 5', value: { n: 5 } },

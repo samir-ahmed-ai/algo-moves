@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 // The tree is provided in level-order (heap layout): children of index i are
 // 2i+1 (left) and 2i+2 (right); `null` marks an absent slot. TreeBoard consumes
@@ -137,45 +136,29 @@ function View({ frame }: PluginViewProps<VerticalOrderState>) {
   const nodeClass = (i: number) =>
     s.current === i ? 'team-1' : visitedSet.has(i) ? 'team-2' : 'team-0';
   const colMap = new Map(s.colOf);
+  const queueItems = s.queue.map((i) => {
+    const col = colMap.get(i) ?? '?';
+    return `${s.tree[i]}(c${col})`;
+  });
+  const colItems = s.cols.map(([c, vals]) => `col ${c}: [${vals}]`);
+  const resultStr = s.result ? s.result.map((c) => `[${c.join(',')}]`).join(' ') : null;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.current !== null && s.currentCol !== null && !s.done ? (
-          <>
-            visiting <span className="font-mono text-ink">{s.tree[s.current]}</span> · column{' '}
-            <span className="font-mono text-ink">{s.currentCol}</span>
-          </>
-        ) : (
-          <>columns: root = 0, left = −1, right = +1</>
-        )}
-      </div>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="node" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} tone={s.current !== null && !s.done ? 'accent' : undefined} />
+            <RailStat k="col" v={s.currentCol ?? '—'} />
+            <RailStat k="visited" v={s.visited.length} />
+          </RailGroup>
+          <RailStack label="queue" items={queueItems} highlightEnd="bottom" topLabel="front" />
+          <RailStack label="columns" items={colItems} />
+          {resultStr && <RailResult label="answer" value={resultStr} tone="good" />}
+        </>
+      }
+    >
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn('mt-1 flex flex-wrap gap-2 font-mono', vizText.sm, 'text-ink3')}>
-        {s.cols.length === 0 ? (
-          <span>columns: —</span>
-        ) : (
-          s.cols.map(([c, vals]) => (
-            <span key={c}>
-              col {c}: [{vals}]
-            </span>
-          ))
-        )}
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        queue [{s.queue.map((i) => s.tree[i]).join(', ')}]
-        {s.colOf.length > 0 && s.queue.length > 0 && (
-          <span className="text-ink3">
-            {' '}
-            (cols {s.queue.map((i) => colMap.get(i) ?? '?').join(', ')})
-          </span>
-        )}
-      </div>
-      {s.result && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → {s.result.map((c) => `[${c.join(',')}]`).join(', ')}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

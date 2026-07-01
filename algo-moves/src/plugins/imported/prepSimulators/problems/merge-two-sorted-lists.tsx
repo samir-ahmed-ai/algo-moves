@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface MergeInput {
   l1: number[];
@@ -20,37 +20,28 @@ interface MergeState {
 }
 
 function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
-  const frames: Frame<MergeState>[] = [];
   const merged: number[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    i: number | null,
-    j: number | null,
-    from: 'l1' | 'l2' | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { l1, l2, i, j, merged: merged.slice(), from, done },
-    });
-
   let i = 0;
   let j = 0;
+
   const headI = () => (i < l1.length ? i : null);
   const headJ = () => (j < l2.length ? j : null);
+
+  const { emit, frames } = createRecorder<MergeState>(() => ({
+    l1,
+    l2,
+    i: headI(),
+    j: headJ(),
+    merged: merged.slice(),
+    from: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
     `n=${l1.length + l2.length}`,
     `Merge two sorted lists: zip them into one sorted chain. We keep a dummy head and a cur pointer, then repeatedly attach the smaller of the two current heads. List 1 = [${l1.join(', ')}], list 2 = [${l2.join(', ')}].`,
-    headI(),
-    headJ(),
-    null,
-    false,
+    { i: headI(), j: headJ() },
   );
 
   while (i < l1.length && j < l2.length) {
@@ -58,10 +49,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
       'COMPARE',
       `${l1[i]} vs ${l2[j]}`,
       `Both lists still have nodes. Compare the two heads: l1 = ${l1[i]} and l2 = ${l2[j]}. The Go code attaches l1 only when l1.Val < l2.Val, so ties go to l2.`,
-      headI(),
-      headJ(),
-      null,
-      false,
+      { i: headI(), j: headJ() },
     );
     if (l1[i] < l2[j]) {
       merged.push(l1[i]);
@@ -70,10 +58,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
         'ATTACH_L1',
         `take ${merged[merged.length - 1]}`,
         `${merged[merged.length - 1]} (from l1) is smaller, so attach it to the result and advance l1's head. cur now sits on the node we just appended.`,
-        headI(),
-        headJ(),
-        'l1',
-        false,
+        { i: headI(), j: headJ(), from: 'l1' },
       );
     } else {
       merged.push(l2[j]);
@@ -82,10 +67,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
         'ATTACH_L2',
         `take ${merged[merged.length - 1]}`,
         `l2's head (${merged[merged.length - 1]}) is smaller or equal, so attach it and advance l2's head. cur moves to the appended node.`,
-        headI(),
-        headJ(),
-        'l2',
-        false,
+        { i: headI(), j: headJ(), from: 'l2' },
       );
     }
   }
@@ -97,10 +79,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
       'APPEND_REST',
       `+[${rest.join(',')}] from l1`,
       `l2 is exhausted, so the remaining l1 tail [${rest.join(', ')}] is already sorted and larger than everything attached. Splice it on in one move (O(1)).`,
-      null,
-      null,
-      'l1',
-      false,
+      { i: null, j: null, from: 'l1' },
     );
   } else if (j < l2.length) {
     const rest = l2.slice(j);
@@ -109,10 +88,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
       'APPEND_REST',
       `+[${rest.join(',')}] from l2`,
       `l1 is exhausted, so the remaining l2 tail [${rest.join(', ')}] is already sorted and larger than everything attached. Splice it on in one move (O(1)).`,
-      null,
-      null,
-      'l2',
-      false,
+      { i: null, j: null, from: 'l2' },
     );
   }
 
@@ -120,10 +96,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
     'DONE',
     `[${merged.join(',')}]`,
     `One list ran out, so the merge is complete. Return dummy.Next — the fully merged sorted chain [${merged.join(', ')}].`,
-    null,
-    null,
-    null,
-    true,
+    { i: null, j: null, from: null, done: true },
     'good',
   );
 
@@ -142,34 +115,37 @@ function View({ frame }: PluginViewProps<MergeState>) {
     s.i !== null && idx === s.i ? 'match' : s.i !== null && idx < s.i ? 'dead' : s.i === null ? 'dead' : '';
   const l2Tone = (idx: number) =>
     s.j !== null && idx === s.j ? 'match' : s.j !== null && idx < s.j ? 'dead' : s.j === null ? 'dead' : '';
-  const mergedTone = (idx: number) =>
-    s.done ? 'found' : idx === s.merged.length - 1 ? 'match' : 'match';
+
+  const headVal = (vals: number[], idx: number | null) =>
+    idx !== null && idx >= 0 && idx < vals.length ? String(vals[idx]) : 'nil';
+
+  const rail = (
+    <>
+      <RailStack
+        label="merged"
+        items={s.merged.map((v, idx) => ({
+          label: String(v),
+          tone: s.done ? 'good' : idx === s.merged.length - 1 ? 'accent' : undefined,
+        }))}
+        highlightEnd="bottom"
+        topLabel="tail"
+      />
+      <RailGroup label="heads">
+        <RailStat k="l1" v={headVal(s.l1, s.i)} tone={s.i !== null ? 'accent' : undefined} />
+        <RailStat k="l2" v={headVal(s.l2, s.j)} tone={s.j !== null ? 'warn' : undefined} />
+        <RailStat k="from" v={s.from ?? '—'} />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="merged" value={`[${s.merged.join(', ')}]`} tone="good" />
+      )}
+    </>
+  );
 
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        attach the smaller head each step, then append the leftover tail
-      </div>
-
-      <div className={cn(vizText.xs, 'mt-1 text-ink3')}>list 1</div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={s.l1} cellTone={l1Tone} pointers={l1Pointers} windowRange={null} />
-
-      <div className={cn(vizText.xs, 'mt-1 text-ink3')}>list 2</div>
       <ArrayRow values={s.l2} cellTone={l2Tone} pointers={l2Pointers} windowRange={null} />
-
-      <div className={cn(vizText.xs, 'mt-2 text-ink3')}>
-        merged (dummy →{s.merged.length ? '' : ' …'})
-      </div>
-      {s.merged.length > 0 ? (
-        <ArrayRow values={s.merged} cellTone={mergedTone} pointers={[]} windowRange={null} />
-      ) : (
-        <div className={cn('font-mono', vizText.sm, 'text-ink3')}>dummy → ·</div>
-      )}
-
-      <div className={cn('mt-1 font-mono', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
-        → [{s.merged.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { ArrayPatternInspector, ArrayPatternView, type ArrayPointer } from '../../../_shared/arrayPatterns';
+import { RailGroup, RailStat, RailResult, RailStack, VizEmpty } from '../../../_shared/vizKit';
 
 interface TwoSumInput {
   nums: number[];
@@ -21,29 +21,17 @@ interface TwoSumState {
 }
 
 function record({ nums, target }: TwoSumInput): Frame<TwoSumState>[] {
-  const frames: Frame<TwoSumState>[] = [];
   const seen = new Map<number, number>();
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<TwoSumState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums,
-        target,
-        i: null,
-        need: null,
-        seen: [...seen.entries()],
-        hit: null,
-        result: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<TwoSumState>(() => ({
+    nums,
+    target,
+    i: null,
+    need: null,
+    seen: [...seen.entries()],
+    hit: null,
+    result: null,
+    done: false,
+  }));
 
   emit('INIT', `target=${target}`, `Two Sum: find two indices whose values add up to ${target}. Walk the array once, remembering each value in a hash map so we can look back for the complement target − v.`, {});
 
@@ -71,27 +59,30 @@ function View({ frame }: PluginViewProps<TwoSumState>) {
   if (s.hit !== null) pointers.push({ i: s.hit, label: 'j', tone: 'good', place: 'below' });
   const tone = (i: number) =>
     s.result && (i === s.result[0] || i === s.result[1]) ? 'found' : s.i === i ? 'match' : '';
+  const seenItems = s.seen.map(([v, idx]) => `${v}:${idx}`);
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target = <span className="font-mono text-ink">{s.target}</span>
-        {s.need !== null && !s.done && (
-          <>
-            {' · '}need ={' '}
-            <span className="font-mono text-ink">{s.need}</span>
-          </>
-        )}
-      </div>
-      <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        seen {'{'}
-        {s.seen.map(([v, idx]) => `${v}:${idx}`).join(', ')}
-        {'}'}
-      </div>
-      {s.result && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ [{s.result[0]}, {s.result[1]}]</div>
-      )}
-    </div>
+    <ArrayPatternView
+      values={s.nums}
+      pointers={pointers}
+      cellTone={tone}
+      rail={
+        <>
+          <RailStack label="seen" items={seenItems} />
+          <RailGroup label="scan">
+            <RailStat k="target" v={s.target} />
+            <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+            <RailStat k="need" v={s.need ?? '—'} />
+          </RailGroup>
+          {s.done && (
+            <RailResult
+              label="answer"
+              value={s.result ? `[${s.result[0]}, ${s.result[1]}]` : 'none'}
+              tone={s.result ? 'good' : 'bad'}
+            />
+          )}
+        </>
+      }
+    />
   );
 }
 
@@ -99,14 +90,16 @@ function Inspector({ frame }: InspectorProps<TwoSumState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   return (
-    <VarGrid>
-      <InspectorRow k="target" v={s.target} />
-      <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
-      <InspectorRow k="need (target−v)" v={s.need ?? '—'} />
-      <InspectorRow k="map size" v={s.seen.length} />
-      <InspectorRow k="result" v={s.result ? `[${s.result.join(', ')}]` : s.done ? 'none' : '…'} />
-    </VarGrid>
+    <ArrayPatternInspector
+      rows={[
+        ['target', s.target],
+        ['i', s.i ?? '—'],
+        ['nums[i]', s.i !== null ? s.nums[s.i] : '—'],
+        ['need (target−v)', s.need ?? '—'],
+        ['map size', s.seen.length],
+        ['result', s.result ? `[${s.result.join(', ')}]` : s.done ? 'none' : '…'],
+      ]}
+    />
   );
 }
 

@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface ADInput {
   words: string[];
@@ -133,32 +132,27 @@ function record({ words }: ADInput): Frame<ADState>[] {
   return frames;
 }
 
-function LetterQueue({ items, labels }: { items: number[]; labels: string[] }) {
-  return (
-    <div className="queue-tape">
-      <span className="queue-label">queue · front →</span>
-      {items.length === 0 ? (
-        <span className="queue-empty">empty</span>
-      ) : (
-        <div className="queue-row">
-          {items.map((n, i) => (
-            <div key={i} className="queue-cell">
-              {labels[n]}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function View({ frame }: PluginViewProps<ADState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailStack
+        label="queue"
+        topLabel="front"
+        highlightEnd="bottom"
+        items={s.queue.map((n) => s.labels[n])}
+      />
+      <RailStack label="order" items={s.order.map((n) => s.labels[n])} />
+      <RailGroup label="active">
+        <RailStat k="cur" v={s.active !== null ? s.labels[s.active] : '—'} tone="accent" />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="answer" value={s.answer ? `"${s.answer}"` : '""'} tone={s.answer ? 'good' : 'bad'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        alien order = <span className="font-mono text-ink">{s.answer ? `"${s.answer}"` : '—'}</span>
-      </div>
+    <VizStage rail={rail}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -168,8 +162,7 @@ function View({ frame }: PluginViewProps<ADState>) {
         directed
         height={260}
       />
-      <LetterQueue items={s.queue} labels={s.labels} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -191,7 +184,7 @@ const WERTF: ADInput = { words: ['wrt', 'wrf', 'er', 'ett', 'rftt'] };
 export const manifestId = 'imp-2-alien-dictionary';
 export const title = 'Alien Dictionary';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [{ id: 'wertf', label: 'wrt, wrf, er, ett, rftt', value: WERTF }] satisfies SampleInput<ADInput>[],
   record,
   View,

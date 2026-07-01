@@ -9,7 +9,7 @@ import {
   PREDICT_MASTERY_FOCUS_MS,
   TIME_LIMIT,
 } from '../shared/practiceConstants';
-import { shuffleSeeded } from '../shared/shuffleSeeded';
+import { shuffleSeeded } from '../../../../lib/shuffleSeeded';
 
 /** #33 Predict-the-next-move: a generic challenge built from the recorder frames. */
 export function PredictPanelBody() {

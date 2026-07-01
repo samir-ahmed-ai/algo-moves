@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface SpbmInput {
   grid: number[][]; // 0 = open, 1 = blocked
@@ -36,7 +36,16 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
   // parent[r][c] = the cell we arrived from, to reconstruct the path.
   const parent: ([number, number] | null)[][] = Array.from({ length: n }, () => new Array<[number, number] | null>(n).fill(null));
   const dist = Array.from({ length: n }, () => new Array<number>(n).fill(0));
-  const frames: Frame<SpbmState>[] = [];
+
+  const { emit, frames } = createRecorder<SpbmState>(() => ({
+    grid,
+    visited: visited.map((row) => row.slice()),
+    cur: null,
+    dist: 0,
+    path: [],
+    answer: null,
+    done: false,
+  }));
 
   const snap = (
     type: string,
@@ -48,18 +57,13 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
     answer: number | null,
     tone?: 'good' | 'bad',
   ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        grid,
-        visited: visited.map((row) => row.slice()),
-        cur,
-        dist: d,
-        path: path.map((p) => [p[0], p[1]] as [number, number]),
-        answer,
-        done: type === 'DONE',
-      },
-    });
+    emit(type, note, caption, {
+      cur,
+      dist: d,
+      path: path.map((p) => [p[0], p[1]] as [number, number]),
+      answer,
+      done: type === 'DONE',
+    }, tone);
 
   snap(
     'INIT',
@@ -169,14 +173,21 @@ function View({ frame }: PluginViewProps<SpbmState>) {
     if (s.visited[r][c]) return 'visited';
     return 'land';
   };
+  const answerValue = s.answer !== null ? s.answer : s.dist > 0 ? s.dist : '—';
+  const answerDone = s.answer !== null;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+        <RailStat k="dist" v={s.dist > 0 ? s.dist : '—'} tone="accent" />
+      </RailGroup>
+      <RailResult label="path len" value={answerValue} tone={answerDone ? (s.answer === -1 ? 'bad' : 'good') : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        path length ={' '}
-        <span className="font-mono text-ink">{s.answer !== null ? s.answer : s.dist > 0 ? s.dist : '—'}</span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={s.grid} cellTone={cellTone} active={s.cur} cellSize={44} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -210,7 +221,7 @@ const G2: SpbmInput = {
 export const manifestId = 'imp-12-shortest-path-in-binary-matrix';
 export const title = 'Shortest Path in Binary Matrix';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g1', label: '3×3 · path 4', value: G1 },
     { id: 'g2', label: '3×3 · path 4', value: G2 },

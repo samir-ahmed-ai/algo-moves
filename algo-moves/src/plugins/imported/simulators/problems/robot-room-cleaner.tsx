@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface RobotInput {
   // 1 = open, 0 = wall. The robot starts at `start` facing up (dir 0).
@@ -125,15 +124,20 @@ function View({ frame }: PluginViewProps<RobotState>) {
     if (s.room[r][c] === 0) return '▧';
     return s.cleaned[r][c] ? '·' : '';
   };
+  const rail = (
+    <>
+      <RailGroup label="robot">
+        <RailStat k="pos" v={`(${s.pos[0]},${s.pos[1]})`} />
+        <RailStat k="facing" v={ARROW[s.dir]} tone="accent" />
+        <RailStat k="cleaned" v={s.count} tone={s.count > 0 ? 'good' : undefined} />
+      </RailGroup>
+      {s.done && <RailResult label="total" value={s.count} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        cells cleaned = <span className="font-mono text-ink">{s.count}</span> · facing{' '}
-        <span className="font-mono text-ink">{ARROW[s.dir]}</span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={s.room} cellTone={cellTone} label={label} active={s.pos} cellSize={44} />
-      <div className={cn(vizText.sm, 'text-ink3')}>▧ wall · arrow = robot · · = cleaned</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -170,7 +174,7 @@ const R2: RobotInput = {
 export const manifestId = 'imp-13-robot-room-cleaner';
 export const title = 'Robot Room Cleaner';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'r1', label: '3×3 ring · 8 open cells', value: R1 },
     { id: 'r2', label: '3×4 room · 9 open cells', value: R2 },

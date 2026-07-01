@@ -3,8 +3,7 @@ import { GraphBoard } from '../../components/GraphBoard';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';
-import { cn } from '../../lib/cn';
-import { vizText } from '../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailStack, RailResult } from '../_shared/vizKit';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
 
 export interface UFInput {
@@ -150,25 +149,27 @@ function record({ n, edges, pos }: UFInput): Frame<UFState>[] {
   return frames;
 }
 
-const STATUS_CLASS: Record<Status, string> = {
-  init: '',
-  consider: 'team-chip-1',
-  accept: 'team-chip-2',
-  reject: '',
-  done: 'team-chip-2',
-};
-
 function View({ frame }: PluginViewProps<UFState>) {
   const s = frame.state;
   const n = s.parent.length;
-  const roots = new Set<number>();
-  for (let i = 0; i < n; i++) {
-    let r = i;
-    while (s.parent[r] !== r) r = s.parent[r];
-    roots.add(r);
-  }
+  let sets = 0;
+  for (let i = 0; i < n; i++) if (s.parent[i] === i) sets++;
+  const considered = s.edgeIdx >= 0 ? Math.min(s.edgeIdx + 1, s.sortedEdges.length) : 0;
+  const mstEdgeItems = s.mst.map((e) => ({
+    label: `${e[0]}–${e[1]} (${s.w[e[0]][e[1]]})`,
+    tone: 'good' as const,
+  }));
   return (
-    <div className="board-area">
+    <VizStage rail={
+      <>
+        <RailGroup label="scan">
+          <RailStat k="considered" v={`${considered}/${s.sortedEdges.length}`} />
+          <RailStat k="sets" v={sets} />
+        </RailGroup>
+        <RailStack label="MST edges" items={mstEdgeItems} />
+        <RailResult label="weight" value={s.mstWeight} tone={s.status === 'done' ? 'good' : 'accent'} />
+      </>
+    }>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -178,30 +179,7 @@ function View({ frame }: PluginViewProps<UFState>) {
         edgeLabel={(a, b) => (s.w[a][b] >= 0 ? s.w[a][b] : undefined)}
         height={264}
       />
-      <div className={cn(vizText.xs, 'text-ink3')}>disjoint-set forest · i→parent (root = i•)</div>
-      <div className="flex flex-wrap gap-1.5">
-        {s.parent.map((p, i) => {
-          const isRoot = p === i;
-          return (
-            <span key={i} className={`chip ${isRoot ? STATUS_CLASS[s.status] : ''}`} style={isRoot ? undefined : { background: 'var(--surface-2)', color: 'var(--text-3)' }}>
-              {isRoot ? `${i}•` : `${i}→${p}`}
-            </span>
-          );
-        })}
-      </div>
-      <div className={cn(vizText.xs, 'text-ink3')}>MST edges · weight {s.mstWeight}</div>
-      <div className="flex flex-wrap gap-1.5">
-        {s.mst.length ? (
-          s.mst.map((e, k) => (
-            <span key={k} className="chip team-chip-2">
-              {e[0]}–{e[1]} ({s.w[e[0]][e[1]]})
-            </span>
-          ))
-        ) : (
-          <span className="chip" style={{ background: 'var(--surface-2)', color: 'var(--text-3)' }}>∅</span>
-        )}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

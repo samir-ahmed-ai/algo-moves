@@ -31,12 +31,15 @@ describe('mobile deck coverage report', () => {
       }
     }
 
-    // eslint-disable-next-line no-console
-    console.log('\nMobile deck coverage\n' + rows.join('\n'));
-    // eslint-disable-next-line no-console
-    console.log(
-      `\nTopics: ${rows.length} | animate-only: ${animateOnly} | with quiz: ${withQuiz} | with reassemble: ${withReassemble}\n`,
-    );
+    expect(rows.length).toBeGreaterThan(0);
+    if (import.meta.env.REPORT_DECK_COVERAGE === '1') {
+      // eslint-disable-next-line no-console -- opt-in report for check-mobile-decks
+      console.log('\nMobile deck coverage\n' + rows.join('\n'));
+      // eslint-disable-next-line no-console
+      console.log(
+        `\nTopics: ${rows.length} | animate-only: ${animateOnly} | with quiz: ${withQuiz} | with reassemble: ${withReassemble}\n`,
+      );
+    }
   });
 
   it('prep arrays and strings topics have full rebuild coverage', () => {

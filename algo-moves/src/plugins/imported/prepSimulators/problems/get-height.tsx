@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface HeightInput {
   // Level-order array of the binary tree; null marks an absent slot.
@@ -137,9 +136,9 @@ function View({ frame }: PluginViewProps<HeightState>) {
   const s = frame.state;
   if (s.tree.length === 0) {
     return (
-      <div className="board-area">
+      <VizStage rail={<RailResult label="height" value={0} />}>
         <VizEmpty message="Empty tree — height 0." />
-      </div>
+      </VizStage>
     );
   }
   const nodeClass = (i: number) => {
@@ -147,18 +146,29 @@ function View({ frame }: PluginViewProps<HeightState>) {
     if (s.current === i || s.visiting.includes(i)) return 'team-1';
     return 'team-0';
   };
-  const answerText = s.answer !== null ? String(s.answer) : s.finished ? '0' : '…';
+  const curLabel =
+    s.current !== null && s.tree[s.current] != null ? String(s.tree[s.current]) : '—';
+  const curHeight =
+    s.current !== null && s.heights[s.current] != null ? String(s.heights[s.current]) : '…';
+  const answerVal = s.answer !== null ? s.answer : s.finished ? 0 : '…';
+  const callStack = s.visiting.map((i) =>
+    s.tree[i] != null ? String(s.tree[i]) : '·',
+  );
+  const rail = (
+    <>
+      <RailStack label="call stack" items={callStack} />
+      <RailGroup label="node">
+        <RailStat k="val" v={curLabel} tone="accent" />
+        <RailStat k="h" v={curHeight} />
+        <RailStat k="done" v={s.done.length} />
+      </RailGroup>
+      <RailResult label="height" value={answerVal} tone={s.finished ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        post-order height · answer ={' '}
-        <span className="font-mono text-ink">{answerText}</span>
-      </div>
+    <VizStage rail={rail}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        current in accent, finished subtrees dimmed; value = node label
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

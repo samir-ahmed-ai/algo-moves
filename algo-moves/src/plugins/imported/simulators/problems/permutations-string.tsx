@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface StrPermInput {
   s: string;
@@ -63,18 +62,20 @@ function View({ frame }: PluginViewProps<StrPermState>) {
     if (i >= s.low && i <= s.high) return 'match';
     return 'sorted';
   };
+  const rail = (
+    <>
+      <RailGroup label="window">
+        <RailStat k="lo" v={s.low} />
+        <RailStat k="hi" v={s.high} />
+      </RailGroup>
+      <RailStack label="results" items={s.results} />
+      {s.done && <RailResult label="found" value={s.results.length} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        window [{s.low}, {s.high}] · found {s.results.length}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} />
-      <div className={cn('mt-1 flex flex-wrap gap-1 font-mono text-ink2', vizText.xs)}>
-        {s.results.map((r) => (
-          <span key={r}>{r}</span>
-        ))}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -94,7 +95,7 @@ function Inspector({ frame }: InspectorProps<StrPermState>) {
 export const manifestId = 'imp-43-permutations';
 export const title = 'Permutations (string)';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'abc', label: 's="abc"', value: { s: 'abc' } },
     { id: 'ab', label: 's="ab"', value: { s: 'ab' } },

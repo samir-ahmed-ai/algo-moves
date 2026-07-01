@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface KnapInput {
   weights: number[];
@@ -115,16 +114,33 @@ function View({ frame }: PluginViewProps<KnapState>) {
   };
 
   const activeCell: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
-  const ans = s.dp[n][s.capacity] >= 0 ? s.dp[n][s.capacity] : '…filling';
+  const done = s.dp[n][s.capacity] >= 0;
+  const ans = done ? s.dp[n][s.capacity] : null;
+  const i = s.cur ? s.cur[0] : -1;
+  const w = s.cur ? s.cur[1] : -1;
+  const wt = i >= 1 ? s.weights[i - 1] : null;
+  const val = i >= 1 ? s.values[i - 1] : null;
+  const skip = i >= 1 && w >= 0 && s.dp[i - 1]?.[w] >= 0 ? s.dp[i - 1][w] : null;
+  const take = i >= 1 && wt !== null && wt <= w && s.dp[i - 1]?.[w - wt] >= 0 ? s.dp[i - 1][w - wt] + s.values[i - 1] : null;
+  const rail = (
+    <>
+      {s.cur && (
+        <RailGroup label="cell">
+          <RailStat k="i" v={i} tone="accent" />
+          <RailStat k="w" v={w} tone="accent" />
+          <RailStat k="wt" v={wt ?? '—'} />
+          <RailStat k="val" v={val ?? '—'} />
+          <RailStat k="skip" v={skip ?? '—'} />
+          <RailStat k="take" v={take ?? '—'} />
+        </RailGroup>
+      )}
+      <RailResult label="answer" value={ans !== null ? ans : '…'} tone={done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        weights {`{${s.weights.join(', ')}}`}, values {`{${s.values.join(', ')}}`}, capacity {s.capacity}, best value ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail} railWidth={112}>
       <GridBoard grid={display} cellTone={cellTone} active={activeCell} cellSize={40} />
-      <div className={cn(vizText.sm, 'text-ink3')}>rows = first i items, columns = capacity w, cell = best value</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -156,7 +172,7 @@ function Inspector({ frame }: InspectorProps<KnapState>) {
 export const manifestId = 'imp-63-0-1-knapsack';
 export const title = '0/1 Knapsack';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'classic',

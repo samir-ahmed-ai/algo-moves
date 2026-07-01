@@ -37,7 +37,7 @@ export function CodeBlueprintPanel({
             <h2 className="code-blueprint-title">Solution blueprint</h2>
             {!inline && (
               <p className="code-blueprint-subtitle">
-                {pieces.length} sections in source order — glance the structure, then close to keep placing
+                {pieces.length} blocks · source order
               </p>
             )}
           </div>

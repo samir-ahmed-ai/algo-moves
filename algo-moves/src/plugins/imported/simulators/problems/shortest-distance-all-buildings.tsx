@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface BuildingsInput {
   grid: number[][]; // 0 empty land, 1 building, 2 wall
@@ -149,21 +148,23 @@ function View({ frame }: PluginViewProps<BuildingsState>) {
     if (s.grid[r][c] === 2) return 'water';
     return s.reach[r][c] > 0 ? 'visited' : '';
   };
+  const rail = (
+    <>
+      <RailGroup label="progress">
+        <RailStat k="buildings" v={`${s.buildingsSeen}/${s.buildingsTotal}`} />
+        <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+        {s.cur && <RailStat k="total" v={s.total[s.cur[0]][s.cur[1]]} tone="accent" />}
+        {s.cur && <RailStat k="reach" v={s.reach[s.cur[0]][s.cur[1]]} />}
+      </RailGroup>
+      {s.answer !== null && (
+        <RailResult label="answer" value={s.answer} tone={s.answer === -1 ? 'bad' : 'good'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        buildings reached ={' '}
-        <span className="font-mono text-ink">
-          {s.buildingsSeen}/{s.buildingsTotal}
-        </span>
-        {s.answer !== null && (
-          <>
-            {' · '}min total = <span className="font-mono text-ink">{s.answer}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GridBoard grid={display} cellTone={cellTone} active={s.cur} cellSize={44} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -199,7 +200,7 @@ const G2: BuildingsInput = {
 export const manifestId = 'imp-0-07-shortest-distance-from-all-buildings';
 export const title = 'Shortest Distance from All Buildings';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g1', label: '3×5 · 3 buildings · 7', value: G1 },
     { id: 'g2', label: '3×3 · 2 buildings · 4', value: G2 },

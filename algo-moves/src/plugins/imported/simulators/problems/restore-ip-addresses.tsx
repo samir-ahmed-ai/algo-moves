@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage, vizText } from '../../../_shared/vizKit';
 
 interface IPInput {
   digits: string;
@@ -91,8 +91,30 @@ function View({ frame }: PluginViewProps<IPState>) {
   const placed = s.octets.join('.');
   const partial = placed + (s.consider !== null ? (placed ? '.' : '') + s.consider : '');
   const rest = s.digits.slice(s.cursor);
+  const rail = (
+    <>
+      <RailStack
+        label="results"
+        items={s.results.map(String)}
+        highlightEnd="bottom"
+        topLabel="latest"
+      />
+      <RailGroup label="scan">
+        <RailStat k="octets" v={s.octets.length} />
+        <RailStat k="cursor" v={s.cursor} />
+        <RailStat k="try" v={s.consider ?? '—'} tone="accent" />
+      </RailGroup>
+      {s.done && (
+        <RailResult
+          label="found"
+          value={s.results.length}
+          tone={s.results.length > 0 ? 'good' : 'bad'}
+        />
+      )}
+    </>
+  );
   return (
-    <div className="board-area board-area--text">
+    <VizStage rail={rail} railWidth={150}>
       <div className={cn(vizText.sm, 'text-ink3')}>
         digits = <span className="font-mono text-ink">{s.digits}</span>
       </div>
@@ -103,17 +125,7 @@ function View({ frame }: PluginViewProps<IPState>) {
           {rest && <span className="text-ink3"> | {rest}</span>}
         </div>
       </div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        valid IP addresses ({s.results.length})
-        <div className="mt-1 flex flex-col gap-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.base)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -133,7 +145,7 @@ function Inspector({ frame }: InspectorProps<IPState>) {
 export const manifestId = 'imp-40-restore-ip-addresses';
 export const title = 'Restore IP Addresses';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: '25525511135', label: '"25525511135"', value: { digits: '25525511135' } },
     { id: '0000', label: '"0000"', value: { digits: '0000' } },

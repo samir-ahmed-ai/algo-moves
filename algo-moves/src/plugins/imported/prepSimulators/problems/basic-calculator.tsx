@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface CalcInput {
   s: string;
@@ -146,30 +145,30 @@ function View({ frame }: PluginViewProps<CalcState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   const tone = (i: number) => (s.i === i ? 'match' : '');
+
+  const stackPairs = s.stack.reduce<string[]>((acc, _v, idx) => {
+    if (idx % 2 === 0) acc.push(`res ${s.stack[idx]}, sign ${s.stack[idx + 1] > 0 ? '+1' : '−1'}`);
+    return acc;
+  }, []);
+
+  const cur = s.i !== null && s.i >= 0 && s.i < s.s.length ? s.s[s.i] : null;
+
+  const rail = (
+    <>
+      <RailStack label="stack" items={stackPairs} topLabel="top" />
+      <RailGroup label="state">
+        {cur !== null && <RailStat k="char" v={cur === ' ' ? '␣' : cur} tone="accent" />}
+        <RailStat k="res" v={s.res} />
+        <RailStat k="sign" v={s.sign > 0 ? '+1' : '−1'} />
+      </RailGroup>
+      {s.done && s.answer !== null && <RailResult label="answer" value={s.answer} tone="good" />}
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        res = <span className="font-mono text-ink">{s.res}</span>
-        {' · '}sign ={' '}
-        <span className="font-mono text-ink">{s.sign > 0 ? '+1' : '−1'}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={chars} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        stack [
-        {s.stack.length === 0
-          ? ' empty '
-          : s.stack
-              .reduce<string[]>((acc, _v, idx) => {
-                if (idx % 2 === 0) acc.push(`(res ${s.stack[idx]}, sign ${s.stack[idx + 1] > 0 ? '+1' : '−1'})`);
-                return acc;
-              }, [])
-              .join(', ')}
-        ] <span className="text-ink3">← top</span>
-      </div>
-      {s.done && s.answer !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ {s.answer}</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

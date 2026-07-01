@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface FirstUniqueInput {
   s: string;
@@ -21,38 +21,24 @@ interface FirstUniqueState {
 
 function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
   const chars = s.split('');
-  const frames: Frame<FirstUniqueState>[] = [];
   const cnt = new Map<string, number>();
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    phase: FirstUniqueState['phase'],
-    extra: Partial<FirstUniqueState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        chars,
-        phase,
-        i: null,
-        freq: [...cnt.entries()],
-        curChar: null,
-        curCount: null,
-        answer: null,
-        done: false,
-        ...extra,
-      },
-    });
+  const { emit, frames } = createRecorder<FirstUniqueState>(() => ({
+    chars,
+    phase: 'count',
+    i: null,
+    freq: [...cnt.entries()],
+    curChar: null,
+    curCount: null,
+    answer: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
     `s="${s}"`,
     `Find First Unique Character: return the index of the first character that appears exactly once. We do two passes — first count every character into a frequency map (O(1) space, at most 26/128 keys), then scan the string in original order for the first count of 1.`,
-    'count',
-    {},
+    { phase: 'count' },
   );
 
   // Pass 1: build the frequency map.
@@ -63,8 +49,7 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
       'COUNT',
       `cnt['${c}']=${cnt.get(c)}`,
       `Pass 1, index ${i}: character '${c}'. Increment its tally — cnt['${c}'] is now ${cnt.get(c)}.`,
-      'count',
-      { i, curChar: c },
+      { phase: 'count', i, curChar: c },
     );
   }
 
@@ -72,8 +57,7 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
     'COUNTED',
     'counts ready',
     `Pass 1 complete. The frequency map now holds the count of every character. Begin pass 2: walk the string left to right and stop at the first character whose count is 1.`,
-    'scan',
-    {},
+    { phase: 'scan' },
   );
 
   // Pass 2: find the first index whose count is 1.
@@ -85,8 +69,7 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
         'FOUND',
         `index ${i}`,
         `Pass 2, index ${i}: '${c}' has count ${count} — it is unique. This is the first such character, so return index ${i}.`,
-        'done',
-        { i, curChar: c, curCount: count, answer: i, done: true },
+        { phase: 'done', i, curChar: c, curCount: count, answer: i, done: true },
         'good',
       );
       return frames;
@@ -95,8 +78,7 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
       'SCAN',
       `'${c}' x${count}`,
       `Pass 2, index ${i}: '${c}' appears ${count} times — not unique. Keep scanning.`,
-      'scan',
-      { i, curChar: c, curCount: count },
+      { phase: 'scan', i, curChar: c, curCount: count },
     );
   }
 
@@ -104,8 +86,7 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
     'DONE',
     'no unique',
     `Scanned the whole string and every character repeats — there is no unique character, so return -1.`,
-    'done',
-    { answer: -1, done: true },
+    { phase: 'done', answer: -1, done: true },
     'bad',
   );
   return frames;
@@ -127,40 +108,24 @@ function View({ frame }: PluginViewProps<FirstUniqueState>) {
   };
   const phaseLabel =
     s.phase === 'count' ? 'Pass 1 · counting' : s.phase === 'scan' ? 'Pass 2 · scanning' : 'done';
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {phaseLabel}
-        {s.curChar !== null && (
-          <>
-            {' · '}char ={' '}
-            <span className="font-mono text-ink">'{s.curChar}'</span>
-            {s.curCount !== null && (
-              <>
-                {' '}×<span className="font-mono text-ink">{s.curCount}</span>
-              </>
-            )}
-          </>
-        )}
-      </div>
-      <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        cnt {'{'}
-        {s.freq.map(([c, n]) => `${c}:${n}`).join(', ')}
-        {'}'}
-      </div>
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="phase" v={phaseLabel} />
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="char" v={s.curChar !== null ? `'${s.curChar}'` : '—'} tone={s.curChar !== null ? 'accent' : undefined} />
+        <RailStat k="count" v={s.curCount ?? '—'} />
+      </RailGroup>
+      <RailStack label="freq" items={s.freq.map(([c, n]) => `${c}:${n}`)} />
       {s.answer !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            s.answer >= 0 ? 'text-good' : 'text-bad',
-            vizText.base,
-          )}
-        >
-          → {s.answer}
-        </div>
+        <RailResult label="answer" value={s.answer} tone={s.answer >= 0 ? 'good' : 'bad'} />
       )}
-    </div>
+    </>
+  );
+  return (
+    <VizStage rail={rail}>
+      <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={null} />
+    </VizStage>
   );
 }
 

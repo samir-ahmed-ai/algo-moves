@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface SearchInput {
   matrix: number[][];
@@ -21,32 +21,20 @@ interface SearchState {
 }
 
 function record({ matrix, target }: SearchInput): Frame<SearchState>[] {
-  const frames: Frame<SearchState>[] = [];
   const m = matrix.length;
   const n = matrix[0].length;
   const visited: [number, number][] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SearchState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        matrix,
-        target,
-        r: null,
-        c: null,
-        visited: visited.map(([rr, cc]) => [rr, cc] as [number, number]),
-        found: null,
-        result: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<SearchState>(() => ({
+    matrix,
+    target,
+    r: null,
+    c: null,
+    visited: visited.map(([rr, cc]) => [rr, cc] as [number, number]),
+    found: null,
+    result: null,
+    done: false,
+  }));
 
   let r = 0;
   let c = n - 1;
@@ -122,24 +110,24 @@ function View({ frame }: PluginViewProps<SearchState>) {
   };
   const active: [number, number] | null = s.r !== null && s.c !== null && !s.done ? [s.r, s.c] : null;
   const current = s.r !== null && s.c !== null ? s.matrix[s.r][s.c] : null;
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target = <span className="font-mono text-ink">{s.target}</span>
-        {current !== null && !s.done && (
-          <>
-            {' · '}cell ={' '}
-            <span className="font-mono text-ink">{current}</span>
-          </>
-        )}
-      </div>
-      <GridBoard grid={s.matrix} cellTone={cellTone} active={active} />
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="target" v={s.target} />
+        <RailStat k="r" v={s.r ?? '—'} tone="accent" />
+        <RailStat k="c" v={s.c ?? '—'} tone="accent" />
+        <RailStat k="cell" v={current ?? '—'} />
+        <RailStat k="steps" v={s.visited.length} />
+      </RailGroup>
       {s.result !== null && (
-        <div className={cn('mt-1 font-mono', vizText.base, s.result ? 'text-good' : 'text-bad')}>
-          → {s.result ? 'true' : 'false'}
-        </div>
+        <RailResult label="found?" value={s.result ? 'true' : 'false'} tone={s.result ? 'good' : 'bad'} />
       )}
-    </div>
+    </>
+  );
+  return (
+    <VizStage rail={rail}>
+      <GridBoard grid={s.matrix} cellTone={cellTone} active={active} />
+    </VizStage>
   );
 }
 

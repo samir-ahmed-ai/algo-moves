@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface MPInput {
   points: number[][];
@@ -104,16 +103,21 @@ function View({ frame }: PluginViewProps<MPState>) {
     if (s.done && r === s.rows - 1 && c === s.bestCol) return 'path';
     return s.dp[r][c] !== UNSET ? 'visited' : '';
   };
-  let ans: number | string = '…filling';
-  if (s.done) ans = s.dp[s.rows - 1][s.bestCol];
+  const ans = s.done ? s.dp[s.rows - 1][s.bestCol] : '—';
+  const curCell = s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—';
+  const ownPts = s.cur ? s.points[s.cur[0]][s.cur[1]] : '—';
+  const dpVal = s.cur && s.dp[s.cur[0]][s.cur[1]] !== UNSET ? s.dp[s.cur[0]][s.cur[1]] : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.rows}×{s.cols} dp table, max points = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="cell" v={curCell} tone="accent" />
+        <RailStat k="pts" v={ownPts} />
+        <RailStat k="dp" v={dpVal} tone="accent" />
+      </RailGroup>
+      <RailResult label="answer" value={s.done ? `${ans} pts` : '…filling'} tone={s.done ? 'good' : 'accent'} />
+    </>}>
       <GridBoard grid={display} cellTone={cellTone} active={s.cur} cellSize={48} />
-      <div className={cn(vizText.sm, 'text-ink3')}>dp[i][j] = best score picking column j in row i</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -137,7 +141,7 @@ function Inspector({ frame }: InspectorProps<MPState>) {
 export const manifestId = 'imp-73-maximum-number-of-points-with-cost';
 export const title = 'Maximum Number of Points with Cost';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'p3x3',

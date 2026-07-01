@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface DiagonalInput {
   mat: number[][];
@@ -142,18 +141,19 @@ function View({ frame }: PluginViewProps<DiagonalState>) {
     return '';
   };
   const active: [number, number] | null = s.done ? null : [s.r, s.c];
-  const dirLabel = s.dir === 1 ? 'up-right ↗' : 'down-left ↙';
+  const dirLabel = s.dir === 1 ? '↗' : '↙';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        at <span className="font-mono text-ink">({s.r},{s.c})</span>
-        {' · '}dir <span className="font-mono text-ink">{dirLabel}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="pos">
+        <RailStat k="r" v={s.r} />
+        <RailStat k="c" v={s.c} />
+        <RailStat k="dir" v={dirLabel} tone="accent" />
+      </RailGroup>
+      <RailStack label="output" items={s.res.map(String)} highlightEnd="bottom" topLabel="last" />
+      {s.done && <RailResult label="answer" value={`[${s.res.join(',')}]`} tone="good" />}
+    </>}>
       <GridBoard grid={s.mat} cellTone={cellTone} active={active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink2')}>
-        out [{s.res.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

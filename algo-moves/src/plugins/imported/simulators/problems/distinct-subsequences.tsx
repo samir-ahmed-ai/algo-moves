@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface DSInput {
   s: string; // source
@@ -98,21 +97,32 @@ function View({ frame }: PluginViewProps<DSState>) {
   const display = buildDisplay(state);
   const m = state.s.length;
   const n = state.t.length;
-  const ans = state.dp[m][n] >= 0 ? state.dp[m][n] : '…filling';
+  const ans = state.dp[m][n] >= 0 ? state.dp[m][n] : undefined;
+  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && state.dp[r]?.[c] >= 0 ? state.dp[r][c] : '—');
   const displayActive: [number, number] | null = state.cur ? [state.cur[0] + 1, state.cur[1] + 1] : null;
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
     if (state.cur && state.cur[0] + 1 === r && state.cur[1] + 1 === c) return 'active';
     return state.dp[r - 1][c - 1] >= 0 ? 'visited' : '';
   };
+  const rail = (
+    <>
+      <RailGroup label="inputs">
+        <RailStat k="s" v={`"${state.s}"`} />
+        <RailStat k="t" v={`"${state.t}"`} />
+      </RailGroup>
+      <RailGroup label="cell">
+        <RailStat k="cur" v={state.cur ? `[${state.cur[0]}][${state.cur[1]}]` : '—'} tone="accent" />
+        <RailStat k="skip" v={state.cur ? cell(state.cur[0] - 1, state.cur[1]) : '—'} />
+        <RailStat k="take" v={state.cur ? cell(state.cur[0] - 1, state.cur[1] - 1) : '—'} />
+      </RailGroup>
+      <RailResult label="ways" value={ans !== undefined ? ans : '…'} tone={state.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        <span className="font-mono text-ink">"{state.s}"</span> / <span className="font-mono text-ink">"{state.t}"</span>, ways ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={36} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -138,7 +148,7 @@ function Inspector({ frame }: InspectorProps<DSState>) {
 export const manifestId = 'imp-76-distinct-subsequences';
 export const title = 'Distinct Subsequences';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'rabbbit-rabbit', label: '"rabbbit" / "rabbit"', value: { s: 'rabbbit', t: 'rabbit' } },
     { id: 'babgbag-bag', label: '"babgbag" / "bag"', value: { s: 'babgbag', t: 'bag' } },

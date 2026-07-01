@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/TreeBoard';
 
 interface FlipTreeInput {
@@ -40,35 +40,21 @@ function ensure(arr: (number | null)[], i: number) {
 }
 
 function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
-  const frames: Frame<FlipTreeState>[] = [];
   // Working copy we mutate as we flip, re-rendered into each frame's state.
   const work: (number | null)[] = tree.slice();
   const swapped: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    current: number | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree: work.slice(),
-        current,
-        swapped: swapped.slice(),
-        done,
-      },
-    });
+  const { emit, frames } = createRecorder<FlipTreeState>(() => ({
+    tree: work.slice(),
+    current: null,
+    swapped: swapped.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
     'flip every node',
     'Flip Tree: invert the tree by swapping the left and right child of every node. The rule is Left, Right = flip(Right), flip(Left) — recurse first, then swap on the way back up. We walk in post-order so a node is flipped only after both of its subtrees are already flipped.',
-    null,
-    false,
   );
 
   // Faithful recursion of flipTree: recurse into (already-in-place) children,
@@ -81,8 +67,7 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
       'ENTER',
       `node ${val}`,
       `Enter node ${val} (index ${i}). Before swapping here we first recurse into its right subtree, then its left — flip(Right) and flip(Left) must finish first.`,
-      i,
-      false,
+      { current: i },
     );
 
     // flip(Right) then flip(Left) — the Go line evaluates both calls first.
@@ -108,8 +93,7 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
         'SWAP',
         `swap under ${val}`,
         `Both subtrees of node ${val} are flipped, so now swap them: its old left subtree moves to the right and its old right subtree moves to the left. Node ${val}'s children are mirrored.`,
-        i,
-        false,
+        { current: i },
         'good',
       );
     } else {
@@ -118,8 +102,7 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
         'LEAF',
         `leaf ${val}`,
         `Node ${val} is a leaf — flip(nil), flip(nil) do nothing and there is nothing to swap. Return it unchanged.`,
-        i,
-        false,
+        { current: i },
       );
     }
   };
@@ -130,8 +113,7 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
     'DONE',
     'tree flipped',
     'Every node has been visited and its children swapped, so the whole tree is now its mirror image. Time O(n) — one visit per node; Space O(h) — the recursion stack is as deep as the tree height.',
-    null,
-    true,
+    { done: true },
     'good',
   );
 
@@ -149,22 +131,25 @@ function clearSubtree(arr: (number | null)[], i: number) {
 function View({ frame }: PluginViewProps<FlipTreeState>) {
   const s = frame.state;
   const nodeClass = (i: number) => {
-    if (s.current === i) return 'team-1'; // node being swapped now
-    if (s.swapped.includes(i)) return 'team-2'; // children already swapped
-    return 'team-0'; // untouched
+    if (s.current === i) return 'team-1';
+    if (s.swapped.includes(i)) return 'team-2';
+    return 'team-0';
   };
   const curVal = s.current !== null && s.current < s.tree.length ? s.tree[s.current] : null;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        post-order swap · current ={' '}
-        <span className="font-mono text-ink">{curVal ?? '—'}</span>
-      </div>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="node" v={curVal ?? '—'} tone="accent" />
+            <RailStat k="swapped" v={s.swapped.length} />
+          </RailGroup>
+          {s.done && <RailResult label="status" value="flipped" tone="good" />}
+        </>
+      }
+    >
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn('mt-1', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
-        {s.done ? 'tree fully flipped' : `swapped ${s.swapped.length} node(s)`}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

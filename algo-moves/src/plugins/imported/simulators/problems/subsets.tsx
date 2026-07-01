@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface SubsetsInput {
   nums: number[];
@@ -63,23 +62,21 @@ function View({ frame }: PluginViewProps<SubsetsState>) {
     if (inCur.has(s.nums[i])) return 'match';
     return '';
   };
+  const rail = (
+    <>
+      <RailStack label="cur subset" items={s.cur.map(String)} />
+      <RailStack label="results" items={s.results.map((r) => `[${r.join(', ')}]`)} highlightEnd="bottom" topLabel="latest" />
+      <RailGroup label="progress">
+        <RailStat k="found" v={s.results.length} tone="accent" />
+        <RailStat k="target" v={2 ** s.nums.length} />
+      </RailGroup>
+      {s.done && <RailResult label="subsets" value={s.results.length} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        subset so far = <span className="font-mono text-ink">[{s.cur.join(', ')}]</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        subsets found ({s.results.length})
-        <div className="mt-1 flex flex-col gap-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.sm)}>
-              [{r.join(', ')}]
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -99,7 +96,7 @@ function Inspector({ frame }: InspectorProps<SubsetsState>) {
 export const manifestId = 'imp-26-subsets';
 export const title = 'Subsets';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: '123', label: 'nums=[1,2,3]', value: { nums: [1, 2, 3] } },
     { id: '12', label: 'nums=[1,2]', value: { nums: [1, 2] } },

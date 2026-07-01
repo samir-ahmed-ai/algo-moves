@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface MSInput {
   matrix: string[][]; // '0' / '1'
@@ -103,15 +102,27 @@ function View({ frame }: PluginViewProps<MSState>) {
     if (s.bestCell && s.bestCell[0] === r && s.bestCell[1] === c) return 'path';
     return s.dp[r][c] >= 0 ? 'visited' : '';
   };
-  const ans = s.done ? s.best * s.best : '…filling';
+  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
+  const area = s.best * s.best;
+  const rail = (
+    <>
+      <RailGroup label="cell">
+        <RailStat k="pos" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} tone="accent" />
+        <RailStat k="val" v={s.cur ? `'${s.matrix[s.cur[0]][s.cur[1]]}'` : '—'} />
+        <RailStat k="up" v={s.cur ? cell(s.cur[0] - 1, s.cur[1]) : '—'} />
+        <RailStat k="left" v={s.cur ? cell(s.cur[0], s.cur[1] - 1) : '—'} />
+        <RailStat k="diag" v={s.cur ? cell(s.cur[0] - 1, s.cur[1] - 1) : '—'} />
+      </RailGroup>
+      <RailGroup label="best">
+        <RailStat k="side" v={s.best} tone={s.best > 0 ? 'accent' : undefined} />
+      </RailGroup>
+      <RailResult label="area" value={s.done ? area : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        binary matrix {`[${s.matrix.map((r) => `[${r.join('')}]`).join(',')}]`}, max square area = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={display} cellTone={cellTone} active={s.cur} cellSize={40} />
-      <div className={cn(vizText.sm, 'text-ink3')}>each cell = side of largest all-1 square ending there</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -136,7 +147,7 @@ function Inspector({ frame }: InspectorProps<MSState>) {
 export const manifestId = 'imp-71-maximal-square';
 export const title = 'Maximal Square';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'm4x5',

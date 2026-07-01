@@ -21,7 +21,7 @@ export interface PatternCard {
   tradeoff?: string;
 }
 
-export const PATTERNS: Record<string, PatternCard> = {
+const PATTERNS: Record<string, PatternCard> = {
   bfs: {
     id: 'bfs',
     title: 'Breadth-first search',

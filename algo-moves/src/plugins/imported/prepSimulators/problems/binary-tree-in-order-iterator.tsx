@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, RailGroup, RailResult, RailStat, RailStack, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/TreeBoard';
 
 interface BtInOrderInput {
@@ -125,17 +124,23 @@ function View({ frame }: PluginViewProps<BtInOrderState>) {
     if (stackSet.has(i)) return 'team-1';
     return 'team-0';
   };
-  const stackLabels = s.stack.map((i) => s.tree[i] as number);
+  const stackLabels = s.stack.map((i) => String(s.tree[i] as number));
+  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]] as number) : '—';
+  const rail = (
+    <>
+      <RailStack label="stack" items={stackLabels} topLabel="top" />
+      <RailGroup label="state">
+        <RailStat k="top" v={topVal} tone="accent" />
+        <RailStat k="hasNext" v={s.hasNext ? 'true' : 'false'} />
+        <RailStat k="yielded" v={s.output.length} />
+      </RailGroup>
+      <RailResult label="in-order" value={s.output.length ? `[${s.output.join(', ')}]` : '…'} tone={s.finished ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
+    <VizStage rail={rail} railWidth={150}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        stack (bottom→top) [{stackLabels.join(', ')}]
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.sm, s.finished ? 'text-good' : 'text-ink3')}>
-        {s.finished ? '→ ' : 'in-order '}[{s.output.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LCSInput {
   a: string;
@@ -21,15 +21,19 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
   const m = a.length;
   const n = b.length;
   const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(-1));
-  const frames: Frame<LCSState>[] = [];
 
-  const emit = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { a, b, dp: dp.map((r) => r.slice()), cur, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<LCSState>(() => ({
+    a,
+    b,
+    dp: dp.map((r) => r.slice()),
+    cur: null,
+    done: false,
+  }));
 
-  emit(
+  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
+    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+
+  snap(
     'INIT',
     `"${a}" vs "${b}"`,
     `Longest Common Subsequence: find the length of the longest subsequence common to "${a}" and "${b}". dp[i][j] is the LCS length using the first i chars of "${a}" and the first j chars of "${b}", built bottom-up.`,
@@ -38,11 +42,11 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
 
   for (let j = 0; j <= n; j++) {
     dp[0][j] = 0;
-    emit('BASE', `dp[0][${j}]=0`, `Base case: with 0 chars of "${a}" the LCS is empty, so dp[0][${j}] = 0.`, [0, j]);
+    snap('BASE', `dp[0][${j}]=0`, `Base case: with 0 chars of "${a}" the LCS is empty, so dp[0][${j}] = 0.`, [0, j]);
   }
   for (let i = 1; i <= m; i++) {
     dp[i][0] = 0;
-    emit('BASE', `dp[${i}][0]=0`, `Base case: with 0 chars of "${b}" the LCS is empty, so dp[${i}][0] = 0.`, [i, 0]);
+    snap('BASE', `dp[${i}][0]=0`, `Base case: with 0 chars of "${b}" the LCS is empty, so dp[${i}][0] = 0.`, [i, 0]);
   }
 
   for (let i = 1; i <= m; i++) {
@@ -51,7 +55,7 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
       const cb = b[j - 1];
       if (ca === cb) {
         dp[i][j] = dp[i - 1][j - 1] + 1;
-        emit(
+        snap(
           'FILL',
           `dp[${i}][${j}]=${dp[i][j]}`,
           `'${ca}' == '${cb}': the match extends the diagonal. dp[${i}][${j}] = dp[${i - 1}][${j - 1}] + 1 = ${dp[i - 1][j - 1]} + 1 = ${dp[i][j]}.`,
@@ -61,7 +65,7 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
         const up = dp[i - 1][j];
         const left = dp[i][j - 1];
         dp[i][j] = Math.max(up, left);
-        emit(
+        snap(
           'FILL',
           `dp[${i}][${j}]=${dp[i][j]}`,
           `'${ca}' != '${cb}': carry the better neighbour. dp[${i}][${j}] = max(up dp[${i - 1}][${j}]=${up}, left dp[${i}][${j - 1}]=${left}) = ${dp[i][j]}.`,
@@ -71,7 +75,7 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
     }
   }
 
-  emit(
+  snap(
     'DONE',
     `LCS = ${dp[m][n]}`,
     `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so the longest common subsequence of "${a}" and "${b}" has length ${dp[m][n]}.`,
@@ -102,21 +106,35 @@ function View({ frame }: PluginViewProps<LCSState>) {
   const display = buildDisplay(s);
   const m = s.a.length;
   const n = s.b.length;
-  const ans = s.dp[m][n] >= 0 ? s.dp[m][n] : '…filling';
+  const ans = s.dp[m][n] >= 0 ? s.dp[m][n] : null;
   const displayActive: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
     if (s.cur && s.cur[0] + 1 === r && s.cur[1] + 1 === c) return 'active';
     return s.dp[r - 1][c - 1] >= 0 ? 'visited' : '';
   };
+  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
+  const rail = (
+    <>
+      <RailGroup label="strings">
+        <RailStat k="a" v={`"${s.a}"`} />
+        <RailStat k="b" v={`"${s.b}"`} />
+      </RailGroup>
+      {s.cur && (
+        <RailGroup label="cell">
+          <RailStat k="i,j" v={`${s.cur[0]},${s.cur[1]}`} tone="accent" />
+          <RailStat k="diag" v={cell(s.cur[0] - 1, s.cur[1] - 1)} />
+          <RailStat k="above" v={cell(s.cur[0] - 1, s.cur[1])} />
+          <RailStat k="left" v={cell(s.cur[0], s.cur[1] - 1)} />
+        </RailGroup>
+      )}
+      <RailResult label="LCS" value={ans !== null ? ans : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        <span className="font-mono text-ink">"{s.a}"</span> vs <span className="font-mono text-ink">"{s.b}"</span>, LCS ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={36} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -143,7 +161,7 @@ function Inspector({ frame }: InspectorProps<LCSState>) {
 export const manifestId = 'imp-65-longest-common-subsequence';
 export const title = 'Longest Common Subsequence';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'abcde-ace', label: '"abcde" vs "ace"', value: { a: 'abcde', b: 'ace' } },
     { id: 'abc-abc', label: '"abc" vs "abc"', value: { a: 'abc', b: 'abc' } },

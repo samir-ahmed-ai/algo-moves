@@ -1,8 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, vizText, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface SqInput {
   values: number[];
@@ -20,41 +21,28 @@ interface SqState {
 }
 
 function record({ values }: SqInput): Frame<SqState>[] {
-  const frames: Frame<SqState>[] = [];
   const n = values.length;
   const result = new Array<number | null>(n).fill(null);
   const dead = new Array<boolean>(n).fill(false);
   let left = 0;
   let right = n - 1;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    chosen: number | null,
-    writeAt: number | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        values,
-        left,
-        right,
-        chosen,
-        writeAt,
-        result: result.slice(),
-        dead: dead.slice(),
-        done: tone != null,
-      },
-    });
+  const { emit, frames } = createRecorder<SqState>(() => ({
+    values,
+    left,
+    right,
+    chosen: null,
+    writeAt: null,
+    result: result.slice(),
+    dead: dead.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
     `left=0 right=${right}`,
     `The input is sorted but has negatives, so the largest square sits at one of the two ends. Put left at 0 and right at ${right}; compare end squares and fill the result from the back forward.`,
-    null,
-    null,
+    { chosen: null, writeAt: null },
   );
 
   for (let k = n - 1; k >= 0; k--) {
@@ -67,8 +55,7 @@ function record({ values }: SqInput): Frame<SqState>[] {
         'TAKE-L',
         `res[${k}]=${lSq}`,
         `left²=${values[left]}²=${lSq} > right²=${values[right]}²=${rSq}, so the left end has the bigger square. Write ${lSq} into result[${k}] and advance left to ${left + 1}.`,
-        left,
-        k,
+        { chosen: left, writeAt: k },
       );
       left++;
     } else {
@@ -78,8 +65,7 @@ function record({ values }: SqInput): Frame<SqState>[] {
         'TAKE-R',
         `res[${k}]=${rSq}`,
         `right²=${values[right]}²=${rSq} ≥ left²=${values[left]}²=${lSq}, so the right end has the bigger square. Write ${rSq} into result[${k}] and move right to ${right - 1}.`,
-        right,
-        k,
+        { chosen: right, writeAt: k },
       );
       right--;
     }
@@ -89,8 +75,7 @@ function record({ values }: SqInput): Frame<SqState>[] {
     'DONE',
     'sorted squares',
     `Every input cell has been consumed. Filling from the back guaranteed the squares come out ascending: [${result.join(', ')}].`,
-    null,
-    null,
+    { chosen: null, writeAt: null, done: true },
     'good',
   );
   return frames;
@@ -99,6 +84,9 @@ function record({ values }: SqInput): Frame<SqState>[] {
 function View({ frame }: PluginViewProps<SqState>) {
   const s = frame.state;
   const live = s.left <= s.right;
+  const lSq = live ? s.values[s.left] * s.values[s.left] : null;
+  const rSq = live ? s.values[s.right] * s.values[s.right] : null;
+  const filled = s.result.filter((v) => v !== null).length;
   const pointers: ArrayPointer[] = [];
   if (live) {
     pointers.push({ i: s.left, label: 'left', tone: 'accent', place: 'below' });
@@ -109,17 +97,27 @@ function View({ frame }: PluginViewProps<SqState>) {
     if (s.dead[i]) return 'dead';
     return '';
   };
-  const out = s.result.map((v) => (v === null ? '·' : v));
+  const resultItems = s.result.map((v, i) =>
+    v === null
+      ? { label: '·', tone: undefined }
+      : { label: String(v), tone: (s.writeAt === i ? 'accent' : 'good') as 'accent' | 'good' },
+  );
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="left²" v={lSq ?? '—'} tone="accent" />
+        <RailStat k="right²" v={rSq ?? '—'} />
+        <RailStat k="filled" v={`${filled}/${s.values.length}`} />
+      </RailGroup>
+      <RailStack label="result" items={resultItems} highlightEnd="bottom" topLabel="back" />
+      {s.done && <RailResult label="answer" value={`[${s.result.join(', ')}]`} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
+    <VizStage rail={rail} railWidth={150}>
       <div className={cn(vizText.sm, 'text-ink3')}>two pointers from the ends · square &amp; merge backward</div>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>result (built back → front)</div>
-      <ArrayRow
-        values={out}
-        cellTone={(i) => (s.writeAt === i ? 'found' : s.result[i] !== null ? 'mid' : '')}
-      />
-    </div>
+    </VizStage>
   );
 }
 
@@ -144,7 +142,7 @@ function Inspector({ frame }: InspectorProps<SqState>) {
 export const manifestId = 'imp-56-squares-of-a-sorted-array';
 export const title = 'Squares of a Sorted Array';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 's1', label: '[-4,-1,0,3,10]', value: { values: [-4, -1, 0, 3, 10] } },
     { id: 's2', label: '[-7,-3,2,3,11]', value: { values: [-7, -3, 2, 3, 11] } },

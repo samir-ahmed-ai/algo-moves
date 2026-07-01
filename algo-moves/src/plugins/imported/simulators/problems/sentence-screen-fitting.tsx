@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface SSFInput {
   sentence: string[];
@@ -124,16 +123,21 @@ function View({ frame }: PluginViewProps<SSFState>) {
   const tone = (i: number) => (s.cur === i ? 'found' : s.fit[i] >= 0 ? 'match' : '');
   const w = s.sentence.length;
   const allFit = s.fit.every((v) => v >= 0);
-  const answer = s.done ? `${Math.floor(s.totalWords / w)}×` : allFit ? `${s.totalWords} words so far` : '…precomputing';
+  const answerVal = s.done ? Math.floor(s.totalWords / w) : null;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="word" v={s.cur !== null ? `${s.cur} "${s.sentence[s.cur]}"` : s.walkStart !== null ? `${s.walkStart} "${s.sentence[s.walkStart]}"` : '—'} tone={s.cur !== null || s.walkStart !== null ? 'accent' : undefined} />
+        <RailStat k="row" v={s.walkRow !== null ? s.walkRow : '—'} />
+        <RailStat k="placed" v={s.totalWords} />
+      </RailGroup>
+      <RailResult label="answer" value={answerVal !== null ? `${answerVal}×` : allFit ? `${s.totalWords}…` : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        [{s.sentence.map((x) => `"${x}"`).join(', ')}], {s.rows}×{s.cols} screen, fits ={' '}
-        <span className="font-mono text-ink">{answer}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => `"${s.sentence[i]}"`} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index = start word, value = words that fit on one row</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -156,7 +160,7 @@ function Inspector({ frame }: InspectorProps<SSFState>) {
 export const manifestId = 'imp-83-sentence-screen-fitting';
 export const title = 'Sentence Screen Fitting';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'hello-world', label: '["hello","world"], 2×8 (1)', value: { sentence: ['hello', 'world'], rows: 2, cols: 8 } },
     { id: 'a-bcd-e', label: '["a","bcd","e"], 3×6 (2)', value: { sentence: ['a', 'bcd', 'e'], rows: 3, cols: 6 } },

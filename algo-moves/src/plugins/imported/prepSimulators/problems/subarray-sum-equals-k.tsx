@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface SubarraySumInput {
   nums: number[];
@@ -110,32 +109,20 @@ function View({ frame }: PluginViewProps<SubarraySumState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   const tone = (i: number) => (s.i === i ? 'match' : '');
+  const prefixItems = s.prefix.map(([v, c]) => `${v}:${c}`);
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        k = <span className="font-mono text-ink">{s.k}</span>
-        {' · '}prefix sum ={' '}
-        <span className="font-mono text-ink">{s.sum}</span>
-        {s.need !== null && !s.done && (
-          <>
-            {' · '}need (sum−k) ={' '}
-            <span className="font-mono text-ink">{s.need}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="k" v={s.k} />
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="sum" v={s.sum} tone="accent" />
+        <RailStat k="need" v={s.need ?? '—'} />
+      </RailGroup>
+      <RailStack label="prefix map" items={prefixItems} topLabel="latest" />
+      <RailResult label="count" value={s.cnt} tone={s.done ? 'good' : s.added !== null && s.added > 0 ? 'accent' : undefined} />
+    </>}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        prefix {'{'}
-        {s.prefix.map(([v, c]) => `${v}:${c}`).join(', ')}
-        {'}'}
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
-        count = {s.cnt}
-        {s.added !== null && s.added > 0 && !s.done && (
-          <span className="text-good"> (+{s.added})</span>
-        )}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

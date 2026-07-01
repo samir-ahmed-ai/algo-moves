@@ -3,8 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
-import { cn } from '../../lib/cn';
-import { InspectorRow, VizEmpty, VizInspector, vizText } from '../_shared/vizKit';
+import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface LSInput {
   s: string;
@@ -115,19 +114,22 @@ function View({ frame }: PluginViewProps<LSState>) {
     if (s.done && i >= s.bestLeft && i <= s.bestRight) return 'match';
     return '';
   };
+  const len = s.right >= s.left ? s.right - s.left + 1 : 0;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        window = <span className="font-mono text-ink">{s.inWindow || '∅'}</span>
-        {' · '}best = <span className="font-mono text-ink">{s.best}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="window">
+        <RailStat k="substr" v={s.inWindow || '∅'} tone="accent" />
+        <RailStat k="len" v={len} />
+      </RailGroup>
+      <RailResult label="best" value={s.best} tone={s.done ? 'good' : 'accent'} />
+    </>}>
       <ArrayRow
         values={s.chars}
         windowRange={hasWindow ? [s.left, s.right] : null}
         cellTone={tone}
         pointers={pointers}
       />
-    </div>
+    </VizStage>
   );
 }
 

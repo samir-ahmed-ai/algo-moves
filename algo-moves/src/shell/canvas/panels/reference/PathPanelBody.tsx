@@ -4,12 +4,12 @@ import { useWorkspace } from '../../../../lib/workspace';
 import { useProgress, statFor } from '../../../../lib/progress';
 import { cn } from '../../../../lib/cn';
 import { useCanvasStatic } from '../../CanvasContext';
-import { Chip, Hint, Meter, Pill, Row } from '../../nodeui';
+import { Chip, Hint, Meter, nodeIconGlyph, Pill, Row } from '../../nodeui';
 
 /** #62 Learning path: ordered sequence with mastery + jump-to. */
 export function PathPanelBody() {
   const { item } = useCanvasStatic();
-  const { setActiveItemId, setSelectedNode } = useWorkspace();
+  const { openProblem } = useWorkspace();
   const progress = useProgress();
   const items = catalog.items.filter((it) => it.pluginId);
   const idx = items.findIndex((it) => it.id === item.id);
@@ -35,10 +35,7 @@ export function PathPanelBody() {
             <Row
               key={it.id}
               active={current}
-              onClick={() => {
-                setActiveItemId(it.id);
-                setSelectedNode(null);
-              }}
+              onClick={() => openProblem(it.id)}
             >
               <Pill>{i + 1}</Pill>
               <span
@@ -47,8 +44,8 @@ export function PathPanelBody() {
               >
                 {it.title}
               </span>
-              {locked && <Lock className="h-3 w-3 shrink-0 text-ink3" />}
-              {mastered && <Trophy className="h-3 w-3 shrink-0" style={{ color: 'var(--good)' }} />}
+              {locked && <Lock className={cn(nodeIconGlyph, 'shrink-0 text-ink3')} />}
+              {mastered && <Trophy className={cn(nodeIconGlyph, 'shrink-0 text-good')} />}
             </Row>
           );
         })}

@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LogInput {
   lines: string[];
@@ -73,29 +72,20 @@ function record({ lines }: LogInput): Frame<LogState>[] {
 function View({ frame }: PluginViewProps<LogState>) {
   const s = frame.state;
   const entries = Object.entries(s.byLevel).sort((a, b) => b[1] - a[1]);
+  const levelItems = entries.map(([level, count]) => `${level} → ${count}`);
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
+    <VizStage rail={<>
+      <RailStack label="by level" items={levelItems} />
+      <RailGroup label="progress">
+        <RailStat k="total" v={s.total} tone="accent" />
+        <RailStat k="levels" v={Object.keys(s.byLevel).length} />
+      </RailGroup>
+      {s.done && <RailResult label="total" value={s.total} tone="good" />}
+    </>}>
+      <div className="font-mono text-sm text-ink2 break-all">
         {s.op || '—'}
-        {s.done && <span className="ml-2 font-mono text-good">total={s.total}</span>}
       </div>
-      {s.lastLine && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink2')}>
-          last: {s.lastLine.slice(0, 50)}
-        </div>
-      )}
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>by level</div>
-      <div className="mt-1 space-y-1">
-        <div className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}>
-          TOTAL → {s.total}
-        </div>
-        {entries.map(([level, count]) => (
-          <div key={level} className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}>
-            {level} → {count}
-          </div>
-        ))}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

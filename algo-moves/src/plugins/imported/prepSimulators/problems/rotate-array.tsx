@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface RotateInput {
   nums: number[];
@@ -143,21 +142,25 @@ function View({ frame }: PluginViewProps<RotateState>) {
     if (s.l === i || s.r === i) return 'match';
     return '';
   };
+  const rail = (
+    <>
+      <RailGroup label="rotation">
+        <RailStat k="raw k" v={s.rawK} />
+        <RailStat k="eff k" v={s.k} tone="accent" />
+        <RailStat k="phase" v={phaseLabel(s.phase)} />
+      </RailGroup>
+      <RailGroup label="pointers">
+        <RailStat k="seg" v={s.seg ? `${s.seg[0]}..${s.seg[1]}` : '—'} />
+        <RailStat k="l" v={s.l ?? '—'} tone={s.l !== null ? 'accent' : undefined} />
+        <RailStat k="r" v={s.r ?? '—'} tone={s.r !== null ? 'warn' : undefined} />
+      </RailGroup>
+      {s.done && <RailResult label="result" value={`[${s.nums.join(', ')}]`} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        k = <span className="font-mono text-ink">{s.rawK}</span>
-        {' → '}effective <span className="font-mono text-ink">{s.k}</span>
-        {' · '}phase <span className="font-mono text-ink">{phaseLabel(s.phase)}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={s.seg} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        segment {s.seg ? `[${s.seg[0]}..${s.seg[1]}]` : '—'}
-      </div>
-      {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ [{s.nums.join(', ')}]</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

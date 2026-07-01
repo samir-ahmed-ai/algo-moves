@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface SuccessorInput {
   /** BST in level-order; null marks an absent child slot. Children of i are 2i+1, 2i+2. */
@@ -34,29 +34,23 @@ function inorderValues(tree: (number | null)[]): number[] {
 }
 
 function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
-  const frames: Frame<SuccessorState>[] = [];
   const path: number[] = [];
   let res: number | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    cur: number | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { tree, p, cur, res, path: path.slice(), done },
-    });
+  const { emit, frames } = createRecorder<SuccessorState>(() => ({
+    tree,
+    p,
+    cur: null,
+    res,
+    path: path.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
     `p=${p}`,
     `Inorder Successor in BST: find the node with the smallest value strictly greater than ${p}. We never touch p's own subtree — we just walk down from the root using the BST order. Whenever p < cur we could still improve, so we record cur as a candidate and go left; otherwise cur is too small, so we go right.`,
-    0,
-    false,
+    { cur: 0 },
   );
 
   let cur = 0; // index into the level-order array (root)
@@ -70,8 +64,7 @@ function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
         'CANDIDATE',
         `res=${curVal}`,
         `p (${p}) < cur (${curVal}), so ${curVal} is greater than p and is a valid successor candidate — remember it as res. A smaller-but-still-greater value can only sit in the left subtree, so move left.`,
-        cur,
-        false,
+        { cur },
       );
       cur = left;
     } else {
@@ -80,8 +73,7 @@ function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
         'GO_RIGHT',
         `skip ${curVal}`,
         `p (${p}) ≥ cur (${curVal}), so ${curVal} is not greater than p and cannot be the successor. Any larger value lies in the right subtree, so move right and keep the current res.`,
-        cur,
-        false,
+        { cur },
       );
       cur = right;
     }
@@ -94,8 +86,7 @@ function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
       'DONE',
       `succ=${ans}`,
       `We walked off the tree. The last candidate we saved is ${ans}, which is the in-order successor of ${p}. (In-order values: ${seq.join(', ')} — right after ${p} comes ${ans}.)`,
-      null,
-      true,
+      { done: true },
       'good',
     );
   } else {
@@ -103,8 +94,7 @@ function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
       'DONE',
       'succ=none',
       `We walked off the tree without ever finding cur > ${p}, so ${p} is the largest value and has no in-order successor. (In-order values: ${seq.join(', ')}.)`,
-      null,
-      true,
+      { done: true },
       'bad',
     );
   }
@@ -115,28 +105,29 @@ function View({ frame }: PluginViewProps<SuccessorState>) {
   const s = frame.state;
   const visited = new Set(s.path);
   const nodeClass = (i: number) => {
-    if (s.cur === i) return 'team-1'; // node we are standing on now
-    if (s.res === i) return 'team-1'; // current best candidate stays highlighted
-    if (visited.has(i)) return 'team-2'; // already walked past
+    if (s.cur === i) return 'team-1';
+    if (s.res === i) return 'team-1';
+    if (visited.has(i)) return 'team-2';
     return 'team-0';
   };
   const resVal = s.res !== null ? (s.tree[s.res] as number) : null;
+  const curVal = s.cur !== null && s.tree[s.cur] != null ? (s.tree[s.cur] as number) : null;
+  const rule = curVal !== null ? (s.p < curVal ? '← left' : '→ right') : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        p = <span className="font-mono text-ink">{s.p}</span>
-        {' · '}res ={' '}
-        <span className={cn('font-mono', resVal !== null ? 'text-good' : 'text-ink3')}>
-          {resVal !== null ? resVal : '—'}
-        </span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="p" v={s.p} />
+        <RailStat k="cur" v={curVal ?? '—'} tone="accent" />
+        <RailStat k="rule" v={rule} />
+      </RailGroup>
+      <RailGroup label="candidate">
+        <RailStat k="res" v={resVal ?? '—'} tone={resVal !== null ? 'good' : undefined} />
+        <RailStat k="steps" v={s.path.length} />
+      </RailGroup>
+      {s.done && <RailResult label="successor" value={resVal !== null ? resVal : 'none'} tone={resVal !== null ? 'good' : 'bad'} />}
+    </>}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.cur} />
-      {s.done && (
-        <div className={cn('mt-1 font-mono', resVal !== null ? 'text-good' : 'text-bad', vizText.base)}>
-          → successor = {resVal !== null ? resVal : 'none'}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

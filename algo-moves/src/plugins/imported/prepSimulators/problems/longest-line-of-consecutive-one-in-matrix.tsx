@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LineInput {
   mat: number[][];
@@ -139,25 +138,27 @@ function View({ frame }: PluginViewProps<LineState>) {
     if (s.best[r][c] > 0) return s.best[r][c] === s.res ? 'path' : 'visited';
     return 'land';
   };
+  const showDirs = s.cur && s.dirs && s.mat[s.cur[0]][s.cur[1]] === 1;
+  const at = s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—';
+  const rail = (
+    <>
+      {showDirs && (
+        <RailGroup label="cell dirs">
+          <RailStat k="cell" v={at} tone="accent" />
+          <RailStat k="→" v={s.dirs!.hor} />
+          <RailStat k="↓" v={s.dirs!.ver} />
+          <RailStat k="↘" v={s.dirs!.diag} />
+          <RailStat k="↙" v={s.dirs!.anti} />
+          {s.bestDir && <RailStat k="best" v={s.bestDir} />}
+        </RailGroup>
+      )}
+      <RailResult label="longest" value={s.res} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        longest line ={' '}
-        <span className="font-mono text-ink">{s.res}</span>
-        {s.cur && s.dirs && s.mat[s.cur[0]][s.cur[1]] === 1 && (
-          <>
-            {' · '}at ({s.cur[0]},{s.cur[1]}):{' '}
-            <span className="font-mono text-ink">
-              →{s.dirs.hor} ↓{s.dirs.ver} ↘{s.dirs.diag} ↙{s.dirs.anti}
-            </span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GridBoard grid={s.mat} cellTone={cellTone} active={s.cur} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        green = a cell on the current longest line; the active cell shows its 4 direction lengths
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

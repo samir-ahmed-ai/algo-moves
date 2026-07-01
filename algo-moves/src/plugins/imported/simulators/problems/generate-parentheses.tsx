@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, PathDisplay, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, PathDisplay } from '../../../_shared/vizKit';
 
 interface ParenInput {
   n: number;
@@ -96,26 +95,18 @@ function record({ n }: ParenInput): Frame<ParenState>[] {
 
 function View({ frame }: PluginViewProps<ParenState>) {
   const s = frame.state;
-  const decision =
-    s.done || s.path.length === 0
-      ? `open ${s.open} / ${s.n} · close ${s.close}`
-      : `open=${s.open} (cap ${s.n}) · close=${s.close} (cap ${s.open})`;
   return (
-    <div className="board-area board-area--text">
-      <div className={cn(vizText.sm, 'text-ink3')}>building valid parentheses · n={s.n}</div>
+    <VizStage rail={<>
+      <RailStack label="results" items={s.results} highlightEnd="bottom" topLabel="latest" />
+      <RailGroup label="counters">
+        <RailStat k="open" v={s.open} tone="accent" />
+        <RailStat k="close" v={s.close} />
+        <RailStat k="n" v={s.n} />
+      </RailGroup>
+      {s.done && <RailResult label="found" value={s.results.length} tone="good" />}
+    </>}>
       <PathDisplay value={s.path || '·'} />
-      <div className={cn(vizText.sm, 'text-ink2')}>{decision}</div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        valid strings found ({s.results.length})
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('chip font-mono text-ink', vizText.sm)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -141,7 +132,7 @@ function Inspector({ frame }: InspectorProps<ParenState>) {
 export const manifestId = 'imp-34-generate-parentheses';
 export const title = 'Generate Parentheses';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'n3', label: 'n = 3', value: { n: 3 } },
     { id: 'n2', label: 'n = 2', value: { n: 2 } },

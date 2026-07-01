@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface ApInput {
   values: number[];
@@ -108,18 +107,22 @@ function View({ frame }: PluginViewProps<ApState>) {
     if (s.dead[i]) return 'dead';
     return '';
   };
+  const rail = (
+    <>
+      <RailGroup label="search">
+        <RailStat k="d" v={s.diff} />
+        <RailStat k="lo" v={s.lo} tone="accent" />
+        <RailStat k="hi" v={s.hi} tone="bad" />
+        <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
+        <RailStat k="exp" v={s.expected ?? '—'} />
+      </RailGroup>
+      {s.result !== null && <RailResult label="missing" value={s.result} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        arithmetic progression · step d = <span className="font-mono text-ink">{s.diff}</span>
-        {s.result !== null && (
-          <>
-            {' · '}missing = <span className="font-mono text-ink">{s.result}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -142,7 +145,7 @@ function Inspector({ frame }: InspectorProps<ApState>) {
 export const manifestId = 'imp-51-missing-number-in-arithmetic-progression';
 export const title = 'Missing Number in Arithmetic Progression';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'ap1', label: '[5,7,11,13] (d=2)', value: { values: [5, 7, 11, 13] } },
     { id: 'ap2', label: '[15,13,12] (d=-1)', value: { values: [15, 13, 12] } },

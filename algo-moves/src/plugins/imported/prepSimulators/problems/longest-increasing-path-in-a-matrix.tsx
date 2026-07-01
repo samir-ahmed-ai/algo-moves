@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LipInput {
   matrix: number[][];
@@ -32,33 +32,21 @@ function record({ matrix }: LipInput): Frame<LipState>[] {
     [1, 0],
     [-1, 0],
   ];
-  const frames: Frame<LipState>[] = [];
   const stack: [number, number][] = [];
   let best = 0;
   let start: [number, number] | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LipState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        matrix,
-        memo: memo.map((row) => row.slice()),
-        active: null,
-        stack: stack.map((p) => [p[0], p[1]] as [number, number]),
-        neighbor: null,
-        start,
-        best,
-        result: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<LipState>(() => ({
+    matrix,
+    memo: memo.map((row) => row.slice()),
+    active: null,
+    stack: stack.map((p) => [p[0], p[1]] as [number, number]),
+    neighbor: null,
+    start,
+    best,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -173,39 +161,31 @@ function View({ frame }: PluginViewProps<LipState>) {
     if (s.memo[r][c] > 0) return 'visited';
     return 'land';
   };
-  const chain = s.stack.map(([r, c]) => matrix(s, r, c)).join(' < ');
+  const at = s.active;
+  const nb = s.neighbor;
+  const chainItems = s.stack.map(([r, c]) => String(s.matrix[r][c]));
+  const rail = (
+    <>
+      <RailStack label="dfs stack" items={chainItems} />
+      <RailGroup label="scan">
+        <RailStat k="cell" v={at ? `(${at[0]},${at[1]})` : '—'} tone="accent" />
+        <RailStat k="val" v={at ? s.matrix[at[0]][at[1]] : '—'} />
+        <RailStat k="memo" v={at && s.memo[at[0]][at[1]] > 0 ? s.memo[at[0]][at[1]] : '—'} />
+        <RailStat k="nbr" v={nb ? `(${nb[0]},${nb[1]})` : '—'} />
+      </RailGroup>
+      <RailResult label="best" value={s.result ?? s.best} tone={s.result !== null ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        best path ={' '}
-        <span className="font-mono text-ink">{s.result ?? s.best}</span>
-        {s.active && (
-          <>
-            {' · '}at{' '}
-            <span className="font-mono text-ink">
-              ({s.active[0]},{s.active[1]})
-            </span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={140}>
       <GridBoard
         grid={s.matrix}
         cellTone={cellTone}
         active={s.active}
         label={(r, c) => `${s.matrix[r][c]}${s.memo[r][c] > 0 ? `·${s.memo[r][c]}` : ''}`}
       />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        chain: {chain || '·'}
-      </div>
-      {s.result !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ {s.result}</div>
-      )}
-    </div>
+    </VizStage>
   );
-}
-
-function matrix(s: LipState, r: number, c: number): number {
-  return s.matrix[r][c];
 }
 
 function Inspector({ frame }: InspectorProps<LipState>) {

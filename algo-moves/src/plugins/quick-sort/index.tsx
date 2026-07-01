@@ -3,7 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
-import { InspectorRow } from '../_shared/vizKit';
+import { InspectorRow, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 import { SortInspector } from '../_shared/sortInspector';
 
 export interface SortInput {
@@ -164,10 +164,27 @@ function View({ frame }: PluginViewProps<SortState>) {
     if (s.i === idx) return 'swap';
     return 'idle';
   };
+  const finalized = s.sorted.filter(Boolean).length;
+  const done = frame.move?.type === 'DONE';
+  const range = s.lo !== null && s.hi !== null ? `[${s.lo},${s.hi}]` : '—';
+  const pivotVal = s.pivotIdx !== null ? s.values[s.pivotIdx] : '—';
   return (
-    <div className="board-area">
+    <VizStage rail={<>
+      <RailGroup label="partition">
+        <RailStat k="range" v={range} />
+        <RailStat k="pivot" v={pivotVal} tone="accent" />
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="j" v={s.j ?? '—'} />
+      </RailGroup>
+      <RailGroup label="stats">
+        <RailStat k="cmps" v={s.comparisons} />
+        <RailStat k="swaps" v={s.swaps} />
+        <RailStat k="fixed" v={`${finalized}/${s.values.length}`} tone={done ? 'good' : undefined} />
+      </RailGroup>
+      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+    </>}>
       <ArrayBars values={s.values} tone={tone} height={242} />
-    </div>
+    </VizStage>
   );
 }
 

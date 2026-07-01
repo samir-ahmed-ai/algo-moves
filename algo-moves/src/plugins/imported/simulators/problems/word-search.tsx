@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface WordSearchInput {
   board: string[][];
@@ -36,33 +36,30 @@ function key(r: number, c: number): string {
 function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
   const m = board.length;
   const n = board[0].length;
-  const frames: Frame<WordSearchState>[] = [];
   const onPath = new Set<string>();
   const path: [number, number][] = [];
   let found = false;
 
-  const emit = (
+  const { emit, frames } = createRecorder<WordSearchState>(() => ({
+    board,
+    path: path.map((p) => [p[0], p[1]] as [number, number]),
+    cur: null,
+    matched: path.length,
+    word,
+    found,
+    done: false,
+  }));
+
+  const snap = (
     type: string,
     note: string,
     caption: string,
     cur: [number, number] | null,
     done = false,
     tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        board,
-        path: path.map((p) => [p[0], p[1]] as [number, number]),
-        cur,
-        matched: path.length,
-        word,
-        found,
-        done,
-      },
-    });
+  ) => emit(type, note, caption, { cur, done }, tone);
 
-  emit(
+  snap(
     'INIT',
     `${m}×${n} board · "${word}"`,
     `Look for "${word}" by stepping cell to cell (up/down/left/right) without reusing a cell. DFS from every starting cell: if board[r][c] equals the next letter, mark the cell, recurse the four neighbours, then restore on backtrack.`,
@@ -71,11 +68,11 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
 
   const dfs = (r: number, c: number, idx: number): boolean => {
     if (r < 0 || r >= m || c < 0 || c >= n) {
-      emit('MISMATCH', 'off board', `Step off the board (${r}, ${c}) — out of bounds, so this path fails.`, null);
+      snap('MISMATCH', 'off board', `Step off the board (${r}, ${c}) — out of bounds, so this path fails.`, null);
       return false;
     }
     if (onPath.has(key(r, c))) {
-      emit(
+      snap(
         'MISMATCH',
         `(${r},${c}) reused`,
         `Cell (${r}, ${c}) is already on the current path — can't reuse it, so this path fails.`,
@@ -86,7 +83,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
     const ch = board[r][c];
     const need = word[idx];
     if (ch !== need) {
-      emit(
+      snap(
         'MISMATCH',
         `'${ch}' ≠ '${need}'`,
         `At (${r}, ${c}) the letter is '${ch}', but we need '${need}' (position ${idx}). Mismatch — prune this branch.`,
@@ -97,7 +94,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
 
     onPath.add(key(r, c));
     path.push([r, c]);
-    emit(
+    snap(
       'MATCH',
       `'${ch}' == '${need}'`,
       `At (${r}, ${c}) the letter '${ch}' matches '${need}' (position ${idx}). Mark it and advance — ${idx + 1}/${word.length} letters matched.`,
@@ -106,7 +103,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
 
     if (idx + 1 === word.length) {
       found = true;
-      emit('FOUND', 'word complete', `All ${word.length} letters of "${word}" matched along this path — the word exists.`, [r, c], false, 'good');
+      snap('FOUND', 'word complete', `All ${word.length} letters of "${word}" matched along this path — the word exists.`, [r, c], false, 'good');
       return true;
     }
 
@@ -118,7 +115,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
 
     onPath.delete(key(r, c));
     path.pop();
-    emit(
+    snap(
       'BACKTRACK',
       `undo (${r},${c})`,
       `No neighbour of (${r}, ${c}) continued "${word}" past '${ch}'. Backtrack: unmark (${r}, ${c}) and return to position ${idx}.`,
@@ -131,7 +128,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
   outer: for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
       if (board[r][c] === word[0]) {
-        emit('TRY', `start (${r},${c})`, `Try starting the search at (${r}, ${c}) — its letter '${board[r][c]}' matches the first letter '${word[0]}'.`, [r, c]);
+        snap('TRY', `start (${r},${c})`, `Try starting the search at (${r}, ${c}) — its letter '${board[r][c]}' matches the first letter '${word[0]}'.`, [r, c]);
       }
       if (dfs(r, c, 0)) {
         answer = true;
@@ -140,7 +137,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
     }
   }
 
-  emit(
+  snap(
     'DONE',
     answer ? 'found' : 'not found',
     answer
@@ -161,18 +158,22 @@ function View({ frame }: PluginViewProps<WordSearchState>) {
     if (onPath.has(key(r, c))) return 'path';
     return 'land';
   };
-  const progress = s.word.slice(0, s.matched);
+  const pathItems = s.path.map(([r, c]) => `(${r},${c})`);
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="word" v={s.word} />
+        <RailStat k="matched" v={`${s.matched}/${s.word.length}`} tone="accent" />
+        <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+      </RailGroup>
+      <RailStack label="path" items={pathItems} />
+      {s.done && <RailResult label="found" value={s.found ? 'true' : 'false'} tone={s.found ? 'good' : 'bad'} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        word <span className="font-mono text-ink">{s.word}</span> · matched{' '}
-        <span className="font-mono text-ink">
-          {progress || '∅'}
-        </span>{' '}
-        ({s.matched}/{s.word.length})
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GridBoard grid={s.board} cellTone={cellTone} active={s.cur} cellSize={40} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -201,7 +202,7 @@ const W2: WordSearchInput = { board: BOARD, word: 'ABCB' };
 export const manifestId = 'imp-44-word-search';
 export const title = 'Word Search';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'w1', label: '"ABCCED" · true', value: W1 },
     { id: 'w2', label: '"ABCB" · false', value: W2 },

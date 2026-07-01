@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useCanvasFrame, useCanvasStatic } from '../CanvasContext';
 import { exampleInputIndex, stepExampleInput } from '../exampleInputNav';
-import { PanelHeaderAction, PanelHeaderMeta } from '../nodeui';
+import { PanelHeaderAction, PanelHeaderMeta, nodeIconGlyph } from '../nodeui';
 
 /** Live step counter for a node header — its own frame-subscribing leaf so it can
  *  update on every step without re-rendering the whole node. */
@@ -23,7 +23,7 @@ export function HeaderPlay() {
       title={player.isPlaying ? 'pause' : 'play'}
       onClick={() => player.togglePlay()}
     >
-      {player.isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+      {player.isPlaying ? <Pause className={nodeIconGlyph} /> : <Play className={nodeIconGlyph} />}
     </PanelHeaderAction>
   );
 }
@@ -52,7 +52,7 @@ export function HeaderExamplesNav() {
           if (next) setInputId(next.id);
         }}
       >
-        <ChevronLeft className="h-3.5 w-3.5" />
+        <ChevronLeft className={nodeIconGlyph} />
       </PanelHeaderAction>
       <PanelHeaderAction
         variant="ghost"
@@ -63,7 +63,7 @@ export function HeaderExamplesNav() {
           if (next) setInputId(next.id);
         }}
       >
-        <ChevronRight className="h-3.5 w-3.5" />
+        <ChevronRight className={nodeIconGlyph} />
       </PanelHeaderAction>
     </>
   );

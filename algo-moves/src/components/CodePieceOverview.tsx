@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { CodePiece } from '../lib/codePieces';
-import { pieceRoleMeta } from '../lib/codePieceRoles';
+import { pieceGlyph, pieceRoleMeta } from '../lib/codePieceRoles';
+import { dedentForDisplay } from '../lib/trayLayout';
 import { HighlightedCode } from './HighlightedCode';
 
 export interface CodePieceOverviewProps {
@@ -14,10 +15,11 @@ export function CodePieceOverview({ pieces, lang = 'go', wrap = false }: CodePie
     <div className="code-overview" role="region" aria-label="Full solution overview">
       {pieces.map((piece, i) => {
         const meta = pieceRoleMeta(piece);
-        const Icon = meta.icon;
+        const glyph = pieceGlyph(piece, meta.kind);
         const sectionStyle = {
           '--section-stroke': meta.stroke,
           '--section-bg': meta.bg,
+          '--section-text': meta.text,
         } as CSSProperties;
 
         return (
@@ -27,19 +29,24 @@ export function CodePieceOverview({ pieces, lang = 'go', wrap = false }: CodePie
             style={sectionStyle}
             aria-label={`Section ${i + 1}: ${piece.role}`}
           >
-            <div className="code-overview-header">
-              <span className="code-overview-index" style={{ color: meta.text }}>
+            <div className="code-overview-code">
+              <span className="code-overview-index" aria-hidden>
                 {i + 1}
               </span>
-              <span className="code-overview-kind" style={{ color: meta.text, borderColor: meta.stroke }}>
-                <Icon className="code-overview-kind-icon" aria-hidden />
-                {meta.label}
-              </span>
-              <span className="code-overview-caption" title={piece.role}>
-                {piece.role}
-              </span>
+              <HighlightedCode
+                code={dedentForDisplay(piece.code)}
+                lang={lang}
+                wrap={wrap}
+                className="code-overview-snippet"
+              />
             </div>
-            <HighlightedCode code={piece.code} lang={lang} wrap={wrap} />
+            <aside className="code-overview-aside" aria-label={piece.role}>
+              <span className="code-overview-glyph" aria-hidden>
+                {glyph}
+              </span>
+              <span className="code-overview-kind">{meta.label}</span>
+              <p className="code-overview-caption">{piece.role}</p>
+            </aside>
           </section>
         );
       })}

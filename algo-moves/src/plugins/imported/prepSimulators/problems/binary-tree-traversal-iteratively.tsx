@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface TraversalInput {
   /** Level-order values; null marks an absent node (children of i are 2i+1, 2i+2). */
@@ -106,28 +105,26 @@ function View({ frame }: PluginViewProps<TraversalState>) {
   const onStack = new Set(s.stack);
   const isVisited = new Set(s.visited);
   const nodeClass = (i: number) => {
-    if (s.cur === i) return 'team-1'; // current node
-    if (isVisited.has(i)) return 'team-2'; // already visited
-    if (onStack.has(i)) return 'team-1'; // waiting on the stack
+    if (s.cur === i) return 'team-1';
+    if (isVisited.has(i)) return 'team-2';
+    if (onStack.has(i)) return 'team-1';
     return 'team-0';
   };
-  const stackVals = s.stack.map((i) => s.tree[i]);
+  const stackVals = s.stack.map((i) => String(s.tree[i]));
+  const outVals = s.out.map(String);
+  const curVal = s.cur !== null ? String(s.tree[s.cur]) : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        cur ={' '}
-        <span className="font-mono text-ink">
-          {s.cur !== null ? s.tree[s.cur] : 'null'}
-        </span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="cur">
+        <RailStat k="node" v={curVal} tone="accent" />
+      </RailGroup>
+      <RailStack label="stack" items={stackVals} />
+      {s.done
+        ? <RailResult label="out" value={`[${s.out.join(', ')}]`} tone="good" />
+        : <RailStack label="out" items={outVals} />}
+    </>}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.cur} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        stack [{stackVals.join(', ')}]
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
-        out [{s.out.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

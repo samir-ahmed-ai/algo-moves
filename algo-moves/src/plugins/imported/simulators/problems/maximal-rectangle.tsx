@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface MRInput {
   matrix: string[][];
@@ -118,15 +117,26 @@ function View({ frame }: PluginViewProps<MRState>) {
     if (s.done && inBest(r, c)) return 'path';
     return s.heights[r][c] >= 0 ? 'visited' : '';
   };
-  const ans = s.done ? s.answer : '…filling';
+  const curCell =
+    s.cur && s.heights[s.cur[0]][s.cur[1]] >= 0 ? s.heights[s.cur[0]][s.cur[1]] : '—';
+  const curMatrix = s.cur ? s.matrix[s.cur[0]][s.cur[1]] : '—';
+  const rail = (
+    <>
+      <RailGroup label="cell">
+        <RailStat k="pos" v={s.cur ? `[${s.cur[0]},${s.cur[1]}]` : '—'} />
+        <RailStat k="val" v={curMatrix} tone="accent" />
+        <RailStat k="h" v={curCell} tone="accent" />
+      </RailGroup>
+      <RailGroup label="best">
+        <RailStat k="area" v={s.answer > 0 ? s.answer : '—'} tone={s.answer > 0 ? 'good' : undefined} />
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.answer} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.rows}×{s.cols} heights table, max area = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={display} cellTone={cellTone} active={s.cur} cellSize={44} />
-      <div className={cn(vizText.sm, 'text-ink3')}>heights[i][j] = consecutive 1s ending at (i, j) going up</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -151,7 +161,7 @@ function Inspector({ frame }: InspectorProps<MRState>) {
 export const manifestId = 'imp-70-maximal-rectangle';
 export const title = 'Maximal Rectangle';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'm4x5',

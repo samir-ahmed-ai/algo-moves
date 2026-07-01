@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface Book {
   id: string;
@@ -144,33 +143,33 @@ function View({ frame }: PluginViewProps<BooksState>) {
     if (s.phase === 'count' && s.i === i) return 'match';
     return '';
   };
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        phase = <span className="font-mono text-ink">{s.phase}</span>
-        {s.bestCost !== null && (
-          <>
-            {' · '}best cost ={' '}
-            <span className="font-mono text-ink">
-              {s.bestCost} ({s.bestCnt}×)
-            </span>
-          </>
-        )}
-      </div>
-      <ArrayRow values={s.costs} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => s.ids[i]} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        costCount {'{'}
-        {s.count
-          .map(([c, n]) => `${c}:${n}${s.consideredCost === c ? '◂' : ''}`)
-          .join(', ')}
-        {'}'}
-      </div>
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="phase" v={s.phase} />
+        <RailStat k="i" v={s.i ?? '—'} tone={s.i !== null ? 'accent' : undefined} />
+        {s.bestCost !== null && <RailStat k="best" v={`${s.bestCost} (${s.bestCnt}×)`} tone="accent" />}
+        {s.consideredCost !== null && <RailStat k="cur" v={s.consideredCost} />}
+      </RailGroup>
+      <RailStack
+        label="costCount"
+        items={s.count.map(([c, n]) => ({
+          label: `${c}: ${n}`,
+          tone: s.consideredCost === c ? 'accent' : undefined,
+        }))}
+      />
       {(s.phase === 'collect' || s.phase === 'done') && (
-        <div className={cn('mt-1 font-mono', s.done ? 'text-good' : 'text-ink3', vizText.base)}>
-          → [{s.result.join(', ')}]
-        </div>
+        <RailStack label="result" items={s.result} />
       )}
-    </div>
+      {s.done && (
+        <RailResult label="answer" value={`[${s.result.join(', ')}]`} tone="good" />
+      )}
+    </>
+  );
+  return (
+    <VizStage rail={rail} railWidth={150}>
+      <ArrayRow values={s.costs} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => s.ids[i]} />
+    </VizStage>
   );
 }
 

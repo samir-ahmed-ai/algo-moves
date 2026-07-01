@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage, vizText } from '../../../_shared/vizKit';
 
 // A nested integer is either a plain number or a (possibly nested) list.
 type Nested = number | Nested[];
@@ -94,14 +94,22 @@ function record({ list }: NestedInput): Frame<NestedState>[] {
 
 function View({ frame }: PluginViewProps<NestedState>) {
   const s = frame.state;
+  const active = s.activeId !== null ? s.lines.find((l) => l.id === s.activeId) : undefined;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="depth" v={active ? active.depth : '—'} />
+        <RailStat k="value" v={active && active.kind === 'int' ? (active.value ?? '—') : '—'} />
+        <RailStat k="+contrib" v={s.contribution !== null ? s.contribution : '—'} tone={s.contribution !== null ? 'accent' : undefined} />
+      </RailGroup>
+      <RailResult label="sum" value={s.sum} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area board-area--text">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        weighted sum (Σ value × depth) · <span className="font-mono text-ink">{s.sum}</span>
-      </div>
+    <VizStage rail={rail}>
       <div className={cn('flex flex-col gap-0.5 font-mono', vizText.base)}>
         {s.lines.map((line) => {
-          const active = s.activeId === line.id;
+          const isActive = s.activeId === line.id;
           const pad = (line.depth - 1) * 18;
           const text =
             line.kind === 'open' ? '[' : line.kind === 'close' ? ']' : String(line.value);
@@ -111,23 +119,18 @@ function View({ frame }: PluginViewProps<NestedState>) {
               className="flex items-center rounded px-1 py-[1px]"
               style={{
                 marginLeft: pad,
-                background: active ? 'var(--accent-bg)' : 'transparent',
-                outline: active ? '1px solid var(--accent)' : 'none',
+                background: isActive ? 'var(--accent-bg)' : 'transparent',
+                outline: isActive ? '1px solid var(--accent)' : 'none',
                 color: line.kind === 'int' ? 'var(--text)' : 'var(--text-3)',
               }}
             >
               <span className={cn('w-14 shrink-0 text-ink3', vizText.xs)}>depth {line.depth}</span>
               <span>{text}</span>
-              {active && line.kind === 'int' && s.contribution !== null && (
-                <span className={cn('ml-2 text-accent', vizText.xs)}>
-                  +{line.value} × {line.depth} = {s.contribution}
-                </span>
-              )}
             </div>
           );
         })}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -148,7 +151,7 @@ function Inspector({ frame }: InspectorProps<NestedState>) {
 export const manifestId = 'imp-38-nested-list-weight-sum';
 export const title = 'Nested List Weight Sum';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'classic', label: '[[1,1],2,[1,1]]', value: { list: [[1, 1], 2, [1, 1]] } },
     { id: 'deep', label: '[1,[4,[6]]]', value: { list: [1, [4, [6]]] } },

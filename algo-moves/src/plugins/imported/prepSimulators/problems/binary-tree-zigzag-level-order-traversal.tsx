@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface ZigzagInput {
   // Level-order array; null marks an absent node. Children of i are 2i+1, 2i+2.
@@ -24,34 +24,22 @@ interface ZigzagState {
 // Follow the queue in insertion order, but keep the level-order *tree index*
 // alongside each node so the TreeBoard can highlight the right circle.
 function record({ tree }: ZigzagInput): Frame<ZigzagState>[] {
-  const frames: Frame<ZigzagState>[] = [];
   const val = (i: number): number => tree[i] as number;
 
   const visited: number[] = [];
   const result: number[][] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ZigzagState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        visited: visited.slice(),
-        queue: [],
-        active: null,
-        ltr: true,
-        levelBuf: [],
-        levelNo: 0,
-        result: result.map((r) => r.slice()),
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<ZigzagState>(() => ({
+    tree,
+    visited: visited.slice(),
+    queue: [],
+    active: null,
+    ltr: true,
+    levelBuf: [],
+    levelNo: 0,
+    result: result.map((r) => r.slice()),
+    done: false,
+  }));
 
   if (tree.length === 0 || tree[0] == null) {
     emit('DONE', 'empty', 'The tree is empty, so the zigzag traversal is an empty list.', {
@@ -156,30 +144,31 @@ function View({ frame }: PluginViewProps<ZigzagState>) {
   };
 
   const displayTree = s.tree.map((v) => (v == null ? null : v));
-  const queueVals = s.queue.map((i) => s.tree[i] as number);
+  const queueVals = s.queue.map((i) => String(s.tree[i] as number));
+  const levelBufVals = s.levelBuf.map((v) => (v == null ? '·' : String(v)));
+  const resultLabel = s.result.length ? s.result.map((r) => `[${r.join(',')}]`).join(' ') : '…';
 
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        level <span className="font-mono text-ink">{s.levelNo}</span>
-        {' · '}
-        <span className="font-mono text-ink">{s.ltr ? 'L→R' : 'R→L'}</span>
-      </div>
-      <TreeBoard tree={displayTree} nodeClass={nodeClass} activeNode={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        queue [{queueVals.join(', ')}]
-      </div>
-      {s.levelBuf.length > 0 && !s.done && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink2')}>
-          level buf [{s.levelBuf.map((v) => (v == null ? '·' : v)).join(', ')}]
-        </div>
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="level" v={s.levelNo} />
+        <RailStat k="dir" v={s.ltr ? 'L→R' : 'R→L'} tone="accent" />
+        <RailStat k="active" v={s.active !== null ? (s.tree[s.active] as number) : '—'} />
+      </RailGroup>
+      <RailStack label="queue" items={queueVals} topLabel="front" highlightEnd="bottom" />
+      {!s.done && levelBufVals.length > 0 && (
+        <RailStack label="level buf" items={levelBufVals} />
       )}
       {s.result.length > 0 && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          {s.result.map((r) => `[${r.join(',')}]`).join(' ')}
-        </div>
+        <RailResult label="result" value={resultLabel} tone={s.done ? 'good' : 'accent'} />
       )}
-    </div>
+    </>
+  );
+
+  return (
+    <VizStage rail={rail} railWidth={150}>
+      <TreeBoard tree={displayTree} nodeClass={nodeClass} activeNode={s.active} />
+    </VizStage>
   );
 }
 

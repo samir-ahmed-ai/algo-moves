@@ -1,9 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 import { minHeapPop, minHeapPush } from '../../../_shared/dualHeapBoard';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface KthStreamInput {
   k: number;
@@ -22,30 +22,19 @@ interface KthStreamState {
 }
 
 function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
-  const frames: Frame<KthStreamState>[] = [];
   let heap: number[] = [];
   const answers: number[] = [];
+  const heapDisplay = () => [...heap].sort((a, b) => a - b);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<KthStreamState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        k,
-        heap: [...heap].sort((a, b) => a - b),
-        added: null,
-        popped: null,
-        kth: null,
-        answers: answers.slice(),
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<KthStreamState>(() => ({
+    k,
+    heap: heapDisplay(),
+    added: null,
+    popped: null,
+    kth: null,
+    answers: answers.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -56,7 +45,7 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
 
   for (const v of init) {
     heap = minHeapPush(heap, v);
-    emit('PUSH', `push ${v}`, `Bootstrap: push ${v} into the min-heap.`, { added: v, heap: [...heap].sort((a, b) => a - b) });
+    emit('PUSH', `push ${v}`, `Bootstrap: push ${v} into the min-heap.`, { added: v, heap: heapDisplay() });
     if (heap.length > k) {
       let popped: number;
       [heap, popped] = minHeapPop(heap);
@@ -64,14 +53,14 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
         'TRIM',
         `popMin ${popped}`,
         `Heap size ${heap.length + 1} > k=${k} — popMin removes ${popped} (too small to be in top k).`,
-        { added: v, popped, heap: [...heap].sort((a, b) => a - b) },
+        { added: v, popped, heap: heapDisplay() },
       );
     }
   }
 
   for (const v of stream) {
     heap = minHeapPush(heap, v);
-    emit('ADD', `push ${v}`, `Stream add ${v}: push into min-heap.`, { added: v, heap: [...heap].sort((a, b) => a - b) });
+    emit('ADD', `push ${v}`, `Stream add ${v}: push into min-heap.`, { added: v, heap: heapDisplay() });
     let popped: number | null = null;
     if (heap.length > k) {
       [heap, popped] = minHeapPop(heap);
@@ -79,7 +68,7 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
         'TRIM',
         `popMin ${popped}`,
         `Size > k — popMin ${popped}. Heap now holds the ${k} largest values.`,
-        { added: v, popped, heap: [...heap].sort((a, b) => a - b) },
+        { added: v, popped, heap: heapDisplay() },
       );
     }
     const kth = heap[0];
@@ -88,7 +77,7 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
       'KTH',
       `kth=${kth}`,
       `Return heap[0] = ${kth} — the kth largest after adding ${v}.`,
-      { added: v, popped, kth, answers: answers.slice(), heap: [...heap].sort((a, b) => a - b) },
+      { added: v, popped, kth, answers: answers.slice(), heap: heapDisplay() },
       'good',
     );
   }
@@ -105,39 +94,28 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
 
 function View({ frame }: PluginViewProps<KthStreamState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="k" v={s.k} />
+        <RailStat k="added" v={s.added ?? '—'} tone={s.added !== null ? 'accent' : undefined} />
+        <RailStat k="popped" v={s.popped ?? '—'} tone={s.popped !== null ? 'bad' : undefined} />
+      </RailGroup>
+      <RailStack label="answers" items={s.answers.map(String)} />
+      {(s.kth !== null || s.done) && (
+        <RailResult label="kth largest" value={s.kth ?? '—'} tone={s.done ? 'good' : 'accent'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        k = <span className="font-mono text-ink">{s.k}</span>
-        {s.added !== null && (
-          <>
-            {' · '}added <span className="font-mono text-ink">{s.added}</span>
-          </>
-        )}
-        {s.popped !== null && (
-          <>
-            {' · '}popped <span className="font-mono text-bad">{s.popped}</span>
-          </>
-        )}
-      </div>
-      <div className={cn(vizText.sm, 'text-ink3')}>min-heap (size ≤ k) · root = kth largest</div>
+    <VizStage rail={rail}>
       <ArrayRow
         values={s.heap.length ? s.heap.map(String) : ['—']}
         cellTone={(i) => (i === 0 ? 'match' : 'found')}
         pointers={s.heap.length ? [{ i: 0, label: 'root', tone: 'accent', place: 'above' }] : []}
         windowRange={null}
       />
-      {s.kth !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          kth largest = {s.kth}
-        </div>
-      )}
-      {s.answers.length > 0 && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          answers [{s.answers.join(', ')}]
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface SpgoInput {
   grid: number[][]; // 0 = open, 1 = obstacle
@@ -142,14 +141,20 @@ function View({ frame }: PluginViewProps<SpgoState>) {
     return s.grid[r][c] === 1 ? 'water' : 'land';
   };
   const label = (r: number, c: number) => (s.grid[r][c] === 1 ? '✕' : '·');
+  const answerTone = s.done ? (s.answer !== null && s.answer >= 0 ? 'good' : 'bad') : 'accent';
+  const answerValue = s.answer !== null ? s.answer : s.steps;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        moves = <span className="font-mono text-ink">{s.answer !== null ? s.answer : s.steps}</span> · remaining k ={' '}
-        <span className="font-mono text-ink">{s.cur ? s.rem : '—'}</span>
-      </div>
+    <VizStage rail={
+      <>
+        <RailGroup label="scan">
+          <RailStat k="moves" v={answerValue} tone="accent" />
+          <RailStat k="rem k" v={s.cur ? s.rem : '—'} />
+        </RailGroup>
+        {s.done && <RailResult label="answer" value={s.answer !== null && s.answer >= 0 ? `${s.answer}` : '-1'} tone={answerTone} />}
+      </>
+    }>
       <GridBoard grid={s.grid} cellTone={cellTone} label={label} active={s.cur} cellSize={44} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -188,7 +193,7 @@ const G2: SpgoInput = {
 export const manifestId = 'imp-11-shortest-path-in-a-grid-with-obstacles-eliminati';
 export const title = 'Shortest Path in a Grid with Obstacles Elimination';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g1', label: '5×3 · k=1 · 6 moves', value: G1 },
     { id: 'g2', label: '3×3 · k=1 · no path', value: G2 },

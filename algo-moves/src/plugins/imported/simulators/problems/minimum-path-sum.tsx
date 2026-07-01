@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface MPSInput {
   grid: number[][];
@@ -21,15 +21,20 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
   const m = grid.length;
   const n = grid[0].length;
   const dp: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(-1));
-  const frames: Frame<MPSState>[] = [];
 
-  const emit = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { grid: grid.map((r) => r.slice()), m, n, dp: dp.map((r) => r.slice()), cur, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<MPSState>(() => ({
+    grid: grid.map((r) => r.slice()),
+    m,
+    n,
+    dp: dp.map((r) => r.slice()),
+    cur: null,
+    done: false,
+  }));
 
-  emit(
+  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
+    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+
+  snap(
     'INIT',
     `${m}×${n}`,
     `Minimum Path Sum: walk from the top-left to the bottom-right of the cost grid moving only right or down, minimising the sum of cells visited. dp[i][j] is the cheapest cost to reach cell (i, j).`,
@@ -38,12 +43,12 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
 
   // Base cell.
   dp[0][0] = grid[0][0];
-  emit('BASE', `dp[0][0]=${dp[0][0]}`, `Base case: the only way to be at the start (0, 0) is to start there, so dp[0][0] = grid[0][0] = ${grid[0][0]}.`, [0, 0]);
+  snap('BASE', `dp[0][0]=${dp[0][0]}`, `Base case: the only way to be at the start (0, 0) is to start there, so dp[0][0] = grid[0][0] = ${grid[0][0]}.`, [0, 0]);
 
   // First row: prefix sums (only reachable from the left).
   for (let c = 1; c < n; c++) {
     dp[0][c] = dp[0][c - 1] + grid[0][c];
-    emit(
+    snap(
       'EDGE',
       `dp[0][${c}]=${dp[0][c]}`,
       `Top row: cell (0, ${c}) is only reachable from the left (0, ${c - 1}) = ${dp[0][c - 1]}, plus its own cost grid[0][${c}] = ${grid[0][c]}, so dp[0][${c}] = ${dp[0][c - 1]} + ${grid[0][c]} = ${dp[0][c]}.`,
@@ -54,7 +59,7 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
   // First column: prefix sums (only reachable from above).
   for (let r = 1; r < m; r++) {
     dp[r][0] = dp[r - 1][0] + grid[r][0];
-    emit(
+    snap(
       'EDGE',
       `dp[${r}][0]=${dp[r][0]}`,
       `Left column: cell (${r}, 0) is only reachable from above (${r - 1}, 0) = ${dp[r - 1][0]}, plus its own cost grid[${r}][0] = ${grid[r][0]}, so dp[${r}][0] = ${dp[r - 1][0]} + ${grid[r][0]} = ${dp[r][0]}.`,
@@ -70,7 +75,7 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
       const cheaper = Math.min(up, left);
       const fromLabel = up <= left ? `above (${r - 1}, ${c}) = ${up}` : `the left (${r}, ${c - 1}) = ${left}`;
       dp[r][c] = grid[r][c] + cheaper;
-      emit(
+      snap(
         'FILL',
         `dp[${r}][${c}]=${dp[r][c]}`,
         `Reach (${r}, ${c}) via the cheaper neighbour: above (${r - 1}, ${c}) = ${up} vs the left (${r}, ${c - 1}) = ${left}, so take ${fromLabel}. Add its own cost grid[${r}][${c}] = ${grid[r][c]}: dp[${r}][${c}] = ${grid[r][c]} + ${cheaper} = ${dp[r][c]}.`,
@@ -79,7 +84,7 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
     }
   }
 
-  emit(
+  snap(
     'DONE',
     `min sum ${dp[m - 1][n - 1]}`,
     `The table is full. dp[${m - 1}][${n - 1}] = ${dp[m - 1][n - 1]}, so the cheapest path sum from top-left to bottom-right is ${dp[m - 1][n - 1]}.`,
@@ -97,15 +102,23 @@ function View({ frame }: PluginViewProps<MPSState>) {
     if (r === s.m - 1 && c === s.n - 1) return 'path';
     return s.dp[r][c] >= 0 ? 'visited' : '';
   };
-  const ans = s.dp[s.m - 1][s.n - 1] >= 0 ? s.dp[s.m - 1][s.n - 1] : '…filling';
+  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
+  const ans = s.dp[s.m - 1][s.n - 1] >= 0 ? s.dp[s.m - 1][s.n - 1] : undefined;
+  const rail = (
+    <>
+      <RailGroup label="cell">
+        <RailStat k="pos" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+        <RailStat k="cost" v={s.cur ? s.grid[s.cur[0]][s.cur[1]] : '—'} tone="accent" />
+        <RailStat k="↑" v={s.cur ? cell(s.cur[0] - 1, s.cur[1]) : '—'} />
+        <RailStat k="←" v={s.cur ? cell(s.cur[0], s.cur[1] - 1) : '—'} />
+      </RailGroup>
+      <RailResult label="min sum" value={ans ?? '…'} tone={ans !== undefined ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        cost grid {`[${s.grid.map((r) => `[${r.join(',')}]`).join(',')}]`}, min path sum = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={display} cellTone={cellTone} active={s.cur} cellSize={40} />
-      <div className={cn(vizText.sm, 'text-ink3')}>each cell = cheapest cost to reach it</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -129,7 +142,7 @@ function Inspector({ frame }: InspectorProps<MPSState>) {
 export const manifestId = 'imp-74-minimum-path-sum';
 export const title = 'Minimum Path Sum';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'g3x3',

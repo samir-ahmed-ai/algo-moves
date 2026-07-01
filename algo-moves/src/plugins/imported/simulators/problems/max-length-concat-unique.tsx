@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface MaxLenInput {
   arr: string[];
@@ -143,21 +142,24 @@ function View({ frame }: PluginViewProps<MaxLenState>) {
     if (!s.valid[i]) return 'bad';
     return '';
   };
+  const rail = (
+    <>
+      <RailStack
+        label="selection"
+        items={s.selected.map((i) => s.arr[i])}
+        highlightEnd="bottom"
+      />
+      <RailGroup label="lengths">
+        <RailStat k="cur" v={s.curLen} tone="accent" />
+        <RailStat k="best" v={s.best} />
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.best} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        strings · selection = <span className="font-mono text-ink">{fmt(s.selected, s.arr)}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={s.arr} cellTone={tone} pointers={pointers} />
-      <div className={cn('mt-3 flex gap-6 text-ink2', vizText.sm)}>
-        <span>
-          current length <span className="font-mono text-ink">{s.curLen}</span>
-        </span>
-        <span>
-          best <span className="font-mono text-accent">{s.best}</span>
-        </span>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -177,7 +179,7 @@ function Inspector({ frame }: InspectorProps<MaxLenState>) {
 export const manifestId = 'imp-37-maximum-length-of-a-concatenated-string-with-uni';
 export const title = 'Maximum Length of a Concatenated String with Unique Characters';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'un-iq-ue', label: '["un","iq","ue"]', value: { arr: ['un', 'iq', 'ue'] } },
     { id: 'cha-r-act-ers', label: '["cha","r","act","ers"]', value: { arr: ['cha', 'r', 'act', 'ers'] } },

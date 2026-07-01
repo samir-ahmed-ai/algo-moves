@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface MinWindowInput {
   s: string;
@@ -22,7 +22,6 @@ interface MinWindowState {
 }
 
 function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
-  const frames: Frame<MinWindowState>[] = [];
   const chars = s.split('');
 
   // freq[c] = how many of char c are still required by the window (mirrors Go's [128]int)
@@ -39,28 +38,17 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
     minLen <= s.length ? [minStart, minStart + minLen - 1] : null;
   const bestText = () => (minLen <= s.length ? s.slice(minStart, minStart + minLen) : '');
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    over: Partial<MinWindowState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        s: chars,
-        t,
-        l: null,
-        r: null,
-        need,
-        window: null,
-        best: bestSpan(),
-        result: bestText(),
-        done: false,
-        ...over,
-      },
-    });
+  const { emit, frames } = createRecorder<MinWindowState>(() => ({
+    s: chars,
+    t,
+    l: null,
+    r: null,
+    need,
+    window: null,
+    best: bestSpan(),
+    result: bestText(),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -158,17 +146,21 @@ function View({ frame }: PluginViewProps<MinWindowState>) {
     return '';
   };
 
+  const answerValue = s.result ? `"${s.result}"` : s.done ? '(none)' : '…';
+  const answerTone = s.done ? (s.result ? 'good' : 'bad') : 'accent';
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        t = <span className="font-mono text-ink">"{s.t}"</span>
-        {' · '}need = <span className="font-mono text-ink">{s.need}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="window">
+        <RailStat k="t" v={`"${s.t}"`} />
+        <RailStat k="need" v={s.need} tone={s.need === 0 ? 'good' : undefined} />
+        <RailStat k="l" v={s.l ?? '—'} />
+        <RailStat k="r" v={s.r ?? '—'} />
+      </RailGroup>
+      <RailResult label="best" value={answerValue} tone={answerTone} />
+    </>}>
       <ArrayRow values={s.s} cellTone={tone} pointers={pointers} windowRange={s.window} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        best = {s.result ? `"${s.result}"` : s.done ? '"" (none)' : '…'}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

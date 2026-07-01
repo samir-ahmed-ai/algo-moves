@@ -1,27 +1,11 @@
-export { createEmitter, type EmitFn } from './recorder';
-export { createSortRecorder, sortVerdict, type SortInput, type SortState } from './sortRecorder';
-export {
-  vizText,
-  vizPad,
-  VizHint,
-  VizCaption,
-  VizEmpty,
-  VizInspector,
-  VizStatRow,
-  PathDisplay,
-  CharCell,
-  DpCell,
-  DpHeader,
-  ExprToken,
-  VizBoard,
-  captionFromMove,
-  makeInspector,
-  useFrameState,
-  type VizBoardProps,
-} from './vizKit';
-export { InspectorRow, VarGrid } from './vizKit';
-export { SortInspector, makeSortInspector, type SortInspectorState } from './sortInspector';
-export { GraphInspector, makeGraphInspector, GraphStatRow } from './graphInspector';
+export { createSortRecorder, type SortInput, type SortState } from './sortRecorder';
+export { SortInspector, type SortInspectorState } from './sortInspector';
+export { GraphInspector, GraphStatRow } from './graphInspector';
+export { createRecorder, type Recorder } from './createRecorder';
+export * from './arrayPatterns';
+export * from './treeRecord';
+export * from './graphRecord';
+export * from './gridRecord';
 import type { ComponentType } from 'react';
 import type { CodePiece } from '../../lib/codePieces';
 import type { Frame, PluginTab, PluginWires, QuizQuestion, SampleInput, Verdict } from '../../core/types';

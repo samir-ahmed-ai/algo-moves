@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import { toBitStrings } from '../../../_shared/bitUtils';
 
 interface CountBitsInput {
   n: number;
@@ -21,13 +21,6 @@ interface CountBitsState {
 }
 
 /** MSB-first bit array of length `width` for a non-negative integer. */
-function toBits(value: number, width: number): string[] {
-  const out: string[] = [];
-  for (let b = width - 1; b >= 0; b--) {
-    out.push(((value >> b) & 1) === 1 ? '1' : '0');
-  }
-  return out;
-}
 
 /** Array index (MSB-first) of the lowest set bit, or null if value is 0. */
 function lowestSetIndex(value: number, width: number): number | null {
@@ -55,7 +48,7 @@ function record({ n, width }: CountBitsInput): Frame<CountBitsState>[] {
       state: {
         width,
         original: n,
-        bits: toBits(cur, width),
+        bits: toBitStrings(cur, width),
         cur,
         lowIndex,
         count,
@@ -130,20 +123,21 @@ function View({ frame }: PluginViewProps<CountBitsState>) {
   };
   // Show the power-of-two exponent under each column instead of the raw index.
   const powerLabel = (i: number) => 2 ** (s.width - 1 - i);
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="n" v={s.cur} tone={s.cur === 0 ? 'bad' : 'accent'} />
+        <RailStat k="count" v={s.count} tone={s.count > 0 ? 'good' : undefined} />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="set bits" value={s.count} tone="good" />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        n = <span className="font-mono text-ink">{s.cur}</span>
-        {' · '}count = <span className="font-mono text-ink">{s.count}</span>
-        <span className="ml-2 text-ink3">(started from {s.original})</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={s.bits} cellTone={tone} pointers={pointers} windowRange={null} label={powerLabel} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {s.done
-          ? `→ ${s.count} set bit${s.count === 1 ? '' : 's'}`
-          : `n & (n − 1) drops the lowest 1 each step`}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

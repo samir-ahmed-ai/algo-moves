@@ -3,6 +3,7 @@ import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
 import { usePlayer } from '../../core';
 import type { ProblemPlugin } from '../../core/types';
 import { cn } from '../../lib/cn';
+import { ErrorBoundary } from '../ErrorBoundary';
 import { VizFitBox } from '../canvas/nodeui';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
@@ -37,7 +38,9 @@ export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
     <div className="mobile-viz-shell flex min-h-0 flex-1 flex-col">
       <div className="mobile-viz-board min-h-0 flex-1 overflow-hidden rounded-2xl border border-edge/60 bg-panel2/30 p-2" data-noswipe>
         <VizFitBox className="h-full min-h-[180px] w-full" remeasureKey={`${player.index}-${frame.move.type}`}>
-          <View frame={frame} />
+          <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
+            <View frame={frame} />
+          </ErrorBoundary>
         </VizFitBox>
       </div>
 

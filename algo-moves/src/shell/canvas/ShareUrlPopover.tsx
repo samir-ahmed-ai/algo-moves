@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Copy, Check, Link } from 'lucide-react';
+import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
 import { getProjectShareUrl, type ProjectState } from '../../lib/projectState';
@@ -22,7 +23,7 @@ export function ShareUrlPopover({
   const copy = () => {
     navigator.clipboard?.writeText(url).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     });
   };
 

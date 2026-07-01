@@ -1,5 +1,7 @@
-import { chromeText } from '../chromeUi';
 import { cn } from '../../lib/cn';
+import { computeInputFrameCounts } from '../../lib/inputFrameCounts';
+import { chromeText } from '../chromeUi';
+import { onReactFlowError } from './canvasFlowErrors';
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import {
   ReactFlow,
@@ -312,6 +314,11 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   } = useWorkspace();
   const pluginId = plugin.meta.id;
   const key = `${pluginId}:${mode}`;
+  const [selectedNode, setSelectedNode] = useState<number | null>(null);
+  useEffect(() => {
+    setSelectedNode(null);
+  }, [pluginId]);
+  const inputFrameCounts = useMemo(() => computeInputFrameCounts(plugin), [plugin]);
   const savedCanvasPrefs = useRef(loadCanvasPrefs()).current;
   const [edgeOpts, setEdgeOpts] = useState(savedCanvasPrefs.edgeOpts);
   const [bg, setBg] = useState<BgVariant>(savedCanvasPrefs.bg);
@@ -1141,8 +1148,18 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   }, [setNodes]);
 
   const staticValue = useMemo(
-    () => ({ plugin, item, inputId, setInputId, customInput, setCustomInput }),
-    [plugin, item, inputId, setInputId, customInput, setCustomInput],
+    () => ({
+      plugin,
+      item,
+      inputId,
+      setInputId,
+      customInput,
+      setCustomInput,
+      inputFrameCounts,
+      selectedNode,
+      setSelectedNode,
+    }),
+    [plugin, item, inputId, setInputId, customInput, setCustomInput, inputFrameCounts, selectedNode],
   );
   const frameValue = useMemo(() => ({ frames: displayFrames, player, frame }), [displayFrames, player, frame]);
 
@@ -1177,11 +1194,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     [key],
   );
 
-  const onError = useCallback((code: string, msg: string) => {
-    // Swallow benign measurement/parent warnings that fire mid-fit/relayout.
-    if (code === '002' || code === '008') return;
-    console.warn(`[react-flow] ${msg}`);
-  }, []);
+  const onError = useCallback(onReactFlowError, []);
 
   // Figma-style: selecting a single panel reveals the properties inspector.
   const selCountRef = useRef(0);

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 type Interval = [number, number];
 
@@ -138,7 +137,6 @@ function record({ ins, x }: InsertInput): Frame<InsertState>[] {
 function View({ frame }: PluginViewProps<InsertState>) {
   const s = frame.state;
 
-  // Row 1: the input intervals as string cells, with a pointer on the current one.
   const inputCells = s.ins.map(fmt);
   const inputPointers: ArrayPointer[] = [];
   if (s.i !== null) {
@@ -148,38 +146,37 @@ function View({ frame }: PluginViewProps<InsertState>) {
   const inputTone = (idx: number) =>
     s.i === idx ? (s.phase === 'merge' ? 'match' : s.phase === 'after' ? 'match' : 'lo') : '';
 
-  // Row 2: the result built so far, with x's slot highlighted green.
   const resCells = s.res.map(fmt);
   const resTone = (idx: number) => (s.placedAt !== null && idx === s.placedAt ? 'found' : 'match');
 
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        inserting{' '}
-        <span className="font-mono text-ink">{fmt(s.x)}</span>
-        {' · '}phase <span className="font-mono text-ink">{s.phase}</span>
-      </div>
+  const rail = (
+    <>
+      <RailGroup label="merge">
+        <RailStat k="x" v={fmt(s.x)} tone="accent" />
+        <RailStat k="phase" v={s.phase} />
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="ins[i]" v={s.i !== null ? fmt(s.ins[s.i]) : '—'} />
+      </RailGroup>
+      {s.done && <RailResult label="result" value={s.res.map(fmt).join(' ')} tone="good" />}
+    </>
+  );
 
-      <div className={cn('mt-1', vizText.xs, 'text-ink3')}>input intervals</div>
+  return (
+    <VizStage rail={rail} railWidth={150}>
+      <div className="text-xs text-ink3 mb-1">input intervals</div>
       {inputCells.length > 0 ? (
         <ArrayRow values={inputCells} cellTone={inputTone} pointers={inputPointers} windowRange={null} />
       ) : (
-        <div className={cn('font-mono', vizText.sm, 'text-ink3')}>(none)</div>
+        <div className="font-mono text-sm text-ink3">(none)</div>
       )}
 
-      <div className={cn('mt-2', vizText.xs, 'text-ink3')}>result</div>
+      <div className="text-xs text-ink3 mt-2 mb-1">result</div>
       {resCells.length > 0 ? (
         <ArrayRow values={resCells} cellTone={resTone} pointers={[]} windowRange={null} />
       ) : (
-        <div className={cn('font-mono', vizText.sm, 'text-ink3')}>(empty)</div>
+        <div className="font-mono text-sm text-ink3">(empty)</div>
       )}
-
-      {s.done && (
-        <div className={cn('mt-2 font-mono text-good', vizText.base)}>
-          → {s.res.map(fmt).join(' ')}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

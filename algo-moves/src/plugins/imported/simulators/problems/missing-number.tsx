@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface MissInput {
   nums: number[];
@@ -112,12 +111,16 @@ function View({ frame }: PluginViewProps<MissState>) {
     return 'dead';
   };
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        sorted · missing = <span className="font-mono text-ink">{s.result ?? '…'}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="search">
+        <RailStat k="lo" v={s.lo} tone="accent" />
+        <RailStat k="hi" v={s.hi} tone="bad" />
+        <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
+      </RailGroup>
+      <RailResult label="missing" value={s.result ?? '…'} tone={s.done ? 'good' : 'accent'} />
+    </>}>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} label={(i) => s.base + i} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -139,7 +142,7 @@ function Inspector({ frame }: InspectorProps<MissState>) {
 export const manifestId = 'imp-52-missing-number';
 export const title = 'Missing Number';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'm1', label: '[3,0,1]', value: { nums: [3, 0, 1] } },
     { id: 'm2', label: '[0,1]', value: { nums: [0, 1] } },

@@ -3,6 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
+import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface ListInput {
   values: number[];
@@ -79,9 +80,9 @@ function View({ frame }: PluginViewProps<ListState>) {
   const pad = 50;
   const gap = 90;
   const r = 22;
-  const cy = 130;
+  const cy = 60;
   const width = pad * 2 + Math.max(0, n - 1) * gap;
-  const height = 200;
+  const height = 100;
   const cx = (i: number) => pad + i * gap;
 
   const tone = (i: number) => {
@@ -103,7 +104,7 @@ function View({ frame }: PluginViewProps<ListState>) {
     // backward pointer: arc above the row so it stays readable
     const sx = x1 - r;
     const ex = x2 + r;
-    const my = cy - 55;
+    const my = cy - 40;
     const mx = (sx + ex) / 2;
     return (
       <path
@@ -117,19 +118,23 @@ function View({ frame }: PluginViewProps<ListState>) {
     );
   });
 
-  const ptrLabel = (label: string, ref: number | null, dy: number) => {
-    const x = ref === null ? pad - 30 : cx(ref);
-    const y = ref === null ? cy : cy - r - 10 - dy;
-    return (
-      <text key={label} x={x} y={y} textAnchor="middle" fontSize={12} fontWeight={600} fill="var(--text)">
-        {label}
-        {ref === null ? ' = null' : ''}
-      </text>
-    );
-  };
+  const show = (p: number | null) => (p === null ? 'null' : String(s.values[p]));
+
+  const rail = (
+    <>
+      <RailGroup label="pointers">
+        <RailStat k="prev" v={show(s.prev)} tone={s.prev !== null ? 'accent' : undefined} />
+        <RailStat k="curr" v={show(s.curr)} tone={s.curr !== null ? 'accent' : undefined} />
+        <RailStat k="next" v={show(s.nextPtr)} />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="head" value={show(s.head)} tone="good" />
+      )}
+    </>
+  );
 
   return (
-    <div className="board-area">
+    <VizStage rail={rail}>
       <svg role="img" aria-label="linked list" viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
         <defs>
           <marker id="rll-arrow" viewBox="0 0 10 10" refX={9} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
@@ -145,11 +150,8 @@ function View({ frame }: PluginViewProps<ListState>) {
             </text>
           </g>
         ))}
-        {ptrLabel('prev', s.prev, 40)}
-        {ptrLabel('curr', s.curr, 20)}
-        {ptrLabel('next', s.nextPtr, 0)}
       </svg>
-    </div>
+    </VizStage>
   );
 }
 

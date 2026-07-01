@@ -1,7 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 import type { Item } from '../../content';
 import { cn } from '../../lib/cn';
-import { glyphFor, shapeFor, type ShapeKey } from '../problemShape';
+import { glyphFor, shapeFor, type ShapeKey } from '../../content/problemShape';
 
 /** Freeze SMIL/CSS motion for reduced-motion users (SMIL ignores CSS rules). */
 function useFreezeIfReducedMotion(ref: React.RefObject<SVGSVGElement | null>) {

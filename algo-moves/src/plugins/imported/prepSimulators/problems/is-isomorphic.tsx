@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface IsIsomorphicInput {
   s: string;
@@ -137,39 +136,36 @@ function View({ frame }: PluginViewProps<IsIsomorphicState>) {
     tPointers.push({ i: st.i, label: 'i', tone, place: 'above' });
   }
 
-  const tone = (i: number) => {
+  const cellTone = (i: number) => {
     if (st.i === null) return '';
     if (i === st.i) return st.conflict ? 'bad' : 'match';
     return i < st.i ? 'found' : '';
   };
 
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        s = <span className="font-mono text-ink">"{st.s.join('')}"</span>
-        {' · '}t = <span className="font-mono text-ink">"{st.t.join('')}"</span>
-      </div>
-
-      <ArrayRow values={st.s} cellTone={tone} pointers={sPointers} windowRange={null} />
-      <ArrayRow values={st.t} cellTone={tone} pointers={tPointers} windowRange={null} />
-
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        s→t {'{'}
-        {st.m1.map(([k, v]) => `${k}:${v}`).join(', ')}
-        {'}'}
-      </div>
-      <div className={cn('font-mono', vizText.sm, 'text-ink3')}>
-        t→s {'{'}
-        {st.m2.map(([k, v]) => `${k}:${v}`).join(', ')}
-        {'}'}
-      </div>
-
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="i" v={st.i ?? '—'} tone="accent" />
+        <RailStat k="s[i]" v={st.a ?? '—'} />
+        <RailStat k="t[i]" v={st.b ?? '—'} />
+      </RailGroup>
+      <RailStack label="s→t" items={st.m1.map(([k, v]) => `${k}:${v}`)} />
+      <RailStack label="t→s" items={st.m2.map(([k, v]) => `${k}:${v}`)} />
       {st.result !== null && (
-        <div className={cn('mt-1 font-mono', vizText.base, st.result ? 'text-good' : 'text-bad')}>
-          → {st.result ? 'isomorphic' : 'not isomorphic'}
-        </div>
+        <RailResult
+          label="answer"
+          value={st.result ? 'isomorphic' : 'not isomorphic'}
+          tone={st.result ? 'good' : 'bad'}
+        />
       )}
-    </div>
+    </>
+  );
+
+  return (
+    <VizStage rail={rail}>
+      <ArrayRow values={st.s} cellTone={cellTone} pointers={sPointers} windowRange={null} />
+      <ArrayRow values={st.t} cellTone={cellTone} pointers={tPointers} windowRange={null} />
+    </VizStage>
   );
 }
 

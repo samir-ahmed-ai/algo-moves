@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface ShortestInput {
   nums: number[];
@@ -23,33 +23,20 @@ interface ShortestState {
 const INF = Number.MAX_SAFE_INTEGER;
 
 function record({ nums, target }: ShortestInput): Frame<ShortestState>[] {
-  const frames: Frame<ShortestState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ShortestState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums,
-        target,
-        l: 0,
-        r: null,
-        sum: 0,
-        best: 0,
-        windowLen: null,
-        done: false,
-        ...s,
-      },
-    });
-
   let sum = 0;
   let l = 0;
   let best = INF;
+
+  const { emit, frames } = createRecorder<ShortestState>(() => ({
+    nums,
+    target,
+    l: 0,
+    r: null,
+    sum: 0,
+    best: 0,
+    windowLen: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -115,27 +102,32 @@ function View({ frame }: PluginViewProps<ShortestState>) {
     hasWindow && s.r !== null && i >= s.l && i <= s.r ? 'match' : '';
 
   const bestLabel = s.done ? (s.best === 0 ? 'none' : s.best) : s.best === 0 ? '…' : s.best;
+  const winLabel = hasWindow && s.r !== null ? `[${s.l}..${s.r}]` : '—';
+  const winLen = hasWindow && s.r !== null ? s.r - s.l + 1 : '—';
+
+  const rail = (
+    <>
+      <RailGroup label="window">
+        <RailStat k="l" v={s.l} tone="accent" />
+        <RailStat k="r" v={s.r ?? '—'} tone="good" />
+        <RailStat k="range" v={winLabel} />
+        <RailStat k="len" v={winLen} />
+      </RailGroup>
+      <RailGroup label="scan">
+        <RailStat k="target" v={s.target} />
+        <RailStat k="sum" v={s.sum} tone={s.sum >= s.target ? 'good' : 'accent'} />
+        {s.windowLen !== null && <RailStat k="recorded" v={s.windowLen} tone="good" />}
+      </RailGroup>
+      {(s.best > 0 || s.done) && (
+        <RailResult label="best" value={bestLabel} tone={s.done ? (s.best === 0 ? 'bad' : 'good') : 'accent'} />
+      )}
+    </>
+  );
 
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target = <span className="font-mono text-ink">{s.target}</span>
-        {' · '}window sum = <span className="font-mono text-ink">{s.sum}</span>
-        {' · '}best = <span className="font-mono text-ink">{bestLabel}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={windowRange} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {hasWindow && s.r !== null
-          ? `window [${s.l}..${s.r}] · len ${s.r - s.l + 1}`
-          : 'window empty'}
-        {s.windowLen !== null && <span className="text-ink"> → recorded len {s.windowLen}</span>}
-      </div>
-      {s.done && (
-        <div className={cn('mt-1 font-mono', vizText.base, s.best === 0 ? 'text-bad' : 'text-good')}>
-          → answer = {s.best}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

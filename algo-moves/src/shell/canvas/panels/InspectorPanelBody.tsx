@@ -1,5 +1,4 @@
 import { ScanSearch } from 'lucide-react';
-import { useWorkspace } from '../../../lib/workspace';
 import { useCanvasFrame, useCanvasStatic } from '../CanvasContext';
 import { ControlsAccordion, EmptyState, Pill } from '../nodeui';
 import { MetricsBody } from './MetricsPanelBody';
@@ -7,7 +6,7 @@ import { MetricsBody } from './MetricsPanelBody';
 export function InspectorPaneContent() {
   const { plugin } = useCanvasStatic();
   const { frame } = useCanvasFrame();
-  const { selectedNode } = useWorkspace();
+  const { selectedNode } = useCanvasStatic();
   const Inspector = plugin.Inspector;
   if (!Inspector) {
     return (
@@ -23,7 +22,7 @@ export function InspectorPaneContent() {
 
 /** Merged Inspector + Metrics as collapsible sections (standalone pop-out panel). */
 export function InspectorPanelBody() {
-  const { selectedNode } = useWorkspace();
+  const { selectedNode } = useCanvasStatic();
   return (
     <div className="flex flex-col">
       <ControlsAccordion

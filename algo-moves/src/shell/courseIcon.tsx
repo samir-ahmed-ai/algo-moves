@@ -19,6 +19,7 @@ import {
   ArrowDownUp,
   Database,
   RectangleHorizontal,
+  Target,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -44,6 +45,7 @@ const ICONS: Record<string, LucideIcon> = {
   ArrowDownUp,
   Database,
   RectangleHorizontal,
+  Target,
 };
 
 export function courseIcon(name?: string): LucideIcon {

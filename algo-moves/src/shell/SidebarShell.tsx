@@ -83,6 +83,8 @@ export function SidebarSection({
   open,
   onToggle,
   maxHeightClass,
+  fill,
+  anchor = 'top',
   children,
 }: {
   icon: ReactNode;
@@ -91,16 +93,27 @@ export function SidebarSection({
   open: boolean;
   onToggle: () => void;
   maxHeightClass?: string;
+  /** When true and open, section grows to fill remaining flex space (top explorer). */
+  fill?: boolean;
+  /** Bottom-anchored sections: header stays at the bottom, content opens upward. */
+  anchor?: 'top' | 'bottom';
   children: ReactNode;
 }) {
+  const bottom = anchor === 'bottom';
   return (
-    <section className="shrink-0 border-b border-edge last:border-b-0">
+    <section
+      className={cn(
+        'border-b border-edge last:border-b-0',
+        fill && open ? 'flex min-h-0 flex-1 flex-col' : 'shrink-0',
+        bottom && 'flex flex-col-reverse',
+      )}
+    >
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
         className={cn(
-          'flex w-full items-center gap-1 px-[var(--hpad)] py-0.5 text-left text-ink3 transition-colors hover:text-ink2',
+          'flex w-full shrink-0 items-center gap-1 px-[var(--hpad)] py-0.5 text-left text-ink3 transition-colors hover:text-ink2',
         )}
       >
         <span className="grid h-3 w-3 shrink-0 place-items-center text-ink3">{icon}</span>
@@ -118,7 +131,15 @@ export function SidebarSection({
         />
       </button>
       {open && (
-        <div className={cn('ws-scroll min-h-0 flex-1 overflow-y-auto pb-1', maxHeightClass)}>{children}</div>
+        <div
+          className={cn(
+            'ws-scroll min-h-0 overflow-y-auto',
+            bottom ? 'pt-1' : 'pb-1',
+            fill ? 'flex-1' : maxHeightClass,
+          )}
+        >
+          {children}
+        </div>
       )}
     </section>
   );

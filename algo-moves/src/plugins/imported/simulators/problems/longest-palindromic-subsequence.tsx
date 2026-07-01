@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { DpCell, DpHeader, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty, vizText, DpCell, DpHeader } from '../../../_shared/vizKit';
 
 interface LPSInput {
   s: string;
@@ -81,24 +81,34 @@ function View({ frame }: PluginViewProps<LPSState>) {
     if (r === 0 && c === n - 1 && st.dp[r][c] >= 0) return 'path';
     return st.dp[r][c] >= 0 ? 'visited' : '';
   };
-  const ans = n > 0 && st.dp[0][n - 1] >= 0 ? st.dp[0][n - 1] : '…filling';
+  const i = st.cur ? st.cur[0] : -1;
+  const j = st.cur ? st.cur[1] : -1;
+  const done = n > 0 && st.dp[0][n - 1] >= 0;
+  const ans = done ? st.dp[0][n - 1] : null;
+  const sub = i >= 0 && j >= 0 ? st.s.slice(i, j + 1) : '—';
+  const ends = i >= 0 && j >= 0 ? `${st.s[i]} / ${st.s[j]}` : '—';
+  const cell = st.cur ? `[${i}][${j}]` : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        s = <span className="font-mono text-ink">{st.s}</span>, LPS length = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="cell">
+        <RailStat k="dp" v={cell} tone="accent" />
+        <RailStat k="sub" v={sub} />
+        <RailStat k="ends" v={ends} />
+      </RailGroup>
+      {ans !== null && <RailResult label="LPS" value={ans} tone="good" />}
+    </>}>
       <div className="flex items-start gap-2">
         <div className="flex flex-col gap-[2px] pt-[26px]">
-          {st.s.split('').map((ch, i) => (
-            <DpCell key={i} width={18} height={40} tone="text-ink3">
+          {st.s.split('').map((ch, idx) => (
+            <DpCell key={idx} width={18} height={40} tone="text-ink3">
               {ch}
             </DpCell>
           ))}
         </div>
         <div className="flex flex-col gap-[2px]">
           <div className="flex gap-[2px]">
-            {st.s.split('').map((ch, j) => (
-              <DpHeader key={j} width={40}>
+            {st.s.split('').map((ch, idx) => (
+              <DpHeader key={idx} width={40}>
                 {ch}
               </DpHeader>
             ))}
@@ -106,8 +116,8 @@ function View({ frame }: PluginViewProps<LPSState>) {
           <GridBoard grid={display} cellTone={cellTone} label={(r, c) => (c < r ? '' : display[r][c])} active={st.cur} cellSize={40} />
         </div>
       </div>
-      <div className={cn(vizText.xs, 'text-ink3')}>Rows/cols are indexed by the characters of s; dp[i][j] covers s[i..j]. The lower triangle is unused.</div>
-    </div>
+      <div className={cn(vizText.xs, 'text-ink3')}>dp[i][j] = LPS length of s[i..j]; lower triangle unused.</div>
+    </VizStage>
   );
 }
 
@@ -133,7 +143,7 @@ function Inspector({ frame }: InspectorProps<LPSState>) {
 export const manifestId = 'imp-67-longest-palindromic-subsequence';
 export const title = 'Longest Palindromic Subsequence';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'bbbab', label: 's = "bbbab"', value: { s: 'bbbab' } },
     { id: 'cbbd', label: 's = "cbbd"', value: { s: 'cbbd' } },

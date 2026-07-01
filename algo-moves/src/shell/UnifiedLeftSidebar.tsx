@@ -17,7 +17,7 @@ import {
   Trophy,
   Code2,
 } from 'lucide-react';
-import { catalog, type ItemStatus } from '../content';
+import { catalog, browseBreadcrumbForItem, getSiblingItems, categoryIdForItem, trackForCategory, type ItemStatus } from '../content';
 import { useProgress, statFor } from '../lib/progress';
 import { useWorkspace, type CanvasZoomApi } from '../lib/workspace';
 import { cn } from '../lib/cn';
@@ -162,10 +162,9 @@ export function UnifiedLeftSidebar() {
     leftOpen,
     setLeftOpen,
     activeItemId,
-    setActiveItemId,
-    setSelectedNode,
-    setActiveTopicId,
-    setActiveCourseId,
+    openProblem,
+    setActiveTrackId,
+    setActiveCategoryId,
     goHome,
     canvasAdd,
     canvasZoom,
@@ -181,8 +180,10 @@ export function UnifiedLeftSidebar() {
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [activeTab, setActiveTab] = useState(0);
 
-  const topic = catalog.breadcrumb(activeItemId).topic;
-  const showProblems = !!topic && topic.items.length >= 2;
+  const siblingItems = getSiblingItems(activeItemId, catalog);
+  const browseCrumb = browseBreadcrumbForItem(activeItemId, catalog);
+  const problemsTitle = browseCrumb.category?.title ?? catalog.breadcrumb(activeItemId).topic?.title ?? 'Problems';
+  const showProblems = siblingItems.length >= 2;
   const showAdd = canvasAdd != null;
   const searching = !!sidebarSearch.trim();
 
@@ -216,10 +217,10 @@ export function UnifiedLeftSidebar() {
 
   const filteredProblems =
     showProblems && searching
-      ? topic!.items.filter((it) =>
+      ? siblingItems.filter((it) =>
           matchesSidebarSearch(sidebarSearch, it.title, it.id, it.difficulty),
         )
-      : topic?.items ?? [];
+      : siblingItems;
 
   const groupedPanelResults = searching
     ? (() => {
@@ -238,10 +239,7 @@ export function UnifiedLeftSidebar() {
 
   const switchTo = (id: string) => {
     if (id === activeItemId) return;
-    setActiveItemId(id);
-    setSelectedNode(null);
-    setActiveTopicId(null);
-    setActiveCourseId(null);
+    openProblem(id);
   };
 
   const expand = (focus?: 'catalog' | 'problems' | 'add') => {
@@ -257,7 +255,7 @@ export function UnifiedLeftSidebar() {
         onHome={goHome}
         onExpand={() => expand()}
         showProblems={showProblems}
-        problemCount={topic?.items.length ?? 0}
+        problemCount={siblingItems.length}
         showAdd={showAdd}
         onOpenCatalog={() => expand('catalog')}
         onOpenProblems={() => expand('problems')}
@@ -287,7 +285,7 @@ export function UnifiedLeftSidebar() {
           <Home className="h-3 w-3" />
         </button>
         <span className={cn('min-w-0 flex-1 truncate font-semibold leading-tight text-ink', chromeText.sm)}>
-          {showProblems ? topic!.title : 'Explorer'}
+          {showProblems ? problemsTitle : 'Explorer'}
         </span>
         <button
           type="button"
@@ -312,29 +310,31 @@ export function UnifiedLeftSidebar() {
         />
       </div>
 
-      <div className="ws-scroll flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <SidebarSection
           icon={<Library className="h-3 w-3" />}
           title="Catalog"
           open={catalogOpen}
           onToggle={() => setCatalogOpen((o) => !o)}
-          maxHeightClass={SECTION_MAX.catalog}
+          fill={catalogOpen}
         >
           <CatalogTree searchQuery={sidebarSearch} />
         </SidebarSection>
 
+        <div className="mt-auto flex shrink-0 flex-col">
         {showProblems && (
           <SidebarSection
             icon={<FileText className="h-3 w-3" />}
             title="Problems"
             badge={
               <span className={cn('shrink-0 rounded-full bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink3', chromeText.xs)}>
-                {searching ? filteredProblems.length : topic!.items.length}
+                {searching ? filteredProblems.length : siblingItems.length}
               </span>
             }
             open={problemsOpen}
             onToggle={() => setProblemsOpen((o) => !o)}
             maxHeightClass={SECTION_MAX.problems}
+            anchor="bottom"
           >
             {searching && filteredProblems.length === 0 ? (
               <div className={cn('px-[var(--hpad)] py-2 leading-snug text-ink3', chromeText.sm)}>No matching problems</div>
@@ -362,7 +362,7 @@ export function UnifiedLeftSidebar() {
                       />
                       <span className={cn('min-w-0 flex-1 truncate', chromeText.sm)}>{it.title}</span>
                       {statFor(progress, it.id).mastered && (
-                        <Trophy className="h-3 w-3 shrink-0" style={{ color: 'var(--good)' }} aria-label="mastered" />
+                        <Trophy className="h-3 w-3 shrink-0 text-good" aria-label="mastered" />
                       )}
                       {it.difficulty && <span className={cn('shrink-0 text-ink3', chromeText.xs)}>{it.difficulty}</span>}
                     </button>
@@ -374,14 +374,18 @@ export function UnifiedLeftSidebar() {
               <button
                 type="button"
                 onClick={() => {
-                  setActiveCourseId(null);
-                  setActiveTopicId(topic!.id);
+                  const catId = categoryIdForItem(activeItemId, catalog);
+                  if (catId) {
+                    const track = trackForCategory(catId);
+                    if (track) setActiveTrackId(track.id);
+                    setActiveCategoryId(catId);
+                  }
                 }}
-                title="Open the topic grid"
+                title="Open the category grid"
                 className={cn('mx-1 mt-1.5 flex min-h-[var(--row)] w-[calc(100%-8px)] items-center gap-1.5 rounded-md px-2 py-0 text-ink3 transition-colors hover:bg-panel2 hover:text-ink', chromeText.sm)}
               >
                 <LayoutGrid className="h-3.5 w-3.5 shrink-0" />
-                <span className="min-w-0 flex-1 truncate text-left">Topic grid</span>
+                <span className="min-w-0 flex-1 truncate text-left">Category grid</span>
               </button>
             )}
           </SidebarSection>
@@ -395,6 +399,7 @@ export function UnifiedLeftSidebar() {
             open={addOpen}
             onToggle={() => setAddOpen((o) => !o)}
             maxHeightClass={SECTION_MAX.addPanel}
+            anchor="bottom"
           >
             <div className="px-[var(--hpad)]">
               {!currentTab && !searching ? (
@@ -471,6 +476,7 @@ export function UnifiedLeftSidebar() {
               open={addOpen}
               onToggle={() => setAddOpen((o) => !o)}
               maxHeightClass={SECTION_MAX.addPanel}
+              anchor="bottom"
             >
               <div className="flex flex-col gap-0.5 px-1">
                 {canvasAdd.addableEffects.map((eff) => (
@@ -493,6 +499,7 @@ export function UnifiedLeftSidebar() {
           )}
           </>
         )}
+        </div>
       </div>
 
       {mode === 'visualize' && canvasZoom && canvasHud?.onTidy && (

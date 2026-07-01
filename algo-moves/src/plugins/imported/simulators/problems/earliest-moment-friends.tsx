@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 /** A friendship log: [timestamp, personX, personY], people are 0-indexed. */
 type Log = [number, number, number];
@@ -158,21 +157,17 @@ function colorOf(parent: number[], node: number): number {
 
 function View({ frame }: PluginViewProps<EMState>) {
   const s = frame.state;
+  const ans = s.earliest ?? (s.done ? -1 : null);
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        components = <span className="font-mono text-ink">{s.components}</span>
-        {s.ts !== null && (
-          <>
-            {' · '}t = <span className="font-mono text-ink">{s.ts}</span>
-          </>
-        )}
-        {s.earliest !== null && (
-          <>
-            {' · '}earliest = <span className="font-mono text-ink">{s.earliest}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="components" v={s.components} tone={s.components === 1 ? 'good' : undefined} />
+        <RailStat k="t" v={s.ts ?? '—'} tone="accent" />
+      </RailGroup>
+      {ans !== null && (
+        <RailResult label="earliest" value={ans} tone={ans === -1 ? 'bad' : 'good'} />
+      )}
+    </>}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -182,7 +177,7 @@ function View({ frame }: PluginViewProps<EMState>) {
         highlightEdge={s.pair}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -231,7 +226,7 @@ const E2: EMInput = {
 export const manifestId = 'imp-14-the-earliest-moment-when-everyone-become-friends';
 export const title = 'The Earliest Moment When Everyone Become Friends';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'connects', label: '6 people (connects)', value: E1 },
     { id: 'never', label: '5 people (never)', value: E2 },

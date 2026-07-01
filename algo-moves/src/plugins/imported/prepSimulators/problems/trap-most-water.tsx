@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 
 interface TrapInput {
@@ -23,37 +23,24 @@ interface TrapState {
 }
 
 function record({ height }: TrapInput): Frame<TrapState>[] {
-  const frames: Frame<TrapState>[] = [];
   let best = 0;
   let bestPair: [number, number] | null = null;
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<TrapState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        height,
-        l: 0,
-        r: height.length - 1,
-        w: null,
-        h: null,
-        area: null,
-        best,
-        bestPair: bestPair ? [bestPair[0], bestPair[1]] : null,
-        improved: false,
-        moved: null,
-        done: false,
-        ...s,
-      },
-    });
-
   let l = 0;
   let r = height.length - 1;
+
+  const { emit, frames } = createRecorder<TrapState>(() => ({
+    height,
+    l: 0,
+    r: height.length - 1,
+    w: null,
+    h: null,
+    area: null,
+    best,
+    bestPair: bestPair ? [bestPair[0], bestPair[1]] : null,
+    improved: false,
+    moved: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -120,28 +107,33 @@ function View({ frame }: PluginViewProps<TrapState>) {
     if (!s.done && (i === s.l || i === s.r)) return 'match';
     return '';
   };
+  const rail = (
+    <>
+      <RailGroup label="pointers">
+        <RailStat k="l" v={s.done ? '—' : s.l} tone="accent" />
+        <RailStat k="r" v={s.done ? '—' : s.r} tone="accent" />
+      </RailGroup>
+      <RailGroup label="measure">
+        <RailStat k="w" v={s.w ?? '—'} />
+        <RailStat k="h" v={s.h ?? '—'} />
+        <RailStat k="area" v={s.area ?? '—'} tone={s.improved ? 'good' : undefined} />
+      </RailGroup>
+      <RailResult
+        label="best"
+        value={s.best === 0 ? '—' : `${s.best}${s.bestPair ? ` @ [${s.bestPair[0]},${s.bestPair[1]}]` : ''}`}
+        tone={s.done ? 'good' : 'accent'}
+      />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        width = <span className="font-mono text-ink">{s.w ?? '—'}</span>
-        {' · '}height = <span className="font-mono text-ink">{s.h ?? '—'}</span>
-        {' · '}area = <span className="font-mono text-ink">{s.area ?? '—'}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow
         values={s.height}
         cellTone={tone}
         pointers={pointers}
         windowRange={inWindow ? [s.l, s.r] : null}
       />
-      <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink3')}>
-        best = {s.best}
-        {s.bestPair && (
-          <span className={cn(vizText.sm, 'text-ink3')}>
-            {' '}@ [{s.bestPair[0]}, {s.bestPair[1]}]
-          </span>
-        )}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

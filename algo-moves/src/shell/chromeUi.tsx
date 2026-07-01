@@ -38,6 +38,11 @@ export function ChromeLabel({
   );
 }
 
+/** Pick a shorter button label on phone-sized viewports. */
+export function compactLabel(full: string, compact: string, isMobile: boolean) {
+  return isMobile ? compact : full;
+}
+
 /** Muted helper / hint copy for shell chrome. */
 export function ChromeHint({
   children,

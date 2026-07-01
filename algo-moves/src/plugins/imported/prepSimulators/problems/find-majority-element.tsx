@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface MajorityInput {
   nums: number[];
@@ -20,32 +20,20 @@ interface MajorityState {
 }
 
 function record({ nums }: MajorityInput): Frame<MajorityState>[] {
-  const frames: Frame<MajorityState>[] = [];
   let count = 0;
   let cand = 0;
   let started = false;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MajorityState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums,
-        i: null,
-        cand: started ? cand : null,
-        count,
-        picked: false,
-        matched: null,
-        done: false,
-        result: null,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<MajorityState>(() => ({
+    nums,
+    i: null,
+    cand: started ? cand : null,
+    count,
+    picked: false,
+    matched: null,
+    done: false,
+    result: null,
+  }));
 
   emit(
     'INIT',
@@ -108,26 +96,26 @@ function View({ frame }: PluginViewProps<MajorityState>) {
     if (s.i === i) return s.matched === false ? 'dead' : 'match';
     return '';
   };
+  const stepLabel =
+    s.i === null
+      ? 'sweeping left → right'
+      : s.matched === false
+        ? `rival: ${s.nums[s.i]} ≠ ${s.cand} → count−1`
+        : `support: ${s.nums[s.i]} = ${s.cand} → count+1`;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        candidate ={' '}
-        <span className="font-mono text-ink">{s.cand === null ? '—' : s.cand}</span>
-        {' · '}count ={' '}
-        <span className="font-mono text-ink">{s.count}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="vote">
+        <RailStat k="cand" v={s.cand === null ? '—' : s.cand} tone="accent" />
+        <RailStat k="count" v={s.count} />
+      </RailGroup>
+      <RailGroup label="step">
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="status" v={stepLabel} />
+      </RailGroup>
+      {s.result !== null && <RailResult label="majority" value={s.result} tone="good" />}
+    </>}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {s.i === null
-          ? 'sweeping left → right'
-          : s.matched === false
-            ? `rival: ${s.nums[s.i]} ≠ ${s.cand} → count−1`
-            : `support: ${s.nums[s.i]} = ${s.cand} → count+1`}
-      </div>
-      {s.result !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ majority = {s.result}</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

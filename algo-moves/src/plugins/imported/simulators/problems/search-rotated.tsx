@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage, vizText } from '../../../_shared/vizKit';
 
 interface RotInput {
   values: number[];
@@ -92,13 +92,25 @@ function View({ frame }: PluginViewProps<RotState>) {
     if (s.dead[i]) return 'dead';
     return '';
   };
+  const resultValue = s.found !== null ? `index ${s.found}` : s.done ? '-1' : '…';
+  const resultTone = s.found !== null ? 'good' : s.done ? 'bad' : 'accent';
+  const rail = (
+    <>
+      <RailGroup label="window">
+        <RailStat k="lo" v={s.lo} tone="accent" />
+        <RailStat k="hi" v={s.hi} tone="bad" />
+        <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
+      </RailGroup>
+      <RailResult label="result" value={resultValue} tone={resultTone} />
+    </>
+  );
   return (
-    <div className="board-area">
+    <VizStage rail={rail}>
       <div className={cn(vizText.sm, 'text-ink3')}>
         rotated · target = <span className="font-mono text-ink">{s.target}</span>
       </div>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -119,7 +131,7 @@ function Inspector({ frame }: InspectorProps<RotState>) {
 export const manifestId = 'imp-46-search-in-rotated-sorted-array';
 export const title = 'Search in Rotated Sorted Array';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'r1', label: '[4,5,6,7,0,1,2], t=0', value: { values: [4, 5, 6, 7, 0, 1, 2], target: 0 } },
     { id: 'r2', label: '[4,5,6,7,0,1,2], t=3', value: { values: [4, 5, 6, 7, 0, 1, 2], target: 3 } },

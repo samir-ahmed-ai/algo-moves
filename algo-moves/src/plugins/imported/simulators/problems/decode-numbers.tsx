@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface DecodeInput {
   digits: string;
@@ -117,11 +117,24 @@ function record({ digits }: DecodeInput): Frame<DecodeState>[] {
 function View({ frame }: PluginViewProps<DecodeState>) {
   const s = frame.state;
   const chars = s.digits.split('');
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="prefix" v={s.path || '∅'} tone="accent" />
+        <RailStat k="remaining" v={s.idx !== null ? s.digits.slice(s.idx) || '∅' : '—'} />
+      </RailGroup>
+      <RailStack
+        label="decodings"
+        items={s.results.map((r) => `"${r}"`)}
+        topLabel="latest"
+      />
+      {s.done && (
+        <RailResult label="total" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area board-area--text">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        decoded prefix · <span className="font-mono text-ink">{s.path || '∅'}</span>
-      </div>
+    <VizStage rail={rail}>
       <div className="flex flex-wrap items-center gap-1">
         {chars.map((c, i) => {
           const active = s.idx !== null && s.span !== null && i >= s.idx && i < s.idx + s.span;
@@ -140,23 +153,8 @@ function View({ frame }: PluginViewProps<DecodeState>) {
             </span>
           );
         })}
-        {s.idx !== null && (
-          <span className={cn('ml-2 text-ink3', vizText.xs)}>
-            remaining: <span className="font-mono">{s.digits.slice(s.idx) || '∅'}</span>
-          </span>
-        )}
       </div>
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        decodings found ({s.results.length})
-        <div className="mt-1 flex flex-col gap-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.sm)}>
-              "{r}"
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -177,7 +175,7 @@ function Inspector({ frame }: InspectorProps<DecodeState>) {
 export const manifestId = 'imp-30-decode-numbers';
 export const title = 'Decode Numbers';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: '12', label: '"12"', value: { digits: '12' } },
     { id: '226', label: '"226"', value: { digits: '226' } },

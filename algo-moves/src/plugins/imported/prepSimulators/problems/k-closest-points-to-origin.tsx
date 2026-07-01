@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface KClosestInput {
   points: [number, number][];
@@ -28,32 +28,20 @@ interface KClosestState {
 }
 
 function record({ points, k }: KClosestInput): Frame<KClosestState>[] {
-  const frames: Frame<KClosestState>[] = [];
   const pts: Pt[] = points.map(([x, y]) => ({ x, y, d2: x * x + y * y }));
   const n = pts.length;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<KClosestState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        points: pts.map((p) => ({ ...p })),
-        k,
-        i: null,
-        j: null,
-        minIdx: null,
-        compareIdx: null,
-        sortedUpto: 0,
-        answerCount: 0,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<KClosestState>(() => ({
+    points: pts.map((p) => ({ ...p })),
+    k,
+    i: null,
+    j: null,
+    minIdx: null,
+    compareIdx: null,
+    sortedUpto: 0,
+    answerCount: 0,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -140,28 +128,42 @@ function View({ frame }: PluginViewProps<KClosestState>) {
     return '';
   };
 
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        k = <span className="font-mono text-ink">{s.k}</span> · sorting by squared distance{' '}
-        <span className="font-mono text-ink">x² + y²</span>
-      </div>
-      <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        points{' '}
-        {s.points
-          .map((p, i) => {
-            const mark = (s.done ? i < s.answerCount : false) ? '*' : '';
-            return `(${p.x},${p.y})${mark}`;
-          })
-          .join('  ')}
-      </div>
+  const pointLabels = s.points.map((p, i) => {
+    const active = !s.done && i === s.compareIdx;
+    const locked = s.done ? i < s.answerCount : i < s.sortedUpto;
+    return {
+      label: `(${p.x},${p.y})`,
+      tone: (active ? 'accent' : locked ? 'good' : undefined) as 'accent' | 'good' | undefined,
+    };
+  });
+
+  const answerPoints = s.done
+    ? s.points.slice(0, s.answerCount).map((p) => `(${p.x},${p.y})`)
+    : [];
+
+  const rail = (
+    <>
+      <RailStack label="points" items={pointLabels} />
+      <RailGroup label="scan">
+        <RailStat k="k" v={s.k} />
+        <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+        <RailStat k="j" v={s.j !== null && s.i !== null ? s.j : '—'} tone="warn" />
+        <RailStat k="sorted" v={s.sortedUpto} />
+      </RailGroup>
       {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → {s.points.slice(0, s.answerCount).map((p) => `(${p.x},${p.y})`).join(', ')}
-        </div>
+        <RailResult
+          label="closest"
+          value={answerPoints.join(', ')}
+          tone="good"
+        />
       )}
-    </div>
+    </>
+  );
+
+  return (
+    <VizStage rail={rail} railWidth={150}>
+      <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} />
+    </VizStage>
   );
 }
 

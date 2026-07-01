@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface LetterInput {
   letters: string[];
@@ -112,12 +111,20 @@ function View({ frame }: PluginViewProps<LetterState>) {
     return '';
   };
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        sorted letters · target = <span className="font-mono text-ink">'{s.target}'</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="search">
+        <RailStat k="target" v={`'${s.target}'`} />
+        <RailStat k="lo" v={s.lo} tone="accent" />
+        <RailStat k="hi" v={s.hi} tone="bad" />
+        <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
+        <RailStat k="res" v={s.res ?? '—'} />
+      </RailGroup>
+      {s.result !== null && (
+        <RailResult label="answer" value={`'${s.result}'`} tone="good" />
+      )}
+    </>}>
       <ArrayRow values={s.letters} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -139,7 +146,7 @@ function Inspector({ frame }: InspectorProps<LetterState>) {
 export const manifestId = 'imp-48-find-smallest-letter-greater-than-target';
 export const title = 'Find Smallest Letter Greater Than Target';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'l1', label: "['c','f','j'], t='a'", value: { letters: ['c', 'f', 'j'], target: 'a' } },
     { id: 'l2', label: "['c','f','j'], t='c'", value: { letters: ['c', 'f', 'j'], target: 'c' } },

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface SquaresInput {
   n: number;
@@ -93,16 +92,25 @@ function View({ frame }: PluginViewProps<SquaresState>) {
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: `i−${s.sq}`, tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== EMPTY ? 'match' : '');
-  const ans = s.dp[s.n] === EMPTY ? '…filling' : s.dp[s.n];
+  const known = s.dp[s.n] !== EMPTY;
+  const ans = known ? s.dp[s.n] : '…';
+  const cell = (i: number | null) =>
+    i !== null && i >= 0 && i < s.dp.length ? (s.dp[i] === EMPTY ? '·' : s.dp[i]) : '—';
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+        <RailStat k="sq" v={s.sq ?? '—'} />
+        <RailStat k="dp[i−sq]" v={cell(s.from)} tone="warn" />
+        <RailStat k="dp[i]" v={cell(s.i)} />
+      </RailGroup>
+      <RailResult label="answer" value={known ? `${ans} squares` : '…filling'} tone={known ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        n = <span className="font-mono text-ink">{s.n}</span>, answer ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index = target sum, value = fewest squares</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -127,7 +135,7 @@ function Inspector({ frame }: InspectorProps<SquaresState>) {
 export const manifestId = 'imp-64-perfect-squares';
 export const title = 'Perfect Squares';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'ps12', label: 'n = 12', value: { n: 12 } },
     { id: 'ps7', label: 'n = 7', value: { n: 7 } },

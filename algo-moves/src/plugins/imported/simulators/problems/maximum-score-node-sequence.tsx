@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface MSInput {
   scores: number[];
@@ -107,12 +106,21 @@ function team(s: MSState, node: number): string {
 
 function View({ frame }: PluginViewProps<MSState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="edge" v={s.edge ? `${s.edge[0]}-${s.edge[1]}` : '—'} />
+        <RailStat k="candidate" v={s.seq.length === 4 ? s.seq.join('-') : '—'} tone="accent" />
+      </RailGroup>
+      <RailResult
+        label="best"
+        value={s.best < 0 ? '−1' : `${s.best}${s.bestSeq.length === 4 ? ` [${s.bestSeq.join('-')}]` : ''}`}
+        tone={s.done ? 'good' : s.best >= 0 ? 'accent' : 'bad'}
+      />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        best = <span className="font-mono text-ink">{s.best < 0 ? '−1' : s.best}</span>
-        {s.bestSeq.length === 4 && <span className="ml-2 font-mono">[{s.bestSeq.join('-')}]</span>}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -123,7 +131,7 @@ function View({ frame }: PluginViewProps<MSState>) {
         highlightEdge={s.edge}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -167,7 +175,7 @@ const G4 = build([5, 2, 9, 1], [
 export const manifestId = 'imp-19-maximum-score-of-a-node-sequence';
 export const title = 'Maximum Score of a Node Sequence';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g5', label: '5 nodes', value: G5 },
     { id: 'g4', label: '4 nodes', value: G4 },

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface PartInput {
   nums: number[];
@@ -104,15 +103,26 @@ function View({ frame }: PluginViewProps<PartState>) {
     if (s.done && s.bestSum === i) return 'found';
     return s.reach[i] ? 'match' : '';
   };
-  const answer = s.answer !== null ? s.answer : '…filling';
+  const count = s.reach.reduce((acc, b) => acc + (b ? 1 : 0), 0);
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="folded" v={`${s.processed}/${s.nums.length}`} />
+        <RailStat k="cur" v={s.justAdded ?? '—'} tone="accent" />
+        <RailStat k="reach" v={count} />
+      </RailGroup>
+      {s.bestSum !== null && (
+        <RailGroup label="best">
+          <RailStat k="s" v={s.bestSum} tone="accent" />
+        </RailGroup>
+      )}
+      <RailResult label="diff" value={s.answer !== null ? s.answer : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        nums [{s.nums.join(', ')}], total {s.total}, min difference = <span className="font-mono text-ink">{answer}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index = subset sum, ✓ = reachable; answer = min |total − 2·sum|</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -136,7 +146,7 @@ function Inspector({ frame }: InspectorProps<PartState>) {
 export const manifestId = 'imp-79-partition-array-into-two-arrays-to-minimize-sum-';
 export const title = 'Partition Array Into Two Arrays to Minimize Sum Difference';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'p3973', label: 'nums [3, 9, 7, 3] (total 22)', value: { nums: [3, 9, 7, 3] } },
   ] satisfies SampleInput<PartInput>[],

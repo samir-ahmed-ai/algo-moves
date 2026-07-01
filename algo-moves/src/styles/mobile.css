@@ -111,12 +111,8 @@
   overflow: hidden;
 }
 
-.mobile-reassemble {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-
+.mobile-reassemble,
+.piece-drag-ghost {
   /* Classic VS Code editor cell tokens (Light+) */
   --vscode-cell-bg: #ffffff;
   --vscode-cell-border: #cecece;
@@ -134,7 +130,15 @@
   --vscode-hl-entry: #0e639c;
 }
 
-:root.dark .mobile-reassemble {
+.mobile-reassemble {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+:root.dark .mobile-reassemble,
+:root.dark .piece-drag-ghost {
   /* Dark+ */
   --vscode-cell-bg: #1e1e1e;
   --vscode-cell-border: #3c3c3c;
@@ -160,6 +164,22 @@
 
 .mobile-reassemble .reassemble-bar {
   flex-shrink: 0;
+  position: relative;
+  z-index: 4;
+  background: var(--bg);
+}
+.mobile-reassemble .reassemble-bar-btn {
+  touch-action: manipulation;
+}
+
+.mobile-reassemble .reassemble-body--scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .mobile-reassemble .code-studio-reassemble .assembled {
@@ -175,14 +195,15 @@
   gap: 6px;
 }
 .mobile-reassemble .reassemble-tray-wrap {
-  flex: 1 1 auto;
-  min-height: 0;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
+  overflow: visible;
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
 .mobile-reassemble .code-studio-reassemble:has(.code-blueprint-panel--inline) .reassemble-tray-wrap {
-  flex: 0 1 42%;
-  min-height: 120px;
+  flex: 0 0 auto;
+  min-height: 0;
 }
 
 /* Inline blueprint panel — fits inside the mobile reassemble card */
@@ -220,16 +241,39 @@
   -webkit-overflow-scrolling: touch;
 }
 .mobile-reassemble .code-blueprint-panel--inline .code-overview-section {
-  padding: var(--space-1) var(--space-2);
+  grid-template-columns: minmax(0, 1fr) 4.25rem;
+  padding: var(--space-1);
+}
+.mobile-reassemble .code-blueprint-panel--inline .code-overview-glyph {
+  font-size: 1.5rem;
 }
 .mobile-reassemble .code-blueprint-panel--inline .code-overview-caption {
-  font-size: 10px;
-  line-height: 1.35;
-  white-space: normal;
+  font-size: 8px;
+  line-height: 1.3;
+  -webkit-line-clamp: 3;
 }
 .mobile-reassemble .code-blueprint-panel--inline .piece-code {
   font-size: 10px;
   line-height: 1.4;
+}
+
+/* Full-screen blueprint overlay (mobile + desktop portal) */
+.code-blueprint-overlay {
+  padding: var(--space-2);
+}
+.code-blueprint-overlay .code-blueprint-panel {
+  max-width: 100%;
+}
+.code-blueprint-overlay .code-blueprint-panel .code-overview-section {
+  grid-template-columns: minmax(0, 1fr) 4.5rem;
+}
+.code-blueprint-overlay .code-blueprint-panel .code-overview-glyph {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+@media (max-width: 480px) {
+  .code-blueprint-overlay .code-blueprint-panel .code-overview-section .piece-code {
+    font-size: 13px;
+  }
 }
 
 .mobile-reassemble .piece.placed {
@@ -237,29 +281,23 @@
   width: fit-content;
   max-width: 100%;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   font-family: var(--vscode-cell-mono);
   font-size: 12px;
   line-height: 18px;
-  border: 1px solid var(--vscode-cell-border);
-  border-radius: 4px;
-  background: var(--vscode-cell-bg);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent);
-}
-.mobile-reassemble .piece-line-num {
-  display: none;
-}
-.mobile-reassemble .next-slot .piece-line-num {
-  display: none;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 .mobile-reassemble .next-slot {
   display: block;
   width: fit-content;
   max-width: 100%;
-  margin: 0;
-  padding: 3px 8px;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-2) var(--space-3);
   border: 1px dashed var(--vscode-cell-border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   opacity: 0.6;
 }
 .mobile-reassemble .next-slot-text {
@@ -271,43 +309,11 @@
   padding: 0;
 }
 
-/* VS Code cell — gutter + formatted source */
-.mobile-reassemble .piece-code-guttered {
-  tab-size: 4;
-  width: fit-content;
-  max-width: 100%;
-  font-family: var(--vscode-cell-mono);
-  font-size: inherit;
-  line-height: inherit;
-  color: var(--vscode-hl-text);
-  background: var(--vscode-cell-bg);
-}
+/* Syntax token colors — shared editor palette */
 .mobile-reassemble .piece-code-line {
-  display: flex;
-  align-items: stretch;
-  width: fit-content;
-  max-width: 100%;
-  min-height: 18px;
   white-space: pre;
-}
-.mobile-reassemble .piece-code-gutter {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 0;
-  padding: 0 3px 0 1px;
-  text-align: right;
-  color: var(--vscode-gutter-fg);
-  background: var(--vscode-gutter-bg);
-  border-right: 1px solid var(--vscode-cell-border);
-  user-select: none;
-  font-variant-numeric: tabular-nums;
-}
-.mobile-reassemble .piece-code-text {
-  flex: 0 1 auto;
-  min-width: 0;
-  padding: 0 3px 0 1px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 .mobile-reassemble .piece-code .hl-keyword {
   color: var(--vscode-hl-keyword);
@@ -378,23 +384,16 @@
   font-size: 12px;
   line-height: 18px;
   color: var(--vscode-hl-text);
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  transition: opacity 0.12s ease;
+}
+.mobile-reassemble .tray-piece .blk-face {
   background: var(--vscode-cell-bg);
-  border: 1px solid var(--vscode-cell-border);
-  border-radius: 4px;
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent);
-  overflow: hidden;
-  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
 }
-.mobile-reassemble .tray-piece:hover,
-.mobile-reassemble .tray-piece:focus {
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--vscode-cell-border));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
-}
-.mobile-reassemble .tray-piece-selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-bg);
-}
-
 .mobile-reassemble .tray-piece .piece-code {
   flex: none;
   display: block;
@@ -404,40 +403,58 @@
   min-height: auto;
   overflow: visible;
   white-space: normal;
-}
-
-.mobile-reassemble .tray-piece .piece-code-line {
-  white-space: pre;
-  overflow-wrap: normal;
-  word-break: normal;
+  color: var(--vscode-hl-text);
 }
 .mobile-reassemble .piece.placed .piece-code {
   overflow: visible;
   white-space: normal;
+  color: var(--vscode-hl-text);
 }
-
+.mobile-reassemble .code-studio-reassemble .assembled.blk-board {
+  align-items: stretch;
+  background: var(--vscode-cell-bg);
+  gap: 0;
+  padding: calc(6px + var(--blk-d, 12px)) 10px calc(6px + var(--blk-d, 12px));
+}
+.mobile-reassemble .assembled.blk-board .piece.placed {
+  width: 100%;
+  max-width: 100%;
+}
+.mobile-reassemble .assembled.blk-board .next-slot {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.mobile-reassemble .code-studio-reassemble .assembled:not(.blk-board) {
+  gap: 6px;
+}
 .mobile-reassemble .assembled.assembled-drag-over {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-bg);
   background: color-mix(in srgb, var(--accent) 4%, var(--surface-2));
 }
 .mobile-reassemble .tray {
-  flex: 1 1 auto;
-  min-height: 0;
+  flex: 0 0 auto;
   overflow: visible;
-  max-height: none;
-  display: flex;
-  flex-direction: column;
+  display: block;
+  padding-bottom: 4px;
+}
+
+.mobile-reassemble .code-studio-reassemble .blk-face {
+  padding: calc(var(--blk-d, 12px) + 10px) 12px calc(var(--blk-d, 12px) + 10px);
+}
+.mobile-reassemble .code-studio-reassemble .piece-code-line {
+  min-height: 1.6em;
 }
 
 .mobile-reassemble .tray-grid-balanced {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   gap: 5px;
-  align-items: stretch;
-  min-height: 100%;
+  align-items: flex-start;
+  min-height: 0;
 }
 
 .mobile-reassemble .tray-column {
@@ -481,59 +498,21 @@
   min-height: 48px;
 }
 
-/* Portaled to document.body — cannot nest under .mobile-reassemble */
+/* Portaled drag ghost — inherits vscode tokens from shared block above */
 .piece-drag-ghost {
-  --vscode-cell-bg: #ffffff;
-  --vscode-cell-border: #cecece;
-  --vscode-gutter-bg: #ffffff;
-  --vscode-gutter-fg: #237893;
-  --vscode-cell-mono: 'Cascadia Code', 'Cascadia Mono', Consolas, 'Courier New', monospace;
-  --vscode-hl-keyword: #0000ff;
-  --vscode-hl-string: #a31515;
-  --vscode-hl-comment: #008000;
-  --vscode-hl-number: #098658;
-  --vscode-hl-punct: #000000;
-  --vscode-hl-text: #000000;
-  --vscode-hl-func: #795e26;
-  --vscode-hl-entry: #0e639c;
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.96;
+  font-family: var(--vscode-cell-mono, var(--mono));
+  font-size: 12px;
+  line-height: 18px;
 }
-:root.dark .piece-drag-ghost {
-  --vscode-cell-bg: #1e1e1e;
-  --vscode-cell-border: #3c3c3c;
-  --vscode-gutter-bg: #1e1e1e;
-  --vscode-gutter-fg: #858585;
-  --vscode-hl-keyword: #569cd6;
-  --vscode-hl-string: #ce9178;
-  --vscode-hl-comment: #6a9955;
-  --vscode-hl-number: #b5cea8;
-  --vscode-hl-punct: #d4d4d4;
-  --vscode-hl-text: #d4d4d4;
-  --vscode-hl-func: #dcdcaa;
-  --vscode-hl-entry: #4fc1ff;
+.piece-drag-ghost .blk-face {
+  background: var(--vscode-cell-bg);
 }
-.piece-drag-ghost .piece-code-line {
-  display: flex;
-  align-items: stretch;
-  width: fit-content;
-  max-width: 100%;
-  min-height: 18px;
-  white-space: pre;
-}
-.piece-drag-ghost .piece-code-gutter {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 0;
-  padding: 0 3px 0 1px;
-  text-align: right;
-  color: var(--vscode-gutter-fg);
-  background: var(--vscode-gutter-bg);
-  border-right: 1px solid var(--vscode-cell-border);
-  user-select: none;
-}
-.piece-drag-ghost .piece-code-text {
-  flex: 0 1 auto;
-  min-width: 0;
-  padding: 0 3px 0 1px;
+.piece-drag-ghost .piece-code {
+  color: var(--vscode-hl-text);
 }
 .piece-drag-ghost .hl-keyword { color: var(--vscode-hl-keyword); }
 .piece-drag-ghost .hl-string { color: var(--vscode-hl-string); }
@@ -543,31 +522,6 @@
 .piece-drag-ghost .hl-sig-kw { color: var(--vscode-hl-keyword); }
 .piece-drag-ghost .hl-sig-name { color: var(--vscode-hl-entry); }
 .piece-drag-ghost .hl-sig-name-func { color: var(--vscode-hl-func); }
-
-.piece-drag-ghost {
-  position: fixed;
-  z-index: 50;
-  pointer-events: none;
-  opacity: 0.96;
-  transform: translate(-50%, -50%) scale(1.03);
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--text) 22%, transparent);
-  background: var(--vscode-cell-bg, var(--surface));
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  padding: 0;
-  font-family: var(--vscode-cell-mono, var(--mono));
-  font-size: 12px;
-  line-height: 18px;
-  min-width: 0;
-  overflow: hidden;
-}
-.piece-drag-ghost .piece-code {
-  flex: none;
-  overflow: visible;
-  min-height: auto;
-  max-width: 100%;
-  width: 100%;
-}
 
 /* animate card — viz board + transport */
 .mobile-animate-card {

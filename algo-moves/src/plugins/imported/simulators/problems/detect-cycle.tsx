@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface DCInput {
   adj: number[][];
@@ -107,11 +106,26 @@ function record({ adj, pos }: DCInput): Frame<DCState>[] {
 
 function View({ frame }: PluginViewProps<DCState>) {
   const s = frame.state;
+  const black = s.color.filter((c) => c === 2).length;
+  const rail = (
+    <>
+      <RailStack
+        label="stack (grey)"
+        items={s.stack.map(String)}
+        topLabel="top"
+      />
+      <RailGroup label="scan">
+        <RailStat k="current" v={s.active ?? '—'} tone="accent" />
+        <RailStat k="back edge" v={s.backEdge ? `${s.backEdge[0]}→${s.backEdge[1]}` : '—'} tone={s.backEdge ? 'bad' : undefined} />
+        <RailStat k="finished" v={`${black} / ${s.adj.length}`} />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="cycle?" value={s.cycle ? 'true' : 'false'} tone={s.cycle ? 'bad' : 'good'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        directed cycle? <span className="font-mono text-ink">{s.done ? (s.cycle ? 'true' : 'false') : '…'}</span>
-      </div>
+    <VizStage rail={rail}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -122,7 +136,7 @@ function View({ frame }: PluginViewProps<DCState>) {
         directed
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -155,7 +169,7 @@ const ACYCLIC: DCInput = {
 export const manifestId = 'imp-23-detect-cycle';
 export const title = 'Detect Cycle';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'cyclic', label: 'cyclic (true)', value: CYCLIC },
     { id: 'acyclic', label: 'acyclic (false)', value: ACYCLIC },

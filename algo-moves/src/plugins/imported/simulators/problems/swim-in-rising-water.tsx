@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface SwimInput {
   grid: number[][]; // n×n elevations, distinct 0..n²-1
@@ -125,18 +124,20 @@ function View({ frame }: PluginViewProps<SwimState>) {
     if (s.reachTime[r][c] >= 0) return 'visited';
     return '';
   };
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+        <RailStat k="elev" v={s.cur ? s.grid[s.cur[0]][s.cur[1]] : '—'} />
+        <RailStat k="time" v={s.res} tone="accent" />
+      </RailGroup>
+      <RailResult label="answer" value={s.answer === null ? '—' : s.answer} tone={s.answer !== null ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        time so far = <span className="font-mono text-ink">{s.res}</span>
-        {s.answer !== null && (
-          <>
-            {' · '}answer = <span className="font-mono text-ink">{s.answer}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={display} cellTone={cellTone} active={s.cur} cellSize={44} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -172,7 +173,7 @@ const G2: SwimInput = {
 export const manifestId = 'imp-5-swim-in-rising-water';
 export const title = 'Swim in Rising Water';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g1', label: '2×2 · answer 3', value: G1 },
     { id: 'g2', label: '5×5 · answer 16', value: G2 },

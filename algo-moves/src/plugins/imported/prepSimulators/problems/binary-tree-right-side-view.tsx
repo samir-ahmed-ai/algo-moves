@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/TreeBoard';
 
 interface RightViewInput {
@@ -20,40 +20,24 @@ interface RightViewState {
 }
 
 function record({ tree }: RightViewInput): Frame<RightViewState>[] {
-  const frames: Frame<RightViewState>[] = [];
   const visited: number[] = [];
   const taken: number[] = [];
   const res: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    current: number | null,
-    depth: number | null,
-    done: boolean,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        current,
-        depth,
-        visited: visited.slice(),
-        res: res.slice(),
-        taken: taken.slice(),
-        done,
-      },
-    });
+  const { emit, frames } = createRecorder<RightViewState>(() => ({
+    tree,
+    current: null,
+    depth: null,
+    visited: visited.slice(),
+    res: res.slice(),
+    taken: taken.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
     'root, depth 0',
     'Right Side View: standing to the right of the tree, which nodes can you see? Do a DFS that visits the RIGHT child before the left. The first node reached at each depth is the rightmost — record it.',
-    null,
-    null,
-    false,
   );
 
   const dfs = (i: number, depth: number) => {
@@ -69,9 +53,7 @@ function record({ tree }: RightViewInput): Frame<RightViewState>[] {
         'RECORD',
         `depth ${depth} → ${val}`,
         `Depth ${depth} is new: res.length is now the depth we just reached, so this node (${val}) is the FIRST — and therefore rightmost — one seen at depth ${depth}. Record ${val}.`,
-        i,
-        depth,
-        false,
+        { current: i, depth },
         'good',
       );
     } else {
@@ -80,9 +62,7 @@ function record({ tree }: RightViewInput): Frame<RightViewState>[] {
         'VISIT',
         `depth ${depth}, hidden`,
         `Node ${val} sits at depth ${depth}, but we already saw a node at that depth (${res[depth]}), which was further right. ${val} is hidden behind it — visit but do not record.`,
-        i,
-        depth,
-        false,
+        { current: i, depth },
       );
     }
 
@@ -96,9 +76,7 @@ function record({ tree }: RightViewInput): Frame<RightViewState>[] {
     'DONE',
     `[${res.join(', ')}]`,
     `DFS finished. Reading top-to-bottom, the rightmost node at each depth gives the right side view: [${res.join(', ')}].`,
-    null,
-    null,
-    true,
+    { done: true },
     'good',
   );
 
@@ -108,22 +86,26 @@ function record({ tree }: RightViewInput): Frame<RightViewState>[] {
 function View({ frame }: PluginViewProps<RightViewState>) {
   const s = frame.state;
   const nodeClass = (i: number) => {
-    if (s.current === i) return 'team-1'; // node being visited now
-    if (s.taken.includes(i)) return 'team-2'; // recorded (part of the answer)
-    if (s.visited.includes(i)) return 'team-2'; // already visited
-    return 'team-0'; // untouched
+    if (s.current === i) return 'team-1';
+    if (s.taken.includes(i)) return 'team-2';
+    if (s.visited.includes(i)) return 'team-2';
+    return 'team-0';
   };
+  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="node" v={curVal ?? '—'} tone="accent" />
+        <RailStat k="depth" v={s.depth ?? '—'} />
+      </RailGroup>
+      <RailStack label="right view" items={s.res.map(String)} />
+      {s.done && <RailResult label="answer" value={`[${s.res.join(', ')}]`} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        DFS right-first · depth ={' '}
-        <span className="font-mono text-ink">{s.depth ?? '—'}</span>
-      </div>
+    <VizStage rail={rail}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
-        right view = [{s.res.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

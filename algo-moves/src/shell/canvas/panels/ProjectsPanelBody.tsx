@@ -9,7 +9,7 @@ import { ShareUrlPopover } from '../ShareUrlPopover';
 import { SaveProjectDialog } from '../SaveProjectDialog';
 import { cn } from '../../../lib/cn';
 import { CHROME_BTN } from '../../chrome';
-import { Btn, EmptyState, Field, Row, Section, TextInput, Pill, nodeText, RADIUS_CTRL } from '../nodeui';
+import { Btn, EmptyState, Field, nodeIconGlyph, Row, Section, TextInput, Pill, nodeText, RADIUS_CTRL } from '../nodeui';
 
 /** Projects: save/load named workspace snapshots with full canvas state when available. */
 export function ProjectsPanelBody() {
@@ -33,8 +33,7 @@ export function ProjectsPanelBody() {
 
   const apply = (s: ShareState) => {
     if (s.item && catalog.getItem(s.item)) {
-      ws.setActiveItemId(s.item);
-      ws.setSelectedNode(null);
+      ws.openProblem(s.item);
     }
     if (s.mode === 'visualize') ws.setMode('visualize');
     else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') ws.setMode('learn');
@@ -72,7 +71,7 @@ export function ProjectsPanelBody() {
         </div>
       </Field>
       {names.length === 0 ? (
-        <EmptyState icon={<FolderOpen className="h-5 w-5" />} title="No saved workspaces" hint="Name the current setup and Save." />
+        <EmptyState icon={<FolderOpen />} title="No saved workspaces" hint="Name the current setup and Save." />
       ) : (
         <Section title="Saved" right={<Pill>{names.length}</Pill>}>
           <div className="flex flex-col">
@@ -88,7 +87,7 @@ export function ProjectsPanelBody() {
                   className={`nodrag grid ${CHROME_BTN} place-items-center text-ink3 transition-colors hover:bg-badbg hover:text-bad ${RADIUS_CTRL}`}
                   aria-label="delete project"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className={nodeIconGlyph} />
                 </button>
               </Row>
             ))}

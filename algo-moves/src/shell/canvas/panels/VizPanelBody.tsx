@@ -33,9 +33,9 @@ export function VizPanelBody({
   showBigO?: boolean;
   onBigOOpenChange?: (open: boolean) => void;
 }) {
-  const { plugin, inputId } = useCanvasStatic();
+  const { plugin, inputId, selectedNode, setSelectedNode } = useCanvasStatic();
   const { frame, player } = useCanvasFrame();
-  const { selectedNode, setSelectedNode, mode } = useWorkspace();
+  const { mode } = useWorkspace();
   const View = plugin.View;
   const inVisualize = mode === 'visualize';
 

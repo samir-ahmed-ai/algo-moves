@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { ExprToken, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, ExprToken } from '../../../_shared/vizKit';
 
 interface ExprInput {
   num: string;
@@ -151,28 +150,22 @@ function View({ frame }: PluginViewProps<ExprState>) {
     pointers.push({ i: s.idx, label: 'next', tone: 'warn', place: 'above' });
   }
   const tone = (i: number) => (i < s.idx ? 'match' : '');
+  const rail = (
+    <>
+      <RailGroup label="expr">
+        <RailStat k="path" v={s.path || '·'} tone="accent" />
+        <RailStat k="value" v={s.evalv} />
+        {!s.done && <RailStat k="prev" v={s.prev} />}
+      </RailGroup>
+      <RailStack label="found" items={s.results} />
+      {s.done && <RailResult label="total" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target <span className="font-mono text-ink">{s.target}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={digits} cellTone={tone} pointers={pointers} />
       <ExprToken>{s.path || '·'}</ExprToken>
-      <div className={cn(vizText.sm, 'text-ink2')}>
-        value = <span className="font-mono text-ink">{s.evalv}</span>
-        {!s.done && ` · prev operand ${s.prev}`}
-      </div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        expressions found ({s.results.length})
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('chip font-mono text-ink', vizText.sm)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -197,7 +190,7 @@ function Inspector({ frame }: InspectorProps<ExprState>) {
 export const manifestId = 'imp-31-expression-add-operators';
 export const title = 'Expression Add Operators';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: '123-6', label: '"123", 6', value: { num: '123', target: 6 } },
     { id: '232-8', label: '"232", 8', value: { num: '232', target: 8 } },

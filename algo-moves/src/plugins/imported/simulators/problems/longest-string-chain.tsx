@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface ChainInput {
   words: string[];
@@ -97,14 +96,22 @@ function View({ frame }: PluginViewProps<ChainState>) {
   if (s.i !== null) pointers.push({ i: s.i, label: `w "${s.sorted[s.i]}"`, tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: `pred "${s.pred}"`, tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== 0 ? 'match' : '');
+  const cell = (i: number | null) => (i !== null && s.dp[i] !== 0 ? s.dp[i] : '—');
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="w" v={s.i !== null ? `"${s.sorted[s.i]}"` : '—'} tone={s.i !== null ? 'accent' : undefined} />
+        <RailStat k="pred" v={s.pred !== null ? `"${s.pred}"` : '—'} />
+        <RailStat k="dp[pred]" v={cell(s.from)} />
+        <RailStat k="dp[w]" v={cell(s.i)} />
+      </RailGroup>
+      <RailResult label="best" value={s.best} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        by length: [{s.sorted.join(', ')}], longest chain = <span className="font-mono text-ink">{s.done ? s.best : '…filling'}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => s.sorted[i]} />
-      <div className={cn(vizText.sm, 'text-ink3')}>cell value = dp[word] = longest chain ending at that word</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -126,7 +133,7 @@ function Inspector({ frame }: InspectorProps<ChainState>) {
 export const manifestId = 'imp-68-longest-string-chain';
 export const title = 'Longest String Chain';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'lsc6', label: '["a","b","ba","bca","bda","bdca"]', value: { words: ['a', 'b', 'ba', 'bca', 'bda', 'bdca'] } },
     { id: 'lsc5', label: '["xbc","pcxbcf","xb","cxbc","pcxbc"]', value: { words: ['xbc', 'pcxbcf', 'xb', 'cxbc', 'pcxbc'] } },

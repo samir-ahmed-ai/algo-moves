@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { GridBoard } from '../../../../components/GridBoard';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface MaxRegionInput {
   mat: number[][];
@@ -154,22 +153,22 @@ function View({ frame }: PluginViewProps<MaxRegionState>) {
     if (v === LAND) return 'land';
     return 'water';
   };
+  const status = s.done ? 'done' : s.active ? 'flooding' : 'scanning';
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="cell" v={s.active ? `(${s.active[0]},${s.active[1]})` : '—'} tone="accent" />
+        <RailStat k="area" v={s.area} />
+        <RailStat k="best" v={s.best} tone={s.best > 0 ? 'good' : undefined} />
+        <RailStat k="status" v={status} />
+      </RailGroup>
+      {s.done && <RailResult label="max region" value={s.best} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        best region ={' '}
-        <span className="font-mono text-ink">{s.best}</span>
-        {' · '}growing ={' '}
-        <span className="font-mono text-ink">{s.area}</span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={s.grid} cellTone={tone} active={s.active} />
-      <div className={cn('mt-1', vizText.xs, 'text-ink3')}>
-        land = 1 · water = 0 · ring = current cell · filled = region growing now · dim = settled region
-      </div>
-      {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ max region = {s.best}</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

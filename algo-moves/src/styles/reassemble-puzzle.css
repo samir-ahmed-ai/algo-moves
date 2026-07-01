@@ -1,0 +1,218 @@
+/* Scroll layout — assembled caps height; tray fills remaining space */
+.code-studio-reassemble {
+  --blk-d: 12px;
+  --blk-w: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.code-studio-reassemble .reassemble-bar {
+  flex-shrink: 0;
+}
+.code-studio-reassemble .assembled {
+  flex: 0 1 auto;
+  max-height: min(45%, 320px);
+  min-height: 56px;
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.code-studio-reassemble .reassemble-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-studio-reassemble .reassemble-tray-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-studio-reassemble .hint-line {
+  flex-shrink: 0;
+}
+.code-studio-reassemble .tray {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding: 4px 2px 6px;
+}
+.code-studio-reassemble .tray-grid {
+  align-content: flex-start;
+}
+
+/* Room for puzzle tabs / drop-shadows at scroll edges */
+.code-studio-reassemble .tray-column,
+.code-studio-reassemble .tray-grid-balanced {
+  min-height: 0;
+  align-items: flex-start;
+}
+
+/* Long lines scroll inside pieces without widening the tray */
+.code-studio-reassemble .tray-piece .piece-code,
+.code-studio-reassemble .assembled .piece-code {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Mobile: bar stays fixed; body scrolls beneath it */
+.code-studio-reassemble--mobile {
+  overflow: hidden;
+}
+.code-studio-reassemble--mobile .reassemble-bar {
+  flex-shrink: 0;
+}
+.code-studio-reassemble--mobile .reassemble-body--scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+.code-studio-reassemble--mobile .reassemble-tray-wrap {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.code-studio-reassemble--mobile .tray {
+  flex: 0 0 auto;
+  height: auto;
+  overflow: visible;
+}
+.code-studio-reassemble--mobile .assembled {
+  flex: 0 0 auto;
+  max-height: none;
+  overflow: visible;
+}
+.code-studio-reassemble .reassemble-bar-btn {
+  touch-action: manipulation;
+}
+
+/* Generous vertical padding so single-line blocks aren't cramped */
+.code-studio-reassemble .blk-face {
+  padding: calc(var(--blk-d) + 6px) 14px calc(var(--blk-d) + 7px);
+}
+.code-studio-reassemble .piece-code-line {
+  min-height: 1.45em;
+}
+
+/* Tray pieces — puzzle outline with subtle lift */
+.code-studio-reassemble .tray-piece {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text);
+}
+.code-studio-reassemble .tray-piece .blk {
+  flex: 1;
+  min-width: 0;
+  cursor: inherit;
+}
+.code-studio-reassemble .tray-piece:hover .blk,
+.code-studio-reassemble .tray-piece:focus .blk {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 5px 6px hsl(0 0% 0% / 0.22));
+}
+.code-studio-reassemble .tray-piece:focus-visible {
+  outline: none;
+}
+.code-studio-reassemble .tray-piece:focus-visible .blk {
+  filter: drop-shadow(0 0 0 2px var(--accent-bg)) drop-shadow(0 4px 5px hsl(0 0% 0% / 0.2));
+}
+.code-studio-reassemble .tray-piece-selected .blk {
+  filter: drop-shadow(0 0 0 2px var(--accent-bg)) drop-shadow(0 4px 5px hsl(0 0% 0% / 0.2));
+}
+.code-studio-reassemble .tray-piece .blk-face {
+  background: var(--vscode-cell-bg, var(--surface));
+}
+.code-studio-reassemble .tray-piece-dragging {
+  opacity: 0.45;
+}
+.code-studio-reassemble .tray-piece .blk-face,
+.code-studio-reassemble .assembled .piece-code {
+  font-family: var(--mono);
+}
+.code-studio-reassemble .shake-wrong .blk {
+  animation: shake 0.35s;
+}
+
+/* Assembled zone — one continuous editor surface */
+.code-studio-reassemble .assembled.blk-board {
+  --blk-d: 12px;
+  --blk-w: 20px;
+  align-items: stretch;
+  background: var(--vscode-cell-bg, var(--surface-2));
+  padding: calc(8px + var(--blk-d)) 10px calc(8px + var(--blk-d));
+  gap: 0;
+}
+.code-studio-reassemble .assembled.blk-board .blk-row,
+.code-studio-reassemble .assembled.blk-board .blk-row .blk {
+  width: 100%;
+  box-sizing: border-box;
+}
+.code-studio-reassemble .assembled .blk-row {
+  position: relative;
+}
+.code-studio-reassemble .assembled .blk-row + .blk-row {
+  margin-top: calc(-1 * var(--blk-d));
+}
+.code-studio-reassemble .assembled .blk {
+  filter: none;
+  cursor: default;
+  padding: 1px;
+}
+.code-studio-reassemble .assembled .blk-face {
+  background: transparent;
+  padding: 4px 14px;
+}
+.code-studio-reassemble .assembled .piece-code-line.hl-line-entry,
+.code-studio-reassemble .assembled .piece-code-line.hl-line-func {
+  border-left: 0;
+  padding-left: 0;
+  margin-left: 0;
+}
+.code-studio-reassemble .assembled .placed-enter .blk {
+  animation: piecePlacedEnter 0.22s ease-out;
+}
+
+/* Next-slot placeholder */
+.code-studio-reassemble .next-slot {
+  display: block;
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  opacity: 0.55;
+}
+.code-studio-reassemble .assembled.blk-board .next-slot {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Drag ghost (portaled to body) — position/z-index; token colors in mobile.css */
+.piece-drag-ghost .blk {
+  filter: drop-shadow(0 8px 12px hsl(0 0% 0% / 0.28));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-studio-reassemble .tray-piece:hover .blk,
+  .code-studio-reassemble .tray-piece:focus .blk {
+    transform: none;
+  }
+}

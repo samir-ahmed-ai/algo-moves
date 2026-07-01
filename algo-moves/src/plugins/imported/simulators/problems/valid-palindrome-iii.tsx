@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { DpCell, DpHeader, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, vizText, DpCell, DpHeader, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface VP3Input {
   s: string;
@@ -86,7 +85,7 @@ function View({ frame }: PluginViewProps<VP3State>) {
   const n = st.s.length;
   const display: (number | string)[][] = st.dp.map((row) => row.map((v) => (v < 0 ? '' : v)));
   const cellTone = (r: number, c: number) => {
-    if (c < r) return 'water'; // unused lower triangle
+    if (c < r) return 'water';
     if (st.cur && st.cur[0] === r && st.cur[1] === c) return 'active';
     if (r === 0 && c === n - 1 && st.dp[r][c] >= 0) return 'path';
     return st.dp[r][c] >= 0 ? 'visited' : '';
@@ -94,31 +93,41 @@ function View({ frame }: PluginViewProps<VP3State>) {
   const lpsReady = n > 0 && st.dp[0][n - 1] >= 0;
   const lps = lpsReady ? st.dp[0][n - 1] : null;
   const removals = lps === null ? null : n - lps;
+  const ok = removals !== null && removals <= st.k;
+  const i = st.cur ? st.cur[0] : -1;
+  const j = st.cur ? st.cur[1] : -1;
+  const sub = i >= 0 && j >= 0 ? st.s.slice(i, j + 1) : '—';
+
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="cell" v={st.cur ? `[${i},${j}]` : '—'} tone={st.cur ? 'accent' : undefined} />
+        <RailStat k="substr" v={st.cur ? `"${sub}"` : '—'} />
+      </RailGroup>
+      <RailGroup label="result">
+        <RailStat k="LPS" v={lps === null ? '…' : lps} tone={lps !== null ? 'accent' : undefined} />
+        <RailStat k="n−LPS" v={removals === null ? '—' : removals} />
+      </RailGroup>
+      {removals !== null && (
+        <RailResult label="answer" value={ok ? 'true' : 'false'} tone={ok ? 'good' : 'bad'} />
+      )}
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        s = <span className="font-mono text-ink">{st.s}</span>, k = <span className="font-mono text-ink">{st.k}</span>
-        {removals === null ? (
-          <>, computing LPS…</>
-        ) : (
-          <>
-            , n − LPS = {n} − {lps} = <span className="font-mono text-ink">{removals}</span> {removals <= st.k ? '≤' : '>'} k → {' '}
-            <span className="font-mono text-ink">{removals <= st.k ? 'true' : 'false'}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <div className="flex items-start gap-2">
         <div className="flex flex-col gap-[2px] pt-[26px]">
-          {st.s.split('').map((ch, i) => (
-            <DpCell key={i} width={18} height={40} tone="text-ink3">
+          {st.s.split('').map((ch, idx) => (
+            <DpCell key={idx} width={18} height={40} tone="text-ink3">
               {ch}
             </DpCell>
           ))}
         </div>
         <div className="flex flex-col gap-[2px]">
           <div className="flex gap-[2px]">
-            {st.s.split('').map((ch, j) => (
-              <DpHeader key={j} width={40}>
+            {st.s.split('').map((ch, jdx) => (
+              <DpHeader key={jdx} width={40}>
                 {ch}
               </DpHeader>
             ))}
@@ -126,8 +135,8 @@ function View({ frame }: PluginViewProps<VP3State>) {
           <GridBoard grid={display} cellTone={cellTone} label={(r, c) => (c < r ? '' : display[r][c])} active={st.cur} cellSize={40} />
         </div>
       </div>
-      <div className={cn(vizText.xs, 'text-ink3')}>dp[i][j] = longest palindromic subsequence of s[i..j]; the answer needs only dp[0][{n - 1}] = LPS(s).</div>
-    </div>
+      <div className={vizText.xs + ' text-ink3'}>dp[i][j] = LPS of s[i..j]; answer uses dp[0][{n - 1}].</div>
+    </VizStage>
   );
 }
 
@@ -158,7 +167,7 @@ function Inspector({ frame }: InspectorProps<VP3State>) {
 export const manifestId = 'imp-85-valid-palindrome-iii';
 export const title = 'Valid Palindrome III';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'abcdeca-2', label: 's = "abcdeca", k = 2', value: { s: 'abcdeca', k: 2 } },
     { id: 'abbababa-1', label: 's = "abbababa", k = 1', value: { s: 'abbababa', k: 1 } },

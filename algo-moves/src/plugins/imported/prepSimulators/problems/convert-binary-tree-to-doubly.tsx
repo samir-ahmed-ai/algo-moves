@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface DoublyInput {
   /** Level-order tree; null marks an absent slot. Children of i are 2i+1, 2i+2. */
@@ -132,23 +131,23 @@ function View({ frame }: PluginViewProps<DoublyState>) {
     if (s.status[i] === 'done') return 'team-2';
     return 'team-0';
   };
+  const prevVal = s.prev !== null ? (s.tree[s.prev] as number) : '—';
+  const rail = (
+    <>
+      <RailGroup label="pointers">
+        <RailStat k="head" v={s.head ?? '—'} tone="accent" />
+        <RailStat k="prev" v={prevVal} />
+      </RailGroup>
+      <RailStack label="list" items={s.list.map(String)} highlightEnd="bottom" topLabel="head" />
+      {s.done && (
+        <RailResult label="result" value={s.list.length ? s.list.join('↔') : '∅'} tone="good" />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        head ={' '}
-        <span className="font-mono text-ink">{s.head ?? '—'}</span>
-        {s.prev !== null && !s.done && (
-          <>
-            {' · '}prev (tail) ={' '}
-            <span className="font-mono text-ink">{s.tree[s.prev] as number}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
-        list: {s.list.length ? s.list.join(' ↔ ') : '·'}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

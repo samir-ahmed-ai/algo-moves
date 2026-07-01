@@ -1,55 +1,16 @@
-import type { ReactNode } from 'react';
-import * as Accordion from '@radix-ui/react-accordion';
 import * as Switch from '@radix-ui/react-switch';
-import { ChevronRight } from 'lucide-react';
 import { cn } from '../lib/cn';
-import { getTag, type TagKind } from '../content';
-import { chromeText, ChromeHint, ChromeLabel } from './chromeUi';
-
-const tagKindColor: Record<TagKind, string> = {
-  pattern: 'var(--accent)',
-  structure: 'var(--good)',
-  skill: 'var(--team2-stroke)',
-  meta: 'var(--text-3)',
-};
+import { getTag } from '../content';
+import { TAG_KIND_COLOR } from '../content/tagColors';
+import { chromeText, ChromeHint } from './chromeUi';
 
 export function TagChip({ id }: { id: string }) {
   const t = getTag(id);
   return (
     <span className={cn('inline-flex items-center gap-1 rounded bg-panel2 px-1.5 py-0.5 text-ink2', chromeText.sm)}>
-      <span className="h-1.5 w-1.5 rounded-full" style={{ background: tagKindColor[t.kind] }} />
+      <span className="h-1.5 w-1.5 rounded-full" style={{ background: TAG_KIND_COLOR[t.kind] }} />
       {t.label}
     </span>
-  );
-}
-
-export function Section({
-  value,
-  title,
-  icon,
-  badge,
-  children,
-}: {
-  value: string;
-  title: string;
-  icon?: ReactNode;
-  badge?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <Accordion.Item value={value} className="border-b border-edge last:border-0">
-      <Accordion.Header className="flex">
-        <Accordion.Trigger className={cn('group flex min-h-[var(--row)] w-full items-center gap-1.5 px-[var(--hpad)] py-0.5 text-ink3 outline-none transition-colors hover:text-ink2')}>
-          <ChevronRight className="h-3 w-3 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
-          {icon}
-          <ChromeLabel className="min-w-0 flex-1 truncate normal-case">{title}</ChromeLabel>
-          {badge}
-        </Accordion.Trigger>
-      </Accordion.Header>
-      <Accordion.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="pb-1">{children}</div>
-      </Accordion.Content>
-    </Accordion.Item>
   );
 }
 
@@ -95,23 +56,5 @@ export function Toggle({
         />
       </Switch.Root>
     </label>
-  );
-}
-
-export function Rail({ items, onExpand }: { items: { icon: ReactNode; label: string }[]; onExpand: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-0.5 py-1.5">
-      {items.map((it, i) => (
-        <button
-          key={i}
-          onClick={onExpand}
-          title={it.label}
-          aria-label={it.label}
-          className="grid h-5 w-5 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
-        >
-          {it.icon}
-        </button>
-      ))}
-    </div>
   );
 }

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface DistanceInput {
   /** Flat n-ary tree; node 0 is the root, children are indices into this list. */
@@ -204,7 +203,7 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {
 
 function View({ frame }: PluginViewProps<DistanceState>) {
   const s = frame.state;
-  const label = (i: number) => s.nodes[i]?.label ?? `#${i}`;
+  const label = (i: number | null) => (i !== null && s.nodes[i] ? s.nodes[i].label : '—');
   const nodeClass = (i: number) => {
     if (i === s.active) return 'team-1';
     if (i === s.lca && s.lca !== null) return 'team-2';
@@ -212,37 +211,36 @@ function View({ frame }: PluginViewProps<DistanceState>) {
     if (s.visited.includes(i)) return 'team-2';
     return 'team-0';
   };
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        targets{' '}
-        <span className="font-mono text-ink">{label(s.a)}</span>
-        {' & '}
-        <span className="font-mono text-ink">{label(s.b)}</span>
-        {s.lca !== null && (
+  const rail = (
+    <>
+      <RailGroup label="targets">
+        <RailStat k="a" v={label(s.a)} />
+        <RailStat k="b" v={label(s.b)} />
+      </RailGroup>
+      <RailGroup label="search">
+        <RailStat k="phase" v={s.phase} />
+        <RailStat k="active" v={label(s.active)} tone="accent" />
+        <RailStat k="LCA" v={s.lca !== null ? label(s.lca) : '…'} tone={s.lca !== null ? 'good' : undefined} />
+        {s.phase === 'level' && s.measureTo !== null && (
           <>
-            {' · '}LCA ={' '}
-            <span className="font-mono text-ink">{label(s.lca)}</span>
+            <RailStat k="→" v={label(s.measureTo)} />
+            <RailStat k="level" v={s.level ?? '—'} tone="accent" />
           </>
         )}
-        {s.measureTo !== null && s.level !== null && !s.done && (
-          <>
-            {' · '}level{' '}
-            <span className="font-mono text-ink">{s.level}</span>
-          </>
-        )}
-      </div>
-      <NaryTreeBoard nodes={s.nodes} nodeClass={nodeClass} activeNode={s.active} />
-      {s.answer !== null ? (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          distance = {s.distA} + {s.distB} = {s.answer}
-        </div>
-      ) : (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          {s.phase === 'lca' ? 'finding LCA…' : `measuring to ${s.measureTo !== null ? label(s.measureTo) : '…'}`}
-        </div>
+      </RailGroup>
+      <RailGroup label="dists">
+        <RailStat k={`d(lca,${label(s.a)})`} v={s.distA ?? '…'} />
+        <RailStat k={`d(lca,${label(s.b)})`} v={s.distB ?? '…'} />
+      </RailGroup>
+      {s.answer !== null && (
+        <RailResult label="distance" value={s.answer} tone="good" />
       )}
-    </div>
+    </>
+  );
+  return (
+    <VizStage rail={rail} railWidth={150}>
+      <NaryTreeBoard nodes={s.nodes} nodeClass={nodeClass} activeNode={s.active} />
+    </VizStage>
   );
 }
 

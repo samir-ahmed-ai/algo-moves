@@ -5,10 +5,9 @@ import type { CodePiece } from '../lib/codePieces';
 import { cn } from '../lib/cn';
 import { hapticError, hapticSuccess } from '../lib/haptic';
 import { pieceHasEntrySignature } from '../lib/highlightSnippet';
-import { balanceTrayColumns, dedentForDisplay } from '../lib/trayLayout';
+import { balanceTrayColumns } from '../lib/trayLayout';
 import { CodeBlueprintOverlay } from './CodeBlueprintOverlay';
-import { CodeBlueprintPanel } from './CodeBlueprintPanel';
-import { HighlightedCode } from './HighlightedCode';
+import { PuzzlePieceShell } from './PuzzlePieceShell';
 
 const FINISH_MS = 400;
 const WRONG_MS = 350;
@@ -70,9 +69,10 @@ function BarIconButton({
       title={title}
       aria-label={title}
       className={cn(
-        'nodrag grid h-6 w-6 shrink-0 place-items-center rounded-md transition-colors',
+        'nodrag reassemble-bar-btn grid h-6 w-6 shrink-0 place-items-center rounded-md transition-colors',
         active ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
       )}
+      onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
@@ -81,12 +81,6 @@ function BarIconButton({
       {children}
     </button>
   );
-}
-
-function PieceCode({ code, lang, wrap, gutter }: { code: string; lang: string; wrap?: boolean; gutter?: boolean }) {
-  const display = dedentForDisplay(code);
-  const showGutter = gutter && display.includes('\n');
-  return <HighlightedCode code={display} lang={lang} wrap={wrap} gutter={showGutter} />;
 }
 
 export function ReassemblePane({
@@ -131,6 +125,7 @@ export function ReassemblePane({
     startX: number;
     startY: number;
     active: boolean;
+    axis: 'x' | 'y' | null;
     pointerId: number;
     target: HTMLElement;
     captured: boolean;
@@ -225,6 +220,14 @@ export function ReassemblePane({
   }, [done, placed, mistakes, onComplete]);
 
   useEffect(() => {
+    const el = assembledRef.current;
+    if (!el || placed.length === 0) return;
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  }, [placed.length]);
+
+  useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
 
@@ -284,63 +287,60 @@ export function ReassemblePane({
     return () => document.removeEventListener('mousedown', onDoc);
   }, [showCheatSheet]);
 
-  useEffect(() => {
-    if (variant !== 'mobile') return;
+  const onTrayPointerMove = useCallback((e: React.PointerEvent) => {
+    const drag = pointerDragRef.current;
+    if (!drag || e.pointerId !== drag.pointerId) return;
 
-    const onPointerMove = (e: PointerEvent) => {
-      const drag = pointerDragRef.current;
-      if (!drag || e.pointerId !== drag.pointerId) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (Math.hypot(dx, dy) >= 4) dragMovedRef.current = true;
 
-      const dx = e.clientX - drag.startX;
-      const dy = e.clientY - drag.startY;
-      if (Math.hypot(dx, dy) >= 4) dragMovedRef.current = true;
-      if (!drag.active && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
-
-      if (!drag.active) {
-        drag.active = true;
-        dragMovedRef.current = true;
-        if (!drag.captured) {
-          drag.target.setPointerCapture(e.pointerId);
-          drag.captured = true;
-        }
+    if (!drag.active) {
+      if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+      // Vertical intent — release so the pane scroll container handles the pan.
+      if (Math.abs(dy) >= Math.abs(dx)) {
+        pointerDragRef.current = null;
+        return;
       }
+      drag.axis = 'x';
+      drag.active = true;
+      dragMovedRef.current = true;
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        drag.captured = true;
+      } catch {
+        /* capture is best-effort */
+      }
+    }
 
-      e.preventDefault();
-      setPointerGhost({ piece: drag.piece, x: e.clientX, y: e.clientY, width: drag.width });
-      setDragOver(isOverAssembled(e.clientX, e.clientY, assembledRef.current));
-    };
+    e.preventDefault();
+    e.stopPropagation();
+    setPointerGhost({ piece: drag.piece, x: e.clientX, y: e.clientY, width: drag.width });
+    setDragOver(isOverAssembled(e.clientX, e.clientY, assembledRef.current));
+  }, []);
 
-    const finishPointerDrag = (e: PointerEvent) => {
+  const finishTrayPointer = useCallback(
+    (e: React.PointerEvent, piece: CodePiece, index: number) => {
       const drag = pointerDragRef.current;
       if (!drag || e.pointerId !== drag.pointerId) return;
 
       if (drag.active) {
         if (isOverAssembled(e.clientX, e.clientY, assembledRef.current)) {
-          const idx = tray.findIndex((p) => p.id === drag.piece.id);
-          tryPlace(drag.piece, idx >= 0 ? idx : undefined);
+          tryPlace(piece, index);
         }
       } else if (!dragMovedRef.current) {
-        const idx = tray.findIndex((p) => p.id === drag.piece.id);
-        tryPlace(drag.piece, idx >= 0 ? idx : undefined);
+        tryPlace(piece, index);
       }
 
       try {
-        if (drag.captured) drag.target.releasePointerCapture(e.pointerId);
+        if (drag.captured) (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
       } catch {
         /* capture may already be released */
       }
       clearPointerDrag();
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', finishPointerDrag);
-    window.addEventListener('pointercancel', finishPointerDrag);
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', finishPointerDrag);
-      window.removeEventListener('pointercancel', finishPointerDrag);
-    };
-  }, [variant, tryPlace, clearPointerDrag]);
+    },
+    [tryPlace, clearPointerDrag],
+  );
 
   const onDragStart = (e: React.DragEvent, piece: CodePiece) => {
     e.dataTransfer.setData('text/plain', piece.id);
@@ -364,6 +364,7 @@ export function ReassemblePane({
       startX: e.clientX,
       startY: e.clientY,
       active: false,
+      axis: null,
       pointerId: e.pointerId,
       target,
       captured: false,
@@ -381,6 +382,9 @@ export function ReassemblePane({
       draggable={variant !== 'mobile'}
       onDragStart={variant !== 'mobile' ? (e) => onDragStart(e, p) : undefined}
       onPointerDown={variant === 'mobile' ? (e) => onTrayPointerDown(e, p, i) : undefined}
+      onPointerMove={variant === 'mobile' ? onTrayPointerMove : undefined}
+      onPointerUp={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
+      onPointerCancel={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
       className={cn(
         'piece tray-piece nodrag',
         wrongId === p.id && 'shake-wrong',
@@ -397,7 +401,7 @@ export function ReassemblePane({
           {i < 9 ? i + 1 : '·'}
         </span>
       )}
-      <PieceCode code={p.code} lang={lang} wrap={!mobileWrap} gutter={mobileWrap} />
+      <PuzzlePieceShell piece={p} lang={lang} wrap={!mobileWrap} mode="tray" />
     </div>
   );
 
@@ -405,13 +409,17 @@ export function ReassemblePane({
     <div
       ref={rootRef}
       tabIndex={0}
-      className={cn('code-studio-reassemble flex min-h-0 flex-1 flex-col outline-none', className)}
+      className={cn(
+        'code-studio-reassemble flex min-h-0 flex-1 flex-col outline-none',
+        mobileWrap && 'code-studio-reassemble--mobile',
+        className,
+      )}
       aria-label="Reassemble code blocks in source order"
     >
       <div className="reassemble-sr-only" aria-live="assertive" aria-atomic="true">
         {liveMessage}
       </div>
-      <div className="reassemble-bar" aria-live="polite">
+      <div className="reassemble-bar" aria-live="polite" data-noswipe>
         <div className="reassemble-progress-wrap">
           <div className="reassemble-progress-track">
             <div
@@ -481,19 +489,12 @@ export function ReassemblePane({
         )}
       </div>
 
-      {mobileWrap && showOverview ? (
-        <CodeBlueprintPanel
-          inline
-          pieces={pieces}
-          lang={lang}
-          wrap
-          onClose={() => setShowOverview(false)}
-        />
-      ) : (
+      <div className={cn('reassemble-body flex min-h-0 flex-1 flex-col', mobileWrap && 'reassemble-body--scroll')}>
         <div
           ref={assembledRef}
           className={cn(
             'assembled nodrag',
+            placed.length > 0 && 'blk-board',
             placed.length === 0 && !done && 'assembled-has-empty',
             dragOver && 'assembled-drag-over',
             completing && 'assembled-complete-flash',
@@ -515,17 +516,13 @@ export function ReassemblePane({
               <span>Drop blocks here in source order</span>
             </div>
           )}
-          {placed.map((p, i) => (
-            <div key={p.id} className={cn('piece placed', lastPlacedId === p.id && 'placed-enter')}>
-              <span className="piece-line-num" aria-hidden>
-                {i + 1}
-              </span>
-              <PieceCode code={p.code} lang={lang} wrap={!mobileWrap} gutter={mobileWrap} />
+          {placed.map((p) => (
+            <div key={p.id} className={cn('blk-row piece placed', lastPlacedId === p.id && 'placed-enter')}>
+              <PuzzlePieceShell piece={p} lang={lang} wrap={!mobileWrap} mode="placed" />
             </div>
           ))}
           {!done && expected && (
             <div className="next-slot" aria-hidden>
-              <span className="piece-line-num">{placed.length + 1}</span>
               <span className="next-slot-text">next block…</span>
             </div>
           )}
@@ -535,31 +532,31 @@ export function ReassemblePane({
             </div>
           )}
         </div>
-      )}
 
-      {!done && (
-        <div className="reassemble-tray-wrap">
-          {showHint && expected && <div className="hint-line">next: {expected.role}</div>}
-          <div
-            className={cn('tray tray-grid', mobileWrap && 'tray-grid-balanced')}
-            role="listbox"
-            aria-label="Code block tray"
-          >
-            {mobileTrayColumns
-              ? mobileTrayColumns.map((col, ci) => (
-                  <div key={ci} className="tray-column">
-                    {col.map(({ piece, index }) => renderTrayPiece(piece, index))}
-                  </div>
-                ))
-              : tray.map((p, i) => renderTrayPiece(p, i))}
+        {!done && (
+          <div className="reassemble-tray-wrap">
+            {showHint && expected && <div className="hint-line">next: {expected.role}</div>}
+            <div
+              className={cn('tray tray-grid', mobileWrap && 'tray-grid-balanced')}
+              role="listbox"
+              aria-label="Code block tray"
+            >
+              {mobileTrayColumns
+                ? mobileTrayColumns.map((col, ci) => (
+                    <div key={ci} className="tray-column">
+                      {col.map(({ piece, index }) => renderTrayPiece(piece, index))}
+                    </div>
+                  ))
+                : tray.map((p, i) => renderTrayPiece(p, i))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {pointerGhost &&
         createPortal(
           <div
-            className="piece piece-drag-ghost tray-piece"
+            className="piece piece-drag-ghost"
             style={{
               left: pointerGhost.x,
               top: pointerGhost.y,
@@ -568,13 +565,13 @@ export function ReassemblePane({
             }}
             aria-hidden
           >
-            <PieceCode code={pointerGhost.piece.code} lang={lang} wrap={!mobileWrap} gutter={mobileWrap} />
+            <PuzzlePieceShell piece={pointerGhost.piece} lang={lang} wrap={!mobileWrap} mode="ghost" />
           </div>,
           document.body,
         )}
 
-      {showOverview && !mobileWrap && (
-        <CodeBlueprintOverlay pieces={pieces} lang={lang} wrap={mobileWrap} onClose={() => setShowOverview(false)} />
+      {showOverview && (
+        <CodeBlueprintOverlay pieces={pieces} lang={lang} wrap={false} onClose={() => setShowOverview(false)} />
       )}
     </div>
   );

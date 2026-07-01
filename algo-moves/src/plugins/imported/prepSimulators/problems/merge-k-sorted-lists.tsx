@@ -2,7 +2,8 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface MergeKInput {
   // Each inner array is one sorted linked list (its node values, head → tail).
@@ -25,34 +26,21 @@ interface MergeKState {
 }
 
 function record({ lists }: MergeKInput): Frame<MergeKState>[] {
-  const frames: Frame<MergeKState>[] = [];
-
   // Working pool of lists; each list is a plain value array (head first).
   let pool: number[][] = lists.map((l) => l.slice());
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MergeKState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        pool: pool.map((l) => l.slice()),
-        round: 0,
-        pairIdx: null,
-        a: null,
-        b: null,
-        ai: null,
-        bi: null,
-        out: [],
-        result: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<MergeKState>(() => ({
+    pool: pool.map((l) => l.slice()),
+    round: 0,
+    pairIdx: null,
+    a: null,
+    b: null,
+    ai: null,
+    bi: null,
+    out: [],
+    result: null,
+    done: false,
+  }));
 
   const show = (l: number[] | null): string =>
     l && l.length ? l.join('→') : '∅';
@@ -238,8 +226,43 @@ function View({ frame }: PluginViewProps<MergeKState>) {
   const s = frame.state;
   const merging = s.pairIdx !== null && !s.done;
 
+  const headA = s.a && s.ai !== null && s.ai < s.a.length ? s.a[s.ai] : null;
+  const headB = s.b && s.bi !== null && s.bi < s.b.length ? s.b[s.bi] : null;
+  const pair =
+    s.pairIdx
+      ? s.pairIdx[1] >= 0
+        ? `${s.pairIdx[0]} & ${s.pairIdx[1]}`
+        : `${s.pairIdx[0]} (carry)`
+      : '—';
+
+  const rail = (
+    <>
+      <RailGroup label="progress">
+        <RailStat k="round" v={s.round} />
+        <RailStat k="pool" v={s.pool.length} />
+        <RailStat k="pair" v={pair} />
+      </RailGroup>
+      {merging && (
+        <RailGroup label="heads">
+          <RailStat k="a" v={headA ?? '—'} tone={headA !== null ? 'accent' : undefined} />
+          <RailStat k="b" v={headB ?? '—'} tone={headB !== null ? 'warn' : undefined} />
+        </RailGroup>
+      )}
+      {merging && (
+        <RailStack label="out" items={s.out.map(String)} />
+      )}
+      {s.done && (
+        <RailResult
+          label="result"
+          value={s.result ? (s.result.length ? s.result.join('→') : '∅') : '∅'}
+          tone="good"
+        />
+      )}
+    </>
+  );
+
   if (merging && s.pairIdx) {
-    const [ia, ib] = s.pairIdx;
+    const [, ib] = s.pairIdx;
     const a = s.a ?? [];
     const b = s.b ?? [];
     const aPtr: ArrayPointer[] =
@@ -253,14 +276,7 @@ function View({ frame }: PluginViewProps<MergeKState>) {
     const aTone = (i: number) => (s.ai !== null && i < s.ai ? 'dead' : s.ai === i ? 'match' : '');
     const bTone = (i: number) => (s.bi !== null && i < s.bi ? 'dead' : s.bi === i ? 'match' : '');
     return (
-      <div className="board-area">
-        <div className={cn(vizText.sm, 'text-ink3')}>
-          round <span className="font-mono text-ink">{s.round}</span> · merging lists{' '}
-          <span className="font-mono text-ink">
-            {ia}
-            {ib >= 0 ? ` & ${ib}` : ' (carry)'}
-          </span>
-        </div>
+      <VizStage rail={rail}>
         <div className={cn('mt-1', vizText.xs, 'text-ink3')}>list A</div>
         <ArrayRow values={a} cellTone={aTone} pointers={aPtr} windowRange={null} />
         {ib >= 0 && (
@@ -269,20 +285,14 @@ function View({ frame }: PluginViewProps<MergeKState>) {
             <ArrayRow values={b} cellTone={bTone} pointers={bPtr} windowRange={null} />
           </>
         )}
-        <div className={cn('mt-2 font-mono', vizText.base, 'text-good')}>
-          out → {s.out.length ? s.out.join('→') : '∅'}
-        </div>
-      </div>
+      </VizStage>
     );
   }
 
   // Pool view (INIT / ROUND / DONE): show every list as a chain row.
   const lists = s.done && s.result ? [s.result] : s.pool;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.done ? 'merged result' : `round ${s.round} · ${lists.length} list(s)`}
-      </div>
+    <VizStage rail={rail}>
       <div className="mt-1 flex flex-col gap-1">
         {lists.length === 0 ? (
           <div className={cn('font-mono', vizText.sm, 'text-ink3')}>∅</div>
@@ -297,7 +307,7 @@ function View({ frame }: PluginViewProps<MergeKState>) {
           ))
         )}
       </div>
-    </div>
+    </VizStage>
   );
 }
 

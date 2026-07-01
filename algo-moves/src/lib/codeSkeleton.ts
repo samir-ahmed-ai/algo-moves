@@ -1,4 +1,4 @@
-/** Keep package/import/header block and replace function bodies with `// TODO` stubs. */
+/** Keep package/import/header block and replace function bodies with `// …` stubs. */
 export function extractSkeleton(ref: string): string {
   const lines = ref.split('\n');
   const out: string[] = [];
@@ -20,7 +20,7 @@ export function extractSkeleton(ref: string): string {
     if (/^func\s/.test(trimmed)) {
       const sig = line.replace(/\{\s*$/, '').trimEnd();
       out.push(sig.endsWith('{') ? sig : `${sig} {`);
-      out.push('\t// TODO');
+      out.push('\t// …');
       out.push('}');
       i++;
       // Skip original body until matching closing brace at column 0 or func indent.

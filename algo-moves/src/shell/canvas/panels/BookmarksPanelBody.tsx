@@ -1,6 +1,6 @@
 import { Bookmark, BookmarkPlus, Trash2 } from 'lucide-react';
 import { useCanvasFrame } from '../CanvasContext';
-import { Btn, EmptyState, Pill, Row, Section, TextInput } from '../nodeui';
+import { Btn, EmptyState, nodeIconGlyph, Pill, Row, Section, TextInput } from '../nodeui';
 
 /** #41 Bookmarks: annotate any frame and jump back to it. */
 export function BookmarksPanelBody() {
@@ -13,13 +13,13 @@ export function BookmarksPanelBody() {
         variant={marked ? 'ghost' : 'primary'}
         size="sm"
         onClick={() => player.setBookmark(player.index, frames[player.index]?.move.note ?? '')}
-        icon={<BookmarkPlus className="h-3.5 w-3.5" />}
+        icon={<BookmarkPlus className={nodeIconGlyph} />}
         className="self-start"
       >
         {marked ? `Step ${player.index + 1} marked` : `Mark step ${player.index + 1}`}
       </Btn>
       {entries.length === 0 ? (
-        <EmptyState icon={<Bookmark className="h-5 w-5" />} title="No bookmarks" hint="Mark a frame to annotate it and jump back." />
+        <EmptyState icon={<Bookmark />} title="No bookmarks" hint="Mark a frame to annotate it and jump back." />
       ) : (
         <Section title="Bookmarks" bordered={false} right={<Pill>{entries.length}</Pill>}>
           <div className="flex flex-col">
@@ -40,7 +40,7 @@ export function BookmarksPanelBody() {
                   className="nodrag shrink-0 text-ink3 hover:text-bad"
                   aria-label="remove bookmark"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className={nodeIconGlyph} />
                 </button>
               </Row>
             ))}

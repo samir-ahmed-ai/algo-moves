@@ -8,3 +8,6 @@ dist-ssr/
 .vite/
 *.local
 tsconfig.tsbuildinfo
+tsconfig.node.tsbuildinfo
+vite.config.js
+vite.config.d.ts

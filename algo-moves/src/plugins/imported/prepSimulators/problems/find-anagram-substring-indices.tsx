@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface AnagramInput {
   s: string;
@@ -28,36 +28,24 @@ const A = 'a'.charCodeAt(0);
 function record({ s, p }: AnagramInput): Frame<AnagramState>[] {
   const chars = s.split('');
   const pLen = p.length;
-  const frames: Frame<AnagramState>[] = [];
   const diff = new Array<number>(26).fill(0);
   const found: number[] = [];
 
   const countNonZero = () => diff.reduce((acc, d) => acc + (d === 0 ? 0 : 1), 0);
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    over: Partial<AnagramState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        chars,
-        p,
-        pLen,
-        diff: diff.slice(),
-        r: null,
-        dropped: null,
-        winLo: null,
-        winHi: null,
-        nonZero: countNonZero(),
-        found: found.slice(),
-        done: false,
-        ...over,
-      },
-    });
+  const { emit, frames } = createRecorder<AnagramState>(() => ({
+    chars,
+    p,
+    pLen,
+    diff: diff.slice(),
+    r: null,
+    dropped: null,
+    winLo: null,
+    winHi: null,
+    nonZero: countNonZero(),
+    found: found.slice(),
+    done: false,
+  }));
 
   if (pLen > s.length) {
     emit(
@@ -143,7 +131,6 @@ function View({ frame }: PluginViewProps<AnagramState>) {
 
   const foundSet = new Set(s.found);
   const tone = (i: number) => {
-    // Light up every cell that begins a recorded anagram window.
     if (foundSet.has(i)) return 'found';
     if (s.winLo !== null && s.winHi !== null && i >= s.winLo && i <= s.winHi) return 'match';
     return '';
@@ -152,17 +139,27 @@ function View({ frame }: PluginViewProps<AnagramState>) {
   const window: [number, number] | null =
     s.winLo !== null && s.winHi !== null ? [s.winLo, s.winHi] : null;
 
+  const rail = (
+    <>
+      <RailGroup label="pattern">
+        <RailStat k="p" v={`"${s.p}"`} />
+        <RailStat k="len" v={s.pLen} />
+      </RailGroup>
+      <RailGroup label="window">
+        <RailStat k="off" v={s.nonZero} tone={s.nonZero === 0 && s.r !== null ? 'good' : 'accent'} />
+      </RailGroup>
+      <RailResult
+        label="starts"
+        value={s.found.length ? `[${s.found.join(', ')}]` : s.done ? 'none' : '…'}
+        tone={s.done ? (s.found.length ? 'good' : 'bad') : 'accent'}
+      />
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        pattern p = <span className="font-mono text-ink">"{s.p}"</span> (len {s.pLen}) · off-balance ={' '}
-        <span className="font-mono text-ink">{s.nonZero}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={window} />
-      <div className={cn('mt-1 font-mono', vizText.sm, s.found.length ? 'text-good' : 'text-ink3')}>
-        → starts [{s.found.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

@@ -187,10 +187,10 @@ export function UnifiedRightSidebar() {
     sidePanelTab,
     setSidePanelTab,
     canvasHud,
-    selectedNode,
     setRightWide,
     isMobile,
   } = useWorkspace();
+  const { selectedNode } = useCanvasStatic();
   const { plugin, item } = useCanvasStatic();
   const { frames, player } = useCanvasFrame();
   const showGlobalTransport = present || (mode === 'visualize' && tweaks.controls);
@@ -339,7 +339,7 @@ export function UnifiedRightSidebar() {
         </button>
       </header>
 
-      <div className="ws-scroll flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <SidebarSection
           icon={<Eye className="h-3 w-3" />}
           title="Mode"
@@ -381,6 +381,7 @@ export function UnifiedRightSidebar() {
           </SidebarSection>
         )}
 
+        <div className="mt-auto flex shrink-0 flex-col">
         <SidebarSection
           icon={<Activity className="h-3 w-3" />}
           title="Replay"
@@ -388,6 +389,7 @@ export function UnifiedRightSidebar() {
           onToggle={() => setReplayOpen((o) => !o)}
           maxHeightClass={SECTION_MAX.replay}
           badge={stepLabel}
+          anchor="bottom"
         >
           <div className="px-[var(--hpad)]">
             <ReplayContent columns={2} />
@@ -401,6 +403,7 @@ export function UnifiedRightSidebar() {
           onToggle={() => setInspectorOpen((o) => !o)}
           maxHeightClass={SECTION_MAX.inspector}
           badge={selectedNode != null ? String(selectedNode) : undefined}
+          anchor="bottom"
         >
           <div className="px-[var(--hpad)]">
             <InspectorPaneContent />
@@ -414,6 +417,7 @@ export function UnifiedRightSidebar() {
           onToggle={() => setMetricsOpen((o) => !o)}
           maxHeightClass={SECTION_MAX.metrics}
           badge={String(frames.length)}
+          anchor="bottom"
         >
           <div className="px-[var(--hpad)]">
             <MetricsBody />
@@ -427,6 +431,7 @@ export function UnifiedRightSidebar() {
           onToggle={() => setSelectionOpen((o) => !o)}
           maxHeightClass={SECTION_MAX.selection}
           badge={selectionActive ? '1' : undefined}
+          anchor="bottom"
         >
           <NodePropertiesBody />
         </SidebarSection>
@@ -439,6 +444,7 @@ export function UnifiedRightSidebar() {
             open={!!pluginOpen[t.id]}
             onToggle={() => togglePluginTab(t.id)}
             maxHeightClass={SECTION_MAX.plugin}
+            anchor="bottom"
           >
             <PluginTabSectionBody tabId={t.id} />
           </SidebarSection>
@@ -450,6 +456,7 @@ export function UnifiedRightSidebar() {
           open={appearanceOpen}
           onToggle={() => setAppearanceOpen((o) => !o)}
           maxHeightClass={SECTION_MAX.appearance}
+          anchor="bottom"
         >
           <div className="flex flex-wrap gap-0.5 px-[var(--hpad)]">
             <HudBtn
@@ -484,9 +491,11 @@ export function UnifiedRightSidebar() {
           open={aboutOpen}
           onToggle={() => setAboutOpen((o) => !o)}
           maxHeightClass={SECTION_MAX.about}
+          anchor="bottom"
         >
           <AboutBody />
         </SidebarSection>
+        </div>
       </div>
     </div>
   );

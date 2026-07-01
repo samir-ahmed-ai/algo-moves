@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { CharCell, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, vizText, CharCell, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface StroboInput {
   n: number;
@@ -89,8 +89,18 @@ function record({ n }: StroboInput): Frame<StroboState>[] {
 
 function View({ frame }: PluginViewProps<StroboState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="low" v={s.low} />
+        <RailStat k="high" v={s.high} />
+      </RailGroup>
+      <RailStack label="found" items={s.results} highlightEnd="bottom" />
+      <RailResult label="count" value={s.results.length} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area board-area--text">
+    <VizStage rail={rail} railWidth={96}>
       <div className={cn(vizText.sm, 'text-ink3')}>length n = {s.n}</div>
       <div className="mt-2 flex gap-1">
         {s.path.map((c, i) => {
@@ -102,17 +112,7 @@ function View({ frame }: PluginViewProps<StroboState>) {
           );
         })}
       </div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        strobogrammatic numbers ({s.results.length})
-        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.base)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -132,7 +132,7 @@ function Inspector({ frame }: InspectorProps<StroboState>) {
 export const manifestId = 'imp-33-strobogrammatic-number-ii';
 export const title = 'Strobogrammatic Number II';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'n2', label: 'n = 2', value: { n: 2 } },
     { id: 'n3', label: 'n = 3', value: { n: 3 } },

@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, vizText, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface SparseInput {
   nums1: number[];
@@ -92,13 +92,20 @@ function record({ nums1, nums2 }: SparseInput): Frame<SparseState>[] {
 
 function View({ frame }: PluginViewProps<SparseState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i} />
+        <RailStat k="j" v={s.j} />
+        <RailStat k="op" v={s.op || '—'} />
+        <RailStat k="acc" v={s.acc} tone="accent" />
+      </RailGroup>
+      {s.result !== null && <RailResult label="dot" value={s.result} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result !== null && <span className="ml-2 font-mono text-good">dot = {s.result}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>vec1 pairs (i→v)</div>
+    <VizStage rail={rail}>
+      <div className={cn(vizText.sm, 'text-ink3')}>vec1 pairs (i→v)</div>
       <div className="mt-1 flex flex-wrap gap-1">
         {s.pairs1.map(([idx, v], k) => (
           <span
@@ -128,8 +135,7 @@ function View({ frame }: PluginViewProps<SparseState>) {
           </span>
         ))}
       </div>
-      <div className={cn('mt-2 font-mono', vizText.sm, 'text-ink')}>acc = {s.acc}</div>
-    </div>
+    </VizStage>
   );
 }
 

@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface IslandInput {
   grid: string[][]; // '1' land, '0' water
@@ -27,16 +27,20 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
   const m = grid.length;
   const n = grid[0].length;
   const seen = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
-  const frames: Frame<IslandState>[] = [];
   let count = 0;
 
-  const emit = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { grid, seen: seen.map((r) => r.slice()), cur, count, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<IslandState>(() => ({
+    grid,
+    seen: seen.map((r) => r.slice()),
+    cur: null,
+    count,
+    done: false,
+  }));
 
-  emit(
+  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
+    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+
+  snap(
     'INIT',
     `${m}×${n} grid`,
     `Count islands: maximal groups of 4-directionally connected '1' cells. Scan every cell; each time an unvisited '1' is found, that's a new island — flood-fill it to mark the whole island visited so it isn't counted again.`,
@@ -47,13 +51,13 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
     for (let c = 0; c < n; c++) {
       if (grid[r][c] === '1' && !seen[r][c]) {
         count++;
-        emit('ISLAND', `island #${count}`, `Cell (${r}, ${c}) is land and unvisited — start island #${count} and flood-fill from here.`, [r, c]);
+        snap('ISLAND', `island #${count}`, `Cell (${r}, ${c}) is land and unvisited — start island #${count} and flood-fill from here.`, [r, c]);
         // iterative DFS flood fill
         const stack: [number, number][] = [[r, c]];
         seen[r][c] = true;
         while (stack.length) {
           const [cr, cc] = stack.pop() as [number, number];
-          emit('FILL', `fill (${cr},${cc})`, `Mark (${cr}, ${cc}) as part of island #${count}; push its unvisited land neighbours.`, [cr, cc]);
+          snap('FILL', `fill (${cr},${cc})`, `Mark (${cr}, ${cc}) as part of island #${count}; push its unvisited land neighbours.`, [cr, cc]);
           for (const [dr, dc] of DIRS) {
             const nr = cr + dr;
             const nc = cc + dc;
@@ -64,12 +68,12 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
           }
         }
       } else if (grid[r][c] === '0') {
-        emit('WATER', `(${r},${c}) water`, `Cell (${r}, ${c}) is water — skip.`, [r, c]);
+        snap('WATER', `(${r},${c}) water`, `Cell (${r}, ${c}) is water — skip.`, [r, c]);
       }
     }
   }
 
-  emit('DONE', `${count} islands`, `Whole grid scanned. Total islands = ${count}.`, null, 'good');
+  snap('DONE', `${count} islands`, `Whole grid scanned. Total islands = ${count}.`, null, 'good');
   return frames;
 }
 
@@ -82,12 +86,16 @@ function View({ frame }: PluginViewProps<IslandState>) {
     return s.grid[r][c] === '1' ? 'land' : 'water';
   };
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        islands found = <span className="font-mono text-ink">{s.count}</span>
-      </div>
+    <VizStage
+      rail={
+        <RailGroup label="progress">
+          <RailStat k="islands" v={s.count} tone={s.count > 0 ? 'good' : undefined} />
+          <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+        </RailGroup>
+      }
+    >
       <GridBoard grid={display} cellTone={cellTone} active={s.cur} cellSize={40} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -121,7 +129,7 @@ const G2: IslandInput = {
 export const manifestId = 'imp-24-number-of-islands';
 export const title = 'Number of Islands';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g1', label: '4×4 · 2 islands', value: G1 },
     { id: 'g2', label: '3×3 · 3 islands', value: G2 },

@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, PathDisplay, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, PathDisplay } from '../../../_shared/vizKit';
 
 interface LettersInput {
   digits: string;
@@ -88,31 +87,22 @@ function record({ digits }: LettersInput): Frame<LettersState>[] {
 
 function View({ frame }: PluginViewProps<LettersState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="idx" v={s.done ? '—' : s.idx} />
+        <RailStat k="path" v={s.path ? `"${s.path}"` : '""'} tone="accent" />
+      </RailGroup>
+      <RailStack label="combinations" items={s.results} />
+      {s.done && (
+        <RailResult label="count" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area board-area--text">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        keypad ·{' '}
-        {s.digits.split('').map((d, i) => (
-          <span key={i} className="mr-2 font-mono text-ink2">
-            {d}→{PHONE_PAD[Number(d)]}
-          </span>
-        ))}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <PathDisplay value={s.path || '·'} />
-      <div className={cn(vizText.sm, 'text-ink2')}>
-        {s.done ? `digits "${s.digits}" complete` : `expanding digit index ${s.idx} of ${s.digits.length}`}
-      </div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        combinations found ({s.results.length})
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('chip font-mono text-ink', vizText.sm)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -134,7 +124,7 @@ function Inspector({ frame }: InspectorProps<LettersState>) {
 export const manifestId = 'imp-36-letter-combinations-of-a-phone-number';
 export const title = 'Letter Combinations of a Phone Number';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'd23', label: 'digits = "23"', value: { digits: '23' } },
     { id: 'd2', label: 'digits = "2"', value: { digits: '2' } },

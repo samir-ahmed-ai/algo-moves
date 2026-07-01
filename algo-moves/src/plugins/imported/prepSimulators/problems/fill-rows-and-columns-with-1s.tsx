@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface FillInput {
   mat: number[][];
@@ -213,18 +212,24 @@ function View({ frame }: PluginViewProps<FillState>) {
     if (isMarker(r, c)) return 'water';
     return '';
   };
+  const ones = s.done
+    ? s.mat.reduce((acc, row) => acc + row.reduce((a, v) => a + v, 0), 0)
+    : null;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        phase = <span className="font-mono text-ink">{s.phase}</span>
-        {' · '}row0 = <span className="font-mono text-ink">{String(s.row0)}</span>
-        {' · '}col0 = <span className="font-mono text-ink">{String(s.col0)}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="flags">
+        <RailStat k="phase" v={s.phase} tone="accent" />
+        <RailStat k="row0" v={String(s.row0)} tone={s.row0 ? 'good' : undefined} />
+        <RailStat k="col0" v={String(s.col0)} tone={s.col0 ? 'good' : undefined} />
+      </RailGroup>
+      <RailGroup label="progress">
+        <RailStat k="marked" v={s.marked.length} />
+        <RailStat k="filled" v={s.filled.length} />
+      </RailGroup>
+      {ones !== null && <RailResult label="ones" value={ones} tone="good" />}
+    </>}>
       <GridBoard grid={s.mat} cellTone={cellTone} active={s.active} />
-      <div className={cn('mt-1', vizText.xs, 'text-ink3')}>
-        row 0 &amp; col 0 are the marker lanes; land = 1, water = 0
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

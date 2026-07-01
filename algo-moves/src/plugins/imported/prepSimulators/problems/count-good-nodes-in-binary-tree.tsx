@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface GoodNodesInput {
   // Level-order binary tree; null marks an absent slot. Children of i are 2i+1, 2i+2.
@@ -20,31 +20,19 @@ interface GoodNodesState {
 }
 
 function record({ tree }: GoodNodesInput): Frame<GoodNodesState>[] {
-  const frames: Frame<GoodNodesState>[] = [];
   const good: number[] = [];
   const visited: number[] = [];
   let count = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<GoodNodesState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        current: null,
-        maxVal: null,
-        good: good.slice(),
-        visited: visited.slice(),
-        count,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<GoodNodesState>(() => ({
+    tree,
+    current: null,
+    maxVal: null,
+    good: good.slice(),
+    visited: visited.slice(),
+    count,
+    done: false,
+  }));
 
   const rootVal = tree[0];
 
@@ -118,19 +106,19 @@ function View({ frame }: PluginViewProps<GoodNodesState>) {
     if (s.good.includes(i) || s.visited.includes(i)) return 'team-2';
     return 'team-0';
   };
+  const rail = (
+    <>
+      <RailGroup label="path">
+        <RailStat k="maxVal" v={s.maxVal ?? '—'} tone="accent" />
+        <RailStat k="good" v={s.count} tone={s.count > 0 ? 'good' : undefined} />
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.count} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        maxVal on path ={' '}
-        <span className="font-mono text-ink">{s.maxVal ?? '—'}</span>
-        {' · '}good so far ={' '}
-        <span className="font-mono text-good">{s.count}</span>
-      </div>
+    <VizStage rail={rail}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        green ring = current · filled = good/visited · a node is good when node.val {'>='} maxVal on its path
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

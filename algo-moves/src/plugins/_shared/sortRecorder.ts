@@ -58,12 +58,6 @@ export function createSortRecorder(initial: number[]) {
   };
 }
 
-export function sortVerdict(frames: Frame<SortState>[]) {
-  const out = frames[frames.length - 1]?.state.values ?? [];
-  const ok = out.length <= 1 || out.every((v, i) => i === 0 || out[i - 1] <= v);
-  return { ok, label: ok ? 'sorted ✓' : 'not sorted' };
-}
-
 /** Selection sort: scan suffix for minimum, swap to front. */
 export interface SelectionSortState {
   values: number[];

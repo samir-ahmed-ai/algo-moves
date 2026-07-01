@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LcaInput {
   // Level-order binary tree; null marks an absent slot. Children of i are 2i+1, 2i+2.
@@ -26,35 +26,23 @@ interface LcaState {
 const NIL = -1;
 
 function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
-  const frames: Frame<LcaState>[] = [];
   const visited: number[] = [];
   const path: number[] = [];
   let lca: number | null = null;
 
-  const valOf = (i: number) => (i >= 0 && i < tree.length ? tree[i] : null);
+  const { emit, frames } = createRecorder<LcaState>(() => ({
+    tree,
+    p,
+    q,
+    current: null,
+    returned: null,
+    visited: visited.slice(),
+    path: path.slice(),
+    lca,
+    done: false,
+  }));
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LcaState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        p,
-        q,
-        current: null,
-        returned: null,
-        visited: visited.slice(),
-        path: path.slice(),
-        lca,
-        done: false,
-        ...s,
-      },
-    });
+  const valOf = (i: number) => (i >= 0 && i < tree.length ? tree[i] : null);
 
   const pVal = valOf(p);
   const qVal = valOf(q);
@@ -171,18 +159,23 @@ function View({ frame }: PluginViewProps<LcaState>) {
   const pVal = s.p >= 0 && s.p < s.tree.length ? s.tree[s.p] : null;
   const qVal = s.q >= 0 && s.q < s.tree.length ? s.tree[s.q] : null;
   const lcaVal = s.lca !== null ? s.tree[s.lca] : null;
+  const retVal = s.returned == null ? null : s.returned === NIL ? 'nil' : s.tree[s.returned];
+  const pathLabels = s.path.map((i) => String(s.tree[i] ?? i));
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        p = <span className="font-mono text-ink">{pVal ?? '—'}</span>
-        {' · '}q = <span className="font-mono text-ink">{qVal ?? '—'}</span>
-        {' · '}LCA = <span className="font-mono text-good">{lcaVal ?? '…'}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="targets">
+        <RailStat k="p" v={pVal ?? '—'} />
+        <RailStat k="q" v={qVal ?? '—'} />
+      </RailGroup>
+      <RailStack label="call stack" items={pathLabels} />
+      <RailGroup label="frame">
+        <RailStat k="cur" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} tone="accent" />
+        <RailStat k="ret" v={retVal ?? '—'} />
+      </RailGroup>
+      <RailResult label="LCA" value={lcaVal ?? '…'} tone={s.done ? (lcaVal !== null ? 'good' : 'bad') : 'accent'} />
+    </>}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        green ring = current call · filled = returned/done · LCA catches a target from both sides
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

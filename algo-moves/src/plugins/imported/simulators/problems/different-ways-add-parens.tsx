@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { ExprToken, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText, ExprToken } from '../../../_shared/vizKit';
 
 interface ParensInput {
   expr: string;
@@ -133,40 +132,47 @@ function record({ expr }: ParensInput): Frame<ParensState>[] {
 function View({ frame }: PluginViewProps<ParensState>) {
   const s = frame.state;
   const sorted = s.results.slice().sort((a, b) => a - b);
+  const rail = (
+    <>
+      <RailGroup label="split">
+        <RailStat k="span" v={s.span || '—'} />
+        <RailStat k="op" v={s.op || '—'} tone={s.op ? 'accent' : undefined} />
+      </RailGroup>
+      <RailStack
+        label="results"
+        items={sorted.map(String)}
+        highlightEnd="bottom"
+        topLabel="latest"
+      />
+      {s.done && (
+        <RailResult label="total" value={s.results.length} tone="good" />
+      )}
+    </>
+  );
   return (
-    <div className="board-area board-area--text">
-      <div className={cn(vizText.sm, 'text-ink3')}>
+    <VizStage rail={rail} railWidth={150}>
+      <div className={`${vizText.sm} text-ink3`}>
         parenthesizing <span className="font-mono text-ink">{s.expr}</span>
       </div>
       <ExprToken>
         {s.op ? (
           <>
-            <span className={cn('chip', vizText.expr)}>{s.left || '·'}</span>
+            <span className={`chip ${vizText.expr}`}>{s.left || '·'}</span>
             <span className="text-accent">{s.op}</span>
-            <span className={cn('chip', vizText.expr)}>{s.right || '·'}</span>
+            <span className={`chip ${vizText.expr}`}>{s.right || '·'}</span>
           </>
         ) : (
           <span>{s.span || '·'}</span>
         )}
       </ExprToken>
-      <div className={cn(vizText.sm, 'text-ink2')}>
+      <div className={`${vizText.sm} text-ink2`}>
         {s.op
           ? `splitting "${s.span}" at '${s.op}'`
           : s.done
             ? 'all splits explored'
             : `evaluating "${s.span}"`}
       </div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        results found ({s.results.length})
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {sorted.map((r, i) => (
-            <span key={i} className={cn('chip font-mono text-ink', vizText.sm)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -187,7 +193,7 @@ function Inspector({ frame }: InspectorProps<ParensState>) {
 export const manifestId = 'imp-39-different-ways-to-add-parentheses';
 export const title = 'Different Ways to Add Parentheses';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: '2-1-1', label: '"2-1-1"', value: { expr: '2-1-1' } },
     { id: '2*3-4*5', label: '"2*3-4*5"', value: { expr: '2*3-4*5' } },

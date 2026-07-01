@@ -64,6 +64,12 @@ The **Practice tab quiz** and **Code Studio quiz phase** share one data source (
 | `_shared/inspector.tsx` | Re-exports `InspectorRow` / `VarGrid` from vizKit |
 | `_shared/graphLayout.ts` | `circleLayout`, `gridLayout`, `layeredLayout` |
 | `_shared/sortRecorder.ts` | `createSortRecorder`, selection/insertion helpers, `sortVerdict` |
+| `_shared/createRecorder.ts` | `createRecorder` — standard `emit` / `frames` factory for simulators |
+| `_shared/arrayPatterns/` | `ArrayPatternView`, `ArrayPatternInspector`, `createArrayRecorder` |
+| `_shared/treeRecord.ts` | Level-order tree helpers + `createTreeRecorder` |
+| `_shared/graphRecord.ts` | `createGraphRecorder`, `recordGraphBfs` |
+| `_shared/gridRecord.ts` | `createGridRecorder`, `recordGridBfs`, `recordDpFill` |
+| `_shared/dualHeapMedianRecord.ts` | Shared dual-heap median stream recorder |
 
 **Imported library** problems use `makeImportedPlugin()` in `imported/factory.tsx`, which auto-attaches
 the learn stack when a simulator + practice bundle exist. Curated duplicates (e.g. climbing-stairs) point

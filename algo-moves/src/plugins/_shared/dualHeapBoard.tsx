@@ -80,22 +80,21 @@ export function maxHeapPop(heap: number[]): [number[], number] {
   return [h, top];
 }
 
-/** Min-heap push. */
-export function minHeapPush(heap: number[], v: number): number[] {
-  const h = [...heap, v];
+/** Min-heap push for comparable items (`compare(a,b) < 0` when a is smaller). */
+export function minHeapPushGeneric<T>(heap: T[], item: T, compare: (a: T, b: T) => number): T[] {
+  const h = [...heap, item];
   let i = h.length - 1;
   while (i > 0) {
     const p = Math.floor((i - 1) / 2);
-    if (h[p] <= h[i]) break;
+    if (compare(h[p], h[i]) <= 0) break;
     [h[p], h[i]] = [h[i], h[p]];
     i = p;
   }
   return h;
 }
 
-/** Min-heap pop root. */
-export function minHeapPop(heap: number[]): [number[], number] {
-  if (heap.length === 0) return [[], 0];
+/** Min-heap pop root for comparable items. Caller must ensure heap is non-empty. */
+export function minHeapPopGeneric<T>(heap: T[], compare: (a: T, b: T) => number): [T[], T] {
   const top = heap[0];
   if (heap.length === 1) return [[], top];
   const h = [...heap];
@@ -106,13 +105,26 @@ export function minHeapPop(heap: number[]): [number[], number] {
     const l = 2 * i + 1;
     const r = 2 * i + 2;
     let smallest = i;
-    if (l < h.length && h[l] < h[smallest]) smallest = l;
-    if (r < h.length && h[r] < h[smallest]) smallest = r;
+    if (l < h.length && compare(h[l], h[smallest]) < 0) smallest = l;
+    if (r < h.length && compare(h[r], h[smallest]) < 0) smallest = r;
     if (smallest === i) break;
     [h[i], h[smallest]] = [h[smallest], h[i]];
     i = smallest;
   }
   return [h, top];
+}
+
+const cmpNum = (a: number, b: number) => a - b;
+
+/** Min-heap push. */
+export function minHeapPush(heap: number[], v: number): number[] {
+  return minHeapPushGeneric(heap, v, cmpNum);
+}
+
+/** Min-heap pop root. */
+export function minHeapPop(heap: number[]): [number[], number] {
+  if (heap.length === 0) return [[], 0];
+  return minHeapPopGeneric(heap, cmpNum);
 }
 
 export function medianFromHeaps(low: number[], high: number[]): number {

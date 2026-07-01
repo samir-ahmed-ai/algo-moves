@@ -1,7 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { minHeapPopGeneric, minHeapPushGeneric } from '../../../_shared/dualHeapBoard';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface StreamItem {
   val: number;
@@ -23,70 +25,21 @@ interface MergeStreamsState {
   done: boolean;
 }
 
-function heapPush(items: StreamItem[], it: StreamItem): StreamItem[] {
-  const h = [...items, it];
-  let i = h.length - 1;
-  while (i > 0) {
-    const p = Math.floor((i - 1) / 2);
-    if (h[p].val <= h[i].val) break;
-    [h[p], h[i]] = [h[i], h[p]];
-    i = p;
-  }
-  return h;
-}
-
-function heapPopMin(items: StreamItem[]): [StreamItem[], StreamItem] {
-  if (items.length === 0) return [[], { val: 0, stream: 0, idx: 0 }];
-  const top = items[0];
-  if (items.length === 1) return [[], top];
-  const h = [...items];
-  const last = h.pop()!;
-  h[0] = last;
-  let i = 0;
-  for (;;) {
-    const l = 2 * i + 1;
-    const r = 2 * i + 2;
-    let smallest = i;
-    if (l < h.length && h[l].val < h[smallest].val) smallest = l;
-    if (r < h.length && h[r].val < h[smallest].val) smallest = r;
-    if (smallest === i) break;
-    [h[i], h[smallest]] = [h[smallest], h[i]];
-    i = smallest;
-  }
-  return [h, top];
-}
-
-function heapDisplay(heap: StreamItem[]): string[] {
-  return heap.length
-    ? [...heap].sort((a, b) => a.val - b.val).map((it) => `s${it.stream}:${it.val}`)
-    : ['—'];
-}
+const cmpStreamItem = (a: StreamItem, b: StreamItem) => a.val - b.val;
 
 function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
-  const frames: Frame<MergeStreamsState>[] = [];
   const cursors = streams.map(() => 0);
   let heap: StreamItem[] = [];
   const out: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MergeStreamsState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        streams,
-        cursors: cursors.slice(),
-        heap: heap.slice(),
-        out: out.slice(),
-        popped: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<MergeStreamsState>(() => ({
+    streams,
+    cursors: cursors.slice(),
+    heap: heap.slice(),
+    out: out.slice(),
+    popped: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -98,7 +51,7 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
   for (let si = 0; si < streams.length; si++) {
     if (streams[si].length > 0) {
       const it: StreamItem = { val: streams[si][0], stream: si, idx: 0 };
-      heap = heapPush(heap, it);
+      heap = minHeapPushGeneric(heap, it, cmpStreamItem);
       emit(
         'SEED',
         `s${si}→${it.val}`,
@@ -110,7 +63,7 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
 
   while (heap.length > 0) {
     let popped: StreamItem;
-    [heap, popped] = heapPopMin(heap);
+    [heap, popped] = minHeapPopGeneric(heap, cmpStreamItem);
     out.push(popped.val);
     emit(
       'POP',
@@ -123,7 +76,7 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
     const next = popped.idx + 1;
     if (next < streams[popped.stream].length) {
       const nxt: StreamItem = { val: streams[popped.stream][next], stream: popped.stream, idx: next };
-      heap = heapPush(heap, nxt);
+      heap = minHeapPushGeneric(heap, nxt, cmpStreamItem);
       emit(
         'PUSH',
         `s${nxt.stream}→${nxt.val}`,
@@ -145,8 +98,22 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
 
 function View({ frame }: PluginViewProps<MergeStreamsState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailStack
+        label="min-heap"
+        items={s.heap.length ? [...s.heap].sort((a, b) => a.val - b.val).map((it) => `s${it.stream}:${it.val}`) : []}
+        topLabel="min"
+      />
+      <RailGroup label="last pop">
+        <RailStat k="stream" v={s.popped ? `s${s.popped.stream}` : '—'} />
+        <RailStat k="val" v={s.popped ? s.popped.val : '—'} tone="accent" />
+      </RailGroup>
+      <RailResult label="merged" value={s.out.length ? `[${s.out.join(', ')}]` : '—'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
+    <VizStage rail={rail} railWidth={150}>
       <div className={cn(vizText.sm, 'text-ink3')}>streams (cursors mark next unread)</div>
       {s.streams.map((st, si) => (
         <div key={si} className={cn('font-mono', vizText.sm)}>
@@ -164,18 +131,7 @@ function View({ frame }: PluginViewProps<MergeStreamsState>) {
           ))}
         </div>
       ))}
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
-        min-heap heads [{heapDisplay(s.heap).join(', ')}]
-      </div>
-      {s.popped && (
-        <div className={cn('font-mono', vizText.sm, 'text-accent')}>
-          popped s{s.popped.stream}:{s.popped.val}
-        </div>
-      )}
-      <div className={cn('mt-1 font-mono', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
-        merged [{s.out.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

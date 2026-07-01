@@ -5,7 +5,7 @@ import { COMPLEXITY_POOL, formatComplexityChoice } from '../../../../lib/complex
 import { patternsForTags } from '../../../../content';
 import { useCanvasStatic } from '../../CanvasContext';
 import { Btn, EmptyState, Hint, Option, Section } from '../../nodeui';
-import { shuffleSeeded } from '../shared/shuffleSeeded';
+import { shuffleSeeded } from '../../../../lib/shuffleSeeded';
 
 /** #57 Complexity quiz: pick the right Big-O (answer derived from the pattern card). */
 export function ComplexityPanelBody() {

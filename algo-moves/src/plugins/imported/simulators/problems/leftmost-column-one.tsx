@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LcoInput {
   grid: number[][]; // each row sorted: 0s then 1s
@@ -88,13 +87,19 @@ function View({ frame }: PluginViewProps<LcoState>) {
     if (s.path[r][c]) return 'visited';
     return s.grid[r][c] === 1 ? 'land' : 'water';
   };
+  const rail = (
+    <>
+      <RailGroup label="pointer">
+        <RailStat k="r" v={s.inBounds && !s.done ? s.r : '—'} tone="accent" />
+        <RailStat k="c" v={s.inBounds && !s.done ? s.c : '—'} tone="accent" />
+      </RailGroup>
+      <RailResult label="leftmost col" value={s.res === -1 ? '—' : s.res} tone={s.done ? (s.res === -1 ? 'bad' : 'good') : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        leftmost column with a one = <span className="font-mono text-ink">{s.res === -1 ? '—' : s.res}</span>
-      </div>
+    <VizStage rail={rail}>
       <GridBoard grid={s.grid} cellTone={cellTone} active={cur} cellSize={40} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -128,7 +133,7 @@ const M2: LcoInput = {
 export const manifestId = 'imp-55-leftmost-column-with-at-least-a-one';
 export const title = 'Leftmost Column with at Least a One';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'lco1', label: '3×4 · leftmost = 1', value: M1 },
     { id: 'lco2', label: '3×3 all zero · -1', value: M2 },

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 const MOD = 1_000_000_007;
 
@@ -123,28 +122,32 @@ function record({ n }: AttInput): Frame<AttState>[] {
 
 function View({ frame }: PluginViewProps<AttState>) {
   const s = frame.state;
-  // Header row of state labels + one row per revealed day.
   const grid: (number | string)[][] = [['day', ...STATE_LABELS]];
   s.table.forEach((row, d) => {
     grid.push([d, ...row]);
   });
 
   const cellTone = (r: number, c: number) => {
-    if (r === 0 || c === 0) return ''; // header band
+    if (r === 0 || c === 0) return '';
     const day = r - 1;
     if (s.day !== null && day === s.day) return s.done ? 'path' : 'active';
     return 'visited';
   };
 
-  const answer = s.answer !== null ? s.answer : '…filling';
+  const row = s.day !== null ? s.table[s.day] : null;
+  const rowSum = row ? sumRow(row) : null;
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        n = {s.n}, valid records = <span className="font-mono text-ink">{answer}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="n" v={s.n} />
+        <RailStat k="day" v={s.day ?? '—'} tone="accent" />
+        <RailStat k="row sum" v={rowSum ?? '—'} />
+      </RailGroup>
+      <RailResult label="answer" value={s.answer !== null ? `${s.answer}` : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>}>
       <GridBoard grid={grid} cellTone={cellTone} active={null} cellSize={52} />
-      <div className={cn(vizText.sm, 'text-ink3')}>row = day, column = state (absences × trailing L's), value = record count</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -165,7 +168,7 @@ function Inspector({ frame }: InspectorProps<AttState>) {
 export const manifestId = 'imp-84-student-attendance-record-ii';
 export const title = 'Student Attendance Record II';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'n2', label: 'n = 2 (answer 8)', value: { n: 2 } },
     { id: 'n3', label: 'n = 3 (answer 19)', value: { n: 3 } },

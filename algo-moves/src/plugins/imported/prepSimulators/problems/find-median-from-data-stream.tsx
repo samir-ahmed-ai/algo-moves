@@ -1,120 +1,48 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import {
-  DualHeapBoard,
-  maxHeapPop,
-  maxHeapPush,
-  medianFromHeaps,
-  minHeapPop,
-  minHeapPush,
-} from '../../../_shared/dualHeapBoard';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import type { DualHeapMedianState } from '../../../_shared/dualHeapMedianRecord';
+import { recordDualHeapMedian } from '../../../_shared/dualHeapMedianRecord';
+import { DualHeapBoard } from '../../../_shared/dualHeapBoard';
 
 interface MedianInput {
   nums: number[];
 }
 
-interface MedianState {
-  low: number[];
-  high: number[];
-  op: string;
-  added: number | null;
-  median: number | null;
-  highlightLow: boolean;
-  highlightHigh: boolean;
-  done: boolean;
-}
+type MedianState = DualHeapMedianState;
 
 function record({ nums }: MedianInput): Frame<MedianState>[] {
-  const frames: Frame<MedianState>[] = [];
-  let low: number[] = [];
-  let high: number[] = [];
-
-  const emit = (type: string, note: string, caption: string, s: Partial<MedianState>, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        low: [...low],
-        high: [...high],
-        op: '',
-        added: null,
-        median: null,
-        highlightLow: false,
-        highlightHigh: false,
-        done: false,
-        ...s,
-      },
-    });
-
-  emit(
-    'INIT',
-    'dual heaps',
-    `Find Median from Data Stream: max-heap \`low\` holds the smaller half, min-heap \`high\` the larger. After each AddNum, rebalance so sizes differ by at most 1.`,
-    {},
-  );
-
-  for (const num of nums) {
-    emit(
-      'ADD',
-      `push ${num} to low`,
-      `AddNum(${num}): push into max-heap low first.`,
-      { op: `add ${num}`, added: num, highlightLow: true },
-    );
-    low = maxHeapPush(low, num);
-    let moved: number;
-    [low, moved] = maxHeapPop(low);
-    high = minHeapPush(high, moved);
-    emit(
-      'BALANCE',
-      `move ${moved} to high`,
-      `Pop max from low (${moved}) and push into min-heap high so every low value ≤ every high value.`,
-      { op: `add ${num}`, added: num, highlightHigh: true },
-    );
-    if (high.length > low.length) {
-      let back: number;
-      [high, back] = minHeapPop(high);
-      low = maxHeapPush(low, back);
-      emit(
-        'REBALANCE',
-        `move ${back} to low`,
-        `high has more elements — move smallest of high (${back}) back to low to restore |low| ≥ |high|.`,
-        { op: `add ${num}`, added: num, highlightLow: true },
-      );
-    }
-    const med = medianFromHeaps(low, high);
-    emit(
-      'MEDIAN',
-      `median ${med}`,
-      `After adding ${num}: low size=${low.length}, high size=${high.length}. Median = ${med}.`,
-      { op: `add ${num}`, added: num, median: med },
-      'good',
-    );
-  }
-
-  const finalMed = medianFromHeaps(low, high);
-  emit(
-    'DONE',
-    `median ${finalMed}`,
-    `Stream complete. Final median = ${finalMed}.`,
-    { op: 'done', median: finalMed, done: true },
-    'good',
-  );
-  return frames;
+  return recordDualHeapMedian(nums, {
+    initCaption:
+      'Find Median from Data Stream: max-heap `low` holds the smaller half, min-heap `high` the larger. After each AddNum, rebalance so sizes differ by at most 1.',
+    doneCaption: (finalMed) => `Stream complete. Final median = ${finalMed}.`,
+  });
 }
 
 function View({ frame }: PluginViewProps<MedianState>) {
   const s = frame.state;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.added !== null && (
-          <>
-            {' · '}added <span className="font-mono text-ink">{s.added}</span>
-          </>
-        )}
-      </div>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="heaps">
+            <RailStat k="low sz" v={s.low.length} />
+            <RailStat k="high sz" v={s.high.length} />
+            <RailStat k="low top" v={s.low[0] ?? '—'} tone={s.highlightLow ? 'accent' : undefined} />
+            <RailStat k="high top" v={s.high[0] ?? '—'} tone={s.highlightHigh ? 'accent' : undefined} />
+          </RailGroup>
+          {s.added !== null && (
+            <RailGroup label="step">
+              <RailStat k="op" v={s.op || '—'} />
+              <RailStat k="added" v={s.added} tone="accent" />
+            </RailGroup>
+          )}
+          {s.median !== null && (
+            <RailResult label="median" value={s.median} tone={s.done ? 'good' : 'accent'} />
+          )}
+        </>
+      }
+    >
       <DualHeapBoard
         low={s.low}
         high={s.high}
@@ -122,7 +50,7 @@ function View({ frame }: PluginViewProps<MedianState>) {
         highlightHigh={s.highlightHigh}
         median={s.median}
       />
-    </div>
+    </VizStage>
   );
 }
 

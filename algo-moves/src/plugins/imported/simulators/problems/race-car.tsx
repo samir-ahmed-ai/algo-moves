@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface RaceInput {
   target: number;
@@ -111,15 +110,25 @@ function View({ frame }: PluginViewProps<RaceState>) {
   if (s.t !== null) pointers.push({ i: s.t, label: 't', tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: 'reuses', tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.t === i ? 'found' : s.dp[i] < INF ? 'match' : '');
-  const ans = s.dp[s.target] >= INF ? '…filling' : s.dp[s.target];
+  const cell = (idx: number | null) =>
+    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
+  const done = s.dp[s.target] < INF;
+  const ans = done ? s.dp[s.target] : '…';
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="t" v={s.t ?? '—'} tone="accent" />
+        <RailStat k="dp[t]" v={cell(s.t)} />
+        <RailStat k="reuses" v={s.from ?? '—'} tone="warn" />
+        <RailStat k="dp[reuse]" v={cell(s.from)} />
+      </RailGroup>
+      <RailResult label="answer" value={ans} tone={done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target {s.target}, fewest instructions = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index = position, value = fewest A/R instructions</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -143,7 +152,7 @@ function Inspector({ frame }: InspectorProps<RaceState>) {
 export const manifestId = 'imp-80-race-car';
 export const title = 'Race Car';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 't6', label: 'target 6', value: { target: 6 } },
     { id: 't3', label: 'target 3', value: { target: 3 } },

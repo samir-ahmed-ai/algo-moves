@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface OSEInput {
   s1: string;
@@ -174,16 +173,19 @@ function View({ frame }: PluginViewProps<OSEState>) {
     if (v === 0) return 'visited';
     return '';
   };
-  const ans = s.answer === null ? '…searching' : s.answer ? 'true' : 'false';
+  const ansDone = s.answer !== null;
+  const ans = ansDone ? (s.answer ? 'true' : 'false') : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        <span className="font-mono text-ink">"{s.s1}"</span> ?= <span className="font-mono text-ink">"{s.s2}"</span>, possible ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="state">
+        <RailStat k="i" v={s.cur ? s.cur[0] : '—'} />
+        <RailStat k="j" v={s.cur ? s.cur[1] : '—'} />
+        <RailStat k="diff" v={s.diff ?? '—'} tone="accent" />
+      </RailGroup>
+      {ansDone && <RailResult label="answer" value={ans} tone={s.answer ? 'good' : 'bad'} />}
+    </>}>
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={34} />
-      <div className={cn(vizText.sm, 'text-ink3')}>cell (i, j): ✓ a state here reaches a solution, ✗ none does</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -205,7 +207,7 @@ function Inspector({ frame }: InspectorProps<OSEState>) {
 export const manifestId = 'imp-57-check-if-an-original-string-exists-given-two-enc';
 export const title = 'Check if An Original String Exists Given Two Encoded Strings';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'l2t-leet', label: '"l2t" ?= "leet" (true)', value: { s1: 'l2t', s2: 'leet' } },
     { id: 'ab-a2', label: '"ab" ?= "a2" (false)', value: { s1: 'ab', s2: 'a2' } },

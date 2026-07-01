@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface IntersectInput {
   a: number[];
@@ -143,19 +142,31 @@ function View({ frame }: PluginViewProps<IntersectState>) {
     return '';
   };
 
+  const av = s.i !== null && s.i < s.a.length ? s.a[s.i] : '—';
+  const bv = s.j !== null && s.j < s.b.length ? s.b[s.j] : '—';
+
+  const rail = (
+    <>
+      <RailStack label="∩ collected" items={s.out.map(String)} />
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+        <RailStat k="j" v={s.j ?? '—'} tone="warn" />
+        <RailStat k="a[i]" v={av} />
+        <RailStat k="b[j]" v={bv} />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="answer" value={`[${s.out.join(', ')}]`} tone={s.out.length > 0 ? 'good' : 'bad'} />
+      )}
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        Two pointers: advance the smaller side, take on a tie.
-      </div>
-      <div className={cn(vizText.xs, 'mt-1 font-mono text-ink3')}>a</div>
+    <VizStage rail={rail}>
+      <div className="font-mono text-xs text-ink3">a</div>
       <ArrayRow values={s.a} cellTone={toneA} pointers={ptrsA} windowRange={null} />
-      <div className={cn(vizText.xs, 'mt-2 font-mono text-ink3')}>b</div>
+      <div className="font-mono text-xs text-ink3 mt-2">b</div>
       <ArrayRow values={s.b} cellTone={toneB} pointers={ptrsB} windowRange={null} />
-      <div className={cn('mt-2 font-mono', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
-        {s.done ? '→ ' : '∩ = '}[{s.out.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

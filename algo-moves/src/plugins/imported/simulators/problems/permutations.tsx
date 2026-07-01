@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface PermInput {
   nums: number[];
@@ -73,22 +72,18 @@ function View({ frame }: PluginViewProps<PermState>) {
     return '';
   };
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        permutation so far = <span className="font-mono text-ink">[{s.cur.join(', ')}]</span>
-      </div>
+    <VizStage
+      rail={<>
+        <RailGroup label="current">
+          <RailStat k="cur" v={`[${s.cur.join(', ')}]`} tone="accent" />
+          <RailStat k="pick" v={s.pick !== null ? s.nums[s.pick] : '—'} />
+        </RailGroup>
+        <RailStack label="results" items={s.results.map((r) => `[${r.join(', ')}]`)} />
+        {s.done && <RailResult label="found" value={s.results.length} tone="good" />}
+      </>}
+    >
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        permutations found ({s.results.length})
-        <div className="mt-1 flex flex-col gap-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.sm)}>
-              [{r.join(', ')}]
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -109,7 +104,7 @@ function Inspector({ frame }: InspectorProps<PermState>) {
 export const manifestId = 'imp-41-permutations';
 export const title = 'Permutations';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: '123', label: 'nums=[1,2,3]', value: { nums: [1, 2, 3] } },
     { id: '12', label: 'nums=[1,2]', value: { nums: [1, 2] } },

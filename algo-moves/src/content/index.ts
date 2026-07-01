@@ -14,3 +14,8 @@ export * from './types';
 export * from './tags';
 export * from './patterns';
 export * from './glossary';
+export * from './taxonomy';
+export * from './browse';
+export { PROBLEM_GLYPHS } from './glyphs';
+export { SHAPE_GLYPHS, glyphFor, shapeFor, type ShapeKey } from './problemShape';
+export { PROBLEM_GISTS, gistFor } from './gists';

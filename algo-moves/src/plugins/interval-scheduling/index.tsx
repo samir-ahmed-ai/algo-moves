@@ -5,7 +5,7 @@ import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { cn } from '../../lib/cn';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
-import { vizText } from '../_shared/vizKit';
+import { vizText, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface SchedInput {
   intervals: [number, number][];
@@ -105,8 +105,25 @@ function View({ frame }: PluginViewProps<SchedState>) {
     pending: { bg: 'var(--surface-2)', fg: 'var(--text-3)' },
   };
 
+  const curIv = s.cur !== null ? `[${s.sorted[s.cur][0]},${s.sorted[s.cur][1]}]` : '—';
+  const done = frame.move.type === 'DONE';
+
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="lastEnd" v={s.lastEnd} tone="accent" />
+        <RailStat k="current" v={curIv} />
+      </RailGroup>
+      <RailResult
+        label="accepted"
+        value={s.acceptedCount}
+        tone={done ? 'good' : 'accent'}
+      />
+    </>
+  );
+
   return (
-    <div className="board-area">
+    <VizStage rail={rail}>
       <div className={cn(vizText.sm, 'text-ink3')}>
         timeline · <span className="font-mono text-ink">{s.tMin}</span> →{' '}
         <span className="font-mono text-ink">{s.tMax}</span> · sorted by end time
@@ -168,10 +185,7 @@ function View({ frame }: PluginViewProps<SchedState>) {
           );
         })}
       </div>
-      <div className={cn(vizText.xs, 'text-ink3')} style={{ marginTop: '2px' }}>
-        vertical line = lastEnd ({s.lastEnd})
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

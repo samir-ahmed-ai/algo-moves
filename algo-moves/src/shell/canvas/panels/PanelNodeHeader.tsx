@@ -16,6 +16,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
+import { cn } from '../../../lib/cn';
 import { useWorkspace } from '../../../lib/workspace';
 import { traceOutputForPanel } from '../../../lib/trace';
 import { resolveCodePieces } from '../../../lib/codePieces';
@@ -30,6 +31,7 @@ import {
   PanelHeaderIcon,
   PanelHeaderMenu,
   PanelHeaderTitle,
+  nodeIconGlyph,
   type HeaderDensity,
   type PanelHeaderMenuItem,
 } from '../nodeui';
@@ -150,38 +152,38 @@ export function PanelNodeHeader({
   const menuItems: PanelHeaderMenuItem[] = [
     {
       label: 'Preview trace',
-      icon: <FileText className="h-3 w-3" />,
+      icon: <FileText className={nodeIconGlyph} />,
       onClick: () => {
         const snippet = traceOutputForPanel(data.kind, frames, player.index);
         navigator.clipboard?.writeText(snippet);
         setTracePreviewOpen(true);
       },
     },
-    { label: data.collapsed ? 'Restore panel' : 'Minimize panel', icon: <ChevronsDownUp className="h-3 w-3" />, onClick: minimize },
-    { label: 'Focus panel', icon: <Crosshair className="h-3 w-3" />, onClick: focus },
-    { label: 'Cycle accent', icon: <Palette className="h-3 w-3" />, onClick: cycleAccent },
+    { label: data.collapsed ? 'Restore panel' : 'Minimize panel', icon: <ChevronsDownUp className={nodeIconGlyph} />, onClick: minimize },
+    { label: 'Focus panel', icon: <Crosshair className={nodeIconGlyph} />, onClick: focus },
+    { label: 'Cycle accent', icon: <Palette className={nodeIconGlyph} />, onClick: cycleAccent },
     {
       label: locked ? 'Unlock panel' : 'Lock panel',
-      icon: locked ? <LockOpen className="h-3 w-3" /> : <Lock className="h-3 w-3" />,
+      icon: locked ? <LockOpen className={nodeIconGlyph} /> : <Lock className={nodeIconGlyph} />,
       onClick: toggleLock,
     },
     ...(isViz && mode === 'visualize'
       ? [
           {
             label: 'Add Code Studio panel',
-            icon: <Code2 className="h-3 w-3" />,
+            icon: <Code2 className={nodeIconGlyph} />,
             disabled: !hasCode,
             onClick: () => spawnConnectedPanel('code', id),
           },
           {
             label: 'Add Structure panel',
-            icon: <Puzzle className="h-3 w-3" />,
+            icon: <Puzzle className={nodeIconGlyph} />,
             disabled: !hasReassemble,
             onClick: () => spawnConnectedPanel('reassemble', id),
           },
           {
             label: 'Add Recall panel',
-            icon: <Keyboard className="h-3 w-3" />,
+            icon: <Keyboard className={nodeIconGlyph} />,
             disabled: !hasCode,
             onClick: () => spawnConnectedPanel('recall', id),
           },
@@ -191,14 +193,14 @@ export function PanelNodeHeader({
       ? [
           {
             label: sideOpen ? `Hide ${sideLabel} panel` : `Show ${sideLabel} panel`,
-            icon: <PanelRightOpen className="h-3 w-3" />,
+            icon: <PanelRightOpen className={nodeIconGlyph} />,
             onClick: onToggleSide,
           },
         ]
       : []),
     {
       label: 'Remove panel',
-      icon: <Trash2 className="h-3 w-3" />,
+      icon: <Trash2 className={nodeIconGlyph} />,
       danger: true,
       disabled: locked,
       onClick: remove,
@@ -210,7 +212,7 @@ export function PanelNodeHeader({
   return (
     <PanelHeader selected={selected} collapsed={collapsed} locked={locked} density={density} className={headerClassName}>
       {!locked && mode !== 'visualize' && <PanelHeaderGrip density={density} />}
-      <PanelHeaderIcon density={density}>{panelKindIcon(data.kind) ?? <FileQuestion className="h-[var(--node-icon,16px)] w-[var(--node-icon,16px)]" />}</PanelHeaderIcon>
+      <PanelHeaderIcon density={density}>{panelKindIcon(data.kind) ?? <FileQuestion className={nodeIconGlyph} />}</PanelHeaderIcon>
 
       <PanelHeaderTitle density={density} className={locked ? 'cursor-default' : undefined}>
         {data.title}
@@ -223,7 +225,7 @@ export function PanelNodeHeader({
           <>
             {isViz && <HeaderStep />}
             <PanelHeaderAction variant="ghost" title="Restore panel" onClick={minimize}>
-              <ChevronsDownUp className="h-3.5 w-3.5" />
+              <ChevronsDownUp className={nodeIconGlyph} />
             </PanelHeaderAction>
           </>
         ) : (
@@ -237,7 +239,7 @@ export function PanelNodeHeader({
                   title={showBigO ? 'Hide Big-O cost' : 'Show Big-O cost'}
                   onClick={onToggleBigO}
                 >
-                  <TrendingUp className="h-3.5 w-3.5" />
+                  <TrendingUp className={nodeIconGlyph} />
                 </PanelHeaderAction>
                 <HeaderPlay />
               </>
@@ -248,21 +250,21 @@ export function PanelNodeHeader({
                   label="Code Studio"
                   disabled={!hasCode}
                   title={hasCode ? 'Add Code Studio — quiz, structure, and recall' : 'No source code for this problem'}
-                  icon={<Code2 className="h-3.5 w-3.5 shrink-0" />}
+                  icon={<Code2 className={cn(nodeIconGlyph, 'shrink-0')} />}
                   onClick={() => spawnConnectedPanel('code', id)}
                 />
                 <VizSpawnBtn
                   label="Structure"
                   disabled={!hasReassemble}
                   title={hasReassemble ? 'Add Structure — reassemble code blocks' : 'No code blocks for this problem'}
-                  icon={<Puzzle className="h-3.5 w-3.5 shrink-0" />}
+                  icon={<Puzzle className={cn(nodeIconGlyph, 'shrink-0')} />}
                   onClick={() => spawnConnectedPanel('reassemble', id)}
                 />
                 <VizSpawnBtn
                   label="Recall"
                   disabled={!hasCode}
                   title={hasCode ? 'Add Recall — rebuild solution from memory' : 'No source code for this problem'}
-                  icon={<Keyboard className="h-3.5 w-3.5 shrink-0" />}
+                  icon={<Keyboard className={cn(nodeIconGlyph, 'shrink-0')} />}
                   onClick={() => spawnConnectedPanel('recall', id)}
                 />
                 <HeaderStep />
@@ -272,17 +274,17 @@ export function PanelNodeHeader({
                   title={showBigO ? 'Hide Big-O cost' : 'Show Big-O cost'}
                   onClick={onToggleBigO}
                 >
-                  <TrendingUp className="h-3.5 w-3.5" />
+                  <TrendingUp className={nodeIconGlyph} />
                 </PanelHeaderAction>
               </>
             )}
             {isProblem && inVisualize && (
               <>
                 <PanelHeaderAction variant="ghost" title="Focus panel" onClick={focus}>
-                  <Crosshair className="h-3.5 w-3.5" />
+                  <Crosshair className={nodeIconGlyph} />
                 </PanelHeaderAction>
                 <PanelHeaderAction variant="ghost" title="Minimize panel" onClick={minimize}>
-                  <ChevronsDownUp className="h-3.5 w-3.5" />
+                  <ChevronsDownUp className={nodeIconGlyph} />
                 </PanelHeaderAction>
               </>
             )}
@@ -293,7 +295,7 @@ export function PanelNodeHeader({
                 title={bottomDockOpen ? 'Hide Replay · Inspector · Metrics dock' : 'Show Replay · Inspector · Metrics dock'}
                 onClick={onToggleDock}
               >
-                <PanelBottomOpen className="h-3.5 w-3.5" />
+                <PanelBottomOpen className={nodeIconGlyph} />
               </PanelHeaderAction>
             )}
             {inlineSideToggle && (
@@ -303,17 +305,17 @@ export function PanelNodeHeader({
                 title={sideOpen ? `Hide ${sideLabel} panel` : `Show ${sideLabel} panel`}
                 onClick={onToggleSide}
               >
-                <PanelRightOpen className="h-3.5 w-3.5" />
+                <PanelRightOpen className={nodeIconGlyph} />
               </PanelHeaderAction>
             )}
             {locked && (
               <PanelHeaderAction variant="ghost" active title="Panel locked" disabled>
-                <Lock className="h-3.5 w-3.5" />
+                <Lock className={nodeIconGlyph} />
               </PanelHeaderAction>
             )}
             {!locked && (
               <PanelHeaderAction variant="ghost" title="Remove panel" onClick={remove}>
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className={nodeIconGlyph} />
               </PanelHeaderAction>
             )}
           </>

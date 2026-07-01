@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 
 interface ThreeSumInput {
@@ -27,36 +27,24 @@ interface ThreeSumState {
 }
 
 function record({ nums }: ThreeSumInput): Frame<ThreeSumState>[] {
-  const frames: Frame<ThreeSumState>[] = [];
   const a = nums.slice();
   const n = a.length;
   const results: Triplet[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<ThreeSumState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums: a.slice(),
-        phase: 'scan',
-        i: null,
-        l: null,
-        r: null,
-        sum: null,
-        compare: null,
-        minIdx: null,
-        swap: null,
-        sortedUpTo: 0,
-        results: results.map((t) => [...t] as Triplet),
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<ThreeSumState>(() => ({
+    nums: a.slice(),
+    phase: 'scan',
+    i: null,
+    l: null,
+    r: null,
+    sum: null,
+    compare: null,
+    minIdx: null,
+    swap: null,
+    sortedUpTo: 0,
+    results: results.map((t) => [...t] as Triplet),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -218,7 +206,6 @@ function View({ frame }: PluginViewProps<ThreeSumState>) {
       if (idx < s.sortedUpTo) return 'sorted';
       return 'idle';
     }
-    // scan phase
     if (s.i === idx) return 'pivot';
     if (s.l === idx || s.r === idx) return 'compare';
     if (s.sum === 0 && (s.l === idx || s.r === idx)) return 'done';
@@ -235,30 +222,32 @@ function View({ frame }: PluginViewProps<ThreeSumState>) {
     return tags.length ? `${idx} ${tags.join('/')}` : `${idx}`;
   };
 
+  const tripletItems = s.results.map((t) => `[${t.join(',')}]`);
+
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="phase" v={s.phase} />
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="l" v={s.l ?? '—'} />
+        <RailStat k="r" v={s.r ?? '—'} />
+        {s.sum !== null && <RailStat k="sum" v={s.sum} tone={s.sum === 0 ? 'good' : 'accent'} />}
+      </RailGroup>
+      <RailStack label="triplets" items={tripletItems} />
+      {s.done && (
+        <RailResult
+          label="answer"
+          value={s.results.length > 0 ? `${s.results.length} found` : 'none'}
+          tone={s.results.length > 0 ? 'good' : 'bad'}
+        />
+      )}
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        phase = <span className="font-mono text-ink">{s.phase}</span>
-        {s.phase === 'scan' && s.i !== null && (
-          <>
-            {' · '}anchor nums[{s.i}] ={' '}
-            <span className="font-mono text-ink">{s.nums[s.i]}</span>
-          </>
-        )}
-        {s.sum !== null && (
-          <>
-            {' · '}sum ={' '}
-            <span className={cn('font-mono', s.sum === 0 ? 'text-good' : 'text-ink')}>{s.sum}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <ArrayBars values={s.nums} tone={tone} label={label} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        triplets{' {'}
-        {s.results.map((t) => `[${t.join(',')}]`).join(', ')}
-        {'}'}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

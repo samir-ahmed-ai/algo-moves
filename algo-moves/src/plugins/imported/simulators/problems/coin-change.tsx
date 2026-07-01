@@ -1,8 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface CoinInput {
   coins: number[];
@@ -23,9 +24,18 @@ const INF = Infinity;
 
 function record({ coins, amount }: CoinInput): Frame<CoinState>[] {
   const dp = new Array<number>(amount + 1).fill(INF);
-  const frames: Frame<CoinState>[] = [];
 
-  const emit = (
+  const { emit, frames } = createRecorder<CoinState>(() => ({
+    coins,
+    amount,
+    dp: dp.slice(),
+    a: null,
+    from: null,
+    coin: null,
+    done: false,
+  }));
+
+  const snap = (
     type: string,
     note: string,
     caption: string,
@@ -33,13 +43,9 @@ function record({ coins, amount }: CoinInput): Frame<CoinState>[] {
     from: number | null,
     coin: number | null,
     tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { coins, amount, dp: dp.slice(), a, from, coin, done: type === 'DONE' },
-    });
+  ) => emit(type, note, caption, { a, from, coin, done: type === 'DONE' }, tone);
 
-  emit(
+  snap(
     'INIT',
     `amount=${amount}`,
     `Coin Change: the fewest coins from {${coins.join(', ')}} that sum to ${amount}. dp[a] = the minimum coins needed to make amount a, built up from a = 0.`,
@@ -49,7 +55,7 @@ function record({ coins, amount }: CoinInput): Frame<CoinState>[] {
   );
 
   dp[0] = 0;
-  emit('BASE', 'dp[0]=0', `Base case: making amount 0 needs 0 coins. dp[0] = 0.`, 0, null, null);
+  snap('BASE', 'dp[0]=0', `Base case: making amount 0 needs 0 coins. dp[0] = 0.`, 0, null, null);
 
   for (let a = 1; a <= amount; a++) {
     let best = INF;
@@ -64,7 +70,7 @@ function record({ coins, amount }: CoinInput): Frame<CoinState>[] {
     }
     dp[a] = best;
     const reach = best === INF;
-    emit(
+    snap(
       reach ? 'UNREACHABLE' : 'FILL',
       reach ? `dp[${a}]=∞` : `dp[${a}]=${best}`,
       reach
@@ -77,7 +83,7 @@ function record({ coins, amount }: CoinInput): Frame<CoinState>[] {
   }
 
   const answer = dp[amount] === INF ? -1 : dp[amount];
-  emit(
+  snap(
     'DONE',
     answer < 0 ? 'no solution' : `${answer} coins`,
     answer < 0
@@ -98,15 +104,32 @@ function View({ frame }: PluginViewProps<CoinState>) {
   if (s.a !== null) pointers.push({ i: s.a, label: 'a', tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: `a−${s.coin}`, tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.a === i ? 'found' : s.dp[i] !== INF ? 'match' : '');
-  const ans = s.dp[s.amount] === INF ? (s.done ? '−1' : '…filling') : s.dp[s.amount];
+  const reachable = s.dp[s.amount] !== INF;
+  const answerKnown = reachable || s.done;
+  const ans = reachable ? s.dp[s.amount] : s.done ? '−1' : '…';
   return (
-    <div className="board-area">
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="amount a" v={s.a ?? '—'} tone="accent" />
+            <RailStat k="coin" v={s.coin ?? '—'} />
+            <RailStat k="from dp[a−coin]" v={s.from !== null ? cells[s.from] : '—'} />
+          </RailGroup>
+          <RailResult
+            label="answer"
+            value={ans}
+            tone={answerKnown ? (reachable ? 'good' : 'bad') : 'accent'}
+          />
+        </>
+      }
+    >
       <div className={cn(vizText.sm, 'text-ink3')}>
-        coins {`{${s.coins.join(', ')}}`} → amount {s.amount}, answer = <span className="font-mono text-ink">{ans}</span>
+        coins {`{${s.coins.join(', ')}}`} → amount {s.amount}
       </div>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn(vizText.sm, 'text-ink3')}>index = amount, value = fewest coins</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -130,7 +153,7 @@ function Inspector({ frame }: InspectorProps<CoinState>) {
 export const manifestId = 'imp-59-coin-change';
 export const title = 'Coin Change';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'c134', label: 'coins {1,3,4}, amount 6', value: { coins: [1, 3, 4], amount: 6 } },
     { id: 'c25', label: 'coins {2}, amount 3 (no solution)', value: { coins: [2], amount: 3 } },

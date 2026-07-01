@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface MonarchyInput {
   /**
@@ -202,25 +201,30 @@ function View({ frame }: PluginViewProps<MonarchyState>) {
     if (visitedSet.has(i)) return 'team-2';
     return 'team-0';
   };
+  const total = s.tree.filter((v) => v != null).length;
+  const activeName = s.active !== null ? s.tree[s.active] : null;
+  const rail = (
+    <>
+      <RailStack
+        label="stack"
+        items={[...s.stack].reverse()}
+        topLabel="top"
+      />
+      <RailGroup label="scan">
+        <RailStat k="current" v={activeName ?? '—'} tone="accent" />
+        <RailStat k="listed" v={`${s.order.length}/${total}`} />
+      </RailGroup>
+      <RailResult
+        label="order"
+        value={s.order.length === 0 ? '—' : s.order.join(' → ')}
+        tone={s.done ? 'good' : 'accent'}
+      />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        listed <span className="font-mono text-ink">{s.order.length}</span> /{' '}
-        <span className="font-mono text-ink">{s.tree.filter((v) => v != null).length}</span> rulers
-        {s.stack.length > 0 && !s.done && (
-          <>
-            {' · '}next <span className="font-mono text-accent">{s.stack[s.stack.length - 1]}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        stack [{[...s.stack].reverse().join(', ')}]
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink3')}>
-        {s.order.length === 0 ? 'order: —' : s.order.join(' → ')}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

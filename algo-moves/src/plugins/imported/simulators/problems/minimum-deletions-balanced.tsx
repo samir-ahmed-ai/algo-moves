@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface MDInput {
   s: string;
@@ -81,27 +80,23 @@ function View({ frame }: PluginViewProps<MDState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: `'${s.s[s.i]}'`, tone: 'accent', place: 'above' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] >= 0 ? 'match' : '');
-  const lastFilled = (() => {
-    let v = '…filling' as string | number;
-    for (let i = s.dp.length - 1; i >= 0; i--) {
-      if (s.dp[i] >= 0) {
-        v = s.dp[i];
-        break;
-      }
-    }
-    return v;
-  })();
-  const ans = s.done ? lastFilled : '…filling';
+  let ans: string | number = '…';
+  for (let i = s.dp.length - 1; i >= 0; i--) {
+    if (s.dp[i] >= 0) { ans = s.dp[i]; break; }
+  }
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i !== null ? `${s.i} ('${s.s[s.i]}')` : '—'} />
+        <RailStat k="bCount" v={s.bCount} />
+      </RailGroup>
+      <RailResult label="deletions" value={s.done ? ans : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        s = <span className="font-mono text-ink">"{s.s}"</span>, min deletions ={' '}
-        <span className="font-mono text-ink">{ans}</span>, bCount ={' '}
-        <span className="font-mono text-ink">{s.bCount}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => s.s[i]} />
-      <div className={cn(vizText.sm, 'text-ink3')}>cell = dp[i] (min deletions for the prefix ending at i); index shows the character</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -133,7 +128,7 @@ function Inspector({ frame }: InspectorProps<MDState>) {
 export const manifestId = 'imp-75-minimum-deletions-to-make-string-balanced';
 export const title = 'Minimum Deletions to Make String Balanced';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'aababbab', label: 's = "aababbab"', value: { s: 'aababbab' } },
     { id: 'bbaaaaabb', label: 's = "bbaaaaabb"', value: { s: 'bbaaaaabb' } },

@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 const INF = 1e9;
 
@@ -140,12 +139,22 @@ function record(input: DijkstraInput): Frame<DijkstraState>[] {
 
 function View({ frame }: PluginViewProps<DijkstraState>) {
   const s = frame.state;
+  const settledCount = s.settled.filter(Boolean).length;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="active" v={s.active ?? '—'} tone="accent" />
+        <RailStat k="settled" v={`${settledCount}/${s.adj.length}`} />
+      </RailGroup>
+      <RailStack
+        label="dist[ ]"
+        items={s.dist.map((d, i) => ({ label: `${i}: ${fmt(d)}`, tone: s.settled[i] ? 'good' : i === s.active ? 'accent' : undefined }))}
+      />
+      <RailResult label={`${s.src}→${s.target}`} value={fmt(s.dist[s.target])} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        shortest {s.src} → {s.target} ={' '}
-        <span className="font-mono text-ink">{fmt(s.dist[s.target])}</span>
-      </div>
+    <VizStage rail={rail} railWidth={100}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -156,7 +165,7 @@ function View({ frame }: PluginViewProps<DijkstraState>) {
         edgeLabel={(v, u) => (s.w[v][u] >= 0 && s.w[v][u] < INF ? s.w[v][u] : undefined)}
         height={286}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -195,7 +204,7 @@ const G6: DijkstraInput = {
 export const manifestId = 'imp-6-find-shortest-path-with-dijkstra-s';
 export const title = "Find Shortest Path with Dijkstra's";
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [{ id: 'g6', label: '6 nodes · detour wins', value: G6 }] satisfies SampleInput<DijkstraInput>[],
   record,
   View,

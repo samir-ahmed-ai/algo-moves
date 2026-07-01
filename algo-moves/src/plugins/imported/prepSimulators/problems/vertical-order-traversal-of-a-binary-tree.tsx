@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 // The tree is provided in level-order (heap layout): children of index i are
 // 2i+1 (left) and 2i+2 (right); `null` marks an absent slot. TreeBoard consumes
@@ -174,49 +173,35 @@ function View({ frame }: PluginViewProps<VerticalState>) {
   const nodeClass = (i: number) =>
     s.current === i ? 'team-1' : visitedSet.has(i) ? 'team-2' : 'team-0';
   const colMap = new Map(s.colOf);
+
+  const queueItems = s.queue.map((i) => {
+    const col = colMap.get(i) ?? '?';
+    return `${s.tree[i]} (c${col})`;
+  });
+
+  const bucketItems = s.buckets.map(([c, pts]) => ({
+    label: `c${c}:[${pts.map((p) => p.val).join(',')}]`,
+    tone: s.sortingCol === c ? ('accent' as const) : undefined,
+  }));
+
+  const resultLabel = s.result ? s.result.map((c) => `[${c.join(',')}]`).join(' ') : undefined;
+
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="node" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} />
+        <RailStat k="col" v={s.currentCol ?? (s.sortingCol !== null ? `sort ${s.sortingCol}` : '—')} tone={s.currentCol !== null ? 'accent' : undefined} />
+      </RailGroup>
+      <RailStack label="queue" items={queueItems} topLabel="front" highlightEnd="bottom" />
+      <RailStack label="columns" items={bucketItems.length > 0 ? bucketItems : []} />
+      {resultLabel && <RailResult label="result" value={resultLabel} tone="good" />}
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.current !== null && s.currentCol !== null && !s.done ? (
-          <>
-            visiting <span className="font-mono text-ink">{s.tree[s.current]}</span> · column{' '}
-            <span className="font-mono text-ink">{s.currentCol}</span>
-          </>
-        ) : s.sortingCol !== null ? (
-          <>
-            sorting column <span className="font-mono text-ink">{s.sortingCol}</span> by (row, value)
-          </>
-        ) : (
-          <>positions (row, col): root = (0, 0), left = (+1, −1), right = (+1, +1)</>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn('mt-1 flex flex-wrap gap-2 font-mono', vizText.sm, 'text-ink3')}>
-        {s.buckets.length === 0 ? (
-          <span>columns: —</span>
-        ) : (
-          s.buckets.map(([c, pts]) => (
-            <span key={c} className={s.sortingCol === c ? 'text-accent' : undefined}>
-              col {c}: [{pts.map((p) => p.val).join(', ')}]
-            </span>
-          ))
-        )}
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        queue [{s.queue.map((i) => s.tree[i]).join(', ')}]
-        {s.queue.length > 0 && (
-          <span className="text-ink3">
-            {' '}
-            (cols {s.queue.map((i) => colMap.get(i) ?? '?').join(', ')})
-          </span>
-        )}
-      </div>
-      {s.result && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → {s.result.map((c) => `[${c.join(',')}]`).join(', ')}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

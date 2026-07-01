@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, RailStack, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
 
 interface RsqInput {
   matrix: number[][];
@@ -185,15 +184,28 @@ function View({ frame }: PluginViewProps<RsqState>) {
     const v = s.pre[r - 1][c - 1];
     return v === null ? '' : 'visited';
   };
-  const ans = s.answer === null ? '…building' : s.answer;
+  const cellVal = s.cur ? s.pre[s.cur[0]][s.cur[1]] : null;
+  const corners = s.corners.map(({ cell, sign }) => ({ label: `${sign > 0 ? '+' : '−'}[${cell[0]},${cell[1]}]`, tone: sign === 1 ? 'good' as const : 'bad' as const }));
+  const rail = (
+    <>
+      <RailGroup label="query">
+        <RailStat k="r1,c1" v={`${s.query.row1},${s.query.col1}`} />
+        <RailStat k="r2,c2" v={`${s.query.row2},${s.query.col2}`} />
+      </RailGroup>
+      {s.cur && (
+        <RailGroup label="cell">
+          <RailStat k="pre" v={`[${s.cur[0]}][${s.cur[1]}]`} tone="accent" />
+          <RailStat k="val" v={cellVal === null ? '—' : cellVal} />
+        </RailGroup>
+      )}
+      {corners.length > 0 && <RailStack label="corners" items={corners} />}
+      <RailResult label="sumRegion" value={s.answer === null ? '…' : s.answer} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        prefix-sum table, sumRegion({s.query.row1}, {s.query.col1}, {s.query.row2}, {s.query.col2}) ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={34} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -217,7 +229,7 @@ function Inspector({ frame }: InspectorProps<RsqState>) {
 export const manifestId = 'imp-81-range-sum-query-2d-immutable';
 export const title = 'Range Sum Query 2D - Immutable';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'sample',

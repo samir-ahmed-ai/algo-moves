@@ -10,7 +10,7 @@ flowchart TB
   design --> viz["Plugin viz — vizText / vizPad"]
   shell --> sidebars["UnifiedLeftSidebar, docks, transport"]
   canvas --> panelNode["PanelNode + panels/*"]
-  viz --> simulators["91 simulators + 19 native plugins"]
+  viz --> simulators["91 simulators + 18 native plugins"]
 ```
 
 ## Rules

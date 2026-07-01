@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface PPInput {
   adj: number[][];
@@ -117,13 +116,19 @@ function nodeColor(s: PPState, node: number): number {
 
 function View({ frame }: PluginViewProps<PPState>) {
   const s = frame.state;
+  const pathItems = s.path.map(String);
+  const resultItems = s.results.map((p) => p.join('→'));
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        source <span className="font-mono text-ink">{s.src}</span> → dest{' '}
-        <span className="font-mono text-ink">{s.dest}</span>, path ={' '}
-        <span className="font-mono text-ink">[{s.path.join(' → ')}]</span>
-      </div>
+    <VizStage rail={<>
+      <RailStack label="path" items={pathItems} />
+      <RailStack label="found" items={resultItems} highlightEnd="bottom" topLabel="latest" />
+      <RailGroup label="scan">
+        <RailStat k="src" v={s.src} />
+        <RailStat k="dst" v={s.dest} />
+        <RailStat k="at" v={s.path.length ? s.path[s.path.length - 1] : '—'} tone="accent" />
+      </RailGroup>
+      {s.done && <RailResult label="paths" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />}
+    </>}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -133,10 +138,7 @@ function View({ frame }: PluginViewProps<PPState>) {
         highlightEdge={s.edge}
         height={260}
       />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        paths found: <span className="font-mono text-ink">{s.results.length}</span>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -175,7 +177,7 @@ const DAG4: PPInput = {
 export const manifestId = 'imp-0-06-print-all-paths-from-source-to-destination';
 export const title = 'Print All Paths from Source to Destination';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'dag6', label: '6 nodes', value: DAG6 },
     { id: 'dag4', label: '4 nodes', value: DAG4 },

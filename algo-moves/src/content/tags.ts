@@ -10,7 +10,7 @@ export interface Tag {
  * Known tags. Items reference tags by id; unknown ids degrade gracefully via
  * getTag(). Add new tags here — the catalog indexes whatever items use.
  */
-export const TAGS: Record<string, Tag> = {
+const TAGS: Record<string, Tag> = {
   graph: { id: 'graph', label: 'Graph', kind: 'structure' },
   queue: { id: 'queue', label: 'Queue', kind: 'structure' },
   stack: { id: 'stack', label: 'Stack', kind: 'structure' },

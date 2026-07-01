@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STRUDEL_NODE_W } from './nodeTokens';
+import { NODE_W, STRUDEL_NODE_W } from './nodeTokens';
 import {
   CANVAS_NODE_SEP,
   VIZ_WIRE_GAP,
@@ -19,9 +19,10 @@ describe('canvasTokens', () => {
     expect(vizMinWidth(400)).toBe(400);
   });
 
-  it('exports defaults aligned with STRUDEL_NODE_W', () => {
-    expect(CANVAS_NODE_SEP).toBe(canvasNodeSep(STRUDEL_NODE_W));
-    expect(VIZ_WIRE_GAP).toBe(vizWireGap(STRUDEL_NODE_W));
+  it('exports defaults aligned with NODE_W', () => {
+    expect(STRUDEL_NODE_W).toBe(NODE_W);
+    expect(CANVAS_NODE_SEP).toBe(canvasNodeSep(NODE_W));
+    expect(VIZ_WIRE_GAP).toBe(vizWireGap(NODE_W));
   });
 
   it('respects scale floors', () => {

@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface CartesianInput {
   lists: string[][];
@@ -102,12 +102,24 @@ function record({ lists }: CartesianInput): Frame<CartesianState>[] {
 
 function View({ frame }: PluginViewProps<CartesianState>) {
   const s = frame.state;
+  const total = s.lists.reduce((acc, l) => acc * l.length, 1);
+  const rail = (
+    <>
+      <RailGroup label="tuple">
+        <RailStat k="path" v={s.path.length ? `(${s.path.join(', ')})` : '—'} tone="accent" />
+      </RailGroup>
+      <RailStack
+        label="results"
+        items={s.results.map((r) => `(${r.join(', ')})`)}
+        topLabel="last"
+      />
+      {s.done && (
+        <RailResult label="answer" value={`${s.results.length} / ${total}`} tone="good" />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        choosing one element from each list · tuple ={' '}
-        <span className="font-mono text-ink">({s.path.join(', ')})</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <div className="flex flex-col gap-2">
         {s.lists.map((list, i) => {
           const isActive = s.depth === i;
@@ -131,17 +143,7 @@ function View({ frame }: PluginViewProps<CartesianState>) {
           );
         })}
       </div>
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        tuples found ({s.results.length})
-        <div className="mt-1 flex flex-col gap-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.sm)}>
-              ({r.join(', ')})
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -163,7 +165,7 @@ function Inspector({ frame }: InspectorProps<CartesianState>) {
 export const manifestId = 'imp-42-cartesian-product-of-multiple-arrays';
 export const title = 'Cartesian Product of Multiple Arrays';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'small', label: '[[1,2],[3,4],[5]]', value: { lists: [['1', '2'], ['3', '4'], ['5']] } },
     { id: 'colors', label: '[[a,b],[x,y]]', value: { lists: [['a', 'b'], ['x', 'y']] } },

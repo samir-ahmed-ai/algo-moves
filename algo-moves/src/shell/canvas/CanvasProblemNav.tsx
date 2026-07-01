@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Panel } from '@xyflow/react';
-import { catalog, type Item } from '../../content';
+import { catalog, getSiblingItems, type Item } from '../../content';
 import { useWorkspace } from '../../lib/workspace';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
-import { PROBLEM_GLYPHS } from '../problemGlyphs';
+import { PROBLEM_GLYPHS } from '../../content/glyphs';
 
 const DIFF_TONE: Record<string, string> = {
   Easy: 'var(--good)',
@@ -23,13 +23,9 @@ function glyphFor(item: Item): string | undefined {
  * with wrap-around prev/next — without leaving the canvas.
  */
 export function CanvasProblemNav() {
-  const { activeItemId, setActiveItemId, setSelectedNode } = useWorkspace();
+  const { activeItemId, openProblem } = useWorkspace();
 
-  const list = useMemo(() => {
-    const topic = catalog.breadcrumb(activeItemId).topic;
-    const sibs = topic?.items.filter((i) => i.pluginId) ?? [];
-    return sibs.length >= 2 ? sibs : catalog.items.filter((i) => i.pluginId);
-  }, [activeItemId]);
+  const list = useMemo(() => getSiblingItems(activeItemId, catalog), [activeItemId]);
 
   const idx = list.findIndex((i) => i.id === activeItemId);
   const item = list[idx];
@@ -37,8 +33,7 @@ export function CanvasProblemNav() {
 
   const go = (delta: number) => {
     const n = (idx + delta + list.length) % list.length;
-    setActiveItemId(list[n].id);
-    setSelectedNode(null);
+    openProblem(list[n].id);
   };
 
   const markup = glyphFor(item);

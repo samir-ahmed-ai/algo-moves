@@ -5,6 +5,7 @@ import { createSortRecorder } from '../_shared/sortRecorder';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { SortInspector } from '../_shared/sortInspector';
+import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface SortInput {
   values: number[];
@@ -48,6 +49,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
 
 function View({ frame }: PluginViewProps<SortState>) {
   const s = frame.state;
+  const done = frame.move.type === 'DONE';
   const tone = (i: number): BarTone => {
     if (s.swap && (s.swap[0] === i || s.swap[1] === i)) return 'swap';
     if (s.compare && (s.compare[0] === i || s.compare[1] === i)) return 'compare';
@@ -55,9 +57,15 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <div className="board-area">
+    <VizStage rail={<>
+      <RailGroup label="ops">
+        <RailStat k="cmp" v={s.comparisons} />
+        <RailStat k="swaps" v={s.swaps} />
+      </RailGroup>
+      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+    </>}>
       <ArrayBars values={s.values} tone={tone} height={242} />
-    </div>
+    </VizStage>
   );
 }
 

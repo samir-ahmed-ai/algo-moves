@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface CombInput {
   n: number;
@@ -69,23 +68,22 @@ function View({ frame }: PluginViewProps<CombState>) {
     if (inCur.has(i + 1)) return 'match';
     return '';
   };
+  const choose = (a: number, b: number) => {
+    let r = 1;
+    for (let i = 0; i < b; i++) r = (r * (a - i)) / (i + 1);
+    return Math.round(r);
+  };
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        choose {s.k} of 1..{s.n} · current = <span className="font-mono text-ink">[{s.cur.join(', ')}]</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="path">
+        <RailStat k="cur" v={s.cur.length ? `[${s.cur.join(', ')}]` : '[]'} tone="accent" />
+        <RailStat k="pick" v={s.pick ?? '—'} />
+      </RailGroup>
+      <RailStack label="results" items={s.results.map((r) => `[${r.join(', ')}]`)} />
+      {s.done && <RailResult label="total" value={`${s.results.length} / ${choose(s.n, s.k)}`} tone="good" />}
+    </>}>
       <ArrayRow values={values} cellTone={tone} pointers={pointers} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        combinations found ({s.results.length})
-        <div className="mt-1 flex flex-col gap-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.sm)}>
-              [{r.join(', ')}]
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -110,7 +108,7 @@ function Inspector({ frame }: InspectorProps<CombState>) {
 export const manifestId = 'imp-27-combinations';
 export const title = 'Combinations';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: '4c2', label: 'n=4, k=2', value: { n: 4, k: 2 } },
     { id: '5c3', label: 'n=5, k=3', value: { n: 5, k: 3 } },

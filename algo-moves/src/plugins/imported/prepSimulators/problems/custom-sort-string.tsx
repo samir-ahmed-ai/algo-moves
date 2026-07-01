@@ -2,7 +2,7 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, vizText, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface CustomSortInput {
   order: string;
@@ -146,7 +146,6 @@ function View({ frame }: PluginViewProps<CustomSortState>) {
   const chars = s.s.split('');
   const pointers: ArrayPointer[] = [];
   if (s.phase === 'count') {
-    // Point at the last char counted (count phase walks s left→right).
     const counted = s.counts.reduce((acc, e) => acc + e.n, 0);
     if (counted > 0 && counted <= chars.length) {
       pointers.push({ i: counted - 1, label: 'count', tone: 'accent', place: 'above' });
@@ -161,8 +160,22 @@ function View({ frame }: PluginViewProps<CustomSortState>) {
     return '';
   };
   const orderChars = s.order.split('');
+  const remaining = s.counts.reduce((acc, e) => acc + e.n, 0);
+  const countItems = s.counts.filter((e) => e.n > 0).map((e) => `${e.ch}:${e.n}`);
+  const rail = (
+    <>
+      <RailStack label="counts" items={countItems.length ? countItems : []} />
+      <RailGroup label="scan">
+        <RailStat k="phase" v={s.phase} />
+        <RailStat k="cur" v={s.orderIdx !== null ? s.order[s.orderIdx] : '—'} tone="accent" />
+        <RailStat k="+char" v={s.takeChar ?? '—'} tone={s.takeChar ? 'accent' : undefined} />
+        <RailStat k="left" v={remaining} />
+      </RailGroup>
+      <RailResult label="result" value={s.result ? `"${s.result}"` : s.done ? '""' : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
+    <VizStage rail={rail}>
       <div className={cn(vizText.sm, 'text-ink3')}>
         order = <span className="font-mono text-ink">{s.order}</span> · s ={' '}
         <span className="font-mono text-ink">{s.s}</span>
@@ -182,18 +195,7 @@ function View({ frame }: PluginViewProps<CustomSortState>) {
           </span>
         ))}
       </div>
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        counts {'{'}
-        {s.counts.map((e) => `${e.ch}:${e.n}`).join(', ')}
-        {'}'}
-      </div>
-      <div className={cn('mt-2 font-mono', s.done ? 'text-good' : 'text-ink', vizText.base)}>
-        → "{s.result || '·'}"
-        {s.takeChar && !s.done && (
-          <span className="text-accent"> (+{s.takeChar})</span>
-        )}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

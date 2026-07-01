@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface SSGInput {
   /** Short equal-length strings; two are "similar" when they differ in 0 or 2 positions. */
@@ -158,15 +157,13 @@ function colorOf(parent: number[], node: number): number {
 function View({ frame }: PluginViewProps<SSGState>) {
   const s = frame.state;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        groups = <span className="font-mono text-ink">{s.groups}</span>
-        {s.pair && s.diffs !== null && (
-          <>
-            {' · '}diff = <span className="font-mono text-ink">{s.diffs}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="groups" v={s.groups} tone="accent" />
+        {s.pair && s.diffs !== null && <RailStat k="diffs" v={s.diffs} />}
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.groups} tone="good" />}
+    </>}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -178,7 +175,7 @@ function View({ frame }: PluginViewProps<SSGState>) {
         nodeRadius={26}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -210,7 +207,7 @@ const S2: SSGInput = {
 export const manifestId = 'imp-9-similar-string-groups';
 export const title = 'Similar String Groups';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'tars', label: 'tars / rats / arts / star', value: S1 },
     { id: 'abc', label: 'abc family + xyz', value: S2 },

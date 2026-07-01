@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface SubarrayInput {
   nums: number[];
@@ -23,33 +23,21 @@ interface SubarrayState {
 }
 
 function record({ nums, k }: SubarrayInput): Frame<SubarrayState>[] {
-  const frames: Frame<SubarrayState>[] = [];
   const modMap = new Map<number, number>([[0, -1]]);
   let prefix = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SubarrayState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums,
-        k,
-        i: null,
-        num: null,
-        prefix: null,
-        prev: null,
-        map: [...modMap.entries()],
-        window: null,
-        result: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<SubarrayState>(() => ({
+    nums,
+    k,
+    i: null,
+    num: null,
+    prefix: null,
+    prev: null,
+    map: [...modMap.entries()],
+    window: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -118,36 +106,25 @@ function View({ frame }: PluginViewProps<SubarrayState>) {
     if (s.window && i >= s.window[0] && i <= s.window[1]) return 'found';
     return s.i === i ? 'match' : '';
   };
+  const mapItems = s.map.map(([rem, idx]) => `${rem}:${idx}`);
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        k = <span className="font-mono text-ink">{s.k}</span>
-        {s.prefix !== null && (
-          <>
-            {' · '}prefix % k ={' '}
-            <span className="font-mono text-ink">{s.prefix}</span>
-          </>
-        )}
-      </div>
-      <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={s.window} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        map {'{'}
-        {s.map.map(([rem, idx]) => `${rem}:${idx}`).join(', ')}
-        {'}'}
-      </div>
+    <VizStage railWidth={150} rail={<>
+      <RailGroup label="scan">
+        <RailStat k="k" v={s.k} />
+        <RailStat k="prefix%k" v={s.prefix ?? '—'} tone="accent" />
+        <RailStat k="prev idx" v={s.prev ?? '—'} tone={s.prev !== null && s.prev >= 0 ? 'good' : undefined} />
+      </RailGroup>
+      <RailStack label="map (rem:idx)" items={mapItems} />
       {s.result !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result ? 'text-good' : 'text-bad',
-          )}
-        >
-          → {s.result ? 'true' : 'false'}
-          {s.window && ` (nums[${s.window[0]}..${s.window[1]}])`}
-        </div>
+        <RailResult
+          label="answer"
+          value={s.result ? 'true' : 'false'}
+          tone={s.result ? 'good' : 'bad'}
+        />
       )}
-    </div>
+    </>}>
+      <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={s.window} />
+    </VizStage>
   );
 }
 

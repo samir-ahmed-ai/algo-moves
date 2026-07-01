@@ -8,7 +8,7 @@
 
 A plugin-driven visual learning app for coding interview prep. ~400 problems from [LeetCode](https://leetcode.com/), [HackerRank](https://www.hackerrank.com/), and original exercises — each replayed as a scrubbable sequence of **moves** with Code Studio, quizzes, and a mobile drill deck.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -32,11 +32,7 @@ Algo Moves applies the same loop to human study:
 
 That is not punishment. It is how memory forms: testing your brain over and over, learning from each mistake, and rebuilding the path until recall is automatic. On desktop, **Code Studio** walks the same ladder — quiz → reassemble → blind recall. On your phone, **Swipe mode** runs animate → quiz → rebuild in a full-screen deck.
 
-![The learning loop](algo-moves/docs/assets/learning-loop.svg)
-
-![Human learning and AI training share the same feedback loop](algo-moves/docs/assets/brain-rl-loop.svg)
-
-![Repetition builds long-term memory](algo-moves/docs/assets/memorize-stack.svg)
+![The learning loop](algo-moves/public/assets/learning-loop.svg)
 
 > **Built into the product:** wrong quiz answers trigger an automatic full restart (~1.9 s feedback, then back to Q1 with reshuffled choices). Mastery unlocks at a **3-streak**. See [Quiz & Code Studio](algo-moves/docs/quiz-and-code-studio.md) for the full rules.
 
@@ -77,4 +73,4 @@ LeetCode and HackerRank are trademarks of their respective owners. This project 
 
 ## License
 
-Copyright (c) 2026 Ahmed Samir · [MIT License](LICENSE)
+Copyright (c) 2026 Ahmed Samir · [GNU Affero General Public License v3.0](LICENSE)

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface RibInput {
   ribbons: number[];
@@ -117,20 +116,22 @@ function View({ frame }: PluginViewProps<RibState>) {
     if (s.dead[i]) return 'dead';
     return '';
   };
+  const midLen = s.mid !== null ? s.values[s.mid] : null;
+  const rail = (
+    <>
+      <RailGroup label="search">
+        <RailStat k="lo" v={live ? s.values[s.lo] : '—'} tone="accent" />
+        <RailStat k="hi" v={live ? s.values[s.hi] : '—'} tone="bad" />
+        <RailStat k="mid" v={midLen ?? '—'} tone="warn" />
+        <RailStat k="pieces" v={s.count ?? '—'} />
+      </RailGroup>
+      <RailResult label="best L" value={s.result ?? '…'} tone={s.done ? (s.result !== null ? 'good' : 'bad') : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        candidate cut length L · ribbons{' '}
-        <span className="font-mono text-ink">[{s.ribbons.join(',')}]</span> · k ={' '}
-        <span className="font-mono text-ink">{s.k}</span>
-        {s.result !== null && (
-          <>
-            {' · '}answer = <span className="font-mono text-ink">{s.result}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} label={(i) => `L${i + 1}`} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -153,7 +154,7 @@ function Inspector({ frame }: InspectorProps<RibState>) {
 export const manifestId = 'imp-47-maximum-length-of-ribbon-cut';
 export const title = 'Maximum Length of Ribbon Cut';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'rib1', label: 'ribbons [5,7,9], k=4', value: { ribbons: [5, 7, 9], k: 4 } },
     { id: 'rib2', label: 'ribbons [9,7,5], k=3', value: { ribbons: [9, 7, 5], k: 3 } },

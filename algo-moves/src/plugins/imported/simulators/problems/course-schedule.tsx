@@ -1,9 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 // adj is the prerequisite graph: an edge pre → course means "course depends on pre".
 // You can finish all courses iff this directed graph has no cycle.
@@ -28,44 +28,30 @@ function record({ adj, pos }: CSInput): Frame<CSState>[] {
   const n = adj.length;
   const color = new Array<number>(n).fill(0);
   const stack: number[] = [];
-  const frames: Frame<CSState>[] = [];
   let cycle = false;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    backEdge: [number, number] | null,
-    tone?: 'good' | 'bad',
-  ): void => {
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
-        color: color.slice(),
-        active,
-        stack: stack.slice(),
-        backEdge,
-        canFinish: !cycle,
-        done: type === 'DONE',
-      },
-    });
-  };
+  const { emit, frames } = createRecorder<CSState>(() => ({
+    adj,
+    pos,
+    color: color.slice(),
+    active: null,
+    stack: stack.slice(),
+    backEdge: null,
+    canFinish: !cycle,
+    done: false,
+  }));
 
   emit(
     'INIT',
     'all untaken',
     'Course Schedule asks whether every course can be finished. An edge pre → course means the course depends on pre, so all courses are completable exactly when this prerequisite graph has no cycle. We run a 3-colour DFS; an edge into a grey course (one still on the stack) is a circular dependency.',
-    null,
-    null,
+    { active: null, backEdge: null },
   );
 
   const dfs = (v: number): boolean => {
     color[v] = 1;
     stack.push(v);
-    emit('ENTER', `start ${v} (grey)`, `Start course ${v} and colour it grey — it is now in progress on the recursion stack.`, v, null);
+    emit('ENTER', `start ${v} (grey)`, `Start course ${v} and colour it grey — it is now in progress on the recursion stack.`, { active: v, backEdge: null });
 
     for (const nb of adj[v]) {
       if (color[nb] === 1) {
@@ -74,22 +60,21 @@ function record({ adj, pos }: CSInput): Frame<CSState>[] {
           'BACK',
           `cycle ${v}→${nb}`,
           `Course ${v} unlocks ${nb}, but ${nb} is grey and still in progress — a circular dependency. Not all courses can be finished.`,
-          v,
-          [v, nb],
+          { active: v, backEdge: [v, nb] },
           'bad',
         );
         return true;
       }
       if (color[nb] === 0) {
-        emit('WALK', `${v}→${nb}`, `Course ${v} unlocks white course ${nb}; recurse into ${nb} first.`, v, [v, nb]);
+        emit('WALK', `${v}→${nb}`, `Course ${v} unlocks white course ${nb}; recurse into ${nb} first.`, { active: v, backEdge: [v, nb] });
         if (dfs(nb)) return true;
-        emit('RESUME', `resume ${v}`, `Back at course ${v} after clearing everything reachable from ${nb}; check its remaining unlocks.`, v, null);
+        emit('RESUME', `resume ${v}`, `Back at course ${v} after clearing everything reachable from ${nb}; check its remaining unlocks.`, { active: v, backEdge: null });
       }
     }
 
     color[v] = 2;
     stack.pop();
-    emit('LEAVE', `clear ${v} (black)`, `Course ${v} has all its unlocks cleared — colour it black and remove it from the stack.`, v, null);
+    emit('LEAVE', `clear ${v} (black)`, `Course ${v} has all its unlocks cleared — colour it black and remove it from the stack.`, { active: v, backEdge: null });
     return false;
   };
 
@@ -100,20 +85,29 @@ function record({ adj, pos }: CSInput): Frame<CSState>[] {
   }
 
   if (cycle) {
-    emit('DONE', 'canFinish: false', 'A circular dependency was found, so the courses cannot all be finished. Answer: false.', null, null, 'bad');
+    emit('DONE', 'canFinish: false', 'A circular dependency was found, so the courses cannot all be finished. Answer: false.', { active: null, backEdge: null, done: true }, 'bad');
   } else {
-    emit('DONE', 'canFinish: true', 'Every course cleared with no circular dependency, so all courses can be finished. Answer: true.', null, null, 'good');
+    emit('DONE', 'canFinish: true', 'Every course cleared with no circular dependency, so all courses can be finished. Answer: true.', { active: null, backEdge: null, done: true }, 'good');
   }
   return frames;
 }
 
 function View({ frame }: PluginViewProps<CSState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailStack label="dfs stack" items={s.stack.map(String)} />
+      <RailGroup label="scan">
+        <RailStat k="node" v={s.active ?? '—'} tone="accent" />
+        <RailStat k="back edge" v={s.backEdge ? `${s.backEdge[0]}→${s.backEdge[1]}` : '—'} tone={s.backEdge ? 'bad' : undefined} />
+      </RailGroup>
+      {s.done && (
+        <RailResult label="canFinish" value={s.canFinish ? 'true' : 'false'} tone={s.canFinish ? 'good' : 'bad'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        canFinish? <span className="font-mono text-ink">{s.done ? (s.canFinish ? 'true' : 'false') : '…'}</span>
-      </div>
+    <VizStage rail={rail}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -124,7 +118,7 @@ function View({ frame }: PluginViewProps<CSState>) {
         directed
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -157,7 +151,7 @@ const CYCLIC: CSInput = {
 export const manifestId = 'imp-20-course-schedule';
 export const title = 'Course Schedule';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'acyclic', label: 'no cycle (true)', value: ACYCLIC },
     { id: 'cyclic', label: 'cycle (false)', value: CYCLIC },

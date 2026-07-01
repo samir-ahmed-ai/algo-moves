@@ -3,8 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
-import { cn } from '../../lib/cn';
-import { InspectorRow, VizEmpty, VizInspector, vizText } from '../_shared/vizKit';
+import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface WindowInput {
   values: number[];
@@ -91,13 +90,15 @@ function View({ frame }: PluginViewProps<WindowState>) {
     return '';
   };
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        sum = <span className="font-mono text-ink">{s.sum}</span>
-        {' · '}best = <span className="font-mono text-ink">{s.best}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="window">
+        <RailStat k="sum" v={s.sum} tone="accent" />
+        <RailStat k="best" v={s.best} tone={s.done ? 'good' : undefined} />
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.best} tone="good" />}
+    </>}>
       <ArrayRow values={s.values} windowRange={[s.left, s.right]} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 

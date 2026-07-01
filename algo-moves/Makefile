@@ -23,4 +23,4 @@ typecheck: ## Run TypeScript without emitting
 check: typecheck build ## Run typecheck and production build
 
 clean: ## Remove build artifacts and Vite cache
-	rm -rf dist node_modules/.vite tsconfig.tsbuildinfo
+	rm -rf dist node_modules/.vite tsconfig.tsbuildinfo tsconfig.node.tsbuildinfo vite.config.js vite.config.d.ts

@@ -1,5 +1,6 @@
 import { cn } from '../../../../lib/cn';
-import { nodeText, RADIUS_CTRL } from '../../nodeui';
+import { Code2 } from 'lucide-react';
+import { nodeIconGlyph, nodeText, PanelHeaderAction, RADIUS_CTRL } from '../../nodeui';
 
 /** All language variants of a plugin's solution: the primary `code` plus `extraCode` (#71). */
 export function codeVariants(plugin: {
@@ -40,5 +41,33 @@ export function LangTabs({
         </button>
       ))}
     </div>
+  );
+}
+
+/** Icon-based language tabs for Code Studio panel headers. */
+export function HeaderLangTabs({
+  variants,
+  active,
+  onPick,
+}: {
+  variants: { lang?: string; file?: string }[];
+  active: number;
+  onPick: (i: number) => void;
+}) {
+  if (variants.length < 2) return null;
+  return (
+    <>
+      {variants.map((v, i) => (
+        <PanelHeaderAction
+          key={i}
+          variant="toggle"
+          active={i === active}
+          onClick={() => onPick(i)}
+          title={`${(v.lang ?? 'text').toUpperCase()}${v.file ? ` · ${v.file}` : ''}`}
+        >
+          <Code2 className={nodeIconGlyph} />
+        </PanelHeaderAction>
+      ))}
+    </>
   );
 }

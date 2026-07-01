@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { useCanvasStatic } from '../CanvasContext';
-import { Btn, Code, Hint } from '../nodeui';
+import { Btn, Code, Hint, nodeIconGlyph } from '../nodeui';
+import { COPY_FEEDBACK_MS } from '../../copyFeedback';
 import { codeVariants, LangTabs } from './shared/codeVariants';
 
 export function CopyPanelBody() {
@@ -18,7 +19,7 @@ export function CopyPanelBody() {
     try {
       await navigator.clipboard.writeText(code);
       setStatus('copied');
-      setTimeout(() => setStatus('idle'), 1400);
+      setTimeout(() => setStatus('idle'), COPY_FEEDBACK_MS);
     } catch {
       const pre = preRef.current;
       const sel = window.getSelection();
@@ -42,7 +43,7 @@ export function CopyPanelBody() {
           variant="good"
           size="sm"
           onClick={copy}
-          icon={status === 'copied' ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          icon={status === 'copied' ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />}
         >
           {status === 'copied' ? 'Copied' : 'Copy'}
         </Btn>

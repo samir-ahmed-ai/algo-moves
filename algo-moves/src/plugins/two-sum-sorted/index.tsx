@@ -3,8 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
-import { cn } from '../../lib/cn';
-import { InspectorRow, VizEmpty, VizInspector, vizText } from '../_shared/vizKit';
+import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface TwoSumInput {
   values: number[];
@@ -71,18 +70,20 @@ function View({ frame }: PluginViewProps<TwoSumState>) {
     if (i < s.left || i > s.right) return 'dead';
     return '';
   };
+  const resultValue = s.found ? `[${s.found[0]}, ${s.found[1]}]` : s.done ? 'none' : '…';
+  const resultTone = s.found ? 'good' : s.done ? 'bad' : 'accent';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target = <span className="font-mono text-ink">{s.target}</span>
-        {s.sum !== null && (
-          <>
-            {' · '}sum = <span className="font-mono text-ink">{s.sum}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="target" v={s.target} />
+        <RailStat k="L[i]" v={s.values[s.left]} tone="accent" />
+        <RailStat k="R[j]" v={s.values[s.right]} tone="bad" />
+        <RailStat k="sum" v={s.sum ?? '—'} tone={s.sum !== null ? 'accent' : undefined} />
+      </RailGroup>
+      <RailResult label="answer" value={resultValue} tone={resultTone} />
+    </>}>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 

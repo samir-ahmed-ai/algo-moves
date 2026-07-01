@@ -25,9 +25,6 @@ export interface ProblemSimulator {
   practice?: PracticeBundle;
 }
 
-/** @deprecated Use ProblemSimulator */
-export type DpSimulator = ProblemSimulator;
-
 /** Shape each `simulators/problems/*.tsx` file must export. */
 export interface ProblemModule {
   /** Must equal the imported manifest `id` (e.g. imp-58-climbing-stairs). */
@@ -37,6 +34,9 @@ export interface ProblemModule {
   simulator: ProblemSimulator;
   practice?: PracticeBundle;
 }
+
+/** @deprecated Use ProblemSimulator */
+export type DpSimulator = ProblemSimulator;
 
 /** @deprecated Use ProblemModule */
 export type DpModule = ProblemModule;

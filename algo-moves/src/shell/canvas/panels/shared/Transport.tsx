@@ -17,7 +17,7 @@ import { useWorkspace } from '../../../../lib/workspace';
 import { cn } from '../../../../lib/cn';
 import { CHROME_BTN } from '../../../chrome';
 import { useCanvasFrame } from '../../CanvasContext';
-import { nodeText, RADIUS_CTRL } from '../../nodeui';
+import { nodeIconGlyph, nodeText, RADIUS_CTRL } from '../../nodeui';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 4];
 
@@ -47,7 +47,7 @@ export function Transport() {
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1">
         <button onClick={player.prev} disabled={player.index === 0} className={btn} aria-label="previous move">
-          <SkipBack className="h-3 w-3" />
+          <SkipBack className={nodeIconGlyph} />
         </button>
         <button
           onClick={player.toggleReverse}
@@ -58,7 +58,7 @@ export function Transport() {
           title={player.reversed ? 'playing backward' : 'play backward'}
           aria-label="toggle reverse playback"
         >
-          <Rewind className="h-3 w-3" />
+          <Rewind className={nodeIconGlyph} />
         </button>
         <button
           onClick={player.togglePlay}
@@ -68,7 +68,7 @@ export function Transport() {
           )}
           aria-label={player.isPlaying ? 'pause' : 'play'}
         >
-          {player.isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+          {player.isPlaying ? <Pause className={nodeIconGlyph} /> : <Play className={nodeIconGlyph} />}
         </button>
         <button
           onClick={player.next}
@@ -76,10 +76,10 @@ export function Transport() {
           className={btn}
           aria-label="next move"
         >
-          <SkipForward className="h-3 w-3" />
+          <SkipForward className={nodeIconGlyph} />
         </button>
         <button onClick={player.reset} className={btn} aria-label="reset">
-          <RotateCcw className="h-3 w-3" />
+          <RotateCcw className={nodeIconGlyph} />
         </button>
         <span className={cn('ml-1 font-mono text-ink3', nodeText.xs)}>
           {player.index + 1}/{player.total}
@@ -94,7 +94,7 @@ export function Transport() {
           title={bookmarked ? 'remove bookmark' : 'bookmark this frame'}
           aria-label="toggle bookmark"
         >
-          {bookmarked ? <Bookmark className="h-3 w-3 fill-current" /> : <BookmarkPlus className="h-3 w-3" />}
+          {bookmarked ? <Bookmark className={cn(nodeIconGlyph, 'fill-current')} /> : <BookmarkPlus className={nodeIconGlyph} />}
         </button>
         <button
           onClick={() => toggleTweak('narrate')}
@@ -105,7 +105,7 @@ export function Transport() {
           title={tweaks.narrate ? 'mute narration' : 'narrate captions'}
           aria-label="toggle narration"
         >
-          {tweaks.narrate ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
+          {tweaks.narrate ? <Volume2 className={nodeIconGlyph} /> : <VolumeX className={nodeIconGlyph} />}
         </button>
         <button
           onClick={() => toggleTweak('moveLog')}
@@ -116,7 +116,7 @@ export function Transport() {
           title={tweaks.moveLog ? 'hide moves' : 'show moves'}
           aria-label="toggle moves"
         >
-          <ListOrdered className="h-3 w-3" />
+          <ListOrdered className={nodeIconGlyph} />
         </button>
       </div>
 
@@ -131,7 +131,7 @@ export function Transport() {
       />
 
       <div className="flex items-center gap-1.5">
-        <Gauge className="h-3.5 w-3.5 text-ink3" />
+        <Gauge className={cn(nodeIconGlyph, 'text-ink3')} />
         <select
           value={player.speed}
           onChange={(e) => player.setSpeed(Number(e.target.value))}
@@ -148,7 +148,7 @@ export function Transport() {
           ))}
         </select>
         <div className="flex-1" />
-        <Repeat className={cn('h-3.5 w-3.5', looping ? 'text-accent' : 'text-ink3')} />
+        <Repeat className={cn(nodeIconGlyph, looping ? 'text-accent' : 'text-ink3')} />
         <button
           onClick={setA}
           className={cn(`nodrag px-1 py-0.5 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`, nodeText.xs)}

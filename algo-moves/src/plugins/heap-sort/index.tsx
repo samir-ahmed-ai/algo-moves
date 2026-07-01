@@ -3,7 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
-import { InspectorRow } from '../_shared/vizKit';
+import { InspectorRow, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 import { SortInspector } from '../_shared/sortInspector';
 
 export interface SortInput {
@@ -165,9 +165,21 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <div className="board-area">
+    <VizStage rail={
+      <>
+        <RailGroup label="phase">
+          <RailStat k="phase" v={s.phase} tone={s.phase === 'done' ? 'good' : 'accent'} />
+          <RailStat k="heap" v={s.heapSize} />
+        </RailGroup>
+        <RailGroup label="ops">
+          <RailStat k="cmp" v={s.comparisons} />
+          <RailStat k="swap" v={s.swaps} />
+        </RailGroup>
+        {s.phase === 'done' && <RailResult label="result" value="sorted" tone="good" />}
+      </>
+    }>
       <ArrayBars values={s.values} tone={tone} height={242} />
-    </div>
+    </VizStage>
   );
 }
 

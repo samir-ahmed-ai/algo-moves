@@ -31,7 +31,7 @@ import {
   FileText,
 } from 'lucide-react';
 
-const PANEL_ICON = 'size-[var(--node-icon,16px)]';
+const PANEL_ICON = 'size-[var(--node-icon,1.125rem)]';
 
 const ICON: Record<string, ReactNode> = {
   examples: <ListChecks className={PANEL_ICON} />,

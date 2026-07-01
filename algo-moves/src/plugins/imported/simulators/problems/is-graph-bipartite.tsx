@@ -1,10 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import { QueueTape } from '../../../../components/QueueTape';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface BipInput {
   adj: number[][];
@@ -27,40 +26,25 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
   const n = adj.length;
   const color = new Array<number>(n).fill(0);
   const queue: number[] = [];
-  const frames: Frame<BipState>[] = [];
   let bipartite: boolean | null = null;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    inspect: number | null,
-    clashEdge: [number, number] | null,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
-        color: color.slice(),
-        active,
-        inspect,
-        clashEdge,
-        queue: queue.slice(),
-        bipartite,
-        done: type === 'DONE',
-      },
-    });
+  const { emit, frames } = createRecorder<BipState>(() => ({
+    adj,
+    pos,
+    color: color.slice(),
+    active: null,
+    inspect: null,
+    clashEdge: null,
+    queue: queue.slice(),
+    bipartite,
+    done: false,
+  }));
 
   emit(
     'INIT',
     'two colours',
     'Try to 2-colour the graph: every edge must join two differently coloured nodes. We BFS from each component, painting each neighbour the opposite colour of its parent. A same-colour edge proves the graph is not bipartite.',
-    null,
-    null,
-    null,
+    { active: null, inspect: null, clashEdge: null },
   );
 
   for (let i = 0; i < n; i++) {
@@ -71,9 +55,7 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
       'SEED',
       `paint ${i} team-1`,
       `Node ${i} is uncoloured, so start a new BFS here: paint it team-1 and queue it.`,
-      i,
-      null,
-      null,
+      { active: i, inspect: null, clashEdge: null },
     );
 
     while (queue.length > 0) {
@@ -82,9 +64,7 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
         'VISIT',
         `expand ${v}`,
         `Dequeue node ${v} (team-${color[v]}) and inspect its neighbours.`,
-        v,
-        null,
-        null,
+        { active: v, inspect: null, clashEdge: null },
       );
 
       for (const nb of adj[v]) {
@@ -95,9 +75,7 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
             'PAINT',
             `paint ${nb} team-${color[nb]}`,
             `Neighbour ${nb} is uncoloured — paint it team-${color[nb]}, the opposite of node ${v}, and queue it.`,
-            v,
-            nb,
-            null,
+            { active: v, inspect: nb, clashEdge: null },
           );
         } else if (color[nb] === color[v]) {
           bipartite = false;
@@ -105,21 +83,17 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
             'CLASH',
             `edge ${v}-${nb} clashes`,
             `Edge ${v}-${nb} joins two team-${color[v]} nodes — a same-colour edge. The graph cannot be 2-coloured, so it is NOT bipartite.`,
-            v,
-            nb,
-            [v, nb],
+            { active: v, inspect: nb, clashEdge: [v, nb] },
             'bad',
           );
-          emit('DONE', 'not bipartite', 'Result: the graph is NOT bipartite (false).', null, null, [v, nb], 'bad');
+          emit('DONE', 'not bipartite', 'Result: the graph is NOT bipartite (false).', { active: null, inspect: null, clashEdge: [v, nb], bipartite, done: true }, 'bad');
           return frames;
         } else {
           emit(
             'OK',
             `edge ${v}-${nb} ok`,
             `Neighbour ${nb} is already team-${color[nb]}, opposite to node ${v} — this edge is consistent.`,
-            v,
-            nb,
-            null,
+            { active: v, inspect: nb, clashEdge: null },
           );
         }
       }
@@ -127,20 +101,31 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
   }
 
   bipartite = true;
-  emit('DONE', 'bipartite', 'Every edge joins opposite colours. The graph IS bipartite (true).', null, null, null, 'good');
+  emit('DONE', 'bipartite', 'Every edge joins opposite colours. The graph IS bipartite (true).', { active: null, inspect: null, clashEdge: null, bipartite, done: true }, 'good');
   return frames;
 }
 
 function View({ frame }: PluginViewProps<BipState>) {
   const s = frame.state;
+  const painted = s.color.filter((c) => c !== 0).length;
+  const rail = (
+    <>
+      <RailStack label="queue" items={s.queue.map(String)} highlightEnd="bottom" topLabel="front" />
+      <RailGroup label="scan">
+        <RailStat k="current" v={s.active ?? '—'} tone="accent" />
+        <RailStat k="painted" v={`${painted}/${s.adj.length}`} />
+      </RailGroup>
+      {s.bipartite !== null && (
+        <RailResult
+          label="bipartite"
+          value={s.bipartite ? 'true' : 'false'}
+          tone={s.bipartite ? 'good' : 'bad'}
+        />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        2-colouring —{' '}
-        <span className="font-mono text-ink">
-          {s.bipartite === null ? 'in progress' : s.bipartite ? 'bipartite' : 'NOT bipartite'}
-        </span>
-      </div>
+    <VizStage rail={rail}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -151,8 +136,7 @@ function View({ frame }: PluginViewProps<BipState>) {
         edgeTone="clash"
         height={260}
       />
-      <QueueTape items={s.queue} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -194,7 +178,7 @@ const TRIANGLE: BipInput = {
 export const manifestId = 'imp-7-is-graph-bipartite';
 export const title = 'Is Graph Bipartite?';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'even-cycle', label: '4-cycle (bipartite)', value: EVEN_CYCLE },
     { id: 'triangle', label: 'triangle (not)', value: TRIANGLE },

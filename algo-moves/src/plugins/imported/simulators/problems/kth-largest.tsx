@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface KthInput {
   nums: number[];
@@ -27,7 +27,6 @@ interface KthState {
 }
 
 function record({ nums, k }: KthInput): Frame<KthState>[] {
-  const frames: Frame<KthState>[] = [];
   const a = nums.slice();
   const n = a.length;
   const target = n - k; // k-th largest sits at this 0-indexed position once sorted
@@ -36,33 +35,36 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
   let answer: number | null = null;
   let found: number | null = null;
 
-  const emit = (
+  const { emit, frames } = createRecorder<KthState>(() => ({
+    values: a.slice(),
+    k,
+    target,
+    lo: 0,
+    hi: n - 1,
+    pivotIdx: null,
+    pivot: null,
+    i: null,
+    pos: null,
+    swapped: null,
+    dead: dead.slice(),
+    found,
+    answer,
+    done: false,
+  }), {
+    merge: (base, partial) => ({
+      ...base,
+      ...partial,
+      done: partial.done ?? base.done,
+    }),
+  });
+
+  const emitDone = (
     type: string,
     note: string,
     caption: string,
     extra: Partial<KthState>,
     tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        values: a.slice(),
-        k,
-        target,
-        lo: 0,
-        hi: n - 1,
-        pivotIdx: null,
-        pivot: null,
-        i: null,
-        pos: null,
-        swapped: null,
-        dead: dead.slice(),
-        found,
-        answer,
-        done: tone != null,
-        ...extra,
-      },
-    });
+  ) => emit(type, note, caption, { ...extra, done: true }, tone);
 
   emit(
     'INIT',
@@ -81,7 +83,7 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
     if (lo === hi) {
       answer = a[lo];
       found = lo;
-      emit(
+      emitDone(
         'BASE',
         `a[${lo}]=${a[lo]}`,
         `Window collapsed to a single cell at index ${lo}. Its value ${a[lo]} is the element at the target position — that is the ${k}${k === 2 ? 'nd' : 'th'} largest. Answer = ${a[lo]}.`,
@@ -136,7 +138,7 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
     if (pos === target) {
       answer = a[pos];
       found = pos;
-      emit(
+      emitDone(
         'HIT',
         `idx ${pos}==${target}`,
         `Pivot landed exactly on the target index ${target}. Its value ${a[pos]} is the ${k}${k === 2 ? 'nd' : 'th'} largest element. Answer = ${a[pos]}.`,
@@ -184,14 +186,29 @@ function View({ frame }: PluginViewProps<KthState>) {
     if (s.dead[i]) return 'dead';
     return '';
   };
+  const rail = (
+    <>
+      <RailGroup label="params">
+        <RailStat k="k" v={s.k} />
+        <RailStat k="target" v={s.target} tone="accent" />
+      </RailGroup>
+      <RailGroup label="window">
+        <RailStat k="lo" v={live ? s.lo : '—'} tone="accent" />
+        <RailStat k="hi" v={live ? s.hi : '—'} tone="bad" />
+      </RailGroup>
+      <RailGroup label="partition">
+        <RailStat k="pivot" v={s.pivot ?? '—'} tone="warn" />
+        <RailStat k="pos" v={s.pos ?? '—'} />
+      </RailGroup>
+      {s.answer !== null && (
+        <RailResult label="answer" value={s.answer} tone="good" />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        quickselect · k = <span className="font-mono text-ink">{s.k}</span> · target index ={' '}
-        <span className="font-mono text-ink">{s.target}</span>
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -214,7 +231,7 @@ function Inspector({ frame }: InspectorProps<KthState>) {
 export const manifestId = 'imp-49-kth-largest-element-in-an-array';
 export const title = 'Kth Largest Element in an Array';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'k1', label: '[3,2,1,5,6,4], k=2 → 5', value: { nums: [3, 2, 1, 5, 6, 4], k: 2 } },
     { id: 'k2', label: '[3,2,3,1,2,4,5,5,6], k=4 → 4', value: { nums: [3, 2, 3, 1, 2, 4, 5, 5, 6], k: 4 } },

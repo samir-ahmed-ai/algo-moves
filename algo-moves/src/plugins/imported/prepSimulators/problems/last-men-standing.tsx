@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LastMenInput {
   n: number; // people standing in the circle, numbered 1..n
@@ -182,31 +181,25 @@ function View({ frame }: PluginViewProps<LastMenState>) {
     return '';
   };
 
-  const chain = s.ring.join(' → ');
+  const cur = s.curIdx !== null ? s.ring[s.curIdx] : null;
+  const doomed = s.doomedIdx !== null ? s.ring[s.doomedIdx] : null;
+
+  const rail = (
+    <>
+      <RailGroup label="ring">
+        <RailStat k="alive" v={s.ring.length} />
+        <RailStat k="cur" v={cur ?? '—'} tone="accent" />
+        <RailStat k="drop" v={doomed ?? '—'} tone={doomed !== null ? 'bad' : undefined} />
+      </RailGroup>
+      <RailStack label="eliminated" items={s.eliminated.map(String)} highlightEnd="bottom" topLabel="first" />
+      {s.survivor !== null && <RailResult label="survivor" value={s.survivor} tone="good" />}
+    </>
+  );
 
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        n = <span className="font-mono text-ink">{s.n}</span> · k ={' '}
-        <span className="font-mono text-ink">{s.k}</span>
-        {s.survivor !== null && (
-          <>
-            {' · '}survivor ={' '}
-            <span className="font-mono text-good">{s.survivor}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <ArrayRow values={s.ring} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        ring: {chain} → <span className="text-ink2">(back to {s.ring[0]})</span>
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        out [{s.eliminated.join(', ')}]
-      </div>
-      {s.survivor !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ survivor {s.survivor}</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

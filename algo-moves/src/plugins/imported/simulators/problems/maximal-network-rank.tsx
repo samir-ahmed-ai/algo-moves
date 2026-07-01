@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface RankInput {
   adj: number[][];
@@ -144,17 +143,27 @@ function View({ frame }: PluginViewProps<RankState>) {
     if (s.a === node || s.b === node) return 'team-1';
     return 'team-0';
   };
+  const pair = s.a !== null && s.b !== null ? `(${s.a},${s.b})` : '—';
+  const rail = (
+    <>
+      <RailGroup label="degrees">
+        {s.degrees.map((d, i) => (
+          <RailStat key={i} k={`${i}`} v={d} tone={s.scan === i ? 'accent' : undefined} />
+        ))}
+      </RailGroup>
+      <RailGroup label="pair">
+        <RailStat k="nodes" v={pair} tone={s.a !== null ? 'accent' : undefined} />
+        <RailStat k="rank" v={s.pairRank ?? '—'} />
+      </RailGroup>
+      <RailGroup label="best">
+        <RailStat k="rank" v={s.best} tone={s.best > 0 ? 'good' : undefined} />
+        <RailStat k="pair" v={s.bestPair ? `(${s.bestPair[0]},${s.bestPair[1]})` : '—'} />
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.best} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        max network rank <span className="font-mono text-ink">{s.best}</span>
-        {s.bestPair && (
-          <>
-            {' '}
-            @ <span className="font-mono text-ink">({s.bestPair[0]}, {s.bestPair[1]})</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={140}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -164,7 +173,7 @@ function View({ frame }: PluginViewProps<RankState>) {
         highlightEdge={s.edge}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -195,7 +204,7 @@ const G6: RankInput = {
 export const manifestId = 'imp-17-maximal-network-rank';
 export const title = 'Maximal Network Rank';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g5', label: '5 nodes', value: G5 },
     { id: 'g6', label: '6 nodes', value: G6 },

@@ -3,10 +3,10 @@
  * built from. Type scale mirrors `.algo-canvas` CSS tokens (`--node-fs*`).
  *
  * Type scale:
- *   title   15px (--node-fs-title) — panel header
- *   base    14px (--node-fs)        — body / options
- *   sm      13px (--node-fs-sm)     — secondary / meta
- *   xs      12px (--node-fs-xs)     — labels / chips / mono hints
+ *   title   1rem (--node-fs-title) — panel header
+ *   base    0.875rem (--node-fs)    — body / options
+ *   sm      0.8125rem (--node-fs-sm) — secondary / meta
+ *   xs      0.75rem (--node-fs-xs)   — labels / chips / mono hints
  */
 import {
   useEffect,
@@ -21,37 +21,41 @@ import {
   type TextareaHTMLAttributes,
 } from 'react';
 import { ChevronDown, GripVertical, MoreVertical, Search } from 'lucide-react';
-import { getTag, type TagKind } from '../../content/tags';
+import { getTag } from '../../content/tags';
+import { TAG_KIND_COLOR } from '../../content/tagColors';
 import { cn } from '../../lib/cn';
 
 export type HeaderDensity = 'compact' | 'ultra' | 'spacious';
 
-export type Tone = 'default' | 'accent' | 'good' | 'bad' | 'muted';
+export type UiTone = 'default' | 'accent' | 'good' | 'bad' | 'muted';
 
 /** Shared canvas node type scale — mirrors `--node-fs*` in theme.css. */
 export const nodeText = {
-  base: 'text-[length:var(--node-fs,14px)] leading-[var(--lh,1.4)]',
-  sm: 'text-[length:var(--node-fs-sm,13px)] leading-[var(--lh-snug,1.35)]',
-  xs: 'text-[length:var(--node-fs-xs,12px)] leading-[var(--lh-snug,1.35)]',
-  '2xs': 'text-[length:var(--node-fs-2xs,9px)] leading-[var(--lh-tight,1.25)]',
-  tight: 'text-[length:var(--node-fs-tight,11px)] leading-[var(--lh-tight,1.25)]',
-  title: 'text-[length:var(--node-fs-title,15px)] leading-[var(--lh-tight,1.25)]',
-  label: 'text-[length:var(--node-fs-xs,12px)] font-medium uppercase tracking-[0.05em] leading-[var(--lh-tight,1.25)]',
+  base: 'text-[length:var(--node-fs,0.875rem)] leading-[var(--lh,1.4)]',
+  sm: 'text-[length:var(--node-fs-sm,0.8125rem)] leading-[var(--lh-snug,1.35)]',
+  xs: 'text-[length:var(--node-fs-xs,0.75rem)] leading-[var(--lh-snug,1.35)]',
+  '2xs': 'text-[length:var(--node-fs-2xs,0.5625rem)] leading-[var(--lh-tight,1.25)]',
+  tight: 'text-[length:var(--node-fs-tight,0.6875rem)] leading-[var(--lh-tight,1.25)]',
+  title: 'text-[length:var(--node-fs-title,1rem)] leading-[var(--lh-tight,1.25)]',
+  label: 'text-[length:var(--node-fs-xs,0.75rem)] font-medium uppercase tracking-[0.05em] leading-[var(--lh-tight,1.25)]',
 } as const;
+
+/** Inner SVG sizing for node header/body icons — scales with `--node-icon`. */
+export const nodeIconGlyph = 'size-[var(--node-icon-glyph)]';
 
 /** Theme-aware border radii for controls and containers. */
 export const RADIUS_CTRL = 'rounded-[calc(var(--radius)-2px)]';
 export const RADIUS_SHELL = 'rounded-[var(--radius)]';
 
 /** Maps a difficulty label to the shared chip tone vocabulary. */
-export function difficultyTone(d?: string): Tone {
+export function difficultyTone(d?: string): UiTone {
   const k = (d ?? '').toLowerCase();
   if (k === 'easy') return 'good';
   if (k === 'hard') return 'bad';
   return 'accent';
 }
 
-const TONE_TEXT: Record<Tone, string> = {
+const TONE_TEXT: Record<UiTone, string> = {
   default: 'text-ink',
   accent: 'text-accent',
   good: 'text-good',
@@ -108,7 +112,7 @@ export function Section({
               onClick={() => setOpen((o) => !o)}
               className="nodrag flex flex-1 items-center gap-1.5 text-left transition-colors hover:opacity-80"
             >
-              <ChevronDown className={cn('h-3 w-3 text-ink3 transition-transform', !open && '-rotate-90')} />
+              <ChevronDown className={cn(nodeIconGlyph, 'text-ink3 transition-transform', !open && '-rotate-90')} />
               <Label>{title}</Label>
             </button>
           ) : (
@@ -159,7 +163,7 @@ export function Stat({
 }: {
   k: ReactNode;
   v: ReactNode;
-  tone?: Tone;
+  tone?: UiTone;
   mono?: boolean;
 }) {
   const flash = useFlash(typeof v === 'string' || typeof v === 'number' ? v : undefined);
@@ -191,7 +195,7 @@ export function StatGrid({ children, cols = 2 }: { children: ReactNode; cols?: n
 
 /* ------------------------------------------------------------------ meters */
 
-const TONE_BAR: Record<Tone, string> = {
+const TONE_BAR: Record<UiTone, string> = {
   default: 'var(--accent)',
   accent: 'var(--accent)',
   good: 'var(--good)',
@@ -208,7 +212,7 @@ export function Meter({
 }: {
   value: number;
   max?: number;
-  tone?: Tone;
+  tone?: UiTone;
   height?: number;
 }) {
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) * 100 : 0;
@@ -224,33 +228,25 @@ export function Meter({
 
 /* ------------------------------------------------------------------- chips */
 
-const TONE_CHIP: Record<Tone, string> = {
+const TONE_CHIP: Record<UiTone, string> = {
   default: 'bg-panel2 text-ink2',
   accent: 'bg-accentbg text-accent',
   good: 'bg-goodbg text-good',
   bad: 'bg-badbg text-bad',
   muted: 'bg-panel2 text-ink3',
 };
-
-const TAG_KIND_COLOR: Record<TagKind, string> = {
-  pattern: 'var(--accent)',
-  structure: 'var(--good)',
-  skill: 'var(--team2-stroke)',
-  meta: 'var(--text-3)',
-};
-
-/** Tag pill using canvas node tokens (scales with `.panel-node--ui-scale`). */
+/** Tag pill using canvas node tokens (scales with `.algo-canvas .panel-node`). */
 export function NodeTagChip({ id }: { id: string }) {
   const t = getTag(id);
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded bg-panel2 px-[calc(var(--node-px,10px)*0.5)] py-[calc(var(--node-py,7px)*0.35)] text-ink2',
+        'inline-flex items-center gap-1 rounded bg-panel2 px-[calc(var(--node-px,0.75rem)*0.5)] py-[calc(var(--node-py,0.5625rem)*0.35)] text-ink2',
         nodeText.xs,
       )}
     >
       <span
-        className="size-[calc(var(--node-icon,16px)*0.4)] shrink-0 rounded-full"
+        className="size-[calc(var(--node-icon,1.125rem)*0.4)] shrink-0 rounded-full"
         style={{ background: TAG_KIND_COLOR[t.kind] }}
       />
       {t.label}
@@ -265,14 +261,14 @@ export function Chip({
   className,
 }: {
   children: ReactNode;
-  tone?: Tone;
+  tone?: UiTone;
   mono?: boolean;
   className?: string;
 }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-[calc(var(--node-px,10px)*0.5)] py-[calc(var(--node-py,7px)*0.35)] font-medium leading-none',
+        'inline-flex items-center gap-1 rounded-full px-[calc(var(--node-px,0.75rem)*0.5)] py-[calc(var(--node-py,0.5625rem)*0.35)] font-medium leading-none',
         nodeText.xs,
         mono && 'font-mono tabular-nums',
         TONE_CHIP[tone],
@@ -292,7 +288,7 @@ type BtnSize = 'xs' | 'sm';
 const BTN_VARIANT: Record<BtnVariant, string> = {
   primary: 'bg-accent text-white hover:opacity-90',
   good: 'bg-good text-white hover:opacity-90',
-  ghost: 'border border-edge text-ink2 hover:border-accent/50 hover:bg-panel2 hover:text-ink',
+  ghost: 'bg-panel2/50 text-ink2 hover:bg-panel2 hover:text-ink',
   quiet: 'text-ink3 hover:bg-panel2 hover:text-ink',
   danger: 'text-bad hover:bg-badbg',
 };
@@ -408,7 +404,7 @@ export function SearchInput({
 }) {
   return (
     <div className="relative">
-      <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink3" />
+      <Search className={cn('pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink3', nodeIconGlyph)} />
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -426,7 +422,7 @@ export function EmptyState({ icon, title, hint }: { icon?: ReactNode; title: str
   return (
     <div className="flex flex-col items-center gap-1.5 px-3 py-5 text-center">
       {icon && (
-        <span className="grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] place-items-center rounded-full bg-panel2 text-ink3 [&>*]:size-[var(--node-icon,16px)]">
+        <span className="grid size-[calc(var(--node-icon,1.125rem)*1.6)] place-items-center rounded-full bg-panel2 text-ink3 [&>*]:size-[var(--node-icon-glyph)]">
           {icon}
         </span>
       )}
@@ -488,7 +484,7 @@ export function Pill({
   title,
 }: {
   children: ReactNode;
-  tone?: Tone;
+  tone?: UiTone;
   active?: boolean;
   onClick?: () => void;
   title?: string;
@@ -529,7 +525,7 @@ export function Row({
   children: ReactNode;
 }) {
   const cls = cn(
-    'flex items-center gap-[var(--node-gap,6px)] border-l-2 px-[var(--node-px,10px)] py-[calc(var(--node-py,7px)*0.75)] text-left transition-colors',
+    'flex items-center gap-[var(--node-gap,0.5rem)] border-l-2 px-[var(--node-px,0.75rem)] py-[calc(var(--node-py,0.5625rem)*0.75)] text-left transition-colors',
     nodeText.sm,
     active ? 'border-l-accent bg-accentbg/60 text-accent' : 'border-l-transparent text-ink2',
     onClick && !active && 'hover:bg-panel2 hover:text-ink',
@@ -546,14 +542,14 @@ export function Row({
 
 /* ----------------------------------------------------------------- banner */
 
-const TONE_BANNER: Record<Tone, string> = {
+const TONE_BANNER: Record<UiTone, string> = {
   default: 'bg-panel2/60 text-ink2',
   accent: 'bg-accentbg/70 text-ink2',
   good: 'bg-goodbg/70 text-ink2',
   bad: 'bg-badbg/70 text-ink2',
   muted: 'bg-panel2/50 text-ink3',
 };
-const TONE_LABEL: Record<Tone, string> = {
+const TONE_LABEL: Record<UiTone, string> = {
   default: 'text-ink3',
   accent: 'text-accent',
   good: 'text-good',
@@ -567,7 +563,7 @@ export function Banner({
   label,
   children,
 }: {
-  tone?: Tone;
+  tone?: UiTone;
   label?: string;
   children: ReactNode;
 }) {
@@ -593,7 +589,7 @@ export function CheckRow({
 }) {
   return (
     <label className={cn('nodrag flex cursor-pointer items-center gap-2 px-1.5 py-1 text-ink2 transition-colors hover:bg-panel2', nodeText.base, RADIUS_CTRL)}>
-      <input type="checkbox" checked={checked} onChange={onChange} className="h-3.5 w-3.5 accent-[var(--accent)]" />
+      <input type="checkbox" checked={checked} onChange={onChange} className="size-[var(--node-icon-glyph)] accent-[var(--accent)]" />
       <span className={cn('min-w-0 flex-1', checked && 'text-ink3 line-through')}>{children}</span>
     </label>
   );
@@ -676,20 +672,20 @@ export function Spark({ series, index }: { series: number[]; index: number }) {
 /* ----------------------------------------------------------- panel headers */
 
 const HEADER_PAD: Record<HeaderDensity, string> = {
-  compact: 'px-0 py-[var(--node-py,7px)] gap-[var(--node-gap,6px)]',
-  ultra: 'px-0 py-[var(--node-py,7px)] gap-[var(--node-gap,6px)]',
-  spacious: 'px-0 py-[var(--node-py,7px)] gap-[var(--node-gap,6px)]',
+  compact: 'px-0 py-[var(--node-py,0.5625rem)] gap-[var(--node-gap,0.5rem)]',
+  ultra: 'px-0 py-[var(--node-py,0.5625rem)] gap-[var(--node-gap,0.5rem)]',
+  spacious: 'px-0 py-[var(--node-py,0.5625rem)] gap-[var(--node-gap,0.5rem)]',
 };
 
 const HEADER_ICON: Record<HeaderDensity, string> = {
-  compact: 'grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,16px)]',
-  ultra: 'grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,16px)]',
-  spacious: 'grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,16px)]',
+  compact: 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,1.125rem)]',
+  ultra: 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,1.125rem)]',
+  spacious: 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,1.125rem)]',
 };
 
 const HEADER_TITLE: Record<HeaderDensity, string> = {
   compact: nodeText.title,
-  ultra: nodeText.sm,
+  ultra: nodeText.title,
   spacious: nodeText.title,
 };
 
@@ -730,16 +726,16 @@ export function PanelHeaderGrip({ density = 'compact' }: { density?: HeaderDensi
       className={cn(
         'grid shrink-0 cursor-grab place-items-center text-ink3 active:cursor-grabbing',
         density === 'spacious'
-          ? 'h-[calc(var(--node-icon,16px)*1.1)] w-[calc(var(--node-icon,16px)*0.65)]'
-          : 'h-[var(--node-icon,16px)] w-[calc(var(--node-icon,16px)*0.65)]',
+          ? 'h-[calc(var(--node-icon,1.125rem)*1.1)] w-[calc(var(--node-icon,1.125rem)*0.65)]'
+          : 'h-[var(--node-icon,1.125rem)] w-[calc(var(--node-icon,1.125rem)*0.65)]',
       )}
       aria-hidden
     >
       <GripVertical
         className={cn(
           density === 'spacious'
-            ? 'h-[calc(var(--node-icon,16px)*1.1)] w-[calc(var(--node-icon,16px)*1.1)]'
-            : 'h-[var(--node-icon,16px)] w-[var(--node-icon,16px)]',
+            ? 'h-[calc(var(--node-icon,1.125rem)*1.1)] w-[calc(var(--node-icon,1.125rem)*1.1)]'
+            : 'h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)]',
         )}
       />
     </span>
@@ -850,18 +846,18 @@ export function PanelHeaderAction({
       aria-label={title}
       aria-pressed={active}
       className={cn(
-        'nodrag place-items-center rounded-[calc(var(--radius)-2px)] p-0.5 transition-colors disabled:opacity-30',
+        'nodrag place-items-center rounded-[calc(var(--radius)-2px)] p-[calc(var(--node-py,0.5625rem)*0.35)] transition-colors disabled:opacity-30',
         label
           ? cn(
-              'flex h-auto min-h-[var(--node-icon,16px)] w-auto items-center gap-1 px-[calc(var(--node-px,10px)*0.5)]',
+              'flex h-auto min-h-[calc(var(--node-icon,1.125rem)*1.1)] w-auto items-center gap-1 px-[calc(var(--node-px,0.75rem)*0.5)]',
               nodeText.xs,
             )
-          : 'grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)]',
+          : 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)]',
         variant === 'primary' &&
           (active ? 'bg-accent text-ink' : 'text-ink3 hover:bg-panel2 hover:text-ink'),
         variant === 'toggle' &&
           (active ? 'text-accent hover:bg-panel2' : 'text-ink3 hover:bg-panel2 hover:text-ink'),
-        variant === 'ghost' && 'text-ink3 hover:bg-panel2 hover:text-ink',
+        variant === 'ghost' && 'text-ink3 hover:bg-panel2/80 hover:text-ink',
         className,
       )}
     >
@@ -902,7 +898,7 @@ export function PanelHeaderMenu({
   return (
     <div ref={ref} className="relative">
       <PanelHeaderAction variant="toggle" active={open} title={title} onClick={() => setOpen((o) => !o)}>
-        <MoreVertical className="h-3 w-3" />
+        <MoreVertical className={nodeIconGlyph} />
       </PanelHeaderAction>
       {open && (
         <div className="absolute right-0 top-[calc(100%+4px)] z-50 min-w-[168px] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel py-1 shadow-[var(--shadow-xl)]">
@@ -1141,7 +1137,7 @@ export function ControlsAccordion({
         {accent && <span className="h-1 w-1 shrink-0 rounded-full" style={{ background: accent }} aria-hidden />}
         <span className="min-w-0 flex-1 truncate text-left">{title}</span>
         {right}
-        <ChevronDown className={cn('ml-auto h-3 w-3 shrink-0 transition-transform', !open && '-rotate-90')} />
+        <ChevronDown className={cn('ml-auto shrink-0 transition-transform', nodeIconGlyph, !open && '-rotate-90')} />
       </button>
       {open && (
         <div className={cn('flex flex-col gap-1 pb-1', fill && 'min-h-0 flex-1 overflow-hidden', bodyClassName)}>
@@ -1189,7 +1185,7 @@ export function PanelBody({
     <div
       className={cn(
         'panel-node-body nowheel flex flex-col text-ink',
-        flush ? 'gap-0 rounded-none bg-transparent p-0' : cn('gap-[var(--node-gap,10px)] rounded-[calc(var(--radius)-2px)] bg-panel'),
+        flush ? 'gap-0 rounded-none bg-transparent p-0' : cn('gap-[var(--node-gap,0.5rem)] rounded-[calc(var(--radius)-2px)] bg-panel'),
         fill ? 'min-h-0 flex-1 overflow-hidden' : 'shrink-0 overflow-x-auto',
         pad,
         className,

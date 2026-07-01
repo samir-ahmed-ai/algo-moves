@@ -30,12 +30,16 @@
   --bad: #a32d2d;
   --bad-bg: #fceaea;
 
-  --radius: 8px;
+  --radius: 0.625rem;
   --border-width: 1px;
   --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.1);
   --shadow-md: 0 2px 4px hsl(0 0% 0% / 0.12);
   --shadow-lg: 0 4px 6px hsl(0 0% 0% / 0.15);
   --shadow-xl: 0 8px 10px hsl(0 0% 0% / 0.18);
+  --node-shadow: 0 1px 2px hsl(0 0% 0% / 0.06), 0 8px 24px hsl(0 0% 0% / 0.14);
+  --node-shadow-hover: 0 2px 4px hsl(0 0% 0% / 0.08), 0 12px 32px hsl(0 0% 0% / 0.18);
+  --node-shadow-selected: 0 4px 8px hsl(0 0% 0% / 0.1), 0 16px 40px hsl(0 0% 0% / 0.22);
+  --node-icon-glyph: calc(var(--node-icon, 1.125rem) * 0.72);
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 
@@ -78,6 +82,9 @@
     --shadow-md: 0 2px 4px hsl(0 0% 0% / 0.25);
     --shadow-lg: 0 4px 6px hsl(0 0% 0% / 0.3);
     --shadow-xl: 0 8px 10px hsl(0 0% 0% / 0.35);
+    --node-shadow: 0 1px 2px hsl(0 0% 0% / 0.12), 0 8px 24px hsl(0 0% 0% / 0.22);
+    --node-shadow-hover: 0 2px 4px hsl(0 0% 0% / 0.16), 0 12px 32px hsl(0 0% 0% / 0.28);
+    --node-shadow-selected: 0 4px 8px hsl(0 0% 0% / 0.2), 0 16px 40px hsl(0 0% 0% / 0.34);
 }
 
 * {
@@ -150,6 +157,229 @@ button {
   height: auto;
   max-width: none;
 }
+
+/* ------------------------------------------------------------------ *
+ * Staged board — stable main animation + subtle right-hand state rail.
+ * The rail holds the values that mutate frame-to-frame so they no longer
+ * live below the animation and change its measured height every step.
+ * ------------------------------------------------------------------ */
+.viz-stage {
+  --viz-rail-w: 128px;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 14px;
+  min-height: 132px;
+}
+.viz-stage-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+  justify-content: center;
+}
+/* The rail spans the row height but never contributes to it: the scroll
+   layer is absolutely positioned, so a growing stack cannot push the
+   board's natural size and trigger a fit-rescale. */
+.viz-rail {
+  position: relative;
+  flex: 0 0 var(--viz-rail-w);
+  width: var(--viz-rail-w);
+  align-self: stretch;
+  border-left: 1px solid color-mix(in srgb, var(--edge) 65%, transparent);
+}
+.viz-rail-scroll {
+  position: absolute;
+  inset: 1px 1px 1px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  /* soft fade at the clipped ends so overflow feels intentional, not cut */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 8px,
+    #000 calc(100% - 8px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 8px,
+    #000 calc(100% - 8px),
+    transparent 100%
+  );
+}
+.viz-rail-scroll::-webkit-scrollbar {
+  display: none;
+}
+.viz-rail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.viz-rail-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.viz-rail-hint {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-3);
+  opacity: 0.8;
+}
+.viz-rail-edge {
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+.viz-rail-edge--bottom {
+  color: var(--text-3);
+}
+
+/* stack / queue column */
+.viz-rail-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.viz-rail-empty {
+  color: var(--text-3);
+  padding: 2px 0;
+}
+.viz-rail-chip {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border-radius: calc(var(--radius) - 3px);
+  border: 1px solid var(--edge);
+  background: color-mix(in srgb, var(--panel-2, var(--surface-2)) 70%, transparent);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease;
+  animation: viz-rail-pop 0.24s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.viz-rail-chip--accent {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.viz-rail-chip--good {
+  border-color: var(--good);
+  background: var(--good-bg);
+  color: var(--good);
+}
+.viz-rail-chip--bad {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.viz-rail-chip--warn {
+  border-color: color-mix(in srgb, var(--warn, var(--accent)) 60%, var(--edge));
+  color: var(--warn, var(--accent));
+}
+@keyframes viz-rail-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* compact stats */
+.viz-rail-group {
+  display: flex;
+  flex-direction: column;
+}
+.viz-rail-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 0;
+  border-top: 1px solid color-mix(in srgb, var(--edge) 45%, transparent);
+}
+.viz-rail-group > .viz-rail-stat:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.viz-rail-stat-k {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.viz-rail-stat-v {
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.25s ease;
+}
+.viz-rail-stat-v--accent {
+  color: var(--accent);
+}
+.viz-rail-stat-v--good {
+  color: var(--good);
+}
+.viz-rail-stat-v--bad {
+  color: var(--bad);
+}
+.viz-rail-stat-v--warn {
+  color: var(--warn, var(--accent));
+}
+
+/* running / final answer */
+.viz-rail-result {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--good);
+  background: var(--good-bg);
+  color: var(--good);
+}
+.viz-rail-result--accent {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.viz-rail-result--bad {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.viz-rail-result--warn {
+  border-color: color-mix(in srgb, var(--warn, var(--accent)) 60%, var(--edge));
+  color: var(--warn, var(--accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viz-rail-chip {
+    animation: none;
+  }
+}
 /* Viz board column: the board renders at its natural size inside a fit wrapper;
    VizFitBox scales it to fit the column. Keep inner boards intrinsically sized
    so FitBox measures the correct natural dimensions. */
@@ -198,6 +428,24 @@ button {
 }
 .viz-board-col--fit .board-area--text {
   min-width: min(320px, 100%);
+}
+/* Staged board: measure the whole row (main + rail) at natural size so the
+   fit box scales them together. The rail keeps a fixed width; the main
+   region sizes to its content. `> .flex` reset above must NOT apply here. */
+.viz-board-col--fit .viz-stage {
+  width: max-content;
+  max-width: 100%;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.viz-board-col--fit .viz-stage-main {
+  width: max-content;
+  max-width: calc(100% - var(--viz-rail-w) - 14px);
+}
+.viz-board-col--fit .viz-stage > .viz-stage-main,
+.viz-board-col--fit .viz-stage > .viz-rail {
+  align-self: stretch;
 }
 
 .case-preview-fit {
@@ -509,9 +757,6 @@ circle {
   color: var(--text-2);
 }
 
-.code-studio-reassemble {
-  overflow-y: auto;
-}
 .code-studio-reassemble .reassemble-bar {
   display: flex;
   align-items: center;
@@ -593,10 +838,7 @@ circle {
   border: 0.5px dashed var(--border-strong);
   border-radius: var(--radius);
   padding: var(--space-2);
-  min-height: 56px;
   margin-bottom: var(--space-2);
-  flex: 1;
-  overflow-y: auto;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .code-studio-reassemble .assembled-drag-over {
@@ -628,10 +870,8 @@ circle {
   padding: var(--space-2) var(--space-1) var(--space-1);
 }
 .code-studio-reassemble .next-slot {
-  display: flex;
-  gap: var(--space-2);
+  display: block;
   padding: var(--space-1) var(--space-2);
-  border-left: 2px dashed var(--border-strong);
   opacity: 0.55;
 }
 .code-studio-reassemble .next-slot-text {
@@ -710,10 +950,10 @@ circle {
   color: var(--team1-stroke);
   font-weight: 600;
 }
-.code-studio-reassemble .tray-piece-signature-entry {
-  border-color: color-mix(in srgb, var(--team2-stroke) 55%, var(--border-strong));
+.code-studio-reassemble .tray-piece-signature-entry .blk {
+  --blk-stroke: color-mix(in srgb, var(--team2-stroke) 55%, var(--border-strong));
 }
-.code-studio-reassemble .piece.placed-enter {
+.code-studio-reassemble .placed-enter .blk {
   animation: piecePlacedEnter 0.22s ease-out;
 }
 @keyframes piecePlacedEnter {
@@ -765,40 +1005,14 @@ circle {
   border: 0;
 }
 .code-studio-reassemble .piece.placed {
-  display: flex;
-  gap: var(--space-2);
+  display: block;
+  padding: 0;
   color: var(--text);
-  padding: 1px var(--space-2);
-  border-left: 2px solid var(--good);
-}
-.code-studio-reassemble .piece-line-num {
-  flex-shrink: 0;
-  width: 1.25rem;
-  text-align: right;
-  font-size: var(--node-fs-2xs, 9px);
-  color: var(--text-3);
-  user-select: none;
-}
-.code-studio-reassemble .tray {
-  flex-shrink: 0;
-  max-height: 40%;
-  min-height: 0;
-  overflow-y: auto;
 }
 .code-studio-reassemble .tray-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--space-2);
-}
-.code-studio-reassemble .tray-piece {
-  display: flex;
-  gap: var(--space-2);
-  background: var(--surface);
-  border: 0.5px solid var(--border-strong);
-  border-radius: var(--radius);
-  padding: var(--space-2) var(--space-2);
-  cursor: pointer;
-  color: var(--text);
 }
 .code-studio-reassemble .tray-piece-key {
   flex-shrink: 0;
@@ -807,16 +1021,7 @@ circle {
   font-weight: 600;
   color: var(--text-3);
   user-select: none;
-}
-.code-studio-reassemble .tray-piece:hover,
-.code-studio-reassemble .tray-piece:focus {
-  border-color: var(--accent);
-  background: var(--surface-2);
-  outline: none;
-}
-.code-studio-reassemble .tray-piece-selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-bg);
+  align-self: center;
 }
 .code-studio-reassemble .hint-line {
   font-size: var(--node-fs-tight, 11px);
@@ -930,59 +1135,87 @@ circle {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-3);
 }
 .code-blueprint-panel .code-overview {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 6px;
   min-height: 0;
 }
 .code-blueprint-panel .code-overview-section {
-  border-left: 3px solid var(--section-stroke, var(--border-strong));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(4.75rem, 5.5rem);
+  gap: var(--space-2);
+  align-items: center;
+  border-left: 2px solid var(--section-stroke, var(--border-strong));
   border-radius: calc(var(--radius) - 2px);
-  background: color-mix(in srgb, var(--section-bg, var(--surface)) 72%, transparent);
-  padding: var(--space-2);
+  background: color-mix(in srgb, var(--section-bg, var(--surface)) 48%, var(--surface));
+  padding: var(--space-2) var(--space-2);
 }
-.code-blueprint-panel .code-overview-header {
+.code-blueprint-panel .code-overview-code {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
-  margin-bottom: var(--space-1);
+  align-items: center;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .code-blueprint-panel .code-overview-index {
   flex-shrink: 0;
   width: 1.25rem;
   font-family: var(--mono);
-  font-size: var(--node-fs-2xs, 9px);
+  font-size: var(--node-fs-tight, 11px);
   font-weight: 600;
   text-align: right;
+  color: var(--section-text, var(--text-3));
+  opacity: 0.85;
+}
+.code-blueprint-panel .code-overview-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding: var(--space-1);
+  text-align: center;
+  border-left: 0.5px solid var(--border-strong);
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in srgb, var(--section-bg, var(--surface-2)) 65%, var(--surface));
+}
+.code-blueprint-panel .code-overview-glyph {
+  font-family: var(--mono);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--section-stroke, var(--text-2));
 }
 .code-blueprint-panel .code-overview-kind {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  flex-shrink: 0;
   font-family: var(--mono);
-  font-size: var(--node-fs-2xs, 9px);
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: 0.5px solid;
-  border-radius: calc(var(--radius) - 4px);
-  padding: 1px var(--space-1);
-}
-.code-blueprint-panel .code-overview-kind-icon {
-  width: 10px;
-  height: 10px;
+  color: var(--section-text, var(--text-2));
 }
 .code-blueprint-panel .code-overview-caption {
-  flex: 1;
-  min-width: 12rem;
+  margin: 0;
   font-size: var(--node-fs-tight, 11px);
-  color: var(--text-2);
-  line-height: 1.4;
+  color: var(--text-3);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+.code-blueprint-panel .code-overview-section .piece-code {
+  font-family: var(--mono);
+  font-size: var(--node-fs, 14px);
+  line-height: 1.5;
+  font-variant-ligatures: none;
 }
 
 .code-studio-reassemble .shake-wrong {
@@ -1349,27 +1582,37 @@ circle {
   --node-fs-2xs: var(--fs-2xs);
   --node-fs-tight: var(--fs-tight);
   --node-fs-title: var(--fs-title);
-  --node-handle: 18px;
-  --node-handle-offset: 10px;
+  --node-handle: 1.125rem;
+  --node-handle-offset: 0.625rem;
   --edge-stroke-width: 1.5;
   --edge-stroke-width-active: 2.5;
   --xy-edge-stroke-default: var(--edge);
   --xy-attribution-background-color-default: transparent;
 }
-/* Problem + Example input — scale all in-node chrome to match Strudel node width (400 vs 320). */
-.algo-canvas .panel-node.panel-node--ui-scale {
+/* All canvas panel nodes — scale in-node chrome to match Strudel node width (400 vs 320). */
+.algo-canvas .panel-node {
+  box-shadow: var(--node-shadow);
+  border: none;
   --node-fs: calc(var(--fs) * var(--node-ui-scale));
   --node-fs-sm: calc(var(--fs-sm) * var(--node-ui-scale));
   --node-fs-xs: calc(var(--fs-xs) * var(--node-ui-scale));
   --node-fs-2xs: calc(var(--fs-2xs) * var(--node-ui-scale));
   --node-fs-tight: calc(var(--fs-tight) * var(--node-ui-scale));
   --node-fs-title: calc(var(--fs-title) * var(--node-ui-scale));
-  --node-px: calc(var(--node-px, 10px) * var(--node-ui-scale));
-  --node-py: calc(var(--node-py, 7px) * var(--node-ui-scale));
-  --node-gap: calc(var(--node-gap, 6px) * var(--node-ui-scale));
-  --node-icon: calc(var(--node-icon, 16px) * var(--node-ui-scale));
-  --node-handle: calc(18px * var(--node-ui-scale));
-  --node-handle-offset: calc(10px * var(--node-ui-scale));
+  --node-px: calc(var(--node-px, 0.75rem) * var(--node-ui-scale));
+  --node-py: calc(var(--node-py, 0.5625rem) * var(--node-ui-scale));
+  --node-gap: calc(var(--node-gap, 0.5rem) * var(--node-ui-scale));
+  --node-icon: calc(var(--node-icon, 1.125rem) * var(--node-ui-scale));
+  --node-icon-glyph: calc(var(--node-icon) * 0.72);
+  --node-handle: calc(1.125rem * var(--node-ui-scale));
+  --node-handle-offset: calc(0.625rem * var(--node-ui-scale));
+  transition: box-shadow 0.15s ease;
+}
+.algo-canvas .panel-node:hover {
+  box-shadow: var(--node-shadow-hover);
+}
+.algo-canvas .panel-node.selected {
+  box-shadow: var(--node-shadow-selected);
 }
 .algo-canvas .react-flow__controls {
   border-radius: var(--radius);
@@ -1561,7 +1804,7 @@ circle {
   .code-blueprint-overlay {
     animation: none;
   }
-  .code-studio-reassemble .piece.placed-enter,
+  .code-studio-reassemble .placed-enter .blk,
   .code-studio-reassemble .next-slot-text,
   .code-studio-reassemble .assembled-empty-chevron,
   .code-studio-reassemble .assembled-complete-flash,

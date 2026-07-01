@@ -22,18 +22,9 @@ import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '../../lib/quizConstants';
 import { correctIndex, type GistCard as GistCardData, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
 import { GistScene } from './gistScenes';
 import { MobileVizShell } from './MobileVizShell';
+import { tintFor } from './mobileCardTints';
 
 /* ------------------------------------------------------------------ shared */
-
-const DIFF_TINT: Record<string, string> = {
-  Easy: 'var(--good)',
-  Medium: 'var(--edge-active)',
-  Hard: 'var(--bad)',
-};
-
-export function tintFor(item: Item): string {
-  return DIFF_TINT[item.difficulty ?? ''] ?? 'var(--accent)';
-}
 
 function DiffChip({ item }: { item: Item }) {
   if (!item.difficulty) return null;
@@ -496,7 +487,7 @@ export function QuizCardView({
           disabled={!canNext && !(answered && !isCorrect)}
           className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-white disabled:opacity-35"
         >
-          {answered && !isCorrect ? 'Try again' : answered ? 'Next' : 'Skip'}
+          {answered && !isCorrect ? 'Retry' : answered ? 'Next' : 'Skip'}
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>

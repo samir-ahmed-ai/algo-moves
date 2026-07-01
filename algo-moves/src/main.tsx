@@ -7,6 +7,7 @@ import './styles/theme.css';
 import './styles/themes/index.css';
 import './styles/theme-cb-layer.css';
 import './styles/learn-studio.css';
+import './styles/reassemble-puzzle.css';
 import './styles/mobile.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

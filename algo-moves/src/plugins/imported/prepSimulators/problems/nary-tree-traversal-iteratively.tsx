@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
 
 /**
@@ -139,27 +138,27 @@ function View({ frame }: PluginViewProps<TraversalState>) {
 
   const stackTop = s.stack.length > 0 ? s.stack[s.stack.length - 1] : null;
 
+  const rail = (
+    <>
+      <RailStack
+        label="stack"
+        topLabel="top"
+        items={s.stack.slice().reverse().map((i) => s.labels[i])}
+      />
+      <RailGroup label="current">
+        <RailStat k="pop" v={s.curr !== null ? s.labels[s.curr] : '—'} tone="accent" />
+        <RailStat k="next" v={stackTop !== null ? s.labels[stackTop] : '—'} />
+      </RailGroup>
+      <RailResult label="result" value={s.res.length ? `[${s.res.join(', ')}]` : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        pre-order (iterative) · pop → emit → push children reversed
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       {boardNodes.length > 0 && (
         <NaryTreeBoard nodes={boardNodes} nodeClass={nodeClass} activeNode={s.curr} highlightNode={s.curr} />
       )}
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        stack (top →){' '}
-        <span className="text-ink">
-          [{s.stack.slice().reverse().map((i) => s.labels[i]).join(', ')}]
-        </span>
-        {stackTop !== null && (
-          <span className="text-ink3"> · next: {s.labels[stackTop]}</span>
-        )}
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
-        result [{s.res.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface CoinIIInput {
   coins: number[];
@@ -119,15 +118,29 @@ function View({ frame }: PluginViewProps<CoinIIState>) {
   };
 
   const activeCell: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
-  const ans = s.dp[n][s.amount] >= 0 ? s.dp[n][s.amount] : '…filling';
+  const i = s.cur ? s.cur[0] : -1;
+  const a = s.cur ? s.cur[1] : -1;
+  const coin = i >= 1 ? s.coins[i - 1] : null;
+  const cell = (ri: number, ca: number) => (ri >= 0 && ca >= 0 && s.dp[ri]?.[ca] >= 0 ? s.dp[ri][ca] : '—');
+  const done = s.dp[n][s.amount] >= 0;
+  const ans = done ? s.dp[n][s.amount] : '…';
+
+  const rail = (
+    <>
+      <RailGroup label="cell">
+        <RailStat k="i,a" v={s.cur ? `[${i}][${a}]` : '—'} />
+        <RailStat k="coin" v={coin ?? '—'} tone="accent" />
+        <RailStat k="skip" v={i >= 1 ? cell(i - 1, a) : '—'} />
+        <RailStat k="use" v={i >= 1 && coin !== null && coin <= a ? cell(i, a - coin) : '—'} />
+      </RailGroup>
+      <RailResult label="ways" value={ans} tone={done ? 'good' : 'accent'} />
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        coins {`{${s.coins.join(', ')}}`} → amount {s.amount}, ways = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={rail} railWidth={140}>
       <GridBoard grid={display} cellTone={cellTone} active={activeCell} cellSize={40} />
-      <div className={cn(vizText.sm, 'text-ink3')}>rows = coin types, columns = amount, cell = number of ways</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -154,7 +167,7 @@ function Inspector({ frame }: InspectorProps<CoinIIState>) {
 export const manifestId = 'imp-60-coin-change-ii';
 export const title = 'Coin Change II';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'c125', label: 'coins {1,2,5}, amount 5', value: { coins: [1, 2, 5], amount: 5 } },
     { id: 'c2', label: 'coins {2}, amount 3 (0 ways)', value: { coins: [2], amount: 3 } },

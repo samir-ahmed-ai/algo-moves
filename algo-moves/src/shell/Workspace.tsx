@@ -12,7 +12,7 @@ import { LearnStudio } from './canvas/LearnStudio';
 import { SettingsDialog } from './canvas/SettingsDialog';
 import { MobileTransportSheet } from './canvas/MobileTransportSheet';
 import { MobileSwipeReturn } from './mobile/MobileSwipeReturn';
-import { CategoryBoard } from './CategoryBoard';
+import { CategoryBoard, TrackCategoryBoard } from './CategoryBoard';
 import { TagChip } from './ui';
 import { ChromeHint, chromeText } from './chromeUi';
 
@@ -23,9 +23,9 @@ export function Workspace() {
     setPresent,
     tweaks,
     activeItemId,
-    setActiveItemId,
-    activeTopicId,
-    activeCourseId,
+    openProblem,
+    activeTrackId,
+    activeCategoryId,
     mode,
     setMode,
     theme,
@@ -57,6 +57,8 @@ export function Workspace() {
     return fromUrl ?? plugin.inputs[0]?.id ?? '';
   });
   const [customInput, setCustomInput] = useState<unknown>(null);
+  const shareHydratedRef = useRef(false);
+  const canvasAppliedRef = useRef(false);
 
   // Restore the sample input from the URL when the problem changes; default to first input.
   useEffect(() => {
@@ -70,23 +72,29 @@ export function Workspace() {
     setCustomInput(null);
   }, [plugin?.meta.id, activeItemId]);
 
-  // Hydrate full project from ?state= URL (lz-string) when present.
+  // Hydrate full project from ?state= URL (lz-string) when present — once per page load.
   useEffect(() => {
     const project = loadProjectFromUrl();
     if (!project?.share) return;
-    const s = project.share;
-    if (s.item && catalog.getItem(s.item)) {
-      setActiveItemId(s.item);
+
+    if (!shareHydratedRef.current) {
+      shareHydratedRef.current = true;
+      const s = project.share;
+      if (s.item && catalog.getItem(s.item)) {
+        openProblem(s.item);
+      }
+      if (s.mode === 'visualize') setMode('visualize');
+      else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') setMode('learn');
+      if (s.theme) setTheme(s.theme === 'light' ? 'light' : 'dark');
+      if (s.palette) setPalette(s.palette === 'cb' ? 'cb' : 'default');
+      if (s.themePreset) setThemePreset(normalizeThemePreset(s.themePreset));
+      if (s.dir === 'TB' || s.dir === 'LR') setDir(s.dir);
+      if (s.input) setInputId(s.input);
     }
-    if (s.mode === 'visualize') setMode('visualize');
-    else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') setMode('learn');
-    if (s.theme) setTheme(s.theme === 'light' ? 'light' : 'dark');
-    if (s.palette) setPalette(s.palette === 'cb' ? 'cb' : 'default');
-    if (s.themePreset) setThemePreset(normalizeThemePreset(s.themePreset));
-    if (s.dir === 'TB' || s.dir === 'LR') setDir(s.dir);
-    if (s.input) setInputId(s.input);
-    // Canvas nodes apply when CanvasStage registers canvasProject.
-    const t = window.setTimeout(() => canvasProject?.applyProjectState(project), 100);
+
+    if (canvasAppliedRef.current || !canvasProject) return;
+    canvasAppliedRef.current = true;
+    const t = window.setTimeout(() => canvasProject.applyProjectState(project), 100);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasProject]);
@@ -121,9 +129,8 @@ export function Workspace() {
   const frame = baseFrames[player.index] ?? baseFrames[0];
   const ready = !!plugin && !!frame;
 
-  // A course or topic click in the explorer opens its problem grid instead of the single-problem canvas.
-  const boardCourse = activeCourseId ? catalog.courses.find((c) => c.id === activeCourseId) : undefined;
-  const boardTopic = !boardCourse && activeTopicId ? catalog.getTopic(activeTopicId) : undefined;
+  const showTrackBoard = activeTrackId && !activeCategoryId;
+  const showCategoryBoard = !!activeCategoryId;
 
   // Keyboard transport: ← / → step, space play/pause, Home/End jump.
   useEffect(() => {
@@ -243,10 +250,10 @@ export function Workspace() {
       {!present && <UnifiedLeftSidebar />}
 
       <div className="relative min-h-0 min-w-0 flex-1 h-full">
-        {boardCourse ? (
-          <CategoryBoard course={boardCourse} />
-        ) : boardTopic ? (
-          <CategoryBoard topic={boardTopic} />
+        {showTrackBoard ? (
+          <TrackCategoryBoard trackId={activeTrackId!} />
+        ) : showCategoryBoard ? (
+          <CategoryBoard categoryId={activeCategoryId!} trackId={activeTrackId} />
         ) : ready ? (
           mode === 'learn' ? (
             <LearnStudio
@@ -314,7 +321,7 @@ interface Command {
 
 function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => void }) {
   const ws = useWorkspace();
-  const { setActiveItemId, setSelectedNode, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd } = ws;
+  const { openProblem, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd } = ws;
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
 
@@ -325,10 +332,7 @@ function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => 
         id: `open:${id}`,
         label: `Open ${it?.title ?? id}`,
         hint: it?.difficulty ?? 'problem',
-        run: () => {
-          setActiveItemId(id);
-          setSelectedNode(null);
-        },
+        run: () => openProblem(id),
       };
     };
     const problemCmds = catalog.items.filter((it) => it.pluginId).map((it) => open(it.id));
@@ -370,7 +374,7 @@ function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => 
       run: () => canvasAdd?.onAddEffect?.(e.id),
     }));
     return [...actions, ...panelCmds, ...effectCmds, ...problemCmds];
-  }, [ws, inputId, setActiveItemId, setSelectedNode, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd]);
+  }, [ws, inputId, openProblem, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd]);
 
   const filtered = commands.filter((c) => !q || c.label.toLowerCase().includes(q.toLowerCase()));
   const clampedSel = Math.min(sel, Math.max(filtered.length - 1, 0));

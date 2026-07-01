@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, Copy, Check } from 'lucide-react';
 import { CSS_CHROME_BOTTOM_DOCK } from '../chrome';
+import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
 import { useWorkspace } from '../../lib/workspace';
@@ -33,7 +34,7 @@ export function TracePreviewPanel() {
   const copy = () => {
     navigator.clipboard?.writeText(traceText).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     });
   };
 

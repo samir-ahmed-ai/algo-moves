@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   ArrowRight,
   BookOpen,
@@ -16,36 +16,20 @@ import {
   Target,
   Trophy,
 } from 'lucide-react';
-import { catalog, type Course, type Difficulty, type Item } from '../../content';
-import { useProgress, statFor, type ProgressData } from '../../lib/progress';
+import { catalog, getAllCategories, getTracks, browseBreadcrumbForItem, type Item, type TrackId } from '../../content';
+import { useProgress, statFor } from '../../lib/progress';
 import { readLastItemId, useWorkspace } from '../../lib/workspace';
 import { useIsMobile } from '../../lib/useMediaQuery';
+import { compactLabel } from '../chromeUi';
 import { cn } from '../../lib/cn';
-import { courseIcon } from '../courseIcon';
 import { SwipeModeQrPromo } from './SwipeModeQrPromo';
-import { glyphFor } from '../problemShape';
-import { Chip, Meter } from '../canvas/nodeui';
+import { glyphFor } from '../../content/problemShape';
+import { Chip } from '../canvas/nodeui';
+import { TrackGrid } from '../browse/TrackGrid';
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`;
 
 /* ----------------------------------------------------------------- helpers */
-
-const DIFFS: Difficulty[] = ['Easy', 'Medium', 'Hard'];
-const DIFF_TONE: Record<Difficulty, string> = {
-  Easy: 'var(--good)',
-  Medium: 'var(--edge-active)',
-  Hard: 'var(--bad)',
-};
-
-function courseProblems(course: Course): Item[] {
-  return course.topics.flatMap((t) => t.items).filter((i) => i.pluginId);
-}
-
-function difficultyTally(items: Item[]): Record<Difficulty, number> {
-  const t: Record<Difficulty, number> = { Easy: 0, Medium: 0, Hard: 0 };
-  for (const i of items) if (i.difficulty) t[i.difficulty] += 1;
-  return t;
-}
 
 /** Inner-SVG mnemonic glyph, drawn the same way the topic board draws it. */
 function Glyph({ markup, className }: { markup: string; className?: string }) {
@@ -97,11 +81,11 @@ function IconButton({
 
 function StatCard({ icon, value, label }: { icon: ReactNode; value: ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-[var(--radius)] border border-edge bg-panel/60 px-4 py-3">
+    <div className="flex h-full items-center gap-3 rounded-[var(--radius)] border border-edge bg-panel/60 px-4 py-3.5">
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-panel2 text-accent [&>svg]:h-[18px] [&>svg]:w-[18px]">
         {icon}
       </span>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="font-mono text-xl font-semibold tabular-nums leading-none text-ink">{value}</div>
         <div className="mt-1 truncate text-xs uppercase tracking-wide text-ink3">{label}</div>
       </div>
@@ -126,7 +110,7 @@ function FeatureCard({
     <button
       type="button"
       onClick={onClick}
-      className="group flex flex-col items-start gap-2 rounded-[var(--radius)] border border-edge bg-panel/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)]"
+      className="group flex h-full flex-col items-start gap-2 rounded-[var(--radius)] border border-edge bg-panel/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)]"
     >
       <span className="grid h-10 w-10 place-items-center rounded-lg bg-accentbg text-accent [&>svg]:h-5 [&>svg]:w-5">
         {icon}
@@ -141,65 +125,11 @@ function FeatureCard({
   );
 }
 
-function CourseCard({
-  course,
-  progress,
-  onOpen,
-}: {
-  course: Course;
-  progress: ProgressData;
-  onOpen: () => void;
-}) {
-  const items = courseProblems(course);
-  const mastered = items.filter((i) => statFor(progress, i.id).mastered).length;
-  const tally = difficultyTally(items);
-  const Icon = courseIcon(course.icon);
-
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group flex flex-col gap-3 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)]"
-    >
-      <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-accent transition-colors group-hover:border-accent/40 [&>svg]:h-5 [&>svg]:w-5">
-          <Icon />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="min-w-0 flex-1 truncate font-semibold text-ink">{course.title}</h3>
-            <span className="shrink-0 font-mono text-xs tabular-nums text-ink3">{items.length}</span>
-          </div>
-          {course.summary && (
-            <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-ink3">{course.summary}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-auto flex items-center gap-3">
-        <div className="flex-1">
-          <Meter value={mastered} max={Math.max(items.length, 1)} tone="good" height={5} />
-        </div>
-        <div className="flex items-center gap-1.5">
-          {DIFFS.map((d) =>
-            tally[d] ? (
-              <span key={d} className="flex items-center gap-1 font-mono text-[11px] tabular-nums text-ink3">
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: DIFF_TONE[d] }} />
-                {tally[d]}
-              </span>
-            ) : null,
-          )}
-        </div>
-      </div>
-    </button>
-  );
-}
-
 /** A small framed preview of the workspace, built from real problem glyphs. */
 function WorkspacePreview({ featured }: { featured: Item[] }) {
   const nodes = featured.slice(0, 3);
   return (
-    <div className="relative w-full overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/70 shadow-[var(--shadow-xl)] backdrop-blur">
+    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/70 shadow-[var(--shadow-xl)] backdrop-blur">
       <div className="flex items-center gap-2 border-b border-edge px-3 py-2">
         <span className="flex gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-bad/70" />
@@ -211,7 +141,7 @@ function WorkspacePreview({ featured }: { featured: Item[] }) {
         </span>
       </div>
       <div
-        className="relative grid grid-cols-3 gap-3 p-4"
+        className="relative grid flex-1 grid-cols-3 gap-3 p-4 sm:p-5"
         style={{
           backgroundImage:
             'radial-gradient(circle at 1px 1px, var(--edge) 1px, transparent 0)',
@@ -251,19 +181,184 @@ function WorkspacePreview({ featured }: { featured: Item[] }) {
 
 /* ----------------------------------------------------------------- landing */
 
+const MBM_WORDS = ['move', 'by', 'move.'] as const;
+
+const LANDING_INNER = 'mx-auto max-w-6xl px-5 sm:px-8';
+const LANDING_SECTION_Y = 'py-12 sm:py-14 lg:py-16';
+
+function LandingSection({
+  id,
+  tone = 'default',
+  bordered = true,
+  className,
+  children,
+}: {
+  id?: string;
+  tone?: 'default' | 'muted';
+  bordered?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      className={cn(
+        tone === 'muted' && 'bg-panel/30',
+        bordered && 'border-b border-edge',
+        className,
+      )}
+    >
+      <div className={cn(LANDING_INNER, LANDING_SECTION_Y)}>{children}</div>
+    </section>
+  );
+}
+
+function LandingSplit({
+  reverse = false,
+  className,
+  children,
+}: {
+  reverse?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16',
+        reverse && '[&>*:first-child]:lg:order-2 [&>*:last-child]:lg:order-1',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SplitCopy({
+  eyebrow,
+  title,
+  description,
+  children,
+  as = 'h2',
+}: {
+  eyebrow?: string;
+  title: ReactNode;
+  description: string;
+  children?: ReactNode;
+  as?: 'h1' | 'h2';
+}) {
+  const Heading = as;
+  return (
+    <div className="@container flex min-w-0 flex-col justify-center">
+      {eyebrow ? (
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">{eyebrow}</p>
+      ) : null}
+      <Heading
+        className={cn(
+          'font-semibold tracking-tight text-ink',
+          as === 'h1'
+            ? 'hero-headline whitespace-nowrap leading-[1.1]'
+            : 'text-2xl leading-tight sm:text-3xl',
+        )}
+      >
+        {title}
+      </Heading>
+      <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink2 sm:text-base">{description}</p>
+      {children ? <div className="mt-5">{children}</div> : null}
+    </div>
+  );
+}
+
+function SplitMedia({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cn('flex min-w-0 items-center justify-center', className)}>{children}</div>
+  );
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  align = 'center',
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  align?: 'center' | 'start';
+}) {
+  return (
+    <div className={cn('mb-8 lg:mb-10', align === 'center' ? 'text-center' : 'text-left')}>
+      {eyebrow ? (
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">{eyebrow}</p>
+      ) : null}
+      <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{title}</h2>
+      {description ? (
+        <p
+          className={cn(
+            'mt-3 text-sm leading-relaxed text-ink2 sm:text-base',
+            align === 'center' && 'mx-auto max-w-2xl',
+          )}
+        >
+          {description}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+const FRAMED_MEDIA =
+  'w-full rounded-[var(--radius)] border border-edge bg-panel/60 shadow-[var(--shadow-md)]';
+
+/** Hero tagline tail — flowing wave underline with staggered word bob. */
+function MoveByMoveAnimated({ className }: { className?: string }) {
+  return (
+    <span className={cn('hero-mbm', className)} aria-label="move by move.">
+      {MBM_WORDS.map((word, step) => (
+        <span key={word} className="hero-mbm__word" style={{ '--step': step } as CSSProperties}>
+          <span className="hero-mbm__wave-char">{word}</span>
+        </span>
+      ))}
+      <span className="hero-mbm__wave" aria-hidden>
+        <svg viewBox="0 0 200 8" preserveAspectRatio="none">
+          <path
+            className="hero-mbm__wave-path"
+            d="M0 4 C25 0 25 8 50 4 S75 0 75 8 100 4 125 0 125 8 150 4 175 0 175 8 200 4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      </span>
+    </span>
+  );
+}
+
 export function LandingPage() {
-  const { theme, setTheme, palette, setPalette, density, enterWorkspace, enterMobile, setActiveCourseId, setActiveTopicId, setMode } =
-    useWorkspace();
+  const {
+    theme,
+    setTheme,
+    palette,
+    setPalette,
+    density,
+    enterWorkspace,
+    enterMobile,
+    setActiveTrackId,
+    setActiveCategoryId,
+    setMode,
+  } = useWorkspace();
   const isMobile = useIsMobile();
   const progress = useProgress();
 
   const problems = useMemo(() => catalog.items.filter((i) => i.pluginId), []);
   const featured = useMemo(() => {
     const picks: Item[] = [];
-    for (const c of catalog.courses) {
-      const it = courseProblems(c).find((i) => glyphFor(i));
-      if (it) picks.push(it);
-      if (picks.length >= 6) break;
+    for (const item of catalog.items) {
+      if (item.pluginId && glyphFor(item)) {
+        picks.push(item);
+        if (picks.length >= 6) break;
+      }
     }
     return picks;
   }, []);
@@ -280,9 +375,9 @@ export function LandingPage() {
   const firstProblem = problems[0];
 
   const openItem = (id: string) => enterWorkspace(id);
-  const browseCourse = (course: Course) => {
-    setActiveCourseId(course.id);
-    setActiveTopicId(null);
+  const browseTrack = (trackId: TrackId) => {
+    setActiveTrackId(trackId);
+    setActiveCategoryId(null);
     enterWorkspace();
   };
   const startIn = (mode: 'visualize' | 'learn') => {
@@ -290,7 +385,7 @@ export function LandingPage() {
     if (firstProblem) enterWorkspace(firstProblem.id);
   };
 
-  const lastCrumb = lastItem ? catalog.breadcrumb(lastItem.id) : undefined;
+  const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
 
   return (
     <div data-density={density} className="ws-scroll h-full w-full overflow-y-auto bg-bg text-ink">
@@ -320,10 +415,11 @@ export function LandingPage() {
             </IconButton>
             <button
               type="button"
+              title="Open workspace"
               onClick={() => enterWorkspace()}
               className="ml-1 inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
-              Open workspace
+              {compactLabel('Open workspace', 'Open', isMobile)}
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -332,183 +428,209 @@ export function LandingPage() {
 
       {/* hero */}
       <section className="relative overflow-hidden border-b border-edge">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-60"
-          style={{
-            background:
-              'radial-gradient(60% 60% at 75% 0%, var(--accent-bg) 0%, transparent 60%)',
-          }}
-        />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:py-10">
-          <div>
-            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-ink sm:text-5xl">
-              See every algorithm
-              <br />
-              <span className="text-accent">move&nbsp;by&nbsp;move.</span>
-            </h1>
-            <p className="mt-3 max-w-md text-base leading-relaxed text-ink2">
-              {problems.length}+ interview problems as step-by-step replays — visualize, learn, and drill until
-              they stick.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
-                className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
-              >
-                <Play className="h-4 w-4" />
-                {lastItem ? 'Resume learning' : 'Start learning'}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }
-                className="inline-flex items-center gap-2 rounded-md border border-edge bg-panel/60 px-5 py-2.5 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
-              >
-                <BookOpen className="h-4 w-4" />
-                Browse courses
-              </button>
-            </div>
-          </div>
-          <WorkspacePreview featured={featured} />
+        <div aria-hidden className="landing-hero-glow pointer-events-none absolute inset-0 opacity-70" />
+        <div className={cn('relative', LANDING_INNER, LANDING_SECTION_Y)}>
+          <LandingSplit>
+            <SplitCopy
+              as="h1"
+              eyebrow="Interview prep"
+              title={
+                <>
+                  Algorithms{' '}
+                  <MoveByMoveAnimated className="text-[0.72em] font-semibold" />
+                </>
+              }
+              description={`${problems.length}+ interview problems as step-by-step replays — visualize, learn, and drill until they stick.`}
+            >
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
+                  className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  <Play className="h-4 w-4" />
+                  {lastItem
+                    ? compactLabel('Resume learning', 'Resume', isMobile)
+                    : compactLabel('Start learning', 'Start', isMobile)}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                  className="inline-flex items-center gap-2 rounded-md border border-edge bg-panel/60 px-5 py-2.5 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  {compactLabel('Browse tracks', 'Browse', isMobile)}
+                </button>
+              </div>
+            </SplitCopy>
+            <SplitMedia>
+              <WorkspacePreview featured={featured} />
+            </SplitMedia>
+          </LandingSplit>
         </div>
       </section>
 
       {/* philosophy */}
-      <section className="border-b border-edge bg-panel/30">
-        <div className="mx-auto grid max-w-6xl items-center gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[1fr_1.1fr]">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-ink">Learn like AI trains</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink2">
-              Try, get feedback, repeat. Wrong answers restart the run — shuffle and streak until you master
-              the pattern.
-            </p>
-          </div>
-          <img
-            src={asset('learning-loop.svg')}
-            alt="The learning loop: watch, quiz, restart on wrong, master"
-            className="w-full max-w-lg justify-self-center rounded-[var(--radius)] border border-edge bg-panel/60 shadow-[var(--shadow-md)] lg:max-w-none"
-            width={800}
-            height={420}
-            loading="lazy"
+      <LandingSection tone="muted">
+        <LandingSplit reverse>
+          <SplitCopy
+            eyebrow="Method"
+            title="Learn like AI trains"
+            description="Try, get feedback, repeat. Wrong answers restart the run — shuffle and streak until you master the pattern."
           />
-        </div>
-      </section>
+          <SplitMedia>
+            <img
+              src={asset('learning-loop.svg')}
+              alt="The learning loop: watch, quiz, restart on wrong, master"
+              className={FRAMED_MEDIA}
+              width={800}
+              height={420}
+              loading="lazy"
+            />
+          </SplitMedia>
+        </LandingSplit>
+      </LandingSection>
 
       {/* mobile preview */}
-      <section className="border-b border-edge">
-        <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
-          <img
-            src={asset('mobile-swipe-deck.svg')}
-            alt="Swipe mode mobile deck for algorithm drilling"
-            className="mx-auto w-full max-w-md rounded-[var(--radius)] border border-edge bg-panel/60 shadow-[var(--shadow-md)] lg:max-w-lg"
-            width={800}
-            height={420}
-            loading="lazy"
-          />
-        </div>
-      </section>
+      <LandingSection>
+        <LandingSplit>
+          <SplitMedia>
+            <img
+              src={asset('mobile-swipe-deck.svg')}
+              alt="Swipe mode mobile deck for algorithm drilling"
+              className={cn(FRAMED_MEDIA, 'max-w-lg')}
+              width={800}
+              height={420}
+              loading="lazy"
+            />
+          </SplitMedia>
+          <SplitCopy
+            eyebrow="Mobile"
+            title="Drill on the go"
+            description="Swipe through animate, quiz, and rebuild cards — built for quick reps between meetings or on the commute."
+          >
+            <button
+              type="button"
+              onClick={() => enterMobile()}
+              className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
+            >
+              <Smartphone className="h-4 w-4" />
+              Open Swipe mode
+            </button>
+          </SplitCopy>
+        </LandingSplit>
+      </LandingSection>
 
-      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
-        {/* stats */}
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <StatCard icon={<BookOpen />} value={catalog.courses.length} label="Courses" />
-          <StatCard icon={<LayoutGrid />} value={catalog.topics.length} label="Topics" />
+      <LandingSection>
+        <SectionHeading
+          eyebrow="Progress"
+          title="Your library at a glance"
+          description="Tracks, categories, and problems — plus how far you've pushed your streak."
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:items-stretch lg:grid-cols-6">
+          <StatCard icon={<BookOpen />} value={getTracks().length} label="Tracks" />
+          <StatCard icon={<LayoutGrid />} value={getAllCategories().length} label="Categories" />
           <StatCard icon={<Code2 />} value={problems.length} label="Problems" />
           <StatCard icon={<Target />} value={totals.attempted} label="Attempted" />
           <StatCard icon={<Trophy />} value={totals.mastered} label="Mastered" />
           <StatCard icon={<Flame />} value={totals.bestStreak} label="Best streak" />
-        </section>
+        </div>
+      </LandingSection>
 
-        {/* continue */}
-        {lastItem && (
-          <section className="mt-8">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink3">Continue where you left off</h2>
-            <button
-              type="button"
-              onClick={() => openItem(lastItem.id)}
-              className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)]"
-            >
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
-                {glyphFor(lastItem) ? (
-                  <Glyph markup={glyphFor(lastItem)!} className="h-8 w-8 transition-colors group-hover:text-accent" />
-                ) : (
-                  <LayoutGrid className="h-7 w-7" />
+      {lastItem ? (
+        <LandingSection tone="muted">
+          <SectionHeading align="start" title="Continue where you left off" />
+          <button
+            type="button"
+            onClick={() => openItem(lastItem.id)}
+            className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)] sm:p-5"
+          >
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
+              {glyphFor(lastItem) ? (
+                <Glyph markup={glyphFor(lastItem)!} className="h-8 w-8 transition-colors group-hover:text-accent" />
+              ) : (
+                <LayoutGrid className="h-7 w-7" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="truncate font-semibold text-ink">{lastItem.title}</span>
+                {lastItem.difficulty && (
+                  <Chip tone={lastItem.difficulty === 'Easy' ? 'good' : lastItem.difficulty === 'Hard' ? 'bad' : 'accent'}>
+                    {lastItem.difficulty}
+                  </Chip>
                 )}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate font-semibold text-ink">{lastItem.title}</span>
-                  {lastItem.difficulty && (
-                    <Chip tone={lastItem.difficulty === 'Easy' ? 'good' : lastItem.difficulty === 'Hard' ? 'bad' : 'accent'}>
-                      {lastItem.difficulty}
-                    </Chip>
-                  )}
-                  {statFor(progress, lastItem.id).mastered && (
-                    <Trophy className="h-4 w-4" style={{ color: 'var(--good)' }} aria-label="mastered" />
-                  )}
-                </div>
-                <p className="mt-0.5 truncate text-xs text-ink3">
-                  {lastCrumb?.course?.title}
-                  {lastCrumb?.topic ? ` · ${lastCrumb.topic.title}` : ''}
-                </p>
+                {statFor(progress, lastItem.id).mastered && (
+                  <Trophy className="h-4 w-4 text-good" aria-label="mastered" />
+                )}
               </div>
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white">
-                Resume
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </button>
-          </section>
-        )}
+              <p className="mt-0.5 truncate text-xs text-ink3">
+                {lastBrowseCrumb?.track?.title}
+                {lastBrowseCrumb?.category ? ` › ${lastBrowseCrumb.category.title}` : ''}
+              </p>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white">
+              Resume
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </button>
+        </LandingSection>
+      ) : null}
 
-        {/* courses */}
-        <section id="courses" className="mt-8 scroll-mt-16">
-          <h2 className="mb-3 text-lg font-semibold text-ink">Courses</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {catalog.courses.map((course) => (
-              <CourseCard key={course.id} course={course} progress={progress} onOpen={() => browseCourse(course)} />
-            ))}
-          </div>
-        </section>
+      <LandingSection id="courses" className="scroll-mt-16">
+        <SectionHeading
+          eyebrow="Catalog"
+          title="Browse by track"
+          description="Pick Data Structures, Algorithms, Design, or browse everything in Interview Preparation."
+        />
+        <TrackGrid onPick={browseTrack} />
+      </LandingSection>
 
-        {/* how it works */}
-        <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold text-ink">Three ways to study</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <FeatureCard
-              icon={<Eye />}
-              title="Visualize"
-              body="Replay each algorithm on a live canvas."
-              cta="Open canvas"
-              onClick={() => startIn('visualize')}
-            />
-            <FeatureCard
-              icon={<GraduationCap />}
-              title="Learn"
-              body="Study the pattern and reassemble the code."
-              cta="Open studio"
-              onClick={() => startIn('learn')}
-            />
-            <FeatureCard
-              icon={<Smartphone />}
-              title="Practice"
-              body="Swipe through animate, quiz, and rebuild cards."
-              cta="Open Swipe mode"
-              onClick={() => enterMobile()}
-            />
-          </div>
-        </section>
-      </main>
+      <LandingSection bordered={false}>
+        <SectionHeading
+          eyebrow="Modes"
+          title="Three ways to study"
+          description="Visualize on the canvas, learn in the studio, or drill in Swipe mode on your phone."
+        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-stretch">
+          <FeatureCard
+            icon={<Eye />}
+            title="Visualize"
+            body="Replay each algorithm on a live canvas."
+            cta="Open canvas"
+            onClick={() => startIn('visualize')}
+          />
+          <FeatureCard
+            icon={<GraduationCap />}
+            title="Learn"
+            body="Study the pattern and reassemble the code."
+            cta="Open studio"
+            onClick={() => startIn('learn')}
+          />
+          <FeatureCard
+            icon={<Smartphone />}
+            title="Practice"
+            body="Swipe through animate, quiz, and rebuild cards."
+            cta="Open Swipe mode"
+            onClick={() => enterMobile()}
+          />
+        </div>
+      </LandingSection>
 
       {/* footer */}
-      <footer className="border-t border-edge">
-        <div className="mx-auto flex max-w-6xl items-center justify-center px-5 py-4 text-sm text-ink3 sm:px-8">
-          <span className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
+      <footer className="border-t border-edge bg-panel/20">
+        <div className={cn(LANDING_INNER, 'py-8 text-center sm:py-10')}>
+          <span className="inline-flex items-center gap-2 font-semibold tracking-tight text-ink">
+            <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-white">
+              <Sparkles className="h-4 w-4" />
+            </span>
             Algo Moves
           </span>
+          <p className="mx-auto mt-2 max-w-md text-sm text-ink3">
+            Step through interview algorithms until they stick.
+          </p>
         </div>
       </footer>
     </div>

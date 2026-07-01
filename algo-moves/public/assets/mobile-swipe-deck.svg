@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" fill="none" role="img" aria-label="Swipe mode mobile deck for algorithm drilling">
   <rect width="800" height="420" rx="16" fill="#f6f8fa"/>
-  <text x="400" y="36" text-anchor="middle" fill="#1a1f26" font-family="system-ui, sans-serif" font-size="18" font-weight="600">Swipe mode  built for your phone</text>
-  <text x="400" y="58" text-anchor="middle" fill="#6b7280" font-family="system-ui, sans-serif" font-size="13">Animate ’ quiz ’ rebuild. Full-screen drill deck.</text>
+  <text x="400" y="36" text-anchor="middle" fill="#1a1f26" font-family="system-ui, sans-serif" font-size="18" font-weight="600">Swipe mode â€” built for your phone</text>
+  <text x="400" y="58" text-anchor="middle" fill="#6b7280" font-family="system-ui, sans-serif" font-size="13">Animate â€™ quiz â€™ rebuild. Full-screen drill deck.</text>
 
   <!-- phone frame -->
   <rect x="290" y="72" width="220" height="320" rx="28" fill="#1a1f26"/>
@@ -47,7 +47,7 @@
 
   <!-- badge -->
   <rect x="318" y="348" width="164" height="28" rx="14" fill="#3d9a8f"/>
-  <text x="400" y="367" text-anchor="middle" fill="#fff" font-family="system-ui, sans-serif" font-size="12" font-weight="600">#mobile · Add to home screen</text>
+  <text x="400" y="367" text-anchor="middle" fill="#fff" font-family="system-ui, sans-serif" font-size="12" font-weight="600">#mobile Â· Add to home screen</text>
 
   <defs>
     <marker id="swipeArr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">

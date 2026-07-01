@@ -1,9 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 /** "M a b" merges the communities of a and b; "Q a" reports a's community size. People are 1-indexed in the op list. */
 type Op = ['M', number, number] | ['Q', number];
@@ -47,36 +47,23 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
     return x;
   };
 
-  const frames: Frame<MCState>[] = [];
-  const snapshot = (
-    type: string,
-    note: string,
-    caption: string,
-    pair: [number, number] | null,
-    query: number | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        parent: parent.slice(),
-        size: size.slice(),
-        adj: adj.map((row) => row.slice()),
-        pos,
-        pair,
-        query,
-        answer,
-        components,
-        done: type === 'DONE',
-      },
-    });
+  const { emit, frames } = createRecorder<MCState>(() => ({
+    parent: parent.slice(),
+    size: size.slice(),
+    adj: adj.map((row) => row.slice()),
+    pos,
+    pair: null,
+    query: null,
+    answer,
+    components,
+    done: false,
+  }));
 
-  snapshot(
+  emit(
     'INIT',
     `${n} singletons`,
     `Merging Communities: ${n} people each start in their own community, so the component count is ${n}. We replay the operations: "M a b" merges two communities; "Q a" reports the size of a's community.`,
-    null,
-    null,
+    { pair: null, query: null },
   );
 
   for (const op of ops) {
@@ -89,12 +76,11 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
       const ra = find(a);
       const rb = find(b);
       if (ra === rb) {
-        snapshot(
+        emit(
           'MERGE',
           `M ${op[1]} ${op[2]}`,
           `Operation M ${op[1]} ${op[2]}: people ${op[1]} and ${op[2]} are already in the same community (root ${ra + 1}), so nothing merges. Component count stays ${components}.`,
-          [a, b],
-          null,
+          { pair: [a, b], query: null },
         );
       } else {
         // Union by size: attach the smaller tree under the larger root.
@@ -107,24 +93,22 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
         parent[small] = big;
         size[big] += size[small];
         components -= 1;
-        snapshot(
+        emit(
           'MERGE',
           `M ${op[1]} ${op[2]}`,
           `Operation M ${op[1]} ${op[2]}: union the communities of ${op[1]} and ${op[2]} under root ${big + 1}; the merged community now holds ${size[big]} people and the component count drops to ${components}.`,
-          [a, b],
-          null,
+          { pair: [a, b], query: null },
         );
       }
     } else {
       const a = op[1] - 1;
       const r = find(a);
       answer = size[r];
-      snapshot(
+      emit(
         'QUERY',
         `Q ${op[1]} → ${answer}`,
         `Operation Q ${op[1]}: person ${op[1]} sits in the community rooted at ${r + 1}, which contains ${answer} ${answer === 1 ? 'person' : 'people'}. Report ${answer}.`,
-        null,
-        a,
+        { pair: null, query: a },
       );
     }
   }
@@ -135,7 +119,7 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
     answer !== null
       ? `All operations replayed. The final query reported a community of size ${answer}; ${components} ${components === 1 ? 'community remains' : 'communities remain'} overall.`
       : `All operations replayed. ${components} ${components === 1 ? 'community remains' : 'communities remain'}.`;
-  snapshot('DONE', finalNote, finalCaption, null, null, 'good');
+  emit('DONE', finalNote, finalCaption, { pair: null, query: null, done: true }, 'good');
 
   return frames;
 }
@@ -148,16 +132,20 @@ function colorOf(parent: number[], node: number): number {
 
 function View({ frame }: PluginViewProps<MCState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="status">
+        <RailStat k="communities" v={s.components} tone="accent" />
+        {s.pair && <RailStat k="merging" v={`${s.pair[0] + 1} ↔ ${s.pair[1] + 1}`} />}
+        {s.query !== null && <RailStat k="querying" v={s.query + 1} />}
+      </RailGroup>
+      {s.answer !== null && (
+        <RailResult label="last Q" value={s.answer} tone={s.done ? 'good' : 'accent'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        communities = <span className="font-mono text-ink">{s.components}</span>
-        {s.answer !== null && (
-          <>
-            {' · '}last Q = <span className="font-mono text-ink">{s.answer}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -168,7 +156,7 @@ function View({ frame }: PluginViewProps<MCState>) {
         highlightEdge={s.pair}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -222,7 +210,7 @@ const M2: MCInput = {
 export const manifestId = 'imp-8-merging-communities';
 export const title = 'Merging Communities';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'm6', label: '6 people', value: M1 },
     { id: 'm7', label: '7 people', value: M2 },

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface LeavesInput {
   /** Level-order array; null marks an absent child slot. Children of i are 2i+1, 2i+2. */
@@ -116,24 +115,25 @@ function View({ frame }: PluginViewProps<LeavesState>) {
     if (activeSet.has(i)) return 'team-2';
     return 'team-0';
   };
+  const activeVal = s.active !== null ? s.tree[s.active] : null;
+  const activeHeight = s.active !== null ? s.height[s.active] : null;
+  const layerItems = s.layers.map((l, idx) => ({ label: `L${idx}[${l.join(',')}]`, tone: idx === s.removedLayer ? 'accent' as const : undefined }));
+  const resultLabel = s.done ? s.layers.map((l) => `[${l.join(',')}]`).join('') : undefined;
+  const rail = (
+    <>
+      <RailGroup label="node">
+        <RailStat k="val" v={activeVal ?? '—'} tone="accent" />
+        <RailStat k="h" v={activeHeight ?? '—'} />
+        <RailStat k="placed" v={s.visited.length} />
+      </RailGroup>
+      <RailStack label="layers" items={layerItems} />
+      {s.done && resultLabel !== undefined && <RailResult label="answer" value={resultLabel} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        placed <span className="font-mono text-ink">{s.visited.length}</span> /{' '}
-        <span className="font-mono text-ink">{s.tree.filter((v) => v != null).length}</span> nodes
-        {s.removedLayer !== null && !s.done && (
-          <>
-            {' · '}layer <span className="font-mono text-accent">{s.removedLayer}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {s.layers.length === 0
-          ? 'layers: —'
-          : s.layers.map((l, idx) => `L${idx}[${l.join(',')}]`).join('  ')}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

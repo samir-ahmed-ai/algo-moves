@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface ShelfInput {
   books: [number, number][]; // [thickness, height]
@@ -92,18 +91,24 @@ function View({ frame }: PluginViewProps<ShelfState>) {
   const cells = s.dp.map((v) => (v >= INF ? '∞' : v));
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.from !== null) pointers.push({ i: s.from, label: 'shelf start', tone: 'warn', place: 'below' });
+  if (s.from !== null) pointers.push({ i: s.from, label: 'from', tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] < INF ? 'match' : '');
   const n = s.books.length;
-  const ans = s.dp[n] >= INF ? '…filling' : s.dp[n];
+  const done = s.dp[n] < INF;
+  const cell = (idx: number | null) =>
+    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {n} books, shelf width {s.shelfWidth}, min height = <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+        <RailStat k="from" v={s.from !== null ? s.from : '—'} tone="warn" />
+        <RailStat k="dp[from]" v={cell(s.from)} />
+        <RailStat k="dp[i]" v={cell(s.i)} />
+      </RailGroup>
+      <RailResult label="answer" value={done ? `${s.dp[n]}` : '…'} tone={done ? 'good' : 'accent'} />
+    </>}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index = books placed, value = least total height</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -129,7 +134,7 @@ function Inspector({ frame }: InspectorProps<ShelfState>) {
 export const manifestId = 'imp-62-filling-bookcase-shelves';
 export const title = 'Filling Bookcase Shelves';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'bk7',

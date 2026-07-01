@@ -3,9 +3,9 @@ import { Play } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import type { InputBuilderKind } from '../../../core/effectTypes';
 import { CategorySelectItems } from '../../../components/CategorySelectItems';
-import { INPUT_BUILDERS } from '../../../plugins/_shared/inputBuilders';
+import { INPUT_BUILDERS } from '../../../effects/inputBuilders';
 import { useCanvasFrame, useCanvasStatic } from '../CanvasContext';
-import { Btn, Chip, Field, Hint, Section, TextArea, TextInput, nodeText } from '../nodeui';
+import { Btn, Chip, Field, Hint, nodeIconGlyph, Section, TextArea, TextInput, nodeText } from '../nodeui';
 
 /** Input editor with optional visual builders (pad, beat, arpeggiator, etc.). */
 export function EditorPanelBody() {
@@ -146,7 +146,7 @@ export function EditorPanelBody() {
         ))}
       {hasFields && (
         <div className="flex items-center gap-2">
-          <Btn variant="good" size="sm" onClick={run} icon={<Play className="h-3.5 w-3.5" />}>
+          <Btn variant="good" size="sm" onClick={run} icon={<Play className={nodeIconGlyph} />}>
             Run
           </Btn>
           {customInput != null && (

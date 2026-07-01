@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown, Copy, Smartphone, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { cn } from '../../lib/cn';
 import { buildMobileModeUrl } from '../mobile/mobileHash';
 import { isSwipeQrPromoDismissed, markSwipeQrPromoDismissed } from './swipeQrPromoState';
@@ -40,7 +41,7 @@ export function SwipeModeQrPromo({ onOpenDevice }: { onOpenDevice: () => void })
   const copy = () => {
     navigator.clipboard?.writeText(url).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     });
   };
 

@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LISInput {
   nums: number[];
@@ -84,14 +83,22 @@ function View({ frame }: PluginViewProps<LISState>) {
   if (s.i !== null) pointers.push({ i: s.i, label: `i (=${s.nums[s.i]})`, tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: `j (=${s.nums[s.from]})`, tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== 0 ? 'match' : '');
+  const dpJ = s.from !== null && s.dp[s.from] !== 0 ? s.dp[s.from] : '—';
+  const dpI = s.i !== null && s.dp[s.i] !== 0 ? s.dp[s.i] : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        nums [{s.nums.join(', ')}], LIS = <span className="font-mono text-ink">{s.done ? s.best : '…filling'}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} tone="accent" />
+        <RailStat k="j" v={s.from ?? '—'} />
+        <RailStat k="dp[j]" v={dpJ} />
+        <RailStat k="dp[i]" v={dpI} />
+        <RailStat k="best" v={s.best || '—'} />
+      </RailGroup>
+      <RailResult label="LIS" value={s.done ? s.best : '…'} tone={s.done ? 'good' : 'accent'} />
+    </>}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn(vizText.sm, 'text-ink3')}>cell value = dp[i] = longest increasing subsequence ending at index i</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -114,7 +121,7 @@ function Inspector({ frame }: InspectorProps<LISState>) {
 export const manifestId = 'imp-66-longest-increasing-subsequence';
 export const title = 'Longest Increasing Subsequence';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'lis8', label: '[10, 9, 2, 5, 3, 7, 101, 18]', value: { nums: [10, 9, 2, 5, 3, 7, 101, 18] } },
     { id: 'lis6', label: '[0, 1, 0, 3, 2, 3]', value: { nums: [0, 1, 0, 3, 2, 3] } },

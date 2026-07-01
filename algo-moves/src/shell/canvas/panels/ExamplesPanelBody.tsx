@@ -1,4 +1,5 @@
 import { cn } from '../../../lib/cn';
+import { inputFrameCount } from '../../../lib/inputFrameCounts';
 import { useCanvasStatic } from '../CanvasContext';
 import { Code, ControlsAccordion, nodeText, Row } from '../nodeui';
 
@@ -16,7 +17,7 @@ function formatInputPreview(value: unknown): string {
 
 /** Example input node: pick which sample input drives the visualization. */
 export function ExamplesPanelBody() {
-  const { plugin, inputId, setInputId } = useCanvasStatic();
+  const { plugin, inputId, setInputId, inputFrameCounts } = useCanvasStatic();
   const active = plugin.inputs.find((i) => i.id === inputId) ?? plugin.inputs[0];
   const preview = active ? formatInputPreview(active.value) : '';
 
@@ -25,12 +26,7 @@ export function ExamplesPanelBody() {
       <div className="nodrag flex flex-col">
         {plugin.inputs.map((i) => {
           const on = i.id === inputId;
-          let ops: number | null = null;
-          try {
-            ops = plugin.record(i.value).length;
-          } catch {
-            ops = null;
-          }
+          const ops = inputFrameCount(inputFrameCounts, i.id);
           return (
             <Row key={i.id} active={on} onClick={() => setInputId(i.id)} className={nodeText.base}>
               <input
@@ -42,7 +38,7 @@ export function ExamplesPanelBody() {
                 tabIndex={-1}
               />
               <span className="min-w-0 flex-1 leading-snug">{i.label}</span>
-              {ops != null && (
+              {ops > 0 && (
                 <span className={cn('shrink-0 font-mono tabular-nums text-ink3', nodeText.xs)}>{ops}</span>
               )}
             </Row>

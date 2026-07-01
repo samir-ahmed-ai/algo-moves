@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
 
 interface WordSearchIIInput {
   board: string[][];
@@ -157,20 +156,21 @@ function View({ frame }: PluginViewProps<WordSearchIIState>) {
     if (onPath.has(key(r, c))) return 'path';
     return 'land';
   };
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="word" v={s.word || '—'} tone={s.word ? 'accent' : undefined} />
+        <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+        <RailStat k="matched" v={s.word ? `${s.matched}/${s.word.length}` : '—'} />
+      </RailGroup>
+      <RailStack label="found" items={s.found} />
+      {s.done && <RailResult label="answer" value={`${s.found.length} found`} tone={s.found.length > 0 ? 'good' : 'bad'} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.word ? (
-          <>
-            searching <span className="font-mono text-ink">{s.word}</span> ({s.matched}/{s.word.length})
-          </>
-        ) : (
-          <>scanning words</>
-        )}{' '}
-        · found <span className="font-mono text-ink">[{s.found.join(', ') || '∅'}]</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GridBoard grid={s.board} cellTone={cellTone} active={s.cur} cellSize={40} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -199,7 +199,7 @@ const I1: WordSearchIIInput = { board: BOARD, words: ['oath', 'pea', 'eat', 'rai
 export const manifestId = 'imp-45-word-search-ii';
 export const title = 'Word Search II';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [{ id: 'i1', label: '4×4 · 2 of 4 found', value: I1 }] satisfies SampleInput<WordSearchIIInput>[],
   record,
   View,

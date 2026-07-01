@@ -6,6 +6,7 @@ import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { cn } from '../../lib/cn';
 import { QUIZ_WRONG_MS } from '../../lib/quizConstants';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
+import { useIsMobile } from '../../lib/useMediaQuery';
 import { chromeText } from '../chromeUi';
 
 export interface CodeStudioQuizProps {
@@ -58,6 +59,7 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
 }
 
 export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinue }: CodeStudioQuizProps) {
+  const isMobile = useIsMobile();
   const total = quiz.length;
   const [i, setI] = useState(() => Math.min(initial?.index ?? 0, Math.max(total - 1, 0)));
   const [score, setScore] = useState(() => initial?.score ?? 0);
@@ -200,20 +202,22 @@ export function CodeStudioQuiz({ quiz, initial, nextLabel, onProgress, onContinu
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-6 text-center">
             <ScoreRing score={score} total={total} />
             <p className={cn('max-w-[280px] leading-snug text-ink2', chromeText.sm)}>{scoreMessage(score, total)}</p>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 flex-nowrap items-center gap-2">
               <button
                 type="button"
                 onClick={restart}
+                title="Retry quiz"
                 className={cn('nodrag inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-ink2 transition-colors hover:border-accent hover:text-ink', chromeText.tight)}
               >
-                <RotateCcw className="h-3.5 w-3.5" /> Retry quiz
+                <RotateCcw className="h-3.5 w-3.5" /> {isMobile ? 'Retry' : 'Retry quiz'}
               </button>
               <button
                 type="button"
                 onClick={() => onContinue(score)}
+                title={`Continue to ${nextLabel}`}
                 className={cn('nodrag inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 font-medium text-white transition-opacity hover:opacity-90', chromeText.tight)}
               >
-                Continue to {nextLabel}
+                {isMobile ? 'Continue' : `Continue to ${nextLabel}`}
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>

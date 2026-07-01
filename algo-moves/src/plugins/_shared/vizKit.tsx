@@ -4,7 +4,7 @@
  * ESLint (optional): ban hardcoded `text-[Npx]` in `src/plugins/**` — use vizText / vizKit instead.
  * Enforced by: npm run check-plugin-typography
  */
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import type { Frame, InspectorProps, PluginViewProps } from '../../core/types';
 import { cn } from '../../lib/cn';
 import { vizPad, vizText } from './vizTokens';
@@ -157,6 +157,180 @@ export function ExprToken({ children, className }: { children: ReactNode; classN
 /** Standard board shell with symmetric padding. */
 export function VizBoard({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn('board-area', vizPad, className)}>{children}</div>;
+}
+
+/* ------------------------------------------------------------------ *
+ * Staged board: a stable main animation on the left, a subtle side
+ * "state rail" on the right for the values that mutate frame-to-frame
+ * (stacks, queues, sets, counters, accumulators, the running answer).
+ *
+ * Why: `VizFitBox` re-measures the board every frame, so any state that
+ * grows/shrinks *below* the animation changes the board's natural size
+ * and makes the whole board rescale ("jump"). The rail is decoupled from
+ * the row height (see `.viz-rail` in theme.css), so the main animation
+ * keeps a constant footprint no matter how the state evolves.
+ * ------------------------------------------------------------------ */
+
+/** Top-level board: stable main region + optional right-hand state rail. */
+export function VizStage({
+  children,
+  rail,
+  railWidth,
+  className,
+}: {
+  children: ReactNode;
+  rail?: ReactNode;
+  /** Override the rail width (default `--viz-rail-w`, 128px). */
+  railWidth?: number | string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn('board-area viz-stage', className)}
+      style={railWidth != null ? ({ ['--viz-rail-w']: typeof railWidth === 'number' ? `${railWidth}px` : railWidth } as CSSProperties) : undefined}
+    >
+      <div className="viz-stage-main">{children}</div>
+      {rail != null && (
+        <div className="viz-rail nodrag">
+          <div className="viz-rail-scroll">{rail}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** A labelled group in the rail — small uppercase label over its body. */
+export function RailSection({
+  label,
+  hint,
+  children,
+  className,
+}: {
+  label?: ReactNode;
+  hint?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn('viz-rail-section', className)}>
+      {label != null && (
+        <div className={cn('viz-rail-label', vizText['2xs'])}>
+          <span className="truncate">{label}</span>
+          {hint != null && <span className="viz-rail-hint">{hint}</span>}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+export type RailStackItem = string | number | { label: ReactNode; tone?: 'accent' | 'good' | 'bad' | 'warn' };
+
+/**
+ * Animated vertical stack / queue column — the "column that keeps changing".
+ * Top of the collection is drawn at the top and grows downward; new entries
+ * pop in subtly. Overflow clips at the bottom with a fade so the active end
+ * stays visible and the rail never changes the board's height.
+ */
+export function RailStack({
+  label,
+  items,
+  empty = '∅',
+  topLabel,
+  bottomLabel,
+  highlightEnd = 'top',
+  className,
+}: {
+  label?: ReactNode;
+  items: readonly RailStackItem[];
+  empty?: ReactNode;
+  /** Small tag next to the leading edge (e.g. "top", "front"). */
+  topLabel?: ReactNode;
+  bottomLabel?: ReactNode;
+  /** Which end is the "live" end to accent — 'top' (LIFO) or 'bottom'. */
+  highlightEnd?: 'top' | 'bottom' | 'none';
+  className?: string;
+}) {
+  // Render top-of-collection first (visually on top), base last.
+  const ordered = items.slice().reverse();
+  return (
+    <RailSection label={label} className={className}>
+      {topLabel != null && items.length > 0 && (
+        <div className={cn('viz-rail-edge', vizText['2xs'])}>{topLabel}</div>
+      )}
+      <div className="viz-rail-stack">
+        {ordered.length === 0 ? (
+          <div className={cn('viz-rail-empty font-mono', vizText.xs)}>{empty}</div>
+        ) : (
+          ordered.map((raw, idx) => {
+            const isTop = idx === 0;
+            const isBottom = idx === ordered.length - 1;
+            const live = (highlightEnd === 'top' && isTop) || (highlightEnd === 'bottom' && isBottom);
+            const item = typeof raw === 'object' ? raw : { label: raw, tone: undefined };
+            const tone = item.tone ?? (live ? 'accent' : undefined);
+            // Stable key from the base so pushing a new top only mounts the new chip.
+            const key = ordered.length - 1 - idx;
+            return (
+              <div
+                key={key}
+                className={cn('viz-rail-chip font-mono', vizText.xs, tone && `viz-rail-chip--${tone}`)}
+              >
+                {item.label}
+              </div>
+            );
+          })
+        )}
+      </div>
+      {bottomLabel != null && items.length > 0 && (
+        <div className={cn('viz-rail-edge viz-rail-edge--bottom', vizText['2xs'])}>{bottomLabel}</div>
+      )}
+    </RailSection>
+  );
+}
+
+/** Compact key / value stat for the rail (label above, mono value below). */
+export function RailStat({
+  k,
+  v,
+  tone,
+}: {
+  k: ReactNode;
+  v: ReactNode;
+  tone?: 'accent' | 'good' | 'bad' | 'warn';
+}) {
+  return (
+    <div className="viz-rail-stat">
+      <span className={cn('viz-rail-stat-k', vizText['2xs'])}>{k}</span>
+      <span className={cn('viz-rail-stat-v font-mono', vizText.sm, tone && `viz-rail-stat-v--${tone}`)}>{v}</span>
+    </div>
+  );
+}
+
+/** Groups RailStats with subtle dividers. */
+export function RailGroup({ label, children }: { label?: ReactNode; children: ReactNode }) {
+  return (
+    <RailSection label={label}>
+      <div className="viz-rail-group">{children}</div>
+    </RailSection>
+  );
+}
+
+/** A single emphasized result chip for the rail (the running / final answer). */
+export function RailResult({
+  label = 'result',
+  value,
+  tone = 'good',
+}: {
+  label?: ReactNode;
+  value: ReactNode;
+  tone?: 'accent' | 'good' | 'bad' | 'warn';
+}) {
+  return (
+    <div className={cn('viz-rail-result', `viz-rail-result--${tone}`)}>
+      <span className={cn('viz-rail-stat-k', vizText['2xs'])}>{label}</span>
+      <span className={cn('font-mono', vizText.base)}>{value}</span>
+    </div>
+  );
 }
 
 // Back-compat aliases — prefer VizStatRow / VizInspector in new code.

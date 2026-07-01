@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface DecodeInput {
   s: string;
@@ -131,16 +130,23 @@ function View({ frame }: PluginViewProps<DecodeState>) {
   if (s.one !== null) pointers.push({ i: s.one, label: 'i−1', tone: 'good', place: 'below' });
   if (s.two !== null) pointers.push({ i: s.two, label: 'i−2', tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== EMPTY ? 'match' : '');
-  const ans = s.dp[s.s.length] === EMPTY ? '…filling' : s.dp[s.s.length];
+  const cell = (i: number | null) =>
+    i !== null && i >= 0 && i < s.dp.length ? (s.dp[i] === EMPTY ? '·' : s.dp[i]) : '—';
+  const known = s.dp[s.s.length] !== EMPTY;
+  const ans = known ? s.dp[s.s.length] : null;
+  const done = s.done;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        s = <span className="font-mono text-ink">"{s.s}"</span>, answer ={' '}
-        <span className="font-mono text-ink">{ans}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+        <RailStat k="dp[i−1]" v={cell(s.one)} tone="good" />
+        <RailStat k="dp[i−2]" v={cell(s.two)} tone="warn" />
+        <RailStat k="dp[i]" v={cell(s.i)} />
+      </RailGroup>
+      {known && <RailResult label="answer" value={`${ans} ways`} tone={done ? (ans as number) > 0 ? 'good' : 'bad' : 'accent'} />}
+    </>}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index i = chars decoded, value = number of ways</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -165,7 +171,7 @@ function Inspector({ frame }: InspectorProps<DecodeState>) {
 export const manifestId = 'imp-78-decode-ways';
 export const title = 'Decode Ways';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'd226', label: 's = "226"', value: { s: '226' } },
     { id: 'd12', label: 's = "12"', value: { s: '12' } },

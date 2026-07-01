@@ -1,9 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface CCInput {
   adj: number[][];
@@ -27,66 +27,51 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
   const disc = new Array<number>(n).fill(-1);
   const low = new Array<number>(n).fill(-1);
   const bridges: [number, number][] = [];
-  const frames: Frame<CCState>[] = [];
   let timer = 0;
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    active: number | null,
-    inspect: number | null,
-    highlightEdge: [number, number] | null,
-    tone?: 'good',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
-        disc: disc.slice(),
-        low: low.slice(),
-        active,
-        inspect,
-        highlightEdge,
-        bridges: bridges.map((b) => [b[0], b[1]] as [number, number]),
-        done: type === 'DONE',
-      },
-    });
+  const { emit, frames } = createRecorder<CCState>(() => ({
+    adj,
+    pos,
+    disc: disc.slice(),
+    low: low.slice(),
+    active: null,
+    inspect: null,
+    highlightEdge: null,
+    bridges: bridges.map((b) => [b[0], b[1]] as [number, number]),
+    done: false,
+  }));
 
   emit(
     'INIT',
     'Tarjan',
     `Find every bridge with Tarjan's DFS. We record disc[u] (the time we first reach u) and low[u] (the earliest node reachable from u's subtree). After exploring a tree edge (u, v), if low[v] > disc[u] then v's subtree has no back-edge above u, so (u, v) is a bridge.`,
-    null,
-    null,
-    null,
+    { active: null, inspect: null, highlightEdge: null },
   );
 
   const dfs = (u: number, parent: number) => {
     disc[u] = timer;
     low[u] = timer;
     timer += 1;
-    emit('DISCOVER', `disc[${u}]=${disc[u]}`, `Enter node ${u}: set disc[${u}] = low[${u}] = ${disc[u]}.`, u, null, null);
+    emit('DISCOVER', `disc[${u}]=${disc[u]}`, `Enter node ${u}: set disc[${u}] = low[${u}] = ${disc[u]}.`, { active: u, inspect: null, highlightEdge: null });
 
     for (const v of adj[u]) {
       if (v === parent) continue;
       if (disc[v] === -1) {
-        emit('TREE', `edge ${u}-${v}`, `Tree edge ${u} → ${v}: ${v} is undiscovered, so recurse into it.`, u, v, [u, v]);
+        emit('TREE', `edge ${u}-${v}`, `Tree edge ${u} → ${v}: ${v} is undiscovered, so recurse into it.`, { active: u, inspect: v, highlightEdge: [u, v] });
         dfs(v, u);
         if (low[v] < low[u]) {
           low[u] = low[v];
-          emit('LOW', `low[${u}]=${low[u]}`, `Back from ${v}: low[${v}] = ${low[v]} is smaller, so pull low[${u}] down to ${low[u]}.`, u, v, [u, v]);
+          emit('LOW', `low[${u}]=${low[u]}`, `Back from ${v}: low[${v}] = ${low[v]} is smaller, so pull low[${u}] down to ${low[u]}.`, { active: u, inspect: v, highlightEdge: [u, v] });
         }
         if (low[v] > disc[u]) {
           bridges.push([u, v]);
-          emit('BRIDGE', `bridge ${u}-${v}`, `low[${v}] = ${low[v]} > disc[${u}] = ${disc[u]}: nothing in ${v}'s subtree reaches above ${u}, so edge ${u}-${v} is a bridge.`, u, v, [u, v]);
+          emit('BRIDGE', `bridge ${u}-${v}`, `low[${v}] = ${low[v]} > disc[${u}] = ${disc[u]}: nothing in ${v}'s subtree reaches above ${u}, so edge ${u}-${v} is a bridge.`, { active: u, inspect: v, highlightEdge: [u, v] });
         } else {
-          emit('NOBRIDGE', `keep ${u}-${v}`, `low[${v}] = ${low[v]} ≤ disc[${u}] = ${disc[u]}: a back-edge bypasses ${u}-${v}, so it is not a bridge.`, u, v, [u, v]);
+          emit('NOBRIDGE', `keep ${u}-${v}`, `low[${v}] = ${low[v]} ≤ disc[${u}] = ${disc[u]}: a back-edge bypasses ${u}-${v}, so it is not a bridge.`, { active: u, inspect: v, highlightEdge: [u, v] });
         }
       } else if (disc[v] < low[u]) {
         low[u] = disc[v];
-        emit('BACK', `low[${u}]=${low[u]}`, `Back edge ${u} → ${v}: ${v} is already visited at disc ${disc[v]}, so lower low[${u}] to ${low[u]}.`, u, v, [u, v]);
+        emit('BACK', `low[${u}]=${low[u]}`, `Back edge ${u} → ${v}: ${v} is already visited at disc ${disc[v]}, so lower low[${u}] to ${low[u]}.`, { active: u, inspect: v, highlightEdge: [u, v] });
       }
     }
   };
@@ -94,7 +79,7 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
   dfs(0, -1);
 
   const bridgeText = bridges.length ? bridges.map((b) => `(${b[0]}, ${b[1]})`).join(', ') : 'none';
-  emit('DONE', `${bridges.length} bridges`, `DFS complete. Critical connections (bridges): ${bridgeText}.`, null, null, null, 'good');
+  emit('DONE', `${bridges.length} bridges`, `DFS complete. Critical connections (bridges): ${bridgeText}.`, { active: null, inspect: null, highlightEdge: null, done: true }, 'good');
   return frames;
 }
 
@@ -104,11 +89,28 @@ function isBridge(s: CCState, v: number, u: number): boolean {
 
 function View({ frame }: PluginViewProps<CCState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="node">
+        <RailStat k="active" v={s.active ?? '—'} tone={s.active !== null ? 'accent' : undefined} />
+        <RailStat k="inspect" v={s.inspect ?? '—'} />
+      </RailGroup>
+      <RailStack
+        label="bridges"
+        items={s.bridges.map((b) => `(${b[0]},${b[1]})`)}
+        topLabel="latest"
+      />
+      {s.done && (
+        <RailResult
+          label="total"
+          value={s.bridges.length}
+          tone={s.bridges.length > 0 ? 'good' : 'bad'}
+        />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        bridges found = <span className="font-mono text-ink">{s.bridges.length ? s.bridges.map((b) => `(${b[0]},${b[1]})`).join(' ') : '—'}</span>
-      </div>
+    <VizStage rail={rail}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -119,7 +121,7 @@ function View({ frame }: PluginViewProps<CCState>) {
         edgeTone={s.highlightEdge && isBridge(s, s.highlightEdge[0], s.highlightEdge[1]) ? 'clash' : 'active'}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -151,7 +153,7 @@ const G6: CCInput = {
 export const manifestId = 'imp-25-critical-connections-in-a-network';
 export const title = 'Critical Connections in a Network';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g5', label: '5 nodes', value: G5 },
     { id: 'g6', label: '6 nodes', value: G6 },

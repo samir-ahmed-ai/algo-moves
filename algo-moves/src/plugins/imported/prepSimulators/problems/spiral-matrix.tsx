@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { GridBoard } from '../../../../components/GridBoard';
 
 interface SpiralInput {
@@ -29,7 +29,6 @@ function cloneVisited(v: boolean[][]): boolean[][] {
 }
 
 function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
-  const frames: Frame<SpiralState>[] = [];
   const rows = matrix.length;
   const cols = rows > 0 ? matrix[0].length : 0;
   const visited = emptyVisited(rows, cols);
@@ -40,35 +39,33 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
   let left = 0;
   let right = cols - 1;
 
-  const emit = (
+  const { emit, frames } = createRecorder<SpiralState>(() => ({
+    matrix,
+    top,
+    bot,
+    left,
+    right,
+    active: null,
+    visited: cloneVisited(visited),
+    res: res.slice(),
+    done: false,
+  }));
+
+  const snap = (
     type: string,
     note: string,
     caption: string,
     active: [number, number] | null,
     done: boolean,
     tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        matrix,
-        top,
-        bot,
-        left,
-        right,
-        active,
-        visited: cloneVisited(visited),
-        res: res.slice(),
-        done,
-      },
-    });
+  ) => emit(type, note, caption, { active, done }, tone);
 
   if (rows === 0 || cols === 0) {
-    emit('DONE', 'empty', 'The matrix is empty, so the spiral order is the empty list.', null, true, 'good');
+    snap('DONE', 'empty', 'The matrix is empty, so the spiral order is the empty list.', null, true, 'good');
     return frames;
   }
 
-  emit(
+  snap(
     'INIT',
     `${rows}x${cols}`,
     `Spiral Matrix: peel the outer ring of a ${rows}×${cols} grid, then move the four boundaries inward and repeat. Bounds start at top=${top}, bot=${bot}, left=${left}, right=${right}. Time O(m·n), Space O(1).`,
@@ -85,7 +82,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
     // Top row: left -> right.
     for (let c = left; c <= right; c++) {
       take(top, c);
-      emit(
+      snap(
         'TOP',
         `${matrix[top][c]}`,
         `Top edge: walk left → right along row ${top}, appending ${matrix[top][c]} from (${top}, ${c}).`,
@@ -94,7 +91,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
       );
     }
     top++;
-    emit(
+    snap(
       'SHRINK',
       `top=${top}`,
       `Finished the top row. Move the top boundary down: top = ${top}. Remaining rows [${top}..${bot}].`,
@@ -105,7 +102,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
     // Right column: top -> bottom.
     for (let r = top; r <= bot; r++) {
       take(r, right);
-      emit(
+      snap(
         'RIGHT',
         `${matrix[r][right]}`,
         `Right edge: walk top → bottom down column ${right}, appending ${matrix[r][right]} from (${r}, ${right}).`,
@@ -114,7 +111,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
       );
     }
     right--;
-    emit(
+    snap(
       'SHRINK',
       `right=${right}`,
       `Finished the right column. Move the right boundary in: right = ${right}. Remaining cols [${left}..${right}].`,
@@ -126,7 +123,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
     if (top <= bot) {
       for (let c = right; c >= left; c--) {
         take(bot, c);
-        emit(
+        snap(
           'BOTTOM',
           `${matrix[bot][c]}`,
           `Bottom edge: walk right → left along row ${bot}, appending ${matrix[bot][c]} from (${bot}, ${c}).`,
@@ -135,7 +132,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
         );
       }
       bot--;
-      emit(
+      snap(
         'SHRINK',
         `bot=${bot}`,
         `Finished the bottom row. Move the bottom boundary up: bot = ${bot}. Remaining rows [${top}..${bot}].`,
@@ -143,7 +140,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
         false,
       );
     } else {
-      emit(
+      snap(
         'GUARD',
         'skip bottom',
         `Guard top ≤ bot is false, so the bottom row was already consumed — skip it to avoid re-appending cells.`,
@@ -156,7 +153,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
     if (left <= right) {
       for (let r = bot; r >= top; r--) {
         take(r, left);
-        emit(
+        snap(
           'LEFT',
           `${matrix[r][left]}`,
           `Left edge: walk bottom → top up column ${left}, appending ${matrix[r][left]} from (${r}, ${left}).`,
@@ -165,7 +162,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
         );
       }
       left++;
-      emit(
+      snap(
         'SHRINK',
         `left=${left}`,
         `Finished the left column. Move the left boundary in: left = ${left}. Remaining cols [${left}..${right}].`,
@@ -173,7 +170,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
         false,
       );
     } else {
-      emit(
+      snap(
         'GUARD',
         'skip left',
         `Guard left ≤ right is false, so the left column was already consumed — skip it to avoid re-appending cells.`,
@@ -183,7 +180,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
     }
   }
 
-  emit(
+  snap(
     'DONE',
     `${res.length} cells`,
     `Bounds crossed (top > bot or left > right), so every cell has been peeled exactly once. Spiral order: [${res.join(', ')}].`,
@@ -202,22 +199,20 @@ function View({ frame }: PluginViewProps<SpiralState>) {
     return 'land';
   };
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        rows{' '}
-        <span className="font-mono text-ink">
-          [{s.top}..{s.bot}]
-        </span>{' '}
-        · cols{' '}
-        <span className="font-mono text-ink">
-          [{s.left}..{s.right}]
-        </span>
-      </div>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="bounds">
+            <RailStat k="rows" v={`[${s.top}..${s.bot}]`} />
+            <RailStat k="cols" v={`[${s.left}..${s.right}]`} />
+          </RailGroup>
+          <RailStack label="result" items={s.res.map(String)} highlightEnd="bottom" topLabel="last" />
+          {s.done && <RailResult label="order" value={`[${s.res.join(', ')}]`} tone="good" />}
+        </>
+      }
+    >
       <GridBoard grid={s.matrix} cellTone={cellTone} active={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
-        → [{s.res.join(', ')}]
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

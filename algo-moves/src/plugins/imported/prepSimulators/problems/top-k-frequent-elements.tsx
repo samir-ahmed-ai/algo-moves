@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface TopKInput {
   nums: number[];
@@ -26,8 +26,6 @@ interface TopKState {
 }
 
 function record({ nums, k }: TopKInput): Frame<TopKState>[] {
-  const frames: Frame<TopKState>[] = [];
-
   // Stable order of distinct elements by first appearance — used for the bars.
   const order: number[] = [];
   const freq = new Map<number, number>();
@@ -42,28 +40,17 @@ function record({ nums, k }: TopKInput): Frame<TopKState>[] {
   const collected: number[] = [];
   const result: number[] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<TopKState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums,
-        k,
-        elements: order,
-        counts,
-        scanFreq: null,
-        active: null,
-        collected: [...collected],
-        result: [...result],
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<TopKState>(() => ({
+    nums,
+    k,
+    elements: order,
+    counts,
+    scanFreq: null,
+    active: null,
+    collected: [...collected],
+    result: [...result],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -133,30 +120,25 @@ function View({ frame }: PluginViewProps<TopKState>) {
     if (s.active === i) return 'compare';
     return 'idle';
   };
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="k" v={s.k} />
+        <RailStat k="freq" v={s.scanFreq ?? '—'} tone={s.scanFreq !== null && !s.done ? 'accent' : undefined} />
+      </RailGroup>
+      <RailStack label="result" items={s.result.map(String)} />
+      {s.done && <RailResult label="answer" value={`[${s.result.join(', ')}]`} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        k = <span className="font-mono text-ink">{s.k}</span>
-        {s.scanFreq !== null && !s.done && (
-          <>
-            {' · '}scanning freq ={' '}
-            <span className="font-mono text-ink">{s.scanFreq}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <ArrayBars
         values={s.counts}
         tone={tone}
         label={(i) => s.elements[i]}
         max={Math.max(1, ...s.counts)}
       />
-      <div className={cn(vizText.sm, 'text-ink3')}>bar height = frequency · label = element value</div>
-      {s.result.length > 0 && (
-        <div className={cn('mt-1 font-mono', s.done ? 'text-good' : 'text-ink', vizText.base)}>
-          result = [{s.result.join(', ')}]
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

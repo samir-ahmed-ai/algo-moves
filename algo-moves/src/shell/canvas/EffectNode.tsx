@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn';
 import { getEffect, type EffectDataMap } from '../../effects/registry';
 import { effectTraceSnippet } from '../../effects/registry';
 import type { PanelRunState } from '../../core/panelRegistry';
-import { Btn, nodeText } from './nodeui';
+import { Btn, nodeIconGlyph, nodeText } from './nodeui';
 import { NodeHeader, NodeHeaderAction, NodeHeaderActions, NodeHeaderTitle } from './panels/NodeHeader';
 import { handleDotClass, portHandleStyle } from './canvasHandles';
 import { useConnectedComponentsOptional } from '../../lib/ConnectedComponentsContext';
@@ -108,9 +108,10 @@ export function EffectNode({ id, data, selected }: NodeProps<EffectFlowNode>) {
   return (
     <div
       className={cn(
-        'panel-node relative flex w-[280px] flex-col rounded-[var(--radius)] border bg-panel text-ink',
-        selected ? 'border-edge2 shadow-theme-lg' : 'border-edge',
+        'panel-node relative flex w-[280px] flex-col rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
+        Boolean(selected) && 'selected',
         chainTint && `ring-1 ${chainTint}`,
+        'hover:ring-1 hover:ring-[color-mix(in_srgb,var(--ring)_25%,transparent)]',
       )}
     >
       <Handle type="target" position={Position.Left} className={handleDotClass} style={portHandleStyle(Position.Left)} />
@@ -118,14 +119,14 @@ export function EffectNode({ id, data, selected }: NodeProps<EffectFlowNode>) {
         <NodeHeaderTitle>{data.title ?? effect?.meta.title ?? effectId}</NodeHeaderTitle>
         <NodeHeaderActions>
           <NodeHeaderAction onClick={toggleRun} title={runState === 'running' ? 'Pause chain' : 'Run chain'}>
-            {runState === 'running' ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+            {runState === 'running' ? <Pause className={nodeIconGlyph} /> : <Play className={nodeIconGlyph} />}
           </NodeHeaderAction>
           <NodeHeaderAction onClick={() => deleteElements({ nodes: [{ id }] })} title="Delete">
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className={nodeIconGlyph} />
           </NodeHeaderAction>
         </NodeHeaderActions>
       </NodeHeader>
-      <div className="nodrag flex flex-col gap-2 p-2">
+      <div className="nodrag flex flex-col gap-[var(--node-gap,0.5rem)] p-[var(--node-px,0.75rem)]">
         <span className={cn('font-mono text-ink3', nodeText.xs)}>{snippet}</span>
         <EffectControls effectId={effectId} data={data.effectData ?? {}} onChange={onEffectDataChange} />
         <Btn variant="quiet" size="sm" onClick={() => updateData({ runState: 'stopped' })}>

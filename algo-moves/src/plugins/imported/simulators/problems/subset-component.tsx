@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, VarGrid, VizEmpty, RailGroup, RailResult, RailStat, VizStage } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface SCInput {
   adj: number[][];
@@ -100,11 +99,15 @@ function record({ adj, pos }: SCInput): Frame<SCState>[] {
 
 function View({ frame }: PluginViewProps<SCState>) {
   const s = frame.state;
+  const painted = s.color.filter((c) => c !== 0).length;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        connected components = <span className="font-mono text-ink">{s.components}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="current" v={s.active ?? '—'} tone="accent" />
+        <RailStat k="painted" v={`${painted}/${s.adj.length}`} />
+      </RailGroup>
+      <RailResult label="components" value={s.components} tone={s.done ? 'good' : 'accent'} />
+    </>}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -113,7 +116,7 @@ function View({ frame }: PluginViewProps<SCState>) {
         inspectNode={s.inspect}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -160,7 +163,7 @@ const G2: SCInput = {
 export const manifestId = 'imp-1-subset-component';
 export const title = 'Subset Component';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g3', label: '3 components', value: G3 },
     { id: 'g2', label: '2 components', value: G2 },

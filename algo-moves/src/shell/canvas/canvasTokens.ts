@@ -1,4 +1,4 @@
-/** Default node width baseline — keep in sync with STRUDEL_NODE_W in nodeTokens. */
+/** Default node width baseline — keep in sync with NODE_W in nodeTokens.ts */
 const DEFAULT_NODE_W = 400;
 
 /** fitView animation duration (ms). */

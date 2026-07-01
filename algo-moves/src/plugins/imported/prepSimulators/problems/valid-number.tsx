@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface ValidNumberInput {
   s: string;
@@ -177,33 +176,30 @@ function View({ frame }: PluginViewProps<ValidNumberState>) {
     if (s.result === false) return 'dead';
     return 'match';
   };
-  const flag = (on: boolean) => (
-    <span className={cn('font-mono', on ? 'text-good' : 'text-ink3')}>{on ? 'true' : 'false'}</span>
+  const rail = (
+    <>
+      <RailGroup label="flags">
+        <RailStat k="seenDigit" v={String(s.seenDigit)} tone={s.seenDigit ? 'good' : undefined} />
+        <RailStat k="seenDot" v={String(s.seenDot)} tone={s.seenDot ? 'accent' : undefined} />
+        <RailStat k="seenExp" v={String(s.seenExp)} tone={s.seenExp ? 'accent' : undefined} />
+      </RailGroup>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="char" v={s.i !== null ? `'${s.chars[s.i]}'` : '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== null && (
+        <RailResult label="answer" value={s.result ? 'valid' : 'invalid'} tone={s.result ? 'good' : 'bad'} />
+      )}
+    </>
   );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        seenDigit = {flag(s.seenDigit)}
-        {' · '}seenDot = {flag(s.seenDot)}
-        {' · '}seenExp = {flag(s.seenExp)}
-      </div>
+    <VizStage rail={rail}>
       {s.chars.length > 0 ? (
         <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={null} />
       ) : (
-        <div className={cn('font-mono text-ink3', vizText.base)}>(empty string)</div>
+        <span className="font-mono text-ink3">(empty string)</span>
       )}
-      {s.result !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result ? 'text-good' : 'text-bad',
-          )}
-        >
-          → {s.result ? 'valid number' : 'not a number'}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

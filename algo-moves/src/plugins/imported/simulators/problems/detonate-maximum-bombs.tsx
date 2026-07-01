@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface DBInput {
   /** Each bomb is [x, y, radius]. */
@@ -168,11 +167,17 @@ function nodeColor(s: DBState, node: number): number {
 function View({ frame }: PluginViewProps<DBState>) {
   const s = frame.state;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        chain from bomb <span className="font-mono text-ink">{s.start}</span>, detonated ={' '}
-        <span className="font-mono text-ink">{s.count}</span>
-      </div>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="chain">
+            <RailStat k="start" v={s.start} />
+            <RailStat k="detonated" v={s.count} tone="accent" />
+          </RailGroup>
+          <RailResult label="max" value={s.answer} tone={s.done ? 'good' : 'accent'} />
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -182,10 +187,7 @@ function View({ frame }: PluginViewProps<DBState>) {
         highlightEdge={s.edge}
         height={260}
       />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        max detonated: <span className="font-mono text-ink">{s.answer}</span>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -227,7 +229,7 @@ const BOMBS4: DBInput = {
 export const manifestId = 'imp-16-detonate-the-maximum-bombs';
 export const title = 'Detonate the Maximum Bombs';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'bombs5', label: '5 bombs', value: BOMBS5 },
     { id: 'bombs4', label: '4 bombs', value: BOMBS4 },

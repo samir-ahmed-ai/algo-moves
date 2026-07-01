@@ -1,10 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import { QueueTape } from '../../../../components/QueueTape';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface HPInput {
   adj: number[][];
@@ -88,12 +86,16 @@ function record({ adj, pos, src, dst }: HPInput): Frame<HPState>[] {
 
 function View({ frame }: PluginViewProps<HPState>) {
   const s = frame.state;
+  const visited = s.color.filter((c) => c === 1).length;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        Has path {s.src} → {s.dst}?{' '}
-        {s.done && <span className="font-mono text-ink">{s.found ? 'true' : 'false'}</span>}
-      </div>
+    <VizStage rail={<>
+      <RailStack label="queue" items={s.queue.map(String)} topLabel="front" highlightEnd="bottom" />
+      <RailGroup label="scan">
+        <RailStat k="current" v={s.active ?? '—'} tone="accent" />
+        <RailStat k="visited" v={`${visited}/${s.adj.length}`} />
+      </RailGroup>
+      {s.done && <RailResult label="reached" value={s.found ? 'true' : 'false'} tone={s.found ? 'good' : 'bad'} />}
+    </>}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -102,8 +104,7 @@ function View({ frame }: PluginViewProps<HPState>) {
         inspectNode={s.active === s.dst ? null : s.dst}
         height={260}
       />
-      <QueueTape items={s.queue} label="queue · front →" />
-    </div>
+    </VizStage>
   );
 }
 
@@ -140,7 +141,7 @@ const NO_REACH: HPInput = {
 export const manifestId = 'imp-0-05-has-path-from-source-to-destination';
 export const title = 'Has Path from Source to Destination';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'reach', label: 'reachable · 0→5', value: REACH },
     { id: 'noreach', label: 'disjoint · 0→5', value: NO_REACH },

@@ -13,6 +13,8 @@ import { Btn, RADIUS_CTRL } from './nodeui';
 import { chromeText } from '../chromeUi';
 import { InsField, InsGrid, InsSection, InsSelect } from './inspectorUi';
 
+export { useHasSelectedPanel } from './useHasSelectedPanel';
+
 const FILL_SWATCHES: { v: string | undefined; label: string }[] = [
   { v: undefined, label: 'Default' },
   { v: 'var(--surface-2)', label: 'Alt' },
@@ -32,10 +34,6 @@ function useSelectedPanel(): PanelFlowNode | null {
     const panels = s.nodes.filter((n) => n.selected && n.type === 'panel');
     return panels.length === 1 ? (panels[0] as PanelFlowNode) : null;
   });
-}
-
-export function useHasSelectedPanel(): boolean {
-  return useStore((s) => s.nodes.filter((n) => n.selected && n.type === 'panel').length === 1);
 }
 
 export function NodePropertiesBody() {

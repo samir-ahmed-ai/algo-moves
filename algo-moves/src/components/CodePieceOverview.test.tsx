@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { CodePieceOverview } from './CodePieceOverview';
+import { dedentForDisplay } from '../lib/trayLayout';
 import { codePieces } from '../plugins/n-queens/practice';
 
 describe('CodePieceOverview', () => {
@@ -8,13 +9,16 @@ describe('CodePieceOverview', () => {
     const html = renderToStaticMarkup(<CodePieceOverview pieces={codePieces.slice(0, 3)} lang="go" />);
     expect(html).toContain('code-overview-section');
     expect(html).toContain('signature — return the column per row');
-    expect(html).toContain('code-overview-kind');
+    expect(html).toContain('code-overview-aside');
+    expect(html).toContain('code-overview-glyph');
     expect(html.split('code-overview-section').length - 1).toBe(3);
   });
 
-  it('shows raw piece code including leading indent', () => {
+  it('shows dedented piece code for display', () => {
     const init = codePieces.find((p) => p.id === 'init')!;
     const html = renderToStaticMarkup(<CodePieceOverview pieces={[init]} lang="go" />);
-    expect(html.replace(/<[^>]+>/g, '')).toContain('\tqueens');
+    const dedented = dedentForDisplay(init.code);
+    expect(html.replace(/<[^>]+>/g, '')).toContain(dedented.split('\n')[0]!);
+    expect(dedented.split('\n')[0]).not.toMatch(/^\t/);
   });
 });

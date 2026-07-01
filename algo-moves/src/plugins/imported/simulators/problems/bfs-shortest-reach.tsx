@@ -1,10 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import { QueueTape } from '../../../../components/QueueTape';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 const EDGE_WEIGHT = 6;
 
@@ -30,37 +29,41 @@ function record({ adj, pos, start }: BSRInput): Frame<BSRState>[] {
   const color = new Array<number>(n).fill(0);
   const dist = new Array<number>(n).fill(-1);
   const queue: number[] = [];
-  const frames: Frame<BSRState>[] = [];
 
-  const emit = (type: string, note: string, caption: string, active: number | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { adj, pos, start, color: color.slice(), dist: dist.slice(), active, queue: queue.slice(), done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<BSRState>(() => ({
+    adj,
+    pos,
+    start,
+    color: color.slice(),
+    dist: dist.slice(),
+    active: null,
+    queue: queue.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
     `BFS from ${start + 1}`,
     `Shortest reach by BFS from node ${start + 1}. Every edge counts as ${EDGE_WEIGHT}, so a node ${EDGE_WEIGHT}×hops away is that far. All distances start at −1 (unreachable) and BFS visits nodes layer by layer, so the first time we reach a node we have its shortest distance.`,
-    null,
+    { active: null },
   );
 
   dist[start] = 0;
   color[start] = 2;
   queue.push(start);
-  emit('SEED', `dist[${start + 1}] = 0`, `Seed the queue with the source node ${start + 1}, set its distance to 0, and mark it queued.`, start);
+  emit('SEED', `dist[${start + 1}] = 0`, `Seed the queue with the source node ${start + 1}, set its distance to 0, and mark it queued.`, { active: start });
 
   while (queue.length > 0) {
     const v = queue.shift() as number;
     color[v] = 1;
-    emit('VISIT', `visit ${v + 1}`, `Dequeue node ${v + 1} (distance ${dist[v]}) and mark it visited — its shortest distance is now final.`, v);
+    emit('VISIT', `visit ${v + 1}`, `Dequeue node ${v + 1} (distance ${dist[v]}) and mark it visited — its shortest distance is now final.`, { active: v });
 
     for (const nb of adj[v]) {
       if (dist[nb] === -1) {
         dist[nb] = dist[v] + EDGE_WEIGHT;
         color[nb] = 2;
         queue.push(nb);
-        emit('RELAX', `dist[${nb + 1}] = ${dist[nb]}`, `Neighbour ${nb + 1} of ${v + 1} is unreached — set dist[${nb + 1}] = ${dist[v]} + ${EDGE_WEIGHT} = ${dist[nb]}, mark it queued, and push it. Queue is now [${queue.map((q) => q + 1).join(', ')}].`, v);
+        emit('RELAX', `dist[${nb + 1}] = ${dist[nb]}`, `Neighbour ${nb + 1} of ${v + 1} is unreached — set dist[${nb + 1}] = ${dist[v]} + ${EDGE_WEIGHT} = ${dist[nb]}, mark it queued, and push it. Queue is now [${queue.map((q) => q + 1).join(', ')}].`, { active: v });
       }
     }
   }
@@ -71,7 +74,7 @@ function record({ adj, pos, start }: BSRInput): Frame<BSRState>[] {
     'DONE',
     `${reachable} reached`,
     `Queue empty. From node ${start + 1}: ${reachable} node(s) reached, ${unreachable} left at −1 (unreachable). Distances to all other nodes: [${dist.map((d, i) => (i === start ? null : d)).filter((d) => d !== null).join(', ')}].`,
-    null,
+    { active: null, done: true },
     'good',
   );
   return frames;
@@ -85,13 +88,33 @@ function distLabel(s: BSRState, node: number): string {
 
 function View({ frame }: PluginViewProps<BSRState>) {
   const s = frame.state;
-  const others = s.dist.map((d, i) => (i === s.start ? null : d)).filter((d): d is number => d !== null);
+  const reachable = s.done ? s.dist.filter((d, i) => i !== s.start && d >= 0).length : null;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        BFS shortest reach from node {s.start + 1} · dist ={' '}
-        <span className="font-mono text-ink">[{others.join(', ')}]</span>
-      </div>
+    <VizStage rail={<>
+      <RailStack
+        label="queue"
+        items={s.queue.map((q) => q + 1)}
+        topLabel="front"
+        highlightEnd="bottom"
+      />
+      <RailGroup label="scan">
+        <RailStat k="src" v={s.start + 1} />
+        <RailStat k="cur" v={s.active === null ? '—' : s.active + 1} tone="accent" />
+      </RailGroup>
+      <RailGroup label="dist">
+        {s.dist.map((d, i) => (
+          <RailStat
+            key={i}
+            k={`n${i + 1}`}
+            v={d < 0 ? '∞' : d}
+            tone={i === s.start ? 'accent' : d >= 0 ? 'good' : undefined}
+          />
+        ))}
+      </RailGroup>
+      {reachable !== null && (
+        <RailResult label="reached" value={reachable} tone="good" />
+      )}
+    </>}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -100,8 +123,7 @@ function View({ frame }: PluginViewProps<BSRState>) {
         activeNode={s.active}
         height={260}
       />
-      <QueueTape items={s.queue.map((q) => q + 1)} label="queue · front →" />
-    </div>
+    </VizStage>
   );
 }
 
@@ -138,7 +160,7 @@ const G6b: BSRInput = {
 export const manifestId = 'imp-0-01-bfs-shortest-reach';
 export const title = 'BFS Shortest Reach';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g6', label: '6 nodes', value: G6 },
     { id: 'g6b', label: '6 nodes · line', value: G6b },

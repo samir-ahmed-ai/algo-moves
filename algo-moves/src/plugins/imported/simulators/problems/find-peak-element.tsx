@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface PeakInput {
   values: number[];
@@ -70,11 +69,22 @@ function View({ frame }: PluginViewProps<PeakState>) {
     if (s.dead[i]) return 'dead';
     return '';
   };
+  const rail = (
+    <>
+      <RailGroup label="window">
+        <RailStat k="lo" v={s.lo} tone="accent" />
+        <RailStat k="hi" v={s.hi} tone="bad" />
+        <RailStat k="mid" v={s.mid ?? '—'} tone={s.mid !== null ? 'warn' : undefined} />
+      </RailGroup>
+      {s.done && s.peak !== null && (
+        <RailResult label="peak" value={`[${s.peak}]=${s.values[s.peak]}`} tone="good" />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>find any peak · slope: compare values[mid] vs values[mid+1]</div>
+    <VizStage rail={rail}>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -94,7 +104,7 @@ function Inspector({ frame }: InspectorProps<PeakState>) {
 export const manifestId = 'imp-54-find-peak-element';
 export const title = 'Find Peak Element';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'p1', label: '[1,2,1,3,5,6,4]', value: { values: [1, 2, 1, 3, 5, 6, 4] } },
     { id: 'p2', label: '[1,2,3,1]', value: { values: [1, 2, 3, 1] } },

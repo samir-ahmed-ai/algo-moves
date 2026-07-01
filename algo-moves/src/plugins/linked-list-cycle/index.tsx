@@ -3,6 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
+import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface CycleInput {
   values: number[];
@@ -162,8 +163,18 @@ function View({ frame }: PluginViewProps<CycleState>) {
     );
   };
 
+  const show = (p: number | null) => (p === null ? 'null' : `${s.values[p]}@${p}`);
+  const result = s.hasCycle === null ? null : s.hasCycle ? 'cycle' : 'no cycle';
+
   return (
-    <div className="board-area">
+    <VizStage rail={<>
+      <RailGroup label="pointers">
+        <RailStat k="step" v={s.step} />
+        <RailStat k="slow" v={show(s.slow)} tone={s.met ? 'accent' : undefined} />
+        <RailStat k="fast" v={show(s.fast)} tone={s.met ? 'accent' : undefined} />
+      </RailGroup>
+      {result !== null && <RailResult label="result" value={result} tone={s.hasCycle ? 'bad' : 'good'} />}
+    </>}>
       <svg role="img" aria-label="linked list with cycle" viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
         <defs>
           <marker
@@ -189,7 +200,7 @@ function View({ frame }: PluginViewProps<CycleState>) {
         ))}
         {s.values.map((_, i) => ptrLabel(i))}
       </svg>
-    </div>
+    </VizStage>
   );
 }
 

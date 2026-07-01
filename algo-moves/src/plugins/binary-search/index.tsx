@@ -3,8 +3,7 @@ import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';
-import { cn } from '../../lib/cn';
-import { InspectorRow, VizEmpty, VizInspector, vizText } from '../_shared/vizKit';
+import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface BinInput {
   values: number[];
@@ -68,6 +67,7 @@ function record({ values, target }: BinInput): Frame<BinState>[] {
 function View({ frame }: PluginViewProps<BinState>) {
   const s = frame.state;
   const live = s.lo <= s.hi;
+  const width = live ? s.hi - s.lo + 1 : 0;
   const pointers: ArrayPointer[] = [];
   if (s.mid !== null) pointers.push({ i: s.mid, label: 'mid', tone: 'warn', place: 'above' });
   if (live) {
@@ -80,13 +80,21 @@ function View({ frame }: PluginViewProps<BinState>) {
     if (s.dead[i]) return 'dead';
     return '';
   };
+  const resultValue = s.found !== null ? `index ${s.found}` : s.done ? '-1 (absent)' : '…';
+  const resultTone = s.found !== null ? 'good' : s.done ? 'bad' : 'accent';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target = <span className="font-mono text-ink">{s.target}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="pointers">
+        <RailStat k="target" v={s.target} tone="accent" />
+        <RailStat k="lo" v={s.lo} />
+        <RailStat k="hi" v={s.hi} />
+        <RailStat k="mid" v={s.mid ?? '—'} />
+        <RailStat k="window" v={width} />
+      </RailGroup>
+      {s.done && <RailResult label="result" value={resultValue} tone={resultTone} />}
+    </>}>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
-    </div>
+    </VizStage>
   );
 }
 

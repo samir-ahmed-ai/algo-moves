@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import type { DpSimulator } from '../types';
+import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { CharCell, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText, CharCell } from '../../../_shared/vizKit';
 
 interface CSSInput {
   chars: string;
@@ -65,12 +65,22 @@ function record({ chars, k }: CSSInput): Frame<CSSState>[] {
 function View({ frame }: PluginViewProps<CSSState>) {
   const s = frame.state;
   const slots = Array.from({ length: s.k }, (_, i) => s.path[i] ?? '·');
+  const rail = (
+    <>
+      <RailStack label="results" items={s.results} />
+      <RailGroup label="state">
+        <RailStat k="path" v={s.path || '∅'} tone="accent" />
+        <RailStat k="found" v={s.results.length} />
+      </RailGroup>
+      {s.done && <RailResult label="total" value={s.results.length} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area board-area--text">
+    <VizStage rail={rail}>
       <div className={cn(vizText.sm, 'text-ink3')}>
         charset = <span className="font-mono text-ink">{[...s.chars].join(' ')}</span> · length k = {s.k}
       </div>
-      <div className={cn(vizText.sm, 'text-ink3')}>partial string</div>
+      <div className={cn('mt-3', vizText.sm, 'text-ink3')}>partial string</div>
       <div className="mt-1 flex gap-1">
         {slots.map((c, i) => (
           <CharCell
@@ -82,17 +92,7 @@ function View({ frame }: PluginViewProps<CSSState>) {
           </CharCell>
         ))}
       </div>
-      <div className={cn('mt-3 text-ink3', vizText.sm)}>
-        strings found ({s.results.length})
-        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.base)}>
-              {r}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -113,7 +113,7 @@ function Inspector({ frame }: InspectorProps<CSSState>) {
 export const manifestId = 'imp-28-combination-of-subset-strings';
 export const title = 'Combination of Subset Strings';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'ab2', label: '"ab", k=2', value: { chars: 'ab', k: 2 } },
     { id: 'abc2', label: '"abc", k=2', value: { chars: 'abc', k: 2 } },

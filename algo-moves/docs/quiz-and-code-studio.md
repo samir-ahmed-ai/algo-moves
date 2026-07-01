@@ -128,7 +128,7 @@ Styles live in `src/styles/theme.css` under `.code-studio-reassemble`.
 During reassemble, the **ScanEye** toolbar button (or **`B`**) opens the solution blueprint:
 
 - **Desktop** — full-page overlay via [`CodeBlueprintOverlay`](../src/components/CodeBlueprintOverlay.tsx)
-- **Mobile deck** — compact in-card panel via [`CodeBlueprintPanel`](../src/components/CodeBlueprintPanel.tsx) (shares space with the block tray; code wraps to fit the screen)
+- **Mobile deck** — compact in-card panel via [`ReassemblePane`](../src/components/ReassemblePane.tsx) (shares space with the block tray; code wraps to fit the screen)
 
 Both use [`CodePieceOverview`](../src/components/CodePieceOverview.tsx) with role tints from [`codePieceRoles.ts`](../src/lib/codePieceRoles.ts). Close with **X**, **`Esc`**, or **`B`**.
 

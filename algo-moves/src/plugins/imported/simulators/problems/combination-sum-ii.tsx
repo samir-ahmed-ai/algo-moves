@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface CombSumInput {
   candidates: number[];
@@ -79,24 +78,18 @@ function View({ frame }: PluginViewProps<CombSumState>) {
     if (inCur[i]) return 'match';
     return '';
   };
+  const resultItems = s.results.map((r) => `[${r.join(', ')}]`);
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        chosen = <span className="font-mono text-ink">[{s.cur.join(', ')}]</span> · remaining ={' '}
-        <span className="font-mono text-ink">{s.remaining}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="path">
+        <RailStat k="chosen" v={s.cur.length ? `[${s.cur.join(', ')}]` : '[]'} tone="accent" />
+        <RailStat k="remaining" v={s.remaining} />
+      </RailGroup>
+      <RailStack label="found" items={resultItems} highlightEnd="bottom" />
+      {s.done && <RailResult label="combos" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />}
+    </>} railWidth={150}>
       <ArrayRow values={s.pool} cellTone={tone} pointers={pointers} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        combinations found ({s.results.length})
-        <div className="mt-1 flex flex-col gap-0.5">
-          {s.results.map((r, i) => (
-            <span key={i} className={cn('font-mono text-ink', vizText.sm)}>
-              [{r.join(', ')}]
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -116,7 +109,7 @@ function Inspector({ frame }: InspectorProps<CombSumState>) {
 export const manifestId = 'imp-29-combination-sum-ii';
 export const title = 'Combination Sum II';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'classic', label: 'cand=[10,1,2,7,6,1,5], t=8', value: { candidates: [10, 1, 2, 7, 6, 1, 5], target: 8 } },
     { id: 'dups', label: 'cand=[2,5,2,1,2], t=5', value: { candidates: [2, 5, 2, 1, 2], target: 5 } },

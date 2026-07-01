@@ -1,11 +1,10 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
-import { cn } from '../../lib/cn';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { TreeBoard } from '../../components/TreeBoard';
 import { QueueTape } from '../../components/QueueTape';
-import { InspectorRow, VizEmpty, VizInspector, vizText } from '../_shared/vizKit';
+import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 type Op = { kind: 'insert'; value: number } | { kind: 'extract' };
 
@@ -191,11 +190,18 @@ function record({ ops }: HeapInput): Frame<HeapState>[] {
 function View({ frame }: PluginViewProps<HeapState>) {
   const s = frame.state;
   const swapped = (i: number) => s.swap != null && (s.swap[0] === i || s.swap[1] === i);
+  const done = s.op === 'done';
   return (
-    <div className="board-area">
-      <div className={cn('px-[var(--hpad)] py-1 text-ink3', vizText.sm)}>
-        op: <span className="font-mono text-ink">{s.op}</span>
-      </div>
+    <VizStage rail={
+      <>
+        <RailGroup label="op">
+          <RailStat k="current" v={s.op} tone="accent" />
+          <RailStat k="size" v={s.size} />
+          <RailStat k="root (min)" v={s.size ? s.heap[0] : '—'} />
+        </RailGroup>
+        {done && <RailResult label="final heap" value={s.size ? `[${s.heap.join(',')}]` : '∅'} tone={s.size ? 'accent' : 'bad'} />}
+      </>
+    }>
       <TreeBoard
         tree={s.heap}
         nodeClass={(i) =>
@@ -205,7 +211,7 @@ function View({ frame }: PluginViewProps<HeapState>) {
         highlightChild={s.compareWith}
       />
       <QueueTape items={s.heap} label="array (level order) →" />
-    </div>
+    </VizStage>
   );
 }
 

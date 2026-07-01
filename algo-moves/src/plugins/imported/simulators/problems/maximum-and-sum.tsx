@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface AndInput {
   nums: number[];
@@ -135,15 +134,21 @@ function View({ frame }: PluginViewProps<AndState>) {
     if (s.cur === i) return 'found';
     return s.dp[i] !== NEG ? 'match' : '';
   };
-  const answer = s.answer !== null ? s.answer : '…filling';
+  const mask = s.cur !== null ? s.masks[s.cur] : null;
+  const dpVal = s.cur !== null && s.dp[s.cur] !== NEG ? s.dp[s.cur] : null;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        nums [{s.nums.join(', ')}], {s.numSlots} slots, max AND sum = <span className="font-mono text-ink">{answer}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="current">
+        <RailStat k="mask" v={mask ?? '—'} tone={mask !== null ? 'accent' : undefined} />
+        <RailStat k="occ" v={mask !== null ? occString(mask, s.numSlots) : '—'} />
+        <RailStat k="dp" v={dpVal ?? '—'} />
+      </RailGroup>
+      {s.answer !== null
+        ? <RailResult label="answer" value={s.answer} tone="good" />
+        : <RailResult label="answer" value="…" tone="accent" />}
+    </>}>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => occString(s.masks[i], s.numSlots)} />
-      <div className={cn(vizText.sm, 'text-ink3')}>index label = slot occupancy (slot1·slot2·…), value = best AND-sum at that mask</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -166,7 +171,7 @@ function Inspector({ frame }: InspectorProps<AndState>) {
 export const manifestId = 'imp-72-maximum-and-sum-of-array';
 export const title = 'Maximum AND Sum of Array';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'n6s3', label: 'nums [1..6], 3 slots (answer 9)', value: { nums: [1, 2, 3, 4, 5, 6], numSlots: 3 } },
   ] satisfies SampleInput<AndInput>[],

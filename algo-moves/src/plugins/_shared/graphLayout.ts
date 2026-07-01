@@ -15,20 +15,6 @@ export function circleLayout(n: number, w = 352, h = 286, pad = 44): [number, nu
   });
 }
 
-/** Lay nodes out on a grid of `cols` columns (row-major). Good for layered/DAG shapes. */
-export function gridLayout(n: number, cols: number, w = 352, h = 286, pad = 44): [number, number][] {
-  const rows = Math.max(1, Math.ceil(n / cols));
-  const dx = cols > 1 ? (w - 2 * pad) / (cols - 1) : 0;
-  const dy = rows > 1 ? (h - 2 * pad) / (rows - 1) : 0;
-  return Array.from({ length: n }, (_, i) => {
-    const r = Math.floor(i / cols);
-    const c = i % cols;
-    const x = cols > 1 ? pad + c * dx : w / 2;
-    const y = rows > 1 ? pad + r * dy : h / 2;
-    return [Math.round(x), Math.round(y)] as [number, number];
-  });
-}
-
 /** Explicit layered layout: `layers` is an array of node-id arrays, left→right. */
 export function layeredLayout(layers: number[][], n: number, w = 352, h = 286, pad = 44): [number, number][] {
   const pos: [number, number][] = Array.from({ length: n }, () => [w / 2, h / 2]);

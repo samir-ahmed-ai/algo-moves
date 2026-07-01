@@ -1,9 +1,9 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface WLInput {
   beginWord: string;
@@ -50,46 +50,41 @@ function record({ beginWord, endWord, wordList }: WLInput): Frame<WLState>[] {
   const color = new Array<number>(n).fill(0);
   const dist = new Array<number>(n).fill(0);
   const queue: number[] = [];
-  const frames: Frame<WLState>[] = [];
   let answer = 0;
 
-  const emit = (type: string, note: string, caption: string, active: number | null, tone?: 'good' | 'bad') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        adj,
-        pos,
-        labels,
-        color: color.slice(),
-        active,
-        queue: queue.slice(),
-        dist: dist.slice(),
-        answer,
-        done: type === 'DONE',
-      },
-    });
+  const { emit, frames } = createRecorder<WLState>(() => ({
+    adj,
+    pos,
+    labels,
+    color: color.slice(),
+    active: null,
+    queue: queue.slice(),
+    dist: dist.slice(),
+    answer,
+    done: false,
+  }));
 
   emit(
     'INIT',
     'build graph',
     `Place every word on the board: "${beginWord}" plus the word list. Draw an edge between any two words that differ at exactly one letter — those are single-step transformations. Then BFS from "${beginWord}", where each level is one more word in the ladder.`,
-    null,
+    { active: null },
   );
 
   color[0] = 2;
   dist[0] = 1;
   queue.push(0);
-  emit('SEED', `queue ["${beginWord}"]`, `Seed the queue with "${beginWord}" at ladder length 1 and mark it queued.`, 0);
+  emit('SEED', `queue ["${beginWord}"]`, `Seed the queue with "${beginWord}" at ladder length 1 and mark it queued.`, { active: 0 });
 
   let resolved = false;
   while (queue.length > 0 && !resolved) {
     const v = queue.shift() as number;
     color[v] = 1;
-    emit('VISIT', `visit "${labels[v]}"`, `Dequeue "${labels[v]}" (ladder length ${dist[v]}) and mark it visited.`, v);
+    emit('VISIT', `visit "${labels[v]}"`, `Dequeue "${labels[v]}" (ladder length ${dist[v]}) and mark it visited.`, { active: v });
 
     if (v === target) {
       answer = dist[v];
-      emit('FOUND', `reached "${endWord}"`, `"${labels[v]}" is the end word — the shortest ladder reaches it in ${answer} words.`, v, 'good');
+      emit('FOUND', `reached "${endWord}"`, `"${labels[v]}" is the end word — the shortest ladder reaches it in ${answer} words.`, { active: v, answer }, 'good');
       resolved = true;
       break;
     }
@@ -103,48 +98,41 @@ function record({ beginWord, endWord, wordList }: WLInput): Frame<WLState>[] {
           'ENQUEUE',
           `enqueue "${labels[nb]}"`,
           `"${labels[nb]}" differs from "${labels[v]}" by one letter and is unvisited — enqueue it at ladder length ${dist[nb]}.`,
-          v,
+          { active: v },
         );
       }
     }
   }
 
   if (resolved) {
-    emit('DONE', `ladder ${answer}`, `Shortest transformation ladder from "${beginWord}" to "${endWord}" has ${answer} words.`, target, 'good');
+    emit('DONE', `ladder ${answer}`, `Shortest transformation ladder from "${beginWord}" to "${endWord}" has ${answer} words.`, { active: target, answer, done: true }, 'good');
   } else {
     answer = 0;
-    emit('DONE', 'no ladder', `Queue drained without reaching "${endWord}" — no transformation ladder exists, so the answer is 0.`, null, 'good');
+    emit('DONE', 'no ladder', `Queue drained without reaching "${endWord}" — no transformation ladder exists, so the answer is 0.`, { active: null, answer, done: true }, 'good');
   }
   return frames;
 }
 
-function WordQueue({ items, labels }: { items: number[]; labels: string[] }) {
-  return (
-    <div className="queue-tape">
-      <span className="queue-label">queue · front →</span>
-      {items.length === 0 ? (
-        <span className="queue-empty">empty</span>
-      ) : (
-        <div className="queue-row">
-          {items.map((n, i) => (
-            <div key={i} className="queue-cell">
-              {labels[n]}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function View({ frame }: PluginViewProps<WLState>) {
   const s = frame.state;
+  const ladderLen = s.active !== null && s.dist[s.active] ? s.dist[s.active] : s.answer || 0;
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="word" v={s.active !== null ? s.labels[s.active] : '—'} tone="accent" />
+        <RailStat k="len" v={ladderLen || '—'} />
+      </RailGroup>
+      <RailStack
+        label="queue"
+        items={s.queue.map((n) => s.labels[n])}
+        topLabel="front"
+        highlightEnd="bottom"
+      />
+      {s.done && <RailResult label="answer" value={s.answer || 0} tone={s.answer > 0 ? 'good' : 'bad'} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        ladder length so far ={' '}
-        <span className="font-mono text-ink">{s.active !== null && s.dist[s.active] ? s.dist[s.active] : s.answer || '—'}</span>
-      </div>
+    <VizStage rail={rail} railWidth={96}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -153,8 +141,7 @@ function View({ frame }: PluginViewProps<WLState>) {
         activeNode={s.active}
         height={260}
       />
-      <WordQueue items={s.queue} labels={s.labels} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -179,7 +166,7 @@ const HIT_COG: WLInput = {
 export const manifestId = 'imp-10-word-ladder';
 export const title = 'Word Ladder';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [{ id: 'hit-cog', label: 'hit → cog', value: HIT_COG }] satisfies SampleInput<WLInput>[],
   record,
   View,

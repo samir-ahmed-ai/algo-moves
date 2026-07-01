@@ -12,7 +12,7 @@ import { IMPORTED_DATA } from './imported/manifest';
 import { resolveSimulator } from './imported/simulators';
 import { SIMULATED_CATEGORIES } from './imported/factory';
 import { resolvePracticeBundle } from './imported/practice';
-import { PROBLEM_GLYPHS } from '../shell/problemGlyphs';
+import { PROBLEM_GLYPHS } from '../content/glyphs';
 
 const BUILTIN_PANELS = new Set([
   'problem', 'viz', 'replay', 'inspector', 'metrics', 'bigo', 'predict', 'mastery',
@@ -168,7 +168,7 @@ describe('visualizer View structure', () => {
   for (const [path, src] of Object.entries(simulatorSources)) {
     const file = path.split('/').pop() ?? path;
     it(`simulator ${file} View uses board-area`, () => {
-      expect(src, file).toMatch(/className="board-area/);
+      expect(src, file).toMatch(/className="board-area|(<VizStage)|(<ArrayPatternView)/);
       if (usesAbsolutePosition(src)) {
         expect(hasMinWidthConstraint(src), `${file} absolute layout needs minWidth`).toBe(true);
       }
@@ -182,7 +182,7 @@ describe('visualizer View structure', () => {
     it(`native ${plugin.meta.id} View uses board-area`, () => {
       const src = nativeSources[nativePath];
       expect(src, plugin.meta.id).toBeDefined();
-      expect(src!, plugin.meta.id).toMatch(/className="board-area/);
+      expect(src!, plugin.meta.id).toMatch(/className="board-area|(<VizStage)|(<ArrayPatternView)/);
       if (usesAbsolutePosition(src!)) {
         expect(hasMinWidthConstraint(src!), `${plugin.meta.id} absolute layout needs minWidth`).toBe(true);
       }
@@ -192,7 +192,7 @@ describe('visualizer View structure', () => {
   for (const [path, src] of Object.entries(prepSimulatorSources)) {
     const file = path.split('/').pop() ?? path;
     it(`prep simulator ${file} View uses board-area`, () => {
-      expect(src, file).toMatch(/className="board-area/);
+      expect(src, file).toMatch(/className="board-area|(<VizStage)|(<ArrayPatternView)/);
       if (usesAbsolutePosition(src)) {
         expect(hasMinWidthConstraint(src), `${file} absolute layout needs minWidth`).toBe(true);
       }

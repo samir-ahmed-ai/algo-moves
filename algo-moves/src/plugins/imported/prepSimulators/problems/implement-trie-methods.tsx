@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
 
 // A trie op we replay against the freshly built structure. `insert` grows the
@@ -226,39 +225,33 @@ function View({ frame }: PluginViewProps<TrieState>) {
     children: s.children[i],
   }));
   const nodeClass = (i: number) => {
-    if (s.active === i) return 'team-1'; // cursor is here
-    if (matchedSet.has(i)) return 'team-2'; // confirmed on the current path
-    return 'team-0'; // idle
+    if (s.active === i) return 'team-1';
+    if (matchedSet.has(i)) return 'team-2';
+    return 'team-0';
   };
+  const curLabel = s.active !== null ? (s.active === 0 ? 'root' : s.labels[s.active]) : '—';
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="call" v={s.op || '—'} />
+        <RailStat k="nodes" v={s.labels.length} />
+        <RailStat k="cursor" v={curLabel} tone="accent" />
+        <RailStat k="path" v={s.matched.length ? s.matched.length - 1 : 0} />
+      </RailGroup>
+      {s.result !== null && (
+        <RailResult label="result" value={String(s.result)} tone={s.result ? 'good' : 'bad'} />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op ? (
-          <>
-            op = <span className="font-mono text-ink">{s.op}</span>
-          </>
-        ) : (
-          <>26-way trie · isEnd shown as a trailing •</>
-        )}
-        {s.result !== null && (
-          <>
-            {' · '}result ={' '}
-            <span className={cn('font-mono', s.result ? 'text-good' : 'text-bad')}>
-              {String(s.result)}
-            </span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <NaryTreeBoard
         nodes={boardNodes}
         nodeClass={nodeClass}
         activeNode={s.active}
         highlightNode={s.edge}
       />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        team-1 = cursor · team-2 = matched path · label• = end of a word
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

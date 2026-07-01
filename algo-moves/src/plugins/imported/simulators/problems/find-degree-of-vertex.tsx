@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface DegInput {
   adj: number[][];
@@ -123,17 +122,23 @@ function View({ frame }: PluginViewProps<DegState>) {
     if (s.done && node === s.query) return 'team-1';
     return 'team-0';
   };
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="vertex" v={s.current ?? '—'} tone={s.current !== null ? 'accent' : undefined} />
+        <RailStat k="deg" v={s.current !== null ? s.degrees[s.current] : '—'} />
+      </RailGroup>
+      <RailGroup label="best">
+        <RailStat k="v" v={s.bestVertex} />
+        <RailStat k="deg" v={s.bestDegree} tone="accent" />
+      </RailGroup>
+      {s.answer !== null && (
+        <RailResult label={`deg(${s.query})`} value={s.answer} tone="good" />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        degree of vertex <span className="font-mono text-ink">{s.query}</span>
-        {s.answer !== null && (
-          <>
-            {' '}
-            = <span className="font-mono text-ink">{s.answer}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -143,7 +148,7 @@ function View({ frame }: PluginViewProps<DegState>) {
         highlightEdge={s.edge}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -175,7 +180,7 @@ const G5: DegInput = {
 export const manifestId = 'imp-22-find-degree-of-vertex';
 export const title = 'Find Degree of Vertex';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'g6', label: '6 nodes', value: G6 },
     { id: 'g5', label: '5 nodes', value: G5 },

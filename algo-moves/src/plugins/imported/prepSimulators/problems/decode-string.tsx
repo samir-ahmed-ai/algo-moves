@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface DecodeInput {
   s: string;
@@ -117,37 +117,23 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
   return frames;
 }
 
-function Stack({ label, items }: { label: string; items: string[] }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className={cn(vizText.sm, 'w-20 shrink-0 text-ink3')}>{label}</span>
-      {items.length === 0 ? (
-        <span className={cn(vizText.sm, 'font-mono text-ink3')}>∅</span>
-      ) : (
-        <div className="flex flex-wrap gap-1">
-          {items.map((v, i) => (
-            <span
-              key={i}
-              className={cn(
-                'rounded border border-edge bg-panel2 px-2 py-[2px] font-mono text-ink',
-                vizText.sm,
-                i === items.length - 1 && 'border-accent text-accent',
-              )}
-            >
-              {v}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function View({ frame }: PluginViewProps<DecodeState>) {
   const s = frame.state;
   return (
-    <div className="board-area">
-      <div className={cn('font-mono', vizText.sm)}>
+    <VizStage
+      rail={
+        <>
+          <RailStack label="count stack" items={s.cntStack.map((n) => String(n))} />
+          <RailStack label="string stack" items={s.strStack.map((v) => `"${v}"`)} />
+          <RailGroup>
+            <RailStat k="num" v={s.num} />
+            <RailStat k="cur" v={`"${s.cur}"`} />
+          </RailGroup>
+          {s.done && <RailResult label="decoded" value={`"${s.cur}"`} />}
+        </>
+      }
+    >
+      <div className={cn('font-mono', vizText.base)}>
         {s.s.split('').map((ch, i) => (
           <span
             key={i}
@@ -160,22 +146,7 @@ function View({ frame }: PluginViewProps<DecodeState>) {
           </span>
         ))}
       </div>
-      <div className="mt-2 flex flex-col gap-1">
-        <Stack label="count stack" items={s.cntStack.map((n) => String(n))} />
-        <Stack label="string stack" items={s.strStack.map((v) => `"${v}"`)} />
-      </div>
-      <div className={cn('mt-2 flex items-center gap-4', vizText.sm, 'text-ink3')}>
-        <span>
-          num = <span className="font-mono text-ink">{s.num}</span>
-        </span>
-        <span>
-          cur = <span className="font-mono text-ink">"{s.cur}"</span>
-        </span>
-      </div>
-      {s.done && (
-        <div className={cn('mt-2 font-mono text-good', vizText.base)}>→ "{s.cur}"</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

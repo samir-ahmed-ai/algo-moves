@@ -1,7 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 
 interface MaxProductInput {
@@ -23,36 +23,23 @@ interface MaxProductState {
 }
 
 function record({ nums }: MaxProductInput): Frame<MaxProductState>[] {
-  const frames: Frame<MaxProductState>[] = [];
-
   let best = nums[0];
   let curMax = nums[0];
   let curMin = nums[0];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MaxProductState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        nums,
-        i: null,
-        v: null,
-        swapped: false,
-        curMax,
-        curMin,
-        best,
-        hi: null,
-        lo: null,
-        bestUpdated: false,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<MaxProductState>(() => ({
+    nums,
+    i: null,
+    v: null,
+    swapped: false,
+    curMax,
+    curMin,
+    best,
+    hi: null,
+    lo: null,
+    bestUpdated: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -136,31 +123,30 @@ function View({ frame }: PluginViewProps<MaxProductState>) {
     if (i < s.i) return 'dead';
     return '';
   };
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        best = <span className="font-mono text-good">{s.best}</span>
-        {s.v !== null && !s.done && (
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="i" v={s.i ?? '—'} />
+        <RailStat k="v" v={s.v ?? '—'} tone="accent" />
+        {s.swapped && <RailStat k="swap" v="v<0" tone="warn" />}
+      </RailGroup>
+      <RailGroup label="window">
+        <RailStat k="curMax" v={s.curMax} tone="accent" />
+        <RailStat k="curMin" v={s.curMin} />
+        {s.hi !== null && s.lo !== null && !s.done && (
           <>
-            {' · '}v = <span className="font-mono text-ink">{s.v}</span>
+            <RailStat k="hi" v={s.hi} />
+            <RailStat k="lo" v={s.lo} />
           </>
         )}
-      </div>
+      </RailGroup>
+      <RailResult label="best" value={s.best} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
+  return (
+    <VizStage rail={rail}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        curMax = <span className="text-ink">{s.curMax}</span>
-        {'  ·  '}curMin = <span className="text-ink">{s.curMin}</span>
-        {s.swapped && <span className="text-warn"> (swapped: v&lt;0)</span>}
-      </div>
-      {s.hi !== null && s.lo !== null && !s.done && (
-        <div className={cn('mt-1 font-mono', vizText.xs, 'text-ink3')}>
-          cand: v={s.v} · max·v={s.hi} · min·v={s.lo}
-        </div>
-      )}
-      {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ {s.best}</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 

@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface EDInput {
   a: string;
@@ -21,15 +21,19 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
   const m = a.length;
   const n = b.length;
   const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(-1));
-  const frames: Frame<EDState>[] = [];
 
-  const emit = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: { a, b, dp: dp.map((r) => r.slice()), cur, done: type === 'DONE' },
-    });
+  const { emit, frames } = createRecorder<EDState>(() => ({
+    a,
+    b,
+    dp: dp.map((r) => r.slice()),
+    cur: null,
+    done: false,
+  }));
 
-  emit(
+  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
+    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+
+  snap(
     'INIT',
     `"${a}" → "${b}"`,
     `Edit Distance: the fewest single-character inserts, deletes, or replaces to turn "${a}" into "${b}". dp[i][j] is the edit distance between the first i chars of "${a}" and the first j chars of "${b}".`,
@@ -38,11 +42,11 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
 
   for (let i = 0; i <= m; i++) {
     dp[i][0] = i;
-    emit('BASE', `dp[${i}][0]=${i}`, `Base case: turning the first ${i} char(s) of "${a}" into "" needs ${i} deletion(s), so dp[${i}][0] = ${i}.`, [i, 0]);
+    snap('BASE', `dp[${i}][0]=${i}`, `Base case: turning the first ${i} char(s) of "${a}" into "" needs ${i} deletion(s), so dp[${i}][0] = ${i}.`, [i, 0]);
   }
   for (let j = 1; j <= n; j++) {
     dp[0][j] = j;
-    emit('BASE', `dp[0][${j}]=${j}`, `Base case: turning "" into the first ${j} char(s) of "${b}" needs ${j} insertion(s), so dp[0][${j}] = ${j}.`, [0, j]);
+    snap('BASE', `dp[0][${j}]=${j}`, `Base case: turning "" into the first ${j} char(s) of "${b}" needs ${j} insertion(s), so dp[0][${j}] = ${j}.`, [0, j]);
   }
 
   for (let i = 1; i <= m; i++) {
@@ -51,7 +55,7 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
       const cb = b[j - 1];
       if (ca === cb) {
         dp[i][j] = dp[i - 1][j - 1];
-        emit(
+        snap(
           'FILL',
           `dp[${i}][${j}]=${dp[i][j]}`,
           `'${ca}' == '${cb}': no edit is needed here, so carry the diagonal dp[${i - 1}][${j - 1}] = ${dp[i][j]} into dp[${i}][${j}].`,
@@ -63,7 +67,7 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
         const rep = dp[i - 1][j - 1];
         const best = Math.min(del, ins, rep);
         dp[i][j] = 1 + best;
-        emit(
+        snap(
           'FILL',
           `dp[${i}][${j}]=${dp[i][j]}`,
           `'${ca}' != '${cb}': dp[${i}][${j}] = 1 + min(delete dp[${i - 1}][${j}]=${del}, insert dp[${i}][${j - 1}]=${ins}, replace dp[${i - 1}][${j - 1}]=${rep}) = 1 + ${best} = ${dp[i][j]}.`,
@@ -73,7 +77,7 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
     }
   }
 
-  emit('DONE', `${dp[m][n]} edits`, `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so turning "${a}" into "${b}" takes ${dp[m][n]} edit(s).`, [m, n], 'good');
+  snap('DONE', `${dp[m][n]} edits`, `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so turning "${a}" into "${b}" takes ${dp[m][n]} edit(s).`, [m, n], 'good');
   return frames;
 }
 
@@ -99,7 +103,7 @@ function View({ frame }: PluginViewProps<EDState>) {
   const display = buildDisplay(s);
   const m = s.a.length;
   const n = s.b.length;
-  const dist = s.dp[m][n] >= 0 ? s.dp[m][n] : '…filling';
+  const dist = s.dp[m][n] >= 0 ? s.dp[m][n] : '…';
   const displayActive: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
@@ -108,15 +112,18 @@ function View({ frame }: PluginViewProps<EDState>) {
     const v = s.dp[r - 1][c - 1];
     return v >= 0 ? 'visited' : '';
   };
+  const curVal = s.cur && s.dp[s.cur[0]][s.cur[1]] >= 0 ? s.dp[s.cur[0]][s.cur[1]] : '—';
+  const cellLabel = s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        <span className="font-mono text-ink">"{s.a}"</span> → <span className="font-mono text-ink">"{s.b}"</span>, distance ={' '}
-        <span className="font-mono text-ink">{dist}</span>
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="cell">
+        <RailStat k="pos" v={cellLabel} />
+        <RailStat k="val" v={curVal} tone="accent" />
+      </RailGroup>
+      <RailResult label="distance" value={dist} tone={s.done ? 'good' : 'accent'} />
+    </>}>
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={34} />
-      <div className={cn(vizText.sm, 'text-ink3')}>row = chars of word1, col = chars of word2</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -141,7 +148,7 @@ function Inspector({ frame }: InspectorProps<EDState>) {
 export const manifestId = 'imp-61-edit-distance';
 export const title = 'Edit Distance';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'horse-ros', label: '"horse" → "ros" (3)', value: { a: 'horse', b: 'ros' } },
     { id: 'intention-execution', label: '"intention" → "execution" (5)', value: { a: 'intention', b: 'execution' } },

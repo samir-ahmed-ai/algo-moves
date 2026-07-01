@@ -3,7 +3,6 @@ import {
   EXAMPLES_MIN_H,
   NODE_UI_SCALE,
   PROBLEM_MIN_H,
-  spacing,
   STRUDEL_NODE_W,
   vizText,
   vizPad,
@@ -13,12 +12,6 @@ import {
 } from './tokens';
 
 describe('design/tokens', () => {
-  it('spacing returns CSS var references for scale 1–6', () => {
-    expect(spacing(1)).toBe('var(--space-1)');
-    expect(spacing(3)).toBe('var(--space-3)');
-    expect(spacing(6)).toBe('var(--space-6)');
-  });
-
   it('re-exports canvas, node, and viz tokens', () => {
     expect(STRUDEL_NODE_W).toBe(400);
     expect(NODE_UI_SCALE).toBe(1.25);

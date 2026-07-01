@@ -1,13 +1,14 @@
+import { inputFrameCount } from '../../../lib/inputFrameCounts';
 import { useCanvasStatic } from '../CanvasContext';
 import { Hint, Meter, Stat } from '../nodeui';
 
 /** "Big-O race": operation count (frames) per sample input, current one highlighted. */
 export function BigOPanelBody() {
-  const { plugin, inputId } = useCanvasStatic();
+  const { plugin, inputId, inputFrameCounts } = useCanvasStatic();
   const data = plugin.inputs.map((inp) => ({
     id: inp.id,
     label: inp.label,
-    ops: plugin.record(inp.value).length,
+    ops: inputFrameCount(inputFrameCounts, inp.id),
   }));
   const max = Math.max(...data.map((d) => d.ops), 1);
   return (

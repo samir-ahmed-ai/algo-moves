@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GridBoard } from '../../../../components/GridBoard';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 const INF = 1e9;
 
@@ -103,20 +102,18 @@ function record(input: FloydInput): Frame<FloydState>[] {
 function View({ frame }: PluginViewProps<FloydState>) {
   const s = frame.state;
   const grid = s.dist.map((row) => row.map((d) => fmt(d)));
+  const ans = fmt(s.dist[s.src][s.dst]);
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="k" v={s.k ?? '—'} tone={s.k !== null ? 'accent' : undefined} />
+        <RailStat k="cell" v={s.cell ? `(${s.cell[0]},${s.cell[1]})` : '—'} />
+      </RailGroup>
+      <RailResult label={`dist[${s.src}][${s.dst}]`} value={ans} tone={s.done ? 'good' : 'accent'} />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.k === null ? (
-          <>
-            query dist[{s.src}][{s.dst}] ={' '}
-            <span className="font-mono text-ink">{fmt(s.dist[s.src][s.dst])}</span>
-          </>
-        ) : (
-          <>
-            intermediate <span className="font-mono text-ink">k = {s.k}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail}>
       <GridBoard
         grid={grid}
         cellTone={(r, c) => {
@@ -127,7 +124,7 @@ function View({ frame }: PluginViewProps<FloydState>) {
         active={s.cell}
         cellSize={44}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -162,7 +159,7 @@ const G4: FloydInput = {
 export const manifestId = 'imp-4-floyd-city-of-blinding-lights';
 export const title = 'Floyd City of Blinding Lights';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [{ id: 'g4', label: '4 nodes · query 0→3', value: G4 }] satisfies SampleInput<FloydInput>[],
   record,
   View,

@@ -3,9 +3,8 @@ import { GridBoard } from '../../components/GridBoard';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';
-import { cn } from '../../lib/cn';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
-import { vizText } from '../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface QueensInput {
   n: number;
@@ -147,10 +146,14 @@ function View({ frame, onSelectNode }: PluginViewProps<QueensState>) {
     Array.from({ length: s.n }, (_, c) => (s.queens[r] === c ? '♛' : '')),
   );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        queens placed: <span className="font-mono text-ink">{s.placedRows}</span> / {s.n}
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="progress">
+        <RailStat k="placed" v={`${s.placedRows} / ${s.n}`} tone="accent" />
+        <RailStat k="placements" v={s.placements} />
+        <RailStat k="backtracks" v={s.backtracks} />
+      </RailGroup>
+      <RailResult label="solved" value={s.solved ? 'yes' : 'no'} tone={s.solved ? 'good' : 'accent'} />
+    </>}>
       <GridBoard
         grid={grid}
         cellTone={(r, c) => {
@@ -162,7 +165,7 @@ function View({ frame, onSelectNode }: PluginViewProps<QueensState>) {
         cellSize={40}
         onCellClick={onSelectNode ? (r, c) => onSelectNode(r * s.n + c) : undefined}
       />
-    </div>
+    </VizStage>
   );
 }
 

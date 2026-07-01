@@ -1,7 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 type TinyOp =
   | { kind: 'encode'; url: string }
@@ -123,31 +122,32 @@ function record({ host, ops }: TinyInput): Frame<TinyState>[] {
 function View({ frame }: PluginViewProps<TinyState>) {
   const s = frame.state;
   const pairs = Object.entries(s.toLong);
+  const mappings = pairs.map(([long, short]) => ({ label: `${short} → ${long}`, tone: 'good' as const }));
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="op" v={s.op || '—'} tone="accent" />
+        <RailStat k="nextID" v={s.nextID} />
+      </RailGroup>
+      <RailStack label="url map" items={mappings.length ? mappings : []} />
+      {s.result && <RailResult label="result" value={s.result} tone={s.done ? 'good' : 'accent'} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result && (
-          <>
-            {' → '}
-            <span className="font-mono text-ink break-all">{s.result}</span>
-          </>
-        )}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>nextID = {s.nextID}</div>
-      <div className="mt-1 max-h-32 space-y-1 overflow-auto">
+    <VizStage rail={rail} railWidth={180}>
+      <div className="mt-1 max-h-48 space-y-1 overflow-auto">
         {pairs.length === 0 ? (
-          <span className={cn(vizText.sm, 'text-ink3')}>no mappings yet</span>
+          <span className="text-sm text-ink3">no mappings yet</span>
         ) : (
           pairs.map(([long, short]) => (
-            <div key={long} className={cn('rounded border border-edge px-2 py-0.5', vizText.tight)}>
+            <div key={long} className="rounded border border-edge px-2 py-0.5 text-xs">
               <div className="font-mono text-accent">{short}</div>
               <div className="text-ink2 truncate">{long}</div>
             </div>
           ))
         )}
       </div>
-    </div>
+    </VizStage>
   );
 }
 

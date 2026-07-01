@@ -4,8 +4,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
-import { cn } from '../../lib/cn';
-import { vizText } from '../_shared/vizTokens';
+import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface TrieInput {
   insert: string[];
@@ -101,18 +100,25 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
 
 function View({ frame }: PluginViewProps<TrieState>) {
   const s = frame.state;
+  const done = s.result !== '';
   return (
-    <div className="board-area">
-      <div className={cn('px-[var(--hpad)] py-1 font-mono text-ink2', vizText.base)}>
-        {s.phase} · "{s.word}"
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="phase" v={s.phase} />
+        <RailStat k="word" v={s.word ? `"${s.word}"` : '∅'} tone="accent" />
+        <RailStat k="nodes" v={s.nodes.length} />
+      </RailGroup>
+      {done && (
+        <RailResult label="result" value={s.result} tone={s.pathOk ? 'good' : 'bad'} />
+      )}
+    </>}>
       <NaryTreeBoard
         nodes={s.nodes}
         nodeClass={(i) => (i === s.active ? 'team-1' : s.nodes[i].isEnd ? 'team-2' : 'team-0')}
         activeNode={s.active}
         highlightNode={s.highlight}
       />
-    </div>
+    </VizStage>
   );
 }
 

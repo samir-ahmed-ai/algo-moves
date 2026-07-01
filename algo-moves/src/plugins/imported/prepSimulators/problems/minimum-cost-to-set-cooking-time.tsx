@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface CookingTimeInput {
   startAt: number;
@@ -177,31 +176,28 @@ function View({ frame }: PluginViewProps<CookingTimeState>) {
     if (i === s.i) return 'found';
     return '';
   };
-  const costLabel = s.cost >= INVALID ? '∞' : s.cost;
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target = <span className="font-mono text-ink">{s.targetSeconds}s</span>
-        {' · '}move = <span className="font-mono text-ink">{s.moveCost}</span>
-        {' · '}push = <span className="font-mono text-ink">{s.pushCost}</span>
-        {' · '}start = <span className="font-mono text-ink">{s.startAt}</span>
-      </div>
-      {s.cand !== null && (
-        <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
-          candidate <span className="font-mono text-ink">{s.cand}</span> ={' '}
-          <span className="font-mono text-ink">
-            {s.candM}m {s.candS}s
-          </span>
-        </div>
-      )}
-      <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        finger @ {s.pos ?? '—'} · cost = <span className="text-ink">{costLabel}</span>
-      </div>
+  const fmt = (v: number | null) => (v === null ? '—' : v >= INVALID ? '∞' : String(v));
+  const rail = (
+    <>
+      <RailGroup label="candidate">
+        <RailStat k="cand" v={s.cand ?? '—'} tone={s.cand !== null ? 'accent' : undefined} />
+        <RailStat k="mm:ss" v={s.candM !== null ? `${s.candM}:${s.candS}` : '—'} />
+        <RailStat k="finger" v={s.pos ?? '—'} />
+        <RailStat k="cost" v={s.cost >= INVALID ? '∞' : s.cost} tone="accent" />
+      </RailGroup>
+      <RailGroup label="results">
+        <RailStat k="A" v={fmt(s.costA)} />
+        <RailStat k="B" v={fmt(s.costB)} />
+      </RailGroup>
       {s.done && s.best !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ min cost = {s.best}</div>
+        <RailResult label="min cost" value={s.best} tone="good" />
       )}
-    </div>
+    </>
+  );
+  return (
+    <VizStage rail={rail} railWidth={140}>
+      <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
+    </VizStage>
   );
 }
 

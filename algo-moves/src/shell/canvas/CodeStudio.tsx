@@ -1,8 +1,6 @@
 import {
-  createContext,
   Fragment,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -11,7 +9,6 @@ import {
 } from 'react';
 import {
   Check,
-  Code2,
   Copy,
   Eye,
   EyeOff,
@@ -26,7 +23,6 @@ import { ReassemblePane } from '../../components/ReassemblePane';
 import { SplitCodeEditor } from '../../components/SplitCodeEditor';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { patternsForTags } from '../../content';
-import type { QuizQuestion } from '../../core/types';
 import { extractSkeleton } from '../../lib/codeSkeleton';
 import { assembleDraft, resolveCodePieces, type CodePiece } from '../../lib/codePieces';
 import {
@@ -45,68 +41,21 @@ import {
   type QuizProgress,
 } from '../../lib/codeStudioPhase';
 import { matchScore } from '../../lib/codeDiff';
-import { type EditorPrefs, useEditorPrefs } from '../../lib/editorPrefs';
+import { useEditorPrefs } from '../../lib/editorPrefs';
 import { parseComplexity } from '../../lib/parseComplexity';
 import { recordAttempt, useProgress, statFor } from '../../lib/progress';
+import { useIsMobile } from '../../lib/useMediaQuery';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
+import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { useWorkspace } from '../../lib/workspace';
 import { useCanvasStatic } from './CanvasContext';
-import { PanelHeaderAction, PanelHeaderMenu } from './nodeui';
+import { nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu } from './nodeui';
+import { codeVariants, HeaderLangTabs } from './panels/shared/codeVariants';
+import { CodeStudioContext } from './codeStudioContextStore';
+import { useCodeStudio } from './useCodeStudio';
 
-interface CodeVariant {
-  text: string;
-  lang?: string;
-  file?: string;
-}
-
-interface CodeStudioContextValue {
-  variants: CodeVariant[];
-  active: number;
-  setActive: (i: number) => void;
-  code: CodeVariant | undefined;
-  reference: string;
-  draft: string;
-  persistDraft: (v: string) => void;
-  skeleton: string;
-  blind: boolean;
-  setBlind: (v: boolean | ((b: boolean) => boolean)) => void;
-  peek: boolean;
-  setPeek: (v: boolean) => void;
-  copied: boolean;
-  copyRef: () => Promise<void>;
-  editorPrefs: EditorPrefs;
-  setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
-  timerRunning: boolean;
-  setTimerRunning: (v: boolean | ((r: boolean) => boolean)) => void;
-  timerLabel: string;
-  score: number;
-  timeLabel: string | undefined;
-  spaceLabel: string | undefined;
-  stat: ReturnType<typeof statFor>;
-  theme: 'dark' | 'light' | undefined;
-  phase: CodeStudioPhase;
-  phaseSeq: CodeStudioPhase[];
-  /** Human label of the phase that follows the current one (e.g. "Structure"). */
-  nextLabel: string;
-  goToPhase: (p: CodeStudioPhase) => void;
-  /** Move to the next phase in the sequence (Skip / Continue). */
-  advance: () => void;
-  quiz: QuizQuestion[] | null;
-  hasQuiz: boolean;
-  savedQuizProgress: QuizProgress | null;
-  onQuizProgress: (p: QuizProgress) => void;
-  onQuizContinue: (score: number) => void;
-  pieces: CodePiece[] | null;
-  hasReassemble: boolean;
-  phaseTransition: boolean;
-  resetReassemble: () => void;
-  reassembleKey: number;
-  onReassembleComplete: (placed: CodePiece[], mistakes: number) => void;
-  savedReassembleProgress: ReturnType<typeof loadReassembleProgress>;
-  /** When set, the studio stays on this phase (standalone Structure panel). */
-  phaseLocked: boolean;
-}
+export { useCodeStudio } from './useCodeStudio';
 
 const PHASE_LABEL: Record<CodeStudioPhase, string> = {
   quiz: 'Quiz',
@@ -116,37 +65,6 @@ const PHASE_LABEL: Record<CodeStudioPhase, string> = {
 
 /** Phase cross-fade duration (ms); paired with the CSS enter/exit animations. */
 const TRANSITION_MS = 340;
-
-const CodeStudioCtx = createContext<CodeStudioContextValue | null>(null);
-
-export function useCodeStudio() {
-  const ctx = useContext(CodeStudioCtx);
-  if (!ctx) throw new Error('CodeStudio components must be used within CodeStudioProvider');
-  return ctx;
-}
-
-function codeVariants(plugin: { code?: CodeVariant; extraCode?: CodeVariant[] }) {
-  return [plugin.code, ...(plugin.extraCode ?? [])].filter(Boolean) as CodeVariant[];
-}
-
-function LangTabs({ variants, active, onPick }: { variants: CodeVariant[]; active: number; onPick: (i: number) => void }) {
-  if (variants.length < 2) return null;
-  return (
-    <>
-      {variants.map((v, i) => (
-        <PanelHeaderAction
-          key={i}
-          variant="toggle"
-          active={i === active}
-          onClick={() => onPick(i)}
-          title={`${(v.lang ?? 'text').toUpperCase()}${v.file ? ` · ${v.file}` : ''}`}
-        >
-          <Code2 className="h-3 w-3" />
-        </PanelHeaderAction>
-      ))}
-    </>
-  );
-}
 
 const STEP_GLYPH = ['①', '②', '③'];
 
@@ -416,7 +334,7 @@ export function CodeStudioProvider({
     try {
       await navigator.clipboard.writeText(reference);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     } catch {
       /* clipboard unavailable */
     }
@@ -439,7 +357,7 @@ export function CodeStudioProvider({
   }
 
   return (
-    <CodeStudioCtx.Provider
+    <CodeStudioContext.Provider
       value={{
         variants,
         active,
@@ -486,7 +404,7 @@ export function CodeStudioProvider({
       }}
     >
       {children}
-    </CodeStudioCtx.Provider>
+    </CodeStudioContext.Provider>
   );
 }
 
@@ -519,7 +437,7 @@ function RecallToolbarInline({
     <>
       <ToolbarDivider />
       <PanelHeaderAction variant="toggle" active={blind} onClick={() => setBlind((b) => !b)} title="Blind recall (⌘\\)">
-        {blind ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+        {blind ? <EyeOff className={nodeIconGlyph} /> : <Eye className={nodeIconGlyph} />}
       </PanelHeaderAction>
       {blind && (
         <span
@@ -529,7 +447,7 @@ function RecallToolbarInline({
           onMouseLeave={() => setPeek(false)}
         >
           <PanelHeaderAction variant="toggle" active={peek} title="Hold to peek at reference">
-            <ScanEye className="h-3 w-3" />
+            <ScanEye className={nodeIconGlyph} />
           </PanelHeaderAction>
         </span>
       )}
@@ -546,7 +464,7 @@ function RecallToolbarInline({
           onClick={() => setTimerRunning((r) => !r)}
           title={timerRunning ? 'Stop recall timer' : 'Start recall timer'}
         >
-          <Timer className="h-3 w-3" />
+          <Timer className={nodeIconGlyph} />
         </PanelHeaderAction>
         {timerRunning && (
           <span className={cn('rounded-md bg-panel2 px-1.5 py-0.5 font-mono tabular-nums text-ink2', chromeText.sm)}>
@@ -561,6 +479,7 @@ function RecallToolbarInline({
 
 /** Inline header controls — icon-only with tooltips. */
 export function CodeStudioToolbar() {
+  const isMobile = useIsMobile();
   const {
     variants,
     active,
@@ -594,28 +513,28 @@ export function CodeStudioToolbar() {
     const recallOverflow = [
       {
         label: copied ? 'Copied reference' : 'Copy reference',
-        icon: copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />,
+        icon: copied ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />,
         onClick: () => void copyRef(),
       },
       {
         label: 'Reset to skeleton (⌘⇧R)',
-        icon: <RotateCcw className="h-3.5 w-3.5" />,
+        icon: <RotateCcw className={nodeIconGlyph} />,
         onClick: () => persistDraft(skeleton),
       },
       {
         label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
-        icon: <Keyboard className="h-3.5 w-3.5" />,
+        icon: <Keyboard className={nodeIconGlyph} />,
         onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
       },
       {
         label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
-        icon: <WrapText className="h-3.5 w-3.5" />,
+        icon: <WrapText className={nodeIconGlyph} />,
         onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
       },
     ];
     return (
       <>
-        <LangTabs variants={variants} active={active} onPick={setActive} />
+        <HeaderLangTabs variants={variants} active={active} onPick={setActive} />
         {phase === 'recall' ? (
           <RecallToolbarInline
             blind={blind}
@@ -633,7 +552,7 @@ export function CodeStudioToolbar() {
             <>
               <ToolbarDivider />
               <PanelHeaderAction variant="ghost" title="Restart structure" onClick={resetReassemble}>
-                <RotateCcw className="h-3 w-3" />
+                <RotateCcw className={nodeIconGlyph} />
               </PanelHeaderAction>
             </>
           )
@@ -647,29 +566,29 @@ export function CodeStudioToolbar() {
       ? [
           {
             label: copied ? 'Copied reference' : 'Copy reference',
-            icon: copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />,
+            icon: copied ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />,
             onClick: () => void copyRef(),
           },
           {
             label: 'Reset to skeleton (⌘⇧R)',
-            icon: <RotateCcw className="h-3.5 w-3.5" />,
+            icon: <RotateCcw className={nodeIconGlyph} />,
             onClick: () => persistDraft(skeleton),
           },
           {
             label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
-            icon: <Keyboard className="h-3.5 w-3.5" />,
+            icon: <Keyboard className={nodeIconGlyph} />,
             onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
           },
           {
             label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
-            icon: <WrapText className="h-3.5 w-3.5" />,
+            icon: <WrapText className={nodeIconGlyph} />,
             onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
           },
           ...(hasReassemble
             ? [
                 {
                   label: 'Restart structure phase',
-                  icon: <RotateCcw className="h-3.5 w-3.5" />,
+                  icon: <RotateCcw className={nodeIconGlyph} />,
                   onClick: resetReassemble,
                 },
               ]
@@ -678,7 +597,7 @@ export function CodeStudioToolbar() {
             ? [
                 {
                   label: 'Retake the quiz',
-                  icon: <RotateCcw className="h-3.5 w-3.5" />,
+                  icon: <RotateCcw className={nodeIconGlyph} />,
                   onClick: () => goToPhase('quiz'),
                 },
               ]
@@ -692,7 +611,7 @@ export function CodeStudioToolbar() {
     <>
       <PhaseStepper seq={phaseSeq} phase={phase} onJump={goToPhase} />
       {showStepper && <ToolbarDivider />}
-      <LangTabs variants={variants} active={active} onPick={setActive} />
+      <HeaderLangTabs variants={variants} active={active} onPick={setActive} />
       {phase === 'recall' ? (
         <RecallToolbarInline
           blind={blind}
@@ -717,8 +636,8 @@ export function CodeStudioToolbar() {
             }}
             title={`Skip to ${nextLabel}`}
           >
-            <SkipForward className="h-3 w-3" />
-            Skip to {nextLabel}
+            <SkipForward className={nodeIconGlyph} />
+            {isMobile ? 'Skip' : `Skip to ${nextLabel}`}
           </button>
         </>
       )}
@@ -806,11 +725,6 @@ export function CodeStudioBody() {
       </div>
     </div>
   );
-}
-
-/** @deprecated use CodeStudioBody */
-export function CodeStudioEditor() {
-  return <CodeStudioBody />;
 }
 
 const PHASE_HINT: Record<CodeStudioPhase, string> = {

@@ -3,7 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
-import { InspectorRow } from '../_shared/vizKit';
+import { InspectorRow, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 import { SortInspector } from '../_shared/sortInspector';
 
 export interface SortInput {
@@ -191,10 +191,23 @@ function View({ frame }: PluginViewProps<SortState>) {
     if (inSpan(i)) return 'pivot';
     return 'idle';
   };
+  const span =
+    s.leftRun !== null && s.rightRun !== null
+      ? `[${s.leftRun[0]}..${s.leftRun[1]}]+[${s.rightRun[0]}..${s.rightRun[1]}]`
+      : '—';
   return (
-    <div className="board-area">
+    <VizStage rail={<>
+      <RailGroup label="ops">
+        <RailStat k="cmps" v={s.comparisons} />
+        <RailStat k="writes" v={s.writes} tone="accent" />
+      </RailGroup>
+      <RailGroup label="merge">
+        <RailStat k="span" v={span} />
+      </RailGroup>
+      {done && <RailResult label="result" value="sorted" tone="good" />}
+    </>} railWidth={150}>
       <ArrayBars values={s.values} tone={tone} height={242} />
-    </div>
+    </VizStage>
   );
 }
 

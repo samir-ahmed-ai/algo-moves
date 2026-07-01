@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 
 interface EqualSumInput {
   nums1: number[];
@@ -189,39 +188,39 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
 
 function View({ frame }: PluginViewProps<EqualSumState>) {
   const s = frame.state;
-  // Show buckets 1..5 as bars (index 0 of contrib is unused).
   const values = [s.contrib[1], s.contrib[2], s.contrib[3], s.contrib[4], s.contrib[5]];
   const tone = (i: number): BarTone => {
-    const bucket = i + 1; // bar i corresponds to contribution value i+1
+    const bucket = i + 1;
     if (s.done && !s.failed) return values[i] > 0 ? 'done' : 'idle';
     if (s.c === bucket) return s.taken > 0 ? 'swap' : 'compare';
     return 'idle';
   };
   const label = (i: number) => `×${i + 1}`;
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        sum1 = <span className="font-mono text-ink">{s.sum1}</span>
-        {' · '}sum2 = <span className="font-mono text-ink">{s.sum2}</span>
-        {' · '}gap = <span className="font-mono text-ink">{s.diff}</span>
-        {' · '}ops = <span className="font-mono text-ink">{s.ops}</span>
-      </div>
-      <ArrayBars values={values} tone={tone} label={label} max={Math.max(1, ...values)} />
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        bars = contribution buckets (×c moves the gap by c), height = count of available moves
-      </div>
+  const rail = (
+    <>
+      <RailGroup label="sums">
+        <RailStat k="sum1" v={s.sum1} />
+        <RailStat k="sum2" v={s.sum2} />
+      </RailGroup>
+      <RailGroup label="scan">
+        <RailStat k="gap" v={s.diff} tone={s.diff === 0 ? 'good' : 'accent'} />
+        <RailStat k="bucket" v={s.c ?? '—'} />
+        <RailStat k="taken" v={s.taken} />
+        <RailStat k="ops" v={s.ops} />
+      </RailGroup>
       {s.result !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result === -1 ? 'text-bad' : 'text-good',
-          )}
-        >
-          → {s.result === -1 ? 'impossible (-1)' : `${s.result} operation(s)`}
-        </div>
+        <RailResult
+          label="answer"
+          value={s.result === -1 ? 'impossible' : `${s.result} op(s)`}
+          tone={s.result === -1 ? 'bad' : 'good'}
+        />
       )}
-    </div>
+    </>
+  );
+  return (
+    <VizStage rail={rail} railWidth={140}>
+      <ArrayBars values={values} tone={tone} label={label} max={Math.max(1, ...values)} />
+    </VizStage>
   );
 }
 

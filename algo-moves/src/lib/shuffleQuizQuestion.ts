@@ -1,6 +1,6 @@
 import type { QuizQuestion } from '../core/types';
 import { QUIZ_SHUFFLE_BY_DEFAULT } from './quizConstants';
-import { shuffleSeeded } from '../shell/canvas/panels/shared/shuffleSeeded';
+import { shuffleSeeded } from './shuffleSeeded';
 
 export function randomShuffleSeed(): number {
   return (Math.random() * 0x7fffffff) | 0;

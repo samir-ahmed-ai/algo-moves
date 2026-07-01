@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Home, Moon, Sparkles, Sun } from 'lucide-react';
-import { catalog, type Topic } from '../../content';
+import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from '../../content';
 import { useWorkspace } from '../../lib/workspace';
 import { MobileBrowse } from './MobileBrowse';
 import { MobileDeck } from './MobileDeck';
@@ -13,13 +13,37 @@ interface DeckTarget {
   initialCIdx?: number;
 }
 
+function resolveTopic(parsed: ReturnType<typeof parseMobileHash>): Topic | undefined {
+  if (!parsed) return undefined;
+  if (parsed.categoryId) return topicForCategory(parsed.categoryId, catalog);
+  if (parsed.topicId) {
+    if (parsed.topicId.startsWith('browse-')) {
+      const catId = categoryIdFromBrowseTopic(parsed.topicId);
+      return catId ? topicForCategory(catId, catalog) : undefined;
+    }
+    return catalog.getTopic(parsed.topicId);
+  }
+  return undefined;
+}
+
 function targetFromHash(): DeckTarget | null {
   if (typeof location === 'undefined') return null;
   const parsed = parseMobileHash(location.hash);
-  if (!parsed?.topicId) return null;
-  const topic = catalog.getTopic(parsed.topicId);
+  if (!parsed?.itemId && !parsed?.categoryId && !parsed?.topicId) return null;
+  const topic = resolveTopic(parsed);
   if (!topic) return null;
-  return { topic, startItemId: parsed.itemId };
+  if (parsed.itemId) return { topic, startItemId: parsed.itemId };
+  return null;
+}
+
+function browseFromHash(): { trackId?: string; categoryId?: string } | null {
+  if (typeof location === 'undefined') return null;
+  const parsed = parseMobileHash(location.hash);
+  if (!parsed || parsed.itemId) return null;
+  if (parsed.trackId || parsed.categoryId) {
+    return { trackId: parsed.trackId, categoryId: parsed.categoryId };
+  }
+  return null;
 }
 
 /**
@@ -28,17 +52,34 @@ function targetFromHash(): DeckTarget | null {
  * it's usable (and testable) at any width.
  */
 export function MobileApp() {
-  const { theme, setTheme, density, goHome, activeTopicId, setActiveTopicId } = useWorkspace();
+  const {
+    theme,
+    setTheme,
+    density,
+    goHome,
+    activeTopicId,
+    setActiveTopicId,
+    activeTrackId,
+    setActiveTrackId,
+    activeCategoryId,
+    setActiveCategoryId,
+  } = useWorkspace();
 
   const [target, setTarget] = useState<DeckTarget | null>(() => {
     const fromHash = targetFromHash();
     if (fromHash) return fromHash;
     if (activeTopicId) {
-      const t = catalog.getTopic(activeTopicId);
+      const t = resolveTopic({ topicId: activeTopicId });
       if (t) return { topic: t };
     }
     return null;
   });
+
+  useEffect(() => {
+    const browse = browseFromHash();
+    if (browse?.trackId) setActiveTrackId(browse.trackId as typeof activeTrackId);
+    if (browse?.categoryId) setActiveCategoryId(browse.categoryId);
+  }, [setActiveTrackId, setActiveCategoryId]);
 
   useEffect(() => {
     const syncFromHash = () => {
@@ -46,8 +87,18 @@ export function MobileApp() {
       if (fromHash) {
         setActiveTopicId(fromHash.topic.id);
         setTarget(fromHash);
+        return;
+      }
+      const browse = browseFromHash();
+      if (browse) {
+        setTarget(null);
+        if (browse.trackId) setActiveTrackId(browse.trackId as typeof activeTrackId);
+        if (browse.categoryId !== undefined) setActiveCategoryId(browse.categoryId ?? null);
+        setActiveTopicId(null);
       } else if (location.hash.startsWith('#mobile')) {
         setActiveTopicId(null);
+        setActiveTrackId(null);
+        setActiveCategoryId(null);
         setTarget(null);
       }
     };
@@ -57,12 +108,20 @@ export function MobileApp() {
       window.removeEventListener('hashchange', syncFromHash);
       window.removeEventListener('popstate', syncFromHash);
     };
-  }, [setActiveTopicId]);
+  }, [setActiveTopicId, setActiveTrackId, setActiveCategoryId]);
 
   const pick = (topic: Topic, startItemId?: string, initialPIdx?: number, initialCIdx?: number) => {
     setActiveTopicId(topic.id);
+    const catId = categoryIdFromBrowseTopic(topic.id);
+    if (catId) {
+      setActiveCategoryId(catId);
+      const track = activeTrackId ?? 'interview-prep';
+      setActiveTrackId(track);
+      writeMobileHash({ trackId: track, categoryId: catId, itemId: startItemId }, { replace: false });
+    } else {
+      writeMobileHash({ topicId: topic.id, itemId: startItemId }, { replace: false });
+    }
     setTarget({ topic, startItemId, initialPIdx, initialCIdx });
-    writeMobileHash({ topicId: topic.id, itemId: startItemId }, { replace: false });
   };
 
   const exitDeck = () => {
@@ -71,16 +130,22 @@ export function MobileApp() {
     if (typeof window !== 'undefined' && window.history.length > 1) {
       window.history.back();
     } else {
-      writeMobileHash(null, { replace: true });
+      const catId = activeCategoryId;
+      const track = activeTrackId;
+      writeMobileHash(catId && track ? { trackId: track, categoryId: catId } : track ? { trackId: track } : null, {
+        replace: true,
+      });
     }
   };
 
   const goTopic = (topicId: string) => {
-    const t = catalog.getTopic(topicId);
+    const catId = categoryIdFromBrowseTopic(topicId);
+    const t = catId ? topicForCategory(catId, catalog) : catalog.getTopic(topicId);
     if (t) {
       setActiveTopicId(topicId);
       setTarget({ topic: t, initialPIdx: 0, initialCIdx: 0 });
-      writeMobileHash({ topicId }, { replace: false });
+      if (catId && activeTrackId) writeMobileHash({ trackId: activeTrackId, categoryId: catId }, { replace: false });
+      else writeMobileHash({ topicId }, { replace: false });
     }
   };
 

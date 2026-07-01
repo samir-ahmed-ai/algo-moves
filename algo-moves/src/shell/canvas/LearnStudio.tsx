@@ -16,7 +16,9 @@ import {
 } from 'lucide-react';
 import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
+import { catalog, browseBreadcrumbForItem } from '../../content';
 import { cn } from '../../lib/cn';
+import { computeInputFrameCounts } from '../../lib/inputFrameCounts';
 import { useWorkspace } from '../../lib/workspace';
 import { useIsMobile } from '../../lib/useMediaQuery';
 import { ChromeLabel, chromeText } from '../chromeUi';
@@ -31,7 +33,7 @@ import {
 import { CodeStudioProvider, useCodeStudio } from './CodeStudio';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { SplitCodeEditor } from '../../components/SplitCodeEditor';
-import { AssembleModes } from '../../components/AssembleModes';
+import { AssembleModes } from './components/AssembleModes';
 import { PanelBody } from './PanelNode';
 import {
   flatOrder,
@@ -82,9 +84,24 @@ export function LearnStudio({
   player,
   frame,
 }: LearnStudioProps) {
+  const [selectedNode, setSelectedNode] = useState<number | null>(null);
+  useEffect(() => {
+    setSelectedNode(null);
+  }, [plugin.meta.id, item.id]);
+  const inputFrameCounts = useMemo(() => computeInputFrameCounts(plugin), [plugin]);
   const staticValue = useMemo(
-    () => ({ plugin, item, inputId, setInputId, customInput, setCustomInput }),
-    [plugin, item, inputId, setInputId, customInput, setCustomInput],
+    () => ({
+      plugin,
+      item,
+      inputId,
+      setInputId,
+      customInput,
+      setCustomInput,
+      inputFrameCounts,
+      selectedNode,
+      setSelectedNode,
+    }),
+    [plugin, item, inputId, setInputId, customInput, setCustomInput, inputFrameCounts, selectedNode],
   );
   const frameValue = useMemo(() => ({ frames, player, frame }), [frames, player, frame]);
 
@@ -244,9 +261,10 @@ function TopBar({
   const cs = useCodeStudio();
   const { item } = useCanvasStatic();
   const { theme, setTheme, present, setPresent, setMode } = useWorkspace();
+  const browseCrumb = browseBreadcrumbForItem(item.id, catalog);
 
   return (
-    <div className="flex h-11 shrink-0 items-center gap-1.5 border-b border-edge bg-panel px-2 sm:gap-2 sm:px-3">
+    <div className="flex min-h-11 shrink-0 items-center gap-1.5 border-b border-edge bg-panel px-2 py-1 sm:gap-2 sm:px-3">
       {isMobile && (
         <IconBtn title="Views" onClick={onMenu}>
           <Menu className="h-4 w-4" />
@@ -256,9 +274,16 @@ function TopBar({
         <Network className="h-4 w-4" />
       </IconBtn>
       <GraduationCap className="hidden h-4 w-4 shrink-0 text-accent sm:block" />
-      <span className={cn('min-w-0 flex-1 truncate font-semibold text-ink', chromeText.sm)}>
-        {isMobile ? active.label : item.title}
-      </span>
+      <div className="min-w-0 flex-1">
+        <span className={cn('block truncate font-semibold text-ink', chromeText.sm)}>
+          {isMobile ? active.label : item.title}
+        </span>
+        {!isMobile && browseCrumb.track && browseCrumb.category && (
+          <span className={cn('block truncate text-ink3', chromeText.xs)}>
+            {browseCrumb.track.title} › {browseCrumb.category.title}
+          </span>
+        )}
+      </div>
       {!isMobile && item.difficulty && <Chip tone={diffTone(item.difficulty)}>{item.difficulty}</Chip>}
 
       {cs.variants.length > 1 && (
@@ -448,6 +473,7 @@ function QuizContent() {
 
 function RecallBody() {
   const cs = useCodeStudio();
+  const isMobile = useIsMobile();
   const { theme, themePreset } = useWorkspace();
   if (!cs.reference) {
     return (
@@ -457,41 +483,51 @@ function RecallBody() {
     );
   }
   const pct = Math.round(cs.score);
+  const blindTitle = cs.blind ? 'Blind recall' : 'Reference mode';
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-edge px-2 py-1">
+      <div className="flex shrink-0 flex-nowrap items-center gap-1 overflow-x-auto border-b border-edge px-2 py-1">
         <Btn
           size="xs"
           variant={cs.blind ? 'primary' : 'ghost'}
           icon={cs.blind ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          title={blindTitle}
           onClick={() => cs.setBlind((b) => !b)}
         >
-          {cs.blind ? 'Blind' : 'Reference'}
+          {isMobile ? null : cs.blind ? 'Blind' : 'Reference'}
         </Btn>
         <Btn
           size="xs"
           variant="ghost"
           icon={<ScanEye className="h-3.5 w-3.5" />}
+          title="Hold to peek at reference"
           onMouseDown={() => cs.setPeek(true)}
           onMouseUp={() => cs.setPeek(false)}
           onMouseLeave={() => cs.setPeek(false)}
         >
-          Peek
+          {isMobile ? null : 'Peek'}
         </Btn>
-        <Btn size="xs" variant="ghost" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => cs.persistDraft(cs.skeleton)}>
-          Reset
+        <Btn
+          size="xs"
+          variant="ghost"
+          icon={<RotateCcw className="h-3.5 w-3.5" />}
+          title="Reset to skeleton"
+          onClick={() => cs.persistDraft(cs.skeleton)}
+        >
+          {isMobile ? null : 'Reset'}
         </Btn>
         <Btn
           size="xs"
           variant={cs.timerRunning ? 'good' : 'ghost'}
           icon={<Timer className="h-3.5 w-3.5" />}
+          title={cs.timerRunning ? 'Stop recall timer' : 'Start recall timer'}
           onClick={() => cs.setTimerRunning((r) => !r)}
         >
-          {cs.timerLabel}
+          {isMobile ? null : cs.timerLabel}
         </Btn>
         <div className="flex-1" />
         <Chip tone={pct >= 80 ? 'good' : pct >= 50 ? 'accent' : 'muted'} mono>
-          {pct}% match
+          {isMobile ? `${pct}%` : `${pct}% match`}
         </Chip>
       </div>
       <div className="min-h-0 flex-1">

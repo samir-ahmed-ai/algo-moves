@@ -43,71 +43,71 @@ html {
 [data-density='compact'] {
   --pad: 0.4375rem;
   --gap: 0.3125rem;
-  --fs: 13px;
-  --fs-sm: 12px;
-  --fs-xs: 11px;
-  --fs-2xs: 9px;
-  --fs-tight: 10.5px;
-  --fs-title: 13px;
+  --fs: 0.875rem;
+  --fs-sm: 0.8125rem;
+  --fs-xs: 0.75rem;
+  --fs-2xs: 0.625rem;
+  --fs-tight: 0.6875rem;
+  --fs-title: 0.9375rem;
   --lh: 1.4;
   --lh-tight: 1.25;
   --lh-snug: 1.35;
-  --row: 30px;
+  --row: 1.875rem;
   --hpad: 0.5625rem;
   --section: 0.375rem;
-  --node-px: 12px;
-  --node-py: 8px;
-  --node-gap: 8px;
-  --node-icon: 16px;
-  --viz-display: 30px;
-  --viz-expr: 24px;
-  --viz-cell: 13px;
+  --node-px: 0.8125rem;
+  --node-py: 0.5625rem;
+  --node-gap: 0.5625rem;
+  --node-icon: 1.125rem;
+  --viz-display: 1.875rem;
+  --viz-expr: 1.5rem;
+  --viz-cell: 0.875rem;
 }
 [data-density='ultra'] {
   --pad: 0.3125rem;
   --gap: 0.1875rem;
-  --fs: 12px;
-  --fs-sm: 11px;
-  --fs-xs: 10px;
-  --fs-2xs: 8px;
-  --fs-tight: 9.5px;
-  --fs-title: 12.5px;
+  --fs: 0.875rem;
+  --fs-sm: 0.8125rem;
+  --fs-xs: 0.75rem;
+  --fs-2xs: 0.5625rem;
+  --fs-tight: 0.6875rem;
+  --fs-title: 1rem;
   --lh: 1.35;
   --lh-tight: 1.2;
   --lh-snug: 1.3;
-  --row: 28px;
+  --row: 1.75rem;
   --hpad: 0.5rem;
   --section: 0.3125rem;
-  --node-px: 10px;
-  --node-py: 7px;
-  --node-gap: 6px;
-  --node-icon: 15px;
-  --viz-display: 28px;
-  --viz-expr: 22px;
-  --viz-cell: 12px;
+  --node-px: 0.75rem;
+  --node-py: 0.5625rem;
+  --node-gap: 0.5rem;
+  --node-icon: 1.125rem;
+  --viz-display: 1.75rem;
+  --viz-expr: 1.375rem;
+  --viz-cell: 0.8125rem;
 }
 [data-density='spacious'] {
   --pad: 1.125rem;
   --gap: 0.8rem;
-  --fs: 18px;
-  --fs-sm: 16px;
-  --fs-xs: 15px;
-  --fs-2xs: 11px;
-  --fs-tight: 13px;
-  --fs-title: 19px;
+  --fs: 1.125rem;
+  --fs-sm: 1rem;
+  --fs-xs: 0.9375rem;
+  --fs-2xs: 0.75rem;
+  --fs-tight: 0.875rem;
+  --fs-title: 1.1875rem;
   --lh: 1.5;
   --lh-tight: 1.3;
   --lh-snug: 1.45;
-  --row: 48px;
+  --row: 3rem;
   --hpad: 1.125rem;
   --section: 1.125rem;
-  --node-px: 18px;
-  --node-py: 14px;
-  --node-gap: 12px;
-  --node-icon: 22px;
-  --viz-display: 36px;
-  --viz-expr: 30px;
-  --viz-cell: 16px;
+  --node-px: 1.125rem;
+  --node-py: 0.875rem;
+  --node-gap: 0.75rem;
+  --node-icon: 1.375rem;
+  --viz-display: 2.25rem;
+  --viz-expr: 1.875rem;
+  --viz-cell: 1rem;
 }
 
 /* Chrome dimensions — defaults mirror src/shell/chrome.ts; Workspace updates --chrome-* at runtime */
@@ -166,6 +166,84 @@ html {
   }
 }
 
+/* Landing hero — headline scales to the left column width. */
+.hero-headline {
+  font-size: clamp(1.125rem, 5.6cqi, 3rem);
+}
+
+.landing-hero-glow {
+  background:
+    radial-gradient(55% 55% at 18% 8%, color-mix(in srgb, var(--accent-bg) 92%, transparent) 0%, transparent 62%),
+    radial-gradient(55% 55% at 82% 8%, color-mix(in srgb, var(--accent-bg) 92%, transparent) 0%, transparent 62%);
+}
+
+/* Landing hero — "move by move" wave animation. */
+.hero-mbm {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.32em;
+  padding-bottom: 0.22em;
+}
+
+.hero-mbm__word {
+  --step: 0;
+  display: inline-block;
+  color: var(--accent);
+}
+
+.hero-mbm__wave-char {
+  display: inline-block;
+  animation: heroMbmWaveBob 1.7s ease-in-out infinite;
+  animation-delay: calc(var(--step) * 0.22s);
+}
+
+.hero-mbm__wave {
+  position: absolute;
+  left: -0.08em;
+  right: -0.08em;
+  bottom: -0.02em;
+  height: 0.5em;
+  color: var(--accent);
+  opacity: 0.6;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-mbm__wave svg {
+  display: block;
+  width: 200%;
+  height: 100%;
+  animation: heroMbmWaveScroll 2.4s linear infinite;
+}
+
+.hero-mbm__wave-path {
+  stroke-dasharray: 3 5;
+  animation: heroMbmWaveDash 1.2s linear infinite;
+}
+
+@keyframes heroMbmWaveBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.12em);
+  }
+}
+
+@keyframes heroMbmWaveScroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes heroMbmWaveDash {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
 .ws-scroll::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -176,4 +254,8 @@ html {
 }
 .ws-scroll::-webkit-scrollbar-track {
   background: transparent;
+}
+
+.browse-problem-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }

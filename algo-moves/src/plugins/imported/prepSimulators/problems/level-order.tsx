@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface LevelOrderInput {
   // Binary tree in level-order form; null marks an absent slot.
@@ -22,32 +22,20 @@ interface LevelOrderState {
 }
 
 function record({ tree }: LevelOrderInput): Frame<LevelOrderState>[] {
-  const frames: Frame<LevelOrderState>[] = [];
   let queue: number[] = [];
   const visited: number[] = [];
   const out: number[][] = [];
 
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<LevelOrderState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        queue: queue.slice(),
-        visited: visited.slice(),
-        active: null,
-        level: out.length,
-        levelSoFar: [],
-        out: out.map((l) => l.slice()),
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<LevelOrderState>(() => ({
+    tree,
+    queue: queue.slice(),
+    visited: visited.slice(),
+    active: null,
+    level: out.length,
+    levelSoFar: [],
+    out: out.map((l) => l.slice()),
+    done: false,
+  }));
 
   const valAt = (i: number) => tree[i] as number;
 
@@ -139,27 +127,27 @@ function View({ frame }: PluginViewProps<LevelOrderState>) {
     if (s.visited.includes(i)) return 'team-2';
     return 'team-0';
   };
-  const queueVals = s.queue.map((i) => s.tree[i] as number);
+  const queueVals = s.queue.map((i) => String(s.tree[i] as number));
+  const outItems = s.out.map((l) => `[${l.join(',')}]`);
+  const activeVal = s.active !== null ? String(s.tree[s.active] as number) : '—';
+  const levelSoFarStr = s.levelSoFar.length > 0 ? `[${s.levelSoFar.join(', ')}]` : '—';
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        building level <span className="font-mono text-ink">{s.level}</span>
-        {s.levelSoFar.length > 0 && (
-          <>
-            {' · '}so far{' '}
-            <span className="font-mono text-ink">[{s.levelSoFar.join(', ')}]</span>
-          </>
+    <VizStage rail={
+      <>
+        <RailStack label="queue" items={queueVals} highlightEnd="bottom" topLabel="front" />
+        <RailGroup label="scan">
+          <RailStat k="level" v={s.level} />
+          <RailStat k="active" v={activeVal} tone="accent" />
+          <RailStat k="so far" v={levelSoFarStr} />
+        </RailGroup>
+        <RailStack label="out" items={outItems} />
+        {s.done && (
+          <RailResult label="levels" value={s.out.length} tone={s.out.length > 0 ? 'good' : 'bad'} />
         )}
-      </div>
+      </>
+    }>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        queue [{queueVals.join(', ')}]
-      </div>
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        out{' '}
-        {s.out.length === 0 ? '[]' : s.out.map((l) => `[${l.join(',')}]`).join(' ')}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

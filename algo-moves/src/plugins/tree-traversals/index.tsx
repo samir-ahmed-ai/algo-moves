@@ -1,10 +1,10 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
 import { TreeBoard } from '../../components/TreeBoard';
-import { QueueTape } from '../../components/QueueTape';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
+import { VizStage, RailStack, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 type Order = 'preorder' | 'inorder' | 'postorder' | 'levelorder';
 
@@ -84,8 +84,26 @@ function record({ tree, order }: TreeInput): Frame<TreeState>[] {
 function View({ frame, onSelectNode, selectedNode }: PluginViewProps<TreeState>) {
   const s = frame.state;
   const vis = new Set(s.visited);
+  const n = s.tree.filter((x) => x != null).length;
+  const done = frame.move?.tone === 'good';
+  const rail = (
+    <>
+      <RailStack
+        label={s.order === 'levelorder' ? 'queue' : 'call stack'}
+        items={s.frontier.map(String)}
+        highlightEnd={s.order === 'levelorder' ? 'bottom' : undefined}
+        topLabel={s.order === 'levelorder' ? 'front' : undefined}
+      />
+      <RailStack label="output" items={s.output.map(String)} />
+      <RailGroup label="progress">
+        <RailStat k="visited" v={`${s.output.length} / ${n}`} />
+        <RailStat k="active" v={s.active !== null ? String(s.tree[s.active]) : '—'} tone="accent" />
+      </RailGroup>
+      {done && <RailResult label="result" value={`[${s.output.join(', ')}]`} tone="good" />}
+    </>
+  );
   return (
-    <div className="board-area">
+    <VizStage rail={rail} railWidth={150}>
       <TreeBoard
         tree={s.tree}
         nodeClass={(i) => (s.active === i ? 'team-1' : vis.has(i) ? 'team-2' : 'team-0')}
@@ -94,13 +112,7 @@ function View({ frame, onSelectNode, selectedNode }: PluginViewProps<TreeState>)
         pickedNode={selectedNode ?? null}
         onNodeClick={onSelectNode}
       />
-      <QueueTape items={s.output} label={`${s.order} · output →`} />
-      {s.order === 'levelorder' ? (
-        <QueueTape items={s.frontier} label="queue →" />
-      ) : (
-        <QueueTape items={s.frontier} label="call stack · root → current" />
-      )}
-    </div>
+    </VizStage>
   );
 }
 

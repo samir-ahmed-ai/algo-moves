@@ -1,125 +1,39 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import {
-  DualHeapBoard,
-  maxHeapPop,
-  maxHeapPush,
-  medianFromHeaps,
-  minHeapPop,
-  minHeapPush,
-} from '../../../_shared/dualHeapBoard';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import type { DualHeapMedianState } from '../../../_shared/dualHeapMedianRecord';
+import { recordDualHeapMedian } from '../../../_shared/dualHeapMedianRecord';
+import { DualHeapBoard } from '../../../_shared/dualHeapBoard';
 
 interface MedianStreamInput {
   nums: number[];
 }
 
-interface MedianStreamState {
-  low: number[];
-  high: number[];
-  op: string;
-  added: number | null;
-  median: number | null;
-  highlightLow: boolean;
-  highlightHigh: boolean;
-  medians: number[];
-  done: boolean;
-}
+type MedianStreamState = DualHeapMedianState & { medians: number[] };
 
 function record({ nums }: MedianStreamInput): Frame<MedianStreamState>[] {
-  const frames: Frame<MedianStreamState>[] = [];
-  let low: number[] = [];
-  let high: number[] = [];
-  const medians: number[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<MedianStreamState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        low: [...low],
-        high: [...high],
-        op: '',
-        added: null,
-        median: null,
-        highlightLow: false,
-        highlightHigh: false,
-        medians: medians.slice(),
-        done: false,
-        ...s,
-      },
-    });
-
-  emit(
-    'INIT',
-    'dual heaps',
-    `Find median in stream: max-heap \`low\` holds the smaller half, min-heap \`high\` the larger. pushLow(v), move low's top to high, rebalance if needed.`,
-    {},
-  );
-
-  for (const v of nums) {
-    emit('ADD', `push ${v} to low`, `Add ${v}: pushLow into max-heap low.`, { op: `add ${v}`, added: v, highlightLow: true });
-    low = maxHeapPush(low, v);
-    let moved: number;
-    [low, moved] = maxHeapPop(low);
-    high = minHeapPush(high, moved);
-    emit(
-      'MOVE',
-      `move ${moved} to high`,
-      `Pop max from low (${moved}) and pushHigh so every low value ≤ every high value.`,
-      { op: `add ${v}`, added: v, highlightHigh: true },
-    );
-    if (high.length > low.length) {
-      let back: number;
-      [high, back] = minHeapPop(high);
-      low = maxHeapPush(low, back);
-      emit(
-        'REBALANCE',
-        `move ${back} to low`,
-        `high has more elements — move smallest of high (${back}) back to low so |low| ≥ |high|.`,
-        { op: `add ${v}`, added: v, highlightLow: true },
-      );
-    }
-    const med = medianFromHeaps(low, high);
-    medians.push(med);
-    emit(
-      'MEDIAN',
-      `median ${med}`,
-      `After ${v}: low size=${low.length}, high size=${high.length}. Median = ${med}.`,
-      { op: `add ${v}`, added: v, median: med, medians: medians.slice() },
-      'good',
-    );
-  }
-
-  const finalMed = medians[medians.length - 1] ?? null;
-  emit(
-    'DONE',
-    finalMed !== null ? `median ${finalMed}` : 'empty',
-    `Stream complete. Median after each add: [${medians.join(', ')}].`,
-    { op: 'done', median: finalMed, medians: medians.slice(), done: true },
-    'good',
-  );
-  return frames;
+  return recordDualHeapMedian(nums, {
+    initCaption:
+      'Find median in stream: max-heap `low` holds the smaller half, min-heap `high` the larger. pushLow(v), move low\'s top to high, rebalance if needed.',
+    trackMedians: true,
+    doneCaption: (_final, medians) => `Stream complete. Median after each add: [${medians.join(', ')}].`,
+  }) as Frame<MedianStreamState>[];
 }
 
 function View({ frame }: PluginViewProps<MedianStreamState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="step">
+        <RailStat k="op" v={s.op || '—'} />
+        {s.added !== null && <RailStat k="added" v={s.added} tone="accent" />}
+        <RailStat k="median" v={s.median ?? '—'} tone={s.done ? 'good' : 'accent'} />
+      </RailGroup>
+      <RailStack label="medians" items={(s.medians ?? []).map(String)} highlightEnd="bottom" />
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.added !== null && (
-          <>
-            {' · '}added <span className="font-mono text-ink">{s.added}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={130}>
       <DualHeapBoard
         low={s.low}
         high={s.high}
@@ -127,12 +41,8 @@ function View({ frame }: PluginViewProps<MedianStreamState>) {
         highlightHigh={s.highlightHigh}
         median={s.median}
       />
-      {s.medians.length > 0 && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          medians [{s.medians.join(', ')}]
-        </div>
-      )}
-    </div>
+      {s.done && s.median != null && <RailResult label="median" value={s.median} tone="good" />}
+    </VizStage>
   );
 }
 

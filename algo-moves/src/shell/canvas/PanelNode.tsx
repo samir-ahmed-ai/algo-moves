@@ -44,7 +44,6 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const isCode = data.kind === 'code' || data.kind === 'scratch' || isReassemble || isRecall;
   const isProblem = data.kind === 'problem';
   const isExamples = data.kind === 'examples';
-  const uiScale = isProblem || isExamples;
   const showTargetHandle = !isProblem && !isExamples;
   const collapsed = !!data.collapsed;
   const showSourceHandle = !collapsed;
@@ -126,15 +125,13 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
     <div
       ref={panelRef}
       className={cn(
-        'panel-node relative flex h-auto flex-col overflow-visible rounded-[var(--radius)] border bg-panel text-ink transition-[box-shadow,ring-color]',
-        uiScale && 'panel-node--ui-scale',
+        'panel-node relative flex h-auto flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
         isCode && !collapsed && 'min-h-0 flex-1',
         fitNodeWidth && !vizCanvas ? 'w-max' : 'w-full',
         vizCanvas && 'h-full min-h-0',
         selected && 'selected',
-        selected ? 'border-edge2 shadow-theme-lg' : 'border-edge',
         chainTint && `ring-1 ${chainTint}`,
-        'hover:ring-1 hover:ring-[color-mix(in_srgb,var(--ring)_30%,transparent)]',
+        'hover:ring-1 hover:ring-[color-mix(in_srgb,var(--ring)_25%,transparent)]',
         locked && !nodeStyle?.opacity && 'opacity-95',
       )}
       style={{
@@ -161,8 +158,8 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
         className={cn(
           'panel-node__body relative z-0 flex min-h-0 flex-col rounded-[inherit]',
           visualizeFlush
-            ? 'gap-0 px-[var(--node-px,10px)]'
-            : 'gap-[var(--node-gap,6px)] px-[var(--node-px,10px)] pb-[var(--node-py,7px)]',
+            ? 'gap-0 px-[var(--node-px,0.75rem)]'
+            : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
           isCode && !collapsed && 'min-h-0 flex-1 overflow-hidden',
           !vizCanvas && 'overflow-hidden',
           vizCanvas && 'h-full flex-1',

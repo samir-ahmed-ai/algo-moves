@@ -4,7 +4,7 @@
 
 Plugin-driven visual learning environment for coding interview prep. Each problem replays as a sequence of **moves** — state snapshots with captions — that you can scrub, play, and study. The shell (canvas, player, move log, Code Studio, mobile deck) knows nothing about any specific algorithm; every problem is a self-contained **plugin**.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -21,7 +21,8 @@ Plugin-driven visual learning environment for coding interview prep. Each proble
 | [**Worked example**](src/plugins/EXAMPLE.md) | Native + imported plugin end-to-end |
 | [**Quiz & Code Studio**](docs/quiz-and-code-studio.md) | Choice labels, shuffle/restart, syntax highlighting, reassemble |
 | [**Design tokens**](src/design/README.md) | Typography and layout token hierarchy |
-| [**Future ideas**](TODO.md) | Trimmed roadmap — not yet built |
+| [**Architecture**](docs/architecture.md) | Shell, plugins, canvas, and content pipeline |
+| [**Backlog**](docs/backlog.md) | Future ideas — not yet built |
 
 ## Why Algo Moves?
 
@@ -84,7 +85,7 @@ Built as a modern React SPA with a strict plugin contract and a token-driven des
 |----------|-----------|
 | **Core** | React 18, TypeScript 5, Vite 5 |
 | **Styling** | Tailwind CSS 3, PostCSS — design tokens in `src/design/tokens.ts` and `src/styles/theme.css` |
-| **Components** | Radix UI (accordion, tabs, tooltip, …), Lucide icons, `clsx` + `tailwind-merge` |
+| **Components** | Radix UI (accordion, switch), Lucide icons, `clsx` + `tailwind-merge` |
 | **Code editing** | CodeMirror 6 (+ `@replit/codemirror-vim`), autocomplete, One Dark theme |
 | **Graph canvas** | `@xyflow/react`, `@dagrejs/dagre` for layout |
 | **Utilities** | `html-to-image` (export), `lz-string` (compact share URLs) |
@@ -127,19 +128,18 @@ npm run new-problem -- two-sum "Two Sum"         # scaffold a native plugin
 | `test` | Vitest + orphan plugin check |
 | `check:all` | Simulators, prep coverage, typography, tokens, quiz labels |
 | `check:quiz-labels` | Quiz choice format + integrity label tests |
-| `repair-quiz-labels` | Bulk-repair imported practice quiz labels |
 | `draft-quiz-from-frames -- <id>` | Draft quiz from recorder captions |
 | `import-prep` | Regenerate `prepManifest.ts` |
+| `import-problems` | Regenerate progress `manifest.ts` |
 | `scaffold-prep-sim -- <slug>` | Stub a new prep simulator |
 | `check-prep-sim-coverage` | Fail if any prep id lacks a simulator |
+| `check-mobile-decks` | Validate mobile deck coverage |
 | `new-problem -- <slug> "<title>"` | Scaffold a native plugin |
 | `new-effect -- <slug>` | Scaffold a canvas effect plugin |
 | `check-simulators` | Progress-library simulator integrity |
 | `check-plugin-typography` | Lint plugin UI for hardcoded font sizes |
 | `check:tokens` | Design-token guard |
 | `generate-themes` | Regenerate theme CSS from token source |
-| `repair-quiz-labels` | Fix imported quiz choice labels (`headline — detail` format) |
-| `migrate-viz-kit` | Batch-migrate plugin views to vizKit |
 
 ---
 
@@ -242,4 +242,4 @@ algo-moves/
 
 Copyright (c) 2026 Ahmed Samir
 
-Licensed under the MIT License. See [LICENSE](LICENSE) for the full text.
+Licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for the full text.

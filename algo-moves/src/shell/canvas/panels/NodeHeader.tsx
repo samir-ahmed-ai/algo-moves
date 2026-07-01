@@ -1,18 +1,26 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
+import { nodeText } from '../nodeui';
 
 /** Composable panel header primitives (Strudel node-header pattern). */
 
 export function NodeHeader({ children, className }: { children: ReactNode; className?: string }) {
-  return <header className={cn('flex items-center gap-1 border-b border-edge px-2 py-1.5', className)}>{children}</header>;
+  return (
+    <header
+      className={cn(
+        'flex items-center gap-[var(--node-gap,0.5rem)] border-b border-edge/40 px-[var(--node-px,0.75rem)] py-[var(--node-py,0.5625rem)]',
+        className,
+      )}
+    >
+      {children}
+    </header>
+  );
 }
 
 export function NodeHeaderTitle({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', className)}>{children}</span>;
-}
-
-export function NodeHeaderIcon({ children }: { children: ReactNode }) {
-  return <span className="grid shrink-0 place-items-center">{children}</span>;
+  return (
+    <span className={cn('min-w-0 flex-1 truncate font-semibold text-ink', nodeText.title, className)}>{children}</span>
+  );
 }
 
 export function NodeHeaderActions({ children, className }: { children: ReactNode; className?: string }) {
@@ -33,7 +41,7 @@ export function NodeHeaderAction({
       type="button"
       onClick={onClick}
       title={title}
-      className="nodrag grid h-5 w-5 place-items-center rounded text-ink3 hover:bg-panel2 hover:text-ink"
+      className="nodrag grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] place-items-center rounded-[calc(var(--radius)-2px)] text-ink3 transition-colors hover:bg-panel2/80 hover:text-ink"
     >
       {children}
     </button>

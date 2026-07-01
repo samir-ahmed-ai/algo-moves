@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { circleLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import { circleLayout } from '../../../_shared/graphLayout';
 
 interface GPInput {
   vals: number[];
@@ -128,11 +127,13 @@ function team(s: GPState, node: number): string {
 function View({ frame }: PluginViewProps<GPState>) {
   const s = frame.state;
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        good paths = <span className="font-mono text-ink">{s.res}</span>
-        {s.groupVal !== null && <span className="ml-2">processing value {s.groupVal}</span>}
-      </div>
+    <VizStage rail={<>
+      <RailGroup label="scan">
+        <RailStat k="value" v={s.groupVal ?? '—'} tone="accent" />
+        <RailStat k="paths" v={s.res} />
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.res} tone="good" />}
+    </>}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -143,7 +144,7 @@ function View({ frame }: PluginViewProps<GPState>) {
         highlightEdge={s.highlightEdge}
         height={260}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -176,7 +177,7 @@ const T4: GPInput = {
 export const manifestId = 'imp-18-number-of-good-paths';
 export const title = 'Number of Good Paths';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 't5', label: '5 nodes', value: T5 },
     { id: 't4', label: '4 nodes', value: T4 },

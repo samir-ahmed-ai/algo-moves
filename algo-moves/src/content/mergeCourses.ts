@@ -1,4 +1,4 @@
-import type { CourseDef } from './types';
+import type { CourseDef, ItemDef, TopicDef } from './types';
 
 /** Imported category key → curated course id. */
 const MERGE_MAP: Record<string, string> = {
@@ -34,7 +34,17 @@ export function mergeCourses(curated: CourseDef[], imported: CourseDef[]): Cours
     const target = byId.get(targetId);
     if (!target) continue;
 
-    target.topics.push(...lib.topics);
+    // Merge imported items into one flat reference topic instead of difficulty buckets.
+    const importedItems: ItemDef[] = lib.topics.flatMap((t) => t.items);
+    if (importedItems.length === 0) continue;
+
+    const refTopic: TopicDef = {
+      id: `${targetId}-reference`,
+      title: 'Reference problems',
+      summary: `${importedItems.length} imported reference solutions`,
+      items: importedItems,
+    };
+    target.topics.push(refTopic);
   }
 
   // COURSE_ORDER controls sort priority, not membership: list the known ids in

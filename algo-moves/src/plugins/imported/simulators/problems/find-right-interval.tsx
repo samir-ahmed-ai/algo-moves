@@ -1,8 +1,7 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
-import type { DpSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 interface FriInput {
   intervals: [number, number][];
@@ -140,11 +139,36 @@ function View({ frame }: PluginViewProps<FriState>) {
     s.cur >= 0
       ? `interval ${s.cur} = [${s.intervals[s.cur][0]}, ${s.intervals[s.cur][1]}] · need start ≥ ${s.key}`
       : 'sorted starts (labelled by original interval index)';
+
+  const answeredItems = s.answers
+    .map((a, i) => (a !== null ? `[${i}]→${a}` : null))
+    .filter((x): x is string => x !== null);
+
+  const rail = (
+    <>
+      <RailGroup label="binary search">
+        <RailStat k="interval" v={s.cur >= 0 ? `[${s.intervals[s.cur][0]},${s.intervals[s.cur][1]}]` : '—'} />
+        <RailStat k="end" v={s.cur >= 0 ? s.key : '—'} tone="accent" />
+        <RailStat k="lo" v={s.lo} />
+        <RailStat k="hi" v={s.hi} />
+        <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
+      </RailGroup>
+      <RailStack label="answers" items={answeredItems} />
+      {s.done && (
+        <RailResult
+          label="result"
+          value={`[${s.answers.map((a) => a ?? -1).join(', ')}]`}
+          tone="good"
+        />
+      )}
+    </>
+  );
+
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>{header}</div>
+    <VizStage rail={rail} railWidth={150}>
+      <div className="text-ink3 text-sm mb-1">{header}</div>
       <ArrayRow values={s.starts} cellTone={tone} pointers={pointers} label={(i) => `→${s.origIdx[i]}`} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -166,7 +190,7 @@ function Inspector({ frame }: InspectorProps<FriState>) {
 export const manifestId = 'imp-50-find-right-interval';
 export const title = 'Find Right Interval';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'fri1', label: '[[3,4],[2,3],[1,2]] → [-1,0,1]', value: { intervals: [[3, 4], [2, 3], [1, 2]] } },
     { id: 'fri2', label: '[[1,4],[2,3],[3,4]] → [-1,2,-1]', value: { intervals: [[1, 4], [2, 3], [3, 4]] } },

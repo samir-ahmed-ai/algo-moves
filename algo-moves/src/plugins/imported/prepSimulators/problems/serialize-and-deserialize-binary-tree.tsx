@@ -1,8 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { createRecorder } from '../../../_shared/createRecorder';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 
 // Input is the tree itself, given in level-order with null holes (children of i
 // are 2i+1, 2i+2). We serialize it with preorder DFS, then deserialize the
@@ -42,35 +42,21 @@ function serializeTokens(tree: (number | null)[]): { tokens: string[]; order: (n
 }
 
 function record({ tree }: SerializeInput): Frame<SerializeState>[] {
-  const frames: Frame<SerializeState>[] = [];
-
-  const emit = (
-    type: string,
-    note: string,
-    caption: string,
-    s: Partial<SerializeState>,
-    tone?: 'good' | 'bad',
-  ) =>
-    frames.push({
-      move: { type, note, caption, tone },
-      state: {
-        tree,
-        phase: 'serialize',
-        current: null,
-        visited: [],
-        tokens: [],
-        built: [],
-        cursor: null,
-        done: false,
-        ...s,
-      },
-    });
+  const { emit, frames } = createRecorder<SerializeState>(() => ({
+    tree,
+    phase: 'serialize',
+    current: null,
+    visited: [],
+    tokens: [],
+    built: [],
+    cursor: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
     'preorder DFS',
     `Serialize & Deserialize a binary tree. Serialize with a preorder DFS: write each node's value then a comma, and write "null" for a missing child. Deserialize replays the same preorder with a shared cursor. Both are O(n) time and space.`,
-    {},
   );
 
   // ---- Phase 1: serialize ----
@@ -154,24 +140,38 @@ function View({ frame }: PluginViewProps<SerializeState>) {
   const active = s.phase === 'serialize' ? s.visited : s.built;
   const nodeClass = (i: number) =>
     s.current === i ? 'team-1' : active.includes(i) ? 'team-2' : 'team-0';
-  const tokenStr = s.tokens.length ? s.tokens.join(',') + ',' : '·';
+  const tokenItems = s.tokens.map((t, idx) => ({
+    label: t,
+    tone: (s.cursor !== null && idx === s.cursor
+      ? 'accent'
+      : t !== 'null'
+      ? undefined
+      : undefined) as 'accent' | undefined,
+  }));
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        phase = <span className="font-mono text-ink">{s.phase}</span>
-        {s.cursor !== null && (
-          <>
-            {' · '}cursor ={' '}
-            <span className="font-mono text-ink">{s.cursor}</span>
-          </>
-        )}
-      </div>
+    <VizStage
+      railWidth={150}
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="phase" v={s.phase} />
+            <RailStat k="cursor" v={s.cursor ?? '—'} tone={s.cursor !== null ? 'accent' : undefined} />
+            <RailStat k="nodes done" v={active.length} />
+          </RailGroup>
+          <RailStack
+            label="tokens"
+            items={tokenItems}
+            highlightEnd="bottom"
+            topLabel="first"
+          />
+          {s.done && (
+            <RailResult label="result" value="round-trip ok" tone="good" />
+          )}
+        </>
+      }
+    >
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
-      <div className={cn('mt-1 break-all font-mono', vizText.sm, 'text-ink')}>{tokenStr}</div>
-      <div className={cn(vizText.xs, 'text-ink3')}>
-        {s.phase === 'serialize' ? 'writing tokens (preorder)' : 'reading tokens (preorder)'}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

@@ -2,7 +2,7 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 interface MeetingRoomsInput {
   intervals: [number, number][];
@@ -112,8 +112,26 @@ function View({ frame }: PluginViewProps<MeetingRoomsState>) {
   if (s.endIdx < s.ends.length) endPointers.push({ i: s.endIdx, label: 'endIdx', tone: 'warn', place: 'below' });
   const endTone = (k: number) => (k < s.endIdx ? 'dead' : k === s.endIdx ? 'mid' : '');
 
+  const curStart = s.i !== null ? s.starts[s.i] : '—';
+  const curEnd = s.endIdx < s.ends.length ? s.ends[s.endIdx] : '—';
+
+  const rail = (
+    <>
+      <RailGroup label="scan">
+        <RailStat k="starts[i]" v={curStart} tone="accent" />
+        <RailStat k="ends[endIdx]" v={curEnd} tone="warn" />
+        <RailStat k="decision" v={s.decision ?? '—'} />
+      </RailGroup>
+      <RailGroup label="rooms">
+        <RailStat k="now" v={s.rooms} tone="accent" />
+        <RailStat k="peak" v={s.peak} />
+      </RailGroup>
+      {s.done && <RailResult label="answer" value={s.peak} tone="good" />}
+    </>
+  );
+
   return (
-    <div className="board-area">
+    <VizStage rail={rail} railWidth={140}>
       <div className={cn(vizText.sm, 'text-ink3')}>
         meetings{' '}
         <span className="font-mono text-ink">
@@ -126,12 +144,7 @@ function View({ frame }: PluginViewProps<MeetingRoomsState>) {
 
       <div className={cn('mt-2 font-mono', vizText.xs, 'text-ink3')}>ends (sorted)</div>
       <ArrayRow values={s.ends} cellTone={endTone} pointers={endPointers} windowRange={null} />
-
-      <div className={cn('mt-2 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
-        rooms now = {s.rooms} · max rooms = {s.peak}
-        {s.done ? ` → answer ${s.peak}` : ''}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 

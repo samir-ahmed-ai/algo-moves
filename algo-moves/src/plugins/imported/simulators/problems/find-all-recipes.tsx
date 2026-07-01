@@ -1,9 +1,8 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { GraphBoard } from '../../../../components/GraphBoard';
-import type { DpSimulator } from '../types';
-import { layeredLayout } from '../graphLayout';
-import { cn } from '../../../../lib/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import type { ProblemSimulator } from '../types';
+import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import { layeredLayout } from '../../../_shared/graphLayout';
 
 interface RInput {
   recipes: string[];
@@ -141,32 +140,36 @@ function record({ recipes, ingredients, supplies }: RInput): Frame<RState>[] {
   return frames;
 }
 
-function NameQueue({ items, labels }: { items: number[]; labels: string[] }) {
-  return (
-    <div className="queue-tape">
-      <span className="queue-label">queue · front →</span>
-      {items.length === 0 ? (
-        <span className="queue-empty">empty</span>
-      ) : (
-        <div className="queue-row">
-          {items.map((n, i) => (
-            <div key={i} className="queue-cell">
-              {labels[n]}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function View({ frame }: PluginViewProps<RState>) {
   const s = frame.state;
+  const recipeCount = s.isRecipe.filter(Boolean).length;
+  const rail = (
+    <>
+      <RailStack
+        label="queue"
+        items={s.queue.map((n) => s.labels[n])}
+        topLabel="front"
+        highlightEnd="bottom"
+      />
+      <RailStack
+        label="made"
+        items={s.made.map((m) => s.labels[m])}
+      />
+      <RailGroup label="scan">
+        <RailStat k="current" v={s.active !== null ? s.labels[s.active] : '—'} tone="accent" />
+        <RailStat k="done" v={`${s.made.length}/${recipeCount}`} />
+      </RailGroup>
+      {s.done && (
+        <RailResult
+          label="recipes"
+          value={`[${s.made.map((m) => s.labels[m]).join(', ')}]`}
+          tone={s.made.length > 0 ? 'good' : 'bad'}
+        />
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        makeable recipes = <span className="font-mono text-ink">[{s.made.map((m) => s.labels[m]).join(', ')}]</span>
-      </div>
+    <VizStage rail={rail} railWidth={150}>
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -176,8 +179,7 @@ function View({ frame }: PluginViewProps<RState>) {
         directed
         height={260}
       />
-      <NameQueue items={s.queue} labels={s.labels} />
-    </div>
+    </VizStage>
   );
 }
 
@@ -207,7 +209,7 @@ const SANDWICH: RInput = {
 export const manifestId = 'imp-15-find-all-possible-recipes-from-given-supplies';
 export const title = 'Find All Possible Recipes from Given Supplies';
 
-export const simulator: DpSimulator = {
+export const simulator: ProblemSimulator = {
   inputs: [{ id: 'sandwich', label: 'bread → sandwich', value: SANDWICH }] satisfies SampleInput<RInput>[],
   record,
   View,
