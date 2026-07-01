@@ -4,12 +4,14 @@ import { Workspace } from './shell/Workspace';
 import { LandingPage } from './shell/home/LandingPage';
 import { MobileApp } from './shell/mobile/MobileApp';
 import { VimDojoPage } from './shell/vim/VimDojoPage';
+import { GamesPage } from './shell/games/GamesPage';
 import { ErrorBoundary } from './shell/ErrorBoundary';
 
 function Shell() {
   const { route } = useWorkspace();
   if (route === 'mobile') return <MobileApp />;
   if (route === 'vim') return <VimDojoPage />;
+  if (route === 'games') return <GamesPage />;
   return route === 'home' ? <LandingPage /> : <Workspace />;
 }
 

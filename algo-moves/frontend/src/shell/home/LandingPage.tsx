@@ -1,11 +1,13 @@
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   ArrowRight,
   BookOpen,
+  ChevronDown,
   Code2,
   Contrast,
   Eye,
   Flame,
+  Gamepad2,
   GraduationCap,
   Keyboard,
   LayoutGrid,
@@ -77,6 +79,86 @@ function IconButton({
       )}
     >
       {children}
+    </button>
+  );
+}
+
+/** Header dropdown grouping the extra play modes — Vim Dojo, then Games. */
+function PlayMenu({ onVim, onGames }: { onVim: () => void; onGames: () => void }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const pick = (fn: () => void) => {
+    setOpen(false);
+    fn();
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        title="Play"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm transition-colors',
+          open
+            ? 'border-accent/60 bg-accentbg text-accent'
+            : 'border-edge text-ink2 hover:border-accent/50 hover:text-ink',
+        )}
+      >
+        <Gamepad2 className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Play</span>
+        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+      </button>
+      {open ? (
+        <>
+          <div className="fixed inset-0 z-30" aria-hidden onClick={() => setOpen(false)} />
+          <div
+            role="menu"
+            className="absolute right-0 z-40 mt-1.5 w-48 overflow-hidden rounded-lg border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]"
+          >
+            <PlayMenuItem icon={<Keyboard className="h-4 w-4" />} title="Vim Dojo" hint="Keyboard maze trainer" onClick={() => pick(onVim)} />
+            <PlayMenuItem icon={<Gamepad2 className="h-4 w-4" />} title="Games" hint="Two-player games" onClick={() => pick(onGames)} />
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function PlayMenuItem({
+  icon,
+  title,
+  hint,
+  onClick,
+}: {
+  icon: ReactNode;
+  title: string;
+  hint: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-panel2"
+    >
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-accentbg text-accent">{icon}</span>
+      <span className="min-w-0">
+        <span className="block text-sm font-medium text-ink">{title}</span>
+        <span className="block truncate text-xs text-ink3">{hint}</span>
+      </span>
     </button>
   );
 }
@@ -347,6 +429,7 @@ export function LandingPage() {
     enterWorkspace,
     enterMobile,
     enterVim,
+    enterGames,
     setActiveTrackId,
     setActiveCategoryId,
     setMode,
@@ -416,15 +499,7 @@ export function LandingPage() {
             >
               <Contrast />
             </IconButton>
-            <button
-              type="button"
-              title="Vim Dojo"
-              onClick={() => enterVim()}
-              className="hidden items-center gap-1.5 rounded-md border border-edge px-2.5 py-1.5 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink sm:inline-flex"
-            >
-              <Keyboard className="h-3.5 w-3.5" />
-              Vim Dojo
-            </button>
+            <PlayMenu onVim={() => enterVim()} onGames={() => enterGames()} />
             <button
               type="button"
               title="Open workspace"
@@ -521,6 +596,38 @@ export function LandingPage() {
             </p>
             <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent">
               Enter the Dojo
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </div>
+        </button>
+      </LandingSection>
+
+      {/* games — two-player arcade promo */}
+      <LandingSection className="!py-8 sm:!py-10">
+        <button
+          type="button"
+          onClick={() => enterGames()}
+          className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)] sm:gap-5 sm:p-5"
+        >
+          <span className="grid h-20 w-20 shrink-0 place-items-center rounded-[var(--radius)] border border-edge bg-accentbg sm:h-24 sm:w-24">
+            <span className="grid grid-cols-2 gap-1.5 text-2xl leading-none">
+              <span>🎯</span>
+              <span>✊</span>
+              <span>⚡</span>
+              <span>🧠</span>
+            </span>
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Play together</p>
+            <h2 className="mt-1 flex items-center gap-2 text-xl font-semibold tracking-tight text-ink sm:text-2xl">
+              <Gamepad2 className="h-5 w-5 text-accent" /> Two-player games
+            </h2>
+            <p className="mt-1.5 text-sm leading-snug text-ink2">
+              Number Duel, Rock-Paper-Scissors, Tic-Tac-Toe and more — share a room code and play from two
+              phones or iPads, in real time.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent">
+              Start a room
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
@@ -625,10 +732,10 @@ export function LandingPage() {
       <LandingSection bordered={false}>
         <SectionHeading
           eyebrow="Modes"
-          title="Three ways to study"
-          description="Visualize on the canvas, learn in the studio, or drill in Swipe mode on your phone."
+          title="Five ways to play & learn"
+          description="Visualize on the canvas, learn in the studio, drill in Swipe mode, train Vim motions, or challenge your partner in two-player games."
         />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-stretch lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-stretch lg:grid-cols-5">
           <FeatureCard
             icon={<Eye />}
             title="Visualize"
@@ -656,6 +763,13 @@ export function LandingPage() {
             body="Master Vim motions in a keyboard-only maze."
             cta="Enter the Dojo"
             onClick={() => enterVim()}
+          />
+          <FeatureCard
+            icon={<Gamepad2 />}
+            title="Games"
+            body="Play Number Duel & more with your partner in real time."
+            cta="Start a room"
+            onClick={() => enterGames()}
           />
         </div>
       </LandingSection>

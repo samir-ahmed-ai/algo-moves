@@ -70,6 +70,8 @@ export interface WorkspaceCtx {
   enterMobile: (categoryId?: string, itemId?: string) => void;
   /** Enter the Vim Dojo maze trainer; pass a level id to open that level directly. */
   enterVim: (levelId?: string) => void;
+  /** Enter the two-player games arcade; pass a room code to join that room directly. */
+  enterGames: (roomCode?: string) => void;
   canvasAdd: CanvasAddPanel | null;
   setCanvasAdd: (v: CanvasAddPanel | null) => void;
   canvasProject: CanvasProjectApi | null;

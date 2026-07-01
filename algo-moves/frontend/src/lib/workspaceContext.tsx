@@ -6,6 +6,7 @@ import { readShareFromUrl } from './shareState';
 import { useIsMobile } from './useMediaQuery';
 import { isMobileHash, writeMobileHash } from '../shell/mobile/mobileHash';
 import { isVimHash, writeVimHash } from '../shell/vim/engine/vimHash';
+import { isGamesHash, writeGamesHash } from '../shell/games/engine/gamesHash';
 import { initialBrowseFromHash } from './browseNavigation';
 import type { LayoutPreset } from '../shell/canvas/layout';
 import { BOTTOM_RAIL_H, SIDEBAR_RAIL_W, SIDEBAR_W, SIDEBAR_WIDE_W } from '../shell/SidebarShell';
@@ -75,6 +76,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       const hash = location.hash;
       if (isMobileHash(hash)) return 'mobile';
       if (isVimHash(hash)) return 'vim';
+      if (isGamesHash(hash)) return 'games';
       if (hash === '#home') return 'home';
       if (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches) return 'mobile';
     }
@@ -126,6 +128,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const enterVim = useCallback((levelId?: string) => {
     setRoute('vim');
     writeVimHash(levelId ? { levelId } : null);
+  }, []);
+
+  const enterGames = useCallback((roomCode?: string) => {
+    setRoute('games');
+    writeGamesHash(roomCode ? { room: roomCode } : null);
   }, []);
 
   const toggleFocusCanvas = useCallback(() => {
@@ -231,6 +238,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         openProblem,
         enterMobile,
         enterVim,
+        enterGames,
         canvasAdd,
         setCanvasAdd,
         canvasProject,

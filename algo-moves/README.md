@@ -17,10 +17,10 @@ Plugin-driven visual learning environment for coding interview prep. Each proble
 
 | Guide | Description |
 |-------|-------------|
-| [**Plugin authoring**](src/plugins/README.md) | `ProblemPlugin` contract, vizKit, teaching stack |
-| [**Worked example**](src/plugins/EXAMPLE.md) | Native + imported plugin end-to-end |
+| [**Plugin authoring**](frontend/src/plugins/README.md) | `ProblemPlugin` contract, vizKit, teaching stack |
+| [**Worked example**](frontend/src/plugins/EXAMPLE.md) | Native + imported plugin end-to-end |
 | [**Quiz & Code Studio**](docs/quiz-and-code-studio.md) | Choice labels, shuffle/restart, syntax highlighting, reassemble |
-| [**Design tokens**](src/design/README.md) | Typography and layout token hierarchy |
+| [**Design tokens**](frontend/src/design/README.md) | Typography and layout token hierarchy |
 | [**Architecture**](docs/architecture.md) | Shell, plugins, canvas, and content pipeline |
 | [**Backlog**](docs/backlog.md) | Future ideas — not yet built |
 
@@ -35,6 +35,8 @@ Most visualizers show you the *answer*. Algo Moves shows you the **process** —
 | **Visualize** | Canvas with step player, move log, inspector, and shareable replay URLs |
 | **Learn** | Cases, quiz, simulate-next-move, and **Code Studio** (quiz → reassemble → blind recall) |
 | **Mobile deck** | Full-screen swipe deck for drilling a topic on the go (`#mobile`) |
+| **Vim Dojo** | Keyboard-only maze puzzles that teach Vim motions (`#vim`) |
+| **Games** | Real-time two-player games — Number Duel, RPS, Tic-Tac-Toe, Mind Meld, Reaction Duel (`#games`) |
 | **Home** | Course catalog with progress meters, difficulty breakdown, and resume-last |
 
 ---
@@ -94,17 +96,40 @@ Built as a modern React SPA with a strict plugin contract and a token-driven des
 
 ---
 
+## Monorepo layout
+
+The project is split into two apps:
+
+```
+algo-moves/
+├── frontend/   React + Vite SPA — the whole learning app (was the repo root)
+└── backend/    Go realtime game server for the two-player Games arcade (stdlib only)
+```
+
+A top-level `Makefile` wraps both (`make dev`, `make backend-dev`, `make build`, `make backend-test`, `make check`).
+
 ## Quick start
 
 ```bash
-cd algo-moves
+# Frontend (from algo-moves/)
+cd frontend
 npm install
-npm run dev          # http://localhost:4321
+npm run dev          # Vite dev server (Network URL printed for phone/QR)
 npm run typecheck    # tsc --noEmit
 npm run build        # production bundle
 npm test             # vitest + orphan check
 npm run check:all    # simulators, prep coverage, typography, tokens, quiz labels
+
+# Backend — only needed for the two-player Games arcade (from algo-moves/)
+cd backend
+go run ./cmd/gameserver   # listens on :8080
+go test ./...             # framing + hub + a real two-client socket relay test
 ```
+
+**Playing the games:** run the Go server, then open the frontend on the host machine's LAN IP from
+both phones/iPads — the client auto-connects to `ws://<that-host>:8080`. For internet play, deploy the
+server and set `VITE_GAMES_SERVER_URL` (see [`frontend/.env.example`](frontend/.env.example) and
+[`backend/README.md`](backend/README.md)).
 
 ### Import & scaffold scripts
 
@@ -180,14 +205,14 @@ interface Move  { type; note; caption; team?; tone? }   // generic, shell render
 interface Frame { move: Move; state: S }                // state is plugin-specific
 ```
 
-`record()` is the heart: your algorithm with `emit(...)` calls where state changes, instead of a bare `return`. See [`binary-search/index.tsx`](src/plugins/binary-search/index.tsx) — the search is line-for-line the reference solution, snapshotting `(lo, mid, hi)` on every move.
+`record()` is the heart: your algorithm with `emit(...)` calls where state changes, instead of a bare `return`. See [`binary-search/index.tsx`](frontend/src/plugins/binary-search/index.tsx) — the search is line-for-line the reference solution, snapshotting `(lo, mid, hi)` on every move.
 
 Two generated import paths produce the reference libraries:
 
 - **`makeImportedPlugin`** (`imported/factory.tsx`) — progress library via `scripts/import-problems.mjs` → `manifest.ts`
 - **`makePrepPlugin`** (`imported/prepFactory.tsx`) — prep library via `scripts/import-prep.mjs` → `prepManifest.ts`
 
-Full authoring guide: [`src/plugins/README.md`](src/plugins/README.md) · worked example: [`src/plugins/EXAMPLE.md`](src/plugins/EXAMPLE.md).
+Full authoring guide: [`src/plugins/README.md`](frontend/src/plugins/README.md) · worked example: [`src/plugins/EXAMPLE.md`](frontend/src/plugins/EXAMPLE.md).
 
 ---
 
@@ -197,7 +222,7 @@ Full authoring guide: [`src/plugins/README.md`](src/plugins/README.md) · worked
 2. Write `recorder.ts` — port the algorithm, `emit` a frame per move.
 3. Write `<Name>View.tsx` — render `frame.state` using `components/` or `_shared/vizKit`.
 4. Write `index.tsx` — `definePlugin({ meta, inputs, record, View, verdict })`.
-5. Register in [`src/plugins/index.ts`](src/plugins/index.ts) and [`src/content/courses.ts`](src/content/courses.ts).
+5. Register in [`src/plugins/index.ts`](frontend/src/plugins/index.ts) and [`src/content/courses.ts`](frontend/src/content/courses.ts).
 
 No shell changes — sidebar, player, move log, input picker, and verdict badge wire up automatically.
 
@@ -210,16 +235,22 @@ Or scaffold: `npm run new-problem -- <slug> "<Title>"`.
 ```
 algo-moves/
 ├── ATTRIBUTIONS.md              LeetCode / HackerRank / OSS notices
-├── index.html
-├── package.json · tsconfig*.json · vite.config.ts
-└── src/
+├── Makefile                     wraps frontend + backend targets
+├── backend/                     Go realtime game server (stdlib-only WebSocket)
+│   ├── cmd/gameserver/          entrypoint (flags, http.Server)
+│   └── internal/{ws,hub,server} RFC 6455 framing · room relay · HTTP routes
+└── frontend/                    React + Vite SPA
+    ├── index.html
+    ├── package.json · tsconfig*.json · vite.config.ts
+    └── src/
     ├── main.tsx                 app entry
-    ├── App.tsx                  shell router: home / workspace / mobile
+    ├── App.tsx                  shell router: home / workspace / mobile / vim / games
     ├── core/                    plugin-agnostic engine
     │   ├── types.ts             ProblemPlugin / Frame / Move contracts
     │   ├── registry.ts          plugin lookup
     │   └── usePlayer.ts         step / play / pause / reset
-    ├── shell/                   home, workspace canvas, mobile deck, docks
+    ├── shell/                   home, workspace canvas, mobile deck, vim dojo, games arcade, docks
+    │   └── games/               two-player arcade: net (WebSocket room hook), lobby, games/<id>/
     ├── design/                  token system (see design/README.md)
     ├── components/              reusable UI (GraphBoard, QueueTape, MoveLog, …)
     ├── content/                 course catalog + merge with imported problems

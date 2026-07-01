@@ -90,7 +90,6 @@ describe('resolveMeasureSize', () => {
     let height = '80px';
     let maxWidth = '400px';
     const main = createMainMock(opts.mainH ?? opts.intrinsicH ?? 80);
-    const mainPrevMaxWidths = [{ maxWidth: 'calc(100% - 150px - 14px)' }];
 
     return {
       classList: {

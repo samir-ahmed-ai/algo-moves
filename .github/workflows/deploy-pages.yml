@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: algo-moves
+        working-directory: algo-moves/frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: algo-moves/package-lock.json
+          cache-dependency-path: algo-moves/frontend/package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm run typecheck
@@ -42,14 +42,14 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: algo-moves/package-lock.json
+          cache-dependency-path: algo-moves/frontend/package-lock.json
       - run: npm ci
-        working-directory: algo-moves
+        working-directory: algo-moves/frontend
       - run: npm run build -- --base /algo-moves/
-        working-directory: algo-moves
+        working-directory: algo-moves/frontend
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: algo-moves/dist
+          path: algo-moves/frontend/dist
 
   deploy:
     environment:

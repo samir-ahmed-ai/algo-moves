@@ -15,8 +15,8 @@ import { readStorageText, writeStorageJson } from './storage';
 export type Theme = 'dark' | 'light';
 export type Density = 'compact' | 'ultra' | 'spacious';
 export type Palette = 'default' | 'cb';
-/** Which top-level surface is showing: home launchpad, canvas workspace, or the mobile swipe deck. */
-export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim';
+/** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, or the two-player games arcade. */
+export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim' | 'games';
 export type { ThemePreset, LayoutPreset };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 
