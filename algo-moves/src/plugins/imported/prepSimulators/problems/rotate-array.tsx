@@ -1,0 +1,197 @@
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
+import type { ProblemSimulator } from '../types';
+import { cn } from '../../../../lib/cn';
+import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+
+interface RotateInput {
+  nums: number[];
+  k: number;
+}
+
+type Phase = 'init' | 'whole' | 'first' | 'rest' | 'done';
+
+interface RotateState {
+  nums: number[]; // current array contents (mutated as we reverse)
+  k: number; // effective rotation (after k %= n)
+  rawK: number; // the k that was passed in, before %= n
+  phase: Phase;
+  seg: [number, number] | null; // inclusive [lo, hi] segment being reversed
+  l: number | null; // left pointer of the current swap
+  r: number | null; // right pointer of the current swap
+  done: boolean;
+}
+
+function record({ nums: input, k: rawK }: RotateInput): Frame<RotateState>[] {
+  const nums = input.slice();
+  const n = nums.length;
+  const frames: Frame<RotateState>[] = [];
+
+  const emit = (
+    type: string,
+    note: string,
+    caption: string,
+    phase: Phase,
+    seg: [number, number] | null,
+    l: number | null,
+    r: number | null,
+    tone?: 'good' | 'bad',
+  ) =>
+    frames.push({
+      move: { type, note, caption, tone },
+      state: { nums: nums.slice(), k: rawK % (n || 1), rawK, phase, seg, l, r, done: phase === 'done' },
+    });
+
+  if (n === 0) {
+    emit('DONE', 'empty', 'The array is empty, so there is nothing to rotate.', 'done', null, null, null, 'good');
+    return frames;
+  }
+
+  const k = ((rawK % n) + n) % n;
+
+  emit(
+    'INIT',
+    `k=${rawK} → ${k}`,
+    `Rotate right by ${rawK}. Since rotating by n returns the array to itself, only k % n = ${rawK} % ${n} = ${k} matters. We rotate in place with three reversals: reverse the whole array, then reverse the first k, then reverse the rest.`,
+    'init',
+    null,
+    null,
+    null,
+  );
+
+  const reverse = (lo: number, hi: number, phase: Phase, segLabel: string) => {
+    emit(
+      'SEG',
+      `${segLabel} [${lo}..${hi}]`,
+      `${segLabel}: reverse the segment from index ${lo} to ${hi} by swapping the ends and walking inward.`,
+      phase,
+      lo <= hi ? [lo, hi] : null,
+      null,
+      null,
+    );
+    let l = lo;
+    let r = hi;
+    while (l < r) {
+      const a = nums[l];
+      const b = nums[r];
+      nums[l] = b;
+      nums[r] = a;
+      emit(
+        'SWAP',
+        `swap ${l}↔${r}`,
+        `Swap nums[${l}] and nums[${r}]: ${a} and ${b} trade places, then move the left pointer right and the right pointer left.`,
+        phase,
+        [lo, hi],
+        l,
+        r,
+      );
+      l++;
+      r--;
+    }
+    if (lo >= hi) {
+      emit(
+        'SKIP',
+        `${segLabel} trivial`,
+        `${segLabel} covers ${lo > hi ? 'no' : 'a single'} element, so there is nothing to swap — it is already reversed.`,
+        phase,
+        lo <= hi ? [lo, hi] : null,
+        null,
+        null,
+      );
+    }
+  };
+
+  reverse(0, n - 1, 'whole', 'Step 1');
+  reverse(0, k - 1, 'first', 'Step 2');
+  reverse(k, n - 1, 'rest', 'Step 3');
+
+  emit(
+    'DONE',
+    `rotated by ${k}`,
+    `All three reversals are complete. The array is now rotated right by ${k}: [${nums.join(', ')}].`,
+    'done',
+    null,
+    null,
+    null,
+    'good',
+  );
+  return frames;
+}
+
+function phaseLabel(phase: Phase): string {
+  switch (phase) {
+    case 'init':
+      return 'setup';
+    case 'whole':
+      return 'reverse whole';
+    case 'first':
+      return 'reverse first k';
+    case 'rest':
+      return 'reverse rest';
+    case 'done':
+      return 'done';
+  }
+}
+
+function View({ frame }: PluginViewProps<RotateState>) {
+  const s = frame.state;
+  const pointers: ArrayPointer[] = [];
+  if (s.l !== null) pointers.push({ i: s.l, label: 'l', tone: 'accent', place: 'above' });
+  if (s.r !== null) pointers.push({ i: s.r, label: 'r', tone: 'warn', place: 'above' });
+  const tone = (i: number) => {
+    if (s.done) return 'found';
+    if (s.l === i || s.r === i) return 'match';
+    return '';
+  };
+  return (
+    <div className="board-area">
+      <div className={cn(vizText.sm, 'text-ink3')}>
+        k = <span className="font-mono text-ink">{s.rawK}</span>
+        {' → '}effective <span className="font-mono text-ink">{s.k}</span>
+        {' · '}phase <span className="font-mono text-ink">{phaseLabel(s.phase)}</span>
+      </div>
+      <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={s.seg} />
+      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
+        segment {s.seg ? `[${s.seg[0]}..${s.seg[1]}]` : '—'}
+      </div>
+      {s.done && (
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ [{s.nums.join(', ')}]</div>
+      )}
+    </div>
+  );
+}
+
+function Inspector({ frame }: InspectorProps<RotateState>) {
+  if (!frame) return <VizEmpty />;
+  const s = frame.state;
+  return (
+    <VarGrid>
+      <InspectorRow k="raw k" v={s.rawK} />
+      <InspectorRow k="effective k" v={s.k} />
+      <InspectorRow k="n" v={s.nums.length} />
+      <InspectorRow k="phase" v={phaseLabel(s.phase)} />
+      <InspectorRow k="segment" v={s.seg ? `[${s.seg[0]}..${s.seg[1]}]` : '—'} />
+      <InspectorRow k="l, r" v={s.l !== null && s.r !== null ? `${s.l}, ${s.r}` : '—'} />
+      <InspectorRow k="array" v={`[${s.nums.join(',')}]`} />
+    </VarGrid>
+  );
+}
+
+export const manifestId = 'prep-arrays-rotate-array';
+export const title = 'Rotate array';
+
+export const simulator: ProblemSimulator = {
+  inputs: [
+    { id: 'ra1', label: '[1,2,3,4,5,6,7] k=3', value: { nums: [1, 2, 3, 4, 5, 6, 7], k: 3 } },
+    { id: 'ra2', label: '[-1,-100,3,99] k=2', value: { nums: [-1, -100, 3, 99], k: 2 } },
+  ] satisfies SampleInput<RotateInput>[],
+  record,
+  View,
+  Inspector,
+  verdict: (frames) => {
+    const s = frames[frames.length - 1]?.state as RotateState | undefined;
+    return s
+      ? { ok: true, label: `[${s.nums.join(',')}]` }
+      : { ok: false, label: 'no result' };
+  },
+};

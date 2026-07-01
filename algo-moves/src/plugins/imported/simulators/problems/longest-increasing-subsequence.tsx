@@ -1,0 +1,130 @@
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
+import type { DpSimulator } from '../types';
+import { cn } from '../../../../lib/cn';
+import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+
+interface LISInput {
+  nums: number[];
+}
+
+interface LISState {
+  nums: number[];
+  dp: number[]; // 0 = not yet filled
+  i: number | null; // index currently being decided
+  from: number | null; // the j whose dp value won (the predecessor), or null
+  best: number; // running answer = max(dp) so far
+  done: boolean;
+}
+
+function record({ nums }: LISInput): Frame<LISState>[] {
+  const n = nums.length;
+  const dp = new Array<number>(n).fill(0);
+  const frames: Frame<LISState>[] = [];
+
+  const emit = (
+    type: string,
+    note: string,
+    caption: string,
+    i: number | null,
+    from: number | null,
+    best: number,
+    tone?: 'good' | 'bad',
+  ) =>
+    frames.push({
+      move: { type, note, caption, tone },
+      state: { nums, dp: dp.slice(), i, from, best, done: type === 'DONE' },
+    });
+
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Longest Increasing Subsequence on nums = [${nums.join(', ')}]. dp[i] = the length of the longest increasing subsequence that ends at index i; the answer is the largest dp value.`,
+    null,
+    null,
+    0,
+  );
+
+  let best = 0;
+  for (let i = 0; i < n; i++) {
+    let cur = 1; // a single element is itself an LIS of length 1
+    let from: number | null = null;
+    for (let j = 0; j < i; j++) {
+      if (nums[j] < nums[i] && dp[j] + 1 > cur) {
+        cur = dp[j] + 1;
+        from = j;
+      }
+    }
+    dp[i] = cur;
+    if (cur > best) best = cur;
+
+    const caption =
+      from === null
+        ? `nums[${i}] = ${nums[i]}: no earlier element is smaller (or none extends past length 1), so it starts a new chain — dp[${i}] = 1.`
+        : `nums[${i}] = ${nums[i]}: the best smaller predecessor is nums[${from}] = ${nums[from]} with dp[${from}] = ${dp[from]}, so dp[${i}] = dp[${from}] + 1 = ${cur}.`;
+    emit('FILL', `dp[${i}]=${cur}`, caption, i, from, best);
+  }
+
+  emit(
+    'DONE',
+    `LIS = ${best}`,
+    `Every cell is filled. The answer is max(dp) = ${best}, the length of the longest increasing subsequence in [${nums.join(', ')}].`,
+    null,
+    null,
+    best,
+    'good',
+  );
+  return frames;
+}
+
+function View({ frame }: PluginViewProps<LISState>) {
+  const s = frame.state;
+  const cells = s.dp.map((v) => (v === 0 ? '·' : v));
+  const pointers: ArrayPointer[] = [];
+  if (s.i !== null) pointers.push({ i: s.i, label: `i (=${s.nums[s.i]})`, tone: 'accent', place: 'above' });
+  if (s.from !== null) pointers.push({ i: s.from, label: `j (=${s.nums[s.from]})`, tone: 'warn', place: 'below' });
+  const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== 0 ? 'match' : '');
+  return (
+    <div className="board-area">
+      <div className={cn(vizText.sm, 'text-ink3')}>
+        nums [{s.nums.join(', ')}], LIS = <span className="font-mono text-ink">{s.done ? s.best : '…filling'}</span>
+      </div>
+      <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
+      <div className={cn(vizText.sm, 'text-ink3')}>cell value = dp[i] = longest increasing subsequence ending at index i</div>
+    </div>
+  );
+}
+
+function Inspector({ frame }: InspectorProps<LISState>) {
+  if (!frame) return <VizEmpty />;
+  const s = frame.state;
+  const cell = (i: number | null) => (i !== null && s.dp[i] !== 0 ? s.dp[i] : '—');
+  return (
+    <VarGrid>
+      <InspectorRow k="index i" v={s.i ?? '—'} />
+      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
+      <InspectorRow k="predecessor j" v={s.from ?? '—'} />
+      <InspectorRow k="dp[j]" v={cell(s.from)} />
+      <InspectorRow k="dp[i]" v={cell(s.i)} />
+      <InspectorRow k="best so far" v={s.best} />
+    </VarGrid>
+  );
+}
+
+export const manifestId = 'imp-66-longest-increasing-subsequence';
+export const title = 'Longest Increasing Subsequence';
+
+export const simulator: DpSimulator = {
+  inputs: [
+    { id: 'lis8', label: '[10, 9, 2, 5, 3, 7, 101, 18]', value: { nums: [10, 9, 2, 5, 3, 7, 101, 18] } },
+    { id: 'lis6', label: '[0, 1, 0, 3, 2, 3]', value: { nums: [0, 1, 0, 3, 2, 3] } },
+  ] satisfies SampleInput<LISInput>[],
+  record,
+  View,
+  Inspector,
+  verdict: (frames) => {
+    const s = (frames[frames.length - 1]?.state as LISState) ?? null;
+    const v = s ? s.best : 0;
+    return { ok: true, label: `LIS = ${v}` };
+  },
+};

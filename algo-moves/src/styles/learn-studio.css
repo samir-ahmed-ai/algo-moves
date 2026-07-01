@@ -1,0 +1,165 @@
+/* Learn Studio — a quiet fade when you switch views, plus the keyframes the
+ * Assemble blocks reuse. No new colours — only token CSS vars; no-ops under
+ * reduced motion. */
+
+/* View hop: the active view fades in. */
+.lesson-swap {
+  animation: studioLessonIn 0.16s ease-out both;
+}
+@keyframes studioLessonIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Used by the Assemble blocks (a block flashes when it locks into place). */
+@keyframes studioPillFlash {
+  0% {
+    box-shadow: 0 0 0 0 var(--good-bg);
+  }
+  55% {
+    box-shadow: 0 0 0 4px var(--good-bg);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lesson-swap {
+    animation: none;
+  }
+}
+
+/* ============================================================ Assemble blocks
+ * Code pieces rendered as physical, interlocking puzzle blocks. A two-layer clip
+ * (stroke layer + tinted face) gives a coloured outline that follows the puzzle
+ * contour; consecutive rows overlap by the tab depth so each block's bottom tab
+ * nests into the next block's top socket. Shape + colour vary by the line's role
+ * (signature / loop / branch / return / statement) so the structure reads at a
+ * glance. All colours are theme tokens — no hard-coded values. */
+.blk-board {
+  display: flex;
+  flex-direction: column;
+  --blk-d: 14px; /* tab + socket depth (must equal the row overlap below) */
+  --blk-w: 22px; /* tab + socket half-width */
+}
+.blk-row {
+  position: relative;
+}
+.blk-row + .blk-row {
+  margin-top: calc(-1 * var(--blk-d));
+}
+.blk-row:hover {
+  z-index: 2;
+}
+
+.blk {
+  position: relative;
+  padding: 2px; /* becomes the coloured stroke around the face */
+  background: var(--blk-stroke, var(--border-strong));
+  clip-path: var(--blk-clip);
+  filter: drop-shadow(0 2px 2px hsl(0 0% 0% / 0.16));
+  cursor: grab;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.blk:active {
+  cursor: grabbing;
+}
+.blk-row:hover .blk {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 5px 6px hsl(0 0% 0% / 0.22));
+}
+.blk-face {
+  clip-path: var(--blk-clip);
+  background: var(--surface);
+  color: var(--text);
+  padding: calc(var(--blk-d) + 3px) 13px calc(var(--blk-d) + 4px);
+}
+.blk-row--correct .blk {
+  --blk-stroke: var(--good);
+}
+.blk-row--correct .blk-face {
+  background: var(--good-bg);
+  color: var(--text);
+}
+.blk-row--over .blk {
+  --blk-stroke: var(--accent);
+  filter: drop-shadow(0 0 0 2px var(--accent-bg)) drop-shadow(0 4px 5px hsl(0 0% 0% / 0.2));
+}
+.blk-row--lock .blk {
+  animation: studioPillFlash 0.5s ease-out;
+}
+.blk-row--wrong .blk {
+  animation: shake 0.35s;
+}
+.blk-step {
+  display: grid;
+  place-items: center;
+  height: 1rem;
+  width: 1rem;
+  border-radius: 4px;
+  color: var(--text-3);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.blk-step:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.blk-step:disabled {
+  opacity: 0.3;
+}
+
+/* Shape variants — each keeps a top socket + bottom tab unless noted. */
+.blk--tab {
+  --blk-clip: polygon(
+    0 0,
+    calc(50% - var(--blk-w)) 0, calc(50% - var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) var(--blk-d), calc(50% + var(--blk-w)) 0,
+    100% 0,
+    100% calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)), calc(50% + var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) 100%, calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
+    0 calc(100% - var(--blk-d))
+  );
+}
+/* signature — flat top (it starts a function), tab bottom. */
+.blk--start {
+  --blk-clip: polygon(
+    0 0, 100% 0,
+    100% calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)), calc(50% + var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) 100%, calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
+    0 calc(100% - var(--blk-d))
+  );
+}
+/* return — socket top, pointed chevron bottom (an exit). */
+.blk--return {
+  --blk-clip: polygon(
+    0 0,
+    calc(50% - var(--blk-w)) 0, calc(50% - var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) var(--blk-d), calc(50% + var(--blk-w)) 0,
+    100% 0,
+    100% calc(100% - var(--blk-d)),
+    50% 100%,
+    0 calc(100% - var(--blk-d))
+  );
+}
+/* branch — chamfered top corners (a decision), socket top, tab bottom. */
+.blk--branch {
+  --blk-clip: polygon(
+    0 9px, 9px 0,
+    calc(50% - var(--blk-w)) 0, calc(50% - var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) var(--blk-d), calc(50% + var(--blk-w)) 0,
+    calc(100% - 9px) 0, 100% 9px,
+    100% calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)), calc(50% + var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) 100%, calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
+    0 calc(100% - var(--blk-d))
+  );
+}

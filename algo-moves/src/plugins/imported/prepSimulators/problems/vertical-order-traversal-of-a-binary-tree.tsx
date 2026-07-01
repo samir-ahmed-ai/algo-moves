@@ -1,0 +1,267 @@
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { TreeBoard } from '../../../../components/TreeBoard';
+import type { ProblemSimulator } from '../types';
+import { cn } from '../../../../lib/cn';
+import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+
+// The tree is provided in level-order (heap layout): children of index i are
+// 2i+1 (left) and 2i+2 (right); `null` marks an absent slot. TreeBoard consumes
+// this exact shape, so the BFS and the board are driven off one array.
+interface VerticalInput {
+  tree: (number | null)[];
+}
+
+// One recorded node inside a column bucket: its row (BFS depth) and value.
+interface Pt {
+  row: number;
+  val: number;
+}
+
+interface VerticalState {
+  tree: (number | null)[];
+  visited: number[]; // node indices already dequeued + recorded
+  current: number | null; // node index dequeued this step
+  queue: number[]; // node indices waiting in the BFS queue
+  colOf: [number, number][]; // node index -> its column
+  rowOf: [number, number][]; // node index -> its row (depth)
+  buckets: [number, Pt[]][]; // column -> recorded (row,val) points, in BFS order
+  currentCol: number | null; // column of the current node
+  sortingCol: number | null; // column being sorted in the final sweep
+  result: number[][] | null; // final left-to-right grouping when done
+  done: boolean;
+}
+
+function record({ tree }: VerticalInput): Frame<VerticalState>[] {
+  const frames: Frame<VerticalState>[] = [];
+
+  // BFS bookkeeping mirrors the Go solution: a queue of node indices, per-node
+  // (row, col), and a map col -> list of (row, val) points. Root sits at
+  // (row 0, col 0); a left child is (row+1, col-1), a right child is (row+1,
+  // col+1). Min/max column bound the final left-to-right sweep.
+  const visited: number[] = [];
+  const colByNode = new Map<number, number>();
+  const rowByNode = new Map<number, number>();
+  const cols = new Map<number, Pt[]>();
+  let queue: number[] = [];
+
+  const bucketEntries = (): [number, Pt[]][] =>
+    [...cols.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([c, pts]) => [c, pts.map((p) => ({ ...p }))]);
+
+  const emit = (
+    type: string,
+    note: string,
+    caption: string,
+    s: Partial<VerticalState>,
+    tone?: 'good' | 'bad',
+  ) =>
+    frames.push({
+      move: { type, note, caption, tone },
+      state: {
+        tree,
+        visited: visited.slice(),
+        current: null,
+        queue: queue.slice(),
+        colOf: [...colByNode.entries()],
+        rowOf: [...rowByNode.entries()],
+        buckets: bucketEntries(),
+        currentCol: null,
+        sortingCol: null,
+        result: null,
+        done: false,
+        ...s,
+      },
+    });
+
+  if (tree.length === 0 || tree[0] == null) {
+    emit('DONE', 'empty', 'The tree is empty, so the vertical order traversal is an empty list.', { done: true }, 'bad');
+    return frames;
+  }
+
+  colByNode.set(0, 0);
+  rowByNode.set(0, 0);
+  queue = [0];
+  emit(
+    'INIT',
+    'root (0,0)',
+    `Vertical Order Traversal groups nodes by column. Root ${tree[0]} starts at (row 0, col 0). We BFS level by level: a left child is one row down and one column left (row+1, col−1); a right child is one row down and one column right (row+1, col+1). Each column also remembers the row so ties can be broken later by (row, value).`,
+    { queue: [0] },
+  );
+
+  while (queue.length > 0) {
+    const i = queue[0];
+    queue = queue.slice(1);
+    const col = colByNode.get(i)!;
+    const row = rowByNode.get(i)!;
+    const val = tree[i] as number;
+
+    // Record this node's (row, val) into its column bucket.
+    const bucket = cols.get(col) ?? [];
+    bucket.push({ row, val });
+    cols.set(col, bucket);
+    visited.push(i);
+
+    emit(
+      'VISIT',
+      `${val}@(${row},${col})`,
+      `Dequeue node ${val} at (row ${row}, col ${col}) and append (${row}, ${val}) to column ${col}. Storing the row lets us later sort each column by (row, value), which decides the order when two nodes share the same cell.`,
+      { current: i, currentCol: col },
+    );
+
+    const left = 2 * i + 1;
+    const right = 2 * i + 2;
+    if (left < tree.length && tree[left] != null) {
+      colByNode.set(left, col - 1);
+      rowByNode.set(left, row + 1);
+      queue = [...queue, left];
+      emit(
+        'ENQUEUE',
+        `${tree[left]}→(${row + 1},${col - 1})`,
+        `Node ${val} has a left child ${tree[left]}. A left child goes one row down and one column left, to (row ${row + 1}, col ${col - 1}). Enqueue it.`,
+        { current: i, currentCol: col },
+      );
+    }
+    if (right < tree.length && tree[right] != null) {
+      colByNode.set(right, col + 1);
+      rowByNode.set(right, row + 1);
+      queue = [...queue, right];
+      emit(
+        'ENQUEUE',
+        `${tree[right]}→(${row + 1},${col + 1})`,
+        `Node ${val} has a right child ${tree[right]}. A right child goes one row down and one column right, to (row ${row + 1}, col ${col + 1}). Enqueue it.`,
+        { current: i, currentCol: col },
+      );
+    }
+  }
+
+  // Sweep columns from smallest (leftmost) to largest (rightmost). Within each
+  // column, sort by (row, value): shallower rows come first, and ties on the
+  // same row are broken by the smaller value.
+  const sortedCols = [...cols.keys()].sort((a, b) => a - b);
+  const result: number[][] = [];
+  for (const c of sortedCols) {
+    const pts = cols.get(c)!;
+    const before = pts.map((p) => p.val);
+    pts.sort((a, b) => (a.row === b.row ? a.val - b.val : a.row - b.row));
+    const after = pts.map((p) => p.val);
+    cols.set(c, pts);
+    const changed = before.join(',') !== after.join(',');
+    emit(
+      'SORT',
+      `col ${c}`,
+      changed
+        ? `Sort column ${c} by (row, value): [${before.join(', ')}] → [${after.join(', ')}]. Two nodes shared a row, so the smaller value is placed first.`
+        : `Sort column ${c} by (row, value): [${after.join(', ')}] is already in order (rows increase top to bottom, no same-row ties to break).`,
+      { sortingCol: c },
+    );
+    result.push(after);
+  }
+
+  emit(
+    'DONE',
+    `${result.length} cols`,
+    `Reading the sorted columns left to right gives the answer: ${result.map((c) => `[${c.join(',')}]`).join(', ')}.`,
+    { result, done: true },
+    'good',
+  );
+  return frames;
+}
+
+function View({ frame }: PluginViewProps<VerticalState>) {
+  const s = frame.state;
+  const visitedSet = new Set(s.visited);
+  const nodeClass = (i: number) =>
+    s.current === i ? 'team-1' : visitedSet.has(i) ? 'team-2' : 'team-0';
+  const colMap = new Map(s.colOf);
+  return (
+    <div className="board-area">
+      <div className={cn(vizText.sm, 'text-ink3')}>
+        {s.current !== null && s.currentCol !== null && !s.done ? (
+          <>
+            visiting <span className="font-mono text-ink">{s.tree[s.current]}</span> · column{' '}
+            <span className="font-mono text-ink">{s.currentCol}</span>
+          </>
+        ) : s.sortingCol !== null ? (
+          <>
+            sorting column <span className="font-mono text-ink">{s.sortingCol}</span> by (row, value)
+          </>
+        ) : (
+          <>positions (row, col): root = (0, 0), left = (+1, −1), right = (+1, +1)</>
+        )}
+      </div>
+      <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
+      <div className={cn('mt-1 flex flex-wrap gap-2 font-mono', vizText.sm, 'text-ink3')}>
+        {s.buckets.length === 0 ? (
+          <span>columns: —</span>
+        ) : (
+          s.buckets.map(([c, pts]) => (
+            <span key={c} className={s.sortingCol === c ? 'text-accent' : undefined}>
+              col {c}: [{pts.map((p) => p.val).join(', ')}]
+            </span>
+          ))
+        )}
+      </div>
+      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
+        queue [{s.queue.map((i) => s.tree[i]).join(', ')}]
+        {s.queue.length > 0 && (
+          <span className="text-ink3">
+            {' '}
+            (cols {s.queue.map((i) => colMap.get(i) ?? '?').join(', ')})
+          </span>
+        )}
+      </div>
+      {s.result && (
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
+          → {s.result.map((c) => `[${c.join(',')}]`).join(', ')}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Inspector({ frame }: InspectorProps<VerticalState>) {
+  if (!frame) return <VizEmpty />;
+  const s = frame.state;
+  return (
+    <VarGrid>
+      <InspectorRow k="current" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} />
+      <InspectorRow k="current col" v={s.currentCol ?? '—'} />
+      <InspectorRow k="sorting col" v={s.sortingCol ?? '—'} />
+      <InspectorRow k="queue size" v={s.queue.length} />
+      <InspectorRow k="columns filled" v={s.buckets.length} />
+      <InspectorRow k="visited" v={s.visited.length} />
+      <InspectorRow
+        k="result"
+        v={s.result ? s.result.map((c) => `[${c.join(',')}]`).join(' ') : s.done ? 'none' : '…'}
+      />
+    </VarGrid>
+  );
+}
+
+export const manifestId = 'prep-trees-vertical-order-traversal-of-a-binary-tree';
+export const title = 'Vertical Order Traversal of a Binary Tree';
+
+export const simulator: ProblemSimulator = {
+  inputs: [
+    {
+      id: 'vt1',
+      label: '[3,9,20,·,·,15,7]',
+      value: { tree: [3, 9, 20, null, null, 15, 7] },
+    },
+    {
+      id: 'vt2',
+      label: '[1,2,3,4,6,5,7]',
+      value: { tree: [1, 2, 3, 4, 6, 5, 7] },
+    },
+  ] satisfies SampleInput<VerticalInput>[],
+  record,
+  View,
+  Inspector,
+  verdict: (frames) => {
+    const s = frames[frames.length - 1]?.state as VerticalState | undefined;
+    const res = s?.result;
+    if (!res) return { ok: false, label: 'empty' };
+    return { ok: true, label: res.map((c) => `[${c.join(',')}]`).join(' ') };
+  },
+};

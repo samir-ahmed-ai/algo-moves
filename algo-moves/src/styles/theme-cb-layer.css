@@ -1,0 +1,36 @@
+/* Colour-blind overrides must load after theme presets (higher specificity). */
+:root.cb[data-theme] {
+  --team1-bg: #d6e6f2;
+  --team1-stroke: #0072b2;
+  --team1-text: #024c78;
+  --team2-bg: #f7e0cf;
+  --team2-stroke: #d55e00;
+  --team2-text: #8a3c00;
+  --edge-active: #e69f00;
+  --ring: #e69f00;
+  --edge-clash: #d55e00;
+  --good: #0072b2;
+  --good-bg: #d6e6f2;
+  --bad: #d55e00;
+  --bad-bg: #f7e0cf;
+  --accent: #0072b2;
+  --accent-bg: #d6e6f2;
+}
+
+:root.cb.dark[data-theme] {
+  --team1-bg: #06304f;
+  --team1-stroke: #56b4e9;
+  --team1-text: #bfe2f7;
+  --team2-bg: #4a2400;
+  --team2-stroke: #e69f00;
+  --team2-text: #f7d9a8;
+  --edge-active: #f0e442;
+  --ring: #f0e442;
+  --edge-clash: #ff7043;
+  --good: #56b4e9;
+  --good-bg: #06304f;
+  --bad: #e69f00;
+  --bad-bg: #4a2400;
+  --accent: #56b4e9;
+  --accent-bg: #06304f;
+}

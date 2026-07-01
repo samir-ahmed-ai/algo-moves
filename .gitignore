@@ -1,0 +1,10 @@
+.DS_Store
+.claude/
+
+# Node / Vite (algo-moves)
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+tsconfig.tsbuildinfo

@@ -1,0 +1,1262 @@
+:root {
+  color-scheme: light dark;
+  --bg: #faf9f5;
+  --surface: #ffffff;
+  --surface-2: #f3f1ea;
+  --border: #e4e1d8;
+  --border-strong: #cfccc0;
+  --text: #23221e;
+  --text-2: #6b6a62;
+  --text-3: #9a988e;
+  --accent: #1d6fe0;
+  --accent-bg: #e6f1fb;
+
+  --team0-bg: #f1efe8;
+  --team0-stroke: #b4b2a9;
+  --team1-bg: #e1f5ee;
+  --team1-stroke: #1d9e75;
+  --team1-text: #0f6e56;
+  --team2-bg: #faece7;
+  --team2-stroke: #d85a30;
+  --team2-text: #993c1d;
+
+  --edge: #cfccc0;
+  --edge-active: #ba7517;
+  --edge-clash: #e24b4a;
+  --ring: #ba7517;
+
+  --good: #3b6d11;
+  --good-bg: #eaf3de;
+  --bad: #a32d2d;
+  --bad-bg: #fceaea;
+
+  --radius: 8px;
+  --border-width: 1px;
+  --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0 2px 4px hsl(0 0% 0% / 0.12);
+  --shadow-lg: 0 4px 6px hsl(0 0% 0% / 0.15);
+  --shadow-xl: 0 8px 10px hsl(0 0% 0% / 0.18);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  /* Legacy aliases (Tailwind uses --text; some plugins reference these) */
+  --ink: var(--text);
+  --ink-3: var(--text-3);
+  --ink3: var(--text-3);
+  --surface2: var(--surface-2);
+  --panel: var(--surface);
+}
+
+:root.dark {
+    --bg: #1f1e1b;
+    --surface: #2a2925;
+    --surface-2: #34322d;
+    --border: #3d3b35;
+    --border-strong: #4f4d45;
+    --text: #ece9e1;
+    --text-2: #a8a59b;
+    --text-3: #76746b;
+    --accent: #6fa8ec;
+    --accent-bg: #15314f;
+
+    --team0-bg: #34322d;
+    --team0-stroke: #76746b;
+    --team1-bg: #0f3b30;
+    --team1-stroke: #5dcaa5;
+    --team1-text: #9fe1cb;
+    --team2-bg: #4a1b0c;
+    --team2-stroke: #f0997b;
+    --team2-text: #f5c4b3;
+
+    --edge: #4f4d45;
+    --good: #97c459;
+    --good-bg: #1b3309;
+    --bad: #f09595;
+    --bad-bg: #3a1414;
+
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 2px 4px hsl(0 0% 0% / 0.25);
+    --shadow-lg: 0 4px 6px hsl(0 0% 0% / 0.3);
+    --shadow-xl: 0 8px 10px hsl(0 0% 0% / 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: var(--fs, 14px);
+  line-height: var(--lh, 1.4);
+}
+
+h1,
+h2 {
+  font-weight: 500;
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.badge {
+  font-size: var(--node-fs-tight, 11px);
+  border-radius: 10px;
+  padding: 1px var(--space-2);
+}
+.diff-easy {
+  background: var(--good-bg);
+  color: var(--good);
+}
+.diff-medium {
+  background: var(--accent-bg);
+  color: var(--edge-active);
+}
+.diff-hard {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.verdict {
+  flex: none;
+  font-size: var(--fs-xs, 12px);
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 4px 14px;
+  white-space: nowrap;
+}
+.verdict.ok {
+  background: var(--good-bg);
+  color: var(--good);
+}
+.verdict.bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.board-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.board-area svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+/* Viz board column: the board renders at its natural size inside a fit wrapper;
+   VizFitBox scales it to fit the column. Keep inner boards intrinsically sized
+   so FitBox measures the correct natural dimensions. */
+.viz-board-col--fit {
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+.viz-board-col--fit .board-area {
+  width: max-content;
+  height: max-content;
+  max-width: 100%;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+.viz-board-col--fit .arow {
+  width: max-content;
+  max-width: 100%;
+}
+.viz-board-col--fit .board-area svg {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+}
+.viz-board-col--fit .grid-board svg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.viz-board-col--fit .bars,
+.viz-board-col--fit .grid-board {
+  width: max-content;
+}
+.viz-board-col--fit .queue-tape {
+  width: max-content;
+  max-width: 100%;
+}
+.viz-board-col--fit .board-area > .flex {
+  width: max-content;
+  max-width: 100%;
+}
+.viz-board-col--fit .board-area--text {
+  min-width: min(320px, 100%);
+}
+
+.case-preview-fit {
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+  max-height: 280px;
+}
+.case-preview-fit .viz-board-col--fit,
+.sim-board-fit .viz-board-col--fit {
+  flex: 1;
+  min-height: 0;
+}
+.sim-board-fit {
+  min-height: 160px;
+  max-height: 360px;
+}
+.viz-board-col .board-area svg {
+  width: auto;
+  height: auto;
+}
+
+.node-label {
+  fill: var(--text);
+  font: 600 var(--node-fs-sm, 13px) var(--sans);
+}
+.node-label--edge {
+  font-size: var(--node-fs-2xs, 9px);
+  font-weight: 500;
+}
+.team-0 circle {
+  fill: color-mix(in srgb, var(--text) 15%, var(--panel));
+  stroke: var(--edge);
+}
+.team-1 circle {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+.team-1 .node-label {
+  fill: var(--text);
+  font-weight: 600;
+}
+.team-2 circle {
+  fill: color-mix(in srgb, var(--accent) 22%, var(--panel));
+  stroke: var(--team2-stroke);
+}
+circle {
+  stroke-width: 1.5;
+}
+
+.queue-tape {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.queue-label {
+  font-size: var(--fs-xs, 12px);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.queue-empty {
+  font-family: var(--mono);
+  font-size: var(--fs-sm, 13px);
+  color: var(--text-3);
+}
+.queue-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.queue-cell {
+  min-width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: var(--fs-xs, 12px);
+}
+
+.move-log {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.log-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: var(--mono);
+  font-size: var(--fs-sm, 13px);
+  color: var(--text-2);
+}
+.log-line:hover {
+  background: var(--surface-2);
+}
+.bp-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border-strong);
+  cursor: pointer;
+  transition: background 0.1s ease, border-color 0.1s ease, transform 0.1s ease;
+}
+.bp-dot:hover {
+  border-color: var(--bad);
+  transform: scale(1.2);
+}
+.log-line .ln {
+  min-width: 16px;
+  text-align: right;
+  color: var(--text-3);
+}
+.log-line .nt {
+  color: var(--text);
+  white-space: nowrap;
+}
+.log-line.cur {
+  background: var(--accent-bg);
+}
+.log-line.cur .nt {
+  color: var(--accent);
+}
+.log-line.bad .nt {
+  color: var(--bad);
+}
+.log-line.bad.cur {
+  background: var(--bad-bg);
+}
+.log-line.good .nt {
+  color: var(--good);
+}
+
+.chip {
+  font-size: var(--node-fs-xs, 12px);
+  padding: 0 var(--space-2);
+  border-radius: 10px;
+  font-family: var(--sans);
+}
+.team-chip-1 {
+  background: var(--team1-bg);
+  color: var(--team1-text);
+}
+.team-chip-2 {
+  background: var(--team2-bg);
+  color: var(--team2-text);
+}
+
+.caption {
+  margin-top: var(--space-4);
+  font-size: var(--node-fs, var(--fs, 14px));
+  line-height: 1.5;
+  color: var(--text-2);
+  border-left: 3px solid var(--border);
+  border-radius: 0;
+  padding-left: var(--space-3);
+  min-height: 44px;
+}
+.caption.good {
+  border-color: var(--good);
+  color: var(--good);
+}
+.caption.bad {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.cm-host {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.cases-panel {
+  display: grid;
+  grid-template-columns: minmax(440px, max-content) minmax(440px, max-content);
+  gap: 20px;
+  align-items: start;
+  width: max-content;
+  min-width: 600px;
+}
+.cases-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* In the right-side dock the cases grid stacks into one column. */
+.side-dock .cases-panel,
+.unified-right-sidebar .plugin-panel .cases-panel {
+  grid-template-columns: 1fr;
+  min-width: 0;
+  width: 100%;
+  gap: 16px;
+}
+.cases-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm, 13px);
+  font-weight: 500;
+}
+.cases-head .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.cases-head.good {
+  color: var(--good);
+}
+.cases-head.good .dot {
+  background: var(--good);
+}
+.cases-head.bad {
+  color: var(--bad);
+}
+.cases-head.bad .dot {
+  background: var(--bad);
+}
+
+.case-card {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.case-board {
+  width: 220px;
+  flex: none;
+}
+.case-text {
+  min-width: 0;
+}
+.case-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--fs-sm, 13px);
+  font-weight: 500;
+}
+.ret {
+  flex: none;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs, 9px);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.ret.ok {
+  background: var(--good-bg);
+  color: var(--good);
+}
+.ret.bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.case-adj {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--node-fs-tight, 11px);
+  color: var(--text-2);
+  margin: var(--space-2) 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.case-q,
+.case-a {
+  margin: 4px 0;
+  font-size: var(--fs-xs, 12px);
+  line-height: 1.55;
+  color: var(--text-2);
+}
+.qa {
+  display: inline-block;
+  width: 16px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.practice .primary {
+  background: var(--surface);
+  border: 0.5px solid var(--accent);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: var(--fs-sm, 13px);
+  color: var(--accent);
+}
+.practice .ghost {
+  background: transparent;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: var(--fs-xs, 12px);
+  color: var(--text-2);
+}
+
+.code-studio-reassemble {
+  overflow-y: auto;
+}
+.code-studio-reassemble .reassemble-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+.code-studio-reassemble .reassemble-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 120px;
+}
+.code-studio-reassemble .reassemble-progress-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.code-studio-reassemble .reassemble-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+.code-studio-reassemble .progress-count {
+  font-family: var(--mono);
+  font-size: var(--node-fs-2xs, 9px);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.code-studio-reassemble .mistakes-pill {
+  font-family: var(--mono);
+  font-size: var(--node-fs-2xs, 9px);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.code-studio-reassemble .cheat-sheet {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: 20;
+  min-width: 168px;
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+.code-studio-reassemble .cheat-row {
+  font-size: var(--node-fs-xs, 12px);
+  color: var(--text-2);
+  padding: var(--space-1) 0;
+}
+.code-studio-reassemble .cheat-row kbd {
+  display: inline-block;
+  min-width: 1.5rem;
+  margin-right: var(--space-2);
+  padding: 0 var(--space-1);
+  border-radius: calc(var(--radius) - 4px);
+  border: 0.5px solid var(--border-strong);
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: var(--node-fs-2xs, 9px);
+  text-align: center;
+  color: var(--text);
+}
+.code-studio-reassemble .assembled {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-2);
+  border: 0.5px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  min-height: 56px;
+  margin-bottom: var(--space-2);
+  flex: 1;
+  overflow-y: auto;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.code-studio-reassemble .assembled-drag-over {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+}
+.code-studio-reassemble .assembled-complete-flash {
+  animation: assembledFlash 0.4s ease-out;
+}
+@keyframes assembledFlash {
+  0% {
+    box-shadow: 0 0 0 0 var(--good-bg);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--good-bg);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+.code-studio-reassemble .assembled-empty {
+  font-size: var(--node-fs-tight, 11px);
+  color: var(--text-3);
+  padding: var(--space-1) var(--space-2);
+}
+.code-studio-reassemble .assembled-done {
+  font-size: var(--node-fs-tight, 11px);
+  color: var(--good);
+  padding: var(--space-2) var(--space-1) var(--space-1);
+}
+.code-studio-reassemble .next-slot {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-left: 2px dashed var(--border-strong);
+  opacity: 0.55;
+}
+.code-studio-reassemble .next-slot-text {
+  font-family: var(--mono);
+  font-size: var(--node-fs-xs, 12px);
+  color: var(--text-3);
+  font-style: italic;
+}
+.code-studio-reassemble .piece {
+  font-family: var(--mono);
+  font-size: var(--node-fs-tight, 11px);
+  line-height: 1.45;
+  white-space: pre;
+  margin: 0;
+  overflow-x: auto;
+}
+.code-studio-reassemble .piece.placed {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--text);
+  padding: 1px var(--space-2);
+  border-left: 2px solid var(--good);
+}
+.code-studio-reassemble .piece-line-num {
+  flex-shrink: 0;
+  width: 1.25rem;
+  text-align: right;
+  font-size: var(--node-fs-2xs, 9px);
+  color: var(--text-3);
+  user-select: none;
+}
+.code-studio-reassemble .tray {
+  flex-shrink: 0;
+  max-height: 40%;
+  min-height: 0;
+  overflow-y: auto;
+}
+.code-studio-reassemble .tray-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-2);
+}
+.code-studio-reassemble .tray-piece {
+  display: flex;
+  gap: var(--space-2);
+  background: var(--surface);
+  border: 0.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-2);
+  cursor: pointer;
+  color: var(--text);
+}
+.code-studio-reassemble .tray-piece-key {
+  flex-shrink: 0;
+  width: 1rem;
+  font-size: var(--node-fs-2xs, 9px);
+  font-weight: 600;
+  color: var(--text-3);
+  user-select: none;
+}
+.code-studio-reassemble .tray-piece:hover,
+.code-studio-reassemble .tray-piece:focus {
+  border-color: var(--accent);
+  background: var(--surface-2);
+  outline: none;
+}
+.code-studio-reassemble .tray-piece-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+}
+.code-studio-reassemble .hint-line {
+  font-size: var(--node-fs-tight, 11px);
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.code-studio-reassemble .shake-wrong {
+  animation: shake 0.35s;
+  border-color: var(--bad) !important;
+  background: var(--bad-bg) !important;
+}
+/* Code Studio phase cross-fade (Quiz → Structure → Recall). */
+.code-studio-phase-enter {
+  animation: codeStudioPhaseIn 0.28s ease-out;
+}
+.code-studio-phase-exit {
+  animation: codeStudioPhaseOut 0.32s ease-in forwards;
+  pointer-events: none;
+}
+@keyframes codeStudioPhaseIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes codeStudioPhaseOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* Code Studio quiz phase. */
+.code-studio-quiz {
+  overflow-y: auto;
+}
+/* Each question / the results screen fades in (covers restart + question advance). */
+.code-studio-quiz-step {
+  animation: quizExplainIn 0.22s ease-out;
+}
+.code-studio-quiz .quiz-choice-correct {
+  animation: quizCorrectPulse 0.45s ease-out;
+}
+.code-studio-quiz .quiz-explain {
+  animation: quizExplainIn 0.25s ease-out;
+}
+@keyframes quizCorrectPulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--good-bg);
+  }
+  60% {
+    box-shadow: 0 0 0 4px var(--good-bg);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+@keyframes quizExplainIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.sim-graphs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.chip-btn {
+  background: var(--surface);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: var(--fs-xs, 12px);
+  color: var(--text-2);
+}
+.chip-btn.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+.sim-meta {
+  font-size: var(--node-fs-tight, 11px);
+  color: var(--text-3);
+  margin-left: auto;
+}
+.sim-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+/* In the right-side dock the simulate stage stacks (board over options). */
+.side-dock .sim-stage,
+.unified-right-sidebar .plugin-panel .sim-stage {
+  grid-template-columns: 1fr;
+}
+.sim-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sim-side .caption {
+  margin-top: 0;
+}
+.sim-movenote {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: var(--fs-xs, 12px);
+  margin-right: 8px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+}
+.sim-q {
+  font-size: var(--fs, 14px);
+  margin: 0;
+}
+.sim-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sim-option {
+  font-family: var(--mono);
+  text-align: left;
+  background: var(--surface);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: var(--fs-sm, 13px);
+  color: var(--text);
+}
+.sim-option:hover {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+.sim-finish {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---- ArrayBars (sorting) ---- */
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 0 0;
+}
+.bar-col {
+  flex: 1 1 0;
+  min-width: 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+.bar {
+  width: 100%;
+  border-radius: 5px 5px 2px 2px;
+  background: var(--team0-bg);
+  border: 1px solid var(--team0-stroke);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  transition: height 0.18s ease, background 0.12s ease, border-color 0.12s ease;
+}
+.bar-val {
+  font-family: var(--mono);
+  font-size: var(--fs-2xs, 9px);
+  color: var(--text-2);
+  padding-top: 2px;
+}
+.bar-idx {
+  font-family: var(--mono);
+  font-size: var(--fs-2xs, 9px);
+  color: var(--text-3);
+}
+.bar-compare {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+.bar-swap {
+  background: var(--team2-bg);
+  border-color: var(--team2-stroke);
+}
+.bar-pivot {
+  background: var(--ring);
+  border-color: var(--edge-active);
+}
+.bar-min {
+  background: var(--team1-bg);
+  border-color: var(--team1-stroke);
+}
+.bar-sorted,
+.bar-done {
+  background: var(--good-bg);
+  border-color: var(--good);
+}
+
+/* ---- ArrayRow (binary search / two-pointers / window) ---- */
+.arow {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  overflow-x: auto;
+}
+.arow-slot {
+  min-height: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.arow-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 2px 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  background: var(--surface-2);
+}
+.arow-val {
+  font-family: var(--mono);
+  font-size: var(--fs-sm, 13px);
+  color: var(--text);
+}
+.arow-idx {
+  font-family: var(--mono);
+  font-size: var(--node-fs-2xs, 9px);
+  color: var(--text-3);
+}
+.arow-cell.lo {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.arow-cell.hi {
+  border-color: var(--team2-stroke);
+  background: var(--team2-bg);
+}
+.arow-cell.mid {
+  border-color: var(--edge-active);
+  background: var(--ring);
+}
+.arow-cell.found,
+.arow-cell.match {
+  border-color: var(--good);
+  background: var(--good-bg);
+}
+.arow-cell.dead {
+  opacity: 0.4;
+}
+.arow-cell.in-window {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.arow-ptr {
+  font-family: var(--mono);
+  font-size: var(--fs-2xs, 9px);
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--accent);
+}
+.arow-ptr.ptr-good {
+  color: var(--good);
+}
+.arow-ptr.ptr-bad {
+  color: var(--bad);
+}
+.arow-ptr.ptr-warn {
+  color: var(--edge-active);
+}
+
+/* ---- GridBoard (islands / 2-D DP) ---- */
+.grid-board {
+  display: grid;
+  gap: var(--space-1);
+  width: max-content;
+  margin: 0 auto;
+}
+.grid-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: var(--viz-cell, 12px);
+  color: var(--text-2);
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+.grid-cell.water {
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.grid-cell.land {
+  background: var(--team0-bg);
+  border-color: var(--team0-stroke);
+  color: var(--text);
+}
+.grid-cell.visited {
+  background: var(--team1-bg);
+  border-color: var(--team1-stroke);
+  color: var(--team1-text);
+}
+.grid-cell.active {
+  outline: 3px solid var(--ring);
+  outline-offset: -1px;
+}
+.grid-cell.path {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.grid-cell.fill {
+  background: var(--team2-bg);
+  border-color: var(--team2-stroke);
+  color: var(--team2-text);
+}
+
+/* ---- React Flow canvas (algo-canvas) ---- */
+.algo-canvas {
+  --node-fs: var(--fs);
+  --node-fs-sm: var(--fs-sm);
+  --node-fs-xs: var(--fs-xs);
+  --node-fs-2xs: var(--fs-2xs);
+  --node-fs-tight: var(--fs-tight);
+  --node-fs-title: var(--fs-title);
+  --node-handle: 18px;
+  --node-handle-offset: 10px;
+  --edge-stroke-width: 1.5;
+  --edge-stroke-width-active: 2.5;
+  --xy-edge-stroke-default: var(--edge);
+  --xy-attribution-background-color-default: transparent;
+}
+.algo-canvas .react-flow__controls {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+.algo-canvas .react-flow__controls-button {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  width: 26px;
+  height: 26px;
+}
+.algo-canvas .react-flow__controls-button:hover {
+  background: var(--surface-2);
+}
+.algo-canvas .react-flow__controls-button svg {
+  fill: var(--text-2);
+}
+.algo-canvas .react-flow__node {
+  font-family: var(--sans);
+  font-size: var(--node-fs, var(--fs, 14px));
+}
+.algo-canvas .react-flow__handle {
+  border: none;
+}
+.algo-canvas .react-flow__handle.handle-dot {
+  z-index: 1;
+}
+.algo-canvas .handle-dot {
+  background: var(--panel2);
+  border: 2px solid var(--border-strong);
+  opacity: 1;
+  box-shadow:
+    0 0 0 2px var(--panel),
+    0 1px 3px color-mix(in srgb, var(--ink) 18%, transparent);
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.algo-canvas .panel-node:hover .handle-dot,
+.algo-canvas .panel-node.selected .handle-dot,
+.algo-canvas .panel-node.connecting .handle-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 2px var(--panel),
+    0 0 0 4px color-mix(in srgb, var(--accent) 28%, transparent),
+    0 1px 4px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.algo-canvas .react-flow__edge-path {
+  stroke-width: var(--edge-stroke-width, 1.5);
+  transition: stroke 0.12s ease, stroke-width 0.12s ease;
+}
+.algo-canvas .react-flow__edge:hover:not(.selected) .react-flow__edge-path {
+  stroke: color-mix(in srgb, var(--edge) 80%, var(--text-3)) !important;
+  stroke-width: calc(var(--edge-stroke-width, 1.5) + 0.25);
+}
+.algo-canvas .react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--accent) !important;
+  stroke-width: var(--edge-stroke-width-active, 2.5) !important;
+}
+.algo-canvas .react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+}
+.algo-canvas .react-flow__attribution {
+  display: none;
+}
+.algo-canvas .react-flow__node-toolbar {
+  z-index: 12;
+}
+
+/* ---- Canvas bottom dock (Replay · Inspector · Metrics) ---- */
+.algo-bottom-dock {
+  animation: bottomDockIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes bottomDockIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.algo-bottom-dock__grip {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 9px;
+  cursor: ns-resize;
+  z-index: 1;
+}
+.algo-bottom-dock__grip::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  transition: background 0.15s ease, width 0.15s ease;
+}
+.algo-bottom-dock__grip:hover::after {
+  background: var(--accent);
+  width: 60px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .algo-bottom-dock {
+    animation: none;
+  }
+}
+
+.unified-bottom-dock .algo-bottom-dock__grip {
+  top: -3px;
+  height: 7px;
+}
+.edge-delete {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  color: var(--text-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.edge-delete--on {
+  opacity: 1;
+  pointer-events: all;
+}
+.edge-delete:hover {
+  background: var(--panel2);
+  border-color: var(--edge);
+  color: var(--text);
+}
+.edge-delete--on:hover {
+  background: var(--bad-bg);
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .stage {
+    grid-template-columns: 1fr;
+  }
+  .cases-panel {
+    grid-template-columns: 1fr;
+  }
+  .sim-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Category board (Blueprint Bay): tiles fade-up on mount, staggered via inline animation-delay. */
+.bp-note {
+  animation: bpNoteIn 0.26s ease-out both;
+}
+@keyframes bpNoteIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bp-note {
+    animation: none;
+  }
+}

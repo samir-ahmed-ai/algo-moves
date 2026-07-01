@@ -1,0 +1,23 @@
+{
+  "id": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "name": "Algo Moves",
+  "short_name": "Algo Moves",
+  "description": "Swipe through algorithm animations, quizzes, and code drills.",
+  "categories": ["education", "productivity", "developer"],
+  "start_url": "/#mobile",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f1419",
+  "theme_color": "#3d9a8f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

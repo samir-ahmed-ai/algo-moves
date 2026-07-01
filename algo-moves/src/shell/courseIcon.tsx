@@ -1,0 +1,51 @@
+import {
+  Network,
+  GitBranch,
+  Search,
+  Table,
+  ListOrdered,
+  ListTree,
+  Triangle,
+  Link as LinkIcon,
+  TrendingUp,
+  Boxes,
+  Type,
+  Sigma,
+  Grid3x3,
+  Layers,
+  Waves,
+  Hash,
+  CalendarRange,
+  ArrowDownUp,
+  Database,
+  RectangleHorizontal,
+  type LucideIcon,
+} from 'lucide-react';
+
+/** Resolve a course's `icon` NAME string (e.g. 'Network') to a lucide component. */
+const ICONS: Record<string, LucideIcon> = {
+  Network,
+  GitBranch,
+  Search,
+  Table,
+  ListOrdered,
+  ListTree,
+  Triangle,
+  Link: LinkIcon,
+  TrendingUp,
+  Boxes,
+  Type,
+  Sigma,
+  Grid: Grid3x3,
+  Layers,
+  Waves,
+  Hash,
+  CalendarRange,
+  ArrowDownUp,
+  Database,
+  RectangleHorizontal,
+};
+
+export function courseIcon(name?: string): LucideIcon {
+  return (name && ICONS[name]) || Boxes;
+}

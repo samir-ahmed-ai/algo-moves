@@ -1,0 +1,214 @@
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
+import type { ProblemSimulator } from '../types';
+import { cn } from '../../../../lib/cn';
+import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+
+interface MtdInput {
+  timePoints: string[];
+}
+
+interface MtdState {
+  timePoints: string[]; // original, unsorted labels for reference
+  mins: number[]; // times converted to minutes, sorted once conversion is done
+  sorted: boolean; // whether mins is already in ascending order
+  i: number | null; // current index in the adjacent scan
+  prev: number | null; // i-1, the index we compare against
+  wrap: boolean; // this frame is examining the wrap-around gap
+  best: number | null; // running minimum difference in minutes
+  bestPair: [number, number] | null; // indices producing the current best
+  done: boolean;
+}
+
+// "HH:MM" -> minutes since midnight, matching the Go char arithmetic.
+function toMinutes(tp: string): number {
+  return (
+    (tp.charCodeAt(0) - 48) * 600 +
+    (tp.charCodeAt(1) - 48) * 60 +
+    (tp.charCodeAt(3) - 48) * 10 +
+    (tp.charCodeAt(4) - 48)
+  );
+}
+
+function fmt(m: number): string {
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+}
+
+function record({ timePoints }: MtdInput): Frame<MtdState>[] {
+  const frames: Frame<MtdState>[] = [];
+
+  const emit = (
+    type: string,
+    note: string,
+    caption: string,
+    mins: number[],
+    sorted: boolean,
+    s: Partial<MtdState>,
+    tone?: 'good' | 'bad',
+  ) =>
+    frames.push({
+      move: { type, note, caption, tone },
+      state: {
+        timePoints,
+        mins: mins.slice(),
+        sorted,
+        i: null,
+        prev: null,
+        wrap: false,
+        best: null,
+        bestPair: null,
+        done: false,
+        ...s,
+      },
+    });
+
+  const raw = timePoints.map(toMinutes);
+  emit(
+    'INIT',
+    `n=${timePoints.length}`,
+    `Minimum Time Difference: find the smallest gap (in minutes) between any two clock times on a 24h circle. First convert each "HH:MM" to minutes since midnight.`,
+    raw,
+    false,
+    {},
+  );
+
+  const mins = raw.slice().sort((a, b) => a - b);
+  emit(
+    'SORT',
+    'sort ↑',
+    `Sort the minute values ascending: [${mins.map(fmt).join(', ')}]. Once sorted, the closest pair must be adjacent — except for the pair that wraps past midnight.`,
+    mins,
+    true,
+    {},
+  );
+
+  // Wrap-around candidate: last time to first time across midnight.
+  const last = mins.length - 1;
+  let best = 1440 - mins[last] + mins[0];
+  let bestPair: [number, number] = [last, 0];
+  emit(
+    'WRAP',
+    `${best}m`,
+    `The wrap-around gap crosses midnight: from ${fmt(mins[last])} forward to ${fmt(mins[0])} is 1440 − ${mins[last]} + ${mins[0]} = ${best} min. Seed the best answer with this.`,
+    mins,
+    true,
+    { i: last, prev: 0, wrap: true, best, bestPair },
+  );
+
+  for (let i = 1; i < mins.length; i++) {
+    const d = mins[i] - mins[i - 1];
+    if (d < best) {
+      best = d;
+      bestPair = [i - 1, i];
+      emit(
+        'FILL',
+        `${d}m ✓`,
+        `Adjacent gap ${fmt(mins[i - 1])} → ${fmt(mins[i])} = ${mins[i]} − ${mins[i - 1]} = ${d} min. That beats the previous best, so the new minimum is ${best} min.`,
+        mins,
+        true,
+        { i, prev: i - 1, best, bestPair },
+        'good',
+      );
+    } else {
+      emit(
+        'SCAN',
+        `${d}m`,
+        `Adjacent gap ${fmt(mins[i - 1])} → ${fmt(mins[i])} = ${d} min. That is not smaller than the current best (${best} min), so the best stays put.`,
+        mins,
+        true,
+        { i, prev: i - 1, best, bestPair },
+      );
+    }
+  }
+
+  emit(
+    'DONE',
+    `${best}m`,
+    `All adjacent gaps and the wrap-around are checked. The minimum time difference is ${best} minute${best === 1 ? '' : 's'}.`,
+    mins,
+    true,
+    { best, bestPair, done: true, i: bestPair[1], prev: bestPair[0] },
+    'good',
+  );
+
+  return frames;
+}
+
+function View({ frame }: PluginViewProps<MtdState>) {
+  const s = frame.state;
+  const chars = s.mins.map(fmt);
+  const pointers: ArrayPointer[] = [];
+  if (s.i !== null) pointers.push({ i: s.i, label: s.wrap ? 'last' : 'i', tone: 'accent', place: 'above' });
+  if (s.prev !== null) pointers.push({ i: s.prev, label: s.wrap ? 'first' : 'i−1', tone: 'good', place: 'below' });
+
+  const tone = (i: number) => {
+    if (s.done && s.bestPair && (i === s.bestPair[0] || i === s.bestPair[1])) return 'found';
+    if (s.i === i || s.prev === i) return 'match';
+    return '';
+  };
+
+  return (
+    <div className="board-area">
+      <div className={cn(vizText.sm, 'text-ink3')}>
+        {s.sorted ? 'sorted times' : 'times → minutes'}
+        {s.best !== null && (
+          <>
+            {' · '}best ={' '}
+            <span className="font-mono text-ink">{s.best}m</span>
+          </>
+        )}
+      </div>
+      <ArrayRow values={chars} cellTone={tone} pointers={pointers} windowRange={null} />
+      {s.best !== null && s.bestPair && (
+        <div className={cn('mt-1 font-mono', s.done ? 'text-good' : 'text-ink3', vizText.sm)}>
+          {s.wrap && !s.done ? 'wrap-around: ' : 'best gap: '}
+          {fmt(s.mins[s.bestPair[0]])} ↔ {fmt(s.mins[s.bestPair[1]])} = {s.best}m
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Inspector({ frame }: InspectorProps<MtdState>) {
+  if (!frame) return <VizEmpty />;
+  const s = frame.state;
+  const at = (idx: number | null) =>
+    idx !== null && idx >= 0 && idx < s.mins.length ? fmt(s.mins[idx]) : '—';
+  return (
+    <VarGrid>
+      <InspectorRow k="n (times)" v={s.timePoints.length} />
+      <InspectorRow k="sorted" v={s.sorted ? 'yes' : 'no'} />
+      <InspectorRow k="i" v={s.i ?? '—'} />
+      <InspectorRow k="times[i]" v={at(s.i)} />
+      <InspectorRow k="times[i−1]" v={at(s.prev)} />
+      <InspectorRow k="phase" v={s.wrap ? 'wrap-around' : s.done ? 'done' : 'adjacent'} />
+      <InspectorRow k="best (min)" v={s.best ?? '—'} />
+    </VarGrid>
+  );
+}
+
+export const manifestId = 'prep-strings-minimum-time-difference';
+export const title = 'Minimum Time Difference';
+
+export const simulator: ProblemSimulator = {
+  inputs: [
+    { id: 'mtd1', label: '["23:59","00:00"]', value: { timePoints: ['23:59', '00:00'] } },
+    {
+      id: 'mtd2',
+      label: '["00:00","23:59","12:00","12:05"]',
+      value: { timePoints: ['00:00', '23:59', '12:00', '12:05'] },
+    },
+  ] satisfies SampleInput<MtdInput>[],
+  record,
+  View,
+  Inspector,
+  verdict: (frames) => {
+    const s = frames[frames.length - 1]?.state as MtdState | undefined;
+    const best = s?.best ?? null;
+    return best !== null
+      ? { ok: true, label: `${best} min` }
+      : { ok: false, label: 'n/a' };
+  },
+};

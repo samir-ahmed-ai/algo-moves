@@ -1,0 +1,509 @@
+import { useEffect, useState, type DragEvent, type ReactNode } from 'react';
+import {
+  BookOpen,
+  Eye,
+  FileText,
+  FolderOpen,
+  Home,
+  LayoutGrid,
+  Library,
+  PanelLeft,
+  PanelLeftClose,
+  Plus,
+  Search,
+  Shapes,
+  Star,
+  Target,
+  Trophy,
+  Code2,
+} from 'lucide-react';
+import { catalog, type ItemStatus } from '../content';
+import { useProgress, statFor } from '../lib/progress';
+import { useWorkspace, type CanvasZoomApi } from '../lib/workspace';
+import { cn } from '../lib/cn';
+import { chromeText } from './chromeUi';
+import { CatalogTree } from './CatalogTree';
+import { nodeIcon, panelAccent } from './canvas/PanelNode';
+import { Label } from './canvas/nodeui';
+import { SidebarZoomControls } from './canvas/CanvasFloatingHud';
+import { CATEGORY_ORDER, nodeCategory } from './canvas/layout';
+import { SIDEBAR_W, SidebarSection, CHROME_BTN_MD, SECTION_MAX, MobileDrawer } from './SidebarShell';
+
+const ESSENTIALS = new Set(['bigo', 'diff', 'watch', 'pattern', 'editor', 'notes', 'predict', 'mastery', 'hints']);
+
+const CAT_ICON: Record<string, ReactNode> = {
+  Visualize: <Eye className="h-4 w-4" />,
+  Practice: <Target className="h-4 w-4" />,
+  Progress: <Trophy className="h-4 w-4" />,
+  Reference: <BookOpen className="h-4 w-4" />,
+  Code: <Code2 className="h-4 w-4" />,
+  Workspace: <FolderOpen className="h-4 w-4" />,
+  Problem: <FileText className="h-4 w-4" />,
+  Effects: <Shapes className="h-4 w-4" />,
+  Other: <Shapes className="h-4 w-4" />,
+};
+
+const STATUS_DOT: Record<ItemStatus, string> = {
+  todo: 'var(--text-3)',
+  'in-progress': 'var(--edge-active)',
+  done: 'var(--good)',
+};
+
+function matchesSidebarSearch(query: string, ...fields: (string | undefined)[]): boolean {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return true;
+  return fields.some((f) => f?.toLowerCase().includes(needle));
+}
+
+function AddItem({
+  kind,
+  title,
+  dndKey,
+  onAddKind,
+}: {
+  kind: string;
+  title: string;
+  dndKey: string;
+  onAddKind: (kind: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      draggable
+      onClick={() => onAddKind(kind)}
+      onDragStart={(e: DragEvent) => {
+        e.dataTransfer.setData(dndKey, kind);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
+      title={`Add ${title}`}
+      aria-label={`Add ${title}`}
+      className="flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
+    >
+      <span className="grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] shrink-0 place-items-center" style={{ color: panelAccent(kind) }}>
+        {nodeIcon(kind)}
+      </span>
+      <span className={cn('min-w-0 flex-1 truncate text-ink2', chromeText.sm)}>{title}</span>
+    </button>
+  );
+}
+
+function CollapsedRail({
+  onHome,
+  onExpand,
+  showProblems,
+  problemCount,
+  showAdd,
+  onOpenCatalog,
+  onOpenProblems,
+  onOpenAdd,
+  zoomApi,
+  onTidy,
+}: {
+  onHome: () => void;
+  onExpand: () => void;
+  showProblems: boolean;
+  problemCount: number;
+  showAdd: boolean;
+  onOpenCatalog: () => void;
+  onOpenProblems: () => void;
+  onOpenAdd: () => void;
+  zoomApi?: CanvasZoomApi;
+  onTidy?: () => void;
+}) {
+  const btn =
+    `grid ${CHROME_BTN_MD} place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink`;
+
+  return (
+    <div className="flex h-full w-[var(--chrome-left,32px)] shrink-0 flex-col items-center gap-0.5 border-r border-edge bg-panel py-1.5">
+      <button type="button" onClick={onHome} title="Home" aria-label="Home" className={btn}>
+        <Home className="h-3.5 w-3.5" />
+      </button>
+      <span className="my-0.5 h-px w-4 bg-edge" aria-hidden />
+      <button type="button" onClick={onExpand} title="Expand sidebar" aria-label="Expand sidebar" className={btn}>
+        <PanelLeft className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" onClick={onOpenCatalog} title="Catalog" aria-label="Open catalog" className={btn}>
+        <Library className="h-3 w-3" />
+      </button>
+      {showProblems && (
+        <button
+          type="button"
+          onClick={onOpenProblems}
+          title={`Problems (${problemCount})`}
+          aria-label="Open problems"
+          className={cn(btn, 'relative')}
+        >
+          <FileText className="h-3 w-3" />
+          <span className={cn('absolute -right-0.5 -top-0.5 grid h-3 min-w-3 place-items-center rounded-full bg-accent px-0.5 font-mono font-medium tabular-nums text-white', chromeText.xs)}>
+            {problemCount}
+          </span>
+        </button>
+      )}
+      {showAdd && (
+        <button type="button" onClick={onOpenAdd} title="Add panel" aria-label="Add panel" className={btn}>
+          <Plus className="h-3 w-3" />
+        </button>
+      )}
+      {zoomApi && onTidy && (
+        <div className="mt-auto flex flex-col items-center pb-0.5">
+          <SidebarZoomControls zoomApi={zoomApi} onTidy={onTidy} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Full-height left sidebar: catalog explorer, topic problem switcher, and canvas
+ * add-panel dock — one collapsible surface for all left-side navigation.
+ */
+export function UnifiedLeftSidebar() {
+  const {
+    leftOpen,
+    setLeftOpen,
+    activeItemId,
+    setActiveItemId,
+    setSelectedNode,
+    setActiveTopicId,
+    goHome,
+    canvasAdd,
+    canvasZoom,
+    canvasHud,
+    mode,
+    isMobile,
+  } = useWorkspace();
+  const progress = useProgress();
+
+  const [catalogOpen, setCatalogOpen] = useState(true);
+  const [problemsOpen, setProblemsOpen] = useState(true);
+  const [addOpen, setAddOpen] = useState(true);
+  const [sidebarSearch, setSidebarSearch] = useState('');
+  const [activeTab, setActiveTab] = useState(0);
+
+  const topic = catalog.breadcrumb(activeItemId).topic;
+  const showProblems = !!topic && topic.items.length >= 2;
+  const showAdd = canvasAdd != null;
+  const searching = !!sidebarSearch.trim();
+
+  useEffect(() => {
+    if (searching) {
+      setCatalogOpen(true);
+      setProblemsOpen(true);
+      setAddOpen(true);
+    }
+  }, [searching]);
+
+  const addableKinds = canvasAdd?.addableKinds ?? [];
+  const filteredAddable = searching
+    ? addableKinds.filter((k) =>
+        matchesSidebarSearch(sidebarSearch, k.title, k.id, nodeCategory(k.id)),
+      )
+    : addableKinds;
+  const essentials = filteredAddable.filter((k) => ESSENTIALS.has(k.id));
+  const catTabs = CATEGORY_ORDER.map((cat) => ({
+    key: cat as string,
+    icon: CAT_ICON[cat],
+    items: filteredAddable.filter((k) => nodeCategory(k.id) === cat && !ESSENTIALS.has(k.id)),
+  })).filter((g) => g.items.length > 0);
+
+  const tabs = [
+    ...(essentials.length ? [{ key: 'Essentials', icon: <Star className="h-3.5 w-3.5" />, items: essentials }] : []),
+    ...catTabs,
+  ];
+  const tabIdx = Math.min(activeTab, Math.max(0, tabs.length - 1));
+  const currentTab = tabs[tabIdx];
+
+  const filteredProblems =
+    showProblems && searching
+      ? topic!.items.filter((it) =>
+          matchesSidebarSearch(sidebarSearch, it.title, it.id, it.difficulty),
+        )
+      : topic?.items ?? [];
+
+  const groupedPanelResults = searching
+    ? (() => {
+        const groups: { key: string; items: typeof filteredAddable }[] = [];
+        const ess = filteredAddable.filter((k) => ESSENTIALS.has(k.id));
+        if (ess.length) groups.push({ key: 'Essentials', items: ess });
+        for (const cat of CATEGORY_ORDER) {
+          const items = filteredAddable.filter(
+            (k) => nodeCategory(k.id) === cat && !ESSENTIALS.has(k.id),
+          );
+          if (items.length) groups.push({ key: cat, items });
+        }
+        return groups;
+      })()
+    : null;
+
+  const switchTo = (id: string) => {
+    if (id === activeItemId) return;
+    setActiveItemId(id);
+    setSelectedNode(null);
+    setActiveTopicId(null);
+  };
+
+  const expand = (focus?: 'catalog' | 'problems' | 'add') => {
+    setLeftOpen(true);
+    if (focus === 'catalog') setCatalogOpen(true);
+    if (focus === 'problems') setProblemsOpen(true);
+    if (focus === 'add') setAddOpen(true);
+  };
+
+  if (!leftOpen) {
+    return (
+      <CollapsedRail
+        onHome={goHome}
+        onExpand={() => expand()}
+        showProblems={showProblems}
+        problemCount={topic?.items.length ?? 0}
+        showAdd={showAdd}
+        onOpenCatalog={() => expand('catalog')}
+        onOpenProblems={() => expand('problems')}
+        onOpenAdd={() => expand('add')}
+        zoomApi={mode === 'visualize' ? canvasZoom ?? undefined : undefined}
+        onTidy={canvasHud?.onTidy}
+      />
+    );
+  }
+
+  const panel = (
+    <div
+      className={cn(
+        'flex h-full flex-col overflow-hidden bg-panel text-ink',
+        isMobile ? 'w-full' : 'shrink-0 border-r border-edge',
+      )}
+      style={isMobile ? undefined : { width: SIDEBAR_W }}
+    >
+      <header className="flex shrink-0 items-center gap-1.5 border-b border-edge px-[var(--hpad)] py-0.5">
+        <button
+          type="button"
+          onClick={goHome}
+          title="Home"
+          aria-label="Home"
+          className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+        >
+          <Home className="h-3 w-3" />
+        </button>
+        <span className={cn('min-w-0 flex-1 truncate font-semibold leading-tight text-ink', chromeText.sm)}>
+          {showProblems ? topic!.title : 'Explorer'}
+        </span>
+        <button
+          type="button"
+          onClick={() => setLeftOpen(false)}
+          title="Collapse sidebar"
+          aria-label="Collapse sidebar"
+          className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+        >
+          <PanelLeftClose className="h-3 w-3" />
+        </button>
+      </header>
+
+      <div className="relative shrink-0 border-b border-edge px-[var(--hpad)] py-1">
+        <Search className="pointer-events-none absolute left-[calc(var(--hpad)+8px)] top-1/2 h-3 w-3 -translate-y-1/2 text-ink3" />
+        <input
+          type="search"
+          value={sidebarSearch}
+          onChange={(e) => setSidebarSearch(e.target.value)}
+          placeholder="Search catalog, problems, panels…"
+          aria-label="Search sidebar"
+          className={cn('w-full rounded-md border border-edge bg-panel2 py-0.5 pl-7 pr-2 text-ink outline-none placeholder:text-ink3 focus:border-accent', chromeText.sm)}
+        />
+      </div>
+
+      <div className="ws-scroll flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <SidebarSection
+          icon={<Library className="h-3 w-3" />}
+          title="Catalog"
+          open={catalogOpen}
+          onToggle={() => setCatalogOpen((o) => !o)}
+          maxHeightClass={SECTION_MAX.catalog}
+        >
+          <CatalogTree searchQuery={sidebarSearch} />
+        </SidebarSection>
+
+        {showProblems && (
+          <SidebarSection
+            icon={<FileText className="h-3 w-3" />}
+            title="Problems"
+            badge={
+              <span className={cn('shrink-0 rounded-full bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink3', chromeText.xs)}>
+                {searching ? filteredProblems.length : topic!.items.length}
+              </span>
+            }
+            open={problemsOpen}
+            onToggle={() => setProblemsOpen((o) => !o)}
+            maxHeightClass={SECTION_MAX.problems}
+          >
+            {searching && filteredProblems.length === 0 ? (
+              <div className={cn('px-[var(--hpad)] py-2 leading-snug text-ink3', chromeText.sm)}>No matching problems</div>
+            ) : (
+              <div className="flex flex-col gap-0.5 px-1">
+                {filteredProblems.map((it) => {
+                  const active = it.id === activeItemId;
+                  return (
+                    <button
+                      key={it.id}
+                      type="button"
+                      onClick={() => switchTo(it.id)}
+                      title={it.title}
+                      className={cn(
+                        'flex w-full min-h-[var(--row)] items-center gap-2 rounded-md border-l-2 px-2 py-0 text-left transition-colors',
+                        active
+                          ? 'border-l-accent bg-accentbg font-medium text-accent'
+                          : 'border-l-transparent text-ink2 hover:bg-panel2 hover:text-ink',
+                      )}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{ background: STATUS_DOT[it.status] }}
+                        title={it.status}
+                      />
+                      <span className={cn('min-w-0 flex-1 truncate', chromeText.sm)}>{it.title}</span>
+                      {statFor(progress, it.id).mastered && (
+                        <Trophy className="h-3 w-3 shrink-0" style={{ color: 'var(--good)' }} aria-label="mastered" />
+                      )}
+                      {it.difficulty && <span className={cn('shrink-0 text-ink3', chromeText.xs)}>{it.difficulty}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {!searching && (
+              <button
+                type="button"
+                onClick={() => setActiveTopicId(topic!.id)}
+                title="Open the topic grid"
+                className={cn('mx-1 mt-1.5 flex min-h-[var(--row)] w-[calc(100%-8px)] items-center gap-1.5 rounded-md px-2 py-0 text-ink3 transition-colors hover:bg-panel2 hover:text-ink', chromeText.sm)}
+              >
+                <LayoutGrid className="h-3.5 w-3.5 shrink-0" />
+                <span className="min-w-0 flex-1 truncate text-left">Topic grid</span>
+              </button>
+            )}
+          </SidebarSection>
+        )}
+
+        {showAdd && canvasAdd && (
+          <>
+          <SidebarSection
+            icon={<Plus className="h-3 w-3" />}
+            title="Add panel"
+            open={addOpen}
+            onToggle={() => setAddOpen((o) => !o)}
+            maxHeightClass={SECTION_MAX.addPanel}
+          >
+            <div className="px-[var(--hpad)]">
+              {!currentTab && !searching ? (
+                <div className="flex flex-col items-center gap-1.5 px-2 py-4 text-center">
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-panel2 text-ink3">
+                    <LayoutGrid className="h-4 w-4" />
+                  </span>
+                  <p className={cn('font-medium text-ink2', chromeText.sm)}>All panels on canvas</p>
+                  <p className={cn('leading-snug text-ink3', chromeText.sm)}>Remove a panel to re-add it here.</p>
+                </div>
+              ) : searching ? (
+                groupedPanelResults!.length === 0 ? (
+                  <div className={cn('py-2 leading-snug text-ink3', chromeText.sm)}>No matching panels</div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {groupedPanelResults!.map((group) => (
+                      <div key={group.key}>
+                        <Label className="mb-1 px-1">{group.key}</Label>
+                        <div className="flex flex-col gap-0.5">
+                          {group.items.map((k) => (
+                            <AddItem
+                              key={k.id}
+                              kind={k.id}
+                              title={k.title}
+                              dndKey={canvasAdd.dndKey}
+                              onAddKind={canvasAdd.onAddKind}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <>
+                  <div className="mb-2 flex flex-wrap gap-1">
+                    {tabs.map((t, i) => (
+                      <button
+                        key={t.key}
+                        type="button"
+                        onClick={() => setActiveTab(i)}
+                        title={t.key}
+                        aria-label={t.key}
+                        aria-pressed={i === tabIdx}
+                        className={cn(
+                          'flex max-w-full min-h-[var(--row)] items-center gap-1 rounded-md px-1.5 py-0 transition-colors',
+                          i === tabIdx ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                        )}
+                      >
+                        <span className="shrink-0">{t.icon}</span>
+                        <span className={cn('truncate', chromeText.sm)}>{t.key}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    {(currentTab?.items ?? []).map((k) => (
+                      <AddItem
+                        key={k.id}
+                        kind={k.id}
+                        title={k.title}
+                        dndKey={canvasAdd.dndKey}
+                        onAddKind={canvasAdd.onAddKind}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </SidebarSection>
+          {canvasAdd.addableEffects && canvasAdd.addableEffects.length > 0 && (
+            <SidebarSection
+              icon={<Shapes className="h-3 w-3" />}
+              title="Effects"
+              open={addOpen}
+              onToggle={() => setAddOpen((o) => !o)}
+              maxHeightClass={SECTION_MAX.addPanel}
+            >
+              <div className="flex flex-col gap-0.5 px-1">
+                {canvasAdd.addableEffects.map((eff) => (
+                  <button
+                    key={eff.id}
+                    type="button"
+                    draggable
+                    onClick={() => canvasAdd.onAddEffect?.(eff.id)}
+                    onDragStart={(e: DragEvent) => {
+                      if (canvasAdd.effectDndKey) e.dataTransfer.setData(canvasAdd.effectDndKey, eff.id);
+                      e.dataTransfer.effectAllowed = 'move';
+                    }}
+                    className="flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
+                  >
+                    <span className={cn('min-w-0 flex-1 truncate text-ink2', chromeText.sm)}>{eff.title}</span>
+                  </button>
+                ))}
+              </div>
+            </SidebarSection>
+          )}
+          </>
+        )}
+      </div>
+
+      {mode === 'visualize' && canvasZoom && canvasHud?.onTidy && (
+        <div className="flex shrink-0 justify-center border-t border-edge px-[var(--hpad)] py-1.5">
+          <SidebarZoomControls zoomApi={canvasZoom} onTidy={canvasHud.onTidy} vertical={false} />
+        </div>
+      )}
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <MobileDrawer side="left" label="Explorer" onClose={() => setLeftOpen(false)}>
+        {panel}
+      </MobileDrawer>
+    );
+  }
+  return panel;
+}

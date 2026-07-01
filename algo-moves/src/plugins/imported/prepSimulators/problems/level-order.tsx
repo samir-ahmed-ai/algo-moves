@@ -1,0 +1,197 @@
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { TreeBoard } from '../../../../components/TreeBoard';
+import type { ProblemSimulator } from '../types';
+import { cn } from '../../../../lib/cn';
+import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+
+interface LevelOrderInput {
+  // Binary tree in level-order form; null marks an absent slot.
+  // Children of index i live at 2i+1 and 2i+2.
+  tree: (number | null)[];
+}
+
+interface LevelOrderState {
+  tree: (number | null)[];
+  queue: number[]; // node indices currently waiting in the BFS queue
+  visited: number[]; // node indices already popped and recorded
+  active: number | null; // node index being processed this step
+  level: number; // which level we are building (0-based)
+  levelSoFar: number[]; // values collected for the in-progress level
+  out: number[][]; // finished levels
+  done: boolean;
+}
+
+function record({ tree }: LevelOrderInput): Frame<LevelOrderState>[] {
+  const frames: Frame<LevelOrderState>[] = [];
+  let queue: number[] = [];
+  const visited: number[] = [];
+  const out: number[][] = [];
+
+  const emit = (
+    type: string,
+    note: string,
+    caption: string,
+    s: Partial<LevelOrderState>,
+    tone?: 'good' | 'bad',
+  ) =>
+    frames.push({
+      move: { type, note, caption, tone },
+      state: {
+        tree,
+        queue: queue.slice(),
+        visited: visited.slice(),
+        active: null,
+        level: out.length,
+        levelSoFar: [],
+        out: out.map((l) => l.slice()),
+        done: false,
+        ...s,
+      },
+    });
+
+  const valAt = (i: number) => tree[i] as number;
+
+  if (tree.length === 0 || tree[0] == null) {
+    emit('DONE', 'empty', 'The tree is empty, so the level order traversal is an empty list.', { done: true }, 'bad');
+    return frames;
+  }
+
+  queue = [0];
+  emit(
+    'INIT',
+    'seed root',
+    `Level order (BFS): visit the tree level by level, top to bottom, left to right. Seed the queue with the root (${valAt(0)}). Each outer pass empties the current queue as one whole level.`,
+    { queue: [0] },
+  );
+
+  let level = 0;
+  while (queue.length > 0) {
+    const sz = queue.length; // snapshot: exactly one level's worth of nodes
+    const levelSoFar: number[] = [];
+    emit(
+      'LEVEL',
+      `size=${sz}`,
+      `Snapshot the queue size: sz = ${sz}. Those ${sz} node(s) form level ${level}. Pop exactly ${sz} node(s), appending each child behind them so the next pass sees level ${level + 1}.`,
+      { level, levelSoFar: [] },
+    );
+
+    for (let i = 0; i < sz; i++) {
+      const node = queue[0];
+      queue = queue.slice(1);
+      levelSoFar.push(valAt(node));
+      visited.push(node);
+      emit(
+        'POP',
+        `pop ${valAt(node)}`,
+        `Pop node ${valAt(node)} and record its value into level ${level} (now [${levelSoFar.join(', ')}]).`,
+        { active: node, level, levelSoFar: levelSoFar.slice() },
+      );
+
+      const left = 2 * node + 1;
+      const right = 2 * node + 2;
+      if (left < tree.length && tree[left] != null) {
+        queue.push(left);
+        emit(
+          'PUSH',
+          `push ${valAt(left)}`,
+          `Node ${valAt(node)} has a left child ${valAt(left)}. Enqueue it — it belongs to the next level.`,
+          { active: node, level, levelSoFar: levelSoFar.slice() },
+        );
+      }
+      if (right < tree.length && tree[right] != null) {
+        queue.push(right);
+        emit(
+          'PUSH',
+          `push ${valAt(right)}`,
+          `Node ${valAt(node)} has a right child ${valAt(right)}. Enqueue it — it belongs to the next level.`,
+          { active: node, level, levelSoFar: levelSoFar.slice() },
+        );
+      }
+    }
+
+    out.push(levelSoFar.slice());
+    emit(
+      'FLUSH',
+      `level ${level} = [${levelSoFar.join(',')}]`,
+      `Level ${level} is complete: [${levelSoFar.join(', ')}]. Append it to the output and move on to the ${queue.length > 0 ? 'next level' : 'end'}.`,
+      { level, levelSoFar: levelSoFar.slice() },
+      'good',
+    );
+    level++;
+  }
+
+  emit(
+    'DONE',
+    `${out.length} levels`,
+    `Every node has been visited. The traversal produced ${out.length} level(s): ${out.map((l) => `[${l.join(',')}]`).join(', ')}.`,
+    { done: true },
+    'good',
+  );
+  return frames;
+}
+
+function View({ frame }: PluginViewProps<LevelOrderState>) {
+  const s = frame.state;
+  const inQueue = new Set(s.queue);
+  const nodeClass = (i: number) => {
+    if (s.active === i) return 'team-1';
+    if (inQueue.has(i)) return 'team-1';
+    if (s.visited.includes(i)) return 'team-2';
+    return 'team-0';
+  };
+  const queueVals = s.queue.map((i) => s.tree[i] as number);
+  return (
+    <div className="board-area">
+      <div className={cn(vizText.sm, 'text-ink3')}>
+        building level <span className="font-mono text-ink">{s.level}</span>
+        {s.levelSoFar.length > 0 && (
+          <>
+            {' · '}so far{' '}
+            <span className="font-mono text-ink">[{s.levelSoFar.join(', ')}]</span>
+          </>
+        )}
+      </div>
+      <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
+      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
+        queue [{queueVals.join(', ')}]
+      </div>
+      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
+        out{' '}
+        {s.out.length === 0 ? '[]' : s.out.map((l) => `[${l.join(',')}]`).join(' ')}
+      </div>
+    </div>
+  );
+}
+
+function Inspector({ frame }: InspectorProps<LevelOrderState>) {
+  if (!frame) return <VizEmpty />;
+  const s = frame.state;
+  return (
+    <VarGrid>
+      <InspectorRow k="level" v={s.level} />
+      <InspectorRow k="queue size" v={s.queue.length} />
+      <InspectorRow k="active" v={s.active !== null ? (s.tree[s.active] as number) : '—'} />
+      <InspectorRow k="level so far" v={s.levelSoFar.length ? `[${s.levelSoFar.join(', ')}]` : '[]'} />
+      <InspectorRow k="visited" v={s.visited.length} />
+      <InspectorRow k="levels done" v={s.out.length} />
+    </VarGrid>
+  );
+}
+
+export const manifestId = 'prep-trees-level-order';
+export const title = 'Level order';
+
+export const simulator: ProblemSimulator = {
+  inputs: [
+    { id: 'lo1', label: '[3,9,20,·,·,15,7]', value: { tree: [3, 9, 20, null, null, 15, 7] } },
+    { id: 'lo2', label: '[1,2,3,4,5,6,7]', value: { tree: [1, 2, 3, 4, 5, 6, 7] } },
+  ] satisfies SampleInput<LevelOrderInput>[],
+  record,
+  View,
+  Inspector,
+  verdict: (frames) => {
+    const s = frames[frames.length - 1]?.state as LevelOrderState | undefined;
+    if (!s || s.out.length === 0) return { ok: false, label: 'empty' };
+    return { ok: true, label: s.out.map((l) => `[${l.join(',')}]`).join(' ') };
+  },
+};

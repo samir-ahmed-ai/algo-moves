@@ -1,0 +1,149 @@
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
+import type { ProblemSimulator } from '../types';
+import { cn } from '../../../../lib/cn';
+import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+
+interface SwapInput {
+  s: string;
+}
+
+interface SwapState {
+  chars: string[]; // working char array (mutated as we swap)
+  i: number | null; // left index of the current pair
+  j: number | null; // right index (i + 1)
+  swapped: boolean[]; // per-index: true once its pair has been swapped
+  done: boolean;
+}
+
+function record({ s }: SwapInput): Frame<SwapState>[] {
+  const chars = s.split('');
+  const n = chars.length;
+  const swapped = new Array<boolean>(n).fill(false);
+  const frames: Frame<SwapState>[] = [];
+
+  const emit = (
+    type: string,
+    note: string,
+    caption: string,
+    st: Partial<SwapState>,
+    tone?: 'good' | 'bad',
+  ) =>
+    frames.push({
+      move: { type, note, caption, tone },
+      state: {
+        chars: chars.slice(),
+        i: null,
+        j: null,
+        swapped: swapped.slice(),
+        done: false,
+        ...st,
+      },
+    });
+
+  emit(
+    'INIT',
+    `"${s}"`,
+    `Swap Even Odd: walk the string two characters at a time and swap each adjacent pair (index i with i+1). We step i += 2 so every neighbouring couple is swapped exactly once.`,
+    {},
+  );
+
+  for (let i = 0; i + 1 < n; i += 2) {
+    const j = i + 1;
+    emit(
+      'PAIR',
+      `i=${i}, j=${j}`,
+      `Look at the pair at indices ${i} and ${j}: '${chars[i]}' and '${chars[j]}'. These two neighbours will trade places.`,
+      { i, j },
+    );
+
+    const tmp = chars[i];
+    chars[i] = chars[j];
+    chars[j] = tmp;
+    swapped[i] = true;
+    swapped[j] = true;
+
+    emit(
+      'SWAP',
+      `${chars[i]}${chars[j]}`,
+      `Swap them: index ${i} and ${j} become '${chars[i]}' and '${chars[j]}'. Now advance i += 2 to the next pair.`,
+      { i, j },
+      'good',
+    );
+  }
+
+  const leftover = n % 2 === 1;
+  emit(
+    'DONE',
+    `"${chars.join('')}"`,
+    leftover
+      ? `No more full pairs — the odd-length string leaves the last character '${chars[n - 1]}' untouched. Result: "${chars.join('')}".`
+      : `All adjacent pairs have been swapped. Result: "${chars.join('')}".`,
+    { i: leftover ? n - 1 : null, done: true },
+    'good',
+  );
+
+  return frames;
+}
+
+function View({ frame }: PluginViewProps<SwapState>) {
+  const s = frame.state;
+  const pointers: ArrayPointer[] = [];
+  if (s.i !== null && !s.done) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
+  if (s.j !== null && !s.done) pointers.push({ i: s.j, label: 'i+1', tone: 'warn', place: 'below' });
+
+  const inActivePair = (idx: number) => !s.done && (idx === s.i || idx === s.j);
+  const tone = (idx: number) => {
+    if (inActivePair(idx)) return 'match';
+    if (s.swapped[idx]) return 'found';
+    return '';
+  };
+
+  return (
+    <div className="board-area">
+      <div className={cn(vizText.sm, 'text-ink3')}>
+        input = <span className="font-mono text-ink">"{s.chars.length === 0 ? '' : s.chars.join('')}"</span>
+      </div>
+      <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={null} />
+      <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink3')}>
+        {s.done ? '→ ' : 'result so far: '}
+        {s.chars.join('')}
+      </div>
+    </div>
+  );
+}
+
+function Inspector({ frame }: InspectorProps<SwapState>) {
+  if (!frame) return <VizEmpty />;
+  const s = frame.state;
+  const swappedCount = s.swapped.filter(Boolean).length;
+  return (
+    <VarGrid>
+      <InspectorRow k="length" v={s.chars.length} />
+      <InspectorRow k="i" v={s.i ?? '—'} />
+      <InspectorRow k="j (i+1)" v={s.j ?? '—'} />
+      <InspectorRow k="chars[i]" v={s.i !== null ? `'${s.chars[s.i]}'` : '—'} />
+      <InspectorRow k="chars[j]" v={s.j !== null ? `'${s.chars[s.j]}'` : '—'} />
+      <InspectorRow k="indices swapped" v={swappedCount} />
+      <InspectorRow k="current" v={`"${s.chars.join('')}"`} />
+    </VarGrid>
+  );
+}
+
+export const manifestId = 'prep-strings-swap-even-odd';
+export const title = 'Swap even odd';
+
+export const simulator: ProblemSimulator = {
+  inputs: [
+    { id: 'se1', label: '"abcdef"', value: { s: 'abcdef' } },
+    { id: 'se2', label: '"algorithm"', value: { s: 'algorithm' } },
+  ] satisfies SampleInput<SwapInput>[],
+  record,
+  View,
+  Inspector,
+  verdict: (frames) => {
+    const s = frames[frames.length - 1]?.state as SwapState | undefined;
+    const result = s ? s.chars.join('') : '';
+    return { ok: true, label: `"${result}"` };
+  },
+};

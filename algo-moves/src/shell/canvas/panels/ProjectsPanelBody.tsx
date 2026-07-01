@@ -1,0 +1,100 @@
+import { useState } from 'react';
+import { FolderOpen, Trash2 } from 'lucide-react';
+import { catalog } from '../../../content';
+import { useWorkspace, normalizeThemePreset } from '../../../lib/workspace';
+import { useProjects, saveProject, deleteProject } from '../../../lib/projects';
+import type { ShareState } from '../../../lib/shareState';
+import { buildMinimalProjectState, type ProjectState } from '../../../lib/projectState';
+import { ShareUrlPopover } from '../ShareUrlPopover';
+import { SaveProjectDialog } from '../SaveProjectDialog';
+import { cn } from '../../../lib/cn';
+import { CHROME_BTN } from '../../chrome';
+import { Btn, EmptyState, Field, Row, Section, TextInput, Pill, nodeText, RADIUS_CTRL } from '../nodeui';
+
+/** Projects: save/load named workspace snapshots with full canvas state when available. */
+export function ProjectsPanelBody() {
+  const ws = useWorkspace();
+  const { canvasProject } = ws;
+  const projects = useProjects();
+  const [name, setName] = useState('');
+  const names = Object.keys(projects).sort();
+
+  const snapshot = (): ShareState => ({
+    item: ws.activeItemId,
+    mode: ws.mode,
+    theme: ws.theme,
+    palette: ws.palette,
+    themePreset: ws.themePreset,
+    dir: ws.dir,
+  });
+
+  const projectState: ProjectState =
+    canvasProject?.getProjectState() ?? buildMinimalProjectState(snapshot(), ws.mode, [], []);
+
+  const apply = (s: ShareState) => {
+    if (s.item && catalog.getItem(s.item)) {
+      ws.setActiveItemId(s.item);
+      ws.setSelectedNode(null);
+    }
+    if (s.mode === 'visualize') ws.setMode('visualize');
+    else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') ws.setMode('learn');
+    if (s.theme) ws.setTheme(s.theme === 'light' ? 'light' : 'dark');
+    ws.setPalette(s.palette === 'cb' ? 'cb' : 'default');
+    if (s.themePreset) ws.setThemePreset(normalizeThemePreset(s.themePreset));
+    if (s.dir === 'TB' || s.dir === 'LR') ws.setDir(s.dir);
+  };
+
+  const save = () => {
+    const n = name.trim();
+    if (!n) return;
+    saveProject(n, snapshot());
+    setName('');
+  };
+
+  return (
+    <div className="nodrag flex flex-col gap-2.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <ShareUrlPopover state={projectState} dense />
+        <SaveProjectDialog state={projectState} />
+      </div>
+      <Field label="New workspace" hint="Captures problem · mode · theme · canvas when on visualize">
+        <div className="flex gap-1.5">
+          <TextInput
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && save()}
+            placeholder="project name…"
+            className="min-w-0 flex-1"
+          />
+          <Btn variant="good" size="sm" onClick={save} disabled={!name.trim()}>
+            Save
+          </Btn>
+        </div>
+      </Field>
+      {names.length === 0 ? (
+        <EmptyState icon={<FolderOpen className="h-5 w-5" />} title="No saved workspaces" hint="Name the current setup and Save." />
+      ) : (
+        <Section title="Saved" right={<Pill>{names.length}</Pill>}>
+          <div className="flex flex-col">
+            {names.map((n) => (
+              <Row key={n} className="justify-between gap-1.5 border-t border-edge py-1.5 first:border-t-0">
+                <span className={cn('min-w-0 flex-1 truncate text-ink', nodeText.sm)}>{n}</span>
+                <Btn variant="ghost" size="xs" onClick={() => apply(projects[n])}>
+                  Load
+                </Btn>
+                <button
+                  type="button"
+                  onClick={() => deleteProject(n)}
+                  className={`nodrag grid ${CHROME_BTN} place-items-center text-ink3 transition-colors hover:bg-badbg hover:text-bad ${RADIUS_CTRL}`}
+                  aria-label="delete project"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </Row>
+            ))}
+          </div>
+        </Section>
+      )}
+    </div>
+  );
+}
