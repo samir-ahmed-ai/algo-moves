@@ -11,8 +11,9 @@ export const ar: ArcadeStrings = {
     darkTheme: 'الوضع الداكن',
   },
   language: {
-    switchToEnglish: 'التبديل إلى الإنجليزية',
-    switchToArabic: 'التبديل إلى العربية',
+    label: 'اللغة',
+    arabic: 'العربية',
+    english: 'English',
     hostOnly: 'يمكن للمضيف فقط تغيير اللغة في هذه الغرفة',
   },
   lobby: {

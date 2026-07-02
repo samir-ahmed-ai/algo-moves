@@ -113,13 +113,11 @@ function Arcade() {
 
           <div className="ms-auto flex items-center gap-1.5">
             {room ? <RoomPill room={room} open={open} reconnecting={reconnecting} filled={bothHere} /> : null}
-            <LanguageToggle
+            <LanguageSelect
               locale={locale}
               disabled={!canChangeLocale}
               onChange={setLocale}
-              switchToEnglish={t.language.switchToEnglish}
-              switchToArabic={t.language.switchToArabic}
-              hostOnly={t.language.hostOnly}
+              labels={t.language}
             />
             <button
               type="button"
@@ -249,32 +247,29 @@ function WaitingRoom({
   );
 }
 
-function LanguageToggle({
+function LanguageSelect({
   locale,
   disabled,
   onChange,
-  switchToEnglish,
-  switchToArabic,
-  hostOnly,
+  labels,
 }: {
   locale: GameLocale;
   disabled?: boolean;
   onChange: (locale: GameLocale) => void;
-  switchToEnglish: string;
-  switchToArabic: string;
-  hostOnly: string;
+  labels: { label: string; arabic: string; english: string; hostOnly: string };
 }) {
-  const next = locale === 'ar' ? 'en' : 'ar';
   return (
-    <button
-      type="button"
-      title={disabled ? hostOnly : locale === 'ar' ? switchToEnglish : switchToArabic}
+    <select
+      value={locale}
       disabled={disabled}
-      onClick={() => onChange(next)}
-      className="grid h-11 min-w-11 place-items-center rounded-md border border-edge px-2 font-mono text-xs font-bold text-ink3 hover:bg-panel2 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+      title={disabled ? labels.hostOnly : labels.label}
+      aria-label={labels.label}
+      onChange={(e) => onChange(e.target.value as GameLocale)}
+      className="h-11 min-w-[5.5rem] cursor-pointer rounded-md border border-edge bg-panel px-2 text-sm font-semibold text-ink outline-none hover:bg-panel2 focus:border-accent disabled:cursor-not-allowed disabled:opacity-40"
     >
-      {locale === 'ar' ? 'EN' : 'عر'}
-    </button>
+      <option value="ar">{labels.arabic}</option>
+      <option value="en">{labels.english}</option>
+    </select>
   );
 }
 

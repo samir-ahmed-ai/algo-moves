@@ -9,8 +9,9 @@ export type ArcadeStrings = {
     darkTheme: string;
   };
   language: {
-    switchToEnglish: string;
-    switchToArabic: string;
+    label: string;
+    arabic: string;
+    english: string;
     hostOnly: string;
   };
   lobby: {
