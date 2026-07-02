@@ -1,11 +1,6 @@
 import type { Item } from '../../content';
-
-const DIFF_TINT: Record<string, string> = {
-  Easy: 'var(--good)',
-  Medium: 'var(--edge-active)',
-  Hard: 'var(--bad)',
-};
+import { difficultyTint } from '../../content/difficultyTint';
 
 export function tintFor(item: Item): string {
-  return DIFF_TINT[item.difficulty ?? ''] ?? 'var(--accent)';
+  return difficultyTint(item.difficulty, 'var(--accent)');
 }

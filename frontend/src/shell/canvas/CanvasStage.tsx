@@ -3,7 +3,7 @@ import { computeInputFrameCounts } from '@/lib/canvas';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { chromeText } from '../chromeUi';
 import { onReactFlowError } from './canvasFlowErrors';
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -11,13 +11,10 @@ import {
   BackgroundVariant,
   MiniMap,
   SelectionMode,
-  addEdge,
-  reconnectEdge,
   useEdgesState,
   useNodesState,
   useNodesInitialized,
   useReactFlow,
-  type Connection,
   type ConnectionLineComponentProps,
   type Edge,
   type Node,
@@ -80,10 +77,11 @@ import { sanitizeVisualizeEdges } from './edgeSanitization';
 import { useCanvasLayoutPersistence, type Saved } from './useCanvasLayoutPersistence';
 import { useCanvasHistory } from './useCanvasHistory';
 import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts';
+import { useCanvasEdgeConnection } from './useCanvasEdgeConnection';
+import { useCanvasDnD, DND_KEY } from './useCanvasDnD';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
-const DND_KEY = 'application/algomove';
 
 /** Custom in-progress connection line — a dashed accent curve with an end dot. */
 function DashedConnectionLine({ fromX, fromY, toX, toY }: ConnectionLineComponentProps) {
@@ -463,40 +461,19 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   useCanvasKeyboardShortcuts({ fitView, undo, redo, toggleFocusCanvas, nodesRef });
 
   // ---- drag a removed panel back onto the canvas ----
-  const onDragOver = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOver(true);
-  }, []);
-
-  const onDragLeave = useCallback(() => setDragOver(false), []);
-
-  const onDrop = useCallback(
-    (e: DragEvent) => {
-      e.preventDefault();
-      setDragOver(false);
-      const position = screenToFlowPosition({ x: e.clientX, y: e.clientY });
-
-      const effectId = e.dataTransfer.getData(EFFECT_DND_KEY);
-      if (effectId) {
-        const node = createEffectByType(effectId, position);
-        setNodes((nds) => [...nds, node as unknown as PanelFlowNode]);
-        return;
-      }
-
-      const kind = e.dataTransfer.getData(DND_KEY);
-      if (!kind || nodesRef.current.some((n) => n.id === kind)) return;
-      removedRef.current[key]?.delete(kind);
-      const node = nodeForKind(plugin, kind, position);
-      const present = new Set([...nodesRef.current.map((n) => n.id), kind]);
-      const newEdges = styleEdges(edgesForKind(plugin, mode, kind, present), edgeOpts).filter(
-        (ne) => !edges.some((ee) => ee.id === ne.id),
-      );
-      setNodes((nds) => [...nds, node]);
-      if (newEdges.length) setEdges((eds) => [...eds, ...newEdges]);
-    },
-    [plugin, mode, key, edgeOpts, edges, screenToFlowPosition, setNodes, setEdges],
-  );
+  const { onDragOver, onDragLeave, onDrop } = useCanvasDnD({
+    plugin,
+    mode,
+    historyKey: key,
+    edgeOpts,
+    edges,
+    screenToFlowPosition,
+    setNodes,
+    setEdges,
+    setDragOver,
+    nodesRef,
+    removedRef,
+  });
 
   const addableKinds = useMemo(() => {
     const present = new Set(nodes.map((n) => n.id));
@@ -631,37 +608,9 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Connect mode: dragging from a handle wires a new (removable, styled) edge.
-  const onConnect = useCallback(
-    (c: Connection) => {
-      if (c.source === c.target) return;
-      const label = edgeConnectionLabel(c, nodes);
-      setEdges((eds) =>
-        styleEdges(addEdge({ ...c, type: 'removable', data: { label } }, eds), edgeOpts),
-      );
-    },
-    [setEdges, edgeOpts, nodes],
-  );
-
-  // Edge reconnection: drag an edge endpoint to a new handle (drop in empty space deletes it).
-  const reconnectOk = useRef(true);
-  const onReconnectStart = useCallback(() => {
-    reconnectOk.current = false;
-  }, []);
-  const onReconnect = useCallback(
-    (oldEdge: Edge, newConn: Connection) => {
-      reconnectOk.current = true;
-      setEdges((els) => styleEdges(reconnectEdge(oldEdge, newConn, els), edgeOpts));
-    },
-    [setEdges, edgeOpts],
-  );
-  const onReconnectEnd = useCallback(
-    (_e: unknown, edge: Edge) => {
-      if (!reconnectOk.current) setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-      reconnectOk.current = true;
-    },
-    [setEdges],
-  );
+  // Edge connect / reconnect / validation.
+  const { onConnect, onReconnectStart, onReconnect, onReconnectEnd, isValidConnection } =
+    useCanvasEdgeConnection({ nodes, edges, edgeOpts, setEdges });
 
   const align = useCallback((a: AlignKind) => setNodes((nds) => applyAlign(nds as PanelFlowNode[], a)), [setNodes]);
   const distribute = useCallback((d: 'h' | 'v') => setNodes((nds) => applyDistribute(nds as PanelFlowNode[], d)), [setNodes]);
@@ -898,11 +847,6 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     bg === 'lines' ? BackgroundVariant.Lines : bg === 'cross' ? BackgroundVariant.Cross : BackgroundVariant.Dots;
 
   // --- xyflow guards / callbacks --------------------------------------------
-  const isValidConnection = useCallback(
-    (c: Connection | Edge) => c.source !== c.target && !edges.some((e) => e.source === c.source && e.target === c.target),
-    [edges],
-  );
-
   const onBeforeDelete = useCallback(
     async ({ nodes: del }: { nodes: Node[]; edges: Edge[] }) =>
       !del.some((n) => (n.data as PanelNodeData | undefined)?.locked),

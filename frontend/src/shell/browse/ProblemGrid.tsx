@@ -6,13 +6,7 @@ import { cn } from '@/lib/utils/cn';
 import { Chip, Meter, Pill, difficultyTone } from '../canvas/nodeui';
 import { chromeText } from '../chromeUi';
 import { glyphFor } from '../../content/problemShape';
-
-const RAIL: Record<Difficulty | 'unrated', string> = {
-  Easy: 'var(--good)',
-  Medium: 'var(--edge-active)',
-  Hard: 'var(--bad)',
-  unrated: 'var(--border-strong)',
-};
+import { difficultyTint } from '../../content/difficultyTint';
 
 const DIFFS: Difficulty[] = ['Easy', 'Medium', 'Hard'];
 
@@ -85,7 +79,7 @@ export function ProblemGrid({
       <div className="browse-problem-grid grid gap-2.5">
         {filtered.map((item, i) => {
           const isMastered = statFor(progress, item.id).mastered;
-          const railColor = RAIL[item.difficulty ?? 'unrated'];
+          const railColor = difficultyTint(item.difficulty, 'var(--border-strong)');
           const glyph = glyphFor(item);
           const delay = `${Math.min(i, 14) * 24}ms`;
           const st = statFor(progress, item.id);
