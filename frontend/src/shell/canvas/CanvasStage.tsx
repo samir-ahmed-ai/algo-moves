@@ -79,6 +79,7 @@ import { snapNodeLayout, restoreNodeWidth } from './nodeSnapshot';
 import { sanitizeVisualizeEdges } from './edgeSanitization';
 import { useCanvasLayoutPersistence, type Saved } from './useCanvasLayoutPersistence';
 import { useCanvasHistory } from './useCanvasHistory';
+import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
@@ -458,36 +459,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     [plugin, mode, key, buildFor, setNodes, setEdges, persist, fitCanvas, setLayoutPreset, setRightOpen, setRightTab, setPresent, requestFitCanvas],
   );
 
-  // Keyboard: Ctrl/⌘+Z undo, Ctrl/⌘+Shift+Z or Ctrl/⌘+Y redo (#82); plain 'z' zoom-to-fit/selection (#77).
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const t = e.target;
-      const inField = isEditableTarget(t);
-      const mod = e.metaKey || e.ctrlKey;
-      if (mod && (e.key === 'z' || e.key === 'Z')) {
-        e.preventDefault();
-        if (e.shiftKey) redo();
-        else undo();
-        return;
-      }
-      if (mod && (e.key === 'y' || e.key === 'Y')) {
-        e.preventDefault();
-        redo();
-        return;
-      }
-      if (!mod && (e.key === 'z' || e.key === 'Z') && !inField) {
-        const selected = nodesRef.current.filter((n) => n.selected);
-        fitView({ padding: FIT_PADDING, duration: FIT_VIEW_DURATION_MS, maxZoom: 1.0, nodes: selected.length ? selected : undefined });
-        return;
-      }
-      if (!mod && (e.key === 'c' || e.key === 'C') && !inField) {
-        e.preventDefault();
-        toggleFocusCanvas();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [fitView, undo, redo, toggleFocusCanvas]);
+  // Keyboard: undo/redo (#82); plain 'z' zoom-to-fit/selection (#77); 'c' focus-canvas.
+  useCanvasKeyboardShortcuts({ fitView, undo, redo, toggleFocusCanvas, nodesRef });
 
   // ---- drag a removed panel back onto the canvas ----
   const onDragOver = useCallback((e: DragEvent) => {

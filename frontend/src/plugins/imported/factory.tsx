@@ -4,7 +4,7 @@ import { wireTeachingStack, codePiecesFromSource, type PracticeBundle } from '..
 import { resolveSimulator } from './simulators';
 import { resolvePracticeBundle } from './practice';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../_shared/vizKit';
+import { InspectorRow, VarGrid, VizEmpty, vizText, CollapsibleDetails } from '../_shared/vizKit';
 
 /** Imported categories that have hand-authored step-by-step simulators. */
 export const SIMULATED_CATEGORIES = new Set(['dynamic-programming', 'graph', 'backtracking', 'binary-search']);
@@ -66,23 +66,12 @@ function Badge({ children, tone }: { children: ReactNode; tone?: 'time' | 'space
   );
 }
 
-function ProblemDetailsBlock({ title, body }: { title: string; body: string }) {
-  return (
-    <details className="mt-2 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
-      <summary className={cn('cursor-pointer', vizText.xs, 'text-ink3')}>{title}</summary>
-      <pre className={cn('nodrag mt-1.5 max-h-[200px] overflow-auto whitespace-pre-wrap font-mono leading-relaxed text-ink2', vizText.xs)}>
-        {body}
-      </pre>
-    </details>
-  );
-}
-
 function ProblemDetails({ notes, approaches }: { notes?: string; approaches?: string }) {
   if (!notes && !approaches) return null;
   return (
     <>
-      {notes && <ProblemDetailsBlock title="Notes (NOTES.md)" body={notes} />}
-      {approaches && <ProblemDetailsBlock title="Approaches" body={approaches} />}
+      {notes && <CollapsibleDetails title="Notes (NOTES.md)" body={notes} size="xs" />}
+      {approaches && <CollapsibleDetails title="Approaches" body={approaches} size="xs" />}
     </>
   );
 }

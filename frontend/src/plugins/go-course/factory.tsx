@@ -1,8 +1,7 @@
 import type { ComponentType } from 'react';
 import { definePlugin, type InspectorProps, type ProblemPlugin } from '../../core/types';
 import { codePiecesFromSource } from '../_shared/pluginKit';
-import { VarGrid, vizText } from '../_shared/vizKit';
-import { cn } from '@/lib/utils/cn';
+import { VarGrid, CollapsibleDetails } from '../_shared/vizKit';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from '../imported/prepScene';
 import type { PrepProblem } from '../imported/prepFactory';
 import { recordTrace, TraceView, traceVerdict, makeGoInspector } from './anim/codeTrace';
@@ -43,17 +42,6 @@ function toPrepProblem(c: GoConcept, topic: GoTopic): PrepProblem {
   };
 }
 
-function DetailsBlock({ title, body }: { title: string; body: string }) {
-  return (
-    <details className="mt-2 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
-      <summary className={cn('cursor-pointer text-ink3', vizText.tight)}>{title}</summary>
-      <pre className={cn('nodrag mt-1.5 max-h-[240px] overflow-auto whitespace-pre-wrap font-mono leading-relaxed text-ink2', vizText.tight)}>
-        {body}
-      </pre>
-    </details>
-  );
-}
-
 /** Append the senior takeaways and design Q&A under the Scene inspector. */
 function withGoNotes(
   Inspector: ComponentType<InspectorProps<any>>,
@@ -65,8 +53,10 @@ function withGoNotes(
       <>
         <Inspector {...props} />
         <VarGrid>
-          {p.notes && <DetailsBlock title="Senior takeaways" body={p.notes} />}
-          {p.approaches && <DetailsBlock title="Design question & model answer" body={p.approaches} />}
+          {p.notes && <CollapsibleDetails title="Senior takeaways" body={p.notes} maxHeightClass="max-h-[240px]" />}
+          {p.approaches && (
+            <CollapsibleDetails title="Design question & model answer" body={p.approaches} maxHeightClass="max-h-[240px]" />
+          )}
         </VarGrid>
       </>
     );
