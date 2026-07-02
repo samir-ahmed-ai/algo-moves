@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Trophy } from 'lucide-react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useProgress, statFor, setMastered } from '@/store/persistence';
 import { useCanvasActions, useCanvasStatic } from '../../CanvasContext';
 import { Btn, Label, Meter, Stat, StatGrid, StreakPips, nodeText } from '../../nodeui';

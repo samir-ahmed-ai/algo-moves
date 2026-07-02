@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { Edge, Node } from '@xyflow/react';
 import type { Frame } from '../core/types';
-import { generateTrace, transformFramesForGraph } from '../lib/trace';
+import { generateTrace, transformFramesForGraph } from '@/lib/canvas';
 import { useReplayStoreOptional } from '@/store/replay';
 
 const DEBOUNCE_MS = 50;

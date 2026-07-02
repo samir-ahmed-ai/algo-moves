@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { X, Copy, Check } from 'lucide-react';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { useWorkspace } from '@/store/workspace';
 import { useCanvasFrame } from './CanvasContext';
 import { useReplayStoreOptional } from '@/store/replay';
-import { generateTrace } from '../../lib/trace';
+import { generateTrace } from '@/lib/canvas';
 import { Label } from './nodeui';
 
 /** Global trace panel — full generated move trace (Strudel PatternPanel). */

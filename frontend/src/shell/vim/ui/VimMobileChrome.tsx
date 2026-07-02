@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useVimGame } from '../canvas/VimGameProvider';
 import { LevelPanelContent } from './panels/LevelPanelContent';
 import { ProgressPanelContent } from './panels/ProgressPanelContent';

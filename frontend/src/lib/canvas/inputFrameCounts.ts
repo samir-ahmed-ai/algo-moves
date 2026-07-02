@@ -1,4 +1,4 @@
-import type { ProblemPlugin, SampleInput } from '../core/types';
+import type { ProblemPlugin, SampleInput } from '@/core/types';
 
 /** Per-sample-input frame counts for a plugin (used by Examples / Big-O panels). */
 export type InputFrameCounts = ReadonlyMap<string, number>;

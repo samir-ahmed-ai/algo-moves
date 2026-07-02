@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Eye, Play, Users } from 'lucide-react';
-import { cn } from '../../../lib/cn';
-import { playCue } from '../../../lib/audio';
+import { cn } from '@/lib/utils/cn';
+import { playCue } from '@/lib/utils/audio';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
 import { useRoomComms } from '../net/useRoomComms';

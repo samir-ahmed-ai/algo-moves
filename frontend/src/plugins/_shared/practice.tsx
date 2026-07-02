@@ -15,15 +15,15 @@
  */
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { Check, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, X } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
-import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '../../lib/quizConstants';
-import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
+import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '@/lib/quiz';
+import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { vizText } from './vizTokens';
-import { useCanvasActions } from '../../lib/canvasActions';
+import { useCanvasActions } from '@/lib/canvas';
 import { recordAttempt } from '@/store/persistence';
 import { useCanvasStatic } from '../../shell/canvas/CanvasContext';
-import { VizFitBox, MiniTabs } from '../../lib/canvasTeachingUi';
+import { VizFitBox, MiniTabs } from '@/lib/canvas';
 import type { Frame, PluginViewProps, QuizQuestion, SampleInput } from '../../core/types';
 
 /* ------------------------------------------------------------------ Quiz -- */

@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
-import { traceOutputForPanel } from '../../../lib/trace';
-import { resolveCodePieces } from '../../../lib/codePieces';
+import { traceOutputForPanel } from '@/lib/canvas';
+import { resolveCodePieces } from '@/lib/code';
 import { ACCENTS, FIT_PADDING_FOCUS } from '../layout';
 import { FIT_VIEW_DURATION_MS } from '../canvasTokens';
 import { togglePanelCollapse } from '../panelCollapse';

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Keyboard, Lightbulb, RotateCcw, ScanEye } from 'lucide-react';
-import type { CodePiece } from '../lib/codePieces';
-import { cn } from '../lib/cn';
-import { hapticError, hapticSuccess } from '../lib/haptic';
-import { pieceHasEntrySignature } from '../lib/highlightSnippet';
-import { balanceTrayColumns } from '../lib/trayLayout';
+import type { CodePiece } from '@/lib/code';
+import { cn } from '@/lib/utils/cn';
+import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
+import { pieceHasEntrySignature } from '@/lib/editor';
+import { balanceTrayColumns } from '@/lib/code';
 import { CodeBlueprintOverlay } from './CodeBlueprintOverlay';
 import { PuzzlePieceShell } from './PuzzlePieceShell';
 

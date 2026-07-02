@@ -9,7 +9,7 @@ import {
   type TrackId,
 } from '../content';
 import { useWorkspace } from '@/store/workspace';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from './chromeUi';
 import { courseIcon } from './courseIcon';
 

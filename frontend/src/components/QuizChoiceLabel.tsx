@@ -1,5 +1,5 @@
-import { cn } from '../lib/cn';
-import { isCodeHeadline, isComplexityHeadline, parseQuizChoiceLabel } from '../lib/quizChoiceFormat';
+import { cn } from '@/lib/utils/cn';
+import { isCodeHeadline, isComplexityHeadline, parseQuizChoiceLabel } from '@/lib/quiz';
 
 type ChoiceState = 'idle' | 'correct' | 'wrong' | 'dim';
 

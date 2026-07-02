@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { stackFrames, transformFramesForGraph } from './trace';
-import type { Frame } from '../core/types';
+import type { Frame } from '@/core/types';
 
 describe('stackFrames', () => {
   it('interleaves two frame lanes', () => {

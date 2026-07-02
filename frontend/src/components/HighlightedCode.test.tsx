@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { HighlightedCode } from './HighlightedCode';
-import { highlightSnippet } from '../lib/highlightSnippet';
+import { highlightSnippet } from '@/lib/editor';
 
 describe('HighlightedCode', () => {
   it('renders visible Go code with wrap', () => {

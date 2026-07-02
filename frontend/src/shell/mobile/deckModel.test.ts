@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { catalog } from '../../content';
 import { getPlugin } from '../../core';
-import { parseQuizChoiceLabel } from '../../lib/quizChoiceFormat';
+import { parseQuizChoiceLabel } from '@/lib/quiz';
 import { buildDeck, deckSummary } from './deckModel';
 
 describe('deckModel', () => {

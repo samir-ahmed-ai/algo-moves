@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import type { QuizQuestion } from '../../core/types';
-import type { CodePiece } from '../../lib/codePieces';
+import type { CodePiece } from '@/lib/code';
 import type {
   CodeStudioPhase,
   QuizProgress,

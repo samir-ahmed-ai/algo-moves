@@ -2,7 +2,7 @@ import type { ComponentType } from 'react';
 import { definePlugin, type InspectorProps, type ProblemPlugin } from '../../core/types';
 import { codePiecesFromSource } from '../_shared/pluginKit';
 import { VarGrid, vizText } from '../_shared/vizKit';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from '../imported/prepScene';
 import type { PrepProblem } from '../imported/prepFactory';
 import { recordTrace, TraceView, traceVerdict, makeGoInspector } from './anim/codeTrace';

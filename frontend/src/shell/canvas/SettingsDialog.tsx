@@ -5,7 +5,7 @@ import { THEME_META, type ThemePreset } from '../../styles/themes/registry';
 import { LAYOUT_PRESETS, type LayoutPreset, type BgVariant, type EdgePathType } from './layout';
 import { Toggle } from '../ui';
 import { Field, RADIUS_CTRL } from './nodeui';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 
 function Segmented<T extends string>({

@@ -7,9 +7,9 @@ export * from './treeRecord';
 export * from './graphRecord';
 export * from './gridRecord';
 import type { ComponentType } from 'react';
-import type { CodePiece } from '../../lib/codePieces';
+import type { CodePiece } from '@/lib/code';
 import type { Frame, PluginTab, PluginWires, QuizQuestion, SampleInput, Verdict } from '../../core/types';
-import { splitCodeIntoPieces } from '../../lib/codePieces';
+import { splitCodeIntoPieces } from '@/lib/code';
 import { makeCasesPanel, makeQuizPanel, makeSimulatePanel, type WorkedCase } from './practice';
 
 /** Teaching content bundle for a plugin (native or imported). */

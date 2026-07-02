@@ -4,7 +4,7 @@
  * shell/Workspace.tsx. Muting is persisted, and playback is a safe no-op where
  * Web Audio is unavailable or the user has muted.
  *
- *   import { playCue } from '../../lib/audio';
+ *   import { playCue } from '@/lib/utils/audio';
  *   playCue('win');
  */
 import { readStorageText, writeStorageText } from '@/store/persistence';

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { useMediaQuery } from '../../../lib/useMediaQuery';
-import { isSoundMuted, subscribeSoundMuted, toggleSoundMuted } from '../../../lib/audio';
+import { useMediaQuery } from '@/lib/utils/useMediaQuery';
+import { isSoundMuted, subscribeSoundMuted, toggleSoundMuted } from '@/lib/utils/audio';
 
 /** True when the user asked the OS to reduce motion. */
 export function usePrefersReducedMotion(): boolean {

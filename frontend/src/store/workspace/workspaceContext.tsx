@@ -3,7 +3,7 @@ import { catalog, type TrackId } from '@/content';
 import { normalizeCanvasMode, type CanvasMode } from '@/core';
 import { normalizeThemePreset, type ThemePreset } from '@/styles/themes/registry';
 import { readShareFromUrl } from '@/store/navigation/shareState';
-import { useIsMobile } from '@/lib/useMediaQuery';
+import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { isMobileHash, writeMobileHash } from '@/shell/mobile/mobileHash';
 import { isVimHash, writeVimHash } from '@/shell/vim/engine/vimHash';
 import { isGamesHash, writeGamesHash } from '@/shell/games/engine/gamesHash';

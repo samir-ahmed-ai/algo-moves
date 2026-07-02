@@ -1,6 +1,6 @@
 import { Circle } from 'lucide-react';
 import { useStore, useReactFlow } from '@xyflow/react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { ACCENTS } from './layout';
 import type { PanelFlowNode, PanelNodeData } from './PanelNode';

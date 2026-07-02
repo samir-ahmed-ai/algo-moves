@@ -1,6 +1,6 @@
-import { cn } from '../../lib/cn';
-import { computeInputFrameCounts } from '../../lib/inputFrameCounts';
-import { isEditableTarget } from '../../lib/keyboard';
+import { cn } from '@/lib/utils/cn';
+import { computeInputFrameCounts } from '@/lib/canvas';
+import { isEditableTarget } from '@/lib/utils/keyboard';
 import { chromeText } from '../chromeUi';
 import { onReactFlowError } from './canvasFlowErrors';
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
@@ -40,7 +40,7 @@ import { ContextMenu, LaserPointer, type MenuItem } from './CanvasTools';
 import { CanvasFloatingHud } from './CanvasFloatingHud';
 import { TracePreviewPanel } from './TracePreviewPanel';
 import { EffectNode, createEffectByType } from './EffectNode';
-import { ConnectedComponentsProvider } from '../../lib/ConnectedComponentsContext';
+import { ConnectedComponentsProvider } from '@/lib/canvas';
 import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
 import { EFFECTS } from '../../effects/registry';

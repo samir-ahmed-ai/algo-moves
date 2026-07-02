@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { Btn, Field, nodeText } from '../../shell/canvas/nodeui';
 
 export interface BeatTrack {

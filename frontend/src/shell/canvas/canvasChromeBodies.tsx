@@ -8,7 +8,7 @@ import {
   type ThemePreset,
   type CanvasHudProps,
 } from '@/store/workspace';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { Toggle } from '../ui';
 import { CanvasToolButtons, HudBtn } from './CanvasTools';

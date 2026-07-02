@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { Item } from '../../content';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { glyphFor } from '../../content/problemShape';
 
 /**

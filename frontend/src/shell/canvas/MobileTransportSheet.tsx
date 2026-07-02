@@ -1,6 +1,6 @@
 import { useWorkspace } from '@/store/workspace';
 import { TransportBar } from './TransportBarCore';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 
 /** Collapsible mobile transport — hamburger sheet on narrow viewports. */
 export function MobileTransportSheet({ open, onClose }: { open: boolean; onClose: () => void }) {

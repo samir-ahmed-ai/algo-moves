@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useVimGame } from '../VimGameProvider';
 import { useVimCellSize } from '../VimLayoutContext';
 import { useSyncNodeHandles } from '../hooks/useSyncNodeHandles';

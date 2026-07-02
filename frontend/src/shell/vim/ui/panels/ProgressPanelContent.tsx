@@ -1,7 +1,7 @@
 import { useVimGame } from '../../canvas/VimGameProvider';
 import { ReferenceSection } from '../ReferenceSection';
 import { VimProgressBar } from '../vimUi';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { VIM_LEVEL_IDS, chaptersFromLevels, VIM_LEVELS } from '../../engine';
 
 export function ProgressPanelContent({ compact = false }: { compact?: boolean }) {

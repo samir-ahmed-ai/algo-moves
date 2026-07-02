@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { GraduationCap } from 'lucide-react';
 import { patternsForTags } from '../../../../content';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useCanvasStatic } from '../../CanvasContext';
 import { Banner, Chip, EmptyState, Label, Section, nodeText } from '../../nodeui';
 

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { CodePieceOverview } from './CodePieceOverview';
-import { dedentForDisplay } from '../lib/trayLayout';
+import { dedentForDisplay } from '@/lib/code';
 import { codePieces } from '../plugins/n-queens/practice';
 
 describe('CodePieceOverview', () => {

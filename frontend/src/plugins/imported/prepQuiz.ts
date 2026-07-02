@@ -1,5 +1,5 @@
 import type { QuizQuestion } from '../../core/types';
-import { COMPLEXITY_POOL } from '../../lib/complexityHints';
+import { COMPLEXITY_POOL } from '@/lib/quiz';
 import type { PrepProblem } from './prepFactory';
 import { PREP_DATA } from './prepManifest';
 

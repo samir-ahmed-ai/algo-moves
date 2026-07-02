@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getPlugin } from '../core/registry';
 import { plugins } from './index';
-import { quizLabelIssues } from '../lib/quizChoiceFormat';
+import { quizLabelIssues } from '@/lib/quiz';
 import { defaultPrepQuiz } from './imported/prepQuiz';
 import { PREP_DATA } from './imported/prepManifest';
 import { curatedCourses } from '../content/courses';

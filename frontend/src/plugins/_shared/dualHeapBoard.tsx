@@ -1,4 +1,4 @@
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { ArrayRow } from '../../components/ArrayRow';
 import { vizText } from './vizKit';
 

@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useWorkspace, type RightSidebarTab } from '@/store/workspace';
 import type { CanvasMode } from '../../core';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import {
   CollapsedRailButton,
   SIDEBAR_W,

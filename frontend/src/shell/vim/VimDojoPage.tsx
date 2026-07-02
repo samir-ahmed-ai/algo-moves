@@ -1,5 +1,5 @@
 import { Contrast, Home, Keyboard, Moon, Sun } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { VimGameProvider, useVimGame } from './canvas/VimGameProvider';
 import { VimDojoCanvas } from './canvas/VimDojoCanvas';

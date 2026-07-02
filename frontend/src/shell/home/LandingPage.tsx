@@ -22,9 +22,9 @@ import {
 import { catalog, getAllCategories, getTracks, browseBreadcrumbForItem, type Item, type TrackId } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { readLastItemId, useWorkspace } from '@/store/workspace';
-import { useIsMobile } from '../../lib/useMediaQuery';
+import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { compactLabel } from '../chromeUi';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import { glyphFor } from '../../content/problemShape';
 import { Chip } from '../canvas/nodeui';

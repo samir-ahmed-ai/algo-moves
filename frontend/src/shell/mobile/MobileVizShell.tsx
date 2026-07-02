@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import { usePlayer } from '../../core';
 import type { ProblemPlugin } from '../../core/types';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { VizFitBox } from '../canvas/nodeui';
 

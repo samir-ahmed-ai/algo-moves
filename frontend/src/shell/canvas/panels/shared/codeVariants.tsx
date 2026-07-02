@@ -1,4 +1,4 @@
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { Code2 } from 'lucide-react';
 import { nodeIconGlyph, nodeText, PanelHeaderAction, RADIUS_CTRL } from '../../nodeui';
 

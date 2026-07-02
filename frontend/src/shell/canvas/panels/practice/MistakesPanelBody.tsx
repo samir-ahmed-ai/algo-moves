@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useProgress, clearMistakes } from '@/store/persistence';
 import { useCanvasStatic } from '../../CanvasContext';
 import { Banner, Btn, EmptyState, Pill, Section, Stat, StatGrid, nodeText } from '../../nodeui';

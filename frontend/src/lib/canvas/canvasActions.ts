@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { LayoutVisualizeOptions } from '../shell/canvas/layout';
+import type { LayoutVisualizeOptions } from '@/shell/canvas/layout';
 
 /** Zoom/focus helpers for canvas panels (practice flow, etc.). */
 export interface CanvasActions {

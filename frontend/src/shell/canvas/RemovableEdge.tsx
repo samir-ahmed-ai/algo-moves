@@ -9,7 +9,7 @@ import {
   type EdgeProps,
 } from '@xyflow/react';
 import { X } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 
 /**
  * Edge that honors a user-selected path type (data.pathType) and exposes a delete

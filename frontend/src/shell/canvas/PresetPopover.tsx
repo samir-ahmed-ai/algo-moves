@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Sparkles, Check, LayoutGrid, Eye, Minimize2, Monitor, Presentation } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { nodeText } from './nodeui';
 import { LAYOUT_PRESET_META, type LayoutPreset } from './layout';

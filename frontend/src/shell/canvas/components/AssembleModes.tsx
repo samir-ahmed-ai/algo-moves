@@ -12,12 +12,12 @@ import {
   Timer,
   Trophy,
 } from 'lucide-react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText } from '../nodeui';
 import { useCodeStudio } from '../CodeStudio';
 import { useCanvasStatic } from '../CanvasContext';
-import type { CodePiece } from '../../../lib/codePieces';
-import { blockKind, BLOCK_META } from '../../../lib/codePieceRoles';
+import type { CodePiece } from '@/lib/code';
+import { blockKind, BLOCK_META } from '@/lib/code';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 
 /* ----------------------------- shared helpers ----------------------------- */

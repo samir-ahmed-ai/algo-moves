@@ -6,7 +6,7 @@ import {
   BackgroundVariant,
   Panel,
 } from '@xyflow/react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { KeyboardHud } from '../ui/KeyboardHud';
 import { onVimFlowError } from './canvasFlowErrors';
 import { vimNodeTypes } from './nodes';

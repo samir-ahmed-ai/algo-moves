@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { definePlugin, type ProblemPlugin } from '../core/types';
+import { definePlugin, type ProblemPlugin } from '@/core/types';
 import {
   computeInputFrameCounts,
   inputFrameCount,

@@ -23,7 +23,7 @@ import {
 import { ChevronDown, GripVertical, MoreVertical, Search } from 'lucide-react';
 import { getTag } from '../../content/tags';
 import { TAG_KIND_COLOR } from '../../content/tagColors';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 
 export type HeaderDensity = 'compact' | 'ultra' | 'spacious';
 

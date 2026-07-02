@@ -1,5 +1,5 @@
-import { highlightSnippet } from '../lib/highlightSnippet';
-import { cn } from '../lib/cn';
+import { highlightSnippet } from '@/lib/editor';
+import { cn } from '@/lib/utils/cn';
 
 export interface HighlightedCodeProps {
   code: string;

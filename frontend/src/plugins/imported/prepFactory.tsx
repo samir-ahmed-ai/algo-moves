@@ -2,7 +2,7 @@ import type { ComponentType } from 'react';
 import { definePlugin, type InspectorProps, type ProblemPlugin } from '../../core/types';
 import { wireTeachingStack, codePiecesFromSource } from '../_shared/pluginKit';
 import { VarGrid, vizText } from '../_shared/vizKit';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { prepCodePieces } from './prepCodePieces';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from './prepScene';
 import { resolvePrepSimulator } from './prepSimulators';

@@ -1,7 +1,7 @@
 import type { Edge, Node } from '@xyflow/react';
-import type { Frame } from '../core/types';
-import type { PanelRunState } from '../core/panelRegistry';
-import { applyEffect, effectTraceSnippet } from '../effects/registry';
+import type { Frame } from '@/core/types';
+import type { PanelRunState } from '@/core/panelRegistry';
+import { applyEffect, effectTraceSnippet } from '@/effects/registry';
 import { findConnectedComponents } from './connectedComponents';
 
 export interface EffectNodeData extends Record<string, unknown> {

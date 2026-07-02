@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText, ChromeLabel } from './chromeUi';
 import { STRUDEL_NODE_W } from './canvas/nodeTokens';
 import { CHROME_BTN_MD } from './chrome';

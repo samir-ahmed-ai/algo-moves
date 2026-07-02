@@ -1,6 +1,6 @@
 import { ChevronLeft } from 'lucide-react';
 import { getCategoryById, getTrackById, type TrackId } from '../../content';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 
 export function BrowseBreadcrumb({

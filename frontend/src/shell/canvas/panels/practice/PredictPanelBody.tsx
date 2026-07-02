@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Lightbulb } from 'lucide-react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useProgress, statFor, recordAttempt, logMistake } from '@/store/persistence';
 import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../../CanvasContext';
 import { Banner, Btn, Chip, EmptyState, Hint, Label, Option, nodeText } from '../../nodeui';
@@ -9,7 +9,7 @@ import {
   PREDICT_MASTERY_FOCUS_MS,
   TIME_LIMIT,
 } from '../shared/practiceConstants';
-import { shuffleSeeded } from '../../../../lib/shuffleSeeded';
+import { shuffleSeeded } from '@/lib/quiz';
 
 /** #33 Predict-the-next-move: a generic challenge built from the recorder frames. */
 export function PredictPanelBody() {

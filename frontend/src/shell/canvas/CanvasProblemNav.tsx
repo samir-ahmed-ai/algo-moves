@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Panel } from '@xyflow/react';
 import { catalog, getSiblingItems, type Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { PROBLEM_GLYPHS } from '../../content/glyphs';
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Copy, Check, Link } from 'lucide-react';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { getProjectShareUrl, type ProjectState } from '@/store/project-state';
 

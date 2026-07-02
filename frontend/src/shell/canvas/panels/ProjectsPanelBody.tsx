@@ -7,7 +7,7 @@ import type { ShareState } from '@/store/navigation';
 import { buildMinimalProjectState, type ProjectState } from '@/store/project-state';
 import { ShareUrlPopover } from '../ShareUrlPopover';
 import { SaveProjectDialog } from '../SaveProjectDialog';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
 import { Btn, EmptyState, Field, nodeIconGlyph, Row, Section, TextInput, Pill, nodeText, nodeTextWrap, RADIUS_CTRL } from '../nodeui';
 

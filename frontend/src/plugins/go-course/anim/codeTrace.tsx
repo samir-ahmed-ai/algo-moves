@@ -1,8 +1,8 @@
 import { useEffect, useRef, type ComponentType } from 'react';
 import { Flag, Sparkles } from 'lucide-react';
 import type { Frame, InspectorProps, PluginViewProps } from '../../../core/types';
-import { cn } from '../../../lib/cn';
-import { highlightSnippet } from '../../../lib/highlightSnippet';
+import { cn } from '@/lib/utils/cn';
+import { highlightSnippet } from '@/lib/editor';
 import { VizStage, RailSection, InspectorRow, VarGrid, VizEmpty, vizText } from '../../_shared/vizKit';
 import type { GoConcept, GoStateChip } from '../types';
 

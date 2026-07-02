@@ -14,11 +14,11 @@ import {
 } from 'lucide-react';
 import type { Item } from '../../content';
 import { recordAttempt, logMistake } from '@/store/persistence';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { ReassemblePane } from '../../components/ReassemblePane';
-import { quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
-import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '../../lib/quizConstants';
+import { quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
+import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '@/lib/quiz';
 import { correctIndex, type GistCard as GistCardData, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
 import { GistScene } from './gistScenes';
 import { MobileVizShell } from './MobileVizShell';

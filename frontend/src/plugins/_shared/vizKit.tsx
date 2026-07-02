@@ -6,7 +6,7 @@
  */
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import type { Frame, InspectorProps, PluginViewProps } from '../../core/types';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { vizPad, vizText } from './vizTokens';
 
 export { vizText, vizPad } from './vizTokens';

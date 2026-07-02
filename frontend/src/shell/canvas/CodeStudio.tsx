@@ -23,8 +23,8 @@ import { ReassemblePane } from '../../components/ReassemblePane';
 import { SplitCodeEditor } from '../../components/SplitCodeEditor';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { patternsForTags } from '../../content';
-import { extractSkeleton } from '../../lib/codeSkeleton';
-import { assembleDraft, resolveCodePieces, type CodePiece } from '../../lib/codePieces';
+import { extractSkeleton } from '@/lib/code';
+import { assembleDraft, resolveCodePieces, type CodePiece } from '@/lib/code';
 import {
   clearQuizProgress,
   clearReassembleProgress,
@@ -40,12 +40,12 @@ import {
   type PhaseAvailability,
   type QuizProgress,
 } from '@/store/user-prefs';
-import { matchScore } from '../../lib/codeDiff';
+import { matchScore } from '@/lib/code';
 import { useEditorPrefs } from '@/store/user-prefs';
-import { parseComplexity } from '../../lib/parseComplexity';
+import { parseComplexity } from '@/lib/quiz';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { recordAttempt, useProgress, statFor } from '@/store/persistence';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { useWorkspace } from '@/store/workspace';

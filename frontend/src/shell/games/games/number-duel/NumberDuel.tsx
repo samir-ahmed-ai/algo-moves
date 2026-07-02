@@ -8,9 +8,9 @@ import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
 import { Avatar } from '../../ui/Avatar';
-import { cn } from '../../../../lib/cn';
-import { playCue } from '../../../../lib/audio';
-import { hapticError, hapticSuccess } from '../../../../lib/haptic';
+import { cn } from '@/lib/utils/cn';
+import { playCue } from '@/lib/utils/audio';
+import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import {
   clampNumber,
   decideWinner,

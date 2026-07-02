@@ -1,7 +1,7 @@
 import type { Ref } from 'react';
 import { ScanEye, X } from 'lucide-react';
-import type { CodePiece } from '../lib/codePieces';
-import { cn } from '../lib/cn';
+import type { CodePiece } from '@/lib/code';
+import { cn } from '@/lib/utils/cn';
 import { CodePieceOverview } from './CodePieceOverview';
 
 export interface CodeBlueprintPanelProps {

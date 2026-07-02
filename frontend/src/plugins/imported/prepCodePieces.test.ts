@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isBraceOnlyPiece } from '../../lib/codePieces';
+import { isBraceOnlyPiece } from '@/lib/code';
 import { prepCodePieces } from '../../plugins/imported/prepCodePieces';
 
 describe('prepCodePieces', () => {

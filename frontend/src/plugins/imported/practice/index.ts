@@ -1,5 +1,5 @@
 import type { PracticeBundle } from '../../_shared/pluginKit';
-import { splitCodeIntoPieces } from '../../../lib/codePieces';
+import { splitCodeIntoPieces } from '@/lib/code';
 import { IMPORTED_PRACTICE } from './bundles';
 import { MIGRATED_BUNDLES } from './migrated';
 import { EXTRA_CASE_BUNDLES } from './extraCases';

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MessageCircle, Send, ChevronDown } from 'lucide-react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
 import { useRoomComms } from '../net/useRoomComms';

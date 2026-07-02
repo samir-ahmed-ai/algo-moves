@@ -17,10 +17,10 @@ import {
 import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
 import { catalog, browseBreadcrumbForItem } from '../../content';
-import { cn } from '../../lib/cn';
-import { computeInputFrameCounts } from '../../lib/inputFrameCounts';
+import { cn } from '@/lib/utils/cn';
+import { computeInputFrameCounts } from '@/lib/canvas';
 import { useWorkspace } from '@/store/workspace';
-import { useIsMobile } from '../../lib/useMediaQuery';
+import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { ChromeLabel, chromeText } from '../chromeUi';
 import { Btn, Chip, EmptyState } from './nodeui';

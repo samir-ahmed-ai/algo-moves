@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { blockKind, pieceRoleMeta } from './codePieceRoles';
-import { codePieces } from '../plugins/n-queens/practice';
+import { codePieces } from '@/plugins/n-queens/practice';
 
 describe('blockKind', () => {
   it('maps signature from role text and func line', () => {

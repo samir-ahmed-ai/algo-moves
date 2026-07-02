@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { nodeTextWrap } from '../../../canvas/nodeui';
-import { useIsMobile } from '../../../../lib/useMediaQuery';
+import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { useVimGame } from '../../canvas/VimGameProvider';
 import { VimBadge, VimBtn, VimKbd } from '../vimUi';
 

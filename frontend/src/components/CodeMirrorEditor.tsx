@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Compartment, EditorState, RangeSetBuilder } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
-import { coreEditorExtensions, vimExtensions, wrapExtensions } from '../lib/editorSetup';
-import { buildEditorTheme } from '../lib/editorTheme';
-import { languageExtension } from '../lib/languageExtension';
+import { coreEditorExtensions, vimExtensions, wrapExtensions } from '@/lib/editor';
+import { buildEditorTheme } from '@/lib/editor';
+import { languageExtension } from '@/lib/editor';
 
 export interface CodeMirrorEditorProps {
   value: string;

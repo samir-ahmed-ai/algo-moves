@@ -2,7 +2,7 @@ import { Lock, Trophy } from 'lucide-react';
 import { catalog } from '../../../../content';
 import { useWorkspace } from '@/store/workspace';
 import { useProgress, statFor } from '@/store/persistence';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useCanvasStatic } from '../../CanvasContext';
 import { Chip, Hint, Meter, nodeIconGlyph, nodeTextWrap, Pill, Row } from '../../nodeui';
 

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 
 type ToastTone = 'info' | 'good' | 'bad';
 interface Toast {

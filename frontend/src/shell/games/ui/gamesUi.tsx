@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 
 /** Inner-SVG mnemonic glyph, drawn the same way the topic board / landing draw it. */
 export function Glyph({ markup, className }: { markup: string; className?: string }) {

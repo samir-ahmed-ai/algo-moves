@@ -1,4 +1,4 @@
-import { inputFrameCount } from '../../../lib/inputFrameCounts';
+import { inputFrameCount } from '@/lib/canvas';
 import { useCanvasStatic } from '../CanvasContext';
 import { Hint, Meter, Stat } from '../nodeui';
 

@@ -5,7 +5,7 @@
  */
 import { getPlugin } from '../../core';
 import type { CodePiece, PluginCode, ProblemPlugin, QuizQuestion } from '../../core/types';
-import { resolveCodePieces, MIN_REASSEMBLE_PIECES } from '../../lib/codePieces';
+import { resolveCodePieces, MIN_REASSEMBLE_PIECES } from '@/lib/code';
 import type { Item, Topic } from '../../content';
 import { gistFor } from '../../content/gists';
 

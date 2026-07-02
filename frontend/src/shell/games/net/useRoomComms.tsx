@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { useGameRoom } from './useGameRoom';
 import { useAuth } from '../data/AuthProvider';
-import { playCue } from '../../../lib/audio';
+import { playCue } from '@/lib/utils/audio';
 
 /**
  * Room-level chat, emoji reactions, ready-state presence and player identity,

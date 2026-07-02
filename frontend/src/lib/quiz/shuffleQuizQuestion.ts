@@ -1,4 +1,4 @@
-import type { QuizQuestion } from '../core/types';
+import type { QuizQuestion } from '@/core/types';
 import { QUIZ_SHUFFLE_BY_DEFAULT } from './quizConstants';
 import { shuffleSeeded } from './shuffleSeeded';
 

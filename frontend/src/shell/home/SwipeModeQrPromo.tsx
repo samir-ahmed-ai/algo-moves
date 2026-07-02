@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown, Copy, Smartphone, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { buildMobileModeUrl } from '../mobile/mobileHash';
 import { isSwipeQrPromoDismissed, markSwipeQrPromoDismissed } from './swipeQrPromoState';
 

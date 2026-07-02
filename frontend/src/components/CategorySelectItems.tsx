@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { nodeText } from '../shell/canvas/nodeui';
 
 export interface SelectCategory<T extends string = string> {

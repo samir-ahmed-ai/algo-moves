@@ -9,16 +9,16 @@ export {
   useCanvasFrame,
   type CanvasStatic,
   type CanvasFrame,
-} from '../../lib/canvasContext';
+} from '@/lib/canvas';
 
 export {
   CanvasActionsContext,
   useCanvasActions,
   type CanvasActions,
-} from '../../lib/canvasActions';
+} from '@/lib/canvas';
 
-import { CanvasStaticContext, CanvasFrameContext } from '../../lib/canvasContext';
-import { CanvasActionsContext } from '../../lib/canvasActions';
+import { CanvasStaticContext, CanvasFrameContext } from '@/lib/canvas';
+import { CanvasActionsContext } from '@/lib/canvas';
 
 export const CanvasStaticProvider = CanvasStaticContext.Provider;
 export const CanvasFrameProvider = CanvasFrameContext.Provider;

@@ -1,5 +1,5 @@
 import { Check, Lock } from 'lucide-react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useVimGame } from '../../canvas/VimGameProvider';
 import { LessonSection } from '../LessonSection';
 import { VimBadge } from '../vimUi';

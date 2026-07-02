@@ -3,7 +3,7 @@ import { definePlugin, type Frame, type InspectorProps, type ProblemPlugin, type
 import { wireTeachingStack, codePiecesFromSource, type PracticeBundle } from '../_shared/pluginKit';
 import { resolveSimulator } from './simulators';
 import { resolvePracticeBundle } from './practice';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../_shared/vizKit';
 
 /** Imported categories that have hand-authored step-by-step simulators. */

@@ -1,5 +1,5 @@
 import * as Switch from '@radix-ui/react-switch';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { getTag } from '../content';
 import { TAG_KIND_COLOR } from '../content/tagColors';
 import { chromeText, ChromeHint } from './chromeUi';

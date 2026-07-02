@@ -3,11 +3,11 @@ import { ArrowRight, Check, Lightbulb, RotateCcw, X } from 'lucide-react';
 import type { QuizQuestion } from '../../core/types';
 import type { QuizProgress } from '@/store/user-prefs';
 import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
-import { cn } from '../../lib/cn';
-import { QUIZ_WRONG_MS } from '../../lib/quizConstants';
-import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
+import { cn } from '@/lib/utils/cn';
+import { QUIZ_WRONG_MS } from '@/lib/quiz';
+import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { recordAttempt } from '@/store/persistence';
-import { useIsMobile } from '../../lib/useMediaQuery';
+import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { chromeText } from '../chromeUi';
 
 export interface CodeStudioQuizProps {

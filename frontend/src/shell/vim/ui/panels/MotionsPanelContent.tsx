@@ -1,5 +1,5 @@
 import { HelpCircle } from 'lucide-react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useVimGame } from '../../canvas/VimGameProvider';
 import { VimKbd } from '../vimUi';
 

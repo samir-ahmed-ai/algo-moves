@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useWorkspace } from '@/store/workspace';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { ErrorBoundary } from '../../ErrorBoundary';
 import { useCanvasFrame, useCanvasStatic } from '../CanvasContext';
 import { ControlsAccordion, nodeText, nodeTextWrap, VizFitBox } from '../nodeui';

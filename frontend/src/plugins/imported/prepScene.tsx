@@ -7,7 +7,7 @@
  */
 import { Clapperboard, Film, KeyRound, Timer } from 'lucide-react';
 import { type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../_shared/vizKit';
 import type { PrepProblem } from './prepFactory';
 

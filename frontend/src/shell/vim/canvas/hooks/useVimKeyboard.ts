@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { isEditableTarget } from '../../../../lib/keyboard';
+import { isEditableTarget } from '@/lib/utils/keyboard';
 import { formatKeyEvent, isModifierOnlyKey } from '../../lib/formatKey';
 import { useVimGame } from '../VimGameProvider';
 

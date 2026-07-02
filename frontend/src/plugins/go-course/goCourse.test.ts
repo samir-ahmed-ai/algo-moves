@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GO_TOPICS } from './topics';
 import { goCoursePlugins, goCourses } from './index';
-import { quizLabelIssues } from '../../lib/quizChoiceFormat';
+import { quizLabelIssues } from '@/lib/quiz';
 import { recordTrace } from './anim/codeTrace';
 
 const concepts = GO_TOPICS.flatMap((t) => t.concepts);

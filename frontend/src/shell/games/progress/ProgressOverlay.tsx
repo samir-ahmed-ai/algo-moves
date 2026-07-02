@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { X, Trophy, User as UserIcon, Pencil, LogOut, Mail } from 'lucide-react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useAuth } from '../data/AuthProvider';
 import { isSupabaseConfigured } from '../data/supabaseClient';

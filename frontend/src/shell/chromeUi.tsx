@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 
 /** Shared shell chrome type scale — mirrors `--fs*` in index.css. */
 export const chromeText = {

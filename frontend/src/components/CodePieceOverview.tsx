@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
-import type { CodePiece } from '../lib/codePieces';
-import { pieceGlyph, pieceRoleMeta } from '../lib/codePieceRoles';
-import { dedentForDisplay } from '../lib/trayLayout';
+import type { CodePiece } from '@/lib/code';
+import { pieceGlyph, pieceRoleMeta } from '@/lib/code';
+import { dedentForDisplay } from '@/lib/code';
 import { HighlightedCode } from './HighlightedCode';
 
 export interface CodePieceOverviewProps {

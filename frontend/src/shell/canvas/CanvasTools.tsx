@@ -11,7 +11,7 @@ import {
   AlignHorizontalDistributeCenter,
   AlignVerticalDistributeCenter,
 } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../chrome';
 import type { AlignKind } from './align';
 

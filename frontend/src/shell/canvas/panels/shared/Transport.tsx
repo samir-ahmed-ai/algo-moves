@@ -14,7 +14,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { useWorkspace } from '@/store/workspace';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../../chrome';
 import { useCanvasFrame } from '../../CanvasContext';
 import { nodeIconGlyph, nodeText, RADIUS_CTRL } from '../../nodeui';

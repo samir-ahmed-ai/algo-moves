@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { CodeMirrorEditor } from './CodeMirrorEditor';
-import { diffChangedLines } from '../lib/codeDiff';
+import { diffChangedLines } from '@/lib/code';
 import { clampSplitPct, SPLIT_MAX, SPLIT_MIN } from '@/store/user-prefs';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { nodeText } from '../shell/canvas/nodeui';
 
 export interface SplitCodeEditorProps {

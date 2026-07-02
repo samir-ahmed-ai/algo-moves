@@ -3,7 +3,7 @@ import { STRUDEL_NODE_W } from '../../design/tokens';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
 import { vizText, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 

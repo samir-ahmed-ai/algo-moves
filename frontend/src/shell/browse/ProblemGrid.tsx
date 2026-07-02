@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Trophy } from 'lucide-react';
 import type { Difficulty, Item } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { Chip, Meter, Pill, difficultyTone } from '../canvas/nodeui';
 import { chromeText } from '../chromeUi';
 import { glyphFor } from '../../content/problemShape';

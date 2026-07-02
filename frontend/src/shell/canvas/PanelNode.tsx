@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Handle, NodeResizer, NodeToolbar, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from './layout';
 import { nodeTier } from './nodeTokens';
 import { handleDotClass, portHandleStyle } from './canvasHandles';
-import { useConnectedComponentsOptional } from '../../lib/ConnectedComponentsContext';
+import { useConnectedComponentsOptional } from '@/lib/canvas';
 import { panelBorderRadius, panelFill, panelOpacity, panelStroke } from './panelStyle';
 
 const CHAIN_TINTS = [

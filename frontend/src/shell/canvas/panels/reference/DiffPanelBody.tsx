@@ -1,5 +1,5 @@
 import { GitCompare } from 'lucide-react';
-import { cn } from '../../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { useCanvasFrame } from '../../CanvasContext';
 import { Banner, ControlsAccordion, EmptyState, Pill, nodeText } from '../../nodeui';
 

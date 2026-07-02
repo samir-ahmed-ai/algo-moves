@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
-import type { CodePiece } from '../lib/codePieces';
-import { pieceRoleMeta } from '../lib/codePieceRoles';
-import { dedentForDisplay } from '../lib/trayLayout';
-import { cn } from '../lib/cn';
+import type { CodePiece } from '@/lib/code';
+import { pieceRoleMeta } from '@/lib/code';
+import { dedentForDisplay } from '@/lib/code';
+import { cn } from '@/lib/utils/cn';
 import { HighlightedCode } from './HighlightedCode';
 
 export interface PuzzlePieceShellProps {

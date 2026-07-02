@@ -12,7 +12,7 @@ import {
 } from '../content';
 import { useWorkspace } from '@/store/workspace';
 import { useProgress, statFor } from '@/store/persistence';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { courseIcon } from './courseIcon';
 import { Chip, EmptyState, Label, Meter, difficultyTone } from './canvas/nodeui';
 import { chromeText } from './chromeUi';

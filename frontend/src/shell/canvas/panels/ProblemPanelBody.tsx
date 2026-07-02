@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useWorkspace } from '@/store/workspace';
-import { cn } from '../../../lib/cn';
-import { inputFrameCount, type InputFrameCounts } from '../../../lib/inputFrameCounts';
+import { cn } from '@/lib/utils/cn';
+import { inputFrameCount, type InputFrameCounts } from '@/lib/canvas';
 import type { SampleInput } from '../../../core/types';
 import { useCanvasStatic } from '../CanvasContext';
 import { stepExampleInput } from '../exampleInputNav';

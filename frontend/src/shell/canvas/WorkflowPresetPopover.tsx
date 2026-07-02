@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LayoutTemplate } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { WORKFLOW_PRESET_ACTIONS, type WorkflowPresetAction } from '../../data/workflowPresets';
 

@@ -1,6 +1,6 @@
 import { catalog, getCategoriesForTrack, getItemsForCategory, getTracks, type TrackId } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
-import { cn } from '../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { courseIcon } from '../courseIcon';
 import { chromeText } from '../chromeUi';
 import { Meter } from '../canvas/nodeui';

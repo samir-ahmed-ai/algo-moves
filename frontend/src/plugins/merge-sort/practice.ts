@@ -1,6 +1,6 @@
 import type { QuizQuestion } from '../_shared/practice';
-import type { CodePiece } from '../../lib/codePieces';
-import { splitCodeIntoPieces } from '../../lib/codePieces';
+import type { CodePiece } from '@/lib/code';
+import { splitCodeIntoPieces } from '@/lib/code';
 
 export const quiz: QuizQuestion[] = [
   {

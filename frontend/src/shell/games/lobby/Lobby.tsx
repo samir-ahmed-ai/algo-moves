@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Eye, Gamepad2, Loader2, Plus, Users } from 'lucide-react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';

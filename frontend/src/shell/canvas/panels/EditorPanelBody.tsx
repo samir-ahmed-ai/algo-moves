@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Play } from 'lucide-react';
-import { cn } from '../../../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import type { InputBuilderKind } from '../../../core/effectTypes';
 import { CategorySelectItems } from '../../../components/CategorySelectItems';
 import { INPUT_BUILDERS } from '../../../effects/inputBuilders';

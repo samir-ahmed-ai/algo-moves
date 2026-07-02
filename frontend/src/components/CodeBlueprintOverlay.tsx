@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { CodeBlueprintPanel, type CodeBlueprintPanelProps } from './CodeBlueprintPanel';
-import { isEditableTarget } from '../lib/keyboard';
+import { isEditableTarget } from '@/lib/utils/keyboard';
 
 export type CodeBlueprintOverlayProps = Omit<CodeBlueprintPanelProps, 'inline' | 'closeRef'>;
 

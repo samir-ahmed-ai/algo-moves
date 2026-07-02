@@ -8,8 +8,8 @@ import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
-import { playCue } from '../../../../lib/audio';
-import { hapticError, hapticSuccess } from '../../../../lib/haptic';
+import { playCue } from '@/lib/utils/audio';
+import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import {
   FALSE_START,
   isFalseStart,

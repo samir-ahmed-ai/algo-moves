@@ -20,7 +20,7 @@ import {
 import { catalog, browseBreadcrumbForItem, getSiblingItems, categoryIdForItem, trackForCategory, type ItemStatus } from '../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { useWorkspace } from '@/store/workspace';
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/utils/cn';
 import { chromeText } from './chromeUi';
 import { CatalogTree } from './CatalogTree';
 import { nodeIcon, panelAccent } from './canvas/PanelNode';
