@@ -177,8 +177,8 @@ describe('visualizer View structure', () => {
   }
 
   for (const plugin of plugins) {
-    // imp-* and prep-* are factory-generated (View lives in factory/prepScene/sim files), not folder plugins.
-    if (plugin.meta.id.startsWith('imp-') || plugin.meta.id.startsWith('prep-')) continue;
+    // imp-*, prep-* and go-* are factory-generated (View lives in factory/prepScene/sim files), not folder plugins.
+    if (plugin.meta.id.startsWith('imp-') || plugin.meta.id.startsWith('prep-') || plugin.meta.id.startsWith('go-')) continue;
     const nativePath = `./${plugin.meta.id}/index.tsx`;
     it(`native ${plugin.meta.id} View uses board-area`, () => {
       const src = nativeSources[nativePath];

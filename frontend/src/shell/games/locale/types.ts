@@ -1,6 +1,6 @@
 export type GameLocale = 'ar' | 'en';
 
-export const DEFAULT_GAME_LOCALE: GameLocale = 'ar';
+export const DEFAULT_GAME_LOCALE: GameLocale = 'en';
 
 export const GAME_LOCALE_KEY = 'algo-moves:games:locale';
 

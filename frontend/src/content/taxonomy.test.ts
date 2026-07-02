@@ -11,13 +11,20 @@ import {
 } from './taxonomy';
 
 describe('content/taxonomy', () => {
-  it('defines four top-level tracks', () => {
+  it('defines the top-level tracks', () => {
     expect(getTracks().map((t) => t.id)).toEqual([
       'data-structures',
       'algorithms',
       'design',
+      'go',
       'interview-prep',
     ]);
+  });
+
+  it('exposes the Go — Senior Developer track with per-topic categories', () => {
+    const go = getTrackById('go');
+    expect(go?.title).toBe('Go — Senior Developer');
+    expect(getCategoriesForTrack('go').length).toBeGreaterThanOrEqual(5);
   });
 
   it('maps browse topic ids', () => {

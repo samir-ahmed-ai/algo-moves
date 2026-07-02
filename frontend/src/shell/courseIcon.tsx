@@ -20,6 +20,15 @@ import {
   Database,
   RectangleHorizontal,
   Target,
+  Workflow,
+  Cpu,
+  Shapes,
+  Braces,
+  TriangleAlert,
+  Library,
+  Gauge,
+  FlaskConical,
+  Blocks,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -46,6 +55,15 @@ const ICONS: Record<string, LucideIcon> = {
   Database,
   RectangleHorizontal,
   Target,
+  Workflow,
+  Cpu,
+  Shapes,
+  Braces,
+  TriangleAlert,
+  Library,
+  Gauge,
+  FlaskConical,
+  Blocks,
 };
 
 export function courseIcon(name?: string): LucideIcon {

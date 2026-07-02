@@ -3,10 +3,12 @@ import { curatedCourses } from './courses';
 import { mergeCourses } from './mergeCourses';
 import { importedCourses } from '../plugins/imported';
 import { prepCourses } from '../plugins/imported/prep';
+import { goCourses } from '../plugins/go-course';
 
 export const catalog = buildCatalog([
   ...mergeCourses(curatedCourses, importedCourses),
   ...prepCourses,
+  ...goCourses,
 ]);
 
 export type { Catalog } from './catalog';

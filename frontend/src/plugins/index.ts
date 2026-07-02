@@ -19,6 +19,7 @@ import { maxSubarraySumKPlugin } from './max-subarray-sum-k';
 import { longestSubstringPlugin } from './longest-substring';
 import { importedPlugins } from './imported';
 import { prepPlugins } from './imported/prep';
+import { goCoursePlugins } from './go-course';
 
 /**
  * The plugin manifest. To add a problem visualizer, build a folder under
@@ -52,4 +53,5 @@ export const plugins: ProblemPlugin<any, any>[] = [
   intervalSchedulingPlugin,
   ...importedPlugins,
   ...prepPlugins,
+  ...goCoursePlugins,
 ];

@@ -3,8 +3,8 @@ import { DEFAULT_GAME_LOCALE } from '../types';
 import { getArcadeStrings } from './index';
 
 describe('arcade messages', () => {
-  it('defaults to Arabic locale', () => {
-    expect(DEFAULT_GAME_LOCALE).toBe('ar');
+  it('defaults to English locale', () => {
+    expect(DEFAULT_GAME_LOCALE).toBe('en');
   });
 
   it('returns Arabic strings for ar locale', () => {

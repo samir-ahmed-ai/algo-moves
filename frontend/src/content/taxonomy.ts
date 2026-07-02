@@ -1,5 +1,7 @@
-/** Top-level browse tracks — the four entry points for organizing content. */
-export type TrackId = 'data-structures' | 'algorithms' | 'design' | 'interview-prep';
+import { GO_COURSE_ID, goBrowseCategories } from '../plugins/go-course';
+
+/** Top-level browse tracks — the entry points for organizing content. */
+export type TrackId = 'data-structures' | 'algorithms' | 'design' | 'go' | 'interview-prep';
 
 export interface BrowseCategorySource {
   courseId: string;
@@ -209,6 +211,17 @@ const CATEGORIES: BrowseCategory[] = [
     icon: 'Boxes',
     sources: [{ courseId: 'prep-design' }],
   },
+
+  // —— Go (Senior) —— one category per Go course topic, generated from the course.
+  ...goBrowseCategories.map(
+    (c): BrowseCategory => ({
+      id: c.id,
+      title: c.title,
+      summary: c.summary,
+      icon: c.icon,
+      sources: [{ courseId: GO_COURSE_ID, topicIds: [c.courseTopicId] }],
+    }),
+  ),
 ];
 
 const categoryById = new Map(CATEGORIES.map((c) => [c.id, c]));
@@ -235,6 +248,8 @@ const ALG_IDS = [
 
 const DESIGN_IDS = ['design'] as const;
 
+const GO_IDS = goBrowseCategories.map((c) => c.id);
+
 const TRACKS: BrowseTrack[] = [
   {
     id: 'data-structures',
@@ -258,11 +273,18 @@ const TRACKS: BrowseTrack[] = [
     categoryIds: [...DESIGN_IDS],
   },
   {
+    id: 'go',
+    title: 'Go — Senior Developer',
+    summary: 'Concurrency, runtime & memory, generics, and system design in Go.',
+    icon: 'Boxes',
+    categoryIds: [...GO_IDS],
+  },
+  {
     id: 'interview-prep',
     title: 'Interview Preparation',
     summary: 'Every category — browse all problems by topic.',
     icon: 'Target',
-    categoryIds: [...DS_IDS, ...ALG_IDS, ...DESIGN_IDS],
+    categoryIds: [...DS_IDS, ...ALG_IDS, ...DESIGN_IDS, ...GO_IDS],
   },
 ];
 
