@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FileQuestion } from 'lucide-react';
-import { loadPlugin, getLoadedPlugin, usePlayer, type ProblemPlugin } from '../core';
+import { usePlayer } from '../core';
 import { catalog } from '../content';
-import { useWorkspace, normalizeThemePreset } from '@/store/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { isEditableTarget } from '@/lib/utils/keyboard';
-import { useNarration, useSoundCues } from '@/hooks';
+import { useNarration, useSoundCues, useWorkspacePlugin, useWorkspaceUrlState } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { buildShareUrl, readShareFromUrl, writeShareToUrl } from '@/store/navigation';
-import { loadProjectFromUrl } from '@/store/project-state';
+import { buildShareUrl } from '@/store/navigation';
 import { UnifiedLeftSidebar } from './UnifiedLeftSidebar';
 import { CanvasStage } from './canvas/CanvasStage';
 import { LearnStudio } from './canvas/LearnStudio';
@@ -25,20 +24,9 @@ export function Workspace() {
     setPresent,
     tweaks,
     activeItemId,
-    openProblem,
     activeTrackId,
     activeCategoryId,
     mode,
-    setMode,
-    theme,
-    setTheme,
-    palette,
-    setPalette,
-    themePreset,
-    setThemePreset,
-    dir,
-    setDir,
-    canvasProject,
     mobileTransportOpen,
     setMobileTransportOpen,
   } = useWorkspace();
@@ -49,119 +37,12 @@ export function Workspace() {
   const item = catalog.getItem(activeItemId) ?? catalog.items[0];
   const pluginId = item?.pluginId;
 
-  // The heavy plugin implementation loads on demand (its group's chunk). Metadata
-  // for the sidebar/catalog is already available synchronously; only the canvas
-  // needs the full plugin, so we resolve it here and show a loading state until ready.
-  const [plugin, setPlugin] = useState<ProblemPlugin<any, any> | undefined>(() =>
-    pluginId ? getLoadedPlugin(pluginId) : undefined,
-  );
-  const [pluginLoading, setPluginLoading] = useState(false);
-  useEffect(() => {
-    if (!pluginId) {
-      setPlugin(undefined);
-      setPluginLoading(false);
-      return;
-    }
-    const cached = getLoadedPlugin(pluginId);
-    if (cached) {
-      setPlugin(cached);
-      setPluginLoading(false);
-      return;
-    }
-    setPlugin(undefined);
-    setPluginLoading(true);
-    let cancelled = false;
-    loadPlugin(pluginId).then((p) => {
-      if (cancelled) return;
-      setPlugin(p);
-      setPluginLoading(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [pluginId]);
+  // The heavy plugin implementation loads on demand (its group's chunk); show a
+  // loading state until its chunk resolves.
+  const { plugin, pluginLoading } = useWorkspacePlugin(pluginId);
 
-  const [inputId, setInputId] = useState(() => {
-    // Capture the shared input from the URL at mount — the plugin loads async, so
-    // waiting for it here would let the share-writer effect clobber the hash first.
-    // The restore effect below validates/clamps it once the plugin resolves.
-    const shared = readShareFromUrl();
-    if (shared?.item === activeItemId && shared.input) return shared.input;
-    return plugin?.inputs[0]?.id ?? '';
-  });
-  const [customInput, setCustomInput] = useState<unknown>(null);
-  const shareHydratedRef = useRef(false);
-  const canvasAppliedRef = useRef(false);
-  const pendingProjectHydration = useRef(
-    typeof location !== 'undefined' && !!loadProjectFromUrl()?.share,
-  );
-
-  // Restore the sample input from the URL when the problem changes; default to first input.
-  useEffect(() => {
-    if (!plugin) return;
-    const shared = readShareFromUrl();
-    const fromUrl =
-      shared?.item === activeItemId && shared.input && plugin.inputs.some((i) => i.id === shared.input)
-        ? shared.input
-        : null;
-    setInputId(fromUrl ?? plugin.inputs[0]?.id ?? '');
-    setCustomInput(null);
-  }, [plugin?.meta.id, activeItemId]);
-
-  // Hydrate full project from ?state= URL (lz-string) when present — once per page load.
-  useEffect(() => {
-    const project = loadProjectFromUrl();
-    if (!project?.share) return;
-
-    if (!shareHydratedRef.current) {
-      shareHydratedRef.current = true;
-      const s = project.share;
-      if (s.item && catalog.getItem(s.item)) {
-        openProblem(s.item);
-      }
-      if (s.mode === 'visualize') setMode('visualize');
-      else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') setMode('learn');
-      if (s.theme) setTheme(s.theme === 'light' ? 'light' : 'dark');
-      if (s.palette) setPalette(s.palette === 'cb' ? 'cb' : 'default');
-      if (s.themePreset) setThemePreset(normalizeThemePreset(s.themePreset));
-      if (s.dir === 'TB' || s.dir === 'LR') setDir(s.dir);
-      if (s.input) {
-        // Best-effort: validate against the plugin only if its chunk is already
-        // loaded. Otherwise the input effect re-validates once the plugin resolves.
-        const targetPlugin = s.item ? getLoadedPlugin(catalog.getItem(s.item)?.pluginId ?? '') : plugin;
-        const validInput =
-          targetPlugin && targetPlugin.inputs.some((i) => i.id === s.input) ? s.input : null;
-        if (validInput) setInputId(validInput);
-      }
-    }
-
-    if (canvasAppliedRef.current || !canvasProject) return;
-    canvasAppliedRef.current = true;
-    const t = window.setTimeout(() => canvasProject.applyProjectState(project), 100);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasProject]);
-
-  // Persist problem, example, mode, and theme in the URL so refresh reopens the same view.
-  useEffect(() => {
-    if (!activeItemId) return;
-    if (pendingProjectHydration.current && !shareHydratedRef.current) return;
-    writeShareToUrl({
-      item: activeItemId,
-      input: inputId || undefined,
-      mode,
-      theme,
-      palette,
-      themePreset,
-      dir,
-    });
-  }, [activeItemId, inputId, mode, theme, palette, themePreset, dir]);
-
-  // Picking a different sample clears any custom edits.
-  const selectInput = (id: string) => {
-    setInputId(id);
-    setCustomInput(null);
-  };
+  // Sample input + share/project URL hydration (writes the share hash on change).
+  const { inputId, customInput, setCustomInput, selectInput } = useWorkspaceUrlState(plugin, activeItemId);
 
   const input = plugin?.inputs.find((i) => i.id === inputId) ?? plugin?.inputs[0];
   const effectiveValue = customInput ?? input?.value;

@@ -3,3 +3,5 @@ export { useWorkflowRunner, type WorkflowRunnerInput } from './useWorkflowRunner
 export { usePluginFrames } from './usePluginFrames';
 export { useNarration } from './useNarration';
 export { useSoundCues } from './useSoundCues';
+export { useWorkspacePlugin } from './useWorkspacePlugin';
+export { useWorkspaceUrlState } from './useWorkspaceUrlState';
