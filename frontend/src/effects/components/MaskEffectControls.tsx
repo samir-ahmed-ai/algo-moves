@@ -1,4 +1,5 @@
 import { Field, nodeText } from '../../shell/canvas/nodeui';
+import type { EffectControlsProps } from './EffectControls';
 
 const PRESETS = [
   { label: 'Always', value: 1 },
@@ -7,14 +8,8 @@ const PRESETS = [
   { label: 'Rarely', value: 0.25 },
 ];
 
-export function MaskEffectControls({
-  data,
-  onChange,
-}: {
-  data: { probability?: number; seed?: number };
-  onChange: (p: Record<string, unknown>) => void;
-}) {
-  const probability = data.probability ?? 0.5;
+export function MaskEffectControls({ data, onChange }: EffectControlsProps) {
+  const probability = (data.probability as number) ?? 0.5;
   return (
     <div className="flex flex-col gap-2">
       <Field label="Keep probability">

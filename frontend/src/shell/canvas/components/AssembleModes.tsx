@@ -19,6 +19,7 @@ import { useCanvasStatic } from '../CanvasContext';
 import type { CodePiece } from '@/lib/code';
 import { blockKind, BLOCK_META } from '@/lib/code';
 import { readStorageText, writeStorageText } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
 /* ----------------------------- shared helpers ----------------------------- */
 
@@ -369,7 +370,7 @@ function RushMode() {
   const pieces = cs.pieces!;
   const byId = useMemo(() => new Map(pieces.map((p) => [p.id, p])), [pieces]);
   const correct = pieces.map((p) => p.id);
-  const bestKey = `algo-moves:rush-best:${useCanvasStatic().item.id}:${cs.active}`;
+  const bestKey = STORAGE_KEYS.RUSH_BEST(useCanvasStatic().item.id, cs.active);
 
   const [runKey, setRunKey] = useState(0);
   const [elapsed, setElapsed] = useState(0);

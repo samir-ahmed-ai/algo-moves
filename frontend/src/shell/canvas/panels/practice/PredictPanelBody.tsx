@@ -9,7 +9,7 @@ import {
   PREDICT_MASTERY_FOCUS_MS,
   TIME_LIMIT,
 } from '../shared/practiceConstants';
-import { shuffleSeeded } from '@/lib/quiz';
+import { buildShuffledChoices } from '@/lib/quiz';
 
 /** #33 Predict-the-next-move: a generic challenge built from the recorder frames. */
 export function PredictPanelBody() {
@@ -35,8 +35,7 @@ export function PredictPanelBody() {
   const answer = frames[pos + 1]?.move.type;
   const choices = useMemo(() => {
     if (!answer) return [];
-    const distract = shuffleSeeded(types.filter((t) => t !== answer), round).slice(0, 3);
-    return shuffleSeeded([answer, ...distract], round + 1);
+    return buildShuffledChoices(answer, types, round);
   }, [types, answer, round]);
 
   useEffect(() => setTimeLeft(TIME_LIMIT), [round]);

@@ -44,6 +44,7 @@ import { useEditorPrefs } from '@/store/user-prefs';
 import { parseComplexity } from '@/lib/quiz';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { recordAttempt, useProgress, statFor } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
@@ -156,7 +157,7 @@ export function CodeStudioProvider({
   );
   const phaseSeq = useMemo(() => phaseSequence(av), [av]);
 
-  const draftKey = `algo-moves:draft:${item.id}:${active}`;
+  const draftKey = STORAGE_KEYS.DRAFT(item.id, active);
   const skeleton = useMemo(() => (reference ? extractSkeleton(reference) : ''), [reference]);
 
   const [phase, setPhase] = useState<CodeStudioPhase>(() =>

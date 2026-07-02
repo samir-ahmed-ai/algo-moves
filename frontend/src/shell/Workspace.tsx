@@ -4,6 +4,7 @@ import { loadPlugin, getLoadedPlugin, usePlayer, type ProblemPlugin } from '../c
 import { catalog } from '../content';
 import { useWorkspace, normalizeThemePreset } from '@/store/workspace';
 import { isEditableTarget } from '@/lib/utils/keyboard';
+import { useNarration, useSoundCues } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { buildShareUrl, readShareFromUrl, writeShareToUrl } from '@/store/navigation';
 import { loadProjectFromUrl } from '@/store/project-state';
@@ -237,42 +238,9 @@ export function Workspace() {
 
   // Closing the palette / re-opening the catalog selection happens inside the component.
 
-  // Text-to-speech narration: speak the current caption when it changes.
-  const caption = frame?.move.caption;
-  useEffect(() => {
-    if (!narrate || !caption || typeof window === 'undefined' || !window.speechSynthesis) return;
-    const u = new SpeechSynthesisUtterance(caption);
-    u.rate = 1.05;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  }, [caption, narrate]);
-  useEffect(() => () => window.speechSynthesis?.cancel(), []);
-
-  // #121 sound cues: a short tone on each step, pitched by the move's tone.
-  const audioRef = useRef<AudioContext | null>(null);
-  const moveTone = frame?.move.tone;
-  const moveType = frame?.move.type;
-  useEffect(() => {
-    if (!tweaks.sound || !moveType) return;
-    try {
-      const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const ctx = audioRef.current ?? (audioRef.current = new Ctx());
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = moveTone === 'good' ? 660 : moveTone === 'bad' ? 220 : 440;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      const t = ctx.currentTime;
-      gain.gain.setValueAtTime(0.06, t);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
-      osc.start(t);
-      osc.stop(t + 0.13);
-    } catch {
-      // Web Audio unavailable — ignore
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moveType, moveTone, frame, tweaks.sound]);
+  // Text-to-speech narration + per-step sound cues.
+  useNarration(narrate, frame?.move.caption);
+  useSoundCues(tweaks.sound, frame);
 
   return (
     <div

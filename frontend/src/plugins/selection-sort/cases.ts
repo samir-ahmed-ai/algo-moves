@@ -1,5 +1,5 @@
 import type { WorkedCase } from '../_shared/practice';
-import type { SortInput } from './index';
+import type { SortInput } from '../_shared/sortRecorder';
 
 export const goodCases: WorkedCase<SortInput>[] = [
   {

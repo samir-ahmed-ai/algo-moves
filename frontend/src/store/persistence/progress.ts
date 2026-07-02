@@ -1,5 +1,6 @@
-import { useSyncExternalStore } from 'react';
-import { readStorageJson, writeStorageJson } from './storage';
+import { STORAGE_KEYS } from '@/store/storageKeys';
+import { createSyncStore } from '@/store/createSyncStore';
+import { readStorageJson } from './storage';
 
 export interface ProblemStat {
   attempts: number;
@@ -23,7 +24,7 @@ export interface ProgressData {
   mistakes: Mistake[];
 }
 
-const KEY = 'algo-moves:progress';
+const KEY = STORAGE_KEYS.PROGRESS;
 const EMPTY: ProblemStat = { attempts: 0, correct: 0, streak: 0, bestStreak: 0, mastered: false };
 
 function isProblemStat(value: unknown): value is ProblemStat {
@@ -68,56 +69,48 @@ function load(): ProgressData {
   return readStorageJson(KEY, { stats: {}, mistakes: [] }, isProgressData);
 }
 
-let data: ProgressData = load();
-const listeners = new Set<() => void>();
+const store = createSyncStore<ProgressData>(KEY, load);
 
-function commit(next: ProgressData) {
-  data = next;
-  writeStorageJson(KEY, data);
-  listeners.forEach((l) => l());
-}
-
-let mistakeSeq = readMistakeSeq(data.mistakes);
+let mistakeSeq = readMistakeSeq(store.get().mistakes);
 
 export function recordAttempt(problemId: string, correct: boolean) {
-  const prev = data.stats[problemId] ?? EMPTY;
-  const streak = correct ? prev.streak + 1 : 0;
-  const stat: ProblemStat = {
-    attempts: prev.attempts + 1,
-    correct: prev.correct + (correct ? 1 : 0),
-    streak,
-    bestStreak: Math.max(prev.bestStreak, streak),
-    mastered: prev.mastered || streak >= 3,
-  };
-  commit({ ...data, stats: { ...data.stats, [problemId]: stat } });
+  store.update((data) => {
+    const prev = data.stats[problemId] ?? EMPTY;
+    const streak = correct ? prev.streak + 1 : 0;
+    const stat: ProblemStat = {
+      attempts: prev.attempts + 1,
+      correct: prev.correct + (correct ? 1 : 0),
+      streak,
+      bestStreak: Math.max(prev.bestStreak, streak),
+      mastered: prev.mastered || streak >= 3,
+    };
+    return { ...data, stats: { ...data.stats, [problemId]: stat } };
+  });
 }
 
 export function setMastered(problemId: string, mastered: boolean) {
-  const prev = data.stats[problemId] ?? EMPTY;
-  commit({ ...data, stats: { ...data.stats, [problemId]: { ...prev, mastered } } });
+  store.update((data) => {
+    const prev = data.stats[problemId] ?? EMPTY;
+    return { ...data, stats: { ...data.stats, [problemId]: { ...prev, mastered } } };
+  });
 }
 
 export function logMistake(m: Omit<Mistake, 'id'>) {
   const entry: Mistake = { ...m, id: `m${mistakeSeq++}` };
   // keep the most recent 50
-  commit({ ...data, mistakes: [entry, ...data.mistakes].slice(0, 50) });
+  store.update((data) => ({ ...data, mistakes: [entry, ...data.mistakes].slice(0, 50) }));
 }
 
 export function clearMistakes() {
-  commit({ ...data, mistakes: [] });
+  store.update((data) => ({ ...data, mistakes: [] }));
 }
 
 export function resetProgress() {
-  commit({ stats: {}, mistakes: [] });
-}
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  return () => listeners.delete(cb);
+  store.set({ stats: {}, mistakes: [] });
 }
 
 export function useProgress(): ProgressData {
-  return useSyncExternalStore(subscribe, () => data, () => data);
+  return store.use();
 }
 
 export function statFor(d: ProgressData, problemId: string): ProblemStat {

@@ -1,12 +1,13 @@
 import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '@/shell/canvas/layout';
 import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
 export interface CanvasPrefs {
   edgeOpts: EdgeOpts;
   bg: BgVariant;
 }
 
-const KEY = 'algo-moves:canvas-prefs';
+const KEY = STORAGE_KEYS.CANVAS_PREFS;
 
 const DEFAULTS: CanvasPrefs = {
   edgeOpts: defaultEdgeOpts,

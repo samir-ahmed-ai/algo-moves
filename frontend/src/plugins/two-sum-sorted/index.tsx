@@ -1,5 +1,6 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
@@ -125,7 +126,7 @@ const inputs = [
     { id: 'mid', label: '[1,3,4,5,7,11] · t=9', value: { values: [1, 3, 4, 5, 7, 11], target: 9 } },
     { id: 'miss', label: '[1,2,3,4] · t=99', value: { values: [1, 2, 3, 4], target: 99 } },
   ];
-const verdict = () => ({ ok: true, label: 'found' });
+const verdict = verdictAlwaysOk('found');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'two-pointer moves' }, simulateQuestion: 'Which pointer moves next?' },

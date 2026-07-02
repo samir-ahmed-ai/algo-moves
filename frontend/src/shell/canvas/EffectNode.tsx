@@ -9,7 +9,7 @@ import { Btn, nodeIconGlyph, nodeText } from './nodeui';
 import { NodeHeader, NodeHeaderAction, NodeHeaderActions, NodeHeaderTitle } from './panels/NodeHeader';
 import { handleDotClass, portHandleStyle } from './canvasHandles';
 import { useConnectedComponentsOptional } from '@/lib/canvas';
-import { FastEffectControls } from '../../effects/components/FastEffectControls';
+import { EffectControls } from '../../effects/components/EffectControls';
 
 const CHAIN_TINTS = [
   'ring-accent/30',
@@ -17,9 +17,6 @@ const CHAIN_TINTS = [
   'ring-[color-mix(in_srgb,var(--team1-stroke)_40%,transparent)]',
   'ring-[color-mix(in_srgb,var(--team2-stroke)_40%,transparent)]',
 ] as const;
-import { SlowEffectControls } from '../../effects/components/SlowEffectControls';
-import { MaskEffectControls } from '../../effects/components/MaskEffectControls';
-import { GenericEffectControls } from '../../effects/components/GenericEffectControls';
 
 export interface EffectNodeData extends Record<string, unknown> {
   effectId: keyof EffectDataMap | string;
@@ -55,27 +52,6 @@ export function createEffectByType(
       runState: 'paused',
     },
   };
-}
-
-function EffectControls({
-  effectId,
-  data,
-  onChange,
-}: {
-  effectId: string;
-  data: Record<string, unknown>;
-  onChange: (p: Record<string, unknown>) => void;
-}) {
-  switch (effectId) {
-    case 'fast':
-      return <FastEffectControls data={data as unknown as EffectDataMap['fast']} onChange={onChange} />;
-    case 'slow':
-      return <SlowEffectControls data={data as unknown as EffectDataMap['slow']} onChange={onChange} />;
-    case 'mask':
-      return <MaskEffectControls data={data as unknown as EffectDataMap['mask']} onChange={onChange} />;
-    default:
-      return <GenericEffectControls effectId={effectId} data={data} onChange={onChange} />;
-  }
 }
 
 export function EffectNode({ id, data, selected }: NodeProps<EffectFlowNode>) {

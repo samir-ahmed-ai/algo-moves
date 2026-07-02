@@ -1,8 +1,10 @@
+import { STORAGE_KEYS } from '@/store/storageKeys';
+
 export type GameLocale = 'ar' | 'en';
 
 export const DEFAULT_GAME_LOCALE: GameLocale = 'en';
 
-export const GAME_LOCALE_KEY = 'algo-moves:games:locale';
+export const GAME_LOCALE_KEY = STORAGE_KEYS.GAMES_LOCALE;
 
 export function isGameLocale(value: unknown): value is GameLocale {
   return value === 'ar' || value === 'en';

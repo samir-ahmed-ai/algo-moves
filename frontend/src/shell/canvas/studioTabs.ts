@@ -26,6 +26,7 @@ import {
   Trophy,
   type LucideIcon,
 } from 'lucide-react';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
 /**
  * The Learn Studio is a single full-bleed surface with a grouped list of views.
@@ -101,7 +102,7 @@ export const STUDIO_TABS: StudioTab[] = [
   { id: 'notes', label: 'Notes', icon: StickyNote, group: 'progress', render: 'panel', kind: 'notes' },
 ];
 
-export const STUDIO_TAB_PERSIST = 'algo-moves:studio-tab';
+export const STUDIO_TAB_PERSIST = STORAGE_KEYS.STUDIO_TAB;
 
 export interface StudioAvailability {
   hasQuiz: boolean;

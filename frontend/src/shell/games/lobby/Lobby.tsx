@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Eye, Gamepad2, Loader2, Plus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { readStorageText, writeStorageText } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
 import { useAuth } from '../data/AuthProvider';
@@ -10,7 +11,7 @@ import { writeGamesHash } from '../engine/gamesHash';
 import { Avatar } from '../ui/Avatar';
 import { TouchButton } from '../ui/gamesUi';
 
-const NAME_KEY = 'algo-moves:games:name';
+const NAME_KEY = STORAGE_KEYS.GAMES_NAME;
 const CAPACITIES = [2, 4, 6, 8];
 
 /** Pre-connection screen: pick a name + avatar, then create or join a room. */

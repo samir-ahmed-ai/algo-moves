@@ -1,5 +1,6 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { TreeBoard } from '../../components/TreeBoard';
@@ -305,7 +306,7 @@ const inputs = [
     { id: 'script1', label: 'insert 5,3,8,1,4 · extract×2', value: { ops: script1 } },
     { id: 'script2', label: 'insert 9,6,2,7 · extract · insert 1 · extract', value: { ops: script2 } },
   ];
-const verdict = () => ({ ok: true, label: 'done' });
+const verdict = verdictAlwaysOk('done');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, intro, goodLabel: 'heap ops' }, simulateQuestion: 'Which heap index swaps next?' },

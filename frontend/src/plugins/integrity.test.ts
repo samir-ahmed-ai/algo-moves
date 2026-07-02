@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadAllPlugins, getPluginMeta } from '../core/registry';
+import { PLUGIN_META } from './_generated/pluginMeta';
 import { quizLabelIssues } from '@/lib/quiz';
 import { defaultPrepQuiz } from './imported/prepQuiz';
 import { PREP_DATA } from './imported/prepManifest';
@@ -58,6 +59,33 @@ describe('catalog ↔ registry integrity', () => {
         expect(getPluginMeta(item.pluginId), `missing plugin for item "${item.id}"`).toBeDefined();
       }
     }
+  });
+});
+
+describe('generated plugin meta is in sync with implementations', () => {
+  // Guards against editing a plugin's meta without re-running `npm run build-plugin-meta`.
+  // The generated PLUGIN_META is a direct copy of each plugin's meta fields + group,
+  // so any drift here means the checked-in generated index is stale.
+  it('every plugin implementation has a matching generated meta entry', () => {
+    const drift: string[] = [];
+    for (const p of plugins) {
+      const gen = getPluginMeta(p.meta.id);
+      if (!gen) {
+        drift.push(`${p.meta.id}: no generated meta entry — run npm run build-plugin-meta`);
+        continue;
+      }
+      if (gen.title !== p.meta.title) drift.push(`${p.meta.id}: title "${gen.title}" ≠ "${p.meta.title}"`);
+      if (gen.difficulty !== p.meta.difficulty) drift.push(`${p.meta.id}: difficulty "${gen.difficulty}" ≠ "${p.meta.difficulty}"`);
+      if (gen.summary !== p.meta.summary) drift.push(`${p.meta.id}: summary drift`);
+      if ((gen.source ?? undefined) !== (p.meta.source ?? undefined)) drift.push(`${p.meta.id}: source drift`);
+      if (JSON.stringify(gen.tags) !== JSON.stringify(p.meta.tags)) drift.push(`${p.meta.id}: tags drift`);
+    }
+    expect(drift, drift.join('\n')).toEqual([]);
+  });
+
+  it('no generated meta entry is orphaned', () => {
+    const orphans = PLUGIN_META.filter((m) => !pluginById.has(m.id)).map((m) => m.id);
+    expect(orphans, `orphaned meta entries (no loadable plugin): ${orphans.join(', ')}`).toEqual([]);
   });
 });
 

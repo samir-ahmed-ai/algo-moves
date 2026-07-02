@@ -1,25 +1,12 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
-import { createInsertionSortRecorder } from '../_shared/sortRecorder';
+import { createInsertionSortRecorder, type SortInput, type InsertionSortState as SortState } from '../_shared/sortRecorder';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
 import { InspectorRow, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 import { SortInspector } from '../_shared/sortInspector';
-
-export interface SortInput {
-  values: number[];
-}
-
-export interface SortState {
-  values: number[];
-  key: number | null;
-  keyIdx: number | null;
-  compare: number | null;
-  sortedUpto: number;
-  comparisons: number;
-  shifts: number;
-}
 
 function record({ values: initial }: SortInput): Frame<SortState>[] {
   const { values, n, frames, emit, incCompare, incShift, setSortedUpto } = createInsertionSortRecorder(initial);
@@ -172,7 +159,7 @@ const inputs = [
     { id: 'rev', label: '[7, 6, 5, 4, 3] · worst', value: { values: [7, 6, 5, 4, 3] } },
     { id: 'near', label: '[1, 2, 4, 3, 5] · best', value: { values: [1, 2, 4, 3, 5] } },
   ];
-const verdict = () => ({ ok: true, label: 'sorted' });
+const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'insertion steps' }, simulateQuestion: 'Which element is inserted into the sorted prefix next?' },

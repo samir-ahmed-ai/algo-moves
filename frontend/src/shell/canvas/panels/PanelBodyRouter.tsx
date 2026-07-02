@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { BigOPanelBody } from './BigOPanelBody';
 import { BookmarksPanelBody } from './BookmarksPanelBody';
 import { CopyPanelBody } from './CopyPanelBody';
@@ -24,60 +25,44 @@ import { PatternPanelBody } from './reference/PatternPanelBody';
 import { WatchPanelBody } from './reference/WatchPanelBody';
 import { TabBody } from './shared/TabBody';
 
+/** Panels whose content is rendered elsewhere (e.g. Code Studio node) render nothing here. */
+const NullBody: ComponentType = () => null;
+
+/**
+ * Registry mapping a panel `kind` to its body component — the single dispatch
+ * table for PanelBody. Add a panel by adding one entry here (plus its metadata in
+ * core/panelRegistry `panelsConfig`); unregistered kinds fall back to <TabBody>.
+ */
+export const PANEL_BODIES: Record<string, ComponentType> = {
+  problem: ProblemPanelBody,
+  replay: ReplayPanelBody,
+  inspector: InspectorPanelBody,
+  metrics: MetricsBody,
+  bigo: BigOPanelBody,
+  predict: PredictPanelBody,
+  mastery: MasteryPanelBody,
+  mistakes: MistakesPanelBody,
+  explain: ExplainPanelBody,
+  badges: BadgesPanelBody,
+  bookmarks: BookmarksPanelBody,
+  editor: EditorPanelBody,
+  pattern: PatternPanelBody,
+  glossary: GlossaryPanelBody,
+  diff: DiffPanelBody,
+  watch: WatchPanelBody,
+  hints: HintsPanelBody,
+  path: PathPanelBody,
+  cheatsheet: CheatPanelBody,
+  projects: ProjectsPanelBody,
+  notes: NotesPanelBody,
+  complexity: ComplexityPanelBody,
+  edgecases: EdgeCasesPanelBody,
+  copy: CopyPanelBody,
+  code: NullBody,
+  scratch: NullBody,
+};
+
 export function PanelBody({ kind }: { kind: string }) {
-  switch (kind) {
-    case 'problem':
-      return <ProblemPanelBody />;
-    case 'replay':
-      return <ReplayPanelBody />;
-    case 'inspector':
-      return <InspectorPanelBody />;
-    case 'metrics':
-      return <MetricsBody />;
-    case 'bigo':
-      return <BigOPanelBody />;
-    case 'predict':
-      return <PredictPanelBody />;
-    case 'mastery':
-      return <MasteryPanelBody />;
-    case 'mistakes':
-      return <MistakesPanelBody />;
-    case 'explain':
-      return <ExplainPanelBody />;
-    case 'badges':
-      return <BadgesPanelBody />;
-    case 'bookmarks':
-      return <BookmarksPanelBody />;
-    case 'editor':
-      return <EditorPanelBody />;
-    case 'pattern':
-      return <PatternPanelBody />;
-    case 'glossary':
-      return <GlossaryPanelBody />;
-    case 'diff':
-      return <DiffPanelBody />;
-    case 'watch':
-      return <WatchPanelBody />;
-    case 'hints':
-      return <HintsPanelBody />;
-    case 'path':
-      return <PathPanelBody />;
-    case 'cheatsheet':
-      return <CheatPanelBody />;
-    case 'projects':
-      return <ProjectsPanelBody />;
-    case 'notes':
-      return <NotesPanelBody />;
-    case 'complexity':
-      return <ComplexityPanelBody />;
-    case 'edgecases':
-      return <EdgeCasesPanelBody />;
-    case 'code':
-    case 'scratch':
-      return null;
-    case 'copy':
-      return <CopyPanelBody />;
-    default:
-      return <TabBody kind={kind} />;
-  }
+  const Body = PANEL_BODIES[kind];
+  return Body ? <Body /> : <TabBody kind={kind} />;
 }

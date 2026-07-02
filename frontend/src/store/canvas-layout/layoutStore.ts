@@ -1,4 +1,5 @@
 import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
 /**
  * Persisted canvas layouts (#73). Per `${pluginId}:${mode}` key we store dragged
@@ -17,7 +18,7 @@ export interface LayoutEntry {
   removedEdges?: string[];
 }
 
-const KEY = 'algo-moves:layouts';
+const KEY = STORAGE_KEYS.LAYOUTS;
 
 export function loadLayouts(): Record<string, LayoutEntry> {
   return readStorageJson(KEY, {});

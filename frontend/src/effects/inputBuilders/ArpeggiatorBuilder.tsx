@@ -19,7 +19,6 @@ export function ArpeggiatorBuilder({ onApply }: { onApply: (values: number[]) =>
         values = [...base, ...[...base].slice(1, -1).reverse()];
         break;
       case 'down-up':
-        values = [[...base].reverse(), ...[...base].slice(1, -1)][0] ? [...base].reverse().concat([...base].slice(1)) : base;
         values = [...[...base].reverse(), ...[...base].slice(1)];
         break;
       default:

@@ -27,9 +27,6 @@ import type { CanvasMode, Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
-import { loadLayouts, saveLayouts, type LayoutEntry } from '@/store/canvas-layout';
-import type { PanelNodeStyle } from './panelStyle';
-import { styleSig } from './panelStyle';
 import { togglePanelCollapse } from './panelCollapse';
 import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
 import { UnifiedRightSidebar } from './UnifiedRightSidebar';
@@ -78,9 +75,10 @@ import {
   type BgVariant,
   type LayoutPreset,
 } from './layout';
-import { migrateLayouts } from './layoutMigration';
 import { snapNodeLayout, restoreNodeWidth } from './nodeSnapshot';
 import { sanitizeVisualizeEdges } from './edgeSanitization';
+import { useCanvasLayoutPersistence, type Saved } from './useCanvasLayoutPersistence';
+import { useCanvasHistory } from './useCanvasHistory';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
@@ -114,8 +112,6 @@ interface Menu {
   y: number;
   items: MenuItem[];
 }
-
-type Saved = Record<string, { position: { x: number; y: number }; width?: number }>;
 
 interface CanvasStageProps {
   plugin: ProblemPlugin<any, any>;
@@ -165,36 +161,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   const [snap, setSnap] = useState(false);
 
   // Per-(plugin, mode) persistence: dragged positions/resizes + which panels were trash-removed.
-  // Seeded from localStorage so a tweaked canvas survives a reload (#73).
-  const persisted = useRef(migrateLayouts(loadLayouts()));
-  const layoutRef = useRef<Record<string, Saved>>(
-    Object.fromEntries(Object.entries(persisted.current).map(([k, v]) => [k, v.nodes])),
-  );
-  const removedRef = useRef<Record<string, Set<string>>>(
-    Object.fromEntries(Object.entries(persisted.current).map(([k, v]) => [k, new Set(v.removed)])),
-  );
-  const removedEdgesRef = useRef<Record<string, Set<string>>>(
-    Object.fromEntries(
-      Object.entries(persisted.current).map(([k, v]) => [k, new Set(v.removedEdges ?? [])]),
-    ),
-  );
-
-  const persist = useCallback(() => {
-    const out: Record<string, LayoutEntry> = {};
-    const keys = new Set([
-      ...Object.keys(layoutRef.current),
-      ...Object.keys(removedRef.current),
-      ...Object.keys(removedEdgesRef.current),
-    ]);
-    for (const k of keys) {
-      out[k] = {
-        nodes: layoutRef.current[k] ?? {},
-        removed: [...(removedRef.current[k] ?? [])],
-        removedEdges: [...(removedEdgesRef.current[k] ?? [])],
-      };
-    }
-    saveLayouts(out);
-  }, []);
+  const { layoutRef, removedRef, removedEdgesRef, persist } = useCanvasLayoutPersistence();
 
   const { fitView, screenToFlowPosition } = useReactFlow();
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -358,9 +325,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
     const built = buildFor(mode, key);
     builtKeyRef.current = key;
-    historyRef.current = [];
-    histIdxRef.current = -1;
-    lastSigRef.current = '';
+    resetHistory();
     setNodes(built.nodes);
     setEdges(built.edges);
     const id = requestAnimationFrame(() => fitCanvas());
@@ -398,64 +363,14 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   }, [nodes, key, plugin, mode, persist]);
 
   // ---- undo/redo of canvas edits (#82) ----
-  const historyRef = useRef<{ nodes: PanelFlowNode[]; edges: Edge[] }[]>([]);
-  const histIdxRef = useRef(-1);
-  const applyingRef = useRef(false);
-  const lastSigRef = useRef('');
-  const [, bumpHist] = useState(0); // mirror history pointer into render so the toolbar enable-state is live
-
-  // Structural signature — ignores `selected`/`dragging` so merely clicking a node
-  // is NOT recorded as an undoable edit (only moves/resizes/add/remove/recolour count).
-  const sigOf = (ns: PanelFlowNode[], es: Edge[]) =>
-    JSON.stringify([
-      ns.map((n) => [
-        n.id,
-        Math.round(n.position.x),
-        Math.round(n.position.y),
-        n.width,
-        !!n.data.collapsed,
-        n.data.accent ?? '',
-        styleSig(n.data.style as PanelNodeStyle | undefined),
-      ]),
-      es.map((e) => [e.id, e.source, e.target]),
-    ]);
-
-  useEffect(() => {
-    if (builtKeyRef.current !== key) return;
-    if (nodes.some((n) => n.dragging)) return;
-    if (applyingRef.current) {
-      applyingRef.current = false;
-      return;
-    }
-    const s = sigOf(nodes, edges);
-    if (s === lastSigRef.current) return; // selection-only / no structural change
-    lastSigRef.current = s;
-    const snap = { nodes: nodes.map((n) => ({ ...n })), edges: edges.map((e) => ({ ...e })) };
-    historyRef.current = historyRef.current.slice(0, histIdxRef.current + 1);
-    historyRef.current.push(snap);
-    if (historyRef.current.length > 60) historyRef.current.shift();
-    histIdxRef.current = historyRef.current.length - 1;
-    bumpHist((v) => v + 1);
-  }, [nodes, edges, key]);
-  const restore = useCallback(
-    (idx: number) => {
-      const snap = historyRef.current[idx];
-      if (!snap) return;
-      histIdxRef.current = idx;
-      applyingRef.current = true;
-      lastSigRef.current = sigOf(snap.nodes, snap.edges);
-      setNodes(snap.nodes.map((n) => ({ ...n })));
-      setEdges(snap.edges.map((e) => ({ ...e })));
-      bumpHist((v) => v + 1);
-    },
-    [setNodes, setEdges],
-  );
-  const undo = useCallback(() => {
-    if (histIdxRef.current > 0) restore(histIdxRef.current - 1);
-  }, [restore]);
-  const redo = useCallback(() => {
-    if (histIdxRef.current < historyRef.current.length - 1) restore(histIdxRef.current + 1);
-  }, [restore]);
+  const { historyRef, histIdxRef, undo, redo, resetHistory } = useCanvasHistory({
+    nodes,
+    edges,
+    historyKey: key,
+    builtKeyRef,
+    setNodes,
+    setEdges,
+  });
 
   // Tidy: re-organize the CURRENT panels (keep removals + resizes, forget positions).
   const reset = useCallback(() => {

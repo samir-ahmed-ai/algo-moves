@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useCanvasStatic } from '../../CanvasContext';
 import { readStorageJson, writeStorageJson } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 import { CheckRow, Hint, Meter, Pill } from '../../nodeui';
 
 /** #58 Edge-case finder: a checklist of cases that break naive solutions. */
 export function EdgeCasesPanelBody() {
   const { item } = useCanvasStatic();
-  const k = `algo-moves:edgecases:${item.id}`;
+  const k = STORAGE_KEYS.EDGE_CASES(item.id);
   const CASES = [
     'Empty input (length 0)',
     'Single element',

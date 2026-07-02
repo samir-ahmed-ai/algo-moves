@@ -1,5 +1,6 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
@@ -172,7 +173,7 @@ const inputs = [
     { id: 'pwwkew', label: '"pwwkew"', value: { s: 'pwwkew' } },
     { id: 'bbbbb', label: '"bbbbb"', value: { s: 'bbbbb' } },
   ];
-const verdict = () => ({ ok: true, label: 'longest' });
+const verdict = verdictAlwaysOk('longest');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'window steps' }, simulateQuestion: 'How does the window expand or shrink next?' },

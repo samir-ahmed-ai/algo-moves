@@ -1,6 +1,7 @@
 import { readStorageText, writeStorageText } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
-const KEY = 'algo-moves:swipe-qr-dismissed';
+const KEY = STORAGE_KEYS.SWIPE_QR_DISMISSED;
 
 export function isSwipeQrPromoDismissed(): boolean {
   return readStorageText(KEY) === '1';

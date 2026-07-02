@@ -1,5 +1,7 @@
-import { useCallback, useSyncExternalStore } from 'react';
-import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
+import { useCallback } from 'react';
+import { readStorageJson } from '@/store/persistence/storage';
+import { STORAGE_KEYS } from '@/store/storageKeys';
+import { createSyncStore } from '@/store/createSyncStore';
 
 export interface EditorPrefs {
   vim: boolean;
@@ -7,7 +9,7 @@ export interface EditorPrefs {
   splitPct: number;
 }
 
-const KEY = 'algo-moves:editor-prefs';
+const KEY = STORAGE_KEYS.EDITOR_PREFS;
 const DEFAULTS: EditorPrefs = { vim: false, wrap: false, splitPct: 50 };
 
 export const SPLIT_MIN = 28;
@@ -29,34 +31,22 @@ function load(): EditorPrefs {
   };
 }
 
-let prefs: EditorPrefs = load();
-const listeners = new Set<() => void>();
-
-function commit(next: EditorPrefs) {
-  prefs = next;
-  writeStorageJson(KEY, next);
-  listeners.forEach((l) => l());
-}
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  return () => listeners.delete(cb);
-}
+const store = createSyncStore<EditorPrefs>(KEY, load);
 
 export function loadEditorPrefs(): EditorPrefs {
-  return prefs;
+  return store.get();
 }
 
 export function saveEditorPrefs(next: EditorPrefs) {
-  commit(next);
+  store.set(next);
 }
 
 export function useEditorPrefs(): [EditorPrefs, (patch: Partial<EditorPrefs>) => void] {
-  const current = useSyncExternalStore(subscribe, () => prefs, () => prefs);
+  const current = store.use();
   const set = useCallback((patch: Partial<EditorPrefs>) => {
-    const next = { ...prefs, ...patch };
+    const next = { ...store.get(), ...patch };
     if (patch.splitPct !== undefined) next.splitPct = clampSplitPct(patch.splitPct);
-    commit(next);
+    store.set(next);
   }, []);
   return [current, set];
 }

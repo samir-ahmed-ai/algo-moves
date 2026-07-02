@@ -1,25 +1,17 @@
 #!/usr/bin/env node
 /** Fail when plugins use banned hardcoded font-size classes (prefer vizKit / vizText). */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { walkFiles } from './lib/walkFiles.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pluginsDir = join(root, 'src/plugins');
 const BANNED = /text-\[(?:7|8|9|10|11|12|13|14|15)(?:\.\d)?px\]/g;
 const ALLOWED = ['vizKit.test.ts', 'vizTokens.ts'];
 
-function walk(dir, out = []) {
-  for (const name of readdirSync(dir)) {
-    const p = join(dir, name);
-    if (statSync(p).isDirectory()) walk(p, out);
-    else if (p.endsWith('.tsx') || p.endsWith('.ts')) out.push(p);
-  }
-  return out;
-}
-
 const hits = [];
-for (const file of walk(pluginsDir)) {
+for (const file of walkFiles(pluginsDir, (p) => p.endsWith('.tsx') || p.endsWith('.ts'))) {
   if (ALLOWED.some((a) => file.endsWith(a))) continue;
   const content = readFileSync(file, 'utf8');
   const matches = content.match(BANNED);

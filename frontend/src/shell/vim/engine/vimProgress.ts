@@ -1,6 +1,7 @@
 import { readStorageJson, writeStorageJson } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
-const VIM_PROGRESS_KEY = 'algo-moves:vim-dojo';
+const VIM_PROGRESS_KEY = STORAGE_KEYS.VIM_PROGRESS;
 
 export interface LevelProgress {
   completed: boolean;

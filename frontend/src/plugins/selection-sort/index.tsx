@@ -1,24 +1,12 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
 import { wireTeachingStack } from '../_shared/pluginKit';
-import { createSelectionSortRecorder } from '../_shared/sortRecorder';
+import { createSelectionSortRecorder, type SortInput, type SelectionSortState as SortState } from '../_shared/sortRecorder';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { SortInspector } from '../_shared/sortInspector';
 import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
-
-export interface SortInput {
-  values: number[];
-}
-
-export interface SortState {
-  values: number[];
-  compare: number | null;
-  minIdx: number | null;
-  sortedUpto: number;
-  comparisons: number;
-  swaps: number;
-}
 
 function record({ values: initial }: SortInput): Frame<SortState>[] {
   const { values, n, frames, emit, incCompare, incSwap, setSortedUpto } = createSelectionSortRecorder(initial);
@@ -139,7 +127,7 @@ const inputs = [
   { id: 'rev', label: '[7, 6, 5, 4, 3] · worst', value: { values: [7, 6, 5, 4, 3] } },
   { id: 'near', label: '[1, 2, 4, 3, 5] · nearly sorted', value: { values: [1, 2, 4, 3, 5] } },
 ];
-const verdict = () => ({ ok: true, label: 'sorted' });
+const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'selection passes', badLabel: 'worst cases' }, simulateQuestion: 'Which index is chosen as the minimum next?' },

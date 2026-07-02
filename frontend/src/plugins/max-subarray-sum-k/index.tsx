@@ -1,5 +1,6 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
@@ -139,7 +140,7 @@ const inputs = [
     { id: 'b', label: '[1,4,2,10,2,3,1,0,20] · k=4', value: { values: [1, 4, 2, 10, 2, 3, 1, 0, 20], k: 4 } },
     { id: 'c', label: '[5,2,1,1,1,1,1,8] · k=2', value: { values: [5, 2, 1, 1, 1, 1, 1, 8], k: 2 } },
   ];
-const verdict = () => ({ ok: true, label: 'max' });
+const verdict = verdictAlwaysOk('max');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'window steps' }, simulateQuestion: 'How does the window shift next?' },

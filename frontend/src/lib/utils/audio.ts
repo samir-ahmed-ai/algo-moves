@@ -8,8 +8,9 @@
  *   playCue('win');
  */
 import { readStorageText, writeStorageText } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
-const MUTE_KEY = 'algo-moves:games:muted';
+const MUTE_KEY = STORAGE_KEYS.GAMES_MUTED;
 
 export type SoundCue =
   | 'click'

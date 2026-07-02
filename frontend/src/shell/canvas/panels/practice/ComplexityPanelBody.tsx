@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { QuizChoiceLabel } from '../../../../components/QuizChoiceLabel';
-import { COMPLEXITY_POOL, formatComplexityChoice } from '@/lib/quiz';
+import { COMPLEXITY_POOL, formatComplexityChoice, buildShuffledChoices } from '@/lib/quiz';
 import { patternsForTags } from '../../../../content';
 import { useCanvasStatic } from '../../CanvasContext';
 import { Btn, EmptyState, Hint, Option, Section } from '../../nodeui';
-import { shuffleSeeded } from '@/lib/quiz';
 
 /** #57 Complexity quiz: pick the right Big-O (answer derived from the pattern card). */
 export function ComplexityPanelBody() {
@@ -16,9 +15,7 @@ export function ComplexityPanelBody() {
   const [picked, setPicked] = useState<string | null>(null);
   const choices = useMemo(() => {
     if (!answer) return [];
-    const distract = shuffleSeeded(COMPLEXITY_POOL.filter((p) => p !== answer), round).slice(0, 3);
-    return shuffleSeeded([answer, ...distract], round + 1).map(formatComplexityChoice);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return buildShuffledChoices(answer, COMPLEXITY_POOL, round).map(formatComplexityChoice);
   }, [answer, round]);
   const formattedAnswer = answer ? formatComplexityChoice(answer) : null;
   if (!answer) {

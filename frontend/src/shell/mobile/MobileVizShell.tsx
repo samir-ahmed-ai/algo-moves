@@ -1,20 +1,14 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
-import { usePlayer } from '../../core';
 import type { ProblemPlugin } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
+import { usePluginFrames } from '@/hooks';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { VizFitBox } from '../canvas/nodeui';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
 export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
-  const input = plugin.inputs[0];
-  const baseFrames = useMemo(
-    () => (input ? plugin.record(input.value) : []),
-    [plugin, input],
-  );
-  const player = usePlayer(Math.max(baseFrames.length, 1));
-  const frame = baseFrames[player.index] ?? baseFrames[0];
+  const { input, baseFrames, player, frame } = usePluginFrames(plugin);
   const View = plugin.View;
   const caption = (frame?.move?.note?.trim() || frame?.move?.caption?.trim()) ?? '';
   const hasFrames = baseFrames.length > 0;

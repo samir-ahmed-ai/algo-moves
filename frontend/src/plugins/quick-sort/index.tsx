@@ -1,5 +1,6 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
@@ -260,7 +261,7 @@ const inputs = [
     { id: 'rev', label: '[7, 6, 5, 4, 3, 2] · worst', value: { values: [7, 6, 5, 4, 3, 2] } },
     { id: 'dup', label: '[4, 2, 4, 1, 3, 2, 4] · dups', value: { values: [4, 2, 4, 1, 3, 2, 4] } },
   ];
-const verdict = () => ({ ok: true, label: 'sorted' });
+const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'partition steps' }, simulateQuestion: 'Which partition step happens next?' },

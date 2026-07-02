@@ -1,4 +1,5 @@
 import { readStorageJson, readStorageText, removeStorageValue, writeStorageJson } from '@/store/persistence/storage';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 export type CodeStudioPhase = 'quiz' | 'reassemble' | 'recall';
 
 /** Which optional phases exist for the current problem + language variant. */
@@ -43,15 +44,15 @@ export interface QuizProgress {
 }
 
 function phaseKey(itemId: string, langIdx: number) {
-  return `algo-moves:code-phase:${itemId}:${langIdx}`;
+  return STORAGE_KEYS.CODE_PHASE(itemId, langIdx);
 }
 
 function progressKey(itemId: string, langIdx: number) {
-  return `algo-moves:reassemble-progress:${itemId}:${langIdx}`;
+  return STORAGE_KEYS.REASSEMBLE_PROGRESS(itemId, langIdx);
 }
 
 function quizKey(itemId: string, langIdx: number) {
-  return `algo-moves:code-quiz:${itemId}:${langIdx}`;
+  return STORAGE_KEYS.CODE_QUIZ(itemId, langIdx);
 }
 
 function isPhase(value: unknown): value is CodeStudioPhase {

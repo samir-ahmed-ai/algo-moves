@@ -1,43 +1,30 @@
-import { useSyncExternalStore } from 'react';
 import type { ShareState } from '@/store/navigation/shareState';
-import { readStorageJson, writeStorageJson } from './storage';
+import { STORAGE_KEYS } from '@/store/storageKeys';
+import { createSyncStore } from '@/store/createSyncStore';
+import { readStorageJson } from './storage';
 
 /**
  * Named saved workspaces (#87). A project is just a ShareState snapshot stored in
  * localStorage by name; loading one applies the same problem/mode/theme.
  */
-const KEY = 'algo-moves:projects';
+const KEY = STORAGE_KEYS.PROJECTS;
 
-function load(): Record<string, ShareState> {
-  return readStorageJson<Record<string, ShareState>>(KEY, {});
-}
-
-let data: Record<string, ShareState> = load();
-const listeners = new Set<() => void>();
-
-function commit(next: Record<string, ShareState>) {
-  data = next;
-  writeStorageJson(KEY, data);
-  listeners.forEach((l) => l());
-}
+const store = createSyncStore<Record<string, ShareState>>(KEY, () =>
+  readStorageJson<Record<string, ShareState>>(KEY, {}),
+);
 
 export function saveProject(name: string, snapshot: ShareState) {
-  commit({ ...data, [name]: snapshot });
+  store.update((data) => ({ ...data, [name]: snapshot }));
 }
 
 export function deleteProject(name: string) {
-  const next = { ...data };
-  delete next[name];
-  commit(next);
+  store.update((data) => {
+    const next = { ...data };
+    delete next[name];
+    return next;
+  });
 }
 
 export function useProjects(): Record<string, ShareState> {
-  return useSyncExternalStore(
-    (cb) => {
-      listeners.add(cb);
-      return () => listeners.delete(cb);
-    },
-    () => data,
-    () => data,
-  );
+  return store.use();
 }

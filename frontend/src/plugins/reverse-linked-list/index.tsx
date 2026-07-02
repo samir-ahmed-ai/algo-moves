@@ -1,5 +1,6 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { GraphInspector, GraphStatRow as InspectorRow } from '../_shared/graphInspector';
@@ -212,7 +213,7 @@ const inputs = [
     { id: 'five', label: '1 2 3 4 5', value: { values: [1, 2, 3, 4, 5] } },
     { id: 'four', label: '7 1 9 4', value: { values: [7, 1, 9, 4] } },
   ];
-const verdict = () => ({ ok: true, label: 'reversed' });
+const verdict = verdictAlwaysOk('reversed');
 const teaching = wireTeachingStack({
   record, View, inputs, verdict,
   practice: { quiz, codePieces, cases: { good: goodCases, intro, goodLabel: 'pointer moves' }, simulateQuestion: 'Which pointer moves next?' },

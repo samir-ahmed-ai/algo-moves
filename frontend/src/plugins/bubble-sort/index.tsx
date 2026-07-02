@@ -1,24 +1,12 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { ArrayBars, type BarTone } from '../../components/ArrayBars';
 import { wireTeachingStack } from '../_shared/pluginKit';
-import { createSortRecorder } from '../_shared/sortRecorder';
+import { createSortRecorder, type SortInput, type SortState } from '../_shared/sortRecorder';
+import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { SortInspector } from '../_shared/sortInspector';
 import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
-
-export interface SortInput {
-  values: number[];
-}
-
-export interface SortState {
-  values: number[];
-  compare: [number, number] | null;
-  swap: [number, number] | null;
-  sortedFrom: number;
-  comparisons: number;
-  swaps: number;
-}
 
 function record({ values: initial }: SortInput): Frame<SortState>[] {
   const { values, n, emit, frames, incCompare, incSwap, setSortedFrom } = createSortRecorder(initial);
@@ -130,7 +118,7 @@ const inputs = [
   { id: 'near', label: '[1, 2, 4, 3, 5] · best', value: { values: [1, 2, 4, 3, 5] } },
 ];
 
-const verdict = () => ({ ok: true, label: 'sorted' });
+const verdict = verdictAlwaysOk('sorted');
 
 const teaching = wireTeachingStack({
   record,

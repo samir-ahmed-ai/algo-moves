@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useCanvasStatic } from '../CanvasContext';
 import { readStorageText, writeStorageText } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 import { Hint, Label, Pill, TextArea } from '../nodeui';
 
 /** #118 Notes: freeform markdown-ish notes pinned per problem (localStorage). */
 export function NotesPanelBody() {
   const { item } = useCanvasStatic();
-  const k = `algo-moves:notes:${item.id}`;
+  const k = STORAGE_KEYS.NOTES(item.id);
   const [text, setText] = useState(() => readStorageText(k, '') ?? '');
   useEffect(() => {
     setText(readStorageText(k, '') ?? '');

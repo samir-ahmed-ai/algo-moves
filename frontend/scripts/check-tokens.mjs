@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /** Grep-based guard for banned layout/typography literals outside token files. */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { walkFiles } from './lib/walkFiles.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = join(root, 'src');
@@ -23,19 +24,8 @@ const BANNED = [
   { re: /minHeight:\s*280\b/, label: 'minHeight: 280' },
 ];
 
-function walk(dir, out = []) {
-  for (const name of readdirSync(dir)) {
-    const p = join(dir, name);
-    if (statSync(p).isDirectory()) {
-      if (name === 'node_modules') continue;
-      walk(p, out);
-    } else if (/\.(tsx?|css)$/.test(name)) out.push(p);
-  }
-  return out;
-}
-
 const hits = [];
-for (const file of walk(src)) {
+for (const file of walkFiles(src, (_p, name) => /\.(tsx?|css)$/.test(name))) {
   const rel = file.replace(root + '/', '');
   if (TOKEN_FILES.has(rel)) continue;
   const content = readFileSync(file, 'utf8');

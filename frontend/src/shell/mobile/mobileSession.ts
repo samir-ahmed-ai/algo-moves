@@ -1,6 +1,7 @@
 import { readStorageJson, removeStorageValue, writeStorageJson } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
-const KEY = 'algo-moves:mobile-session';
+const KEY = STORAGE_KEYS.MOBILE_SESSION;
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export interface MobileSession {
