@@ -56,20 +56,16 @@ import { applyAlign, applyDistribute, type AlignKind } from './align';
 import { FIT_VIEW_DURATION_MS } from './canvasTokens';
 import {
   ACCENTS,
-  DOCK_ONLY_PANELS,
   buildEdges,
   buildNodes,
-  DEPRECATED_VISUALIZE_EDGES,
   REQUIRED_VISUALIZE_EDGES,
   connectionLineType,
-  defaultEdgeOpts,
   edgeConnectionLabel,
   FIT_PADDING,
   FIT_PADDING_FOCUS,
   FIT_PADDING_VIEW,
   edgesForKind,
   kindTitle,
-  layoutFixedWidth,
   layoutGraph,
   layoutLearnCanvas,
   layoutVisualizeCanvas,
@@ -82,6 +78,9 @@ import {
   type BgVariant,
   type LayoutPreset,
 } from './layout';
+import { migrateLayouts } from './layoutMigration';
+import { snapNodeLayout, restoreNodeWidth } from './nodeSnapshot';
+import { sanitizeVisualizeEdges } from './edgeSanitization';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
@@ -108,182 +107,6 @@ function DashedConnectionLine({ fromX, fromY, toX, toY }: ConnectionLineComponen
 /** Tint minimap nodes by their panel accent so kinds stay recognizable. */
 function minimapNodeColor(n: Node): string {
   return panelAccent((n.data as PanelNodeData | undefined)?.kind ?? n.id);
-}
-
-function snapNodeWidth(n: PanelFlowNode): number | undefined {
-  return n.width ?? undefined;
-}
-
-/** Persist position + width; viz width is layout-owned in visualize mode. */
-function snapNodeLayout(n: PanelFlowNode): { position: { x: number; y: number }; width?: number } {
-  const kind = (n.data as PanelNodeData | undefined)?.kind ?? n.id;
-  const entry: { position: { x: number; y: number }; width?: number } = { position: n.position };
-  if (kind !== 'viz') {
-    const w = snapNodeWidth(n);
-    if (w != null) entry.width = w;
-  }
-  return entry;
-}
-
-function restoreNodeWidth(kind: string, savedWidth: number | undefined, layoutWidth: number | undefined): number | undefined {
-  const raw = savedWidth ?? layoutWidth;
-  const maxW = layoutFixedWidth(kind);
-  if (raw == null) return raw;
-  return maxW != null ? Math.min(raw, maxW) : raw;
-}
-
-/** Drop retired shell edges; restore required wires unless the user removed them. */
-function sanitizeVisualizeEdges(
-  edges: Edge[],
-  plugin: ProblemPlugin<any, any>,
-  present: Set<string>,
-  edgeOpts: typeof defaultEdgeOpts,
-  removedEdgeIds: Set<string>,
-): Edge[] {
-  const filtered = edges.filter((e) => !DEPRECATED_VISUALIZE_EDGES.has(e.id));
-  const canonical = buildEdges(plugin, 'visualize').filter(
-    (e) =>
-      present.has(e.source) &&
-      present.has(e.target) &&
-      REQUIRED_VISUALIZE_EDGES.has(e.id) &&
-      !removedEdgeIds.has(e.id),
-  );
-  const canonicalById = new Map(canonical.map((e) => [e.id, e]));
-  const enriched = filtered.map((e) => {
-    const canon = canonicalById.get(e.id);
-    if (!canon) return e;
-    const targetHandle = e.targetHandle ?? canon.targetHandle;
-    if (targetHandle === e.targetHandle) return e;
-    return {
-      ...e,
-      ...(targetHandle ? { targetHandle } : {}),
-    };
-  });
-  const ids = new Set(enriched.map((e) => e.id));
-  const merged = [...enriched, ...canonical.filter((e) => !ids.has(e.id))];
-  return styleEdges(merged, edgeOpts);
-}
-
-/** Migrate legacy separate inspector node into the merged viz node; strip dock-only panels. */
-function migrateVisualizeLayoutEntry(entry: LayoutEntry): LayoutEntry {
-  const inspector = entry.nodes.inspector;
-  const alreadyRemoved = entry.removed.includes('inspector');
-  let nodes = { ...entry.nodes };
-  let removed = [...entry.removed];
-
-  if (inspector) {
-    const viz = nodes.viz;
-    if (viz) {
-      nodes.viz = {
-        ...viz,
-        width: (viz.width ?? 680) + (inspector.width ?? 400),
-      };
-    }
-    delete nodes.inspector;
-    if (!alreadyRemoved) removed.push('inspector');
-  } else if (alreadyRemoved) {
-    // keep removed as-is
-  }
-
-  for (const id of DOCK_ONLY_PANELS) {
-    if (nodes[id]) {
-      delete nodes[id];
-      if (!removed.includes(id)) removed.push(id);
-    }
-  }
-
-  // Migrate legacy split examples panel into unified problem panel.
-  if (nodes.examples && !nodes.problem) {
-    nodes.problem = nodes.examples;
-  }
-  delete nodes.examples;
-  if (!removed.includes('examples')) removed.push('examples');
-
-  return { nodes, removed };
-}
-
-/** Migrate legacy code+scratch layouts to unified Code Studio. */
-function migrateCodeLayoutEntry(entry: LayoutEntry): LayoutEntry {
-  const scratch = entry.nodes.scratch;
-  if (!scratch) return entry;
-  const nodes = { ...entry.nodes };
-  if (nodes.code) {
-    nodes.code = {
-      ...nodes.code,
-      width: Math.max(nodes.code.width ?? 0, scratch.width ?? 0) || nodes.code.width,
-    };
-  } else {
-    nodes.code = scratch;
-  }
-  delete nodes.scratch;
-  const removed = entry.removed.includes('scratch') ? entry.removed : [...entry.removed, 'scratch'];
-  return { nodes, removed };
-}
-
-function mergeLearnLayoutEntries(a: LayoutEntry, b?: LayoutEntry): LayoutEntry {
-  const nodes = { ...a.nodes };
-  if (b) {
-    for (const [id, saved] of Object.entries(b.nodes)) {
-      if (id === 'code' && nodes.code) {
-        nodes.code = {
-          ...nodes.code,
-          width: Math.max(nodes.code.width ?? 0, saved.width ?? 0) || saved.width,
-        };
-      } else if (id === 'code' || !nodes[id]) {
-        nodes[id] = saved;
-      }
-    }
-  }
-  const removed = [...new Set([...a.removed, ...(b?.removed ?? [])])];
-  return { nodes, removed };
-}
-
-function stripLayoutHeights(entry: LayoutEntry): LayoutEntry {
-  const nodes: LayoutEntry['nodes'] = {};
-  for (const [id, saved] of Object.entries(entry.nodes)) {
-    const { height: _, ...rest } = saved;
-    nodes[id] = rest;
-  }
-  return { ...entry, nodes };
-}
-
-function migrateLayouts(stored: Record<string, LayoutEntry>): Record<string, LayoutEntry> {
-  const temp: Record<string, LayoutEntry> = {};
-  for (const [key, entry] of Object.entries(stored)) {
-    let migrated = entry;
-    if (key.endsWith(':code') || key.endsWith(':practice') || key.endsWith(':learn')) {
-      migrated = migrateCodeLayoutEntry(migrated);
-    } else if (key.endsWith(':visualize')) {
-      migrated = migrateVisualizeLayoutEntry(migrated);
-    }
-    temp[key] = stripLayoutHeights(migrated);
-  }
-
-  const out: Record<string, LayoutEntry> = {};
-  const mergedPlugins = new Set<string>();
-
-  for (const key of Object.keys(temp)) {
-    if (!key.endsWith(':practice') && !key.endsWith(':code')) continue;
-    const pluginId = key.slice(0, key.lastIndexOf(':'));
-    if (mergedPlugins.has(pluginId)) continue;
-    mergedPlugins.add(pluginId);
-    const practice = temp[`${pluginId}:practice`];
-    const code = temp[`${pluginId}:code`];
-    const existingLearn = temp[`${pluginId}:learn`];
-    let learn: LayoutEntry = practice && code
-      ? mergeLearnLayoutEntries(practice, code)
-      : practice ?? code ?? existingLearn!;
-    if (existingLearn) learn = mergeLearnLayoutEntries(learn, existingLearn);
-    out[`${pluginId}:learn`] = learn;
-  }
-
-  for (const [key, entry] of Object.entries(temp)) {
-    if (key.endsWith(':practice') || key.endsWith(':code')) continue;
-    if (key.endsWith(':learn') && mergedPlugins.has(key.slice(0, key.lastIndexOf(':')))) continue;
-    out[key] = entry;
-  }
-
-  return out;
 }
 
 interface Menu {
