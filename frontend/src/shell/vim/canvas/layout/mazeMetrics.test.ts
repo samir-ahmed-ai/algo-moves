@@ -43,4 +43,12 @@ describe('mazeMetrics', () => {
     const short = computeStudioCellSize(grid, 1280, 360, { hudW: HUD_PANEL_WIDTH });
     expect(short).toBeLessThanOrEqual(full);
   });
+
+  it('computeStudioCellSize scales up on large full-page viewports', () => {
+    const grid = getVimLevel('basic-02')!.grid;
+    const compact = computeStudioCellSize(grid, 480, 640, { hudW: HUD_PANEL_WIDTH });
+    const spacious = computeStudioCellSize(grid, 1600, 1000, { hudW: HUD_PANEL_WIDTH });
+    expect(spacious).toBeGreaterThan(compact);
+    expect(spacious).toBeGreaterThan(30);
+  });
 });

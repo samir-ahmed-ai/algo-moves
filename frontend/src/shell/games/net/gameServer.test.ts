@@ -18,8 +18,19 @@ describe('gameServer', () => {
     vi.stubEnv('VITE_GAMES_SERVER_URL', 'https://games.example.com/');
     expect(gameServerHttpBase()).toBe('https://games.example.com');
     expect(hasConfiguredServer()).toBe(true);
-    expect(gameServerWsUrl('abcd', 'Ahmed', 'pid-1')).toBe(
+    expect(gameServerWsUrl('abcd', 'Ahmed', { pid: 'pid-1' })).toBe(
       'wss://games.example.com/ws?room=ABCD&name=Ahmed&pid=pid-1',
+    );
+  });
+
+  it('encodes spectator and capacity join options', () => {
+    vi.stubEnv('VITE_GAMES_SERVER_URL', 'https://games.example.com');
+    expect(gameServerWsUrl('abcd', 'Ahmed', { pid: 'p1', asSpectator: true, capacity: 4 })).toBe(
+      'wss://games.example.com/ws?room=ABCD&name=Ahmed&pid=p1&role=spectator&cap=4',
+    );
+    // A default (no-opts) join carries neither role nor cap.
+    expect(gameServerWsUrl('abcd', 'Ahmed')).toBe(
+      'wss://games.example.com/ws?room=ABCD&name=Ahmed',
     );
   });
 

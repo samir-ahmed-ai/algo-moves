@@ -2,6 +2,7 @@ package hub
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"testing"
 )
@@ -71,18 +72,21 @@ func TestJoinAssignsHostThenGuest(t *testing.T) {
 		t.Fatalf("guest join = (%v,%v), want (guest,true)", role, ok)
 	}
 
-	// Host's welcome should list no peers initially.
-	w := host.lastOfType("welcome")
-	if w == nil {
-		t.Fatal("host got no welcome")
+	// Host's first welcome lists only itself in the players roster.
+	w := host.decoded()[0]
+	if w["t"] != "welcome" {
+		t.Fatalf("host's first message = %v, want welcome", w["t"])
 	}
-	if peers, _ := w["peers"].([]any); len(peers) != 0 {
-		t.Fatalf("host welcome peers = %v, want empty", w["peers"])
+	if players, _ := w["players"].([]any); len(players) != 1 {
+		t.Fatalf("host welcome players = %v, want 1 (itself)", w["players"])
 	}
-	// Guest's welcome should include the host as a peer.
+	// Guest's welcome should include both players.
 	gw := guest.lastOfType("welcome")
-	if peers, _ := gw["peers"].([]any); len(peers) != 1 {
-		t.Fatalf("guest welcome peers = %v, want 1", gw["peers"])
+	if players, _ := gw["players"].([]any); len(players) != 2 {
+		t.Fatalf("guest welcome players = %v, want 2", gw["players"])
+	}
+	if specs, _ := gw["spectators"].([]any); len(specs) != 0 {
+		t.Fatalf("guest welcome spectators = %v, want empty", gw["spectators"])
 	}
 	// Host should have been told the guest joined.
 	if host.lastOfType("peer-join") == nil {
@@ -90,16 +94,21 @@ func TestJoinAssignsHostThenGuest(t *testing.T) {
 	}
 }
 
-func TestThirdJoinIsRejected(t *testing.T) {
-	h := New()
+func TestThirdJoinBecomesSpectator(t *testing.T) {
+	h := New() // default capacity 2
 	h.Join("R", &rec{id: "1"}, "")
 	h.Join("R", &rec{id: "2"}, "")
 	third := &rec{id: "3"}
-	if _, ok := h.Join("R", third, ""); ok {
-		t.Fatal("third join should fail")
+	role, ok := h.Join("R", third, "")
+	if !ok || role != RoleSpectator {
+		t.Fatalf("third join = (%v,%v), want (spectator,true)", role, ok)
 	}
-	if third.lastOfType("error") == nil {
-		t.Fatal("third join should receive an error message")
+	w := third.lastOfType("welcome")
+	if players, _ := w["players"].([]any); len(players) != 2 {
+		t.Fatalf("spectator welcome players = %v, want 2", w["players"])
+	}
+	if specs, _ := w["spectators"].([]any); len(specs) != 1 {
+		t.Fatalf("spectator welcome spectators = %v, want 1 (itself)", w["spectators"])
 	}
 }
 
@@ -249,12 +258,13 @@ func TestReconnectBeforeTimeoutEvictsStaleConnection(t *testing.T) {
 		t.Fatal("unrelated guest connection should not be evicted")
 	}
 
-	// A third connection now correctly finds the room full (2 live players:
-	// hostAgain and guest), proving the stale slot was truly replaced rather
+	// A third connection now finds both seats occupied (hostAgain + guest) and
+	// so joins as a spectator, proving the stale slot was truly replaced rather
 	// than just added on top of.
 	third := &rec{id: "third"}
-	if _, ok := h.Join("R", third, ""); ok {
-		t.Fatal("room should be full after the reconnect replaced the stale host")
+	role, ok = h.Join("R", third, "")
+	if !ok || role != RoleSpectator {
+		t.Fatalf("third join = (%v,%v), want (spectator,true) once both seats are full", role, ok)
 	}
 }
 
@@ -330,6 +340,37 @@ func TestHubConcurrentAccessIsRaceSafe(t *testing.T) {
 	// deadlock": the point of this test is concurrent-safety, not a specific
 	// end state, per the Hub's "safe for concurrent use" doc comment.
 	_ = h.RoomCount()
+}
+
+// TestConcurrentJoinLeaveSameCodeReclaimsRoomCleanly hammers Join/Leave for a
+// single room code from many goroutines at once. It specifically exercises
+// the per-room dead-flag/retry handshake between Hub.deleteIfStillEmpty and
+// room.join: a room emptied by Leave and concurrently re-fetched by Join must
+// never be resurrected once deleted, and Join must never resurrect a deleted
+// room instead of creating a fresh one.
+func TestConcurrentJoinLeaveSameCodeReclaimsRoomCleanly(t *testing.T) {
+	h := New()
+	const code = "R"
+	const iterations = 200
+
+	var wg sync.WaitGroup
+	for i := 0; i < iterations; i++ {
+		for _, prefix := range [2]string{"a", "b"} {
+			wg.Add(1)
+			go func(id string) {
+				defer wg.Done()
+				c := &rec{id: id}
+				if _, ok := h.Join(code, c, ""); ok {
+					h.Leave(code, c)
+				}
+			}(fmt.Sprintf("%s%d", prefix, i))
+		}
+	}
+	wg.Wait()
+
+	if got := h.RoomCount(); got != 0 {
+		t.Fatalf("room count = %d, want 0 once every joiner has left", got)
+	}
 }
 
 func TestFreshCodeIsUniqueAndClean(t *testing.T) {

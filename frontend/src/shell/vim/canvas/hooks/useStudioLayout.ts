@@ -17,6 +17,8 @@ import {
 import type { MazeGrid } from '../../engine';
 
 const FIT_PADDING = 0.12;
+/** Allow fitView to scale the studio up on large full-page viewports. */
+const FIT_MAX_ZOOM = 2.5;
 const STUDIO_NODE_IDS = [{ id: HUD_NODE_ID }, { id: MAZE_NODE_ID }];
 
 function layoutForGrid(grid: MazeGrid, cellSize: number) {
@@ -65,7 +67,7 @@ export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HT
         nodes: STUDIO_NODE_IDS,
         padding: FIT_PADDING,
         duration,
-        maxZoom: 1,
+        maxZoom: FIT_MAX_ZOOM,
       });
     },
     [fitView],

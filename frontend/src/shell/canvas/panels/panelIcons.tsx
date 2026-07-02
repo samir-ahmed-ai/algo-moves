@@ -34,7 +34,6 @@ import {
 const PANEL_ICON = 'size-[var(--node-icon,1.125rem)]';
 
 const ICON: Record<string, ReactNode> = {
-  examples: <ListChecks className={PANEL_ICON} />,
   problem: <FileText className={PANEL_ICON} />,
   viz: <Network className={PANEL_ICON} />,
   replay: <Activity className={PANEL_ICON} />,
@@ -69,7 +68,6 @@ const ICON: Record<string, ReactNode> = {
 };
 
 const KIND_ACCENT: Record<string, string> = {
-  examples: 'var(--good)',
   problem: 'var(--edge-active)',
   viz: 'var(--team1-stroke)',
   replay: 'var(--accent)',

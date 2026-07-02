@@ -24,11 +24,21 @@ export function gameServerHttpBase(): string {
   return `${proto}//${location.hostname}:8080`;
 }
 
+/** How a client wants to join: reconnect id, spectate, and desired room size. */
+export interface JoinOpts {
+  pid?: string;
+  asSpectator?: boolean;
+  /** Player seats to size a freshly-created room to (ignored for existing rooms). */
+  capacity?: number;
+}
+
 /** WebSocket URL to join a room. http→ws and https→wss are derived automatically. */
-export function gameServerWsUrl(room: string, name: string, pid?: string): string {
+export function gameServerWsUrl(room: string, name: string, opts: JoinOpts = {}): string {
   const ws = gameServerHttpBase().replace(/^http/, 'ws');
   const params = new URLSearchParams({ room: room.toUpperCase(), name });
-  if (pid) params.set('pid', pid);
+  if (opts.pid) params.set('pid', opts.pid);
+  if (opts.asSpectator) params.set('role', 'spectator');
+  if (opts.capacity && opts.capacity > 0) params.set('cap', String(opts.capacity));
   return `${ws}/ws?${params.toString()}`;
 }
 

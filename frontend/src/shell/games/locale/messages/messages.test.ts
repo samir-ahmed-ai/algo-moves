@@ -18,9 +18,11 @@ describe('arcade messages', () => {
   it('returns English strings for en locale', () => {
     const t = getArcadeStrings('en');
     expect(t.header.games).toBe('Games');
-    expect(t.lobby.title).toBe('Two-player games');
+    expect(t.lobby.title).toBe('Play with friends');
     expect(t.picker.title).toBe('Pick a game');
     expect(t.shareRoom.roomCode).toBe('Room code');
+    expect(t.room.readyUp).toBe('Ready up');
+    expect(t.leaderboard.title).toBe('Leaderboards');
   });
 
   it('formats waiting reconnect with partner name', () => {

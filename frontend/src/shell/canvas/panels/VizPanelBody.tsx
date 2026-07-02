@@ -4,7 +4,6 @@ import { cn } from '../../../lib/cn';
 import { ErrorBoundary } from '../../ErrorBoundary';
 import { useCanvasFrame, useCanvasStatic } from '../CanvasContext';
 import { ControlsAccordion, nodeText, nodeTextWrap, VizFitBox } from '../nodeui';
-import { GlobalTransportBar } from '../GlobalTransportBar';
 import { BigOPanelBody } from './BigOPanelBody';
 import { Transport } from './shared/Transport';
 
@@ -104,7 +103,6 @@ export function VizPanelBody({
           </div>
         </ControlsAccordion>
       )}
-      {inVisualize && <GlobalTransportBar />}
       {!inVisualize && (
         <ControlsAccordion>
           <Transport />

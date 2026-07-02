@@ -37,7 +37,7 @@ describe('togglePanelCollapse', () => {
   });
 
   it('respects custom min height', () => {
-    const n = panel({ kind: 'examples', title: 'Examples', collapsed: false }, { height: 200 });
+    const n = panel({ kind: 'problem', title: 'Problem', collapsed: false }, { height: 200 });
     const out = togglePanelCollapse(n, 48);
 
     expect(out.height).toBe(48);

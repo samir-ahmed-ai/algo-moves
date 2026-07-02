@@ -19,6 +19,7 @@ import { HUD_NODE_ID, MAZE_NODE_ID } from './layout/orbitSlots';
 
 const edgeTypes = { orbit: OrbitEdge };
 const FIT_PADDING = 0.12;
+const FIT_MAX_ZOOM = 2.5;
 const STUDIO_NODES = [{ id: HUD_NODE_ID }, { id: MAZE_NODE_ID }];
 
 function VimDojoFlow() {
@@ -44,9 +45,9 @@ function VimDojoFlow() {
           panOnDrag={[1, 2]}
           zoomOnScroll
           minZoom={0.2}
-          maxZoom={1.5}
+          maxZoom={FIT_MAX_ZOOM}
           fitView
-          fitViewOptions={{ padding: FIT_PADDING, maxZoom: 1, nodes: STUDIO_NODES }}
+          fitViewOptions={{ padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM, nodes: STUDIO_NODES }}
           proOptions={{ hideAttribution: true }}
           onError={onVimFlowError}
           className="vim-dojo-canvas"

@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { currentMark, emptyBoard, isFull, WIN_LINES, winner, type Board } from './logic';
+import {
+  autoMoveIndex,
+  currentMark,
+  emptyBoard,
+  isFull,
+  WIN_LINES,
+  winner,
+  winningLine,
+  type Board,
+} from './logic';
 
 const b = (cells: string): Board =>
   cells.split('').map((ch) => (ch === 'X' ? 'X' : ch === 'O' ? 'O' : null));
@@ -47,5 +56,28 @@ describe('tic-tac-toe logic', () => {
     expect(currentMark(b('X..' + '...' + '...'))).toBe('O');
     expect(currentMark(b('XO.' + '...' + '...'))).toBe('X');
     expect(currentMark(b('XOX' + '...' + '...'))).toBe('O');
+  });
+
+  it('returns the completed winning triple', () => {
+    expect(winningLine(b('XXX' + 'OO.' + '...'))).toEqual([0, 1, 2]);
+    expect(winningLine(b('X..' + 'X..' + 'X..'))).toEqual([0, 3, 6]);
+    expect(winningLine(b('X..' + '.X.' + '..X'))).toEqual([0, 4, 8]);
+    expect(winningLine(b('..O' + '.O.' + 'O..'))).toEqual([2, 4, 6]);
+  });
+
+  it('has no winning triple without a winner', () => {
+    expect(winningLine(emptyBoard())).toBeNull();
+    expect(winningLine(b('XO.' + '.X.' + '..O'))).toBeNull();
+  });
+
+  it('auto-skip picks the lowest empty cell', () => {
+    expect(autoMoveIndex(emptyBoard())).toBe(0);
+    expect(autoMoveIndex(b('XO.' + '...' + '...'))).toBe(2);
+    expect(autoMoveIndex(b('XOX' + 'O..' + '...'))).toBe(4);
+  });
+
+  it('auto-skip returns -1 when there is nothing to play', () => {
+    expect(autoMoveIndex(b('XOX' + 'XOO' + 'OXX'))).toBe(-1); // full draw
+    expect(autoMoveIndex(b('XXX' + 'OO.' + '...'))).toBe(-1); // already won
   });
 });

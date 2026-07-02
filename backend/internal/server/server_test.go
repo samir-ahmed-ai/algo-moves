@@ -182,8 +182,8 @@ func TestEndToEndRelay(t *testing.T) {
 	if gw["self"].(map[string]any)["role"] != "guest" {
 		t.Fatalf("guest role = %v, want guest", gw["self"])
 	}
-	if peers := gw["peers"].([]any); len(peers) != 1 {
-		t.Fatalf("guest sees %d peers, want 1", len(peers))
+	if players := gw["players"].([]any); len(players) != 2 {
+		t.Fatalf("guest sees %d players, want 2 (host + self)", len(players))
 	}
 
 	// Host should be notified that the guest joined.
@@ -287,7 +287,7 @@ func TestCorsJSONRequiresOriginOnNewWhenAllowlisted(t *testing.T) {
 	}
 }
 
-func TestEndToEndRoomFull(t *testing.T) {
+func TestEndToEndThirdJoinerSpectates(t *testing.T) {
 	ts := newTestServer()
 	defer ts.Close()
 
@@ -300,13 +300,48 @@ func TestEndToEndRoomFull(t *testing.T) {
 	guest.readMessage(t)
 	host.readMessage(t) // peer-join
 
+	// With both seats of a default (capacity-2) room taken, a third connection
+	// joins as a spectator rather than being turned away.
 	third := dialWS(t, ts.URL, "/ws?room=FULL&name=Third")
 	defer third.close()
 	msg := third.readMessage(t)
-	if msg["t"] != "error" {
-		t.Fatalf("third join expected error, got %v", msg)
+	if msg["t"] != "welcome" {
+		t.Fatalf("third join expected welcome, got %v", msg)
 	}
-	if msg["msg"] != "room-full" {
-		t.Fatalf("error msg = %v, want room-full", msg["msg"])
+	if msg["self"].(map[string]any)["role"] != "spectator" {
+		t.Fatalf("third role = %v, want spectator", msg["self"])
+	}
+	if specs := msg["spectators"].([]any); len(specs) != 1 {
+		t.Fatalf("third sees %d spectators, want 1 (itself)", len(specs))
+	}
+}
+
+func TestEndToEndCapacityAndSpectatorParams(t *testing.T) {
+	ts := newTestServer()
+	defer ts.Close()
+
+	// The room creator sizes the room to 3 seats.
+	host := dialWS(t, ts.URL, "/ws?room=BIG&name=Host&cap=3")
+	defer host.close()
+	host.readMessage(t)
+
+	// A third player still gets a seat (role "player").
+	p2 := dialWS(t, ts.URL, "/ws?room=BIG&name=P2")
+	defer p2.close()
+	p2.readMessage(t)
+	host.readMessage(t)
+	p3 := dialWS(t, ts.URL, "/ws?room=BIG&name=P3")
+	defer p3.close()
+	w := p3.readMessage(t)
+	if w["self"].(map[string]any)["role"] != "player" {
+		t.Fatalf("third player role = %v, want player", w["self"])
+	}
+
+	// An explicit ?role=spectator watcher never takes a seat.
+	watcher := dialWS(t, ts.URL, "/ws?room=BIG&name=Watcher&role=spectator")
+	defer watcher.close()
+	ww := watcher.readMessage(t)
+	if ww["self"].(map[string]any)["role"] != "spectator" {
+		t.Fatalf("watcher role = %v, want spectator", ww["self"])
 	}
 }

@@ -38,9 +38,9 @@ type Client struct {
 	once    sync.Once
 	limiter *msgLimiter
 
-	// role is only ever read or written while the owning Hub holds its lock
-	// (Hub.Join sets it, Hub.SetState reads it), so — like room.slots/pids/state
-	// — it needs no dedicated mutex of its own.
+	// role is only ever read or written while the owning room holds its lock
+	// (room.join / room.setSeat set it, room.setState reads it), so — like
+	// room.players/pids/state — it needs no dedicated mutex of its own.
 	role Role
 }
 
@@ -118,11 +118,12 @@ func (c *Client) drainOutbound(timeout time.Duration) {
 
 // Serve runs the full lifecycle for a connection: join the room, pump messages
 // until the socket dies, then leave. It blocks until the connection ends. The
-// pid is a stable per-player id used to reclaim a slot across reconnects.
-func Serve(h *Hub, conn *ws.Conn, code, name, pid string) {
+// pid is a stable per-player id used to reclaim a slot across reconnects; opts
+// carries the requested capacity and whether to join as a spectator.
+func Serve(h *Hub, conn *ws.Conn, code, name, pid string, opts JoinOptions) {
 	c := newClient(conn, name)
 	go c.writePump()
-	if _, ok := h.Join(code, c, pid); !ok {
+	if _, ok := h.JoinWith(code, c, pid, opts); !ok {
 		c.drainOutbound(500 * time.Millisecond)
 		c.close()
 		return
@@ -153,6 +154,13 @@ func (c *Client) readPump(h *Hub, code string) {
 			h.Relay(code, c, in.D)
 		case "state":
 			h.SetState(code, c, in.D)
+		case "seat":
+			var s struct {
+				Want string `json:"want"`
+			}
+			if json.Unmarshal(in.D, &s) == nil {
+				h.SetSeat(code, c, s.Want == "player")
+			}
 		case "ping":
 			// Optional application-level heartbeat; keepalive already handled.
 		}

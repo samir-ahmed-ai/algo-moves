@@ -192,10 +192,12 @@ function migrateVisualizeLayoutEntry(entry: LayoutEntry): LayoutEntry {
     }
   }
 
-  // Default problem+viz layouts should include the split examples panel unless viz/problem were removed.
-  if (!removed.includes('problem') && !removed.includes('viz')) {
-    removed = removed.filter((id) => id !== 'examples');
+  // Migrate legacy split examples panel into unified problem panel.
+  if (nodes.examples && !nodes.problem) {
+    nodes.problem = nodes.examples;
   }
+  delete nodes.examples;
+  if (!removed.includes('examples')) removed.push('examples');
 
   return { nodes, removed };
 }
@@ -485,7 +487,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   const builtKeyRef = useRef(key);
   const mounted = useRef(false);
 
-  // Strip legacy examples→problem edges; restore required examples→viz unless user removed it.
+  // Strip legacy examples edges; restore required problem→viz unless user removed it.
   useEffect(() => {
     if (mode !== 'visualize') return;
     const present = new Set(nodesRef.current.map((n) => n.id));

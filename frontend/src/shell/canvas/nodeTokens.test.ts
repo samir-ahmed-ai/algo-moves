@@ -15,14 +15,12 @@ describe('nodeTokens', () => {
   });
 
   it('scales narrow panel layout estimates', () => {
-    expect(layoutEstimate('problem').estH).toBe(Math.round(275 * NODE_UI_SCALE));
-    expect(layoutEstimate('examples').estH).toBe(Math.round(150 * NODE_UI_SCALE));
+    expect(layoutEstimate('problem').estH).toBe(Math.round(380 * NODE_UI_SCALE));
   });
 
-  it('caps problem/examples resize at NODE_MAX_W', () => {
+  it('caps problem resize at NODE_MAX_W', () => {
     expect(NODE_MAX_W).toBe(600);
     expect(layoutFixedWidth('problem')).toBe(NODE_MAX_W);
-    expect(layoutFixedWidth('examples')).toBe(NODE_MAX_W);
     expect(layoutEstimate('problem').cap).toBe(NODE_MAX_W);
   });
 });

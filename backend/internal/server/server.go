@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -48,6 +49,10 @@ func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 		}
 		name := SanitizeName(r.URL.Query().Get("name"))
 		pid := sanitizePid(r.URL.Query().Get("pid"))
+		opts := hub.JoinOptions{
+			Capacity:    parseCapacity(r.URL.Query().Get("cap")),
+			AsSpectator: r.URL.Query().Get("role") == "spectator",
+		}
 
 		conn, err := ws.Upgrade(w, r)
 		if err != nil {
@@ -55,7 +60,7 @@ func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 			return
 		}
 		log.Printf("room %s: %s connected from %s", code, name, conn.RemoteAddr())
-		hub.Serve(h, conn, code, name, pid)
+		hub.Serve(h, conn, code, name, pid, opts)
 		log.Printf("room %s: %s disconnected", code, name)
 	}
 }
@@ -143,6 +148,20 @@ func SanitizeName(raw string) string {
 		runes = runes[:24]
 	}
 	return string(runes)
+}
+
+// parseCapacity reads the optional ?cap= room-size hint. A missing or invalid
+// value yields 0, which the hub reads as "use the default capacity"; the hub
+// clamps any out-of-range number to its own [min,max] bounds.
+func parseCapacity(raw string) int {
+	if raw == "" {
+		return 0
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n < 0 {
+		return 0
+	}
+	return n
 }
 
 // sanitizePid keeps only URL-safe id characters and caps the length; the pid is

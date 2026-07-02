@@ -3,6 +3,9 @@ import type { MazeGrid } from '../../engine';
 /** Cell size in px — keep in sync with MazeBoard default. */
 export const MAZE_CELL_SIZE = 30;
 
+/** Largest maze cell when the studio has room to grow (full-page viewports). */
+export const MAX_STUDIO_CELL_SIZE = 56;
+
 /** Grid gap in px — matches `--space-1` (0.25rem @ 16px root) and MazeBoard inline gap. */
 export const MAZE_GRID_GAP = 4;
 
@@ -52,7 +55,18 @@ export function fitMazeCellSize(grid: MazeGrid, maxInnerW: number, maxCellSize =
 export const VIM_FIT_CHROME_TOP = 56;
 export const VIM_FIT_CHROME_BOTTOM = 104;
 
-/** Pick a cell size so HUD + maze fit the React Flow viewport without clipping. */
+function studioStackSize(
+  grid: MazeGrid,
+  cell: number,
+  hudW: number,
+  hudH: number,
+  gap: number,
+): { w: number; h: number } {
+  const maze = mazeNodeSize(grid, cell);
+  return { w: Math.max(hudW, maze.w), h: hudH + gap + maze.h };
+}
+
+/** Pick the largest cell size so HUD + maze fit the React Flow viewport (scales up on full-page). */
 export function computeStudioCellSize(
   grid: MazeGrid,
   viewportW: number,
@@ -62,6 +76,7 @@ export function computeStudioCellSize(
     hudH?: number;
     gap?: number;
     maxCell?: number;
+    minCell?: number;
     pad?: number;
   } = {},
 ): number {
@@ -69,33 +84,32 @@ export function computeStudioCellSize(
     hudW = 422,
     hudH = 128,
     gap = 24,
-    maxCell = MAZE_CELL_SIZE,
+    maxCell = MAX_STUDIO_CELL_SIZE,
+    minCell = 16,
     pad = 0.12,
   } = opts;
 
-  if (viewportW <= 0 || viewportH <= 0) return maxCell;
-
-  const innerW = hudW - MAZE_NODE_CHROME.padX;
-  let cell = fitMazeCellSize(grid, innerW, maxCell);
+  if (viewportW <= 0 || viewportH <= 0) return MAZE_CELL_SIZE;
 
   const insetX = viewportW * pad * 2;
   const insetY = viewportH * pad * 2 + VIM_FIT_CHROME_TOP + VIM_FIT_CHROME_BOTTOM;
   const availW = Math.max(0, viewportW - insetX);
   const availH = Math.max(0, viewportH - insetY);
 
-  const maze = () => mazeNodeSize(grid, cell);
-  let stackW = Math.max(hudW, maze().w);
-  let stackH = hudH + gap + maze().h;
+  let lo = minCell;
+  let hi = maxCell;
+  let best = minCell;
 
-  if (stackW > availW && stackW > 0) {
-    cell = Math.max(16, Math.floor((cell * availW) / stackW));
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const stack = studioStackSize(grid, mid, hudW, hudH, gap);
+    if (stack.w <= availW && stack.h <= availH) {
+      best = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
   }
 
-  stackW = Math.max(hudW, maze().w);
-  stackH = hudH + gap + maze().h;
-  if (stackH > availH && stackH > 0) {
-    cell = Math.max(16, Math.floor((cell * availH) / stackH));
-  }
-
-  return cell;
+  return best;
 }

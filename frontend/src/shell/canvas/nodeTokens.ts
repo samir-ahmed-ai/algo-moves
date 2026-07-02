@@ -8,7 +8,7 @@ export type PanelSize = { w: number; estH: number; cap?: number };
 /** Strudel Flow standard node width (~25% above legacy w-80). */
 export const NODE_W = 400;
 
-/** Max resize width for problem/examples panels. */
+/** Max resize width for problem panel. */
 export const NODE_MAX_W = 600;
 
 /** @deprecated Use NODE_W */
@@ -29,8 +29,7 @@ function scaleEstH(base: number): number {
  * `estH` is the initial dagre height before ResizeObserver measures.
  */
 const SIZE: Record<string, PanelSize> = {
-  examples: { w: STRUDEL_NODE_W, estH: scaleEstH(150), cap: NODE_MAX_W },
-  problem: { w: STRUDEL_NODE_W, estH: scaleEstH(275), cap: NODE_MAX_W },
+  problem: { w: STRUDEL_NODE_W, estH: scaleEstH(380), cap: NODE_MAX_W },
   viz: { w: STRUDEL_NODE_W, estH: 550 },
   replay: { w: STRUDEL_NODE_W, estH: 450, cap: STRUDEL_NODE_W },
   inspector: { w: STRUDEL_NODE_W, estH: 525, cap: 450 },
@@ -67,7 +66,6 @@ const SIZE: Record<string, PanelSize> = {
 const DEFAULT_SIZE: PanelSize = { w: STRUDEL_NODE_W, estH: 350, cap: STRUDEL_NODE_W };
 
 const KIND_TIER: Record<string, NodeTier> = {
-  examples: 'narrow',
   problem: 'narrow',
   viz: 'board',
   replay: 'standard',
@@ -119,9 +117,9 @@ export function layoutCap(kind: string): number | undefined {
   return (SIZE[kind] ?? DEFAULT_SIZE).cap;
 }
 
-/** Max node width cap for problem/examples; undefined = no cap. */
+/** Max node width cap for problem; undefined = no cap. */
 export function layoutFixedWidth(kind: string): number | undefined {
-  if (kind === 'problem' || kind === 'examples') return NODE_MAX_W;
+  if (kind === 'problem') return NODE_MAX_W;
   return undefined;
 }
 

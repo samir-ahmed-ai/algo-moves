@@ -2,7 +2,6 @@ import { BigOPanelBody } from './BigOPanelBody';
 import { BookmarksPanelBody } from './BookmarksPanelBody';
 import { CopyPanelBody } from './CopyPanelBody';
 import { EditorPanelBody } from './EditorPanelBody';
-import { ExamplesPanelBody } from './ExamplesPanelBody';
 import { InspectorPanelBody } from './InspectorPanelBody';
 import { MetricsBody } from './MetricsPanelBody';
 import { NotesPanelBody } from './NotesPanelBody';
@@ -27,8 +26,6 @@ import { TabBody } from './shared/TabBody';
 
 export function PanelBody({ kind }: { kind: string }) {
   switch (kind) {
-    case 'examples':
-      return <ExamplesPanelBody />;
     case 'problem':
       return <ProblemPanelBody />;
     case 'replay':

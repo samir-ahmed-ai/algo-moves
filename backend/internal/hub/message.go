@@ -2,16 +2,20 @@ package hub
 
 import "encoding/json"
 
-// Role marks which side of a two-player room a client occupies. The host (slot
-// 0) owns the shared room state; the guest (slot 1) follows it.
+// Role marks a client's standing in a room. The host (players[0]) owns the
+// shared room state; guest/player are the other active seats; a spectator
+// watches without a seat. Guest is retained as the name for seat 1 so existing
+// two-player games keep working unchanged.
 type Role string
 
 const (
-	RoleHost  Role = "host"
-	RoleGuest Role = "guest"
+	RoleHost      Role = "host"
+	RoleGuest     Role = "guest"
+	RolePlayer    Role = "player"
+	RoleSpectator Role = "spectator"
 )
 
-// Peer is the public description of a connected player.
+// Peer is the public description of a connected client.
 type Peer struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -20,8 +24,10 @@ type Peer struct {
 
 // Inbound is a message sent by a client to the server.
 //
-//	{"t":"relay","d":{...}}  — forward d verbatim to the other player
-//	{"t":"state","d":{...}}  — host sets shared room state (echoed to peers)
+//	{"t":"relay","d":{...}}          — forward d verbatim to everyone else
+//	{"t":"state","d":{...}}          — host sets shared room state (echoed to all)
+//	{"t":"seat","d":{"want":"..."}}  — request to become "player" or "spectator"
+//	{"t":"ping"}                     — optional app-level heartbeat (no-op)
 //
 // It is only ever json.Unmarshal'd, never marshaled, so D has no omitempty tag.
 type Inbound struct {
@@ -30,15 +36,17 @@ type Inbound struct {
 }
 
 // The set of server → client message builders. Each returns marshalled JSON
-// ready to hand to Conn.WriteText. Keeping them as small helpers avoids scattering
-// map[string]any literals across the hub.
+// ready to hand to Conn.WriteText. Keeping them as small helpers avoids
+// scattering map[string]any literals across the hub.
 
-func msgWelcome(self Peer, peers []Peer, state json.RawMessage) []byte {
+func msgWelcome(self Peer, players, spectators []Peer, capacity int, state json.RawMessage) []byte {
 	return mustJSON(map[string]any{
-		"t":     "welcome",
-		"self":  self,
-		"peers": peers,
-		"state": rawOrNull(state),
+		"t":          "welcome",
+		"self":       self,
+		"players":    players,
+		"spectators": spectators,
+		"capacity":   capacity,
+		"state":      rawOrNull(state),
 	})
 }
 
@@ -48,6 +56,12 @@ func msgPeerJoin(p Peer) []byte {
 
 func msgPeerLeave(p Peer) []byte {
 	return mustJSON(map[string]any{"t": "peer-leave", "peer": p})
+}
+
+// msgRoleChange announces that a peer's role changed (host handoff after the
+// host leaves, or a spectator/player seat swap), so clients re-bucket it.
+func msgRoleChange(p Peer) []byte {
+	return mustJSON(map[string]any{"t": "role-change", "peer": p})
 }
 
 func msgRelay(from string, d json.RawMessage) []byte {

@@ -142,18 +142,18 @@ export interface LayoutVisualizeOptions {
 const PRESET_KEEP: Record<LayoutPreset, Partial<Record<CanvasMode, string[]>>> = {
   Full: {},
   Study: {
-    visualize: ['problem', 'examples', 'viz'],
+    visualize: ['problem', 'viz'],
     learn: ['predict', 'mastery', 'code'],
   },
   Minimal: {
-    visualize: ['problem', 'examples', 'viz'],
+    visualize: ['problem', 'viz'],
     learn: ['predict', 'code'],
   },
   Theater: {
-    visualize: ['problem', 'examples', 'viz'],
+    visualize: ['problem', 'viz'],
   },
   Demo: {
-    visualize: ['problem', 'examples', 'viz'],
+    visualize: ['problem', 'viz'],
   },
 };
 
@@ -173,23 +173,17 @@ export function nodeForKind(
   return makeNode(id, kindTitle(plugin, id), position);
 }
 
-/** Obsolete shell edges from before the examples split; stripped on load. */
-export const DEPRECATED_VISUALIZE_EDGES = new Set(['examples->problem']);
+/** Obsolete shell edges from before the unified problem panel; stripped on load. */
+export const DEPRECATED_VISUALIZE_EDGES = new Set(['examples->problem', 'examples->viz']);
 
 /** Shell edges always restored on sanitize (data path). */
-export const REQUIRED_VISUALIZE_EDGES = new Set(['examples->viz']);
+export const REQUIRED_VISUALIZE_EDGES = new Set(['problem->viz']);
 
-/** Default stroke overrides for specific shell edges (id = `source->target`). */
-export const SHELL_EDGE_STROKE: Record<string, string> = {
-  'problem->viz': 'var(--bad)',
-};
-
-/** Shared input port on the visualizer — problem and examples both wire here. */
+/** Shared input port on the visualizer — problem wires here. */
 export const VIZ_INPUT_HANDLE = 'viz-in';
 
 const SHELL_WIRES: Record<CanvasMode, [string, string, string?][]> = {
   visualize: [
-    ['examples', 'viz'],
     ['problem', 'viz'],
     ['viz', 'code'],
     ['viz', 'reassemble'],
@@ -214,11 +208,9 @@ function allWires(plugin: ProblemPlugin<any, any>, mode: CanvasMode): [string, s
 
 function rawEdge(a: string, b: string, label?: string): Edge {
   const id = `${a}->${b}`;
-  const stroke = SHELL_EDGE_STROKE[id];
-  const targetHandle = b === 'viz' && (a === 'problem' || a === 'examples') ? VIZ_INPUT_HANDLE : undefined;
+  const targetHandle = b === 'viz' && a === 'problem' ? VIZ_INPUT_HANDLE : undefined;
   const data: Record<string, unknown> = { pathType: 'bezier' as EdgePathType };
   if (label) data.label = label;
-  if (stroke) data.stroke = stroke;
   return {
     id,
     source: a,
@@ -319,59 +311,28 @@ function centerStackY(colY: number, spanH: number, colH: number): number {
   return colY + Math.max(0, (spanH - colH) / 2);
 }
 
-/** Stack problem above examples in a left column; return positioned nodes and column metrics. */
+/** Position the unified problem panel in the left column. */
 function layoutLeftColumn(
   problem: PanelFlowNode | undefined,
-  examples: PanelFlowNode | undefined,
   x: number,
   y: number,
 ): { nodes: PanelFlowNode[]; colW: number; colH: number } {
-  const positioned: PanelFlowNode[] = [];
   const fixedW = layoutEstimate('problem').w;
-  let colBottom = y;
+  if (!problem) return { nodes: [], colW: fixedW, colH: 0 };
 
-  if (problem) {
-    const problemNode = {
-      ...problem,
-      position: { x, y } as XYPosition,
-      width: fixedW,
-    };
-    positioned.push(rowHandles(problemNode));
-    const problemBottom = y + nodeH(problemNode);
-    colBottom = Math.max(colBottom, problemBottom);
-    if (examples) {
-      colBottom = Math.max(colBottom, problemBottom + CANVAS_NODE_SEP);
-    }
-  }
-
-  if (examples) {
-    const ey = problem ? y + nodeH(problem) + CANVAS_NODE_SEP : y;
-    positioned.push(
-      rowHandles({
-        ...examples,
-        position: { x, y: ey },
-        width: fixedW,
-      }),
-    );
-    colBottom = Math.max(colBottom, ey + nodeH(examples));
-  }
-
-  return { nodes: positioned, colW: fixedW, colH: colBottom - y };
+  const problemNode = rowHandles({
+    ...problem,
+    position: { x, y } as XYPosition,
+    width: fixedW,
+  });
+  return { nodes: [problemNode], colW: fixedW, colH: nodeH(problemNode) };
 }
 
-function leftColumnHeight(
-  problem: PanelFlowNode | undefined,
-  examples: PanelFlowNode | undefined,
-): number {
-  let h = 0;
-  if (problem) {
-    h += nodeH(problem) + (examples ? CANVAS_NODE_SEP : 0);
-  }
-  if (examples) h += nodeH(examples);
-  return h;
+function leftColumnHeight(problem: PanelFlowNode | undefined): number {
+  return problem ? nodeH(problem) : 0;
 }
 
-/** Visualize mode: problem stacked above examples on the left, vertically centered against the visualizer. */
+/** Visualize mode: unified problem panel on the left, vertically centered against the visualizer. */
 export function layoutVisualizeCanvas(
   nodes: PanelFlowNode[],
   options?: LayoutVisualizeOptions,
@@ -380,10 +341,9 @@ export function layoutVisualizeCanvas(
 
   const vp = options?.viewport;
   const theater = options?.preset === 'Theater' || options?.preset === 'Demo';
-  const examples = findKind(nodes, 'examples');
   const problem = findKind(nodes, 'problem');
   const viz = findKind(nodes, 'viz');
-  const rest = nodes.filter((n) => n !== examples && n !== problem && n !== viz);
+  const rest = nodes.filter((n) => n !== problem && n !== viz);
 
   const colW = vp ? layoutSize('problem', vp).w : layoutEstimate('problem').w;
   const nodeSep = canvasNodeSep(colW);
@@ -391,16 +351,16 @@ export function layoutVisualizeCanvas(
   const colX = CANVAS_MARGIN;
   const colY = CANVAS_MARGIN;
 
-  if ((problem || examples) && viz && vp) {
+  if (problem && viz && vp) {
     const availW = Math.max(
       vizMinWidth(colW),
       vp.width - CANVAS_MARGIN * 2 - colW - wireGap,
     );
     const availH = Math.max(MIN_VIEWPORT_HEIGHT, vp.height - CANVAS_MARGIN * 2);
-    const colH = leftColumnHeight(problem, examples);
+    const colH = leftColumnHeight(problem);
     const stackY = centerStackY(colY, availH, colH);
 
-    const { nodes: colNodes } = layoutLeftColumn(problem, examples, colX, stackY);
+    const { nodes: colNodes } = layoutLeftColumn(problem, colX, stackY);
 
     const vizX = colX + colW + wireGap;
     // The visualizer hugs its board + rail (measured) rather than stretching to
@@ -431,10 +391,10 @@ export function layoutVisualizeCanvas(
     return positioned;
   }
 
-  const colH = leftColumnHeight(problem, examples);
+  const colH = leftColumnHeight(problem);
   const vizH = viz ? Math.max(nodeH(viz), colH) : colH;
   const stackY = viz ? centerStackY(colY, vizH, colH) : colY;
-  const { nodes: colNodes } = layoutLeftColumn(problem, examples, colX, stackY);
+  const { nodes: colNodes } = layoutLeftColumn(problem, colX, stackY);
   const positioned: PanelFlowNode[] = [...colNodes];
 
   let x = colX + colW + wireGap;
@@ -461,7 +421,7 @@ export function layoutVisualizeCanvas(
     x += nodeW(n) + CANVAS_NODE_SEP;
   }
 
-  // Nodes with no examples/problem/viz match (edge case): lay out in a row
+  // Nodes with no problem/viz match (edge case): lay out in a row
   if (positioned.length === 0) {
     let rx = CANVAS_MARGIN;
     const rH = Math.max(...nodes.map((n) => nodeH(n)));

@@ -1,22 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Gamepad2, Loader2, Plus, Users } from 'lucide-react';
+import { AlertCircle, Eye, Gamepad2, Loader2, Plus, Users } from 'lucide-react';
+import { cn } from '../../../lib/cn';
 import { readStorageText, writeStorageText } from '../../../lib/storage';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
+import { useAuth } from '../data/AuthProvider';
 import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net/gameServer';
 import { writeGamesHash } from '../engine/gamesHash';
+import { Avatar } from '../ui/Avatar';
 import { TouchButton } from '../ui/gamesUi';
 
 const NAME_KEY = 'algo-moves:games:name';
+const CAPACITIES = [2, 4, 6, 8];
 
-/** Pre-connection screen: pick a display name, then create or join a room. */
+/** Pre-connection screen: pick a name + avatar, then create or join a room. */
 export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
   const { locale } = useGamesLocale();
   const t = useMemo(() => getArcadeStrings(locale), [locale]);
   const { connect, disconnect, status, error } = useGameRoom();
+  const { ensureSignedIn, updateMyProfile, configured } = useAuth();
   const [name, setName] = useState(() => readStorageText(NAME_KEY, '') ?? '');
   const [joinCode, setJoinCode] = useState(prefillRoom ?? '');
   const [tab, setTab] = useState<'create' | 'join'>(prefillRoom ? 'join' : 'create');
+  const [capacity, setCapacity] = useState(2);
   const [createError, setCreateError] = useState<string | null>(null);
   const nameOk = name.trim().length > 0;
   const configuredServer = hasConfiguredServer();
@@ -28,27 +34,33 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
     }
   }, [prefillRoom]);
 
-  const remember = () => writeStorageText(NAME_KEY, name.trim());
+  const prepare = async () => {
+    writeStorageText(NAME_KEY, name.trim());
+    if (configured) {
+      await ensureSignedIn();
+      await updateMyProfile({ display_name: name.trim() });
+    }
+  };
 
   const createRoom = async () => {
     if (!nameOk) return;
-    remember();
     setCreateError(null);
     try {
+      await prepare();
       const code = await fetchNewRoomCode();
       writeGamesHash({ room: code });
-      connect(code, name.trim());
+      connect(code, name.trim(), { capacity });
     } catch (e) {
       setCreateError(e instanceof Error ? e.message : t.lobby.createRoomError);
     }
   };
 
-  const joinRoom = () => {
+  const joinRoom = async (asSpectator = false) => {
     const code = normalizeRoomCode(joinCode);
     if (!nameOk || code.length < 4) return;
-    remember();
+    await prepare();
     writeGamesHash({ room: code });
-    connect(code, name.trim());
+    connect(code, name.trim(), { asSpectator });
   };
 
   const connecting = status === 'connecting';
@@ -79,13 +91,16 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
 
       <label className="flex flex-col gap-1.5 text-start">
         <span className="text-xs font-semibold uppercase tracking-wide text-ink3">{t.lobby.yourName}</span>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value.slice(0, 24))}
-          placeholder={t.lobby.namePlaceholder}
-          className="min-h-12 rounded-[var(--radius)] border border-edge bg-panel px-4 text-base text-ink outline-none focus:border-accent"
-          autoComplete="given-name"
-        />
+        <div className="flex items-center gap-3">
+          {name.trim() ? <Avatar seed={name.trim()} name={name.trim()} size={44} /> : null}
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value.slice(0, 24))}
+            placeholder={t.lobby.namePlaceholder}
+            className="min-h-12 flex-1 rounded-[var(--radius)] border border-edge bg-panel px-4 text-base text-ink outline-none focus:border-accent"
+            autoComplete="given-name"
+          />
+        </div>
       </label>
 
       <div className="grid grid-cols-2 gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1">
@@ -98,9 +113,29 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       </div>
 
       {tab === 'create' ? (
-        <TouchButton variant="primary" size="lg" busy={connecting} disabled={!nameOk} onClick={createRoom}>
-          {connecting ? t.lobby.creatingRoom : t.lobby.createRoom}
-        </TouchButton>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-semibold uppercase tracking-wide text-ink3">{t.room.capacity}</span>
+            <div className="grid grid-cols-4 gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1">
+              {CAPACITIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCapacity(c)}
+                  className={cn(
+                    'min-h-10 rounded-[calc(var(--radius)-2px)] text-sm font-semibold transition-colors',
+                    capacity === c ? 'bg-panel text-ink shadow-sm' : 'text-ink3 hover:text-ink',
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+          <TouchButton variant="primary" size="lg" busy={connecting} disabled={!nameOk} onClick={createRoom}>
+            {connecting ? t.lobby.creatingRoom : t.lobby.createRoom}
+          </TouchButton>
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           <input
@@ -117,9 +152,18 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
             size="lg"
             busy={connecting}
             disabled={!nameOk || normalizeRoomCode(joinCode).length < 4}
-            onClick={joinRoom}
+            onClick={() => joinRoom(false)}
           >
             {connecting ? t.lobby.joining : t.lobby.joinRoom}
+          </TouchButton>
+          <TouchButton
+            variant="ghost"
+            size="md"
+            icon={<Eye className="h-4 w-4" />}
+            disabled={!nameOk || normalizeRoomCode(joinCode).length < 4}
+            onClick={() => joinRoom(true)}
+          >
+            {t.room.watchInstead}
           </TouchButton>
         </div>
       )}

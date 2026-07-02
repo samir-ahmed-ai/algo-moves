@@ -17,8 +17,19 @@ export interface GameDef {
   glyph: string;
   /** Rough session length, e.g. "~2 min". */
   minutes: string;
-  /** How the two players interact — drives the "Turns" / "Together" badge. */
+  /** How players interact — drives the "Turns" / "Together" badge. */
   pace: 'turns' | 'simultaneous';
+  /** Minimum players needed to start. Defaults to 2. */
+  minPlayers?: number;
+  /** Maximum players the game itself supports (arcade caps rooms at 8). Defaults to 2. */
+  maxPlayers?: number;
+  /** A CSS color used to accent the game's card and player identity. */
+  accent?: string;
   /** The game surface. Rendered only when the room is connected. */
   Component: ComponentType;
+}
+
+/** Player-count bounds for a game, applying the 2-player defaults. */
+export function gameCapacity(game: GameDef): { min: number; max: number } {
+  return { min: game.minPlayers ?? 2, max: game.maxPlayers ?? 2 };
 }

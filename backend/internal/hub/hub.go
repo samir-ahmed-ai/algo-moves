@@ -11,7 +11,11 @@ import (
 	"sync"
 )
 
-// Hub owns every active room. It is safe for concurrent use.
+// Hub owns every active room and the code → room map itself. It is safe for
+// concurrent use. Hub.mu only ever guards that map (lookup, creation,
+// deletion); a room's own state (slots/pids/state) is guarded by the room's
+// own mutex instead (see room.go), so a slow operation confined to one room
+// can never stall Join/Leave/Relay/SetState for any other room.
 type Hub struct {
 	mu       sync.Mutex
 	rooms    map[string]*room
@@ -40,11 +44,49 @@ func (h *Hub) RoomCount() int {
 	return len(h.rooms)
 }
 
-// Join places c into the room identified by code, creating the room if needed.
-// It returns the assigned role and true on success. If the room already holds
-// two players (and neither slot belongs to this pid), it sends an error to c
-// and returns ("", false) — the caller should then close the connection.
+// JoinOptions carries how a client wants to join a room. Capacity sizes the
+// room's player seats but only takes effect for the client that creates the
+// room (a later cap for an existing room is ignored). AsSpectator asks to watch
+// rather than take a player seat.
+type JoinOptions struct {
+	Capacity    int
+	AsSpectator bool
+}
+
+// Join places c into the room identified by code as a player with the default
+// capacity, creating the room if needed. See JoinWith for the full-control
+// variant.
 func (h *Hub) Join(code string, c Sender, pid string) (Role, bool) {
+	return h.JoinWith(code, c, pid, JoinOptions{})
+}
+
+// JoinWith places c into the room identified by code, creating the room if
+// needed. It returns the assigned role and true on success. A join past the
+// room's player capacity, or one that asks to spectate, lands in the
+// spectators (still true). It returns ("", false) — after sending an error to
+// c — only when the server is at its room cap or the spectator gallery is full;
+// the caller should then close the connection.
+func (h *Hub) JoinWith(code string, c Sender, pid string, opts JoinOptions) (Role, bool) {
+	for {
+		r, ok := h.roomFor(code, c, opts.Capacity)
+		if !ok {
+			return "", false
+		}
+		role, ok, retry := r.join(c, pid, opts.AsSpectator)
+		if retry {
+			// r was emptied and reaped between us fetching it and locking it;
+			// go around and get/create a fresh room for code.
+			continue
+		}
+		return role, ok
+	}
+}
+
+// roomFor returns the room for code, creating it (subject to the maxRooms
+// cap, and sized to capacity) if it doesn't exist yet. Only Hub.mu is held
+// here — the room's own state is untouched until the caller locks r.mu
+// separately.
+func (h *Hub) roomFor(code string, c Sender, capacity int) (*room, bool) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -52,123 +94,79 @@ func (h *Hub) Join(code string, c Sender, pid string) (Role, bool) {
 	if r == nil {
 		if h.maxRooms > 0 && len(h.rooms) >= h.maxRooms {
 			c.Send(msgError("server-full"))
-			return "", false
+			return nil, false
 		}
-		r = &room{}
+		size := clampCapacity(capacity)
+		r = &room{
+			capacity: size,
+			players:  make([]Sender, size),
+			pids:     make([]string, size),
+		}
 		h.rooms[code] = r
 	}
+	return r, true
+}
 
-	// Reclaim the exact slot this player held before a reconnect (matched by their
-	// stable pid), so roles survive a transient drop — a reconnecting host stays
-	// host instead of being promoted/demoted by slot order. Unlike a plain free-slot
-	// match, this also matches a slot that is still occupied: if the previous
-	// connection for this pid never cleanly disconnected (e.g. a phone that lost
-	// its network without sending a close frame), the new connection supersedes it
-	// immediately instead of the room wrongly reporting "room-full" until the
-	// stale peer's 60s keepalive timeout finally reaps it.
-	slot := -1
-	if pid != "" {
-		for i := range r.slots {
-			if r.pids[i] != pid {
-				continue
-			}
-			if stale := r.slots[i]; stale != nil && stale.ID() != c.ID() {
-				stale.Send(msgError("replaced-by-reconnect"))
-				stale.Close()
-			}
-			slot = i
-			break
-		}
-	}
-	if slot < 0 {
-		slot = r.freeSlot()
-	}
-	if slot < 0 {
-		c.Send(msgError("room-full"))
-		return "", false
-	}
-
-	role := roleForSlot(slot)
-	c.SetRole(role)
-	r.slots[slot] = c
-	if pid != "" {
-		r.pids[slot] = pid
-	}
-
-	// Tell the newcomer who is already here and what the current state is.
-	c.Send(msgWelcome(peerOf(c), peersOf(r.others(c)), r.state))
-	// Tell the existing player(s) someone arrived.
-	for _, o := range r.others(c) {
-		o.Send(msgPeerJoin(peerOf(c)))
-	}
-	return role, true
+func (h *Hub) getRoom(code string) *room {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.rooms[code]
 }
 
 // Leave removes c from its room and notifies the remaining player. Empty rooms
 // are deleted so their codes are reusable.
 func (h *Hub) Leave(code string, c Sender) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	r := h.rooms[code]
+	r := h.getRoom(code)
 	if r == nil {
 		return
 	}
-	for i, s := range r.slots {
-		if s != nil && s.ID() == c.ID() {
-			r.slots[i] = nil
-			break
-		}
+	if r.leave(c) {
+		h.deleteIfStillEmpty(code, r)
 	}
-	for _, o := range r.occupants() {
-		o.Send(msgPeerLeave(peerOf(c)))
+}
+
+// deleteIfStillEmpty removes r from the map, but only if it is still the room
+// registered for code (a newer room may have replaced it already) and it is
+// still empty (a concurrent Join may have reoccupied it since r.leave
+// observed it as empty).
+func (h *Hub) deleteIfStillEmpty(code string, r *room) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.rooms[code] != r {
+		return
 	}
-	if r.empty() {
+	if r.markDeadIfEmpty() {
 		delete(h.rooms, code)
 	}
 }
 
 // Relay forwards d to the other player(s) in the room, tagged with the sender.
 func (h *Hub) Relay(code string, from Sender, d json.RawMessage) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	r := h.rooms[code]
+	r := h.getRoom(code)
 	if r == nil {
 		return
 	}
-	payload := msgRelay(from.ID(), d)
-	for _, o := range r.others(from) {
-		o.Send(payload)
-	}
+	r.relay(from, d)
 }
 
 // SetState stores the shared room state and broadcasts it to EVERYONE in the
 // room, including the sender. Only the host may publish shared state.
 func (h *Hub) SetState(code string, from Sender, d json.RawMessage) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	r := h.rooms[code]
+	r := h.getRoom(code)
 	if r == nil {
 		return
 	}
-	if from.Role() != RoleHost {
-		return
-	}
-	r.state = append(json.RawMessage(nil), d...)
-	payload := msgState(d)
-	for _, o := range r.occupants() {
-		o.Send(payload)
-	}
+	r.setState(from, d)
 }
 
-func peersOf(ss []Sender) []Peer {
-	peers := make([]Peer, 0, len(ss))
-	for _, s := range ss {
-		peers = append(peers, peerOf(s))
+// SetSeat moves c between the player seats and the spectator gallery. wantPlayer
+// true tries to claim a free player seat; false steps down to spectator.
+func (h *Hub) SetSeat(code string, c Sender, wantPlayer bool) {
+	r := h.getRoom(code)
+	if r == nil {
+		return
 	}
-	return peers
+	r.setSeat(c, wantPlayer)
 }
 
 // FreshCode returns a short room code not currently in use. Codes avoid

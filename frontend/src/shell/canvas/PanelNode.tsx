@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Handle, NodeResizer, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
+import { Handle, NodeResizer, NodeToolbar, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { useWorkspace } from '../../lib/workspace';
 import { cn } from '../../lib/cn';
 import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from './layout';
@@ -24,6 +24,7 @@ import { PanelNodeHeader } from './panels/PanelNodeHeader';
 import { HeaderExamplesNav } from './panels/PanelHeaderControls';
 import { useFitContentSize } from './panels/useFitContentSize';
 import { VizPanelBody } from './panels/VizPanelBody';
+import { TransportBar } from './TransportBarCore';
 
 export type { PanelFlowNode, PanelNodeData } from './panels/panelTypes';
 export { panelAccent, nodeIcon } from './panels/panelIcons';
@@ -36,15 +37,15 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   const nodeStyle = data.style;
   const kindAccent = panelAccent(data.kind);
   const accent = panelStroke(nodeStyle, data.accent ?? kindAccent);
-  const { dir, mode, density, sidePanelTab, setSidePanelTab, setRightOpen, setRightTab } = useWorkspace();
-  const { plugin } = useCanvasStatic();
+  const { dir, mode, density, present, tweaks, sidePanelTab, setSidePanelTab, setRightOpen, setRightTab } = useWorkspace();
+  const { plugin, item } = useCanvasStatic();
   const isViz = data.kind === 'viz';
   const isReassemble = data.kind === 'reassemble';
   const isRecall = data.kind === 'recall';
   const isCode = data.kind === 'code' || data.kind === 'scratch' || isReassemble || isRecall;
   const isProblem = data.kind === 'problem';
-  const isExamples = data.kind === 'examples';
-  const showTargetHandle = !isProblem && !isExamples;
+  const showTargetHandle = !isProblem;
+  const headerData = isProblem && mode === 'visualize' ? { ...data, title: item.title } : data;
   const collapsed = !!data.collapsed;
   const showSourceHandle = !collapsed;
   const locked = !!data.locked;
@@ -95,12 +96,13 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   const handleCls = handleDotClass;
 
   const vizCanvas = isViz && mode === 'visualize';
-  const visualizeFlush = mode === 'visualize' && (isProblem || isExamples || isViz || isCode);
-  const flushBody = vizCanvas || (mode === 'visualize' && (isProblem || isExamples));
+  const showNodeTransport = vizCanvas && (present || tweaks.controls);
+  const visualizeFlush = mode === 'visualize' && (isProblem || isViz || isCode);
+  const flushBody = vizCanvas || (mode === 'visualize' && isProblem);
 
   const headerProps = {
     id,
-    data,
+    data: headerData,
     accent,
     selected,
     collapsed,
@@ -116,6 +118,18 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   };
 
   return (
+    <>
+    {showNodeTransport && (
+      <NodeToolbar
+        nodeId={id}
+        position={Position.Top}
+        offset={12}
+        isVisible={selected && !collapsed}
+        className="nowheel nodrag"
+      >
+        <TransportBar />
+      </NodeToolbar>
+    )}
     <div
       ref={panelRef}
       className={cn(
@@ -173,7 +187,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
             <PanelNodeHeader
               {...headerProps}
               inlineToolbar={
-                isExamples && !collapsed ? (
+                isProblem && !collapsed ? (
                   <div className="nodrag flex shrink-0 items-center gap-0.5">
                     <HeaderExamplesNav />
                   </div>
@@ -218,5 +232,6 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
         <Handle type="source" position={sourcePos} className={handleCls} style={portHandleStyle(sourcePos)} />
       )}
     </div>
+    </>
   );
 }
