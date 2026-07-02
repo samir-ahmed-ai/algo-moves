@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FileQuestion } from 'lucide-react';
-import { getPlugin, usePlayer } from '../core';
+import { loadPlugin, getLoadedPlugin, usePlayer, type ProblemPlugin } from '../core';
 import { catalog } from '../content';
 import { useWorkspace, normalizeThemePreset } from '@/store/workspace';
 import { isEditableTarget } from '@/lib/utils/keyboard';
@@ -46,7 +46,39 @@ export function Workspace() {
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   const item = catalog.getItem(activeItemId) ?? catalog.items[0];
-  const plugin = item?.pluginId ? getPlugin(item.pluginId) : undefined;
+  const pluginId = item?.pluginId;
+
+  // The heavy plugin implementation loads on demand (its group's chunk). Metadata
+  // for the sidebar/catalog is already available synchronously; only the canvas
+  // needs the full plugin, so we resolve it here and show a loading state until ready.
+  const [plugin, setPlugin] = useState<ProblemPlugin<any, any> | undefined>(() =>
+    pluginId ? getLoadedPlugin(pluginId) : undefined,
+  );
+  const [pluginLoading, setPluginLoading] = useState(false);
+  useEffect(() => {
+    if (!pluginId) {
+      setPlugin(undefined);
+      setPluginLoading(false);
+      return;
+    }
+    const cached = getLoadedPlugin(pluginId);
+    if (cached) {
+      setPlugin(cached);
+      setPluginLoading(false);
+      return;
+    }
+    setPlugin(undefined);
+    setPluginLoading(true);
+    let cancelled = false;
+    loadPlugin(pluginId).then((p) => {
+      if (cancelled) return;
+      setPlugin(p);
+      setPluginLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pluginId]);
 
   const [inputId, setInputId] = useState(() => {
     if (!plugin) return '';
@@ -94,7 +126,9 @@ export function Workspace() {
       if (s.themePreset) setThemePreset(normalizeThemePreset(s.themePreset));
       if (s.dir === 'TB' || s.dir === 'LR') setDir(s.dir);
       if (s.input) {
-        const targetPlugin = s.item ? getPlugin(catalog.getItem(s.item)?.pluginId ?? '') : plugin;
+        // Best-effort: validate against the plugin only if its chunk is already
+        // loaded. Otherwise the input effect re-validates once the plugin resolves.
+        const targetPlugin = s.item ? getLoadedPlugin(catalog.getItem(s.item)?.pluginId ?? '') : plugin;
         const validInput =
           targetPlugin && targetPlugin.inputs.some((i) => i.id === s.input) ? s.input : null;
         if (validInput) setInputId(validInput);
@@ -281,6 +315,8 @@ export function Workspace() {
               player={player}
             />
           )
+        ) : pluginLoading ? (
+          <LoadingPreview title={item.title} />
         ) : (
           <NoPreview title={item.title} tags={item.tags} />
         )}
@@ -478,6 +514,15 @@ function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function LoadingPreview({ title }: { title: string }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-edge border-t-accent" />
+      <div className={cn('text-ink2', chromeText.base)}>Loading {title}…</div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { deckSummary } from './deckModel';
 
 /** Dev report: mobile deck coverage per topic (run via `node scripts/check-mobile-decks.mjs`). */
 describe('mobile deck coverage report', () => {
-  it('prints animate / quiz / reassemble counts per topic', () => {
+  it('prints animate / quiz / reassemble counts per topic', async () => {
     const rows: string[] = [];
     let animateOnly = 0;
     let withQuiz = 0;
@@ -12,7 +12,7 @@ describe('mobile deck coverage report', () => {
 
     for (const course of catalog.courses) {
       for (const topic of course.topics) {
-        const s = deckSummary(topic);
+        const s = await deckSummary(topic);
         if (s.problems === 0) continue;
         const label =
           s.totalQuiz === 0 && s.withReassemble === 0
@@ -42,13 +42,13 @@ describe('mobile deck coverage report', () => {
     }
   });
 
-  it('prep arrays and strings topics have full rebuild coverage', () => {
+  it('prep arrays and strings topics have full rebuild coverage', async () => {
     const arrays = catalog.getTopic('prep-arrays-all');
     const strings = catalog.getTopic('prep-strings-all');
     expect(arrays).toBeDefined();
     expect(strings).toBeDefined();
-    const a = deckSummary(arrays!);
-    const s = deckSummary(strings!);
+    const a = await deckSummary(arrays!);
+    const s = await deckSummary(strings!);
     expect(a.withReassemble).toBe(a.problems);
     expect(s.withReassemble).toBe(s.problems);
   });

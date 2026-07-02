@@ -3,7 +3,7 @@ import { ChevronLeft, Layers } from 'lucide-react';
 import { catalog, type Topic } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
-import { buildDeck } from './deckModel';
+import { buildDeck, type MobileDeck as MobileDeckModel } from './deckModel';
 import { clearMobileSession, loadMobileSession, saveMobileSession } from './mobileSession';
 import { useSwipe } from './useSwipe';
 import { newQuizRunSeed } from '@/lib/quiz';
@@ -11,7 +11,7 @@ import { AnimateCardView, CompleteScreen, GistCardView, QuizCardView, Reassemble
 
 function initialIndices(
   topicId: string,
-  blocks: ReturnType<typeof buildDeck>['blocks'],
+  blocks: MobileDeckModel['blocks'],
   startItemId?: string,
   resumePIdx?: number,
   resumeCIdx?: number,
@@ -60,8 +60,23 @@ export function MobileDeck({
   headerRight?: ReactNode;
 }) {
   const { enterWorkspace } = useWorkspace();
-  const deck = useMemo(() => buildDeck(topic), [topic]);
+  // The topic's plugins load on demand (their group chunk); build the deck once ready.
+  const [deck, setDeck] = useState<MobileDeckModel>(() => ({ topic, blocks: [], totalQuiz: 0 }));
+  const [deckLoading, setDeckLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    setDeckLoading(true);
+    buildDeck(topic).then((d) => {
+      if (cancelled) return;
+      setDeck(d);
+      setDeckLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [topic]);
   const { blocks } = deck;
+  const deckReady = !deckLoading && deck.topic === topic;
 
   const start = useMemo(
     () => initialIndices(topic.id, blocks, startItemId, initialPIdx, initialCIdx),
@@ -200,6 +215,15 @@ export function MobileDeck({
   const course = catalog.courses.find((c) => c.id === topic.courseId);
   const tIdx = course ? course.topics.findIndex((t) => t.id === topic.id) : -1;
   const nextTopic = course && tIdx >= 0 ? course.topics[tIdx + 1] : undefined;
+
+  if (!deckReady) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-edge border-t-accent" />
+        <p className="text-[13px] text-ink3">Loading {topic.title}…</p>
+      </div>
+    );
+  }
 
   if (blocks.length === 0) {
     return (

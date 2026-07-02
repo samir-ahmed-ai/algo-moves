@@ -3,7 +3,7 @@
  * of cards — animate → quiz questions → reassemble — and the runner walks
  * problem-by-problem so finishing one rolls straight into the next.
  */
-import { getPlugin } from '../../core';
+import { loadPlugin } from '../../core';
 import type { CodePiece, PluginCode, ProblemPlugin, QuizQuestion } from '../../core/types';
 import { resolveCodePieces, MIN_REASSEMBLE_PIECES } from '@/lib/code';
 import type { Item, Topic } from '../../content';
@@ -90,9 +90,9 @@ function patternFor(tags: string[]): string | undefined {
   return hit ? prettyTag(hit) : undefined;
 }
 
-function blockFor(item: Item): ProblemBlock | null {
+async function blockFor(item: Item): Promise<ProblemBlock | null> {
   if (!item.pluginId) return null;
-  const plugin = getPlugin(item.pluginId);
+  const plugin = await loadPlugin(item.pluginId);
   if (!plugin) return null;
   const code = plugin.code;
   const quiz = plugin.quiz ?? [];
@@ -129,10 +129,9 @@ function blockFor(item: Item): ProblemBlock | null {
   };
 }
 
-export function buildDeck(topic: Topic): MobileDeck {
-  const blocks = topic.items
-    .map(blockFor)
-    .filter((b): b is ProblemBlock => b != null);
+export async function buildDeck(topic: Topic): Promise<MobileDeck> {
+  const built = await Promise.all(topic.items.map(blockFor));
+  const blocks = built.filter((b): b is ProblemBlock => b != null);
   const totalQuiz = blocks.reduce((n, b) => n + b.quizCount, 0);
   return { topic, blocks, totalQuiz };
 }
@@ -144,8 +143,8 @@ export interface DeckSummary {
   withReassemble: number;
 }
 
-export function deckSummary(topic: Topic): DeckSummary {
-  const deck = buildDeck(topic);
+export async function deckSummary(topic: Topic): Promise<DeckSummary> {
+  const deck = await buildDeck(topic);
   const withReassemble = deck.blocks.filter((b) => b.cards.some((c) => c.kind === 'reassemble')).length;
   return { problems: deck.blocks.length, totalQuiz: deck.totalQuiz, withReassemble };
 }

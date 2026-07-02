@@ -1,22 +1,70 @@
 import type { ProblemPlugin } from './types';
-import { plugins } from '../plugins';
+import { GROUP_LOADERS, PLUGIN_GROUPS, type PluginGroup } from '../plugins';
+import { PLUGIN_META, type PluginMetaEntry } from '../plugins/_generated/pluginMeta';
 
-const byId = new Map<string, ProblemPlugin<any, any>>();
-for (const p of plugins) {
-  if (byId.has(p.meta.id)) {
-    if (import.meta.env.DEV) {
-      // Keep first registration and warn so duplicates don't silently shadow values.
-      console.warn(`[core/registry] Duplicate plugin id "${p.meta.id}" ignored`);
-    }
+export type { PluginMetaEntry } from '../plugins/_generated/pluginMeta';
+
+// Split registry (#code-split): plugin *metadata* is available synchronously from
+// the generated index (catalog / sidebar / search need only this); the heavy plugin
+// implementation is loaded on demand, one chunk per group, and memoized.
+
+const metaById = new Map<string, PluginMetaEntry>();
+for (const m of PLUGIN_META) {
+  if (metaById.has(m.id)) {
+    if (import.meta.env?.DEV) console.warn(`[core/registry] Duplicate plugin id "${m.id}" ignored`);
     continue;
   }
-  byId.set(p.meta.id, p);
+  metaById.set(m.id, m);
 }
 
-export function listPlugins(): ProblemPlugin<any, any>[] {
-  return Array.from(byId.values());
+/** All plugin metadata (sync). Use for catalogs, sidebars and search. */
+export function listPluginMeta(): PluginMetaEntry[] {
+  return Array.from(metaById.values());
 }
 
-export function getPlugin(id: string): ProblemPlugin<any, any> | undefined {
-  return byId.get(id);
+/** One plugin's metadata (sync), or undefined if the id is unknown. */
+export function getPluginMeta(id: string): PluginMetaEntry | undefined {
+  return metaById.get(id);
+}
+
+const groupMaps = new Map<PluginGroup, Promise<Map<string, ProblemPlugin<any, any>>>>();
+
+function loadGroup(group: PluginGroup): Promise<Map<string, ProblemPlugin<any, any>>> {
+  let pending = groupMaps.get(group);
+  if (!pending) {
+    pending = GROUP_LOADERS[group]().then((plugins) => {
+      const map = new Map<string, ProblemPlugin<any, any>>();
+      for (const p of plugins) if (!map.has(p.meta.id)) map.set(p.meta.id, p);
+      return map;
+    });
+    groupMaps.set(group, pending);
+  }
+  return pending;
+}
+
+const loaded = new Map<string, ProblemPlugin<any, any>>();
+
+/** The full plugin implementation, loading its group's chunk on first use. */
+export async function loadPlugin(id: string): Promise<ProblemPlugin<any, any> | undefined> {
+  const cached = loaded.get(id);
+  if (cached) return cached;
+  const meta = metaById.get(id);
+  if (!meta) return undefined;
+  const map = await loadGroup(meta.group);
+  const plugin = map.get(id);
+  if (plugin) loaded.set(id, plugin);
+  return plugin;
+}
+
+/** A plugin only if its group chunk is already loaded (sync, no fetch). */
+export function getLoadedPlugin(id: string): ProblemPlugin<any, any> | undefined {
+  return loaded.get(id);
+}
+
+/** Load every plugin across all groups — for tests and tooling only. */
+export async function loadAllPlugins(): Promise<ProblemPlugin<any, any>[]> {
+  const maps = await Promise.all(PLUGIN_GROUPS.map(loadGroup));
+  const all = new Map<string, ProblemPlugin<any, any>>();
+  for (const map of maps) for (const [id, p] of map) if (!all.has(id)) all.set(id, p);
+  return Array.from(all.values());
 }

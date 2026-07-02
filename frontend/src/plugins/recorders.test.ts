@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { plugins } from './index';
-import { getPlugin } from '../core/registry';
+import { loadAllPlugins } from '../core/registry';
 import { binarySearchPlugin } from './binary-search';
 import { bubbleSortPlugin } from './bubble-sort';
 import { selectionSortPlugin } from './selection-sort';
@@ -22,6 +21,10 @@ import { heapOperationsPlugin } from './heap-operations';
 import { curatedCourses } from '../content/courses';
 import { IMPORTED_DATA } from './imported/manifest';
 import { resolveSimulator } from './imported/simulators';
+
+// Load every plugin's implementation once (all group chunks) for the contract tests.
+const plugins = await loadAllPlugins();
+const pluginById = new Map(plugins.map((p) => [p.meta.id, p]));
 
 /**
  * Recorder contract tests (#95). Every plugin's record() must produce a sane,
@@ -228,7 +231,7 @@ describe('curated course plugins expose learn stack', () => {
   }
   for (const id of ids) {
     it(`${id} has quiz or practice tabs`, () => {
-      const p = getPlugin(id)!;
+      const p = pluginById.get(id)!;
       const hasQuiz = (p.quiz?.length ?? 0) > 0;
       const hasTabs = (p.tabs ?? []).some((t) => t.mode === 'practice' || t.mode === 'learn');
       expect(hasQuiz || hasTabs).toBe(true);

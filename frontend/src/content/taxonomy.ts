@@ -1,4 +1,4 @@
-import { GO_COURSE_ID, goBrowseCategories } from '../plugins/go-course';
+import { GO_COURSE_ID, GO_BROWSE_CATEGORIES as goBrowseCategories } from '@/plugins/_generated/courses';
 
 /** Top-level browse tracks — the entry points for organizing content. */
 export type TrackId = 'data-structures' | 'algorithms' | 'design' | 'go' | 'interview-prep';

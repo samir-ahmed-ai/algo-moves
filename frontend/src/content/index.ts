@@ -1,14 +1,14 @@
 import { buildCatalog } from './catalog';
 import { curatedCourses } from './courses';
 import { mergeCourses } from './mergeCourses';
-import { importedCourses } from '../plugins/imported';
-import { prepCourses } from '../plugins/imported/prep';
-import { goCourses } from '../plugins/go-course';
+// Light, generated course defs (no heavy plugin manifests) — keeps catalog build
+// out of the imported/prep/go-course chunks. Regenerate with `npm run build-plugin-meta`.
+import { IMPORTED_COURSES, PREP_COURSES, GO_COURSES } from '@/plugins/_generated/courses';
 
 export const catalog = buildCatalog([
-  ...mergeCourses(curatedCourses, importedCourses),
-  ...prepCourses,
-  ...goCourses,
+  ...mergeCourses(curatedCourses, IMPORTED_COURSES),
+  ...PREP_COURSES,
+  ...GO_COURSES,
 ]);
 
 export type { Catalog } from './catalog';

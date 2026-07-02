@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPlugin } from '../core/registry';
-import { plugins } from './index';
+import { loadAllPlugins, getPluginMeta } from '../core/registry';
 import { quizLabelIssues } from '@/lib/quiz';
 import { defaultPrepQuiz } from './imported/prepQuiz';
 import { PREP_DATA } from './imported/prepManifest';
@@ -14,6 +13,10 @@ import { resolveSimulator } from './imported/simulators';
 import { SIMULATED_CATEGORIES } from './imported/factory';
 import { resolvePracticeBundle } from './imported/practice';
 import { PROBLEM_GLYPHS } from '../content/glyphs';
+
+// Load every plugin's implementation once (all group chunks) for the integrity checks.
+const plugins = await loadAllPlugins();
+const pluginById = new Map(plugins.map((p) => [p.meta.id, p]));
 
 const BUILTIN_PANELS = new Set([
   'problem', 'viz', 'replay', 'inspector', 'metrics', 'bigo', 'predict', 'mastery',
@@ -45,14 +48,14 @@ describe('catalog ↔ registry integrity', () => {
 
   it('every curated catalog pluginId resolves in the registry', () => {
     for (const id of curatedPluginIds()) {
-      expect(getPlugin(id), `missing plugin for curated pluginId "${id}"`).toBeDefined();
+      expect(getPluginMeta(id), `missing plugin for curated pluginId "${id}"`).toBeDefined();
     }
   });
 
   it('every catalog item pluginId resolves', () => {
     for (const item of catalog.items) {
       if (item.kind === 'problem' && item.pluginId) {
-        expect(getPlugin(item.pluginId), `missing plugin for item "${item.id}"`).toBeDefined();
+        expect(getPluginMeta(item.pluginId), `missing plugin for item "${item.id}"`).toBeDefined();
       }
     }
   });
@@ -78,7 +81,7 @@ describe('curated course plugins have learn stack', () => {
 
   for (const id of CURATED_FULL_STACK) {
     it(`${id} has quiz or practice tabs`, () => {
-      const p = getPlugin(id);
+      const p = pluginById.get(id);
       expect(p).toBeDefined();
       const hasQuiz = (p!.quiz?.length ?? 0) > 0;
       const hasPracticeTabs = (p!.tabs ?? []).some((t) => t.mode === 'practice' || t.mode === 'learn');

@@ -33,7 +33,9 @@
     "check-simulators": "node scripts/check-simulators.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:quiz-labels": "vitest run src/lib/quizChoiceFormat.test.ts src/plugins/integrity.test.ts",
-    "check:all": "npm run check-simulators && npm run check-prep-sim-coverage && npm run check-plugin-typography && npm run check:tokens && npm run check:quiz-labels",
+    "build-plugin-meta": "vite-node scripts/build-plugin-meta.mts",
+    "check-plugin-meta": "vite-node scripts/build-plugin-meta.mts -- --check",
+    "check:all": "npm run check-simulators && npm run check-prep-sim-coverage && npm run check-plugin-typography && npm run check:tokens && npm run check:quiz-labels && npm run check-plugin-meta",
     "draft-quiz-from-frames": "node scripts/draft-quiz-from-frames.mjs",
     "test": "vitest run && npm run check-orphans"
   },

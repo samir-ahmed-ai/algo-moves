@@ -17,22 +17,30 @@ import { intervalSchedulingPlugin } from './interval-scheduling';
 import { twoSumSortedPlugin } from './two-sum-sorted';
 import { maxSubarraySumKPlugin } from './max-subarray-sum-k';
 import { longestSubstringPlugin } from './longest-substring';
-import { importedPlugins } from './imported';
-import { prepPlugins } from './imported/prep';
-import { goCoursePlugins } from './go-course';
 
 /**
- * The plugin manifest. To add a problem visualizer, build a folder under
- * src/plugins/<name>/ exporting a ProblemPlugin and append it here — the shell,
- * sidebar, player and move log pick it up with no further wiring.
+ * Plugin groups & lazy loading (#code-split).
  *
- * `importedPlugins` are auto-generated from algo/progress/**\/solution.go
- * (see scripts/import-problems.mjs) — the full reference library.
+ * The catalog, sidebar and search only need plugin *metadata*, which is served
+ * synchronously from the generated meta index (src/plugins/_generated). The heavy
+ * implementation of each problem (record + View + tabs + code) is loaded on demand,
+ * one chunk per group, the first time a problem in that group is opened.
  *
- * Overlapping curated problems (is-bipartite, climbing-stairs, etc.) are
- * imported-canonical — see courses.ts pluginId and imported/practice/migrated.ts.
+ * `curated` problems are hand-authored under src/plugins/<name>/ and kept in the
+ * entry bundle (small, always-linked). The large generated groups — `imported`
+ * (reference library), `prep`, and `go-course` — each live behind a dynamic
+ * import() so Rollup emits a separate chunk.
+ *
+ * To add a curated problem: build src/plugins/<name>/ exporting a ProblemPlugin and
+ * append it to `curatedPlugins` below — the loader, sidebar, player and move log
+ * pick it up. After changing any plugin's metadata, run `npm run build-plugin-meta`.
  */
-export const plugins: ProblemPlugin<any, any>[] = [
+export type PluginGroup = 'curated' | 'imported' | 'prep' | 'go-course';
+
+export const PLUGIN_GROUPS: PluginGroup[] = ['curated', 'imported', 'prep', 'go-course'];
+
+/** Hand-authored problems, statically linked into the entry bundle. */
+export const curatedPlugins: ProblemPlugin<any, any>[] = [
   unionFindPlugin,
   treeTraversalsPlugin,
   triePlugin,
@@ -51,7 +59,17 @@ export const plugins: ProblemPlugin<any, any>[] = [
   heapOperationsPlugin,
   nQueensPlugin,
   intervalSchedulingPlugin,
-  ...importedPlugins,
-  ...prepPlugins,
-  ...goCoursePlugins,
 ];
+
+/**
+ * Per-group loaders. `curated` resolves synchronously; the generated groups are
+ * dynamic import()s so their manifests + factories land in their own chunk.
+ * Registered plugin folders (checked by scripts/check-orphans.mjs): './imported',
+ * './imported/prep', './go-course'.
+ */
+export const GROUP_LOADERS: Record<PluginGroup, () => Promise<ProblemPlugin<any, any>[]>> = {
+  curated: async () => curatedPlugins,
+  imported: () => import('./imported').then((m) => m.importedPlugins),
+  prep: () => import('./imported/prep').then((m) => m.prepPlugins),
+  'go-course': () => import('./go-course').then((m) => m.goCoursePlugins),
+};

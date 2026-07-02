@@ -29,9 +29,19 @@ export default defineConfig({
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom'],
-          xyflow: ['@xyflow/react'],
+        // Vendor libs in long-cached chunks; the large plugin groups each get a
+        // named lazy chunk (only fetched when a problem in that group is opened).
+        manualChunks(id: string) {
+          const has = (s: string) => id.indexOf(s) !== -1;
+          if (has('node_modules')) {
+            if (has('/react') || has('/react-dom')) return 'react';
+            if (has('@xyflow')) return 'xyflow';
+            return;
+          }
+          if (has('/plugins/imported/prep')) return 'plugins-prep';
+          if (has('/plugins/imported/')) return 'plugins-imported';
+          if (has('/plugins/go-course/')) return 'plugins-go-course';
+          return;
         },
       },
     },

@@ -1,4 +1,4 @@
-import { getPlugin } from '../core';
+import { getPluginMeta } from '../core';
 import type { Course, CourseDef, Item, ItemDef, Topic } from './types';
 
 /** Fill an item's metadata from its bound plugin, letting explicit fields win. */
@@ -10,13 +10,13 @@ function hydrateItem(def: ItemDef, courseId: string, topicId: string): Item {
   let pluginTags: string[] = [];
 
   if (def.kind === 'problem' && def.pluginId) {
-    const p = getPlugin(def.pluginId);
+    const p = getPluginMeta(def.pluginId);
     if (p) {
-      title = title ?? p.meta.title;
-      summary = summary ?? p.meta.summary;
-      difficulty = difficulty ?? p.meta.difficulty;
-      pluginTags = p.meta.tags ?? [];
-      if (!source && p.meta.source) source = { label: 'Source', url: p.meta.source };
+      title = title ?? p.title;
+      summary = summary ?? p.summary;
+      difficulty = difficulty ?? p.difficulty;
+      pluginTags = p.tags ?? [];
+      if (!source && p.source) source = { label: 'Source', url: p.source };
     }
   }
 
