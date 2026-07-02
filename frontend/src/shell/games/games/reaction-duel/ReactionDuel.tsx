@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getArcadeStrings, useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
@@ -19,6 +20,8 @@ const ARM_MAX_MS = 3500;
 const RESULT_MS = 2400;
 
 export function ReactionDuel() {
+  const { locale } = useGamesLocale();
+  const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
   const { self, peer, connected } = useGameRoom();
   const amHost = self?.role === 'host';
 
@@ -133,7 +136,9 @@ export function ReactionDuel() {
     send({ kind: 'rematch' });
   };
 
-  if (!connected) return <WaitingForPeer name={peer?.name} />;
+  if (!connected) {
+    return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? arcade.picker.partner)} />;
+  }
 
   const meName = self?.name ?? 'You';
   const peerName = peer?.name ?? 'Partner';

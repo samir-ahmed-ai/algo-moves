@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Gamepad2, Loader2, Plus, Users } from 'lucide-react';
 import { readStorageText, writeStorageText } from '../../../lib/storage';
+import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
 import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net/gameServer';
 import { writeGamesHash } from '../engine/gamesHash';
@@ -10,6 +11,8 @@ const NAME_KEY = 'algo-moves:games:name';
 
 /** Pre-connection screen: pick a display name, then create or join a room. */
 export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
+  const { locale } = useGamesLocale();
+  const t = useMemo(() => getArcadeStrings(locale), [locale]);
   const { connect, disconnect, status, error } = useGameRoom();
   const [name, setName] = useState(() => readStorageText(NAME_KEY, '') ?? '');
   const [joinCode, setJoinCode] = useState(prefillRoom ?? '');
@@ -36,7 +39,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       writeGamesHash({ room: code });
       connect(code, name.trim());
     } catch (e) {
-      setCreateError(e instanceof Error ? e.message : 'Could not create a room.');
+      setCreateError(e instanceof Error ? e.message : t.lobby.createRoomError);
     }
   };
 
@@ -57,8 +60,8 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-accent text-white shadow-[var(--shadow-lg)]">
           <Gamepad2 className="h-7 w-7" />
         </span>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink">Two-player games</h1>
-        <p className="mt-1 text-sm text-ink2">Create a room and share the code — play together from anywhere.</p>
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink">{t.lobby.title}</h1>
+        <p className="mt-1 text-sm text-ink2">{t.lobby.subtitle}</p>
       </div>
 
       {bannerError ? (
@@ -69,18 +72,17 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       ) : null}
 
       {!configuredServer ? (
-        <p className="rounded-[var(--radius)] border border-edge bg-panel2 px-3 py-2 text-xs text-ink3">
-          LAN mode: run <code className="font-mono">make backend-dev</code> and open this site on your machine&apos;s IP.
-          For internet play, set <code className="font-mono">VITE_GAMES_SERVER_URL</code> at build time.
+        <p className="rounded-[var(--radius)] border border-edge bg-panel2 px-3 py-2 text-start text-xs text-ink3">
+          {t.lobby.lanHint}
         </p>
       ) : null}
 
-      <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-ink3">Your name</span>
+      <label className="flex flex-col gap-1.5 text-start">
+        <span className="text-xs font-semibold uppercase tracking-wide text-ink3">{t.lobby.yourName}</span>
         <input
           value={name}
           onChange={(e) => setName(e.target.value.slice(0, 24))}
-          placeholder="e.g. Ahmed"
+          placeholder={t.lobby.namePlaceholder}
           className="min-h-12 rounded-[var(--radius)] border border-edge bg-panel px-4 text-base text-ink outline-none focus:border-accent"
           autoComplete="given-name"
         />
@@ -88,25 +90,26 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
 
       <div className="grid grid-cols-2 gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1">
         <TabButton active={tab === 'create'} onClick={() => setTab('create')} icon={<Plus className="h-4 w-4" />}>
-          Create
+          {t.lobby.createTab}
         </TabButton>
         <TabButton active={tab === 'join'} onClick={() => setTab('join')} icon={<Users className="h-4 w-4" />}>
-          Join
+          {t.lobby.joinTab}
         </TabButton>
       </div>
 
       {tab === 'create' ? (
         <TouchButton variant="primary" size="lg" busy={connecting} disabled={!nameOk} onClick={createRoom}>
-          {connecting ? 'Creating room…' : 'Create a room'}
+          {connecting ? t.lobby.creatingRoom : t.lobby.createRoom}
         </TouchButton>
       ) : (
         <div className="flex flex-col gap-3">
           <input
             value={joinCode}
             onChange={(e) => setJoinCode(normalizeRoomCode(e.target.value))}
-            placeholder="ROOM CODE"
+            placeholder={t.lobby.roomCodePlaceholder}
             inputMode="text"
             autoCapitalize="characters"
+            dir="ltr"
             className="min-h-14 rounded-[var(--radius)] border border-edge bg-panel text-center font-mono text-2xl font-bold uppercase tracking-[0.3em] text-ink outline-none focus:border-accent"
           />
           <TouchButton
@@ -116,7 +119,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
             disabled={!nameOk || normalizeRoomCode(joinCode).length < 4}
             onClick={joinRoom}
           >
-            {connecting ? 'Joining…' : 'Join room'}
+            {connecting ? t.lobby.joining : t.lobby.joinRoom}
           </TouchButton>
         </div>
       )}
@@ -127,7 +130,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
           onClick={disconnect}
           className="mx-auto inline-flex min-h-11 items-center gap-1.5 px-4 text-sm text-ink3 hover:text-ink"
         >
-          <Loader2 className="h-3.5 w-3.5 animate-spin" /> Cancel
+          <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t.lobby.cancel}
         </button>
       ) : null}
     </div>

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getArcadeStrings, useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { ChoiceCard, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
@@ -11,6 +12,8 @@ type Phase = 'pick' | 'reveal' | 'over';
 const REVEAL_MS = 2200;
 
 export function RockPaperScissors() {
+  const { locale } = useGamesLocale();
+  const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
   const { self, peer, connected } = useGameRoom();
   const [round, setRound] = useState(0);
   const [phase, setPhase] = useState<Phase>('pick');
@@ -70,7 +73,9 @@ export function RockPaperScissors() {
     send({ kind: 'rematch' });
   };
 
-  if (!connected) return <WaitingForPeer name={peer?.name} />;
+  if (!connected) {
+    return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? arcade.picker.partner)} />;
+  }
 
   const emojiFor = (c: Choice) => CHOICES.find((x) => x.id === c)?.emoji ?? '❔';
   const roundOutcome = myPick && peerPick ? outcome(myPick, peerPick) : null;

@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Circle, X } from 'lucide-react';
+import { getArcadeStrings, useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
@@ -11,6 +12,8 @@ import { currentMark, emptyBoard, isFull, WIN_LINES, winner, type Board, type Ma
 type TttMsg = { kind: 'move'; index: number; gen: number } | { kind: 'rematch'; gen: number };
 
 export function TicTacToe() {
+  const { locale } = useGamesLocale();
+  const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
   const { self, peer, connected } = useGameRoom();
   const myMark: Mark = self?.role === 'host' ? 'X' : 'O';
 
@@ -76,7 +79,9 @@ export function TicTacToe() {
     send({ kind: 'rematch', gen: nextGen });
   };
 
-  if (!connected) return <WaitingForPeer name={peer?.name} />;
+  if (!connected) {
+    return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? arcade.picker.partner)} />;
+  }
 
   const iWon = win === myMark;
   const meName = self?.name ?? 'You';

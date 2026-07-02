@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Home, LogOut, Moon, Sun, Users, Wifi, WifiOff } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useWorkspace } from '../../lib/workspace';
+import { getMindMeldMeta } from './games/mind-meld';
+import { GamesLocaleProvider, getArcadeStrings, useGamesLocale, type GameLocale } from './locale';
 import { GameRoomProvider, useGameRoom } from './net/useGameRoom';
 import { parseGamesHash } from './engine/gamesHash';
 import { GAMES, getGame } from './registry';
@@ -24,18 +26,27 @@ export function GamesPage() {
   const { density } = useWorkspace();
   return (
     <GameRoomProvider>
-      <div
-        data-density={density}
-        className="ws-scroll flex h-full w-full flex-col overflow-y-auto bg-bg text-ink [padding-bottom:env(safe-area-inset-bottom)]"
-      >
-        <Arcade />
-      </div>
+      <GamesLocaleProvider>
+        <div
+          data-density={density}
+          className="ws-scroll flex h-full w-full flex-col overflow-y-auto bg-bg text-ink [padding-bottom:env(safe-area-inset-bottom)]"
+        >
+          <Arcade />
+        </div>
+      </GamesLocaleProvider>
     </GameRoomProvider>
   );
 }
 
+function localizedGameMeta(game: GameDef, locale: GameLocale): Pick<GameDef, 'title' | 'tagline'> {
+  if (game.id === 'mind-meld') return getMindMeldMeta(locale);
+  return { title: game.title, tagline: game.tagline };
+}
+
 function Arcade() {
   const { theme, setTheme, goHome } = useWorkspace();
+  const { locale, setLocale, canChangeLocale } = useGamesLocale();
+  const t = useMemo(() => getArcadeStrings(locale), [locale]);
   const { status, room, peer, self, role, sharedState, publishState, disconnect, reconnecting } = useGameRoom();
   const [prefillRoom] = useState(() =>
     typeof location === 'undefined' ? undefined : parseGamesHash(location.hash)?.room,
@@ -45,8 +56,6 @@ function Arcade() {
   const currentGame = getGame(selectedGameId(sharedState));
   const open = status === 'open';
   const isHost = role === 'host';
-  // `live` stays true during a transient reconnect so the game view is not torn
-  // down (and its state lost) by a brief network blip.
   const live = open || reconnecting;
   const bothHere = live && peer !== null;
   const inGame = live && currentGame !== undefined && (bothHere || partnerLeft);
@@ -61,7 +70,7 @@ function Arcade() {
 
   const selectGame = (id: string) => {
     if (!isHost) return;
-    publishState({ ...(sharedState as object | null), game: id });
+    publishState({ ...(sharedState as object | null), game: id, locale });
   };
   const backToPicker = () => {
     if (!isHost) return;
@@ -79,7 +88,7 @@ function Arcade() {
         <div className="mx-auto flex w-full max-w-2xl items-center gap-2 px-4 py-2.5">
           <button
             type="button"
-            title="Home"
+            title={t.header.home}
             onClick={goHome}
             className="grid h-11 w-11 place-items-center rounded-md border border-edge text-ink3 hover:bg-panel2 hover:text-ink"
           >
@@ -92,19 +101,29 @@ function Arcade() {
               onClick={backToPicker}
               className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-edge px-3 py-1.5 text-sm text-ink2 hover:text-ink"
             >
-              <ArrowLeft className="h-4 w-4" /> Games
+              <ArrowLeft className="h-4 w-4" /> {t.header.backToGames}
             </button>
           ) : currentGame && inGame ? (
-            <span className="font-semibold tracking-tight">{currentGame.title}</span>
+            <span className="font-semibold tracking-tight">
+              {localizedGameMeta(currentGame, locale).title}
+            </span>
           ) : (
-            <span className="font-semibold tracking-tight">Games</span>
+            <span className="font-semibold tracking-tight">{t.header.games}</span>
           )}
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ms-auto flex items-center gap-1.5">
             {room ? <RoomPill room={room} open={open} reconnecting={reconnecting} filled={bothHere} /> : null}
+            <LanguageToggle
+              locale={locale}
+              disabled={!canChangeLocale}
+              onChange={setLocale}
+              switchToEnglish={t.language.switchToEnglish}
+              switchToArabic={t.language.switchToArabic}
+              hostOnly={t.language.hostOnly}
+            />
             <button
               type="button"
-              title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+              title={theme === 'dark' ? t.header.lightTheme : t.header.darkTheme}
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="grid h-11 w-11 place-items-center rounded-md border border-edge text-ink3 hover:bg-panel2 hover:text-ink"
             >
@@ -113,7 +132,7 @@ function Arcade() {
             {live ? (
               <button
                 type="button"
-                title="Leave room"
+                title={t.header.leaveRoom}
                 onClick={leave}
                 className="grid h-11 w-11 place-items-center rounded-md border border-edge text-ink3 hover:border-bad/50 hover:text-bad"
               >
@@ -128,7 +147,7 @@ function Arcade() {
         {reconnecting ? (
           <div className="mb-4 flex items-center justify-center gap-2 rounded-[var(--radius)] border border-edge bg-panel2 px-3 py-2 text-sm text-ink3">
             <span className="h-2 w-2 animate-pulse rounded-full" style={{ background: 'var(--edge-active)' }} />
-            Reconnecting…
+            {t.header.reconnecting}
           </div>
         ) : null}
         {!live ? (
@@ -141,19 +160,28 @@ function Arcade() {
                 aria-live="polite"
                 className="mb-4 flex flex-col gap-2 rounded-[var(--radius)] border border-amber-400/40 bg-amber-500/10 px-3 py-3 text-sm text-ink2"
               >
-                <span className="font-semibold text-ink">Your partner left.</span>
-                <span>
-                  The game stays on screen while you wait. Share the room code again, or{' '}
-                  {isHost ? 'tap Games above to pick another.' : 'ask the host to pick another game.'}
-                </span>
+                <span className="font-semibold text-ink">{t.partnerLeftBanner.title}</span>
+                <span>{isHost ? t.partnerLeftBanner.detailHost : t.partnerLeftBanner.detailGuest}</span>
               </div>
             ) : null}
-            <GameFrame game={currentGame} selfName={self?.name} peerName={peer?.name} />
+            <GameFrame
+              game={currentGame}
+              locale={locale}
+              selfName={self?.name}
+              peerName={peer?.name}
+              picker={t.picker}
+            />
           </>
         ) : !bothHere ? (
-          <WaitingRoom room={room ?? ''} partnerLeft={partnerLeft} />
+          <WaitingRoom room={room ?? ''} partnerLeft={partnerLeft} locale={locale} />
         ) : (
-          <GamePicker onPick={selectGame} selfName={self?.name} peerName={peer?.name} isHost={isHost} />
+          <GamePicker
+            locale={locale}
+            onPick={selectGame}
+            selfName={self?.name}
+            peerName={peer?.name}
+            isHost={isHost}
+          />
         )}
       </main>
     </>
@@ -183,16 +211,25 @@ function RoomPill({
       )}
     >
       {open ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-      {room}
+      <span dir="ltr">{room}</span>
       <span className="opacity-70">· {filled ? '2/2' : '1/2'}</span>
     </span>
   );
 }
 
-function WaitingRoom({ room, partnerLeft }: { room: string; partnerLeft?: boolean }) {
+function WaitingRoom({
+  room,
+  partnerLeft,
+  locale,
+}: {
+  room: string;
+  partnerLeft?: boolean;
+  locale: GameLocale;
+}) {
+  const t = useMemo(() => getArcadeStrings(locale), [locale]);
   const serverHint = hasConfiguredServer()
-    ? 'Both devices need internet access to reach the deployed game server.'
-    : "Both devices need to reach the game server. On the same Wi-Fi, open this site on the host's IP and run make backend-dev.";
+    ? t.waitingRoom.serverHintDeployed
+    : t.waitingRoom.serverHintLan;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5">
@@ -201,69 +238,119 @@ function WaitingRoom({ room, partnerLeft }: { room: string; partnerLeft?: boolea
           <Users className="h-6 w-6" />
         </span>
         <h2 className="mt-3 text-xl font-bold tracking-tight text-ink">
-          {partnerLeft ? 'Your partner left the room' : 'Waiting for your partner…'}
+          {partnerLeft ? t.waitingRoom.partnerLeftTitle : t.waitingRoom.waitingTitle}
         </h2>
         <p className="mt-1 text-sm text-ink2">
-          {partnerLeft
-            ? 'Share the code again — the game resumes when they rejoin.'
-            : 'Share this code — the game starts the moment they join.'}
+          {partnerLeft ? t.waitingRoom.partnerLeftDetail : t.waitingRoom.waitingDetail}
         </p>
       </div>
-      <ShareRoom room={room} hint={serverHint} />
+      <ShareRoom room={room} hint={serverHint} locale={locale} />
     </div>
   );
 }
 
+function LanguageToggle({
+  locale,
+  disabled,
+  onChange,
+  switchToEnglish,
+  switchToArabic,
+  hostOnly,
+}: {
+  locale: GameLocale;
+  disabled?: boolean;
+  onChange: (locale: GameLocale) => void;
+  switchToEnglish: string;
+  switchToArabic: string;
+  hostOnly: string;
+}) {
+  const next = locale === 'ar' ? 'en' : 'ar';
+  return (
+    <button
+      type="button"
+      title={disabled ? hostOnly : locale === 'ar' ? switchToEnglish : switchToArabic}
+      disabled={disabled}
+      onClick={() => onChange(next)}
+      className="grid h-11 min-w-11 place-items-center rounded-md border border-edge px-2 font-mono text-xs font-bold text-ink3 hover:bg-panel2 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {locale === 'ar' ? 'EN' : 'عر'}
+    </button>
+  );
+}
+
 function GamePicker({
+  locale,
   onPick,
   selfName,
   peerName,
   isHost,
 }: {
+  locale: GameLocale;
   onPick: (id: string) => void;
   selfName?: string;
   peerName?: string;
   isHost: boolean;
 }) {
+  const t = useMemo(() => getArcadeStrings(locale), [locale]);
+  const you = selfName ?? t.picker.you;
+  const partner = peerName ?? t.picker.partner;
+
   return (
     <div className="mx-auto w-full max-w-2xl">
       <div className="mb-5 flex items-center justify-center gap-2 text-sm text-ink2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-3 py-1 font-medium text-good">
           <span className="h-1.5 w-1.5 rounded-full bg-good" />
-          {selfName ?? 'You'} &amp; {peerName ?? 'Partner'} are in
+          {t.picker.playersIn(you, partner)}
         </span>
       </div>
-      <h2 className="mb-1 text-center text-2xl font-bold tracking-tight text-ink">Pick a game</h2>
+      <h2 className="mb-1 text-center text-2xl font-bold tracking-tight text-ink">{t.picker.title}</h2>
       <p className="mb-6 text-center text-sm text-ink3">
-        {isHost ? 'Choose a game — it opens on both screens.' : 'Waiting for the host to pick a game…'}
+        {isHost ? t.picker.hostHint : t.picker.guestHint}
       </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {GAMES.map((game) => (
-          <GameCard key={game.id} game={game} onClick={() => onPick(game.id)} disabled={!isHost} />
+          <GameCard
+            key={game.id}
+            game={game}
+            meta={localizedGameMeta(game, locale)}
+            paceLabel={game.pace === 'simultaneous' ? t.picker.paceTogether : t.picker.paceTurns}
+            onClick={() => onPick(game.id)}
+            disabled={!isHost}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function GameCard({ game, onClick, disabled }: { game: GameDef; onClick: () => void; disabled?: boolean }) {
+function GameCard({
+  game,
+  meta,
+  paceLabel,
+  onClick,
+  disabled,
+}: {
+  game: GameDef;
+  meta: Pick<GameDef, 'title' | 'tagline'>;
+  paceLabel: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="group flex items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+      className="group flex items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-start transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
     >
       <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-accentbg text-accent">
         <Glyph markup={game.glyph} className="h-8 w-8" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold text-ink">{game.title}</span>
-        <span className="mt-0.5 block text-sm leading-snug text-ink2">{game.tagline}</span>
+        <span className="block truncate font-semibold text-ink">{meta.title}</span>
+        <span className="mt-0.5 block text-sm leading-snug text-ink2">{meta.tagline}</span>
         <span className="mt-2 flex items-center gap-2 text-[11px] text-ink3">
-          <span className="rounded-full bg-panel2 px-2 py-0.5 font-medium">
-            {game.pace === 'simultaneous' ? 'Together' : 'Turns'}
-          </span>
+          <span className="rounded-full bg-panel2 px-2 py-0.5 font-medium">{paceLabel}</span>
           <span>{game.minutes}</span>
         </span>
       </span>
@@ -271,14 +358,30 @@ function GameCard({ game, onClick, disabled }: { game: GameDef; onClick: () => v
   );
 }
 
-function GameFrame({ game, selfName, peerName }: { game: GameDef; selfName?: string; peerName?: string }) {
+function GameFrame({
+  game,
+  locale,
+  selfName,
+  peerName,
+  picker,
+}: {
+  game: GameDef;
+  locale: GameLocale;
+  selfName?: string;
+  peerName?: string;
+  picker: ReturnType<typeof getArcadeStrings>['picker'];
+}) {
   const Component = game.Component;
+  const meta = localizedGameMeta(game, locale);
+  const you = selfName ?? picker.you;
+  const partner = peerName ?? picker.partner;
+
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-4 text-center">
-        <h2 className="text-lg font-bold tracking-tight text-ink">{game.title}</h2>
+        <h2 className="text-lg font-bold tracking-tight text-ink">{meta.title}</h2>
         <p className="text-xs text-ink3">
-          {selfName ?? 'You'} vs {peerName ?? 'Partner'}
+          {you} {picker.vs} {partner}
         </p>
       </div>
       <Component />

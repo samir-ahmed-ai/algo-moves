@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Loader2, Lock, Minus, Plus } from 'lucide-react';
+import { getArcadeStrings, useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
@@ -27,6 +28,8 @@ type Phase = 'setup' | 'waitingKeeper' | 'watching' | 'guessing' | 'roundResult'
 const ROUND_RECAP_MS = 2600;
 
 export function NumberDuel() {
+  const { locale } = useGamesLocale();
+  const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
   const { self, peer, connected } = useGameRoom();
   const amHost = self?.role === 'host';
 
@@ -120,7 +123,9 @@ export function NumberDuel() {
     send({ kind: 'rematch' });
   };
 
-  if (!connected) return <WaitingForPeer name={peer?.name} />;
+  if (!connected) {
+    return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? arcade.picker.partner)} />;
+  }
 
   return (
     <GameBody>

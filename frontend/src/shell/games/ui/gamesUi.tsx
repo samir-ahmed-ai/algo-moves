@@ -149,11 +149,11 @@ export function ResultBanner({
 }
 
 /** Shown inside a game while the peer is momentarily gone. */
-export function WaitingForPeer({ name }: { name?: string }) {
+export function WaitingForPeer({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center gap-3 py-10 text-center text-ink3">
       <Loader2 className="h-6 w-6 animate-spin text-accent" />
-      <p className="text-sm">Waiting for {name ?? 'your partner'} to reconnect…</p>
+      <p className="text-sm">{message}</p>
     </div>
   );
 }

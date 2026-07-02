@@ -1,11 +1,7 @@
-export interface MeldPrompt {
-  q: string;
-  a: string;
-  b: string;
-}
+import type { MeldPrompt } from './types';
 
 /** Fixed, ordered this-or-that prompts. Both players answer them in this order. */
-export const MELD_PROMPTS: MeldPrompt[] = [
+export const MELD_PROMPTS_EN: MeldPrompt[] = [
   { q: 'Ideal escape?', a: 'Beach', b: 'Mountains' },
   { q: 'Team...', a: 'Cats', b: 'Dogs' },
   { q: 'Flavor', a: 'Sweet', b: 'Savory' },
@@ -16,4 +12,6 @@ export const MELD_PROMPTS: MeldPrompt[] = [
   { q: 'With money you', a: 'Save', b: 'Spend' },
   { q: 'On a plane', a: 'Window', b: 'Aisle' },
   { q: 'Weekend plan', a: 'Planned', b: 'Spontaneous' },
+  { q: 'Clothes style?', a: 'Show off your neck', b: "Don't show off the neck" },
+  { q: 'City I love?', a: 'Kom Hamada', b: 'Damatuo' },
 ];

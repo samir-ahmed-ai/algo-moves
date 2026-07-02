@@ -1,18 +1,25 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getArcadeStrings, useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { ChoiceCard, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
-import { compatibilityLabel, isMatch, type MeldChoice } from './logic';
-import { MELD_PROMPTS } from './prompts';
+import { compatibilityKey, isMatch, type MeldChoice } from './logic';
+import { getMeldPrompts } from './prompts';
+import { getMindMeldStrings } from './strings';
 
 type MeldMsg = { kind: 'answer'; round: number; choice: MeldChoice } | { kind: 'rematch' };
 
 type Phase = 'answer' | 'reveal' | 'over';
 
 const REVEAL_MS = 2200;
-const TOTAL = MELD_PROMPTS.length;
 
 export function MindMeld() {
+  const { locale } = useGamesLocale();
+  const strings = useMemo(() => getMindMeldStrings(locale), [locale]);
+  const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
+  const prompts = useMemo(() => getMeldPrompts(locale), [locale]);
+  const total = prompts.length;
+
   const { self, peer, connected } = useGameRoom();
   const [round, setRound] = useState(0);
   const [phase, setPhase] = useState<Phase>('answer');
@@ -36,6 +43,16 @@ export function MindMeld() {
     }
   });
 
+  // Reset when locale changes mid-game so prompt text stays aligned with round state.
+  const prevLocaleRef = useRef(locale);
+  useEffect(() => {
+    if (prevLocaleRef.current === locale) return;
+    prevLocaleRef.current = locale;
+    if (round === 0 && myPick === null && phase === 'answer') return;
+    resetMatch();
+    send({ kind: 'rematch' });
+  }, [locale, round, myPick, phase, resetMatch, send]);
+
   const peerPick = peerPicks[round] ?? null;
   const matched = myPick !== null && peerPick !== null ? isMatch(myPick, peerPick) : null;
 
@@ -50,7 +67,7 @@ export function MindMeld() {
   useEffect(() => {
     if (phase !== 'reveal') return;
     const t = setTimeout(() => {
-      if (round + 1 >= TOTAL) {
+      if (round + 1 >= total) {
         setPhase('over');
       } else {
         setRound((r) => r + 1);
@@ -59,7 +76,7 @@ export function MindMeld() {
       }
     }, REVEAL_MS);
     return () => clearTimeout(t);
-  }, [phase, round]);
+  }, [phase, round, total]);
 
   const answer = (c: MeldChoice) => {
     if (myPick !== null || phase !== 'answer') return;
@@ -72,29 +89,32 @@ export function MindMeld() {
     send({ kind: 'rematch' });
   };
 
-  if (!connected) return <WaitingForPeer name={peer?.name} />;
+  if (!connected) {
+    return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? strings.partner)} />;
+  }
 
-  const meName = self?.name ?? 'You';
-  const peerName = peer?.name ?? 'Partner';
+  const meName = self?.name ?? strings.you;
+  const peerName = peer?.name ?? strings.partner;
 
   if (phase === 'over') {
-    const ratio = TOTAL > 0 ? syncScore / TOTAL : 0;
+    const ratio = total > 0 ? syncScore / total : 0;
+    const labelKey = compatibilityKey(syncScore, total);
     return (
       <GameBody>
-        <Progress round={TOTAL} total={TOTAL} score={syncScore} />
+        <Progress round={total} total={total} score={syncScore} inSyncCount={strings.inSyncCount} />
         <ResultBanner
           tone={ratio >= 0.8 ? 'win' : ratio >= 0.5 ? 'draw' : 'lose'}
-          title={`In sync ${syncScore} / ${TOTAL}`}
-          detail={compatibilityLabel(syncScore, TOTAL)}
+          title={strings.inSyncTitle(syncScore, total)}
+          detail={strings.compatibility[labelKey]}
         />
         <TouchButton variant="primary" size="lg" onClick={rematch}>
-          Play again
+          {strings.playAgain}
         </TouchButton>
       </GameBody>
     );
   }
 
-  const prompt = MELD_PROMPTS[round];
+  const prompt = prompts[round];
   const options: { choice: MeldChoice; label: string }[] = [
     { choice: 0, label: prompt.a },
     { choice: 1, label: prompt.b },
@@ -102,11 +122,11 @@ export function MindMeld() {
 
   return (
     <GameBody>
-      <Progress round={round} total={TOTAL} score={syncScore} />
+      <Progress round={round} total={total} score={syncScore} inSyncCount={strings.inSyncCount} />
 
       <div className="text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink3">{prompt.q}</p>
-        <p className="mt-1 text-lg font-bold tracking-tight text-ink">This or that?</p>
+        <p className="mt-1 text-lg font-bold tracking-tight text-ink">{strings.thisOrThat}</p>
       </div>
 
       {phase === 'reveal' && matched !== null ? (
@@ -116,13 +136,13 @@ export function MindMeld() {
             <RevealCard label={peerName} pick={peerPick} prompt={prompt} highlight={matched} />
           </div>
           <p className="text-center text-lg font-bold">
-            {matched ? 'In sync! 💞' : 'Off this time'}
+            {matched ? strings.inSync : strings.offThisTime}
           </p>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3">
           <TurnBadge tone={myPick !== null ? 'wait' : 'you'}>
-            {myPick !== null ? `Waiting for ${peerName}…` : 'Pick together'}
+            {myPick !== null ? strings.waitingFor(peerName) : strings.pickTogether}
           </TurnBadge>
           <div className="grid w-full grid-cols-2 gap-3">
             {options.map((o) => (
@@ -143,7 +163,17 @@ export function MindMeld() {
   );
 }
 
-function Progress({ round, total, score }: { round: number; total: number; score: number }) {
+function Progress({
+  round,
+  total,
+  score,
+  inSyncCount,
+}: {
+  round: number;
+  total: number;
+  score: number;
+  inSyncCount: (score: number) => string;
+}) {
   const current = Math.min(round + 1, total);
   return (
     <div className="flex flex-col items-center gap-2">
@@ -152,7 +182,7 @@ function Progress({ round, total, score }: { round: number; total: number; score
           {current} / {total}
         </span>
         <span className="rounded-full bg-goodbg px-2.5 py-0.5 font-mono text-xs font-bold text-good">
-          {score} in sync
+          {inSyncCount(score)}
         </span>
       </div>
       <div className="flex flex-wrap justify-center gap-1.5">

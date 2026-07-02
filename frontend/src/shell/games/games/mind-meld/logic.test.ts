@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compatibilityLabel, isMatch } from './logic';
+import { compatibilityKey, isMatch } from './logic';
 
 describe('mind-meld logic', () => {
   it('detects matching picks', () => {
@@ -13,21 +13,21 @@ describe('mind-meld logic', () => {
   });
 
   it('labels high sync as two peas in a pod', () => {
-    expect(compatibilityLabel(10, 10)).toBe('Two peas in a pod 🫛');
-    expect(compatibilityLabel(8, 10)).toBe('Two peas in a pod 🫛');
+    expect(compatibilityKey(10, 10)).toBe('twoPeas');
+    expect(compatibilityKey(8, 10)).toBe('twoPeas');
   });
 
   it('labels middling sync as pretty in tune', () => {
-    expect(compatibilityLabel(5, 10)).toBe('Pretty in tune 💫');
-    expect(compatibilityLabel(7, 10)).toBe('Pretty in tune 💫');
+    expect(compatibilityKey(5, 10)).toBe('prettyInTune');
+    expect(compatibilityKey(7, 10)).toBe('prettyInTune');
   });
 
   it('labels low sync as opposites attract', () => {
-    expect(compatibilityLabel(4, 10)).toBe('Opposites attract ✨');
-    expect(compatibilityLabel(0, 10)).toBe('Opposites attract ✨');
+    expect(compatibilityKey(4, 10)).toBe('opposites');
+    expect(compatibilityKey(0, 10)).toBe('opposites');
   });
 
   it('handles a zero-length quiz gracefully', () => {
-    expect(compatibilityLabel(0, 0)).toBe('Opposites attract ✨');
+    expect(compatibilityKey(0, 0)).toBe('opposites');
   });
 });
