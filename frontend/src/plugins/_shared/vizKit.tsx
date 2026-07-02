@@ -24,6 +24,33 @@ export function useFrameState<S>(frame: Frame<S> | null | undefined): S | null {
   return frame?.state ?? null;
 }
 
+/**
+ * Collapsible `<details>` block for notes / approaches / takeaways shown under an
+ * inspector. Shared by the imported, prep and go-course plugin factories (each of
+ * which used to hand-roll an identical block).
+ */
+export function CollapsibleDetails({
+  title,
+  body,
+  size = 'tight',
+  maxHeightClass = 'max-h-[200px]',
+}: {
+  title: string;
+  body: string;
+  size?: 'tight' | 'xs';
+  maxHeightClass?: string;
+}) {
+  const t = size === 'xs' ? vizText.xs : vizText.tight;
+  return (
+    <details className="mt-2 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
+      <summary className={cn('cursor-pointer text-ink3', t)}>{title}</summary>
+      <pre className={cn('nodrag mt-1.5 overflow-auto whitespace-pre-wrap font-mono leading-relaxed text-ink2', maxHeightClass, t)}>
+        {body}
+      </pre>
+    </details>
+  );
+}
+
 /** Build a standard Inspector from state rows. */
 export function makeInspector<S>(
   rows: (state: S) => ReactNode,

@@ -1,8 +1,7 @@
 import type { ComponentType } from 'react';
 import { definePlugin, type InspectorProps, type ProblemPlugin } from '../../core/types';
 import { wireTeachingStack, codePiecesFromSource } from '../_shared/pluginKit';
-import { VarGrid, vizText } from '../_shared/vizKit';
-import { cn } from '@/lib/utils/cn';
+import { VarGrid, CollapsibleDetails } from '../_shared/vizKit';
 import { prepCodePieces } from './prepCodePieces';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from './prepScene';
 import { resolvePrepSimulator } from './prepSimulators';
@@ -39,17 +38,6 @@ export interface PrepProblem {
   variants: { file: string; text: string }[];
 }
 
-function NotesBlock({ title, body }: { title: string; body: string }) {
-  return (
-    <details className="mt-2 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
-      <summary className={cn('cursor-pointer text-ink3', vizText.tight)}>{title}</summary>
-      <pre className={cn('nodrag mt-1.5 max-h-[200px] overflow-auto whitespace-pre-wrap font-mono leading-relaxed text-ink2', vizText.tight)}>
-        {body}
-      </pre>
-    </details>
-  );
-}
-
 /** Append the prep NOTES.md / Approaches under a simulator's own inspector. */
 function withNotes(
   Inspector: ComponentType<InspectorProps<any>>,
@@ -61,8 +49,8 @@ function withNotes(
       <>
         <Inspector {...props} />
         <VarGrid>
-          {p.notes && <NotesBlock title="Notes (NOTES.md)" body={p.notes} />}
-          {p.approaches && <NotesBlock title="Approaches" body={p.approaches} />}
+          {p.notes && <CollapsibleDetails title="Notes (NOTES.md)" body={p.notes} />}
+          {p.approaches && <CollapsibleDetails title="Approaches" body={p.approaches} />}
         </VarGrid>
       </>
     );
