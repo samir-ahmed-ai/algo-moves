@@ -12,6 +12,7 @@ type rec struct {
 	mu       sync.Mutex
 	role     Role
 	msgs     [][]byte
+	closed   bool
 }
 
 func (r *rec) ID() string     { return r.id }
@@ -22,6 +23,16 @@ func (r *rec) Send(p []byte) {
 	r.mu.Lock()
 	r.msgs = append(r.msgs, append([]byte(nil), p...))
 	r.mu.Unlock()
+}
+func (r *rec) Close() {
+	r.mu.Lock()
+	r.closed = true
+	r.mu.Unlock()
+}
+func (r *rec) isClosed() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.closed
 }
 
 func (r *rec) decoded() []map[string]any {
@@ -202,6 +213,123 @@ func TestReconnectReclaimsSameSlotByPid(t *testing.T) {
 	if !ok || role != RoleHost {
 		t.Fatalf("reconnecting host role = (%v,%v), want (host,true)", role, ok)
 	}
+}
+
+func TestReconnectBeforeTimeoutEvictsStaleConnection(t *testing.T) {
+	h := New()
+	host := &rec{id: "h"}
+	guest := &rec{id: "g"}
+	if _, ok := h.Join("R", host, "pid-host"); !ok {
+		t.Fatal("host join failed")
+	}
+	if _, ok := h.Join("R", guest, "pid-guest"); !ok {
+		t.Fatal("guest join failed")
+	}
+
+	// Unlike TestReconnectReclaimsSameSlotByPid, the host's connection never
+	// calls Leave: it just goes stale (e.g. a phone that lost network without a
+	// clean close), so slot 0 is still occupied when the reconnect arrives.
+	// Without active eviction this would wrongly report room-full even though
+	// two live players are trying to occupy the two-player room.
+	hostAgain := &rec{id: "h2"}
+	role, ok := h.Join("R", hostAgain, "pid-host")
+	if !ok || role != RoleHost {
+		t.Fatalf("reconnecting host role = (%v,%v), want (host,true)", role, ok)
+	}
+
+	if !host.isClosed() {
+		t.Fatal("stale host connection was not evicted (Close was never called)")
+	}
+	if host.lastOfType("error") == nil {
+		t.Fatal("stale host connection was not notified it was replaced")
+	}
+
+	// The guest should not have been touched by the eviction.
+	if guest.isClosed() {
+		t.Fatal("unrelated guest connection should not be evicted")
+	}
+
+	// A third connection now correctly finds the room full (2 live players:
+	// hostAgain and guest), proving the stale slot was truly replaced rather
+	// than just added on top of.
+	third := &rec{id: "third"}
+	if _, ok := h.Join("R", third, ""); ok {
+		t.Fatal("room should be full after the reconnect replaced the stale host")
+	}
+}
+
+func TestReconnectSamePidSameConnectionIsNotSelfEvicted(t *testing.T) {
+	h := New()
+	host := &rec{id: "h"}
+	if _, ok := h.Join("R", host, "pid-host"); !ok {
+		t.Fatal("host join failed")
+	}
+	// Re-joining with the very same Sender and pid must not evict itself.
+	if _, ok := h.Join("R", host, "pid-host"); !ok {
+		t.Fatal("re-join with same sender+pid should succeed")
+	}
+	if host.isClosed() {
+		t.Fatal("a client must never evict its own connection")
+	}
+}
+
+func TestMaxRoomsCeilingRejectsNewRooms(t *testing.T) {
+	h := NewWithMaxRooms(1)
+	first := &rec{id: "1"}
+	if _, ok := h.Join("A", first, ""); !ok {
+		t.Fatal("first room should be allowed under the cap")
+	}
+
+	blocked := &rec{id: "2"}
+	if _, ok := h.Join("B", blocked, ""); ok {
+		t.Fatal("second distinct room should be rejected once at the cap")
+	}
+	if blocked.lastOfType("error") == nil {
+		t.Fatal("rejected join should receive an error message")
+	}
+	if h.RoomCount() != 1 {
+		t.Fatalf("room count = %d, want 1 (rejected room must not be created)", h.RoomCount())
+	}
+
+	// Joining (including reconnecting into) an existing room must still work
+	// even at the cap.
+	second := &rec{id: "3"}
+	if _, ok := h.Join("A", second, ""); !ok {
+		t.Fatal("joining an existing room at the cap should still succeed")
+	}
+}
+
+func TestHubConcurrentAccessIsRaceSafe(t *testing.T) {
+	h := New()
+	const rooms = 8
+	const playersPerRoom = 6 // several reconnect/evict cycles per room, plus a spectator or two
+
+	var wg sync.WaitGroup
+	for room := 0; room < rooms; room++ {
+		code := string(rune('A' + room))
+		for p := 0; p < playersPerRoom; p++ {
+			wg.Add(1)
+			go func(code string, p int) {
+				defer wg.Done()
+				c := &rec{id: code + string(rune('0'+p))}
+				pid := "pid-" + code + "-" + string(rune('0'+p%2)) // some pid collisions to exercise eviction
+				role, ok := h.Join(code, c, pid)
+				if ok {
+					h.Relay(code, c, json.RawMessage(`{"x":1}`))
+					if role == RoleHost {
+						h.SetState(code, c, json.RawMessage(`{"y":2}`))
+					}
+					h.Leave(code, c)
+				}
+			}(code, p)
+		}
+	}
+	wg.Wait()
+
+	// No assertion beyond "the race detector found nothing and this didn't
+	// deadlock": the point of this test is concurrent-safety, not a specific
+	// end state, per the Hub's "safe for concurrent use" doc comment.
+	_ = h.RoomCount()
 }
 
 func TestFreshCodeIsUniqueAndClean(t *testing.T) {

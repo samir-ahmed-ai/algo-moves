@@ -22,9 +22,11 @@ type Peer struct {
 //
 //	{"t":"relay","d":{...}}  — forward d verbatim to the other player
 //	{"t":"state","d":{...}}  — host sets shared room state (echoed to peers)
+//
+// It is only ever json.Unmarshal'd, never marshaled, so D has no omitempty tag.
 type Inbound struct {
 	T string          `json:"t"`
-	D json.RawMessage `json:"d,omitempty"`
+	D json.RawMessage `json:"d"`
 }
 
 // The set of server → client message builders. Each returns marshalled JSON

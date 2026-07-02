@@ -13,13 +13,24 @@ import (
 
 // Hub owns every active room. It is safe for concurrent use.
 type Hub struct {
-	mu    sync.Mutex
-	rooms map[string]*room
+	mu       sync.Mutex
+	rooms    map[string]*room
+	maxRooms int // 0 means unlimited
 }
 
-// New returns an empty Hub.
+// New returns an empty Hub with no cap on concurrent rooms.
 func New() *Hub {
 	return &Hub{rooms: make(map[string]*room)}
+}
+
+// NewWithMaxRooms returns an empty Hub that refuses to create a new room once
+// maxRooms distinct room codes are concurrently active (existing rooms, and
+// reconnects to them, are unaffected). A non-positive maxRooms means
+// unlimited, same as New(). This bounds steady-state memory/goroutine growth,
+// which the /ws upgrade-rate limiter alone does not: that limiter only caps
+// burst rate, not how many rooms accumulate over time.
+func NewWithMaxRooms(maxRooms int) *Hub {
+	return &Hub{rooms: make(map[string]*room), maxRooms: maxRooms}
 }
 
 // RoomCount reports how many rooms currently exist (for /healthz + tests).
@@ -31,28 +42,42 @@ func (h *Hub) RoomCount() int {
 
 // Join places c into the room identified by code, creating the room if needed.
 // It returns the assigned role and true on success. If the room already holds
-// two players, it sends an error to c and returns ("", false) — the caller
-// should then close the connection.
+// two players (and neither slot belongs to this pid), it sends an error to c
+// and returns ("", false) — the caller should then close the connection.
 func (h *Hub) Join(code string, c Sender, pid string) (Role, bool) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
 	r := h.rooms[code]
 	if r == nil {
-		r = &room{code: code}
+		if h.maxRooms > 0 && len(h.rooms) >= h.maxRooms {
+			c.Send(msgError("server-full"))
+			return "", false
+		}
+		r = &room{}
 		h.rooms[code] = r
 	}
 
 	// Reclaim the exact slot this player held before a reconnect (matched by their
 	// stable pid), so roles survive a transient drop — a reconnecting host stays
-	// host instead of being promoted/demoted by slot order.
+	// host instead of being promoted/demoted by slot order. Unlike a plain free-slot
+	// match, this also matches a slot that is still occupied: if the previous
+	// connection for this pid never cleanly disconnected (e.g. a phone that lost
+	// its network without sending a close frame), the new connection supersedes it
+	// immediately instead of the room wrongly reporting "room-full" until the
+	// stale peer's 60s keepalive timeout finally reaps it.
 	slot := -1
 	if pid != "" {
 		for i := range r.slots {
-			if r.slots[i] == nil && r.pids[i] == pid {
-				slot = i
-				break
+			if r.pids[i] != pid {
+				continue
 			}
+			if stale := r.slots[i]; stale != nil && stale.ID() != c.ID() {
+				stale.Send(msgError("replaced-by-reconnect"))
+				stale.Close()
+			}
+			slot = i
+			break
 		}
 	}
 	if slot < 0 {
@@ -60,9 +85,6 @@ func (h *Hub) Join(code string, c Sender, pid string) (Role, bool) {
 	}
 	if slot < 0 {
 		c.Send(msgError("room-full"))
-		if r.empty() {
-			delete(h.rooms, code)
-		}
 		return "", false
 	}
 

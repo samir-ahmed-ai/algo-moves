@@ -31,12 +31,23 @@ so open the site on your laptop's IP from both phones.
 
 ## Endpoints
 
-| Method | Path                          | Purpose                                    |
-| ------ | ----------------------------- | ------------------------------------------ |
-| GET    | `/ws?room=CODE&name=NAME`     | Upgrade to a game-room WebSocket           |
-| GET    | `/new`                        | Mint a fresh room code → `{"code":"ABCD"}` |
-| GET    | `/healthz`                    | Liveness → `{"status":"ok","rooms":N}`     |
-| GET    | `/`                           | Plain-text banner                          |
+| Method | Path                               | Purpose                                    |
+| ------ | ----------------------------------- | ------------------------------------------ |
+| GET    | `/ws?room=CODE&name=NAME&pid=PID`  | Upgrade to a game-room WebSocket           |
+| GET    | `/new`                              | Mint a fresh room code → `{"code":"ABCD"}` |
+| GET    | `/healthz`                          | Liveness → `{"status":"ok","rooms":N}`     |
+| GET    | `/`                                 | Plain-text banner                          |
+
+`pid` is optional but recommended: a stable, client-minted id (e.g. persisted in
+`localStorage`) that identifies the *player*, not the connection. Reconnecting
+with the same `pid` reclaims that player's original slot/role in the room —
+important for a host, whose role controls who may publish shared `state` — even
+across a dropped socket. If the previous connection for that `pid` is still
+technically open but has gone stale (e.g. a phone that lost network without a
+clean close), the reconnect actively replaces it rather than waiting on the
+60s keepalive timeout or being wrongly rejected with `room-full`. Joining
+without a `pid` (or with one that matches nothing) falls back to plain
+lowest-free-slot assignment, same as before.
 
 ## Protocol
 
@@ -113,5 +124,6 @@ Or enable [`.github/workflows/deploy-railway.yml`](../.github/workflows/deploy-r
 | -------- | ------- |
 | `PORT` | Listen port (default `:8080`) |
 | `ALLOWED_ORIGINS` | Comma-separated browser origins allowed for WebSocket upgrade and CORS. Empty = allow all (LAN dev). |
+| `MAX_ROOMS` | Cap on concurrent rooms; new-room `/ws` joins are rejected past this (default `5000`). Reconnects to existing rooms are never blocked by this cap. |
 
 Rate limits (per client IP): 60 WebSocket upgrades/minute, 20 `/new` calls/minute.

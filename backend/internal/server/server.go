@@ -22,8 +22,15 @@ func Handler(h *hub.Hub) http.Handler {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", rateLimit(wsHandler(h, allowed), wsLimit))
-	mux.HandleFunc("/new", corsJSON(newCodeHandler(h), allowed, newLimit))
-	mux.HandleFunc("/healthz", corsJSON(healthHandler(h), allowed, nil))
+	// /new mints a room code, so — like /ws — it requires a recognised Origin
+	// whenever ALLOWED_ORIGINS is configured; a request with no Origin header at
+	// all is rejected rather than silently allowed through.
+	mux.HandleFunc("/new", corsJSON(newCodeHandler(h), allowed, newLimit, true))
+	// /healthz stays permissive of a missing Origin even when ALLOWED_ORIGINS is
+	// configured: it exists for infra liveness probes (e.g. Railway's
+	// healthcheckPath) that are plain HTTP clients and never send an Origin
+	// header, not for browsers.
+	mux.HandleFunc("/healthz", corsJSON(healthHandler(h), allowed, nil, false))
 	mux.HandleFunc("/", bannerHandler)
 	return mux
 }
@@ -54,13 +61,21 @@ func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 }
 
 func newCodeHandler(h *hub.Hub) http.HandlerFunc {
-	return func(w http.ResponseWriter, _ *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
 		writeJSON(w, map[string]any{"code": h.FreshCode()})
 	}
 }
 
 func healthHandler(h *hub.Hub) http.HandlerFunc {
-	return func(w http.ResponseWriter, _ *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
 		writeJSON(w, map[string]any{"status": "ok", "rooms": h.RoomCount()})
 	}
 }
@@ -75,15 +90,26 @@ func bannerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // corsJSON wraps a handler so the static frontend (a different origin) can call
-// it, and answers CORS preflight requests.
-func corsJSON(next http.HandlerFunc, allowed []string, limiter *ipRateLimiter) http.HandlerFunc {
+// it, and answers CORS preflight requests. When requireOrigin is true, a
+// request with no Origin header at all is rejected as soon as ALLOWED_ORIGINS
+// is configured — mirroring wsHandler's stricter originAllowed check — instead
+// of silently bypassing the allowlist the way a bare `origin != ""` guard
+// would. Pass false for endpoints (like /healthz) that must stay reachable by
+// non-browser clients that never send Origin.
+func corsJSON(next http.HandlerFunc, allowed []string, limiter *ipRateLimiter, requireOrigin bool) http.HandlerFunc {
 	handler := next
 	if limiter != nil {
 		handler = rateLimit(next, limiter)
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		if origin != "" && !originAllowed(origin, allowed) {
+		rejected := false
+		if requireOrigin {
+			rejected = !originAllowed(origin, allowed)
+		} else {
+			rejected = origin != "" && !originAllowed(origin, allowed)
+		}
+		if rejected {
 			http.Error(w, "origin not allowed", http.StatusForbidden)
 			return
 		}

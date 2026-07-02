@@ -121,7 +121,7 @@ func (c *Conn) SetReadDeadline(t time.Time) error { return c.raw.SetReadDeadline
 func (c *Conn) EnableKeepalive(d time.Duration) {
 	c.keepalive = d
 	if d > 0 {
-		_ = c.raw.SetReadDeadline(time.Now().Add(d))
+		_ = c.SetReadDeadline(time.Now().Add(d))
 	}
 }
 
@@ -146,7 +146,7 @@ func (c *Conn) ReadMessage() (opcode byte, payload []byte, err error) {
 			return 0, nil, err
 		}
 		if c.keepalive > 0 {
-			_ = c.raw.SetReadDeadline(time.Now().Add(c.keepalive))
+			_ = c.SetReadDeadline(time.Now().Add(c.keepalive))
 		}
 		switch op {
 		case opPing:

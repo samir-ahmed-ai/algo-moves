@@ -13,6 +13,10 @@ type Sender interface {
 	// Send enqueues one server → client message. Implementations must not block
 	// the caller (the hub holds a lock while broadcasting).
 	Send(payload []byte)
+	// Close disconnects the underlying connection. Implementations must not
+	// block the caller (the hub may call this while holding its lock, e.g. to
+	// evict a stale connection during a reconnect).
+	Close()
 }
 
 func peerOf(s Sender) Peer {
@@ -22,7 +26,6 @@ func peerOf(s Sender) Peer {
 // room is a single two-player match. slots[0] is the host, slots[1] the guest.
 // A nil slot is free. All access is serialised by the owning Hub's mutex.
 type room struct {
-	code  string
 	slots [2]Sender
 	// pids remembers which stable player id last held each slot, so a reconnecting
 	// player reclaims their original slot/role. Kept even while a slot is nil; it is

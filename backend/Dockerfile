@@ -12,4 +12,6 @@ COPY --from=build /gameserver /app/gameserver
 ENV PORT=8080
 EXPOSE 8080
 USER nobody
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget -q -T 2 -O /dev/null "http://localhost:${PORT}/healthz" || exit 1
 ENTRYPOINT ["/app/gameserver"]

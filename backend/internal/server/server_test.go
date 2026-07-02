@@ -203,6 +203,90 @@ func TestEndToEndRelay(t *testing.T) {
 	}
 }
 
+func TestBannerHandler(t *testing.T) {
+	ts := newTestServer()
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatalf("GET /: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d, want 200", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), "Algo Moves game server") {
+		t.Fatalf("banner body = %q, want it to mention the game server", body)
+	}
+
+	resp2, err := http.Get(ts.URL + "/nonexistent")
+	if err != nil {
+		t.Fatalf("GET /nonexistent: %v", err)
+	}
+	defer resp2.Body.Close()
+	if resp2.StatusCode != http.StatusNotFound {
+		t.Fatalf("status for unknown path = %d, want 404", resp2.StatusCode)
+	}
+}
+
+func TestNewAndHealthzRejectNonGET(t *testing.T) {
+	ts := newTestServer()
+	defer ts.Close()
+
+	for _, path := range []string{"/new", "/healthz"} {
+		resp, err := http.Post(ts.URL+path, "application/json", nil)
+		if err != nil {
+			t.Fatalf("POST %s: %v", path, err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusMethodNotAllowed {
+			t.Fatalf("POST %s status = %d, want 405", path, resp.StatusCode)
+		}
+	}
+}
+
+// TestCorsJSONRequiresOriginOnNewWhenAllowlisted covers the /new vs /healthz
+// asymmetry: once ALLOWED_ORIGINS is configured, /new must reject a request
+// with no Origin header at all (mirroring /ws's strictness), while /healthz
+// must keep serving plain infra healthchecks that never send one.
+func TestCorsJSONRequiresOriginOnNewWhenAllowlisted(t *testing.T) {
+	t.Setenv("ALLOWED_ORIGINS", "https://good.example")
+	ts := httptest.NewServer(Handler(hub.New()))
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/new")
+	if err != nil {
+		t.Fatalf("GET /new: %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("/new with no Origin, allowlist configured: status = %d, want 403", resp.StatusCode)
+	}
+
+	req, _ := http.NewRequest(http.MethodGet, ts.URL+"/new", nil)
+	req.Header.Set("Origin", "https://good.example")
+	resp2, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("GET /new with allowed origin: %v", err)
+	}
+	resp2.Body.Close()
+	if resp2.StatusCode != http.StatusOK {
+		t.Fatalf("/new with allowed Origin: status = %d, want 200", resp2.StatusCode)
+	}
+
+	// /healthz must remain reachable with no Origin header even though the
+	// allowlist is configured, since infra healthchecks never send one.
+	resp3, err := http.Get(ts.URL + "/healthz")
+	if err != nil {
+		t.Fatalf("GET /healthz: %v", err)
+	}
+	resp3.Body.Close()
+	if resp3.StatusCode != http.StatusOK {
+		t.Fatalf("/healthz with no Origin, allowlist configured: status = %d, want 200", resp3.StatusCode)
+	}
+}
+
 func TestEndToEndRoomFull(t *testing.T) {
 	ts := newTestServer()
 	defer ts.Close()

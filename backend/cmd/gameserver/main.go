@@ -7,12 +7,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
 	"algomoves/gameserver/internal/hub"
 	"algomoves/gameserver/internal/server"
 )
+
+// defaultMaxRooms bounds steady-state memory/goroutine growth: the /ws
+// upgrade-rate limiter only caps burst rate, not how many rooms accumulate
+// over the process lifetime. Override with MAX_ROOMS.
+const defaultMaxRooms = 5000
 
 func main() {
 	defaultAddr := ":8080"
@@ -22,9 +28,18 @@ func main() {
 	addr := flag.String("addr", defaultAddr, "listen address, e.g. :8080")
 	flag.Parse()
 
+	maxRooms := defaultMaxRooms
+	if v := os.Getenv("MAX_ROOMS"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			maxRooms = n
+		} else {
+			log.Printf("ignoring invalid MAX_ROOMS=%q, using default %d", v, defaultMaxRooms)
+		}
+	}
+
 	srv := &http.Server{
 		Addr:              *addr,
-		Handler:           server.Handler(hub.New()),
+		Handler:           server.Handler(hub.NewWithMaxRooms(maxRooms)),
 		ReadHeaderTimeout: 10 * time.Second,
 		// No overall write timeout: hijacked WebSocket connections are long-lived.
 	}
