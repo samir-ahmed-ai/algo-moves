@@ -87,7 +87,7 @@ jobs:
             echo "Skipping backend deploy: set RAILWAY_TOKEN and RAILWAY_BACKEND_SERVICE_ID repo secrets."
             exit 0
           fi
-          railway up backend --path-as-root --ci --service="${{ secrets.RAILWAY_BACKEND_SERVICE_ID }}"
+          railway up --ci --service="${{ secrets.RAILWAY_BACKEND_SERVICE_ID }}"
 
   deploy-frontend:
     needs: [changes, test-frontend]
@@ -107,4 +107,4 @@ jobs:
             echo "Skipping frontend deploy: set RAILWAY_TOKEN and RAILWAY_FRONTEND_SERVICE_ID repo secrets."
             exit 0
           fi
-          railway up frontend --path-as-root --ci --service="${{ secrets.RAILWAY_FRONTEND_SERVICE_ID }}"
+          railway up --ci --service="${{ secrets.RAILWAY_FRONTEND_SERVICE_ID }}"
