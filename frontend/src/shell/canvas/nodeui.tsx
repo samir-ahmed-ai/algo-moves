@@ -30,6 +30,7 @@ import {
   computeVizFitLayout,
   resolveMeasureSize,
 } from './vizFitMeasure';
+import { TONE_TEXT, TONE_BAR, TONE_CHIP, TONE_BANNER, TONE_LABEL } from './nodeUiTones';
 // Re-export the fit-measurement surface so `nodeui` stays the public entry point
 // (consumers + nodeui.test.ts import these from here).
 export {
@@ -72,13 +73,6 @@ export function difficultyTone(d?: string): UiTone {
   return 'accent';
 }
 
-const TONE_TEXT: Record<UiTone, string> = {
-  default: 'text-ink',
-  accent: 'text-accent',
-  good: 'text-good',
-  bad: 'text-bad',
-  muted: 'text-ink3',
-};
 
 /* ------------------------------------------------------------------ labels */
 
@@ -212,13 +206,6 @@ export function StatGrid({ children, cols = 2 }: { children: ReactNode; cols?: n
 
 /* ------------------------------------------------------------------ meters */
 
-const TONE_BAR: Record<UiTone, string> = {
-  default: 'var(--accent)',
-  accent: 'var(--accent)',
-  good: 'var(--good)',
-  bad: 'var(--bad)',
-  muted: 'var(--edge-active)',
-};
 
 /** Animated progress bar. */
 export function Meter({
@@ -245,13 +232,6 @@ export function Meter({
 
 /* ------------------------------------------------------------------- chips */
 
-const TONE_CHIP: Record<UiTone, string> = {
-  default: 'bg-panel2 text-ink2',
-  accent: 'bg-accentbg text-accent',
-  good: 'bg-goodbg text-good',
-  bad: 'bg-badbg text-bad',
-  muted: 'bg-panel2 text-ink3',
-};
 /** Tag pill using canvas node tokens (scales with `.algo-canvas .panel-node`). */
 export function NodeTagChip({ id }: { id: string }) {
   const t = getTag(id);
@@ -559,20 +539,6 @@ export function Row({
 
 /* ----------------------------------------------------------------- banner */
 
-const TONE_BANNER: Record<UiTone, string> = {
-  default: 'bg-panel2/60 text-ink2',
-  accent: 'bg-accentbg/70 text-ink2',
-  good: 'bg-goodbg/70 text-ink2',
-  bad: 'bg-badbg/70 text-ink2',
-  muted: 'bg-panel2/50 text-ink3',
-};
-const TONE_LABEL: Record<UiTone, string> = {
-  default: 'text-ink3',
-  accent: 'text-accent',
-  good: 'text-good',
-  bad: 'text-bad',
-  muted: 'text-ink3',
-};
 
 /** A tinted callout block — pattern pitfall/tip, diff "this step", hint cards. */
 export function Banner({
