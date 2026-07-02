@@ -158,6 +158,186 @@ export const slicesMaps: GoTopic = {
         "Three-index slicing s[low:high:max] sets cap=max-low, letting you force the next append to reallocate instead of aliasing.",
         "Returning sub-slices of a big buffer retains the whole backing array for the GC — clone to release it.",
         "A same-cap or overlapping-cap sibling slice can be corrupted by an in-cap append; s[i:j:j] prevents this."
+      ],
+      "walkthrough": [
+        {
+          "title": "Allocate backing array",
+          "caption": "make builds a header {ptr, len=5, cap=8} pointing at an 8-element backing array whose first five slots are then filled 0..4.",
+          "focus": [
+            "backing := make([]int, 5, 8)",
+            "backing[i] = i"
+          ],
+          "state": [
+            {
+              "k": "backing len",
+              "v": "5"
+            },
+            {
+              "k": "backing cap",
+              "v": "8"
+            },
+            {
+              "k": "backing",
+              "v": "[0 1 2 3 4]"
+            }
+          ]
+        },
+        {
+          "title": "Three-index reslice",
+          "caption": "view shares backing's array starting at index 1; the third index 4 caps its capacity, so len=hi-lo=2 and cap=max-lo=3.",
+          "focus": [
+            "view := backing[1:3:4]"
+          ],
+          "state": [
+            {
+              "k": "view len",
+              "v": "2"
+            },
+            {
+              "k": "view cap",
+              "v": "3"
+            },
+            {
+              "k": "view",
+              "v": "[1 2]"
+            },
+            {
+              "k": "aliases backing",
+              "v": "yes"
+            }
+          ]
+        },
+        {
+          "title": "Confirm len and cap",
+          "caption": "Printf reports len=2 cap=3, showing the three-index slice deliberately restricted capacity below what the backing array could otherwise offer.",
+          "focus": [
+            "fmt.Printf(\"view len=%d cap=%d\\n\", len(view), cap(view))"
+          ],
+          "state": [
+            {
+              "k": "view len",
+              "v": "2"
+            },
+            {
+              "k": "view cap",
+              "v": "3"
+            }
+          ]
+        },
+        {
+          "title": "In-cap append mutates backing",
+          "caption": "append fits within cap (len 2 < 3) so it writes 99 into the shared backing slot at index 3 in place, no reallocation.",
+          "focus": [
+            "view = append(view, 99)",
+            "fmt.Println(\"backing after in-cap append:\", backing)"
+          ],
+          "state": [
+            {
+              "k": "view len",
+              "v": "3"
+            },
+            {
+              "k": "view cap",
+              "v": "3"
+            },
+            {
+              "k": "view",
+              "v": "[1 2 99]"
+            },
+            {
+              "k": "backing",
+              "v": "[0 1 2 99 4]"
+            }
+          ]
+        },
+        {
+          "title": "Over-cap append reallocates",
+          "caption": "Now len==cap==3, so append allocates a fresh larger array, copies view's elements into it, and rebinds view — detaching it from backing.",
+          "focus": [
+            "view = append(view, 100)",
+            "view[0] = -1"
+          ],
+          "state": [
+            {
+              "k": "view len",
+              "v": "4"
+            },
+            {
+              "k": "view cap",
+              "v": "6"
+            },
+            {
+              "k": "view",
+              "v": "[-1 2 99 100]"
+            },
+            {
+              "k": "aliases backing",
+              "v": "no"
+            }
+          ]
+        },
+        {
+          "title": "Backing stays untouched",
+          "caption": "Because view now points at a new array, writing view[0]=-1 and appending 100 leave backing frozen at [0 1 2 99 4].",
+          "focus": [
+            "fmt.Println(\"backing after realloc append:\", backing)",
+            "fmt.Println(\"view detached:\", view)"
+          ],
+          "state": [
+            {
+              "k": "backing",
+              "v": "[0 1 2 99 4]"
+            },
+            {
+              "k": "view detached",
+              "v": "[-1 2 99 100]"
+            }
+          ]
+        },
+        {
+          "title": "Growth loop",
+          "caption": "Starting from an empty non-nil slice, each append that finds len==cap triggers a reallocation to a larger backing array, counted via cap changes.",
+          "focus": [
+            "s := []int{}",
+            "s = append(s, i)",
+            "if cap(s) != prev {"
+          ],
+          "state": [
+            {
+              "k": "iterations",
+              "v": "2048"
+            },
+            {
+              "k": "start cap",
+              "v": "0"
+            },
+            {
+              "k": "grows when",
+              "v": "len==cap"
+            }
+          ]
+        },
+        {
+          "title": "Amortized reallocations",
+          "caption": "Over 2048 appends the capacity roughly doubles (then grows more gently past the ~256/512 threshold), yielding only 12 reallocations — amortized O(1) per append.",
+          "focus": [
+            "fmt.Println(\"reallocations for 2048 appends:\", growths)"
+          ],
+          "state": [
+            {
+              "k": "growths",
+              "v": "12"
+            },
+            {
+              "k": "final len",
+              "v": "2048"
+            },
+            {
+              "k": "amortized cost",
+              "v": "O(1)"
+            }
+          ]
+        }
       ]
     },
     {
@@ -330,6 +510,170 @@ export const slicesMaps: GoTopic = {
         "copy(dst, src) copies min(len(dst),len(src)) elements, never grows dst, and returns the count copied; it is the idiomatic way to detach.",
         "nil and empty slices both have len 0 and range safely, but nil==nil is true while empty==nil is false (and they marshal differently in JSON).",
         "For public APIs prefer allocate-and-copy semantics; expose destructive in-place variants only under distinct, well-documented names."
+      ],
+      "walkthrough": [
+        {
+          "title": "Allocate backing array",
+          "caption": "make builds a 5-element backing array but exposes only a length-3 slice header, leaving indices 3 and 4 as spare capacity.",
+          "focus": [
+            "base := make([]int, 3, 5)"
+          ],
+          "state": [
+            {
+              "k": "base",
+              "v": "[0 0 0]"
+            },
+            {
+              "k": "len(base)",
+              "v": "3"
+            },
+            {
+              "k": "cap(base)",
+              "v": "5"
+            },
+            {
+              "k": "backing",
+              "v": "[0 0 0 _ _]"
+            }
+          ]
+        },
+        {
+          "title": "Fill base values",
+          "caption": "The three visible slots are written, so the shared backing array now holds 1, 2, 3 in its first three positions.",
+          "focus": [
+            "base[0], base[1], base[2] = 1, 2, 3"
+          ],
+          "state": [
+            {
+              "k": "base",
+              "v": "[1 2 3]"
+            },
+            {
+              "k": "backing",
+              "v": "[1 2 3 _ _]"
+            }
+          ]
+        },
+        {
+          "title": "Create aliasing view",
+          "caption": "view is a new header pointing at the SAME backing array, spanning only the first two elements but inheriting the remaining capacity.",
+          "focus": [
+            "view := base[0:2]"
+          ],
+          "state": [
+            {
+              "k": "view",
+              "v": "[1 2]"
+            },
+            {
+              "k": "len(view)",
+              "v": "2"
+            },
+            {
+              "k": "cap(view)",
+              "v": "5"
+            },
+            {
+              "k": "aliases",
+              "v": "base backing"
+            }
+          ]
+        },
+        {
+          "title": "append clobbers in place",
+          "caption": "Because cap(view)>len(view), append reuses the backing array and writes 99 into slot index 2 — the very element base[2] still points at.",
+          "focus": [
+            "view = append(view, 99)"
+          ],
+          "state": [
+            {
+              "k": "view",
+              "v": "[1 2 99]"
+            },
+            {
+              "k": "base",
+              "v": "[1 2 99]"
+            },
+            {
+              "k": "backing",
+              "v": "[1 2 99 _ _]"
+            },
+            {
+              "k": "reallocated?",
+              "v": "no"
+            }
+          ]
+        },
+        {
+          "title": "Detach via copy",
+          "caption": "make plus copy produces detached with its own independent backing array, so mutating detached[0] to -1 leaves base untouched.",
+          "focus": [
+            "copy(detached, base)",
+            "detached[0] = -1"
+          ],
+          "state": [
+            {
+              "k": "detached",
+              "v": "[-1 2 99]"
+            },
+            {
+              "k": "base",
+              "v": "[1 2 99]"
+            },
+            {
+              "k": "backing",
+              "v": "separate"
+            }
+          ]
+        },
+        {
+          "title": "Full-slice expression caps",
+          "caption": "base[0:2:2] sets cap==len, so the next append has no spare room and must allocate a fresh backing array instead of clobbering base.",
+          "focus": [
+            "safe := base[0:2:2]",
+            "safe = append(safe, 7)"
+          ],
+          "state": [
+            {
+              "k": "cap(safe)",
+              "v": "2 (before append)"
+            },
+            {
+              "k": "safe",
+              "v": "[1 2 7]"
+            },
+            {
+              "k": "base",
+              "v": "[1 2 99]"
+            },
+            {
+              "k": "reallocated?",
+              "v": "yes"
+            }
+          ]
+        },
+        {
+          "title": "nil vs empty slice",
+          "caption": "A nil slice and an empty literal both have len 0 and are range-safe, but only the nil one compares equal to nil because it carries no backing pointer.",
+          "focus": [
+            "var nilSlice []int",
+            "emptySlice := []int{}"
+          ],
+          "state": [
+            {
+              "k": "nilSlice==nil",
+              "v": "true"
+            },
+            {
+              "k": "emptySlice==nil",
+              "v": "false"
+            },
+            {
+              "k": "len both",
+              "v": "0"
+            }
+          ]
+        }
       ]
     },
     {
@@ -502,6 +846,160 @@ export const slicesMaps: GoTopic = {
         "delete during range is safe and skips keys removed before they are reached; whether inserts appear is unspecified.",
         "In the traditional bucket implementation, growth triggers around load factor ~6.5 per bucket or on excessive overflow buckets (same-size growth); a full bucket alone just adds an overflow bucket.",
         "Unsynchronized concurrent access can trigger an unrecoverable runtime fatal ('concurrent map writes'), not a catchable panic; use a mutex or sync.Map."
+      ],
+      "walkthrough": [
+        {
+          "title": "Build the map",
+          "caption": "A map from string to *Counter is created with two entries; each value is a pointer to a heap-allocated Counter.",
+          "focus": [
+            "m := map[string]*Counter{",
+            "\"b\": {Hits: 3},"
+          ],
+          "state": [
+            {
+              "k": "m[\"a\"].Hits",
+              "v": "1"
+            },
+            {
+              "k": "m[\"b\"].Hits",
+              "v": "3"
+            },
+            {
+              "k": "len(m)",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "Mutate through pointer",
+          "caption": "m[\"a\"] returns the pointer value, and .Hits++ mutates the pointed-to Counter in place — legal because we never take the address of the map element itself.",
+          "focus": [
+            "m[\"a\"].Hits++"
+          ],
+          "state": [
+            {
+              "k": "m[\"a\"].Hits",
+              "v": "2"
+            },
+            {
+              "k": "m[\"b\"].Hits",
+              "v": "3"
+            }
+          ]
+        },
+        {
+          "title": "Addressability rule",
+          "caption": "You may call a method or access a field on m[k], but &m[k] is a compile error because map elements are not addressable (the backing slot can move when the map grows).",
+          "focus": [
+            "because map elements are not addressable."
+          ],
+          "state": [
+            {
+              "k": "&m[\"a\"]",
+              "v": "compile error"
+            },
+            {
+              "k": "m[\"a\"].Hits++",
+              "v": "ok (ptr value)"
+            }
+          ]
+        },
+        {
+          "title": "Range in random order",
+          "caption": "The range begins at a randomized bucket and offset chosen per-loop, so key visitation order is nondeterministic across runs.",
+          "focus": [
+            "for k, v := range m {"
+          ],
+          "state": [
+            {
+              "k": "iteration order",
+              "v": "randomized"
+            },
+            {
+              "k": "len(m)",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "Delete during range",
+          "caption": "When a visited entry has Hits > 2 it is deleted mid-iteration; deleting the current or a not-yet-reached key during range is well-defined and safe.",
+          "focus": [
+            "if v.Hits > 2 {",
+            "delete(m, k)"
+          ],
+          "state": [
+            {
+              "k": "deletes \"b\"",
+              "v": "Hits 3 > 2"
+            },
+            {
+              "k": "\"a\" kept",
+              "v": "Hits 2"
+            },
+            {
+              "k": "len(m) after",
+              "v": "1"
+            }
+          ]
+        },
+        {
+          "title": "Read from nil map",
+          "caption": "nilMap is a nil map; indexing a missing key on it returns the int zero value 0 and never panics (only writes to a nil map panic).",
+          "focus": [
+            "var nilMap map[string]int",
+            "nilMap[\"missing\"]"
+          ],
+          "state": [
+            {
+              "k": "nilMap",
+              "v": "nil"
+            },
+            {
+              "k": "nilMap[\"missing\"]",
+              "v": "0"
+            },
+            {
+              "k": "prints",
+              "v": "nil read: 0"
+            }
+          ]
+        },
+        {
+          "title": "Sum remaining values",
+          "caption": "A fresh range (again randomized) walks the surviving entry; only \"a\" remains, so total accumulates its Hits value of 2.",
+          "focus": [
+            "for _, v := range m {",
+            "total += v.Hits"
+          ],
+          "state": [
+            {
+              "k": "len(m)",
+              "v": "1"
+            },
+            {
+              "k": "total",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "Print total",
+          "caption": "The final total 2 is printed, reflecting the mutated \"a\" entry after \"b\" was deleted during iteration.",
+          "focus": [
+            "fmt.Println(\"total:\", total)"
+          ],
+          "state": [
+            {
+              "k": "total",
+              "v": "2"
+            },
+            {
+              "k": "prints",
+              "v": "total: 2"
+            }
+          ]
+        }
       ]
     },
     {
@@ -656,6 +1154,178 @@ export const slicesMaps: GoTopic = {
         "[]byte(s) and []rune(s) both copy because strings are immutable; []rune also decodes to int32.",
         "Compiler elides some string([]byte) allocations (map key, range) but not []byte(string).",
         "Slice strings on rune boundaries with utf8 helpers, not arbitrary byte offsets."
+      ],
+      "walkthrough": [
+        {
+          "title": "Declare the string",
+          "caption": "s is bound to a UTF-8 encoded string literal holding 9 characters that occupy 14 bytes.",
+          "focus": [
+            "s := \"héllo, 世界\""
+          ],
+          "state": [
+            {
+              "k": "s",
+              "v": "héllo, 世界"
+            },
+            {
+              "k": "type",
+              "v": "string (immutable)"
+            }
+          ]
+        },
+        {
+          "title": "len is bytes",
+          "caption": "len(s) returns the number of bytes in the encoding — 14 — because é is 2 bytes and 世/界 are 3 bytes each.",
+          "focus": [
+            "len(s)"
+          ],
+          "state": [
+            {
+              "k": "len(s)",
+              "v": "14"
+            },
+            {
+              "k": "h/é/l/l/o/,/·",
+              "v": "1+2+1+1+1+1+1"
+            },
+            {
+              "k": "世/界",
+              "v": "3+3"
+            }
+          ]
+        },
+        {
+          "title": "Count actual runes",
+          "caption": "utf8.RuneCountInString decodes the bytes and reports 9 — the true number of Unicode code points, not bytes.",
+          "focus": [
+            "utf8.RuneCountInString(s)"
+          ],
+          "state": [
+            {
+              "k": "RuneCount",
+              "v": "9"
+            },
+            {
+              "k": "len(s)",
+              "v": "14"
+            },
+            {
+              "k": "len != runes",
+              "v": "true"
+            }
+          ]
+        },
+        {
+          "title": "Indexing yields a byte",
+          "caption": "s[1] reads a single byte (195, the 0xC3 lead byte of é), NOT the rune é — indexing a string is always byte-addressed.",
+          "focus": [
+            "s[1] = %d (byte, not rune)"
+          ],
+          "state": [
+            {
+              "k": "s[1]",
+              "v": "195 (0xC3)"
+            },
+            {
+              "k": "is é?",
+              "v": "no — lead byte only"
+            },
+            {
+              "k": "type of s[1]",
+              "v": "byte"
+            }
+          ]
+        },
+        {
+          "title": "range decodes runes",
+          "caption": "range over a string decodes UTF-8 on the fly, giving the starting byte index i and the decoded rune r for each code point.",
+          "focus": [
+            "for i, r := range s"
+          ],
+          "state": [
+            {
+              "k": "i (byte index)",
+              "v": "0,1,3,4,5,6,7,8,11"
+            },
+            {
+              "k": "i jumps",
+              "v": "1→3 (é), 8→11 (世)"
+            },
+            {
+              "k": "r",
+              "v": "rune (int32)"
+            }
+          ]
+        },
+        {
+          "title": "Gotcha: index != rune order",
+          "caption": "The index i is a byte offset, so it skips ahead by the encoded width (RuneLen): é occupies bytes 1-2, 世 occupies 8-10, hence 界 starts at 11.",
+          "focus": [
+            "utf8.RuneLen(r)"
+          ],
+          "state": [
+            {
+              "k": "é width",
+              "v": "2"
+            },
+            {
+              "k": "世/界 width",
+              "v": "3"
+            },
+            {
+              "k": "世 at index",
+              "v": "8"
+            },
+            {
+              "k": "界 at index",
+              "v": "11"
+            }
+          ]
+        },
+        {
+          "title": "[]byte copies, then mutate",
+          "caption": "[]byte(s) allocates a fresh mutable copy of the bytes, so b[0]='H' changes the copy while the original immutable string s is untouched.",
+          "focus": [
+            "b := []byte(s)",
+            "b[0] = 'H'"
+          ],
+          "state": [
+            {
+              "k": "b (copy)",
+              "v": "Héllo, 世界"
+            },
+            {
+              "k": "s (original)",
+              "v": "héllo, 世界"
+            },
+            {
+              "k": "aliased?",
+              "v": "no — copied"
+            }
+          ]
+        },
+        {
+          "title": "[]rune gives code points",
+          "caption": "[]rune(s) decodes into a slice of 9 runes, so len(rs) equals the rune count and rs[0] is the first whole code point 'h', printed via string().",
+          "focus": [
+            "rs := []rune(s)",
+            "string(rs[0])"
+          ],
+          "state": [
+            {
+              "k": "len(rs)",
+              "v": "9"
+            },
+            {
+              "k": "rs[0]",
+              "v": "'h' (U+0068)"
+            },
+            {
+              "k": "len(rs) == RuneCount",
+              "v": "true"
+            }
+          ]
+        }
       ]
     }
   ]

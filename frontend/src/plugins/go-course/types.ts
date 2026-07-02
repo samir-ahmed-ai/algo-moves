@@ -6,6 +6,24 @@ export interface GoDesignQuestion {
   answer: string;
 }
 
+/** A key/value chip shown in the animation side rail. */
+export interface GoStateChip {
+  k: string;
+  v: string;
+}
+
+/**
+ * One step of a concept's animated code walkthrough. `focus` holds exact
+ * substrings of code lines to highlight for the step; `state` is the evolving
+ * program/mental state shown alongside.
+ */
+export interface GoTraceStep {
+  title: string;
+  caption: string;
+  focus: string[];
+  state: GoStateChip[];
+}
+
 /**
  * One concept card in the hand-authored "Go — Senior Developer" course. Each
  * concept becomes a ProblemPlugin (see ./factory.tsx) reusing the prep Scene
@@ -38,6 +56,8 @@ export interface GoConcept {
   design: GoDesignQuestion;
   /** Senior takeaways shown in the inspector. */
   keyPoints: string[];
+  /** Ordered animation steps tracing the code; omit to fall back to the Scene reveal. */
+  walkthrough?: GoTraceStep[];
 }
 
 /** A course topic grouping several concepts (Concurrency, Generics, …). */

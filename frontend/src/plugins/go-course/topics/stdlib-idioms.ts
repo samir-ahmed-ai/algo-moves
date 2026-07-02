@@ -158,7 +158,165 @@ export const stdlibIdioms: GoTopic = {
       "design": {
         "prompt": "You are designing a streaming upload pipeline: bytes arrive over HTTP, must be (1) size-limited to prevent abuse, (2) checksummed with SHA-256, (3) gzip-compressed, and (4) written to object storage — all without buffering the whole payload in memory. How do you compose io.Reader/io.Writer, where do you put each concern, and what are the failure and resource pitfalls?",
         "answer": "Compose small interfaces as a chain rather than staging the payload. Wrap the request body first in io.LimitReader (or http.MaxBytesReader, which also signals the client) to bound memory and reject oversize uploads early. For the checksum, use io.TeeReader(limited, sha256Hasher) so bytes are digested as they flow, or alternatively io.MultiWriter on the write side; pick the side that keeps the hash aligned with exactly the bytes you persist. Compression belongs on the write path: pipe into a gzip.Writer that wraps the storage writer, and drive it with io.Copy(gzipWriter, teeReader). The key recommendation is to run the whole thing through a single io.Copy so backpressure is preserved and only a small buffer (typically 32 KB) is resident. Pitfalls: you must Close the gzip.Writer (not just the storage writer) to flush its trailer, and do it before checking the final error; io.Copy returns nil on EOF so do not treat EOF as failure; a MultiWriter aborts on the first sink error, so a slow or failing storage writer stops hashing too; and LimitReader returning EOF at the cap looks identical to a genuine short body, so validate the byte count explicitly. Order matters: hash the plaintext before gzip if you want to verify content identity, or the compressed bytes if you want to verify what landed in storage, and state which invariant you need. Use bufio only where syscall counts matter (many tiny writes to the network or disk), remembering to Flush it in the correct order relative to gzip.Close."
-      }
+      },
+      "walkthrough": [
+        {
+          "title": "Build the reader chain",
+          "caption": "A string source is wrapped by countingReader so every byte read from src also increments a counter, forming the base of a lazy pipeline that moves nothing yet.",
+          "focus": [
+            "src := strings.NewReader(\"the quick brown fox\\njumps over the lazy dog\\n\")",
+            "cr := &countingReader{r: src}"
+          ],
+          "state": [
+            {
+              "k": "cr.n",
+              "v": "0"
+            },
+            {
+              "k": "src bytes",
+              "v": "44 unread"
+            },
+            {
+              "k": "data moved",
+              "v": "none (lazy)"
+            }
+          ]
+        },
+        {
+          "title": "Tee reads into a hash",
+          "caption": "TeeReader wraps cr so that whatever is Read from tee is simultaneously written into the sha256 hash, letting us digest the stream while it flows rather than after.",
+          "focus": [
+            "h := sha256.New()",
+            "tee := io.TeeReader(cr, h)"
+          ],
+          "state": [
+            {
+              "k": "hash",
+              "v": "empty"
+            },
+            {
+              "k": "reader chain",
+              "v": "src->cr->tee"
+            },
+            {
+              "k": "cr.n",
+              "v": "0"
+            }
+          ]
+        },
+        {
+          "title": "Fan out the writer side",
+          "caption": "MultiWriter bundles buf and mirror into one dst so a single Write call duplicates the bytes into both buffers at once.",
+          "focus": [
+            "dst := io.MultiWriter(&buf, mirror)"
+          ],
+          "state": [
+            {
+              "k": "buf.Len",
+              "v": "0"
+            },
+            {
+              "k": "mirror.Len",
+              "v": "0"
+            },
+            {
+              "k": "sinks",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "Copy pumps the pipeline",
+          "caption": "io.Copy loops calling tee.Read into an internal 32KB buffer and writing to dst, so bytes stream src->cr(count)->tee(hash)->dst(buf+mirror) without ever buffering the whole input separately.",
+          "focus": [
+            "if _, err := io.Copy(dst, tee); err != nil {"
+          ],
+          "state": [
+            {
+              "k": "cr.n",
+              "v": "44"
+            },
+            {
+              "k": "hash",
+              "v": "digesting"
+            },
+            {
+              "k": "buf.Len",
+              "v": "44"
+            },
+            {
+              "k": "mirror.Len",
+              "v": "44"
+            }
+          ]
+        },
+        {
+          "title": "How EOF terminates",
+          "caption": "strings.Reader returns the final bytes with a nil error, then returns n=0 with io.EOF on the next call; countingReader adds each n to the count and passes the error through unchanged, and io.Copy treats that io.EOF as a clean stop (not an error).",
+          "focus": [
+            "n, err := c.r.Read(p)",
+            "c.n += int64(n)",
+            "return n, err"
+          ],
+          "state": [
+            {
+              "k": "final data Read",
+              "v": "n>0, err=nil"
+            },
+            {
+              "k": "next Read",
+              "v": "n=0, err=EOF"
+            },
+            {
+              "k": "cr.n",
+              "v": "44 (final)"
+            }
+          ]
+        },
+        {
+          "title": "Scan the captured bytes",
+          "caption": "bufio.Scanner reads buf line by line, splitting on '\\n', incrementing lines for each of the two lines it yields.",
+          "focus": [
+            "sc := bufio.NewScanner(&buf)",
+            "for sc.Scan() {"
+          ],
+          "state": [
+            {
+              "k": "lines",
+              "v": "2"
+            },
+            {
+              "k": "buf drained",
+              "v": "yes"
+            },
+            {
+              "k": "sc.Err",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "Report the results",
+          "caption": "With the pipeline fully drained, it prints the counted byte total, the line count, and the first 4 bytes of the streamed sha256 digest.",
+          "focus": [
+            "fmt.Printf(\"bytes=%d lines=%d sum=%x\\n\", cr.n, lines, h.Sum(nil)[:4])"
+          ],
+          "state": [
+            {
+              "k": "bytes",
+              "v": "44"
+            },
+            {
+              "k": "lines",
+              "v": "2"
+            },
+            {
+              "k": "sum",
+              "v": "sha256[:4]"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "go-std-json",
@@ -330,6 +488,142 @@ export const stdlibIdioms: GoTopic = {
         "Anonymous embedded structs without a json tag are flattened; adding a tag makes them a nested object.",
         "json.RawMessage defers parsing and preserves exact bytes — ideal for discriminated unions and opaque passthrough.",
         "Unknown JSON keys are ignored by default; opt into strictness with Decoder.DisallowUnknownFields()."
+      ],
+      "walkthrough": [
+        {
+          "title": "Construct the Event",
+          "caption": "An Event is built with an embedded Base (ID=7, Name unset), Kind=\"click\", and the unexported field tag set to \"ignored\".",
+          "focus": [
+            "e := Event{Base: Base{ID: 7}, Kind: \"click\", tag: \"ignored\"}"
+          ],
+          "state": [
+            {
+              "k": "e.ID",
+              "v": "7"
+            },
+            {
+              "k": "e.Name",
+              "v": "\"\" (zero)"
+            },
+            {
+              "k": "e.Kind",
+              "v": "\"click\""
+            },
+            {
+              "k": "e.tag",
+              "v": "\"ignored\""
+            }
+          ]
+        },
+        {
+          "title": "Marshal walks exported fields",
+          "caption": "json.Marshal uses reflection: Base is embedded so its fields flatten to top level, Name has omitempty and is the zero \"\" so it is dropped, and unexported tag is skipped entirely.",
+          "focus": [
+            "out, _ := json.Marshal(e)"
+          ],
+          "state": [
+            {
+              "k": "id",
+              "v": "7 (Base flattened)"
+            },
+            {
+              "k": "name",
+              "v": "omitted (zero + omitempty)"
+            },
+            {
+              "k": "tag",
+              "v": "skipped (unexported)"
+            },
+            {
+              "k": "data",
+              "v": "null (nil RawMessage)"
+            }
+          ]
+        },
+        {
+          "title": "Print the JSON output",
+          "caption": "The result is {\"id\":7,\"kind\":\"click\",\"data\":null}: embedded fields promoted, name omitted, tag absent, and nil RawMessage encoded as null.",
+          "focus": [
+            "fmt.Println(string(out))"
+          ],
+          "state": [
+            {
+              "k": "stdout",
+              "v": "{\"id\":7,\"kind\":\"click\",\"data\":null}"
+            }
+          ]
+        },
+        {
+          "title": "Unmarshal into interface{}",
+          "caption": "With a nil interface{} target, json.Unmarshal chooses default Go types: JSON objects become map[string]interface{}, arrays become []interface{}, and all numbers become float64.",
+          "focus": [
+            "var v interface{}",
+            "json.Unmarshal([]byte(`{\"n\":42,\"xs\":[1,2]}`), &v)"
+          ],
+          "state": [
+            {
+              "k": "v dynamic type",
+              "v": "map[string]interface{}"
+            },
+            {
+              "k": "m[\"n\"]",
+              "v": "float64(42)"
+            },
+            {
+              "k": "m[\"xs\"]",
+              "v": "[]interface{}{float64(1),float64(2)}"
+            }
+          ]
+        },
+        {
+          "title": "Type assertion + %T gotcha",
+          "caption": "The assertion to map[string]interface{} succeeds, and %T reveals the number decoded as float64 (not int) and the array as []interface{}, the classic interface{} default.",
+          "focus": [
+            "m := v.(map[string]interface{})",
+            "fmt.Printf(\"%T %T\\n\", m[\"n\"], m[\"xs\"])"
+          ],
+          "state": [
+            {
+              "k": "stdout",
+              "v": "float64 []interface {}"
+            }
+          ]
+        },
+        {
+          "title": "Unmarshal into typed struct",
+          "caption": "Decoding into a concrete Event matches JSON keys to tags case-insensitively, fills the promoted embedded ID, and stores the data object verbatim without parsing because Data is json.RawMessage.",
+          "focus": [
+            "var dec Event",
+            "json.Unmarshal([]byte(`{\"id\":9,\"kind\":\"k\",\"data\":{\"raw\":true}}`), &dec)"
+          ],
+          "state": [
+            {
+              "k": "dec.ID",
+              "v": "9 (into embedded Base)"
+            },
+            {
+              "k": "dec.Kind",
+              "v": "\"k\""
+            },
+            {
+              "k": "dec.Data",
+              "v": "{\"raw\":true} (raw bytes, deferred)"
+            }
+          ]
+        },
+        {
+          "title": "Print decoded fields",
+          "caption": "Output is \"9 k {\\\"raw\\\":true}\": the RawMessage held the nested JSON as unparsed bytes, letting you defer or re-dispatch its parsing later.",
+          "focus": [
+            "fmt.Println(dec.ID, dec.Kind, string(dec.Data))"
+          ],
+          "state": [
+            {
+              "k": "stdout",
+              "v": "9 k {\"raw\":true}"
+            }
+          ]
+        }
       ]
     },
     {
@@ -484,6 +778,174 @@ export const stdlibIdioms: GoTopic = {
         "Ticker.Stop halts future ticks but never closes C, so you cannot range-until-closed on it; still defer Stop to stop ticks promptly.",
         "Since Go 1.23 timer channels are unbuffered (cap 0) and Stop/Reset guarantee no stale value survives, so the pre-1.23 drain-before-Reset guard is no longer needed and len/cap now return 0.",
         "Ticker coalesces missed ticks (fixed-rate); fixed-delay requires Reset-after-completion; Sleep-in-loop drifts by the job's own runtime."
+      ],
+      "walkthrough": [
+        {
+          "title": "Capture monotonic start",
+          "caption": "time.Now() records both a wall-clock time and a monotonic reading, and start keeps both so later elapsed math ignores wall-clock jumps.",
+          "focus": [
+            "start := time.Now()"
+          ],
+          "state": [
+            {
+              "k": "start",
+              "v": "has monotonic"
+            },
+            {
+              "k": "interval",
+              "v": "40ms"
+            }
+          ]
+        },
+        {
+          "title": "Create the ticker",
+          "caption": "NewTicker starts a ticker that delivers a value on ticker.C roughly every 40ms; defer ensures Stop runs on return to release its resources.",
+          "focus": [
+            "ticker := time.NewTicker(interval)",
+            "defer ticker.Stop()"
+          ],
+          "state": [
+            {
+              "k": "ticker.C",
+              "v": "cap 1, empty"
+            },
+            {
+              "k": "period",
+              "v": "40ms"
+            },
+            {
+              "k": "ctx budget",
+              "v": "120ms"
+            }
+          ]
+        },
+        {
+          "title": "Select blocks on two channels",
+          "caption": "The loop parks in select, simultaneously waiting for ctx cancellation and for the next tick, resuming on whichever fires first.",
+          "focus": [
+            "select {",
+            "case <-ctx.Done():"
+          ],
+          "state": [
+            {
+              "k": "blocked on",
+              "v": "ctx.Done, ticker.C"
+            },
+            {
+              "k": "ticks",
+              "v": "0"
+            },
+            {
+              "k": "elapsed",
+              "v": "~0"
+            }
+          ]
+        },
+        {
+          "title": "First tick fires",
+          "caption": "At ~40ms the ticker sends on C, select takes that case, and work is invoked with time.Since(start) computed from the monotonic reading.",
+          "focus": [
+            "case <-ticker.C:",
+            "work(time.Since(start))"
+          ],
+          "state": [
+            {
+              "k": "ticks",
+              "v": "1"
+            },
+            {
+              "k": "elapsed",
+              "v": "~40ms"
+            },
+            {
+              "k": "source",
+              "v": "monotonic"
+            }
+          ]
+        },
+        {
+          "title": "Monotonic immunity",
+          "caption": "time.Since subtracts using the monotonic component, so even an NTP or DST wall-clock jump between start and now cannot corrupt the elapsed value.",
+          "focus": [
+            "work(time.Since(start))",
+            "elapsed.Round(10*time.Millisecond)"
+          ],
+          "state": [
+            {
+              "k": "ticks",
+              "v": "2 (~80ms)"
+            },
+            {
+              "k": "wall jump",
+              "v": "ignored"
+            },
+            {
+              "k": "printed",
+              "v": "~40ms, ~80ms"
+            }
+          ]
+        },
+        {
+          "title": "Context times out",
+          "caption": "Around 120ms ctx.Done() closes; select takes that case and poll returns. Whether a third tick prints first is a race, since that tick and the deadline are both ready near 120ms.",
+          "focus": [
+            "case <-ctx.Done():",
+            "return"
+          ],
+          "state": [
+            {
+              "k": "ticks",
+              "v": "~2-3"
+            },
+            {
+              "k": "ctx",
+              "v": "deadline exceeded"
+            }
+          ]
+        },
+        {
+          "title": "Deferred Stop under 1.23+",
+          "caption": "The deferred ticker.Stop() runs on return; since Go 1.23 the ticker is GC-eligible even if unstopped, and Stop guarantees no stale tick is delivered after it returns.",
+          "focus": [
+            "defer ticker.Stop()"
+          ],
+          "state": [
+            {
+              "k": "ticker",
+              "v": "stopped"
+            },
+            {
+              "k": "ticker.C",
+              "v": "not closed"
+            },
+            {
+              "k": "GC",
+              "v": "reclaimable"
+            }
+          ]
+        },
+        {
+          "title": "Round(0) strips monotonic",
+          "caption": "time.Now().Round(0) removes the monotonic reading, yielding a pure wall-clock Time suitable for stable marshaling and equality; t.Equal(t) is trivially true.",
+          "focus": [
+            "t := time.Now().Round(0)",
+            "t.Equal(t)"
+          ],
+          "state": [
+            {
+              "k": "t",
+              "v": "wall-clock only"
+            },
+            {
+              "k": "monotonic",
+              "v": "stripped"
+            },
+            {
+              "k": "t.Equal(t)",
+              "v": "true"
+            }
+          ]
+        }
       ]
     },
     {
@@ -656,6 +1118,172 @@ export const stdlibIdioms: GoTopic = {
         "Go 1.22's fresh loop variable only matters for closures capturing the variable; `defer f(v)` already captured v at defer time in every Go version.",
         "Open-coded defers are near-free in straight-line code; loop/dynamic defers fall back to runtime.deferproc and may allocate.",
         "Merge cleanup errors via `if cerr := c.Close(); cerr != nil && err == nil { err = cerr }` on a named return so Close/Commit failures are not dropped."
+      ],
+      "walkthrough": [
+        {
+          "title": "Loop enters, call process(\"main\",\"ok\")",
+          "caption": "main ranges over names and calls process with b=\"ok\" first; execution jumps into process with named return err zero-valued to nil.",
+          "focus": [
+            "for _, n := range names {",
+            "if err := process(\"main\", n); err != nil {"
+          ],
+          "state": [
+            {
+              "k": "n",
+              "v": "\"ok\""
+            },
+            {
+              "k": "err (named)",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "Open ra, register defer A",
+          "caption": "open(\"main\") succeeds so ra points to a live resource, then the first deferred closure is pushed onto process's defer stack (its body does not run yet).",
+          "focus": [
+            "ra, err := open(a)",
+            "defer func() {",
+            "if cerr := ra.Close(); cerr != nil && err == nil {"
+          ],
+          "state": [
+            {
+              "k": "ra.name",
+              "v": "\"main\""
+            },
+            {
+              "k": "defer stack",
+              "v": "[A]"
+            },
+            {
+              "k": "err",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "Open rb, register defer B",
+          "caption": "open(\"ok\") succeeds and a second closure is pushed above A; deferred calls run LIFO so B will fire before A on return.",
+          "focus": [
+            "rb, err := open(b)",
+            "defer func() {",
+            "if cerr := rb.Close(); cerr != nil && err == nil {"
+          ],
+          "state": [
+            {
+              "k": "rb.name",
+              "v": "\"ok\""
+            },
+            {
+              "k": "defer stack",
+              "v": "[A, B]"
+            },
+            {
+              "k": "order",
+              "v": "B then A"
+            }
+          ]
+        },
+        {
+          "title": "Return nil triggers LIFO unwind",
+          "caption": "the body finishes and returns nil, then B runs first closing rb (\"ok\") and A runs second closing ra (\"main\"), both leaving named err as nil.",
+          "focus": [
+            "return nil",
+            "if cerr := rb.Close(); cerr != nil && err == nil {",
+            "if cerr := ra.Close(); cerr != nil && err == nil {"
+          ],
+          "state": [
+            {
+              "k": "closed order",
+              "v": "ok, main"
+            },
+            {
+              "k": "err returned",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "Second iteration: process(\"main\",\"bad\")",
+          "caption": "the loop calls process again with b=\"bad\", re-opening ra=\"main\" and rb=\"bad\" and re-registering both defers on a fresh stack.",
+          "focus": [
+            "defer func() {",
+            "if cerr := ra.Close(); cerr != nil && err == nil {",
+            "rb, err := open(b)"
+          ],
+          "state": [
+            {
+              "k": "ra.name",
+              "v": "\"main\""
+            },
+            {
+              "k": "rb.name",
+              "v": "\"bad\""
+            },
+            {
+              "k": "defer stack",
+              "v": "[A, B]"
+            },
+            {
+              "k": "err",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "GOTCHA: Close error rewrites named return",
+          "caption": "return nil sets err=nil, but deferred B calls rb.Close() which returns a flush error; because err==nil the closure overwrites the named return with cerr instead of swallowing it.",
+          "focus": [
+            "return nil",
+            "return fmt.Errorf(\"close %s: flush failed\", r.name)",
+            "err = cerr"
+          ],
+          "state": [
+            {
+              "k": "return value pre-defer",
+              "v": "nil"
+            },
+            {
+              "k": "cerr",
+              "v": "\"close bad: flush failed\""
+            },
+            {
+              "k": "err after B",
+              "v": "cerr"
+            }
+          ]
+        },
+        {
+          "title": "Defer A guarded by err==nil",
+          "caption": "A then closes ra (\"main\") successfully, but since err is now non-nil the guard skips reassignment so the earlier flush error is preserved and process returns it.",
+          "focus": [
+            "if cerr := ra.Close(); cerr != nil && err == nil {",
+            "fmt.Println(\"closed\", r.name)"
+          ],
+          "state": [
+            {
+              "k": "ra Close",
+              "v": "nil"
+            },
+            {
+              "k": "err preserved",
+              "v": "\"close bad: flush failed\""
+            }
+          ]
+        },
+        {
+          "title": "main prints the surfaced error",
+          "caption": "back in main the non-nil err from the \"bad\" iteration is printed, proving the deferred close surfaced a failure a naked return would have hidden.",
+          "focus": [
+            "fmt.Println(\"error:\", err)"
+          ],
+          "state": [
+            {
+              "k": "output",
+              "v": "error: close bad: flush failed"
+            }
+          ]
+        }
       ]
     }
   ]

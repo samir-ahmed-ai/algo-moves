@@ -176,7 +176,170 @@ export const interfacesTypes: GoTopic = {
       "design": {
         "prompt": "You maintain a hot data-processing pipeline where a core transform is invoked through a single-method interface millions of times per second, and profiling shows the interface dispatch is a measurable cost. How do you reason about whether and how to remove the abstraction, and what would you recommend?",
         "answer": "First quantify: an interface call is an indirect call through the itab's fun array plus loss of inlining and the escape/boxing that often accompanies interface conversions; the boxing allocation is frequently a bigger cost than the indirection itself, so I'd check whether values are escaping to the heap on each conversion before touching dispatch. If there are only a few concrete implementations, the cleanest fix is to make the type a generic type parameter (func Process[T Transformer](...)), which monomorphizes and lets the compiler inline the concrete method and keep values on the stack, eliminating both the itab indirection and the boxing. If the set of types is truly dynamic, a type switch on the hot path can let the compiler devirtualize the common case (Go's devirtualization already does this for some monomorphic call sites) while keeping the interface fallback. I'd avoid premature de-abstraction: the win is real only when the call is genuinely hot and the body is tiny, since for larger method bodies the dispatch cost is noise. My recommendation is generics for a bounded implementation set (best speed with retained type safety), a type switch for a dynamic set with a dominant case, and leaving the interface alone otherwise, backed by before/after benchmarks and allocation counts, not intuition."
-      }
+      },
+      "walkthrough": [
+        {
+          "title": "Build the itab",
+          "caption": "Assigning a concrete Dog value to a Speaker builds/looks up an itab pairing the Dog type with the interface method set; s becomes two words (itab, data pointer). A Dog is larger than one word, so it is heap-boxed and the data word points to that copy.",
+          "focus": [
+            "var s Speaker = Dog{name: \"Rex\"}"
+          ],
+          "state": [
+            {
+              "k": "s.word0",
+              "v": "*itab(Speaker,Dog)"
+            },
+            {
+              "k": "s.word1",
+              "v": "&Dog{Rex} copy"
+            },
+            {
+              "k": "s == nil",
+              "v": "false"
+            }
+          ]
+        },
+        {
+          "title": "Dispatch via itab",
+          "caption": "Calling s.Speak() does a single indirect call: the runtime reads the Speak entry from the itab's function table and calls it with the data word as the receiver.",
+          "focus": [
+            "s.Speak()"
+          ],
+          "state": [
+            {
+              "k": "lookup",
+              "v": "itab.fun[0]"
+            },
+            {
+              "k": "receiver",
+              "v": "Dog{Rex} (value)"
+            },
+            {
+              "k": "prints",
+              "v": "Rex says woof"
+            }
+          ]
+        },
+        {
+          "title": "Empty interface = eface",
+          "caption": "any is the empty interface, so a holds an eface header of exactly two words: a *_type pointer instead of an itab, plus the data pointer.",
+          "focus": [
+            "var a any = Dog{name: \"Fido\"}"
+          ],
+          "state": [
+            {
+              "k": "a.type",
+              "v": "*_type(Dog)"
+            },
+            {
+              "k": "a.data",
+              "v": "&Dog{Fido}"
+            },
+            {
+              "k": "kind",
+              "v": "eface (no itab)"
+            }
+          ]
+        },
+        {
+          "title": "Reinterpret header",
+          "caption": "Casting &a through unsafe.Pointer to *eface aliases the same two machine words, letting the program inspect the raw interface header directly.",
+          "focus": [
+            "hdr := (*eface)(unsafe.Pointer(&a))"
+          ],
+          "state": [
+            {
+              "k": "hdr.typ",
+              "v": "== a.type"
+            },
+            {
+              "k": "hdr.data",
+              "v": "== a.data"
+            }
+          ]
+        },
+        {
+          "title": "Two-word width",
+          "caption": "sizeof(any) divided by pointer size confirms the interface value is two machine words wide, matching the (type, data) layout.",
+          "focus": [
+            "unsafe.Sizeof(a)/unsafe.Sizeof(uintptr(0))"
+          ],
+          "state": [
+            {
+              "k": "Sizeof(a)",
+              "v": "16 (amd64)"
+            },
+            {
+              "k": "words",
+              "v": "2"
+            },
+            {
+              "k": "prints",
+              "v": "eface words: 2"
+            }
+          ]
+        },
+        {
+          "title": "Data word non-nil",
+          "caption": "Because the Fido value was boxed into the interface, the data word points at a copy of the Dog, so hdr.data is non-nil.",
+          "focus": [
+            "hdr.data != nil"
+          ],
+          "state": [
+            {
+              "k": "hdr.data",
+              "v": "non-nil"
+            },
+            {
+              "k": "prints",
+              "v": "data non-nil: true"
+            }
+          ]
+        },
+        {
+          "title": "Typed nil enters",
+          "caption": "dp is a nil *Dog; passing it through dpToSpeaker converts (*Dog)(nil) into a Speaker, setting the itab word (Speaker,*Dog) while leaving the data word nil.",
+          "focus": [
+            "var dp *Dog",
+            "return d"
+          ],
+          "state": [
+            {
+              "k": "dp",
+              "v": "(*Dog)(nil)"
+            },
+            {
+              "k": "s2.itab",
+              "v": "*itab(Speaker,*Dog)"
+            },
+            {
+              "k": "s2.data",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "Typed-nil gotcha",
+          "caption": "s2 == nil is false: an interface equals nil only when BOTH words are nil, but s2's itab word is set, so the typed nil pointer makes the interface non-nil.",
+          "focus": [
+            "s2 == nil"
+          ],
+          "state": [
+            {
+              "k": "itab word",
+              "v": "set"
+            },
+            {
+              "k": "data word",
+              "v": "nil"
+            },
+            {
+              "k": "prints",
+              "v": "interface nil: false"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "go-iface-nil",
@@ -330,6 +493,158 @@ export const interfacesTypes: GoTopic = {
         "The classic symptom is a passed `if err != nil` guard followed by a nil-dereference panic in a pointer-receiver method.",
         "Only reflection (Kind + IsNil) can detect a typed nil at runtime; `== nil`, `%v`, and errors.Is do not.",
         "Prefer structuring code so success paths return the untyped nil; enforce with vet/nilaway rather than defensive reflection."
+      ],
+      "walkthrough": [
+        {
+          "title": "main starts",
+          "caption": "Execution enters main and calls validateBuggy with ok=true.",
+          "focus": [
+            "buggy := validateBuggy(true)"
+          ],
+          "state": [
+            {
+              "k": "ok",
+              "v": "true"
+            }
+          ]
+        },
+        {
+          "title": "declare typed nil pointer",
+          "caption": "Inside validateBuggy, p is declared as a *ValidationError and defaults to a nil pointer.",
+          "focus": [
+            "var p *ValidationError"
+          ],
+          "state": [
+            {
+              "k": "p type",
+              "v": "*ValidationError"
+            },
+            {
+              "k": "p value",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "skip the error branch",
+          "caption": "Because ok is true, !ok is false, so the assignment is skipped and p stays a nil pointer.",
+          "focus": [
+            "if !ok {",
+            "p = &ValidationError{Field: \"name\"}"
+          ],
+          "state": [
+            {
+              "k": "!ok",
+              "v": "false"
+            },
+            {
+              "k": "p value",
+              "v": "nil (unchanged)"
+            }
+          ]
+        },
+        {
+          "title": "nil pointer boxed into interface",
+          "caption": "Returning p converts the concrete *ValidationError into the error interface, filling the type slot even though the pointer value is nil.",
+          "focus": [
+            "return p"
+          ],
+          "state": [
+            {
+              "k": "iface type",
+              "v": "*ValidationError"
+            },
+            {
+              "k": "iface value",
+              "v": "nil"
+            },
+            {
+              "k": "iface header",
+              "v": "(type set, value nil)"
+            }
+          ]
+        },
+        {
+          "title": "the nil trap fires",
+          "caption": "buggy == nil is false because the interface holds a non-nil type descriptor even though the wrapped pointer is nil.",
+          "focus": [
+            "buggy == nil"
+          ],
+          "state": [
+            {
+              "k": "buggy",
+              "v": "(*ValidationError)(nil)"
+            },
+            {
+              "k": "buggy == nil",
+              "v": "false"
+            },
+            {
+              "k": "printed isNil",
+              "v": "false"
+            }
+          ]
+        },
+        {
+          "title": "the correct pattern",
+          "caption": "validateFixed returns the untyped nil literal on the success path, so no type descriptor is ever placed into the interface and fixed == nil is true.",
+          "focus": [
+            "return nil"
+          ],
+          "state": [
+            {
+              "k": "fixed type",
+              "v": "nil"
+            },
+            {
+              "k": "fixed value",
+              "v": "nil"
+            },
+            {
+              "k": "fixed == nil",
+              "v": "true"
+            }
+          ]
+        },
+        {
+          "title": "reproduce via explicit boxing",
+          "caption": "Assigning a nil *ValidationError into an error variable produces the same typed-nil interface as the buggy path.",
+          "focus": [
+            "var asIface error = raw"
+          ],
+          "state": [
+            {
+              "k": "raw",
+              "v": "(*ValidationError)(nil)"
+            },
+            {
+              "k": "asIface type",
+              "v": "*ValidationError"
+            },
+            {
+              "k": "asIface value",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "two comparisons contrasted",
+          "caption": "asIface == nil is false (untyped nil has no type), but asIface == error(raw) is true because both interfaces share the same type and nil value.",
+          "focus": [
+            "asIface == nil",
+            "asIface == error(raw)"
+          ],
+          "state": [
+            {
+              "k": "asIface == nil",
+              "v": "false"
+            },
+            {
+              "k": "asIface == error(raw)",
+              "v": "true"
+            }
+          ]
+        }
       ]
     },
     {
@@ -502,6 +817,162 @@ export const interfacesTypes: GoTopic = {
         "Embedding follows receiver rules: embedding T by value promotes T's pointer methods only into *S, not S.",
         "A typed nil pointer stored in an interface makes the interface non-nil (type word is set).",
         "Prefer a single consistent receiver kind per type; mixing them causes surprising interface-satisfaction and lock-copy bugs."
+      ],
+      "walkthrough": [
+        {
+          "title": "Define method set",
+          "caption": "Both Inc and Value are declared with a pointer receiver (*tally), so they belong to *tally's method set, not tally's.",
+          "focus": [
+            "func (t *tally) Inc()",
+            "func (t *tally) Value() int"
+          ],
+          "state": [
+            {
+              "k": "*tally methods",
+              "v": "Inc, Value"
+            },
+            {
+              "k": "tally methods",
+              "v": "(none)"
+            }
+          ]
+        },
+        {
+          "title": "Assign *tally to interface",
+          "caption": "A *tally is boxed into the Counter interface; because *tally's method set has both Inc and Value, this compiles.",
+          "focus": [
+            "var c Counter = &tally{}"
+          ],
+          "state": [
+            {
+              "k": "c dynamic type",
+              "v": "*tally"
+            },
+            {
+              "k": "tally.n",
+              "v": "0"
+            },
+            {
+              "k": "assign tally value?",
+              "v": "would NOT compile"
+            }
+          ]
+        },
+        {
+          "title": "Call Inc via interface",
+          "caption": "Two interface method dispatches call the pointer-receiver Inc, mutating the pointed-to tally.",
+          "focus": [
+            "c.Inc()",
+            "c.Inc()"
+          ],
+          "state": [
+            {
+              "k": "c dynamic type",
+              "v": "*tally"
+            },
+            {
+              "k": "tally.n",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "Read value via interface",
+          "caption": "Value() returns the mutated count through the interface; prints \"counter: 2\".",
+          "focus": [
+            "c.Value()"
+          ],
+          "state": [
+            {
+              "k": "tally.n",
+              "v": "2"
+            },
+            {
+              "k": "output",
+              "v": "counter: 2"
+            }
+          ]
+        },
+        {
+          "title": "Method call on map element",
+          "caption": "m[\"a\"] yields a *tally (a pointer value, not the map slot), so calling the pointer method Inc is legal and mutates the pointee.",
+          "focus": [
+            "m[\"a\"].Inc()"
+          ],
+          "state": [
+            {
+              "k": "m[\"a\"] type",
+              "v": "*tally"
+            },
+            {
+              "k": "(*m[\"a\"]).n",
+              "v": "1"
+            },
+            {
+              "k": "gotcha",
+              "v": "map value is a pointer; addressability not needed"
+            }
+          ]
+        },
+        {
+          "title": "Read from map",
+          "caption": "m[\"a\"].Value() dispatches through the pointer and prints \"map: 1\".",
+          "focus": [
+            "m[\"a\"].Value()"
+          ],
+          "state": [
+            {
+              "k": "(*m[\"a\"]).n",
+              "v": "1"
+            },
+            {
+              "k": "output",
+              "v": "map: 1"
+            }
+          ]
+        },
+        {
+          "title": "Value in addressable slice",
+          "caption": "s[0] is an addressable slice element, so Go auto-takes its address (&s[0]) to satisfy the pointer receiver Inc, mutating the element in place.",
+          "focus": [
+            "s[0].Inc()"
+          ],
+          "state": [
+            {
+              "k": "s[0] type",
+              "v": "tally (value)"
+            },
+            {
+              "k": "addressable",
+              "v": "yes -> &s[0] taken"
+            },
+            {
+              "k": "s[0].n",
+              "v": "1"
+            }
+          ]
+        },
+        {
+          "title": "The addressability gotcha",
+          "caption": "s[0].Value() prints \"slice: 1\"; the same call on a map[string]tally would fail to compile, because map values are NOT addressable so &m[\"a\"] can't be formed for the pointer method.",
+          "focus": [
+            "s[0].Value()"
+          ],
+          "state": [
+            {
+              "k": "s[0].n",
+              "v": "1"
+            },
+            {
+              "k": "output",
+              "v": "slice: 1"
+            },
+            {
+              "k": "map[string]tally.Inc()",
+              "v": "would NOT compile"
+            }
+          ]
+        }
       ]
     },
     {
@@ -657,6 +1128,154 @@ export const interfacesTypes: GoTopic = {
         "Embedding an interface enables the decorator pattern (override some methods, forward the rest), but an unset embedded interface is nil and panics when a forwarded method is called.",
         "Interface-in-interface embedding is allowed even with overlapping methods as long as signatures are identical (Go 1.14+); conflicting signatures for the same name are rejected.",
         "Embedding auto-forwards new interface methods (survives interface growth) but can silently skip wrapping them; explicit forwarding breaks the build instead, which is sometimes the safer default."
+      ],
+      "walkthrough": [
+        {
+          "title": "Embed Logger into Service",
+          "caption": "Service embeds Logger with no field name, so Logger's Log method is promoted to Service at depth 1.",
+          "focus": [
+            "type Service struct {",
+            "\tLogger"
+          ],
+          "state": [
+            {
+              "k": "Service methods",
+              "v": "Log (promoted, depth 1)"
+            },
+            {
+              "k": "Logger.Log depth",
+              "v": "1"
+            }
+          ]
+        },
+        {
+          "title": "Service overrides Log",
+          "caption": "Service declares its own Log at depth 0, which shadows the deeper promoted Logger.Log, so there is no ambiguity when calling Log on a Service.",
+          "focus": [
+            "func (s Service) Log(msg string) string {",
+            "return s.Logger.Log(\"[\" + s.name + \"] \" + msg)"
+          ],
+          "state": [
+            {
+              "k": "Service.Log depth",
+              "v": "0 (wins)"
+            },
+            {
+              "k": "Logger.Log depth",
+              "v": "1 (shadowed)"
+            }
+          ]
+        },
+        {
+          "title": "Build the Service value",
+          "caption": "svc is constructed with an embedded Logger{prefix:\"svc\"} and name \"auth\".",
+          "focus": [
+            "svc := Service{Logger: Logger{prefix: \"svc\"}, name: \"auth\"}"
+          ],
+          "state": [
+            {
+              "k": "svc.name",
+              "v": "auth"
+            },
+            {
+              "k": "svc.Logger.prefix",
+              "v": "svc"
+            }
+          ]
+        },
+        {
+          "title": "Call svc.Log(\"start\")",
+          "caption": "Service.Log runs (depth 0 wins), wraps the message as [auth] start, then calls the embedded Logger.Log which prepends the prefix, printing svc: [auth] start.",
+          "focus": [
+            "fmt.Println(svc.Log(\"start\"))",
+            "return s.Logger.Log(\"[\" + s.name + \"] \" + msg)"
+          ],
+          "state": [
+            {
+              "k": "output",
+              "v": "svc: [auth] start"
+            }
+          ]
+        },
+        {
+          "title": "Embed the Handler interface",
+          "caption": "countingLogger embeds the Handler interface itself, so it satisfies Handler by promoting the wrapped value's Log while overriding it to add behavior — interface embedding as decoration.",
+          "focus": [
+            "type countingLogger struct {",
+            "\tHandler"
+          ],
+          "state": [
+            {
+              "k": "embeds",
+              "v": "Handler (interface)"
+            },
+            {
+              "k": "decorates",
+              "v": "any Handler"
+            }
+          ]
+        },
+        {
+          "title": "Wrap svc in a decorator",
+          "caption": "h holds a countingLogger whose embedded Handler is svc and whose count points at n; h's static type is the Handler interface.",
+          "focus": [
+            "var h Handler = countingLogger{Handler: svc, count: &n}"
+          ],
+          "state": [
+            {
+              "k": "n",
+              "v": "0"
+            },
+            {
+              "k": "h dynamic type",
+              "v": "countingLogger"
+            },
+            {
+              "k": "inner Handler",
+              "v": "svc (Service)"
+            }
+          ]
+        },
+        {
+          "title": "Decorated call: login",
+          "caption": "countingLogger.Log increments the shared counter to 1, then delegates to the embedded svc, whose Service.Log adds [auth] and Logger.Log adds the prefix, printing svc: [auth] (#1) login.",
+          "focus": [
+            "*c.count++",
+            "return c.Handler.Log(fmt.Sprintf(\"(#%d) %s\", *c.count, msg))"
+          ],
+          "state": [
+            {
+              "k": "n",
+              "v": "1"
+            },
+            {
+              "k": "output",
+              "v": "svc: [auth] (#1) login"
+            }
+          ]
+        },
+        {
+          "title": "Second call + final count",
+          "caption": "The next h.Log bumps the pointer-shared counter to 2, and printing n confirms the decorator mutated the caller's variable.",
+          "focus": [
+            "fmt.Println(h.Log(\"logout\"))",
+            "fmt.Println(\"calls:\", n)"
+          ],
+          "state": [
+            {
+              "k": "n",
+              "v": "2"
+            },
+            {
+              "k": "output",
+              "v": "svc: [auth] (#2) logout"
+            },
+            {
+              "k": "final line",
+              "v": "calls: 2"
+            }
+          ]
+        }
       ]
     },
     {
@@ -829,6 +1448,193 @@ export const interfacesTypes: GoTopic = {
         "Type switches match the first applicable case top-to-bottom; ordering matters when concrete and interface cases overlap, and `case nil` catches nil interfaces (fallthrough is illegal).",
         "In a multi-type case the guard variable keeps the switch expression's static type; it narrows to the concrete type only in single-type cases.",
         "Interface `==` is legal at compile time but panics at runtime if both operands share a non-comparable dynamic type (slice, map, func)."
+      ],
+      "walkthrough": [
+        {
+          "title": "Comma-ok assertion succeeds",
+          "caption": "v holds a Named value whose dynamic type implements Stringer, so the two-result assertion sets ok=true and s to the Named, printing its String().",
+          "focus": [
+            "var v any = Named{Name: \"go\"}",
+            "if s, ok := v.(Stringer); ok {"
+          ],
+          "state": [
+            {
+              "k": "v dynamic type",
+              "v": "main.Named"
+            },
+            {
+              "k": "ok",
+              "v": "true"
+            },
+            {
+              "k": "s.String()",
+              "v": "\"go\""
+            }
+          ]
+        },
+        {
+          "title": "Comma-ok assertion fails safely",
+          "caption": "Named is not an int, so the comma-ok form yields ok=false and the zero value for the ignored result instead of panicking.",
+          "focus": [
+            "if _, ok := v.(int); !ok {",
+            "fmt.Println(\"not an int\")"
+          ],
+          "state": [
+            {
+              "k": "v dynamic type",
+              "v": "main.Named"
+            },
+            {
+              "k": "assert int ok",
+              "v": "false"
+            },
+            {
+              "k": "panic?",
+              "v": "no"
+            }
+          ]
+        },
+        {
+          "title": "Type switch: int case",
+          "caption": "describe(42) binds x to the int 42 in the int case, formatting int=42; case order means int is tested before the broader cases.",
+          "focus": [
+            "switch x := v.(type) {",
+            "case int:",
+            "return fmt.Sprintf(\"int=%d\", x)"
+          ],
+          "state": [
+            {
+              "k": "arg",
+              "v": "42"
+            },
+            {
+              "k": "matched case",
+              "v": "int"
+            },
+            {
+              "k": "x",
+              "v": "42"
+            },
+            {
+              "k": "result",
+              "v": "\"int=42\""
+            }
+          ]
+        },
+        {
+          "title": "Type switch: Stringer case",
+          "caption": "describe(Named{...}) skips nil and int and matches the Stringer interface case because Named implements String(), so x is used as a Stringer.",
+          "focus": [
+            "case Stringer:",
+            "return \"Stringer=\" + x.String()"
+          ],
+          "state": [
+            {
+              "k": "arg dynamic type",
+              "v": "main.Named"
+            },
+            {
+              "k": "matched case",
+              "v": "Stringer"
+            },
+            {
+              "k": "result",
+              "v": "\"Stringer=iface\""
+            }
+          ]
+        },
+        {
+          "title": "Type switch: io.Reader case",
+          "caption": "A *strings.Reader satisfies io.Reader but not Stringer, so it falls to the io.Reader case, reads up to 4 bytes from \"data\", and reports n=4.",
+          "focus": [
+            "case io.Reader:",
+            "n, _ := x.Read(buf)"
+          ],
+          "state": [
+            {
+              "k": "arg dynamic type",
+              "v": "*strings.Reader"
+            },
+            {
+              "k": "matched case",
+              "v": "io.Reader"
+            },
+            {
+              "k": "n",
+              "v": "4"
+            },
+            {
+              "k": "result",
+              "v": "\"reader read 4\""
+            }
+          ]
+        },
+        {
+          "title": "Type switch: nil interface",
+          "caption": "describe(nil) passes an interface with no dynamic type, which matches only the explicit nil case and returns \"nil interface\".",
+          "focus": [
+            "case nil:",
+            "return \"nil interface\""
+          ],
+          "state": [
+            {
+              "k": "arg",
+              "v": "nil interface"
+            },
+            {
+              "k": "dynamic type",
+              "v": "<none>"
+            },
+            {
+              "k": "matched case",
+              "v": "nil"
+            }
+          ]
+        },
+        {
+          "title": "Deferred recover armed",
+          "caption": "a and b each hold a []int; the deferred closure installs a recover so a coming panic is caught rather than crashing the program.",
+          "focus": [
+            "var a any = []int{1, 2}",
+            "if r := recover(); r != nil {"
+          ],
+          "state": [
+            {
+              "k": "a dynamic type",
+              "v": "[]int"
+            },
+            {
+              "k": "b dynamic type",
+              "v": "[]int"
+            },
+            {
+              "k": "recover armed",
+              "v": "yes"
+            }
+          ]
+        },
+        {
+          "title": "== on uncomparable types panics",
+          "caption": "a == b compares two interfaces whose identical dynamic type ([]int) is not comparable, triggering a runtime panic that the deferred recover then reports.",
+          "focus": [
+            "fmt.Println(a == b)",
+            "fmt.Println(\"recovered:\", r)"
+          ],
+          "state": [
+            {
+              "k": "a == b",
+              "v": "panics"
+            },
+            {
+              "k": "reason",
+              "v": "[]int not comparable"
+            },
+            {
+              "k": "recovered",
+              "v": "runtime error"
+            }
+          ]
+        }
       ]
     }
   ]

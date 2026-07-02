@@ -176,6 +176,169 @@ export const runtimeMemory: GoTopic = {
         "Inspect decisions with go build -gcflags=-m (double -m for detail); it reports 'moved to heap' and 'does not escape' at compile time without changing codegen.",
         "Stack alloc/free is a pointer bump with zero GC cost; heap allocations add allocator work and later mark/scan, so fewer escapes means less GC pressure.",
         "Optimize from pprof evidence, verify with -gcflags=-m, and re-benchmark — escape analysis is conservative and refactors can backfire (e.g. large value copies)."
+      ],
+      "walkthrough": [
+        {
+          "title": "main calls newPoint",
+          "caption": "main invokes newPoint(3, 4), pushing a new frame whose result the compiler already knows must survive the call.",
+          "focus": [
+            "p := newPoint(3, 4)",
+            "func newPoint(x, y int) *Point {"
+          ],
+          "state": [
+            {
+              "k": "frame",
+              "v": "newPoint"
+            },
+            {
+              "k": "x, y",
+              "v": "3, 4"
+            }
+          ]
+        },
+        {
+          "title": "Point escapes to heap",
+          "caption": "p is built and its address is returned, so the value must outlive newPoint's frame and escape analysis allocates it on the heap.",
+          "focus": [
+            "p := Point{X: x, Y: y}",
+            "return &p"
+          ],
+          "state": [
+            {
+              "k": "p",
+              "v": "{3, 4}"
+            },
+            {
+              "k": "alloc",
+              "v": "heap"
+            },
+            {
+              "k": "reason",
+              "v": "address outlives frame"
+            }
+          ]
+        },
+        {
+          "title": "sumLocal stays on stack",
+          "caption": "sumLocal builds a local Point whose address never leaves the frame, so acc lives entirely on the stack with zero heap cost.",
+          "focus": [
+            "acc := Point{}",
+            "func sumLocal(n int) int {"
+          ],
+          "state": [
+            {
+              "k": "frame",
+              "v": "sumLocal"
+            },
+            {
+              "k": "acc",
+              "v": "{0, 0}"
+            },
+            {
+              "k": "alloc",
+              "v": "stack"
+            }
+          ]
+        },
+        {
+          "title": "Loop mutates stack value",
+          "caption": "The loop accumulates into acc's fields in place on the stack, needing no allocation and no GC involvement.",
+          "focus": [
+            "acc.X += i",
+            "acc.Y -= i"
+          ],
+          "state": [
+            {
+              "k": "n",
+              "v": "10"
+            },
+            {
+              "k": "acc.X",
+              "v": "45"
+            },
+            {
+              "k": "acc.Y",
+              "v": "-45"
+            }
+          ]
+        },
+        {
+          "title": "sumLocal returns scalar",
+          "caption": "Only an int is returned by value, confirming nothing pointed into the frame and the whole computation avoided the heap.",
+          "focus": [
+            "return acc.X + acc.Y"
+          ],
+          "state": [
+            {
+              "k": "result",
+              "v": "0"
+            },
+            {
+              "k": "heap allocs",
+              "v": "0"
+            }
+          ]
+        },
+        {
+          "title": "leak boxes into interface",
+          "caption": "leak converts myInt to the fmt.Stringer interface; storing a value behind an interface forces it onto the heap so the interface can hold a pointer to it.",
+          "focus": [
+            "return myInt(v)",
+            "func leak(v int) fmt.Stringer {"
+          ],
+          "state": [
+            {
+              "k": "v",
+              "v": "7"
+            },
+            {
+              "k": "boxed as",
+              "v": "fmt.Stringer"
+            },
+            {
+              "k": "alloc",
+              "v": "heap"
+            },
+            {
+              "k": "reason",
+              "v": "interface conversion"
+            }
+          ]
+        },
+        {
+          "title": "Println consumes results",
+          "caption": "main prints the heap Point's fields, the stack-computed sum, and the boxed Stringer, whose String method fmt calls via the interface.",
+          "focus": [
+            "fmt.Println(p.X+p.Y, sumLocal(10), leak(7))"
+          ],
+          "state": [
+            {
+              "k": "output",
+              "v": "7 0 myInt(7)"
+            },
+            {
+              "k": "heap objects",
+              "v": "2 (Point, myInt)"
+            }
+          ]
+        },
+        {
+          "title": "GC reclaims escaped values",
+          "caption": "After main returns, the heap-allocated Point and boxed myInt become unreachable and are eventually collected, incurring the GC pressure the stack path avoided entirely.",
+          "focus": [
+            "func main() {"
+          ],
+          "state": [
+            {
+              "k": "stack path",
+              "v": "no GC work"
+            },
+            {
+              "k": "heap path",
+              "v": "needs GC"
+            }
+          ]
+        }
       ]
     },
     {
@@ -330,6 +493,179 @@ export const runtimeMemory: GoTopic = {
         "STW is limited to brief mark-setup and mark-termination phases; the bulk of marking and all sweeping run concurrently.",
         "Mark assist charges allocation debt to fast-allocating goroutines so a cycle completes before the heap goal is exceeded.",
         "The write barrier is active only during the mark phase, so steady-state non-GC code pays no barrier cost."
+      ],
+      "walkthrough": [
+        {
+          "title": "Set GOGC ratio",
+          "caption": "SetGCPercent installs a 100% heap-growth target and returns the prior GOGC, which the pacer uses to compute each cycle's heap goal.",
+          "focus": [
+            "prev := debug.SetGCPercent(100)"
+          ],
+          "state": [
+            {
+              "k": "GOGC",
+              "v": "100"
+            },
+            {
+              "k": "prev",
+              "v": "prior value (default 100)"
+            },
+            {
+              "k": "heap goal",
+              "v": "~2x live heap"
+            }
+          ]
+        },
+        {
+          "title": "Read soft memory limit",
+          "caption": "SetMemoryLimit(-1) leaves the soft ceiling unchanged and returns the current value; when live memory nears this limit the pacer schedules GC more aggressively than GOGC alone would.",
+          "focus": [
+            "oldLimit := debug.SetMemoryLimit(-1)"
+          ],
+          "state": [
+            {
+              "k": "GOMEMLIMIT",
+              "v": "unchanged (math.MaxInt64 default)"
+            },
+            {
+              "k": "oldLimit",
+              "v": "current soft limit"
+            }
+          ]
+        },
+        {
+          "title": "Snapshot heap before",
+          "caption": "ReadMemStats stops the world briefly to capture a consistent baseline, recording before.NumGC so we can later count only the cycles this code triggers.",
+          "focus": [
+            "runtime.ReadMemStats(&before)"
+          ],
+          "state": [
+            {
+              "k": "before.NumGC",
+              "v": "cycles so far"
+            },
+            {
+              "k": "live heap",
+              "v": "baseline"
+            }
+          ]
+        },
+        {
+          "title": "Allocate live + garbage",
+          "caption": "Each iteration appends a retained 4 KiB slice (reachable via retained's backing array) while a second 4 KiB slice is immediately unreachable, so roughly half the allocated bytes are dead by the next mark.",
+          "focus": [
+            "retained = append(retained, make([]byte, 4096))",
+            "_ = make([]byte, 4096) // immediately unreachable garbage"
+          ],
+          "state": [
+            {
+              "k": "i",
+              "v": "0 to 1023"
+            },
+            {
+              "k": "len(retained)",
+              "v": "grows to 1024"
+            },
+            {
+              "k": "cap(retained)",
+              "v": "1024 (no regrow)"
+            },
+            {
+              "k": "retained bytes",
+              "v": "~4 MiB live"
+            }
+          ]
+        },
+        {
+          "title": "Concurrent mark phase",
+          "caption": "runtime.GC starts a cycle: roots (globals and stacks, from which retained's backing array is reachable) go grey, then workers scan grey to black; the hybrid write barrier shades pointers written during marking so no reachable object stays white.",
+          "focus": [
+            "runtime.GC() // blocking cycle: mark then sweep"
+          ],
+          "state": [
+            {
+              "k": "phase",
+              "v": "concurrent mark"
+            },
+            {
+              "k": "retained",
+              "v": "black (reachable)"
+            },
+            {
+              "k": "garbage slices",
+              "v": "white (unreached)"
+            },
+            {
+              "k": "write barrier",
+              "v": "on (hybrid)"
+            }
+          ]
+        },
+        {
+          "title": "Mark termination + sweep",
+          "caption": "After a short stop-the-world mark termination the barrier turns off; remaining white objects (the ~4 MiB of garbage) are swept, and the pacer sets the next heap goal to ~2x the surviving live heap.",
+          "focus": [
+            "runtime.GC() // blocking cycle: mark then sweep",
+            "runtime.ReadMemStats(&after)"
+          ],
+          "state": [
+            {
+              "k": "phase",
+              "v": "sweep"
+            },
+            {
+              "k": "reclaimed",
+              "v": "~4 MiB garbage"
+            },
+            {
+              "k": "survivors",
+              "v": "~4 MiB retained"
+            },
+            {
+              "k": "after.NumGC",
+              "v": "before.NumGC + 1"
+            }
+          ]
+        },
+        {
+          "title": "Report cycle results",
+          "caption": "The delta after.NumGC-before.NumGC is at least 1 (the forced cycle), and after.NextGC exposes the pacer's computed heap goal for the next automatic trigger.",
+          "focus": [
+            "after.NumGC-before.NumGC",
+            "after.NextGC"
+          ],
+          "state": [
+            {
+              "k": "completed GC cycles",
+              "v": ">= 1"
+            },
+            {
+              "k": "retained slices",
+              "v": "1024"
+            },
+            {
+              "k": "NextGC",
+              "v": "~2x live heap"
+            }
+          ]
+        },
+        {
+          "title": "KeepAlive guard",
+          "caption": "runtime.KeepAlive extends retained's lifetime to this exact line, preventing the optimizer/GC from reclaiming it earlier and ensuring it was genuinely live (black) during the mark above.",
+          "focus": [
+            "runtime.KeepAlive(retained)"
+          ],
+          "state": [
+            {
+              "k": "retained",
+              "v": "provably live until here"
+            },
+            {
+              "k": "reason",
+              "v": "defeat premature collection"
+            }
+          ]
+        }
       ]
     },
     {
@@ -502,6 +838,166 @@ export const runtimeMemory: GoTopic = {
         "Publication requires a happens-before edge so readers see fully-initialized data; a bare nil-check double-checked lock does not provide one.",
         "Package init happens-before main, and starting a goroutine happens-before it runs, giving transitive visibility of pre-launch writes.",
         "go test -race is the practical verifier; correctness under it means your happens-before edges are actually present."
+      ],
+      "walkthrough": [
+        {
+          "title": "Publish via channel",
+          "caption": "main creates an unbuffered channel that will act as the synchronization point publishing the *config to the receiver.",
+          "focus": [
+            "ch := make(chan *config)"
+          ],
+          "state": [
+            {
+              "k": "ch",
+              "v": "unbuffered chan *config"
+            },
+            {
+              "k": "goroutines",
+              "v": "1 (main)"
+            }
+          ]
+        },
+        {
+          "title": "Spawn producer",
+          "caption": "A new goroutine is launched; the go statement happens-before the goroutine begins executing, and it builds the config on the heap before sending.",
+          "focus": [
+            "go func() {",
+            "c := &config{version: 2, name: \"prod\"}"
+          ],
+          "state": [
+            {
+              "k": "goroutines",
+              "v": "2"
+            },
+            {
+              "k": "c",
+              "v": "&config{2, \"prod\"} (heap)"
+            },
+            {
+              "k": "published?",
+              "v": "no"
+            }
+          ]
+        },
+        {
+          "title": "Send blocks",
+          "caption": "The unbuffered send blocks until a receiver is ready; completing the receive is ordered after this send, establishing the happens-before edge.",
+          "focus": [
+            "ch <- c // send happens-before the matching receive completes"
+          ],
+          "state": [
+            {
+              "k": "send state",
+              "v": "blocked, waiting for receiver"
+            },
+            {
+              "k": "hb edge",
+              "v": "send → receive"
+            }
+          ]
+        },
+        {
+          "title": "Receive observes writes",
+          "caption": "The receive completes and, because send happens-before receive, main is guaranteed to see the fully initialized config rather than a zero or partially written value.",
+          "focus": [
+            "got := <-ch",
+            "fmt.Println(got.version, got.name)"
+          ],
+          "state": [
+            {
+              "k": "got.version",
+              "v": "2"
+            },
+            {
+              "k": "got.name",
+              "v": "\"prod\""
+            },
+            {
+              "k": "guaranteed?",
+              "v": "yes (hb edge)"
+            }
+          ]
+        },
+        {
+          "title": "Fan out 100 goroutines",
+          "caption": "The loop starts 100 goroutines that each increment the shared counter; without synchronization these increments would race and be undefined behavior.",
+          "focus": [
+            "for i := 0; i < 100; i++ {",
+            "wg.Add(1)"
+          ],
+          "state": [
+            {
+              "k": "goroutines",
+              "v": "up to 101"
+            },
+            {
+              "k": "counter",
+              "v": "0"
+            },
+            {
+              "k": "wg",
+              "v": "100"
+            }
+          ]
+        },
+        {
+          "title": "Mutex orders increments",
+          "caption": "Each goroutine takes the lock before touching counter; the n-th Unlock happens-before the (n+1)-th Lock, so every increment observes the previous one.",
+          "focus": [
+            "mu.Lock()",
+            "counter++",
+            "mu.Unlock()"
+          ],
+          "state": [
+            {
+              "k": "hb edge",
+              "v": "Unlock(n) → Lock(n+1)"
+            },
+            {
+              "k": "counter++",
+              "v": "read-modify-write, serialized"
+            }
+          ]
+        },
+        {
+          "title": "Gotcha: no edge = UB",
+          "caption": "If counter++ ran without the mutex there would be no happens-before edge, making it a data race that is undefined behavior, not merely a stale read of 99 vs 100.",
+          "focus": [
+            "counter++"
+          ],
+          "state": [
+            {
+              "k": "without mutex",
+              "v": "data race = UB"
+            },
+            {
+              "k": "contract",
+              "v": "hb is the only guarantee"
+            }
+          ]
+        },
+        {
+          "title": "Join and read result",
+          "caption": "wg.Wait happens-after every Done, and each Done happens-after its Unlock, so main is guaranteed to observe all 100 increments as 100.",
+          "focus": [
+            "wg.Wait()",
+            "fmt.Println(counter)"
+          ],
+          "state": [
+            {
+              "k": "counter",
+              "v": "100"
+            },
+            {
+              "k": "guaranteed?",
+              "v": "yes (Wait after all Done)"
+            },
+            {
+              "k": "goroutines",
+              "v": "1 (main)"
+            }
+          ]
+        }
       ]
     },
     {
@@ -675,6 +1171,167 @@ export const runtimeMemory: GoTopic = {
         "Preallocate with make([]T, 0, n) to avoid growth reallocations; make([]T, n)+append leaves n leading zeros and grows past n, and nil+append reallocates repeatedly.",
         "Pad hot concurrently-written fields to a 64-byte cache line to prevent false sharing between cores — this removes coherence traffic but does not make the write atomic.",
         "Eliminate heap escapes first (escape analysis) before pooling — Pool cannot help allocations the compiler could keep on the stack."
+      ],
+      "walkthrough": [
+        {
+          "title": "Pool declared, lazily empty",
+          "caption": "The package-level sync.Pool is created with only a New hook set; no buffers exist yet — the pool starts empty and allocates on demand.",
+          "focus": [
+            "var bufPool = sync.Pool{",
+            "New: func() any { return new(bytes.Buffer) },"
+          ],
+          "state": [
+            {
+              "k": "pool objects",
+              "v": "0"
+            },
+            {
+              "k": "New set",
+              "v": "true"
+            }
+          ]
+        },
+        {
+          "title": "Padded counters allocated",
+          "caption": "main allocates a 4-element counter slice; each counter is 64 bytes (8-byte n plus 56-byte pad) so no two counters share a cache line.",
+          "focus": [
+            "stats := make([]counter, 4)",
+            "_ [56]byte"
+          ],
+          "state": [
+            {
+              "k": "len(stats)",
+              "v": "4"
+            },
+            {
+              "k": "sizeof(counter)",
+              "v": "64B"
+            },
+            {
+              "k": "total bytes",
+              "v": "256"
+            }
+          ]
+        },
+        {
+          "title": "Four goroutines launched",
+          "caption": "One goroutine per slice index is spawned, each capturing its own index p by value so writes to stats[p] target a distinct, cache-line-isolated counter.",
+          "focus": [
+            "go func(p int) {",
+            "wg.Add(1)"
+          ],
+          "state": [
+            {
+              "k": "goroutines",
+              "v": "4"
+            },
+            {
+              "k": "wg counter",
+              "v": "4"
+            }
+          ]
+        },
+        {
+          "title": "Get from per-P cache",
+          "caption": "On the first call render does a pool miss and invokes New to allocate a fresh *bytes.Buffer; later calls tend to hit the runtime's per-P cache and reuse a buffer, avoiding an allocation.",
+          "focus": [
+            "b := bufPool.Get().(*bytes.Buffer)",
+            "fmt.Fprintf(b, \"item-%d\", id)"
+          ],
+          "state": [
+            {
+              "k": "first call",
+              "v": "New (miss)"
+            },
+            {
+              "k": "reuse call",
+              "v": "per-P hit"
+            },
+            {
+              "k": "buffer",
+              "v": "escapes → heap"
+            }
+          ]
+        },
+        {
+          "title": "Reset then Put",
+          "caption": "The deferred cleanup clears the buffer's contents with Reset before returning it to the pool, so a later Get sees an empty buffer rather than leftover bytes.",
+          "focus": [
+            "b.Reset()",
+            "bufPool.Put(b)"
+          ],
+          "state": [
+            {
+              "k": "buffer len",
+              "v": "0 after Reset"
+            },
+            {
+              "k": "ownership",
+              "v": "returned to pool"
+            }
+          ]
+        },
+        {
+          "title": "Copy out, never leak",
+          "caption": "b.String() copies the bytes into a new immutable string returned to the caller, so no reference to b escapes after Put reclaims it — reusing b elsewhere would corrupt this result.",
+          "focus": [
+            "return b.String() // copy out; never leak b"
+          ],
+          "state": [
+            {
+              "k": "return",
+              "v": "owned string copy"
+            },
+            {
+              "k": "b after return",
+              "v": "reusable"
+            }
+          ]
+        },
+        {
+          "title": "Contended updates, no false sharing",
+          "caption": "All four goroutines increment their own stats[p].n concurrently; because each counter sits on its own cache line the cores don't ping-pong ownership, so there is no false-sharing slowdown.",
+          "focus": [
+            "stats[p].n++",
+            "_ = render(p*1000 + i)"
+          ],
+          "state": [
+            {
+              "k": "iterations each",
+              "v": "1000"
+            },
+            {
+              "k": "false sharing",
+              "v": "none (64B pad)"
+            },
+            {
+              "k": "data race",
+              "v": "none (disjoint p)"
+            }
+          ]
+        },
+        {
+          "title": "Join and sum",
+          "caption": "wg.Wait blocks until all goroutines finish, then the serial reduction sums the four independent counters to print 4000; a GC at any point may silently drain the pool.",
+          "focus": [
+            "wg.Wait()",
+            "total += stats[i].n"
+          ],
+          "state": [
+            {
+              "k": "total",
+              "v": "4000"
+            },
+            {
+              "k": "pool after GC",
+              "v": "may be empty"
+            },
+            {
+              "k": "goroutines",
+              "v": "0"
+            }
+          ]
+        }
       ]
     }
   ]

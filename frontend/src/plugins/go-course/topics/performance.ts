@@ -158,6 +158,145 @@ export const performance: GoTopic = {
         "Defeat dead-code elimination by publishing results to a package-level sink, or use the Go 1.24+ 'for b.Loop()' form which keeps loop-body values alive.",
         "benchstat needs multiple samples per side (-count>=10) to judge significance; one-vs-one runs report '~'.",
         "In b.RunParallel, ResetTimer once before starting and keep per-goroutine setup outside the pb.Next() loop."
+      ],
+      "walkthrough": [
+        {
+          "title": "Setup before timing",
+          "caption": "benchmarkBuilder builds a 128-element slice of \"chunk\" strings as fixture data before any measurement begins.",
+          "focus": [
+            "parts := make([]string, 128)",
+            "parts[i] = \"chunk\""
+          ],
+          "state": [
+            {
+              "k": "len(parts)",
+              "v": "128"
+            },
+            {
+              "k": "timer",
+              "v": "running (default)"
+            }
+          ]
+        },
+        {
+          "title": "Report allocations",
+          "caption": "ReportAllocs enables per-op allocation accounting so the harness also emits B/op and allocs/op alongside ns/op.",
+          "focus": [
+            "b.ReportAllocs()"
+          ],
+          "state": [
+            {
+              "k": "alloc reporting",
+              "v": "on"
+            }
+          ]
+        },
+        {
+          "title": "Reset the timer",
+          "caption": "ResetTimer zeroes the elapsed time and memory allocation counters so the fixture setup above is excluded from the reported cost.",
+          "focus": [
+            "b.ResetTimer()"
+          ],
+          "state": [
+            {
+              "k": "elapsed",
+              "v": "0"
+            },
+            {
+              "k": "alloc counters",
+              "v": "0"
+            },
+            {
+              "k": "setup cost",
+              "v": "excluded"
+            }
+          ]
+        },
+        {
+          "title": "Drive the b.N loop",
+          "caption": "The harness chooses b.N and reruns this loop, growing N until the measured wall time is long enough to be statistically stable.",
+          "focus": [
+            "for i := 0; i < b.N; i++ {",
+            "local = buildWithBuilder(parts)"
+          ],
+          "state": [
+            {
+              "k": "b.N",
+              "v": "grows (e.g. 1e6)"
+            },
+            {
+              "k": "local",
+              "v": "last result"
+            }
+          ]
+        },
+        {
+          "title": "Builder grows and copies",
+          "caption": "Each call appends 128 chunks into a strings.Builder; the backing buffer grows by doubling, so it reallocates several times as it reaches 640 bytes before returning the joined string.",
+          "focus": [
+            "var b strings.Builder",
+            "b.WriteString(p)"
+          ],
+          "state": [
+            {
+              "k": "allocs/op",
+              "v": "several (grow steps)"
+            },
+            {
+              "k": "result len",
+              "v": "640 bytes"
+            }
+          ]
+        },
+        {
+          "title": "Sink the result",
+          "caption": "Assigning the loop's output to the package-level sink prevents dead-code elimination, so the compiler cannot delete buildWithBuilder as unused work.",
+          "focus": [
+            "sink = local",
+            "var sink string"
+          ],
+          "state": [
+            {
+              "k": "sink",
+              "v": "published"
+            },
+            {
+              "k": "DCE",
+              "v": "defeated"
+            }
+          ]
+        },
+        {
+          "title": "Read the per-op metrics",
+          "caption": "testing.Benchmark returns a BenchmarkResult whose NsPerOp, AllocedBytesPerOp, and AllocsPerOp divide totals by b.N to give stable per-operation numbers.",
+          "focus": [
+            "res := testing.Benchmark(benchmarkBuilder)",
+            "res.NsPerOp(), res.AllocedBytesPerOp(), res.AllocsPerOp()"
+          ],
+          "state": [
+            {
+              "k": "metrics",
+              "v": "ns/op, B/op, allocs/op"
+            }
+          ]
+        },
+        {
+          "title": "Compare with benchstat",
+          "caption": "Running the real benchmark with go test -bench -count=10 twice (old vs new) and feeding both outputs to benchstat yields a statistical delta with confidence rather than a single noisy number.",
+          "focus": [
+            "func benchmarkBuilder(b *testing.B)"
+          ],
+          "state": [
+            {
+              "k": "-count",
+              "v": ">= 10"
+            },
+            {
+              "k": "benchstat",
+              "v": "reports p-value & %delta"
+            }
+          ]
+        }
       ]
     },
     {
@@ -312,6 +451,178 @@ export const performance: GoTopic = {
         "Heap sampling is size-based (runtime.MemProfileRate, default 512KiB); call runtime.GC() before WriteHeapProfile for accurate live numbers.",
         "net/http/pprof's blank import only registers /debug/pprof handlers on DefaultServeMux; it starts no profiling and should be on an internal port only.",
         "Flame graphs stack frames by width = cum time/bytes; wide plateaus are hotspots, and diff mode reveals regressions across builds."
+      ],
+      "walkthrough": [
+        {
+          "title": "Open CPU profile file",
+          "caption": "main creates cpu.prof on disk as the destination file that pprof will write the CPU profiling data into.",
+          "focus": [
+            "cpu, err := os.Create(\"cpu.prof\")"
+          ],
+          "state": [
+            {
+              "k": "cpu.prof",
+              "v": "created (empty)"
+            },
+            {
+              "k": "profiling",
+              "v": "off"
+            }
+          ]
+        },
+        {
+          "title": "Start CPU profiling",
+          "caption": "StartCPUProfile enables the runtime's SIGPROF-based profiler (~100 Hz) that periodically interrupts the program and records the current call stack as a sample.",
+          "focus": [
+            "pprof.StartCPUProfile(cpu)"
+          ],
+          "state": [
+            {
+              "k": "CPU sampler",
+              "v": "on ~100Hz"
+            },
+            {
+              "k": "samples",
+              "v": "0"
+            },
+            {
+              "k": "unit",
+              "v": "time on-CPU"
+            }
+          ]
+        },
+        {
+          "title": "Run the hot loop",
+          "caption": "The 2000-iteration loop keeps work() on-CPU, so most profiler interrupts catch stacks inside work, accumulating samples there.",
+          "focus": [
+            "for i := 0; i < 2000; i++ {",
+            "_ = work(100000)"
+          ],
+          "state": [
+            {
+              "k": "top of stack",
+              "v": "main → work"
+            },
+            {
+              "k": "samples",
+              "v": "growing"
+            },
+            {
+              "k": "work flat",
+              "v": "high (self CPU)"
+            },
+            {
+              "k": "main cum",
+              "v": "high (self+callees)"
+            }
+          ]
+        },
+        {
+          "title": "work does the CPU labor",
+          "caption": "The arithmetic loop is where instructions actually retire, so work carries a large flat (self) time while main's flat stays near zero.",
+          "focus": [
+            "sum += i * i"
+          ],
+          "state": [
+            {
+              "k": "work flat",
+              "v": "~all CPU"
+            },
+            {
+              "k": "work cum",
+              "v": "= flat (no callees)"
+            },
+            {
+              "k": "main flat",
+              "v": "~0"
+            }
+          ]
+        },
+        {
+          "title": "Stop CPU profiling",
+          "caption": "StopCPUProfile disables the profiler and flushes the aggregated stack samples to cpu.prof, which now holds the complete CPU profile.",
+          "focus": [
+            "pprof.StopCPUProfile()"
+          ],
+          "state": [
+            {
+              "k": "CPU sampler",
+              "v": "off"
+            },
+            {
+              "k": "cpu.prof",
+              "v": "written"
+            }
+          ]
+        },
+        {
+          "title": "Force a GC before heap snapshot",
+          "caption": "runtime.GC() runs a full collection so unreachable objects are freed first, making the upcoming inuse_space reflect only live memory rather than not-yet-collected garbage.",
+          "focus": [
+            "runtime.GC()"
+          ],
+          "state": [
+            {
+              "k": "heap",
+              "v": "swept"
+            },
+            {
+              "k": "inuse target",
+              "v": "live objects only"
+            },
+            {
+              "k": "alloc_space",
+              "v": "still cumulative"
+            }
+          ]
+        },
+        {
+          "title": "Write the heap profile",
+          "caption": "WriteHeapProfile emits an allocation-sampled snapshot: inuse_space/inuse_objects (live now) plus alloc_space/alloc_objects (cumulative since start), defaulting to the inuse view.",
+          "focus": [
+            "pprof.WriteHeapProfile(mem)"
+          ],
+          "state": [
+            {
+              "k": "heap.prof",
+              "v": "written"
+            },
+            {
+              "k": "sample rate",
+              "v": "~512KB avg"
+            },
+            {
+              "k": "inuse",
+              "v": "live"
+            },
+            {
+              "k": "alloc",
+              "v": "cumulative"
+            }
+          ]
+        },
+        {
+          "title": "Files close on return",
+          "caption": "As main returns the deferred Close calls run in LIFO order (mem then cpu), closing both profile files.",
+          "focus": [
+            "defer cpu.Close()",
+            "defer mem.Close()"
+          ],
+          "state": [
+            {
+              "k": "defer order",
+              "v": "mem then cpu"
+            },
+            {
+              "k": "cpu.prof",
+              "v": "closed"
+            },
+            {
+              "k": "heap.prof",
+              "v": "closed"
+            }
+          ]
+        }
       ]
     },
     {
@@ -466,6 +777,173 @@ export const performance: GoTopic = {
         "Bounds-check elimination fires when the prover can derive 0<=i and i<len(s); hoisting len and idiomatic loops help.",
         "strings.Builder writes into a single heap buffer and String() avoids a copy; copying a used Builder panics by design.",
         "Measure with -benchmem and -gcflags=-m before optimizing; reserve sync.Pool and unsafe for justified, benchmarked cases."
+      ],
+      "walkthrough": [
+        {
+          "title": "Enter joinNaive",
+          "caption": "main calls joinNaive with the 4-element slice; s starts as an empty string header pointing at no backing bytes.",
+          "focus": [
+            "var s string",
+            "joinNaive(parts)"
+          ],
+          "state": [
+            {
+              "k": "parts",
+              "v": "[algo - moves !]"
+            },
+            {
+              "k": "s",
+              "v": "\"\""
+            },
+            {
+              "k": "heap allocs",
+              "v": "0"
+            }
+          ]
+        },
+        {
+          "title": "Concatenation reallocates",
+          "caption": "Each non-empty s += p calls runtime.concatstrings, which allocates a fresh backing array and copies all prior bytes plus p, so total bytes copied grows O(n^2).",
+          "focus": [
+            "s += p"
+          ],
+          "state": [
+            {
+              "k": "s",
+              "v": "\"algo-moves!\""
+            },
+            {
+              "k": "heap allocs",
+              "v": "~3 (grows each step)"
+            },
+            {
+              "k": "bytes copied",
+              "v": "O(n^2)"
+            }
+          ]
+        },
+        {
+          "title": "joinFast sizes first",
+          "caption": "joinFast walks the parts once summing len(p) so it knows the exact final byte count before writing anything.",
+          "focus": [
+            "total += len(p)"
+          ],
+          "state": [
+            {
+              "k": "total",
+              "v": "11"
+            },
+            {
+              "k": "heap allocs",
+              "v": "0 so far"
+            }
+          ]
+        },
+        {
+          "title": "Grow preallocates once",
+          "caption": "b.Grow(total) makes a single allocation of the exact capacity, so the Builder's backing array will never have to grow again.",
+          "focus": [
+            "b.Grow(total)"
+          ],
+          "state": [
+            {
+              "k": "builder cap",
+              "v": "11"
+            },
+            {
+              "k": "builder len",
+              "v": "0"
+            },
+            {
+              "k": "heap allocs",
+              "v": "1 (final)"
+            }
+          ]
+        },
+        {
+          "title": "Write without regrowth",
+          "caption": "Each b.WriteString(p) appends into the pre-sized buffer; the compiler inlines WriteString and no reallocation or copy of old data occurs.",
+          "focus": [
+            "b.WriteString(p)",
+            "return b.String()"
+          ],
+          "state": [
+            {
+              "k": "builder len",
+              "v": "11"
+            },
+            {
+              "k": "builder cap",
+              "v": "11"
+            },
+            {
+              "k": "reallocs",
+              "v": "0"
+            }
+          ]
+        },
+        {
+          "title": "sumBCE hoists len",
+          "caption": "The loop condition compares against len(xs) so the compiler can prove i is in range for every xs[i] access.",
+          "focus": [
+            "i < len(xs)",
+            "xs[i]"
+          ],
+          "state": [
+            {
+              "k": "len(xs)",
+              "v": "4"
+            },
+            {
+              "k": "bounds checks",
+              "v": "eliminated"
+            }
+          ]
+        },
+        {
+          "title": "Bounds check eliminated",
+          "caption": "With the range proof in place the generated code drops the per-iteration bounds check, and sumBCE (inline cost 25) is small enough to inline into main.",
+          "focus": [
+            "sum += xs[i]",
+            "func sumBCE(xs []int) int"
+          ],
+          "state": [
+            {
+              "k": "sum",
+              "v": "10"
+            },
+            {
+              "k": "sumBCE inlined",
+              "v": "yes"
+            },
+            {
+              "k": "BCE",
+              "v": "applied"
+            }
+          ]
+        },
+        {
+          "title": "Program prints results",
+          "caption": "main prints true (both joins produce the same string) and 10 (the sum); joinNaive and sumBCE are inlined into main while joinFast stays a real call (inline cost 134 > budget 80).",
+          "focus": [
+            "fmt.Println(joinNaive(parts) == joinFast(parts))",
+            "fmt.Println(sumBCE([]int{1, 2, 3, 4}))"
+          ],
+          "state": [
+            {
+              "k": "output",
+              "v": "true / 10"
+            },
+            {
+              "k": "inlined",
+              "v": "joinNaive, sumBCE"
+            },
+            {
+              "k": "not inlined",
+              "v": "joinFast (cost 134)"
+            }
+          ]
+        }
       ]
     },
     {
@@ -621,6 +1099,157 @@ export const performance: GoTopic = {
         "Map keys must be comparable: slices, maps, and funcs are illegal; key by string(bytes) or a comparable struct.",
         "Value struct keys dedupe by content; pointer keys dedupe by identity.",
         "Prefer an ID-to-index map over a map of full records to keep the records contiguous for scans."
+      ],
+      "walkthrough": [
+        {
+          "title": "Bad struct laid out",
+          "caption": "unsafe.Sizeof reports Bad as 24 bytes: the int64 needs 8-byte alignment, so 7 padding bytes follow field a and 7 trailing padding bytes follow field c.",
+          "focus": [
+            "type Bad struct {",
+            "a bool"
+          ],
+          "state": [
+            {
+              "k": "Bad size",
+              "v": "24"
+            },
+            {
+              "k": "Bad align",
+              "v": "8"
+            },
+            {
+              "k": "padding",
+              "v": "14 bytes wasted"
+            }
+          ]
+        },
+        {
+          "title": "Good struct laid out",
+          "caption": "Reordering fields largest-to-smallest places the two bools right after the int64, so only trailing padding remains and Good shrinks to 16 bytes.",
+          "focus": [
+            "type Good struct {",
+            "b int64"
+          ],
+          "state": [
+            {
+              "k": "Good size",
+              "v": "16"
+            },
+            {
+              "k": "Bad size",
+              "v": "24"
+            },
+            {
+              "k": "savings",
+              "v": "8 bytes / value"
+            }
+          ]
+        },
+        {
+          "title": "Print the sizes",
+          "caption": "main prints both sizes, making the 24-vs-16 difference visible — the same fields, only the declaration order changed.",
+          "focus": [
+            "unsafe.Sizeof(Bad{})",
+            "unsafe.Sizeof(Good{})"
+          ],
+          "state": [
+            {
+              "k": "stdout",
+              "v": "Bad size=24 align=8"
+            },
+            {
+              "k": "stdout",
+              "v": "Good size=16 align=8"
+            }
+          ]
+        },
+        {
+          "title": "Build contiguous slice",
+          "caption": "A slice of Point values is preallocated with cap 4 and filled, so all 4 points live back-to-back in one backing array with no per-element pointers.",
+          "focus": [
+            "make([]Point, 0, 4)",
+            "Point{X: i, Y: i * i}"
+          ],
+          "state": [
+            {
+              "k": "len(pts)",
+              "v": "4"
+            },
+            {
+              "k": "cap(pts)",
+              "v": "4"
+            },
+            {
+              "k": "layout",
+              "v": "contiguous, 8B each"
+            },
+            {
+              "k": "reallocs",
+              "v": "0"
+            }
+          ]
+        },
+        {
+          "title": "Cache-friendly sum",
+          "caption": "sumX walks the slice by index; because the Point values sit contiguously in memory, the CPU streams cache lines linearly instead of chasing pointers.",
+          "focus": [
+            "for i := range pts",
+            "total += int64(pts[i].X)"
+          ],
+          "state": [
+            {
+              "k": "total",
+              "v": "0+1+2+3 = 6"
+            },
+            {
+              "k": "access",
+              "v": "sequential"
+            },
+            {
+              "k": "cache misses",
+              "v": "minimal"
+            }
+          ]
+        },
+        {
+          "title": "Comparable struct key",
+          "caption": "Point has only int32 fields, so it is comparable and can be used directly as a map key without allocating to build the key.",
+          "focus": [
+            "make(map[Point]bool, len(pts))",
+            "seen[p] = true"
+          ],
+          "state": [
+            {
+              "k": "key type",
+              "v": "Point (comparable)"
+            },
+            {
+              "k": "map hint",
+              "v": "4"
+            },
+            {
+              "k": "key alloc",
+              "v": "none"
+            }
+          ]
+        },
+        {
+          "title": "Distinct count",
+          "caption": "All four points are unique, so len(seen) is 4 — the map hashes Point's fields to determine key identity and equality.",
+          "focus": [
+            "fmt.Println(\"distinct points:\", len(seen))"
+          ],
+          "state": [
+            {
+              "k": "len(seen)",
+              "v": "4"
+            },
+            {
+              "k": "stdout",
+              "v": "distinct points: 4"
+            }
+          ]
+        }
       ]
     }
   ]

@@ -176,6 +176,164 @@ export const design: GoTopic = {
         "Use Reserve+Cancel to return unused tokens; Allow is the drop-on-empty fast path; Wait blocks until a token is available.",
         "rate.Inf disables throttling; rate.Every(d) converts an interval to a rate.Limit.",
         "In a distributed setting, N in-process limiters multiply the effective rate — coordinate via a central store or budget division."
+      ],
+      "walkthrough": [
+        {
+          "title": "Construct the limiter",
+          "caption": "main builds a PerKeyLimiter configured for 2 tokens/sec (one every 500ms) with a burst capacity of 3 and a 1-minute idle window.",
+          "focus": [
+            "p := NewPerKeyLimiter(rate.Every(500*time.Millisecond), 3, time.Minute)"
+          ],
+          "state": [
+            {
+              "k": "p.r",
+              "v": "2/sec"
+            },
+            {
+              "k": "p.burst",
+              "v": "3"
+            },
+            {
+              "k": "p.idleFor",
+              "v": "1m"
+            },
+            {
+              "k": "buckets",
+              "v": "{} (empty)"
+            }
+          ]
+        },
+        {
+          "title": "First Allow call",
+          "caption": "i=0: main calls p.Allow(\"user-42\"), which delegates to get to fetch (or create) this key's limiter.",
+          "focus": [
+            "if p.Allow(\"user-42\") {",
+            "return p.get(key).Allow()"
+          ],
+          "state": [
+            {
+              "k": "i",
+              "v": "0"
+            },
+            {
+              "k": "allowed",
+              "v": "0"
+            },
+            {
+              "k": "key",
+              "v": "user-42"
+            }
+          ]
+        },
+        {
+          "title": "Create the bucket under lock",
+          "caption": "get locks the mutex, finds no entry for user-42, and lazily creates a fresh rate.Limiter that starts full with 3 tokens.",
+          "focus": [
+            "e, ok := p.buckets[key]",
+            "e = &entry{lim: rate.NewLimiter(p.r, p.burst)}"
+          ],
+          "state": [
+            {
+              "k": "ok",
+              "v": "false"
+            },
+            {
+              "k": "tokens",
+              "v": "3.0 (full)"
+            },
+            {
+              "k": "mu",
+              "v": "locked"
+            }
+          ]
+        },
+        {
+          "title": "Record last-seen and unlock",
+          "caption": "get stamps e.seen with the current time (for the idle sweeper) and returns the limiter as the deferred Unlock releases the mutex.",
+          "focus": [
+            "e.seen = time.Now()",
+            "defer p.mu.Unlock()"
+          ],
+          "state": [
+            {
+              "k": "e.seen",
+              "v": "now"
+            },
+            {
+              "k": "buckets",
+              "v": "{user-42}"
+            },
+            {
+              "k": "mu",
+              "v": "unlocked"
+            }
+          ]
+        },
+        {
+          "title": "Burst drains tokens",
+          "caption": "Allow() consumes one token per call; i=0,1,2 each find a token available and admit, dropping the bucket to roughly 0.",
+          "focus": [
+            "allowed++",
+            ".Allow()"
+          ],
+          "state": [
+            {
+              "k": "i",
+              "v": "2"
+            },
+            {
+              "k": "allowed",
+              "v": "3"
+            },
+            {
+              "k": "tokens",
+              "v": "~0.0"
+            }
+          ]
+        },
+        {
+          "title": "Gotcha: refill is time-based",
+          "caption": "i=3,4 run microseconds later, so almost no tokens have refilled (refill needs 500ms each) and both calls are rejected.",
+          "focus": [
+            "for i := 0; i < 5; i++ {",
+            "p.Allow(\"user-42\")"
+          ],
+          "state": [
+            {
+              "k": "i",
+              "v": "4"
+            },
+            {
+              "k": "allowed",
+              "v": "3"
+            },
+            {
+              "k": "tokens",
+              "v": "~0.0 (no time elapsed)"
+            },
+            {
+              "k": "rejected",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "Report the result",
+          "caption": "The loop ends and main prints that exactly the burst size was admitted: 3 of 5.",
+          "focus": [
+            "fmt.Printf(\"burst admitted %d of 5\\n\", allowed)"
+          ],
+          "state": [
+            {
+              "k": "allowed",
+              "v": "3"
+            },
+            {
+              "k": "output",
+              "v": "burst admitted 3 of 5"
+            }
+          ]
+        }
       ]
     },
     {
@@ -330,6 +488,189 @@ export const design: GoTopic = {
         "A multi-sender results channel must be closed exactly once, after wg.Wait(), by a dedicated goroutine.",
         "Guard every blocking send with select-on-ctx.Done() so workers don't leak when the collector stops reading.",
         "errgroup.WithContext returns the first error and cancels on it; use explicit collection + errors.Join when you need all partial failures."
+      ],
+      "walkthrough": [
+        {
+          "title": "Bounded context + channels",
+          "caption": "A 1s deadline context is created and the job/result channels are made, with jobs buffered to the worker count so the producer can run slightly ahead before blocking.",
+          "focus": [
+            "ctx, cancel := context.WithTimeout(context.Background(), time.Second)",
+            "jobs := make(chan Job, workers)",
+            "out := make(chan Result)"
+          ],
+          "state": [
+            {
+              "k": "workers",
+              "v": "4"
+            },
+            {
+              "k": "cap(jobs)",
+              "v": "4"
+            },
+            {
+              "k": "cap(out)",
+              "v": "0"
+            },
+            {
+              "k": "ctx",
+              "v": "1s deadline"
+            }
+          ]
+        },
+        {
+          "title": "Spawn warm workers",
+          "caption": "Four long-lived worker goroutines are started and tracked with the WaitGroup; each will pull jobs until the channel is closed.",
+          "focus": [
+            "for i := 0; i < workers; i++ {",
+            "wg.Add(1)",
+            "go func() {"
+          ],
+          "state": [
+            {
+              "k": "goroutines",
+              "v": "4 workers"
+            },
+            {
+              "k": "wg counter",
+              "v": "4"
+            },
+            {
+              "k": "pool",
+              "v": "idle, warm"
+            }
+          ]
+        },
+        {
+          "title": "Producer feeds + backpressure",
+          "caption": "A producer goroutine sends jobs 1..20 into the buffered channel; once the 4-slot buffer fills it blocks on the send until a worker frees a slot, applying natural backpressure.",
+          "focus": [
+            "for i := 1; i <= 20; i++ {",
+            "case jobs <- Job{ID: i}:"
+          ],
+          "state": [
+            {
+              "k": "produced",
+              "v": "1..20"
+            },
+            {
+              "k": "buffer",
+              "v": "fills to 4 then blocks"
+            },
+            {
+              "k": "backpressure",
+              "v": "send blocks"
+            }
+          ]
+        },
+        {
+          "title": "Workers process jobs",
+          "caption": "Each worker ranges over jobs, runs process under the context, and sends a Result; jobs whose ID is divisible by 7 (7 and 14) return an error, the rest succeed.",
+          "focus": [
+            "for j := range jobs {",
+            "out <- Result{ID: j.ID, Err: process(ctx, j)}",
+            "if j.ID%7 == 0 {"
+          ],
+          "state": [
+            {
+              "k": "failing IDs",
+              "v": "7, 14"
+            },
+            {
+              "k": "process",
+              "v": "~1ms each"
+            },
+            {
+              "k": "out",
+              "v": "drained by main"
+            }
+          ]
+        },
+        {
+          "title": "Cancellation path",
+          "caption": "If the deadline fires or ctx is canceled, process returns ctx.Err() immediately and the producer's select takes the ctx.Done() branch, stopping new sends.",
+          "focus": [
+            "case <-ctx.Done():",
+            "return ctx.Err()"
+          ],
+          "state": [
+            {
+              "k": "on timeout",
+              "v": "process aborts"
+            },
+            {
+              "k": "producer",
+              "v": "stops early"
+            },
+            {
+              "k": "remaining jobs",
+              "v": "skipped"
+            }
+          ]
+        },
+        {
+          "title": "Producer closes jobs",
+          "caption": "When the producer's loop ends (or it returns on cancel), its deferred close(jobs) runs, causing every worker's range loop to terminate after the buffer empties.",
+          "focus": [
+            "defer close(jobs)",
+            "for j := range jobs {"
+          ],
+          "state": [
+            {
+              "k": "jobs",
+              "v": "closed"
+            },
+            {
+              "k": "workers",
+              "v": "draining then exit"
+            }
+          ]
+        },
+        {
+          "title": "WaitGroup gates out close",
+          "caption": "The gotcha: a dedicated goroutine blocks on wg.Wait() and only closes out after all workers exit — closing out any earlier would race a live worker's send and panic.",
+          "focus": [
+            "wg.Wait()",
+            "close(out)",
+            "defer wg.Done()"
+          ],
+          "state": [
+            {
+              "k": "wg counter",
+              "v": "4 -> 0"
+            },
+            {
+              "k": "out",
+              "v": "closed after last worker"
+            },
+            {
+              "k": "why",
+              "v": "avoid send-on-closed panic"
+            }
+          ]
+        },
+        {
+          "title": "Aggregate + report",
+          "caption": "Main ranges over out until it is closed, collecting non-nil errors, then joins them so the whole pool's failures surface as one aggregated error.",
+          "focus": [
+            "for r := range out {",
+            "errs = append(errs, r.Err)",
+            "errors.Join(errs...)"
+          ],
+          "state": [
+            {
+              "k": "errs (no timeout)",
+              "v": "2 (jobs 7,14)"
+            },
+            {
+              "k": "output",
+              "v": "completed with 2 errors"
+            },
+            {
+              "k": "exit",
+              "v": "clean drain"
+            }
+          ]
+        }
       ]
     },
     {
@@ -484,6 +825,187 @@ export const design: GoTopic = {
         "sharding by hash(key) spreads lock contention at the cost of fragmented recency and slightly lower hit rate",
         "sync.Map has no recency/size accounting and suits read-mostly stable keys, not LRU eviction",
         "combine lazy TTL checks on access with active/sampled expiry so untouched expired keys do not pin memory"
+      ],
+      "walkthrough": [
+        {
+          "title": "Build the shard",
+          "caption": "newShard allocates an empty list.List and a map[K]*list.Element, giving O(1) lookup plus O(1) reorder for a cap-2, no-TTL LRU.",
+          "focus": [
+            "s := newShard[string, int](2, 0)",
+            "ll:    list.New(),",
+            "items: make(map[K]*list.Element, capacity),"
+          ],
+          "state": [
+            {
+              "k": "cap",
+              "v": "2"
+            },
+            {
+              "k": "ttl",
+              "v": "0 (none)"
+            },
+            {
+              "k": "ll",
+              "v": "[] (empty)"
+            },
+            {
+              "k": "items",
+              "v": "{}"
+            }
+          ]
+        },
+        {
+          "title": "Put(\"a\", 1)",
+          "caption": "Key a is absent, so a new entry is pushed to the front of the list and recorded in the map; length is 1, under cap.",
+          "focus": [
+            "el := s.ll.PushFront(&entry[K, V]{key: k, val: v, expires: s.deadline()})",
+            "s.items[k] = el"
+          ],
+          "state": [
+            {
+              "k": "ll (MRU→LRU)",
+              "v": "[a]"
+            },
+            {
+              "k": "items",
+              "v": "{a}"
+            },
+            {
+              "k": "len",
+              "v": "1"
+            }
+          ]
+        },
+        {
+          "title": "Put(\"b\", 2)",
+          "caption": "Key b is also new; it is pushed to the front so b becomes MRU and a slides to the back — length now equals cap, no eviction yet.",
+          "focus": [
+            "if s.ll.Len() > s.cap {",
+            "el := s.ll.PushFront(&entry[K, V]{key: k, val: v, expires: s.deadline()})"
+          ],
+          "state": [
+            {
+              "k": "ll (MRU→LRU)",
+              "v": "[b, a]"
+            },
+            {
+              "k": "items",
+              "v": "{a, b}"
+            },
+            {
+              "k": "len",
+              "v": "2 (= cap)"
+            }
+          ]
+        },
+        {
+          "title": "Get(\"a\") touches a",
+          "caption": "a is found and not expired (ttl=0 means expires.IsZero() is true, so the check short-circuits), so MoveToFront makes a the MRU — this is the pivotal step that leaves b as the coldest entry.",
+          "focus": [
+            "if !e.expires.IsZero() && time.Now().After(e.expires) {",
+            "s.ll.MoveToFront(el)",
+            "return e.val, true"
+          ],
+          "state": [
+            {
+              "k": "ll (MRU→LRU)",
+              "v": "[a, b]"
+            },
+            {
+              "k": "LRU / next evict",
+              "v": "b"
+            },
+            {
+              "k": "return",
+              "v": "1, true"
+            }
+          ]
+        },
+        {
+          "title": "Put(\"c\", 3) evicts b",
+          "caption": "c is new and pushed to front making len 3 > cap 2, so removeElem(ll.Back()) drops b — the least-recently-used — from both the list and the map.",
+          "focus": [
+            "if s.ll.Len() > s.cap {",
+            "s.removeElem(s.ll.Back())"
+          ],
+          "state": [
+            {
+              "k": "ll (MRU→LRU)",
+              "v": "[c, a]"
+            },
+            {
+              "k": "items",
+              "v": "{a, c}"
+            },
+            {
+              "k": "evicted",
+              "v": "b"
+            },
+            {
+              "k": "len",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "removeElem detail",
+          "caption": "Eviction stays O(1): the list node is unlinked and its key is read off the element's entry to delete the matching map slot, keeping map and list in sync.",
+          "focus": [
+            "s.ll.Remove(el)",
+            "delete(s.items, el.Value.(*entry[K, V]).key)"
+          ],
+          "state": [
+            {
+              "k": "items",
+              "v": "{a, c}"
+            },
+            {
+              "k": "list len",
+              "v": "2"
+            }
+          ]
+        },
+        {
+          "title": "Get(\"b\") misses",
+          "caption": "b was evicted, so the map lookup fails and Get returns the zero value with false — okB is false.",
+          "focus": [
+            "el, ok := s.items[k]",
+            "if !ok {",
+            "return zero, false"
+          ],
+          "state": [
+            {
+              "k": "okB",
+              "v": "false"
+            },
+            {
+              "k": "items",
+              "v": "{a, c}"
+            }
+          ]
+        },
+        {
+          "title": "Get(\"a\") hits, print",
+          "caption": "a survived because touching it earlier saved it from eviction; the program prints false true 1.",
+          "focus": [
+            "v, okA := s.Get(\"a\")",
+            "fmt.Println(okB, okA, v)"
+          ],
+          "state": [
+            {
+              "k": "okA",
+              "v": "true"
+            },
+            {
+              "k": "v",
+              "v": "1"
+            },
+            {
+              "k": "output",
+              "v": "false true 1"
+            }
+          ]
+        }
       ]
     },
     {
@@ -638,6 +1160,168 @@ export const design: GoTopic = {
         "Go cannot kill goroutines: Shutdown only waits, so handlers must honor r.Context() or the drain deadline just returns an error while work continues.",
         "Close dependencies in reverse order of initialization so draining components still have the resources (DB pool, producers) they depend on.",
         "Bound every stage with a timeout that sums to under Kubernetes terminationGracePeriodSeconds, and drain LB traffic (readiness) before closing listeners."
+      ],
+      "walkthrough": [
+        {
+          "title": "Register signal listener",
+          "caption": "signal.NotifyContext derives a context that will be canceled the moment SIGINT or SIGTERM arrives, and stop is deferred to release the signal handler on exit.",
+          "focus": [
+            "ctx, stop := signal.NotifyContext(context.Background()",
+            "defer stop()"
+          ],
+          "state": [
+            {
+              "k": "ctx",
+              "v": "active"
+            },
+            {
+              "k": "watched signals",
+              "v": "SIGINT, SIGTERM"
+            }
+          ]
+        },
+        {
+          "title": "Wire the handler",
+          "caption": "A mux is built whose /work handler simulates slow work, finishing after 2s unless the request's own context is canceled first.",
+          "focus": [
+            "mux.HandleFunc(\"/work\"",
+            "case <-time.After(2 * time.Second):",
+            "case <-r.Context().Done():"
+          ],
+          "state": [
+            {
+              "k": "route",
+              "v": "/work"
+            },
+            {
+              "k": "work duration",
+              "v": "2s"
+            }
+          ]
+        },
+        {
+          "title": "Serve in background",
+          "caption": "ListenAndServe runs in its own goroutine so main can proceed; a normal shutdown returns ErrServerClosed, which is treated as expected rather than fatal.",
+          "focus": [
+            "go func()",
+            "srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed)"
+          ],
+          "state": [
+            {
+              "k": "server goroutine",
+              "v": "running"
+            },
+            {
+              "k": "main goroutine",
+              "v": "will block"
+            },
+            {
+              "k": "listening",
+              "v": ":8080"
+            }
+          ]
+        },
+        {
+          "title": "Block until signal",
+          "caption": "Main parks on ctx.Done(); it stays blocked here serving traffic until the OS delivers SIGINT/SIGTERM and NotifyContext cancels ctx.",
+          "focus": [
+            "<-ctx.Done()"
+          ],
+          "state": [
+            {
+              "k": "main goroutine",
+              "v": "blocked"
+            },
+            {
+              "k": "ctx",
+              "v": "waiting for signal"
+            }
+          ]
+        },
+        {
+          "title": "Signal: restore hard-kill",
+          "caption": "On the first signal main wakes, and stop() detaches the handler so a SECOND SIGINT/SIGTERM now kills the process immediately instead of being swallowed during a slow drain.",
+          "focus": [
+            "stop() // restore default handling: a second signal now kills hard",
+            "log.Println(\"shutting down\")"
+          ],
+          "state": [
+            {
+              "k": "signal",
+              "v": "received"
+            },
+            {
+              "k": "signal handler",
+              "v": "detached"
+            },
+            {
+              "k": "2nd signal",
+              "v": "hard kill"
+            }
+          ]
+        },
+        {
+          "title": "Bound the drain",
+          "caption": "A 10-second deadline context is created to cap how long shutdown will wait for in-flight requests before giving up.",
+          "focus": [
+            "shutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)",
+            "defer cancel()"
+          ],
+          "state": [
+            {
+              "k": "drain deadline",
+              "v": "10s"
+            },
+            {
+              "k": "shutCtx",
+              "v": "active"
+            }
+          ]
+        },
+        {
+          "title": "Drain in-flight requests",
+          "caption": "srv.Shutdown stops accepting new connections and blocks until active handlers (the 2s /work calls) finish or shutCtx expires; it also causes ListenAndServe to return ErrServerClosed.",
+          "focus": [
+            "srv.Shutdown(shutCtx)"
+          ],
+          "state": [
+            {
+              "k": "new connections",
+              "v": "refused"
+            },
+            {
+              "k": "in-flight",
+              "v": "draining"
+            },
+            {
+              "k": "ListenAndServe",
+              "v": "returns ErrServerClosed"
+            }
+          ]
+        },
+        {
+          "title": "Force close on timeout",
+          "caption": "If draining exceeds the 10s deadline Shutdown returns an error, so srv.Close forcibly severs remaining connections as a last resort; either way the program then logs stopped.",
+          "focus": [
+            "log.Printf(\"forced close: %v\", err)",
+            "_ = srv.Close()",
+            "log.Println(\"stopped\")"
+          ],
+          "state": [
+            {
+              "k": "drain",
+              "v": "timed out"
+            },
+            {
+              "k": "connections",
+              "v": "force-closed"
+            },
+            {
+              "k": "exit",
+              "v": "complete"
+            }
+          ]
+        }
       ]
     },
     {
@@ -792,6 +1476,184 @@ export const design: GoTopic = {
         "Cancellation drops in-flight values by design — that is correct, not a leak.",
         "context adds deadlines and request scope over a bare done channel; use errgroup for first-error-aborts.",
         "Unbuffered channels give backpressure and bound memory; buffer only to smooth proven bottlenecks."
+      ],
+      "walkthrough": [
+        {
+          "title": "Build the pipeline",
+          "caption": "main creates a cancellable context and wires gen into two square stages, all sharing ctx so a single cancel() can stop every goroutine.",
+          "focus": [
+            "ctx, cancel := context.WithCancel(context.Background())",
+            "source := gen(ctx, 1, 2, 3, 4, 5, 6)"
+          ],
+          "state": [
+            {
+              "k": "ctx",
+              "v": "active"
+            },
+            {
+              "k": "stages wired",
+              "v": "gen->2x square"
+            },
+            {
+              "k": "values emitted",
+              "v": "0"
+            }
+          ]
+        },
+        {
+          "title": "Source emits with select",
+          "caption": "The gen goroutine tries to send each number, but the select lets it bail out via ctx.Done() instead of blocking forever on an unread channel.",
+          "focus": [
+            "case out <- n:",
+            "case <-ctx.Done():"
+          ],
+          "state": [
+            {
+              "k": "gen goroutine",
+              "v": "running"
+            },
+            {
+              "k": "out chan",
+              "v": "unbuffered"
+            },
+            {
+              "k": "sending",
+              "v": "1,2,3..."
+            }
+          ]
+        },
+        {
+          "title": "Fan-out shares one source",
+          "caption": "w1 and w2 both read from the same source channel, so the six values are split between the two square workers rather than duplicated.",
+          "focus": [
+            "w1 := square(ctx, source)",
+            "w2 := square(ctx, source)"
+          ],
+          "state": [
+            {
+              "k": "square goroutines",
+              "v": "2"
+            },
+            {
+              "k": "source consumers",
+              "v": "w1 & w2"
+            },
+            {
+              "k": "values per worker",
+              "v": "~3 each"
+            }
+          ]
+        },
+        {
+          "title": "Fan-in merges channels",
+          "caption": "merge launches one goroutine per input channel, all forwarding into a shared out, and a separate goroutine waits on the WaitGroup to close out exactly once.",
+          "focus": [
+            "wg.Add(len(cs))",
+            "case out <- v:"
+          ],
+          "state": [
+            {
+              "k": "merge fwd goroutines",
+              "v": "2"
+            },
+            {
+              "k": "wg counter",
+              "v": "2"
+            },
+            {
+              "k": "out",
+              "v": "open"
+            }
+          ]
+        },
+        {
+          "title": "Consume until threshold",
+          "caption": "main sums squared values as they arrive; each iteration of the range reads one value from the merged channel.",
+          "focus": [
+            "for v := range merge(ctx, w1, w2)",
+            "sum += v"
+          ],
+          "state": [
+            {
+              "k": "sum",
+              "v": "growing"
+            },
+            {
+              "k": "squares seen",
+              "v": "1,4,9,16..."
+            },
+            {
+              "k": "threshold",
+              "v": "20"
+            }
+          ]
+        },
+        {
+          "title": "Cancel and break",
+          "caption": "Once sum exceeds 20 main calls cancel() and breaks, closing ctx.Done() for every stage before it stops reading the merged channel.",
+          "focus": [
+            "if sum > 20 {",
+            "cancel()"
+          ],
+          "state": [
+            {
+              "k": "sum",
+              "v": ">20"
+            },
+            {
+              "k": "ctx",
+              "v": "cancelled"
+            },
+            {
+              "k": "main loop",
+              "v": "exited"
+            }
+          ]
+        },
+        {
+          "title": "Stages drain via ctx.Done()",
+          "caption": "With no consumer left, each blocked send unblocks through its ctx.Done() case and the goroutines return, hitting their deferred close(out).",
+          "focus": [
+            "case <-ctx.Done():",
+            "return"
+          ],
+          "state": [
+            {
+              "k": "blocked sends",
+              "v": "released"
+            },
+            {
+              "k": "gen/square goroutines",
+              "v": "returning"
+            },
+            {
+              "k": "defer close(out)",
+              "v": "fires"
+            }
+          ]
+        },
+        {
+          "title": "Clean shutdown, no leak",
+          "caption": "As each forwarding goroutine returns, wg.Done() drops the counter to zero, wg.Wait() unblocks and close(out) runs once, leaving no leaked goroutines.",
+          "focus": [
+            "wg.Wait()",
+            "close(out)"
+          ],
+          "state": [
+            {
+              "k": "wg counter",
+              "v": "0"
+            },
+            {
+              "k": "out",
+              "v": "closed"
+            },
+            {
+              "k": "leaked goroutines",
+              "v": "0"
+            }
+          ]
+        }
       ]
     }
   ]

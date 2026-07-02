@@ -5,6 +5,7 @@ import { VarGrid, vizText } from '../_shared/vizKit';
 import { cn } from '../../lib/cn';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from '../imported/prepScene';
 import type { PrepProblem } from '../imported/prepFactory';
+import { recordTrace, TraceView, traceVerdict, makeGoInspector } from './anim/codeTrace';
 import type { GoConcept, GoTopic } from './types';
 
 const COURSE_TITLE = 'Go · Senior Developer';
@@ -79,7 +80,6 @@ function withGoNotes(
  * Quiz phase and Learn-mode Quiz tab.
  */
 export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin<any, any> {
-  const p = toPrepProblem(c, topic);
   const meta = {
     id: c.id,
     title: c.title,
@@ -87,6 +87,27 @@ export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin
     tags: c.tags,
     summary: c.summary,
   };
+  const code = { text: c.code, lang: 'go', file: 'main.go' };
+  const codePieces = codePiecesFromSource(c.code);
+
+  // Concepts with an authored walkthrough get the animated code-trace player
+  // (active lines glow + auto-scroll, evolving state rail); the rest fall back
+  // to the Scene mnemonic reveal.
+  if (c.walkthrough && c.walkthrough.length > 0) {
+    return definePlugin<GoConcept, any>({
+      meta,
+      inputs: [{ id: 'trace', label: 'Trace', value: c }],
+      record: recordTrace,
+      View: TraceView,
+      Inspector: makeGoInspector(c),
+      verdict: traceVerdict,
+      code,
+      quiz: c.quiz,
+      codePieces,
+    });
+  }
+
+  const p = toPrepProblem(c, topic);
   return definePlugin<PrepProblem, any>({
     meta,
     inputs: [{ id: 'concept', label: 'Concept', value: p }],
@@ -94,8 +115,8 @@ export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin
     View: SceneView,
     Inspector: withGoNotes(SceneInspector, p),
     verdict: sceneVerdict,
-    code: { text: c.code, lang: 'go', file: 'main.go' },
+    code,
     quiz: c.quiz,
-    codePieces: codePiecesFromSource(c.code),
+    codePieces,
   });
 }
