@@ -1,0 +1,12 @@
+# Railway config for the static frontend (no secrets — set VITE_GAMES_SERVER_URL in the dashboard).
+# Service root directory in Railway: /frontend
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["**"]
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"

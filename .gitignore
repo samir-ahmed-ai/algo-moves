@@ -1,13 +1,20 @@
 .DS_Store
 .claude/
 
-# Node / Vite (algo-moves)
+# Node / Vite
 node_modules/
 dist/
 dist-ssr/
 .vite/
 *.local
+.env
+.env.*
+!.env.example
 tsconfig.tsbuildinfo
 tsconfig.node.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+
+# Go backend
+backend/bin/
+*.out

@@ -1,0 +1,12 @@
+# Railway config for the game server (no secrets — set ALLOWED_ORIGINS in the dashboard).
+# Service root directory in Railway: /backend
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["**"]
+
+[deploy]
+healthcheckPath = "/healthz"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
