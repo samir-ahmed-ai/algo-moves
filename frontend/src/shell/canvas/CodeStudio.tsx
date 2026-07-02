@@ -55,6 +55,7 @@ import { CodeStudioContext } from './codeStudioContextStore';
 import { useCodeStudio } from './useCodeStudio';
 import { usePhaseTransition } from './usePhaseTransition';
 import { useCodeStudioTimer } from './useCodeStudioTimer';
+import { useCodeStudioRecallShortcuts } from './useCodeStudioRecallShortcuts';
 
 export { useCodeStudio } from './useCodeStudio';
 
@@ -266,26 +267,14 @@ export function CodeStudioProvider({
   const timeLabel = parsed.time ?? fallbackTime;
   const spaceLabel = parsed.space;
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (phase !== 'recall') return;
-      if (!(e.metaKey || e.ctrlKey)) return;
-      if (e.key === '\\') {
-        e.preventDefault();
-        setBlind((b) => !b);
-      }
-      if (e.key === 'r' && e.shiftKey) {
-        e.preventDefault();
-        persistDraft(skeleton);
-      }
-      if (e.key === 'v' && e.shiftKey) {
-        e.preventDefault();
-        setEditorPrefs({ vim: !editorPrefs.vim });
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [phase, skeleton, persistDraft, editorPrefs.vim, setEditorPrefs]);
+  useCodeStudioRecallShortcuts({
+    phase,
+    skeleton,
+    persistDraft,
+    vim: editorPrefs.vim,
+    setEditorPrefs,
+    setBlind,
+  });
 
   const copyRef = async () => {
     try {

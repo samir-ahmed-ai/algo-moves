@@ -139,7 +139,7 @@ node scripts/draft-quiz-from-frames.mjs imp-44-word-search
 | Visual + recorder | `index.tsx` | `simulators/problems/*.tsx` |
 | Cases / quiz | `cases.ts`, `practice.ts` | `extraCases.ts` or `practice/items/` |
 | Learn tabs | `wireTeachingStack` | factory auto-wires |
-| Registry | `plugins/index.ts` | manifest + factory |
+| Registry | `curatedPlugins` in `plugins/index.ts` + `npm run build-plugin-meta` | manifest + factory + `npm run build-plugin-meta` |
 | Course link | `courses.ts` | `courses.ts` (`imp-*` id) |
 | Tests | `recorders.test.ts` behavioural checks | `integrity.test.ts` simulator + cases |
 

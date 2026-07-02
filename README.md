@@ -223,7 +223,7 @@ The engine never inspects algorithm state — it only steps an array of `Frame`s
 ```
                  ┌──────────────────────────────────────────┐
    core/         │ types.ts   ProblemPlugin contract          │
-   (engine,      │ registry.ts  discovers plugins by id       │
+   (engine,      │ registry.ts  sync meta, lazy loading       │
     contracts)   │ usePlayer.ts  prev / next / play over frames│
                  └──────────────────────────────────────────┘
                         ▲                         ▲
@@ -294,7 +294,7 @@ Or scaffold: `npm run new-problem -- <slug> "<Title>"`.
         ├── App.tsx              shell router: home / workspace / mobile / vim / games
         ├── core/                plugin-agnostic engine
         │   ├── types.ts         ProblemPlugin / Frame / Move contracts
-        │   ├── registry.ts      plugin lookup
+        │   ├── registry.ts      sync meta index + async per-group loadPlugin
         │   └── usePlayer.ts     step / play / pause / reset
         ├── shell/               home, workspace canvas, mobile deck, vim dojo, games arcade, docks
         │   └── games/           two-player arcade: net (WebSocket room hook), lobby, games/<id>/

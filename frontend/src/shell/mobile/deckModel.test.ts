@@ -49,13 +49,14 @@ describe('deckModel', () => {
     expect(deck.blocks.every((b) => b.plugin.meta.id)).toBe(true);
   });
 
+  // Loads the whole prep group chunk (271 plugins) via the async loader.
   it('deckSummary counts quiz and reassemble coverage', async () => {
     const topic = catalog.getTopic('prep-arrays-all');
     if (!topic) return;
     const summary = await deckSummary(topic);
     expect(summary.problems).toBeGreaterThan(0);
     expect(summary.totalQuiz).toBeGreaterThan(0);
-  });
+  }, 30000);
 
   it('n-queens quiz choices parse with headline and detail', async () => {
     const quiz = (await loadPlugin('n-queens'))?.quiz ?? [];

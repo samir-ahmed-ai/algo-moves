@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, Layers } from 'lucide-react';
 import { catalog, type Topic } from '../../content';
 import { useWorkspace } from '@/store/workspace';
@@ -85,6 +85,15 @@ export function MobileDeck({
 
   const [pIdx, setPIdx] = useState(start.pIdx);
   const [cIdx, setCIdx] = useState(start.cIdx);
+  // `start` is {0,0} on the first (empty) async render, so seed the real resume /
+  // deep-link position once the deck resolves — before paint to avoid a flash.
+  const seededRef = useRef(false);
+  useLayoutEffect(() => {
+    if (!deckReady || seededRef.current) return;
+    seededRef.current = true;
+    setPIdx(start.pIdx);
+    setCIdx(start.cIdx);
+  }, [deckReady, start]);
   const [dir, setDir] = useState<1 | -1>(1);
   const [quizRunSeed, setQuizRunSeed] = useState(() => newQuizRunSeed());
   const [quizAttempt, setQuizAttempt] = useState(0);

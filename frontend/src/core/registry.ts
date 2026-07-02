@@ -1,5 +1,5 @@
 import type { ProblemPlugin } from './types';
-import { GROUP_LOADERS, PLUGIN_GROUPS, type PluginGroup } from '../plugins';
+import { GROUP_LOADERS, PLUGIN_GROUPS, curatedPlugins, type PluginGroup } from '../plugins';
 import { PLUGIN_META, type PluginMetaEntry } from '../plugins/_generated/pluginMeta';
 
 export type { PluginMetaEntry } from '../plugins/_generated/pluginMeta';
@@ -43,6 +43,9 @@ function loadGroup(group: PluginGroup): Promise<Map<string, ProblemPlugin<any, a
 }
 
 const loaded = new Map<string, ProblemPlugin<any, any>>();
+// Curated plugins ship in the entry bundle, so resolve them synchronously — this
+// avoids a needless loading flash and lets consumers read them on first render.
+for (const p of curatedPlugins) if (!loaded.has(p.meta.id)) loaded.set(p.meta.id, p);
 
 /** The full plugin implementation, loading its group's chunk on first use. */
 export async function loadPlugin(id: string): Promise<ProblemPlugin<any, any> | undefined> {

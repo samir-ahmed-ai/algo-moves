@@ -81,13 +81,12 @@ export function Workspace() {
   }, [pluginId]);
 
   const [inputId, setInputId] = useState(() => {
-    if (!plugin) return '';
+    // Capture the shared input from the URL at mount — the plugin loads async, so
+    // waiting for it here would let the share-writer effect clobber the hash first.
+    // The restore effect below validates/clamps it once the plugin resolves.
     const shared = readShareFromUrl();
-    const fromUrl =
-      shared?.item === activeItemId && shared.input && plugin.inputs.some((i) => i.id === shared.input)
-        ? shared.input
-        : null;
-    return fromUrl ?? plugin.inputs[0]?.id ?? '';
+    if (shared?.item === activeItemId && shared.input) return shared.input;
+    return plugin?.inputs[0]?.id ?? '';
   });
   const [customInput, setCustomInput] = useState<unknown>(null);
   const shareHydratedRef = useRef(false);

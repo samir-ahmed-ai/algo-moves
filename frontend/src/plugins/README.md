@@ -102,8 +102,12 @@ wires: {
 
 ## Register it
 
-1. Append to `src/plugins/index.ts`
+1. Append to `curatedPlugins` in `src/plugins/index.ts`
 2. Add `{ id: '…', kind: 'problem', pluginId: '…' }` in `src/content/courses.ts`
+3. Run `npm run build-plugin-meta` to refresh the generated metadata index
+   (`src/plugins/_generated/`). The catalog, sidebar, search and registry read plugin
+   metadata from there, so a new plugin will not appear or load until it is regenerated.
+   `npm run check-plugin-meta` (part of `check:all`) fails if it is stale.
 
 Reference: `src/plugins/binary-search/` (hand-crafted) or any imported simulator under `imported/simulators/problems/`.
 

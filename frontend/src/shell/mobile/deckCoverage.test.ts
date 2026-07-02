@@ -40,7 +40,7 @@ describe('mobile deck coverage report', () => {
         `\nTopics: ${rows.length} | animate-only: ${animateOnly} | with quiz: ${withQuiz} | with reassemble: ${withReassemble}\n`,
       );
     }
-  });
+  }, 60000); // builds a deck for every topic — loads all group chunks
 
   it('prep arrays and strings topics have full rebuild coverage', async () => {
     const arrays = catalog.getTopic('prep-arrays-all');
@@ -51,5 +51,5 @@ describe('mobile deck coverage report', () => {
     const s = await deckSummary(strings!);
     expect(a.withReassemble).toBe(a.problems);
     expect(s.withReassemble).toBe(s.problems);
-  });
+  }, 30000);
 });
