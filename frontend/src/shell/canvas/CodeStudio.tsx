@@ -3,7 +3,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -54,6 +53,8 @@ import { nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu } from './nodeui';
 import { codeVariants, HeaderLangTabs } from './panels/shared/codeVariants';
 import { CodeStudioContext } from './codeStudioContextStore';
 import { useCodeStudio } from './useCodeStudio';
+import { usePhaseTransition } from './usePhaseTransition';
+import { useCodeStudioTimer } from './useCodeStudioTimer';
 
 export { useCodeStudio } from './useCodeStudio';
 
@@ -62,9 +63,6 @@ const PHASE_LABEL: Record<CodeStudioPhase, string> = {
   reassemble: 'Structure',
   recall: 'Recall',
 };
-
-/** Phase cross-fade duration (ms); paired with the CSS enter/exit animations. */
-const TRANSITION_MS = 340;
 
 const STEP_GLYPH = ['①', '②', '③'];
 
@@ -137,32 +135,10 @@ export function CodeStudioProvider({
   const [peek, setPeek] = useState(false);
   const [copied, setCopied] = useState(false);
   const [editorPrefs, setEditorPrefs] = useEditorPrefs();
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timerSec, setTimerSec] = useState(0);
+  const { timerRunning, setTimerRunning, setTimerSec, timerLabel } = useCodeStudioTimer(item.id);
   const [phaseTransition, setPhaseTransition] = useState(false);
   const [reassembleKey, setReassembleKey] = useState(0);
-  const transitionTimer = useRef<number | null>(null);
-
-  const clearTransition = useCallback(() => {
-    if (transitionTimer.current !== null) {
-      window.clearTimeout(transitionTimer.current);
-      transitionTimer.current = null;
-    }
-  }, []);
-
-  /** Run a phase swap after the cross-fade, cancelling any pending one first. */
-  const scheduleTransition = useCallback(
-    (fn: () => void) => {
-      clearTransition();
-      transitionTimer.current = window.setTimeout(() => {
-        transitionTimer.current = null;
-        fn();
-      }, TRANSITION_MS);
-    },
-    [clearTransition],
-  );
-
-  useEffect(() => clearTransition, [clearTransition]);
+  const { scheduleTransition, clearTransition } = usePhaseTransition();
 
   const code = variants[Math.min(active, Math.max(variants.length - 1, 0))];
   const reference = code?.text ?? '';
@@ -291,17 +267,6 @@ export function CodeStudioProvider({
   const spaceLabel = parsed.space;
 
   useEffect(() => {
-    if (!timerRunning) return;
-    const t = setInterval(() => setTimerSec((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, [timerRunning]);
-
-  useEffect(() => {
-    setTimerSec(0);
-    setTimerRunning(false);
-  }, [item.id]);
-
-  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (phase !== 'recall') return;
       if (!(e.metaKey || e.ctrlKey)) return;
@@ -331,8 +296,6 @@ export function CodeStudioProvider({
       /* clipboard unavailable */
     }
   };
-
-  const timerLabel = `${String(Math.floor(timerSec / 60)).padStart(2, '0')}:${String(timerSec % 60).padStart(2, '0')}`;
 
   const savedReassembleProgress = useMemo(
     () => (phase === 'reassemble' ? loadReassembleProgress(item.id, active) : null),
