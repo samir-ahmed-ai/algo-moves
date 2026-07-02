@@ -1,11 +1,4 @@
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import {
   Check,
   Copy,
@@ -23,27 +16,18 @@ import { SplitCodeEditor } from '../../components/SplitCodeEditor';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { patternsForTags } from '../../content';
 import { extractSkeleton } from '@/lib/code';
-import { assembleDraft, resolveCodePieces, type CodePiece } from '@/lib/code';
+import { resolveCodePieces } from '@/lib/code';
 import {
-  clearQuizProgress,
-  clearReassembleProgress,
-  loadPhase,
-  loadQuizProgress,
-  loadReassembleProgress,
   nextPhase,
   phaseSequence,
-  savePhase,
-  saveQuizProgress,
   saveReassembleProgress,
   type CodeStudioPhase,
   type PhaseAvailability,
-  type QuizProgress,
 } from '@/store/user-prefs';
 import { matchScore } from '@/lib/code';
 import { useEditorPrefs } from '@/store/user-prefs';
 import { parseComplexity } from '@/lib/quiz';
-import { readStorageText, writeStorageText } from '@/store/persistence';
-import { recordAttempt, useProgress, statFor } from '@/store/persistence';
+import { useProgress, statFor } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
@@ -54,9 +38,9 @@ import { nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu } from './nodeui';
 import { codeVariants, HeaderLangTabs } from './panels/shared/codeVariants';
 import { CodeStudioContext } from './codeStudioContextStore';
 import { useCodeStudio } from './useCodeStudio';
-import { usePhaseTransition } from './usePhaseTransition';
 import { useCodeStudioTimer } from './useCodeStudioTimer';
 import { useCodeStudioRecallShortcuts } from './useCodeStudioRecallShortcuts';
+import { useCodeStudioMachine } from './useCodeStudioMachine';
 
 export { useCodeStudio } from './useCodeStudio';
 
@@ -138,9 +122,6 @@ export function CodeStudioProvider({
   const [copied, setCopied] = useState(false);
   const [editorPrefs, setEditorPrefs] = useEditorPrefs();
   const { timerRunning, setTimerRunning, setTimerSec, timerLabel } = useCodeStudioTimer(item.id);
-  const [phaseTransition, setPhaseTransition] = useState(false);
-  const [reassembleKey, setReassembleKey] = useState(0);
-  const { scheduleTransition, clearTransition } = usePhaseTransition();
 
   const code = variants[Math.min(active, Math.max(variants.length - 1, 0))];
   const reference = code?.text ?? '';
@@ -160,106 +141,31 @@ export function CodeStudioProvider({
   const draftKey = STORAGE_KEYS.DRAFT(item.id, active);
   const skeleton = useMemo(() => (reference ? extractSkeleton(reference) : ''), [reference]);
 
-  const [phase, setPhase] = useState<CodeStudioPhase>(() =>
-    phaseLock ?? loadPhase(item.id, active, av),
-  );
-
-  const loadDraft = useCallback(() => {
-    if (!reference) return '';
-    return readStorageText(draftKey, skeleton) ?? '';
-  }, [draftKey, skeleton, reference]);
-
-  const [draft, setDraft] = useState(loadDraft);
-
-  useEffect(() => {
-    clearTransition();
-    setPhaseTransition(false);
-    setDraft(loadDraft());
-    setPhase(phaseLock ?? loadPhase(item.id, active, av));
-    setReassembleKey((k) => k + 1);
-  }, [loadDraft, item.id, active, av, clearTransition, phaseLock]);
-
-  const persistDraft = useCallback(
-    (v: string) => {
-      setDraft(v);
-      writeStorageText(draftKey, v);
-    },
-    [draftKey],
-  );
-
-  const enterRecall = useCallback(
-    (draftValue: string, startTimer = true) => {
-      setPhaseTransition(true);
-      persistDraft(draftValue);
-      savePhase(item.id, active, 'recall');
-      clearReassembleProgress(item.id, active);
-      scheduleTransition(() => {
-        setPhase('recall');
-        setPhaseTransition(false);
-        if (startTimer) setTimerRunning(true);
-      });
-    },
-    [persistDraft, item.id, active, scheduleTransition],
-  );
-
-  /** Animated, persisted jump to any phase (stepper navigation). Re-entering the
-   *  quiz is a fresh restart, so its saved progress is cleared first. */
-  const goToPhase = useCallback(
-    (target: CodeStudioPhase) => {
-      if (phaseLock) return;
-      if (target === phase) return;
-      if (target === 'quiz') clearQuizProgress(item.id, active);
-      setPhaseTransition(true);
-      savePhase(item.id, active, target);
-      if (target !== 'recall') {
-        setTimerRunning(false);
-        setTimerSec(0);
-      }
-      scheduleTransition(() => {
-        setPhase(target);
-        setPhaseTransition(false);
-      });
-    },
-    [phase, item.id, active, scheduleTransition],
-  );
-
-  /** Skip / continue to the next phase in the sequence. */
-  const advance = useCallback(() => {
-    if (phaseLock) return;
-    const target = nextPhase(phase, av);
-    if (target === phase) return;
-    if (target === 'recall') enterRecall(skeleton, false);
-    else goToPhase(target);
-  }, [phase, av, enterRecall, skeleton, goToPhase]);
-
-  const resetReassemble = useCallback(() => {
-    clearReassembleProgress(item.id, active);
-    savePhase(item.id, active, 'reassemble');
-    setPhase('reassemble');
-    setReassembleKey((k) => k + 1);
-    setTimerRunning(false);
-    setTimerSec(0);
-  }, [item.id, active]);
-
-  const onReassembleComplete = useCallback(
-    (placed: CodePiece[], mistakes: number) => {
-      if (mistakes <= 3) recordAttempt(item.id, true);
-      if (phaseLock === 'reassemble') return;
-      enterRecall(assembleDraft(reference, placed), true);
-    },
-    [enterRecall, item.id, reference, phaseLock],
-  );
-
-  const onQuizProgress = useCallback(
-    (p: QuizProgress) => saveQuizProgress(item.id, active, p),
-    [item.id, active],
-  );
-
-  const onQuizContinue = useCallback(() => {
-    const target = nextPhase('quiz', av);
-    if (target === 'recall') enterRecall(skeleton, false);
-    else goToPhase(target);
-  }, [av, enterRecall, skeleton, goToPhase]);
+  const {
+    phase,
+    draft,
+    persistDraft,
+    phaseTransition,
+    reassembleKey,
+    goToPhase,
+    advance,
+    resetReassemble,
+    onReassembleComplete,
+    onQuizProgress,
+    onQuizContinue,
+    savedReassembleProgress,
+    savedQuizProgress,
+  } = useCodeStudioMachine({
+    itemId: item.id,
+    active,
+    av,
+    skeleton,
+    reference,
+    draftKey,
+    phaseLock,
+    setTimerRunning,
+    setTimerSec,
+  });
 
   const score = reference ? matchScore(reference, draft) : 0;
   const parsed = parseComplexity(reference);
@@ -286,16 +192,6 @@ export function CodeStudioProvider({
       /* clipboard unavailable */
     }
   };
-
-  const savedReassembleProgress = useMemo(
-    () => (phase === 'reassemble' ? loadReassembleProgress(item.id, active) : null),
-    [phase, item.id, active, reassembleKey],
-  );
-
-  const savedQuizProgress = useMemo(
-    () => loadQuizProgress(item.id, active),
-    [item.id, active],
-  );
 
   if (variants.length === 0) {
     return <p className={cn('px-3 py-2 text-ink3', chromeText.base)}>No source for this problem.</p>;
