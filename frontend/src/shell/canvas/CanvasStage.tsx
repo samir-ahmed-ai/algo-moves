@@ -49,7 +49,6 @@ import type { ShareState } from '@/store/navigation';
 import { applyAlign, applyDistribute, type AlignKind } from './align';
 import { FIT_VIEW_DURATION_MS } from './canvasTokens';
 import {
-  ACCENTS,
   buildEdges,
   buildNodes,
   REQUIRED_VISUALIZE_EDGES,
@@ -79,6 +78,7 @@ import { useCanvasHistory } from './useCanvasHistory';
 import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts';
 import { useCanvasEdgeConnection } from './useCanvasEdgeConnection';
 import { useCanvasDnD, DND_KEY } from './useCanvasDnD';
+import { useCanvasNodeMutations } from './useCanvasNodeMutations';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
@@ -721,53 +721,12 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     [plugin, mode, ensureAndFocusPanel, setSidePanelTab],
   );
 
-  const onNodeClick = useCallback(
-    (e: React.MouseEvent, n: Node) => {
-      const t = e.target as HTMLElement;
-      if (t.closest('.nodrag') || t.closest('button, input, textarea, .cm-editor')) return;
-      setNodes((nds) => nds.map((node) => ({ ...node, selected: node.id === n.id })));
-    },
-    [setNodes],
-  );
+  const { onNodeClick, recolorNode, minimizeNode, removeNode, toggleNodeLock } =
+    useCanvasNodeMutations({ setNodes, setEdges });
 
   const canvasActions = useMemo(
     () => ({ focusPanel: focusNode, advancePractice, spawnConnectedPanel, layoutVisualizeOptions: layoutOpts }),
     [focusNode, advancePractice, spawnConnectedPanel, layoutOpts],
-  );
-  const recolorNode = useCallback(
-    (id: string) =>
-      setNodes((nds) =>
-        nds.map((n) => {
-          if (n.id !== id) return n;
-          const cur = ACCENTS.indexOf((n.data.accent as string) ?? '');
-          return { ...n, data: { ...n.data, accent: ACCENTS[(cur + 1) % ACCENTS.length] } };
-        }),
-      ),
-    [setNodes],
-  );
-  const minimizeNode = useCallback(
-    (id: string) => setNodes((nds) => nds.map((n) => (n.id === id ? togglePanelCollapse(n as PanelFlowNode) : n))),
-    [setNodes],
-  );
-  const removeNode = useCallback(
-    (id: string) => {
-      setNodes((nds) => nds.filter((n) => n.id !== id));
-      setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
-    },
-    [setNodes, setEdges],
-  );
-
-  const toggleNodeLock = useCallback(
-    (id: string) =>
-      setNodes((nds) =>
-        nds.map((n) => {
-          if (n.id !== id) return n;
-          const d = n.data as PanelNodeData;
-          const next = !d.locked;
-          return { ...n, draggable: !next, data: { ...d, locked: next } };
-        }),
-      ),
-    [setNodes],
   );
 
   const onNodeContextMenu = useCallback(
