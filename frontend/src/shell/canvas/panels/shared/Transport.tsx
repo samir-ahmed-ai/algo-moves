@@ -13,7 +13,7 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import { useWorkspace } from '../../../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../../../../lib/cn';
 import { CHROME_BTN } from '../../../chrome';
 import { useCanvasFrame } from '../../CanvasContext';

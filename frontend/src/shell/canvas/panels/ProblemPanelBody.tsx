@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useWorkspace } from '../../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../../../lib/cn';
 import { inputFrameCount, type InputFrameCounts } from '../../../lib/inputFrameCounts';
 import type { SampleInput } from '../../../core/types';

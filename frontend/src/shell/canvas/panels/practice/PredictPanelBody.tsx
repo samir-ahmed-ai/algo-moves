@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Lightbulb } from 'lucide-react';
 import { cn } from '../../../../lib/cn';
-import { useProgress, statFor, recordAttempt, logMistake } from '../../../../lib/progress';
+import { useProgress, statFor, recordAttempt, logMistake } from '@/store/persistence';
 import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../../CanvasContext';
 import { Banner, Btn, Chip, EmptyState, Hint, Label, Option, nodeText } from '../../nodeui';
 import {

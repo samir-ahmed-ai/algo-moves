@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ChevronLeft, Layers } from 'lucide-react';
 import { catalog, type Topic } from '../../content';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../../lib/cn';
 import { buildDeck } from './deckModel';
 import { clearMobileSession, loadMobileSession, saveMobileSession } from './mobileSession';

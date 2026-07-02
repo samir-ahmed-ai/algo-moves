@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { catalog } from '../content';
+import { catalog } from '@/content';
 import { initialBrowseFromHash } from './browseNavigation';
 
 describe('initialBrowseFromHash', () => {

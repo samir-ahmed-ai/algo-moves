@@ -7,7 +7,7 @@
  *   import { playCue } from '../../lib/audio';
  *   playCue('win');
  */
-import { readStorageText, writeStorageText } from './storage';
+import { readStorageText, writeStorageText } from '@/store/persistence';
 
 const MUTE_KEY = 'algo-moves:games:muted';
 

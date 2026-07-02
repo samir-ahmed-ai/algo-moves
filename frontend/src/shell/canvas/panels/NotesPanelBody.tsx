@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useCanvasStatic } from '../CanvasContext';
-import { readStorageText, writeStorageText } from '../../../lib/storage';
+import { readStorageText, writeStorageText } from '@/store/persistence';
 import { Hint, Label, Pill, TextArea } from '../nodeui';
 
 /** #118 Notes: freeform markdown-ish notes pinned per problem (localStorage). */

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { readStorageText, writeStorageText } from '../../../lib/storage';
+import { readStorageText, writeStorageText } from '@/store/persistence';
 import { useGameRoom } from '../net/useGameRoom';
 import {
   DEFAULT_GAME_LOCALE,

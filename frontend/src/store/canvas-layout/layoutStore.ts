@@ -1,4 +1,4 @@
-import { readStorageJson, writeStorageJson } from './storage';
+import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
 
 /**
  * Persisted canvas layouts (#73). Per `${pluginId}:${mode}` key we store dragged

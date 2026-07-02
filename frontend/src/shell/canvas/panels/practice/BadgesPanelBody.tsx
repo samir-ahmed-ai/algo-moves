@@ -1,6 +1,6 @@
 import { Award } from 'lucide-react';
 import { catalog } from '../../../../content';
-import { useProgress, statFor } from '../../../../lib/progress';
+import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '../../../../lib/cn';
 import { useCanvasActions } from '../../CanvasContext';
 import { Meter, Pill, Section, nodeText, nodeTextWrap } from '../../nodeui';

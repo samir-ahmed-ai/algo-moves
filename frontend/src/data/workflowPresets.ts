@@ -1,6 +1,6 @@
 import type { LayoutPreset } from '../shell/canvas/layout';
 import type { CanvasMode } from '../core';
-import { readStorageText, writeStorageText } from '../lib/storage';
+import { readStorageText, writeStorageText } from '@/store/persistence';
 
 /** Built-in workflow presets — layout + mode actions (no encoded blob required). */
 export interface WorkflowPresetAction {

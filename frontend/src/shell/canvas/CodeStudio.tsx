@@ -39,16 +39,16 @@ import {
   type CodeStudioPhase,
   type PhaseAvailability,
   type QuizProgress,
-} from '../../lib/codeStudioPhase';
+} from '@/store/user-prefs';
 import { matchScore } from '../../lib/codeDiff';
-import { useEditorPrefs } from '../../lib/editorPrefs';
+import { useEditorPrefs } from '@/store/user-prefs';
 import { parseComplexity } from '../../lib/parseComplexity';
-import { readStorageText, writeStorageText } from '../../lib/storage';
-import { recordAttempt, useProgress, statFor } from '../../lib/progress';
+import { readStorageText, writeStorageText } from '@/store/persistence';
+import { recordAttempt, useProgress, statFor } from '@/store/persistence';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { useCanvasStatic } from './CanvasContext';
 import { nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu } from './nodeui';
 import { codeVariants, HeaderLangTabs } from './panels/shared/codeVariants';

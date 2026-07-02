@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { useWorkspace } from '../../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { useCanvasActions } from '../CanvasContext';
 import { layoutVisualizeCanvas } from '../layout';
 import { setMeasuredHeight } from '../measuredCache';

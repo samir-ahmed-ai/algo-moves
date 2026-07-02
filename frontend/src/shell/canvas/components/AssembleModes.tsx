@@ -18,7 +18,7 @@ import { useCodeStudio } from '../CodeStudio';
 import { useCanvasStatic } from '../CanvasContext';
 import type { CodePiece } from '../../../lib/codePieces';
 import { blockKind, BLOCK_META } from '../../../lib/codePieceRoles';
-import { readStorageText, writeStorageText } from '../../../lib/storage';
+import { readStorageText, writeStorageText } from '@/store/persistence';
 
 /* ----------------------------- shared helpers ----------------------------- */
 

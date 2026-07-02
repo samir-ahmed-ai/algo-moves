@@ -5,9 +5,9 @@ import type {
   CodeStudioPhase,
   QuizProgress,
   loadReassembleProgress,
-} from '../../lib/codeStudioPhase';
-import type { EditorPrefs } from '../../lib/editorPrefs';
-import type { statFor } from '../../lib/progress';
+} from '@/store/user-prefs';
+import type { EditorPrefs } from '@/store/user-prefs';
+import type { statFor } from '@/store/persistence';
 
 export interface CodeVariant {
   text: string;

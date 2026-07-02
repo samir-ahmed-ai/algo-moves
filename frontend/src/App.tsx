@@ -1,5 +1,5 @@
-import { WorkspaceProvider, useWorkspace } from './lib/workspace';
-import { ReplayStoreProvider } from './store/replayStore';
+import { WorkspaceProvider, useWorkspace } from '@/store/workspace';
+import { ReplayStoreProvider } from '@/store/replay';
 import { Workspace } from './shell/Workspace';
 import { LandingPage } from './shell/home/LandingPage';
 import { MobileApp } from './shell/mobile/MobileApp';

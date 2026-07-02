@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Handle, NodeResizer, NodeToolbar, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../../lib/cn';
 import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from './layout';
 import { nodeTier } from './nodeTokens';

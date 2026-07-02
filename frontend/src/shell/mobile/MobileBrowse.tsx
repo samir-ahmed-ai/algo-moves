@@ -11,8 +11,8 @@ import {
   type Topic,
   type TrackId,
 } from '../../content';
-import { useProgress, statFor } from '../../lib/progress';
-import { useWorkspace } from '../../lib/workspace';
+import { useProgress, statFor } from '@/store/persistence';
+import { useWorkspace } from '@/store/workspace';
 import { Chip, difficultyTone } from '../canvas/nodeui';
 import { TrackGrid } from '../browse/TrackGrid';
 import { CategoryGrid } from '../browse/CategoryGrid';

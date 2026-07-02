@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { FolderOpen, Trash2 } from 'lucide-react';
 import { catalog } from '../../../content';
-import { useWorkspace, normalizeThemePreset } from '../../../lib/workspace';
-import { useProjects, saveProject, deleteProject } from '../../../lib/projects';
-import type { ShareState } from '../../../lib/shareState';
-import { buildMinimalProjectState, type ProjectState } from '../../../lib/projectState';
+import { useWorkspace, normalizeThemePreset } from '@/store/workspace';
+import { useProjects, saveProject, deleteProject } from '@/store/persistence';
+import type { ShareState } from '@/store/navigation';
+import { buildMinimalProjectState, type ProjectState } from '@/store/project-state';
 import { ShareUrlPopover } from '../ShareUrlPopover';
 import { SaveProjectDialog } from '../SaveProjectDialog';
 import { cn } from '../../../lib/cn';

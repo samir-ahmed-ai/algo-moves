@@ -1,5 +1,5 @@
 import { catalog, getCategoriesForTrack, getItemsForCategory, type BrowseCategory, type TrackId } from '../../content';
-import { useProgress, statFor } from '../../lib/progress';
+import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '../../lib/cn';
 import { courseIcon } from '../courseIcon';
 import { chromeText } from '../chromeUi';

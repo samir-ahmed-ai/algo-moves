@@ -1,9 +1,9 @@
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import type { Edge, Node } from '@xyflow/react';
-import type { CanvasMode } from '../core';
-import type { ShareState } from './shareState';
-import { getPanelConfig } from '../core/panelRegistry';
-import { isKnownEffectId } from '../effects/registry';
+import type { CanvasMode } from '@/core';
+import type { ShareState } from '@/store/navigation/shareState';
+import { getPanelConfig } from '@/core/panelRegistry';
+import { isKnownEffectId } from '@/effects/registry';
 
 export interface ProjectState {
   version: 1;

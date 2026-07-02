@@ -18,8 +18,8 @@ import {
   Code2,
 } from 'lucide-react';
 import { catalog, browseBreadcrumbForItem, getSiblingItems, categoryIdForItem, trackForCategory, type ItemStatus } from '../content';
-import { useProgress, statFor } from '../lib/progress';
-import { useWorkspace } from '../lib/workspace';
+import { useProgress, statFor } from '@/store/persistence';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../lib/cn';
 import { chromeText } from './chromeUi';
 import { CatalogTree } from './CatalogTree';

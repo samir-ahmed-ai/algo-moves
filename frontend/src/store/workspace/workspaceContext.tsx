@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { catalog, type TrackId } from '../content';
-import { normalizeCanvasMode, type CanvasMode } from '../core';
-import { normalizeThemePreset, type ThemePreset } from '../styles/themes/registry';
-import { readShareFromUrl } from './shareState';
-import { useIsMobile } from './useMediaQuery';
-import { isMobileHash, writeMobileHash } from '../shell/mobile/mobileHash';
-import { isVimHash, writeVimHash } from '../shell/vim/engine/vimHash';
-import { isGamesHash, writeGamesHash } from '../shell/games/engine/gamesHash';
-import { initialBrowseFromHash } from './browseNavigation';
-import type { LayoutPreset } from '../shell/canvas/layout';
-import { BOTTOM_RAIL_H, SIDEBAR_RAIL_W, SIDEBAR_W, SIDEBAR_WIDE_W } from '../shell/SidebarShell';
+import { catalog, type TrackId } from '@/content';
+import { normalizeCanvasMode, type CanvasMode } from '@/core';
+import { normalizeThemePreset, type ThemePreset } from '@/styles/themes/registry';
+import { readShareFromUrl } from '@/store/navigation/shareState';
+import { useIsMobile } from '@/lib/useMediaQuery';
+import { isMobileHash, writeMobileHash } from '@/shell/mobile/mobileHash';
+import { isVimHash, writeVimHash } from '@/shell/vim/engine/vimHash';
+import { isGamesHash, writeGamesHash } from '@/shell/games/engine/gamesHash';
+import { initialBrowseFromHash } from '@/store/navigation/browseNavigation';
+import type { LayoutPreset } from '@/shell/canvas/layout';
+import { BOTTOM_RAIL_H, SIDEBAR_RAIL_W, SIDEBAR_W, SIDEBAR_WIDE_W } from '@/shell/SidebarShell';
 import type {
   AppRoute,
   CanvasAddPanel,
@@ -25,7 +25,7 @@ import type {
 } from './workspace';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 import { WorkspaceContext } from './workspaceContextStore';
-import { readStorageJson, writeStorageText } from './storage';
+import { readStorageJson, writeStorageText } from '@/store/persistence/storage';
 
 function loadDefaults(): Partial<WorkspaceDefaults> {
   return readStorageJson(DEFAULTS_KEY, {});

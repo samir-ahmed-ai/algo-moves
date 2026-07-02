@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { Frame } from '../core/types';
+import type { Frame } from '@/core/types';
 
 /** Replay engine state — separated from canvas graph (Strudel dual-store pattern). */
 export interface ReplayState {

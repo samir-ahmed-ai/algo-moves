@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { panelsConfig, modeBuiltins, panelTitle, getPanelConfig } from '../core/panelRegistry';
 import { applyEffect, fastEffect, reverseEffect, maskEffect } from '../effects/registry';
-import { encodeProjectState, decodeProjectState } from '../lib/projectState';
+import { encodeProjectState, decodeProjectState } from '@/store/project-state';
 import type { Frame } from '../core/types';
 
 const sampleFrames = (): Frame[] =>

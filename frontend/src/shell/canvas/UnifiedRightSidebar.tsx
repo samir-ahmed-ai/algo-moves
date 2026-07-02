@@ -22,7 +22,7 @@ import {
   SlidersHorizontal,
   MoreHorizontal,
 } from 'lucide-react';
-import { useWorkspace, type RightSidebarTab } from '../../lib/workspace';
+import { useWorkspace, type RightSidebarTab } from '@/store/workspace';
 import type { CanvasMode } from '../../core';
 import { cn } from '../../lib/cn';
 import {

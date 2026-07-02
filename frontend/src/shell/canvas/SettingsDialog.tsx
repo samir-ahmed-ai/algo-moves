@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { X, Settings } from 'lucide-react';
-import { useWorkspace, saveDefaults, type WorkspaceDefaults, type Density } from '../../lib/workspace';
+import { useWorkspace, saveDefaults, type WorkspaceDefaults, type Density } from '@/store/workspace';
 import { THEME_META, type ThemePreset } from '../../styles/themes/registry';
 import { LAYOUT_PRESETS, type LayoutPreset, type BgVariant, type EdgePathType } from './layout';
 import { Toggle } from '../ui';

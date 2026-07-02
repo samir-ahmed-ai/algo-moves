@@ -1,5 +1,5 @@
 import { Controls } from '@xyflow/react';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 
 /** Native XYFlow zoom/fit controls — bottom-left on the canvas. */
 export function CanvasFloatingHud() {

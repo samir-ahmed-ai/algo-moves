@@ -1,5 +1,5 @@
 import { cn } from '../../../../lib/cn';
-import { useWorkspace } from '../../../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { useCanvasStatic } from '../../CanvasContext';
 
 export function TabBody({ kind }: { kind: string }) {

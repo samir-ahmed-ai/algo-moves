@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { useWorkspace } from '../../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../../../lib/cn';
 import { ErrorBoundary } from '../../ErrorBoundary';
 import { useCanvasFrame, useCanvasStatic } from '../CanvasContext';

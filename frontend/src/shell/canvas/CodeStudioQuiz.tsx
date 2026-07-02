@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Check, Lightbulb, RotateCcw, X } from 'lucide-react';
 import type { QuizQuestion } from '../../core/types';
-import type { QuizProgress } from '../../lib/codeStudioPhase';
+import type { QuizProgress } from '@/store/user-prefs';
 import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { cn } from '../../lib/cn';
 import { QUIZ_WRONG_MS } from '../../lib/quizConstants';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '../../lib/shuffleQuizQuestion';
-import { recordAttempt } from '../../lib/progress';
+import { recordAttempt } from '@/store/persistence';
 import { useIsMobile } from '../../lib/useMediaQuery';
 import { chromeText } from '../chromeUi';
 

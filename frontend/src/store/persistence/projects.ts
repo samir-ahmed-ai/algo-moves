@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { ShareState } from './shareState';
+import type { ShareState } from '@/store/navigation/shareState';
 import { readStorageJson, writeStorageJson } from './storage';
 
 /**

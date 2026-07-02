@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Home, LogOut, Moon, Sun, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { GamesLocaleProvider, getArcadeStrings, useGamesLocale, type GameLocale } from './locale';
 import { GameRoomProvider, useGameRoom } from './net/useGameRoom';
 import { RoomCommsProvider } from './net/useRoomComms';

@@ -7,7 +7,7 @@ import {
   THEME_META,
   type ThemePreset,
   type CanvasHudProps,
-} from '../../lib/workspace';
+} from '@/store/workspace';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
 import { Toggle } from '../ui';

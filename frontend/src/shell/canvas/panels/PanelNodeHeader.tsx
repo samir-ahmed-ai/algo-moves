@@ -15,7 +15,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
-import { useWorkspace } from '../../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { traceOutputForPanel } from '../../../lib/trace';
 import { resolveCodePieces } from '../../../lib/codePieces';
 import { ACCENTS, FIT_PADDING_FOCUS } from '../layout';

@@ -1,4 +1,4 @@
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { TransportBar } from './TransportBarCore';
 import { cn } from '../../lib/cn';
 

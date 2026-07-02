@@ -8,7 +8,7 @@ import {
   getTracks,
   type TrackId,
 } from '../content';
-import { useWorkspace } from '../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../lib/cn';
 import { chromeText } from './chromeUi';
 import { courseIcon } from './courseIcon';

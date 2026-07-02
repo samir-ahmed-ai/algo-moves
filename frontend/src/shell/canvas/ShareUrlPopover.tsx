@@ -3,7 +3,7 @@ import { Copy, Check, Link } from 'lucide-react';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
-import { getProjectShareUrl, type ProjectState } from '../../lib/projectState';
+import { getProjectShareUrl, type ProjectState } from '@/store/project-state';
 
 export function ShareUrlPopover({
   state,

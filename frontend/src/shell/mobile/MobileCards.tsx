@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import type { Item } from '../../content';
-import { recordAttempt, logMistake } from '../../lib/progress';
+import { recordAttempt, logMistake } from '@/store/persistence';
 import { cn } from '../../lib/cn';
 import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { ReassemblePane } from '../../components/ReassemblePane';

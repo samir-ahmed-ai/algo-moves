@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Panel } from '@xyflow/react';
 import { catalog, getSiblingItems, type Item } from '../../content';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
 import { PROBLEM_GLYPHS } from '../../content/glyphs';

@@ -1,4 +1,4 @@
-import { readStorageJson, removeStorageValue, writeStorageJson } from '../../lib/storage';
+import { readStorageJson, removeStorageValue, writeStorageJson } from '@/store/persistence';
 
 const KEY = 'algo-moves:mobile-session';
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;

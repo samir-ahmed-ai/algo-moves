@@ -1,4 +1,4 @@
-import { readStorageText, writeStorageText } from '../../lib/storage';
+import { readStorageText, writeStorageText } from '@/store/persistence';
 
 const KEY = 'algo-moves:swipe-qr-dismissed';
 

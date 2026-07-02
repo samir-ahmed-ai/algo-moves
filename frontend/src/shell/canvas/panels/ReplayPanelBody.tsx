@@ -1,5 +1,5 @@
 import { ListOrdered } from 'lucide-react';
-import { useWorkspace } from '../../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { MoveLog } from '../../../components/MoveLog';
 import { useCanvasFrame } from '../CanvasContext';
 import { ControlsAccordion, EmptyState } from '../nodeui';

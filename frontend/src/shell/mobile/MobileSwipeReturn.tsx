@@ -1,6 +1,6 @@
 import { Smartphone } from 'lucide-react';
 import { categoryIdFromBrowseTopic } from '../../content';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { loadMobileSession } from './mobileSession';
 
 /** Compact return link when the canvas workspace is open on a phone-sized viewport. */

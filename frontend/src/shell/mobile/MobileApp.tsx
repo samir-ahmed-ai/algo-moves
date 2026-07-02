@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Home, Moon, Sparkles, Sun } from 'lucide-react';
 import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from '../../content';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { MobileBrowse } from './MobileBrowse';
 import { MobileDeck } from './MobileDeck';
 import { isMobileHash, parseMobileHash, writeMobileHash } from './mobileHash';

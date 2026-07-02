@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react';
-import { readStorageJson, writeStorageJson } from './storage';
+import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
 
 export interface EditorPrefs {
   vim: boolean;

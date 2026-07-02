@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { recordAttempt } from '../../../../lib/progress';
+import { recordAttempt } from '@/store/persistence';
 import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../../CanvasContext';
 import { Banner, Btn, Field, Hint, TextArea } from '../../nodeui';
 import { PRACTICE_ADVANCE_MS } from '../shared/practiceConstants';

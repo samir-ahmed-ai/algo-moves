@@ -3,9 +3,9 @@ import { X, Copy, Check } from 'lucide-react';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { cn } from '../../lib/cn';
 import { chromeText } from '../chromeUi';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { useCanvasFrame } from './CanvasContext';
-import { useReplayStoreOptional } from '../../store/replayStore';
+import { useReplayStoreOptional } from '@/store/replay';
 import { generateTrace } from '../../lib/trace';
 import { Label } from './nodeui';
 

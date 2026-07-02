@@ -1,4 +1,4 @@
-import { readStorageJson, writeStorageJson } from '../../../lib/storage';
+import { readStorageJson, writeStorageJson } from '@/store/persistence';
 
 const VIM_PROGRESS_KEY = 'algo-moves:vim-dojo';
 

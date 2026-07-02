@@ -1,6 +1,6 @@
 import { Contrast, Home, Keyboard, Moon, Sun } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { VimGameProvider, useVimGame } from './canvas/VimGameProvider';
 import { VimDojoCanvas } from './canvas/VimDojoCanvas';
 import { VIM_LEVEL_IDS } from './engine';

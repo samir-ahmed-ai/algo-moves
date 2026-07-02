@@ -1,4 +1,4 @@
-import { readStorageJson, readStorageText, removeStorageValue, writeStorageJson } from './storage';
+import { readStorageJson, readStorageText, removeStorageValue, writeStorageJson } from '@/store/persistence/storage';
 export type CodeStudioPhase = 'quiz' | 'reassemble' | 'recall';
 
 /** Which optional phases exist for the current problem + language variant. */

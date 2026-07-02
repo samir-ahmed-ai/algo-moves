@@ -1,16 +1,16 @@
-import type { CanvasMode } from '../core';
+import type { CanvasMode } from '@/core';
 import {
   DEFAULT_THEME_PRESET,
   THEME_META,
   THEME_PRESETS,
   normalizeThemePreset,
   type ThemePreset,
-} from '../styles/themes/registry';
-import type { ProjectState } from './projectState';
-import type { CanvasToolsProps } from '../shell/canvas/CanvasTools';
-import type { BgVariant, EdgeOpts, LayoutPreset } from '../shell/canvas/layout';
+} from '@/styles/themes/registry';
+import type { ProjectState } from '@/store/project-state/projectState';
+import type { CanvasToolsProps } from '@/shell/canvas/CanvasTools';
+import type { BgVariant, EdgeOpts, LayoutPreset } from '@/shell/canvas/layout';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
-import { readStorageText, writeStorageJson } from './storage';
+import { readStorageText, writeStorageJson } from '@/store/persistence/storage';
 
 export type Theme = 'dark' | 'light';
 export type Density = 'compact' | 'ultra' | 'spacious';

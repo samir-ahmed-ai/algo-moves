@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useCanvasStatic } from '../../CanvasContext';
-import { readStorageJson, writeStorageJson } from '../../../../lib/storage';
+import { readStorageJson, writeStorageJson } from '@/store/persistence';
 import { CheckRow, Hint, Meter, Pill } from '../../nodeui';
 
 /** #58 Edge-case finder: a checklist of cases that break naive solutions. */

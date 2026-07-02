@@ -1,5 +1,5 @@
-import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '../shell/canvas/layout';
-import { readStorageJson, writeStorageJson } from './storage';
+import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '@/shell/canvas/layout';
+import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
 
 export interface CanvasPrefs {
   edgeOpts: EdgeOpts;

@@ -20,8 +20,8 @@ import {
   Trophy,
 } from 'lucide-react';
 import { catalog, getAllCategories, getTracks, browseBreadcrumbForItem, type Item, type TrackId } from '../../content';
-import { useProgress, statFor } from '../../lib/progress';
-import { readLastItemId, useWorkspace } from '../../lib/workspace';
+import { useProgress, statFor } from '@/store/persistence';
+import { readLastItemId, useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '../../lib/useMediaQuery';
 import { compactLabel } from '../chromeUi';
 import { cn } from '../../lib/cn';

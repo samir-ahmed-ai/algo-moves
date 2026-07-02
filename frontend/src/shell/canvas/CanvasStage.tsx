@@ -25,9 +25,9 @@ import {
 import { Crosshair, ChevronsDownUp, Trash2, Palette, Maximize, LayoutGrid, Lock } from 'lucide-react';
 import type { CanvasMode, Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
-import { useWorkspace } from '../../lib/workspace';
-import { loadCanvasPrefs, saveCanvasPrefs } from '../../lib/canvasPrefs';
-import { loadLayouts, saveLayouts, type LayoutEntry } from '../../lib/layoutStore';
+import { useWorkspace } from '@/store/workspace';
+import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
+import { loadLayouts, saveLayouts, type LayoutEntry } from '@/store/canvas-layout';
 import type { PanelNodeStyle } from './panelStyle';
 import { styleSig } from './panelStyle';
 import { togglePanelCollapse } from './panelCollapse';
@@ -44,14 +44,14 @@ import { ConnectedComponentsProvider } from '../../lib/ConnectedComponentsContex
 import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
 import { EFFECTS } from '../../effects/registry';
-import { buildMinimalProjectState, sanitizeLoadedNodes } from '../../lib/projectState';
+import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
 import {
   FIRST_VISIT_PRESET_ID,
   WORKFLOW_PRESET_ACTIONS,
   hasSeenDemoWorkflow,
   markDemoWorkflowSeen,
 } from '../../data/workflowPresets';
-import type { ShareState } from '../../lib/shareState';
+import type { ShareState } from '@/store/navigation';
 import { applyAlign, applyDistribute, type AlignKind } from './align';
 import { FIT_VIEW_DURATION_MS } from './canvasTokens';
 import {

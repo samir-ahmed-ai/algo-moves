@@ -10,8 +10,8 @@ import {
   type Difficulty,
   type TrackId,
 } from '../content';
-import { useWorkspace } from '../lib/workspace';
-import { useProgress, statFor } from '../lib/progress';
+import { useWorkspace } from '@/store/workspace';
+import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '../lib/cn';
 import { courseIcon } from './courseIcon';
 import { Chip, EmptyState, Label, Meter, difficultyTone } from './canvas/nodeui';

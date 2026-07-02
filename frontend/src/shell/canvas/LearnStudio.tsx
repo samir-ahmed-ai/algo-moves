@@ -19,9 +19,9 @@ import type { Item } from '../../content';
 import { catalog, browseBreadcrumbForItem } from '../../content';
 import { cn } from '../../lib/cn';
 import { computeInputFrameCounts } from '../../lib/inputFrameCounts';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '../../lib/useMediaQuery';
-import { readStorageText, writeStorageText } from '../../lib/storage';
+import { readStorageText, writeStorageText } from '@/store/persistence';
 import { ChromeLabel, chromeText } from '../chromeUi';
 import { Btn, Chip, EmptyState } from './nodeui';
 import {

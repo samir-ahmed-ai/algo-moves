@@ -7,7 +7,7 @@ import {
   RotateCcw,
   NotebookText,
 } from 'lucide-react';
-import { useWorkspace } from '../../lib/workspace';
+import { useWorkspace } from '@/store/workspace';
 import { useCanvasFrame } from './CanvasContext';
 import { cn } from '../../lib/cn';
 import { CHROME_BTN } from '../chrome';
