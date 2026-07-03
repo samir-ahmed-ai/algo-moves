@@ -5,4 +5,4 @@ export * from './inputFrameCounts';
 export * from './layoutPrefs';
 export * from './canvasContext';
 export * from './canvasActions';
-export * from './canvasTeachingUi';
+export * from './vizFitMeasure';

@@ -21,7 +21,8 @@ import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '@/lib/q
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { vizText } from './vizTokens';
 import { recordAttempt } from '@/store/persistence';
-import { useCanvasActions, useCanvasStatic, VizFitBox, MiniTabs } from '@/lib/canvas';
+import { useCanvasActions, useCanvasStatic } from '@/lib/canvas';
+import { VizFitBox, MiniTabs } from '@/components/vizFit';
 import type { Frame, PluginViewProps, QuizQuestion, SampleInput } from '../../core/types';
 
 /* ------------------------------------------------------------------ Quiz -- */

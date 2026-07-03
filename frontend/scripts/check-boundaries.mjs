@@ -59,13 +59,9 @@ const ACCEPTED = new Set([
  * `<src-rel> :: <import>`. Delete an entry when its import is fixed; a stale
  * entry fails the build, so the list can only shrink. Do NOT add new ones.
  */
-const KNOWN_VIOLATIONS = new Set([
-  // Last remaining debt (#08): lib/canvas/canvasTeachingUi re-exports
-  // VizFitBox/MiniTabs from shell/canvas/nodeui. These depend on the canvas
-  // vizFitMeasure runtime, so relocating them to a shared leaf is bundled with
-  // the CanvasStage/vizFitMeasure decomposition (Tranche 4 God-component work).
-  'lib/canvas/canvasTeachingUi.ts :: @/shell/canvas/nodeui',
-]);
+// No tracked debt remaining — every layer boundary is clean. Keep this empty:
+// new violations must be fixed, not allowlisted.
+const KNOWN_VIOLATIONS = new Set([]);
 
 const IMPORT_RE = /(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*['"]([^'"]+)['"]/g;
 const IS_TEST = /(?:\.test\.|\.spec\.|(?:^|\/)__tests__\/)/;
