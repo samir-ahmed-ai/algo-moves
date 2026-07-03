@@ -1,8 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Copy, Lock, Unlock } from 'lucide-react';
+import type { EditorView } from '@codemirror/view';
 import { CodeMirrorEditor } from '@/components/CodeMirrorEditor';
-import { useSubDocSync } from '@/shell/canvas/collab/useSubDocSync';
-import type { EditorPayload } from '@/shell/canvas/collab/subdocProtocol';
+import { useSubDocSyncContext } from '@/shell/canvas/collab/SubDocSyncProvider';
+import { SUBDOC_TAG, type EditorPayload } from '@/shell/canvas/collab/subdocProtocol';
 import { useCanvasCollab } from '@/shell/canvas/collab/CanvasCollabProvider';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
@@ -18,7 +19,7 @@ const LANGS = [
 ];
 
 export function CollabCodeStudioToolbar() {
-  const sync = useSubDocSync('collab-code');
+  const sync = useSubDocSyncContext();
   const { isHost } = useCanvasCollab();
   const payload = sync.payload as EditorPayload;
   const [copied, setCopied] = useState(false);
@@ -73,22 +74,64 @@ export function CollabCodeStudioToolbar() {
 }
 
 export function CollabCodeStudioBody() {
-  const sync = useSubDocSync('collab-code');
+  const sync = useSubDocSyncContext();
+  const { emitSubDoc, isCollaborating } = useCanvasCollab();
   const payload = sync.payload as EditorPayload;
   const [wrap, setWrap] = useState(true);
+  const viewRef = useRef<EditorView | null>(null);
+  const lastCursorEmit = useRef(0);
 
   const onChange = useCallback(
     (text: string) => sync.setPayload({ ...payload, text }),
     [sync, payload],
   );
 
+  // Emit cursor position on selection change via polling the view
+  useEffect(() => {
+    if (!isCollaborating || !viewRef.current) return;
+    const view = viewRef.current;
+    const iv = setInterval(() => {
+      const sel = view.state.selection.main;
+      const line = view.state.doc.lineAt(sel.head);
+      const now = Date.now();
+      if (now - lastCursorEmit.current < 100) return;
+      lastCursorEmit.current = now;
+      emitSubDoc({
+        [SUBDOC_TAG]: 'cursor',
+        nodeId: 'collab-code',
+        kind: 'collab-code',
+        x: 0,
+        y: 0,
+        line: line.number,
+      });
+    }, 200);
+    return () => clearInterval(iv);
+  }, [isCollaborating, emitSubDoc]);
+
+  const remoteCursorLines = sync.remoteCursors
+    .filter((c) => c.line != null)
+    .map((c) => ({ name: c.name, color: c.color, line: c.line! }));
+
   return (
     <div className="nowheel flex min-h-[280px] flex-1 flex-col overflow-hidden">
-      <div className="flex justify-end px-1 pb-0.5">
+      <div className="flex flex-wrap items-center justify-between gap-1 px-1 pb-0.5">
+        {remoteCursorLines.length > 0 && (
+          <div className="flex items-center gap-1">
+            {remoteCursorLines.map((c) => (
+              <span
+                key={c.name}
+                className={cn('inline-flex items-center gap-0.5 rounded-sm px-1 py-px', chromeText.xs)}
+                style={{ backgroundColor: `${c.color}20`, color: c.color }}
+              >
+                L{c.line} {c.name}
+              </span>
+            ))}
+          </div>
+        )}
         <button
           type="button"
           onClick={() => setWrap((v) => !v)}
-          className={cn('rounded px-1.5 py-0.5 text-ink3 hover:text-ink', chromeText.xs, wrap && 'text-accent')}
+          className={cn('ml-auto rounded px-1.5 py-0.5 text-ink3 hover:text-ink', chromeText.xs, wrap && 'text-accent')}
         >
           Wrap {wrap ? 'on' : 'off'}
         </button>
@@ -101,6 +144,7 @@ export function CollabCodeStudioBody() {
         dark={sync.dark}
         minHeight="280px"
         onChange={onChange}
+        onView={(v) => { viewRef.current = v; }}
         className="h-full min-h-0 flex-1"
       />
     </div>

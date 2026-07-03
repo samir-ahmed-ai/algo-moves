@@ -16,6 +16,7 @@ import {
   UserCheck,
   Link2,
   LayoutTemplate,
+  Settings2,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -27,7 +28,8 @@ import { chromeText } from '../../chromeUi';
 import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '../nodeui';
 import { useRoomComms } from '../../games/net/useRoomComms';
 import { useCanvasCollab } from './CanvasCollabProvider';
-import { buildInterviewBoardNodes } from '../interviewLayout';
+import { buildInterviewBoardNodes, mergeInterviewNodes } from '../interviewLayout';
+import type { PanelFlowNode } from '@/shell/panels/panelTypes';
 import type { CanvasWidget } from '../widgets/types';
 
 const QUICK_REACTIONS = ['👍', '🔥', '😂', '🎉', '👏', '🧠'];
@@ -36,8 +38,8 @@ const QUICK_REACTIONS = ['👍', '🔥', '😂', '🎉', '👏', '🧠'];
 
 export function SessionBody() {
   const collab = useCanvasCollab();
-  const { activeItemId, mode, theme, palette, themePreset, dir } = useWorkspace();
-  const { setNodes, setEdges } = useReactFlow();
+  const { activeItemId, mode, theme, palette, themePreset, dir, enterCanvas } = useWorkspace();
+  const { setNodes } = useReactFlow();
   const {
     isCollaborating,
     startSession,
@@ -63,15 +65,16 @@ export function SessionBody() {
   const activeItem = catalog.getItem(activeItemId);
   const canInterview = !!activeItem?.pluginId;
 
+  const isInterview = session.kind === 'interview';
   const shareBase = {
-    item: session.kind === 'interview' ? activeItemId : undefined,
-    focus: 'canvas' as const,
+    item: isInterview ? activeItemId : undefined,
+    focus: (isInterview && activeItemId ? 'problem' : 'canvas') as 'problem' | 'canvas',
     mode,
     theme,
     palette,
     themePreset,
     dir,
-    sessionKind: (session.kind === 'interview' ? 'interview' : 'collab') as 'interview' | 'collab',
+    sessionKind: (isInterview ? 'interview' : 'collab') as 'interview' | 'collab',
   };
 
   const start = async () => {
@@ -96,13 +99,18 @@ export function SessionBody() {
   const startInterviewBoard = async () => {
     setBoardBusy(true);
     try {
+      enterCanvas();
       if (canInterview) {
         await startInterviewSession(activeItemId);
       } else {
         await startSession();
       }
-      setNodes(buildInterviewBoardNodes(canInterview));
-      setEdges([]);
+      const newNodes = buildInterviewBoardNodes({
+        includeNotes: canInterview,
+        includeProblem: canInterview,
+        problemId: canInterview ? activeItemId : undefined,
+      });
+      setNodes((prev) => mergeInterviewNodes(prev as PanelFlowNode[], newNodes));
     } finally {
       setBoardBusy(false);
     }
@@ -350,6 +358,78 @@ function RosterRow({
   );
 }
 
+/* -------------------------------------------------------- interview settings */
+
+function SettingsToggle({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-2 py-0.5">
+      <span className={cn('text-ink2', chromeText.sm)}>{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={cn(
+          'relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors',
+          checked ? 'bg-accent' : 'bg-edge',
+        )}
+      >
+        <span
+          className={cn(
+            'inline-block h-3 w-3 rounded-full bg-white transition-transform',
+            checked ? 'translate-x-3.5' : 'translate-x-0.5',
+          )}
+        />
+      </button>
+    </label>
+  );
+}
+
+function InterviewSettingsBody() {
+  const { session, updateInterviewSettings, isHost } = useCanvasCollab();
+  if (!isHost || session.kind !== 'interview' || !session.interview) return null;
+  const s = session.interview;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <SettingsToggle
+        label="Guest can draw on whiteboard"
+        checked={s.guestCanEditBoard !== false}
+        onChange={(v) => updateInterviewSettings({ guestCanEditBoard: v })}
+      />
+      <SettingsToggle
+        label="Guest can edit code"
+        checked={s.guestCanEditCode !== false}
+        onChange={(v) => updateInterviewSettings({ guestCanEditCode: v })}
+      />
+      <SettingsToggle
+        label="Guest can move nodes"
+        checked={s.guestCanMoveNodes === true}
+        onChange={(v) => updateInterviewSettings({ guestCanMoveNodes: v })}
+      />
+      <span className="my-0.5 h-px bg-edge" />
+      <SettingsToggle
+        label="Hide hints from candidate"
+        checked={s.hideHints}
+        onChange={(v) => updateInterviewSettings({ hideHints: v })}
+      />
+      <SettingsToggle
+        label="Hide solutions from candidate"
+        checked={s.hideSolutions}
+        onChange={(v) => updateInterviewSettings({ hideSolutions: v })}
+      />
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------- chat */
 
 function ChatBody() {
@@ -551,6 +631,18 @@ export const COLLAB_WIDGETS: CanvasWidget[] = [
     defaultOpen: true,
     useVisible: () => useCanvasCollab().isCollaborating,
     Body: ChatBody,
+  },
+  {
+    id: 'collab-interview-settings',
+    title: 'Interview settings',
+    icon: <Settings2 className="h-3 w-3" />,
+    tab: 'collab',
+    order: 22,
+    useVisible: () => {
+      const c = useCanvasCollab();
+      return c.isCollaborating && c.isHost && c.session.kind === 'interview';
+    },
+    Body: InterviewSettingsBody,
   },
   {
     id: 'collab-quiz-log',

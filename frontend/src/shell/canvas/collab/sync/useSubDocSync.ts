@@ -25,6 +25,8 @@ export interface SubDocSyncResult {
   locked: boolean;
   setLocked: (locked: boolean) => void;
   dark: boolean;
+  /** Monotonic revision counter — changes on remote update. */
+  rev: number;
   onPointerUpdate?: (payload: { pointer: { x: number; y: number }; button: 'up' | 'down' }) => void;
   remoteCursors: Array<{ peerId: string; name: string; color: string; x: number; y: number; line?: number }>;
 }
@@ -63,17 +65,22 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
   );
   const applyingRemote = useRef(false);
   const revRef = useRef(remote?.rev ?? nodeData?.subDoc?.rev ?? 0);
+  const [revState, setRevState] = useState(revRef.current);
 
   useEffect(() => {
     if (!remotePayload) return;
+    const nextRev = remote?.rev ?? 0;
+    // Only apply remote if it has a newer revision (host-authoritative)
+    if (nextRev <= revRef.current && isHost) return;
     applyingRemote.current = true;
     setLocal(remotePayload);
-    revRef.current = remote?.rev ?? revRef.current;
+    revRef.current = nextRev;
+    setRevState(nextRev);
     if ((remotePayload as EditorPayload).locked != null) {
       setLockedState(!!(remotePayload as EditorPayload).locked);
     }
     applyingRemote.current = false;
-  }, [remotePayload, remote?.rev]);
+  }, [remotePayload, remote?.rev, isHost]);
 
   useEffect(() => {
     if (isCollaborating || !persisted) return;
@@ -204,7 +211,9 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
     locked,
     setLocked,
     dark: theme !== 'light',
+    rev: revState,
     onPointerUpdate: kind === 'whiteboard' ? onPointerUpdate : undefined,
     remoteCursors,
   };
 }
+

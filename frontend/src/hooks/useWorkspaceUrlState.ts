@@ -99,8 +99,15 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
   }, [canvasProject]);
 
   // Persist problem, example, mode, and theme in the URL so refresh reopens the same view.
+  // Preserve room/sessionKind so invite links survive hash rewrites.
   useEffect(() => {
     if (pendingProjectHydration.current && !shareHydratedRef.current) return;
+
+    const preserved = readShareFromUrl();
+    const roomFields = {
+      room: preserved?.room,
+      sessionKind: preserved?.sessionKind,
+    };
 
     if (mode === 'visualize' && !problemFocused) {
       writeShareToUrl({
@@ -110,6 +117,7 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
         palette,
         themePreset,
         dir,
+        ...roomFields,
       });
       return;
     }
@@ -124,6 +132,7 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
       palette,
       themePreset,
       dir,
+      ...roomFields,
     });
   }, [activeItemId, inputId, mode, theme, palette, themePreset, dir, problemFocused]);
 

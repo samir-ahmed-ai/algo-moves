@@ -16,9 +16,10 @@ import { RoomCommsProvider } from '../../games/net/useRoomComms';
 import { fetchNewRoomCode, makeRoomCode, normalizeRoomCode } from '@/shell/realtime';
 import type { RoomStatus } from '@/shell/realtime';
 import type { Peer, Role } from '@/shell/realtime';
-import { collabSession, defaultSession, interviewSession, type SessionMeta } from '@/lib/session';
+import { collabSession, defaultSession, interviewSession, type InterviewSettings, type SessionMeta } from '@/lib/session';
 import { extractSessionMeta } from '@/shell/realtime/roomState';
-import { readRoomFromUrl } from '@/store/navigation/shareState';
+import { readRoomFromUrl, readShareFromUrl, writeShareToUrl } from '@/store/navigation/shareState';
+import { canEditSubDoc } from './subdocPermissions';
 import {
   CANVAS_TAG,
   isCanvasOp,
@@ -79,6 +80,8 @@ export interface CanvasCollabApi {
   /** Join an existing room by code. */
   joinSession: (code: string, name?: string) => void;
   leaveSession: () => void;
+  /** Host-only: update interview permission settings (publishes to guests). */
+  updateInterviewSettings: (patch: Partial<InterviewSettings>) => void;
 
   // ---- presence ----
   peers: PeerPresence[];
@@ -104,7 +107,7 @@ export interface CanvasCollabApi {
   subDocs: Record<string, SubDocSnapshot>;
   setSubDocs: Dispatch<SetStateAction<Record<string, SubDocSnapshot>>>;
   /** Ephemeral in-panel cursors keyed by node id → peer id. */
-  subDocCursors: Record<string, Record<string, { name: string; color: string; x: number; y: number; line?: number }>>;
+  subDocCursors: Record<string, Record<string, { name: string; color: string; x: number; y: number; line?: number; at: number }>>;
   emitSubDoc: (op: SubDocOp) => void;
 
   // ---- internal wiring (used by the in-canvas doc-sync hook) ----
@@ -131,7 +134,7 @@ function CollabState({ children }: { children: ReactNode }) {
   const [hostQuizLog, setHostQuizLog] = useState<HostQuizEntry[]>([]);
   const [subDocs, setSubDocs] = useState<Record<string, SubDocSnapshot>>({});
   const [subDocCursors, setSubDocCursors] = useState<
-    Record<string, Record<string, { name: string; color: string; x: number; y: number; line?: number }>>
+    Record<string, Record<string, { name: string; color: string; x: number; y: number; line?: number; at: number }>>
   >({});
 
   const isHost = role === 'host';
@@ -180,12 +183,17 @@ function CollabState({ children }: { children: ReactNode }) {
                   x: op.x,
                   y: op.y,
                   line: op.line,
+                  at: Date.now(),
                 },
               },
             }));
             return;
           }
           if (!isHost || !isSubDocEditOp(op)) return;
+          // Gate: reject guest patches when interview settings deny edit
+          const senderRole = players.find((p) => p.id === fromId)?.role ?? 'guest';
+          const patchKind = op[SUBDOC_TAG] === 'patch-editor' ? 'collab-code' as const : 'whiteboard' as const;
+          if (!canEditSubDoc({ role: senderRole as 'host' | 'guest' | 'spectator', session: sessionMeta, isCollaborating }, patchKind)) return;
           setSubDocs((docs) => {
             if (op[SUBDOC_TAG] === 'snapshot') {
               return { ...docs, [op.doc.nodeId]: op.doc };
@@ -294,6 +302,32 @@ function CollabState({ children }: { children: ReactNode }) {
     return () => clearInterval(iv);
   }, [isCollaborating]);
 
+  // Prune stale sub-doc cursors (same cadence as drag expiry)
+  useEffect(() => {
+    if (!isCollaborating) return;
+    const iv = setInterval(() => {
+      const cutoff = Date.now() - 2000;
+      setSubDocCursors((m) => {
+        let changed = false;
+        const next: typeof m = {};
+        for (const [nodeId, peers] of Object.entries(m)) {
+          const kept: typeof peers = {};
+          for (const [pid, c] of Object.entries(peers)) {
+            if (c.at >= cutoff) {
+              kept[pid] = c;
+            } else {
+              changed = true;
+            }
+          }
+          if (Object.keys(kept).length > 0) next[nodeId] = kept;
+          else changed = true;
+        }
+        return changed ? next : m;
+      });
+    }, 500);
+    return () => clearInterval(iv);
+  }, [isCollaborating]);
+
   // ---- outbound presence (throttled per kind) ----
   const lastSent = useRef<Record<string, number>>({});
   const emit = useCallback((op: CanvasOp) => {
@@ -378,7 +412,26 @@ function CollabState({ children }: { children: ReactNode }) {
     setSubDocs({});
     setSubDocCursors({});
     setSessionMeta(defaultSession('solo'));
+    autoJoinRef.current = false;
+
+    // Strip room/sessionKind from URL so refresh doesn't re-join
+    const current = readShareFromUrl();
+    if (current?.room) {
+      const { room: _, sessionKind: __, ...rest } = current;
+      writeShareToUrl(rest);
+    }
   }, [disconnect]);
+
+  const updateInterviewSettings = useCallback(
+    (patch: Partial<InterviewSettings>) => {
+      if (!isHost) return;
+      setSessionMeta((prev) => {
+        if (prev.kind !== 'interview') return prev;
+        return { ...prev, interview: { ...prev.interview!, ...patch } };
+      });
+    },
+    [isHost],
+  );
 
   // ---- comment actions (optimistic locally; folded by the host doc) ----
   const emitEdit = useCallback((op: EditOp) => emit(op), [emit]);
@@ -418,6 +471,7 @@ function CollabState({ children }: { children: ReactNode }) {
       status, room, role, self, players, isCollaborating, isHost,
       session: sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
+      updateInterviewSettings,
       peers, followId, setFollowId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
@@ -432,6 +486,7 @@ function CollabState({ children }: { children: ReactNode }) {
       status, room, role, self, players, isCollaborating, isHost,
       sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
+      updateInterviewSettings,
       peers, followId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,

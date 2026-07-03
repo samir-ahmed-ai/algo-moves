@@ -37,6 +37,7 @@ export function WhiteboardPanelBody() {
         readOnly={sync.readOnly}
         isCollaborating={sync.isLive}
         initialData={payload}
+        remoteRev={sync.rev}
         collaborators={collaborators}
         onChange={(next) => sync.setPayload(next)}
         onPointerUpdate={sync.onPointerUpdate}

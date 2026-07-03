@@ -79,6 +79,7 @@ import { useCanvasNodeMutations } from './useCanvasNodeMutations';
 import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProvider';
 import { useCanvasDocSync } from './collab/useCanvasDocSync';
 import { useCanvasFollow } from './collab/useCanvasFollow';
+import { canMoveCanvasNodes } from './collab/subdocPermissions';
 import { CanvasCollabOverlays } from './collab/CanvasCollabOverlays';
 import { CommentLayer } from './collab/CommentLayer';
 
@@ -904,7 +905,7 @@ function Inner({
             reconnectRadius={18}
             proOptions={{ hideAttribution: true }}
             nodesConnectable={!lock}
-            nodesDraggable={!lock}
+            nodesDraggable={!lock && canMoveCanvasNodes({ role: collab.role, session: collab.session, isCollaborating: collab.isCollaborating })}
             elementsSelectable={!lock}
             connectOnClick={false}
             autoPanOnNodeDrag

@@ -16,7 +16,8 @@ import {
   mergeRemoteNodes,
 } from './canvasDoc';
 import { canMoveCanvasNodes } from './subdocPermissions';
-import { subDocSignature } from './subdocProtocol';
+import { subDocSignature, type SubDocKind, type SubDocPayload } from './subdocProtocol';
+import { snapshotFromPayload } from './subdocMerge';
 
 type SetNodes = (u: PanelFlowNode[] | ((prev: PanelFlowNode[]) => PanelFlowNode[])) => void;
 type SetEdges = (u: Edge[] | ((prev: Edge[]) => Edge[])) => void;
@@ -41,13 +42,14 @@ interface DocSyncArgs {
  *  - Everyone broadcasts their live drags as ephemeral presence.
  */
 export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncArgs): void {
-  const { role, isCollaborating, session, comments, setComments, emit, broadcastDrag, broadcastSelection, subDocs } = useCanvasCollab();
+  const { role, isCollaborating, session, comments, setComments, emit, broadcastDrag, broadcastSelection, subDocs, setSubDocs } = useCanvasCollab();
   const { publishState, subscribe, sharedState } = useGameRoom();
 
   const isHost = role === 'host';
   const prevNodes = useRef<PanelFlowNode[]>(nodes);
   const prevEdges = useRef<Edge[]>(edges);
   const revRef = useRef(0);
+  const seededSubDocs = useRef(false);
 
   // Fresh mirrors so the host publisher reads current state without re-binding.
   const nodesRef = useRef(nodes);
@@ -61,10 +63,34 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
 
   const canMoveNodes = canMoveCanvasNodes({ role, session, isCollaborating });
 
+  // Seed subDocs from existing node.data.subDoc when host starts a session
+  useEffect(() => {
+    if (!isHost || !isCollaborating || seededSubDocs.current) return;
+    seededSubDocs.current = true;
+    const initial: Record<string, ReturnType<typeof snapshotFromPayload>> = {};
+    const subDocKinds = new Set(['whiteboard', 'collab-code']);
+    for (const n of nodesRef.current) {
+      const kind = n.data?.kind;
+      const sub = n.data?.subDoc;
+      if (kind && subDocKinds.has(kind) && sub?.payload) {
+        initial[n.id] = snapshotFromPayload(n.id, kind as SubDocKind, sub.rev ?? 0, sub.payload as SubDocPayload);
+      }
+    }
+    if (Object.keys(initial).length > 0) {
+      setSubDocs((prev) => ({ ...initial, ...prev }));
+    }
+  }, [isHost, isCollaborating, setSubDocs]);
+
+  // Reset seed flag when leaving session
+  useEffect(() => {
+    if (!isCollaborating) seededSubDocs.current = false;
+  }, [isCollaborating]);
+
   // ---- host: publish the authoritative document on every settled change ----
   const sig = isCollaborating && isHost ? docSignature(nodes, edges, comments) : '';
   const subSig = isCollaborating && isHost ? subDocSignature(subDocs) : '';
-  usePublishState(isHost && isCollaborating, [sig, subSig, session.kind, session.activeProblemId], () => {
+  const interviewSig = session.interview ? JSON.stringify(session.interview) : '';
+  usePublishState(isHost && isCollaborating, [sig, subSig, session.kind, session.activeProblemId, interviewSig], () => {
     if (!sig && !subSig) return;
     revRef.current += 1;
     const doc: CanvasDoc = {

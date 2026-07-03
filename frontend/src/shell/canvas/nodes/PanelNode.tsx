@@ -16,6 +16,7 @@ const CHAIN_TINTS = [
 ] as const;
 import { CodeStudioProvider, CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
 import { CollabCodeStudioBody, CollabCodeStudioToolbar } from '@/shell/study/CollabCodeStudio';
+import { SubDocSyncProvider } from '@/shell/canvas/collab/SubDocSyncProvider';
 import { useCanvasStatic } from './CanvasContext';
 import { PanelBody as PanelBodyShell, type HeaderDensity } from './nodeui';
 import { PanelBody } from '@/shell/panels';
@@ -189,7 +190,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
             <CodeStudioFooter />
           </CodeStudioProvider>
         ) : !collapsed && isCollabCode ? (
-          <>
+          <SubDocSyncProvider kind="collab-code">
             <PanelNodeHeader
               {...headerProps}
               inlineToolbar={
@@ -199,7 +200,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
               }
             />
             <CollabCodeStudioBody />
-          </>
+          </SubDocSyncProvider>
         ) : (
           <>
             <PanelNodeHeader
