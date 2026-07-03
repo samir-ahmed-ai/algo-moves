@@ -4,6 +4,7 @@ import { useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
+import { usePublishState } from '../../net/usePublishState';
 import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { Avatar } from '../../ui/Avatar';
@@ -141,15 +142,10 @@ export function TicTacToe() {
     setGen(specShared.gen);
   }, [isSpectator, specShared]);
 
-  // Host mirrors the live board into shared state whenever it changes — in an
-  // effect, never during render — so spectators and late joiners stay in sync.
-  // publishBoard is intentionally omitted from deps: it closes over sharedState,
-  // and re-running when sharedState changes (i.e. after our own publish) would
-  // loop. The effect always sees the latest publishBoard, so it reads fresh state.
-  useEffect(() => {
-    if (role === 'host') publishBoard(board, gen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board, gen, role]);
+  // Host mirrors the live board into shared state whenever it changes, so
+  // spectators and late joiners stay in sync. usePublishState owns the
+  // effect + loop-safe ref handling.
+  usePublishState(role === 'host', [board, gen], () => publishBoard(board, gen));
 
   // --- Per-turn countdown timer (players only). Auto-plays the lowest empty
   //     cell if the local player lets their clock run out, keeping play moving
