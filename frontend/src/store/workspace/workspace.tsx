@@ -8,7 +8,7 @@ import {
 } from '@/styles/themes/registry';
 import type { ProjectState } from '@/store/project-state/projectState';
 import type { CanvasToolsProps } from '@/shell/canvas/CanvasTools';
-import type { BgVariant, EdgeOpts, LayoutPreset } from '@/shell/canvas/layout';
+import type { BgVariant, EdgeOpts, LayoutPreset } from '@/lib/canvas/layoutPrefs';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 import { readStorageText, writeStorageJson } from '@/store/persistence/storage';
 

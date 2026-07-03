@@ -60,22 +60,23 @@ const ACCEPTED = new Set([
  * entry fails the build, so the list can only shrink. Do NOT add new ones.
  */
 const KNOWN_VIOLATIONS = new Set([
-  // Tranche 1 / Theme B — token modules still live under shell/canvas &
-  // plugins; the design leaf re-exports upward. Fixed by moving the canonical
-  // token modules down into @/design (nodeui primitives already relocated).
+  // Remaining debt — all blocked on relocating canvas token/primitive modules
+  // (canvasTokens, nodeTokens, vizTokens, vizFitMeasure, align) out of
+  // shell/canvas into leaves. Grouped for the canvas tranche (Tranche 4).
+  //
+  // The design leaf re-exports token modules that still live upward:
   'design/tokens.ts :: ../shell/canvas/canvasTokens',
   'design/tokens.ts :: ../shell/canvas/nodeTokens',
   'design/tokens.ts :: ../plugins/_shared/vizTokens',
-  // Tranche 1 — lib pulled back to pure / neutral leaves
-  'lib/canvas/canvasActions.ts :: @/shell/canvas/layout', // #59 — move LayoutVisualizeOptions to lib
-  'lib/canvas/canvasTeachingUi.ts :: @/shell/canvas/nodeui', // #08 — VizFitBox/MiniTabs -> shared leaf
-  // Tranche 1 — store canvas-pref constants/types moved to a neutral leaf
-  'store/canvas-layout/canvasPrefs.ts :: @/shell/canvas/layout', // #17
-  'store/workspace/useAppearanceState.ts :: @/shell/canvas/layout', // #17
-  'store/workspace/workspaceContextTypes.ts :: @/shell/canvas/layout', // #17
-  'store/workspace/workspace.tsx :: @/shell/canvas/layout', // #14
-  'store/workspace/workspace.tsx :: @/shell/canvas/CanvasTools', // #14
-  'store/workspace/useChromeState.ts :: @/shell/SidebarShell', // #14 — SIDEBAR_* -> design/layout leaf
+  // lib/canvas re-exports VizFitBox/MiniTabs, which depend on shell/canvas
+  // vizFitMeasure; move those to a shared leaf first (#08):
+  'lib/canvas/canvasTeachingUi.ts :: @/shell/canvas/nodeui',
+  // store context is typed by CanvasToolsProps (which pulls AlignKind from
+  // shell/canvas/align) — move CanvasToolsProps + AlignKind to a leaf (#14):
+  'store/workspace/workspace.tsx :: @/shell/canvas/CanvasTools',
+  // SIDEBAR_WIDE_W derives from STRUDEL_NODE_W (nodeTokens), so these sidebar
+  // dims relocate together with the token modules above (#14):
+  'store/workspace/useChromeState.ts :: @/shell/SidebarShell',
 ]);
 
 const IMPORT_RE = /(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*['"]([^'"]+)['"]/g;

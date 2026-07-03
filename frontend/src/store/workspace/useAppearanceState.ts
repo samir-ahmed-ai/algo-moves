@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { normalizeThemePreset, type ThemePreset } from '@/styles/themes/registry';
 import type { ShareState } from '@/store/navigation/shareState';
-import type { LayoutPreset } from '@/shell/canvas/layout';
+import type { LayoutPreset } from '@/lib/canvas/layoutPrefs';
 import type { Density, Palette, Theme, Tweaks, WorkspaceDefaults } from './workspace';
 
 /** Theme, palette, density and display tweaks, plus the document-element sync effects. */

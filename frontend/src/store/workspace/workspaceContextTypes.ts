@@ -1,7 +1,7 @@
 import type { TrackId } from '@/content';
 import type { CanvasMode } from '@/core';
 import type { ThemePreset } from '@/styles/themes/registry';
-import type { LayoutPreset } from '@/shell/canvas/layout';
+import type { LayoutPreset } from '@/lib/canvas/layoutPrefs';
 import type {
   AppRoute,
   CanvasAddPanel,

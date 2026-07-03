@@ -25,9 +25,22 @@ import {
   sizeOf,
   STRUDEL_NODE_W,
 } from './nodeTokens';
+// Canvas layout/edge preference data + types are homed in the lib leaf so store
+// and lib can share them; re-exported here for layout.ts's existing consumers.
+import {
+  LAYOUT_PRESETS,
+  defaultEdgeOpts,
+  type LayoutPreset,
+  type LayoutVisualizeOptions,
+  type BgVariant,
+  type EdgePathType,
+  type EdgeOpts,
+} from '@/lib/canvas/layoutPrefs';
 
 export { layoutEstimate, layoutCap, layoutFixedWidth, layoutSize, nodeTier } from './nodeTokens';
 export { CANVAS_MARGIN, CANVAS_NODE_SEP, VIZ_WIRE_GAP } from './canvasTokens';
+export { LAYOUT_PRESETS, defaultEdgeOpts };
+export type { LayoutPreset, LayoutVisualizeOptions, BgVariant, EdgePathType, EdgeOpts };
 export { CATEGORY_ORDER, DOCK_ONLY_PANELS } from '../../core/panelRegistry';
 
 /** Width of the right-side dock that hosts `mode:'visualize'` plugin tabs (e.g. Cases). */
@@ -97,9 +110,7 @@ export function buildNodes(plugin: ProblemPlugin<any, any>, mode: CanvasMode): P
   return defaultNodeIds(plugin, mode).map((id) => makeNode(id, kindTitle(plugin, id), { x: 0, y: 0 }));
 }
 
-// ---- named layout presets (#74) ----
-export const LAYOUT_PRESETS = ['Full', 'Study', 'Minimal', 'Theater', 'Demo'] as const;
-export type LayoutPreset = (typeof LAYOUT_PRESETS)[number];
+// ---- named layout presets (#74) — LAYOUT_PRESETS/LayoutPreset live in lib/canvas/layoutPrefs ----
 
 /** UI copy for preset picker — icons stay in PresetPopover. */
 export const LAYOUT_PRESET_META: Record<
@@ -133,10 +144,6 @@ export const LAYOUT_PRESET_META: Record<
   },
 };
 
-export interface LayoutVisualizeOptions {
-  preset?: LayoutPreset;
-  viewport?: { width: number; height: number };
-}
 
 /** Default panels each preset keeps per mode (undefined mode = keep all). */
 const PRESET_KEEP: Record<LayoutPreset, Partial<Record<CanvasMode, string[]>>> = {
@@ -489,25 +496,8 @@ export function layoutGraph(nodes: PanelFlowNode[], edges: Edge[], rankdir: Layo
 
 // ---- user-controllable edge appearance ----
 
-export type BgVariant = 'dots' | 'lines' | 'cross' | 'none';
-export type EdgePathType = 'smoothstep' | 'bezier' | 'step' | 'straight';
-
 /** Accent swatches a node can be re-coloured to (NodeToolbar / context menu). */
 export const ACCENTS = ['var(--accent)', 'var(--good)', 'var(--bad)', 'var(--team1-stroke)', 'var(--team2-stroke)', 'var(--edge-active)'];
-
-export interface EdgeOpts {
-  pathType: EdgePathType;
-  animated: boolean;
-  strokeWidth: number;
-  arrow: boolean;
-}
-
-export const defaultEdgeOpts: EdgeOpts = {
-  pathType: 'bezier',
-  animated: true,
-  strokeWidth: 1.5,
-  arrow: false,
-};
 
 /** Fit-view padding constants — single source for canvas chrome-aware framing. */
 export const FIT_PADDING = 0.08;
