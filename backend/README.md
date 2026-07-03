@@ -118,7 +118,7 @@ docker run --rm -p 8080:8080 -e ALLOWED_ORIGINS=https://your-pages-origin algomo
 
 ### Railway
 
-The repo includes [`railway.toml`](railway.toml) and [`Dockerfile`](Dockerfile). Create a Railway **backend** service with root directory `/backend`, generate a public domain, then set variables in the Railway dashboard (not in git):
+The repo includes [`railway.toml`](railway.toml) and [`Dockerfile`](Dockerfile). In Railway, create a **backend** service with **root directory** `backend`, connect your GitHub repo, and set branch **`main`** with deploy-on-push enabled. Set variables in the dashboard (not in git):
 
 | Variable | Purpose |
 | -------- | ------- |
@@ -127,17 +127,13 @@ The repo includes [`railway.toml`](railway.toml) and [`Dockerfile`](Dockerfile).
 | `RUN_MIGRATIONS` | `true` to apply schema + seed on startup |
 | `PORT` | Set automatically by Railway |
 
-The **frontend** Railway service (root `/frontend`) needs `VITE_GAMES_SERVER_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` so the build reaches this server.
+The **frontend** service uses root directory `frontend`, the same GitHub repo/branch, and `VITE_GAMES_SERVER_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}`.
 
-Deploy from the repo root:
+Pushes to `main` deploy both services automatically via Railway's GitHub integration. For a manual fallback:
 
 ```bash
-export RAILWAY_TOKEN="<project-token>"
-export RAILWAY_PROJECT_ID="<project-id>"
 railway up backend --path-as-root --service backend --detach
 ```
-
-Or enable [`.github/workflows/deploy-railway.yml`](../.github/workflows/deploy-railway.yml) with GitHub secrets `RAILWAY_TOKEN` and `RAILWAY_BACKEND_SERVICE_ID`.
 
 ### Environment
 
