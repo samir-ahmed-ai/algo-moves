@@ -29,3 +29,7 @@ export const defaultEdgeOpts: EdgeOpts = {
   strokeWidth: 1.5,
   arrow: false,
 };
+
+/** Node alignment directions for the canvas align/distribute tools. Pure type,
+ * homed here so the store's CanvasToolsProps contract doesn't import shell. */
+export type AlignKind = 'left' | 'hcenter' | 'right' | 'top' | 'vmiddle' | 'bottom';

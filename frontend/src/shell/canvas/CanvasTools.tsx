@@ -14,16 +14,9 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../chrome';
 import type { AlignKind } from './align';
+import type { CanvasToolsProps } from '@/store/workspace';
 
-export interface CanvasToolsProps {
-  selCount: number;
-  onAlign: (a: AlignKind) => void;
-  onDistribute: (d: 'h' | 'v') => void;
-  canUndo: boolean;
-  canRedo: boolean;
-  onUndo: () => void;
-  onRedo: () => void;
-}
+export type { CanvasToolsProps };
 
 const HUD_BTN =
   'grid place-items-center rounded-[calc(var(--radius)-2px)] transition-colors disabled:opacity-30';

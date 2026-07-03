@@ -7,10 +7,21 @@ import {
   type ThemePreset,
 } from '@/styles/themes/registry';
 import type { ProjectState } from '@/store/project-state/projectState';
-import type { CanvasToolsProps } from '@/shell/canvas/CanvasTools';
-import type { BgVariant, EdgeOpts, LayoutPreset } from '@/lib/canvas/layoutPrefs';
+import type { AlignKind, BgVariant, EdgeOpts, LayoutPreset } from '@/lib/canvas/layoutPrefs';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 import { readStorageText, writeStorageJson } from '@/store/persistence/storage';
+
+/** Canvas align/undo/redo tool callbacks — the contract the workspace context
+ * exposes to chrome. CanvasTools (shell) consumes this shape. */
+export interface CanvasToolsProps {
+  selCount: number;
+  onAlign: (a: AlignKind) => void;
+  onDistribute: (d: 'h' | 'v') => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+}
 
 export type Theme = 'dark' | 'light';
 export type Density = 'compact' | 'ultra' | 'spacious';

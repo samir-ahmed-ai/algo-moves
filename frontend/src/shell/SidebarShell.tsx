@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText, ChromeLabel } from './chromeUi';
-import { STRUDEL_NODE_W } from './canvas/nodeTokens';
 import { CHROME_BTN_MD } from './chrome';
 
 export {
@@ -13,9 +12,8 @@ export {
   CSS_CHROME_BOTTOM_RAIL,
 } from './chrome';
 
-export const SIDEBAR_W = 192;
-export const SIDEBAR_RAIL_W = 32;
-export const SIDEBAR_WIDE_W = STRUDEL_NODE_W;
+// Sidebar dimensions are pure design tokens; re-exported for chrome consumers.
+export { SIDEBAR_W, SIDEBAR_RAIL_W, SIDEBAR_WIDE_W } from '@/design/sidebarMetrics';
 
 export const SECTION_MAX = {
   catalog: 'max-h-[36vh]',

@@ -1,8 +1,9 @@
 import type { PanelFlowNode } from './PanelNode';
 import { layoutEstimate } from './nodeTokens';
 import { getMeasuredHeight } from './measuredCache';
+import type { AlignKind } from '@/lib/canvas/layoutPrefs';
 
-export type AlignKind = 'left' | 'hcenter' | 'right' | 'top' | 'vmiddle' | 'bottom';
+export type { AlignKind };
 
 const W = (n: PanelFlowNode) => n.width ?? layoutEstimate(n.data.kind ?? n.id).w;
 const H = (n: PanelFlowNode) =>

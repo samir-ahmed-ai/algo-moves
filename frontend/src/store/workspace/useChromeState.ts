@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BOTTOM_RAIL_H, SIDEBAR_RAIL_W, SIDEBAR_W, SIDEBAR_WIDE_W } from '@/shell/SidebarShell';
+import { BOTTOM_RAIL_H, SIDEBAR_RAIL_W, SIDEBAR_W, SIDEBAR_WIDE_W } from '@/design/sidebarMetrics';
 import type { LayoutDir, RightSidebarTab } from './workspace';
 
 export interface ChromeStateOptions {

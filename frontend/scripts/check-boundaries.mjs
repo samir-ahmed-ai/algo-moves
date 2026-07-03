@@ -60,19 +60,11 @@ const ACCEPTED = new Set([
  * entry fails the build, so the list can only shrink. Do NOT add new ones.
  */
 const KNOWN_VIOLATIONS = new Set([
-  // Remaining debt — all blocked on relocating canvas token/primitive modules
-  // (canvasTokens, nodeTokens, vizTokens, vizFitMeasure, align) out of
-  // shell/canvas into leaves. Grouped for the canvas tranche (Tranche 4).
-  //
-  // lib/canvas re-exports VizFitBox/MiniTabs, which depend on shell/canvas
-  // vizFitMeasure; move those to a shared leaf first (#08):
+  // Last remaining debt (#08): lib/canvas/canvasTeachingUi re-exports
+  // VizFitBox/MiniTabs from shell/canvas/nodeui. These depend on the canvas
+  // vizFitMeasure runtime, so relocating them to a shared leaf is bundled with
+  // the CanvasStage/vizFitMeasure decomposition (Tranche 4 God-component work).
   'lib/canvas/canvasTeachingUi.ts :: @/shell/canvas/nodeui',
-  // store context is typed by CanvasToolsProps (which pulls AlignKind from
-  // shell/canvas/align) — move CanvasToolsProps + AlignKind to a leaf (#14):
-  'store/workspace/workspace.tsx :: @/shell/canvas/CanvasTools',
-  // SIDEBAR_WIDE_W derives from STRUDEL_NODE_W (nodeTokens), so these sidebar
-  // dims relocate together with the token modules above (#14):
-  'store/workspace/useChromeState.ts :: @/shell/SidebarShell',
 ]);
 
 const IMPORT_RE = /(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*['"]([^'"]+)['"]/g;
