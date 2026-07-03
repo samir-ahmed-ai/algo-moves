@@ -233,3 +233,45 @@ Two subsystems the completeness critic flagged as uncovered were audited separat
 
 **Total: 84 confirmed findings across 12 subsystems.**
 
+---
+
+## Execution progress log
+
+Branch: `refactor/architecture-remediation`. Every commit verified with
+`tsc` + `vitest` (3447 tests) + `check:all` + `go build/test`.
+
+**Module-boundary debt: 29 → 6** (tracked by `scripts/check-boundaries.mjs`, wired into `check:all`).
+
+- ✅ **Tranche 0 — guardrails + quick wins.** Added the import-boundary firewall
+  (`check-boundaries.mjs`, ratchet allowlist). Landed 9 quick wins: practice.tsx
+  HIGH leak (#02), align.ts (#57), browseNavigation dup (#73), ShareRoom const
+  (#53), diffTone reuse (#19), cycle-safe NODE_W (#22), dead scaffold field,
+  backend message-type consts (#44) + `sanitizeName` unexport (#45).
+- ✅ **Tranche 1 — shared leaves.** `@/lib/navigation` (hash utils, #15),
+  `lib/utils` extractions (shuffle #26/#75, webAudio #27/#74, searchPredicate
+  #69, isEditableTarget reuse #28), audio store-decoupling (#01), split-pane
+  consts → lib, `@/design/typography` + `@/components/formControls` extracted
+  from the 1151-LOC nodeui (#37/#42/#77, clears design/components/effects
+  upward imports), and `@/lib/canvas/layoutPrefs` (#14/#17/#59).
+- 🟡 **Tranche 2 — games engine (partial).** `net/usePublishState` fixes the
+  host-sync footgun in TicTacToe + MindMeld (#09). Deferred: GameCommonStrings
+  (#24 — locale-key naming diverges across games, high translation-typo risk),
+  useReportOnce (#23 — reset-guard placement differs per game), per-game
+  useXGame view-models (#35), spectator standardization (#03).
+
+### Remaining (needs care / user steer)
+
+- **6 boundary debts** all blocked on relocating canvas token modules
+  (`canvasTokens`/`nodeTokens`/`vizTokens`/`vizFitMeasure`/`align`) out of
+  shell/canvas — a coherent unit best done with **Tranche 4**. Documented in
+  `check-boundaries.mjs`.
+- **Tranche 3 (plugin infra)** — mostly clean mechanical wins (delete unused
+  `makeInspector` #65, `verdictLastFrameTone` #50, GridToggleButton, generic
+  effect controls) plus larger `createRecorder`/factory consolidation (#30/#31).
+- **Tranche 4 (canvas SoC)** — decomposing CanvasStage (961), layout.ts (557),
+  and the wide contexts is **hard to reverse**; the completeness critic requires
+  **characterization tests written first** (history/persistence/refit). Recommend
+  landing those tests before touching CanvasStage.
+- **Tranche 5 (store + backend)** — createSyncStore unification (#52), move IO
+  out of shell components (#61/#63), games-catalog table (#06), invariant tests.
+
