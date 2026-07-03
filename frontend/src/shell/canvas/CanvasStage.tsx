@@ -71,7 +71,8 @@ import {
   type BgVariant,
   type LayoutPreset,
 } from './layout';
-import { snapNodeLayout, restoreNodeWidth } from './nodeSnapshot';
+import { snapNodeLayout } from './nodeSnapshot';
+import { buildCanvasFrame } from './canvasFrame';
 import { sanitizeVisualizeEdges } from './edgeSanitization';
 import { useCanvasLayoutPersistence, type Saved } from './useCanvasLayoutPersistence';
 import { useCanvasHistory } from './useCanvasHistory';
@@ -178,44 +179,19 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     [mode, layoutPreset, viewportSize],
   );
 
-  // Build the node+edge set for a mode, respecting removals, dagre layout, and saved positions/sizes.
+  // Build the node+edge set for a mode, respecting removals, dagre layout, and
+  // saved positions/sizes. Pure assembly lives in buildCanvasFrame; this wrapper
+  // only supplies the current per-mode removal/layout refs.
   const buildFor = useCallback(
-    (m: CanvasMode, k: string): { nodes: PanelFlowNode[]; edges: Edge[] } => {
-      const removed = removedRef.current[k];
-      let nodes = buildNodes(plugin, m);
-      if (removed?.size) nodes = nodes.filter((n) => !removed.has(n.id));
-      const present = new Set(nodes.map((n) => n.id));
-      const removedEdges = removedEdgesRef.current[k] ?? new Set<string>();
-      const raw = buildEdges(plugin, m)
-        .filter((e) => present.has(e.source) && present.has(e.target))
-        .filter((e) => !removedEdges.has(e.id));
-      nodes = m === 'visualize'
-        ? layoutVisualizeCanvas(nodes, layoutOpts())
-        : m === 'learn'
-          ? layoutLearnCanvas(nodes, raw)
-          : layoutGraph(nodes, raw, dir);
-      const saved = layoutRef.current[k];
-      if (saved) {
-        nodes = nodes.map((n) => {
-          if (!saved[n.id]) return n;
-          const kind = n.data.kind ?? n.id;
-          const width =
-            m === 'visualize' && kind === 'viz'
-              ? n.width
-              : restoreNodeWidth(kind, saved[n.id].width, n.width);
-          // Visualize / Learn: keep canonical stacked layout; restore widths only.
-          if (m === 'visualize' || m === 'learn') {
-            return { ...n, position: n.position, width };
-          }
-          return {
-            ...n,
-            position: saved[n.id].position,
-            width,
-          };
-        });
-      }
-      return { nodes, edges: styleEdges(raw, edgeOpts) };
-    },
+    (m: CanvasMode, k: string): { nodes: PanelFlowNode[]; edges: Edge[] } =>
+      buildCanvasFrame(plugin, m, {
+        removed: removedRef.current[k],
+        removedEdges: removedEdgesRef.current[k],
+        saved: layoutRef.current[k],
+        layoutOpts: layoutOpts(),
+        dir,
+        edgeOpts,
+      }),
     [plugin, edgeOpts, dir, layoutOpts],
   );
 
