@@ -20,10 +20,8 @@ import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '@/lib/quiz';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { vizText } from './vizTokens';
-import { useCanvasActions } from '@/lib/canvas';
 import { recordAttempt } from '@/store/persistence';
-import { useCanvasStatic } from '../../shell/canvas/CanvasContext';
-import { VizFitBox, MiniTabs } from '@/lib/canvas';
+import { useCanvasActions, useCanvasStatic, VizFitBox, MiniTabs } from '@/lib/canvas';
 import type { Frame, PluginViewProps, QuizQuestion, SampleInput } from '../../core/types';
 
 /* ------------------------------------------------------------------ Quiz -- */

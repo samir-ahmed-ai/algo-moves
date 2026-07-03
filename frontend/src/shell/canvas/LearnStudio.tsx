@@ -23,7 +23,7 @@ import { useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { ChromeLabel, chromeText } from '../chromeUi';
-import { Btn, Chip, EmptyState } from './nodeui';
+import { Btn, Chip, EmptyState, difficultyTone } from './nodeui';
 import {
   CanvasActionsProvider,
   CanvasFrameProvider,
@@ -45,14 +45,6 @@ import {
   type StudioGroupId,
   type StudioTab,
 } from './studioTabs';
-
-type DiffTone = 'good' | 'bad' | 'accent';
-function diffTone(d?: string): DiffTone {
-  const k = (d ?? '').toLowerCase();
-  if (k === 'easy') return 'good';
-  if (k === 'hard') return 'bad';
-  return 'accent';
-}
 
 export interface LearnStudioProps {
   plugin: ProblemPlugin<any, any>;
@@ -276,7 +268,7 @@ function TopBar({
           </span>
         )}
       </div>
-      {!isMobile && item.difficulty && <Chip tone={diffTone(item.difficulty)}>{item.difficulty}</Chip>}
+      {!isMobile && item.difficulty && <Chip tone={difficultyTone(item.difficulty)}>{item.difficulty}</Chip>}
 
       {cs.variants.length > 1 && (
         <div className="flex shrink-0 items-center gap-0.5">

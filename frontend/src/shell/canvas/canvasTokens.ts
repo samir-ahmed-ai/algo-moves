@@ -1,5 +1,9 @@
-/** Default node width baseline — keep in sync with NODE_W in nodeTokens.ts */
-const DEFAULT_NODE_W = 400;
+/**
+ * Standard node width baseline (px). Homed here (not nodeTokens) because
+ * nodeTokens imports MIN_VIEWPORT_HEIGHT from this module; defining it here
+ * keeps a single source without a circular import. nodeTokens re-exports it.
+ */
+export const NODE_W = 400;
 
 /** fitView animation duration (ms). */
 export const FIT_VIEW_DURATION_MS = 400;
@@ -16,28 +20,28 @@ export function scaleFromNodeWidth(nodeW: number, ratio: number, floor = 0): num
 export const CANVAS_MARGIN = 12;
 
 /** Gap between stacked / row nodes — ~6% of node width. */
-export function canvasNodeSep(nodeW = DEFAULT_NODE_W): number {
+export function canvasNodeSep(nodeW = NODE_W): number {
   return scaleFromNodeWidth(nodeW, 0.06, 16);
 }
 
 /** Horizontal corridor for converging wires into the visualizer — ~25% of node width. */
-export function vizWireGap(nodeW = DEFAULT_NODE_W, preset?: 'default' | 'theater'): number {
+export function vizWireGap(nodeW = NODE_W, preset?: 'default' | 'theater'): number {
   const base = scaleFromNodeWidth(nodeW, 0.25, 80);
   return preset === 'theater' ? Math.max(64, Math.round(base * 0.85)) : base;
 }
 
 /** Port dot offset outside the node border. */
-export function handlePortOffset(nodeW = DEFAULT_NODE_W): number {
+export function handlePortOffset(nodeW = NODE_W): number {
   return scaleFromNodeWidth(nodeW, 0.025, 8);
 }
 
 /** Minimum visualizer width when viewport layout runs. */
-export function vizMinWidth(nodeW = DEFAULT_NODE_W): number {
+export function vizMinWidth(nodeW = NODE_W): number {
   return nodeW;
 }
 
-export const CANVAS_NODE_SEP = canvasNodeSep(DEFAULT_NODE_W);
-export const VIZ_WIRE_GAP = vizWireGap(DEFAULT_NODE_W);
+export const CANVAS_NODE_SEP = canvasNodeSep(NODE_W);
+export const VIZ_WIRE_GAP = vizWireGap(NODE_W);
 
 /** Tailwind class shared by all canvas port handles. */
 export const HANDLE_DOT_CLASS =

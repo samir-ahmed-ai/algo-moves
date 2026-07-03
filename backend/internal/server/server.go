@@ -47,7 +47,7 @@ func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 			http.Error(w, "missing or invalid room code", http.StatusBadRequest)
 			return
 		}
-		name := SanitizeName(r.URL.Query().Get("name"))
+		name := sanitizeName(r.URL.Query().Get("name"))
 		pid := sanitizePid(r.URL.Query().Get("pid"))
 		opts := hub.JoinOptions{
 			Capacity:    parseCapacity(r.URL.Query().Get("cap")),
@@ -133,9 +133,9 @@ func writeJSON(w http.ResponseWriter, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-// SanitizeName trims a display name and caps its length so a peer cannot inject
+// sanitizeName trims a display name and caps its length so a peer cannot inject
 // huge or control-laden strings into the other player's UI.
-func SanitizeName(raw string) string {
+func sanitizeName(raw string) string {
 	name := strings.TrimSpace(raw)
 	name = strings.Map(func(r rune) rune {
 		if r < 0x20 || r == 0x7f {

@@ -20,12 +20,12 @@ func TestSanitizeName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := SanitizeName(tt.in)
+			got := sanitizeName(tt.in)
 			if got != tt.want {
-				t.Fatalf("SanitizeName(%q) = %q, want %q", tt.in, got, tt.want)
+				t.Fatalf("sanitizeName(%q) = %q, want %q", tt.in, got, tt.want)
 			}
 			if n := len([]rune(got)); n > 24 {
-				t.Fatalf("SanitizeName(%q) returned %d runes, want <= 24", tt.in, n)
+				t.Fatalf("sanitizeName(%q) returned %d runes, want <= 24", tt.in, n)
 			}
 		})
 	}

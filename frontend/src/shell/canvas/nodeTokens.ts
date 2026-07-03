@@ -1,12 +1,13 @@
-import { MIN_VIEWPORT_HEIGHT } from './canvasTokens';
+import { MIN_VIEWPORT_HEIGHT, NODE_W } from './canvasTokens';
 import { getMeasuredHeight } from './measuredCache';
 
 export type NodeTier = 'narrow' | 'standard' | 'wide' | 'board';
 
 export type PanelSize = { w: number; estH: number; cap?: number };
 
-/** Strudel Flow standard node width (~25% above legacy w-80). */
-export const NODE_W = 400;
+/** Strudel Flow standard node width (~25% above legacy w-80). Defined in
+ * canvasTokens (cycle-safe single source); re-exported here for consumers. */
+export { NODE_W };
 
 /** Max resize width for problem panel. */
 export const NODE_MAX_W = 600;

@@ -35,7 +35,6 @@ export const ${varName} = defineEffect<${Pascal}Data>({
   defaultData: { amount: 1 },
   transformFrames: (frames: Frame[], data) => frames,
   traceSnippet: (data) => \`${id}(\${data.amount})\`,
-  Panel: () => null,
 });
 `;
 

@@ -1,5 +1,5 @@
 import type { PanelFlowNode } from './PanelNode';
-import { layoutEstimate } from './layout';
+import { layoutEstimate } from './nodeTokens';
 import { getMeasuredHeight } from './measuredCache';
 
 export type AlignKind = 'left' | 'hcenter' | 'right' | 'top' | 'vmiddle' | 'bottom';
