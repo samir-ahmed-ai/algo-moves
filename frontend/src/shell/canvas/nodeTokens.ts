@@ -1,25 +1,20 @@
-import { MIN_VIEWPORT_HEIGHT, NODE_W } from './canvasTokens';
+import { MIN_VIEWPORT_HEIGHT } from './canvasTokens';
 import { getMeasuredHeight } from './measuredCache';
+import {
+  NODE_W,
+  NODE_MAX_W,
+  STRUDEL_NODE_W,
+  LEGACY_STRUDEL_NODE_W,
+  NODE_UI_SCALE,
+} from '@/design/nodeScale';
 
 export type NodeTier = 'narrow' | 'standard' | 'wide' | 'board';
 
 export type PanelSize = { w: number; estH: number; cap?: number };
 
-/** Strudel Flow standard node width (~25% above legacy w-80). Defined in
- * canvasTokens (cycle-safe single source); re-exported here for consumers. */
-export { NODE_W };
-
-/** Max resize width for problem panel. */
-export const NODE_MAX_W = 600;
-
-/** @deprecated Use NODE_W */
-export const STRUDEL_NODE_W = NODE_W;
-
-/** Legacy canvas node width (Tailwind `w-80`). */
-export const LEGACY_STRUDEL_NODE_W = 320;
-
-/** Uniform UI scale for Strudel-sized narrow panels — typography, padding, estimates. */
-export const NODE_UI_SCALE = STRUDEL_NODE_W / LEGACY_STRUDEL_NODE_W;
+// Node-scale constants are defined in @/design/nodeScale (a pure leaf);
+// re-exported here for this module's many consumers.
+export { NODE_W, NODE_MAX_W, STRUDEL_NODE_W, LEGACY_STRUDEL_NODE_W, NODE_UI_SCALE };
 
 function scaleEstH(base: number): number {
   return Math.round(base * NODE_UI_SCALE);

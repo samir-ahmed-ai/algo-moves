@@ -64,10 +64,6 @@ const KNOWN_VIOLATIONS = new Set([
   // (canvasTokens, nodeTokens, vizTokens, vizFitMeasure, align) out of
   // shell/canvas into leaves. Grouped for the canvas tranche (Tranche 4).
   //
-  // The design leaf re-exports token modules that still live upward:
-  'design/tokens.ts :: ../shell/canvas/canvasTokens',
-  'design/tokens.ts :: ../shell/canvas/nodeTokens',
-  'design/tokens.ts :: ../plugins/_shared/vizTokens',
   // lib/canvas re-exports VizFitBox/MiniTabs, which depend on shell/canvas
   // vizFitMeasure; move those to a shared leaf first (#08):
   'lib/canvas/canvasTeachingUi.ts :: @/shell/canvas/nodeui',

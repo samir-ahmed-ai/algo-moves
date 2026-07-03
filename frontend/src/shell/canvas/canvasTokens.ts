@@ -1,23 +1,14 @@
-/**
- * Standard node width baseline (px). Homed here (not nodeTokens) because
- * nodeTokens imports MIN_VIEWPORT_HEIGHT from this module; defining it here
- * keeps a single source without a circular import. nodeTokens re-exports it.
- */
-export const NODE_W = 400;
-
-/** fitView animation duration (ms). */
-export const FIT_VIEW_DURATION_MS = 400;
-
-/** Minimum usable viewport height for board / viz layout. */
-export const MIN_VIEWPORT_HEIGHT = 280;
+import { NODE_W } from '@/design/nodeScale';
+import { FIT_VIEW_DURATION_MS, MIN_VIEWPORT_HEIGHT, CANVAS_MARGIN } from '@/design/canvasMetrics';
+// Node width + viewport metrics are defined in the design leaf; re-exported so
+// existing `./canvasTokens` consumers keep working.
+export { NODE_W };
+export { FIT_VIEW_DURATION_MS, MIN_VIEWPORT_HEIGHT, CANVAS_MARGIN };
 
 /** Scale a spacing token from the standard node width (400px baseline). */
 export function scaleFromNodeWidth(nodeW: number, ratio: number, floor = 0): number {
   return Math.max(floor, Math.round(nodeW * ratio));
 }
-
-/** Outer canvas inset — fixed for readability at any node scale. */
-export const CANVAS_MARGIN = 12;
 
 /** Gap between stacked / row nodes — ~6% of node width. */
 export function canvasNodeSep(nodeW = NODE_W): number {
