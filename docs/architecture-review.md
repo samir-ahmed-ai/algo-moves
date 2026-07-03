@@ -265,22 +265,29 @@ Branch: `refactor/architecture-remediation`. Every commit verified with
   token leaf: `@/design/nodeScale`, `@/design/canvasMetrics`, `@/design/vizText`
   now own the canonical tokens (canvasTokens/nodeTokens/vizTokens re-export
   down). Moved `AlignKind` + `CanvasToolsProps` and `SIDEBAR_*`/`BOTTOM_RAIL_H`
-  to leaves (`@/lib/canvas/layoutPrefs`, `@/design/sidebarMetrics`). **Boundary
-  debt 6 → 1.**
+  to leaves (`@/lib/canvas/layoutPrefs`, `@/design/sidebarMetrics`).
+- ✅ **Tranche 4c — pure `buildCanvasFrame` (#34).** Extracted CanvasStage's
+  node/edge assembly into `canvasFrame.ts` (no refs, no React state) with 6
+  characterization tests (`canvasFrame.test.ts`) locking the removal/layout/
+  restore behavior. `buildFor` is now a thin ref-supplying wrapper.
+- ✅ **Tranche 4d — VizFitBox relocation (#08).** `vizFitMeasure` →
+  `@/lib/canvas`; VizFitBox + MiniTabs → `@/components/vizFit`; deleted the
+  `canvasTeachingUi` firewall; practice imports them straight from the leaf.
+  nodeui 1151 → 895 LOC.
 
-### Remaining (the tests-first God-component phase)
+### 🎉 Module-boundary debt: 29 → **0**. The Shell → Canvas → Plugins layering is fully enforced.
 
-- **1 boundary debt** — `canvasTeachingUi` re-exports VizFitBox/MiniTabs from
-  nodeui; these depend on the `vizFitMeasure` canvas runtime, so they relocate
-  together with the CanvasStage decomposition below.
-- **Tranche 4 core (canvas SoC)** — decomposing CanvasStage (961), layout.ts
-  (557), and the wide contexts is **hard to reverse**. Approach (per the
-  completeness critic): (1) write characterization tests for CanvasStage
-  history/persistence/refit + CodeStudio contexts; (2) extract pure
-  `buildCanvasFrame` into layout.ts and a `useCanvasLifecycle` hook; (3) split
-  layout.ts + the wide contexts; (4) relocate VizFitBox/vizFitMeasure to clear
-  the final boundary debt. Best done as a focused, reviewable session.
+### Remaining polish (incremental — architecture is now solid)
+
+- **Tranche 4 residual SoC** — split `layout.ts` (557) into
+  presets/wiring/algorithms/edge-styles behind a barrel (#78); split the wide
+  `CodeStudioProvider` / `WorkspaceCtx` contexts (the logic is already in hooks —
+  only the context surface is monolithic, #33/#39); optional `useCanvasLifecycle`
+  hook for CanvasStage's residual effects.
 - **Tranche 5 (store + backend)** — createSyncStore unification (#52), move IO
-  out of shell components (#61/#63), games-catalog table (#06), invariant tests.
-  Mostly independent of the canvas work; can land in parallel.
+  out of shell components (#61/#63), games-catalog table (#06), invariant docs +
+  tests (#55/#56/#64). Independent of the canvas work.
+- **Tranche 2/3 deferrals** — GameCommonStrings (#24), useReportOnce (#23),
+  per-game useXGame (#35); plugin `createRecorder`/factory consolidation
+  (#30/#31), `verdictLastFrameTone` (#50).
 
