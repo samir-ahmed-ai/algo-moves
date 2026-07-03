@@ -1,6 +1,5 @@
-# Railway config for the static frontend (no secrets — set VITE_GAMES_SERVER_URL,
-# VITE_SUPABASE_URL, and VITE_SUPABASE_ANON_KEY in the dashboard).
-# Service root directory in Railway: /frontend
+# Railway config for the static frontend (set VITE_GAMES_SERVER_URL in the dashboard).
+# Service root directory in Railway: frontend
 
 [build]
 builder = "DOCKERFILE"
