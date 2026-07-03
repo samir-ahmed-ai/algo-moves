@@ -427,13 +427,14 @@ export function LandingPage() {
     setPalette,
     density,
     enterWorkspace,
+    enterCanvas,
+    enterProblemInMode,
     enterMobile,
     enterVim,
     enterGames,
     setActiveTrackId,
     setActiveCategoryId,
     setProblemFocused,
-    setMode,
   } = useWorkspace();
   const isMobile = useIsMobile();
   const progress = useProgress();
@@ -469,8 +470,11 @@ export function LandingPage() {
     enterWorkspace();
   };
   const startIn = (mode: 'play' | 'visualize' | 'learn') => {
-    setMode(mode);
-    if (firstProblem) enterWorkspace(firstProblem.id);
+    if (mode === 'visualize') {
+      enterCanvas();
+      return;
+    }
+    if (firstProblem) enterProblemInMode(firstProblem.id, mode);
   };
 
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;

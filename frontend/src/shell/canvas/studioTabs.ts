@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   Award,
+  BookOpen,
   BookMarked,
   Code2,
   Crosshair,
@@ -35,10 +36,10 @@ import { STORAGE_KEYS } from '@/store/storageKeys';
  * existing `PanelBody(kind)` switch from PanelNode; the three "build" views reach the
  * CodeStudio phase components, and `assemble` opens the AssembleModes.
  */
-export type StudioGroupId = 'build' | 'practice' | 'trace' | 'reference' | 'progress';
+export type StudioGroupId = 'start' | 'build' | 'practice' | 'trace' | 'reference' | 'progress';
 
 /** How LearnStudio renders the tab body. */
-export type StudioRender = 'quiz' | 'assemble' | 'recall' | 'panel';
+export type StudioRender = 'overview' | 'quiz' | 'assemble' | 'recall' | 'panel';
 
 /** A tab is hidden unless the underlying studio data is present. */
 export type StudioNeed = 'quiz' | 'pieces' | 'source';
@@ -62,6 +63,7 @@ export interface StudioGroup {
 }
 
 export const STUDIO_GROUPS: StudioGroup[] = [
+  { id: 'start', label: 'Start' },
   { id: 'build', label: 'Build & Recall' },
   { id: 'practice', label: 'Practice' },
   { id: 'trace', label: 'Trace the Run' },
@@ -70,6 +72,8 @@ export const STUDIO_GROUPS: StudioGroup[] = [
 ];
 
 export const STUDIO_TABS: StudioTab[] = [
+  // Start
+  { id: 'overview', label: 'Overview', icon: BookOpen, group: 'start', render: 'overview', wide: true },
   // Build & Recall
   { id: 'quiz', label: 'Quiz', icon: HelpCircle, group: 'build', render: 'quiz', need: 'quiz' },
   { id: 'assemble', label: 'Assemble', icon: Puzzle, group: 'build', render: 'assemble', need: 'pieces', wide: true },

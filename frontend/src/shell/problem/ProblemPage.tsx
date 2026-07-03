@@ -115,6 +115,7 @@ function ProblemPageHeader() {
     openProblem,
     activeItemId,
     setMode,
+    enterCanvas,
   } = useWorkspace();
   const isMobile = useIsMobile();
 
@@ -182,7 +183,7 @@ function ProblemPageHeader() {
             variant="ghost"
             size="sm"
             icon={<Network className="h-3.5 w-3.5" />}
-            onClick={() => setMode('visualize')}
+            onClick={() => enterCanvas()}
           >
             {!isMobile && 'Canvas'}
           </Btn>

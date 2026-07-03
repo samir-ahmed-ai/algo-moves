@@ -35,6 +35,7 @@ import { CodeStudioProvider, useCodeStudio } from './CodeStudio';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { SplitCodeEditor } from '../../components/SplitCodeEditor';
 import { AssembleModes } from './components/AssembleModes';
+import { ProblemOverviewBody } from './panels/ProblemOverviewBody';
 import { PanelBody } from './PanelNode';
 import {
   flatOrder,
@@ -112,8 +113,12 @@ export function LearnStudio({
 function initialTab(itemId: string, avail: StudioTab[]): string {
   const saved = readStorageText(`${STUDIO_TAB_PERSIST}:${itemId}`, null);
   if (saved && avail.some((t) => t.id === saved)) return saved;
-  const prefer = avail.find((t) => t.id === 'quiz') ?? avail.find((t) => t.id === 'pattern') ?? avail[0];
-  return prefer?.id ?? 'pattern';
+  const prefer =
+    avail.find((t) => t.id === 'overview') ??
+    avail.find((t) => t.id === 'quiz') ??
+    avail.find((t) => t.id === 'pattern') ??
+    avail[0];
+  return prefer?.id ?? 'overview';
 }
 
 function StudioShell() {
@@ -244,7 +249,7 @@ function TopBar({
 }) {
   const cs = useCodeStudio();
   const { item } = useCanvasStatic();
-  const { theme, setTheme, present, setPresent, setMode } = useWorkspace();
+  const { theme, setTheme, present, setPresent, enterCanvas } = useWorkspace();
   const browseCrumb = browseBreadcrumbForItem(item.id, catalog);
 
   return (
@@ -254,7 +259,7 @@ function TopBar({
           <Menu className="h-4 w-4" />
         </IconBtn>
       )}
-      <IconBtn title="Open canvas" onClick={() => setMode('visualize')}>
+      <IconBtn title="Open canvas" onClick={() => enterCanvas()}>
         <Network className="h-4 w-4" />
       </IconBtn>
       <GraduationCap className="hidden h-4 w-4 shrink-0 text-accent sm:block" />
@@ -407,7 +412,9 @@ function StageBody({
         <span className={cn('truncate font-medium text-ink', chromeText.sm)}>{active.label}</span>
       </div>
       <div key={active.id} className="lesson-swap flex min-h-0 flex-1 flex-col overflow-hidden">
-        {active.render === 'recall' ? (
+        {active.render === 'overview' ? (
+          <ProblemOverviewBody />
+        ) : active.render === 'recall' ? (
           <RecallBody />
         ) : active.render === 'assemble' ? (
           <AssembleModes />

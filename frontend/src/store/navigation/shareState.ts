@@ -9,6 +9,8 @@ export interface ShareState {
   /** Selected sample input id for the active problem. */
   input?: string;
   mode?: string;
+  /** `canvas` = standalone freeform canvas; `problem` (or omitted) = problem-focused workspace. */
+  focus?: 'problem' | 'canvas';
   theme?: string;
   palette?: string;
   themePreset?: string;

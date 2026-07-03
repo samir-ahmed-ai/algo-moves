@@ -25,7 +25,7 @@ const QUICK_REACTIONS = ['👍', '🔥', '😂', '🎉', '👏', '🧠'];
 
 /* ---------------------------------------------------------------- session */
 
-function SessionBody() {
+export function SessionBody() {
   const collab = useCanvasCollab();
   const {
     isCollaborating,

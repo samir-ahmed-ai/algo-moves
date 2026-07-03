@@ -7,6 +7,7 @@ import { InspectorPanelBody } from './InspectorPanelBody';
 import { MetricsBody } from './MetricsPanelBody';
 import { NotesPanelBody } from './NotesPanelBody';
 import { ProblemPanelBody } from './ProblemPanelBody';
+import { VizPanelBody } from './VizPanelBody';
 import { ProjectsPanelBody } from './ProjectsPanelBody';
 import { ReplayPanelBody } from './ReplayPanelBody';
 import { BadgesPanelBody } from './practice/BadgesPanelBody';
@@ -35,6 +36,7 @@ const NullBody: ComponentType = () => null;
  */
 export const PANEL_BODIES: Record<string, ComponentType> = {
   problem: ProblemPanelBody,
+  viz: VizPanelBody,
   replay: ReplayPanelBody,
   inspector: InspectorPanelBody,
   metrics: MetricsBody,

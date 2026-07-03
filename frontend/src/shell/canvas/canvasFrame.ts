@@ -5,7 +5,6 @@ import type { EdgeOpts, LayoutVisualizeOptions } from '@/lib/canvas/layoutPrefs'
 import {
   buildNodes,
   buildEdges,
-  layoutVisualizeCanvas,
   layoutLearnCanvas,
   layoutGraph,
   styleEdges,
@@ -30,16 +29,15 @@ export interface CanvasFrameInput {
 
 /**
  * Pure node+edge assembly for a canvas mode — respects removals, runs the
- * mode's layout (dagre for graph, stacked for visualize/learn), and restores
- * saved positions/widths. Extracted from CanvasStage.buildFor so the layout
- * math is testable and side-effect free (it reads no refs and no React state).
+ * mode's layout (dagre for graph, stacked for learn), and restores
+ * saved positions/widths. Visualize mode is freeform (no auto-layout).
  */
 export function buildCanvasFrame(
   plugin: ProblemPlugin<any, any>,
   mode: CanvasMode,
   input: CanvasFrameInput,
 ): { nodes: PanelFlowNode[]; edges: Edge[] } {
-  const { removed, removedEdges, saved, layoutOpts, dir, edgeOpts } = input;
+  const { removed, removedEdges, saved, dir, edgeOpts } = input;
 
   let nodes = buildNodes(plugin, mode);
   if (removed?.size) nodes = nodes.filter((n) => !removed.has(n.id));
@@ -51,7 +49,7 @@ export function buildCanvasFrame(
 
   nodes =
     mode === 'visualize'
-      ? layoutVisualizeCanvas(nodes, layoutOpts)
+      ? nodes
       : mode === 'learn'
         ? layoutLearnCanvas(nodes, raw)
         : layoutGraph(nodes, raw, dir);
@@ -64,8 +62,7 @@ export function buildCanvasFrame(
         mode === 'visualize' && kind === 'viz'
           ? n.width
           : restoreNodeWidth(kind, saved[n.id].width, n.width);
-      // Visualize / Learn: keep canonical stacked layout; restore widths only.
-      if (mode === 'visualize' || mode === 'learn') {
+      if (mode === 'learn') {
         return { ...n, position: n.position, width };
       }
       return { ...n, position: saved[n.id].position, width };

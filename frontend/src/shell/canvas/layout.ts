@@ -39,6 +39,8 @@ import {
 
 export { layoutEstimate, layoutCap, layoutFixedWidth, layoutSize, nodeTier } from './nodeTokens';
 export { CANVAS_MARGIN, CANVAS_NODE_SEP, VIZ_WIRE_GAP } from './canvasTokens';
+/** Persistence key for the standalone freeform canvas (not tied to a catalog item). */
+export const STANDALONE_CANVAS_KEY = 'standalone:visualize';
 export { LAYOUT_PRESETS, defaultEdgeOpts };
 export type { LayoutPreset, LayoutVisualizeOptions, BgVariant, EdgePathType, EdgeOpts };
 export { CATEGORY_ORDER, DOCK_ONLY_PANELS } from '../../core/panelRegistry';
@@ -109,6 +111,13 @@ function defaultNodeIds(plugin: ProblemPlugin<any, any>, mode: CanvasMode): stri
   return [...MODE_BUILTINS[mode], ...modeTabIds(plugin, mode)];
 }
 
+/** Optional panels that work on the standalone canvas without a loaded problem plugin. */
+export const STANDALONE_ADDABLE_PANELS = ['notes', 'bookmarks', 'projects'] as const;
+
+export function standaloneNodeIds(): string[] {
+  return [...STANDALONE_ADDABLE_PANELS];
+}
+
 export function buildNodes(plugin: ProblemPlugin<any, any>, mode: CanvasMode): PanelFlowNode[] {
   return defaultNodeIds(plugin, mode).map((id) => makeNode(id, kindTitle(plugin, id), { x: 0, y: 0 }));
 }
@@ -152,19 +161,13 @@ export const LAYOUT_PRESET_META: Record<
 const PRESET_KEEP: Record<LayoutPreset, Partial<Record<CanvasMode, string[]>>> = {
   Full: {},
   Study: {
-    visualize: ['problem', 'viz'],
     learn: ['predict', 'mastery', 'code'],
   },
   Minimal: {
-    visualize: ['problem', 'viz'],
     learn: ['predict', 'code'],
   },
-  Theater: {
-    visualize: ['problem', 'viz'],
-  },
-  Demo: {
-    visualize: ['problem', 'viz'],
-  },
+  Theater: {},
+  Demo: {},
 };
 
 /** Ids to mark removed for a preset (so buildFor hides them). Empty = show everything. */
@@ -187,7 +190,7 @@ export function nodeForKind(
 export const DEPRECATED_VISUALIZE_EDGES = new Set(['examples->problem', 'examples->viz']);
 
 /** Shell edges always restored on sanitize (data path). */
-export const REQUIRED_VISUALIZE_EDGES = new Set(['problem->viz']);
+export const REQUIRED_VISUALIZE_EDGES = new Set<string>();
 
 /** Shared input port on the visualizer — problem wires here. */
 export const VIZ_INPUT_HANDLE = 'viz-in';
@@ -199,12 +202,7 @@ const SHELL_WIRES: Record<CanvasMode, [string, string, string?][]> = {
     ['viz', 'reassemble'],
     ['viz', 'recall'],
   ],
-  visualize: [
-    ['problem', 'viz'],
-    ['viz', 'code'],
-    ['viz', 'reassemble'],
-    ['viz', 'recall'],
-  ],
+  visualize: [],
   learn: [
     ['predict', 'mastery'],
     ['mastery', 'code'],

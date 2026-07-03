@@ -14,6 +14,7 @@ import { loadProjectFromUrl } from '@/store/project-state';
 export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined, activeItemId: string) {
   const {
     openProblem,
+    enterCanvas,
     setMode,
     setTheme,
     setPalette,
@@ -25,6 +26,7 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
     palette,
     themePreset,
     dir,
+    problemFocused,
   } = useWorkspace();
 
   const [inputId, setInputId] = useState(() => {
@@ -66,9 +68,15 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
       if (s.item && catalog.getItem(s.item)) {
         openProblem(s.item);
       }
-      if (s.mode === 'visualize') setMode('visualize');
-      else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') setMode('learn');
-      else setMode('play');
+      if (s.focus === 'canvas' || (s.mode === 'visualize' && !s.item)) {
+        enterCanvas();
+      } else if (s.mode === 'visualize') {
+        enterCanvas();
+      } else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') {
+        setMode('learn');
+      } else if (s.mode === 'play') {
+        setMode('play');
+      }
       if (s.theme) setTheme(s.theme === 'light' ? 'light' : 'dark');
       if (s.palette) setPalette(s.palette === 'cb' ? 'cb' : 'default');
       if (s.themePreset) setThemePreset(normalizeThemePreset(s.themePreset));
@@ -92,18 +100,32 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
 
   // Persist problem, example, mode, and theme in the URL so refresh reopens the same view.
   useEffect(() => {
-    if (!activeItemId) return;
     if (pendingProjectHydration.current && !shareHydratedRef.current) return;
+
+    if (mode === 'visualize' && !problemFocused) {
+      writeShareToUrl({
+        mode,
+        focus: 'canvas',
+        theme,
+        palette,
+        themePreset,
+        dir,
+      });
+      return;
+    }
+
+    if (!activeItemId) return;
     writeShareToUrl({
       item: activeItemId,
       input: inputId || undefined,
       mode,
+      focus: 'problem',
       theme,
       palette,
       themePreset,
       dir,
     });
-  }, [activeItemId, inputId, mode, theme, palette, themePreset, dir]);
+  }, [activeItemId, inputId, mode, theme, palette, themePreset, dir, problemFocused]);
 
   // Picking a different sample clears any custom edits.
   const selectInput = (id: string) => {

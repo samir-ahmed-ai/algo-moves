@@ -64,6 +64,10 @@ export interface WorkspaceCtx {
   goHome: () => void;
   /** Enter the workspace; pass an item id to open that problem directly. */
   enterWorkspace: (itemId?: string) => void;
+  /** Open the standalone freeform canvas (no problem nodes). */
+  enterCanvas: () => void;
+  /** Open a problem in a specific workspace mode (play or learn). */
+  enterProblemInMode: (id: string, mode: CanvasMode) => void;
   /** Open a problem in the workspace and leave browse grids. */
   openProblem: (id: string) => void;
   /** True while a problem page is open (hides browse grids). */

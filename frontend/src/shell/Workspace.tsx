@@ -58,6 +58,7 @@ export function Workspace() {
 
   const showTrackBoard = activeTrackId && !activeCategoryId && !problemFocused;
   const showCategoryBoard = !!activeCategoryId && !problemFocused;
+  const showCanvas = mode === 'visualize' && !problemFocused;
 
   // Keyboard transport: ← / → step, space play/pause, Home/End jump.
   useEffect(() => {
@@ -136,13 +137,15 @@ export function Workspace() {
         !tweaks.animate && '[&_*]:!transition-none [&_*]:!animate-none',
       )}
     >
-      {!present && <UnifiedLeftSidebar />}
+      {!present && mode !== 'visualize' && <UnifiedLeftSidebar />}
 
       <div className="relative min-h-0 min-w-0 flex-1 h-full">
         {showTrackBoard ? (
           <TrackCategoryBoard trackId={activeTrackId!} />
         ) : showCategoryBoard ? (
           <CategoryBoard categoryId={activeCategoryId!} trackId={activeTrackId} />
+        ) : showCanvas ? (
+          <CanvasStage standalone />
         ) : ready ? (
           mode === 'play' ? (
             <ProblemPage
@@ -156,7 +159,7 @@ export function Workspace() {
               player={player}
               frame={frame!}
             />
-          ) : mode === 'learn' ? (
+          ) : (
             <LearnStudio
               plugin={plugin!}
               item={item}
@@ -167,17 +170,6 @@ export function Workspace() {
               frames={baseFrames}
               player={player}
               frame={frame!}
-            />
-          ) : (
-            <CanvasStage
-              plugin={plugin!}
-              item={item}
-              inputId={inputId}
-              setInputId={selectInput}
-              customInput={customInput}
-              setCustomInput={setCustomInput}
-              baseFrames={baseFrames}
-              player={player}
             />
           )
         ) : pluginLoading ? (
@@ -224,7 +216,7 @@ interface Command {
 
 function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => void }) {
   const ws = useWorkspace();
-  const { openProblem, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd } = ws;
+  const { openProblem, enterCanvas, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd } = ws;
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
 
@@ -242,7 +234,7 @@ function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => 
     const actions: Command[] = [
       { id: 'mode:play', label: 'Mode: Play', hint: 'action', run: () => setMode('play') },
       { id: 'mode:learn', label: 'Mode: Learn', hint: 'action', run: () => setMode('learn') },
-      { id: 'mode:visualize', label: 'Mode: Visualize', hint: 'action', run: () => setMode('visualize') },
+      { id: 'mode:visualize', label: 'Mode: Canvas', hint: 'action', run: () => enterCanvas() },
       { id: 'present', label: 'Enter presentation mode', hint: 'action', run: () => setPresent(true) },
       { id: 'settings', label: 'Open settings', hint: 'action', run: () => setSettingsOpen(true) },
       { id: 'theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, hint: 'action', run: () => setTheme(theme === 'dark' ? 'light' : 'dark') },
@@ -252,15 +244,28 @@ function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => 
         label: 'Copy share link',
         hint: 'action',
         run: () => {
-          const url = buildShareUrl({
-            item: ws.activeItemId,
-            input: inputId || undefined,
-            mode: ws.mode,
-            theme: ws.theme,
-            palette: ws.palette,
-            themePreset: ws.themePreset,
-            dir: ws.dir,
-          });
+          const canvasFocus = ws.mode === 'visualize' && !ws.problemFocused;
+          const url = buildShareUrl(
+            canvasFocus
+              ? {
+                  mode: ws.mode,
+                  focus: 'canvas',
+                  theme: ws.theme,
+                  palette: ws.palette,
+                  themePreset: ws.themePreset,
+                  dir: ws.dir,
+                }
+              : {
+                  item: ws.activeItemId,
+                  input: inputId || undefined,
+                  mode: ws.mode,
+                  focus: 'problem',
+                  theme: ws.theme,
+                  palette: ws.palette,
+                  themePreset: ws.themePreset,
+                  dir: ws.dir,
+                },
+          );
           navigator.clipboard?.writeText(url).catch(() => {});
         },
       },
@@ -278,7 +283,7 @@ function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => 
       run: () => canvasAdd?.onAddEffect?.(e.id),
     }));
     return [...actions, ...panelCmds, ...effectCmds, ...problemCmds];
-  }, [ws, inputId, openProblem, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd]);
+  }, [ws, inputId, openProblem, enterCanvas, setMode, setPresent, theme, setTheme, palette, setPalette, setSettingsOpen, canvasAdd]);
 
   const filtered = commands.filter((c) => !q || c.label.toLowerCase().includes(q.toLowerCase()));
   const clampedSel = Math.min(sel, Math.max(filtered.length - 1, 0));

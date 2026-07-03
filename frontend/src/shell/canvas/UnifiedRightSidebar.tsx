@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, type ReactNode } from 'react';
 import {
   Eye,
   GraduationCap,
@@ -153,6 +153,8 @@ export function UnifiedRightSidebar() {
     setRightTab,
     mode,
     setMode,
+    enterCanvas,
+    setProblemFocused,
     present,
     tweaks,
     sidePanelTab,
@@ -173,6 +175,17 @@ export function UnifiedRightSidebar() {
     sidePanelTab && pluginTabs.some((t) => t.id === sidePanelTab) ? sidePanelTab : null;
   const selectionActive = useHasSelectedPanel();
   const stepLabel = frames.length ? `${player.index + 1} / ${frames.length}` : '0';
+
+  const switchMode = useCallback(
+    (m: CanvasMode) => {
+      if (m === 'visualize') enterCanvas();
+      else if (m === 'learn') {
+        setMode('learn');
+        setProblemFocused(true);
+      } else setMode(m);
+    },
+    [enterCanvas, setMode, setProblemFocused],
+  );
 
   const analysisWidgets = widgetsForTab('analysis');
   const collabWidgets = widgetsForTab('collab');
@@ -251,7 +264,7 @@ export function UnifiedRightSidebar() {
             <button
               key={m.id}
               type="button"
-              onClick={() => setMode(m.id)}
+              onClick={() => switchMode(m.id)}
               title={m.label}
               className={cn(
                 chromeText.xs,
@@ -352,7 +365,7 @@ export function UnifiedRightSidebar() {
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setMode(m.id)}
+                  onClick={() => switchMode(m.id)}
                   title={m.label}
                   className={cn(
                     chromeText.sm,

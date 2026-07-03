@@ -21,14 +21,14 @@ import {
 } from '@xyflow/react';
 import { Crosshair, ChevronsDownUp, Trash2, Palette, Maximize, LayoutGrid, Lock } from 'lucide-react';
 import type { CanvasMode, Frame, Player, ProblemPlugin } from '../../core';
+import { usePlayer } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
 import { togglePanelCollapse } from './panelCollapse';
 import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
-import { UnifiedRightSidebar } from './UnifiedRightSidebar';
+import { CanvasToolbar } from './CanvasToolbar';
 import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from './PanelNode';
-import { CanvasProblemNav } from './CanvasProblemNav';
 import { RemovableEdge } from './RemovableEdge';
 import { ContextMenu, LaserPointer, type MenuItem } from './CanvasTools';
 import { CanvasFloatingHud } from './CanvasFloatingHud';
@@ -39,12 +39,6 @@ import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
 import { EFFECTS } from '../../effects/registry';
 import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
-import {
-  FIRST_VISIT_PRESET_ID,
-  WORKFLOW_PRESET_ACTIONS,
-  hasSeenDemoWorkflow,
-  markDemoWorkflowSeen,
-} from '../../data/workflowPresets';
 import type { ShareState } from '@/store/navigation';
 import { applyAlign, applyDistribute, type AlignKind } from './align';
 import { FIT_VIEW_DURATION_MS } from './canvasTokens';
@@ -61,12 +55,13 @@ import {
   kindTitle,
   layoutGraph,
   layoutLearnCanvas,
-  layoutVisualizeCanvas,
   modeNodeIds,
   nextPracticePanel,
   sidePanelTabs,
   nodeForKind,
   presetRemoved,
+  standaloneNodeIds,
+  STANDALONE_CANVAS_KEY,
   styleEdges,
   type BgVariant,
   type LayoutPreset,
@@ -119,17 +114,56 @@ interface Menu {
 }
 
 interface CanvasStageProps {
-  plugin: ProblemPlugin<any, any>;
-  item: Item;
-  inputId: string;
-  setInputId: (id: string) => void;
-  customInput: unknown;
-  setCustomInput: (v: unknown) => void;
-  baseFrames: Frame<any>[];
-  player: Player;
+  standalone?: boolean;
+  plugin?: ProblemPlugin<any, any>;
+  item?: Item;
+  inputId?: string;
+  setInputId?: (id: string) => void;
+  customInput?: unknown;
+  setCustomInput?: (v: unknown) => void;
+  baseFrames?: Frame<any>[];
+  player?: Player;
 }
 
-function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput, baseFrames, player }: CanvasStageProps) {
+const STUB_PLUGIN = {
+  meta: { id: 'standalone', title: 'Canvas' },
+  tabs: [],
+  wires: {},
+  inputs: [],
+  record: () => [],
+} as unknown as ProblemPlugin<any, any>;
+
+const STUB_ITEM: Item = {
+  id: 'canvas',
+  kind: 'problem',
+  title: 'Canvas',
+  tags: [],
+  status: 'todo',
+  prereqs: [],
+  courseId: '',
+  topicId: '',
+};
+
+function Inner({
+  standalone = false,
+  plugin: pluginProp,
+  item: itemProp,
+  inputId: inputIdProp = '',
+  setInputId: setInputIdProp = () => {},
+  customInput: customInputProp = null,
+  setCustomInput: setCustomInputProp = () => {},
+  baseFrames: baseFramesProp,
+  player: playerProp,
+}: CanvasStageProps) {
+  const plugin = pluginProp ?? STUB_PLUGIN;
+  const item = itemProp ?? STUB_ITEM;
+  const internalPlayer = usePlayer(1);
+  const player = playerProp ?? internalPlayer;
+  const baseFrames = baseFramesProp ?? [];
+  const inputId = inputIdProp;
+  const setInputId = setInputIdProp;
+  const customInput = customInputProp;
+  const setCustomInput = setCustomInputProp;
   const {
     mode,
     present,
@@ -148,13 +182,11 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     requestFitCanvas,
     toggleFocusCanvas,
     setPresent,
-    rightOpen,
     setRightOpen,
-    rightTab,
     setRightTab,
   } = useWorkspace();
   const pluginId = plugin.meta.id;
-  const key = `${pluginId}:${mode}`;
+  const key = standalone ? STANDALONE_CANVAS_KEY : `${pluginId}:${mode}`;
   const [selectedNode, setSelectedNode] = useState<number | null>(null);
   useEffect(() => {
     setSelectedNode(null);
@@ -312,9 +344,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
       snap[n.id] = snapNodeLayout(n);
     });
     layoutRef.current[prevKeyRef.current] = snap;
-    removedRef.current[prevKeyRef.current] = new Set(
-      modeNodeIds(plugin, prevModeRef.current).filter((id) => !presentIds.has(id)),
-    );
+    const prevNodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, prevModeRef.current);
+    removedRef.current[prevKeyRef.current] = new Set(prevNodeIds.filter((id) => !presentIds.has(id)));
     prevKeyRef.current = key;
     prevModeRef.current = mode;
 
@@ -354,7 +385,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     });
     layoutRef.current[key] = snap;
     const presentIds = new Set(nodes.map((n) => n.id));
-    removedRef.current[key] = new Set(modeNodeIds(plugin, mode).filter((id) => !presentIds.has(id)));
+    const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
+    removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     persist();
   }, [nodes, key, plugin, mode, persist, collab.isCollaborating]);
 
@@ -372,7 +404,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   const reset = useCallback(() => {
     const present = nodesRef.current;
     const presentIds = new Set(present.map((n) => n.id));
-    removedRef.current[key] = new Set(modeNodeIds(plugin, mode).filter((id) => !presentIds.has(id)));
+    const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
+    removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     removedEdgesRef.current[key] = new Set();
     delete layoutRef.current[key];
     const sizeById = new Map(present.map((n) => [n.id, { width: n.width }]));
@@ -384,7 +417,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
       });
     const raw = buildEdges(plugin, mode).filter((e) => presentIds.has(e.source) && presentIds.has(e.target));
     kept = mode === 'visualize'
-      ? layoutVisualizeCanvas(kept, layoutOpts())
+      ? layoutGraph(kept, raw, dir)
       : mode === 'learn'
         ? layoutLearnCanvas(kept, raw)
         : layoutGraph(kept, raw, dir);
@@ -395,12 +428,9 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
   // Re-fit when chrome dimensions change or focus-canvas toggles.
   useEffect(() => {
-    if (mode === 'visualize') {
-      setNodes((nds) => layoutVisualizeCanvas(nds as PanelFlowNode[], layoutOpts()));
-    }
     const id = requestAnimationFrame(() => fitCanvas(200));
     return () => cancelAnimationFrame(id);
-  }, [fitCanvasSignal, rightOpen, rightTab, layoutPreset, fitCanvas, mode, setNodes, layoutOpts]);
+  }, [fitCanvasSignal, fitCanvas]);
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -408,19 +438,14 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     let t: number | undefined;
     const ro = new ResizeObserver(() => {
       window.clearTimeout(t);
-      t = window.setTimeout(() => {
-        if (mode === 'visualize') {
-          setNodes((nds) => layoutVisualizeCanvas(nds as PanelFlowNode[], layoutOpts()));
-        }
-        fitCanvas(150);
-      }, 150);
+      t = window.setTimeout(() => fitCanvas(150), 150);
     });
     ro.observe(el);
     return () => {
       ro.disconnect();
       if (t) window.clearTimeout(t);
     };
-  }, [fitCanvas, mode, setNodes, layoutOpts]);
+  }, [fitCanvas]);
 
   // Re-layout the current panels only when the direction actually toggles (TB ↔ LR) (#75).
   const prevDirRef = useRef(dir);
@@ -474,10 +499,11 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
   const addableKinds = useMemo(() => {
     const present = new Set(nodes.map((n) => n.id));
-    return modeNodeIds(plugin, mode)
+    const ids = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
+    return ids
       .filter((id) => !present.has(id))
       .map((id) => ({ id, title: kindTitle(plugin, id) }));
-  }, [nodes, plugin, mode]);
+  }, [nodes, plugin, mode, standalone]);
 
   // ---- interaction state: lock / connect mode / scroll-pan / context menu ----
   // (wrapperRef is declared near the top, beside fitCanvas.)
@@ -539,15 +565,14 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
   const shareSnapshot = useCallback(
     (): ShareState => ({
-      item: item.id,
-      input: inputId || undefined,
+      ...(standalone ? { focus: 'canvas' as const } : { item: item.id, input: inputId || undefined, focus: 'problem' as const }),
       mode,
       theme,
       palette,
       themePreset,
       dir,
     }),
-    [item.id, inputId, mode, theme, palette, themePreset, dir],
+    [standalone, item.id, inputId, mode, theme, palette, themePreset, dir],
   );
 
   const getProjectState = useCallback(
@@ -596,14 +621,6 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     setCanvasProject({ getProjectState, applyProjectState, applyWorkflowPreset });
     return () => setCanvasProject(null);
   }, [getProjectState, applyProjectState, applyWorkflowPreset, setCanvasProject]);
-
-  useEffect(() => {
-    if (mode !== 'visualize' || hasSeenDemoWorkflow()) return;
-    const demo = WORKFLOW_PRESET_ACTIONS.find((p) => p.id === FIRST_VISIT_PRESET_ID);
-    if (demo) applyWorkflowPreset(demo);
-    markDemoWorkflowSeen();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Edge connect / reconnect / validation.
   const { onConnect, onReconnectStart, onReconnect, onReconnectEnd, isValidConnection } =
@@ -666,17 +683,11 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
         });
       };
 
-      const applySelectRelayout = (nds: PanelFlowNode[]) => {
-        let next = nds.map((n) => {
+      const applySelectRelayout = (nds: PanelFlowNode[]) =>
+        nds.map((n) => {
           if (n.id === id && n.data.collapsed) return togglePanelCollapse(n);
           return { ...n, selected: n.id === id };
         });
-        if (mode === 'visualize') {
-          next = layoutVisualizeCanvas(next, layoutOpts());
-          next = next.map((n) => ({ ...n, selected: n.id === id }));
-        }
-        return next;
-      };
 
       const existing = nodesRef.current.find((n) => n.id === id);
       if (existing) {
@@ -914,8 +925,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
               className="!bottom-[calc(var(--chrome-bottom,0px)+8px)] !right-2 !m-0 hidden overflow-hidden rounded-md border border-edge shadow-[var(--shadow-md)] lg:block"
               style={{ width: 132, height: 92 }}
             />
-            {!present && <CanvasProblemNav />}
-            <CanvasFloatingHud />
+            {!present && <CanvasFloatingHud />}
+            {!present && <CanvasToolbar lock={lock} onToggleLock={() => setLock((l) => !l)} onTidy={reset} />}
             <CanvasCollabOverlays />
             <CommentLayer />
           </ReactFlow>
@@ -937,13 +948,12 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
           {nodes.length === 0 && (
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
               <p className={cn('rounded-lg border border-edge bg-panel/80 px-4 py-2 text-ink2 shadow-sm backdrop-blur', chromeText.base)}>
-                No {mode} panels — drag one in from the “＋” menu.
+                Empty canvas — use + in the toolbar or right-click to add panels.
               </p>
             </div>
           )}
         </div>
         </div>
-        {!present && <UnifiedRightSidebar />}
         </div>
         </CanvasActionsProvider>
       </CanvasFrameProvider>
@@ -962,3 +972,6 @@ export function CanvasStage(props: CanvasStageProps) {
     </CanvasCollabProvider>
   );
 }
+
+/** Re-export kept for widget registry / saved-canvas flows (not mounted in standalone canvas). */
+export { UnifiedRightSidebar } from './UnifiedRightSidebar';

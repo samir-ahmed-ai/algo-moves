@@ -15,9 +15,19 @@ import type { ShareState } from '@/store/navigation/shareState';
 import type { AppRoute } from './workspace';
 import { LAST_ITEM_KEY } from './workspaceConstants';
 
+function isCanvasFocus(shared: ShareState | null): boolean {
+  if (!shared) return false;
+  if (shared.focus === 'canvas') return true;
+  // Legacy share links: mode=visualize without an item meant canvas-only.
+  return shared.mode === 'visualize' && !shared.item;
+}
+
 /** App route + active problem/browse selection + the enter-X navigators. */
 export function useAppNavigation(shared: ShareState | null) {
-  const [mode, setMode] = useState<CanvasMode>(() => normalizeCanvasMode(shared?.mode));
+  const canvasFocus = isCanvasFocus(shared);
+  const [mode, setMode] = useState<CanvasMode>(() =>
+    canvasFocus ? 'visualize' : normalizeCanvasMode(shared?.mode),
+  );
   const [activeItemId, setActiveItemId] = useState(
     shared?.item && catalog.getItem(shared.item) ? shared.item : catalog.firstItemId,
   );
@@ -29,10 +39,12 @@ export function useAppNavigation(shared: ShareState | null) {
   const [activeTopicId, setActiveTopicId] = useState<string | null>(initialBrowse.topicId);
   const [activeTrackId, setActiveTrackId] = useState<TrackId | null>(initialBrowse.trackId);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(initialBrowse.categoryId);
-  const [problemFocused, setProblemFocused] = useState(
-    () => !!(shared?.item && catalog.getItem(shared.item)),
-  );
+  const [problemFocused, setProblemFocused] = useState(() => {
+    if (canvasFocus) return false;
+    return !!(shared?.item && catalog.getItem(shared.item));
+  });
   const [route, setRoute] = useState<AppRoute>(() => {
+    if (canvasFocus) return 'workspace';
     if (shared?.item && catalog.getItem(shared.item)) return 'workspace';
     if (typeof location !== 'undefined') {
       const hash = location.hash;
@@ -55,8 +67,17 @@ export function useAppNavigation(shared: ShareState | null) {
   const openProblem = useCallback((id: string) => {
     setActiveItemId(id);
     setActiveTopicId(null);
-    setMode('play');
+    setMode('learn');
     setProblemFocused(true);
+    setRoute('workspace');
+  }, []);
+
+  const enterCanvas = useCallback(() => {
+    setActiveTrackId(null);
+    setActiveCategoryId(null);
+    setActiveTopicId(null);
+    setMode('visualize');
+    setProblemFocused(false);
     setRoute('workspace');
   }, []);
 
@@ -71,6 +92,14 @@ export function useAppNavigation(shared: ShareState | null) {
     },
     [openProblem],
   );
+
+  const enterProblemInMode = useCallback((id: string, problemMode: CanvasMode) => {
+    setActiveItemId(id);
+    setActiveTopicId(null);
+    setMode(problemMode);
+    setProblemFocused(true);
+    setRoute('workspace');
+  }, []);
 
   const enterMobile = useCallback((categoryId?: string, itemId?: string) => {
     setActiveCategoryId(categoryId ?? null);
@@ -112,6 +141,8 @@ export function useAppNavigation(shared: ShareState | null) {
     route,
     goHome,
     enterWorkspace,
+    enterCanvas,
+    enterProblemInMode,
     openProblem,
     backToBrowse,
     enterMobile,

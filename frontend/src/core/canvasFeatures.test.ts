@@ -33,10 +33,16 @@ describe('panelRegistry', () => {
     expect(panelTitle('viz')).toBe('Visualizer');
   });
 
-  it('modeBuiltins includes problem and viz for visualize', () => {
+  it('visualize mode has no built-in panels (freeform canvas)', () => {
     const builtins = modeBuiltins('visualize');
-    expect(builtins).toContain('problem');
-    expect(builtins).toContain('viz');
+    expect(builtins).not.toContain('problem');
+    expect(builtins).not.toContain('viz');
+    expect(builtins).toHaveLength(0);
+  });
+
+  it('viz is optional in visualize mode', () => {
+    const optional = panelsConfig.filter((p) => p.modes.includes('visualize') && p.optional);
+    expect(optional.some((p) => p.id === 'viz')).toBe(true);
   });
 
   it('every config entry has id and title', () => {
