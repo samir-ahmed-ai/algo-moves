@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { Btn, Field, nodeText } from '../../shell/canvas/nodeui';
+import { Btn, Field } from '@/components/formControls';
+import { nodeText } from '@/design/typography';
 import {
   createPadGrid,
   EUCLIDEAN_PRESETS,

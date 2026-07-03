@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils/cn';
-import { nodeText } from '../shell/canvas/nodeui';
+import { nodeText } from '@/design/typography';
 
 export interface SelectCategory<T extends string = string> {
   label: string;

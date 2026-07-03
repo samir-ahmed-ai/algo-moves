@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Btn, Field } from '../../shell/canvas/nodeui';
+import { Btn, Field } from '@/components/formControls';
 
 const DIRECTIONS = ['up', 'down', 'up-down', 'down-up'] as const;
 

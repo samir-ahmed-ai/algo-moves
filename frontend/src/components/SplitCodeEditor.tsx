@@ -4,7 +4,7 @@ import { CodeMirrorEditor } from './CodeMirrorEditor';
 import { diffChangedLines } from '@/lib/code';
 import { clampSplitPct, SPLIT_MAX, SPLIT_MIN } from '@/lib/editor/splitLayout';
 import { cn } from '@/lib/utils/cn';
-import { nodeText } from '../shell/canvas/nodeui';
+import { nodeText } from '@/design/typography';
 
 export interface SplitCodeEditorProps {
   reference: string;

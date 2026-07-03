@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Btn, Field } from '../../shell/canvas/nodeui';
+import { Btn, Field } from '@/components/formControls';
 
 export function PolyrhythmBuilder({ onApply }: { onApply: (layers: number[][]) => void }) {
   const [layers, setLayers] = useState<number[][]>([

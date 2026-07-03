@@ -13,12 +13,9 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type ButtonHTMLAttributes,
   type CSSProperties,
-  type InputHTMLAttributes,
   type ReactNode,
   type RefObject,
-  type TextareaHTMLAttributes,
 } from 'react';
 import { ChevronDown, GripVertical, MoreVertical, Search } from 'lucide-react';
 import { getTag } from '../../content/tags';
@@ -31,6 +28,11 @@ import {
   resolveMeasureSize,
 } from './vizFitMeasure';
 import { TONE_TEXT, TONE_BAR, TONE_CHIP, TONE_BANNER, TONE_LABEL } from './nodeUiTones';
+// Typography/radius tokens live in the design leaf; shared form primitives in
+// the components leaf. Imported for internal use and re-exported below so
+// `nodeui` stays the canvas-facing entry point for its existing consumers.
+import { nodeText, nodeTextWrap, nodeIconGlyph, RADIUS_CTRL, RADIUS_SHELL } from '@/design/typography';
+import { Label, Hint, Btn, Field, TextInput, TextArea, INPUT_CLS } from '@/components/formControls';
 // Re-export the fit-measurement surface so `nodeui` stays the public entry point
 // (consumers + nodeui.test.ts import these from here).
 export {
@@ -44,26 +46,9 @@ export type HeaderDensity = 'compact' | 'ultra' | 'spacious';
 
 export type UiTone = 'default' | 'accent' | 'good' | 'bad' | 'muted';
 
-/** Shared canvas node type scale — mirrors `--node-fs*` in theme.css. */
-export const nodeText = {
-  base: 'text-[length:var(--node-fs,0.875rem)] leading-[var(--lh,1.4)]',
-  sm: 'text-[length:var(--node-fs-sm,0.8125rem)] leading-[var(--lh-snug,1.35)]',
-  xs: 'text-[length:var(--node-fs-xs,0.75rem)] leading-[var(--lh-snug,1.35)]',
-  '2xs': 'text-[length:var(--node-fs-2xs,0.5625rem)] leading-[var(--lh-tight,1.25)]',
-  tight: 'text-[length:var(--node-fs-tight,0.6875rem)] leading-[var(--lh-tight,1.25)]',
-  title: 'text-[length:var(--node-fs-title,1rem)] leading-[var(--lh-tight,1.25)]',
-  label: 'text-[length:var(--node-fs-xs,0.75rem)] font-medium uppercase tracking-[0.05em] leading-[var(--lh-tight,1.25)]',
-} as const;
-
-/** Wrap prose/labels inside bounded node width — use on text only, not chrome. */
-export const nodeTextWrap = 'min-w-0 break-words [overflow-wrap:anywhere]';
-
-/** Inner SVG sizing for node header/body icons — scales with `--node-icon`. */
-export const nodeIconGlyph = 'size-[var(--node-icon-glyph)]';
-
-/** Theme-aware border radii for controls and containers. */
-export const RADIUS_CTRL = 'rounded-[calc(var(--radius)-2px)]';
-export const RADIUS_SHELL = 'rounded-[var(--radius)]';
+// Re-export the moved design tokens + form primitives (see imports above).
+export { nodeText, nodeTextWrap, nodeIconGlyph, RADIUS_CTRL, RADIUS_SHELL };
+export { Label, Hint, Btn, Field, TextInput, TextArea };
 
 /** Maps a difficulty label to the shared chip tone vocabulary. */
 export function difficultyTone(d?: string): UiTone {
@@ -77,19 +62,6 @@ export function difficultyTone(d?: string): UiTone {
 /* ------------------------------------------------------------------ labels */
 
 /** Small uppercase section/field label — the one tracked-caps style used everywhere. */
-export function Label({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <span className={cn(nodeText.label, 'text-ink3', className)}>
-      {children}
-    </span>
-  );
-}
-
-/** Muted one-line helper copy. */
-export function Hint({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn(nodeText.sm, 'leading-snug text-ink3', className)}>{children}</p>;
-}
-
 /* ---------------------------------------------------------------- sections */
 
 /**
@@ -277,94 +249,6 @@ export function Chip({
   );
 }
 
-/* ----------------------------------------------------------------- buttons */
-
-type BtnVariant = 'primary' | 'good' | 'ghost' | 'quiet' | 'danger';
-type BtnSize = 'xs' | 'sm';
-
-const BTN_VARIANT: Record<BtnVariant, string> = {
-  primary: 'bg-accent text-white hover:opacity-90',
-  good: 'bg-good text-white hover:opacity-90',
-  ghost: 'bg-panel2/50 text-ink2 hover:bg-panel2 hover:text-ink',
-  quiet: 'text-ink3 hover:bg-panel2 hover:text-ink',
-  danger: 'text-bad hover:bg-badbg',
-};
-
-const BTN_SIZE: Record<BtnSize, string> = {
-  xs: cn('px-2 py-1', nodeText.xs),
-  sm: cn('px-2.5 py-1.5', nodeText.sm),
-};
-
-/** The single button vocabulary — every node button is one of these. */
-export function Btn({
-  variant = 'ghost',
-  size = 'sm',
-  icon,
-  children,
-  className,
-  ...rest
-}: {
-  variant?: BtnVariant;
-  size?: BtnSize;
-  icon?: ReactNode;
-} & ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        'nodrag inline-flex items-center justify-center gap-1.5 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40',
-        RADIUS_CTRL,
-        BTN_VARIANT[variant],
-        BTN_SIZE[size],
-        className,
-      )}
-      {...rest}
-    >
-      {icon}
-      {children}
-    </button>
-  );
-}
-
-/* ------------------------------------------------------------ form controls */
-
-export function Field({
-  label,
-  hint,
-  children,
-  dense,
-  className,
-}: {
-  label?: string;
-  hint?: string;
-  children: ReactNode;
-  dense?: boolean;
-  className?: string;
-}) {
-  return (
-    <label className={cn('flex flex-col', dense ? 'gap-0.5' : 'gap-1', className)}>
-      {label && <Label className={dense ? '!text-[length:var(--node-fs-xs,12px)]' : undefined}>{label}</Label>}
-      {children}
-      {hint && <Hint>{hint}</Hint>}
-    </label>
-  );
-}
-
-const INPUT_CLS =
-  `nodrag w-full border border-edge bg-panel2 px-2 py-1.5 ${nodeText.sm} text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent ${RADIUS_CTRL}`;
-
-export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={cn(INPUT_CLS, props.className)} />;
-}
-
-export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      {...props}
-      className={cn(INPUT_CLS, 'min-h-[4.5rem] resize-none leading-relaxed', props.className)}
-    />
-  );
-}
 
 /** Term + definition row for glossary and cheat-sheet entries. */
 export function DefRow({

@@ -60,23 +60,12 @@ const ACCEPTED = new Set([
  * entry fails the build, so the list can only shrink. Do NOT add new ones.
  */
 const KNOWN_VIOLATIONS = new Set([
-  // Tranche 1 / Theme B — token + shared-primitive definitions still live in
-  // shell/canvas & plugins; the design leaf re-exports upward. Fixed by moving
-  // canonical tokens/nodeui primitives down into @/design + a shared UI leaf.
+  // Tranche 1 / Theme B — token modules still live under shell/canvas &
+  // plugins; the design leaf re-exports upward. Fixed by moving the canonical
+  // token modules down into @/design (nodeui primitives already relocated).
   'design/tokens.ts :: ../shell/canvas/canvasTokens',
   'design/tokens.ts :: ../shell/canvas/nodeTokens',
-  'design/tokens.ts :: ../shell/canvas/nodeui',
   'design/tokens.ts :: ../plugins/_shared/vizTokens',
-  'components/CategorySelectItems.tsx :: ../shell/canvas/nodeui',
-  'components/SplitCodeEditor.tsx :: ../shell/canvas/nodeui',
-  'effects/components/GenericEffectControls.tsx :: ../../shell/canvas/nodeui',
-  'effects/components/MaskEffectControls.tsx :: ../../shell/canvas/nodeui',
-  'effects/components/RangeEffectControls.tsx :: ../../shell/canvas/nodeui',
-  'effects/inputBuilders/ArpeggiatorBuilder.tsx :: ../../shell/canvas/nodeui',
-  'effects/inputBuilders/BeatMachineBuilder.tsx :: ../../shell/canvas/nodeui',
-  'effects/inputBuilders/CustomInputBuilder.tsx :: ../../shell/canvas/nodeui',
-  'effects/inputBuilders/PadGridBuilder.tsx :: ../../shell/canvas/nodeui',
-  'effects/inputBuilders/PolyrhythmBuilder.tsx :: ../../shell/canvas/nodeui',
   // Tranche 1 — lib pulled back to pure / neutral leaves
   'lib/canvas/canvasActions.ts :: @/shell/canvas/layout', // #59 — move LayoutVisualizeOptions to lib
   'lib/canvas/canvasTeachingUi.ts :: @/shell/canvas/nodeui', // #08 — VizFitBox/MiniTabs -> shared leaf
