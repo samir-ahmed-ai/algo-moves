@@ -1,5 +1,5 @@
 .PHONY: help install dev build preview typecheck check clean \
-        backend backend-dev backend-build backend-test dev-all
+        backend-dev backend-build backend-test dev-all db-migrate
 
 NPM := npm --prefix frontend
 GO := go
@@ -45,6 +45,9 @@ backend-build: ## Compile the Go game server binary into backend/bin/
 
 backend-test: ## Run backend Go tests
 	cd $(BACKEND_DIR) && $(GO) test ./...
+
+db-migrate: ## Apply arcade schema to DATABASE_URL (see db/README.md)
+	./scripts/migrate-db.sh
 
 clean: ## Remove build artifacts and caches (frontend + backend)
 	rm -rf frontend/dist frontend/node_modules/.vite \

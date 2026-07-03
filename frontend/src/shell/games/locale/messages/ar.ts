@@ -112,7 +112,8 @@ export const ar: ArcadeStrings = {
     guest: 'ضيف',
     level: (n) => `المستوى ${n}`,
     signIn: 'تسجيل الدخول',
-    signInHint: 'احتفظ بإحصائياتك وصورتك وسجلّك عبر أجهزتك.',
+    signInHint: 'تُحفظ إحصائياتك على هذا الجهاز أثناء اللعب.',
+    guestHint: 'ملف ضيف — تبقى الإحصائيات على هذا المتصفح حتى تسجّل الخروج أو تمسح بيانات الموقع.',
     keepStats: 'احفظ إحصائياتي',
     email: 'البريد الإلكتروني',
     sendLink: 'أرسل رابط الدخول',
@@ -133,7 +134,7 @@ export const ar: ArcadeStrings = {
     unlocked: (a, b) => `${a} من ${b} مفتوحة`,
     history: 'المباريات الأخيرة',
     noHistory: 'لا مباريات بعد.',
-    needsSupabase: 'اربط Supabase لحفظ الملفات والإحصائيات.',
+    needsDatabase: 'اربط Postgres على خادم الألعاب لحفظ الملفات والإحصائيات.',
   },
   leaderboard: {
     title: 'المتصدرون',
@@ -146,7 +147,7 @@ export const ar: ArcadeStrings = {
     player: 'اللاعب',
     score: 'النتيجة',
     empty: 'لا لاعبين مصنّفين بعد — كن الأول!',
-    needsSupabase: 'اربط Supabase لعرض المتصدرين.',
+    needsDatabase: 'اربط Postgres على خادم الألعاب لعرض المتصدرين.',
   },
   waitingReconnect: (name) => `بانتظار ${name} لإعادة الاتصال…`,
 };

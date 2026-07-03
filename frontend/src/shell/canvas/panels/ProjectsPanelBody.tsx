@@ -37,6 +37,7 @@ export function ProjectsPanelBody() {
     }
     if (s.mode === 'visualize') ws.setMode('visualize');
     else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') ws.setMode('learn');
+    else ws.setMode('play');
     if (s.theme) ws.setTheme(s.theme === 'light' ? 'light' : 'dark');
     ws.setPalette(s.palette === 'cb' ? 'cb' : 'default');
     if (s.themePreset) ws.setThemePreset(normalizeThemePreset(s.themePreset));

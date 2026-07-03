@@ -254,7 +254,7 @@ function TopBar({
           <Menu className="h-4 w-4" />
         </IconBtn>
       )}
-      <IconBtn title="Back to the canvas" onClick={() => setMode('visualize')}>
+      <IconBtn title="Open canvas" onClick={() => setMode('visualize')}>
         <Network className="h-4 w-4" />
       </IconBtn>
       <GraduationCap className="hidden h-4 w-4 shrink-0 text-accent sm:block" />

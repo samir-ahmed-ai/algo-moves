@@ -120,7 +120,7 @@ export function CategoryBoard({
 
 /** Track-level category picker shown in the workspace main pane. */
 export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
-  const { setActiveCategoryId, setActiveTrackId } = useWorkspace();
+  const { setActiveCategoryId, setActiveTrackId, setProblemFocused } = useWorkspace();
   const track = getTrackById(trackId);
   const [query, setQuery] = useState('');
 
@@ -142,7 +142,7 @@ export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
     <div className="relative h-full overflow-auto p-2 sm:p-3">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.15]" style={gridStyle} />
       <div className="relative">
-        <BrowseBreadcrumb trackId={trackId} onBack={() => setActiveTrackId(null)} />
+        <BrowseBreadcrumb trackId={trackId} onBack={() => { setActiveTrackId(null); setProblemFocused(false); }} />
         <div className="relative mb-3 overflow-hidden rounded-lg border border-edge bg-panel px-3 py-2">
           <Label className="font-mono tracking-[0.12em]">PICK A CATEGORY</Label>
           <h2 className={cn('font-medium text-ink', chromeText.base)}>{track?.title ?? 'Browse'}</h2>
@@ -160,7 +160,7 @@ export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
         {filteredCategories.length === 0 ? (
           <p className="px-1 py-8 text-center text-sm text-ink3">No matching categories.</p>
         ) : (
-          <CategoryGrid categories={filteredCategories} onPick={(id) => setActiveCategoryId(id)} />
+          <CategoryGrid categories={filteredCategories} onPick={(id) => { setActiveCategoryId(id); setProblemFocused(false); }} />
         )}
       </div>
     </div>

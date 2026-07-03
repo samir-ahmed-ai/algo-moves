@@ -68,6 +68,7 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
       }
       if (s.mode === 'visualize') setMode('visualize');
       else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') setMode('learn');
+      else setMode('play');
       if (s.theme) setTheme(s.theme === 'light' ? 'light' : 'dark');
       if (s.palette) setPalette(s.palette === 'cb' ? 'cb' : 'default');
       if (s.themePreset) setThemePreset(normalizeThemePreset(s.themePreset));

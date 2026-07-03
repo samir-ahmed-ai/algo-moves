@@ -3,12 +3,28 @@ import { panelsConfig, modeBuiltins, panelTitle, getPanelConfig } from '../core/
 import { applyEffect, fastEffect, reverseEffect, maskEffect } from '../effects/registry';
 import { encodeProjectState, decodeProjectState } from '@/store/project-state';
 import type { Frame } from '../core/types';
+import { normalizeCanvasMode } from '../core/types';
 
 const sampleFrames = (): Frame[] =>
   [0, 1, 2, 3, 4].map((i) => ({
     move: { type: 'STEP', note: `n${i}`, caption: `Step ${i}` },
     state: { i },
   }));
+
+describe('normalizeCanvasMode', () => {
+  it('defaults missing or unknown modes to play', () => {
+    expect(normalizeCanvasMode()).toBe('play');
+    expect(normalizeCanvasMode('')).toBe('play');
+    expect(normalizeCanvasMode('unknown')).toBe('play');
+  });
+
+  it('preserves explicit modes', () => {
+    expect(normalizeCanvasMode('play')).toBe('play');
+    expect(normalizeCanvasMode('visualize')).toBe('visualize');
+    expect(normalizeCanvasMode('learn')).toBe('learn');
+    expect(normalizeCanvasMode('practice')).toBe('learn');
+  });
+});
 
 describe('panelRegistry', () => {
   it('has entries for core visualize panels', () => {

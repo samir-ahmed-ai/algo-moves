@@ -31,6 +31,7 @@ export interface Player {
 }
 
 const BASE_MS = 1100;
+const MIN_MS = 80;
 
 export function usePlayer(total: number): Player {
   const [index, setIndex] = useState(0);
@@ -42,8 +43,12 @@ export function usePlayer(total: number): Player {
   const [bookmarks, setBookmarks] = useState<Map<number, string>>(() => new Map());
   const [reversed, setReversed] = useState(false);
   const timer = useRef<number | null>(null);
-  const indexRef = useRef(index);
-  indexRef.current = index;
+
+  // The interval tick reads through this instead of closing over state directly,
+  // so toggling a breakpoint/loop/direction mid-playback doesn't reset the timer
+  // — only isPlaying/total/speed (below) should restart it.
+  const latest = useRef({ index, loopStart, loopEnd, breakpoints, reversed });
+  latest.current = { index, loopStart, loopEnd, breakpoints, reversed };
 
   const clear = useCallback(() => {
     if (timer.current !== null) {
@@ -72,18 +77,16 @@ export function usePlayer(total: number): Player {
 
   useEffect(() => {
     if (!isPlaying) return;
-    const ms = Math.max(80, Math.round(BASE_MS / speed));
+    const ms = Math.max(MIN_MS, Math.round(BASE_MS / speed));
     timer.current = window.setInterval(() => {
-      const i = indexRef.current;
-      let nextI: number;
-      if (reversed) nextI = Math.max(i - 1, 0);
-      else nextI = loopEnd !== null && i >= loopEnd ? loopStart ?? 0 : Math.min(i + 1, total - 1);
+      const { index: i, loopStart: ls, loopEnd: le, breakpoints: bps, reversed: rev } = latest.current;
+      const nextI = rev ? Math.max(i - 1, 0) : le !== null && i >= le ? ls ?? 0 : Math.min(i + 1, total - 1);
       if (nextI === i) return; // at a boundary — the auto-stop effect handles it
       setIndex(nextI);
-      if (breakpoints.has(nextI)) setPlaying(false); // hit a breakpoint
+      if (bps.has(nextI)) setPlaying(false); // hit a breakpoint
     }, ms);
     return clear;
-  }, [isPlaying, total, speed, loopStart, loopEnd, breakpoints, reversed, clear]);
+  }, [isPlaying, total, speed, clear]);
 
   const next = useCallback(() => {
     setPlaying(false);
@@ -109,16 +112,15 @@ export function usePlayer(total: number): Player {
   );
 
   const togglePlay = useCallback(() => {
-    setPlaying((p) => {
-      if (!p) {
-        setIndex((i) => {
-          if (loopEnd !== null && (i >= loopEnd || i < (loopStart ?? 0))) return loopStart ?? 0;
-          return i >= total - 1 ? 0 : i;
-        });
-      }
-      return !p;
-    });
-  }, [total, loopStart, loopEnd]);
+    // Resuming (not pausing): rewind into the loop segment, or from the end.
+    if (!isPlaying) {
+      setIndex((i) => {
+        if (loopEnd !== null && (i >= loopEnd || i < (loopStart ?? 0))) return loopStart ?? 0;
+        return i >= total - 1 ? 0 : i;
+      });
+    }
+    setPlaying((p) => !p);
+  }, [isPlaying, total, loopStart, loopEnd]);
 
   const clearLoop = useCallback(() => {
     setLoopStart(null);

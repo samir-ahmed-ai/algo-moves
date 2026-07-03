@@ -48,12 +48,14 @@ export const SIDE_DOCK_WIDTH = STRUDEL_NODE_W;
 
 /** Built-in panels shown per mode by default (plugin tabs are added by their tab.mode). */
 const MODE_BUILTINS: Record<CanvasMode, string[]> = {
+  play: modeBuiltins('visualize'),
   visualize: modeBuiltins('visualize'),
   learn: modeBuiltins('learn'),
 };
 
 /** Built-ins known to a mode but hidden until added from the ＋ menu. */
 const MODE_OPTIONAL: Record<CanvasMode, string[]> = {
+  play: modeOptional('visualize'),
   visualize: modeOptional('visualize'),
   learn: modeOptional('learn'),
 };
@@ -74,6 +76,7 @@ function makeNode(id: string, title: string, position: XYPosition): PanelFlowNod
 function tabInMode(tab: { mode?: string }, mode: CanvasMode): boolean {
   const tm = tab.mode ?? 'visualize';
   if (mode === 'learn') return tm === 'learn' || tm === 'practice';
+  if (mode === 'play') return tm === 'visualize';
   return tm === mode;
 }
 
@@ -97,7 +100,7 @@ function modeTabIds(plugin: ProblemPlugin<any, any>, mode: CanvasMode): string[]
 /** All node ids a mode knows about (default + optional + tabs) — used for ＋-menu/edges/removal. */
 export function modeNodeIds(plugin: ProblemPlugin<any, any>, mode: CanvasMode): string[] {
   const ids = [...MODE_BUILTINS[mode], ...MODE_OPTIONAL[mode], ...modeTabIds(plugin, mode)];
-  if (mode === 'visualize') return ids.filter((id) => !DOCK_ONLY_PANELS.has(id));
+  if (mode === 'visualize' || mode === 'play') return ids.filter((id) => !DOCK_ONLY_PANELS.has(id));
   return ids;
 }
 
@@ -190,6 +193,12 @@ export const REQUIRED_VISUALIZE_EDGES = new Set(['problem->viz']);
 export const VIZ_INPUT_HANDLE = 'viz-in';
 
 const SHELL_WIRES: Record<CanvasMode, [string, string, string?][]> = {
+  play: [
+    ['problem', 'viz'],
+    ['viz', 'code'],
+    ['viz', 'reassemble'],
+    ['viz', 'recall'],
+  ],
   visualize: [
     ['problem', 'viz'],
     ['viz', 'code'],
@@ -206,6 +215,7 @@ const SHELL_WIRES: Record<CanvasMode, [string, string, string?][]> = {
 
 function pluginWires(plugin: ProblemPlugin<any, any>, mode: CanvasMode): [string, string, string?][] {
   if (mode === 'learn') return plugin.wires?.learn ?? plugin.wires?.practice ?? [];
+  if (mode === 'play') return plugin.wires?.visualize ?? [];
   return plugin.wires?.[mode] ?? [];
 }
 

@@ -1,4 +1,4 @@
-import { getSupabase } from './supabaseClient';
+import { arcadeFetch } from './arcadeClient';
 import type {
   Achievement,
   DailyChallenge,
@@ -14,89 +14,71 @@ import type {
 
 /**
  * Data-access layer for the arcade. Every function is a no-op / empty result
- * when Supabase is not configured, so callers never need to branch on it.
+ * when the backend has no Postgres configured, so callers never need to branch.
  */
 
 // ---- profiles -------------------------------------------------------------
 
 export async function getProfile(id: string): Promise<Profile | null> {
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data } = await sb.from('profiles').select('*').eq('id', id).maybeSingle();
-  return (data as Profile) ?? null;
+  return arcadeFetch<Profile>(`/api/profiles/${id}`, { auth: false });
 }
 
 export async function getProfilesByIds(ids: string[]): Promise<Profile[]> {
-  const sb = getSupabase();
-  if (!sb || ids.length === 0) return [];
-  const { data } = await sb.from('profiles').select('*').in('id', ids);
-  return (data as Profile[]) ?? [];
+  if (ids.length === 0) return [];
+  return (await arcadeFetch<Profile[]>(`/api/profiles/${ids.join(',')}`, { auth: false })) ?? [];
 }
 
 export async function updateProfile(
   id: string,
   patch: Partial<Pick<Profile, 'display_name' | 'avatar_seed' | 'is_anonymous'>>,
 ): Promise<Profile | null> {
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data } = await sb.from('profiles').update(patch).eq('id', id).select('*').maybeSingle();
-  return (data as Profile) ?? null;
+  void id;
+  return arcadeFetch<Profile>('/api/profiles/me', {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  });
 }
 
 // ---- stats & history ------------------------------------------------------
 
 export async function getGameStats(profileId: string): Promise<GameStats[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb.from('game_stats').select('*').eq('profile_id', profileId);
-  return (data as GameStats[]) ?? [];
+  void profileId;
+  return (await arcadeFetch<GameStats[]>('/api/stats/me')) ?? [];
 }
 
 export async function getMatchHistory(profileId: string, limit = 25): Promise<MatchHistoryEntry[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb
-    .from('match_participants')
-    .select('*, match:matches(*)')
-    .eq('profile_id', profileId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  return (data as MatchHistoryEntry[]) ?? [];
+  void profileId;
+  void limit;
+  return (await arcadeFetch<MatchHistoryEntry[]>('/api/matches/me')) ?? [];
 }
 
 export async function submitMatchResult(input: MatchResultInput): Promise<SubmitMatchResult | null> {
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data, error } = await sb.rpc('submit_match_result', {
-    p_game: input.gameId,
-    p_room: input.roomCode ?? null,
-    p_mode: input.mode ?? 'duel',
-    p_participants: input.participants.map((p) => ({
-      profile_id: p.profileId,
-      display_name: p.displayName,
-      placement: p.placement,
-      score: p.score ?? 0,
-    })),
-    p_metadata: input.metadata ?? {},
+  return arcadeFetch<SubmitMatchResult>('/api/matches', {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({
+      gameId: input.gameId,
+      roomCode: input.roomCode ?? null,
+      mode: input.mode ?? 'duel',
+      participants: input.participants.map((p) => ({
+        profile_id: p.profileId,
+        display_name: p.displayName,
+        placement: p.placement,
+        score: p.score ?? 0,
+      })),
+      metadata: input.metadata ?? {},
+    }),
   });
-  if (error) return null;
-  return (data as SubmitMatchResult) ?? null;
 }
 
 // ---- leaderboards ---------------------------------------------------------
 
 export async function leaderboardGame(gameId: string, limit = 50): Promise<LeaderboardEntry[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb.rpc('leaderboard_game', { p_game: gameId, p_limit: limit });
-  return (data as LeaderboardEntry[]) ?? [];
+  return (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/game/${gameId}?limit=${limit}`, { auth: false })) ?? [];
 }
 
 export async function leaderboardGlobal(limit = 50): Promise<LeaderboardEntry[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb.rpc('leaderboard_global', { p_limit: limit });
-  return (data as LeaderboardEntry[]) ?? [];
+  return (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/global?limit=${limit}`, { auth: false })) ?? [];
 }
 
 export async function leaderboardRecent(
@@ -104,90 +86,52 @@ export async function leaderboardRecent(
   gameId: string | null = null,
   limit = 50,
 ): Promise<LeaderboardEntry[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb.rpc('leaderboard_recent', {
-    p_since: sinceIso,
-    p_game: gameId,
-    p_limit: limit,
-  });
-  return (data as LeaderboardEntry[]) ?? [];
+  const params = new URLSearchParams({ since: sinceIso, limit: String(limit) });
+  if (gameId) params.set('game', gameId);
+  return (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/recent?${params}`, { auth: false })) ?? [];
 }
 
 // ---- achievements ---------------------------------------------------------
 
 export async function listAchievements(): Promise<Achievement[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb.from('achievements').select('*').order('sort_order');
-  return (data as Achievement[]) ?? [];
+  return (await arcadeFetch<Achievement[]>('/api/achievements', { auth: false })) ?? [];
 }
 
 export async function listUnlockedAchievementIds(profileId: string): Promise<string[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb
-    .from('profile_achievements')
-    .select('achievement_id')
-    .eq('profile_id', profileId);
-  return ((data as { achievement_id: string }[]) ?? []).map((r) => r.achievement_id);
+  void profileId;
+  return (await arcadeFetch<string[]>('/api/achievements?unlocked=1')) ?? [];
 }
 
 export async function unlockAchievement(achievementId: string): Promise<void> {
-  const sb = getSupabase();
-  if (!sb) return;
-  await sb.rpc('unlock_achievement', { p_ach: achievementId });
+  await arcadeFetch(`/api/achievements/${achievementId}`, { method: 'POST' });
 }
 
 // ---- rooms ----------------------------------------------------------------
 
 export async function upsertRoom(row: Partial<RoomRow> & { code: string }): Promise<RoomRow | null> {
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data } = await sb
-    .from('rooms')
-    .upsert({ ...row, last_active_at: new Date().toISOString() })
-    .select('*')
-    .maybeSingle();
-  return (data as RoomRow) ?? null;
+  return arcadeFetch<RoomRow>(`/api/rooms/${row.code}`, {
+    method: 'PUT',
+    body: JSON.stringify({ ...row, last_active_at: new Date().toISOString() }),
+  });
 }
 
 export async function getRoom(code: string): Promise<RoomRow | null> {
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data } = await sb.from('rooms').select('*').eq('code', code).maybeSingle();
-  return (data as RoomRow) ?? null;
+  return arcadeFetch<RoomRow>(`/api/rooms/${code}`, { auth: false });
 }
 
 export async function listPublicRooms(limit = 20): Promise<RoomRow[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb
-    .from('rooms')
-    .select('*')
-    .eq('is_public', true)
-    .order('last_active_at', { ascending: false })
-    .limit(limit);
-  return (data as RoomRow[]) ?? [];
+  return (await arcadeFetch<RoomRow[]>(`/api/rooms/public?limit=${limit}`, { auth: false })) ?? [];
 }
 
 export async function touchRoom(code: string): Promise<void> {
-  const sb = getSupabase();
-  if (!sb) return;
-  await sb.from('rooms').update({ last_active_at: new Date().toISOString() }).eq('code', code);
+  await arcadeFetch(`/api/rooms/${code}/touch`, { method: 'POST' });
 }
 
 // ---- friends / recent players ---------------------------------------------
 
 export async function listFriends(profileId: string): Promise<Friend[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb
-    .from('friends')
-    .select('*')
-    .eq('profile_id', profileId)
-    .order('created_at', { ascending: false });
-  return (data as Friend[]) ?? [];
+  void profileId;
+  return (await arcadeFetch<Friend[]>('/api/friends')) ?? [];
 }
 
 export async function addFriend(
@@ -195,24 +139,25 @@ export async function addFriend(
   friendProfileId: string,
   status: Friend['status'] = 'pending',
 ): Promise<void> {
-  const sb = getSupabase();
-  if (!sb || profileId === friendProfileId) return;
-  await sb
-    .from('friends')
-    .upsert({ profile_id: profileId, friend_profile_id: friendProfileId, status });
+  void profileId;
+  if (profileId === friendProfileId) return;
+  await arcadeFetch('/api/friends', {
+    method: 'POST',
+    body: JSON.stringify({ friend_profile_id: friendProfileId, status }),
+  });
 }
 
 // ---- daily challenge ------------------------------------------------------
 
 export async function getOrCreateDailyChallenge(dateIso?: string): Promise<DailyChallenge | null> {
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data } = await sb.rpc('get_or_create_daily_challenge', dateIso ? { p_date: dateIso } : {});
-  return (data as DailyChallenge) ?? null;
+  const date = dateIso?.slice(0, 10);
+  const q = date ? `?date=${encodeURIComponent(date)}` : '';
+  return arcadeFetch<DailyChallenge>(`/api/daily-challenge${q}`, { auth: false });
 }
 
 export async function submitDailyScore(dateIso: string, score: number): Promise<void> {
-  const sb = getSupabase();
-  if (!sb) return;
-  await sb.rpc('submit_daily_score', { p_date: dateIso, p_score: score });
+  await arcadeFetch('/api/daily-challenge/score', {
+    method: 'POST',
+    body: JSON.stringify({ date: dateIso.slice(0, 10), score }),
+  });
 }

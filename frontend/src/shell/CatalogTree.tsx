@@ -21,6 +21,7 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
     activeTrackId,
     setActiveCategoryId,
     setActiveTrackId,
+    setProblemFocused,
   } = useWorkspace();
 
   const openCategoryId =
@@ -105,6 +106,7 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
                   onClick={() => {
                     setActiveTrackId(track.id);
                     setActiveCategoryId(cat.id);
+                    setProblemFocused(false);
                   }}
                   title={`Open the ${cat.title} grid`}
                   className={cn(

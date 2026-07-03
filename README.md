@@ -123,7 +123,8 @@ The project is split into two apps:
 
 ```
 ├── frontend/   React + Vite SPA — the whole learning app
-└── backend/    Go realtime game server for the two-player Games arcade (stdlib only)
+├── backend/    Go realtime game server + optional Postgres arcade API
+└── db/         Arcade Postgres schema (see db/README.md)
 ```
 
 A top-level `Makefile` wraps both (`make dev`, `make dev-all`, `make backend-dev`, `make build`, `make backend-test`, `make check`).
@@ -152,13 +153,16 @@ make backend-test    # framing + hub + a real two-client socket relay test
 
 Deploy the **frontend** and **game server** on [Railway](https://railway.com). No secrets or production URLs in the repo — set them in the Railway dashboard (and optional GitHub Actions secrets for CI deploy).
 
-1. Create a Railway project with two services: **frontend** (root `/frontend`) and **backend** (root `/backend`).
-2. Generate a public domain for each service (Settings → Networking).
+1. Create a Railway project with three services: **frontend** (root `/frontend`),
+   **backend** (root `/backend`), and **Postgres** (Railway database plugin).
+2. Generate a public domain for the frontend and backend services (Settings → Networking).
 3. Set **service variables** in the Railway dashboard:
 
    | Service | Variable | Example value |
    |---------|----------|---------------|
    | **backend** | `ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
+   | **backend** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (use **Add Reference**) |
+   | **backend** | `RUN_MIGRATIONS` | `true` |
    | **frontend** | `VITE_GAMES_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
 
    Use your exact Railway service names in the `${{…}}` references.

@@ -66,6 +66,11 @@ export interface WorkspaceCtx {
   enterWorkspace: (itemId?: string) => void;
   /** Open a problem in the workspace and leave browse grids. */
   openProblem: (id: string) => void;
+  /** True while a problem page is open (hides browse grids). */
+  problemFocused: boolean;
+  setProblemFocused: (b: boolean) => void;
+  /** Return from a problem page to the browse grid when one is active. */
+  backToBrowse: () => void;
   /** Enter the full-screen mobile swipe deck; pass a category id to open that category directly. */
   enterMobile: (categoryId?: string, itemId?: string) => void;
   /** Enter the Vim Dojo maze trainer; pass a level id to open that level directly. */

@@ -21,12 +21,12 @@ describe('shareState', () => {
   });
 
   it('builds share URL with encoded payload', () => {
-    const payload = { item: 'two-sum', mode: 'visualize', theme: 'dark', dir: 'LR' };
+    const payload = { item: 'two-sum', mode: 'play', theme: 'dark', dir: 'LR' };
     expect(buildShareUrl(payload)).toBe(`https://example.test/algo-moves/#s=${encodeShare(payload)}`);
   });
 
   it('merges share state into existing hash and reads it back', () => {
-    const payload = { item: 'two-sum', mode: 'visualize', theme: 'dark', dir: 'LR' };
+    const payload = { item: 'two-sum', mode: 'play', theme: 'dark', dir: 'LR' };
     const replace = vi.spyOn(history, 'replaceState').mockImplementation(() => {});
     writeShareToUrl(payload);
     const next = replace.mock.calls[0]?.[2];

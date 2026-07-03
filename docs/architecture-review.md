@@ -143,7 +143,7 @@ Five game components share copy-pasted scaffolding. Build a small `games/engine`
   `mobileSession`, `AssembleModes` currently read/write storage directly (#61, #63).
 - Split `WorkspaceCtx` (also Theme C, #39).
 
-### Theme H — Backend (Go) + Supabase polish · LOW (already healthy)
+### Theme H — Backend (Go) + Postgres arcade polish · LOW (already healthy)
 - Centralize message-type strings in a `const` block in `message.go` (#44).
 - Unexport `SanitizeName` → `sanitizeName` for parity with `sanitizePid` (#45).
 - Replace the hardcoded game list in `get_or_create_daily_challenge` with a seeded `games` catalog table +
@@ -166,7 +166,7 @@ Ranked by **(impact × reach) ÷ (effort × risk)**. Quick wins are safe mechani
 | 5 | Plugin recorder/factory/verdict consolidation; practice quiz reducer | E | M | med | 04,11,30,31,43,50,65,68 |
 | 6 | Decompose CanvasStage / layout.ts / contexts (behind characterization tests) | C | L | med | 33,34,36,38,39,40,41,78 |
 | 7 | Store consistency: unify persistence, move IO out of shell components | G | M | low | 46,52,61,63,76 |
-| 8 | Backend/Supabase polish | H | S | low | 06,44,45,55,56,64,66 |
+| 8 | Backend/Postgres polish | H | S | low | 06,44,45,55,56,64,66 |
 
 ### Quick wins (safe, < 30 min each — do first)
 - `plugins/_shared/practice.tsx:25` → `import { useCanvasStatic } from '@/lib/canvas'` (#02/#62 — kills a HIGH leak in one line)

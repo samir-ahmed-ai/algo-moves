@@ -1,11 +1,5 @@
--- Algo Moves — Games Arcade functions, RPCs and leaderboards.
---
--- All score-affecting writes live here as SECURITY DEFINER functions so the
--- client can never forge stats: RLS denies direct writes to matches/stats, and
--- these functions (owned by the migration role) perform the trusted updates.
+-- Algo Moves — Games Arcade functions and RPCs (standalone PostgreSQL)
 
--- Award an achievement to a profile, but only if it exists in the catalog
--- (avoids FK errors when the seed hasn't been loaded). Internal helper.
 create or replace function public.award_if(p_profile uuid, p_ach text)
 returns void
 language sql
@@ -17,32 +11,20 @@ as $$
   on conflict do nothing;
 $$;
 
--- Unlock an achievement for the calling user (idempotent).
-create or replace function public.unlock_achievement(p_ach text)
+create or replace function public.unlock_achievement(p_profile uuid, p_ach text)
 returns void
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
-  if auth.uid() is null then
+  if p_profile is null then
     return;
   end if;
-  perform public.award_if(auth.uid(), p_ach);
+  perform public.award_if(p_profile, p_ach);
 end;
 $$;
 
--- ---------------------------------------------------------------------------
--- submit_match_result: the single entry point for recording a finished game.
--- Inserts the match + participants, updates per-game MMR (placement-based Elo),
--- win/loss/draw record and streaks, awards XP and unlocks milestone
--- achievements — all in one transaction. Returns the new match id and each
--- participant's rating delta.
---
--- p_participants: jsonb array of
---   { "profile_id": uuid|null, "display_name": text, "placement": int, "score": int }
--- placement 1 = best; ties share a placement (a two-way tie for 1st is a draw).
--- ---------------------------------------------------------------------------
 create or replace function public.submit_match_result(
   p_game         text,
   p_room         text,
@@ -180,11 +162,6 @@ begin
 end;
 $$;
 
--- ---------------------------------------------------------------------------
--- Leaderboards. Three focused readers the client picks between by period.
--- ---------------------------------------------------------------------------
-
--- All-time, per game, ranked by MMR.
 create or replace function public.leaderboard_game(p_game text, p_limit int default 50)
 returns table (
   rank bigint, profile_id uuid, display_name text, avatar_seed text,
@@ -203,7 +180,6 @@ as $$
   limit greatest(p_limit, 1);
 $$;
 
--- All-time, across all games, ranked by XP / level.
 create or replace function public.leaderboard_global(p_limit int default 50)
 returns table (
   rank bigint, profile_id uuid, display_name text, avatar_seed text, level int, xp int
@@ -218,8 +194,6 @@ as $$
   limit greatest(p_limit, 1);
 $$;
 
--- Rolling window (day / week), ranked by wins in that window. p_game null =
--- across all games.
 create or replace function public.leaderboard_recent(
   p_since timestamptz,
   p_game  text default null,
@@ -244,9 +218,6 @@ as $$
   limit greatest(p_limit, 1);
 $$;
 
--- ---------------------------------------------------------------------------
--- Daily challenge: deterministic per-day seed, created on first read.
--- ---------------------------------------------------------------------------
 create or replace function public.get_or_create_daily_challenge(p_date date default current_date)
 returns public.daily_challenges
 language plpgsql
@@ -263,7 +234,6 @@ begin
     return v_row;
   end if;
 
-  -- Pick a game deterministically from the date so every client agrees.
   v_idx := (('x' || substr(md5(p_date::text), 1, 8))::bit(32)::bigint % array_length(v_games, 1)) + 1;
   insert into public.daily_challenges (challenge_date, game_id, seed)
   values (p_date, v_games[v_idx], md5(p_date::text))
@@ -274,31 +244,19 @@ begin
 end;
 $$;
 
--- Record (best-only) a daily challenge score for the caller.
-create or replace function public.submit_daily_score(p_date date, p_score int)
+create or replace function public.submit_daily_score(p_profile uuid, p_date date, p_score int)
 returns void
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
-  if auth.uid() is null then
+  if p_profile is null then
     return;
   end if;
   insert into public.daily_challenge_scores (challenge_date, profile_id, score)
-  values (p_date, auth.uid(), p_score)
+  values (p_date, p_profile, p_score)
   on conflict (challenge_date, profile_id)
     do update set score = greatest(public.daily_challenge_scores.score, excluded.score);
 end;
 $$;
-
--- ---------------------------------------------------------------------------
--- Grants: let signed-in users (including anonymous sessions) call the RPCs.
--- ---------------------------------------------------------------------------
-grant execute on function public.submit_match_result(text, text, text, jsonb, jsonb) to authenticated;
-grant execute on function public.unlock_achievement(text) to authenticated;
-grant execute on function public.leaderboard_game(text, int) to authenticated, anon;
-grant execute on function public.leaderboard_global(int) to authenticated, anon;
-grant execute on function public.leaderboard_recent(timestamptz, text, int) to authenticated, anon;
-grant execute on function public.get_or_create_daily_challenge(date) to authenticated, anon;
-grant execute on function public.submit_daily_score(date, int) to authenticated;

@@ -13,11 +13,11 @@ export interface ReportedParticipant {
 }
 
 /**
- * Records a finished match to Supabase. Only the host reports — it is the
- * authoritative peer and reporting from every client would double-count. The
- * hook resolves each peer id to a durable Supabase profile via room presence,
- * so stats land on the right accounts. A no-op (returns null) when Supabase is
- * unconfigured or the caller isn't the host.
+ * Records a finished match via the game server (Postgres). Only the host reports —
+ * the authoritative peer; reporting from every client would double-count. The
+ * hook resolves each peer id to a durable profile via room presence, so stats land
+ * on the right accounts. A no-op (returns null) when the backend has no database
+ * or the caller isn't the host.
  */
 export function useMatchReporter(gameId: string): {
   isReporter: boolean;
@@ -30,7 +30,7 @@ export function useMatchReporter(gameId: string): {
   const report = useCallback(
     async (participants: ReportedParticipant[], opts?: { mode?: RoomMode; metadata?: Record<string, unknown> }) => {
       if (!isReporter) return null;
-      // Feed the running session standings (works even without Supabase).
+      // Feed the running session standings (works even without Postgres).
       reportResult(participants.filter((p) => p.placement === 1).map((p) => p.peerId));
       const mode =
         opts?.mode ??

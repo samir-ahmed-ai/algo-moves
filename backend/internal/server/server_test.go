@@ -124,7 +124,7 @@ func (c *wsClient) readMessage(t *testing.T) map[string]any {
 func (c *wsClient) close() { c.conn.Close() }
 
 func newTestServer() *httptest.Server {
-	return httptest.NewServer(Handler(hub.New()))
+	return httptest.NewServer(Handler(hub.New(), nil))
 }
 
 func TestNewCodeEndpoint(t *testing.T) {
@@ -252,7 +252,7 @@ func TestNewAndHealthzRejectNonGET(t *testing.T) {
 // must keep serving plain infra healthchecks that never send one.
 func TestCorsJSONRequiresOriginOnNewWhenAllowlisted(t *testing.T) {
 	t.Setenv("ALLOWED_ORIGINS", "https://good.example")
-	ts := httptest.NewServer(Handler(hub.New()))
+	ts := httptest.NewServer(Handler(hub.New(), nil))
 	defer ts.Close()
 
 	resp, err := http.Get(ts.URL + "/new")

@@ -108,6 +108,7 @@ export type ArcadeStrings = {
     level: (n: number) => string;
     signIn: string;
     signInHint: string;
+    guestHint: string;
     keepStats: string;
     email: string;
     sendLink: string;
@@ -128,7 +129,7 @@ export type ArcadeStrings = {
     unlocked: (a: number, b: number) => string;
     history: string;
     noHistory: string;
-    needsSupabase: string;
+    needsDatabase: string;
   };
   leaderboard: {
     title: string;
@@ -141,7 +142,7 @@ export type ArcadeStrings = {
     player: string;
     score: string;
     empty: string;
-    needsSupabase: string;
+    needsDatabase: string;
   };
   waitingReconnect: (name: string) => string;
 };

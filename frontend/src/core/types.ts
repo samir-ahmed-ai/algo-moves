@@ -58,7 +58,7 @@ export interface Verdict {
 }
 
 /** Top-level canvas modes shown in the HUD. */
-export type CanvasMode = 'visualize' | 'learn';
+export type CanvasMode = 'play' | 'learn' | 'visualize';
 
 /** Plugin tab mode — `practice` is a legacy alias for `learn`. */
 export type PluginTabMode = CanvasMode | 'practice';
@@ -66,7 +66,8 @@ export type PluginTabMode = CanvasMode | 'practice';
 /** Normalize share URL / legacy mode strings to a canvas mode. */
 export function normalizeCanvasMode(m?: string): CanvasMode {
   if (m === 'learn' || m === 'practice' || m === 'code') return 'learn';
-  return 'visualize';
+  if (m === 'visualize') return 'visualize';
+  return 'play';
 }
 
 export interface PluginTab {

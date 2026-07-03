@@ -1,4 +1,4 @@
-/** Row + payload types mirroring the Supabase schema (supabase/migrations). */
+/** Row + payload types mirroring the arcade Postgres schema (db/migrations). */
 
 export interface Profile {
   id: string;

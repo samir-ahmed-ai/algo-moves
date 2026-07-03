@@ -10,6 +10,7 @@ import { buildShareUrl } from '@/store/navigation';
 import { UnifiedLeftSidebar } from './UnifiedLeftSidebar';
 import { CanvasStage } from './canvas/CanvasStage';
 import { LearnStudio } from './canvas/LearnStudio';
+import { ProblemPage } from './problem/ProblemPage';
 import { SettingsDialog } from './canvas/SettingsDialog';
 import { MobileTransportSheet } from './canvas/MobileTransportSheet';
 import { MobileSwipeReturn } from './mobile/MobileSwipeReturn';
@@ -26,6 +27,7 @@ export function Workspace() {
     activeItemId,
     activeTrackId,
     activeCategoryId,
+    problemFocused,
     mode,
     mobileTransportOpen,
     setMobileTransportOpen,
@@ -54,8 +56,8 @@ export function Workspace() {
   const frame = baseFrames[player.index] ?? baseFrames[0];
   const ready = !!plugin && !!frame;
 
-  const showTrackBoard = activeTrackId && !activeCategoryId;
-  const showCategoryBoard = !!activeCategoryId;
+  const showTrackBoard = activeTrackId && !activeCategoryId && !problemFocused;
+  const showCategoryBoard = !!activeCategoryId && !problemFocused;
 
   // Keyboard transport: ← / → step, space play/pause, Home/End jump.
   useEffect(() => {
@@ -115,7 +117,10 @@ export function Workspace() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [player, present, setPresent, helpOpen, mode]);
+    // player.next/prev/togglePlay/goTo (not the whole `player` object) so this
+    // listener isn't torn down and re-added on every animation tick — only when
+    // playback controls actually change identity (new total, loop, or play state).
+  }, [player.next, player.prev, player.togglePlay, player.goTo, present, setPresent, helpOpen, mode]);
 
   // Closing the palette / re-opening the catalog selection happens inside the component.
 
@@ -139,7 +144,19 @@ export function Workspace() {
         ) : showCategoryBoard ? (
           <CategoryBoard categoryId={activeCategoryId!} trackId={activeTrackId} />
         ) : ready ? (
-          mode === 'learn' ? (
+          mode === 'play' ? (
+            <ProblemPage
+              plugin={plugin!}
+              item={item}
+              inputId={inputId}
+              setInputId={selectInput}
+              customInput={customInput}
+              setCustomInput={setCustomInput}
+              frames={baseFrames}
+              player={player}
+              frame={frame!}
+            />
+          ) : mode === 'learn' ? (
             <LearnStudio
               plugin={plugin!}
               item={item}
@@ -223,8 +240,9 @@ function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => 
     };
     const problemCmds = catalog.items.filter((it) => it.pluginId).map((it) => open(it.id));
     const actions: Command[] = [
-      { id: 'mode:visualize', label: 'Mode: Visualize', hint: 'action', run: () => setMode('visualize') },
+      { id: 'mode:play', label: 'Mode: Play', hint: 'action', run: () => setMode('play') },
       { id: 'mode:learn', label: 'Mode: Learn', hint: 'action', run: () => setMode('learn') },
+      { id: 'mode:visualize', label: 'Mode: Visualize', hint: 'action', run: () => setMode('visualize') },
       { id: 'present', label: 'Enter presentation mode', hint: 'action', run: () => setPresent(true) },
       { id: 'settings', label: 'Open settings', hint: 'action', run: () => setSettingsOpen(true) },
       { id: 'theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, hint: 'action', run: () => setTheme(theme === 'dark' ? 'light' : 'dark') },

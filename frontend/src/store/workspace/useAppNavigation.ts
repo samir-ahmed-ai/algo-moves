@@ -29,6 +29,9 @@ export function useAppNavigation(shared: ShareState | null) {
   const [activeTopicId, setActiveTopicId] = useState<string | null>(initialBrowse.topicId);
   const [activeTrackId, setActiveTrackId] = useState<TrackId | null>(initialBrowse.trackId);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(initialBrowse.categoryId);
+  const [problemFocused, setProblemFocused] = useState(
+    () => !!(shared?.item && catalog.getItem(shared.item)),
+  );
   const [route, setRoute] = useState<AppRoute>(() => {
     if (shared?.item && catalog.getItem(shared.item)) return 'workspace';
     if (typeof location !== 'undefined') {
@@ -52,9 +55,13 @@ export function useAppNavigation(shared: ShareState | null) {
   const openProblem = useCallback((id: string) => {
     setActiveItemId(id);
     setActiveTopicId(null);
-    setActiveTrackId(null);
-    setActiveCategoryId(null);
+    setMode('play');
+    setProblemFocused(true);
     setRoute('workspace');
+  }, []);
+
+  const backToBrowse = useCallback(() => {
+    setProblemFocused(false);
   }, []);
 
   const enterWorkspace = useCallback(
@@ -100,10 +107,13 @@ export function useAppNavigation(shared: ShareState | null) {
     setActiveTrackId,
     activeCategoryId,
     setActiveCategoryId,
+    problemFocused,
+    setProblemFocused,
     route,
     goHome,
     enterWorkspace,
     openProblem,
+    backToBrowse,
     enterMobile,
     enterVim,
     enterGames,

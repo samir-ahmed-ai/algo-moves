@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X, Trophy, User as UserIcon, Pencil, LogOut, Mail } from 'lucide-react';
+import { X, Trophy, User as UserIcon, Pencil, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useAuth } from '../data/AuthProvider';
-import { isSupabaseConfigured } from '../data/supabaseClient';
 import {
   getGameStats,
   getMatchHistory,
@@ -111,15 +110,13 @@ function Unconfigured({ message }: { message: string }) {
 function ProfileTab() {
   const { locale } = useGamesLocale();
   const t = useMemo(() => getArcadeStrings(locale), [locale]);
-  const { configured, profile, isAnonymous, ensureSignedIn, updateMyProfile, linkEmail, linkOAuth, signOut } = useAuth();
+  const { configured, loading: authLoading, profile, isAnonymous, ensureSignedIn, updateMyProfile, signOut } = useAuth();
   const [stats, setStats] = useState<GameStats[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [unlocked, setUnlocked] = useState<string[]>([]);
   const [history, setHistory] = useState<MatchHistoryEntry[]>([]);
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
-  const [email, setEmail] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
 
   const load = useCallback(async () => {
     if (!configured) return;
@@ -141,7 +138,8 @@ function ProfileTab() {
     void load();
   }, [load]);
 
-  if (!configured) return <Unconfigured message={t.profile.needsSupabase} />;
+  if (authLoading) return <p className="py-6 text-center text-sm text-ink3">…</p>;
+  if (!configured) return <Unconfigured message={t.profile.needsDatabase} />;
 
   const name = profile?.display_name ?? t.profile.guest;
   const totalWins = stats.reduce((n, s) => n + s.wins, 0);
@@ -194,42 +192,14 @@ function ProfileTab() {
       {/* Sign-in / upgrade for anonymous guests */}
       {isAnonymous ? (
         <div className="rounded-[var(--radius)] border border-edge bg-panel/60 p-3">
-          <p className="mb-2 text-sm font-semibold text-ink">{t.profile.keepStats}</p>
-          <p className="mb-3 text-xs text-ink3">{t.profile.signInHint}</p>
-          {emailSent ? (
-            <p className="text-sm text-good">{t.profile.linkSent}</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t.profile.email}
-                  className="min-h-10 flex-1 rounded-md border border-edge bg-panel px-3 text-sm text-ink outline-none focus:border-accent"
-                />
-                <TouchButton
-                  variant="accentSoft"
-                  size="md"
-                  icon={<Mail className="h-4 w-4" />}
-                  disabled={!email.includes('@')}
-                  onClick={async () => {
-                    const { error } = await linkEmail(email);
-                    if (!error) setEmailSent(true);
-                  }}
-                >
-                  {t.profile.sendLink}
-                </TouchButton>
-              </div>
-              <button
-                type="button"
-                onClick={() => void linkOAuth('google')}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-edge bg-panel text-sm font-medium text-ink hover:bg-panel2"
-              >
-                {t.profile.continueWithGoogle}
-              </button>
-            </div>
-          )}
+          <p className="text-sm text-ink3">{t.profile.guestHint}</p>
+          <button
+            type="button"
+            onClick={() => void signOut()}
+            className="mt-3 inline-flex min-h-9 items-center gap-1.5 text-xs text-ink3 hover:text-bad"
+          >
+            <LogOut className="h-3.5 w-3.5" /> {t.profile.signOut}
+          </button>
         </div>
       ) : (
         <button
@@ -346,13 +316,14 @@ type Period = 'all' | 'week' | 'today';
 function LeaderboardTab() {
   const { locale } = useGamesLocale();
   const t = useMemo(() => getArcadeStrings(locale), [locale]);
+  const { configured, loading: authLoading } = useAuth();
   const [period, setPeriod] = useState<Period>('all');
   const [gameId, setGameId] = useState<string | null>(null);
   const [rows, setRows] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) return;
+    if (!configured) return;
     let alive = true;
     setLoading(true);
     const run = async () => {
@@ -372,9 +343,10 @@ function LeaderboardTab() {
     return () => {
       alive = false;
     };
-  }, [period, gameId]);
+  }, [configured, period, gameId]);
 
-  if (!isSupabaseConfigured()) return <Unconfigured message={t.leaderboard.needsSupabase} />;
+  if (authLoading) return <p className="py-6 text-center text-sm text-ink3">…</p>;
+  if (!configured) return <Unconfigured message={t.leaderboard.needsDatabase} />;
 
   return (
     <div className="flex flex-col gap-3">

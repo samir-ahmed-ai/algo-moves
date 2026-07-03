@@ -150,6 +150,7 @@ export function UnifiedLeftSidebar() {
     openProblem,
     setActiveTrackId,
     setActiveCategoryId,
+    setProblemFocused,
     goHome,
     canvasAdd,
     isMobile,
@@ -359,6 +360,7 @@ export function UnifiedLeftSidebar() {
                     const track = trackForCategory(catId);
                     if (track) setActiveTrackId(track.id);
                     setActiveCategoryId(catId);
+                    setProblemFocused(false);
                   }
                 }}
                 title="Open the category grid"

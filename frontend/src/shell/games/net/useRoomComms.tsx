@@ -16,7 +16,7 @@ import { playCue } from '@/lib/utils/audio';
  * multiplexed over the same relay channel the games use. Room messages carry an
  * `__arcade` tag so game move handlers (which switch on their own `kind`) ignore
  * them and vice versa. Presence is peer-broadcast (not host state) so any player
- * can toggle their own ready and share their Supabase profile id; late joiners
+ * can toggle their own ready and share their profile id; late joiners
  * request a re-announce.
  *
  * Exposed as a provider so a single instance (one chat log, one presence map) is
