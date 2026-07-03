@@ -7,7 +7,7 @@ import { LAYOUT_PRESET_META, type LayoutPreset } from './layout';
 
 const PRESET_ICONS: Record<LayoutPreset, React.ReactNode> = {
   Full: <LayoutGrid className="h-4 w-4" />,
-  Study: <Eye className="h-4 w-4" />,
+  TraceFocus: <Eye className="h-4 w-4" />,
   Minimal: <Minimize2 className="h-4 w-4" />,
   Theater: <Monitor className="h-4 w-4" />,
   Demo: <Presentation className="h-4 w-4" />,

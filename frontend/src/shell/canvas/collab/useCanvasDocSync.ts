@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { Edge } from '@xyflow/react';
-import { useGameRoom } from '../../games/net/useGameRoom';
-import { usePublishState } from '../../games/net/usePublishState';
+import { useGameRoom } from '@/shell/realtime';
+import { usePublishState } from '@/shell/realtime';
+import { buildCanvasRoomState, extractCanvasDoc } from '@/shell/realtime/roomState';
 import { useCanvasCollab } from './CanvasCollabProvider';
 import type { PanelFlowNode } from '../PanelNode';
 import { isCanvasOp, isEditOp, type CanvasDoc, type CanvasOp } from './collabProtocol';
@@ -12,7 +13,6 @@ import {
   diffEdges,
   diffNodes,
   docSignature,
-  isCanvasDoc,
   mergeRemoteNodes,
 } from './canvasDoc';
 
@@ -39,7 +39,7 @@ interface DocSyncArgs {
  *  - Everyone broadcasts their live drags as ephemeral presence.
  */
 export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncArgs): void {
-  const { role, isCollaborating, comments, setComments, emit, broadcastDrag, broadcastSelection } = useCanvasCollab();
+  const { role, isCollaborating, session, comments, setComments, emit, broadcastDrag, broadcastSelection } = useCanvasCollab();
   const { publishState, subscribe, sharedState } = useGameRoom();
 
   const isHost = role === 'host';
@@ -57,7 +57,7 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
 
   // ---- host: publish the authoritative document on every settled change ----
   const sig = isCollaborating && isHost ? docSignature(nodes, edges, comments) : '';
-  usePublishState(isHost && isCollaborating, [sig], () => {
+  usePublishState(isHost && isCollaborating, [sig, session.kind, session.activeProblemId], () => {
     if (!sig) return;
     revRef.current += 1;
     const doc: CanvasDoc = {
@@ -69,7 +69,7 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
       removedEdges: [],
       comments: commentsRef.current,
     };
-    publishState(doc);
+    publishState(buildCanvasRoomState(session, doc));
   });
 
   // ---- non-host: reconcile to the host snapshot (also seeds late joiners) ----
@@ -79,16 +79,17 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
   // exactly one move op.
   useEffect(() => {
     if (isHost || !isCollaborating) return;
-    if (!isCanvasDoc(sharedState)) return;
+    const doc = extractCanvasDoc(sharedState);
+    if (!doc) return;
     const local = nodesRef.current;
-    const merged = mergeRemoteNodes(local, sharedState.nodes);
+    const merged = mergeRemoteNodes(local, doc.nodes);
     const draggingIds = new Set(local.filter((n) => n.dragging).map((n) => n.id));
     const prevById = new Map(prevNodes.current.map((n) => [n.id, n]));
     prevNodes.current = merged.map((n) => (draggingIds.has(n.id) ? prevById.get(n.id) ?? n : n));
     setNodes(merged);
-    prevEdges.current = sharedState.edges;
-    setEdges(sharedState.edges);
-    setComments(sharedState.comments);
+    prevEdges.current = doc.edges;
+    setEdges(doc.edges);
+    setComments(doc.comments);
   }, [sharedState, isHost, isCollaborating, setNodes, setEdges, setComments]);
 
   // ---- host: fold peer edit ops into the canonical document ----

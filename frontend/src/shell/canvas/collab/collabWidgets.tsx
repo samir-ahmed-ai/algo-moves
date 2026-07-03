@@ -12,11 +12,15 @@ import {
   Send,
   Trash2,
   LogOut,
+  ClipboardList,
+  UserCheck,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import { cn } from '@/lib/utils/cn';
+import { catalog } from '@/content';
+import { useWorkspace } from '@/store/workspace';
 import { chromeText } from '../../chromeUi';
-import { RADIUS_CTRL, RADIUS_SHELL } from '../nodeui';
+import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '../nodeui';
 import { useRoomComms } from '../../games/net/useRoomComms';
 import { useCanvasCollab } from './CanvasCollabProvider';
 import type { CanvasWidget } from '../widgets/types';
@@ -27,9 +31,11 @@ const QUICK_REACTIONS = ['👍', '🔥', '😂', '🎉', '👏', '🧠'];
 
 export function SessionBody() {
   const collab = useCanvasCollab();
+  const { activeItemId } = useWorkspace();
   const {
     isCollaborating,
     startSession,
+    startInterviewSession,
     joinSession,
     leaveSession,
     room,
@@ -38,10 +44,15 @@ export function SessionBody() {
     peers,
     followId,
     setFollowId,
+    session,
   } = collab;
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [interviewBusy, setInterviewBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const activeItem = catalog.getItem(activeItemId);
+  const canInterview = !!activeItem?.pluginId;
 
   const start = async () => {
     setBusy(true);
@@ -49,6 +60,16 @@ export function SessionBody() {
       await startSession();
     } finally {
       setBusy(false);
+    }
+  };
+
+  const startInterview = async () => {
+    if (!canInterview) return;
+    setInterviewBusy(true);
+    try {
+      await startInterviewSession(activeItemId);
+    } finally {
+      setInterviewBusy(false);
     }
   };
 
@@ -84,6 +105,25 @@ export function SessionBody() {
           <Radio className="h-3 w-3" />
           Start collaborating
         </button>
+        <button
+          type="button"
+          onClick={startInterview}
+          disabled={interviewBusy || !canInterview}
+          title={canInterview ? undefined : 'Open a problem first'}
+          className={cn(
+            'inline-flex items-center justify-center gap-1.5 border border-edge bg-panel2 px-2.5 py-1.5 font-medium text-ink2 transition-colors hover:border-accent hover:text-accent disabled:opacity-40',
+            RADIUS_CTRL,
+            chromeText.sm,
+          )}
+        >
+          <UserCheck className="h-3 w-3" />
+          Start interview
+        </button>
+        <p className={cn('text-ink3', chromeText.xs)}>
+          {canInterview
+            ? `Shares “${activeItem?.title ?? activeItemId}” with candidates.`
+            : 'Open a problem to host an interview session.'}
+        </p>
         <div className="flex items-center gap-1.5">
           <input
             value={code}
@@ -153,6 +193,12 @@ export function SessionBody() {
         <Eye className="h-3 w-3" />
         <span className={chromeText.xs}>{live} live</span>
       </div>
+
+      {session.kind === 'interview' && session.activeProblemId ? (
+        <Chip tone="accent" mono className={cn('!px-2 !py-0.5', chromeText.xs)}>
+          Interview · {catalog.getItem(session.activeProblemId)?.title ?? session.activeProblemId}
+        </Chip>
+      ) : null}
 
       <ul className="flex flex-col gap-0.5">
         {self ? <RosterRow name={self.name} role={self.role} isSelf /> : null}
@@ -361,6 +407,34 @@ function CommentsBody() {
   );
 }
 
+/* ---------------------------------------------------------------- quiz log */
+
+function QuizLogBody() {
+  const { hostQuizLog } = useCanvasCollab();
+
+  if (hostQuizLog.length === 0) {
+    return <p className={cn('py-2 text-center text-ink3', chromeText.xs)}>No answers yet.</p>;
+  }
+
+  return (
+    <ul className="flex max-h-48 flex-col gap-1 overflow-y-auto">
+      {[...hostQuizLog].reverse().map((entry, i) => (
+        <li
+          key={`${entry.at}-${entry.peerId}-${entry.questionId}-${i}`}
+          className={cn('border border-edge bg-panel2/50 px-2 py-1.5', RADIUS_SHELL)}
+        >
+          <div className={cn('flex items-center justify-between gap-2', chromeText.xs)}>
+            <span className="truncate font-semibold text-ink2">{entry.peerName}</span>
+            <span className={entry.correct ? 'text-good' : 'text-bad'}>{entry.correct ? 'Correct' : 'Wrong'}</span>
+          </div>
+          <div className={cn('mt-0.5 truncate text-ink', chromeText.sm)}>{entry.answer}</div>
+          <div className={cn('mt-0.5 text-ink3', chromeText.xs)}>{entry.questionId}</div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /* ---------------------------------------------------------------- badges */
 
 function CommentsBadge() {
@@ -389,6 +463,18 @@ export const COLLAB_WIDGETS: CanvasWidget[] = [
     defaultOpen: true,
     useVisible: () => useCanvasCollab().isCollaborating,
     Body: ChatBody,
+  },
+  {
+    id: 'collab-quiz-log',
+    title: 'Quiz log',
+    icon: <ClipboardList className="h-3 w-3" />,
+    tab: 'collab',
+    order: 25,
+    useVisible: () => {
+      const c = useCanvasCollab();
+      return c.isCollaborating && c.isHost && c.session.kind === 'interview';
+    },
+    Body: QuizLogBody,
   },
   {
     id: 'collab-comments',

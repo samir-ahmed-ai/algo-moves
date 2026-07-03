@@ -42,8 +42,42 @@ sync when editing schema.
 ```bash
 psql "$DATABASE_URL" -f db/migrations/001_arcade_schema.sql
 psql "$DATABASE_URL" -f db/migrations/002_arcade_functions.sql
+psql "$DATABASE_URL" -f db/migrations/003_canvas_schema.sql
+psql "$DATABASE_URL" -f db/migrations/004_content_schema.sql
 psql "$DATABASE_URL" -f db/seed.sql
 ```
+
+## Learning content
+
+Migration `004_content_schema.sql` adds the **learning catalog** tables —
+`courses`, `topics`, `items`, `problems`, `solutions` (one row per
+problem × language), `tags` + `problem_tags`, `quiz_questions` + `quiz_choices`,
+and `story_regions` (narrative worlds layered over a course, e.g. Graphs →
+*The Archipelago of Reach*). The schema runs on deploy like the others.
+
+The catalog is still authored in the frontend TypeScript (`src/plugins/**`,
+`src/content/**`). `frontend/scripts/export-content-sql.mts` mirrors it into a
+deterministic seed and `check:all` fails if the seed drifts:
+
+```bash
+npm --prefix frontend run export-content-sql   # writes db/content_seed.sql
+npm --prefix frontend run check-content-sql     # CI drift guard (in check:all)
+```
+
+The seed is a single transaction that **truncates and reloads** the content
+tables, so re-running always converges to the current catalog. It is large, so
+it is **not** applied automatically on deploy — apply it explicitly:
+
+```bash
+make content-seed                       # regenerate + apply to $DATABASE_URL
+# or: SEED_CONTENT=1 ./scripts/migrate-db.sh
+# or: psql "$DATABASE_URL" -f db/content_seed.sql
+```
+
+Reads are public (no auth), mirroring the leaderboard endpoints:
+`GET /api/content/catalog` (course/topic/item tree) and
+`GET /api/content/problems/{id}` (a problem with its tags, per-language
+solutions and quiz).
 
 ## Design notes
 

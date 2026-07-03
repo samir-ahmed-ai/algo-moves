@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { shuffle } from '@/lib/utils/shuffle';
 import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText } from '../nodeui';
-import { useCodeStudio } from '../CodeStudio';
+import { useCodeStudio } from '@/shell/study/hooks/useCodeStudio';
 import { useCanvasStatic } from '../CanvasContext';
 import type { CodePiece } from '@/lib/code';
 import { blockKind, BLOCK_META } from '@/lib/code';

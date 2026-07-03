@@ -18,6 +18,7 @@ export * from './patterns';
 export * from './glossary';
 export * from './taxonomy';
 export * from './browse';
+export * from './navigation';
 export { PROBLEM_GLYPHS } from './glyphs';
 export { SHAPE_GLYPHS, glyphFor, shapeFor, type ShapeKey } from './problemShape';
 export { PROBLEM_GISTS, gistFor } from './gists';

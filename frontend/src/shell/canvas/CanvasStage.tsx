@@ -184,6 +184,7 @@ function Inner({
     setPresent,
     setRightOpen,
     setRightTab,
+    enterProblemInMode,
   } = useWorkspace();
   const pluginId = plugin.meta.id;
   const key = standalone ? STANDALONE_CANVAS_KEY : `${pluginId}:${mode}`;
@@ -483,6 +484,14 @@ function Inner({
   useCanvasKeyboardShortcuts({ fitView, undo, redo, toggleFocusCanvas, nodesRef });
 
   // ---- drag a removed panel back onto the canvas ----
+  const onProblemDrop = useCallback(
+    (itemId: string, _position: { x: number; y: number }) => {
+      // Scaffold: load problem in visualize mode; full frame placement at pointer is deferred.
+      enterProblemInMode(itemId, 'visualize');
+    },
+    [enterProblemInMode],
+  );
+
   const { onDragOver, onDragLeave, onDrop } = useCanvasDnD({
     plugin,
     mode,
@@ -495,6 +504,7 @@ function Inner({
     setDragOver,
     nodesRef,
     removedRef,
+    onProblemDrop,
   });
 
   const addableKinds = useMemo(() => {

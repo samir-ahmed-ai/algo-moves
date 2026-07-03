@@ -6,7 +6,7 @@ import { getEffect, type EffectDataMap } from '../../effects/registry';
 import { effectTraceSnippet } from '../../effects/registry';
 import type { PanelRunState } from '../../core/panelRegistry';
 import { Btn, nodeIconGlyph, nodeText } from './nodeui';
-import { NodeHeader, NodeHeaderAction, NodeHeaderActions, NodeHeaderTitle } from './panels/NodeHeader';
+import { NodeHeader, NodeHeaderAction, NodeHeaderActions, NodeHeaderTitle } from '@/shell/panels/NodeHeader';
 import { handleDotClass, portHandleStyle } from './canvasHandles';
 import { useConnectedComponentsOptional } from '@/lib/canvas';
 import { EffectControls } from '../../effects/components/EffectControls';

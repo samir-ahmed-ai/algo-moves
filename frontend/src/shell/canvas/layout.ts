@@ -134,8 +134,8 @@ export const LAYOUT_PRESET_META: Record<
     description: 'Every panel — maximum context',
     sketch: '[P][V][+][+][+]',
   },
-  Study: {
-    label: 'Study',
+  TraceFocus: {
+    label: 'Trace focus',
     description: 'Core learn panels — problem path + code',
     sketch: '[P][V] · predict · code',
   },
@@ -160,7 +160,7 @@ export const LAYOUT_PRESET_META: Record<
 /** Default panels each preset keeps per mode (undefined mode = keep all). */
 const PRESET_KEEP: Record<LayoutPreset, Partial<Record<CanvasMode, string[]>>> = {
   Full: {},
-  Study: {
+  TraceFocus: {
     learn: ['predict', 'mastery', 'code'],
   },
   Minimal: {

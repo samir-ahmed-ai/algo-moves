@@ -14,24 +14,24 @@ const CHAIN_TINTS = [
   'ring-[color-mix(in_srgb,var(--team1-stroke)_40%,transparent)]',
   'ring-[color-mix(in_srgb,var(--team2-stroke)_40%,transparent)]',
 ] as const;
-import { CodeStudioBody, CodeStudioFooter, CodeStudioProvider, CodeStudioToolbar } from './CodeStudio';
+import { CodeStudioProvider, CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
 import { useCanvasStatic } from './CanvasContext';
 import { PanelBody as PanelBodyShell, type HeaderDensity } from './nodeui';
-import { PanelBody } from './panels/PanelBodyRouter';
-import { panelAccent } from './panels/panelIcons';
-import type { PanelFlowNode } from './panels/panelTypes';
-import { PanelNodeHeader } from './panels/PanelNodeHeader';
-import { HeaderExamplesNav } from './panels/PanelHeaderControls';
-import { useFitContentSize } from './panels/useFitContentSize';
-import { VizPanelBody } from './panels/VizPanelBody';
+import { PanelBody } from '@/shell/panels';
+import { panelAccent } from '@/shell/panels/panelIcons';
+import type { PanelFlowNode } from '@/shell/panels/panelTypes';
+import { PanelNodeHeader } from '@/shell/panels/PanelNodeHeader';
+import { HeaderExamplesNav } from '@/shell/panels/PanelHeaderControls';
+import { useFitContentSize } from '@/shell/panels/useFitContentSize';
+import { VizPanelBody } from '@/shell/panels/VizPanelBody';
 import { TransportBar } from './TransportBarCore';
 
-export type { PanelFlowNode, PanelNodeData } from './panels/panelTypes';
-export { panelAccent, nodeIcon } from './panels/panelIcons';
-export { InspectorPaneContent } from './panels/InspectorPanelBody';
-export { ReplayContent } from './panels/ReplayPanelBody';
-export { MetricsBody } from './panels/MetricsPanelBody';
-export { PanelBody } from './panels/PanelBodyRouter';
+export type { PanelFlowNode, PanelNodeData } from '@/shell/panels/panelTypes';
+export { panelAccent, nodeIcon } from '@/shell/panels/panelIcons';
+export { InspectorPaneContent } from '@/shell/panels/InspectorPanelBody';
+export { ReplayContent } from '@/shell/panels/ReplayPanelBody';
+export { MetricsBody } from '@/shell/panels/MetricsPanelBody';
+export { PanelBody } from '@/shell/panels/PanelBodyRouter';
 
 export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode>) {
   const nodeStyle = data.style;

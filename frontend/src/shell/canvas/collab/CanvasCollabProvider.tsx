@@ -11,11 +11,13 @@ import {
   type SetStateAction,
 } from 'react';
 import { AuthProvider, useAuth } from '../../games/data/AuthProvider';
-import { GameRoomProvider, useGameRoom } from '../../games/net/useGameRoom';
+import { GameRoomProvider, useGameRoom } from '@/shell/realtime';
 import { RoomCommsProvider } from '../../games/net/useRoomComms';
-import { fetchNewRoomCode, makeRoomCode, normalizeRoomCode } from '../../games/net/gameServer';
-import type { RoomStatus } from '../../games/net/useGameRoom';
-import type { Peer, Role } from '../../games/net/protocol';
+import { fetchNewRoomCode, makeRoomCode, normalizeRoomCode } from '@/shell/realtime';
+import type { RoomStatus } from '@/shell/realtime';
+import type { Peer, Role } from '@/shell/realtime';
+import { collabSession, defaultSession, interviewSession, type SessionMeta } from '@/lib/session';
+import { extractSessionMeta } from '@/shell/realtime/roomState';
 import {
   CANVAS_TAG,
   isCanvasOp,
@@ -26,6 +28,7 @@ import {
   type CanvasOp,
   type EditOp,
 } from './collabProtocol';
+import { isQuizOp, toHostQuizEntry, type HostQuizEntry } from './quizProtocol';
 
 /** Live, ephemeral state for one remote collaborator. */
 export interface PeerPresence {
@@ -49,8 +52,12 @@ export interface CanvasCollabApi {
   players: Peer[];
   isCollaborating: boolean;
   isHost: boolean;
+  /** Active session metadata (solo when not in a room). */
+  session: SessionMeta;
   /** Mint a fresh room and host it. */
   startSession: (name?: string) => Promise<string | null>;
+  /** Host an interview room with a shared problem (scaffold). */
+  startInterviewSession: (problemId: string, name?: string) => Promise<string | null>;
   /** Join an existing room by code. */
   joinSession: (code: string, name?: string) => void;
   leaveSession: () => void;
@@ -72,6 +79,9 @@ export interface CanvasCollabApi {
   resolveComment: (id: string, resolved: boolean) => void;
   removeComment: (id: string) => void;
 
+  /** Host-only: quiz answers relayed from guests during interview sessions. */
+  hostQuizLog: HostQuizEntry[];
+
   // ---- internal wiring (used by the in-canvas doc-sync hook) ----
   /** Send a raw op over the relay (gated: hosts publish state instead of edit ops). */
   emit: (op: CanvasOp) => void;
@@ -86,16 +96,24 @@ let cseq = 0;
 const cid = () => `c${Date.now().toString(36)}${(cseq++).toString(36)}`;
 
 function CollabState({ children }: { children: ReactNode }) {
-  const { status, room, role, self, players, send, subscribe, connect, disconnect } = useGameRoom();
+  const { status, room, role, self, players, send, subscribe, connect, disconnect, sharedState } = useGameRoom();
   const { profile } = useAuth();
 
   const [peerMap, setPeerMap] = useState<Record<string, PeerPresence>>({});
   const [followId, setFollowId] = useState<string | null>(null);
   const [comments, setComments] = useState<CanvasComment[]>([]);
+  const [sessionMeta, setSessionMeta] = useState<SessionMeta>(() => defaultSession('solo'));
+  const [hostQuizLog, setHostQuizLog] = useState<HostQuizEntry[]>([]);
 
   const isHost = role === 'host';
   const isCollaborating = status === 'open' && room != null;
   const selfName = self?.name ?? profile?.display_name ?? 'You';
+
+  // Guests mirror session metadata from the host envelope.
+  useEffect(() => {
+    if (isHost || !isCollaborating) return;
+    setSessionMeta(extractSessionMeta(sharedState));
+  }, [sharedState, isHost, isCollaborating]);
 
   // Roster order → stable peer color assignment shared across clients.
   const colorForRef = useRef<(id: string) => string>(() => peerColor('', -1));
@@ -107,6 +125,13 @@ function CollabState({ children }: { children: ReactNode }) {
   // ---- inbound relay: presence only (edits/doc are applied by the sync hook) ----
   useEffect(() => {
     return subscribe((data, fromId) => {
+      if (isQuizOp(data)) {
+        if (isHost && isCollaborating) {
+          const name = players.find((p) => p.id === fromId)?.name ?? 'Peer';
+          setHostQuizLog((log) => [...log, toHostQuizEntry(data, fromId, name)]);
+        }
+        return;
+      }
       if (!isCanvasOp(data)) return;
       const op = data as CanvasOp;
       if (isEditOp(op)) return; // handled by useCanvasDocSync on the host
@@ -132,13 +157,14 @@ function CollabState({ children }: { children: ReactNode }) {
           break;
       }
     });
-  }, [subscribe, players]);
+  }, [subscribe, players, isHost, isCollaborating]);
 
   // Prune presence for peers who left; clear all when we disconnect.
   useEffect(() => {
     if (!isCollaborating) {
       setPeerMap({});
       setFollowId(null);
+      setHostQuizLog([]);
       return;
     }
     const live = new Set(players.map((p) => p.id));
@@ -197,6 +223,20 @@ function CollabState({ children }: { children: ReactNode }) {
 
   // ---- session controls ----
   const startSession = useCallback(async (name?: string): Promise<string | null> => {
+    setSessionMeta(collabSession());
+    let code: string | null = null;
+    try {
+      code = await fetchNewRoomCode();
+    } catch {
+      code = makeRoomCode();
+    }
+    if (!code) return null;
+    connect(code, name?.trim() || selfName, { capacity: 8 });
+    return code;
+  }, [connect, selfName]);
+
+  const startInterviewSession = useCallback(async (problemId: string, name?: string): Promise<string | null> => {
+    setSessionMeta(interviewSession(problemId));
     let code: string | null = null;
     try {
       code = await fetchNewRoomCode();
@@ -219,6 +259,8 @@ function CollabState({ children }: { children: ReactNode }) {
     setPeerMap({});
     setComments([]);
     setFollowId(null);
+    setHostQuizLog([]);
+    setSessionMeta(defaultSession('solo'));
   }, [disconnect]);
 
   // ---- comment actions (optimistic locally; folded by the host doc) ----
@@ -257,18 +299,22 @@ function CollabState({ children }: { children: ReactNode }) {
   const value = useMemo<CanvasCollabApi>(
     () => ({
       status, room, role, self, players, isCollaborating, isHost,
-      startSession, joinSession, leaveSession,
+      session: sessionMeta,
+      startSession, startInterviewSession, joinSession, leaveSession,
       peers, followId, setFollowId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
+      hostQuizLog,
       emit, setComments,
     }),
     [
       status, room, role, self, players, isCollaborating, isHost,
-      startSession, joinSession, leaveSession,
+      sessionMeta,
+      startSession, startInterviewSession, joinSession, leaveSession,
       peers, followId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
+      hostQuizLog,
       emit,
     ],
   );

@@ -5,8 +5,17 @@
  * shell/canvas/layout.ts re-exports these for its existing consumers.
  */
 
-export const LAYOUT_PRESETS = ['Full', 'Study', 'Minimal', 'Theater', 'Demo'] as const;
+export const LAYOUT_PRESETS = ['Full', 'TraceFocus', 'Minimal', 'Theater', 'Demo'] as const;
 export type LayoutPreset = (typeof LAYOUT_PRESETS)[number];
+
+/** Legacy persisted preset name → current {@link LayoutPreset}. */
+export function normalizeLayoutPreset(value: unknown): LayoutPreset {
+  if (value === 'Study') return 'TraceFocus';
+  if (typeof value === 'string' && (LAYOUT_PRESETS as readonly string[]).includes(value)) {
+    return value as LayoutPreset;
+  }
+  return 'TraceFocus';
+}
 
 export interface LayoutVisualizeOptions {
   preset?: LayoutPreset;

@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { useGameRoom } from './useGameRoom';
+import { useGameRoom } from '@/shell/realtime';
 import { useAuth } from '../data/AuthProvider';
 import { playCue } from '@/lib/utils/audio';
 

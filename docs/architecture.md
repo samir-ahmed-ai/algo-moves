@@ -5,15 +5,12 @@ Three layers in the frontend SPA, plus an optional Go backend for realtime games
 ```mermaid
 flowchart TB
   subgraph shell [Shell — frontend/src/shell]
-    Workspace
-    Sidebars["UnifiedLeftSidebar / RightSidebar"]
-    GamesArcade["games/ — two-player arcade"]
-  end
-  subgraph canvas [Canvas]
-    PanelNode["PanelNode — routing shell"]
-    panels["panels/* — panel bodies"]
-    layout["layout.ts + canvasTokens"]
-    flow["React Flow stage"]
+    Workspace["workspace/ — mode router"]
+    Study["study/ — Learn Studio, Play, Code Studio"]
+    Canvas["canvas/ — React Flow + collab"]
+    Panels["panels/ — shared panel kernel"]
+    Realtime["realtime/ — WebSocket room transport"]
+    GamesArcade["games/ — arcade plugins"]
   end
   subgraph plugins [Plugins — frontend/src/plugins]
     vizKit["plugins/_shared/vizKit"]
@@ -23,42 +20,56 @@ flowchart TB
   subgraph backend [Backend — backend/]
     GameServer["gameserver — WebSocket room relay"]
   end
-  shell --> canvas
-  plugins --> canvas
-  GamesArcade --> GameServer
-  design["design/tokens.ts"] --> shell
-  design --> canvas
-  design --> plugins
-  vizKit --> native
-  vizKit --> imported
-  panels --> PanelNode
+  Workspace --> Study
+  Workspace --> Canvas
+  Study --> Panels
+  Canvas --> Panels
+  Canvas --> Realtime
+  GamesArcade --> Realtime
+  Realtime --> GameServer
+  plugins --> Panels
+  plugins --> Study
 ```
+
+## Product domains
+
+| Domain | Path | Purpose |
+|--------|------|---------|
+| **Study** | `shell/study/` | Solo learning: Learn Studio, Play mode, Code Studio quiz/recall |
+| **Canvas** | `shell/canvas/` | Freeform React Flow workspace, layout, collaboration overlays |
+| **Panels** | `shell/panels/` | Shared panel bodies used by both Study and Canvas |
+| **Realtime** | `shell/realtime/` | WebSocket room transport (games + canvas collab) |
+| **Session** | `lib/session/` | Session kinds: solo, collab, interview |
+
+### Session model
+
+- **solo** — default; Learn / Play / Mobile
+- **collab** — freeform canvas with generic host/guest roles
+- **interview** — host shares a problem; candidate works; quiz answers relay to host (scaffold)
+
+Room shared state uses a v1 envelope (`shell/realtime/roomState.ts`) with `session` + `canvas` fields.
 
 ## Shell (`frontend/src/shell/`)
 
 App chrome: navigation, catalog, transport, density presets. Typography uses `--fs` / `--fs-sm` via `chromeUi.tsx`.
 
-Routes in `App.tsx`: home, workspace canvas, mobile deck (`#mobile`), Vim Dojo (`#vim`), and the **Games arcade** (`#games`).
+Routes in `App.tsx`: home, workspace, mobile deck (`#mobile`), Vim Dojo (`#vim`), and the **Games arcade** (`#games`).
 
 ### Games arcade (`frontend/src/shell/games/`)
 
-Two-player couch/long-distance games over WebSocket:
+Multiplayer games over WebSocket. Transport lives in `shell/realtime/`; game plugins stay under `games/<id>/`.
 
-- `net/` — `useGameRoom` hook, protocol types, server URL resolution
-- `lobby/` — create/join room, share code + QR
-- `games/<id>/` — individual game plugins (Tic-Tac-Toe, Number Duel, …)
+### Study store facade (`store/study/`)
 
-Room codes are minted by the Go server (`GET /new`). The host picks the shared game; relay messages carry per-game moves.
+Thin re-exports over progress, Code Studio phase persistence, and resume helpers — prep for future server sync.
 
 ## Backend (`backend/`)
 
-Stdlib-only Go service: pairs two players into a room, relays JSON, stores host shared state. See [`backend/README.md`](../backend/README.md).
-
-Deploy both apps on Railway with GitHub connected per service (`backend/` and `frontend/` root directories, branch `main`). The frontend build injects `VITE_GAMES_SERVER_URL` from Railway service variables so browsers reach the game server.
+Stdlib-only Go service: pairs players into a room, relays JSON, stores host shared state. See [`backend/README.md`](../backend/README.md).
 
 ## Canvas (`frontend/src/shell/canvas/`)
 
-React Flow workspace. `PanelNode.tsx` is a thin router; panel content lives in `panels/`. Layout presets and wire gaps come from `canvasTokens.ts`. Node sizing from `nodeTokens.ts` (`STRUDEL_NODE_W = 400`).
+React Flow workspace. `PanelNode.tsx` routes to bodies in `shell/panels/`. Layout presets include **TraceFocus** (formerly "Study").
 
 ## Plugins (`frontend/src/plugins/`)
 

@@ -1,22 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FileQuestion } from 'lucide-react';
 import { usePlayer } from '../core';
 import { catalog } from '../content';
 import { useWorkspace } from '@/store/workspace';
-import { isEditableTarget } from '@/lib/utils/keyboard';
 import { useNarration, useSoundCues, useWorkspacePlugin, useWorkspaceUrlState } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { buildShareUrl } from '@/store/navigation';
 import { UnifiedLeftSidebar } from './UnifiedLeftSidebar';
-import { CanvasStage } from './canvas/CanvasStage';
-import { LearnStudio } from './canvas/LearnStudio';
-import { ProblemPage } from './problem/ProblemPage';
 import { SettingsDialog } from './canvas/SettingsDialog';
 import { MobileTransportSheet } from './canvas/MobileTransportSheet';
 import { MobileSwipeReturn } from './mobile/MobileSwipeReturn';
-import { CategoryBoard, TrackCategoryBoard } from './CategoryBoard';
 import { TagChip } from './ui';
 import { ChromeHint, chromeText } from './chromeUi';
+import { ModeRouter, resolveWorkspaceSurface, useWorkspaceKeyboard } from '@/shell/workspace/index';
 
 export function Workspace() {
   const {
@@ -56,74 +52,24 @@ export function Workspace() {
   const frame = baseFrames[player.index] ?? baseFrames[0];
   const ready = !!plugin && !!frame;
 
-  const showTrackBoard = activeTrackId && !activeCategoryId && !problemFocused;
-  const showCategoryBoard = !!activeCategoryId && !problemFocused;
-  const showCanvas = mode === 'visualize' && !problemFocused;
+  const surface = resolveWorkspaceSurface({
+    activeTrackId,
+    activeCategoryId,
+    problemFocused,
+    mode,
+    ready,
+    pluginLoading,
+  });
 
-  // Keyboard transport: ← / → step, space play/pause, Home/End jump.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      // ⌘K / Ctrl+K opens the command palette from anywhere (even inside inputs).
-      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
-        e.preventDefault();
-        setPaletteOpen((p) => !p);
-        return;
-      }
-      const t = e.target;
-      if (isEditableTarget(t)) return;
-      // The Learn Studio owns its own navigation keys and its trace views carry
-      // on-screen transport, so the global transport shortcuts would only drive
-      // hidden canvas playback there — skip them in learn mode.
-      const transport = mode !== 'learn';
-      switch (e.key) {
-        case 'ArrowRight':
-          if (!transport) break;
-          e.preventDefault();
-          player.next();
-          break;
-        case 'ArrowLeft':
-          if (!transport) break;
-          e.preventDefault();
-          player.prev();
-          break;
-        case ' ':
-          if (!transport) break;
-          e.preventDefault();
-          player.togglePlay();
-          break;
-        case 'Home':
-          if (!transport) break;
-          e.preventDefault();
-          player.goTo(0);
-          break;
-        case 'End':
-          if (!transport) break;
-          e.preventDefault();
-          player.goTo(player.total - 1);
-          break;
-        case 'f':
-        case 'F':
-          e.preventDefault();
-          setPresent(!present);
-          break;
-        case '?':
-          e.preventDefault();
-          setHelpOpen((h) => !h);
-          break;
-        case 'Escape':
-          if (helpOpen) setHelpOpen(false);
-          else if (present) setPresent(false);
-          break;
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-    // player.next/prev/togglePlay/goTo (not the whole `player` object) so this
-    // listener isn't torn down and re-added on every animation tick — only when
-    // playback controls actually change identity (new total, loop, or play state).
-  }, [player.next, player.prev, player.togglePlay, player.goTo, present, setPresent, helpOpen, mode]);
-
-  // Closing the palette / re-opening the catalog selection happens inside the component.
+  useWorkspaceKeyboard({
+    mode,
+    present,
+    setPresent,
+    player,
+    helpOpen,
+    setHelpOpen,
+    setPaletteOpen,
+  });
 
   // Text-to-speech narration + per-step sound cues.
   useNarration(narrate, frame?.move.caption);
@@ -140,43 +86,29 @@ export function Workspace() {
       {!present && mode !== 'visualize' && <UnifiedLeftSidebar />}
 
       <div className="relative min-h-0 min-w-0 flex-1 h-full">
-        {showTrackBoard ? (
-          <TrackCategoryBoard trackId={activeTrackId!} />
-        ) : showCategoryBoard ? (
-          <CategoryBoard categoryId={activeCategoryId!} trackId={activeTrackId} />
-        ) : showCanvas ? (
-          <CanvasStage standalone />
-        ) : ready ? (
-          mode === 'play' ? (
-            <ProblemPage
-              plugin={plugin!}
-              item={item}
-              inputId={inputId}
-              setInputId={selectInput}
-              customInput={customInput}
-              setCustomInput={setCustomInput}
-              frames={baseFrames}
-              player={player}
-              frame={frame!}
-            />
-          ) : (
-            <LearnStudio
-              plugin={plugin!}
-              item={item}
-              inputId={inputId}
-              setInputId={selectInput}
-              customInput={customInput}
-              setCustomInput={setCustomInput}
-              frames={baseFrames}
-              player={player}
-              frame={frame!}
-            />
-          )
-        ) : pluginLoading ? (
-          <LoadingPreview title={item.title} />
-        ) : (
-          <NoPreview title={item.title} tags={item.tags} />
+        {(surface === 'track-board' || surface === 'category-board' || surface === 'canvas' || surface === 'play' || surface === 'learn') && (
+          <ModeRouter
+            activeTrackId={activeTrackId}
+            activeCategoryId={activeCategoryId}
+            problemFocused={problemFocused}
+            mode={mode}
+            ready={ready}
+            pluginLoading={pluginLoading}
+            trackId={activeTrackId!}
+            categoryId={activeCategoryId!}
+            plugin={plugin}
+            item={item}
+            inputId={inputId}
+            selectInput={selectInput}
+            customInput={customInput}
+            setCustomInput={setCustomInput}
+            frames={baseFrames}
+            player={player}
+            frame={frame}
+          />
         )}
+        {surface === 'loading' && <LoadingPreview title={item.title} />}
+        {surface === 'empty' && <NoPreview title={item.title} tags={item.tags} />}
       </div>
 
       {present && (

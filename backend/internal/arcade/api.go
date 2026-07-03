@@ -70,6 +70,9 @@ func (s *Service) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/api/daily-challenge/score", s.handleDailyScore)
 	mux.HandleFunc("/api/canvases", s.handleCanvases)
 	mux.HandleFunc("/api/canvases/", s.handleCanvas)
+	// Learning content (public, read-only).
+	mux.HandleFunc("/api/content/catalog", s.handleContentCatalog)
+	mux.HandleFunc("/api/content/problems/", s.handleContentProblem)
 }
 
 func bearerToken(r *http.Request) string {

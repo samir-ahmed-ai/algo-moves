@@ -1,7 +1,7 @@
 /**
  * Wire contract for real-time canvas collaboration.
  *
- * Everything rides the existing game relay (frontend/src/shell/games/net). Two
+ * Everything rides the shared room relay (frontend/src/shell/realtime). Two
  * kinds of traffic share one channel, distinguished by a `__canvas` tag so the
  * arcade's own `__arcade` room messages and any game moves never collide:
  *

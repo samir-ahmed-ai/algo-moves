@@ -5,9 +5,12 @@ import type { PanelFlowNode } from './PanelNode';
 import { createEffectByType } from './EffectNode';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
 import { edgesForKind, nodeForKind, styleEdges, type EdgeOpts } from './layout';
+import { readProblemDrop } from './problemDnD';
 
 /** MIME type for dragging a removed panel back onto the canvas. */
 export const DND_KEY = 'application/algomove';
+
+export { PROBLEM_DND_KEY, readProblemDrop } from './problemDnD';
 
 /**
  * Canvas drag-and-drop, extracted from CanvasStage: drop a removed panel (or an
@@ -25,6 +28,7 @@ export function useCanvasDnD({
   setDragOver,
   nodesRef,
   removedRef,
+  onProblemDrop,
 }: {
   plugin: ProblemPlugin<any, any>;
   mode: CanvasMode;
@@ -37,6 +41,8 @@ export function useCanvasDnD({
   setDragOver: Dispatch<SetStateAction<boolean>>;
   nodesRef: MutableRefObject<PanelFlowNode[]>;
   removedRef: MutableRefObject<Record<string, Set<string>>>;
+  /** Scaffold: problem dragged from browse onto the canvas. */
+  onProblemDrop?: (itemId: string, position: { x: number; y: number }) => void;
 }) {
   const onDragOver = useCallback(
     (e: DragEvent) => {
@@ -54,6 +60,12 @@ export function useCanvasDnD({
       e.preventDefault();
       setDragOver(false);
       const position = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+
+      const problemId = readProblemDrop(e.dataTransfer);
+      if (problemId) {
+        onProblemDrop?.(problemId, position);
+        return;
+      }
 
       const effectId = e.dataTransfer.getData(EFFECT_DND_KEY);
       if (effectId) {
@@ -74,7 +86,7 @@ export function useCanvasDnD({
       if (newEdges.length) setEdges((eds) => [...eds, ...newEdges]);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [plugin, mode, historyKey, edgeOpts, edges, screenToFlowPosition, setNodes, setEdges],
+    [plugin, mode, historyKey, edgeOpts, edges, screenToFlowPosition, setNodes, setEdges, onProblemDrop],
   );
 
   return { onDragOver, onDragLeave, onDrop };

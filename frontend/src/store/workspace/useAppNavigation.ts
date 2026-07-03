@@ -81,6 +81,9 @@ export function useAppNavigation(shared: ShareState | null) {
     setRoute('workspace');
   }, []);
 
+  /** Alias for {@link enterCanvas} — freeform collab surface. */
+  const enterCollabCanvas = enterCanvas;
+
   const backToBrowse = useCallback(() => {
     setProblemFocused(false);
   }, []);
@@ -142,6 +145,7 @@ export function useAppNavigation(shared: ShareState | null) {
     goHome,
     enterWorkspace,
     enterCanvas,
+    enterCollabCanvas,
     enterProblemInMode,
     openProblem,
     backToBrowse,
