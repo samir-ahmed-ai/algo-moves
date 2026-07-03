@@ -3,6 +3,7 @@ import { ChevronLeft, Layers } from 'lucide-react';
 import { catalog, type Topic } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
+import { isEditableTarget } from '@/lib/utils/keyboard';
 import { buildDeck, type MobileDeck as MobileDeckModel } from './deckModel';
 import { clearMobileSession, loadMobileSession, saveMobileSession } from './mobileSession';
 import { useSwipe } from './useSwipe';
@@ -203,14 +204,7 @@ export function MobileDeck({
     const onKey = (e: KeyboardEvent) => {
       if (quizNavLocked) return;
       const t = e.target;
-      if (
-        t instanceof HTMLElement &&
-        (t.closest('[data-noswipe]') ||
-          t.tagName === 'INPUT' ||
-          t.tagName === 'TEXTAREA' ||
-          t.tagName === 'SELECT' ||
-          t.isContentEditable)
-      ) {
+      if (isEditableTarget(t) || (t instanceof HTMLElement && t.closest('[data-noswipe]'))) {
         return;
       }
       if (e.key === 'ArrowRight') advance();

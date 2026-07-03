@@ -13,6 +13,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { shuffle } from '@/lib/utils/shuffle';
 import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText } from '../nodeui';
 import { useCodeStudio } from '../CodeStudio';
 import { useCanvasStatic } from '../CanvasContext';
@@ -43,14 +44,6 @@ function codeLines(ref: string): Line[] {
     .map((l) => ({ text: l.trim(), indent: indentUnits(l) }));
 }
 
-function shuffle<T>(a: T[]): T[] {
-  const r = a.slice();
-  for (let i = r.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [r[i], r[j]] = [r[j], r[i]];
-  }
-  return r;
-}
 
 /** Shuffle that avoids returning the already-correct order for short lists. */
 function scramble(ids: string[]): string[] {

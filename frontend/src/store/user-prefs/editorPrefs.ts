@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { readStorageJson } from '@/store/persistence/storage';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { createSyncStore } from '@/store/createSyncStore';
+import { clampSplitPct } from '@/lib/editor/splitLayout';
 
 export interface EditorPrefs {
   vim: boolean;
@@ -11,13 +12,6 @@ export interface EditorPrefs {
 
 const KEY = STORAGE_KEYS.EDITOR_PREFS;
 const DEFAULTS: EditorPrefs = { vim: false, wrap: false, splitPct: 50 };
-
-export const SPLIT_MIN = 28;
-export const SPLIT_MAX = 72;
-
-export function clampSplitPct(pct: number): number {
-  return Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, pct));
-}
 
 function load(): EditorPrefs {
   const data = readStorageJson(KEY, null as Partial<EditorPrefs> | null, (value): value is Partial<EditorPrefs> => {

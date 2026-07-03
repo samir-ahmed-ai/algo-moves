@@ -4,6 +4,8 @@ import { Keyboard, Lightbulb, RotateCcw, ScanEye } from 'lucide-react';
 import type { CodePiece } from '@/lib/code';
 import { cn } from '@/lib/utils/cn';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
+import { shuffle } from '@/lib/utils/shuffle';
+import { isEditableTarget } from '@/lib/utils/keyboard';
 import { pieceHasEntrySignature } from '@/lib/editor';
 import { balanceTrayColumns } from '@/lib/code';
 import { CodeBlueprintOverlay } from './CodeBlueprintOverlay';
@@ -14,15 +16,6 @@ const WRONG_MS = 350;
 const DRAG_THRESHOLD = 8;
 const PLACE_ENTER_MS = 220;
 const MOBILE_WRAP_COLS = 22;
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 function orderTray(all: CodePiece[], placedIds: string[], trayIds: string[]): CodePiece[] {
   const byId = new Map(all.map((p) => [p.id, p]));
@@ -232,8 +225,7 @@ export function ReassemblePane({
     if (!el) return;
 
     const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      if (isEditableTarget(e.target)) return;
 
       if (showOverview && (e.key === 'Escape' || e.key === 'b' || e.key === 'B')) {
         e.preventDefault();

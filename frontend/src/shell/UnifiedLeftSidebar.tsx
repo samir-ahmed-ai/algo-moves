@@ -21,6 +21,7 @@ import { catalog, browseBreadcrumbForItem, getSiblingItems, categoryIdForItem, t
 import { useProgress, statFor } from '@/store/persistence';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
+import { matchesQuery } from '@/lib/utils/searchPredicate';
 import { chromeText } from './chromeUi';
 import { CatalogTree } from './CatalogTree';
 import { nodeIcon, panelAccent } from './canvas/PanelNode';
@@ -47,12 +48,6 @@ const STATUS_DOT: Record<ItemStatus, string> = {
   'in-progress': 'var(--edge-active)',
   done: 'var(--good)',
 };
-
-function matchesSidebarSearch(query: string, ...fields: (string | undefined)[]): boolean {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return true;
-  return fields.some((f) => f?.toLowerCase().includes(needle));
-}
 
 function AddItem({
   kind,
@@ -185,7 +180,7 @@ export function UnifiedLeftSidebar() {
   const addableKinds = canvasAdd?.addableKinds ?? [];
   const filteredAddable = searching
     ? addableKinds.filter((k) =>
-        matchesSidebarSearch(sidebarSearch, k.title, k.id, nodeCategory(k.id)),
+        matchesQuery(sidebarSearch, k.title, k.id, nodeCategory(k.id)),
       )
     : addableKinds;
   const essentials = filteredAddable.filter((k) => ESSENTIALS.has(k.id));
@@ -205,7 +200,7 @@ export function UnifiedLeftSidebar() {
   const filteredProblems =
     showProblems && searching
       ? siblingItems.filter((it) =>
-          matchesSidebarSearch(sidebarSearch, it.title, it.id, it.difficulty),
+          matchesQuery(sidebarSearch, it.title, it.id, it.difficulty),
         )
       : siblingItems;
 

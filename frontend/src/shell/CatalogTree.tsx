@@ -12,12 +12,7 @@ import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from './chromeUi';
 import { courseIcon } from './courseIcon';
-
-function matchesSearch(query: string, ...fields: (string | undefined)[]): boolean {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return true;
-  return fields.some((f) => f?.toLowerCase().includes(needle));
-}
+import { matchesQuery } from '@/lib/utils/searchPredicate';
 
 export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
   const {
@@ -60,12 +55,12 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
     if (!searching) return tracks;
     return tracks
       .map((track) => {
-        const trackMatch = matchesSearch(searchQuery, track.title, track.summary);
+        const trackMatch = matchesQuery(searchQuery, track.title, track.summary);
         const categories = getCategoriesForTrack(track.id).filter(
           (cat) =>
             trackMatch ||
-            matchesSearch(searchQuery, cat.title, cat.summary) ||
-            getItemsForCategory(cat.id, catalog).some((it) => matchesSearch(searchQuery, it.title)),
+            matchesQuery(searchQuery, cat.title, cat.summary) ||
+            getItemsForCategory(cat.id, catalog).some((it) => matchesQuery(searchQuery, it.title)),
         );
         return categories.length ? { ...track, categories } : null;
       })

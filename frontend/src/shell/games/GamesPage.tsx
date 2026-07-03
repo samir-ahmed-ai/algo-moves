@@ -14,8 +14,10 @@ import { parseGamesHash } from '@/lib/navigation';
 import { Lobby } from './lobby/Lobby';
 import { RoomView } from './room/RoomView';
 import { ProgressOverlay } from './progress/ProgressOverlay';
+import { ensureSoundConfig } from './soundConfig';
 
 export function GamesPage() {
+  ensureSoundConfig();
   const { density } = useWorkspace();
   return (
     <AuthProvider>

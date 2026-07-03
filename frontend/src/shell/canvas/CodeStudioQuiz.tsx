@@ -8,6 +8,7 @@ import { QUIZ_WRONG_MS } from '@/lib/quiz';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { recordAttempt } from '@/store/persistence';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
+import { isEditableTarget } from '@/lib/utils/keyboard';
 import { chromeText } from '../chromeUi';
 
 export interface CodeStudioQuizProps {
@@ -155,8 +156,7 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
     const el = rootRef.current;
     if (!el) return;
     const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (isEditableTarget(e.target)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (done) {
         if (e.key === 'Enter' || e.key === 'ArrowRight') {

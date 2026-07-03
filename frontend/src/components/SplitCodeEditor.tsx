@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { CodeMirrorEditor } from './CodeMirrorEditor';
 import { diffChangedLines } from '@/lib/code';
-import { clampSplitPct, SPLIT_MAX, SPLIT_MIN } from '@/store/user-prefs';
+import { clampSplitPct, SPLIT_MAX, SPLIT_MIN } from '@/lib/editor/splitLayout';
 import { cn } from '@/lib/utils/cn';
 import { nodeText } from '../shell/canvas/nodeui';
 

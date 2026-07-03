@@ -78,8 +78,6 @@ const KNOWN_VIOLATIONS = new Set([
   'effects/inputBuilders/PadGridBuilder.tsx :: ../../shell/canvas/nodeui',
   'effects/inputBuilders/PolyrhythmBuilder.tsx :: ../../shell/canvas/nodeui',
   // Tranche 1 — lib pulled back to pure / neutral leaves
-  'lib/utils/audio.ts :: @/store/persistence', // #01 — inject persistence adapter
-  'lib/utils/audio.ts :: @/store/storageKeys', // #01
   'lib/canvas/canvasActions.ts :: @/shell/canvas/layout', // #59 — move LayoutVisualizeOptions to lib
   'lib/canvas/canvasTeachingUi.ts :: @/shell/canvas/nodeui', // #08 — VizFitBox/MiniTabs -> shared leaf
   // Tranche 1 — store canvas-pref constants/types moved to a neutral leaf
@@ -89,8 +87,6 @@ const KNOWN_VIOLATIONS = new Set([
   'store/workspace/workspace.tsx :: @/shell/canvas/layout', // #14
   'store/workspace/workspace.tsx :: @/shell/canvas/CanvasTools', // #14
   'store/workspace/useChromeState.ts :: @/shell/SidebarShell', // #14 — SIDEBAR_* -> design/layout leaf
-  // Tranche 1 — split-pane constants moved out of store into lib
-  'components/SplitCodeEditor.tsx :: @/store/user-prefs', // split constants belong in lib
 ]);
 
 const IMPORT_RE = /(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*['"]([^'"]+)['"]/g;
