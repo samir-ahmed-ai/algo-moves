@@ -21,6 +21,7 @@ import {
 } from '@xyflow/react';
 import { Crosshair, ChevronsDownUp, Trash2, Palette, Maximize, LayoutGrid, Lock } from 'lucide-react';
 import type { CanvasMode, Frame, Player, ProblemPlugin } from '../../core';
+import { createPanelByType } from '../../core/panelRegistry';
 import { usePlayer } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
@@ -83,6 +84,9 @@ import { CommentLayer } from './collab/CommentLayer';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
+
+/** Panel kinds that may be added multiple times (dynamic node ids). */
+const MULTI_INSTANCE_PANELS = new Set(['whiteboard', 'collab-code']);
 
 /** Custom in-progress connection line — a dashed accent curve with an end dot. */
 function DashedConnectionLine({ fromX, fromY, toX, toY }: ConnectionLineComponentProps) {
@@ -511,7 +515,7 @@ function Inner({
     const present = new Set(nodes.map((n) => n.id));
     const ids = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
     return ids
-      .filter((id) => !present.has(id))
+      .filter((id) => MULTI_INSTANCE_PANELS.has(id) || !present.has(id))
       .map((id) => ({ id, title: kindTitle(plugin, id) }));
   }, [nodes, plugin, mode, standalone]);
 
@@ -531,20 +535,23 @@ function Inner({
   // (drag still works; this is the no-aim path). Focuses the new node.
   const addKind = useCallback(
     (kind: string) => {
-      if (!kind || nodesRef.current.some((n) => n.id === kind)) return;
+      if (!kind) return;
+      if (!MULTI_INSTANCE_PANELS.has(kind) && nodesRef.current.some((n) => n.id === kind)) return;
       removedRef.current[key]?.delete(kind);
       const r = wrapperRef.current?.getBoundingClientRect();
       const center = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: 240, y: 240 };
       const position = screenToFlowPosition(center);
-      const node = nodeForKind(plugin, kind, position);
-      const present = new Set([...nodesRef.current.map((n) => n.id), kind]);
+      const node = MULTI_INSTANCE_PANELS.has(kind)
+        ? (createPanelByType(kind, position) as PanelFlowNode)
+        : nodeForKind(plugin, kind, position);
+      const present = new Set([...nodesRef.current.map((n) => n.id), node.id]);
       const newEdges = styleEdges(edgesForKind(plugin, mode, kind, present), edgeOpts).filter(
         (ne) => !edges.some((ee) => ee.id === ne.id),
       );
       setNodes((nds) => [...nds, node]);
       if (newEdges.length) setEdges((eds) => [...eds, ...newEdges]);
       requestAnimationFrame(() =>
-        requestAnimationFrame(() => fitView({ padding: FIT_PADDING_FOCUS, duration: FIT_VIEW_DURATION_MS, nodes: [{ id: kind }] })),
+        requestAnimationFrame(() => fitView({ padding: FIT_PADDING_FOCUS, duration: FIT_VIEW_DURATION_MS, nodes: [{ id: node.id }] })),
       );
     },
     [plugin, mode, key, edgeOpts, edges, screenToFlowPosition, setNodes, setEdges, fitView],

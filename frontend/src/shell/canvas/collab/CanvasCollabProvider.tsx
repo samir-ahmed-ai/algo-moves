@@ -18,6 +18,7 @@ import type { RoomStatus } from '@/shell/realtime';
 import type { Peer, Role } from '@/shell/realtime';
 import { collabSession, defaultSession, interviewSession, type SessionMeta } from '@/lib/session';
 import { extractSessionMeta } from '@/shell/realtime/roomState';
+import { readRoomFromUrl } from '@/store/navigation/shareState';
 import {
   CANVAS_TAG,
   isCanvasOp,
@@ -28,6 +29,23 @@ import {
   type CanvasOp,
   type EditOp,
 } from './collabProtocol';
+import {
+  SUBDOC_TAG,
+  emptyEditorPayload,
+  emptyWhiteboardPayload,
+  isSubDocEditOp,
+  isSubDocOp,
+  type SubDocOp,
+  type SubDocSnapshot,
+  type WhiteboardPayload,
+  type EditorPayload,
+} from './subdocProtocol';
+import {
+  applyEditorPatch,
+  applyWhiteboardPatch,
+  snapshotFromPayload,
+} from './subdocMerge';
+import { extractSubDocs } from '@/shell/realtime/roomState';
 import { isQuizOp, toHostQuizEntry, type HostQuizEntry } from './quizProtocol';
 
 /** Live, ephemeral state for one remote collaborator. */
@@ -82,6 +100,13 @@ export interface CanvasCollabApi {
   /** Host-only: quiz answers relayed from guests during interview sessions. */
   hostQuizLog: HostQuizEntry[];
 
+  /** Shared panel interiors (whiteboard scenes, collab editors) keyed by node id. */
+  subDocs: Record<string, SubDocSnapshot>;
+  setSubDocs: Dispatch<SetStateAction<Record<string, SubDocSnapshot>>>;
+  /** Ephemeral in-panel cursors keyed by node id → peer id. */
+  subDocCursors: Record<string, Record<string, { name: string; color: string; x: number; y: number; line?: number }>>;
+  emitSubDoc: (op: SubDocOp) => void;
+
   // ---- internal wiring (used by the in-canvas doc-sync hook) ----
   /** Send a raw op over the relay (gated: hosts publish state instead of edit ops). */
   emit: (op: CanvasOp) => void;
@@ -104,15 +129,23 @@ function CollabState({ children }: { children: ReactNode }) {
   const [comments, setComments] = useState<CanvasComment[]>([]);
   const [sessionMeta, setSessionMeta] = useState<SessionMeta>(() => defaultSession('solo'));
   const [hostQuizLog, setHostQuizLog] = useState<HostQuizEntry[]>([]);
+  const [subDocs, setSubDocs] = useState<Record<string, SubDocSnapshot>>({});
+  const [subDocCursors, setSubDocCursors] = useState<
+    Record<string, Record<string, { name: string; color: string; x: number; y: number; line?: number }>>
+  >({});
 
   const isHost = role === 'host';
   const isCollaborating = status === 'open' && room != null;
   const selfName = self?.name ?? profile?.display_name ?? 'You';
 
-  // Guests mirror session metadata from the host envelope.
+  // Guests mirror session metadata and sub-docs from the host envelope.
   useEffect(() => {
     if (isHost || !isCollaborating) return;
     setSessionMeta(extractSessionMeta(sharedState));
+    const remoteSubDocs = extractSubDocs(sharedState);
+    if (Object.keys(remoteSubDocs).length > 0) {
+      setSubDocs((prev) => ({ ...prev, ...remoteSubDocs }));
+    }
   }, [sharedState, isHost, isCollaborating]);
 
   // Roster order → stable peer color assignment shared across clients.
@@ -132,7 +165,68 @@ function CollabState({ children }: { children: ReactNode }) {
         }
         return;
       }
-      if (!isCanvasOp(data)) return;
+      if (!isCanvasOp(data)) {
+        if (isSubDocOp(data)) {
+          const op = data;
+          if (op[SUBDOC_TAG] === 'cursor') {
+            const name = players.find((p) => p.id === fromId)?.name ?? 'Peer';
+            setSubDocCursors((m) => ({
+              ...m,
+              [op.nodeId]: {
+                ...(m[op.nodeId] ?? {}),
+                [fromId]: {
+                  name,
+                  color: colorForRef.current(fromId),
+                  x: op.x,
+                  y: op.y,
+                  line: op.line,
+                },
+              },
+            }));
+            return;
+          }
+          if (!isHost || !isSubDocEditOp(op)) return;
+          setSubDocs((docs) => {
+            if (op[SUBDOC_TAG] === 'snapshot') {
+              return { ...docs, [op.doc.nodeId]: op.doc };
+            }
+            const nodeId = op.nodeId;
+            const prev =
+              docs[nodeId] ??
+              snapshotFromPayload(
+                nodeId,
+                op[SUBDOC_TAG] === 'patch-editor' ? 'collab-code' : 'whiteboard',
+                0,
+                op[SUBDOC_TAG] === 'patch-editor' ? emptyEditorPayload() : emptyWhiteboardPayload(),
+              );
+            if (op[SUBDOC_TAG] === 'patch-whiteboard' && prev.kind === 'whiteboard') {
+              return {
+                ...docs,
+                [nodeId]: snapshotFromPayload(
+                  nodeId,
+                  'whiteboard',
+                  op.rev,
+                  applyWhiteboardPatch(prev.payload as WhiteboardPayload, op),
+                ),
+              };
+            }
+            if (op[SUBDOC_TAG] === 'patch-editor') {
+              const base = prev.kind === 'collab-code' ? (prev.payload as EditorPayload) : emptyEditorPayload();
+              return {
+                ...docs,
+                [nodeId]: snapshotFromPayload(
+                  nodeId,
+                  'collab-code',
+                  op.rev,
+                  applyEditorPatch(base, op.text, op.language),
+                ),
+              };
+            }
+            return docs;
+          });
+        }
+        return;
+      }
       const op = data as CanvasOp;
       if (isEditOp(op)) return; // handled by useCanvasDocSync on the host
       const name = players.find((p) => p.id === fromId)?.name ?? 'Peer';
@@ -165,6 +259,8 @@ function CollabState({ children }: { children: ReactNode }) {
       setPeerMap({});
       setFollowId(null);
       setHostQuizLog([]);
+      setSubDocs({});
+      setSubDocCursors({});
       return;
     }
     const live = new Set(players.map((p) => p.id));
@@ -254,12 +350,33 @@ function CollabState({ children }: { children: ReactNode }) {
     connect(norm, name?.trim() || selfName, { capacity: 8 });
   }, [connect, selfName]);
 
+  // Auto-join when the URL carries a room code (invite links).
+  const autoJoinRef = useRef(false);
+  useEffect(() => {
+    if (autoJoinRef.current || isCollaborating) return;
+    const code = readRoomFromUrl();
+    if (!code || code.length < 4) return;
+    autoJoinRef.current = true;
+    joinSession(code);
+  }, [isCollaborating, joinSession]);
+
+  const emitSubDoc = useCallback(
+    (op: SubDocOp) => {
+      if (!isCollaborating) return;
+      if (isSubDocEditOp(op) && (role === 'host' || role === 'spectator')) return;
+      send(op);
+    },
+    [send, isCollaborating, role],
+  );
+
   const leaveSession = useCallback(() => {
     disconnect();
     setPeerMap({});
     setComments([]);
     setFollowId(null);
     setHostQuizLog([]);
+    setSubDocs({});
+    setSubDocCursors({});
     setSessionMeta(defaultSession('solo'));
   }, [disconnect]);
 
@@ -305,6 +422,10 @@ function CollabState({ children }: { children: ReactNode }) {
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
       hostQuizLog,
+      subDocs,
+      setSubDocs,
+      subDocCursors,
+      emitSubDoc,
       emit, setComments,
     }),
     [
@@ -315,6 +436,8 @@ function CollabState({ children }: { children: ReactNode }) {
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
       hostQuizLog,
+      subDocs,
+      emitSubDoc,
       emit,
     ],
   );

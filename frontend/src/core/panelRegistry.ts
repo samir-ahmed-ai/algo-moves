@@ -67,6 +67,8 @@ export const panelsConfig: PanelConfigEntry[] = [
   { id: 'cheatsheet', title: 'Cheat sheet', category: 'Reference', modes: ['visualize'], optional: true },
   { id: 'projects', title: 'Projects', category: 'Workspace', modes: ['visualize'], optional: true },
   { id: 'notes', title: 'Notes', category: 'Workspace', modes: ['visualize', 'learn'], optional: true },
+  { id: 'whiteboard', title: 'Whiteboard', category: 'Visualize', modes: ['visualize'], optional: true },
+  { id: 'collab-code', title: 'Collab Code Studio', category: 'Code', modes: ['visualize'], optional: true },
   {
     id: 'code',
     title: 'Code Studio',

@@ -15,6 +15,8 @@ import {
   docSignature,
   mergeRemoteNodes,
 } from './canvasDoc';
+import { canMoveCanvasNodes } from './subdocPermissions';
+import { subDocSignature } from './subdocProtocol';
 
 type SetNodes = (u: PanelFlowNode[] | ((prev: PanelFlowNode[]) => PanelFlowNode[])) => void;
 type SetEdges = (u: Edge[] | ((prev: Edge[]) => Edge[])) => void;
@@ -39,7 +41,7 @@ interface DocSyncArgs {
  *  - Everyone broadcasts their live drags as ephemeral presence.
  */
 export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncArgs): void {
-  const { role, isCollaborating, session, comments, setComments, emit, broadcastDrag, broadcastSelection } = useCanvasCollab();
+  const { role, isCollaborating, session, comments, setComments, emit, broadcastDrag, broadcastSelection, subDocs } = useCanvasCollab();
   const { publishState, subscribe, sharedState } = useGameRoom();
 
   const isHost = role === 'host';
@@ -54,11 +56,16 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
   edgesRef.current = edges;
   const commentsRef = useRef(comments);
   commentsRef.current = comments;
+  const subDocsRef = useRef(subDocs);
+  subDocsRef.current = subDocs;
+
+  const canMoveNodes = canMoveCanvasNodes({ role, session, isCollaborating });
 
   // ---- host: publish the authoritative document on every settled change ----
   const sig = isCollaborating && isHost ? docSignature(nodes, edges, comments) : '';
-  usePublishState(isHost && isCollaborating, [sig, session.kind, session.activeProblemId], () => {
-    if (!sig) return;
+  const subSig = isCollaborating && isHost ? subDocSignature(subDocs) : '';
+  usePublishState(isHost && isCollaborating, [sig, subSig, session.kind, session.activeProblemId], () => {
+    if (!sig && !subSig) return;
     revRef.current += 1;
     const doc: CanvasDoc = {
       v: 1,
@@ -69,7 +76,7 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
       removedEdges: [],
       comments: commentsRef.current,
     };
-    publishState(buildCanvasRoomState(session, doc));
+    publishState(buildCanvasRoomState(session, doc, subDocsRef.current));
   });
 
   // ---- non-host: reconcile to the host snapshot (also seeds late joiners) ----
@@ -119,20 +126,24 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
       prevNodes.current = nodes;
       return;
     }
+    if (!canMoveNodes) {
+      prevNodes.current = nodes;
+      return;
+    }
     const ops = diffNodes(prevNodes.current, nodes);
     prevNodes.current = nodes;
     for (const op of ops) emit(op);
-  }, [nodes, isCollaborating, isHost, emit, broadcastDrag]);
+  }, [nodes, isCollaborating, isHost, emit, broadcastDrag, canMoveNodes]);
 
   useEffect(() => {
-    if (!isCollaborating || isHost) {
+    if (!isCollaborating || isHost || !canMoveNodes) {
       prevEdges.current = edges;
       return;
     }
     const ops = diffEdges(prevEdges.current, edges);
     prevEdges.current = edges;
     for (const op of ops) emit(op);
-  }, [edges, isCollaborating, isHost, emit]);
+  }, [edges, isCollaborating, isHost, emit, canMoveNodes]);
 
   // ---- everyone: broadcast the local selection so peers can see it ----
   const selKey = useMemo(

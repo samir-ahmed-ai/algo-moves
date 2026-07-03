@@ -112,7 +112,7 @@ function defaultNodeIds(plugin: ProblemPlugin<any, any>, mode: CanvasMode): stri
 }
 
 /** Optional panels that work on the standalone canvas without a loaded problem plugin. */
-export const STANDALONE_ADDABLE_PANELS = ['notes', 'bookmarks', 'projects'] as const;
+export const STANDALONE_ADDABLE_PANELS = ['notes', 'bookmarks', 'projects', 'whiteboard', 'collab-code'] as const;
 
 export function standaloneNodeIds(): string[] {
   return [...STANDALONE_ADDABLE_PANELS];

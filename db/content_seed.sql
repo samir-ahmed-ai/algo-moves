@@ -5901,6 +5901,38 @@ func btSubsets(a []int, idx int, path []int, res *[][]int) {
 	}
 }
 ', true, 0),
+  ('imp-26-subsets', 'python', 'solution.py', 'from typing import List
+
+
+def all_subsets(a: List[int]) -> List[List[int]]:
+    res: List[List[int]] = []
+    _bt_subsets(a, 0, [], res)
+    return res
+
+
+def _bt_subsets(a: List[int], idx: int, path: List[int], res: List[List[int]]) -> None:
+    res.append(list(path))
+    for i in range(idx, len(a)):
+        path.append(a[i])
+        _bt_subsets(a, i + 1, path, res)
+        path.pop()', false, 1),
+  ('imp-26-subsets', 'java', 'Solution.java', 'class Solution {
+    public java.util.List<java.util.List<Integer>> allSubsets(int[] a) {
+        java.util.List<java.util.List<Integer>> res = new java.util.ArrayList<>();
+        btSubsets(a, 0, new java.util.ArrayList<>(), res);
+        return res;
+    }
+
+    private void btSubsets(int[] a, int idx, java.util.List<Integer> path,
+                           java.util.List<java.util.List<Integer>> res) {
+        res.add(new java.util.ArrayList<>(path));
+        for (int i = idx; i < a.length; i++) {
+            path.add(a[i]);
+            btSubsets(a, i + 1, path, res);
+            path.remove(path.size() - 1);
+        }
+    }
+}', false, 2),
   ('imp-27-combinations', 'go', 'solution.go', 'package main
 
 func combinationNums(n, k int) [][]int {
@@ -5921,6 +5953,44 @@ func btComb(idx, n, k int, path []int, res *[][]int) {
 	}
 }
 ', true, 0),
+  ('imp-27-combinations', 'python', 'solution.py', 'from typing import List
+
+
+def combination_nums(n: int, k: int) -> List[List[int]]:
+    res: List[List[int]] = []
+    _bt_comb(1, n, k, [], res)
+    return res
+
+
+def _bt_comb(idx: int, n: int, k: int, path: List[int], res: List[List[int]]) -> None:
+    if len(path) == k:
+        res.append(path[:])
+        return
+    for num in range(idx, n + 1):
+        _bt_comb(num + 1, n, k, path + [num], res)', false, 1),
+  ('imp-27-combinations', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    List<List<Integer>> combinationNums(int n, int k) {
+        List<List<Integer>> res = new ArrayList<>();
+        btComb(1, n, k, new ArrayList<>(), res);
+        return res;
+    }
+
+    private void btComb(int idx, int n, int k, List<Integer> path, List<List<Integer>> res) {
+        if (path.size() == k) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int num = idx; num <= n; num++) {
+            path.add(num);
+            btComb(num + 1, n, k, path, res);
+            path.remove(path.size() - 1);
+        }
+    }
+}', false, 2),
   ('imp-28-combination-of-subset-strings', 'go', 'solution.go', 'package main
 
 func combinationSubsetStr(str string, k int) []string {
@@ -5939,6 +6009,44 @@ func btSubsetStr(chars []byte, k int, path []byte, res *[]string) {
 	}
 }
 ', true, 0),
+  ('imp-28-combination-of-subset-strings', 'python', 'solution.py', 'from typing import List
+
+
+def combination_subset_str(s: str, k: int) -> List[str]:
+    res: List[str] = []
+    _bt_subset_str(list(s), k, [], res)
+    return res
+
+
+def _bt_subset_str(chars: List[str], k: int, path: List[str], res: List[str]) -> None:
+    if len(path) == k:
+        res.append("".join(path))
+        return
+    for ch in chars:
+        _bt_subset_str(chars, k, path + [ch], res)', false, 1),
+  ('imp-28-combination-of-subset-strings', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    List<String> combinationSubsetStr(String str, int k) {
+        List<String> res = new ArrayList<>();
+        btSubsetStr(str.toCharArray(), k, new StringBuilder(), res);
+        return res;
+    }
+
+    private void btSubsetStr(char[] chars, int k, StringBuilder path, List<String> res) {
+        if (path.length() == k) {
+            res.add(path.toString());
+            return;
+        }
+        for (char ch : chars) {
+            path.append(ch);
+            btSubsetStr(chars, k, path, res);
+            path.deleteCharAt(path.length() - 1);
+        }
+    }
+}', false, 2),
   ('imp-29-combination-sum-ii', 'go', 'solution.go', 'package main
 
 import (
@@ -5972,6 +6080,61 @@ func btCombSum(a []int, idx, target int, path []int, res *[][]int) {
 	}
 }
 ', true, 0),
+  ('imp-29-combination-sum-ii', 'python', 'solution.py', 'from typing import List
+
+
+def combination_sum_k(a: List[int], target: int) -> List[List[int]]:
+    sorted_a = sorted(a)
+    res: List[List[int]] = []
+    _bt_comb_sum(sorted_a, 0, target, [], res)
+    return res
+
+
+def _bt_comb_sum(a: List[int], idx: int, target: int, path: List[int], res: List[List[int]]) -> None:
+    if target < 0:
+        return
+    if target == 0:
+        res.append(list(path))
+        return
+    i = idx
+    while i < len(a) and target >= a[i]:
+        if i > idx and a[i] == a[i - 1]:
+            i += 1
+            continue
+        _bt_comb_sum(a, i + 1, target - a[i], path + [a[i]], res)
+        i += 1', false, 1),
+  ('imp-29-combination-sum-ii', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+
+    static List<List<Integer>> combinationSumK(int[] a, int target) {
+        int[] sorted = a.clone();
+        Arrays.sort(sorted);
+        List<List<Integer>> res = new ArrayList<>();
+        btCombSum(sorted, 0, target, new ArrayList<>(), res);
+        return res;
+    }
+
+    static void btCombSum(int[] a, int idx, int target, List<Integer> path, List<List<Integer>> res) {
+        if (target < 0) {
+            return;
+        }
+        if (target == 0) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = idx; i < a.length && target >= a[i]; i++) {
+            if (i > idx && a[i] == a[i - 1]) {
+                continue;
+            }
+            path.add(a[i]);
+            btCombSum(a, i + 1, target - a[i], path, res);
+            path.remove(path.size() - 1);
+        }
+    }
+}', false, 2),
   ('imp-30-decode-numbers', 'go', 'solution.go', 'package main
 
 func decodeNumbers(digits string, dict map[string]byte) []string {
@@ -5992,6 +6155,47 @@ func btDecode(s string, idx int, path string, dict map[string]byte, res *[]strin
 	}
 }
 ', true, 0),
+  ('imp-30-decode-numbers', 'python', 'solution.py', 'from typing import Dict, List
+
+
+def decode_numbers(digits: str, dict_map: Dict[str, str]) -> List[str]:
+    res: List[str] = []
+    _bt_decode(digits, 0, "", dict_map, res)
+    return res
+
+
+def _bt_decode(s: str, idx: int, path: str, dict_map: Dict[str, str], res: List[str]) -> None:
+    if idx == len(s):
+        res.append(path)
+        return
+    for key, ch in dict_map.items():
+        if idx + len(key) <= len(s) and s[idx:idx + len(key)] == key:
+            _bt_decode(s, idx + len(key), path + ch, dict_map, res)', false, 1),
+  ('imp-30-decode-numbers', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+class Solution {
+    public List<String> decodeNumbers(String digits, Map<String, Character> dict) {
+        List<String> res = new ArrayList<>();
+        btDecode(digits, 0, "", dict, res);
+        return res;
+    }
+
+    private void btDecode(String s, int idx, String path, Map<String, Character> dict, List<String> res) {
+        if (idx == s.length()) {
+            res.add(path);
+            return;
+        }
+        for (Map.Entry<String, Character> e : dict.entrySet()) {
+            String key = e.getKey();
+            char ch = e.getValue();
+            if (idx + key.length() <= s.length() && s.substring(idx, idx + key.length()).equals(key)) {
+                btDecode(s, idx + key.length(), path + ch, dict, res);
+            }
+        }
+    }
+}', false, 2),
   ('imp-31-expression-add-operators', 'go', 'solution.go', 'package main
 
 import "strconv"
@@ -6025,6 +6229,75 @@ func btAddOperators(num string, target, idx int, path string, eval, prev int, re
 	}
 }
 ', true, 0),
+  ('imp-31-expression-add-operators', 'python', 'solution.py', 'from typing import List
+
+
+def add_operators(num: str, target: int) -> List[str]:
+    res: List[str] = []
+    _bt_add_operators(num, target, 0, "", 0, 0, res)
+    return res
+
+
+def _bt_add_operators(
+    num: str,
+    target: int,
+    idx: int,
+    path: str,
+    eval_: int,
+    prev: int,
+    res: List[str],
+) -> None:
+    if idx == len(num):
+        if eval_ == target:
+            res.append(path)
+        return
+    for i in range(idx, len(num)):
+        if i > idx and num[idx] == "0":
+            break
+        sub = num[idx : i + 1]
+        val = int(sub)
+        if idx == 0:
+            _bt_add_operators(num, target, i + 1, sub, val, val, res)
+        else:
+            _bt_add_operators(num, target, i + 1, path + "+" + sub, eval_ + val, val, res)
+            _bt_add_operators(num, target, i + 1, path + "-" + sub, eval_ - val, -val, res)
+            _bt_add_operators(
+                num, target, i + 1, path + "*" + sub, eval_ - prev + prev * val, prev * val, res
+            )', false, 1),
+  ('imp-31-expression-add-operators', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    public List<String> addOperators(String num, long target) {
+        List<String> res = new ArrayList<>();
+        bt(num, target, 0, "", 0L, 0L, res);
+        return res;
+    }
+
+    private void bt(String num, long target, int idx, String path, long eval, long prev, List<String> res) {
+        if (idx == num.length()) {
+            if (eval == target) {
+                res.add(path);
+            }
+            return;
+        }
+        for (int i = idx; i < num.length(); i++) {
+            if (i > idx && num.charAt(idx) == ''0'') {
+                break;
+            }
+            String sub = num.substring(idx, i + 1);
+            long val = Long.parseLong(sub);
+            if (idx == 0) {
+                bt(num, target, i + 1, sub, val, val, res);
+            } else {
+                bt(num, target, i + 1, path + "+" + sub, eval + val, val, res);
+                bt(num, target, i + 1, path + "-" + sub, eval - val, -val, res);
+                bt(num, target, i + 1, path + "*" + sub, eval - prev + prev * val, prev * val, res);
+            }
+        }
+    }
+}', false, 2),
   ('imp-32-generate-binary-strings', 'go', 'solution.go', 'package main
 
 func genBinStrings(n int) []string {
@@ -6042,6 +6315,37 @@ func btBin(path string, n int, res *[]string) {
 	btBin(path+"1", n, res)
 }
 ', true, 0),
+  ('imp-32-generate-binary-strings', 'python', 'solution.py', 'def gen_bin_strings(n):
+    res = []
+    _bt_bin("", n, res)
+    return res
+
+
+def _bt_bin(path, n, res):
+    if len(path.encode(''utf-8'')) == n:
+        res.append(path)
+        return
+    _bt_bin(path + "0", n, res)
+    _bt_bin(path + "1", n, res)', false, 1),
+  ('imp-32-generate-binary-strings', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    List<String> genBinStrings(int n) {
+        List<String> res = new ArrayList<>();
+        btBin("", n, res);
+        return res;
+    }
+
+    void btBin(String path, int n, List<String> res) {
+        if (path.getBytes(StandardCharsets.UTF_8).length == n) {
+            res.add(path);
+            return;
+        }
+        btBin(path + "0", n, res);
+        btBin(path + "1", n, res);
+    }
+}', false, 2),
   ('imp-33-strobogrammatic-number-ii', 'go', 'solution.go', 'package main
 
 func genStroboNums(n int) []string {
@@ -6077,6 +6381,72 @@ func btStrobo(path []byte, low, high int, res *[]string) {
 	}
 }
 ', true, 0),
+  ('imp-33-strobogrammatic-number-ii', 'python', 'solution.py', 'from typing import List
+
+
+def gen_strobo_nums(n: int) -> List[str]:
+    res: List[str] = []
+    if n == 0:
+        return res
+    path = [''\0''] * n
+    _bt_strobo(path, 0, n - 1, res)
+    return res
+
+
+def _bt_strobo(path: List[str], low: int, high: int, res: List[str]) -> None:
+    if low > high:
+        res.append(''''.join(path))
+        return
+    if low == high:
+        for c in [''0'', ''1'', ''8'']:
+            path[low] = c
+            res.append(''''.join(path))
+        return
+    pairs = [(''0'', ''0''), (''1'', ''1''), (''8'', ''8''), (''6'', ''9''), (''9'', ''6'')]
+    for pair in pairs:
+        if low == 0 and pair[0] == ''0'':
+            continue
+        path[low] = pair[0]
+        path[high] = pair[1]
+        _bt_strobo(path, low + 1, high - 1, res)', false, 1),
+  ('imp-33-strobogrammatic-number-ii', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    List<String> genStroboNums(int n) {
+        List<String> res = new ArrayList<>();
+        if (n == 0) {
+            return res;
+        }
+        char[] path = new char[n];
+        btStrobo(path, 0, n - 1, res);
+        return res;
+    }
+
+    void btStrobo(char[] path, int low, int high, List<String> res) {
+        if (low > high) {
+            res.add(new String(path));
+            return;
+        }
+        if (low == high) {
+            for (char c : new char[]{''0'', ''1'', ''8''}) {
+                path[low] = c;
+                res.add(new String(path));
+            }
+            return;
+        }
+        char[][] pairs = {{''0'', ''0''}, {''1'', ''1''}, {''8'', ''8''}, {''6'', ''9''}, {''9'', ''6''}};
+        for (char[] pair : pairs) {
+            if (low == 0 && pair[0] == ''0'') {
+                continue;
+            }
+            path[low] = pair[0];
+            path[high] = pair[1];
+            btStrobo(path, low + 1, high - 1, res);
+        }
+    }
+}', false, 2),
   ('imp-34-generate-parentheses', 'go', 'solution.go', 'package main
 
 func genValidParen(n int) []string {
@@ -6098,6 +6468,46 @@ func btParen(n, open, close int, path string, res *[]string) {
 	}
 }
 ', true, 0),
+  ('imp-34-generate-parentheses', 'python', 'solution.py', 'from typing import List
+
+
+def gen_valid_paren(n: int) -> List[str]:
+    res: List[str] = []
+    _bt_paren(n, 0, 0, "", res)
+    return res
+
+
+def _bt_paren(n: int, open_: int, close_: int, path: str, res: List[str]) -> None:
+    if len(path) == 2 * n:
+        res.append(path)
+        return
+    if open_ < n:
+        _bt_paren(n, open_ + 1, close_, path + "(", res)
+    if close_ < open_:
+        _bt_paren(n, open_, close_ + 1, path + ")", res)', false, 1),
+  ('imp-34-generate-parentheses', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<String> genValidParen(int n) {
+        List<String> res = new ArrayList<>();
+        btParen(n, 0, 0, "", res);
+        return res;
+    }
+
+    private void btParen(int n, int open, int close, String path, List<String> res) {
+        if (path.length() == 2 * n) {
+            res.add(path);
+            return;
+        }
+        if (open < n) {
+            btParen(n, open + 1, close, path + "(", res);
+        }
+        if (close < open) {
+            btParen(n, open, close + 1, path + ")", res);
+        }
+    }
+}', false, 2),
   ('imp-36-letter-combinations-of-a-phone-number', 'go', 'solution.go', 'package main
 
 var phonePad = []string{"0", "1", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"}
@@ -6122,6 +6532,50 @@ func btLetters(digits string, idx int, path string, res *[]string) {
 	}
 }
 ', true, 0),
+  ('imp-36-letter-combinations-of-a-phone-number', 'python', 'solution.py', 'from typing import List
+
+PHONE_PAD = ["0", "1", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"]
+
+
+def letter_combinations(digits: str) -> List[str]:
+    if len(digits) == 0:
+        return []
+    res: List[str] = []
+    _bt_letters(digits, 0, "", res)
+    return res
+
+
+def _bt_letters(digits: str, idx: int, path: str, res: List[str]) -> None:
+    if idx == len(digits):
+        res.append(path)
+        return
+    letters = PHONE_PAD[ord(digits[idx]) - ord("0")]
+    for ch in letters:
+        _bt_letters(digits, idx + 1, path + ch, res)', false, 1),
+  ('imp-36-letter-combinations-of-a-phone-number', 'java', 'Solution.java', 'class Solution {
+
+    static final String[] PHONE_PAD = {"0", "1", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+
+    public java.util.List<String> letterCombinations(String digits) {
+        if (digits.length() == 0) {
+            return new java.util.ArrayList<>();
+        }
+        java.util.List<String> res = new java.util.ArrayList<>();
+        btLetters(digits, 0, "", res);
+        return res;
+    }
+
+    private void btLetters(String digits, int idx, String path, java.util.List<String> res) {
+        if (idx == digits.length()) {
+            res.add(path);
+            return;
+        }
+        String letters = PHONE_PAD[digits.charAt(idx) - ''0''];
+        for (int i = 0; i < letters.length(); i++) {
+            btLetters(digits, idx + 1, path + letters.charAt(i), res);
+        }
+    }
+}', false, 2),
   ('imp-37-maximum-length-of-a-concatenated-string-with-uni', 'go', 'solution.go', 'package main
 
 import "math/bits"
@@ -6160,6 +6614,73 @@ func btMaxLength(masks []uint, idx int, path uint, res *int) {
 	}
 }
 ', true, 0),
+  ('imp-37-maximum-length-of-a-concatenated-string-with-uni', 'python', 'solution.py', 'from typing import List
+
+
+def max_length(arr: List[str]) -> int:
+    masks: List[int] = []
+    for s in arr:
+        mask = 0
+        dup = False
+        for ch in s:
+            bit = 1 << (ord(ch) - ord(''a''))
+            if mask & bit:
+                dup = True
+                break
+            mask |= bit
+        if not dup:
+            masks.append(mask)
+    res = [0]
+    _bt_max_length(masks, 0, 0, res)
+    return res[0]
+
+
+def _bt_max_length(masks: List[int], idx: int, path: int, res: List[int]) -> None:
+    cnt = bin(path).count("1")
+    if cnt > res[0]:
+        res[0] = cnt
+    for i in range(idx, len(masks)):
+        if path & masks[i] == 0:
+            _bt_max_length(masks, i + 1, path | masks[i], res)', false, 1),
+  ('imp-37-maximum-length-of-a-concatenated-string-with-uni', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    public int maxLength(List<String> arr) {
+        List<Integer> masks = new ArrayList<>();
+        for (String s : arr) {
+            int mask = 0;
+            boolean dup = false;
+            for (int i = 0; i < s.length(); i++) {
+                int bit = 1 << (s.charAt(i) - ''a'');
+                if ((mask & bit) > 0) {
+                    dup = true;
+                    break;
+                }
+                mask |= bit;
+            }
+            if (!dup) {
+                masks.add(mask);
+            }
+        }
+        int[] res = new int[]{0};
+        btMaxLength(masks, 0, 0, res);
+        return res[0];
+    }
+
+    private void btMaxLength(List<Integer> masks, int idx, int path, int[] res) {
+        int cnt = Integer.bitCount(path);
+        if (cnt > res[0]) {
+            res[0] = cnt;
+        }
+        for (int i = idx; i < masks.size(); i++) {
+            if ((path & masks.get(i)) == 0) {
+                btMaxLength(masks, i + 1, path | masks.get(i), res);
+            }
+        }
+    }
+}', false, 2),
   ('imp-38-nested-list-weight-sum', 'go', 'solution.go', 'package main
 
 type NestedInteger struct {
@@ -6184,6 +6705,62 @@ func btDepthSum(list []*NestedInteger, depth int) int {
 	return sum
 }
 ', true, 0),
+  ('imp-38-nested-list-weight-sum', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class NestedInteger:
+    def __init__(self, integer: bool, val: int = 0,
+                 lst: Optional[List["NestedInteger"]] = None):
+        self.integer = integer
+        self.val = val
+        self.list = lst if lst is not None else []
+
+
+def depth_sum(nested_list: List[NestedInteger]) -> int:
+    return _bt_depth_sum(nested_list, 1)
+
+
+def _bt_depth_sum(nested_list: List[NestedInteger], depth: int) -> int:
+    total = 0
+    for item in nested_list:
+        if item.integer:
+            total += item.val * depth
+        else:
+            total += _bt_depth_sum(item.list, depth + 1)
+    return total', false, 1),
+  ('imp-38-nested-list-weight-sum', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    static class NestedInteger {
+        boolean integer;
+        int val;
+        List<NestedInteger> list;
+
+        NestedInteger(boolean integer, int val, List<NestedInteger> list) {
+            this.integer = integer;
+            this.val = val;
+            this.list = (list != null) ? list : new ArrayList<>();
+        }
+    }
+
+    public int depthSum(List<NestedInteger> nestedList) {
+        return btDepthSum(nestedList, 1);
+    }
+
+    private int btDepthSum(List<NestedInteger> nestedList, int depth) {
+        int sum = 0;
+        for (NestedInteger item : nestedList) {
+            if (item.integer) {
+                sum += item.val * depth;
+            } else {
+                sum += btDepthSum(item.list, depth + 1);
+            }
+        }
+        return sum;
+    }
+}', false, 2),
   ('imp-39-different-ways-to-add-parentheses', 'go', 'solution.go', 'package main
 
 func operatorCombinations(tokens []int) []int {
@@ -6246,6 +6823,94 @@ func btIntToString(n int) string {
 	return string(digits)
 }
 ', true, 0),
+  ('imp-39-different-ways-to-add-parentheses', 'python', 'solution.py', 'from typing import List, Dict
+
+
+def operator_combinations(tokens: List[int]) -> List[int]:
+    memo: Dict[str, List[int]] = {}
+    return _bt_ops(tokens, memo)
+
+
+def _int_div_trunc(a: int, b: int) -> int:
+    q = abs(a) // abs(b)
+    if (a < 0) != (b < 0):
+        q = -q
+    return q
+
+
+def _bt_ops(t: List[int], memo: Dict[str, List[int]]) -> List[int]:
+    key = _bt_ints_key(t)
+    if key in memo:
+        return memo[key]
+    if len(t) == 1:
+        return [t[0]]
+    res: List[int] = []
+    for i in range(1, len(t)):
+        left = _bt_ops(t[:i], memo)
+        right = _bt_ops(t[i:], memo)
+        for a in left:
+            for b in right:
+                res.append(a + b)
+                res.append(a - b)
+                res.append(a * b)
+                if b != 0:
+                    res.append(_int_div_trunc(a, b))
+    memo[key] = res
+    return res
+
+
+def _bt_ints_key(a: List[int]) -> str:
+    return ",".join(str(v) for v in a)', false, 1),
+  ('imp-39-different-ways-to-add-parentheses', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    List<Integer> operatorCombinations(int[] tokens) {
+        Map<String, List<Integer>> memo = new HashMap<>();
+        return btOps(tokens, memo);
+    }
+
+    private List<Integer> btOps(int[] t, Map<String, List<Integer>> memo) {
+        String key = btIntsKey(t);
+        List<Integer> cached = memo.get(key);
+        if (cached != null) {
+            return cached;
+        }
+        if (t.length == 1) {
+            List<Integer> single = new ArrayList<>();
+            single.add(t[0]);
+            return single;
+        }
+        List<Integer> res = new ArrayList<>();
+        for (int i = 1; i < t.length; i++) {
+            List<Integer> left = btOps(Arrays.copyOfRange(t, 0, i), memo);
+            List<Integer> right = btOps(Arrays.copyOfRange(t, i, t.length), memo);
+            for (int a : left) {
+                for (int b : right) {
+                    res.add(a + b);
+                    res.add(a - b);
+                    res.add(a * b);
+                    if (b != 0) {
+                        res.add(a / b);
+                    }
+                }
+            }
+        }
+        memo.put(key, res);
+        return res;
+    }
+
+    private String btIntsKey(int[] a) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < a.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(a[i]);
+        }
+        return sb.toString();
+    }
+}', false, 2),
   ('imp-40-restore-ip-addresses', 'go', 'solution.go', 'package main
 
 func partitionCombinations(digits string) []string {
@@ -6294,6 +6959,88 @@ func btValidIPPart(part string) bool {
 	return val <= 255
 }
 ', true, 0),
+  ('imp-40-restore-ip-addresses', 'python', 'solution.py', 'from typing import List
+
+
+def partition_combinations(digits: str) -> List[str]:
+    if len(digits) > 12:
+        return []
+    res: List[str] = []
+    _bt_ip(digits, 0, 0, "", res)
+    return res
+
+
+def _bt_ip(s: str, idx: int, dots: int, path: str, res: List[str]) -> None:
+    if dots == 3:
+        if _bt_valid_ip_part(s[idx:]):
+            res.append(path + "." + s[idx:])
+        return
+    for i in range(idx, len(s)):
+        if i > idx and s[idx] == ''0'':
+            break
+        part = s[idx:i + 1]
+        if not _bt_valid_ip_part(part):
+            continue
+        sep = "." if path != "" else ""
+        _bt_ip(s, i + 1, dots + 1, path + sep + part, res)
+
+
+def _bt_valid_ip_part(part: str) -> bool:
+    if len(part) == 0 or len(part) > 3:
+        return False
+    if len(part) > 1 and part[0] == ''0'':
+        return False
+    val = 0
+    for ch in part:
+        val = val * 10 + (ord(ch) - ord(''0''))
+    return val <= 255', false, 1),
+  ('imp-40-restore-ip-addresses', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<String> partitionCombinations(String digits) {
+        List<String> res = new ArrayList<>();
+        if (digits.length() > 12) {
+            return res;
+        }
+        btIP(digits, 0, 0, "", res);
+        return res;
+    }
+
+    private void btIP(String s, int idx, int dots, String path, List<String> res) {
+        if (dots == 3) {
+            if (btValidIPPart(s.substring(idx))) {
+                res.add(path + "." + s.substring(idx));
+            }
+            return;
+        }
+        for (int i = idx; i < s.length(); i++) {
+            if (i > idx && s.charAt(idx) == ''0'') {
+                break;
+            }
+            String part = s.substring(idx, i + 1);
+            if (!btValidIPPart(part)) {
+                continue;
+            }
+            String sep = path.isEmpty() ? "" : ".";
+            btIP(s, i + 1, dots + 1, path + sep + part, res);
+        }
+    }
+
+    private boolean btValidIPPart(String part) {
+        if (part.length() == 0 || part.length() > 3) {
+            return false;
+        }
+        if (part.length() > 1 && part.charAt(0) == ''0'') {
+            return false;
+        }
+        int val = 0;
+        for (int i = 0; i < part.length(); i++) {
+            val = val * 10 + (part.charAt(i) - ''0'');
+        }
+        return val <= 255;
+    }
+}', false, 2),
   ('imp-41-permutations', 'go', 'solution.go', 'package main
 
 func permArray(a []int) [][]int {
@@ -6318,6 +7065,54 @@ func btPerm(a []int, idx int, res *[][]int) {
 	}
 }
 ', true, 0),
+  ('imp-41-permutations', 'python', 'solution.py', 'from typing import List
+
+
+def perm_array(a: List[int]) -> List[List[int]]:
+    res: List[List[int]] = []
+    nums = list(a)
+    _bt_perm(nums, 0, res)
+    return res
+
+
+def _bt_perm(a: List[int], idx: int, res: List[List[int]]) -> None:
+    if idx == len(a):
+        res.append(list(a))
+        return
+    for i in range(idx, len(a)):
+        a[idx], a[i] = a[i], a[idx]
+        _bt_perm(a, idx + 1, res)
+        a[idx], a[i] = a[i], a[idx]', false, 1),
+  ('imp-41-permutations', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    static List<List<Integer>> permArray(int[] a) {
+        List<List<Integer>> res = new ArrayList<>();
+        int[] nums = a.clone();
+        btPerm(nums, 0, res);
+        return res;
+    }
+
+    static void btPerm(int[] a, int idx, List<List<Integer>> res) {
+        if (idx == a.length) {
+            List<Integer> row = new ArrayList<>(a.length);
+            for (int v : a) row.add(v);
+            res.add(row);
+            return;
+        }
+        for (int i = idx; i < a.length; i++) {
+            int tmp = a[idx];
+            a[idx] = a[i];
+            a[i] = tmp;
+            btPerm(a, idx + 1, res);
+            tmp = a[idx];
+            a[idx] = a[i];
+            a[i] = tmp;
+        }
+    }
+}', false, 2),
   ('imp-42-cartesian-product-of-multiple-arrays', 'go', 'solution.go', 'package main
 
 func permMultipleArrays(lists [][]string) [][]string {
@@ -6355,6 +7150,57 @@ func btJoinStrings(a []string, sep string) string {
 	return out
 }
 ', true, 0),
+  ('imp-42-cartesian-product-of-multiple-arrays', 'python', 'solution.py', 'from typing import List
+
+
+def perm_multiple_arrays(lists: List[List[str]]) -> List[List[str]]:
+    res: List[List[str]] = []
+    seen = set()
+    _bt_perm_lists(lists, [], res, seen)
+    return res
+
+
+def _bt_perm_lists(lists, path, res, seen):
+    if len(lists) == 0:
+        key = ",".join(path)
+        if key in seen:
+            return
+        seen.add(key)
+        res.append(list(path))
+        return
+    for s in lists[0]:
+        _bt_perm_lists(lists[1:], path + [s], res, seen)', false, 1),
+  ('imp-42-cartesian-product-of-multiple-arrays', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+class Solution {
+    public List<List<String>> permMultipleArrays(List<List<String>> lists) {
+        List<List<String>> res = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        btPermLists(lists, new ArrayList<>(), res, seen);
+        return res;
+    }
+
+    private void btPermLists(List<List<String>> lists, List<String> path,
+                             List<List<String>> res, Set<String> seen) {
+        if (lists.isEmpty()) {
+            String key = String.join(",", path);
+            if (seen.contains(key)) {
+                return;
+            }
+            seen.add(key);
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (String s : lists.get(0)) {
+            List<String> next = new ArrayList<>(path);
+            next.add(s);
+            btPermLists(lists.subList(1, lists.size()), next, res, seen);
+        }
+    }
+}', false, 2),
   ('imp-43-permutations', 'go', 'solution.go', 'package main
 
 func permString(str string) []string {
@@ -6376,6 +7222,49 @@ func btPermStr(path []byte, low, high int, res *[]string) {
 	}
 }
 ', true, 0),
+  ('imp-43-permutations', 'python', 'solution.py', 'def perm_string(s):
+    res = []
+    path = list(s)
+    _bt_perm_str(path, 0, len(path) - 1, res)
+    return res
+
+
+def _bt_perm_str(path, low, high, res):
+    if low == high:
+        res.append("".join(path))
+        return
+    for i in range(low, high + 1):
+        path[low], path[i] = path[i], path[low]
+        _bt_perm_str(path, low + 1, high, res)
+        path[low], path[i] = path[i], path[low]', false, 1),
+  ('imp-43-permutations', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    List<String> permString(String str) {
+        List<String> res = new ArrayList<>();
+        char[] path = str.toCharArray();
+        btPermStr(path, 0, path.length - 1, res);
+        return res;
+    }
+
+    void btPermStr(char[] path, int low, int high, List<String> res) {
+        if (low == high) {
+            res.add(new String(path));
+            return;
+        }
+        for (int i = low; i <= high; i++) {
+            char tmp = path[low];
+            path[low] = path[i];
+            path[i] = tmp;
+            btPermStr(path, low + 1, high, res);
+            tmp = path[low];
+            path[low] = path[i];
+            path[i] = tmp;
+        }
+    }
+}', false, 2),
   ('imp-44-word-search', 'go', 'solution.go', 'package main
 
 func exist(board [][]byte, word string) bool {
@@ -6407,6 +7296,63 @@ func btWordSearch(board [][]byte, word string, m, n, r, c, idx int) bool {
 	return found
 }
 ', true, 0),
+  ('imp-44-word-search', 'python', 'solution.py', 'from typing import List
+
+
+def exist(board: List[List[str]], word: str) -> bool:
+    m, n = len(board), len(board[0])
+
+    def bt(r: int, c: int, idx: int) -> bool:
+        if idx == len(word):
+            return True
+        if r < 0 or r >= m or c < 0 or c >= n or board[r][c] != word[idx]:
+            return False
+        tmp = board[r][c]
+        board[r][c] = ''#''
+        found = (
+            bt(r + 1, c, idx + 1)
+            or bt(r - 1, c, idx + 1)
+            or bt(r, c + 1, idx + 1)
+            or bt(r, c - 1, idx + 1)
+        )
+        board[r][c] = tmp
+        return found
+
+    for r in range(m):
+        for c in range(n):
+            if bt(r, c, 0):
+                return True
+    return False', false, 1),
+  ('imp-44-word-search', 'java', 'Solution.java', 'class Solution {
+    public boolean exist(char[][] board, String word) {
+        int m = board.length, n = board[0].length;
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (bt(board, word, m, n, r, c, 0)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean bt(char[][] board, String word, int m, int n, int r, int c, int idx) {
+        if (idx == word.length()) {
+            return true;
+        }
+        if (r < 0 || r >= m || c < 0 || c >= n || board[r][c] != word.charAt(idx)) {
+            return false;
+        }
+        char tmp = board[r][c];
+        board[r][c] = ''#'';
+        boolean found = bt(board, word, m, n, r + 1, c, idx + 1)
+                || bt(board, word, m, n, r - 1, c, idx + 1)
+                || bt(board, word, m, n, r, c + 1, idx + 1)
+                || bt(board, word, m, n, r, c - 1, idx + 1);
+        board[r][c] = tmp;
+        return found;
+    }
+}', false, 2),
   ('imp-45-word-search-ii', 'go', 'solution.go', 'package main
 
 type trieNode struct {
@@ -6458,6 +7404,107 @@ func btWordSearchII(board [][]byte, m, n, r, c int, node *trieNode, res *[]strin
 	board[r][c] = ch
 }
 ', true, 0),
+  ('imp-45-word-search-ii', 'python', 'solution.py', 'from typing import List
+
+
+class TrieNode:
+    __slots__ = ("children", "word")
+
+    def __init__(self):
+        self.children = [None] * 26
+        self.word = ""
+
+
+def findWords(board: List[List[str]], words: List[str]) -> List[str]:
+    root = TrieNode()
+    for w in words:
+        cur = root
+        for ch in w:
+            idx = ord(ch) - ord(''a'')
+            if cur.children[idx] is None:
+                cur.children[idx] = TrieNode()
+            cur = cur.children[idx]
+        cur.word = w
+    m = len(board)
+    n = len(board[0])
+    res: List[str] = []
+    for r in range(m):
+        for c in range(n):
+            _bt(board, m, n, r, c, root, res)
+    return res
+
+
+def _bt(board, m, n, r, c, node, res):
+    if r < 0 or r >= m or c < 0 or c >= n or board[r][c] == ''#'':
+        return
+    ch = board[r][c]
+    child = node.children[ord(ch) - ord(''a'')]
+    if child is None:
+        return
+    if child.word != "":
+        res.append(child.word)
+        child.word = ""
+    board[r][c] = ''#''
+    _bt(board, m, n, r + 1, c, child, res)
+    _bt(board, m, n, r - 1, c, child, res)
+    _bt(board, m, n, r, c + 1, child, res)
+    _bt(board, m, n, r, c - 1, child, res)
+    board[r][c] = ch', false, 1),
+  ('imp-45-word-search-ii', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    static class TrieNode {
+        TrieNode[] children = new TrieNode[26];
+        String word = "";
+    }
+
+    public List<String> findWords(char[][] board, String[] words) {
+        TrieNode root = new TrieNode();
+        for (String w : words) {
+            TrieNode cur = root;
+            for (int i = 0; i < w.length(); i++) {
+                int idx = w.charAt(i) - ''a'';
+                if (cur.children[idx] == null) {
+                    cur.children[idx] = new TrieNode();
+                }
+                cur = cur.children[idx];
+            }
+            cur.word = w;
+        }
+        int m = board.length;
+        int n = board[0].length;
+        List<String> res = new ArrayList<>();
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                bt(board, m, n, r, c, root, res);
+            }
+        }
+        return res;
+    }
+
+    private void bt(char[][] board, int m, int n, int r, int c, TrieNode node, List<String> res) {
+        if (r < 0 || r >= m || c < 0 || c >= n || board[r][c] == ''#'') {
+            return;
+        }
+        char ch = board[r][c];
+        TrieNode child = node.children[ch - ''a''];
+        if (child == null) {
+            return;
+        }
+        if (!child.word.isEmpty()) {
+            res.add(child.word);
+            child.word = "";
+        }
+        board[r][c] = ''#'';
+        bt(board, m, n, r + 1, c, child, res);
+        bt(board, m, n, r - 1, c, child, res);
+        bt(board, m, n, r, c + 1, child, res);
+        bt(board, m, n, r, c - 1, child, res);
+        board[r][c] = ch;
+    }
+}', false, 2),
   ('imp-46-search-in-rotated-sorted-array', 'go', 'solution.go', 'package main
 
 func searchRotated(a []int, key int) int {
@@ -6484,6 +7531,51 @@ func searchRotated(a []int, key int) int {
 	return -1
 }
 ', true, 0),
+  ('imp-46-search-in-rotated-sorted-array', 'python', 'solution.py', 'from typing import List
+
+
+def search_rotated(a: List[int], key: int) -> int:
+    low, high = 0, len(a) - 1
+    while low <= high:
+        mid = low + (high - low) // 2
+        if a[mid] == key:
+            return mid
+        if a[low] <= a[mid]:
+            if a[low] <= key < a[mid]:
+                high = mid - 1
+            else:
+                low = mid + 1
+        else:
+            if a[mid] < key <= a[high]:
+                low = mid + 1
+            else:
+                high = mid - 1
+    return -1', false, 1),
+  ('imp-46-search-in-rotated-sorted-array', 'java', 'Solution.java', 'class Solution {
+    public int searchRotated(int[] a, int key) {
+        int low = 0, high = a.length - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (a[mid] == key) {
+                return mid;
+            }
+            if (a[low] <= a[mid]) {
+                if (a[low] <= key && key < a[mid]) {
+                    high = mid - 1;
+                } else {
+                    low = mid + 1;
+                }
+            } else {
+                if (a[mid] < key && key <= a[high]) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+}', false, 2),
   ('imp-47-maximum-length-of-ribbon-cut', 'go', 'solution.go', 'package main
 
 func cutRibbons(ribbons []int, k int) int {
@@ -6510,6 +7602,51 @@ func cutRibbons(ribbons []int, k int) int {
 	return res
 }
 ', true, 0),
+  ('imp-47-maximum-length-of-ribbon-cut', 'python', 'solution.py', 'from typing import List
+
+
+def cut_ribbons(ribbons: List[int], k: int) -> int:
+    low, high = 1, 0
+    for r in ribbons:
+        if r > high:
+            high = r
+    res = 0
+    while low <= high:
+        mid = low + (high - low) // 2
+        cnt = 0
+        for r in ribbons:
+            cnt += r // mid
+        if cnt >= k:
+            res = mid
+            low = mid + 1
+        else:
+            high = mid - 1
+    return res', false, 1),
+  ('imp-47-maximum-length-of-ribbon-cut', 'java', 'Solution.java', 'class Solution {
+    public int cutRibbons(int[] ribbons, int k) {
+        int low = 1, high = 0;
+        for (int r : ribbons) {
+            if (r > high) {
+                high = r;
+            }
+        }
+        int res = 0;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            int cnt = 0;
+            for (int r : ribbons) {
+                cnt += r / mid;
+            }
+            if (cnt >= k) {
+                res = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-48-find-smallest-letter-greater-than-target', 'go', 'solution.go', 'package main
 
 func firstLargerThan(a []int, key int) int {
@@ -6530,6 +7667,41 @@ func firstLargerThan(a []int, key int) int {
 	return a[res]
 }
 ', true, 0),
+  ('imp-48-find-smallest-letter-greater-than-target', 'python', 'solution.py', 'from typing import List
+
+
+def first_larger_than(a: List[int], key: int) -> int:
+    low, high = 0, len(a) - 1
+    res = -1
+    while low <= high:
+        mid = low + (high - low) // 2
+        if a[mid] > key:
+            res = mid
+            high = mid - 1
+        else:
+            low = mid + 1
+    if res == -1:
+        return -1
+    return a[res]', false, 1),
+  ('imp-48-find-smallest-letter-greater-than-target', 'java', 'Solution.java', 'class Solution {
+    int firstLargerThan(int[] a, int key) {
+        int low = 0, high = a.length - 1;
+        int res = -1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (a[mid] > key) {
+                res = mid;
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        if (res == -1) {
+            return -1;
+        }
+        return a[res];
+    }
+}', false, 2),
   ('imp-49-kth-largest-element-in-an-array', 'go', 'solution.go', 'package main
 
 func kthLargest(a []int, k int) int {
@@ -6573,6 +7745,90 @@ func btPartition(a []int, start, end int) int {
 	return pos
 }
 ', true, 0),
+  ('imp-49-kth-largest-element-in-an-array', 'python', 'solution.py', 'from typing import List
+
+
+def kth_largest(a: List[int], k: int) -> int:
+    n = len(a)
+    arr = a[:]
+    return bt_quick_select(arr, 0, n - 1, n + 1 - k)
+
+
+def kth_smallest(a: List[int], k: int) -> int:
+    n = len(a)
+    arr = a[:]
+    return bt_quick_select(arr, 0, n - 1, k)
+
+
+def bt_quick_select(a: List[int], start: int, end: int, k: int) -> int:
+    if start == end:
+        return a[start]
+    pivot_idx = bt_partition(a, start, end)
+    if pivot_idx == k - 1:
+        return a[pivot_idx]
+    if k - 1 < pivot_idx:
+        return bt_quick_select(a, start, pivot_idx - 1, k)
+    return bt_quick_select(a, pivot_idx + 1, end, k)
+
+
+def bt_partition(a: List[int], start: int, end: int) -> int:
+    pivot = a[start]
+    pos = start
+    for i in range(start + 1, end + 1):
+        if a[i] < pivot:
+            pos += 1
+            a[pos], a[i] = a[i], a[pos]
+    a[start], a[pos] = a[pos], a[start]
+    return pos
+', false, 1),
+  ('imp-49-kth-largest-element-in-an-array', 'java', 'Solution.java', 'class Solution {
+
+    int kthLargest(int[] a, int k) {
+        int n = a.length;
+        int[] arr = new int[n];
+        System.arraycopy(a, 0, arr, 0, n);
+        return btQuickSelect(arr, 0, n - 1, n + 1 - k);
+    }
+
+    int kthSmallest(int[] a, int k) {
+        int n = a.length;
+        int[] arr = new int[n];
+        System.arraycopy(a, 0, arr, 0, n);
+        return btQuickSelect(arr, 0, n - 1, k);
+    }
+
+    int btQuickSelect(int[] a, int start, int end, int k) {
+        if (start == end) {
+            return a[start];
+        }
+        int pivotIdx = btPartition(a, start, end);
+        if (pivotIdx == k - 1) {
+            return a[pivotIdx];
+        }
+        if (k - 1 < pivotIdx) {
+            return btQuickSelect(a, start, pivotIdx - 1, k);
+        }
+        return btQuickSelect(a, pivotIdx + 1, end, k);
+    }
+
+    int btPartition(int[] a, int start, int end) {
+        int pivot = a[start];
+        int pos = start;
+        for (int i = start + 1; i <= end; i++) {
+            if (a[i] < pivot) {
+                pos++;
+                int tmp = a[pos];
+                a[pos] = a[i];
+                a[i] = tmp;
+            }
+        }
+        int tmp = a[start];
+        a[start] = a[pos];
+        a[pos] = tmp;
+        return pos;
+    }
+}
+', false, 2),
   ('imp-50-find-right-interval', 'go', 'solution.go', 'package main
 
 func firstSmallerThan(a []int, key int) int {
@@ -6593,6 +7849,41 @@ func firstSmallerThan(a []int, key int) int {
 	return a[res]
 }
 ', true, 0),
+  ('imp-50-find-right-interval', 'python', 'solution.py', 'from typing import List
+
+
+def first_smaller_than(a: List[int], key: int) -> int:
+    low, high = 0, len(a) - 1
+    res = -1
+    while low <= high:
+        mid = low + (high - low) // 2
+        if a[mid] < key:
+            res = mid
+            low = mid + 1
+        else:
+            high = mid - 1
+    if res == -1:
+        return -1
+    return a[res]', false, 1),
+  ('imp-50-find-right-interval', 'java', 'Solution.java', 'class Solution {
+    int firstSmallerThan(int[] a, int key) {
+        int low = 0, high = a.length - 1;
+        int res = -1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (a[mid] < key) {
+                res = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        if (res == -1) {
+            return -1;
+        }
+        return a[res];
+    }
+}', false, 2),
   ('imp-51-missing-number-in-arithmetic-progression', 'go', 'solution.go', 'package main
 
 func findMissingInAp(a []int) int {
@@ -6611,6 +7902,40 @@ func findMissingInAp(a []int) int {
 	return a[0] + low*diff
 }
 ', true, 0),
+  ('imp-51-missing-number-in-arithmetic-progression', 'python', 'solution.py', 'def find_missing_in_ap(a):
+    n = len(a)
+    low, high = 0, n - 1
+    num = a[high] - a[low]
+    # Go integer division truncates toward zero
+    q = abs(num) // n
+    diff = q if num >= 0 else -q
+    while low <= high:
+        mid = low + (high - low) // 2
+        expected = a[0] + mid * diff
+        if a[mid] == expected:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return a[0] + low * diff', false, 1),
+  ('imp-51-missing-number-in-arithmetic-progression', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long findMissingInAp(long[] a) {
+        int n = a.length;
+        int low = 0, high = n - 1;
+        long diff = (a[high] - a[low]) / n; // Java long division truncates toward zero, like Go
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            long expected = a[0] + (long) mid * diff;
+            if (a[mid] == expected) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return a[0] + (long) low * diff;
+    }
+}', false, 2),
   ('imp-52-missing-number', 'go', 'solution.go', 'package main
 
 func findMissingInConsecNums(a []int) int {
@@ -6630,6 +7955,36 @@ func findMissingInConsecNums(a []int) int {
 	return a[0] + low
 }
 ', true, 0),
+  ('imp-52-missing-number', 'python', 'solution.py', 'def find_missing_in_consec_nums(a):
+    low, high = 0, len(a) - 1
+    while low <= high:
+        mid = low + (high - low) // 2
+        expected = a[0] + mid
+        if mid > 0 and a[mid - 1] == a[0] + mid - 1 and a[mid] != expected:
+            return expected
+        if a[mid] == expected:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return a[0] + low', false, 1),
+  ('imp-52-missing-number', 'java', 'Solution.java', 'class Solution {
+    int findMissingInConsecNums(int[] a) {
+        int low = 0, high = a.length - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            int expected = a[0] + mid;
+            if (mid > 0 && a[mid - 1] == a[0] + mid - 1 && a[mid] != expected) {
+                return expected;
+            }
+            if (a[mid] == expected) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return a[0] + low;
+    }
+}', false, 2),
   ('imp-53-find-first-and-last-position-of-element-in-sorte', 'go', 'solution.go', 'package main
 
 func countOccurrence(a []int, key int) int {
@@ -6673,6 +8028,101 @@ func btFirstGreater(a []int, key int) int {
 	return low
 }
 ', true, 0),
+  ('imp-53-find-first-and-last-position-of-element-in-sorte', 'python', 'solution.py', 'from typing import List
+
+
+def count_occurrence(a: List[int], key: int) -> int:
+    if len(a) == 0:
+        return 0
+    left = bt_first_greater_or_equal(a, key)
+    if left == len(a) or a[left] != key:
+        return 0
+    right = bt_first_greater(a, key)
+    return right - left
+
+
+def bt_first_greater_or_equal(a: List[int], key: int) -> int:
+    low, high = 0, len(a) - 1
+    while low < high:
+        mid = low + (high - low) // 2
+        if a[mid] < key:
+            low = mid + 1
+        else:
+            high = mid
+    if a[low] < key:
+        return len(a)
+    return low
+
+
+def bt_first_greater(a: List[int], key: int) -> int:
+    low, high = 0, len(a)
+    while low < high:
+        mid = low + (high - low) // 2
+        if a[mid] <= key:
+            low = mid + 1
+        else:
+            high = mid
+    return low
+
+
+def search_range(a: List[int], key: int) -> List[int]:
+    cnt = count_occurrence(a, key)
+    if cnt == 0:
+        return [-1, -1]
+    left = bt_first_greater_or_equal(a, key)
+    return [left, left + cnt - 1]', false, 1),
+  ('imp-53-find-first-and-last-position-of-element-in-sorte', 'java', 'Solution.java', 'class Solution {
+
+    int countOccurrence(int[] a, int key) {
+        if (a.length == 0) {
+            return 0;
+        }
+        int left = btFirstGreaterOrEqual(a, key);
+        if (left == a.length || a[left] != key) {
+            return 0;
+        }
+        int right = btFirstGreater(a, key);
+        return right - left;
+    }
+
+    int btFirstGreaterOrEqual(int[] a, int key) {
+        int low = 0, high = a.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (a[mid] < key) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        if (a[low] < key) {
+            return a.length;
+        }
+        return low;
+    }
+
+    int btFirstGreater(int[] a, int key) {
+        int low = 0, high = a.length;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (a[mid] <= key) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+
+    int[] searchRange(int[] a, int key) {
+        int cnt = countOccurrence(a, key);
+        if (cnt == 0) {
+            return new int[]{-1, -1};
+        }
+        int left = btFirstGreaterOrEqual(a, key);
+        return new int[]{left, left + cnt - 1};
+    }
+}', false, 2),
   ('imp-54-find-peak-element', 'go', 'solution.go', 'package main
 
 func findPeakElement(nums []int) int {
@@ -6688,6 +8138,34 @@ func findPeakElement(nums []int) int {
 	return low
 }
 ', true, 0),
+  ('imp-54-find-peak-element', 'python', 'solution.py', 'from typing import List
+
+
+def find_peak_element(nums: List[int]) -> int:
+    low, high = 0, len(nums) - 1
+    while low < high:
+        mid = low + (high - low) // 2
+        if nums[mid] > nums[mid + 1]:
+            high = mid
+        else:
+            low = mid + 1
+    return low
+', false, 1),
+  ('imp-54-find-peak-element', 'java', 'Solution.java', 'class Solution {
+    public int findPeakElement(int[] nums) {
+        int low = 0, high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] > nums[mid + 1]) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
+    }
+}
+', false, 2),
   ('imp-55-leftmost-column-with-at-least-a-one', 'go', 'solution.go', 'package main
 
 type BinaryMatrix struct {
@@ -6713,6 +8191,64 @@ func leftMostColumnWithOne(bm BinaryMatrix) int {
 	return res
 }
 ', true, 0),
+  ('imp-55-leftmost-column-with-at-least-a-one', 'python', 'solution.py', 'class BinaryMatrix:
+    def __init__(self, grid):
+        self.grid = grid
+
+    def get(self, row, col):
+        return self.grid[row][col]
+
+    def dimensions(self):
+        return [len(self.grid), len(self.grid[0])]
+
+
+def left_most_column_with_one(bm):
+    dims = bm.dimensions()
+    m, n = dims[0], dims[1]
+    r, c = 0, n - 1
+    res = -1
+    while r < m and c >= 0:
+        if bm.get(r, c) == 1:
+            res = c
+            c -= 1
+        else:
+            r += 1
+    return res
+', false, 1),
+  ('imp-55-leftmost-column-with-at-least-a-one', 'java', 'Solution.java', 'class Solution {
+    static class BinaryMatrix {
+        int[][] grid;
+
+        BinaryMatrix(int[][] grid) {
+            this.grid = grid;
+        }
+
+        int get(int row, int col) {
+            return grid[row][col];
+        }
+
+        int[] dimensions() {
+            return new int[]{grid.length, grid[0].length};
+        }
+    }
+
+    int leftMostColumnWithOne(BinaryMatrix bm) {
+        int[] dims = bm.dimensions();
+        int m = dims[0], n = dims[1];
+        int r = 0, c = n - 1;
+        int res = -1;
+        while (r < m && c >= 0) {
+            if (bm.get(r, c) == 1) {
+                res = c;
+                c--;
+            } else {
+                r++;
+            }
+        }
+        return res;
+    }
+}
+', false, 2),
   ('imp-56-squares-of-a-sorted-array', 'go', 'solution.go', 'package main
 
 func sortSquares(a []int) []int {
@@ -6738,6 +8274,44 @@ func absInt(x int) int {
 	return x
 }
 ', true, 0),
+  ('imp-56-squares-of-a-sorted-array', 'python', 'solution.py', 'def _i64(x):
+    x &= (1 << 64) - 1
+    if x >= (1 << 63):
+        x -= (1 << 64)
+    return x
+
+
+def sortSquares(a):
+    n = len(a)
+    res = [0] * n
+    i, j = 0, n - 1
+    for k in range(n - 1, -1, -1):
+        if abs(a[i]) > abs(a[j]):
+            res[k] = _i64(a[i] * a[i])
+            i += 1
+        else:
+            res[k] = _i64(a[j] * a[j])
+            j -= 1
+    return res', false, 1),
+  ('imp-56-squares-of-a-sorted-array', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[] sortSquares(long[] a) {
+        int n = a.length;
+        long[] res = new long[n];
+        int i = 0, j = n - 1;
+        for (int k = n - 1; k >= 0; k--) {
+            if (Math.abs(a[i]) > Math.abs(a[j])) {
+                res[k] = a[i] * a[i];
+                i++;
+            } else {
+                res[k] = a[j] * a[j];
+                j--;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-57-check-if-an-original-string-exists-given-two-enc', 'go', 'solution.go', 'package main
 
 func possiblyEquals(s1 string, s2 string) bool {
@@ -6790,6 +8364,114 @@ func btPossiblyEquals(s1, s2 string, i, j, diff, m, n int, memo map[[3]int]bool)
 	return res
 }
 ', true, 0),
+  ('imp-57-check-if-an-original-string-exists-given-two-enc', 'python', 'solution.py', 'from functools import lru_cache
+
+
+def possibly_equals(s1: str, s2: str) -> bool:
+    m, n = len(s1), len(s2)
+    memo = {}
+
+    def bt(i: int, j: int, diff: int) -> bool:
+        if i == m and j == n:
+            return diff == 0
+        key = (i, j, diff)
+        if key in memo:
+            return memo[key]
+        res = False
+        if i < m and s1[i].isdigit():
+            num = 0
+            p = i
+            while p < m and s1[p].isdigit():
+                num = num * 10 + (ord(s1[p]) - ord(''0''))
+                if bt(p + 1, j, diff + num):
+                    res = True
+                    break
+                p += 1
+        elif j < n and s2[j].isdigit():
+            num = 0
+            p = j
+            while p < n and s2[p].isdigit():
+                num = num * 10 + (ord(s2[p]) - ord(''0''))
+                if bt(i, p + 1, diff - num):
+                    res = True
+                    break
+                p += 1
+        elif diff > 0 and j < n:
+            if ''a'' <= s2[j] <= ''z'':
+                res = bt(i, j + 1, diff - 1)
+        elif diff < 0 and i < m:
+            if ''a'' <= s1[i] <= ''z'':
+                res = bt(i + 1, j, diff + 1)
+        elif diff == 0 and i < m and j < n:
+            if ''a'' <= s1[i] <= ''z'' and ''a'' <= s2[j] <= ''z'':
+                res = s1[i] == s2[j] and bt(i + 1, j + 1, 0)
+        memo[key] = res
+        return res
+
+    return bt(0, 0, 0)', false, 1),
+  ('imp-57-check-if-an-original-string-exists-given-two-enc', 'java', 'Solution.java', 'import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public boolean possiblyEquals(String s1, String s2) {
+        int m = s1.length(), n = s2.length();
+        Map<Long, Boolean> memo = new HashMap<>();
+        return bt(s1, s2, 0, 0, 0, m, n, memo);
+    }
+
+    private long key(int i, int j, int diff) {
+        // diff is bounded (|diff| < ~1000 for valid inputs); encode three ints safely.
+        return ((long) i << 40) | ((long) j << 20) | ((long) (diff + 100000) & 0xFFFFF);
+    }
+
+    private boolean bt(String s1, String s2, int i, int j, int diff, int m, int n,
+                       Map<Long, Boolean> memo) {
+        if (i == m && j == n) {
+            return diff == 0;
+        }
+        long k = key(i, j, diff);
+        Boolean cached = memo.get(k);
+        if (cached != null) {
+            return cached;
+        }
+        boolean res = false;
+        if (i < m && s1.charAt(i) >= ''0'' && s1.charAt(i) <= ''9'') {
+            int num = 0;
+            for (int p = i; p < m && s1.charAt(p) >= ''0'' && s1.charAt(p) <= ''9''; p++) {
+                num = num * 10 + (s1.charAt(p) - ''0'');
+                if (bt(s1, s2, p + 1, j, diff + num, m, n, memo)) {
+                    res = true;
+                    break;
+                }
+            }
+        } else if (j < n && s2.charAt(j) >= ''0'' && s2.charAt(j) <= ''9'') {
+            int num = 0;
+            for (int p = j; p < n && s2.charAt(p) >= ''0'' && s2.charAt(p) <= ''9''; p++) {
+                num = num * 10 + (s2.charAt(p) - ''0'');
+                if (bt(s1, s2, i, p + 1, diff - num, m, n, memo)) {
+                    res = true;
+                    break;
+                }
+            }
+        } else if (diff > 0 && j < n) {
+            if (s2.charAt(j) >= ''a'' && s2.charAt(j) <= ''z'') {
+                res = bt(s1, s2, i, j + 1, diff - 1, m, n, memo);
+            }
+        } else if (diff < 0 && i < m) {
+            if (s1.charAt(i) >= ''a'' && s1.charAt(i) <= ''z'') {
+                res = bt(s1, s2, i + 1, j, diff + 1, m, n, memo);
+            }
+        } else if (diff == 0 && i < m && j < n) {
+            if (s1.charAt(i) >= ''a'' && s1.charAt(i) <= ''z''
+                    && s2.charAt(j) >= ''a'' && s2.charAt(j) <= ''z'') {
+                res = s1.charAt(i) == s2.charAt(j)
+                        && bt(s1, s2, i + 1, j + 1, 0, m, n, memo);
+            }
+        }
+        memo.put(k, res);
+        return res;
+    }
+}', false, 2),
   ('imp-58-climbing-stairs', 'go', 'solution.go', 'package main
 
 func climbStairs(n int) int {
@@ -6821,6 +8503,35 @@ func btClimbStairs(k int, memo map[int]int) int {
 	return memo[k]
 }
 ', false, 1),
+  ('imp-58-climbing-stairs', 'python', 'solution.py', 'def _i64(x):
+    x &= (1 << 64) - 1
+    return x - (1 << 64) if x >= (1 << 63) else x
+
+
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        if n <= 2:
+            return n
+        prev, cur = 1, 2
+        for _ in range(3, n + 1):
+            prev, cur = cur, _i64(prev + cur)
+        return cur', false, 2),
+  ('imp-58-climbing-stairs', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long climbStairs(int n) {
+        if (n <= 2) {
+            return n;
+        }
+        long prev = 1, cur = 2;
+        for (int i = 3; i <= n; i++) {
+            long next = prev + cur;
+            prev = cur;
+            cur = next;
+        }
+        return cur;
+    }
+}', false, 3),
   ('imp-59-coin-change', 'go', 'solution.go', 'package main
 
 func coinChange(coins []int, amount int) int {
@@ -6874,6 +8585,41 @@ func btCoinChange(a int, coins []int, inf int, memo map[int]int) int {
 	return best
 }
 ', false, 1),
+  ('imp-59-coin-change', 'python', 'solution.py', 'from typing import List
+
+
+def coin_change(coins: List[int], amount: int) -> int:
+    INF = 1 << 30
+    dp = [0] * (amount + 1)
+    for i in range(1, amount + 1):
+        dp[i] = INF
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c <= a and dp[a - c] + 1 < dp[a]:
+                dp[a] = dp[a - c] + 1
+    if dp[amount] == INF:
+        return -1
+    return dp[amount]', false, 2),
+  ('imp-59-coin-change', 'java', 'Solution.java', 'class Solution {
+    public int coinChange(int[] coins, int amount) {
+        final int INF = 1 << 30;
+        int[] dp = new int[amount + 1];
+        for (int i = 1; i <= amount; i++) {
+            dp[i] = INF;
+        }
+        for (int a = 1; a <= amount; a++) {
+            for (int c : coins) {
+                if (c <= a && dp[a - c] + 1 < dp[a]) {
+                    dp[a] = dp[a - c] + 1;
+                }
+            }
+        }
+        if (dp[amount] == INF) {
+            return -1;
+        }
+        return dp[amount];
+    }
+}', false, 3),
   ('imp-60-coin-change-ii', 'go', 'solution.go', 'package main
 
 func makeChange(n int, coins []int) int64 {
@@ -6896,6 +8642,43 @@ func makeChange(n int, coins []int) int64 {
 	return dp[n]
 }
 ', true, 0),
+  ('imp-60-coin-change-ii', 'python', 'solution.py', 'from typing import List
+
+
+def make_change(n: int, coins: List[int]) -> int:
+    if n < 0:
+        return 0
+    if n == 0:
+        return 1
+    if len(coins) == 0:
+        return 0
+    dp = [0] * (n + 1)
+    dp[0] = 1
+    for coin in coins:
+        for i in range(coin, n + 1):
+            dp[i] += dp[i - coin]
+    return dp[n]', false, 1),
+  ('imp-60-coin-change-ii', 'java', 'Solution.java', 'class Solution {
+    public long makeChange(int n, int[] coins) {
+        if (n < 0) {
+            return 0;
+        }
+        if (n == 0) {
+            return 1;
+        }
+        if (coins.length == 0) {
+            return 0;
+        }
+        long[] dp = new long[n + 1];
+        dp[0] = 1;
+        for (int coin : coins) {
+            for (int i = coin; i <= n; i++) {
+                dp[i] += dp[i - coin];
+            }
+        }
+        return dp[n];
+    }
+}', false, 2),
   ('imp-61-edit-distance', 'go', 'solution.go', 'package main
 
 func editDistance(word1 string, word2 string) int {
@@ -6951,6 +8734,44 @@ func btEditDistance(word1, word2 string, i, j int, memo map[[2]int]int) int {
 	return memo[key]
 }
 ', false, 1),
+  ('imp-61-edit-distance', 'python', 'solution.py', 'def editDistance(word1: str, word2: str) -> int:
+    a = word1.encode(''utf-8'')
+    b = word2.encode(''utf-8'')
+    m, n = len(a), len(b)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(m + 1):
+        dp[i][0] = i
+    for j in range(n + 1):
+        dp[0][j] = j
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if a[i - 1] == b[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1]
+            else:
+                dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+    return dp[m][n]', false, 2),
+  ('imp-61-edit-distance', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    long editDistance(String word1, String word2) {
+        byte[] a = word1.getBytes(StandardCharsets.UTF_8);
+        byte[] b = word2.getBytes(StandardCharsets.UTF_8);
+        int m = a.length, n = b.length;
+        long[][] dp = new long[m + 1][n + 1];
+        for (int i = 0; i <= m; i++) dp[i][0] = i;
+        for (int j = 0; j <= n; j++) dp[0][j] = j;
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (a[i - 1] == b[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = 1 + Math.min(dp[i - 1][j], Math.min(dp[i][j - 1], dp[i - 1][j - 1]));
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}', false, 3),
   ('imp-62-filling-bookcase-shelves', 'go', 'solution.go', 'package main
 
 func minHeightShelves(books [][]int, shelfWidth int) int {
@@ -6977,6 +8798,50 @@ func minHeightShelves(books [][]int, shelfWidth int) int {
 	return dp[n]
 }
 ', true, 0),
+  ('imp-62-filling-bookcase-shelves', 'python', 'solution.py', 'from typing import List
+
+
+def minHeightShelves(books: List[List[int]], shelfWidth: int) -> int:
+    n = len(books)
+    dp = [0] * (n + 1)
+    for i in range(1, n + 1):
+        dp[i] = 1 << 30
+    for i in range(1, n + 1):
+        w, h = 0, 0
+        for j in range(i, 0, -1):
+            w += books[j - 1][0]
+            if w > shelfWidth:
+                break
+            if books[j - 1][1] > h:
+                h = books[j - 1][1]
+            if dp[j - 1] + h < dp[i]:
+                dp[i] = dp[j - 1] + h
+    return dp[n]', false, 1),
+  ('imp-62-filling-bookcase-shelves', 'java', 'Solution.java', 'class Solution {
+    public int minHeightShelves(int[][] books, int shelfWidth) {
+        int n = books.length;
+        int[] dp = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            dp[i] = 1 << 30;
+        }
+        for (int i = 1; i <= n; i++) {
+            int w = 0, h = 0;
+            for (int j = i; j >= 1; j--) {
+                w += books[j - 1][0];
+                if (w > shelfWidth) {
+                    break;
+                }
+                if (books[j - 1][1] > h) {
+                    h = books[j - 1][1];
+                }
+                if (dp[j - 1] + h < dp[i]) {
+                    dp[i] = dp[j - 1] + h;
+                }
+            }
+        }
+        return dp[n];
+    }
+}', false, 2),
   ('imp-63-0-1-knapsack', 'go', 'solution.go', 'package main
 
 func knapsack(weights []int, values []int, capacity int) int {
@@ -7016,6 +8881,31 @@ func btKnapsack(weights, values []int, idx, cap int, memo map[[2]int]int) int {
 	return best
 }
 ', false, 1),
+  ('imp-63-0-1-knapsack', 'python', 'solution.py', 'from typing import List
+
+
+def knapsack(weights: List[int], values: List[int], capacity: int) -> int:
+    dp = [0] * (capacity + 1)
+    for i in range(len(weights)):
+        w, v = weights[i], values[i]
+        for c in range(capacity, w - 1, -1):
+            if dp[c - w] + v > dp[c]:
+                dp[c] = dp[c - w] + v
+    return dp[capacity]', false, 2),
+  ('imp-63-0-1-knapsack', 'java', 'Solution.java', 'class Solution {
+    public int knapsack(int[] weights, int[] values, int capacity) {
+        int[] dp = new int[capacity + 1];
+        for (int i = 0; i < weights.length; i++) {
+            int w = weights[i], v = values[i];
+            for (int c = capacity; c >= w; c--) {
+                if (dp[c - w] + v > dp[c]) {
+                    dp[c] = dp[c - w] + v;
+                }
+            }
+        }
+        return dp[capacity];
+    }
+}', false, 3),
   ('imp-64-perfect-squares', 'go', 'solution.go', 'package main
 
 func leastSquareNumbersSumToK(n int) int {
@@ -7031,6 +8921,30 @@ func leastSquareNumbersSumToK(n int) int {
 	return dp[n]
 }
 ', true, 0),
+  ('imp-64-perfect-squares', 'python', 'solution.py', 'def least_square_numbers_sum_to_k(n: int) -> int:
+    dp = [0] * (n + 1)
+    for i in range(1, n + 1):
+        dp[i] = i
+        j = 1
+        while j * j <= i:
+            if dp[i - j * j] + 1 < dp[i]:
+                dp[i] = dp[i - j * j] + 1
+            j += 1
+    return dp[n]', false, 1),
+  ('imp-64-perfect-squares', 'java', 'Solution.java', 'class Solution {
+    public int leastSquareNumbersSumToK(int n) {
+        int[] dp = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            dp[i] = i;
+            for (int j = 1; j * j <= i; j++) {
+                if (dp[i - j * j] + 1 < dp[i]) {
+                    dp[i] = dp[i - j * j] + 1;
+                }
+            }
+        }
+        return dp[n];
+    }
+}', false, 2),
   ('imp-65-longest-common-subsequence', 'go', 'solution.go', 'package main
 
 func longestCommonSequence(text1 string, text2 string) int {
@@ -7074,6 +8988,38 @@ func btLCS(text1, text2 string, i, j int, memo map[[2]int]int) int {
 	return memo[key]
 }
 ', false, 1),
+  ('imp-65-longest-common-subsequence', 'python', 'solution.py', 'def longest_common_sequence(text1, text2):
+    a = text1.encode(''utf-8'')
+    b = text2.encode(''utf-8'')
+    m, n = len(a), len(b)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if a[i - 1] == b[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    return dp[m][n]', false, 2),
+  ('imp-65-longest-common-subsequence', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    int longestCommonSequence(String text1, String text2) {
+        byte[] a = text1.getBytes(StandardCharsets.UTF_8);
+        byte[] b = text2.getBytes(StandardCharsets.UTF_8);
+        int m = a.length, n = b.length;
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (a[i - 1] == b[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}', false, 3),
   ('imp-66-longest-increasing-subsequence', 'go', 'solution.go', 'package main
 
 func longestIncreasingSubsequence(nums []int) int {
@@ -7122,6 +9068,47 @@ func lengthOfLISQuadratic(nums []int) int {
 	return res
 }
 ', false, 1),
+  ('imp-66-longest-increasing-subsequence', 'python', 'solution.py', 'def longest_increasing_subsequence(nums):
+    tails = []
+    for x in nums:
+        low, high = 0, len(tails)
+        while low < high:
+            mid = low + (high - low) // 2
+            if tails[mid] < x:
+                low = mid + 1
+            else:
+                high = mid
+        if low == len(tails):
+            tails.append(x)
+        else:
+            tails[low] = x
+    return len(tails)', false, 2),
+  ('imp-66-longest-increasing-subsequence', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    int longestIncreasingSubsequence(long[] nums) {
+        long[] tails = new long[nums.length];
+        int size = 0;
+        for (long x : nums) {
+            int low = 0, high = size;
+            while (low < high) {
+                int mid = low + (high - low) / 2;
+                if (tails[mid] < x) {
+                    low = mid + 1;
+                } else {
+                    high = mid;
+                }
+            }
+            if (low == size) {
+                tails[size] = x;
+                size++;
+            } else {
+                tails[low] = x;
+            }
+        }
+        return size;
+    }
+}', false, 3),
   ('imp-67-longest-palindromic-subsequence', 'go', 'solution.go', 'package main
 
 func longestPalindromicSubsequence(s string) int {
@@ -7170,6 +9157,50 @@ func btPalSubseq(s string, i, j int, memo map[[2]int]int) int {
 	return memo[key]
 }
 ', false, 1),
+  ('imp-67-longest-palindromic-subsequence', 'python', 'solution.py', 'def longest_palindromic_subsequence(s):
+    b = s.encode(''utf-8'')
+    n = len(b)
+    if n == 0:
+        return 0
+    dp = [[0] * n for _ in range(n)]
+    for i in range(n):
+        dp[i][i] = 1
+    for length in range(2, n + 1):
+        i = 0
+        while i + length - 1 < n:
+            j = i + length - 1
+            if b[i] == b[j]:
+                dp[i][j] = dp[i + 1][j - 1] + 2
+            else:
+                dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])
+            i += 1
+    return dp[0][n - 1]', false, 2),
+  ('imp-67-longest-palindromic-subsequence', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    long longestPalindromicSubsequence(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int n = b.length;
+        if (n == 0) {
+            return 0;
+        }
+        long[][] dp = new long[n][n];
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+        for (int length = 2; length <= n; length++) {
+            for (int i = 0; i + length - 1 < n; i++) {
+                int j = i + length - 1;
+                if (b[i] == b[j]) {
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                } else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[0][n - 1];
+    }
+}', false, 3),
   ('imp-68-longest-string-chain', 'go', 'solution.go', 'package main
 
 import "sort"
@@ -7193,6 +9224,48 @@ func longestStrChain(words []string) int {
 	return res
 }
 ', true, 0),
+  ('imp-68-longest-string-chain', 'python', 'solution.py', 'from typing import List
+
+
+def longest_str_chain(words: List[str]) -> int:
+    words = sorted(words, key=len)
+    dp = {}
+    res = 1
+    for w in words:
+        dp[w] = 1
+        for i in range(len(w)):
+            pred = w[:i] + w[i + 1:]
+            v = dp.get(pred)
+            if v is not None and v + 1 > dp[w]:
+                dp[w] = v + 1
+        if dp[w] > res:
+            res = dp[w]
+    return res', false, 1),
+  ('imp-68-longest-string-chain', 'java', 'Solution.java', 'import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int longestStrChain(String[] words) {
+        Arrays.sort(words, (a, b) -> Integer.compare(a.length(), b.length()));
+        Map<String, Integer> dp = new HashMap<>();
+        int res = 1;
+        for (String w : words) {
+            dp.put(w, 1);
+            for (int i = 0; i < w.length(); i++) {
+                String pred = w.substring(0, i) + w.substring(i + 1);
+                Integer v = dp.get(pred);
+                if (v != null && v + 1 > dp.get(w)) {
+                    dp.put(w, v + 1);
+                }
+            }
+            if (dp.get(w) > res) {
+                res = dp.get(w);
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-69-longest-valid-parentheses', 'go', 'solution.go', 'package main
 
 func longestValidParentheses(s string) int {
@@ -7216,6 +9289,47 @@ func longestValidParentheses(s string) int {
 	return res
 }
 ', true, 0),
+  ('imp-69-longest-valid-parentheses', 'python', 'solution.py', 'def longest_valid_parentheses(s: str) -> int:
+    stack = [-1]
+    res = 0
+    for i in range(len(s)):
+        if s[i] == ''('':
+            stack.append(i)
+        else:
+            stack.pop()
+            if not stack:
+                stack.append(i)
+            else:
+                l = i - stack[-1]
+                if l > res:
+                    res = l
+    return res', false, 1),
+  ('imp-69-longest-valid-parentheses', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public int longestValidParentheses(String s) {
+        Deque<Integer> stack = new ArrayDeque<>();
+        stack.push(-1);
+        int res = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ''('') {
+                stack.push(i);
+            } else {
+                stack.pop();
+                if (stack.isEmpty()) {
+                    stack.push(i);
+                } else {
+                    int l = i - stack.peek();
+                    if (l > res) {
+                        res = l;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-70-maximal-rectangle', 'go', 'solution.go', 'package main
 
 func maxRectangleSumInMatrix(matrix [][]byte) int {
@@ -7257,6 +9371,86 @@ func btMaxRectHistogram(heights []int) int {
 	return res
 }
 ', true, 0),
+  ('imp-70-maximal-rectangle', 'python', 'solution.py', 'from typing import List
+
+
+def max_rectangle_sum_in_matrix(matrix: List[List[str]]) -> int:
+    if len(matrix) == 0:
+        return 0
+    m, n = len(matrix), len(matrix[0])
+    heights = [0] * n
+    res = 0
+    for r in range(m):
+        for c in range(n):
+            if matrix[r][c] == ''1'':
+                heights[c] += 1
+            else:
+                heights[c] = 0
+        res = max(res, _bt_max_rect_histogram(heights))
+    return res
+
+
+def _bt_max_rect_histogram(heights: List[int]) -> int:
+    stack: List[int] = []
+    res = 0
+    heights = heights + [0]
+    for i, h in enumerate(heights):
+        while stack and heights[stack[-1]] > h:
+            height = heights[stack[-1]]
+            stack.pop()
+            width = i
+            if stack:
+                width = i - stack[-1] - 1
+            res = max(res, height * width)
+        stack.append(i)
+    return res', false, 1),
+  ('imp-70-maximal-rectangle', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+
+    int maxRectangleSumInMatrix(byte[][] matrix) {
+        if (matrix.length == 0) {
+            return 0;
+        }
+        int m = matrix.length, n = matrix[0].length;
+        int[] heights = new int[n];
+        int res = 0;
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (matrix[r][c] == ''1'') {
+                    heights[c]++;
+                } else {
+                    heights[c] = 0;
+                }
+            }
+            res = Math.max(res, btMaxRectHistogram(heights));
+        }
+        return res;
+    }
+
+    int btMaxRectHistogram(int[] heights) {
+        Deque<Integer> stack = new ArrayDeque<>();
+        int res = 0;
+        int[] h2 = new int[heights.length + 1];
+        System.arraycopy(heights, 0, h2, 0, heights.length);
+        h2[heights.length] = 0;
+        for (int i = 0; i < h2.length; i++) {
+            int h = h2[i];
+            while (!stack.isEmpty() && h2[stack.peek()] > h) {
+                int height = h2[stack.peek()];
+                stack.pop();
+                int width = i;
+                if (!stack.isEmpty()) {
+                    width = i - stack.peek() - 1;
+                }
+                res = Math.max(res, height * width);
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-71-maximal-square', 'go', 'solution.go', 'package main
 
 func maxSquareArea(matrix [][]byte) int {
@@ -7283,6 +9477,47 @@ func maxSquareArea(matrix [][]byte) int {
 	return res * res
 }
 ', true, 0),
+  ('imp-71-maximal-square', 'python', 'solution.py', 'from typing import List
+
+
+def max_square_area(matrix: List[List[str]]) -> int:
+    if len(matrix) == 0:
+        return 0
+    m, n = len(matrix), len(matrix[0])
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    res = 0
+    for r in range(1, m + 1):
+        for c in range(1, n + 1):
+            if matrix[r - 1][c - 1] == ''1'':
+                side = min(dp[r - 1][c], dp[r][c - 1], dp[r - 1][c - 1]) + 1
+                dp[r][c] = side
+                if side > res:
+                    res = side
+    return res * res
+', false, 1),
+  ('imp-71-maximal-square', 'java', 'Solution.java', 'class Solution {
+    int maxSquareArea(char[][] matrix) {
+        if (matrix.length == 0) {
+            return 0;
+        }
+        int m = matrix.length, n = matrix[0].length;
+        int[][] dp = new int[m + 1][n + 1];
+        int res = 0;
+        for (int r = 1; r <= m; r++) {
+            for (int c = 1; c <= n; c++) {
+                if (matrix[r - 1][c - 1] == ''1'') {
+                    int side = Math.min(Math.min(dp[r - 1][c], dp[r][c - 1]), dp[r - 1][c - 1]) + 1;
+                    dp[r][c] = side;
+                    if (side > res) {
+                        res = side;
+                    }
+                }
+            }
+        }
+        return res * res;
+    }
+}
+', false, 2),
   ('imp-72-maximum-and-sum-of-array', 'go', 'solution.go', 'package main
 
 func maximumANDSum(nums []int, numSlots int) int {
@@ -7312,6 +9547,61 @@ func btMaxAndSum(nums []int, idx, state, numSlots int, memo map[int]int) int {
 	return res
 }
 ', true, 0),
+  ('imp-72-maximum-and-sum-of-array', 'python', 'solution.py', 'from typing import List, Dict
+
+
+def maximumANDSum(nums: List[int], numSlots: int) -> int:
+    memo: Dict[int, int] = {}
+    return _bt_max_and_sum(nums, 0, 0, numSlots, memo)
+
+
+def _bt_max_and_sum(nums: List[int], idx: int, state: int, numSlots: int, memo: Dict[int, int]) -> int:
+    if idx == len(nums):
+        return 0
+    if state in memo:
+        return memo[state]
+    res = 0
+    for slot in range(1, numSlots + 1):
+        occ = (state >> (2 * (slot - 1))) & 3
+        if occ < 2:
+            nxt = state + (1 << (2 * (slot - 1)))
+            val = (nums[idx] & slot) + _bt_max_and_sum(nums, idx + 1, nxt, numSlots, memo)
+            if val > res:
+                res = val
+    memo[state] = res
+    return res', false, 1),
+  ('imp-72-maximum-and-sum-of-array', 'java', 'Solution.java', 'import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int maximumANDSum(int[] nums, int numSlots) {
+        Map<Integer, Integer> memo = new HashMap<>();
+        return btMaxAndSum(nums, 0, 0, numSlots, memo);
+    }
+
+    private int btMaxAndSum(int[] nums, int idx, int state, int numSlots, Map<Integer, Integer> memo) {
+        if (idx == nums.length) {
+            return 0;
+        }
+        Integer cached = memo.get(state);
+        if (cached != null) {
+            return cached;
+        }
+        int res = 0;
+        for (int slot = 1; slot <= numSlots; slot++) {
+            int occ = (state >> (2 * (slot - 1))) & 3;
+            if (occ < 2) {
+                int next = state + (1 << (2 * (slot - 1)));
+                int val = (nums[idx] & slot) + btMaxAndSum(nums, idx + 1, next, numSlots, memo);
+                if (val > res) {
+                    res = val;
+                }
+            }
+        }
+        memo.put(state, res);
+        return res;
+    }
+}', false, 2),
   ('imp-73-maximum-number-of-points-with-cost', 'go', 'solution.go', 'package main
 
 func maxPoints(points [][]int) int64 {
@@ -7354,6 +9644,76 @@ func maxPoints(points [][]int) int64 {
 	return res
 }
 ', true, 0),
+  ('imp-73-maximum-number-of-points-with-cost', 'python', 'solution.py', 'from typing import List
+
+
+def maxPoints(points: List[List[int]]) -> int:
+    n = len(points[0])
+    dp = [points[0][j] for j in range(n)]
+    for i in range(1, len(points)):
+        left = [0] * n
+        left[0] = dp[0]
+        for j in range(1, n):
+            left[j] = dp[j]
+            if left[j - 1] - 1 > left[j]:
+                left[j] = left[j - 1] - 1
+        right = [0] * n
+        right[n - 1] = dp[n - 1]
+        for j in range(n - 2, -1, -1):
+            right[j] = dp[j]
+            if right[j + 1] - 1 > right[j]:
+                right[j] = right[j + 1] - 1
+        for j in range(n):
+            best = left[j]
+            if right[j] > best:
+                best = right[j]
+            dp[j] = points[i][j] + best
+    res = 0
+    for v in dp:
+        if v > res:
+            res = v
+    return res', false, 1),
+  ('imp-73-maximum-number-of-points-with-cost', 'java', 'Solution.java', 'class Solution {
+    public long maxPoints(int[][] points) {
+        int n = points[0].length;
+        long[] dp = new long[n];
+        for (int j = 0; j < n; j++) {
+            dp[j] = points[0][j];
+        }
+        for (int i = 1; i < points.length; i++) {
+            long[] left = new long[n];
+            left[0] = dp[0];
+            for (int j = 1; j < n; j++) {
+                left[j] = dp[j];
+                if (left[j - 1] - 1 > left[j]) {
+                    left[j] = left[j - 1] - 1;
+                }
+            }
+            long[] right = new long[n];
+            right[n - 1] = dp[n - 1];
+            for (int j = n - 2; j >= 0; j--) {
+                right[j] = dp[j];
+                if (right[j + 1] - 1 > right[j]) {
+                    right[j] = right[j + 1] - 1;
+                }
+            }
+            for (int j = 0; j < n; j++) {
+                long best = left[j];
+                if (right[j] > best) {
+                    best = right[j];
+                }
+                dp[j] = points[i][j] + best;
+            }
+        }
+        long res = 0;
+        for (long v : dp) {
+            if (v > res) {
+                res = v;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-74-minimum-path-sum', 'go', 'solution.go', 'package main
 
 func minPathSumInMatrix(grid [][]int) int {
@@ -7399,6 +9759,36 @@ func btMinPathSum(grid [][]int, r, c int, memo map[[2]int]int) int {
 	return memo[key]
 }
 ', false, 1),
+  ('imp-74-minimum-path-sum', 'python', 'solution.py', 'from typing import List
+
+
+def min_path_sum_in_matrix(grid: List[List[int]]) -> int:
+    m, n = len(grid), len(grid[0])
+    for r in range(1, m):
+        grid[r][0] += grid[r - 1][0]
+    for c in range(1, n):
+        grid[0][c] += grid[0][c - 1]
+    for r in range(1, m):
+        for c in range(1, n):
+            grid[r][c] += min(grid[r - 1][c], grid[r][c - 1])
+    return grid[m - 1][n - 1]', false, 2),
+  ('imp-74-minimum-path-sum', 'java', 'Solution.java', 'class Solution {
+    public int minPathSumInMatrix(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        for (int r = 1; r < m; r++) {
+            grid[r][0] += grid[r - 1][0];
+        }
+        for (int c = 1; c < n; c++) {
+            grid[0][c] += grid[0][c - 1];
+        }
+        for (int r = 1; r < m; r++) {
+            for (int c = 1; c < n; c++) {
+                grid[r][c] += Math.min(grid[r - 1][c], grid[r][c - 1]);
+            }
+        }
+        return grid[m - 1][n - 1];
+    }
+}', false, 3),
   ('imp-75-minimum-deletions-to-make-string-balanced', 'go', 'solution.go', 'package main
 
 func minimumDeletions(s string) int {
@@ -7417,6 +9807,36 @@ func minimumDeletions(s string) int {
 	return dp
 }
 ', true, 0),
+  ('imp-75-minimum-deletions-to-make-string-balanced', 'python', 'solution.py', 'def minimum_deletions(s: str) -> int:
+    b_count = 0
+    dp = 0
+    for ch in s:
+        if ch == ''b'':
+            b_count += 1
+        else:
+            if dp + 1 < b_count:
+                dp += 1
+            else:
+                dp = b_count
+    return dp', false, 1),
+  ('imp-75-minimum-deletions-to-make-string-balanced', 'java', 'Solution.java', 'class Solution {
+    public int minimumDeletions(String s) {
+        int bCount = 0;
+        int dp = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ''b'') {
+                bCount++;
+            } else {
+                if (dp + 1 < bCount) {
+                    dp++;
+                } else {
+                    dp = bCount;
+                }
+            }
+        }
+        return dp;
+    }
+}', false, 2),
   ('imp-76-distinct-subsequences', 'go', 'solution.go', 'package main
 
 func numberOfDistinctSubsequence(s string, t string) int {
@@ -7464,6 +9884,35 @@ func btNumDistinct(s, t string, i, j int, memo map[[2]int]int) int {
 	return memo[key]
 }
 ', false, 1),
+  ('imp-76-distinct-subsequences', 'python', 'solution.py', 'def number_of_distinct_subsequence(s: str, t: str) -> int:
+    m, n = len(s), len(t)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(m + 1):
+        dp[i][0] = 1
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            dp[i][j] = dp[i - 1][j]
+            if s[i - 1] == t[j - 1]:
+                dp[i][j] += dp[i - 1][j - 1]
+    return dp[m][n]', false, 2),
+  ('imp-76-distinct-subsequences', 'java', 'Solution.java', 'class Solution {
+    public int numberOfDistinctSubsequence(String s, String t) {
+        int m = s.length(), n = t.length();
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 0; i <= m; i++) {
+            dp[i][0] = 1;
+        }
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                dp[i][j] = dp[i - 1][j];
+                if (s.charAt(i - 1) == t.charAt(j - 1)) {
+                    dp[i][j] += dp[i - 1][j - 1];
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}', false, 3),
   ('imp-77-unique-paths', 'go', 'solution.go', 'package main
 
 func numberOfUniquePathsIn(m int, n int) int {
@@ -7498,6 +9947,28 @@ func btUniquePaths(r, c int, memo map[[2]int]int) int {
 	return memo[key]
 }
 ', false, 1),
+  ('imp-77-unique-paths', 'python', 'solution.py', 'def numberOfUniquePathsIn(m, n):
+    dp = [1] * n
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[j] += dp[j - 1]
+    return dp[n - 1]', false, 2),
+  ('imp-77-unique-paths', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long numberOfUniquePathsIn(int m, int n) {
+        long[] dp = new long[n];
+        for (int j = 0; j < n; j++) {
+            dp[j] = 1;
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[j] += dp[j - 1];
+            }
+        }
+        return dp[n - 1];
+    }
+}', false, 3),
   ('imp-78-decode-ways', 'go', 'solution.go', 'package main
 
 func numberOfWaysDecodingBase26(s string) int {
@@ -7519,6 +9990,40 @@ func numberOfWaysDecodingBase26(s string) int {
 	return cur
 }
 ', true, 0),
+  ('imp-78-decode-ways', 'python', 'solution.py', 'def number_of_ways_decoding_base26(s: str) -> int:
+    if len(s) == 0 or s[0] == ''0'':
+        return 0
+    prev, cur = 1, 1
+    for i in range(1, len(s)):
+        nxt = 0
+        if s[i] != ''0'':
+            nxt = cur
+        two = (ord(s[i - 1]) - ord(''0'')) * 10 + (ord(s[i]) - ord(''0''))
+        if 10 <= two <= 26:
+            nxt += prev
+        prev, cur = cur, nxt
+    return cur', false, 1),
+  ('imp-78-decode-ways', 'java', 'Solution.java', 'class Solution {
+    public long numberOfWaysDecodingBase26(String s) {
+        if (s.length() == 0 || s.charAt(0) == ''0'') {
+            return 0;
+        }
+        long prev = 1, cur = 1;
+        for (int i = 1; i < s.length(); i++) {
+            long next = 0;
+            if (s.charAt(i) != ''0'') {
+                next = cur;
+            }
+            int two = (s.charAt(i - 1) - ''0'') * 10 + (s.charAt(i) - ''0'');
+            if (two >= 10 && two <= 26) {
+                next += prev;
+            }
+            prev = cur;
+            cur = next;
+        }
+        return cur;
+    }
+}', false, 2),
   ('imp-79-partition-array-into-two-arrays-to-minimize-sum-', 'go', 'solution.go', 'package main
 
 import "sort"
@@ -7582,6 +10087,126 @@ func genSubsetSums(arr []int) [][]int {
 	return sums
 }
 ', true, 0),
+  ('imp-79-partition-array-into-two-arrays-to-minimize-sum-', 'python', 'solution.py', 'import bisect
+
+
+def _abs_int(x):
+    return -x if x < 0 else x
+
+
+def _gen_subset_sums(arr):
+    k = len(arr)
+    sums = [[] for _ in range(k + 1)]
+    for mask in range(1 << k):
+        s = 0
+        cnt = 0
+        for i in range(k):
+            if mask & (1 << i):
+                s += arr[i]
+                cnt += 1
+        sums[cnt].append(s)
+    return sums
+
+
+def minimum_difference(nums):
+    n = len(nums) // 2
+    total = 0
+    for x in nums:
+        total += x
+    left, right = nums[:n], nums[n:]
+    ls = _gen_subset_sums(left)
+    rs = _gen_subset_sums(right)
+    for i in range(len(rs)):
+        rs[i].sort()
+    res = 1 << 30
+    target = _go_int_div(total, 2)
+    for sz in range(n + 1):
+        r_sz = n - sz
+        for l_sum in ls[sz]:
+            t = target - l_sum
+            arr = rs[r_sz]
+            idx = bisect.bisect_left(arr, t)
+            if idx < len(arr):
+                d = _abs_int(total - 2 * (l_sum + arr[idx]))
+                if d < res:
+                    res = d
+            if idx > 0:
+                d = _abs_int(total - 2 * (l_sum + arr[idx - 1]))
+                if d < res:
+                    res = d
+    return res
+
+
+def _go_int_div(a, b):
+    # Go integer division truncates toward zero
+    q = a // b
+    if (a % b != 0) and ((a < 0) != (b < 0)):
+        q += 1
+    return q', false, 1),
+  ('imp-79-partition-array-into-two-arrays-to-minimize-sum-', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long minimumDifference(long[] nums) {
+        int n = nums.length / 2;
+        long total = 0;
+        for (long x : nums) total += x;
+        long[] left = Arrays.copyOfRange(nums, 0, n);
+        long[] right = Arrays.copyOfRange(nums, n, nums.length);
+        long[][] ls = genSubsetSums(left);
+        long[][] rs = genSubsetSums(right);
+        for (int i = 0; i < rs.length; i++) Arrays.sort(rs[i]);
+        long res = 1L << 30;
+        long target = total / 2; // long division truncates toward zero, matching Go
+        for (int sz = 0; sz <= n; sz++) {
+            int rSz = n - sz;
+            for (long lSum : ls[sz]) {
+                long t = target - lSum;
+                long[] arr = rs[rSz];
+                int idx = lowerBound(arr, t);
+                if (idx < arr.length) {
+                    long d = Math.abs(total - 2 * (lSum + arr[idx]));
+                    if (d < res) res = d;
+                }
+                if (idx > 0) {
+                    long d = Math.abs(total - 2 * (lSum + arr[idx - 1]));
+                    if (d < res) res = d;
+                }
+            }
+        }
+        return res;
+    }
+
+    private long[][] genSubsetSums(long[] arr) {
+        int k = arr.length;
+        List<List<Long>> sums = new ArrayList<>();
+        for (int i = 0; i <= k; i++) sums.add(new ArrayList<>());
+        for (int mask = 0; mask < (1 << k); mask++) {
+            long s = 0; int cnt = 0;
+            for (int i = 0; i < k; i++) {
+                if ((mask & (1 << i)) != 0) { s += arr[i]; cnt++; }
+            }
+            sums.get(cnt).add(s);
+        }
+        long[][] out = new long[k + 1][];
+        for (int i = 0; i <= k; i++) {
+            List<Long> lst = sums.get(i);
+            long[] a = new long[lst.size()];
+            for (int j = 0; j < lst.size(); j++) a[j] = lst.get(j);
+            out[i] = a;
+        }
+        return out;
+    }
+
+    // Returns first index i where arr[i] >= t (Go sort.Search / bisect_left)
+    private int lowerBound(long[] arr, long t) {
+        int lo = 0, hi = arr.length;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (arr[mid] >= t) hi = mid; else lo = mid + 1;
+        }
+        return lo;
+    }
+}', false, 2),
   ('imp-80-race-car', 'go', 'solution.go', 'package main
 
 func racecar(target int) int {
@@ -7615,6 +10240,67 @@ func racecar(target int) int {
 	return -1
 }
 ', true, 0),
+  ('imp-80-race-car', 'python', 'solution.py', 'from collections import deque
+
+
+def racecar(target: int) -> int:
+    vis = {(0, 1)}
+    q = deque([(0, 1)])
+    steps = 0
+    while q:
+        steps += 1
+        for _ in range(len(q)):
+            pos, speed = q.popleft()
+            np, ns = pos + speed, speed * 2
+            if np == target:
+                return steps
+            if 0 < np < 2 * target and (np, ns) not in vis:
+                vis.add((np, ns))
+                q.append((np, ns))
+            rs = 1 if speed < 0 else -1
+            if (pos, rs) not in vis:
+                vis.add((pos, rs))
+                q.append((pos, rs))
+    return -1', false, 1),
+  ('imp-80-race-car', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Set;
+
+class Solution {
+    public int racecar(int target) {
+        Set<Long> vis = new HashSet<>();
+        ArrayDeque<int[]> q = new ArrayDeque<>();
+        vis.add(key(0, 1));
+        q.add(new int[]{0, 1});
+        int steps = 0;
+        while (!q.isEmpty()) {
+            steps++;
+            int sz = q.size();
+            for (int i = 0; i < sz; i++) {
+                int[] cur = q.poll();
+                int pos = cur[0], speed = cur[1];
+                int np = pos + speed, ns = speed * 2;
+                if (np == target) {
+                    return steps;
+                }
+                if (np > 0 && np < 2 * target && !vis.contains(key(np, ns))) {
+                    vis.add(key(np, ns));
+                    q.add(new int[]{np, ns});
+                }
+                int rs = speed < 0 ? 1 : -1;
+                if (!vis.contains(key(pos, rs))) {
+                    vis.add(key(pos, rs));
+                    q.add(new int[]{pos, rs});
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static long key(int a, int b) {
+        return ((long) a << 32) ^ (b & 0xffffffffL);
+    }
+}', false, 2),
   ('imp-81-range-sum-query-2d-immutable', 'go', 'solution.go', 'package main
 
 func newRangeSumMatrix(matrix [][]int) [][]int {
@@ -7635,6 +10321,48 @@ func rangeSumQueryInMatrix(prefix [][]int, row1, col1, row2, col2 int) int {
 	return prefix[row2+1][col2+1] - prefix[row1][col2+1] - prefix[row2+1][col1] + prefix[row1][col1]
 }
 ', true, 0),
+  ('imp-81-range-sum-query-2d-immutable', 'python', 'solution.py', 'from typing import List
+
+
+def new_range_sum_matrix(matrix: List[List[int]]) -> List[List[int]]:
+    m, n = len(matrix), len(matrix[0])
+    prefix = [[0] * (n + 1) for _ in range(m + 1)]
+    for r in range(m):
+        for c in range(n):
+            prefix[r + 1][c + 1] = (
+                matrix[r][c] + prefix[r][c + 1] + prefix[r + 1][c] - prefix[r][c]
+            )
+    return prefix
+
+
+def range_sum_query_in_matrix(
+    prefix: List[List[int]], row1: int, col1: int, row2: int, col2: int
+) -> int:
+    return (
+        prefix[row2 + 1][col2 + 1]
+        - prefix[row1][col2 + 1]
+        - prefix[row2 + 1][col1]
+        + prefix[row1][col1]
+    )
+', false, 1),
+  ('imp-81-range-sum-query-2d-immutable', 'java', 'Solution.java', 'class Solution {
+
+    int[][] newRangeSumMatrix(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int[][] prefix = new int[m + 1][n + 1];
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                prefix[r + 1][c + 1] = matrix[r][c] + prefix[r][c + 1] + prefix[r + 1][c] - prefix[r][c];
+            }
+        }
+        return prefix;
+    }
+
+    int rangeSumQueryInMatrix(int[][] prefix, int row1, int col1, int row2, int col2) {
+        return prefix[row2 + 1][col2 + 1] - prefix[row1][col2 + 1] - prefix[row2 + 1][col1] + prefix[row1][col1];
+    }
+}
+', false, 2),
   ('imp-82-regular-expression-matching', 'go', 'solution.go', 'package main
 
 func isMatch(s string, p string) bool {
@@ -7673,6 +10401,59 @@ func btIsMatch(s, p string, i, j int, memo [][]int) bool {
 	return res
 }
 ', true, 0),
+  ('imp-82-regular-expression-matching', 'python', 'solution.py', 'def is_match(s: str, p: str) -> bool:
+    memo = [[-1] * (len(p) + 1) for _ in range(len(s) + 1)]
+    return _bt_is_match(s, p, 0, 0, memo)
+
+
+def _bt_is_match(s: str, p: str, i: int, j: int, memo) -> bool:
+    if memo[i][j] != -1:
+        return memo[i][j] == 1
+    if i == len(s) and j == len(p):
+        res = True
+    elif j == len(p):
+        res = False
+    else:
+        match = i < len(s) and (s[i] == p[j] or p[j] == ''.'')
+        if j + 1 < len(p) and p[j + 1] == ''*'':
+            res = _bt_is_match(s, p, i, j + 2, memo) or (
+                match and _bt_is_match(s, p, i + 1, j, memo)
+            )
+        else:
+            res = match and _bt_is_match(s, p, i + 1, j + 1, memo)
+    memo[i][j] = 1 if res else 0
+    return res', false, 1),
+  ('imp-82-regular-expression-matching', 'java', 'Solution.java', 'class Solution {
+
+    public boolean isMatch(String s, String p) {
+        int[][] memo = new int[s.length() + 1][p.length() + 1];
+        for (int[] row : memo) {
+            java.util.Arrays.fill(row, -1);
+        }
+        return btIsMatch(s, p, 0, 0, memo);
+    }
+
+    private boolean btIsMatch(String s, String p, int i, int j, int[][] memo) {
+        if (memo[i][j] != -1) {
+            return memo[i][j] == 1;
+        }
+        boolean res;
+        if (i == s.length() && j == p.length()) {
+            res = true;
+        } else if (j == p.length()) {
+            res = false;
+        } else {
+            boolean match = i < s.length() && (s.charAt(i) == p.charAt(j) || p.charAt(j) == ''.'');
+            if (j + 1 < p.length() && p.charAt(j + 1) == ''*'') {
+                res = btIsMatch(s, p, i, j + 2, memo) || (match && btIsMatch(s, p, i + 1, j, memo));
+            } else {
+                res = match && btIsMatch(s, p, i + 1, j + 1, memo);
+            }
+        }
+        memo[i][j] = res ? 1 : 0;
+        return res;
+    }
+}', false, 2),
   ('imp-83-sentence-screen-fitting', 'go', 'solution.go', 'package main
 
 import "strings"
@@ -7694,6 +10475,39 @@ func wordsTyping(sentence []string, rows int, cols int) int {
 	return start / n
 }
 ', true, 0),
+  ('imp-83-sentence-screen-fitting', 'python', 'solution.py', 'from typing import List
+
+
+def wordsTyping(sentence: List[str], rows: int, cols: int) -> int:
+    s = " ".join(sentence) + " "
+    n = len(s)
+    start = 0
+    for _ in range(rows):
+        start += cols
+        if s[start % n] == " ":
+            start += 1
+        else:
+            while start > 0 and s[(start - 1) % n] != " ":
+                start -= 1
+    return start // n', false, 1),
+  ('imp-83-sentence-screen-fitting', 'java', 'Solution.java', 'class Solution {
+    public int wordsTyping(String[] sentence, int rows, int cols) {
+        String s = String.join(" ", sentence) + " ";
+        int n = s.length();
+        int start = 0;
+        for (int i = 0; i < rows; i++) {
+            start += cols;
+            if (s.charAt(start % n) == '' '') {
+                start++;
+            } else {
+                while (start > 0 && s.charAt((start - 1) % n) != '' '') {
+                    start--;
+                }
+            }
+        }
+        return start / n;
+    }
+}', false, 2),
   ('imp-84-student-attendance-record-ii', 'go', 'solution.go', 'package main
 
 func checkRecord(n int) int {
@@ -7722,6 +10536,54 @@ func checkRecord(n int) int {
 	return res
 }
 ', true, 0),
+  ('imp-84-student-attendance-record-ii', 'python', 'solution.py', 'def check_record(n):
+    mod = 1_000_000_007
+    dp = [[0, 0, 0], [0, 0, 0]]
+    dp[0][0] = 1
+    dp[0][1] = 1
+    dp[1][0] = 1
+    for _ in range(2, n + 1):
+        nd = [[0, 0, 0], [0, 0, 0]]
+        nd[0][0] = (dp[0][0] + dp[0][1] + dp[0][2]) % mod
+        nd[1][0] = (dp[1][0] + dp[1][1] + dp[1][2]) % mod
+        nd[0][1] = dp[0][0]
+        nd[0][2] = dp[0][1]
+        nd[1][1] = dp[1][0]
+        nd[1][2] = dp[1][1]
+        nd[1][0] = (nd[1][0] + dp[0][0] + dp[0][1] + dp[0][2]) % mod
+        dp = nd
+    res = 0
+    for a in range(2):
+        for l in range(3):
+            res = (res + dp[a][l]) % mod
+    return res', false, 1),
+  ('imp-84-student-attendance-record-ii', 'java', 'Solution.java', 'class Solution {
+    public int checkRecord(int n) {
+        final long mod = 1_000_000_007L;
+        long[][] dp = new long[2][3];
+        dp[0][0] = 1;
+        dp[0][1] = 1;
+        dp[1][0] = 1;
+        for (int i = 2; i <= n; i++) {
+            long[][] nd = new long[2][3];
+            nd[0][0] = (dp[0][0] + dp[0][1] + dp[0][2]) % mod;
+            nd[1][0] = (dp[1][0] + dp[1][1] + dp[1][2]) % mod;
+            nd[0][1] = dp[0][0];
+            nd[0][2] = dp[0][1];
+            nd[1][1] = dp[1][0];
+            nd[1][2] = dp[1][1];
+            nd[1][0] = (nd[1][0] + dp[0][0] + dp[0][1] + dp[0][2]) % mod;
+            dp = nd;
+        }
+        long res = 0;
+        for (int a = 0; a < 2; a++) {
+            for (int l = 0; l < 3; l++) {
+                res = (res + dp[a][l]) % mod;
+            }
+        }
+        return (int) res;
+    }
+}', false, 2),
   ('imp-85-valid-palindrome-iii', 'go', 'solution.go', 'package main
 
 func isValidPalindrome(s string, k int) bool {
@@ -7745,6 +10607,45 @@ func isValidPalindrome(s string, k int) bool {
 	return n-dp[n-1] <= k
 }
 ', true, 0),
+  ('imp-85-valid-palindrome-iii', 'python', 'solution.py', 'def is_valid_palindrome(s: str, k: int) -> bool:
+    b = s.encode(''utf-8'')
+    n = len(b)
+    dp = [1] * n
+    for i in range(n - 2, -1, -1):
+        prev = 0
+        for j in range(i + 1, n):
+            tmp = dp[j]
+            if b[i] == b[j]:
+                dp[j] = prev + 2
+            elif dp[j - 1] > dp[j]:
+                dp[j] = dp[j - 1]
+            prev = tmp
+    return n - dp[n - 1] <= k', false, 1),
+  ('imp-85-valid-palindrome-iii', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public boolean isValidPalindrome(String s, int k) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int n = b.length;
+        long[] dp = new long[n];
+        for (int i = 0; i < n; i++) {
+            dp[i] = 1;
+        }
+        for (int i = n - 2; i >= 0; i--) {
+            long prev = 0;
+            for (int j = i + 1; j < n; j++) {
+                long tmp = dp[j];
+                if (b[i] == b[j]) {
+                    dp[j] = prev + 2;
+                } else if (dp[j - 1] > dp[j]) {
+                    dp[j] = dp[j - 1];
+                }
+                prev = tmp;
+            }
+        }
+        return n - dp[n - 1] <= k;
+    }
+}', false, 2),
   ('prep-arrays-find-duplicate-and-missing', 'go', 'solution.go', 'package main
 func findDuplicateAndMissing(nums []int) (int, int) {
 	n := len(nums)
@@ -7777,6 +10678,65 @@ func findDuplicateAndMissing(nums []int) (int, int) {
 	return y, x
 }
 ', true, 0),
+  ('prep-arrays-find-duplicate-and-missing', 'python', 'solution.py', 'from typing import List, Tuple
+
+
+def findDuplicateAndMissing(nums: List[int]) -> Tuple[int, int]:
+    n = len(nums)
+    xorAll = 0
+    for i in range(1, n + 1):
+        xorAll ^= i
+    for v in nums:
+        xorAll ^= v
+    rightBit = xorAll & -xorAll
+    x, y = 0, 0
+    for i in range(1, n + 1):
+        if i & rightBit != 0:
+            x ^= i
+        else:
+            y ^= i
+    for v in nums:
+        if v & rightBit != 0:
+            x ^= v
+        else:
+            y ^= v
+    if nums[x - 1] == x:
+        return x, y
+    return y, x', false, 1),
+  ('prep-arrays-find-duplicate-and-missing', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long[] findDuplicateAndMissing(long[] nums) {
+        int n = nums.length;
+        long xorAll = 0;
+        for (int i = 1; i <= n; i++) {
+            xorAll ^= i;
+        }
+        for (long v : nums) {
+            xorAll ^= v;
+        }
+        long rightBit = xorAll & -xorAll;
+        long x = 0, y = 0;
+        for (int i = 1; i <= n; i++) {
+            if ((i & rightBit) != 0) {
+                x ^= i;
+            } else {
+                y ^= i;
+            }
+        }
+        for (long v : nums) {
+            if ((v & rightBit) != 0) {
+                x ^= v;
+            } else {
+                y ^= v;
+            }
+        }
+        if (nums[(int) x - 1] == x) {
+            return new long[]{x, y};
+        }
+        return new long[]{y, x};
+    }
+}', false, 2),
   ('prep-arrays-find-duplicate-number', 'go', 'solution.go', 'package main
 func findDuplicateNumber(nums []int) int {
 	slow, fast := nums[0], nums[nums[0]]
@@ -7792,6 +10752,36 @@ func findDuplicateNumber(nums []int) int {
 	return slow
 }
 ', true, 0),
+  ('prep-arrays-find-duplicate-number', 'python', 'solution.py', 'from typing import List
+
+
+def findDuplicateNumber(nums: List[int]) -> int:
+    slow, fast = nums[0], nums[nums[0]]
+    while slow != fast:
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+    slow = 0
+    while slow != fast:
+        slow = nums[slow]
+        fast = nums[fast]
+    return slow', false, 1),
+  ('prep-arrays-find-duplicate-number', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int findDuplicateNumber(int[] nums) {
+        int slow = nums[0], fast = nums[nums[0]];
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        }
+        slow = 0;
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        return slow;
+    }
+}', false, 2),
   ('prep-arrays-find-intersection-of-two-sorted', 'go', 'solution.go', 'package main
 func findIntersectionOfTwoSorted(a, b []int) []int {
 	i, j := 0, 0
@@ -7810,6 +10800,44 @@ func findIntersectionOfTwoSorted(a, b []int) []int {
 	return out
 }
 ', true, 0),
+  ('prep-arrays-find-intersection-of-two-sorted', 'python', 'solution.py', 'from typing import List
+
+
+def find_intersection_of_two_sorted(a: List[int], b: List[int]) -> List[int]:
+    i, j = 0, 0
+    out: List[int] = []
+    while i < len(a) and j < len(b):
+        if a[i] == b[j]:
+            out.append(a[i])
+            i += 1
+            j += 1
+        elif a[i] < b[j]:
+            i += 1
+        else:
+            j += 1
+    return out', false, 1),
+  ('prep-arrays-find-intersection-of-two-sorted', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[] findIntersectionOfTwoSorted(long[] a, long[] b) {
+        int i = 0, j = 0;
+        List<Long> out = new ArrayList<>();
+        while (i < a.length && j < b.length) {
+            if (a[i] == b[j]) {
+                out.add(a[i]);
+                i++;
+                j++;
+            } else if (a[i] < b[j]) {
+                i++;
+            } else {
+                j++;
+            }
+        }
+        long[] res = new long[out.size()];
+        for (int k = 0; k < res.length; k++) res[k] = out.get(k);
+        return res;
+    }
+}', false, 2),
   ('prep-arrays-find-majority-element', 'go', 'solution.go', 'package main
 func findMajorityElement(nums []int) int {
 	count, cand := 0, 0
@@ -7826,6 +10854,34 @@ func findMajorityElement(nums []int) int {
 	return cand
 }
 ', true, 0),
+  ('prep-arrays-find-majority-element', 'python', 'solution.py', 'def find_majority_element(nums):
+    count, cand = 0, 0
+    for v in nums:
+        if count == 0:
+            cand = v
+        if v == cand:
+            count += 1
+        else:
+            count -= 1
+    return cand', false, 1),
+  ('prep-arrays-find-majority-element', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long findMajorityElement(long[] nums) {
+        long count = 0, cand = 0;
+        for (long v : nums) {
+            if (count == 0) {
+                cand = v;
+            }
+            if (v == cand) {
+                count++;
+            } else {
+                count--;
+            }
+        }
+        return cand;
+    }
+}', false, 2),
   ('prep-arrays-jump-game', 'go', 'solution.go', 'package main
 func jumpGame(nums []int) bool {
 	reach := 0
@@ -7837,6 +10893,30 @@ func jumpGame(nums []int) bool {
 	return reach >= len(nums)-1
 }
 ', true, 0),
+  ('prep-arrays-jump-game', 'python', 'solution.py', 'from typing import List
+
+
+def jump_game(nums: List[int]) -> bool:
+    reach = 0
+    i = 0
+    while i <= reach and i < len(nums):
+        if i + nums[i] > reach:
+            reach = i + nums[i]
+        i += 1
+    return reach >= len(nums) - 1', false, 1),
+  ('prep-arrays-jump-game', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public boolean jumpGame(long[] nums) {
+        long reach = 0;
+        for (long i = 0; i <= reach && i < nums.length; i++) {
+            if (i + nums[(int) i] > reach) {
+                reach = i + nums[(int) i];
+            }
+        }
+        return reach >= (long) nums.length - 1;
+    }
+}', false, 2),
   ('prep-arrays-max-product-of-subarray', 'go', 'solution.go', 'package main
 func maxProductOfSubarray(nums []int) int {
 	best := nums[0]
@@ -7870,6 +10950,30 @@ func maxProfitSellingStocks(prices []int) int {
 	return best
 }
 ', true, 0),
+  ('prep-arrays-max-profit-selling-stocks', 'python', 'solution.py', 'def maxProfitSellingStocks(prices):
+    minP, best = (1 << 63) - 1, 0
+    for p in prices:
+        if p < minP:
+            minP = p
+        if p - minP > best:
+            best = p - minP
+    return best', false, 1),
+  ('prep-arrays-max-profit-selling-stocks', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long maxProfitSellingStocks(long[] prices) {
+        long minP = Long.MAX_VALUE, best = 0;
+        for (long p : prices) {
+            if (p < minP) {
+                minP = p;
+            }
+            if (p - minP > best) {
+                best = p - minP;
+            }
+        }
+        return best;
+    }
+}', false, 2),
   ('prep-arrays-max-rectangle-in-histogram', 'go', 'solution.go', 'package main
 func maxRectangleInHistogram(heights []int) int {
 	stack := []int{}
@@ -7895,6 +10999,52 @@ func maxRectangleInHistogram(heights []int) int {
 	return best
 }
 ', true, 0),
+  ('prep-arrays-max-rectangle-in-histogram', 'python', 'solution.py', 'from typing import List
+
+
+def maxRectangleInHistogram(heights: List[int]) -> int:
+    stack: List[int] = []
+    best = 0
+    n = len(heights)
+    for i in range(n + 1):
+        h = heights[i] if i < n else 0
+        while stack and h < heights[stack[-1]]:
+            top = stack.pop()
+            width = i
+            if stack:
+                width = i - stack[-1] - 1
+            if heights[top] * width > best:
+                best = heights[top] * width
+        stack.append(i)
+    return best', false, 1),
+  ('prep-arrays-max-rectangle-in-histogram', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long maxRectangleInHistogram(long[] heights) {
+        int[] stack = new int[heights.length + 1];
+        int sp = 0;
+        long best = 0;
+        int n = heights.length;
+        for (int i = 0; i <= n; i++) {
+            long h = 0;
+            if (i < n) {
+                h = heights[i];
+            }
+            while (sp > 0 && h < heights[stack[sp - 1]]) {
+                int top = stack[--sp];
+                long width = i;
+                if (sp > 0) {
+                    width = i - stack[sp - 1] - 1;
+                }
+                if (heights[top] * width > best) {
+                    best = heights[top] * width;
+                }
+            }
+            stack[sp++] = i;
+        }
+        return best;
+    }
+}', false, 2),
   ('prep-arrays-max-sum-of-subarray-size-k', 'go', 'solution.go', 'package main
 func maxSumOfSubarraySizeK(nums []int, k int) int {
 	if len(nums) < k {
@@ -7914,6 +11064,42 @@ func maxSumOfSubarraySizeK(nums []int, k int) int {
 	return best
 }
 ', true, 0),
+  ('prep-arrays-max-sum-of-subarray-size-k', 'python', 'solution.py', 'from typing import List
+
+
+def max_sum_of_subarray_size_k(nums: List[int], k: int) -> int:
+    if len(nums) < k:
+        return 0
+    s = 0
+    for i in range(k):
+        s += nums[i]
+    best = s
+    for i in range(k, len(nums)):
+        s += nums[i] - nums[i - k]
+        if s > best:
+            best = s
+    return best', false, 1),
+  ('prep-arrays-max-sum-of-subarray-size-k', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long maxSumOfSubarraySizeK(long[] nums, int k) {
+        if (nums.length < k) {
+            return 0;
+        }
+        long sum = 0;
+        for (int i = 0; i < k; i++) {
+            sum += nums[i];
+        }
+        long best = sum;
+        for (int i = k; i < nums.length; i++) {
+            sum += nums[i] - nums[i - k];
+            if (sum > best) {
+                best = sum;
+            }
+        }
+        return best;
+    }
+}', false, 2),
   ('prep-arrays-merge-two-sorted-arrays', 'go', 'solution.go', 'package main
 func mergeTwoSortedArrays(a []int, m int, b []int, n int) {
 	i, j, k := m-1, n-1, m+n-1
@@ -7929,6 +11115,46 @@ func mergeTwoSortedArrays(a []int, m int, b []int, n int) {
 	}
 }
 ', true, 0),
+  ('prep-arrays-merge-two-sorted-arrays', 'python', 'solution.py', 'from typing import List
+
+
+def merge_two_sorted_arrays(a: List[int], m: int, b: List[int], n: int) -> None:
+    """Merge sorted array b (len n) into sorted array a in place.
+
+    a has length m + n, with the first m slots holding valid elements and the
+    trailing n slots reserved. Fills a from the back so no element is
+    overwritten before it is placed. Mutates a; returns nothing.
+    """
+    i, j, k = m - 1, n - 1, m + n - 1
+    while j >= 0:
+        if i >= 0 and a[i] > b[j]:
+            a[k] = a[i]
+            i -= 1
+        else:
+            a[k] = b[j]
+            j -= 1
+        k -= 1', false, 1),
+  ('prep-arrays-merge-two-sorted-arrays', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    // Merge sorted array b (len n) into sorted array a in place.
+    // a has length m + n: first m slots are valid, trailing n slots reserved.
+    // Fills a from the back so no valid element is clobbered before placement.
+    // Go''s int is 64-bit, so element values use long to preserve faithfulness.
+    void mergeTwoSortedArrays(long[] a, int m, long[] b, int n) {
+        int i = m - 1, j = n - 1, k = m + n - 1;
+        while (j >= 0) {
+            if (i >= 0 && a[i] > b[j]) {
+                a[k] = a[i];
+                i--;
+            } else {
+                a[k] = b[j];
+                j--;
+            }
+            k--;
+        }
+    }
+}', false, 2),
   ('prep-arrays-move-all-zeros-to-end', 'go', 'solution.go', 'package main
 func moveAllZerosToEnd(nums []int) {
 	w := 0
@@ -7943,6 +11169,33 @@ func moveAllZerosToEnd(nums []int) {
 	}
 }
 ', true, 0),
+  ('prep-arrays-move-all-zeros-to-end', 'python', 'solution.py', 'from typing import List
+
+
+def move_all_zeros_to_end(nums: List[int]) -> None:
+    w = 0
+    for v in nums:
+        if v != 0:
+            nums[w] = v
+            w += 1
+    for i in range(w, len(nums)):
+        nums[i] = 0', false, 1),
+  ('prep-arrays-move-all-zeros-to-end', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public void moveAllZerosToEnd(long[] nums) {
+        int w = 0;
+        for (long v : nums) {
+            if (v != 0) {
+                nums[w] = v;
+                w++;
+            }
+        }
+        for (int i = w; i < nums.length; i++) {
+            nums[i] = 0;
+        }
+    }
+}', false, 2),
   ('prep-arrays-next-permutation', 'go', 'solution.go', 'package main
 func nextPermutation(nums []int) {
 	n := len(nums)
@@ -7965,6 +11218,55 @@ func nextPermutation(nums []int) {
 	}
 }
 ', true, 0),
+  ('prep-arrays-next-permutation', 'python', 'solution.py', 'from typing import List
+
+
+class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        n = len(nums)
+        i = n - 2
+        while i >= 0 and nums[i] >= nums[i + 1]:
+            i -= 1
+        if i >= 0:
+            j = n - 1
+            while nums[j] <= nums[i]:
+                j -= 1
+            nums[i], nums[j] = nums[j], nums[i]
+        l, r = i + 1, n - 1
+        while l < r:
+            nums[l], nums[r] = nums[r], nums[l]
+            l += 1
+            r -= 1
+', false, 1),
+  ('prep-arrays-next-permutation', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public void nextPermutation(int[] nums) {
+        int n = nums.length;
+        int i = n - 2;
+        while (i >= 0 && nums[i] >= nums[i + 1]) {
+            i--;
+        }
+        if (i >= 0) {
+            int j = n - 1;
+            while (nums[j] <= nums[i]) {
+                j--;
+            }
+            int tmp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = tmp;
+        }
+        int l = i + 1, r = n - 1;
+        while (l < r) {
+            int tmp = nums[l];
+            nums[l] = nums[r];
+            nums[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+}
+', false, 2),
   ('prep-arrays-remove-duplicates-in-place', 'go', 'solution.go', 'package main
 func removeDuplicatesInPlace(nums []int) int {
 	if len(nums) == 0 {
@@ -7980,6 +11282,35 @@ func removeDuplicatesInPlace(nums []int) int {
 	return w
 }
 ', true, 0),
+  ('prep-arrays-remove-duplicates-in-place', 'python', 'solution.py', 'from typing import List
+
+
+def removeDuplicatesInPlace(nums: List[int]) -> int:
+    if len(nums) == 0:
+        return 0
+    w = 1
+    for i in range(1, len(nums)):
+        if nums[i] != nums[i - 1]:
+            nums[w] = nums[i]
+            w += 1
+    return w', false, 1),
+  ('prep-arrays-remove-duplicates-in-place', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int removeDuplicatesInPlace(long[] nums) {
+        if (nums.length == 0) {
+            return 0;
+        }
+        int w = 1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] != nums[i - 1]) {
+                nums[w] = nums[i];
+                w++;
+            }
+        }
+        return w;
+    }
+}', false, 2),
   ('prep-arrays-reverse-array', 'go', 'solution.go', 'package main
 func reverseArray(nums []int) {
 	for i, j := 0, len(nums)-1; i < j; i, j = i+1, j-1 {
@@ -7987,6 +11318,25 @@ func reverseArray(nums []int) {
 	}
 }
 ', true, 0),
+  ('prep-arrays-reverse-array', 'python', 'solution.py', 'from typing import List
+
+
+def reverseArray(nums: List[int]) -> None:
+    i, j = 0, len(nums) - 1
+    while i < j:
+        nums[i], nums[j] = nums[j], nums[i]
+        i, j = i + 1, j - 1', false, 1),
+  ('prep-arrays-reverse-array', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    void reverseArray(long[] nums) {
+        for (int i = 0, j = nums.length - 1; i < j; i++, j--) {
+            long tmp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = tmp;
+        }
+    }
+}', false, 2),
   ('prep-arrays-rotate-array', 'go', 'solution.go', 'package main
 func rotateArray(nums []int, k int) {
 	n := len(nums)
@@ -8006,6 +11356,48 @@ func rotateArray(nums []int, k int) {
 	reverse(k, n-1)
 }
 ', true, 0),
+  ('prep-arrays-rotate-array', 'python', 'solution.py', 'from typing import List
+
+
+def rotateArray(nums: List[int], k: int) -> None:
+    n = len(nums)
+    if n == 0:
+        return
+    k %= n
+
+    def reverse(l: int, r: int) -> None:
+        while l < r:
+            nums[l], nums[r] = nums[r], nums[l]
+            l += 1
+            r -= 1
+
+    reverse(0, n - 1)
+    reverse(0, k - 1)
+    reverse(k, n - 1)', false, 1),
+  ('prep-arrays-rotate-array', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public void rotateArray(long[] nums, int k) {
+        int n = nums.length;
+        if (n == 0) {
+            return;
+        }
+        k %= n;
+        reverse(nums, 0, n - 1);
+        reverse(nums, 0, k - 1);
+        reverse(nums, k, n - 1);
+    }
+
+    private void reverse(long[] nums, int l, int r) {
+        while (l < r) {
+            long tmp = nums[l];
+            nums[l] = nums[r];
+            nums[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+}', false, 2),
   ('prep-arrays-self-exclude-product', 'go', 'solution.go', 'package main
 func selfExcludeProduct(nums []int) []int {
 	n := len(nums)
@@ -8022,6 +11414,38 @@ func selfExcludeProduct(nums []int) []int {
 	return out
 }
 ', true, 0),
+  ('prep-arrays-self-exclude-product', 'python', 'solution.py', 'from typing import List
+
+
+def self_exclude_product(nums: List[int]) -> List[int]:
+    n = len(nums)
+    out = [0] * n
+    out[0] = 1
+    for i in range(1, n):
+        out[i] = out[i - 1] * nums[i - 1]
+    suffix = 1
+    for i in range(n - 1, -1, -1):
+        out[i] *= suffix
+        suffix *= nums[i]
+    return out', false, 1),
+  ('prep-arrays-self-exclude-product', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[] selfExcludeProduct(long[] nums) {
+        int n = nums.length;
+        long[] out = new long[n];
+        out[0] = 1;
+        for (int i = 1; i < n; i++) {
+            out[i] = out[i - 1] * nums[i - 1];
+        }
+        long suffix = 1;
+        for (int i = n - 1; i >= 0; i--) {
+            out[i] *= suffix;
+            suffix *= nums[i];
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-arrays-task-scheduler', 'go', 'solution.go', 'package main
 func taskScheduler(tasks []byte, n int) int {
 	freq := map[byte]int{}
@@ -8045,6 +11469,47 @@ func taskScheduler(tasks []byte, n int) int {
 	return idle
 }
 ', true, 0),
+  ('prep-arrays-task-scheduler', 'python', 'solution.py', 'def task_scheduler(tasks: bytes, n: int) -> int:
+    freq = {}
+    max_f = 0
+    for t in tasks:
+        freq[t] = freq.get(t, 0) + 1
+        if freq[t] > max_f:
+            max_f = freq[t]
+    cnt_max = 0
+    for f in freq.values():
+        if f == max_f:
+            cnt_max += 1
+    idle = (max_f - 1) * n + cnt_max
+    if idle < len(tasks):
+        return len(tasks)
+    return idle', false, 1),
+  ('prep-arrays-task-scheduler', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long taskScheduler(byte[] tasks, long n) {
+        Map<Byte, Long> freq = new HashMap<>();
+        long maxF = 0;
+        for (byte t : tasks) {
+            long f = freq.getOrDefault(t, 0L) + 1;
+            freq.put(t, f);
+            if (f > maxF) {
+                maxF = f;
+            }
+        }
+        long cntMax = 0;
+        for (long f : freq.values()) {
+            if (f == maxF) {
+                cntMax++;
+            }
+        }
+        long idle = (maxF - 1) * n + cntMax;
+        if (idle < tasks.length) {
+            return tasks.length;
+        }
+        return idle;
+    }
+}', false, 2),
   ('prep-arrays-trap-most-water', 'go', 'solution.go', 'package main
 func trapMostWater(height []int) int {
 	l, r := 0, len(height)-1
@@ -8067,6 +11532,45 @@ func trapMostWater(height []int) int {
 	return best
 }
 ', true, 0),
+  ('prep-arrays-trap-most-water', 'python', 'solution.py', 'def trapMostWater(height):
+    l, r = 0, len(height) - 1
+    best = 0
+    while l < r:
+        w = r - l
+        h = height[l]
+        if height[r] < h:
+            h = height[r]
+        if w * h > best:
+            best = w * h
+        if height[l] < height[r]:
+            l += 1
+        else:
+            r -= 1
+    return best', false, 1),
+  ('prep-arrays-trap-most-water', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long trapMostWater(long[] height) {
+        int l = 0, r = height.length - 1;
+        long best = 0;
+        while (l < r) {
+            long w = r - l;
+            long h = height[l];
+            if (height[r] < h) {
+                h = height[r];
+            }
+            if (w * h > best) {
+                best = w * h;
+            }
+            if (height[l] < height[r]) {
+                l++;
+            } else {
+                r--;
+            }
+        }
+        return best;
+    }
+}', false, 2),
   ('prep-arrays-trap-rain-water', 'go', 'solution.go', 'package main
 func trapRainWater(height []int) int {
 	if len(height) == 0 {
@@ -8095,6 +11599,59 @@ func trapRainWater(height []int) int {
 	return ans
 }
 ', true, 0),
+  ('prep-arrays-trap-rain-water', 'python', 'solution.py', 'from typing import List
+
+
+def trapRainWater(height: List[int]) -> int:
+    if len(height) == 0:
+        return 0
+    l, r = 0, len(height) - 1
+    leftMax, rightMax = height[l], height[r]
+    ans = 0
+    while l < r:
+        if leftMax < rightMax:
+            l += 1
+            if height[l] > leftMax:
+                leftMax = height[l]
+            else:
+                ans += leftMax - height[l]
+        else:
+            r -= 1
+            if height[r] > rightMax:
+                rightMax = height[r]
+            else:
+                ans += rightMax - height[r]
+    return ans', false, 1),
+  ('prep-arrays-trap-rain-water', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long trapRainWater(int[] height) {
+        if (height.length == 0) {
+            return 0;
+        }
+        int l = 0, r = height.length - 1;
+        long leftMax = height[l], rightMax = height[r];
+        long ans = 0;
+        while (l < r) {
+            if (leftMax < rightMax) {
+                l++;
+                if (height[l] > leftMax) {
+                    leftMax = height[l];
+                } else {
+                    ans += leftMax - height[l];
+                }
+            } else {
+                r--;
+                if (height[r] > rightMax) {
+                    rightMax = height[r];
+                } else {
+                    ans += rightMax - height[r];
+                }
+            }
+        }
+        return ans;
+    }
+}', false, 2),
   ('prep-arrays-two-sum', 'go', 'solution.go', 'package main
 func twoSum(nums []int, target int) []int {
 	seen := map[int]int{}
@@ -8107,6 +11664,32 @@ func twoSum(nums []int, target int) []int {
 	return nil
 }
 ', true, 0),
+  ('prep-arrays-two-sum', 'python', 'solution.py', 'from typing import List, Optional
+
+
+def two_sum(nums: List[int], target: int) -> Optional[List[int]]:
+    seen = {}
+    for i, v in enumerate(nums):
+        if target - v in seen:
+            return [seen[target - v], i]
+        seen[v] = i
+    return None', false, 1),
+  ('prep-arrays-two-sum', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[] twoSum(long[] nums, long target) {
+        Map<Long, Integer> seen = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            long v = nums[i];
+            Integer j = seen.get(target - v);
+            if (j != null) {
+                return new long[]{j, i};
+            }
+            seen.put(v, i);
+        }
+        return null;
+    }
+}', false, 2),
   ('prep-database-department-top-three-salaries', 'go', 'solution.go', 'package main
 import (
 	"sort"
@@ -9381,6 +12964,39 @@ func findKClosestToCenter(pairs [][2]int, k int) [][2]int {
 	return cp[:k]
 }
 ', true, 0),
+  ('prep-hash-maps-find-k-closest-to-center', 'python', 'solution.py', 'from typing import List, Tuple
+
+
+def dist_sq(p: Tuple[int, int]) -> int:
+    return p[0] * p[0] + p[1] * p[1]
+
+
+def find_k_closest_to_center(pairs: List[Tuple[int, int]], k: int) -> List[Tuple[int, int]]:
+    cp = list(pairs)
+    cp.sort(key=dist_sq)
+    if k > len(cp):
+        k = len(cp)
+    return cp[:k]', false, 1),
+  ('prep-hash-maps-find-k-closest-to-center', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static long distSq(int[] p) {
+        return (long) p[0] * p[0] + (long) p[1] * p[1];
+    }
+
+    int[][] findKClosestToCenter(int[][] pairs, int k) {
+        int[][] cp = new int[pairs.length][];
+        for (int i = 0; i < pairs.length; i++) {
+            cp[i] = pairs[i];
+        }
+        Arrays.sort(cp, (a, b) -> Long.compare(distSq(a), distSq(b)));
+        if (k > cp.length) {
+            k = cp.length;
+        }
+        return Arrays.copyOfRange(cp, 0, k);
+    }
+}', false, 2),
   ('prep-hash-maps-find-kth-largest', 'go', 'solution.go', 'package main
 func partitionKth(a []int, lo, hi int) int {
 	pivot := a[hi]
@@ -9412,6 +13028,69 @@ func findKthLargest(a []int, k int) int {
 	return a[lo]
 }
 ', true, 0),
+  ('prep-hash-maps-find-kth-largest', 'python', 'solution.py', 'from typing import List
+
+
+def partition_kth(a: List[int], lo: int, hi: int) -> int:
+    pivot = a[hi]
+    store = lo
+    for i in range(lo, hi):
+        if a[i] <= pivot:
+            a[i], a[store] = a[store], a[i]
+            store += 1
+    a[store], a[hi] = a[hi], a[store]
+    return store
+
+
+def find_kth_largest(a: List[int], k: int) -> int:
+    target = len(a) - k
+    lo, hi = 0, len(a) - 1
+    while lo < hi:
+        p = partition_kth(a, lo, hi)
+        if p == target:
+            return a[p]
+        if p < target:
+            lo = p + 1
+        else:
+            hi = p - 1
+    return a[lo]', false, 1),
+  ('prep-hash-maps-find-kth-largest', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static int partitionKth(long[] a, int lo, int hi) {
+        long pivot = a[hi];
+        int store = lo;
+        for (int i = lo; i < hi; i++) {
+            if (a[i] <= pivot) {
+                long t = a[i];
+                a[i] = a[store];
+                a[store] = t;
+                store++;
+            }
+        }
+        long t = a[store];
+        a[store] = a[hi];
+        a[hi] = t;
+        return store;
+    }
+
+    static long findKthLargest(long[] a, int k) {
+        int target = a.length - k;
+        int lo = 0, hi = a.length - 1;
+        while (lo < hi) {
+            int p = partitionKth(a, lo, hi);
+            if (p == target) {
+                return a[p];
+            }
+            if (p < target) {
+                lo = p + 1;
+            } else {
+                hi = p - 1;
+            }
+        }
+        return a[lo];
+    }
+}', false, 2),
   ('prep-hash-maps-find-most-popular-cost-books', 'go', 'solution.go', 'package main
 type Book struct {
 	ID   string
@@ -9439,6 +13118,66 @@ func findMostPopularCostBooks(bookList []Book) []string {
 	return ids
 }
 ', true, 0),
+  ('prep-hash-maps-find-most-popular-cost-books', 'python', 'solution.py', 'from typing import List
+
+
+class Book:
+    def __init__(self, id: str, cost: int):
+        self.ID = id
+        self.Cost = cost
+
+
+def findMostPopularCostBooks(bookList: List[Book]) -> List[str]:
+    costCount = {}
+    for b in bookList:
+        costCount[b.Cost] = costCount.get(b.Cost, 0) + 1
+    bestCost, bestCnt = 0, 0
+    for cost, cnt in costCount.items():
+        if cnt > bestCnt:
+            bestCnt = cnt
+            bestCost = cost
+    ids = []
+    for b in bookList:
+        if b.Cost == bestCost:
+            ids.append(b.ID)
+    return ids', false, 1),
+  ('prep-hash-maps-find-most-popular-cost-books', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class Book {
+        String ID;
+        long Cost;
+
+        Book(String id, long cost) {
+            this.ID = id;
+            this.Cost = cost;
+        }
+    }
+
+    static List<String> findMostPopularCostBooks(List<Book> bookList) {
+        Map<Long, Long> costCount = new HashMap<>();
+        for (Book b : bookList) {
+            costCount.merge(b.Cost, 1L, Long::sum);
+        }
+        long bestCost = 0, bestCnt = 0;
+        for (Map.Entry<Long, Long> e : costCount.entrySet()) {
+            long cost = e.getKey();
+            long cnt = e.getValue();
+            if (cnt > bestCnt) {
+                bestCnt = cnt;
+                bestCost = cost;
+            }
+        }
+        List<String> ids = new ArrayList<>();
+        for (Book b : bookList) {
+            if (b.Cost == bestCost) {
+                ids.add(b.ID);
+            }
+        }
+        return ids;
+    }
+}', false, 2),
   ('prep-hash-maps-find-top-k-frequent-elements', 'go', 'solution.go', 'package main
 func findTopKFrequentElements(a []int, k int) []int {
 	freq := make(map[int]int)
@@ -9537,6 +13276,64 @@ func findXToMakeArraySumToK(a []int, target int) int {
 	return lo
 }
 ', true, 0),
+  ('prep-hash-maps-find-x-to-make-array-sum-to-k', 'python', 'solution.py', 'from typing import List
+
+
+def capped_sum(a: List[int], x: int) -> int:
+    s = 0
+    for v in a:
+        if v > x:
+            s += x
+        else:
+            s += v
+    return s
+
+
+def find_x_to_make_array_sum_to_k(a: List[int], target: int) -> int:
+    a.sort()
+    lo, hi = a[0], a[-1]
+    while capped_sum(a, hi) < target:
+        hi *= 2
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if capped_sum(a, mid) >= target:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo', false, 1),
+  ('prep-hash-maps-find-x-to-make-array-sum-to-k', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static long cappedSum(long[] a, long x) {
+        long s = 0;
+        for (long v : a) {
+            if (v > x) {
+                s += x;
+            } else {
+                s += v;
+            }
+        }
+        return s;
+    }
+
+    static long findXToMakeArraySumToK(long[] a, long target) {
+        Arrays.sort(a);
+        long lo = a[0], hi = a[a.length - 1];
+        while (cappedSum(a, hi) < target) {
+            hi *= 2;
+        }
+        while (lo < hi) {
+            long mid = lo + (hi - lo) / 2;
+            if (cappedSum(a, mid) >= target) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return lo;
+    }
+}', false, 2),
   ('prep-hash-maps-find-year-with-most-population', 'go', 'solution.go', 'package main
 import (
 	"sort"
@@ -9566,6 +13363,46 @@ func findYearWithMostPopulation(years [][]int) int {
 	return bestYear
 }
 ', true, 0),
+  ('prep-hash-maps-find-year-with-most-population', 'python', 'solution.py', 'from typing import List
+
+
+def findYearWithMostPopulation(years: List[List[int]]) -> int:
+    delta = {}
+    for y in years:
+        birth, death = y[0], y[1]
+        delta[birth] = delta.get(birth, 0) + 1
+        delta[death + 1] = delta.get(death + 1, 0) - 1
+    year_keys = sorted(delta.keys())
+    pop, best_pop, best_year = 0, 0, 0
+    for yr in year_keys:
+        pop += delta[yr]
+        if pop > best_pop:
+            best_pop = pop
+            best_year = yr
+    return best_year', false, 1),
+  ('prep-hash-maps-find-year-with-most-population', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    int findYearWithMostPopulation(int[][] years) {
+        Map<Integer, Integer> delta = new HashMap<>();
+        for (int[] y : years) {
+            int birth = y[0], death = y[1];
+            delta.merge(birth, 1, Integer::sum);
+            delta.merge(death + 1, -1, Integer::sum);
+        }
+        List<Integer> yearKeys = new ArrayList<>(delta.keySet());
+        Collections.sort(yearKeys);
+        int pop = 0, bestPop = 0, bestYear = 0;
+        for (int yr : yearKeys) {
+            pop += delta.get(yr);
+            if (pop > bestPop) {
+                bestPop = pop;
+                bestYear = yr;
+            }
+        }
+        return bestYear;
+    }
+}', false, 2),
   ('prep-hash-maps-get-all-element-counts', 'go', 'solution.go', 'package main
 func getAllElementCounts(a []int) map[int]int {
 	counts := make(map[int]int)
@@ -9575,6 +13412,25 @@ func getAllElementCounts(a []int) map[int]int {
 	return counts
 }
 ', true, 0),
+  ('prep-hash-maps-get-all-element-counts', 'python', 'solution.py', 'from typing import List, Dict
+
+
+def get_all_element_counts(a: List[int]) -> Dict[int, int]:
+    counts: Dict[int, int] = {}
+    for x in a:
+        counts[x] = counts.get(x, 0) + 1
+    return counts', false, 1),
+  ('prep-hash-maps-get-all-element-counts', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public Map<Long, Long> getAllElementCounts(long[] a) {
+        Map<Long, Long> counts = new HashMap<>();
+        for (long x : a) {
+            counts.merge(x, 1L, Long::sum);
+        }
+        return counts;
+    }
+}', false, 2),
   ('prep-hash-maps-object-as-key', 'go', 'solution.go', 'package main
 type Student struct {
 	ID   int
@@ -9591,6 +13447,54 @@ func objectAsKey(students []Student, grades map[Student]int) map[Student]int {
 	return result
 }
 ', true, 0),
+  ('prep-hash-maps-object-as-key', 'python', 'solution.py', 'from typing import List, Dict, Tuple
+
+Student = Tuple[int, str]
+
+
+def object_as_key(students: List[Student], grades: Dict[Student, int]) -> Dict[Student, int]:
+    result: Dict[Student, int] = {}
+    for s in students:
+        if s in grades:
+            result[s] = grades[s]
+    return result', false, 1),
+  ('prep-hash-maps-object-as-key', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static final class Student {
+        final long id;
+        final String name;
+
+        Student(long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Student)) return false;
+            Student s = (Student) o;
+            return id == s.id && Objects.equals(name, s.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name);
+        }
+    }
+
+    Map<Student, Long> objectAsKey(List<Student> students, Map<Student, Long> grades) {
+        Map<Student, Long> result = new HashMap<>(students.size());
+        for (Student s : students) {
+            Long g = grades.get(s);
+            if (g != null) {
+                result.put(s, g);
+            }
+        }
+        return result;
+    }
+}', false, 2),
   ('prep-hash-maps-remove-duplicate-contacts', 'go', 'solution.go', 'package main
 type Contact struct {
 	ID     int
@@ -9638,6 +13542,108 @@ func removeDuplicateContacts(contacts []Contact) []Contact {
 	return out
 }
 ', true, 0),
+  ('prep-hash-maps-remove-duplicate-contacts', 'python', 'solution.py', 'from typing import List, Dict
+
+
+class Contact:
+    def __init__(self, id: int, emails: List[str]):
+        self.id = id
+        self.emails = emails
+
+
+def remove_duplicate_contacts(contacts: List[Contact]) -> List[Contact]:
+    parent: Dict[int, int] = {}
+
+    def find(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: int, b: int) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[rb] = ra
+
+    email_owner: Dict[str, int] = {}
+    by_id: Dict[int, Contact] = {}
+    for c in contacts:
+        parent[c.id] = c.id
+        by_id[c.id] = c
+        for e in c.emails:
+            if e in email_owner:
+                union(c.id, email_owner[e])
+            else:
+                email_owner[e] = c.id
+
+    seen: Dict[int, bool] = {}
+    out: List[Contact] = []
+    for c in contacts:
+        root = find(c.id)
+        if seen.get(root, False):
+            continue
+        seen[root] = True
+        out.append(by_id[root])
+    return out', false, 1),
+  ('prep-hash-maps-remove-duplicate-contacts', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class Contact {
+        long id;
+        List<String> emails;
+
+        Contact(long id, List<String> emails) {
+            this.id = id;
+            this.emails = emails;
+        }
+    }
+
+    private Map<Long, Long> parent;
+
+    private long find(long x) {
+        while (parent.get(x) != x) {
+            parent.put(x, parent.get(parent.get(x)));
+            x = parent.get(x);
+        }
+        return x;
+    }
+
+    private void union(long a, long b) {
+        long ra = find(a), rb = find(b);
+        if (ra != rb) {
+            parent.put(rb, ra);
+        }
+    }
+
+    public List<Contact> removeDuplicateContacts(List<Contact> contacts) {
+        parent = new HashMap<>();
+        Map<String, Long> emailOwner = new HashMap<>();
+        Map<Long, Contact> byID = new HashMap<>();
+        for (Contact c : contacts) {
+            parent.put(c.id, c.id);
+            byID.put(c.id, c);
+            for (String e : c.emails) {
+                if (emailOwner.containsKey(e)) {
+                    union(c.id, emailOwner.get(e));
+                } else {
+                    emailOwner.put(e, c.id);
+                }
+            }
+        }
+        Map<Long, Boolean> seen = new HashMap<>();
+        List<Contact> out = new ArrayList<>();
+        for (Contact c : contacts) {
+            long root = find(c.id);
+            if (seen.getOrDefault(root, false)) {
+                continue;
+            }
+            seen.put(root, true);
+            out.add(byID.get(root));
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-hash-maps-sort-pairs', 'go', 'solution.go', 'package main
 func sortPairs(inputMap map[string]string) []string {
 	dest := make(map[string]bool, len(inputMap))
@@ -9664,6 +13670,57 @@ func sortPairs(inputMap map[string]string) []string {
 	return route
 }
 ', true, 0),
+  ('prep-hash-maps-sort-pairs', 'python', 'solution.py', 'from typing import Dict, List
+
+
+def sort_pairs(input_map: Dict[str, str]) -> List[str]:
+    dest = {}
+    for v in input_map.values():
+        dest[v] = True
+    start = ""
+    for k in input_map.keys():
+        if not dest.get(k, False):
+            start = k
+            break
+    route: List[str] = []
+    cur = start
+    while True:
+        ok = cur in input_map
+        nxt = input_map.get(cur, "")
+        route.append(cur + "-" + nxt)
+        if not ok:
+            break
+        cur = nxt
+    return route', false, 1),
+  ('prep-hash-maps-sort-pairs', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    List<String> sortPairs(Map<String, String> inputMap) {
+        Map<String, Boolean> dest = new HashMap<>(inputMap.size());
+        for (String v : inputMap.values()) {
+            dest.put(v, true);
+        }
+        String start = "";
+        for (String k : inputMap.keySet()) {
+            if (!dest.getOrDefault(k, false)) {
+                start = k;
+                break;
+            }
+        }
+        List<String> route = new ArrayList<>();
+        String cur = start;
+        while (true) {
+            boolean ok = inputMap.containsKey(cur);
+            String next = inputMap.getOrDefault(cur, "");
+            route.add(cur + "-" + next);
+            if (!ok) {
+                break;
+            }
+            cur = next;
+        }
+        return route;
+    }
+}', false, 2),
   ('prep-intervals-count-intervals-range', 'go', 'solution.go', 'package main
 import (
 	"sort"
@@ -9701,6 +13758,75 @@ func countRange(ins []Interval) int {
 	return rangeSum
 }
 ', true, 0),
+  ('prep-intervals-count-intervals-range', 'python', 'solution.py', 'from typing import List, Tuple
+
+
+def count_range(ins: List[Tuple[int, int]]) -> int:
+    """Merge overlapping/adjacent intervals (a gap of 1 still touches) and
+    return the total number of distinct integers covered.
+
+    Each interval is an inclusive (start, end) pair. Matches the reference Go
+    countRange: sort by start, sweep, extend the running end while the next
+    interval''s start is <= end + 1, and accumulate (end - start + 1) per group.
+    """
+    if len(ins) == 0:
+        return 0
+    sorted_ins = sorted(ins, key=lambda iv: iv[0])
+    range_sum = 0
+    i = 0
+    n = len(sorted_ins)
+    while i < n:
+        start = sorted_ins[i][0]
+        end = sorted_ins[i][1]
+        j = i + 1
+        while j < n and sorted_ins[j][0] <= end + 1:
+            if sorted_ins[j][1] > end:
+                end = sorted_ins[j][1]
+            j += 1
+        range_sum += end - start + 1
+        i = j
+    return range_sum', false, 1),
+  ('prep-intervals-count-intervals-range', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    /**
+     * Merge overlapping/adjacent intervals (a gap of 1 still touches) and
+     * return the total number of distinct integers covered.
+     *
+     * Each interval is an inclusive {start, end} pair. Uses long throughout:
+     * individual bounds are int-range but the accumulated covered count can
+     * exceed 2^31-1 across many wide intervals, so the sum must be long to
+     * stay faithful to Go''s 64-bit int.
+     */
+    static long countRange(long[][] ins) {
+        if (ins.length == 0) {
+            return 0;
+        }
+        long[][] sorted = new long[ins.length][];
+        for (int k = 0; k < ins.length; k++) {
+            sorted[k] = new long[] { ins[k][0], ins[k][1] };
+        }
+        Arrays.sort(sorted, (a, b) -> Long.compare(a[0], b[0]));
+        long rangeSum = 0;
+        int i = 0;
+        int n = sorted.length;
+        while (i < n) {
+            long start = sorted[i][0];
+            long end = sorted[i][1];
+            int j = i + 1;
+            while (j < n && sorted[j][0] <= end + 1) {
+                if (sorted[j][1] > end) {
+                    end = sorted[j][1];
+                }
+                j++;
+            }
+            rangeSum += end - start + 1;
+            i = j;
+        }
+        return rangeSum;
+    }
+}', false, 2),
   ('prep-intervals-distance-of-nearest-stores', 'go', 'solution.go', 'package main
 type Point struct {
 	X, Y int
@@ -9733,6 +13859,65 @@ func distanceOfNearestStores(stores, customers []GeoPoint) []float64 {
 	return res
 }
 ', true, 0),
+  ('prep-intervals-distance-of-nearest-stores', 'python', 'solution.py', 'from typing import List
+
+
+class GeoPoint:
+    def __init__(self, x: float, y: float, dist: float = 0.0):
+        self.x = x
+        self.y = y
+        self.dist = dist
+
+
+def dist_ed(p1: GeoPoint, p2: GeoPoint) -> float:
+    dx = p1.x - p2.x
+    dy = p1.y - p2.y
+    return dx * dx + dy * dy
+
+
+def distance_of_nearest_stores(stores: List[GeoPoint], customers: List[GeoPoint]) -> List[float]:
+    res = [0.0] * len(customers)
+    for i, cust in enumerate(customers):
+        best = -1.0
+        for store in stores:
+            d = dist_ed(cust, store)
+            if best < 0 or d < best:
+                best = d
+        res[i] = best
+    return res
+', false, 1),
+  ('prep-intervals-distance-of-nearest-stores', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class GeoPoint {
+        double x, y, dist;
+        GeoPoint(double x, double y) { this.x = x; this.y = y; }
+        GeoPoint(double x, double y, double dist) { this.x = x; this.y = y; this.dist = dist; }
+    }
+
+    static double distED(GeoPoint p1, GeoPoint p2) {
+        double dx = p1.x - p2.x;
+        double dy = p1.y - p2.y;
+        return dx * dx + dy * dy;
+    }
+
+    static double[] distanceOfNearestStores(GeoPoint[] stores, GeoPoint[] customers) {
+        double[] res = new double[customers.length];
+        for (int i = 0; i < customers.length; i++) {
+            GeoPoint cust = customers[i];
+            double best = -1.0;
+            for (GeoPoint store : stores) {
+                double d = distED(cust, store);
+                if (best < 0 || d < best) {
+                    best = d;
+                }
+            }
+            res[i] = best;
+        }
+        return res;
+    }
+}
+', false, 2),
   ('prep-intervals-draw-skyline', 'go', 'solution.go', 'package main
 import (
 	"sort"
@@ -9786,6 +13971,104 @@ func drawSkyline(buildings [][]int) []SkyPoint {
 	return res
 }
 ', true, 0),
+  ('prep-intervals-draw-skyline', 'python', 'solution.py', 'from typing import List
+
+
+class SkyPoint:
+    __slots__ = ("x", "height")
+
+    def __init__(self, x: int, height: int):
+        self.x = x
+        self.height = height
+
+
+def draw_skyline(buildings: List[List[int]]) -> List[SkyPoint]:
+    events: List[SkyPoint] = []
+    for b in buildings:
+        events.append(SkyPoint(b[0], -b[2]))
+        events.append(SkyPoint(b[1], b[2]))
+
+    # Faithful to Go''s sort.Slice comparator:
+    # primary X ascending, then Height ascending.
+    events.sort(key=lambda e: (e.x, e.height))
+
+    heights = {0: 1}
+    curr_max = 0
+    res: List[SkyPoint] = []
+    for ev in events:
+        if ev.height < 0:
+            heights[-ev.height] = heights.get(-ev.height, 0) + 1
+        else:
+            heights[ev.height] -= 1
+            if heights[ev.height] == 0:
+                del heights[ev.height]
+        new_max = 0
+        for h in heights:
+            if h > new_max:
+                new_max = h
+        if new_max != curr_max:
+            res.append(SkyPoint(ev.x, new_max))
+            curr_max = new_max
+    return res', false, 1),
+  ('prep-intervals-draw-skyline', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class SkyPoint {
+        long x;
+        long height;
+
+        SkyPoint(long x, long height) {
+            this.x = x;
+            this.height = height;
+        }
+    }
+
+    List<SkyPoint> drawSkyline(long[][] buildings) {
+        List<SkyPoint> events = new ArrayList<>(buildings.length * 2);
+        for (long[] b : buildings) {
+            events.add(new SkyPoint(b[0], -b[2]));
+            events.add(new SkyPoint(b[1], b[2]));
+        }
+        // Faithful to Go''s sort.Slice comparator:
+        // primary X ascending, then Height ascending. Ties (equal X and
+        // equal Height) are interchangeable, so a stable sort matches Go''s
+        // unstable sort here.
+        events.sort((a, c) -> {
+            if (a.x != c.x) {
+                return Long.compare(a.x, c.x);
+            }
+            return Long.compare(a.height, c.height);
+        });
+        Map<Long, Long> heights = new HashMap<>();
+        heights.put(0L, 1L);
+        long currMax = 0;
+        List<SkyPoint> res = new ArrayList<>();
+        for (SkyPoint ev : events) {
+            if (ev.height < 0) {
+                heights.merge(-ev.height, 1L, Long::sum);
+            } else {
+                long v = heights.get(ev.height) - 1;
+                if (v == 0) {
+                    heights.remove(ev.height);
+                } else {
+                    heights.put(ev.height, v);
+                }
+            }
+            long newMax = 0;
+            for (long h : heights.keySet()) {
+                if (h > newMax) {
+                    newMax = h;
+                }
+            }
+            if (newMax != currMax) {
+                res.add(new SkyPoint(ev.x, newMax));
+                currMax = newMax;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-intervals-insert-interval', 'go', 'solution.go', 'package main
 type Interval struct {
 	Start, End int
@@ -9826,6 +14109,38 @@ func isOverlapped(p1, p2, q1, q2 Point) bool {
 		min(p2.Y, q2.Y) > max(p1.Y, q1.Y)
 }
 ', true, 0),
+  ('prep-intervals-is-overlapped', 'python', 'solution.py', 'from dataclasses import dataclass
+
+
+@dataclass
+class Point:
+    x: int
+    y: int
+
+
+def is_overlapped(p1: Point, p2: Point, q1: Point, q2: Point) -> bool:
+    return min(p2.x, q2.x) > max(p1.x, q1.x) and \
+        min(p2.y, q2.y) > max(p1.y, q1.y)
+', false, 1),
+  ('prep-intervals-is-overlapped', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static final class Point {
+        final long x;
+        final long y;
+
+        Point(long x, long y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    static boolean isOverlapped(Point p1, Point p2, Point q1, Point q2) {
+        return Math.min(p2.x, q2.x) > Math.max(p1.x, q1.x)
+                && Math.min(p2.y, q2.y) > Math.max(p1.y, q1.y);
+    }
+}
+', false, 2),
   ('prep-intervals-is-square', 'go', 'solution.go', 'package main
 type Point struct {
 	X, Y int
@@ -9855,6 +14170,67 @@ func isSquare(p1, p2, p3, p4 Point) bool {
 	return counts[d1] == 4 && counts[d2] == 2 && d1 != d2
 }
 ', true, 0),
+  ('prep-intervals-is-square', 'python', 'solution.py', 'from typing import Tuple
+
+Point = Tuple[int, int]
+
+
+def dist_point(p1: Point, p2: Point) -> int:
+    dx = p1[0] - p2[0]
+    dy = p1[1] - p2[1]
+    return dx * dx + dy * dy
+
+
+def is_square(p1: Point, p2: Point, p3: Point, p4: Point) -> bool:
+    d1 = dist_point(p1, p2)
+    if d1 == 0:
+        return False
+    d2 = dist_point(p1, p3)
+    d3 = dist_point(p1, p4)
+    d4 = dist_point(p2, p3)
+    d5 = dist_point(p2, p4)
+    d6 = dist_point(p3, p4)
+    pairs = [d1, d2, d3, d4, d5, d6]
+    counts = {}
+    for d in pairs:
+        counts[d] = counts.get(d, 0) + 1
+    return counts[d1] == 4 and counts[d2] == 2 and d1 != d2', false, 1),
+  ('prep-intervals-is-square', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public static final class Point {
+        public final long x, y;
+
+        public Point(long x, long y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    public static long distPoint(Point p1, Point p2) {
+        long dx = p1.x - p2.x;
+        long dy = p1.y - p2.y;
+        return dx * dx + dy * dy;
+    }
+
+    public static boolean isSquare(Point p1, Point p2, Point p3, Point p4) {
+        long d1 = distPoint(p1, p2);
+        if (d1 == 0) {
+            return false;
+        }
+        long d2 = distPoint(p1, p3);
+        long d3 = distPoint(p1, p4);
+        long d4 = distPoint(p2, p3);
+        long d5 = distPoint(p2, p4);
+        long d6 = distPoint(p3, p4);
+        long[] pairs = {d1, d2, d3, d4, d5, d6};
+        Map<Long, Integer> counts = new HashMap<>();
+        for (long d : pairs) {
+            counts.merge(d, 1, Integer::sum);
+        }
+        return counts.get(d1) == 4 && counts.get(d2) == 2 && d1 != d2;
+    }
+}', false, 2),
   ('prep-intervals-meeting-rooms-ii', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -9880,6 +14256,45 @@ func minMeetingRooms(intervals [][]int) int {
 	return rooms
 }
 ', true, 0),
+  ('prep-intervals-meeting-rooms-ii', 'python', 'solution.py', 'def minMeetingRooms(intervals):
+    n = len(intervals)
+    starts = [v[0] for v in intervals]
+    ends = [v[1] for v in intervals]
+    starts.sort()
+    ends.sort()
+    rooms = 0
+    end_idx = 0
+    for i in range(n):
+        if starts[i] < ends[end_idx]:
+            rooms += 1
+        else:
+            end_idx += 1
+    return rooms', false, 1),
+  ('prep-intervals-meeting-rooms-ii', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long minMeetingRooms(long[][] intervals) {
+        int n = intervals.length;
+        long[] starts = new long[n];
+        long[] ends = new long[n];
+        for (int i = 0; i < n; i++) {
+            starts[i] = intervals[i][0];
+            ends[i] = intervals[i][1];
+        }
+        Arrays.sort(starts);
+        Arrays.sort(ends);
+        long rooms = 0;
+        int endIdx = 0;
+        for (int i = 0; i < n; i++) {
+            if (starts[i] < ends[endIdx]) {
+                rooms++;
+            } else {
+                endIdx++;
+            }
+        }
+        return rooms;
+    }
+}', false, 2),
   ('prep-intervals-merge-intervals', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -9903,6 +14318,42 @@ func merge(intervals [][]int) [][]int {
 	return res
 }
 ', true, 0),
+  ('prep-intervals-merge-intervals', 'python', 'solution.py', 'from typing import List
+
+
+def merge(intervals: List[List[int]]) -> List[List[int]]:
+    intervals.sort(key=lambda p: p[0])
+    res = [intervals[0]]
+    for i in range(1, len(intervals)):
+        last = res[-1]
+        cur = intervals[i]
+        if cur[0] <= last[1]:
+            if cur[1] > last[1]:
+                last[1] = cur[1]
+        else:
+            res.append(cur)
+    return res', false, 1),
+  ('prep-intervals-merge-intervals', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[][] merge(long[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> Long.compare(a[0], b[0]));
+        List<long[]> res = new ArrayList<>();
+        res.add(intervals[0]);
+        for (int i = 1; i < intervals.length; i++) {
+            long[] last = res.get(res.size() - 1);
+            long[] cur = intervals[i];
+            if (cur[0] <= last[1]) {
+                if (cur[1] > last[1]) {
+                    last[1] = cur[1];
+                }
+            } else {
+                res.add(cur);
+            }
+        }
+        return res.toArray(new long[0][]);
+    }
+}', false, 2),
   ('prep-intervals-schedule-meetings', 'go', 'solution.go', 'package main
 import (
 	"sort"
@@ -9984,6 +14435,97 @@ func maxProfit(jobs []Job) int {
 	return dp[n-1]
 }
 ', true, 0),
+  ('prep-intervals-weighted-job-scheduler', 'python', 'solution.py', 'from typing import List, Tuple
+
+
+def last_not_overlap_job(jobs: List[Tuple[int, int, int]], idx: int) -> int:
+    lo, hi = 0, idx - 1
+    res = -1
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2
+        if jobs[mid][1] <= jobs[idx][0]:
+            res = mid
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return res
+
+
+def max_profit(jobs: List[Tuple[int, int, int]]) -> int:
+    """Weighted job scheduler. Each job is a (start, end, profit) tuple.
+    Returns the maximum total profit from a subset of non-overlapping jobs.
+    """
+    if len(jobs) == 0:
+        return 0
+    sorted_jobs = sorted(jobs, key=lambda j: j[1])
+    n = len(sorted_jobs)
+    dp = [0] * n
+    dp[0] = sorted_jobs[0][2]
+    for i in range(1, n):
+        profit = sorted_jobs[i][2]
+        prev = last_not_overlap_job(sorted_jobs, i)
+        if prev != -1:
+            profit += dp[prev]
+        if dp[i - 1] > profit:
+            dp[i] = dp[i - 1]
+        else:
+            dp[i] = profit
+    return dp[n - 1]', false, 1),
+  ('prep-intervals-weighted-job-scheduler', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class Job {
+        int start;
+        int end;
+        long profit;
+
+        public Job(int start, int end, long profit) {
+            this.start = start;
+            this.end = end;
+            this.profit = profit;
+        }
+    }
+
+    static int lastNotOverlapJob(Job[] jobs, int idx) {
+        int lo = 0, hi = idx - 1;
+        int res = -1;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (jobs[mid].end <= jobs[idx].start) {
+                res = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return res;
+    }
+
+    public static long maxProfit(Job[] jobs) {
+        if (jobs.length == 0) {
+            return 0;
+        }
+        Job[] sorted = Arrays.copyOf(jobs, jobs.length);
+        Arrays.sort(sorted, (a, b) -> Integer.compare(a.end, b.end));
+        int n = sorted.length;
+        long[] dp = new long[n];
+        dp[0] = sorted[0].profit;
+        for (int i = 1; i < n; i++) {
+            long profit = sorted[i].profit;
+            int prev = lastNotOverlapJob(sorted, i);
+            if (prev != -1) {
+                profit += dp[prev];
+            }
+            if (dp[i - 1] > profit) {
+                dp[i] = dp[i - 1];
+            } else {
+                dp[i] = profit;
+            }
+        }
+        return dp[n - 1];
+    }
+}', false, 2),
   ('prep-linked-lists-add-two-numbers', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10011,6 +14553,63 @@ func addTwoNumbers(l1, l2 *ListNode) *ListNode {
 	return dummy.Next
 }
 ', true, 0),
+  ('prep-linked-lists-add-two-numbers', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def addTwoNumbers(l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+    dummy = ListNode()
+    cur = dummy
+    carry = 0
+    while l1 is not None or l2 is not None or carry > 0:
+        s = carry
+        if l1 is not None:
+            s += l1.val
+            l1 = l1.next
+        if l2 is not None:
+            s += l2.val
+            l2 = l2.next
+        cur.next = ListNode(s % 10)
+        cur = cur.next
+        carry = s // 10
+    return dummy.next', false, 1),
+  ('prep-linked-lists-add-two-numbers', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public static class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        int carry = 0;
+        while (l1 != null || l2 != null || carry > 0) {
+            int sum = carry;
+            if (l1 != null) {
+                sum += l1.val;
+                l1 = l1.next;
+            }
+            if (l2 != null) {
+                sum += l2.val;
+                l2 = l2.next;
+            }
+            cur.next = new ListNode(sum % 10);
+            cur = cur.next;
+            carry = sum / 10;
+        }
+        return dummy.next;
+    }
+}', false, 2),
   ('prep-linked-lists-copy-list-with-random-pointer', 'go', 'solution.go', 'package main
 type Node struct {
 	Val    int
@@ -10080,6 +14679,70 @@ func deepCopyRandomPointers(head *RandomNode) *RandomNode {
 	return clone(head)
 }
 ', true, 0),
+  ('prep-linked-lists-deep-copy-random-pointers', 'python', 'solution.py', 'class RandomNode:
+    __slots__ = ("val", "next", "random")
+
+    def __init__(self, val=0, next=None, random=None):
+        self.val = val
+        self.next = next
+        self.random = random
+
+
+def deep_copy_random_pointers(head):
+    if head is None:
+        return None
+    seen = {}
+
+    def clone(n):
+        if n is None:
+            return None
+        c = seen.get(id(n))
+        if c is not None:
+            return c
+        c = RandomNode(n.val)
+        seen[id(n)] = c
+        c.next = clone(n.next)
+        c.random = clone(n.random)
+        return c
+
+    return clone(head)', false, 1),
+  ('prep-linked-lists-deep-copy-random-pointers', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class RandomNode {
+        long val;
+        RandomNode next;
+        RandomNode random;
+
+        RandomNode(long val) {
+            this.val = val;
+        }
+    }
+
+    public RandomNode deepCopyRandomPointers(RandomNode head) {
+        if (head == null) {
+            return null;
+        }
+        IdentityHashMap<RandomNode, RandomNode> seen = new IdentityHashMap<>();
+        return clone(head, seen);
+    }
+
+    private RandomNode clone(RandomNode n, IdentityHashMap<RandomNode, RandomNode> seen) {
+        if (n == null) {
+            return null;
+        }
+        RandomNode c = seen.get(n);
+        if (c != null) {
+            return c;
+        }
+        c = new RandomNode(n.val);
+        seen.put(n, c);
+        c.next = clone(n.next, seen);
+        c.random = clone(n.random, seen);
+        return c;
+    }
+}', false, 2),
   ('prep-linked-lists-delete-every-kth-node-in-dll', 'go', 'solution.go', 'package main
 type DLLNode struct {
 	Val        int
@@ -10122,6 +14785,89 @@ func deleteEveryKthNodeInDll(head *DLLNode, k int) *DLLNode {
 	return head
 }
 ', true, 0),
+  ('prep-linked-lists-delete-every-kth-node-in-dll', 'python', 'solution.py', 'from typing import Optional
+
+
+class DLLNode:
+    def __init__(self, val: int = 0):
+        self.val = val
+        self.prev: Optional["DLLNode"] = None
+        self.next: Optional["DLLNode"] = None
+
+
+def deleteEveryKthNodeInDll(head: Optional[DLLNode], k: int) -> Optional[DLLNode]:
+    if head is None or k <= 0:
+        return head
+    count = 0
+    cur = head
+    while cur is not None:
+        count += 1
+        cur = cur.next
+    if k > count:
+        return head
+    cur = head
+    step = 0
+    while cur is not None:
+        step += 1
+        if step == k:
+            prev, nxt = cur.prev, cur.next
+            if prev is not None:
+                prev.next = nxt
+            else:
+                head = nxt
+            if nxt is not None:
+                nxt.prev = prev
+            step = 0
+            cur = nxt
+            continue
+        cur = cur.next
+    return head', false, 1),
+  ('prep-linked-lists-delete-every-kth-node-in-dll', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class DLLNode {
+        long val;
+        DLLNode prev, next;
+        DLLNode(long val) { this.val = val; }
+    }
+
+    public DLLNode deleteEveryKthNodeInDll(DLLNode head, int k) {
+        if (head == null || k <= 0) {
+            return head;
+        }
+        long count = 0;
+        DLLNode cur = head;
+        while (cur != null) {
+            count++;
+            cur = cur.next;
+        }
+        if (k > count) {
+            return head;
+        }
+        cur = head;
+        int step = 0;
+        while (cur != null) {
+            step++;
+            if (step == k) {
+                DLLNode prev = cur.prev, next = cur.next;
+                if (prev != null) {
+                    prev.next = next;
+                } else {
+                    head = next;
+                }
+                if (next != null) {
+                    next.prev = prev;
+                }
+                step = 0;
+                cur = next;
+                continue;
+            }
+            cur = cur.next;
+        }
+        return head;
+    }
+}', false, 2),
   ('prep-linked-lists-delete-node', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10133,6 +14879,37 @@ func deleteNode(node *ListNode) {
 	node.Next = node.Next.Next
 }
 ', true, 0),
+  ('prep-linked-lists-delete-node', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def deleteNode(node: ListNode) -> None:
+    node.val = node.next.val
+    node.next = node.next.next
+', false, 1),
+  ('prep-linked-lists-delete-node', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class ListNode {
+        long val;
+        ListNode next;
+        ListNode() {}
+        ListNode(long val) { this.val = val; }
+        ListNode(long val, ListNode next) { this.val = val; this.next = next; }
+    }
+
+    public void deleteNode(ListNode node) {
+        node.val = node.next.val;
+        node.next = node.next.next;
+    }
+}
+', false, 2),
   ('prep-linked-lists-detect-loop', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10159,6 +14936,59 @@ func detectLoop(head *ListNode) *ListNode {
 	return nil
 }
 ', true, 0),
+  ('prep-linked-lists-detect-loop', 'python', 'solution.py', 'class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+def detectLoop(head):
+    if head is None:
+        return None
+    slow, fast = head, head
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            slow = head
+            while slow is not fast:
+                slow = slow.next
+                fast = fast.next
+            return slow
+    return None', false, 1),
+  ('prep-linked-lists-detect-loop', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class ListNode {
+        long val;
+        ListNode next;
+
+        ListNode(long val) {
+            this.val = val;
+        }
+    }
+
+    public ListNode detectLoop(ListNode head) {
+        if (head == null) {
+            return null;
+        }
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                slow = head;
+                while (slow != fast) {
+                    slow = slow.next;
+                    fast = fast.next;
+                }
+                return slow;
+            }
+        }
+        return null;
+    }
+}', false, 2),
   ('prep-linked-lists-find-intersection-of-two-lists', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10185,6 +15015,44 @@ func findIntersectionOfTwoLists(a, b *ListNode) *ListNode {
 	return pa
 }
 ', true, 0),
+  ('prep-linked-lists-find-intersection-of-two-lists', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def findIntersectionOfTwoLists(a: Optional[ListNode], b: Optional[ListNode]) -> Optional[ListNode]:
+    if a is None or b is None:
+        return None
+    pa, pb = a, b
+    while pa is not pb:
+        pa = b if pa is None else pa.next
+        pb = a if pb is None else pb.next
+    return pa', false, 1),
+  ('prep-linked-lists-find-intersection-of-two-lists', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class ListNode {
+        long val;
+        ListNode next;
+        ListNode(long val) { this.val = val; }
+    }
+
+    public ListNode findIntersectionOfTwoLists(ListNode a, ListNode b) {
+        if (a == null || b == null) {
+            return null;
+        }
+        ListNode pa = a, pb = b;
+        while (pa != pb) {
+            pa = (pa == null) ? b : pa.next;
+            pb = (pb == null) ? a : pb.next;
+        }
+        return pa;
+    }
+}', false, 2),
   ('prep-linked-lists-find-node', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10201,6 +15069,37 @@ func findNode(head *ListNode, val int) *ListNode {
 	return nil
 }
 ', true, 0),
+  ('prep-linked-lists-find-node', 'python', 'solution.py', 'class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+def findNode(head, val):
+    while head is not None:
+        if head.val == val:
+            return head
+        head = head.next
+    return None', false, 1),
+  ('prep-linked-lists-find-node', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class ListNode {
+        long val;
+        ListNode next;
+        ListNode(long val) { this.val = val; }
+    }
+
+    ListNode findNode(ListNode head, long val) {
+        while (head != null) {
+            if (head.val == val) {
+                return head;
+            }
+            head = head.next;
+        }
+        return null;
+    }
+}', false, 2),
   ('prep-linked-lists-flatten-doubly-linked-list', 'go', 'solution.go', 'package main
 type MultilevelNode struct {
 	Val        int
@@ -10244,6 +15143,95 @@ func flattenDoublyLinkedList(head *MultilevelNode) *MultilevelNode {
 	return head
 }
 ', true, 0),
+  ('prep-linked-lists-flatten-doubly-linked-list', 'python', 'solution.py', 'from typing import Optional
+
+
+class MultilevelNode:
+    def __init__(self, val: int = 0):
+        self.val = val
+        self.prev: Optional["MultilevelNode"] = None
+        self.next: Optional["MultilevelNode"] = None
+        self.child: Optional["MultilevelNode"] = None
+
+
+def flatten_doubly_linked_list(head: Optional[MultilevelNode]) -> Optional[MultilevelNode]:
+    if head is None:
+        return None
+
+    prev: Optional[MultilevelNode] = None
+
+    def dfs(node: Optional[MultilevelNode]) -> Optional[MultilevelNode]:
+        nonlocal prev
+        if node is None:
+            return None
+        if prev is not None:
+            prev.next = node
+            node.prev = prev
+        prev = node
+        nxt = node.next
+        if node.child is not None:
+            tail = dfs(node.child)
+            node.next = node.child
+            node.child.prev = node
+            node.child = None
+            if nxt is not None:
+                tail.next = nxt
+                nxt.prev = tail
+            prev = tail
+        if nxt is not None:
+            return dfs(nxt)
+        return node
+
+    dfs(head)
+    return head', false, 1),
+  ('prep-linked-lists-flatten-doubly-linked-list', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class MultilevelNode {
+        long val;
+        MultilevelNode prev, next, child;
+        MultilevelNode(long v) { this.val = v; }
+    }
+
+    private MultilevelNode prev;
+
+    public MultilevelNode flattenDoublyLinkedList(MultilevelNode head) {
+        if (head == null) {
+            return null;
+        }
+        prev = null;
+        dfs(head);
+        return head;
+    }
+
+    private MultilevelNode dfs(MultilevelNode node) {
+        if (node == null) {
+            return null;
+        }
+        if (prev != null) {
+            prev.next = node;
+            node.prev = prev;
+        }
+        prev = node;
+        MultilevelNode next = node.next;
+        if (node.child != null) {
+            MultilevelNode tail = dfs(node.child);
+            node.next = node.child;
+            node.child.prev = node;
+            node.child = null;
+            if (next != null) {
+                tail.next = next;
+                next.prev = tail;
+            }
+            prev = tail;
+        }
+        if (next != null) {
+            return dfs(next);
+        }
+        return node;
+    }
+}', false, 2),
   ('prep-linked-lists-insert-into-a-sorted-circular-linked-list', 'go', 'solution.go', 'package main
 type Node struct {
 	Val  int
@@ -10276,6 +15264,66 @@ func insert(head *Node, insertVal int) *Node {
 	return head
 }
 ', true, 0),
+  ('prep-linked-lists-insert-into-a-sorted-circular-linked-list', 'python', 'solution.py', 'class Node:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+def insert(head, insertVal):
+    node = Node(insertVal)
+    if head is None:
+        node.next = node
+        return node
+    prev, cur = head, head.next
+    while True:
+        if prev.val <= insertVal <= cur.val:
+            break
+        if prev.val > cur.val:
+            if insertVal >= prev.val or insertVal <= cur.val:
+                break
+        prev, cur = cur, cur.next
+        if prev is head:
+            break
+    prev.next = node
+    node.next = cur
+    return head', false, 1),
+  ('prep-linked-lists-insert-into-a-sorted-circular-linked-list', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class Node {
+        long val;
+        Node next;
+        Node(long v) { val = v; }
+    }
+
+    Node insert(Node head, long insertVal) {
+        Node node = new Node(insertVal);
+        if (head == null) {
+            node.next = node;
+            return node;
+        }
+        Node prev = head, cur = head.next;
+        while (true) {
+            if (prev.val <= insertVal && insertVal <= cur.val) {
+                break;
+            }
+            if (prev.val > cur.val) {
+                if (insertVal >= prev.val || insertVal <= cur.val) {
+                    break;
+                }
+            }
+            prev = cur;
+            cur = cur.next;
+            if (prev == head) {
+                break;
+            }
+        }
+        prev.next = node;
+        node.next = cur;
+        return head;
+    }
+}', false, 2),
   ('prep-linked-lists-last-men-standing', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10303,6 +15351,57 @@ func lastMenStanding(n, k int) int {
 	return cur.Val
 }
 ', true, 0),
+  ('prep-linked-lists-last-men-standing', 'python', 'solution.py', 'class ListNode:
+    def __init__(self, val=0, nxt=None):
+        self.val = val
+        self.next = nxt
+
+
+def last_men_standing(n, k):
+    if n == 1:
+        return 1
+    head = ListNode(1)
+    cur = head
+    for i in range(2, n + 1):
+        cur.next = ListNode(i)
+        cur = cur.next
+    cur.next = head
+    cur = head
+    while cur.next is not cur:
+        for _ in range(1, k):
+            cur = cur.next
+        cur.next = cur.next.next
+    return cur.val', false, 1),
+  ('prep-linked-lists-last-men-standing', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class ListNode {
+        int val;
+        ListNode next;
+        ListNode(int val) { this.val = val; }
+    }
+
+    public int lastMenStanding(int n, int k) {
+        if (n == 1) {
+            return 1;
+        }
+        ListNode head = new ListNode(1);
+        ListNode cur = head;
+        for (int i = 2; i <= n; i++) {
+            cur.next = new ListNode(i);
+            cur = cur.next;
+        }
+        cur.next = head;
+        cur = head;
+        while (cur.next != cur) {
+            for (int i = 1; i < k; i++) {
+                cur = cur.next;
+            }
+            cur.next = cur.next.next;
+        }
+        return cur.val;
+    }
+}', false, 2),
   ('prep-linked-lists-merge-k-sorted-lists', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10349,6 +15448,99 @@ func mergeTwo(a, b *ListNode) *ListNode {
 	return dummy.Next
 }
 ', true, 0),
+  ('prep-linked-lists-merge-k-sorted-lists', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def mergeKSortedLists(lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+    if len(lists) == 0:
+        return None
+    while len(lists) > 1:
+        merged: List[Optional[ListNode]] = []
+        i = 0
+        while i < len(lists):
+            l1 = lists[i]
+            l2 = None
+            if i + 1 < len(lists):
+                l2 = lists[i + 1]
+            merged.append(mergeTwo(l1, l2))
+            i += 2
+        lists = merged
+    return lists[0]
+
+
+def mergeTwo(a: Optional[ListNode], b: Optional[ListNode]) -> Optional[ListNode]:
+    dummy = ListNode()
+    cur = dummy
+    while a is not None and b is not None:
+        if a.val < b.val:
+            cur.next = a
+            a = a.next
+        else:
+            cur.next = b
+            b = b.next
+        cur = cur.next
+    if a is not None:
+        cur.next = a
+    else:
+        cur.next = b
+    return dummy.next', false, 1),
+  ('prep-linked-lists-merge-k-sorted-lists', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class ListNode {
+        long val;
+        ListNode next;
+        ListNode() {}
+        ListNode(long val) { this.val = val; }
+    }
+
+    public static ListNode mergeKSortedLists(List<ListNode> lists) {
+        if (lists.size() == 0) {
+            return null;
+        }
+        while (lists.size() > 1) {
+            List<ListNode> merged = new ArrayList<>();
+            for (int i = 0; i < lists.size(); i += 2) {
+                ListNode l1 = lists.get(i);
+                ListNode l2 = null;
+                if (i + 1 < lists.size()) {
+                    l2 = lists.get(i + 1);
+                }
+                merged.add(mergeTwo(l1, l2));
+            }
+            lists = merged;
+        }
+        return lists.get(0);
+    }
+
+    public static ListNode mergeTwo(ListNode a, ListNode b) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while (a != null && b != null) {
+            if (a.val < b.val) {
+                cur.next = a;
+                a = a.next;
+            } else {
+                cur.next = b;
+                b = b.next;
+            }
+            cur = cur.next;
+        }
+        if (a != null) {
+            cur.next = a;
+        } else {
+            cur.next = b;
+        }
+        return dummy.next;
+    }
+}', false, 2),
   ('prep-linked-lists-merge-two-sorted-lists', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10392,6 +15584,62 @@ func mergeTwoListsRecursive(l1, l2 *ListNode) *ListNode {
 	return l2
 }
 ', false, 1),
+  ('prep-linked-lists-merge-two-sorted-lists', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def mergeTwoSortedLists(l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+    dummy = ListNode()
+    cur = dummy
+    while l1 is not None and l2 is not None:
+        if l1.val < l2.val:
+            cur.next = l1
+            l1 = l1.next
+        else:
+            cur.next = l2
+            l2 = l2.next
+        cur = cur.next
+    if l1 is not None:
+        cur.next = l1
+    else:
+        cur.next = l2
+    return dummy.next', false, 2),
+  ('prep-linked-lists-merge-two-sorted-lists', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class ListNode {
+        long val;
+        ListNode next;
+        ListNode() {}
+        ListNode(long val) { this.val = val; }
+    }
+
+    public ListNode mergeTwoSortedLists(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while (l1 != null && l2 != null) {
+            if (l1.val < l2.val) {
+                cur.next = l1;
+                l1 = l1.next;
+            } else {
+                cur.next = l2;
+                l2 = l2.next;
+            }
+            cur = cur.next;
+        }
+        if (l1 != null) {
+            cur.next = l1;
+        } else {
+            cur.next = l2;
+        }
+        return dummy.next;
+    }
+}', false, 3),
   ('prep-linked-lists-print-from-end', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10407,6 +15655,42 @@ func printFromEnd(head *ListNode) []int {
 	return out
 }
 ', true, 0),
+  ('prep-linked-lists-print-from-end', 'python', 'solution.py', 'from typing import Optional, List
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def printFromEnd(head: Optional[ListNode]) -> List[int]:
+    if head is None:
+        return []
+    out = printFromEnd(head.next)
+    out.append(head.val)
+    return out', false, 1),
+  ('prep-linked-lists-print-from-end', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class ListNode {
+        long val;
+        ListNode next;
+        ListNode(long val, ListNode next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
+    List<Long> printFromEnd(ListNode head) {
+        if (head == null) {
+            return new ArrayList<>();
+        }
+        List<Long> out = printFromEnd(head.next);
+        out.add(head.val);
+        return out;
+    }
+}', false, 2),
   ('prep-linked-lists-reverse-linked-list', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10435,6 +15719,45 @@ func reverseListRecursive(head *ListNode) *ListNode {
 	return newHead
 }
 ', false, 1),
+  ('prep-linked-lists-reverse-linked-list', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def reverseLinkedList(head: Optional[ListNode]) -> Optional[ListNode]:
+    prev = None
+    while head is not None:
+        nxt = head.next
+        head.next = prev
+        prev = head
+        head = nxt
+    return prev', false, 2),
+  ('prep-linked-lists-reverse-linked-list', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class ListNode {
+        long val;
+        ListNode next;
+        ListNode() {}
+        ListNode(long val) { this.val = val; }
+        ListNode(long val, ListNode next) { this.val = val; this.next = next; }
+    }
+
+    public ListNode reverseLinkedList(ListNode head) {
+        ListNode prev = null;
+        while (head != null) {
+            ListNode next = head.next;
+            head.next = prev;
+            prev = head;
+            head = next;
+        }
+        return prev;
+    }
+}', false, 3),
   ('prep-linked-lists-reverse-nodes-in-k-group', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10466,6 +15789,71 @@ func reverseKGroup(head *ListNode, k int) *ListNode {
 	}
 }
 ', true, 0),
+  ('prep-linked-lists-reverse-nodes-in-k-group', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def reverseKGroup(head: Optional[ListNode], k: int) -> Optional[ListNode]:
+    dummy = ListNode(next=head)
+    group_prev = dummy
+    while True:
+        kth = group_prev
+        for _ in range(k):
+            kth = kth.next
+            if kth is None:
+                return dummy.next
+        group_next = kth.next
+        prev, cur = group_next, group_prev.next
+        while cur is not group_next:
+            tmp = cur.next
+            cur.next = prev
+            prev = cur
+            cur = tmp
+        tmp = group_prev.next
+        group_prev.next = kth
+        group_prev = tmp', false, 1),
+  ('prep-linked-lists-reverse-nodes-in-k-group', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+
+    public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode dummy = new ListNode();
+        dummy.next = head;
+        ListNode groupPrev = dummy;
+        while (true) {
+            ListNode kth = groupPrev;
+            for (int i = 0; i < k; i++) {
+                kth = kth.next;
+                if (kth == null) {
+                    return dummy.next;
+                }
+            }
+            ListNode groupNext = kth.next;
+            ListNode prev = groupNext, cur = groupPrev.next;
+            while (cur != groupNext) {
+                ListNode tmp = cur.next;
+                cur.next = prev;
+                prev = cur;
+                cur = tmp;
+            }
+            ListNode tmp = groupPrev.next;
+            groupPrev.next = kth;
+            groupPrev = tmp;
+        }
+    }
+}', false, 2),
   ('prep-linked-lists-sort-linked-list', 'go', 'solution.go', 'package main
 type ListNode struct {
 	Val  int
@@ -10509,6 +15897,98 @@ func mergeSorted(a, b *ListNode) *ListNode {
 	return dummy.Next
 }
 ', true, 0),
+  ('prep-linked-lists-sort-linked-list', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val: int = 0, next: "Optional[ListNode]" = None):
+        self.val = val
+        self.next = next
+
+
+def sortLinkedList(head: Optional[ListNode]) -> Optional[ListNode]:
+    if head is None or head.next is None:
+        return head
+    slow, fast = head, head.next
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+    mid = slow.next
+    slow.next = None
+    left = sortLinkedList(head)
+    right = sortLinkedList(mid)
+    return mergeSorted(left, right)
+
+
+def mergeSorted(a: Optional[ListNode], b: Optional[ListNode]) -> Optional[ListNode]:
+    dummy = ListNode()
+    cur = dummy
+    while a is not None and b is not None:
+        if a.val < b.val:
+            cur.next = a
+            a = a.next
+        else:
+            cur.next = b
+            b = b.next
+        cur = cur.next
+    if a is not None:
+        cur.next = a
+    else:
+        cur.next = b
+    return dummy.next', false, 1),
+  ('prep-linked-lists-sort-linked-list', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class ListNode {
+        long val;
+        ListNode next;
+
+        ListNode() {
+        }
+
+        ListNode(long val) {
+            this.val = val;
+        }
+    }
+
+    ListNode sortLinkedList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode slow = head, fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        ListNode mid = slow.next;
+        slow.next = null;
+        ListNode left = sortLinkedList(head);
+        ListNode right = sortLinkedList(mid);
+        return mergeSorted(left, right);
+    }
+
+    ListNode mergeSorted(ListNode a, ListNode b) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while (a != null && b != null) {
+            if (a.val < b.val) {
+                cur.next = a;
+                a = a.next;
+            } else {
+                cur.next = b;
+                b = b.next;
+            }
+            cur = cur.next;
+        }
+        if (a != null) {
+            cur.next = a;
+        } else {
+            cur.next = b;
+        }
+        return dummy.next;
+    }
+}', false, 2),
   ('prep-math-add-binary', 'go', 'solution.go', 'package main
 func addBinary(a string, b string) string {
 	i, j := len(a)-1, len(b)-1
@@ -10533,6 +16013,55 @@ func addBinary(a string, b string) string {
 	return string(out)
 }
 ', true, 0),
+  ('prep-math-add-binary', 'python', 'solution.py', 'def addBinary(a: str, b: str) -> str:
+    ab = a.encode(''utf-8'')
+    bb = b.encode(''utf-8'')
+    i, j = len(ab) - 1, len(bb) - 1
+    carry = 0
+    out = bytearray()
+    while i >= 0 or j >= 0 or carry > 0:
+        s = carry
+        if i >= 0:
+            s += ab[i] - ord(''0'')
+            i -= 1
+        if j >= 0:
+            s += bb[j] - ord(''0'')
+            j -= 1
+        out.append(ord(''0'') + s % 2)
+        carry = s // 2
+    out.reverse()
+    return out.decode(''utf-8'')', false, 1),
+  ('prep-math-add-binary', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    String addBinary(String a, String b) {
+        byte[] ab = a.getBytes(StandardCharsets.UTF_8);
+        byte[] bb = b.getBytes(StandardCharsets.UTF_8);
+        int i = ab.length - 1, j = bb.length - 1;
+        int carry = 0;
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        while (i >= 0 || j >= 0 || carry > 0) {
+            int sum = carry;
+            if (i >= 0) {
+                sum += ab[i] - ''0'';
+                i--;
+            }
+            if (j >= 0) {
+                sum += bb[j] - ''0'';
+                j--;
+            }
+            out.write(''0'' + sum % 2);
+            carry = sum / 2;
+        }
+        byte[] arr = out.toByteArray();
+        for (int l = 0, r = arr.length - 1; l < r; l++, r--) {
+            byte t = arr[l];
+            arr[l] = arr[r];
+            arr[r] = t;
+        }
+        return new String(arr, StandardCharsets.UTF_8);
+    }
+}', false, 2),
   ('prep-math-add-two-big-string-numbers', 'go', 'solution.go', 'package main
 func addTwoBigStringNumbers(a string, b string) string {
 	i, j := len(a)-1, len(b)-1
@@ -10557,6 +16086,56 @@ func addTwoBigStringNumbers(a string, b string) string {
 	return string(out)
 }
 ', true, 0),
+  ('prep-math-add-two-big-string-numbers', 'python', 'solution.py', 'def add_two_big_string_numbers(a: str, b: str) -> str:
+    ab = a.encode("utf-8")
+    bb = b.encode("utf-8")
+    i, j = len(ab) - 1, len(bb) - 1
+    carry = 0
+    out = bytearray()
+    while i >= 0 or j >= 0 or carry > 0:
+        s = carry
+        if i >= 0:
+            s += (ab[i] - 0x30) & 0xFF  # Go uint8 wrap on (a[i]-''0''), widened to int
+            i -= 1
+        if j >= 0:
+            s += (bb[j] - 0x30) & 0xFF
+            j -= 1
+        out.append((0x30 + s % 10) & 0xFF)  # byte(''0''+sum%10)
+        carry = s // 10
+    out.reverse()
+    return out.decode("utf-8", errors="surrogateescape")', false, 1),
+  ('prep-math-add-two-big-string-numbers', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
+
+class Solution {
+    String addTwoBigStringNumbers(String a, String b) {
+        byte[] ab = a.getBytes(StandardCharsets.UTF_8);
+        byte[] bb = b.getBytes(StandardCharsets.UTF_8);
+        int i = ab.length - 1, j = bb.length - 1;
+        long carry = 0;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        while (i >= 0 || j >= 0 || carry > 0) {
+            long sum = carry;
+            if (i >= 0) {
+                sum += ((ab[i] & 0xFF) - 0x30) & 0xFF; // Go uint8 wrap on (a[i]-''0'')
+                i--;
+            }
+            if (j >= 0) {
+                sum += ((bb[j] & 0xFF) - 0x30) & 0xFF;
+                j--;
+            }
+            out.write((int) ((0x30 + sum % 10) & 0xFF)); // byte(''0''+sum%10)
+            carry = sum / 10;
+        }
+        byte[] arr = out.toByteArray();
+        for (int l = 0, r = arr.length - 1; l < r; l++, r--) {
+            byte t = arr[l];
+            arr[l] = arr[r];
+            arr[r] = t;
+        }
+        return new String(arr, StandardCharsets.UTF_8);
+    }
+}', false, 2),
   ('prep-math-base-26-encoding', 'go', 'solution.go', 'package main
 func base26Encoding(n int) string {
 	if n <= 0 {
@@ -10574,6 +16153,33 @@ func base26Encoding(n int) string {
 	return string(out)
 }
 ', true, 0),
+  ('prep-math-base-26-encoding', 'python', 'solution.py', 'def base26_encoding(n: int) -> str:
+    if n <= 0:
+        return ""
+    out = bytearray()
+    while n > 0:
+        n -= 1
+        out.append(ord(''A'') + n % 26)
+        n //= 26
+    out.reverse()
+    return out.decode(''ascii'')', false, 1),
+  ('prep-math-base-26-encoding', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    String base26Encoding(long n) {
+        if (n <= 0) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        while (n > 0) {
+            n--;
+            out.append((char) (''A'' + (int) (n % 26)));
+            n /= 26;
+        }
+        out.reverse();
+        return out.toString();
+    }
+}', false, 2),
   ('prep-math-basic-calculator-ii', 'go', 'solution.go', 'package main
 func calculate(s string) int {
 	var stack []int
@@ -10609,6 +16215,79 @@ func calculate(s string) int {
 	return res
 }
 ', true, 0),
+  ('prep-math-basic-calculator-ii', 'python', 'solution.py', 'def _trunc_div(a, b):
+    # Go integer division truncates toward zero (Python // floors, so emulate)
+    q = abs(a) // abs(b)
+    if (a < 0) != (b < 0):
+        q = -q
+    return q
+
+
+def calculate(s):
+    stack = []
+    num = 0
+    op = ord(''+'')
+    n = len(s)
+    for i in range(n + 1):
+        if i < n and s[i] == '' '':
+            continue
+        if i < n and ''0'' <= s[i] <= ''9'':
+            num = num * 10 + (ord(s[i]) - ord(''0''))
+            continue
+        if op == ord(''+''):
+            stack.append(num)
+        elif op == ord(''-''):
+            stack.append(-num)
+        elif op == ord(''*''):
+            stack[-1] = stack[-1] * num
+        elif op == ord(''/''):
+            stack[-1] = _trunc_div(stack[-1], num)
+        num = 0
+        if i < n:
+            op = ord(s[i])
+    return sum(stack)', false, 1),
+  ('prep-math-basic-calculator-ii', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long calculate(String s) {
+        ArrayList<Long> stack = new ArrayList<>();
+        long num = 0;
+        char op = ''+'';
+        int n = s.length();
+        for (int i = 0; i <= n; i++) {
+            if (i < n && s.charAt(i) == '' '') {
+                continue;
+            }
+            if (i < n && s.charAt(i) >= ''0'' && s.charAt(i) <= ''9'') {
+                num = num * 10 + (s.charAt(i) - ''0'');
+                continue;
+            }
+            switch (op) {
+                case ''+'':
+                    stack.add(num);
+                    break;
+                case ''-'':
+                    stack.add(-num);
+                    break;
+                case ''*'':
+                    stack.set(stack.size() - 1, stack.get(stack.size() - 1) * num);
+                    break;
+                case ''/'':
+                    stack.set(stack.size() - 1, stack.get(stack.size() - 1) / num);
+                    break;
+            }
+            num = 0;
+            if (i < n) {
+                op = s.charAt(i);
+            }
+        }
+        long res = 0;
+        for (long v : stack) {
+            res += v;
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-math-cinema-seat-allocation', 'go', 'solution.go', 'package main
 func maxNumberOfFamilies(n int, reservedSeats [][]int) int {
 	rows := map[int]int{}
@@ -10630,6 +16309,49 @@ func maxNumberOfFamilies(n int, reservedSeats [][]int) int {
 	return res
 }
 ', true, 0),
+  ('prep-math-cinema-seat-allocation', 'python', 'solution.py', 'from typing import List
+
+
+def maxNumberOfFamilies(n: int, reservedSeats: List[List[int]]) -> int:
+    rows = {}
+    for r in reservedSeats:
+        rows[r[0]] = rows.get(r[0], 0) | (1 << r[1])
+    res = 2 * n
+    for mask in rows.values():
+        left = (mask & 0b0000111100) == 0
+        mid = (mask & 0b0011110000) == 0
+        right = (mask & 0b1111000000) == 0
+        if left and right:
+            pass
+        elif left or mid or right:
+            res -= 1
+        else:
+            res -= 2
+    return res', false, 1),
+  ('prep-math-cinema-seat-allocation', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int maxNumberOfFamilies(int n, int[][] reservedSeats) {
+        Map<Integer, Integer> rows = new HashMap<>();
+        for (int[] r : reservedSeats) {
+            rows.merge(r[0], 1 << r[1], (a, b) -> a | b);
+        }
+        int res = 2 * n;
+        for (int mask : rows.values()) {
+            boolean left = (mask & 0b0000111100) == 0;
+            boolean mid = (mask & 0b0011110000) == 0;
+            boolean right = (mask & 0b1111000000) == 0;
+            if (left && right) {
+                // both aisle groups free: seat 2 families, no decrement
+            } else if (left || mid || right) {
+                res--;
+            } else {
+                res -= 2;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-math-convert-decimal-to-base-n', 'go', 'solution.go', 'package main
 func convertDecimalToBaseN(n int, base int) string {
 	if n == 0 {
@@ -10654,6 +16376,45 @@ func convertDecimalToBaseN(n int, base int) string {
 	return string(out)
 }
 ', true, 0),
+  ('prep-math-convert-decimal-to-base-n', 'python', 'solution.py', 'def convert_decimal_to_base_n(n: int, base: int) -> str:
+    if n == 0:
+        return "0"
+    digits = "0123456789ABCDEF"
+    neg = n < 0
+    if neg:
+        n = -n
+    out = []
+    while n > 0:
+        out.append(digits[n % base])
+        n //= base
+    if neg:
+        out.append(''-'')
+    out.reverse()
+    return ''''.join(out)', false, 1),
+  ('prep-math-convert-decimal-to-base-n', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static String convertDecimalToBaseN(long n, long base) {
+        if (n == 0) {
+            return "0";
+        }
+        final String digits = "0123456789ABCDEF";
+        boolean neg = n < 0;
+        if (neg) {
+            n = -n;
+        }
+        StringBuilder out = new StringBuilder();
+        while (n > 0) {
+            out.append(digits.charAt((int) (n % base)));
+            n /= base;
+        }
+        if (neg) {
+            out.append(''-'');
+        }
+        out.reverse();
+        return out.toString();
+    }
+}', false, 2),
   ('prep-math-convert-string-to-integer', 'go', 'solution.go', 'package main
 func convertStringToInteger(s string) int {
 	i, n := 0, len(s)
@@ -10687,6 +16448,83 @@ func convertStringToInteger(s string) int {
 	return sign * result
 }
 ', true, 0),
+  ('prep-math-convert-string-to-integer', 'python', 'solution.py', 'def convert_string_to_integer(s: str) -> int:
+    b = s.encode(''utf-8'')
+    i, n = 0, len(b)
+    while i < n and b[i] == ord('' ''):
+        i += 1
+    if i == n:
+        return 0
+    sign = 1
+    if b[i] == ord(''-''):
+        sign = -1
+        i += 1
+    elif b[i] == ord(''+''):
+        i += 1
+    max_int = (1 << 63) - 1
+    min_int = -max_int - 1
+    result = 0
+    while i < n and ord(''0'') <= b[i] <= ord(''9''):
+        digit = b[i] - ord(''0'')
+        if sign == 1 and result > _go_div(max_int - digit, 10):
+            return max_int
+        if sign == -1 and result < _go_div(min_int + digit, 10):
+            return min_int
+        # Go''s int is 64-bit; emulate signed 64-bit wraparound on overflow.
+        result = _wrap64(result * 10 + digit)
+        i += 1
+    return _wrap64(sign * result)
+
+
+def _wrap64(x: int) -> int:
+    x &= (1 << 64) - 1
+    if x >= (1 << 63):
+        x -= (1 << 64)
+    return x
+
+
+def _go_div(a: int, b: int) -> int:
+    # Go integer division truncates toward zero.
+    q = abs(a) // abs(b)
+    if (a < 0) != (b < 0):
+        q = -q
+    return q', false, 1),
+  ('prep-math-convert-string-to-integer', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    long convertStringToInteger(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int i = 0, n = b.length;
+        while (i < n && b[i] == '' '') {
+            i++;
+        }
+        if (i == n) {
+            return 0;
+        }
+        int sign = 1;
+        if (b[i] == ''-'') {
+            sign = -1;
+            i++;
+        } else if (b[i] == ''+'') {
+            i++;
+        }
+        final long maxInt = Long.MAX_VALUE;
+        final long minInt = -maxInt - 1;
+        long result = 0;
+        while (i < n && b[i] >= ''0'' && b[i] <= ''9'') {
+            int digit = b[i] - ''0'';
+            if (sign == 1 && result > (maxInt - digit) / 10) {
+                return maxInt;
+            }
+            if (sign == -1 && result < (minInt + digit) / 10) {
+                return minInt;
+            }
+            result = result * 10 + digit;
+            i++;
+        }
+        return sign * result;
+    }
+}', false, 2),
   ('prep-math-count-set-bits-in-number', 'go', 'solution.go', 'package main
 func countSetBitsInNumber(n int) int {
 	count := 0
@@ -10697,6 +16535,31 @@ func countSetBitsInNumber(n int) int {
 	return count
 }
 ', true, 0),
+  ('prep-math-count-set-bits-in-number', 'python', 'solution.py', 'MASK64 = 0xFFFFFFFFFFFFFFFF
+
+
+def count_set_bits_in_number(n: int) -> int:
+    # Go''s int is 64-bit two''s complement; mask to 64 bits so negative
+    # inputs count all set bits identically to Go (e.g. -1 -> 64).
+    n &= MASK64
+    count = 0
+    while n != 0:
+        n &= n - 1
+        count += 1
+    return count', false, 1),
+  ('prep-math-count-set-bits-in-number', 'java', 'Solution.java', 'class Solution {
+    // Go''s int is 64-bit; use long. Java long is two''s complement 64-bit,
+    // so the Kernighan clear-lowest-set-bit loop matches Go for negatives
+    // (e.g. -1 -> 64, Long.MIN_VALUE -> 1).
+    public int countSetBitsInNumber(long n) {
+        int count = 0;
+        while (n != 0) {
+            n &= n - 1;
+            count++;
+        }
+        return count;
+    }
+}', false, 2),
   ('prep-math-covert-integer-to-roman-numeral', 'go', 'solution.go', 'package main
 import (
 	"strings"
@@ -10716,6 +16579,31 @@ func covertIntegerToRomanNumeral(num int) string {
 	return out.String()
 }
 ', true, 0),
+  ('prep-math-covert-integer-to-roman-numeral', 'python', 'solution.py', 'def covert_integer_to_roman_numeral(num: int) -> str:
+    values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+    symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
+    out = []
+    for i, v in enumerate(values):
+        while num >= v:
+            out.append(symbols[i])
+            num -= v
+    return "".join(out)', false, 1),
+  ('prep-math-covert-integer-to-roman-numeral', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public String covertIntegerToRomanNumeral(long num) {
+        int[] values = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+        String[] symbols = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            while (num >= values[i]) {
+                out.append(symbols[i]);
+                num -= values[i];
+            }
+        }
+        return out.toString();
+    }
+}', false, 2),
   ('prep-math-factorial-number', 'go', 'solution.go', 'package main
 func factorialNumber(n int) int {
 	if n < 0 {
@@ -10728,6 +16616,31 @@ func factorialNumber(n int) int {
 	return result
 }
 ', true, 0),
+  ('prep-math-factorial-number', 'python', 'solution.py', 'def factorial_number(n):
+    MASK = (1 << 64) - 1
+    if n < 0:
+        return 0
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+        result &= MASK
+        if result >= (1 << 63):
+            result -= (1 << 64)
+    return result', false, 1),
+  ('prep-math-factorial-number', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long factorialNumber(int n) {
+        if (n < 0) {
+            return 0;
+        }
+        long result = 1;
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
+}', false, 2),
   ('prep-math-fibonacci-number', 'go', 'solution.go', 'package main
 func fibonacciNumber(n int) int {
 	if n <= 1 {
@@ -10770,6 +16683,29 @@ func findMissingNumber(nums []int) int {
 	return xorAll
 }
 ', true, 0),
+  ('prep-math-find-missing-number', 'python', 'solution.py', 'from typing import List
+
+
+def find_missing_number(nums: List[int]) -> int:
+    n = len(nums)
+    xor_all = n
+    for i, v in enumerate(nums):
+        xor_all ^= i ^ v
+    return xor_all
+', false, 1),
+  ('prep-math-find-missing-number', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long findMissingNumber(long[] nums) {
+        int n = nums.length;
+        long xorAll = n;
+        for (int i = 0; i < n; i++) {
+            xorAll ^= (long) i ^ nums[i];
+        }
+        return xorAll;
+    }
+}
+', false, 2),
   ('prep-math-find-single-number', 'go', 'solution.go', 'package main
 func findSingleNumber(nums []int) int {
 	acc := 0
@@ -10779,6 +16715,22 @@ func findSingleNumber(nums []int) int {
 	return acc
 }
 ', true, 0),
+  ('prep-math-find-single-number', 'python', 'solution.py', 'def find_single_number(nums):
+    acc = 0
+    for v in nums:
+        acc ^= v
+    return acc', false, 1),
+  ('prep-math-find-single-number', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long findSingleNumber(long[] nums) {
+        long acc = 0;
+        for (long v : nums) {
+            acc ^= v;
+        }
+        return acc;
+    }
+}', false, 2),
   ('prep-math-fizzbuzz', 'go', 'solution.go', 'package main
 import (
 	"strconv"
@@ -10802,6 +16754,40 @@ func fizzbuzz(n int) []string {
 	return out
 }
 ', true, 0),
+  ('prep-math-fizzbuzz', 'python', 'solution.py', 'from typing import List
+
+
+def fizzbuzz(n: int) -> List[str]:
+    out = [""] * n
+    for i in range(1, n + 1):
+        if i % 15 == 0:
+            out[i - 1] = "FizzBuzz"
+        elif i % 3 == 0:
+            out[i - 1] = "Fizz"
+        elif i % 5 == 0:
+            out[i - 1] = "Buzz"
+        else:
+            out[i - 1] = str(i)
+    return out', false, 1),
+  ('prep-math-fizzbuzz', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public String[] fizzbuzz(int n) {
+        String[] out = new String[n];
+        for (int i = 1; i <= n; i++) {
+            if (i % 15 == 0) {
+                out[i - 1] = "FizzBuzz";
+            } else if (i % 3 == 0) {
+                out[i - 1] = "Fizz";
+            } else if (i % 5 == 0) {
+                out[i - 1] = "Buzz";
+            } else {
+                out[i - 1] = Integer.toString(i);
+            }
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-math-hamming-distance', 'go', 'solution.go', 'package main
 func hammingDistance(x int, y int) int {
 	xor := x ^ y
@@ -10813,6 +16799,31 @@ func hammingDistance(x int, y int) int {
 	return count
 }
 ', true, 0),
+  ('prep-math-hamming-distance', 'python', 'solution.py', 'MASK64 = (1 << 64) - 1
+
+
+def hammingDistance(x: int, y: int) -> int:
+    # Go''s int is 64-bit signed; mask the XOR to 64 bits so negative
+    # operands reproduce Go''s two''s-complement bit pattern exactly.
+    xor = (x ^ y) & MASK64
+    count = 0
+    while xor != 0:
+        xor &= xor - 1
+        count += 1
+    return count', false, 1),
+  ('prep-math-hamming-distance', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long hammingDistance(long x, long y) {
+        long xor = x ^ y;
+        long count = 0;
+        while (xor != 0) {
+            xor &= xor - 1;
+            count++;
+        }
+        return count;
+    }
+}', false, 2),
   ('prep-math-integer-to-english-words', 'go', 'solution.go', 'package main
 import "strings"
 
@@ -10861,16 +16872,113 @@ func numberToWords(num int) string {
 	return strings.Join(parts, " ")
 }
 ', true, 0),
+  ('prep-math-integer-to-english-words', 'python', 'solution.py', 'class Solution:
+    def numberToWords(self, num: int) -> str:
+        if num == 0:
+            return "Zero"
+        below20 = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"]
+        tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
+        thousands = ["", "Thousand", "Million", "Billion"]
+
+        def helper(n: int) -> str:
+            if n == 0:
+                return ""
+            if n < 20:
+                return below20[n]
+            if n < 100:
+                r = tens[n // 10]
+                if n % 10 > 0:
+                    r += " " + below20[n % 10]
+                return r
+            r = below20[n // 100] + " Hundred"
+            if n % 100 > 0:
+                r += " " + helper(n % 100)
+            return r
+
+        parts = []
+        idx = 0
+        while num > 0:
+            if num % 1000 != 0:
+                s = helper(num % 1000)
+                if thousands[idx] != "":
+                    s += " " + thousands[idx]
+                parts = [s] + parts
+            num //= 1000
+            idx += 1
+        return " ".join(parts)', false, 1),
+  ('prep-math-integer-to-english-words', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    private static final String[] BELOW20 = {"", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"};
+    private static final String[] TENS = {"", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"};
+    private static final String[] THOUSANDS = {"", "Thousand", "Million", "Billion"};
+
+    private String helper(long n) {
+        if (n == 0) {
+            return "";
+        }
+        if (n < 20) {
+            return BELOW20[(int) n];
+        }
+        if (n < 100) {
+            String r = TENS[(int) (n / 10)];
+            if (n % 10 > 0) {
+                r += " " + BELOW20[(int) (n % 10)];
+            }
+            return r;
+        }
+        String r = BELOW20[(int) (n / 100)] + " Hundred";
+        if (n % 100 > 0) {
+            r += " " + helper(n % 100);
+        }
+        return r;
+    }
+
+    public String numberToWords(int num) {
+        if (num == 0) {
+            return "Zero";
+        }
+        long n = num;
+        List<String> parts = new ArrayList<>();
+        int idx = 0;
+        while (n > 0) {
+            if (n % 1000 != 0) {
+                String s = helper(n % 1000);
+                if (!THOUSANDS[idx].equals("")) {
+                    s += " " + THOUSANDS[idx];
+                }
+                parts.add(0, s);
+            }
+            n /= 1000;
+            idx++;
+        }
+        return String.join(" ", parts);
+    }
+}', false, 2),
   ('prep-math-is-binary', 'go', 'solution.go', 'package main
 func isBinary(n int) bool {
 	return n > 0 && (n&(n-1)) == 0
 }
 ', true, 0),
+  ('prep-math-is-binary', 'python', 'solution.py', 'def is_binary(n: int) -> bool:
+    return n > 0 and (n & (n - 1)) == 0', false, 1),
+  ('prep-math-is-binary', 'java', 'Solution.java', 'class Solution {
+    boolean isBinary(long n) {
+        return n > 0 && (n & (n - 1)) == 0;
+    }
+}', false, 2),
   ('prep-math-is-odd-number', 'go', 'solution.go', 'package main
 func isOddNumber(n int) bool {
 	return n&1 == 1
 }
 ', true, 0),
+  ('prep-math-is-odd-number', 'python', 'solution.py', 'def is_odd_number(n: int) -> bool:
+    return n & 1 == 1', false, 1),
+  ('prep-math-is-odd-number', 'java', 'Solution.java', 'class Solution {
+    boolean isOddNumber(long n) {
+        return (n & 1L) == 1L;
+    }
+}', false, 2),
   ('prep-math-is-palindromic-number', 'go', 'solution.go', 'package main
 func isPalindromicNumber(n int) bool {
 	if n < 0 || (n%10 == 0 && n != 0) {
@@ -10884,6 +16992,27 @@ func isPalindromicNumber(n int) bool {
 	return n == rev || n == rev/10
 }
 ', true, 0),
+  ('prep-math-is-palindromic-number', 'python', 'solution.py', 'def is_palindromic_number(n: int) -> bool:
+    if n < 0 or (n % 10 == 0 and n != 0):
+        return False
+    rev = 0
+    while n > rev:
+        rev = rev * 10 + n % 10
+        n //= 10
+    return n == rev or n == rev // 10', false, 1),
+  ('prep-math-is-palindromic-number', 'java', 'Solution.java', 'class Solution {
+    boolean isPalindromicNumber(long n) {
+        if (n < 0 || (n % 10 == 0 && n != 0)) {
+            return false;
+        }
+        long rev = 0;
+        while (n > rev) {
+            rev = rev * 10 + n % 10;
+            n /= 10;
+        }
+        return n == rev || n == rev / 10;
+    }
+}', false, 2),
   ('prep-math-is-strobogrammatic-number', 'go', 'solution.go', 'package main
 func isStrobogrammaticNumber(s string) bool {
 	pairs := map[byte]byte{''0'': ''0'', ''1'': ''1'', ''6'': ''9'', ''8'': ''8'', ''9'': ''6''}
@@ -10900,6 +17029,45 @@ func isStrobogrammaticNumber(s string) bool {
 	return true
 }
 ', true, 0),
+  ('prep-math-is-strobogrammatic-number', 'python', 'solution.py', 'def is_strobogrammatic_number(s: str) -> bool:
+    b = s.encode(''utf-8'')
+    pairs = {ord(''0''): ord(''0''), ord(''1''): ord(''1''), ord(''6''): ord(''9''),
+             ord(''8''): ord(''8''), ord(''9''): ord(''6'')}
+    lo, hi = 0, len(b) - 1
+    while lo <= hi:
+        a = pairs.get(b[lo])
+        c = pairs.get(b[hi])
+        if a is None or c is None or a != c:
+            return False
+        lo += 1
+        hi -= 1
+    return True', false, 1),
+  ('prep-math-is-strobogrammatic-number', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    boolean isStrobogrammaticNumber(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        Map<Byte, Byte> pairs = new HashMap<>();
+        pairs.put((byte) ''0'', (byte) ''0'');
+        pairs.put((byte) ''1'', (byte) ''1'');
+        pairs.put((byte) ''6'', (byte) ''9'');
+        pairs.put((byte) ''8'', (byte) ''8'');
+        pairs.put((byte) ''9'', (byte) ''6'');
+        int lo = 0, hi = b.length - 1;
+        while (lo <= hi) {
+            Byte a = pairs.get(b[lo]);
+            Byte c = pairs.get(b[hi]);
+            if (a == null || c == null || !a.equals(c)) {
+                return false;
+            }
+            lo++;
+            hi--;
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-math-k-closest-points-to-origin', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -10911,6 +17079,33 @@ func kClosest(points [][]int, k int) [][]int {
 	return points[:k]
 }
 ', true, 0),
+  ('prep-math-k-closest-points-to-origin', 'python', 'solution.py', 'from functools import cmp_to_key
+
+
+def k_closest(points, k):
+    def cmp(a, b):
+        da = a[0] * a[0] + a[1] * a[1]
+        db = b[0] * b[0] + b[1] * b[1]
+        if da < db:
+            return -1
+        if da > db:
+            return 1
+        return 0
+
+    points.sort(key=cmp_to_key(cmp))
+    return points[:k]', false, 1),
+  ('prep-math-k-closest-points-to-origin', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int[][] kClosest(int[][] points, int k) {
+        Arrays.sort(points, (a, b) -> {
+            long da = (long) a[0] * a[0] + (long) a[1] * a[1];
+            long db = (long) b[0] * b[0] + (long) b[1] * b[1];
+            return Long.compare(da, db);
+        });
+        return Arrays.copyOfRange(points, 0, k);
+    }
+}', false, 2),
   ('prep-math-log-two', 'go', 'solution.go', 'package main
 func logTwo(n int) int {
 	if n <= 0 {
@@ -10924,6 +17119,29 @@ func logTwo(n int) int {
 	return bits
 }
 ', true, 0),
+  ('prep-math-log-two', 'python', 'solution.py', 'def log_two(n):
+    if n <= 0:
+        return -1
+    bits = 0
+    while n > 1:
+        n >>= 1
+        bits += 1
+    return bits', false, 1),
+  ('prep-math-log-two', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static long logTwo(long n) {
+        if (n <= 0) {
+            return -1;
+        }
+        long bits = 0;
+        while (n > 1) {
+            n >>= 1;
+            bits++;
+        }
+        return bits;
+    }
+}', false, 2),
   ('prep-math-maximum-number-of-visible-points', 'go', 'solution.go', 'package main
 import (
 	"math"
@@ -10960,6 +17178,63 @@ func visiblePoints(points [][]int, angle int, location []int) int {
 	return res + same
 }
 ', true, 0),
+  ('prep-math-maximum-number-of-visible-points', 'python', 'solution.py', 'import math
+from typing import List
+
+
+def visiblePoints(points: List[List[int]], angle: int, location: List[int]) -> int:
+    same = 0
+    angles: List[float] = []
+    for p in points:
+        if p[0] == location[0] and p[1] == location[1]:
+            same += 1
+        else:
+            a = math.atan2(float(p[1] - location[1]), float(p[0] - location[0])) * 180 / math.pi
+            angles.append(a)
+    angles.sort()
+    n = len(angles)
+    for i in range(n):
+        angles.append(angles[i] + 360)
+    res, j = 0, 0
+    limit = float(angle)
+    for i in range(len(angles)):
+        while j < len(angles) and angles[j] - angles[i] <= limit:
+            j += 1
+        if j - i > res:
+            res = j - i
+    return res + same', false, 1),
+  ('prep-math-maximum-number-of-visible-points', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int visiblePoints(int[][] points, int angle, int[] location) {
+        int same = 0;
+        ArrayList<Double> angles = new ArrayList<>();
+        for (int[] p : points) {
+            if (p[0] == location[0] && p[1] == location[1]) {
+                same++;
+            } else {
+                double a = Math.atan2((double) (p[1] - location[1]), (double) (p[0] - location[0])) * 180 / Math.PI;
+                angles.add(a);
+            }
+        }
+        Collections.sort(angles);
+        int n = angles.size();
+        for (int i = 0; i < n; i++) {
+            angles.add(angles.get(i) + 360);
+        }
+        int res = 0, j = 0;
+        double limit = (double) angle;
+        for (int i = 0; i < angles.size(); i++) {
+            while (j < angles.size() && angles.get(j) - angles.get(i) <= limit) {
+                j++;
+            }
+            if (j - i > res) {
+                res = j - i;
+            }
+        }
+        return res + same;
+    }
+}', false, 2),
   ('prep-math-maximum-split-of-positive-even-integers', 'go', 'solution.go', 'package main
 func maximumEvenSplit(finalSum int64) []int64 {
 	if finalSum%2 != 0 {
@@ -10976,6 +17251,38 @@ func maximumEvenSplit(finalSum int64) []int64 {
 	return res
 }
 ', true, 0),
+  ('prep-math-maximum-split-of-positive-even-integers', 'python', 'solution.py', 'from typing import List, Optional
+
+
+def maximumEvenSplit(finalSum: int) -> Optional[List[int]]:
+    if finalSum % 2 != 0:
+        return None
+    res: List[int] = []
+    cur, s = 2, 0
+    while s + cur <= finalSum:
+        res.append(cur)
+        s += cur
+        cur += 2
+    res[-1] += finalSum - s
+    return res', false, 1),
+  ('prep-math-maximum-split-of-positive-even-integers', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public List<Long> maximumEvenSplit(long finalSum) {
+        if (finalSum % 2 != 0) {
+            return null;
+        }
+        List<Long> res = new ArrayList<>();
+        long cur = 2, sum = 0;
+        while (sum + cur <= finalSum) {
+            res.add(cur);
+            sum += cur;
+            cur += 2;
+        }
+        res.set(res.size() - 1, res.get(res.size() - 1) + (finalSum - sum));
+        return res;
+    }
+}', false, 2),
   ('prep-math-maximum-swap', 'go', 'solution.go', 'package main
 import "strconv"
 
@@ -10998,6 +17305,39 @@ func maximumSwap(num int) int {
 	return num
 }
 ', true, 0),
+  ('prep-math-maximum-swap', 'python', 'solution.py', 'def maximumSwap(num: int) -> int:
+    s = list(str(num))
+    last = [0] * 10
+    for i, c in enumerate(s):
+        last[ord(c) - ord(''0'')] = i
+    for i, c in enumerate(s):
+        for d in range(9, ord(c) - ord(''0''), -1):
+            if last[d] > i:
+                s[i], s[last[d]] = s[last[d]], s[i]
+                return int(''''.join(s))
+    return num', false, 1),
+  ('prep-math-maximum-swap', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int maximumSwap(int num) {
+        char[] s = Integer.toString(num).toCharArray();
+        int[] last = new int[10];
+        for (int i = 0; i < s.length; i++) {
+            last[s[i] - ''0''] = i;
+        }
+        for (int i = 0; i < s.length; i++) {
+            for (int d = 9; d > (s[i] - ''0''); d--) {
+                if (last[d] > i) {
+                    char tmp = s[i];
+                    s[i] = s[last[d]];
+                    s[last[d]] = tmp;
+                    return Integer.parseInt(new String(s));
+                }
+            }
+        }
+        return num;
+    }
+}', false, 2),
   ('prep-math-minimum-cost-to-set-cooking-time', 'go', 'solution.go', 'package main
 func minCostSetTime(startAt int, moveCost int, pushCost int, targetSeconds int) int {
 	costOf := func(m, s int) int {
@@ -11034,6 +17374,65 @@ func minCostSetTime(startAt int, moveCost int, pushCost int, targetSeconds int) 
 	return c2
 }
 ', true, 0),
+  ('prep-math-minimum-cost-to-set-cooking-time', 'python', 'solution.py', 'def minCostSetTime(startAt, moveCost, pushCost, targetSeconds):
+    def costOf(m, s):
+        if m < 0 or m > 99 or s < 0 or s > 99:
+            return 1 << 30
+        digits = []
+        if m >= 10:
+            digits.append(m // 10)
+        if m > 0:
+            digits.append(m % 10)
+        if len(digits) > 0 or s >= 10:
+            digits.append(s // 10)
+        digits.append(s % 10)
+        cost, pos = 0, startAt
+        for d in digits:
+            if d != pos:
+                cost += moveCost
+                pos = d
+            cost += pushCost
+        return cost
+
+    m, s = targetSeconds // 60, targetSeconds % 60
+    c1 = costOf(m, s)
+    c2 = costOf(m - 1, s + 60)
+    return c1 if c1 < c2 else c2', false, 1),
+  ('prep-math-minimum-cost-to-set-cooking-time', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long minCostSetTime(long startAt, long moveCost, long pushCost, long targetSeconds) {
+        java.util.function.BiFunction<Long, Long, Long> costOf = (m, s) -> {
+            if (m < 0 || m > 99 || s < 0 || s > 99) {
+                return (long) (1 << 30);
+            }
+            List<Long> digits = new ArrayList<>();
+            if (m >= 10) {
+                digits.add(m / 10);
+            }
+            if (m > 0) {
+                digits.add(m % 10);
+            }
+            if (digits.size() > 0 || s >= 10) {
+                digits.add(s / 10);
+            }
+            digits.add(s % 10);
+            long cost = 0, pos = startAt;
+            for (long d : digits) {
+                if (d != pos) {
+                    cost += moveCost;
+                    pos = d;
+                }
+                cost += pushCost;
+            }
+            return cost;
+        };
+        long m = targetSeconds / 60, s = targetSeconds % 60;
+        long c1 = costOf.apply(m, s);
+        long c2 = costOf.apply(m - 1, s + 60);
+        return c1 < c2 ? c1 : c2;
+    }
+}', false, 2),
   ('prep-math-minimum-moves-to-equal-array-elements', 'go', 'solution.go', 'package main
 func minMoves(nums []int) int {
 	mn, sum := nums[0], 0
@@ -11046,6 +17445,27 @@ func minMoves(nums []int) int {
 	return sum - len(nums)*mn
 }
 ', true, 0),
+  ('prep-math-minimum-moves-to-equal-array-elements', 'python', 'solution.py', 'def min_moves(nums):
+    mn, s = nums[0], 0
+    for x in nums:
+        s += x
+        if x < mn:
+            mn = x
+    return s - len(nums) * mn', false, 1),
+  ('prep-math-minimum-moves-to-equal-array-elements', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long minMoves(int[] nums) {
+        long mn = nums[0], sum = 0;
+        for (int x : nums) {
+            sum += x;
+            if (x < mn) {
+                mn = x;
+            }
+        }
+        return sum - (long) nums.length * mn;
+    }
+}', false, 2),
   ('prep-math-multiply-string-numbers', 'go', 'solution.go', 'package main
 import (
 	"strings"
@@ -11077,6 +17497,57 @@ func multiplyStringNumbers(num1 string, num2 string) string {
 	return out.String()
 }
 ', true, 0),
+  ('prep-math-multiply-string-numbers', 'python', 'solution.py', 'def multiply_string_numbers(num1: str, num2: str) -> str:
+    if num1 == "0" or num2 == "0":
+        return "0"
+    b1 = num1.encode("utf-8")
+    b2 = num2.encode("utf-8")
+    m, n = len(b1), len(b2)
+    result = [0] * (m + n)
+    for i in range(m - 1, -1, -1):
+        for j in range(n - 1, -1, -1):
+            mul = (b1[i] - ord(''0'')) * (b2[j] - ord(''0''))
+            s = mul + result[i + j + 1]
+            result[i + j + 1] = s % 10
+            result[i + j] += s // 10
+    start = 0
+    while start < len(result) - 1 and result[start] == 0:
+        start += 1
+    out = []
+    while start < len(result):
+        out.append(chr(ord(''0'') + result[start]))
+        start += 1
+    return "".join(out)', false, 1),
+  ('prep-math-multiply-string-numbers', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    String multiplyStringNumbers(String num1, String num2) {
+        if (num1.equals("0") || num2.equals("0")) {
+            return "0";
+        }
+        byte[] b1 = num1.getBytes(StandardCharsets.UTF_8);
+        byte[] b2 = num2.getBytes(StandardCharsets.UTF_8);
+        int m = b1.length, n = b2.length;
+        long[] result = new long[m + n];
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                long mul = (long) (b1[i] - ''0'') * (long) (b2[j] - ''0'');
+                long sum = mul + result[i + j + 1];
+                result[i + j + 1] = sum % 10;
+                result[i + j] += sum / 10;
+            }
+        }
+        int start = 0;
+        while (start < result.length - 1 && result[start] == 0) {
+            start++;
+        }
+        StringBuilder out = new StringBuilder();
+        for (; start < result.length; start++) {
+            out.append((char) (''0'' + result[start]));
+        }
+        return out.toString();
+    }
+}', false, 2),
   ('prep-math-multiply-strings', 'go', 'solution.go', 'package main
 func multiply(num1 string, num2 string) string {
 	if num1 == "0" || num2 == "0" {
@@ -11101,6 +17572,52 @@ func multiply(num1 string, num2 string) string {
 	return string(res)
 }
 ', true, 0),
+  ('prep-math-multiply-strings', 'python', 'solution.py', 'def multiply(num1: str, num2: str) -> str:
+    if num1 == "0" or num2 == "0":
+        return "0"
+    a = num1.encode("utf-8")
+    b = num2.encode("utf-8")
+    m, n = len(a), len(b)
+    pos = [0] * (m + n)
+    for i in range(m - 1, -1, -1):
+        for j in range(n - 1, -1, -1):
+            mul = (a[i] - ord(''0'')) * (b[j] - ord(''0''))
+            s = mul + pos[i + j + 1]
+            pos[i + j + 1] = s % 10
+            pos[i + j] += s // 10
+    res = []
+    for p in pos:
+        if res or p != 0:
+            res.append(ord(''0'') + p)
+    return bytes(res).decode("utf-8")', false, 1),
+  ('prep-math-multiply-strings', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public String multiply(String num1, String num2) {
+        if (num1.equals("0") || num2.equals("0")) {
+            return "0";
+        }
+        byte[] a = num1.getBytes(StandardCharsets.UTF_8);
+        byte[] b = num2.getBytes(StandardCharsets.UTF_8);
+        int m = a.length, n = b.length;
+        int[] pos = new int[m + n];
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                int mul = (a[i] - ''0'') * (b[j] - ''0'');
+                int sum = mul + pos[i + j + 1];
+                pos[i + j + 1] = sum % 10;
+                pos[i + j] += sum / 10;
+            }
+        }
+        StringBuilder res = new StringBuilder();
+        for (int p : pos) {
+            if (res.length() > 0 || p != 0) {
+                res.append((char) (''0'' + p));
+            }
+        }
+        return res.toString();
+    }
+}', false, 2),
   ('prep-math-next-greater-element-iii', 'go', 'solution.go', 'package main
 import (
 	"math"
@@ -11133,6 +17650,62 @@ func nextGreaterElement(n int) int {
 	return val
 }
 ', true, 0),
+  ('prep-math-next-greater-element-iii', 'python', 'solution.py', 'INT32_MAX = 2**31 - 1
+
+
+def next_greater_element(n: int) -> int:
+    s = list(str(n))
+    k = len(s)
+    i = k - 2
+    while i >= 0 and s[i] >= s[i + 1]:
+        i -= 1
+    if i < 0:
+        return -1
+    j = k - 1
+    while s[j] <= s[i]:
+        j -= 1
+    s[i], s[j] = s[j], s[i]
+    l, r = i + 1, k - 1
+    while l < r:
+        s[l], s[r] = s[r], s[l]
+        l += 1
+        r -= 1
+    val = int("".join(s))
+    if val > INT32_MAX:
+        return -1
+    return val', false, 1),
+  ('prep-math-next-greater-element-iii', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int nextGreaterElement(int n) {
+        char[] s = Integer.toString(n).toCharArray();
+        int k = s.length;
+        int i = k - 2;
+        while (i >= 0 && s[i] >= s[i + 1]) {
+            i--;
+        }
+        if (i < 0) {
+            return -1;
+        }
+        int j = k - 1;
+        while (s[j] <= s[i]) {
+            j--;
+        }
+        char tmp = s[i];
+        s[i] = s[j];
+        s[j] = tmp;
+        for (int l = i + 1, r = k - 1; l < r; l++, r--) {
+            char t2 = s[l];
+            s[l] = s[r];
+            s[r] = t2;
+        }
+        long val = Long.parseLong(new String(s));
+        if (val > Integer.MAX_VALUE) {
+            return -1;
+        }
+        return (int) val;
+    }
+}', false, 2),
   ('prep-math-powx-n', 'go', 'solution.go', 'package main
 func myPow(x float64, n int) float64 {
 	N := int64(n)
@@ -11151,11 +17724,48 @@ func myPow(x float64, n int) float64 {
 	return res
 }
 ', true, 0),
+  ('prep-math-powx-n', 'python', 'solution.py', 'def my_pow(x: float, n: int) -> float:
+    N = n
+    if N < 0:
+        x = 1 / x
+        N = -N
+    res = 1.0
+    while N > 0:
+        if N % 2 == 1:
+            res *= x
+        x *= x
+        N //= 2
+    return res', false, 1),
+  ('prep-math-powx-n', 'java', 'Solution.java', 'class Solution {
+    public double myPow(double x, int n) {
+        long N = (long) n;
+        if (N < 0) {
+            x = 1 / x;
+            N = -N;
+        }
+        double res = 1.0;
+        while (N > 0) {
+            if (N % 2 == 1) {
+                res *= x;
+            }
+            x *= x;
+            N /= 2;
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-math-power-two', 'go', 'solution.go', 'package main
 func powerTwo(n int) bool {
 	return n > 0 && (n&(n-1)) == 0
 }
 ', true, 0),
+  ('prep-math-power-two', 'python', 'solution.py', 'def power_two(n):
+    return n > 0 and (n & (n - 1)) == 0', false, 1),
+  ('prep-math-power-two', 'java', 'Solution.java', 'class Solution {
+    boolean powerTwo(long n) {
+        return n > 0 && (n & (n - 1)) == 0;
+    }
+}', false, 2),
   ('prep-math-power-x-of-y', 'go', 'solution.go', 'package main
 func powerXOfY(base int, exp int) int {
 	if exp < 0 {
@@ -11172,6 +17782,44 @@ func powerXOfY(base int, exp int) int {
 	return result
 }
 ', true, 0),
+  ('prep-math-power-x-of-y', 'python', 'solution.py', '_MASK64 = (1 << 64) - 1
+
+
+def _to_int64(x: int) -> int:
+    x &= _MASK64
+    if x >= (1 << 63):
+        x -= (1 << 64)
+    return x
+
+
+def powerXOfY(base: int, exp: int) -> int:
+    if exp < 0:
+        return 0
+    result = 1
+    while exp > 0:
+        if exp & 1 == 1:
+            result = _to_int64(result * base)
+        base = _to_int64(base * base)
+        exp >>= 1
+    return result', false, 1),
+  ('prep-math-power-x-of-y', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long powerXOfY(long base, long exp) {
+        if (exp < 0) {
+            return 0;
+        }
+        long result = 1;
+        while (exp > 0) {
+            if ((exp & 1) == 1) {
+                result *= base;
+            }
+            base *= base;
+            exp >>= 1;
+        }
+        return result;
+    }
+}', false, 2),
   ('prep-math-prime-number', 'go', 'solution.go', 'package main
 func primeNumber(n int) bool {
 	if n < 2 {
@@ -11188,6 +17836,35 @@ func primeNumber(n int) bool {
 	return true
 }
 ', true, 0),
+  ('prep-math-prime-number', 'python', 'solution.py', 'def prime_number(n):
+    if n < 2:
+        return False
+    if n % 2 == 0:
+        return n == 2
+    i = 3
+    while i * i <= n:
+        if n % i == 0:
+            return False
+        i += 2
+    return True', false, 1),
+  ('prep-math-prime-number', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    boolean primeNumber(long n) {
+        if (n < 2) {
+            return false;
+        }
+        if (n % 2 == 0) {
+            return n == 2;
+        }
+        for (long i = 3; i * i <= n; i += 2) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-math-random-number', 'go', 'solution.go', 'package main
 import (
 	"math/rand"
@@ -11202,6 +17879,612 @@ func randomNumber(minVal int, maxVal int, seed int64) int {
 	return minVal + rng.Intn(maxVal-minVal+1)
 }
 ', true, 0),
+  ('prep-math-random-number', 'python', 'solution.py', 'RNG_LEN = 607
+RNG_TAP = 273
+INT32_MAX = (1 << 31) - 1
+RNG_MASK = (1 << 63) - 1
+U64 = (1 << 64) - 1
+
+# rngCooked table from Go''s math/rand/rng.go (607 entries)
+RNG_COOKED = [
+    -4181792142133755926, -4576982950128230565, 1395769623340756751, 5333664234075297259,
+    -6347679516498800754, 9033628115061424579, 7143218595135194537, 4812947590706362721,
+    7937252194349799378, 5307299880338848416, 8209348851763925077, -7107630437535961764,
+    4593015457530856296, 8140875735541888011, -5903942795589686782, -603556388664454774,
+    -7496297993371156308, 113108499721038619, 4569519971459345583, -4160538177779461077,
+    -6835753265595711384, -6507240692498089696, 6559392774825876886, 7650093201692370310,
+    7684323884043752161, -8965504200858744418, -2629915517445760644, 271327514973697897,
+    -6433985589514657524, 1065192797246149621, 3344507881999356393, -4763574095074709175,
+    7465081662728599889, 1014950805555097187, -4773931307508785033, -5742262670416273165,
+    2418672789110888383, 5796562887576294778, 4484266064449540171, 3738982361971787048,
+    -4699774852342421385, 10530508058128498, -589538253572429690, -6598062107225984180,
+    8660405965245884302, 10162832508971942, -2682657355892958417, 7031802312784620857,
+    6240911277345944669, 831864355460801054, -1218937899312622917, 2116287251661052151,
+    2202309800992166967, 9161020366945053561, 4069299552407763864, 4936383537992622449,
+    457351505131524928, -8881176990926596454, -6375600354038175299, -7155351920868399290,
+    4368649989588021065, 887231587095185257, -3659780529968199312, -2407146836602825512,
+    5616972787034086048, -751562733459939242, 1686575021641186857, -5177887698780513806,
+    -4979215821652996885, -1375154703071198421, 5632136521049761902, -8390088894796940536,
+    -193645528485698615, -5979788902190688516, -4907000935050298721, -285522056888777828,
+    -2776431630044341707, 1679342092332374735, 6050638460742422078, -2229851317345194226,
+    -1582494184340482199, 5881353426285907985, 812786550756860885, 4541845584483343330,
+    -6497901820577766722, 4980675660146853729, -4012602956251539747, -329088717864244987,
+    -2896929232104691526, 1495812843684243920, -2153620458055647789, 7370257291860230865,
+    -2466442761497833547, 4706794511633873654, -1398851569026877145, 8549875090542453214,
+    -9189721207376179652, -7894453601103453165, 7297902601803624459, 1011190183918857495,
+    -6985347000036920864, 5147159997473910359, -8326859945294252826, 2659470849286379941,
+    6097729358393448602, -7491646050550022124, -5117116194870963097, -896216826133240300,
+    -745860416168701406, 5803876044675762232, -787954255994554146, -3234519180203704564,
+    -4507534739750823898, -1657200065590290694, 505808562678895611, -4153273856159712438,
+    -8381261370078904295, 572156825025677802, 1791881013492340891, 3393267094866038768,
+    -5444650186382539299, 2352769483186201278, -7930912453007408350, -325464993179687389,
+    -3441562999710612272, -6489413242825283295, 5092019688680754699, -227247482082248967,
+    4234737173186232084, 5027558287275472836, 4635198586344772304, -536033143587636457,
+    5907508150730407386, -8438615781380831356, 972392927514829904, -3801314342046600696,
+    -4064951393885491917, -174840358296132583, 2407211146698877100, -1640089820333676239,
+    3940796514530962282, -5882197405809569433, 3095313889586102949, -1818050141166537098,
+    5832080132947175283, 7890064875145919662, 8184139210799583195, -8073512175445549678,
+    -7758774793014564506, -4581724029666783935, 3516491885471466898, -8267083515063118116,
+    6657089965014657519, 5220884358887979358, 1796677326474620641, 5340761970648932916,
+    1147977171614181568, 5066037465548252321, 2574765911837859848, 1085848279845204775,
+    -5873264506986385449, 6116438694366558490, 2107701075971293812, -7420077970933506541,
+    2469478054175558874, -1855128755834809824, -5431463669011098282, -9038325065738319171,
+    -6966276280341336160, 7217693971077460129, -8314322083775271549, 7196649268545224266,
+    -3585711691453906209, -5267827091426810625, 8057528650917418961, -5084103596553648165,
+    -2601445448341207749, -7850010900052094367, 6527366231383600011, 3507654575162700890,
+    9202058512774729859, 1954818376891585542, -2582991129724600103, 8299563319178235687,
+    -5321504681635821435, 7046310742295574065, -2376176645520785576, -7650733936335907755,
+    8850422670118399721, 3631909142291992901, 5158881091950831288, -6340413719511654215,
+    4763258931815816403, 6280052734341785344, -4979582628649810958, 2043464728020827976,
+    -2678071570832690343, 4562580375758598164, 5495451168795427352, -7485059175264624713,
+    553004618757816492, 6895160632757959823, -989748114590090637, 7139506338801360852,
+    -672480814466784139, 5535668688139305547, 2430933853350256242, -3821430778991574732,
+    -1063731997747047009, -3065878205254005442, 7632066283658143750, 6308328381617103346,
+    3681878764086140361, 3289686137190109749, 6587997200611086848, 244714774258135476,
+    -5143583659437639708, 8090302575944624335, 2945117363431356361, -8359047641006034763,
+    3009039260312620700, -793344576772241777, 401084700045993341, -1968749590416080887,
+    4707864159563588614, -3583123505891281857, -3240864324164777915, -5908273794572565703,
+    -3719524458082857382, -5281400669679581926, 8118566580304798074, 3839261274019871296,
+    7062410411742090847, -8481991033874568140, 6027994129690250817, -6725542042704711878,
+    -2971981702428546974, -7854441788951256975, 8809096399316380241, 6492004350391900708,
+    2462145737463489636, -8818543617934476634, -5070345602623085213, -8961586321599299868,
+    -3758656652254704451, -8630661632476012791, 6764129236657751224, -709716318315418359,
+    -3403028373052861600, -8838073512170985897, -3999237033416576341, -2920240395515973663,
+    -2073249475545404416, 368107899140673753, -6108185202296464250, -6307735683270494757,
+    4782583894627718279, 6718292300699989587, 8387085186914375220, 3387513132024756289,
+    4654329375432538231, -292704475491394206, -3848998599978456535, 7623042350483453954,
+    7725442901813263321, 9186225467561587250, -5132344747257272453, -6865740430362196008,
+    2530936820058611833, 1636551876240043639, -3658707362519810009, 1452244145334316253,
+    -7161729655835084979, -7943791770359481772, 9108481583171221009, -3200093350120725999,
+    5007630032676973346, 2153168792952589781, 6720334534964750538, -3181825545719981703,
+    3433922409283786309, 2285479922797300912, 3110614940896576130, -2856812446131932915,
+    -3804580617188639299, 7163298419643543757, 4891138053923696990, 580618510277907015,
+    1684034065251686769, 4429514767357295841, -8893025458299325803, -8103734041042601133,
+    7177515271653460134, 4589042248470800257, -1530083407795771245, 143607045258444228,
+    246994305896273627, -8356954712051676521, 6473547110565816071, 3092379936208876896,
+    2058427839513754051, -4089587328327907870, 8785882556301281247, -3074039370013608197,
+    -637529855400303673, 6137678347805511274, -7152924852417805802, 5708223427705576541,
+    -3223714144396531304, 4358391411789012426, 325123008708389849, 6837621693887290924,
+    4843721905315627004, -3212720814705499393, -3825019837890901156, 4602025990114250980,
+    1044646352569048800, 9106614159853161675, -8394115921626182539, -4304087667751778808,
+    2681532557646850893, 3681559472488511871, -3915372517896561773, -2889241648411946534,
+    -6564663803938238204, -8060058171802589521, 581945337509520675, 3648778920718647903,
+    -4799698790548231394, -7602572252857820065, 220828013409515943, -1072987336855386047,
+    4287360518296753003, -4633371852008891965, 5513660857261085186, -2258542936462001533,
+    -8744380348503999773, 8746140185685648781, 228500091334420247, 1356187007457302238,
+    3019253992034194581, 3152601605678500003, -8793219284148773595, 5559581553696971176,
+    4916432985369275664, -8559797105120221417, -5802598197927043732, 2868348622579915573,
+    -7224052902810357288, -5894682518218493085, 2587672709781371173, -7706116723325376475,
+    3092343956317362483, -5561119517847711700, 972445599196498113, -1558506600978816441,
+    1708913533482282562, -2305554874185907314, -6005743014309462908, -6653329009633068701,
+    -483583197311151195, 2488075924621352812, -4529369641467339140, -4663743555056261452,
+    2997203966153298104, 1282559373026354493, 240113143146674385, 8665713329246516443,
+    628141331766346752, -4651421219668005332, -7750560848702540400, 7596648026010355826,
+    -3132152619100351065, 7834161864828164065, 7103445518877254909, 4390861237357459201,
+    -4780718172614204074, -319889632007444440, 622261699494173647, -3186110786557562560,
+    -8718967088789066690, -1948156510637662747, -8212195255998774408, -7028621931231314745,
+    2623071828615234808, -4066058308780939700, -5484966924888173764, -6683604512778046238,
+    -6756087640505506466, 5256026990536851868, 7841086888628396109, 6640857538655893162,
+    -8021284697816458310, -7109857044414059830, -1689021141511844405, -4298087301956291063,
+    -4077748265377282003, -998231156719803476, 2719520354384050532, 9132346697815513771,
+    4332154495710163773, -2085582442760428892, 6994721091344268833, -2556143461985726874,
+    -8567931991128098309, 59934747298466858, -3098398008776739403, -265597256199410390,
+    2332206071942466437, -7522315324568406181, 3154897383618636503, -7585605855467168281,
+    -6762850759087199275, 197309393502684135, -8579694182469508493, 2543179307861934850,
+    4350769010207485119, -4468719947444108136, -7207776534213261296, -1224312577878317200,
+    4287946071480840813, 8362686366770308971, 6486469209321732151, -5605644191012979782,
+    -1669018511020473564, 4450022655153542367, -7618176296641240059, -3896357471549267421,
+    -4596796223304447488, -6531150016257070659, -8982326463137525940, -4125325062227681798,
+    -1306489741394045544, -8338554946557245229, 5329160409530630596, 7790979528857726136,
+    4955070238059373407, -4304834761432101506, -6215295852904371179, 3007769226071157901,
+    -6753025801236972788, 8928702772696731736, 7856187920214445904, -4748497451462800923,
+    7900176660600710914, -7082800908938549136, -6797926979589575837, -6737316883512927978,
+    4186670094382025798, 1883939007446035042, -414705992779907823, 3734134241178479257,
+    4065968871360089196, 6953124200385847784, -7917685222115876751, -7585632937840318161,
+    -5567246375906782599, -5256612402221608788, 3106378204088556331, -2894472214076325998,
+    4565385105440252958, 1979884289539493806, -6891578849933910383, 3783206694208922581,
+    8464961209802336085, 2843963751609577687, 3030678195484896323, -4429654462759003204,
+    4459239494808162889, 402587895800087237, 8057891408711167515, 4541888170938985079,
+    1042662272908816815, -3666068979732206850, 2647678726283249984, 2144477441549833761,
+    -3417019821499388721, -2105601033380872185, 5916597177708541638, -8760774321402454447,
+    8833658097025758785, 5970273481425315300, 563813119381731307, -6455022486202078793,
+    1598828206250873866, -4016978389451217698, -2988328551145513985, -6071154634840136312,
+    8469693267274066490, 125672920241807416, -3912292412830714870, -2559617104544284221,
+    -486523741806024092, -4735332261862713930, 5923302823487327109, -9082480245771672572,
+    -1808429243461201518, 7990420780896957397, 4317817392807076702, 3625184369705367340,
+    -6482649271566653105, -3480272027152017464, -3225473396345736649, -368878695502291645,
+    -3981164001421868007, -8522033136963788610, 7609280429197514109, 3020985755112334161,
+    -2572049329799262942, 2635195723621160615, 5144520864246028816, -8188285521126945980,
+    1567242097116389047, 8172389260191636581, -2885551685425483535, -7060359469858316883,
+    -6480181133964513127, -7317004403633452381, 6011544915663598137, 5932255307352610768,
+    2241128460406315459, -8327867140638080220, 3094483003111372717, 4583857460292963101,
+    9079887171656594975, -384082854924064405, -3460631649611717935, 4225072055348026230,
+    -7385151438465742745, 3801620336801580414, -399845416774701952, -7446754431269675473,
+    7899055018877642622, 5421679761463003041, 5521102963086275121, -4975092593295409910,
+    8735487530905098534, -7462844945281082830, -2080886987197029914, -1000715163927557685,
+    -4253840471931071485, -5828896094657903328, 6424174453260338141, 359248545074932887,
+    -5949720754023045210, -2426265837057637212, 3030918217665093212, -9077771202237461772,
+    -3186796180789149575, 740416251634527158, -2142944401404840226, 6951781370868335478,
+    399922722363687927, -8928469722407522623, -1378421100515597285, -8343051178220066766,
+    -3030716356046100229, -8811767350470065420, 9026808440365124461, 6440783557497587732,
+    4615674634722404292, 539897290441580544, 2096238225866883852, 8751955639408182687,
+    -7316147128802486205, 7381039757301768559, 6157238513393239656, -1473377804940618233,
+    8629571604380892756, 5280433031239081479, 7101611890139813254, 2479018537985767835,
+    7169176924412769570, -1281305539061572506, -7865612307799218120, 2278447439451174845,
+    3625338785743880657, 6477479539006708521, 8976185375579272206, -3712000482142939688,
+    1326024180520890843, 7537449876596048829, 5464680203499696154, 3189671183162196045,
+    6346751753565857109, -8982212049534145501, -6127578587196093755, -245039190118465649,
+    -6320577374581628592, 7208698530190629697, 7276901792339343736, -7490986807540332668,
+    4133292154170828382, 2918308698224194548, -7703910638917631350, -3929437324238184044,
+    -4300543082831323144, -6344160503358350167, 5896236396443472108, -758328221503023383,
+    -1894351639983151068, -307900319840287220, -6278469401177312761, -2171292963361310674,
+    8382142935188824023, 9103922860780351547, 4152330101494654406,
+]
+
+
+def _to_int32(x):
+    """Interpret the low 32 bits of x as a signed 32-bit integer (Go int32)."""
+    x &= 0xFFFFFFFF
+    if x & 0x80000000:
+        x -= 1 << 32
+    return x
+
+
+def _to_int64(x):
+    """Interpret the low 64 bits of x as a signed 64-bit integer (Go int64)."""
+    x &= U64
+    if x & (1 << 63):
+        x -= 1 << 64
+    return x
+
+
+def _trunc_div(a, b):
+    """Integer division truncating toward zero, like Go/C for int types."""
+    q = abs(a) // abs(b)
+    if (a < 0) != (b < 0):
+        q = -q
+    return q
+
+
+def _seedrand(x):
+    # seed rng x[n+1] = 48271 * x[n] mod (2**31 - 1); Go int32 arithmetic.
+    A = 48271
+    Q = 44488
+    R = 3399
+    hi = _trunc_div(x, Q)
+    lo = x - hi * Q  # truncated-division remainder (same sign as x)
+    x = A * lo - R * hi
+    if x < 0:
+        x += INT32_MAX
+    return _to_int32(x)
+
+
+class RngSource:
+    """Faithful port of Go''s math/rand.rngSource (Additive Lagged Fibonacci Generator)."""
+
+    def __init__(self):
+        self.tap = 0
+        self.feed = 0
+        self.vec = [0] * RNG_LEN
+
+    def seed(self, seed):
+        self.tap = 0
+        self.feed = RNG_LEN - RNG_TAP
+
+        # Go: seed = seed % int32max (truncated toward zero), then if <0 add int32max
+        seed = seed - _trunc_div(seed, INT32_MAX) * INT32_MAX
+        if seed < 0:
+            seed += INT32_MAX
+        if seed == 0:
+            seed = 89482311
+
+        x = _to_int32(seed)
+        for i in range(-20, RNG_LEN):
+            x = _seedrand(x)
+            if i >= 0:
+                u = _to_int64(x) << 40
+                x = _seedrand(x)
+                u ^= _to_int64(x) << 20
+                x = _seedrand(x)
+                u ^= _to_int64(x)
+                u ^= RNG_COOKED[i]
+                self.vec[i] = _to_int64(u)
+
+    def uint64(self):
+        self.tap -= 1
+        if self.tap < 0:
+            self.tap += RNG_LEN
+        self.feed -= 1
+        if self.feed < 0:
+            self.feed += RNG_LEN
+        x = _to_int64(self.vec[self.feed] + self.vec[self.tap])
+        self.vec[self.feed] = x
+        return x & U64
+
+    def int63(self):
+        return _to_int64(self.uint64() & RNG_MASK)
+
+
+class GoRand:
+    """Faithful port of Go''s math/rand.Rand for Int63/Int31/Intn."""
+
+    def __init__(self, src):
+        self.src = src
+
+    def int63(self):
+        return self.src.int63()
+
+    def int31(self):
+        # int32(Int63() >> 32)
+        return _to_int32(self.int63() >> 32)
+
+    def int31n(self, n):
+        if n <= 0:
+            raise ValueError("invalid argument to Int31n")
+        if (n & (n - 1)) == 0:  # power of two, can mask
+            return self.int31() & (n - 1)
+        maxv = _to_int32((1 << 31) - 1 - ((1 << 31) % n))
+        v = self.int31()
+        while v > maxv:
+            v = self.int31()
+        return v % n
+
+    def int63n(self, n):
+        if n <= 0:
+            raise ValueError("invalid argument to Int63n")
+        if (n & (n - 1)) == 0:  # power of two, can mask
+            return self.int63() & (n - 1)
+        maxv = _to_int64((1 << 63) - 1 - ((1 << 63) % n))
+        v = self.int63()
+        while v > maxv:
+            v = self.int63()
+        return v % n
+
+    def intn(self, n):
+        if n <= 0:
+            raise ValueError("invalid argument to Intn")
+        if n <= (1 << 31) - 1:
+            return int(self.int31n(n))
+        return int(self.int63n(n))
+
+
+def new_source(seed):
+    src = RngSource()
+    src.seed(seed)
+    return src
+
+
+def random_number(min_val, max_val, seed):
+    rng = GoRand(new_source(seed))
+    if min_val > max_val:
+        min_val, max_val = max_val, min_val
+    return min_val + rng.intn(max_val - min_val + 1)', false, 1),
+  ('prep-math-random-number', 'java', 'Solution.java', 'import java.util.*;
+
+// Faithful port of Go''s math/rand (Additive Lagged Fibonacci Generator) backing randomNumber.
+// Go''s `int` is 64-bit, so all values use `long`. Reproduces Go''s exact value stream.
+class Solution {
+    static final int RNG_LEN = 607;
+    static final int RNG_TAP = 273;
+    static final int INT32_MAX = (1 << 31) - 1;
+    static final long RNG_MASK = (1L << 63) - 1;
+
+    // rngCooked table from Go''s math/rand/rng.go (607 entries)
+    static final long[] RNG_COOKED = {
+        -4181792142133755926L, -4576982950128230565L, 1395769623340756751L, 5333664234075297259L,
+        -6347679516498800754L, 9033628115061424579L, 7143218595135194537L, 4812947590706362721L,
+        7937252194349799378L, 5307299880338848416L, 8209348851763925077L, -7107630437535961764L,
+        4593015457530856296L, 8140875735541888011L, -5903942795589686782L, -603556388664454774L,
+        -7496297993371156308L, 113108499721038619L, 4569519971459345583L, -4160538177779461077L,
+        -6835753265595711384L, -6507240692498089696L, 6559392774825876886L, 7650093201692370310L,
+        7684323884043752161L, -8965504200858744418L, -2629915517445760644L, 271327514973697897L,
+        -6433985589514657524L, 1065192797246149621L, 3344507881999356393L, -4763574095074709175L,
+        7465081662728599889L, 1014950805555097187L, -4773931307508785033L, -5742262670416273165L,
+        2418672789110888383L, 5796562887576294778L, 4484266064449540171L, 3738982361971787048L,
+        -4699774852342421385L, 10530508058128498L, -589538253572429690L, -6598062107225984180L,
+        8660405965245884302L, 10162832508971942L, -2682657355892958417L, 7031802312784620857L,
+        6240911277345944669L, 831864355460801054L, -1218937899312622917L, 2116287251661052151L,
+        2202309800992166967L, 9161020366945053561L, 4069299552407763864L, 4936383537992622449L,
+        457351505131524928L, -8881176990926596454L, -6375600354038175299L, -7155351920868399290L,
+        4368649989588021065L, 887231587095185257L, -3659780529968199312L, -2407146836602825512L,
+        5616972787034086048L, -751562733459939242L, 1686575021641186857L, -5177887698780513806L,
+        -4979215821652996885L, -1375154703071198421L, 5632136521049761902L, -8390088894796940536L,
+        -193645528485698615L, -5979788902190688516L, -4907000935050298721L, -285522056888777828L,
+        -2776431630044341707L, 1679342092332374735L, 6050638460742422078L, -2229851317345194226L,
+        -1582494184340482199L, 5881353426285907985L, 812786550756860885L, 4541845584483343330L,
+        -6497901820577766722L, 4980675660146853729L, -4012602956251539747L, -329088717864244987L,
+        -2896929232104691526L, 1495812843684243920L, -2153620458055647789L, 7370257291860230865L,
+        -2466442761497833547L, 4706794511633873654L, -1398851569026877145L, 8549875090542453214L,
+        -9189721207376179652L, -7894453601103453165L, 7297902601803624459L, 1011190183918857495L,
+        -6985347000036920864L, 5147159997473910359L, -8326859945294252826L, 2659470849286379941L,
+        6097729358393448602L, -7491646050550022124L, -5117116194870963097L, -896216826133240300L,
+        -745860416168701406L, 5803876044675762232L, -787954255994554146L, -3234519180203704564L,
+        -4507534739750823898L, -1657200065590290694L, 505808562678895611L, -4153273856159712438L,
+        -8381261370078904295L, 572156825025677802L, 1791881013492340891L, 3393267094866038768L,
+        -5444650186382539299L, 2352769483186201278L, -7930912453007408350L, -325464993179687389L,
+        -3441562999710612272L, -6489413242825283295L, 5092019688680754699L, -227247482082248967L,
+        4234737173186232084L, 5027558287275472836L, 4635198586344772304L, -536033143587636457L,
+        5907508150730407386L, -8438615781380831356L, 972392927514829904L, -3801314342046600696L,
+        -4064951393885491917L, -174840358296132583L, 2407211146698877100L, -1640089820333676239L,
+        3940796514530962282L, -5882197405809569433L, 3095313889586102949L, -1818050141166537098L,
+        5832080132947175283L, 7890064875145919662L, 8184139210799583195L, -8073512175445549678L,
+        -7758774793014564506L, -4581724029666783935L, 3516491885471466898L, -8267083515063118116L,
+        6657089965014657519L, 5220884358887979358L, 1796677326474620641L, 5340761970648932916L,
+        1147977171614181568L, 5066037465548252321L, 2574765911837859848L, 1085848279845204775L,
+        -5873264506986385449L, 6116438694366558490L, 2107701075971293812L, -7420077970933506541L,
+        2469478054175558874L, -1855128755834809824L, -5431463669011098282L, -9038325065738319171L,
+        -6966276280341336160L, 7217693971077460129L, -8314322083775271549L, 7196649268545224266L,
+        -3585711691453906209L, -5267827091426810625L, 8057528650917418961L, -5084103596553648165L,
+        -2601445448341207749L, -7850010900052094367L, 6527366231383600011L, 3507654575162700890L,
+        9202058512774729859L, 1954818376891585542L, -2582991129724600103L, 8299563319178235687L,
+        -5321504681635821435L, 7046310742295574065L, -2376176645520785576L, -7650733936335907755L,
+        8850422670118399721L, 3631909142291992901L, 5158881091950831288L, -6340413719511654215L,
+        4763258931815816403L, 6280052734341785344L, -4979582628649810958L, 2043464728020827976L,
+        -2678071570832690343L, 4562580375758598164L, 5495451168795427352L, -7485059175264624713L,
+        553004618757816492L, 6895160632757959823L, -989748114590090637L, 7139506338801360852L,
+        -672480814466784139L, 5535668688139305547L, 2430933853350256242L, -3821430778991574732L,
+        -1063731997747047009L, -3065878205254005442L, 7632066283658143750L, 6308328381617103346L,
+        3681878764086140361L, 3289686137190109749L, 6587997200611086848L, 244714774258135476L,
+        -5143583659437639708L, 8090302575944624335L, 2945117363431356361L, -8359047641006034763L,
+        3009039260312620700L, -793344576772241777L, 401084700045993341L, -1968749590416080887L,
+        4707864159563588614L, -3583123505891281857L, -3240864324164777915L, -5908273794572565703L,
+        -3719524458082857382L, -5281400669679581926L, 8118566580304798074L, 3839261274019871296L,
+        7062410411742090847L, -8481991033874568140L, 6027994129690250817L, -6725542042704711878L,
+        -2971981702428546974L, -7854441788951256975L, 8809096399316380241L, 6492004350391900708L,
+        2462145737463489636L, -8818543617934476634L, -5070345602623085213L, -8961586321599299868L,
+        -3758656652254704451L, -8630661632476012791L, 6764129236657751224L, -709716318315418359L,
+        -3403028373052861600L, -8838073512170985897L, -3999237033416576341L, -2920240395515973663L,
+        -2073249475545404416L, 368107899140673753L, -6108185202296464250L, -6307735683270494757L,
+        4782583894627718279L, 6718292300699989587L, 8387085186914375220L, 3387513132024756289L,
+        4654329375432538231L, -292704475491394206L, -3848998599978456535L, 7623042350483453954L,
+        7725442901813263321L, 9186225467561587250L, -5132344747257272453L, -6865740430362196008L,
+        2530936820058611833L, 1636551876240043639L, -3658707362519810009L, 1452244145334316253L,
+        -7161729655835084979L, -7943791770359481772L, 9108481583171221009L, -3200093350120725999L,
+        5007630032676973346L, 2153168792952589781L, 6720334534964750538L, -3181825545719981703L,
+        3433922409283786309L, 2285479922797300912L, 3110614940896576130L, -2856812446131932915L,
+        -3804580617188639299L, 7163298419643543757L, 4891138053923696990L, 580618510277907015L,
+        1684034065251686769L, 4429514767357295841L, -8893025458299325803L, -8103734041042601133L,
+        7177515271653460134L, 4589042248470800257L, -1530083407795771245L, 143607045258444228L,
+        246994305896273627L, -8356954712051676521L, 6473547110565816071L, 3092379936208876896L,
+        2058427839513754051L, -4089587328327907870L, 8785882556301281247L, -3074039370013608197L,
+        -637529855400303673L, 6137678347805511274L, -7152924852417805802L, 5708223427705576541L,
+        -3223714144396531304L, 4358391411789012426L, 325123008708389849L, 6837621693887290924L,
+        4843721905315627004L, -3212720814705499393L, -3825019837890901156L, 4602025990114250980L,
+        1044646352569048800L, 9106614159853161675L, -8394115921626182539L, -4304087667751778808L,
+        2681532557646850893L, 3681559472488511871L, -3915372517896561773L, -2889241648411946534L,
+        -6564663803938238204L, -8060058171802589521L, 581945337509520675L, 3648778920718647903L,
+        -4799698790548231394L, -7602572252857820065L, 220828013409515943L, -1072987336855386047L,
+        4287360518296753003L, -4633371852008891965L, 5513660857261085186L, -2258542936462001533L,
+        -8744380348503999773L, 8746140185685648781L, 228500091334420247L, 1356187007457302238L,
+        3019253992034194581L, 3152601605678500003L, -8793219284148773595L, 5559581553696971176L,
+        4916432985369275664L, -8559797105120221417L, -5802598197927043732L, 2868348622579915573L,
+        -7224052902810357288L, -5894682518218493085L, 2587672709781371173L, -7706116723325376475L,
+        3092343956317362483L, -5561119517847711700L, 972445599196498113L, -1558506600978816441L,
+        1708913533482282562L, -2305554874185907314L, -6005743014309462908L, -6653329009633068701L,
+        -483583197311151195L, 2488075924621352812L, -4529369641467339140L, -4663743555056261452L,
+        2997203966153298104L, 1282559373026354493L, 240113143146674385L, 8665713329246516443L,
+        628141331766346752L, -4651421219668005332L, -7750560848702540400L, 7596648026010355826L,
+        -3132152619100351065L, 7834161864828164065L, 7103445518877254909L, 4390861237357459201L,
+        -4780718172614204074L, -319889632007444440L, 622261699494173647L, -3186110786557562560L,
+        -8718967088789066690L, -1948156510637662747L, -8212195255998774408L, -7028621931231314745L,
+        2623071828615234808L, -4066058308780939700L, -5484966924888173764L, -6683604512778046238L,
+        -6756087640505506466L, 5256026990536851868L, 7841086888628396109L, 6640857538655893162L,
+        -8021284697816458310L, -7109857044414059830L, -1689021141511844405L, -4298087301956291063L,
+        -4077748265377282003L, -998231156719803476L, 2719520354384050532L, 9132346697815513771L,
+        4332154495710163773L, -2085582442760428892L, 6994721091344268833L, -2556143461985726874L,
+        -8567931991128098309L, 59934747298466858L, -3098398008776739403L, -265597256199410390L,
+        2332206071942466437L, -7522315324568406181L, 3154897383618636503L, -7585605855467168281L,
+        -6762850759087199275L, 197309393502684135L, -8579694182469508493L, 2543179307861934850L,
+        4350769010207485119L, -4468719947444108136L, -7207776534213261296L, -1224312577878317200L,
+        4287946071480840813L, 8362686366770308971L, 6486469209321732151L, -5605644191012979782L,
+        -1669018511020473564L, 4450022655153542367L, -7618176296641240059L, -3896357471549267421L,
+        -4596796223304447488L, -6531150016257070659L, -8982326463137525940L, -4125325062227681798L,
+        -1306489741394045544L, -8338554946557245229L, 5329160409530630596L, 7790979528857726136L,
+        4955070238059373407L, -4304834761432101506L, -6215295852904371179L, 3007769226071157901L,
+        -6753025801236972788L, 8928702772696731736L, 7856187920214445904L, -4748497451462800923L,
+        7900176660600710914L, -7082800908938549136L, -6797926979589575837L, -6737316883512927978L,
+        4186670094382025798L, 1883939007446035042L, -414705992779907823L, 3734134241178479257L,
+        4065968871360089196L, 6953124200385847784L, -7917685222115876751L, -7585632937840318161L,
+        -5567246375906782599L, -5256612402221608788L, 3106378204088556331L, -2894472214076325998L,
+        4565385105440252958L, 1979884289539493806L, -6891578849933910383L, 3783206694208922581L,
+        8464961209802336085L, 2843963751609577687L, 3030678195484896323L, -4429654462759003204L,
+        4459239494808162889L, 402587895800087237L, 8057891408711167515L, 4541888170938985079L,
+        1042662272908816815L, -3666068979732206850L, 2647678726283249984L, 2144477441549833761L,
+        -3417019821499388721L, -2105601033380872185L, 5916597177708541638L, -8760774321402454447L,
+        8833658097025758785L, 5970273481425315300L, 563813119381731307L, -6455022486202078793L,
+        1598828206250873866L, -4016978389451217698L, -2988328551145513985L, -6071154634840136312L,
+        8469693267274066490L, 125672920241807416L, -3912292412830714870L, -2559617104544284221L,
+        -486523741806024092L, -4735332261862713930L, 5923302823487327109L, -9082480245771672572L,
+        -1808429243461201518L, 7990420780896957397L, 4317817392807076702L, 3625184369705367340L,
+        -6482649271566653105L, -3480272027152017464L, -3225473396345736649L, -368878695502291645L,
+        -3981164001421868007L, -8522033136963788610L, 7609280429197514109L, 3020985755112334161L,
+        -2572049329799262942L, 2635195723621160615L, 5144520864246028816L, -8188285521126945980L,
+        1567242097116389047L, 8172389260191636581L, -2885551685425483535L, -7060359469858316883L,
+        -6480181133964513127L, -7317004403633452381L, 6011544915663598137L, 5932255307352610768L,
+        2241128460406315459L, -8327867140638080220L, 3094483003111372717L, 4583857460292963101L,
+        9079887171656594975L, -384082854924064405L, -3460631649611717935L, 4225072055348026230L,
+        -7385151438465742745L, 3801620336801580414L, -399845416774701952L, -7446754431269675473L,
+        7899055018877642622L, 5421679761463003041L, 5521102963086275121L, -4975092593295409910L,
+        8735487530905098534L, -7462844945281082830L, -2080886987197029914L, -1000715163927557685L,
+        -4253840471931071485L, -5828896094657903328L, 6424174453260338141L, 359248545074932887L,
+        -5949720754023045210L, -2426265837057637212L, 3030918217665093212L, -9077771202237461772L,
+        -3186796180789149575L, 740416251634527158L, -2142944401404840226L, 6951781370868335478L,
+        399922722363687927L, -8928469722407522623L, -1378421100515597285L, -8343051178220066766L,
+        -3030716356046100229L, -8811767350470065420L, 9026808440365124461L, 6440783557497587732L,
+        4615674634722404292L, 539897290441580544L, 2096238225866883852L, 8751955639408182687L,
+        -7316147128802486205L, 7381039757301768559L, 6157238513393239656L, -1473377804940618233L,
+        8629571604380892756L, 5280433031239081479L, 7101611890139813254L, 2479018537985767835L,
+        7169176924412769570L, -1281305539061572506L, -7865612307799218120L, 2278447439451174845L,
+        3625338785743880657L, 6477479539006708521L, 8976185375579272206L, -3712000482142939688L,
+        1326024180520890843L, 7537449876596048829L, 5464680203499696154L, 3189671183162196045L,
+        6346751753565857109L, -8982212049534145501L, -6127578587196093755L, -245039190118465649L,
+        -6320577374581628592L, 7208698530190629697L, 7276901792339343736L, -7490986807540332668L,
+        4133292154170828382L, 2918308698224194548L, -7703910638917631350L, -3929437324238184044L,
+        -4300543082831323144L, -6344160503358350167L, 5896236396443472108L, -758328221503023383L,
+        -1894351639983151068L, -307900319840287220L, -6278469401177312761L, -2171292963361310674L,
+        8382142935188824023L, 9103922860780351547L, 4152330101494654406L
+    };
+
+    static int seedrand(int x) {
+        final int A = 48271;
+        final int Q = 44488;
+        final int R = 3399;
+        int hi = x / Q;
+        int lo = x % Q;
+        x = A * lo - R * hi;
+        if (x < 0) {
+            x += INT32_MAX;
+        }
+        return x;
+    }
+
+    static final class RngSource {
+        int tap;
+        int feed;
+        long[] vec = new long[RNG_LEN];
+
+        void seed(long seed) {
+            tap = 0;
+            feed = RNG_LEN - RNG_TAP;
+
+            seed = seed % INT32_MAX; // Java % truncates toward zero, matching Go
+            if (seed < 0) {
+                seed += INT32_MAX;
+            }
+            if (seed == 0) {
+                seed = 89482311;
+            }
+
+            int x = (int) seed;
+            for (int i = -20; i < RNG_LEN; i++) {
+                x = seedrand(x);
+                if (i >= 0) {
+                    long u;
+                    u = (long) x << 40;
+                    x = seedrand(x);
+                    u ^= (long) x << 20;
+                    x = seedrand(x);
+                    u ^= (long) x;
+                    u ^= RNG_COOKED[i];
+                    vec[i] = u;
+                }
+            }
+        }
+
+        long uint64() {
+            tap--;
+            if (tap < 0) {
+                tap += RNG_LEN;
+            }
+            feed--;
+            if (feed < 0) {
+                feed += RNG_LEN;
+            }
+            long x = vec[feed] + vec[tap];
+            vec[feed] = x;
+            return x;
+        }
+
+        long int63() {
+            return uint64() & RNG_MASK;
+        }
+    }
+
+    static final class GoRand {
+        final RngSource src;
+
+        GoRand(RngSource src) {
+            this.src = src;
+        }
+
+        long int63() {
+            return src.int63();
+        }
+
+        int int31() {
+            return (int) (int63() >>> 32);
+        }
+
+        int int31n(int n) {
+            if (n <= 0) {
+                throw new IllegalArgumentException("invalid argument to Int31n");
+            }
+            if ((n & (n - 1)) == 0) { // power of two, can mask
+                return int31() & (n - 1);
+            }
+            int max = (int) ((1L << 31) - 1 - (1L << 31) % n);
+            int v = int31();
+            while (v > max) {
+                v = int31();
+            }
+            return v % n;
+        }
+
+        long int63n(long n) {
+            if (n <= 0) {
+                throw new IllegalArgumentException("invalid argument to Int63n");
+            }
+            if ((n & (n - 1)) == 0) { // power of two, can mask
+                return int63() & (n - 1);
+            }
+            // Go: max = int64((1<<63) - 1 - (1<<63)%uint64(n))
+            // (1<<63)-1 == Long.MAX_VALUE; (1<<63)%n == remainderUnsigned(Long.MIN_VALUE, n)
+            long max = Long.MAX_VALUE - Long.remainderUnsigned(Long.MIN_VALUE, n);
+            long v = int63();
+            while (v > max) {
+                v = int63();
+            }
+            return v % n;
+        }
+
+        long intn(long n) {
+            if (n <= 0) {
+                throw new IllegalArgumentException("invalid argument to Intn");
+            }
+            if (n <= (1L << 31) - 1) {
+                return int31n((int) n);
+            }
+            return int63n(n);
+        }
+    }
+
+    static RngSource newSource(long seed) {
+        RngSource s = new RngSource();
+        s.seed(seed);
+        return s;
+    }
+
+    // Go int is 64-bit; randomNumber''s range can be up to 2^32, so use long.
+    static long randomNumber(long minVal, long maxVal, long seed) {
+        GoRand rng = new GoRand(newSource(seed));
+        if (minVal > maxVal) {
+            long t = minVal;
+            minVal = maxVal;
+            maxVal = t;
+        }
+        return minVal + rng.intn(maxVal - minVal + 1);
+    }
+}', false, 2),
   ('prep-math-random-number-not-in-array', 'go', 'solution.go', 'package main
 import (
 	"math/rand"
@@ -11231,6 +18514,525 @@ func randomNumberNotInArray(maxVal int, blocked []int, seed int64) int {
 	return -1
 }
 ', true, 0),
+  ('prep-math-random-number-not-in-array', 'python', 'solution.py', 'from typing import List
+
+# Faithful port of Go''s math/rand (rngSource + Rand.Intn) so that
+# randomNumberNotInArray reproduces the exact Go output byte-for-byte.
+
+_RNG_LEN = 607
+_RNG_TAP = 273
+_MASK64 = (1 << 64) - 1
+_RNG_MASK = (1 << 63) - 1  # rngMax - 1
+_INT32_MAX = (1 << 31) - 1
+
+# rngCooked table (identical to Go''s math/rand/rng.go). 607 entries.
+_RNG_COOKED = [
+    -4181792142133755926, -4576982950128230565, 1395769623340756751, 5333664234075297259, -6347679516498800754, 9033628115061424579,
+    7143218595135194537, 4812947590706362721, 7937252194349799378, 5307299880338848416, 8209348851763925077, -7107630437535961764,
+    4593015457530856296, 8140875735541888011, -5903942795589686782, -603556388664454774, -7496297993371156308, 113108499721038619,
+    4569519971459345583, -4160538177779461077, -6835753265595711384, -6507240692498089696, 6559392774825876886, 7650093201692370310,
+    7684323884043752161, -8965504200858744418, -2629915517445760644, 271327514973697897, -6433985589514657524, 1065192797246149621,
+    3344507881999356393, -4763574095074709175, 7465081662728599889, 1014950805555097187, -4773931307508785033, -5742262670416273165,
+    2418672789110888383, 5796562887576294778, 4484266064449540171, 3738982361971787048, -4699774852342421385, 10530508058128498,
+    -589538253572429690, -6598062107225984180, 8660405965245884302, 10162832508971942, -2682657355892958417, 7031802312784620857,
+    6240911277345944669, 831864355460801054, -1218937899312622917, 2116287251661052151, 2202309800992166967, 9161020366945053561,
+    4069299552407763864, 4936383537992622449, 457351505131524928, -8881176990926596454, -6375600354038175299, -7155351920868399290,
+    4368649989588021065, 887231587095185257, -3659780529968199312, -2407146836602825512, 5616972787034086048, -751562733459939242,
+    1686575021641186857, -5177887698780513806, -4979215821652996885, -1375154703071198421, 5632136521049761902, -8390088894796940536,
+    -193645528485698615, -5979788902190688516, -4907000935050298721, -285522056888777828, -2776431630044341707, 1679342092332374735,
+    6050638460742422078, -2229851317345194226, -1582494184340482199, 5881353426285907985, 812786550756860885, 4541845584483343330,
+    -6497901820577766722, 4980675660146853729, -4012602956251539747, -329088717864244987, -2896929232104691526, 1495812843684243920,
+    -2153620458055647789, 7370257291860230865, -2466442761497833547, 4706794511633873654, -1398851569026877145, 8549875090542453214,
+    -9189721207376179652, -7894453601103453165, 7297902601803624459, 1011190183918857495, -6985347000036920864, 5147159997473910359,
+    -8326859945294252826, 2659470849286379941, 6097729358393448602, -7491646050550022124, -5117116194870963097, -896216826133240300,
+    -745860416168701406, 5803876044675762232, -787954255994554146, -3234519180203704564, -4507534739750823898, -1657200065590290694,
+    505808562678895611, -4153273856159712438, -8381261370078904295, 572156825025677802, 1791881013492340891, 3393267094866038768,
+    -5444650186382539299, 2352769483186201278, -7930912453007408350, -325464993179687389, -3441562999710612272, -6489413242825283295,
+    5092019688680754699, -227247482082248967, 4234737173186232084, 5027558287275472836, 4635198586344772304, -536033143587636457,
+    5907508150730407386, -8438615781380831356, 972392927514829904, -3801314342046600696, -4064951393885491917, -174840358296132583,
+    2407211146698877100, -1640089820333676239, 3940796514530962282, -5882197405809569433, 3095313889586102949, -1818050141166537098,
+    5832080132947175283, 7890064875145919662, 8184139210799583195, -8073512175445549678, -7758774793014564506, -4581724029666783935,
+    3516491885471466898, -8267083515063118116, 6657089965014657519, 5220884358887979358, 1796677326474620641, 5340761970648932916,
+    1147977171614181568, 5066037465548252321, 2574765911837859848, 1085848279845204775, -5873264506986385449, 6116438694366558490,
+    2107701075971293812, -7420077970933506541, 2469478054175558874, -1855128755834809824, -5431463669011098282, -9038325065738319171,
+    -6966276280341336160, 7217693971077460129, -8314322083775271549, 7196649268545224266, -3585711691453906209, -5267827091426810625,
+    8057528650917418961, -5084103596553648165, -2601445448341207749, -7850010900052094367, 6527366231383600011, 3507654575162700890,
+    9202058512774729859, 1954818376891585542, -2582991129724600103, 8299563319178235687, -5321504681635821435, 7046310742295574065,
+    -2376176645520785576, -7650733936335907755, 8850422670118399721, 3631909142291992901, 5158881091950831288, -6340413719511654215,
+    4763258931815816403, 6280052734341785344, -4979582628649810958, 2043464728020827976, -2678071570832690343, 4562580375758598164,
+    5495451168795427352, -7485059175264624713, 553004618757816492, 6895160632757959823, -989748114590090637, 7139506338801360852,
+    -672480814466784139, 5535668688139305547, 2430933853350256242, -3821430778991574732, -1063731997747047009, -3065878205254005442,
+    7632066283658143750, 6308328381617103346, 3681878764086140361, 3289686137190109749, 6587997200611086848, 244714774258135476,
+    -5143583659437639708, 8090302575944624335, 2945117363431356361, -8359047641006034763, 3009039260312620700, -793344576772241777,
+    401084700045993341, -1968749590416080887, 4707864159563588614, -3583123505891281857, -3240864324164777915, -5908273794572565703,
+    -3719524458082857382, -5281400669679581926, 8118566580304798074, 3839261274019871296, 7062410411742090847, -8481991033874568140,
+    6027994129690250817, -6725542042704711878, -2971981702428546974, -7854441788951256975, 8809096399316380241, 6492004350391900708,
+    2462145737463489636, -8818543617934476634, -5070345602623085213, -8961586321599299868, -3758656652254704451, -8630661632476012791,
+    6764129236657751224, -709716318315418359, -3403028373052861600, -8838073512170985897, -3999237033416576341, -2920240395515973663,
+    -2073249475545404416, 368107899140673753, -6108185202296464250, -6307735683270494757, 4782583894627718279, 6718292300699989587,
+    8387085186914375220, 3387513132024756289, 4654329375432538231, -292704475491394206, -3848998599978456535, 7623042350483453954,
+    7725442901813263321, 9186225467561587250, -5132344747257272453, -6865740430362196008, 2530936820058611833, 1636551876240043639,
+    -3658707362519810009, 1452244145334316253, -7161729655835084979, -7943791770359481772, 9108481583171221009, -3200093350120725999,
+    5007630032676973346, 2153168792952589781, 6720334534964750538, -3181825545719981703, 3433922409283786309, 2285479922797300912,
+    3110614940896576130, -2856812446131932915, -3804580617188639299, 7163298419643543757, 4891138053923696990, 580618510277907015,
+    1684034065251686769, 4429514767357295841, -8893025458299325803, -8103734041042601133, 7177515271653460134, 4589042248470800257,
+    -1530083407795771245, 143607045258444228, 246994305896273627, -8356954712051676521, 6473547110565816071, 3092379936208876896,
+    2058427839513754051, -4089587328327907870, 8785882556301281247, -3074039370013608197, -637529855400303673, 6137678347805511274,
+    -7152924852417805802, 5708223427705576541, -3223714144396531304, 4358391411789012426, 325123008708389849, 6837621693887290924,
+    4843721905315627004, -3212720814705499393, -3825019837890901156, 4602025990114250980, 1044646352569048800, 9106614159853161675,
+    -8394115921626182539, -4304087667751778808, 2681532557646850893, 3681559472488511871, -3915372517896561773, -2889241648411946534,
+    -6564663803938238204, -8060058171802589521, 581945337509520675, 3648778920718647903, -4799698790548231394, -7602572252857820065,
+    220828013409515943, -1072987336855386047, 4287360518296753003, -4633371852008891965, 5513660857261085186, -2258542936462001533,
+    -8744380348503999773, 8746140185685648781, 228500091334420247, 1356187007457302238, 3019253992034194581, 3152601605678500003,
+    -8793219284148773595, 5559581553696971176, 4916432985369275664, -8559797105120221417, -5802598197927043732, 2868348622579915573,
+    -7224052902810357288, -5894682518218493085, 2587672709781371173, -7706116723325376475, 3092343956317362483, -5561119517847711700,
+    972445599196498113, -1558506600978816441, 1708913533482282562, -2305554874185907314, -6005743014309462908, -6653329009633068701,
+    -483583197311151195, 2488075924621352812, -4529369641467339140, -4663743555056261452, 2997203966153298104, 1282559373026354493,
+    240113143146674385, 8665713329246516443, 628141331766346752, -4651421219668005332, -7750560848702540400, 7596648026010355826,
+    -3132152619100351065, 7834161864828164065, 7103445518877254909, 4390861237357459201, -4780718172614204074, -319889632007444440,
+    622261699494173647, -3186110786557562560, -8718967088789066690, -1948156510637662747, -8212195255998774408, -7028621931231314745,
+    2623071828615234808, -4066058308780939700, -5484966924888173764, -6683604512778046238, -6756087640505506466, 5256026990536851868,
+    7841086888628396109, 6640857538655893162, -8021284697816458310, -7109857044414059830, -1689021141511844405, -4298087301956291063,
+    -4077748265377282003, -998231156719803476, 2719520354384050532, 9132346697815513771, 4332154495710163773, -2085582442760428892,
+    6994721091344268833, -2556143461985726874, -8567931991128098309, 59934747298466858, -3098398008776739403, -265597256199410390,
+    2332206071942466437, -7522315324568406181, 3154897383618636503, -7585605855467168281, -6762850759087199275, 197309393502684135,
+    -8579694182469508493, 2543179307861934850, 4350769010207485119, -4468719947444108136, -7207776534213261296, -1224312577878317200,
+    4287946071480840813, 8362686366770308971, 6486469209321732151, -5605644191012979782, -1669018511020473564, 4450022655153542367,
+    -7618176296641240059, -3896357471549267421, -4596796223304447488, -6531150016257070659, -8982326463137525940, -4125325062227681798,
+    -1306489741394045544, -8338554946557245229, 5329160409530630596, 7790979528857726136, 4955070238059373407, -4304834761432101506,
+    -6215295852904371179, 3007769226071157901, -6753025801236972788, 8928702772696731736, 7856187920214445904, -4748497451462800923,
+    7900176660600710914, -7082800908938549136, -6797926979589575837, -6737316883512927978, 4186670094382025798, 1883939007446035042,
+    -414705992779907823, 3734134241178479257, 4065968871360089196, 6953124200385847784, -7917685222115876751, -7585632937840318161,
+    -5567246375906782599, -5256612402221608788, 3106378204088556331, -2894472214076325998, 4565385105440252958, 1979884289539493806,
+    -6891578849933910383, 3783206694208922581, 8464961209802336085, 2843963751609577687, 3030678195484896323, -4429654462759003204,
+    4459239494808162889, 402587895800087237, 8057891408711167515, 4541888170938985079, 1042662272908816815, -3666068979732206850,
+    2647678726283249984, 2144477441549833761, -3417019821499388721, -2105601033380872185, 5916597177708541638, -8760774321402454447,
+    8833658097025758785, 5970273481425315300, 563813119381731307, -6455022486202078793, 1598828206250873866, -4016978389451217698,
+    -2988328551145513985, -6071154634840136312, 8469693267274066490, 125672920241807416, -3912292412830714870, -2559617104544284221,
+    -486523741806024092, -4735332261862713930, 5923302823487327109, -9082480245771672572, -1808429243461201518, 7990420780896957397,
+    4317817392807076702, 3625184369705367340, -6482649271566653105, -3480272027152017464, -3225473396345736649, -368878695502291645,
+    -3981164001421868007, -8522033136963788610, 7609280429197514109, 3020985755112334161, -2572049329799262942, 2635195723621160615,
+    5144520864246028816, -8188285521126945980, 1567242097116389047, 8172389260191636581, -2885551685425483535, -7060359469858316883,
+    -6480181133964513127, -7317004403633452381, 6011544915663598137, 5932255307352610768, 2241128460406315459, -8327867140638080220,
+    3094483003111372717, 4583857460292963101, 9079887171656594975, -384082854924064405, -3460631649611717935, 4225072055348026230,
+    -7385151438465742745, 3801620336801580414, -399845416774701952, -7446754431269675473, 7899055018877642622, 5421679761463003041,
+    5521102963086275121, -4975092593295409910, 8735487530905098534, -7462844945281082830, -2080886987197029914, -1000715163927557685,
+    -4253840471931071485, -5828896094657903328, 6424174453260338141, 359248545074932887, -5949720754023045210, -2426265837057637212,
+    3030918217665093212, -9077771202237461772, -3186796180789149575, 740416251634527158, -2142944401404840226, 6951781370868335478,
+    399922722363687927, -8928469722407522623, -1378421100515597285, -8343051178220066766, -3030716356046100229, -8811767350470065420,
+    9026808440365124461, 6440783557497587732, 4615674634722404292, 539897290441580544, 2096238225866883852, 8751955639408182687,
+    -7316147128802486205, 7381039757301768559, 6157238513393239656, -1473377804940618233, 8629571604380892756, 5280433031239081479,
+    7101611890139813254, 2479018537985767835, 7169176924412769570, -1281305539061572506, -7865612307799218120, 2278447439451174845,
+    3625338785743880657, 6477479539006708521, 8976185375579272206, -3712000482142939688, 1326024180520890843, 7537449876596048829,
+    5464680203499696154, 3189671183162196045, 6346751753565857109, -8982212049534145501, -6127578587196093755, -245039190118465649,
+    -6320577374581628592, 7208698530190629697, 7276901792339343736, -7490986807540332668, 4133292154170828382, 2918308698224194548,
+    -7703910638917631350, -3929437324238184044, -4300543082831323144, -6344160503358350167, 5896236396443472108, -758328221503023383,
+    -1894351639983151068, -307900319840287220, -6278469401177312761, -2171292963361310674, 8382142935188824023, 9103922860780351547,
+    4152330101494654406,
+]
+
+
+def _to_int64(v: int) -> int:
+    """Interpret the low 64 bits of v as a signed int64 (Go int64 semantics)."""
+    v &= _MASK64
+    if v >= (1 << 63):
+        v -= (1 << 64)
+    return v
+
+
+def _to_int32(v: int) -> int:
+    v &= 0xFFFFFFFF
+    if v >= (1 << 31):
+        v -= (1 << 32)
+    return v
+
+
+def _seedrand(x: int) -> int:
+    # x[n+1] = 48271 * x[n] mod (2**31 - 1), via Schrage''s method on int32.
+    A = 48271
+    Q = 44488
+    R = 3399
+    # Go int division truncates toward zero; x stays in [0, int32max) here, so // matches.
+    hi = x // Q
+    lo = x % Q
+    x = A * lo - R * hi
+    if x < 0:
+        x += _INT32_MAX
+    return x
+
+
+class _RngSource:
+    __slots__ = ("tap", "feed", "vec")
+
+    def __init__(self, seed: int):
+        self.tap = 0
+        self.feed = 0
+        self.vec = [0] * _RNG_LEN
+        self.seed(seed)
+
+    def seed(self, seed: int) -> None:
+        self.tap = 0
+        self.feed = _RNG_LEN - _RNG_TAP
+
+        seed = seed % _INT32_MAX
+        if seed < 0:
+            seed += _INT32_MAX
+        if seed == 0:
+            seed = 89482311
+
+        x = _to_int32(seed)
+        i = -20
+        while i < _RNG_LEN:
+            x = _seedrand(x)
+            if i >= 0:
+                u = _to_int64(x) << 40
+                x = _seedrand(x)
+                u ^= _to_int64(x) << 20
+                x = _seedrand(x)
+                u ^= _to_int64(x)
+                u ^= _RNG_COOKED[i]
+                self.vec[i] = _to_int64(u)
+            i += 1
+
+    def uint64(self) -> int:
+        self.tap -= 1
+        if self.tap < 0:
+            self.tap += _RNG_LEN
+        self.feed -= 1
+        if self.feed < 0:
+            self.feed += _RNG_LEN
+        x = _to_int64(self.vec[self.feed] + self.vec[self.tap])
+        self.vec[self.feed] = x
+        return x & _MASK64
+
+    def int63(self) -> int:
+        return _to_int64(self.uint64() & _RNG_MASK)
+
+
+class _Rand:
+    def __init__(self, src: _RngSource):
+        self.src = src
+
+    def int63(self) -> int:
+        return self.src.int63()
+
+    def int31(self) -> int:
+        return _to_int32(self.int63() >> 32)
+
+    def int31n(self, n: int) -> int:
+        if n <= 0:
+            raise ValueError("invalid argument to Int31n")
+        if n & (n - 1) == 0:  # power of two
+            return self.int31() & (n - 1)
+        maxv = _to_int32(_INT32_MAX - ((1 << 31) % (n & 0xFFFFFFFF)))
+        v = self.int31()
+        while v > maxv:
+            v = self.int31()
+        return v % n
+
+    def int63n(self, n: int) -> int:
+        if n <= 0:
+            raise ValueError("invalid argument to Int63n")
+        if n & (n - 1) == 0:
+            return self.int63() & (n - 1)
+        maxv = _to_int64((1 << 63) - 1 - ((1 << 63) % (n & _MASK64)))
+        v = self.int63()
+        while v > maxv:
+            v = self.int63()
+        return v % n
+
+    def intn(self, n: int) -> int:
+        if n <= 0:
+            raise ValueError("invalid argument to Intn")
+        if n <= (1 << 31) - 1:
+            return self.int31n(n)
+        return self.int63n(n)
+
+
+def _new_rand(seed: int) -> _Rand:
+    return _Rand(_RngSource(seed))
+
+
+def random_number_not_in_array(max_val: int, blocked: List[int], seed: int) -> int:
+    blocked_set = set(blocked)
+    available = max_val + 1 - len(blocked_set)
+    if available <= 0:
+        return -1
+    rng = _new_rand(seed)
+    k = rng.intn(available)
+    v = 0
+    while v <= max_val:
+        if v in blocked_set:
+            v += 1
+            continue
+        if k == 0:
+            return v
+        k -= 1
+        v += 1
+    return -1', false, 1),
+  ('prep-math-random-number-not-in-array', 'java', 'Solution.java', 'import java.util.*;
+
+// Faithful port of Go''s math/rand (rngSource + Rand.Intn) so that
+// randomNumberNotInArray reproduces the exact Go output byte-for-byte.
+class Solution {
+
+    static final int RNG_LEN = 607;
+    static final int RNG_TAP = 273;
+    static final long RNG_MASK = (1L << 63) - 1; // rngMax - 1
+    static final int INT32_MAX = (1 << 31) - 1;
+
+    // rngCooked table (identical to Go''s math/rand/rng.go). 607 entries.
+    static final long[] RNG_COOKED = {
+        -4181792142133755926L, -4576982950128230565L, 1395769623340756751L, 5333664234075297259L, -6347679516498800754L, 9033628115061424579L,
+        7143218595135194537L, 4812947590706362721L, 7937252194349799378L, 5307299880338848416L, 8209348851763925077L, -7107630437535961764L,
+        4593015457530856296L, 8140875735541888011L, -5903942795589686782L, -603556388664454774L, -7496297993371156308L, 113108499721038619L,
+        4569519971459345583L, -4160538177779461077L, -6835753265595711384L, -6507240692498089696L, 6559392774825876886L, 7650093201692370310L,
+        7684323884043752161L, -8965504200858744418L, -2629915517445760644L, 271327514973697897L, -6433985589514657524L, 1065192797246149621L,
+        3344507881999356393L, -4763574095074709175L, 7465081662728599889L, 1014950805555097187L, -4773931307508785033L, -5742262670416273165L,
+        2418672789110888383L, 5796562887576294778L, 4484266064449540171L, 3738982361971787048L, -4699774852342421385L, 10530508058128498L,
+        -589538253572429690L, -6598062107225984180L, 8660405965245884302L, 10162832508971942L, -2682657355892958417L, 7031802312784620857L,
+        6240911277345944669L, 831864355460801054L, -1218937899312622917L, 2116287251661052151L, 2202309800992166967L, 9161020366945053561L,
+        4069299552407763864L, 4936383537992622449L, 457351505131524928L, -8881176990926596454L, -6375600354038175299L, -7155351920868399290L,
+        4368649989588021065L, 887231587095185257L, -3659780529968199312L, -2407146836602825512L, 5616972787034086048L, -751562733459939242L,
+        1686575021641186857L, -5177887698780513806L, -4979215821652996885L, -1375154703071198421L, 5632136521049761902L, -8390088894796940536L,
+        -193645528485698615L, -5979788902190688516L, -4907000935050298721L, -285522056888777828L, -2776431630044341707L, 1679342092332374735L,
+        6050638460742422078L, -2229851317345194226L, -1582494184340482199L, 5881353426285907985L, 812786550756860885L, 4541845584483343330L,
+        -6497901820577766722L, 4980675660146853729L, -4012602956251539747L, -329088717864244987L, -2896929232104691526L, 1495812843684243920L,
+        -2153620458055647789L, 7370257291860230865L, -2466442761497833547L, 4706794511633873654L, -1398851569026877145L, 8549875090542453214L,
+        -9189721207376179652L, -7894453601103453165L, 7297902601803624459L, 1011190183918857495L, -6985347000036920864L, 5147159997473910359L,
+        -8326859945294252826L, 2659470849286379941L, 6097729358393448602L, -7491646050550022124L, -5117116194870963097L, -896216826133240300L,
+        -745860416168701406L, 5803876044675762232L, -787954255994554146L, -3234519180203704564L, -4507534739750823898L, -1657200065590290694L,
+        505808562678895611L, -4153273856159712438L, -8381261370078904295L, 572156825025677802L, 1791881013492340891L, 3393267094866038768L,
+        -5444650186382539299L, 2352769483186201278L, -7930912453007408350L, -325464993179687389L, -3441562999710612272L, -6489413242825283295L,
+        5092019688680754699L, -227247482082248967L, 4234737173186232084L, 5027558287275472836L, 4635198586344772304L, -536033143587636457L,
+        5907508150730407386L, -8438615781380831356L, 972392927514829904L, -3801314342046600696L, -4064951393885491917L, -174840358296132583L,
+        2407211146698877100L, -1640089820333676239L, 3940796514530962282L, -5882197405809569433L, 3095313889586102949L, -1818050141166537098L,
+        5832080132947175283L, 7890064875145919662L, 8184139210799583195L, -8073512175445549678L, -7758774793014564506L, -4581724029666783935L,
+        3516491885471466898L, -8267083515063118116L, 6657089965014657519L, 5220884358887979358L, 1796677326474620641L, 5340761970648932916L,
+        1147977171614181568L, 5066037465548252321L, 2574765911837859848L, 1085848279845204775L, -5873264506986385449L, 6116438694366558490L,
+        2107701075971293812L, -7420077970933506541L, 2469478054175558874L, -1855128755834809824L, -5431463669011098282L, -9038325065738319171L,
+        -6966276280341336160L, 7217693971077460129L, -8314322083775271549L, 7196649268545224266L, -3585711691453906209L, -5267827091426810625L,
+        8057528650917418961L, -5084103596553648165L, -2601445448341207749L, -7850010900052094367L, 6527366231383600011L, 3507654575162700890L,
+        9202058512774729859L, 1954818376891585542L, -2582991129724600103L, 8299563319178235687L, -5321504681635821435L, 7046310742295574065L,
+        -2376176645520785576L, -7650733936335907755L, 8850422670118399721L, 3631909142291992901L, 5158881091950831288L, -6340413719511654215L,
+        4763258931815816403L, 6280052734341785344L, -4979582628649810958L, 2043464728020827976L, -2678071570832690343L, 4562580375758598164L,
+        5495451168795427352L, -7485059175264624713L, 553004618757816492L, 6895160632757959823L, -989748114590090637L, 7139506338801360852L,
+        -672480814466784139L, 5535668688139305547L, 2430933853350256242L, -3821430778991574732L, -1063731997747047009L, -3065878205254005442L,
+        7632066283658143750L, 6308328381617103346L, 3681878764086140361L, 3289686137190109749L, 6587997200611086848L, 244714774258135476L,
+        -5143583659437639708L, 8090302575944624335L, 2945117363431356361L, -8359047641006034763L, 3009039260312620700L, -793344576772241777L,
+        401084700045993341L, -1968749590416080887L, 4707864159563588614L, -3583123505891281857L, -3240864324164777915L, -5908273794572565703L,
+        -3719524458082857382L, -5281400669679581926L, 8118566580304798074L, 3839261274019871296L, 7062410411742090847L, -8481991033874568140L,
+        6027994129690250817L, -6725542042704711878L, -2971981702428546974L, -7854441788951256975L, 8809096399316380241L, 6492004350391900708L,
+        2462145737463489636L, -8818543617934476634L, -5070345602623085213L, -8961586321599299868L, -3758656652254704451L, -8630661632476012791L,
+        6764129236657751224L, -709716318315418359L, -3403028373052861600L, -8838073512170985897L, -3999237033416576341L, -2920240395515973663L,
+        -2073249475545404416L, 368107899140673753L, -6108185202296464250L, -6307735683270494757L, 4782583894627718279L, 6718292300699989587L,
+        8387085186914375220L, 3387513132024756289L, 4654329375432538231L, -292704475491394206L, -3848998599978456535L, 7623042350483453954L,
+        7725442901813263321L, 9186225467561587250L, -5132344747257272453L, -6865740430362196008L, 2530936820058611833L, 1636551876240043639L,
+        -3658707362519810009L, 1452244145334316253L, -7161729655835084979L, -7943791770359481772L, 9108481583171221009L, -3200093350120725999L,
+        5007630032676973346L, 2153168792952589781L, 6720334534964750538L, -3181825545719981703L, 3433922409283786309L, 2285479922797300912L,
+        3110614940896576130L, -2856812446131932915L, -3804580617188639299L, 7163298419643543757L, 4891138053923696990L, 580618510277907015L,
+        1684034065251686769L, 4429514767357295841L, -8893025458299325803L, -8103734041042601133L, 7177515271653460134L, 4589042248470800257L,
+        -1530083407795771245L, 143607045258444228L, 246994305896273627L, -8356954712051676521L, 6473547110565816071L, 3092379936208876896L,
+        2058427839513754051L, -4089587328327907870L, 8785882556301281247L, -3074039370013608197L, -637529855400303673L, 6137678347805511274L,
+        -7152924852417805802L, 5708223427705576541L, -3223714144396531304L, 4358391411789012426L, 325123008708389849L, 6837621693887290924L,
+        4843721905315627004L, -3212720814705499393L, -3825019837890901156L, 4602025990114250980L, 1044646352569048800L, 9106614159853161675L,
+        -8394115921626182539L, -4304087667751778808L, 2681532557646850893L, 3681559472488511871L, -3915372517896561773L, -2889241648411946534L,
+        -6564663803938238204L, -8060058171802589521L, 581945337509520675L, 3648778920718647903L, -4799698790548231394L, -7602572252857820065L,
+        220828013409515943L, -1072987336855386047L, 4287360518296753003L, -4633371852008891965L, 5513660857261085186L, -2258542936462001533L,
+        -8744380348503999773L, 8746140185685648781L, 228500091334420247L, 1356187007457302238L, 3019253992034194581L, 3152601605678500003L,
+        -8793219284148773595L, 5559581553696971176L, 4916432985369275664L, -8559797105120221417L, -5802598197927043732L, 2868348622579915573L,
+        -7224052902810357288L, -5894682518218493085L, 2587672709781371173L, -7706116723325376475L, 3092343956317362483L, -5561119517847711700L,
+        972445599196498113L, -1558506600978816441L, 1708913533482282562L, -2305554874185907314L, -6005743014309462908L, -6653329009633068701L,
+        -483583197311151195L, 2488075924621352812L, -4529369641467339140L, -4663743555056261452L, 2997203966153298104L, 1282559373026354493L,
+        240113143146674385L, 8665713329246516443L, 628141331766346752L, -4651421219668005332L, -7750560848702540400L, 7596648026010355826L,
+        -3132152619100351065L, 7834161864828164065L, 7103445518877254909L, 4390861237357459201L, -4780718172614204074L, -319889632007444440L,
+        622261699494173647L, -3186110786557562560L, -8718967088789066690L, -1948156510637662747L, -8212195255998774408L, -7028621931231314745L,
+        2623071828615234808L, -4066058308780939700L, -5484966924888173764L, -6683604512778046238L, -6756087640505506466L, 5256026990536851868L,
+        7841086888628396109L, 6640857538655893162L, -8021284697816458310L, -7109857044414059830L, -1689021141511844405L, -4298087301956291063L,
+        -4077748265377282003L, -998231156719803476L, 2719520354384050532L, 9132346697815513771L, 4332154495710163773L, -2085582442760428892L,
+        6994721091344268833L, -2556143461985726874L, -8567931991128098309L, 59934747298466858L, -3098398008776739403L, -265597256199410390L,
+        2332206071942466437L, -7522315324568406181L, 3154897383618636503L, -7585605855467168281L, -6762850759087199275L, 197309393502684135L,
+        -8579694182469508493L, 2543179307861934850L, 4350769010207485119L, -4468719947444108136L, -7207776534213261296L, -1224312577878317200L,
+        4287946071480840813L, 8362686366770308971L, 6486469209321732151L, -5605644191012979782L, -1669018511020473564L, 4450022655153542367L,
+        -7618176296641240059L, -3896357471549267421L, -4596796223304447488L, -6531150016257070659L, -8982326463137525940L, -4125325062227681798L,
+        -1306489741394045544L, -8338554946557245229L, 5329160409530630596L, 7790979528857726136L, 4955070238059373407L, -4304834761432101506L,
+        -6215295852904371179L, 3007769226071157901L, -6753025801236972788L, 8928702772696731736L, 7856187920214445904L, -4748497451462800923L,
+        7900176660600710914L, -7082800908938549136L, -6797926979589575837L, -6737316883512927978L, 4186670094382025798L, 1883939007446035042L,
+        -414705992779907823L, 3734134241178479257L, 4065968871360089196L, 6953124200385847784L, -7917685222115876751L, -7585632937840318161L,
+        -5567246375906782599L, -5256612402221608788L, 3106378204088556331L, -2894472214076325998L, 4565385105440252958L, 1979884289539493806L,
+        -6891578849933910383L, 3783206694208922581L, 8464961209802336085L, 2843963751609577687L, 3030678195484896323L, -4429654462759003204L,
+        4459239494808162889L, 402587895800087237L, 8057891408711167515L, 4541888170938985079L, 1042662272908816815L, -3666068979732206850L,
+        2647678726283249984L, 2144477441549833761L, -3417019821499388721L, -2105601033380872185L, 5916597177708541638L, -8760774321402454447L,
+        8833658097025758785L, 5970273481425315300L, 563813119381731307L, -6455022486202078793L, 1598828206250873866L, -4016978389451217698L,
+        -2988328551145513985L, -6071154634840136312L, 8469693267274066490L, 125672920241807416L, -3912292412830714870L, -2559617104544284221L,
+        -486523741806024092L, -4735332261862713930L, 5923302823487327109L, -9082480245771672572L, -1808429243461201518L, 7990420780896957397L,
+        4317817392807076702L, 3625184369705367340L, -6482649271566653105L, -3480272027152017464L, -3225473396345736649L, -368878695502291645L,
+        -3981164001421868007L, -8522033136963788610L, 7609280429197514109L, 3020985755112334161L, -2572049329799262942L, 2635195723621160615L,
+        5144520864246028816L, -8188285521126945980L, 1567242097116389047L, 8172389260191636581L, -2885551685425483535L, -7060359469858316883L,
+        -6480181133964513127L, -7317004403633452381L, 6011544915663598137L, 5932255307352610768L, 2241128460406315459L, -8327867140638080220L,
+        3094483003111372717L, 4583857460292963101L, 9079887171656594975L, -384082854924064405L, -3460631649611717935L, 4225072055348026230L,
+        -7385151438465742745L, 3801620336801580414L, -399845416774701952L, -7446754431269675473L, 7899055018877642622L, 5421679761463003041L,
+        5521102963086275121L, -4975092593295409910L, 8735487530905098534L, -7462844945281082830L, -2080886987197029914L, -1000715163927557685L,
+        -4253840471931071485L, -5828896094657903328L, 6424174453260338141L, 359248545074932887L, -5949720754023045210L, -2426265837057637212L,
+        3030918217665093212L, -9077771202237461772L, -3186796180789149575L, 740416251634527158L, -2142944401404840226L, 6951781370868335478L,
+        399922722363687927L, -8928469722407522623L, -1378421100515597285L, -8343051178220066766L, -3030716356046100229L, -8811767350470065420L,
+        9026808440365124461L, 6440783557497587732L, 4615674634722404292L, 539897290441580544L, 2096238225866883852L, 8751955639408182687L,
+        -7316147128802486205L, 7381039757301768559L, 6157238513393239656L, -1473377804940618233L, 8629571604380892756L, 5280433031239081479L,
+        7101611890139813254L, 2479018537985767835L, 7169176924412769570L, -1281305539061572506L, -7865612307799218120L, 2278447439451174845L,
+        3625338785743880657L, 6477479539006708521L, 8976185375579272206L, -3712000482142939688L, 1326024180520890843L, 7537449876596048829L,
+        5464680203499696154L, 3189671183162196045L, 6346751753565857109L, -8982212049534145501L, -6127578587196093755L, -245039190118465649L,
+        -6320577374581628592L, 7208698530190629697L, 7276901792339343736L, -7490986807540332668L, 4133292154170828382L, 2918308698224194548L,
+        -7703910638917631350L, -3929437324238184044L, -4300543082831323144L, -6344160503358350167L, 5896236396443472108L, -758328221503023383L,
+        -1894351639983151068L, -307900319840287220L, -6278469401177312761L, -2171292963361310674L, 8382142935188824023L, 9103922860780351547L,
+        4152330101494654406L,
+    };
+
+    static int seedrand(int x) {
+        final int A = 48271, Q = 44488, R = 3399;
+        int hi = x / Q;
+        int lo = x % Q;
+        x = A * lo - R * hi;
+        if (x < 0) {
+            x += INT32_MAX;
+        }
+        return x;
+    }
+
+    static final class RngSource {
+        int tap, feed;
+        long[] vec = new long[RNG_LEN];
+
+        RngSource(long seed) {
+            seed(seed);
+        }
+
+        void seed(long seed) {
+            tap = 0;
+            feed = RNG_LEN - RNG_TAP;
+
+            seed = seed % INT32_MAX;
+            if (seed < 0) {
+                seed += INT32_MAX;
+            }
+            if (seed == 0) {
+                seed = 89482311;
+            }
+
+            int x = (int) seed;
+            for (int i = -20; i < RNG_LEN; i++) {
+                x = seedrand(x);
+                if (i >= 0) {
+                    long u = ((long) x) << 40;
+                    x = seedrand(x);
+                    u ^= ((long) x) << 20;
+                    x = seedrand(x);
+                    u ^= (long) x;
+                    u ^= RNG_COOKED[i];
+                    vec[i] = u;
+                }
+            }
+        }
+
+        long uint64() {
+            tap--;
+            if (tap < 0) {
+                tap += RNG_LEN;
+            }
+            feed--;
+            if (feed < 0) {
+                feed += RNG_LEN;
+            }
+            long x = vec[feed] + vec[tap]; // Java long wraps like Go int64
+            vec[feed] = x;
+            return x;
+        }
+
+        long int63() {
+            return uint64() & RNG_MASK;
+        }
+    }
+
+    static final class GoRand {
+        final RngSource src;
+
+        GoRand(long seed) {
+            this.src = new RngSource(seed);
+        }
+
+        long int63() {
+            return src.int63();
+        }
+
+        int int31() {
+            return (int) (int63() >>> 32);
+        }
+
+        int int31n(int n) {
+            if (n <= 0) {
+                throw new IllegalArgumentException("invalid argument to Int31n");
+            }
+            if ((n & (n - 1)) == 0) { // power of two
+                return int31() & (n - 1);
+            }
+            // max = (1<<31)-1 - (1<<31)%uint32(n), computed with unsigned 32-bit math.
+            long un = n & 0xFFFFFFFFL;
+            int max = (int) (INT32_MAX - ((1L << 31) % un));
+            int v = int31();
+            while (v > max) {
+                v = int31();
+            }
+            return v % n;
+        }
+
+        long int63n(long n) {
+            if (n <= 0) {
+                throw new IllegalArgumentException("invalid argument to Int63n");
+            }
+            if ((n & (n - 1)) == 0) {
+                return int63() & (n - 1);
+            }
+            long max = (1L << 63) - 1 - Long.remainderUnsigned(1L << 63, n);
+            long v = int63();
+            while (v > max) {
+                v = int63();
+            }
+            return v % n;
+        }
+
+        int intn(int n) {
+            if (n <= 0) {
+                throw new IllegalArgumentException("invalid argument to Intn");
+            }
+            if (n <= (1 << 31) - 1) {
+                return int31n(n);
+            }
+            return (int) int63n((long) n);
+        }
+    }
+
+    static int randomNumberNotInArray(int maxVal, int[] blocked, long seed) {
+        Set<Integer> blockedSet = new HashSet<>();
+        for (int v : blocked) {
+            blockedSet.add(v);
+        }
+        int available = maxVal + 1 - blockedSet.size();
+        if (available <= 0) {
+            return -1;
+        }
+        GoRand rng = new GoRand(seed);
+        int k = rng.intn(available);
+        for (int v = 0; v <= maxVal; v++) {
+            if (blockedSet.contains(v)) {
+                continue;
+            }
+            if (k == 0) {
+                return v;
+            }
+            k--;
+        }
+        return -1;
+    }
+}', false, 2),
   ('prep-math-reverse-number', 'go', 'solution.go', 'package main
 func reverseNumber(n int) int {
 	neg := n < 0
@@ -11248,6 +19050,45 @@ func reverseNumber(n int) int {
 	return rev
 }
 ', true, 0),
+  ('prep-math-reverse-number', 'python', 'solution.py', 'MASK = (1 << 64) - 1
+
+
+def _to_int64(x):
+    """Emulate Go''s 64-bit signed int wraparound (Go `int` is 64-bit)."""
+    x &= MASK
+    if x >= (1 << 63):
+        x -= (1 << 64)
+    return x
+
+
+def reverse_number(n):
+    neg = n < 0
+    if neg:
+        n = _to_int64(-n)
+    rev = 0
+    while n > 0:
+        rev = _to_int64(rev * 10 + n % 10)
+        n = _to_int64(n // 10)
+    if neg:
+        return _to_int64(-rev)
+    return rev', false, 1),
+  ('prep-math-reverse-number', 'java', 'Solution.java', 'class Solution {
+    long reverseNumber(long n) {
+        boolean neg = n < 0;
+        if (neg) {
+            n = -n;
+        }
+        long rev = 0;
+        while (n > 0) {
+            rev = rev * 10 + n % 10;
+            n /= 10;
+        }
+        if (neg) {
+            return -rev;
+        }
+        return rev;
+    }
+}', false, 2),
   ('prep-math-square-root', 'go', 'solution.go', 'package main
 func squareRoot(x int) int {
 	if x < 2 {
@@ -11267,6 +19108,38 @@ func squareRoot(x int) int {
 	return ans
 }
 ', true, 0),
+  ('prep-math-square-root', 'python', 'solution.py', 'def square_root(x):
+    if x < 2:
+        return x
+    lo, hi = 1, x // 2
+    ans = 1
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2
+        if mid <= x // mid:
+            ans = mid
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return ans', false, 1),
+  ('prep-math-square-root', 'java', 'Solution.java', 'class Solution {
+    long squareRoot(long x) {
+        if (x < 2) {
+            return x;
+        }
+        long lo = 1, hi = x / 2;
+        long ans = 1;
+        while (lo <= hi) {
+            long mid = lo + (hi - lo) / 2;
+            if (mid <= x / mid) {
+                ans = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return ans;
+    }
+}', false, 2),
   ('prep-math-sum-of-digits', 'go', 'solution.go', 'package main
 func sumOfDigits(n int) int {
 	if n < 0 {
@@ -11280,6 +19153,29 @@ func sumOfDigits(n int) int {
 	return sum
 }
 ', true, 0),
+  ('prep-math-sum-of-digits', 'python', 'solution.py', 'def sum_of_digits(n: int) -> int:
+    if n < 0:
+        n = -n
+    total = 0
+    while n > 0:
+        total += n % 10
+        n //= 10
+    return total', false, 1),
+  ('prep-math-sum-of-digits', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long sumOfDigits(long n) {
+        if (n < 0) {
+            n = -n;
+        }
+        long sum = 0;
+        while (n > 0) {
+            sum += n % 10;
+            n /= 10;
+        }
+        return sum;
+    }
+}', false, 2),
   ('prep-matrices-battleships-in-a-board', 'go', 'solution.go', 'package main
 func countBattleships(board [][]byte) int {
 	cnt := 0
@@ -11293,6 +19189,31 @@ func countBattleships(board [][]byte) int {
 	return cnt
 }
 ', true, 0),
+  ('prep-matrices-battleships-in-a-board', 'python', 'solution.py', 'from typing import List
+
+
+def countBattleships(board: List[List[int]]) -> int:
+    cnt = 0
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] == ord(''X'') and (i == 0 or board[i - 1][j] != ord(''X'')) and (j == 0 or board[i][j - 1] != ord(''X'')):
+                cnt += 1
+    return cnt', false, 1),
+  ('prep-matrices-battleships-in-a-board', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int countBattleships(char[][] board) {
+        int cnt = 0;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j] == ''X'' && (i == 0 || board[i - 1][j] != ''X'') && (j == 0 || board[i][j - 1] != ''X'')) {
+                    cnt++;
+                }
+            }
+        }
+        return cnt;
+    }
+}', false, 2),
   ('prep-matrices-check-if-word-can-be-placed-in-crossword', 'go', 'solution.go', 'package main
 func placeWordInCrossword(board [][]byte, word string) bool {
 	m, n, wLen := len(board), len(board[0]), len(word)
@@ -11340,6 +19261,83 @@ func placeWordInCrossword(board [][]byte, word string) bool {
 	return false
 }
 ', true, 0),
+  ('prep-matrices-check-if-word-can-be-placed-in-crossword', 'python', 'solution.py', 'def placeWordInCrossword(board, word):
+    wb = word.encode(''utf-8'') if isinstance(word, str) else word
+    m, n, wLen = len(board), len(board[0]), len(wb)
+
+    def matches(seg):
+        if len(seg) != wLen:
+            return False
+        fwd, bwd = True, True
+        for i in range(wLen):
+            if seg[i] != ord('' '') and seg[i] != wb[i]:
+                fwd = False
+            if seg[i] != ord('' '') and seg[i] != wb[wLen - 1 - i]:
+                bwd = False
+        return fwd or bwd
+
+    for i in range(m):
+        seg = []
+        for j in range(n + 1):
+            if j < n and board[i][j] != ord(''#''):
+                seg.append(board[i][j])
+            else:
+                if matches(seg):
+                    return True
+                seg = []
+    for j in range(n):
+        seg = []
+        for i in range(m + 1):
+            if i < m and board[i][j] != ord(''#''):
+                seg.append(board[i][j])
+            else:
+                if matches(seg):
+                    return True
+                seg = []
+    return False', false, 1),
+  ('prep-matrices-check-if-word-can-be-placed-in-crossword', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    public boolean placeWordInCrossword(char[][] board, String word) {
+        byte[] wb = word.getBytes(StandardCharsets.UTF_8);
+        int m = board.length, n = board[0].length, wLen = wb.length;
+        for (int i = 0; i < m; i++) {
+            List<Byte> seg = new ArrayList<>();
+            for (int j = 0; j <= n; j++) {
+                if (j < n && board[i][j] != ''#'') {
+                    seg.add((byte) board[i][j]);
+                } else {
+                    if (matches(seg, wb, wLen)) return true;
+                    seg = new ArrayList<>();
+                }
+            }
+        }
+        for (int j = 0; j < n; j++) {
+            List<Byte> seg = new ArrayList<>();
+            for (int i = 0; i <= m; i++) {
+                if (i < m && board[i][j] != ''#'') {
+                    seg.add((byte) board[i][j]);
+                } else {
+                    if (matches(seg, wb, wLen)) return true;
+                    seg = new ArrayList<>();
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean matches(List<Byte> seg, byte[] wb, int wLen) {
+        if (seg.size() != wLen) return false;
+        boolean fwd = true, bwd = true;
+        for (int i = 0; i < wLen; i++) {
+            byte c = seg.get(i);
+            if (c != '' '' && c != wb[i]) fwd = false;
+            if (c != '' '' && c != wb[wLen - 1 - i]) bwd = false;
+        }
+        return fwd || bwd;
+    }
+}', false, 2),
   ('prep-matrices-diagonal-traverse', 'go', 'solution.go', 'package main
 func findDiagonalOrder(mat [][]int) []int {
 	m, n := len(mat), len(mat[0])
@@ -11374,6 +19372,72 @@ func findDiagonalOrder(mat [][]int) []int {
 	return res
 }
 ', true, 0),
+  ('prep-matrices-diagonal-traverse', 'python', 'solution.py', 'from typing import List
+
+
+def findDiagonalOrder(mat: List[List[int]]) -> List[int]:
+    m, n = len(mat), len(mat[0])
+    res = [0] * (m * n)
+    r, c, d = 0, 0, 1
+    for i in range(m * n):
+        res[i] = mat[r][c]
+        if d == 1:
+            if c == n - 1:
+                r += 1
+                d = -1
+            elif r == 0:
+                c += 1
+                d = -1
+            else:
+                r -= 1
+                c += 1
+        else:
+            if r == m - 1:
+                c += 1
+                d = 1
+            elif c == 0:
+                r += 1
+                d = 1
+            else:
+                r += 1
+                c -= 1
+    return res', false, 1),
+  ('prep-matrices-diagonal-traverse', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[] findDiagonalOrder(long[][] mat) {
+        int m = mat.length, n = mat[0].length;
+        long[] res = new long[m * n];
+        int r = 0, c = 0, d = 1;
+        for (int i = 0; i < m * n; i++) {
+            res[i] = mat[r][c];
+            if (d == 1) {
+                if (c == n - 1) {
+                    r++;
+                    d = -1;
+                } else if (r == 0) {
+                    c++;
+                    d = -1;
+                } else {
+                    r--;
+                    c++;
+                }
+            } else {
+                if (r == m - 1) {
+                    c++;
+                    d = 1;
+                } else if (c == 0) {
+                    r++;
+                    d = 1;
+                } else {
+                    r++;
+                    c--;
+                }
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-matrices-fill-rows-and-columns-with-1s', 'go', 'solution.go', 'package main
 func fillRowsAndColumnsWith1s(mat [][]int) {
 	if len(mat) == 0 {
@@ -11418,6 +19482,81 @@ func fillRowsAndColumnsWith1s(mat [][]int) {
 	}
 }
 ', true, 0),
+  ('prep-matrices-fill-rows-and-columns-with-1s', 'python', 'solution.py', 'from typing import List
+
+
+def fillRowsAndColumnsWith1s(mat: List[List[int]]) -> None:
+    if len(mat) == 0:
+        return
+    m, n = len(mat), len(mat[0])
+    row0, col0 = False, False
+    for j in range(n):
+        if mat[0][j] == 1:
+            row0 = True
+    for i in range(m):
+        if mat[i][0] == 1:
+            col0 = True
+    for i in range(1, m):
+        for j in range(1, n):
+            if mat[i][j] == 1:
+                mat[i][0] = 1
+                mat[0][j] = 1
+    for i in range(1, m):
+        for j in range(1, n):
+            if mat[i][0] == 1 or mat[0][j] == 1:
+                mat[i][j] = 1
+    if row0:
+        for j in range(n):
+            mat[0][j] = 1
+    if col0:
+        for i in range(m):
+            mat[i][0] = 1', false, 1),
+  ('prep-matrices-fill-rows-and-columns-with-1s', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    void fillRowsAndColumnsWith1s(int[][] mat) {
+        if (mat.length == 0) {
+            return;
+        }
+        int m = mat.length, n = mat[0].length;
+        boolean row0 = false, col0 = false;
+        for (int j = 0; j < n; j++) {
+            if (mat[0][j] == 1) {
+                row0 = true;
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            if (mat[i][0] == 1) {
+                col0 = true;
+            }
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (mat[i][j] == 1) {
+                    mat[i][0] = 1;
+                    mat[0][j] = 1;
+                }
+            }
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (mat[i][0] == 1 || mat[0][j] == 1) {
+                    mat[i][j] = 1;
+                }
+            }
+        }
+        if (row0) {
+            for (int j = 0; j < n; j++) {
+                mat[0][j] = 1;
+            }
+        }
+        if (col0) {
+            for (int i = 0; i < m; i++) {
+                mat[i][0] = 1;
+            }
+        }
+    }
+}', false, 2),
   ('prep-matrices-find-path-between-cells', 'go', 'solution.go', 'package main
 func findPathBetweenCells(mat [][]int, sx, sy, dx, dy int) [][2]int {
 	m, n := len(mat), len(mat[0])
@@ -11451,6 +19590,68 @@ func findPathBetweenCells(mat [][]int, sx, sy, dx, dy int) [][2]int {
 	return nil
 }
 ', true, 0),
+  ('prep-matrices-find-path-between-cells', 'python', 'solution.py', 'from typing import List, Optional, Tuple
+
+
+def find_path_between_cells(
+    mat: List[List[int]], sx: int, sy: int, dx: int, dy: int
+) -> Optional[List[Tuple[int, int]]]:
+    m, n = len(mat), len(mat[0])
+    visited = [[False] * n for _ in range(m)]
+    path: List[Tuple[int, int]] = []
+    dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+    def dfs(i: int, j: int) -> bool:
+        if i < 0 or j < 0 or i >= m or j >= n or mat[i][j] == 1 or visited[i][j]:
+            return False
+        path.append((i, j))
+        if i == dx and j == dy:
+            return True
+        visited[i][j] = True
+        for di, dj in dirs:
+            if dfs(i + di, j + dj):
+                return True
+        path.pop()
+        return False
+
+    if dfs(sx, sy):
+        return path
+    return None', false, 1),
+  ('prep-matrices-find-path-between-cells', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    private static final int[][] DIRS = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+    public List<int[]> findPathBetweenCells(int[][] mat, int sx, int sy, int dx, int dy) {
+        int m = mat.length, n = mat[0].length;
+        boolean[][] visited = new boolean[m][n];
+        List<int[]> path = new ArrayList<>();
+        if (dfs(mat, visited, path, sx, sy, dx, dy, m, n)) {
+            return path;
+        }
+        return null;
+    }
+
+    private boolean dfs(int[][] mat, boolean[][] visited, List<int[]> path,
+                        int i, int j, int dx, int dy, int m, int n) {
+        if (i < 0 || j < 0 || i >= m || j >= n || mat[i][j] == 1 || visited[i][j]) {
+            return false;
+        }
+        path.add(new int[]{i, j});
+        if (i == dx && j == dy) {
+            return true;
+        }
+        visited[i][j] = true;
+        for (int[] d : DIRS) {
+            if (dfs(mat, visited, path, i + d[0], j + d[1], dx, dy, m, n)) {
+                return true;
+            }
+        }
+        path.remove(path.size() - 1);
+        return false;
+    }
+}', false, 2),
   ('prep-matrices-longest-increasing-path', 'go', 'solution.go', 'package main
 func longestIncreasingPath(mat [][]int) int {
 	m, n := len(mat), len(mat[0])
@@ -11487,6 +19688,65 @@ func longestIncreasingPath(mat [][]int) int {
 	return ans
 }
 ', true, 0),
+  ('prep-matrices-longest-increasing-path', 'python', 'solution.py', 'from typing import List
+
+
+def longestIncreasingPath(mat: List[List[int]]) -> int:
+    m, n = len(mat), len(mat[0])
+    memo = [[0] * n for _ in range(m)]
+    dirs = ((0, 1), (1, 0), (0, -1), (-1, 0))
+
+    def dfs(i: int, j: int) -> int:
+        if memo[i][j] != 0:
+            return memo[i][j]
+        best = 1
+        for di, dj in dirs:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < m and 0 <= nj < n and mat[ni][nj] > mat[i][j]:
+                v = dfs(ni, nj) + 1
+                if v > best:
+                    best = v
+        memo[i][j] = best
+        return best
+
+    ans = 0
+    for i in range(m):
+        for j in range(n):
+            v = dfs(i, j)
+            if v > ans:
+                ans = v
+    return ans', false, 1),
+  ('prep-matrices-longest-increasing-path', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int longestIncreasingPath(int[][] mat) {
+        int m = mat.length, n = mat[0].length;
+        int[][] memo = new int[m][n];
+        int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int v = dfs(mat, memo, dirs, m, n, i, j);
+                if (v > ans) ans = v;
+            }
+        }
+        return ans;
+    }
+
+    private int dfs(int[][] mat, int[][] memo, int[][] dirs, int m, int n, int i, int j) {
+        if (memo[i][j] != 0) return memo[i][j];
+        int best = 1;
+        for (int[] d : dirs) {
+            int ni = i + d[0], nj = j + d[1];
+            if (ni >= 0 && nj >= 0 && ni < m && nj < n && mat[ni][nj] > mat[i][j]) {
+                int v = dfs(mat, memo, dirs, m, n, ni, nj) + 1;
+                if (v > best) best = v;
+            }
+        }
+        memo[i][j] = best;
+        return best;
+    }
+}', false, 2),
   ('prep-matrices-longest-increasing-path-in-a-matrix', 'go', 'solution.go', 'package main
 func longestIncreasingPath(matrix [][]int) int {
 	m, n := len(matrix), len(matrix[0])
@@ -11523,6 +19783,69 @@ func longestIncreasingPath(matrix [][]int) int {
 	return res
 }
 ', true, 0),
+  ('prep-matrices-longest-increasing-path-in-a-matrix', 'python', 'solution.py', 'from typing import List
+
+
+def longestIncreasingPath(matrix: List[List[int]]) -> int:
+    m, n = len(matrix), len(matrix[0])
+    memo = [[0] * n for _ in range(m)]
+    dirs = ((0, 1), (0, -1), (1, 0), (-1, 0))
+
+    def dfs(r: int, c: int) -> int:
+        if memo[r][c] > 0:
+            return memo[r][c]
+        mx = 1
+        for dr, dc in dirs:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < m and 0 <= nc < n and matrix[nr][nc] > matrix[r][c]:
+                v = 1 + dfs(nr, nc)
+                if v > mx:
+                    mx = v
+        memo[r][c] = mx
+        return mx
+
+    res = 0
+    for i in range(m):
+        for j in range(n):
+            v = dfs(i, j)
+            if v > res:
+                res = v
+    return res', false, 1),
+  ('prep-matrices-longest-increasing-path-in-a-matrix', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    private int m, n;
+    private int[][] memo;
+    private static final int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
+    public int longestIncreasingPath(int[][] matrix) {
+        m = matrix.length;
+        n = matrix[0].length;
+        memo = new int[m][n];
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int v = dfs(matrix, i, j);
+                if (v > res) res = v;
+            }
+        }
+        return res;
+    }
+
+    private int dfs(int[][] matrix, int r, int c) {
+        if (memo[r][c] > 0) return memo[r][c];
+        int mx = 1;
+        for (int[] d : dirs) {
+            int nr = r + d[0], nc = c + d[1];
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && matrix[nr][nc] > matrix[r][c]) {
+                int v = 1 + dfs(matrix, nr, nc);
+                if (v > mx) mx = v;
+            }
+        }
+        memo[r][c] = mx;
+        return mx;
+    }
+}', false, 2),
   ('prep-matrices-longest-line-of-consecutive-one-in-matrix', 'go', 'solution.go', 'package main
 func longestLine(mat [][]int) int {
 	m, n := len(mat), len(mat[0])
@@ -11557,6 +19880,69 @@ func longestLine(mat [][]int) int {
 	return res
 }
 ', true, 0),
+  ('prep-matrices-longest-line-of-consecutive-one-in-matrix', 'python', 'solution.py', 'from typing import List
+
+
+class Solution:
+    def longestLine(self, mat: List[List[int]]) -> int:
+        m, n = len(mat), len(mat[0])
+        dp = [[0, 0, 0, 0] for _ in range(n)]
+        res = 0
+        for i in range(m):
+            nd = [[0, 0, 0, 0] for _ in range(n)]
+            for j in range(n):
+                if mat[i][j] == 1:
+                    nd[j][0] = 1
+                    if j > 0:
+                        nd[j][0] = nd[j - 1][0] + 1
+                    nd[j][1] = dp[j][1] + 1
+                    nd[j][2] = 1
+                    if j > 0:
+                        nd[j][2] = dp[j - 1][2] + 1
+                    nd[j][3] = 1
+                    if j < n - 1:
+                        nd[j][3] = dp[j + 1][3] + 1
+                    for d in range(4):
+                        if nd[j][d] > res:
+                            res = nd[j][d]
+            dp = nd
+        return res', false, 1),
+  ('prep-matrices-longest-line-of-consecutive-one-in-matrix', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int longestLine(int[][] mat) {
+        int m = mat.length, n = mat[0].length;
+        int[][] dp = new int[n][4];
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            int[][] nd = new int[n][4];
+            for (int j = 0; j < n; j++) {
+                if (mat[i][j] == 1) {
+                    nd[j][0] = 1;
+                    if (j > 0) {
+                        nd[j][0] = nd[j - 1][0] + 1;
+                    }
+                    nd[j][1] = dp[j][1] + 1;
+                    nd[j][2] = 1;
+                    if (j > 0) {
+                        nd[j][2] = dp[j - 1][2] + 1;
+                    }
+                    nd[j][3] = 1;
+                    if (j < n - 1) {
+                        nd[j][3] = dp[j + 1][3] + 1;
+                    }
+                    for (int d = 0; d < 4; d++) {
+                        if (nd[j][d] > res) {
+                            res = nd[j][d];
+                        }
+                    }
+                }
+            }
+            dp = nd;
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-matrices-max-region', 'go', 'solution.go', 'package main
 func maxRegion(mat [][]int) int {
 	if len(mat) == 0 {
@@ -11589,6 +19975,73 @@ func maxRegion(mat [][]int) int {
 	return best
 }
 ', true, 0),
+  ('prep-matrices-max-region', 'python', 'solution.py', 'from typing import List
+
+
+def maxRegion(mat: List[List[int]]) -> int:
+    if len(mat) == 0:
+        return 0
+    m, n = len(mat), len(mat[0])
+    dirs = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+    def dfs(i: int, j: int) -> int:
+        if i < 0 or j < 0 or i >= m or j >= n or mat[i][j] != 1:
+            return 0
+        mat[i][j] = 0
+        area = 1
+        for di, dj in dirs:
+            area += dfs(i + di, j + dj)
+        return area
+
+    best = 0
+    for i in range(m):
+        for j in range(n):
+            if mat[i][j] == 1:
+                a = dfs(i, j)
+                if a > best:
+                    best = a
+    return best', false, 1),
+  ('prep-matrices-max-region', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    private int m, n;
+    private static final int[][] DIRS = {
+        {0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+    };
+
+    public long maxRegion(int[][] mat) {
+        if (mat.length == 0) {
+            return 0;
+        }
+        m = mat.length;
+        n = mat[0].length;
+        long best = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (mat[i][j] == 1) {
+                    long a = dfs(mat, i, j);
+                    if (a > best) {
+                        best = a;
+                    }
+                }
+            }
+        }
+        return best;
+    }
+
+    private long dfs(int[][] mat, int i, int j) {
+        if (i < 0 || j < 0 || i >= m || j >= n || mat[i][j] != 1) {
+            return 0;
+        }
+        mat[i][j] = 0;
+        long area = 1;
+        for (int[] d : DIRS) {
+            area += dfs(mat, i + d[0], j + d[1]);
+        }
+        return area;
+    }
+}', false, 2),
   ('prep-matrices-min-distance-of-meeting-point', 'go', 'solution.go', 'package main
 import (
 	"sort"
@@ -11632,6 +20085,72 @@ func minDistanceOfMeetingPoint(grid [][]int) int {
 	return minDist1D(rows) + minDist1D(cols)
 }
 ', true, 0),
+  ('prep-matrices-min-distance-of-meeting-point', 'python', 'solution.py', 'from typing import List
+
+
+def min_dist_1d(a: List[int]) -> int:
+    a.sort()
+    lo, hi = 0, len(a) - 1
+    dist = 0
+    while lo < hi:
+        mn = a[lo]
+        if a[hi] < mn:
+            mn = a[hi]
+        dist += mn * (hi - lo)
+        if a[lo] == mn:
+            lo += 1
+        if a[hi] == mn:
+            hi -= 1
+    return dist
+
+
+def min_distance_of_meeting_point(grid: List[List[int]]) -> int:
+    rows: List[int] = []
+    cols: List[int] = []
+    for r in range(len(grid)):
+        for c, v in enumerate(grid[r]):
+            if v == 1:
+                rows.append(r)
+                cols.append(c)
+    return min_dist_1d(rows) + min_dist_1d(cols)', false, 1),
+  ('prep-matrices-min-distance-of-meeting-point', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static long minDist1D(List<Integer> a) {
+        Collections.sort(a);
+        int lo = 0, hi = a.size() - 1;
+        long dist = 0;
+        while (lo < hi) {
+            int mn = a.get(lo);
+            if (a.get(hi) < mn) {
+                mn = a.get(hi);
+            }
+            dist += (long) mn * (hi - lo);
+            if (a.get(lo) == mn) {
+                lo++;
+            }
+            if (a.get(hi) == mn) {
+                hi--;
+            }
+        }
+        return dist;
+    }
+
+    static long minDistanceOfMeetingPoint(int[][] grid) {
+        List<Integer> rows = new ArrayList<>();
+        List<Integer> cols = new ArrayList<>();
+        for (int r = 0; r < grid.length; r++) {
+            for (int c = 0; c < grid[r].length; c++) {
+                if (grid[r][c] == 1) {
+                    rows.add(r);
+                    cols.add(c);
+                }
+            }
+        }
+        return minDist1D(rows) + minDist1D(cols);
+    }
+}', false, 2),
   ('prep-matrices-nearest-bikes', 'go', 'solution.go', 'package main
 type Position struct {
 	R, C int
@@ -11672,6 +20191,76 @@ func nearestBikes(grid [][]byte) int {
 	return best
 }
 ', true, 0),
+  ('prep-matrices-nearest-bikes', 'python', 'solution.py', 'from typing import List, Tuple
+
+
+def _abs_int(x: int) -> int:
+    return -x if x < 0 else x
+
+
+def _manhattan(a: Tuple[int, int], b: Tuple[int, int]) -> int:
+    return _abs_int(a[0] - b[0]) + _abs_int(a[1] - b[1])
+
+
+def nearest_bikes(grid: List[bytes]) -> int:
+    m = len(grid)
+    n = len(grid[0])
+    bikes: List[Tuple[int, int]] = []
+    workers: List[Tuple[int, int]] = []
+    for r in range(m):
+        row = grid[r]
+        for c in range(n):
+            ch = row[c]
+            if ch == ord(''X''):
+                bikes.append((r, c))
+            elif ch == ord(''Y''):
+                workers.append((r, c))
+    best = (1 << 63) - 1
+    for w in workers:
+        for b in bikes:
+            d = _manhattan(w, b)
+            if d < best:
+                best = d
+    return best', false, 1),
+  ('prep-matrices-nearest-bikes', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static long absInt(long x) {
+        return x < 0 ? -x : x;
+    }
+
+    static long manhattan(int[] a, int[] b) {
+        return absInt(a[0] - b[0]) + absInt(a[1] - b[1]);
+    }
+
+    public long nearestBikes(byte[][] grid) {
+        int m = grid.length;
+        int n = grid[0].length;
+        List<int[]> bikes = new ArrayList<>();
+        List<int[]> workers = new ArrayList<>();
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                byte ch = grid[r][c];
+                if (ch == ''X'') {
+                    bikes.add(new int[]{r, c});
+                } else if (ch == ''Y'') {
+                    workers.add(new int[]{r, c});
+                }
+            }
+        }
+        long best = Long.MAX_VALUE;
+        for (int[] w : workers) {
+            for (int[] b : bikes) {
+                long d = manhattan(w, b);
+                if (d < best) {
+                    best = d;
+                }
+            }
+        }
+        return best;
+    }
+}', false, 2),
   ('prep-matrices-print-matrix-in-spiral-order', 'go', 'solution.go', 'package main
 func printMatrixInSpiralOrder(mat [][]int) []int {
 	if len(mat) == 0 {
@@ -11705,6 +20294,66 @@ func printMatrixInSpiralOrder(mat [][]int) []int {
 	return res
 }
 ', true, 0),
+  ('prep-matrices-print-matrix-in-spiral-order', 'python', 'solution.py', 'from typing import List, Optional
+
+
+def printMatrixInSpiralOrder(mat: List[List[int]]) -> Optional[List[int]]:
+    if len(mat) == 0:
+        return None
+    startR, startC = 0, 0
+    endR, endC = len(mat) - 1, len(mat[0]) - 1
+    res: List[int] = []
+    while startR <= endR and startC <= endC:
+        for c in range(startC, endC + 1):
+            res.append(mat[startR][c])
+        startR += 1
+        for r in range(startR, endR + 1):
+            res.append(mat[r][endC])
+        endC -= 1
+        if startR <= endR:
+            for c in range(endC, startC - 1, -1):
+                res.append(mat[endR][c])
+            endR -= 1
+        if startC <= endC:
+            for r in range(endR, startR - 1, -1):
+                res.append(mat[r][startC])
+            startC += 1
+    return res', false, 1),
+  ('prep-matrices-print-matrix-in-spiral-order', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static List<Long> printMatrixInSpiralOrder(long[][] mat) {
+        if (mat.length == 0) {
+            return null;
+        }
+        int startR = 0, startC = 0;
+        int endR = mat.length - 1, endC = mat[0].length - 1;
+        List<Long> res = new ArrayList<>();
+        while (startR <= endR && startC <= endC) {
+            for (int c = startC; c <= endC; c++) {
+                res.add(mat[startR][c]);
+            }
+            startR++;
+            for (int r = startR; r <= endR; r++) {
+                res.add(mat[r][endC]);
+            }
+            endC--;
+            if (startR <= endR) {
+                for (int c = endC; c >= startC; c--) {
+                    res.add(mat[endR][c]);
+                }
+                endR--;
+            }
+            if (startC <= endC) {
+                for (int r = endR; r >= startR; r--) {
+                    res.add(mat[r][startC]);
+                }
+                startC++;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-matrices-remove-all-ones-with-row-and-column-flips', 'go', 'solution.go', 'package main
 func removeOnes(grid [][]int) bool {
 	n := len(grid[0])
@@ -11725,6 +20374,44 @@ func removeOnes(grid [][]int) bool {
 	return true
 }
 ', true, 0),
+  ('prep-matrices-remove-all-ones-with-row-and-column-flips', 'python', 'solution.py', 'from typing import List
+
+
+class Solution:
+    def removeOnes(self, grid: List[List[int]]) -> bool:
+        n = len(grid[0])
+        for i in range(1, len(grid)):
+            same, inv = True, True
+            for j in range(n):
+                if grid[i][j] != grid[0][j]:
+                    same = False
+                if grid[i][j] == grid[0][j]:
+                    inv = False
+            if not same and not inv:
+                return False
+        return True', false, 1),
+  ('prep-matrices-remove-all-ones-with-row-and-column-flips', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public boolean removeOnes(int[][] grid) {
+        int n = grid[0].length;
+        for (int i = 1; i < grid.length; i++) {
+            boolean same = true, inv = true;
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] != grid[0][j]) {
+                    same = false;
+                }
+                if (grid[i][j] == grid[0][j]) {
+                    inv = false;
+                }
+            }
+            if (!same && !inv) {
+                return false;
+            }
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-matrices-rotate-matrix-by-90-degrees', 'go', 'solution.go', 'package main
 func rotateMatrixBy90Degrees(mat [][]int) {
 	n := len(mat)
@@ -11739,6 +20426,34 @@ func rotateMatrixBy90Degrees(mat [][]int) {
 	}
 }
 ', true, 0),
+  ('prep-matrices-rotate-matrix-by-90-degrees', 'python', 'solution.py', 'from typing import List
+
+
+def rotate_matrix_by_90_degrees(mat: List[List[int]]) -> None:
+    n = len(mat)
+    for i in range(n // 2):
+        for j in range(i, n - i - 1):
+            tmp = mat[i][j]
+            mat[i][j] = mat[n - j - 1][i]
+            mat[n - j - 1][i] = mat[n - i - 1][n - j - 1]
+            mat[n - i - 1][n - j - 1] = mat[j][n - i - 1]
+            mat[j][n - i - 1] = tmp', false, 1),
+  ('prep-matrices-rotate-matrix-by-90-degrees', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    void rotateMatrixBy90Degrees(long[][] mat) {
+        int n = mat.length;
+        for (int i = 0; i < n / 2; i++) {
+            for (int j = i; j < n - i - 1; j++) {
+                long tmp = mat[i][j];
+                mat[i][j] = mat[n - j - 1][i];
+                mat[n - j - 1][i] = mat[n - i - 1][n - j - 1];
+                mat[n - i - 1][n - j - 1] = mat[j][n - i - 1];
+                mat[j][n - i - 1] = tmp;
+            }
+        }
+    }
+}', false, 2),
   ('prep-matrices-search-a-2d-matrix-ii', 'go', 'solution.go', 'package main
 func searchMatrix(matrix [][]int, target int) bool {
 	m, n := len(matrix), len(matrix[0])
@@ -11756,6 +20471,39 @@ func searchMatrix(matrix [][]int, target int) bool {
 	return false
 }
 ', true, 0),
+  ('prep-matrices-search-a-2d-matrix-ii', 'python', 'solution.py', 'from typing import List
+
+
+def searchMatrix(matrix: List[List[int]], target: int) -> bool:
+    m, n = len(matrix), len(matrix[0])
+    r, c = 0, n - 1
+    while r < m and c >= 0:
+        if matrix[r][c] == target:
+            return True
+        if matrix[r][c] > target:
+            c -= 1
+        else:
+            r += 1
+    return False', false, 1),
+  ('prep-matrices-search-a-2d-matrix-ii', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    boolean searchMatrix(int[][] matrix, int target) {
+        int m = matrix.length, n = matrix[0].length;
+        int r = 0, c = n - 1;
+        while (r < m && c >= 0) {
+            if (matrix[r][c] == target) {
+                return true;
+            }
+            if (matrix[r][c] > target) {
+                c--;
+            } else {
+                r++;
+            }
+        }
+        return false;
+    }
+}', false, 2),
   ('prep-matrices-search-in-sorted-matrix', 'go', 'solution.go', 'package main
 func searchInSortedMatrix(mat [][]int, key int) [2]int {
 	if len(mat) == 0 {
@@ -11775,6 +20523,42 @@ func searchInSortedMatrix(mat [][]int, key int) [2]int {
 	return [2]int{-1, -1}
 }
 ', true, 0),
+  ('prep-matrices-search-in-sorted-matrix', 'python', 'solution.py', 'from typing import List, Tuple
+
+
+def search_in_sorted_matrix(mat: List[List[int]], key: int) -> Tuple[int, int]:
+    if len(mat) == 0:
+        return (-1, -1)
+    i, j = 0, len(mat[0]) - 1
+    while i < len(mat) and j >= 0:
+        if mat[i][j] == key:
+            return (i, j)
+        if mat[i][j] > key:
+            j -= 1
+        else:
+            i += 1
+    return (-1, -1)', false, 1),
+  ('prep-matrices-search-in-sorted-matrix', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[] searchInSortedMatrix(long[][] mat, long key) {
+        if (mat.length == 0) {
+            return new long[]{-1, -1};
+        }
+        int i = 0, j = mat[0].length - 1;
+        while (i < mat.length && j >= 0) {
+            if (mat[i][j] == key) {
+                return new long[]{i, j};
+            }
+            if (mat[i][j] > key) {
+                j--;
+            } else {
+                i++;
+            }
+        }
+        return new long[]{-1, -1};
+    }
+}', false, 2),
   ('prep-matrices-spiral-matrix', 'go', 'solution.go', 'package main
 func spiralOrder(matrix [][]int) []int {
 	var res []int
@@ -11804,6 +20588,59 @@ func spiralOrder(matrix [][]int) []int {
 	return res
 }
 ', true, 0),
+  ('prep-matrices-spiral-matrix', 'python', 'solution.py', 'from typing import List
+
+
+def spiralOrder(matrix: List[List[int]]) -> List[int]:
+    res: List[int] = []
+    top, bot, left, right = 0, len(matrix) - 1, 0, len(matrix[0]) - 1
+    while top <= bot and left <= right:
+        for c in range(left, right + 1):
+            res.append(matrix[top][c])
+        top += 1
+        for r in range(top, bot + 1):
+            res.append(matrix[r][right])
+        right -= 1
+        if top <= bot:
+            for c in range(right, left - 1, -1):
+                res.append(matrix[bot][c])
+            bot -= 1
+        if left <= right:
+            for r in range(bot, top - 1, -1):
+                res.append(matrix[r][left])
+            left += 1
+    return res', false, 1),
+  ('prep-matrices-spiral-matrix', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> res = new ArrayList<>();
+        int top = 0, bot = matrix.length - 1, left = 0, right = matrix[0].length - 1;
+        while (top <= bot && left <= right) {
+            for (int c = left; c <= right; c++) {
+                res.add(matrix[top][c]);
+            }
+            top++;
+            for (int r = top; r <= bot; r++) {
+                res.add(matrix[r][right]);
+            }
+            right--;
+            if (top <= bot) {
+                for (int c = right; c >= left; c--) {
+                    res.add(matrix[bot][c]);
+                }
+                bot--;
+            }
+            if (left <= right) {
+                for (int r = bot; r >= top; r--) {
+                    res.add(matrix[r][left]);
+                }
+                left++;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-matrices-word-search-on-board', 'go', 'solution.go', 'package main
 func wordSearchOnBoard(board [][]byte, word string) bool {
 	m, n := len(board), len(board[0])
@@ -11839,6 +20676,77 @@ func wordSearchOnBoard(board [][]byte, word string) bool {
 	return false
 }
 ', true, 0),
+  ('prep-matrices-word-search-on-board', 'python', 'solution.py', 'from typing import List
+
+
+def word_search_on_board(board: List[bytes], word: bytes) -> bool:
+    m, n = len(board), len(board[0])
+    visited = [[False] * n for _ in range(m)]
+    dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+    def dfs(i: int, j: int, idx: int) -> bool:
+        if idx == len(word):
+            return True
+        if i < 0 or j < 0 or i >= m or j >= n or visited[i][j] or board[i][j] != word[idx]:
+            return False
+        visited[i][j] = True
+        for di, dj in dirs:
+            if dfs(i + di, j + dj, idx + 1):
+                return True
+        visited[i][j] = False
+        return False
+
+    for i in range(m):
+        for j in range(n):
+            if dfs(i, j, 0):
+                return True
+    return False', false, 1),
+  ('prep-matrices-word-search-on-board', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+
+    private static final int[][] DIRS = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+    public boolean wordSearchOnBoard(byte[][] board, byte[] word) {
+        int m = board.length, n = board[0].length;
+        boolean[][] visited = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dfs(board, word, visited, m, n, i, j, 0)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean dfs(byte[][] board, byte[] word, boolean[][] visited,
+                        int m, int n, int i, int j, int idx) {
+        if (idx == word.length) {
+            return true;
+        }
+        if (i < 0 || j < 0 || i >= m || j >= n || visited[i][j] || board[i][j] != word[idx]) {
+            return false;
+        }
+        visited[i][j] = true;
+        for (int[] d : DIRS) {
+            if (dfs(board, word, visited, m, n, i + d[0], j + d[1], idx + 1)) {
+                return true;
+            }
+        }
+        visited[i][j] = false;
+        return false;
+    }
+
+    // Convenience overload matching the Go String-based input.
+    public boolean wordSearchOnBoard(String[] rows, String word) {
+        byte[][] board = new byte[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            board[i] = rows[i].getBytes(StandardCharsets.UTF_8);
+        }
+        return wordSearchOnBoard(board, word.getBytes(StandardCharsets.UTF_8));
+    }
+}', false, 2),
   ('prep-prefix-sum-array-manipulation', 'go', 'solution.go', 'package main
 func arrayManipulation(n int32, queries [][]int32) int64 {
 	diff := make([]int64, n+2)
@@ -11857,6 +20765,43 @@ func arrayManipulation(n int32, queries [][]int32) int64 {
 	return res
 }
 ', true, 0),
+  ('prep-prefix-sum-array-manipulation', 'python', 'solution.py', 'from typing import List
+
+
+def arrayManipulation(n: int, queries: List[List[int]]) -> int:
+    diff = [0] * (n + 2)
+    for q in queries:
+        a, b, k = q[0], q[1], q[2]
+        diff[a] += k
+        diff[b + 1] -= k
+    res = 0
+    cur = 0
+    for i in range(1, n + 1):
+        cur += diff[i]
+        if cur > res:
+            res = cur
+    return res', false, 1),
+  ('prep-prefix-sum-array-manipulation', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long arrayManipulation(int n, int[][] queries) {
+        long[] diff = new long[n + 2];
+        for (int[] q : queries) {
+            int a = q[0], b = q[1];
+            long k = (long) q[2];
+            diff[a] += k;
+            diff[b + 1] -= k;
+        }
+        long res = 0, cur = 0;
+        for (int i = 1; i <= n; i++) {
+            cur += diff[i];
+            if (cur > res) {
+                res = cur;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-prefix-sum-continuous-subarray-sum', 'go', 'solution.go', 'package main
 func checkSubarraySum(nums []int, k int) bool {
 	modMap := map[int]int{0: -1}
@@ -11877,6 +20822,49 @@ func checkSubarraySum(nums []int, k int) bool {
 	return false
 }
 ', true, 0),
+  ('prep-prefix-sum-continuous-subarray-sum', 'python', 'solution.py', 'from typing import List
+
+
+class Solution:
+    def checkSubarraySum(self, nums: List[int], k: int) -> bool:
+        mod_map = {0: -1}
+        prefix = 0
+        for i, num in enumerate(nums):
+            prefix = (prefix + num) % k
+            if prefix < 0:
+                prefix += k
+            if prefix in mod_map:
+                prev = mod_map[prefix]
+                if i - prev >= 2:
+                    return True
+            else:
+                mod_map[prefix] = i
+        return False', false, 1),
+  ('prep-prefix-sum-continuous-subarray-sum', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public boolean checkSubarraySum(int[] nums, int k) {
+        // Go''s int is 64-bit; use long for the prefix accumulator and indices.
+        HashMap<Long, Long> modMap = new HashMap<>();
+        modMap.put(0L, -1L);
+        long prefix = 0;
+        for (long i = 0; i < nums.length; i++) {
+            prefix = (prefix + nums[(int) i]) % k; // Java % truncates like Go
+            if (prefix < 0) {
+                prefix += k;
+            }
+            if (modMap.containsKey(prefix)) {
+                long prev = modMap.get(prefix);
+                if (i - prev >= 2) {
+                    return true;
+                }
+            } else {
+                modMap.put(prefix, i);
+            }
+        }
+        return false;
+    }
+}', false, 2),
   ('prep-prefix-sum-subarray-sum-equals-k', 'go', 'solution.go', 'package main
 func subarraySum(nums []int, k int) int {
 	prefixMap := map[int]int{0: 1}
@@ -11891,6 +20879,37 @@ func subarraySum(nums []int, k int) int {
 	return cnt
 }
 ', true, 0),
+  ('prep-prefix-sum-subarray-sum-equals-k', 'python', 'solution.py', 'from typing import List
+
+
+def subarraySum(nums: List[int], k: int) -> int:
+    prefix_map = {0: 1}
+    total = 0
+    cnt = 0
+    for num in nums:
+        total += num
+        if (total - k) in prefix_map:
+            cnt += prefix_map[total - k]
+        prefix_map[total] = prefix_map.get(total, 0) + 1
+    return cnt', false, 1),
+  ('prep-prefix-sum-subarray-sum-equals-k', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long subarraySum(long[] nums, long k) {
+        Map<Long, Long> prefixMap = new HashMap<>();
+        prefixMap.put(0L, 1L);
+        long sum = 0, cnt = 0;
+        for (long num : nums) {
+            sum += num;
+            Long c = prefixMap.get(sum - k);
+            if (c != null) {
+                cnt += c;
+            }
+            prefixMap.merge(sum, 1L, Long::sum);
+        }
+        return cnt;
+    }
+}', false, 2),
   ('prep-sliding-window-minimum-window-substring', 'go', 'solution.go', 'package main
 func minWindow(s string, t string) string {
 	if len(s) < len(t) {
@@ -11926,6 +20945,72 @@ func minWindow(s string, t string) string {
 	return s[minStart : minStart+minLen]
 }
 ', true, 0),
+  ('prep-sliding-window-minimum-window-substring', 'python', 'solution.py', 'def min_window(s: str, t: str) -> str:
+    sb = s.encode(''utf-8'')
+    tb = t.encode(''utf-8'')
+    if len(sb) < len(tb):
+        return ""
+    freq = [0] * 128
+    for i in range(len(tb)):
+        freq[tb[i]] += 1
+    need = len(tb)
+    min_len, min_start = len(sb) + 1, 0
+    l = 0
+    for r in range(len(sb)):
+        if freq[sb[r]] > 0:
+            need -= 1
+        freq[sb[r]] -= 1
+        while need == 0:
+            if r - l + 1 < min_len:
+                min_len = r - l + 1
+                min_start = l
+            freq[sb[l]] += 1
+            if freq[sb[l]] > 0:
+                need += 1
+            l += 1
+    if min_len > len(sb):
+        return ""
+    return sb[min_start:min_start + min_len].decode(''utf-8'')', false, 1),
+  ('prep-sliding-window-minimum-window-substring', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    public String minWindow(String s, String t) {
+        byte[] sb = s.getBytes(StandardCharsets.UTF_8);
+        byte[] tb = t.getBytes(StandardCharsets.UTF_8);
+        if (sb.length < tb.length) {
+            return "";
+        }
+        int[] freq = new int[128];
+        for (int i = 0; i < tb.length; i++) {
+            freq[tb[i] & 0xFF]++;
+        }
+        int need = tb.length;
+        int minLen = sb.length + 1, minStart = 0;
+        int l = 0;
+        for (int r = 0; r < sb.length; r++) {
+            if (freq[sb[r] & 0xFF] > 0) {
+                need--;
+            }
+            freq[sb[r] & 0xFF]--;
+            while (need == 0) {
+                if (r - l + 1 < minLen) {
+                    minLen = r - l + 1;
+                    minStart = l;
+                }
+                freq[sb[l] & 0xFF]++;
+                if (freq[sb[l] & 0xFF] > 0) {
+                    need++;
+                }
+                l++;
+            }
+        }
+        if (minLen > sb.length) {
+            return "";
+        }
+        return new String(sb, minStart, minLen, StandardCharsets.UTF_8);
+    }
+}', false, 2),
   ('prep-sorting-3sum', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -12004,6 +21089,79 @@ func minOperations(nums1 []int, nums2 []int) int {
 	return ops
 }
 ', true, 0),
+  ('prep-sorting-equal-sum-arrays-with-minimum-number-of-operations', 'python', 'solution.py', 'from typing import List
+
+
+def minOperations(nums1: List[int], nums2: List[int]) -> int:
+    if len(nums1) > len(nums2) * 6 or len(nums2) > len(nums1) * 6:
+        return -1
+    sum1 = sum(nums1)
+    sum2 = sum(nums2)
+    if sum1 > sum2:
+        nums1, nums2 = nums2, nums1
+        sum1, sum2 = sum2, sum1
+    diff = sum2 - sum1
+    if diff == 0:
+        return 0
+    contrib = [0] * 6
+    for x in nums1:
+        contrib[6 - x] += 1
+    for x in nums2:
+        contrib[x - 1] += 1
+    ops = 0
+    c = 5
+    while c >= 1 and diff > 0:
+        take = contrib[c]
+        need = (diff + c - 1) // c
+        if take > need:
+            take = need
+        ops += take
+        diff -= take * c
+        c -= 1
+    if diff > 0:
+        return -1
+    return ops', false, 1),
+  ('prep-sorting-equal-sum-arrays-with-minimum-number-of-operations', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long minOperations(long[] nums1, long[] nums2) {
+        if (nums1.length > nums2.length * 6 || nums2.length > nums1.length * 6) {
+            return -1;
+        }
+        long sum1 = 0, sum2 = 0;
+        for (long x : nums1) sum1 += x;
+        for (long x : nums2) sum2 += x;
+        if (sum1 > sum2) {
+            long[] tmp = nums1;
+            nums1 = nums2;
+            nums2 = tmp;
+            long ts = sum1;
+            sum1 = sum2;
+            sum2 = ts;
+        }
+        long diff = sum2 - sum1;
+        if (diff == 0) {
+            return 0;
+        }
+        long[] contrib = new long[6];
+        for (long x : nums1) contrib[(int) (6 - x)]++;
+        for (long x : nums2) contrib[(int) (x - 1)]++;
+        long ops = 0;
+        for (long c = 5; c >= 1 && diff > 0; c--) {
+            long take = contrib[(int) c];
+            long need = (diff + c - 1) / c;
+            if (take > need) {
+                take = need;
+            }
+            ops += take;
+            diff -= take * c;
+        }
+        if (diff > 0) {
+            return -1;
+        }
+        return ops;
+    }
+}', false, 2),
   ('prep-sorting-max-chunks-to-make-sorted-ii', 'go', 'solution.go', 'package main
 func maxChunksToSorted(arr []int) int {
 	var stack []int
@@ -12021,6 +21179,37 @@ func maxChunksToSorted(arr []int) int {
 	return len(stack)
 }
 ', true, 0),
+  ('prep-sorting-max-chunks-to-make-sorted-ii', 'python', 'solution.py', 'from typing import List
+
+
+def maxChunksToSorted(arr: List[int]) -> int:
+    stack: List[int] = []
+    for val in arr:
+        mx = val
+        while stack and stack[-1] > val:
+            top = stack.pop()
+            if top > mx:
+                mx = top
+        stack.append(mx)
+    return len(stack)', false, 1),
+  ('prep-sorting-max-chunks-to-make-sorted-ii', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int maxChunksToSorted(long[] arr) {
+        Deque<Long> stack = new ArrayDeque<>();
+        for (long val : arr) {
+            long mx = val;
+            while (!stack.isEmpty() && stack.peekLast() > val) {
+                long top = stack.pollLast();
+                if (top > mx) {
+                    mx = top;
+                }
+            }
+            stack.addLast(mx);
+        }
+        return stack.size();
+    }
+}', false, 2),
   ('prep-sorting-minimum-deletions-to-make-character-frequencies-unique', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -12045,6 +21234,46 @@ func minDeletions(s string) int {
 	return dels
 }
 ', true, 0),
+  ('prep-sorting-minimum-deletions-to-make-character-frequencies-unique', 'python', 'solution.py', 'def minDeletions(s: str) -> int:
+    freq = [0] * 26
+    b = s.encode(''utf-8'')
+    for i in range(len(b)):
+        freq[b[i] - ord(''a'')] += 1
+    freq.sort()
+    dels = 0
+    used = set()
+    for i in range(25, -1, -1):
+        while freq[i] > 0 and freq[i] in used:
+            freq[i] -= 1
+            dels += 1
+        if freq[i] > 0:
+            used.add(freq[i])
+    return dels', false, 1),
+  ('prep-sorting-minimum-deletions-to-make-character-frequencies-unique', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public int minDeletions(String s) {
+        int[] freq = new int[26];
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i < b.length; i++) {
+            freq[(b[i] & 0xFF) - ''a'']++;
+        }
+        Arrays.sort(freq);
+        int dels = 0;
+        Set<Integer> used = new HashSet<>();
+        for (int i = 25; i >= 0; i--) {
+            while (freq[i] > 0 && used.contains(freq[i])) {
+                freq[i]--;
+                dels++;
+            }
+            if (freq[i] > 0) {
+                used.add(freq[i]);
+            }
+        }
+        return dels;
+    }
+}', false, 2),
   ('prep-sorting-sort-integers-by-the-power-value', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -12082,6 +21311,67 @@ func getKth(lo int, hi int, k int) int {
 	return nums[k-1]
 }
 ', true, 0),
+  ('prep-sorting-sort-integers-by-the-power-value', 'python', 'solution.py', 'import functools
+
+
+class Solution:
+    def getKth(self, lo: int, hi: int, k: int) -> int:
+        memo = {}
+
+        def power(n: int) -> int:
+            if n == 1:
+                return 0
+            if n in memo:
+                return memo[n]
+            if n % 2 == 0:
+                res = 1 + power(n // 2)
+            else:
+                res = 1 + power(3 * n + 1)
+            memo[n] = res
+            return res
+
+        nums = list(range(lo, hi + 1))
+        nums.sort(key=lambda x: (power(x), x))
+        return nums[k - 1]', false, 1),
+  ('prep-sorting-sort-integers-by-the-power-value', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    private Map<Long, Integer> memo;
+
+    private int power(long n) {
+        if (n == 1) {
+            return 0;
+        }
+        Integer v = memo.get(n);
+        if (v != null) {
+            return v;
+        }
+        int res;
+        if (n % 2 == 0) {
+            res = 1 + power(n / 2);
+        } else {
+            res = 1 + power(3 * n + 1);
+        }
+        memo.put(n, res);
+        return res;
+    }
+
+    public int getKth(int lo, int hi, int k) {
+        memo = new HashMap<>();
+        Integer[] nums = new Integer[hi - lo + 1];
+        for (int i = lo; i <= hi; i++) {
+            nums[i - lo] = i;
+        }
+        Arrays.sort(nums, (a, b) -> {
+            int pi = power(a), pj = power(b);
+            if (pi == pj) {
+                return Integer.compare(a, b);
+            }
+            return Integer.compare(pi, pj);
+        });
+        return nums[k - 1];
+    }
+}', false, 2),
   ('prep-sorting-the-number-of-weak-characters-in-the-game', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -12104,6 +21394,37 @@ func numberOfWeakCharacters(properties [][]int) int {
 	return cnt
 }
 ', true, 0),
+  ('prep-sorting-the-number-of-weak-characters-in-the-game', 'python', 'solution.py', 'def numberOfWeakCharacters(properties):
+    properties.sort(key=lambda p: (-p[0], p[1]))
+    maxDef = 0
+    cnt = 0
+    for p in properties:
+        if p[1] < maxDef:
+            cnt += 1
+        else:
+            maxDef = p[1]
+    return cnt', false, 1),
+  ('prep-sorting-the-number-of-weak-characters-in-the-game', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    int numberOfWeakCharacters(int[][] properties) {
+        Arrays.sort(properties, (a, b) -> {
+            if (a[0] == b[0]) {
+                return Integer.compare(a[1], b[1]);
+            }
+            return Integer.compare(b[0], a[0]);
+        });
+        int maxDef = 0, cnt = 0;
+        for (int[] p : properties) {
+            if (p[1] < maxDef) {
+                cnt++;
+            } else {
+                maxDef = p[1];
+            }
+        }
+        return cnt;
+    }
+}', false, 2),
   ('prep-sorting-top-k-frequent-elements', 'go', 'solution.go', 'package main
 func topKFrequent(nums []int, k int) []int {
 	freq := map[int]int{}
@@ -12126,6 +21447,61 @@ func topKFrequent(nums []int, k int) []int {
 	return res
 }
 ', true, 0),
+  ('prep-sorting-top-k-frequent-elements', 'python', 'solution.py', 'from collections import defaultdict
+from typing import List
+
+
+def topKFrequent(nums: List[int], k: int) -> List[int]:
+    freq = defaultdict(int)
+    for num in nums:
+        freq[num] += 1
+    buckets = [[] for _ in range(len(nums) + 1)]
+    for num, cnt in freq.items():
+        buckets[cnt].append(num)
+    res: List[int] = []
+    i = len(buckets) - 1
+    while i >= 0 and len(res) < k:
+        for num in buckets[i]:
+            res.append(num)
+            if len(res) == k:
+                return res
+        i -= 1
+    return res', false, 1),
+  ('prep-sorting-top-k-frequent-elements', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long[] topKFrequent(long[] nums, int k) {
+        Map<Long, Long> freq = new HashMap<>();
+        for (long num : nums) {
+            freq.merge(num, 1L, Long::sum);
+        }
+        List<List<Long>> buckets = new ArrayList<>(nums.length + 1);
+        for (int i = 0; i < nums.length + 1; i++) {
+            buckets.add(new ArrayList<>());
+        }
+        for (Map.Entry<Long, Long> e : freq.entrySet()) {
+            buckets.get((int) (long) e.getValue()).add(e.getKey());
+        }
+        List<Long> res = new ArrayList<>();
+        for (int i = buckets.size() - 1; i >= 0 && res.size() < k; i--) {
+            for (long num : buckets.get(i)) {
+                res.add(num);
+                if (res.size() == k) {
+                    return toArray(res);
+                }
+            }
+        }
+        return toArray(res);
+    }
+
+    private long[] toArray(List<Long> list) {
+        long[] out = new long[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            out[i] = list.get(i);
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-stacks-queues-basic-calculator', 'go', 'solution.go', 'package main
 func calculate(s string) int {
 	var stack []int
@@ -12157,6 +21533,72 @@ func calculate(s string) int {
 	return res
 }
 ', true, 0),
+  ('prep-stacks-queues-basic-calculator', 'python', 'solution.py', 'def calculate(s: str) -> int:
+    b = s.encode(''utf-8'')
+    stack = []
+    res, sign = 0, 1
+    i = 0
+    n = len(b)
+    while i < n:
+        c = b[i]
+        if ord(''0'') <= c <= ord(''9''):
+            num = 0
+            while i < n and ord(''0'') <= b[i] <= ord(''9''):
+                num = num * 10 + (b[i] - ord(''0''))
+                i += 1
+            i -= 1
+            res += sign * num
+        elif c == ord(''+''):
+            sign = 1
+        elif c == ord(''-''):
+            sign = -1
+        elif c == ord(''(''):
+            stack.append(res)
+            stack.append(sign)
+            res, sign = 0, 1
+        elif c == ord('')''):
+            prev_sign = stack.pop()
+            prev_res = stack.pop()
+            res = prev_res + prev_sign * res
+        i += 1
+    return res', false, 1),
+  ('prep-stacks-queues-basic-calculator', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public long calculate(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        Deque<Long> stack = new ArrayDeque<>();
+        long res = 0, sign = 1;
+        int n = b.length;
+        for (int i = 0; i < n; i++) {
+            int c = b[i] & 0xFF;
+            if (c >= ''0'' && c <= ''9'') {
+                long num = 0;
+                while (i < n && (b[i] & 0xFF) >= ''0'' && (b[i] & 0xFF) <= ''9'') {
+                    num = num * 10 + ((b[i] & 0xFF) - ''0'');
+                    i++;
+                }
+                i--;
+                res += sign * num;
+            } else if (c == ''+'') {
+                sign = 1;
+            } else if (c == ''-'') {
+                sign = -1;
+            } else if (c == ''('') {
+                stack.push(res);
+                stack.push(sign);
+                res = 0;
+                sign = 1;
+            } else if (c == '')'') {
+                long prevSign = stack.pop();
+                long prevRes = stack.pop();
+                res = prevRes + prevSign * res;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-stacks-queues-buildings-with-an-ocean-view', 'go', 'solution.go', 'package main
 func findBuildings(heights []int) []int {
 	var res []int
@@ -12173,6 +21615,43 @@ func findBuildings(heights []int) []int {
 	return res
 }
 ', true, 0),
+  ('prep-stacks-queues-buildings-with-an-ocean-view', 'python', 'solution.py', 'from typing import List
+
+
+def findBuildings(heights: List[int]) -> List[int]:
+    res: List[int] = []
+    maxH = 0
+    for i in range(len(heights) - 1, -1, -1):
+        if heights[i] > maxH:
+            res.append(i)
+            maxH = heights[i]
+    i, j = 0, len(res) - 1
+    while i < j:
+        res[i], res[j] = res[j], res[i]
+        i, j = i + 1, j - 1
+    return res', false, 1),
+  ('prep-stacks-queues-buildings-with-an-ocean-view', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int[] findBuildings(int[] heights) {
+        List<Integer> res = new ArrayList<>();
+        long maxH = 0;
+        for (int i = heights.length - 1; i >= 0; i--) {
+            if (heights[i] > maxH) {
+                res.add(i);
+                maxH = heights[i];
+            }
+        }
+        for (int i = 0, j = res.size() - 1; i < j; i++, j--) {
+            int tmp = res.get(i);
+            res.set(i, res.get(j));
+            res.set(j, tmp);
+        }
+        int[] out = new int[res.size()];
+        for (int k = 0; k < res.size(); k++) out[k] = res.get(k);
+        return out;
+    }
+}', false, 2),
   ('prep-stacks-queues-calculate-infix', 'go', 'solution.go', 'package main
 func applyInfix(a, b int64, op byte) int64 {
 	switch op {
@@ -12234,6 +21713,133 @@ func calculateInfix(exp string) int64 {
 	return nums[0]
 }
 ', true, 0),
+  ('prep-stacks-queues-calculate-infix', 'python', 'solution.py', 'MASK = (1 << 64) - 1
+
+
+def _wrap64(x):
+    x &= MASK
+    if x >= (1 << 63):
+        x -= (1 << 64)
+    return x
+
+
+def apply_infix(a, b, op):
+    if op == ord(''+''):
+        return _wrap64(a + b)
+    if op == ord(''-''):
+        return _wrap64(a - b)
+    if op == ord(''*''):
+        return _wrap64(a * b)
+    if op == ord(''/''):
+        # Go int64 division truncates toward zero
+        q = abs(a) // abs(b)
+        if (a < 0) != (b < 0):
+            q = -q
+        return _wrap64(q)
+    return 0
+
+
+def op_prec(op):
+    if op == ord(''+'') or op == ord(''-''):
+        return 1
+    return 2
+
+
+def calculate_infix(exp):
+    b = exp.encode(''utf-8'')
+    nums = []
+    ops = []
+
+    def apply_top():
+        op = ops.pop()
+        y = nums.pop()
+        x = nums.pop()
+        nums.append(apply_infix(x, y, op))
+
+    i, n = 0, len(b)
+    while i < n:
+        c = b[i]
+        if c == ord('' ''):
+            i += 1
+            continue
+        if ord(''0'') <= c <= ord(''9''):
+            val = 0
+            while i < n and ord(''0'') <= b[i] <= ord(''9''):
+                val = _wrap64(val * 10 + (b[i] - ord(''0'')))
+                i += 1
+            nums.append(val)
+            continue
+        while ops and op_prec(ops[-1]) >= op_prec(c):
+            apply_top()
+        ops.append(c)
+        i += 1
+    while ops:
+        apply_top()
+    return nums[0]', false, 1),
+  ('prep-stacks-queues-calculate-infix', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    static long applyInfix(long a, long b, byte op) {
+        switch (op) {
+            case ''+'':
+                return a + b;
+            case ''-'':
+                return a - b;
+            case ''*'':
+                return a * b;
+            case ''/'':
+                return a / b;
+        }
+        return 0;
+    }
+
+    static int opPrec(byte op) {
+        if (op == ''+'' || op == ''-'') {
+            return 1;
+        }
+        return 2;
+    }
+
+    static long calculateInfix(String exp) {
+        byte[] s = exp.getBytes(StandardCharsets.UTF_8);
+        ArrayList<Long> nums = new ArrayList<>();
+        ArrayList<Byte> ops = new ArrayList<>();
+        int i = 0, n = s.length;
+        while (i < n) {
+            byte c = s[i];
+            if (c == '' '') {
+                i++;
+                continue;
+            }
+            if (c >= ''0'' && c <= ''9'') {
+                long val = 0;
+                while (i < n && s[i] >= ''0'' && s[i] <= ''9'') {
+                    val = val * 10 + (long) (s[i] - ''0'');
+                    i++;
+                }
+                nums.add(val);
+                continue;
+            }
+            while (!ops.isEmpty() && opPrec(ops.get(ops.size() - 1)) >= opPrec(c)) {
+                applyTop(nums, ops);
+            }
+            ops.add(c);
+            i++;
+        }
+        while (!ops.isEmpty()) {
+            applyTop(nums, ops);
+        }
+        return nums.get(0);
+    }
+
+    static void applyTop(ArrayList<Long> nums, ArrayList<Byte> ops) {
+        byte op = ops.remove(ops.size() - 1);
+        long b = nums.remove(nums.size() - 1);
+        long a = nums.remove(nums.size() - 1);
+        nums.add(applyInfix(a, b, op));
+    }
+}', false, 2),
   ('prep-stacks-queues-calculate-postfix', 'go', 'solution.go', 'package main
 func applyOp(a, b int, op string) int {
 	switch op {
@@ -12269,6 +21875,95 @@ func calculatePostfix(tokens []string) int {
 	return stack[0]
 }
 ', true, 0),
+  ('prep-stacks-queues-calculate-postfix', 'python', 'solution.py', 'MASK = (1 << 64) - 1
+
+
+def _to_i64(x):
+    x &= MASK
+    if x >= (1 << 63):
+        x -= (1 << 64)
+    return x
+
+
+def _trunc_div(a, b):
+    q = abs(a) // abs(b)
+    if (a < 0) != (b < 0):
+        q = -q
+    return q
+
+
+def apply_op(a, b, op):
+    if op == "+":
+        return _to_i64(a + b)
+    if op == "-":
+        return _to_i64(a - b)
+    if op == "*":
+        return _to_i64(a * b)
+    if op == "/":
+        return _to_i64(_trunc_div(a, b))
+    return 0
+
+
+def calculate_postfix(tokens):
+    stack = []
+    for tok in tokens:
+        if tok in ("+", "-", "*", "/"):
+            b = stack[-1]
+            a = stack[-2]
+            del stack[-2:]
+            stack.append(apply_op(a, b, tok))
+        else:
+            v = 0
+            data = tok.encode("utf-8")
+            for byte in data:
+                # Go parses digit-by-digit via byte (uint8) subtraction:
+                # int(tok[i] - ''0''), which wraps for non-digit bytes.
+                digit = (byte - ord("0")) & 0xFF
+                v = _to_i64(v * 10 + digit)
+            stack.append(v)
+    return stack[0]', false, 1),
+  ('prep-stacks-queues-calculate-postfix', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    static long applyOp(long a, long b, String op) {
+        switch (op) {
+            case "+":
+                return a + b;
+            case "-":
+                return a - b;
+            case "*":
+                return a * b;
+            case "/":
+                return a / b;
+        }
+        return 0;
+    }
+
+    public long calculatePostfix(String[] tokens) {
+        long[] stack = new long[tokens.length + 1];
+        int top = 0;
+        for (String tok : tokens) {
+            if (tok.equals("+") || tok.equals("-") || tok.equals("*") || tok.equals("/")) {
+                long b = stack[top - 1];
+                long a = stack[top - 2];
+                top -= 2;
+                stack[top++] = applyOp(a, b, tok);
+            } else {
+                long v = 0;
+                byte[] data = tok.getBytes(StandardCharsets.UTF_8);
+                for (int i = 0; i < data.length; i++) {
+                    // Go parses digit-by-digit via byte (uint8) subtraction:
+                    // int(tok[i] - ''0''), which wraps for non-digit bytes.
+                    int digit = ((data[i] & 0xFF) - ''0'') & 0xFF;
+                    v = v * 10 + digit;
+                }
+                stack[top++] = v;
+            }
+        }
+        return stack[0];
+    }
+}', false, 2),
   ('prep-stacks-queues-decode-string', 'go', 'solution.go', 'package main
 import "strings"
 
@@ -12321,6 +22016,52 @@ func findMaxInSlidingWindow(nums []int, k int) []int {
 	return res
 }
 ', true, 0),
+  ('prep-stacks-queues-find-max-in-sliding-window', 'python', 'solution.py', 'from typing import List, Optional
+
+
+def find_max_in_sliding_window(nums: List[int], k: int) -> Optional[List[int]]:
+    if k == 0 or len(nums) == 0:
+        return None
+    dq: List[int] = []
+    res: List[int] = []
+    for i, x in enumerate(nums):
+        while len(dq) > 0 and nums[dq[-1]] <= x:
+            dq.pop()
+        dq.append(i)
+        if dq[0] <= i - k:
+            dq.pop(0)
+        if i >= k - 1:
+            res.append(nums[dq[0]])
+    return res', false, 1),
+  ('prep-stacks-queues-find-max-in-sliding-window', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long[] findMaxInSlidingWindow(long[] nums, int k) {
+        if (k == 0 || nums.length == 0) {
+            return null;
+        }
+        Deque<Integer> dq = new ArrayDeque<>();
+        List<Long> res = new ArrayList<>();
+        for (int i = 0; i < nums.length; i++) {
+            long x = nums[i];
+            while (!dq.isEmpty() && nums[dq.peekLast()] <= x) {
+                dq.pollLast();
+            }
+            dq.addLast(i);
+            if (dq.peekFirst() <= i - k) {
+                dq.pollFirst();
+            }
+            if (i >= k - 1) {
+                res.add(nums[dq.peekFirst()]);
+            }
+        }
+        long[] out = new long[res.size()];
+        for (int i = 0; i < res.size(); i++) {
+            out[i] = res.get(i);
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-stacks-queues-find-moving-average-in-sliding', 'go', 'solution.go', 'package main
 type MovingAverage struct {
 	winSize int
@@ -12346,6 +22087,56 @@ func findMovingAverageInSliding(size int) *MovingAverage {
 	return NewMovingAverage(size)
 }
 ', true, 0),
+  ('prep-stacks-queues-find-moving-average-in-sliding', 'python', 'solution.py', 'from collections import deque
+
+
+class MovingAverage:
+    def __init__(self, size):
+        self.win_size = size
+        self.sum = 0.0
+        self.dq = deque()
+
+    def next(self, val):
+        self.dq.append(val)
+        self.sum += float(val)
+        if len(self.dq) > self.win_size:
+            self.sum -= float(self.dq[0])
+            self.dq.popleft()
+        return self.sum / float(len(self.dq))
+
+
+def find_moving_average_in_sliding(size):
+    return MovingAverage(size)', false, 1),
+  ('prep-stacks-queues-find-moving-average-in-sliding', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class MovingAverage {
+        int winSize;
+        double sum;
+        ArrayDeque<Long> dq;
+
+        MovingAverage(int size) {
+            this.winSize = size;
+            this.sum = 0.0;
+            this.dq = new ArrayDeque<>();
+        }
+
+        double next(long val) {
+            dq.addLast(val);
+            sum += (double) val;
+            if (dq.size() > winSize) {
+                sum -= (double) dq.peekFirst();
+                dq.pollFirst();
+            }
+            return sum / (double) dq.size();
+        }
+    }
+
+    static MovingAverage findMovingAverageInSliding(int size) {
+        return new MovingAverage(size);
+    }
+}', false, 2),
   ('prep-stacks-queues-implement-queue-with-max', 'go', 'solution.go', 'package main
 type QueueWithMax struct {
 	queue []int
@@ -12383,6 +22174,75 @@ func implementQueueWithMax() *QueueWithMax {
 	return &QueueWithMax{}
 }
 ', true, 0),
+  ('prep-stacks-queues-implement-queue-with-max', 'python', 'solution.py', 'from collections import deque
+
+
+class QueueWithMax:
+    def __init__(self):
+        self.queue = deque()
+        self.max_dq = deque()
+
+    def enqueue(self, val):
+        self.queue.append(val)
+        while self.max_dq and self.max_dq[-1] < val:
+            self.max_dq.pop()
+        self.max_dq.append(val)
+
+    def dequeue(self):
+        if not self.queue:
+            return 0
+        v = self.queue.popleft()
+        if self.max_dq and self.max_dq[0] == v:
+            self.max_dq.popleft()
+        return v
+
+    def max(self):
+        if not self.max_dq:
+            return 0
+        return self.max_dq[0]
+
+
+def implement_queue_with_max():
+    return QueueWithMax()', false, 1),
+  ('prep-stacks-queues-implement-queue-with-max', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class QueueWithMax {
+        private Deque<Long> queue = new ArrayDeque<>();
+        private Deque<Long> maxDQ = new ArrayDeque<>();
+
+        void enqueue(long val) {
+            queue.addLast(val);
+            while (!maxDQ.isEmpty() && maxDQ.peekLast() < val) {
+                maxDQ.pollLast();
+            }
+            maxDQ.addLast(val);
+        }
+
+        long dequeue() {
+            if (queue.isEmpty()) {
+                return 0;
+            }
+            long v = queue.pollFirst();
+            if (!maxDQ.isEmpty() && maxDQ.peekFirst() == v) {
+                maxDQ.pollFirst();
+            }
+            return v;
+        }
+
+        long max() {
+            if (maxDQ.isEmpty()) {
+                return 0;
+            }
+            return maxDQ.peekFirst();
+        }
+    }
+
+    static QueueWithMax implementQueueWithMax() {
+        return new QueueWithMax();
+    }
+}', false, 2),
   ('prep-stacks-queues-implement-stack-with-min', 'go', 'solution.go', 'package main
 type minStackNode struct {
 	val  int
@@ -12422,6 +22282,86 @@ func implementStackWithMin() *MinStack {
 	return &MinStack{}
 }
 ', true, 0),
+  ('prep-stacks-queues-implement-stack-with-min', 'python', 'solution.py', 'class MinStack:
+    class _Node:
+        __slots__ = ("val", "min", "next")
+
+        def __init__(self, val, min_, nxt):
+            self.val = val
+            self.min = min_
+            self.next = nxt
+
+    def __init__(self):
+        self.top = None
+
+    def push(self, val):
+        m = val
+        if self.top is not None and self.top.min < m:
+            m = self.top.min
+        self.top = MinStack._Node(val, m, self.top)
+
+    def pop(self):
+        if self.top is None:
+            return 0
+        v = self.top.val
+        self.top = self.top.next
+        return v
+
+    def min(self):
+        if self.top is None:
+            return 0
+        return self.top.min
+
+
+def implement_stack_with_min():
+    return MinStack()', false, 1),
+  ('prep-stacks-queues-implement-stack-with-min', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class MinStack {
+        static class Node {
+            long val;
+            long min;
+            Node next;
+            Node(long val, long min, Node next) {
+                this.val = val;
+                this.min = min;
+                this.next = next;
+            }
+        }
+
+        Node top;
+
+        void push(long val) {
+            long m = val;
+            if (top != null && top.min < m) {
+                m = top.min;
+            }
+            top = new Node(val, m, top);
+        }
+
+        long pop() {
+            if (top == null) {
+                return 0;
+            }
+            long v = top.val;
+            top = top.next;
+            return v;
+        }
+
+        long min() {
+            if (top == null) {
+                return 0;
+            }
+            return top.min;
+        }
+    }
+
+    static MinStack implementStackWithMin() {
+        return new MinStack();
+    }
+}', false, 2),
   ('prep-stacks-queues-infix-to-postfix', 'go', 'solution.go', 'package main
 func prec(c rune) int {
 	switch c {
@@ -12458,6 +22398,82 @@ func infixToPostfix(exp string) string {
 	return string(out)
 }
 ', true, 0),
+  ('prep-stacks-queues-infix-to-postfix', 'python', 'solution.py', 'def prec(c):
+    if c in (''+'', ''-''):
+        return 1
+    if c in (''*'', ''/''):
+        return 2
+    return 0
+
+
+def infixToPostfix(exp):
+    # Faithful to Go: iterates over Unicode code points (runes) and emits the
+    # low byte of each (Go''s byte(rune) == rune & 0xFF). Returns the byte
+    # sequence, mirroring Go''s []byte -> string conversion.
+    out = bytearray()
+    ops = []
+    for c in exp:
+        if c == '' '':
+            continue
+        if ''0'' <= c <= ''9'':
+            out.append(ord(c) & 0xFF)
+        else:
+            while ops and prec(ops[-1]) >= prec(c):
+                out.append(ord(ops[-1]) & 0xFF)
+                ops.pop()
+            ops.append(c)
+    while ops:
+        out.append(ord(ops[-1]) & 0xFF)
+        ops.pop()
+    return bytes(out)', false, 1),
+  ('prep-stacks-queues-infix-to-postfix', 'java', 'Solution.java', 'import java.util.*;
+import java.io.*;
+
+class Solution {
+    static int prec(int c) {
+        switch (c) {
+            case ''+'':
+            case ''-'':
+                return 1;
+            case ''*'':
+            case ''/'':
+                return 2;
+            default:
+                return 0;
+        }
+    }
+
+    // Faithful to Go: iterates over Unicode code points (runes) and emits the
+    // low byte of each (Go''s byte(rune) == rune & 0xFF). Returns the byte
+    // sequence, mirroring Go''s []byte -> string conversion.
+    static byte[] infixToPostfix(String exp) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ArrayList<Integer> ops = new ArrayList<>();
+        int i = 0;
+        int n = exp.length();
+        while (i < n) {
+            int c = exp.codePointAt(i);
+            i += Character.charCount(c);
+            if (c == '' '') {
+                continue;
+            }
+            if (c >= ''0'' && c <= ''9'') {
+                out.write(c & 0xFF);
+            } else {
+                while (!ops.isEmpty() && prec(ops.get(ops.size() - 1)) >= prec(c)) {
+                    out.write(ops.get(ops.size() - 1) & 0xFF);
+                    ops.remove(ops.size() - 1);
+                }
+                ops.add(c);
+            }
+        }
+        while (!ops.isEmpty()) {
+            out.write(ops.get(ops.size() - 1) & 0xFF);
+            ops.remove(ops.size() - 1);
+        }
+        return out.toByteArray();
+    }
+}', false, 2),
   ('prep-stacks-queues-prefix-to-postfix', 'go', 'solution.go', 'package main
 func isOp(c byte) bool {
 	return c == ''+'' || c == ''-'' || c == ''*'' || c == ''/''
@@ -12503,6 +22519,46 @@ func simplifyPath(path string) string {
 	return "/" + strings.Join(stack, "/")
 }
 ', true, 0),
+  ('prep-stacks-queues-simplify-path', 'python', 'solution.py', 'def simplify_path(path: str) -> str:
+    stack = []
+    for part in path.split("/"):
+        if part == "" or part == ".":
+            continue
+        if part == "..":
+            if stack:
+                stack.pop()
+        else:
+            stack.append(part)
+    return "/" + "/".join(stack)', false, 1),
+  ('prep-stacks-queues-simplify-path', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public String simplifyPath(String path) {
+        Deque<String> stack = new ArrayDeque<>();
+        for (String part : path.split("/", -1)) {
+            if (part.equals("") || part.equals(".")) {
+                continue;
+            }
+            if (part.equals("..")) {
+                if (!stack.isEmpty()) {
+                    stack.removeLast();
+                }
+            } else {
+                stack.addLast(part);
+            }
+        }
+        StringBuilder sb = new StringBuilder("/");
+        boolean first = true;
+        for (String s : stack) {
+            if (!first) {
+                sb.append("/");
+            }
+            sb.append(s);
+            first = false;
+        }
+        return sb.toString();
+    }
+}', false, 2),
   ('prep-stacks-queues-trapping-rain-water', 'go', 'solution.go', 'package main
 func trap(height []int) int {
 	l, r := 0, len(height)-1
@@ -12528,6 +22584,54 @@ func trap(height []int) int {
 	return water
 }
 ', true, 0),
+  ('prep-stacks-queues-trapping-rain-water', 'python', 'solution.py', 'from typing import List
+
+
+def trap(height: List[int]) -> int:
+    l, r = 0, len(height) - 1
+    max_l, max_r = 0, 0
+    water = 0
+    while l < r:
+        if height[l] < height[r]:
+            if height[l] >= max_l:
+                max_l = height[l]
+            else:
+                water += max_l - height[l]
+            l += 1
+        else:
+            if height[r] >= max_r:
+                max_r = height[r]
+            else:
+                water += max_r - height[r]
+            r -= 1
+    return water', false, 1),
+  ('prep-stacks-queues-trapping-rain-water', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public long trap(int[] height) {
+        int l = 0, r = height.length - 1;
+        long maxL = 0, maxR = 0;
+        long water = 0;
+        while (l < r) {
+            if (height[l] < height[r]) {
+                if (height[l] >= maxL) {
+                    maxL = height[l];
+                } else {
+                    water += maxL - height[l];
+                }
+                l++;
+            } else {
+                if (height[r] >= maxR) {
+                    maxR = height[r];
+                } else {
+                    water += maxR - height[r];
+                }
+                r--;
+            }
+        }
+        return water;
+    }
+}', false, 2),
   ('prep-stacks-queues-validate-parentheses', 'go', 'solution.go', 'package main
 func validateParentheses(str string) bool {
 	pairs := map[rune]rune{'')'': ''('', '']'': ''['', ''}'': ''{''}
@@ -12545,6 +22649,43 @@ func validateParentheses(str string) bool {
 	return len(stack) == 0
 }
 ', true, 0),
+  ('prep-stacks-queues-validate-parentheses', 'python', 'solution.py', 'def validate_parentheses(s: str) -> bool:
+    pairs = {'')'': ''('', '']'': ''['', ''}'': ''{''}
+    stack = []
+    for c in s:
+        if c == ''('' or c == ''['' or c == ''{'':
+            stack.append(c)
+        elif c in pairs:
+            if not stack or stack[-1] != pairs[c]:
+                return False
+            stack.pop()
+    return len(stack) == 0', false, 1),
+  ('prep-stacks-queues-validate-parentheses', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public boolean validateParentheses(String str) {
+        Map<Integer, Integer> pairs = new HashMap<>();
+        pairs.put((int) '')'', (int) ''('');
+        pairs.put((int) '']'', (int) ''['');
+        pairs.put((int) ''}'', (int) ''{'');
+        Deque<Integer> stack = new ArrayDeque<>();
+        int i = 0;
+        int n = str.length();
+        while (i < n) {
+            int c = str.codePointAt(i);
+            i += Character.charCount(c);
+            if (c == ''('' || c == ''['' || c == ''{'') {
+                stack.push(c);
+            } else if (pairs.containsKey(c)) {
+                if (stack.isEmpty() || stack.peek() != pairs.get(c).intValue()) {
+                    return false;
+                }
+                stack.pop();
+            }
+        }
+        return stack.isEmpty();
+    }
+}', false, 2),
   ('prep-streams-io-add-spaces-around-parentheses-in', 'go', 'solution.go', 'package main
 import (
 	"strings"
@@ -13083,6 +23224,45 @@ func customSortString(order string, s string) string {
 	return string(res)
 }
 ', true, 0),
+  ('prep-strings-custom-sort-string', 'python', 'solution.py', 'def customSortString(order: str, s: str) -> str:
+    cnt = [0] * 26
+    for c in s:
+        cnt[ord(c) - ord(''a'')] += 1
+    res = []
+    for c in order:
+        while cnt[ord(c) - ord(''a'')] > 0:
+            res.append(c)
+            cnt[ord(c) - ord(''a'')] -= 1
+    for i in range(26):
+        while cnt[i] > 0:
+            res.append(chr(ord(''a'') + i))
+            cnt[i] -= 1
+    return ''''.join(res)', false, 1),
+  ('prep-strings-custom-sort-string', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public String customSortString(String order, String s) {
+        int[] cnt = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            cnt[s.charAt(i) - ''a'']++;
+        }
+        StringBuilder res = new StringBuilder();
+        for (int i = 0; i < order.length(); i++) {
+            char c = order.charAt(i);
+            while (cnt[c - ''a''] > 0) {
+                res.append(c);
+                cnt[c - ''a'']--;
+            }
+        }
+        for (int i = 0; i < 26; i++) {
+            while (cnt[i] > 0) {
+                res.append((char) (''a'' + i));
+                cnt[i]--;
+            }
+        }
+        return res.toString();
+    }
+}', false, 2),
   ('prep-strings-find-all-subset-words', 'go', 'solution.go', 'package main
 func findAllSubsetWords(text string, words []string) []string {
 	cnt := map[byte]int{}
@@ -13107,6 +23287,50 @@ func findAllSubsetWords(text string, words []string) []string {
 	return out
 }
 ', true, 0),
+  ('prep-strings-find-all-subset-words', 'python', 'solution.py', 'def find_all_subset_words(text, words):
+    cnt = {}
+    for b in text.encode(''utf-8''):
+        cnt[b] = cnt.get(b, 0) + 1
+    out = []
+    for w in words:
+        tmp = {}
+        ok = True
+        for b in w.encode(''utf-8''):
+            tmp[b] = tmp.get(b, 0) + 1
+            if tmp[b] > cnt.get(b, 0):
+                ok = False
+                break
+        if ok:
+            out.append(w)
+    return out', false, 1),
+  ('prep-strings-find-all-subset-words', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    List<String> findAllSubsetWords(String text, String[] words) {
+        Map<Integer, Integer> cnt = new HashMap<>();
+        for (byte b : text.getBytes(StandardCharsets.UTF_8)) {
+            cnt.merge(b & 0xFF, 1, Integer::sum);
+        }
+        List<String> out = new ArrayList<>();
+        for (String w : words) {
+            Map<Integer, Integer> tmp = new HashMap<>();
+            boolean ok = true;
+            for (byte b : w.getBytes(StandardCharsets.UTF_8)) {
+                int k = b & 0xFF;
+                int v = tmp.merge(k, 1, Integer::sum);
+                if (v > cnt.getOrDefault(k, 0)) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) {
+                out.add(w);
+            }
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-strings-find-anagram-substring-indices', 'go', 'solution.go', 'package main
 func findAnagramSubstringIndices(s, p string) []int {
 	if len(p) > len(s) {
@@ -13138,6 +23362,71 @@ func findAnagramSubstringIndices(s, p string) []int {
 	return out
 }
 ', true, 0),
+  ('prep-strings-find-anagram-substring-indices', 'python', 'solution.py', 'from typing import List, Optional
+
+
+def findAnagramSubstringIndices(s: str, p: str) -> Optional[List[int]]:
+    sb = s.encode(''utf-8'')
+    pb = p.encode(''utf-8'')
+    if len(pb) > len(sb):
+        return None
+    diff = [0] * 26
+    A = ord(''a'')
+    for i in range(len(pb)):
+        diff[pb[i] - A] += 1
+    out: List[int] = []
+    for i in range(len(sb)):
+        diff[sb[i] - A] -= 1
+        if i >= len(pb):
+            diff[sb[i - len(pb)] - A] += 1
+        if i >= len(pb) - 1:
+            ok = True
+            for d in diff:
+                if d != 0:
+                    ok = False
+                    break
+            if ok:
+                out.append(i - len(pb) + 1)
+    return out', false, 1),
+  ('prep-strings-find-anagram-substring-indices', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    int[] findAnagramSubstringIndices(String s, String p) {
+        byte[] sb = s.getBytes(StandardCharsets.UTF_8);
+        byte[] pb = p.getBytes(StandardCharsets.UTF_8);
+        if (pb.length > sb.length) {
+            return null;
+        }
+        int[] diff = new int[26];
+        int A = ''a'';
+        for (int i = 0; i < pb.length; i++) {
+            diff[(pb[i] & 0xff) - A]++;
+        }
+        List<Integer> out = new ArrayList<>();
+        for (int i = 0; i < sb.length; i++) {
+            diff[(sb[i] & 0xff) - A]--;
+            if (i >= pb.length) {
+                diff[(sb[i - pb.length] & 0xff) - A]++;
+            }
+            if (i >= pb.length - 1) {
+                boolean ok = true;
+                for (int d : diff) {
+                    if (d != 0) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok) {
+                    out.add(i - pb.length + 1);
+                }
+            }
+        }
+        int[] res = new int[out.size()];
+        for (int i = 0; i < res.length; i++) res[i] = out.get(i);
+        return res;
+    }
+}', false, 2),
   ('prep-strings-find-and-replace-in-string', 'go', 'solution.go', 'package main
 import "strings"
 
@@ -13162,6 +23451,73 @@ func findReplaceString(s string, indices []int, sources []string, targets []stri
 	return sb.String()
 }
 ', true, 0),
+  ('prep-strings-find-and-replace-in-string', 'python', 'solution.py', 'from typing import List
+
+
+def find_replace_string(s: str, indices: List[int], sources: List[str], targets: List[str]) -> str:
+    b = s.encode(''utf-8'')
+    src_b = [x.encode(''utf-8'') for x in sources]
+    tgt_b = [x.encode(''utf-8'') for x in targets]
+    m = {}
+    for i, idx in enumerate(indices):
+        m[idx] = (src_b[i], tgt_b[i])
+    out = bytearray()
+    i = 0
+    n = len(b)
+    while i < n:
+        if i in m:
+            src, tgt = m[i]
+            if i + len(src) <= n and b[i:i + len(src)] == src:
+                out += tgt
+                i += len(src)
+                continue
+        out.append(b[i])
+        i += 1
+    return out.decode(''utf-8'')', false, 1),
+  ('prep-strings-find-and-replace-in-string', 'java', 'Solution.java', 'import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public String findReplaceString(String s, int[] indices, String[] sources, String[] targets) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        byte[][] srcB = new byte[sources.length][];
+        byte[][] tgtB = new byte[targets.length][];
+        for (int i = 0; i < sources.length; i++) srcB[i] = sources[i].getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i < targets.length; i++) tgtB[i] = targets[i].getBytes(StandardCharsets.UTF_8);
+        Map<Integer, Integer> m = new HashMap<>();
+        for (int i = 0; i < indices.length; i++) {
+            m.put(indices[i], i);
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int i = 0;
+        int n = b.length;
+        while (i < n) {
+            Integer k = m.get(i);
+            boolean matched = false;
+            if (k != null) {
+                byte[] src = srcB[k];
+                if (i + src.length <= n && matchAt(b, i, src)) {
+                    out.write(tgtB[k], 0, tgtB[k].length);
+                    i += src.length;
+                    matched = true;
+                }
+            }
+            if (!matched) {
+                out.write(b[i]);
+                i++;
+            }
+        }
+        return new String(out.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    private boolean matchAt(byte[] b, int i, byte[] src) {
+        for (int j = 0; j < src.length; j++) {
+            if (b[i + j] != src[j]) return false;
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-strings-find-first-unique-character', 'go', 'solution.go', 'package main
 func findFirstUniqueCharacter(s string) int {
 	cnt := map[byte]int{}
@@ -13176,6 +23532,33 @@ func findFirstUniqueCharacter(s string) int {
 	return -1
 }
 ', true, 0),
+  ('prep-strings-find-first-unique-character', 'python', 'solution.py', 'def find_first_unique_character(s: str) -> int:
+    b = s.encode(''utf-8'')
+    cnt = {}
+    for i in range(len(b)):
+        cnt[b[i]] = cnt.get(b[i], 0) + 1
+    for i in range(len(b)):
+        if cnt[b[i]] == 1:
+            return i
+    return -1', false, 1),
+  ('prep-strings-find-first-unique-character', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    int findFirstUniqueCharacter(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        Map<Byte, Integer> cnt = new HashMap<>();
+        for (int i = 0; i < b.length; i++) {
+            cnt.merge(b[i], 1, Integer::sum);
+        }
+        for (int i = 0; i < b.length; i++) {
+            if (cnt.get(b[i]) == 1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}', false, 2),
   ('prep-strings-find-repeated-substrings-size-k', 'go', 'solution.go', 'package main
 func findRepeatedSubstringsSizeK(s string, k int) []string {
 	if k == 0 || len(s) < k {
@@ -13193,6 +23576,59 @@ func findRepeatedSubstringsSizeK(s string, k int) []string {
 	return out
 }
 ', true, 0),
+  ('prep-strings-find-repeated-substrings-size-k', 'python', 'solution.py', 'from typing import List, Optional
+
+
+def find_repeated_substrings_size_k(s: str, k: int) -> Optional[List[bytes]]:
+    # Go indexes strings by BYTE, so operate on UTF-8 bytes for faithful
+    # (non-ASCII) behavior. Substrings are returned as byte slices.
+    b = s.encode("utf-8")
+    if k == 0 or len(b) < k:
+        return None
+    seen = {}
+    out = []
+    i = 0
+    while i + k <= len(b):
+        sub = b[i:i + k]
+        seen[sub] = seen.get(sub, 0) + 1
+        if seen[sub] == 2:
+            out.append(sub)
+        i += 1
+    return out', false, 1),
+  ('prep-strings-find-repeated-substrings-size-k', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    // Go indexes strings by BYTE, so operate on UTF-8 bytes for faithful
+    // (non-ASCII) behavior. Substrings are returned as byte slices.
+    // Returns null when k == 0 or the byte length is < k (Go returns nil).
+    List<byte[]> findRepeatedSubstringsSizeK(String s, int k) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        if (k == 0 || b.length < k) {
+            return null;
+        }
+        Map<String, Integer> seen = new HashMap<>();
+        List<byte[]> out = new ArrayList<>();
+        for (int i = 0; i + k <= b.length; i++) {
+            byte[] sub = Arrays.copyOfRange(b, i, i + k);
+            String key = keyOf(sub);
+            int c = seen.getOrDefault(key, 0) + 1;
+            seen.put(key, c);
+            if (c == 2) {
+                out.add(sub);
+            }
+        }
+        return out;
+    }
+
+    private String keyOf(byte[] b) {
+        StringBuilder sb = new StringBuilder(b.length * 2);
+        for (byte x : b) {
+            sb.append(String.format("%02x", x & 0xff));
+        }
+        return sb.toString();
+    }
+}', false, 2),
   ('prep-strings-group-anagrams', 'go', 'solution.go', 'package main
 func groupAnagrams(strs []string) [][]string {
 	groups := map[string][]string{}
@@ -13211,6 +23647,39 @@ func groupAnagrams(strs []string) [][]string {
 	return out
 }
 ', true, 0),
+  ('prep-strings-group-anagrams', 'python', 'solution.py', 'from typing import List
+
+
+def groupAnagrams(strs: List[str]) -> List[List[str]]:
+    groups = {}
+    for s in strs:
+        b = s.encode("utf-8")
+        cnt = bytearray(26)
+        for i in range(len(b)):
+            idx = b[i] - ord("a")
+            cnt[idx] = (cnt[idx] + 1) & 0xFF
+        key = bytes(cnt)
+        groups.setdefault(key, []).append(s)
+    return list(groups.values())', false, 1),
+  ('prep-strings-group-anagrams', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> groups = new HashMap<>();
+        for (String s : strs) {
+            byte[] b = s.getBytes(StandardCharsets.UTF_8);
+            byte[] cnt = new byte[26];
+            for (int i = 0; i < b.length; i++) {
+                int idx = (b[i] & 0xFF) - ''a'';
+                cnt[idx]++;
+            }
+            String key = new String(cnt, StandardCharsets.ISO_8859_1);
+            groups.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+        }
+        return new ArrayList<>(groups.values());
+    }
+}', false, 2),
   ('prep-strings-group-shifted-strings', 'go', 'solution.go', 'package main
 func groupStrings(strings []string) [][]string {
 	groups := map[string][]string{}
@@ -13251,6 +23720,42 @@ func isAnagram(s, t string) bool {
 	return true
 }
 ', true, 0),
+  ('prep-strings-is-anagram', 'python', 'solution.py', 'def is_anagram(s: str, t: str) -> bool:
+    sb = s.encode(''utf-8'')
+    tb = t.encode(''utf-8'')
+    if len(sb) != len(tb):
+        return False
+    cnt = {}
+    for i in range(len(sb)):
+        cnt[sb[i]] = cnt.get(sb[i], 0) + 1
+        cnt[tb[i]] = cnt.get(tb[i], 0) - 1
+    for v in cnt.values():
+        if v != 0:
+            return False
+    return True', false, 1),
+  ('prep-strings-is-anagram', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    boolean isAnagram(String s, String t) {
+        byte[] sb = s.getBytes(StandardCharsets.UTF_8);
+        byte[] tb = t.getBytes(StandardCharsets.UTF_8);
+        if (sb.length != tb.length) {
+            return false;
+        }
+        Map<Byte, Long> cnt = new HashMap<>();
+        for (int i = 0; i < sb.length; i++) {
+            cnt.merge(sb[i], 1L, Long::sum);
+            cnt.merge(tb[i], -1L, Long::sum);
+        }
+        for (long v : cnt.values()) {
+            if (v != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-strings-is-isomorphic', 'go', 'solution.go', 'package main
 func isIsomorphic(s, t string) bool {
 	if len(s) != len(t) {
@@ -13271,6 +23776,49 @@ func isIsomorphic(s, t string) bool {
 	return true
 }
 ', true, 0),
+  ('prep-strings-is-isomorphic', 'python', 'solution.py', 'def is_isomorphic(s: str, t: str) -> bool:
+    sb = s.encode(''utf-8'')
+    tb = t.encode(''utf-8'')
+    if len(sb) != len(tb):
+        return False
+    m1: dict[int, int] = {}
+    m2: dict[int, int] = {}
+    for i in range(len(sb)):
+        a, b = sb[i], tb[i]
+        if a in m1 and m1[a] != b:
+            return False
+        if b in m2 and m2[b] != a:
+            return False
+        m1[a] = b
+        m2[b] = a
+    return True', false, 1),
+  ('prep-strings-is-isomorphic', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    boolean isIsomorphic(String s, String t) {
+        byte[] sb = s.getBytes(StandardCharsets.UTF_8);
+        byte[] tb = t.getBytes(StandardCharsets.UTF_8);
+        if (sb.length != tb.length) {
+            return false;
+        }
+        Map<Integer, Integer> m1 = new HashMap<>();
+        Map<Integer, Integer> m2 = new HashMap<>();
+        for (int i = 0; i < sb.length; i++) {
+            int a = sb[i] & 0xFF;
+            int b = tb[i] & 0xFF;
+            if (m1.containsKey(a) && m1.get(a) != b) {
+                return false;
+            }
+            if (m2.containsKey(b) && m2.get(b) != a) {
+                return false;
+            }
+            m1.put(a, b);
+            m2.put(b, a);
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-strings-is-palindrome', 'go', 'solution.go', 'package main
 func isPalindrome(s string) bool {
 	l, r := 0, len(s)-1
@@ -13301,6 +23849,68 @@ func toLower(b byte) byte {
 	return b
 }
 ', true, 0),
+  ('prep-strings-is-palindrome', 'python', 'solution.py', 'def is_palindrome(s: str) -> bool:
+    b = s.encode(''utf-8'')
+    l, r = 0, len(b) - 1
+    while l < r:
+        while l < r and not _is_alnum(b[l]):
+            l += 1
+        while l < r and not _is_alnum(b[r]):
+            r -= 1
+        if _to_lower(b[l]) != _to_lower(b[r]):
+            return False
+        l += 1
+        r -= 1
+    return True
+
+
+def _is_alnum(c: int) -> bool:
+    return (
+        (ord(''a'') <= c <= ord(''z''))
+        or (ord(''A'') <= c <= ord(''Z''))
+        or (ord(''0'') <= c <= ord(''9''))
+    )
+
+
+def _to_lower(c: int) -> int:
+    if ord(''A'') <= c <= ord(''Z''):
+        return c - ord(''A'') + ord(''a'')
+    return c', false, 1),
+  ('prep-strings-is-palindrome', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    boolean isPalindrome(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int l = 0, r = b.length - 1;
+        while (l < r) {
+            while (l < r && !isAlnum(b[l])) {
+                l++;
+            }
+            while (l < r && !isAlnum(b[r])) {
+                r--;
+            }
+            if (toLower(b[l]) != toLower(b[r])) {
+                return false;
+            }
+            l++;
+            r--;
+        }
+        return true;
+    }
+
+    boolean isAlnum(byte b) {
+        int c = b & 0xFF;
+        return (c >= ''a'' && c <= ''z'') || (c >= ''A'' && c <= ''Z'') || (c >= ''0'' && c <= ''9'');
+    }
+
+    int toLower(byte b) {
+        int c = b & 0xFF;
+        if (c >= ''A'' && c <= ''Z'') {
+            return c - ''A'' + ''a'';
+        }
+        return c;
+    }
+}', false, 2),
   ('prep-strings-longest-common-prefix', 'go', 'solution.go', 'package main
 func longestCommonPrefix(strs []string) string {
 	if len(strs) == 0 {
@@ -13317,6 +23927,41 @@ func longestCommonPrefix(strs []string) string {
 	return strs[0]
 }
 ', true, 0),
+  ('prep-strings-longest-common-prefix', 'python', 'solution.py', 'def longest_common_prefix(strs):
+    if len(strs) == 0:
+        return b""
+    encoded = [s.encode("utf-8") if isinstance(s, str) else s for s in strs]
+    first = encoded[0]
+    for i in range(len(first)):
+        c = first[i]
+        for j in range(1, len(encoded)):
+            if i >= len(encoded[j]) or encoded[j][i] != c:
+                return first[:i]
+    return first', false, 1),
+  ('prep-strings-longest-common-prefix', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    byte[] longestCommonPrefix(String[] strs) {
+        if (strs.length == 0) {
+            return new byte[0];
+        }
+        byte[][] encoded = new byte[strs.length][];
+        for (int k = 0; k < strs.length; k++) {
+            encoded[k] = strs[k].getBytes(StandardCharsets.UTF_8);
+        }
+        byte[] first = encoded[0];
+        for (int i = 0; i < first.length; i++) {
+            byte c = first[i];
+            for (int j = 1; j < encoded.length; j++) {
+                if (i >= encoded[j].length || encoded[j][i] != c) {
+                    return Arrays.copyOfRange(first, 0, i);
+                }
+            }
+        }
+        return first;
+    }
+}', false, 2),
   ('prep-strings-longest-happy-string', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -13351,6 +23996,54 @@ func longestDiverseString(a int, b int, c int) string {
 	return string(res)
 }
 ', true, 0),
+  ('prep-strings-longest-happy-string', 'python', 'solution.py', 'def longestDiverseString(a: int, b: int, c: int) -> str:
+    res = bytearray()
+    counts = [[a, ord(''a'')], [b, ord(''b'')], [c, ord(''c'')]]
+    while True:
+        counts.sort(key=lambda p: p[0], reverse=True)
+        pick = -1
+        for i in range(len(counts)):
+            if counts[i][0] == 0:
+                continue
+            n = len(res)
+            if n >= 2 and res[n - 1] == counts[i][1] and res[n - 2] == counts[i][1]:
+                continue
+            pick = i
+            break
+        if pick == -1:
+            break
+        res.append(counts[pick][1])
+        counts[pick][0] -= 1
+    return res.decode(''latin-1'')', false, 1),
+  ('prep-strings-longest-happy-string', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public String longestDiverseString(int a, int b, int c) {
+        StringBuilder res = new StringBuilder();
+        int[][] counts = {{a, ''a''}, {b, ''b''}, {c, ''c''}};
+        while (true) {
+            Arrays.sort(counts, (x, y) -> Integer.compare(y[0], x[0]));
+            int pick = -1;
+            for (int i = 0; i < counts.length; i++) {
+                if (counts[i][0] == 0) {
+                    continue;
+                }
+                int n = res.length();
+                if (n >= 2 && res.charAt(n - 1) == counts[i][1] && res.charAt(n - 2) == counts[i][1]) {
+                    continue;
+                }
+                pick = i;
+                break;
+            }
+            if (pick == -1) {
+                break;
+            }
+            res.append((char) counts[pick][1]);
+            counts[pick][0]--;
+        }
+        return res.toString();
+    }
+}', false, 2),
   ('prep-strings-longest-palindromic-substring', 'go', 'solution.go', 'package main
 func longestPalindromicSubstring(s string) string {
 	start, maxLen := 0, 0
@@ -13371,6 +24064,49 @@ func longestPalindromicSubstring(s string) string {
 	return s[start : start+maxLen]
 }
 ', true, 0),
+  ('prep-strings-longest-palindromic-substring', 'python', 'solution.py', 'def longest_palindromic_substring(s):
+    b = s.encode(''utf-8'')
+    n = len(b)
+    start, max_len = 0, 0
+
+    def expand(l, r):
+        nonlocal start, max_len
+        while l >= 0 and r < n and b[l] == b[r]:
+            l -= 1
+            r += 1
+        if r - l - 1 > max_len:
+            max_len = r - l - 1
+            start = l + 1
+
+    for i in range(n):
+        expand(i, i)
+        expand(i, i + 1)
+    return b[start:start + max_len].decode(''utf-8'')', false, 1),
+  ('prep-strings-longest-palindromic-substring', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public String longestPalindromicSubstring(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int n = b.length;
+        int[] state = new int[]{0, 0}; // start, maxLen
+        for (int i = 0; i < n; i++) {
+            expand(b, n, i, i, state);
+            expand(b, n, i, i + 1, state);
+        }
+        return new String(b, state[0], state[1], StandardCharsets.UTF_8);
+    }
+
+    private void expand(byte[] b, int n, int l, int r, int[] state) {
+        while (l >= 0 && r < n && b[l] == b[r]) {
+            l--;
+            r++;
+        }
+        if (r - l - 1 > state[1]) {
+            state[1] = r - l - 1;
+            state[0] = l + 1;
+        }
+    }
+}', false, 2),
   ('prep-strings-longest-substring-with-unique', 'go', 'solution.go', 'package main
 func longestSubstringWithUnique(s string) int {
 	last := map[byte]int{}
@@ -13388,6 +24124,40 @@ func longestSubstringWithUnique(s string) int {
 	return best
 }
 ', true, 0),
+  ('prep-strings-longest-substring-with-unique', 'python', 'solution.py', 'def longest_substring_with_unique(s):
+    b = s.encode(''utf-8'')
+    last = {}
+    l, best = 0, 0
+    for r in range(len(b)):
+        c = b[r]
+        if c in last and last[c] >= l:
+            l = last[c] + 1
+        last[c] = r
+        if r - l + 1 > best:
+            best = r - l + 1
+    return best', false, 1),
+  ('prep-strings-longest-substring-with-unique', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    static int longestSubstringWithUnique(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        Map<Byte, Integer> last = new HashMap<>();
+        int l = 0, best = 0;
+        for (int r = 0; r < b.length; r++) {
+            byte c = b[r];
+            Integer idx = last.get(c);
+            if (idx != null && idx >= l) {
+                l = idx + 1;
+            }
+            last.put(c, r);
+            if (r - l + 1 > best) {
+                best = r - l + 1;
+            }
+        }
+        return best;
+    }
+}', false, 2),
   ('prep-strings-min-insertions-to-form-palin', 'go', 'solution.go', 'package main
 func minInsertionsToFormPalin(s string) int {
 	n := len(s)
@@ -13411,6 +24181,46 @@ func minInsertionsToFormPalin(s string) int {
 	return n - dp[0][n-1]
 }
 ', true, 0),
+  ('prep-strings-min-insertions-to-form-palin', 'python', 'solution.py', 'def min_insertions_to_form_palin(s):
+    b = s.encode(''utf-8'')
+    n = len(b)
+    if n == 0:
+        return 0
+    dp = [[0] * n for _ in range(n)]
+    for i in range(n):
+        dp[i][i] = 1
+    for l in range(n - 2, -1, -1):
+        for r in range(l + 1, n):
+            if b[l] == b[r]:
+                dp[l][r] = dp[l + 1][r - 1] + 2
+            else:
+                dp[l][r] = max(dp[l + 1][r], dp[l][r - 1])
+    return n - dp[0][n - 1]', false, 1),
+  ('prep-strings-min-insertions-to-form-palin', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    int minInsertionsToFormPalin(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int n = b.length;
+        if (n == 0) {
+            return 0;
+        }
+        int[][] dp = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+        for (int l = n - 2; l >= 0; l--) {
+            for (int r = l + 1; r < n; r++) {
+                if (b[l] == b[r]) {
+                    dp[l][r] = dp[l + 1][r - 1] + 2;
+                } else {
+                    dp[l][r] = Math.max(dp[l + 1][r], dp[l][r - 1]);
+                }
+            }
+        }
+        return n - dp[0][n - 1];
+    }
+}', false, 2),
   ('prep-strings-min-window-substring', 'go', 'solution.go', 'package main
 func minWindowSubstring(s, t string) string {
 	if len(t) == 0 {
@@ -13449,6 +24259,84 @@ func minWindowSubstring(s, t string) string {
 	return s[bestL : bestL+bestLen]
 }
 ', true, 0),
+  ('prep-strings-min-window-substring', 'python', 'solution.py', 'def min_window_substring(s, t):
+    sb = s.encode(''utf-8'')
+    tb = t.encode(''utf-8'')
+    if len(tb) == 0:
+        return ""
+    need = {}
+    for i in range(len(tb)):
+        need[tb[i]] = need.get(tb[i], 0) + 1
+    required = len(need)
+    formed = 0
+    have = {}
+    INF = (1 << 63) - 1
+    l, best_l, best_len = 0, 0, INF
+    for r in range(len(sb)):
+        c = sb[r]
+        have[c] = have.get(c, 0) + 1
+        if c in need and have[c] == need[c]:
+            formed += 1
+        while formed == required and l <= r:
+            if r - l + 1 < best_len:
+                best_len = r - l + 1
+                best_l = l
+            left = sb[l]
+            have[left] -= 1
+            if left in need and have[left] < need[left]:
+                formed -= 1
+            l += 1
+    if best_len == INF:
+        return ""
+    return sb[best_l:best_l + best_len].decode(''utf-8'')', false, 1),
+  ('prep-strings-min-window-substring', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    String minWindowSubstring(String s, String t) {
+        byte[] sb = s.getBytes(StandardCharsets.UTF_8);
+        byte[] tb = t.getBytes(StandardCharsets.UTF_8);
+        if (tb.length == 0) {
+            return "";
+        }
+        Map<Byte, Integer> need = new HashMap<>();
+        for (int i = 0; i < tb.length; i++) {
+            need.merge(tb[i], 1, Integer::sum);
+        }
+        int required = need.size();
+        int formed = 0;
+        Map<Byte, Integer> have = new HashMap<>();
+        long INF = Long.MAX_VALUE;
+        int l = 0, bestL = 0;
+        long bestLen = INF;
+        for (int r = 0; r < sb.length; r++) {
+            byte c = sb[r];
+            have.merge(c, 1, Integer::sum);
+            Integer cnt = need.get(c);
+            if (cnt != null && have.get(c).intValue() == cnt.intValue()) {
+                formed++;
+            }
+            while (formed == required && l <= r) {
+                if (r - l + 1 < bestLen) {
+                    bestLen = r - l + 1;
+                    bestL = l;
+                }
+                byte left = sb[l];
+                have.merge(left, -1, Integer::sum);
+                Integer lcnt = need.get(left);
+                if (lcnt != null && have.get(left).intValue() < lcnt.intValue()) {
+                    formed--;
+                }
+                l++;
+            }
+        }
+        if (bestLen == INF) {
+            return "";
+        }
+        byte[] slice = Arrays.copyOfRange(sb, bestL, bestL + (int) bestLen);
+        return new String(slice, StandardCharsets.UTF_8);
+    }
+}', false, 2),
   ('prep-strings-minimum-add-to-make-parentheses-valid', 'go', 'solution.go', 'package main
 func minAddToMakeValid(s string) int {
 	open, close := 0, 0
@@ -13464,6 +24352,36 @@ func minAddToMakeValid(s string) int {
 	return open + close
 }
 ', true, 0),
+  ('prep-strings-minimum-add-to-make-parentheses-valid', 'python', 'solution.py', 'def min_add_to_make_valid(s: str) -> int:
+    b = s.encode(''utf-8'')
+    open_ = 0
+    close = 0
+    for i in range(len(b)):
+        if b[i] == ord(''(''):
+            open_ += 1
+        elif open_ > 0:
+            open_ -= 1
+        else:
+            close += 1
+    return open_ + close', false, 1),
+  ('prep-strings-minimum-add-to-make-parentheses-valid', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public int minAddToMakeValid(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int open = 0, close = 0;
+        for (int i = 0; i < b.length; i++) {
+            if (b[i] == (byte) ''('') {
+                open++;
+            } else if (open > 0) {
+                open--;
+            } else {
+                close++;
+            }
+        }
+        return open + close;
+    }
+}', false, 2),
   ('prep-strings-minimum-remove-to-make-valid-parentheses', 'go', 'solution.go', 'package main
 func minRemoveToMakeValid(s string) string {
 	buf := []byte(s)
@@ -13491,6 +24409,57 @@ func minRemoveToMakeValid(s string) string {
 	return string(res)
 }
 ', true, 0),
+  ('prep-strings-minimum-remove-to-make-valid-parentheses', 'python', 'solution.py', 'def min_remove_to_make_valid(s):
+    buf = bytearray(s.encode(''utf-8''))
+    stack = []
+    for i in range(len(buf)):
+        if buf[i] == ord(''(''):
+            stack.append(i)
+        elif buf[i] == ord('')''):
+            if stack:
+                stack.pop()
+            else:
+                buf[i] = ord(''*'')
+    for idx in stack:
+        buf[idx] = ord(''*'')
+    res = bytearray()
+    for b in buf:
+        if b != ord(''*''):
+            res.append(b)
+    return res.decode(''utf-8'')', false, 1),
+  ('prep-strings-minimum-remove-to-make-valid-parentheses', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    public String minRemoveToMakeValid(String s) {
+        byte[] buf = s.getBytes(StandardCharsets.UTF_8);
+        List<Integer> stack = new ArrayList<>();
+        for (int i = 0; i < buf.length; i++) {
+            if (buf[i] == ''('') {
+                stack.add(i);
+            } else if (buf[i] == '')'') {
+                if (!stack.isEmpty()) {
+                    stack.remove(stack.size() - 1);
+                } else {
+                    buf[i] = ''*'';
+                }
+            }
+        }
+        for (int idx : stack) {
+            buf[idx] = ''*'';
+        }
+        int n = 0;
+        for (byte b : buf) {
+            if (b != ''*'') n++;
+        }
+        byte[] res = new byte[n];
+        int j = 0;
+        for (byte b : buf) {
+            if (b != ''*'') res[j++] = b;
+        }
+        return new String(res, StandardCharsets.UTF_8);
+    }
+}', false, 2),
   ('prep-strings-minimum-time-difference', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -13510,6 +24479,43 @@ func findMinDifference(timePoints []string) int {
 	return res
 }
 ', true, 0),
+  ('prep-strings-minimum-time-difference', 'python', 'solution.py', 'from typing import List
+
+
+def findMinDifference(timePoints: List[str]) -> int:
+    mins = [0] * len(timePoints)
+    for i, tp in enumerate(timePoints):
+        b = tp.encode("utf-8")
+        mins[i] = (b[0] - ord("0")) * 600 + (b[1] - ord("0")) * 60 + (b[3] - ord("0")) * 10 + (b[4] - ord("0"))
+    mins.sort()
+    res = 1440 - mins[-1] + mins[0]
+    for i in range(1, len(mins)):
+        d = mins[i] - mins[i - 1]
+        if d < res:
+            res = d
+    return res', false, 1),
+  ('prep-strings-minimum-time-difference', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public int findMinDifference(List<String> timePoints) {
+        int n = timePoints.size();
+        int[] mins = new int[n];
+        for (int i = 0; i < n; i++) {
+            byte[] b = timePoints.get(i).getBytes(StandardCharsets.UTF_8);
+            mins[i] = (b[0] - ''0'') * 600 + (b[1] - ''0'') * 60 + (b[3] - ''0'') * 10 + (b[4] - ''0'');
+        }
+        Arrays.sort(mins);
+        int res = 1440 - mins[mins.length - 1] + mins[0];
+        for (int i = 1; i < mins.length; i++) {
+            int d = mins[i] - mins[i - 1];
+            if (d < res) {
+                res = d;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-strings-minimum-time-to-make-rope-colorful', 'go', 'solution.go', 'package main
 func minCost(colors string, neededTime []int) int {
 	cost := 0
@@ -13530,6 +24536,44 @@ func minCost(colors string, neededTime []int) int {
 	return cost
 }
 ', true, 0),
+  ('prep-strings-minimum-time-to-make-rope-colorful', 'python', 'solution.py', 'def minCost(colors, neededTime):
+    b = colors.encode(''utf-8'')
+    cost = 0
+    mx = sum_ = neededTime[0]
+    for i in range(1, len(b)):
+        if b[i] == b[i - 1]:
+            sum_ += neededTime[i]
+            if neededTime[i] > mx:
+                mx = neededTime[i]
+        else:
+            cost += sum_ - mx
+            sum_ = neededTime[i]
+            mx = neededTime[i]
+    cost += sum_ - mx
+    return cost', false, 1),
+  ('prep-strings-minimum-time-to-make-rope-colorful', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    long minCost(String colors, long[] neededTime) {
+        byte[] b = colors.getBytes(StandardCharsets.UTF_8);
+        long cost = 0;
+        long mx = neededTime[0], sum = neededTime[0];
+        for (int i = 1; i < b.length; i++) {
+            if (b[i] == b[i - 1]) {
+                sum += neededTime[i];
+                if (neededTime[i] > mx) {
+                    mx = neededTime[i];
+                }
+            } else {
+                cost += sum - mx;
+                sum = neededTime[i];
+                mx = neededTime[i];
+            }
+        }
+        cost += sum - mx;
+        return cost;
+    }
+}', false, 2),
   ('prep-strings-number-of-matching-subsequences', 'go', 'solution.go', 'package main
 type wordNode struct {
 	word string
@@ -13557,6 +24601,63 @@ func numMatchingSubseq(s string, words []string) int {
 	return cnt
 }
 ', true, 0),
+  ('prep-strings-number-of-matching-subsequences', 'python', 'solution.py', 'from collections import defaultdict
+
+
+def num_matching_subseq(s, words):
+    sb = s.encode(''utf-8'')
+    wbs = [w.encode(''utf-8'') for w in words]
+    buckets = defaultdict(list)
+    for wb in wbs:
+        buckets[wb[0]].append((wb, 0))
+    cnt = 0
+    for i in range(len(sb)):
+        nodes = buckets.get(sb[i], [])
+        if sb[i] in buckets:
+            del buckets[sb[i]]
+        for wb, idx in nodes:
+            idx += 1
+            if idx == len(wb):
+                cnt += 1
+            else:
+                buckets[wb[idx]].append((wb, idx))
+    return cnt', false, 1),
+  ('prep-strings-number-of-matching-subsequences', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public long numMatchingSubseq(String s, String[] words) {
+        byte[] sb = s.getBytes(StandardCharsets.UTF_8);
+        Map<Integer, List<int[]>> buckets = new HashMap<>();
+        byte[][] wbs = new byte[words.length][];
+        for (int wi = 0; wi < words.length; wi++) {
+            byte[] wb = words[wi].getBytes(StandardCharsets.UTF_8);
+            wbs[wi] = wb;
+            int key = wb[0] & 0xFF;
+            buckets.computeIfAbsent(key, k -> new ArrayList<>()).add(new int[]{wi, 0});
+        }
+        long cnt = 0;
+        for (int i = 0; i < sb.length; i++) {
+            int key = sb[i] & 0xFF;
+            List<int[]> nodes = buckets.get(key);
+            buckets.remove(key);
+            if (nodes != null) {
+                for (int[] nd : nodes) {
+                    int wi = nd[0];
+                    int idx = nd[1] + 1;
+                    byte[] wb = wbs[wi];
+                    if (idx == wb.length) {
+                        cnt++;
+                    } else {
+                        int nkey = wb[idx] & 0xFF;
+                        buckets.computeIfAbsent(nkey, k -> new ArrayList<>()).add(new int[]{wi, idx});
+                    }
+                }
+            }
+        }
+        return cnt;
+    }
+}', false, 2),
   ('prep-strings-number-of-steps-to-reduce-a-number-in-binary-representation-', 'go', 'solution.go', 'package main
 func numSteps(s string) int {
 	steps, carry := 0, 0
@@ -13588,6 +24689,38 @@ func ransomNote(ransomNote, magazine string) bool {
 	return true
 }
 ', true, 0),
+  ('prep-strings-ransom-note', 'python', 'solution.py', 'def ransom_note(ransom_note: str, magazine: str) -> bool:
+    mag = magazine.encode(''utf-8'')
+    note = ransom_note.encode(''utf-8'')
+    cnt = {}
+    for b in mag:
+        cnt[b] = cnt.get(b, 0) + 1
+    for b in note:
+        if cnt.get(b, 0) == 0:
+            return False
+        cnt[b] -= 1
+    return True', false, 1),
+  ('prep-strings-ransom-note', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    boolean ransomNote(String ransomNote, String magazine) {
+        byte[] mag = magazine.getBytes(StandardCharsets.UTF_8);
+        byte[] note = ransomNote.getBytes(StandardCharsets.UTF_8);
+        Map<Byte, Long> cnt = new HashMap<>();
+        for (byte b : mag) {
+            cnt.merge(b, 1L, Long::sum);
+        }
+        for (byte b : note) {
+            long v = cnt.getOrDefault(b, 0L);
+            if (v == 0) {
+                return false;
+            }
+            cnt.put(b, v - 1);
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-strings-reverse-words', 'go', 'solution.go', 'package main
 func reverseWords(s string) string {
 	b := []byte(s)
@@ -13622,6 +24755,71 @@ func reverseWords(s string) string {
 	return string(b)
 }
 ', true, 0),
+  ('prep-strings-reverse-words', 'python', 'solution.py', 'def reverse_words(s):
+    b = bytearray(s.encode(''utf-8''))
+    start, end = 0, len(b) - 1
+    while start <= end and b[start] == ord('' ''):
+        start += 1
+    while end >= start and b[end] == ord('' ''):
+        end -= 1
+    b = b[start:end + 1]
+
+    def rev(l, r):
+        while l < r:
+            b[l], b[r] = b[r], b[l]
+            l += 1
+            r -= 1
+
+    rev(0, len(b) - 1)
+    i = 0
+    n = len(b)
+    while i < n:
+        j = i
+        while j < n and b[j] != ord('' ''):
+            j += 1
+        rev(i, j - 1)
+        i = j + 1
+    return b.decode(''utf-8'')', false, 1),
+  ('prep-strings-reverse-words', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public String reverseWords(String s) {
+        byte[] full = s.getBytes(StandardCharsets.UTF_8);
+        int start = 0, end = full.length - 1;
+        while (start <= end && full[start] == '' '') {
+            start++;
+        }
+        while (end >= start && full[end] == '' '') {
+            end--;
+        }
+        int len = end + 1 - start;
+        byte[] b = new byte[len];
+        System.arraycopy(full, start, b, 0, len);
+
+        rev(b, 0, b.length - 1);
+        int i = 0;
+        int n = b.length;
+        while (i < n) {
+            int j = i;
+            while (j < n && b[j] != '' '') {
+                j++;
+            }
+            rev(b, i, j - 1);
+            i = j + 1;
+        }
+        return new String(b, StandardCharsets.UTF_8);
+    }
+
+    private void rev(byte[] b, int l, int r) {
+        while (l < r) {
+            byte t = b[l];
+            b[l] = b[r];
+            b[r] = t;
+            l++;
+            r--;
+        }
+    }
+}', false, 2),
   ('prep-strings-reverse-words-in-a-string', 'go', 'solution.go', 'package main
 import "strings"
 
@@ -13655,6 +24853,52 @@ func containsSubstr(s, sub string) bool {
 	return false
 }
 ', true, 0),
+  ('prep-strings-rotate-string', 'python', 'solution.py', 'def rotate_string(s: str, goal: str) -> bool:
+    sb = s.encode(''utf-8'')
+    gb = goal.encode(''utf-8'')
+    if len(sb) != len(gb):
+        return False
+    double = sb + sb
+    return _contains_substr(double, gb)
+
+
+def _contains_substr(s: bytes, sub: bytes) -> bool:
+    if len(sub) == 0:
+        return True
+    i = 0
+    while i + len(sub) <= len(s):
+        if s[i:i + len(sub)] == sub:
+            return True
+        i += 1
+    return False', false, 1),
+  ('prep-strings-rotate-string', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+class Solution {
+    boolean rotateString(String s, String goal) {
+        byte[] sb = s.getBytes(StandardCharsets.UTF_8);
+        byte[] gb = goal.getBytes(StandardCharsets.UTF_8);
+        if (sb.length != gb.length) {
+            return false;
+        }
+        byte[] doubled = new byte[sb.length * 2];
+        System.arraycopy(sb, 0, doubled, 0, sb.length);
+        System.arraycopy(sb, 0, doubled, sb.length, sb.length);
+        return containsSubstr(doubled, gb);
+    }
+
+    boolean containsSubstr(byte[] s, byte[] sub) {
+        if (sub.length == 0) {
+            return true;
+        }
+        for (int i = 0; i + sub.length <= s.length; i++) {
+            if (Arrays.equals(Arrays.copyOfRange(s, i, i + sub.length), sub)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}', false, 2),
   ('prep-strings-run-length-encoding', 'go', 'solution.go', 'package main
 func runLengthEncoding(s string) string {
 	if len(s) == 0 {
@@ -13677,6 +24921,58 @@ func runLengthEncoding(s string) string {
 	return string(b)
 }
 ', true, 0),
+  ('prep-strings-run-length-encoding', 'python', 'solution.py', 'def run_length_encoding(s: str) -> str:
+    data = s.encode(''utf-8'')
+    if len(data) == 0:
+        return ""
+    b = bytearray()
+    run = 1
+    c = data[0]
+    for i in range(1, len(data)):
+        if data[i] == c:
+            run += 1
+        else:
+            b.append(c)
+            b.append((ord(''0'') + run) & 0xFF)
+            c = data[i]
+            run = 1
+    b.append(c)
+    b.append((ord(''0'') + run) & 0xFF)
+    # Go returns string(b): the raw bytes reinterpreted as a string. We decode as
+    # latin-1 so every byte maps 1:1 to a code point, preserving the exact byte
+    # sequence (including run bytes that overflow past ''9'' when run > 9).
+    return b.decode(''latin-1'')', false, 1),
+  ('prep-strings-run-length-encoding', 'java', 'Solution.java', 'import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    String runLengthEncoding(String s) {
+        byte[] data = s.getBytes(StandardCharsets.UTF_8);
+        if (data.length == 0) {
+            return "";
+        }
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        long run = 1;
+        int c = data[0] & 0xFF;
+        for (int i = 1; i < data.length; i++) {
+            int cur = data[i] & 0xFF;
+            if (cur == c) {
+                run++;
+            } else {
+                b.write((byte) c);
+                b.write((byte) (''0'' + run));
+                c = cur;
+                run = 1;
+            }
+        }
+        b.write((byte) c);
+        b.write((byte) (''0'' + run));
+        // Go returns string(b): raw bytes reinterpreted. Decode as ISO-8859-1
+        // (latin-1) so each byte maps 1:1 to a char, preserving the exact byte
+        // sequence including run bytes that overflow past ''9'' when run > 9.
+        return new String(b.toByteArray(), StandardCharsets.ISO_8859_1);
+    }
+}', false, 2),
   ('prep-strings-shortest-subarray-contains-all', 'go', 'solution.go', 'package main
 func shortestSubarrayContainsAll(nums []int, target int) int {
 	sum, l, best := 0, 0, int(^uint(0)>>1)
@@ -13696,6 +24992,41 @@ func shortestSubarrayContainsAll(nums []int, target int) int {
 	return best
 }
 ', true, 0),
+  ('prep-strings-shortest-subarray-contains-all', 'python', 'solution.py', 'def shortest_subarray_contains_all(nums, target):
+    INT_MAX = (1 << 63) - 1
+    total, l, best = 0, 0, INT_MAX
+    for r in range(len(nums)):
+        total += nums[r]
+        while total >= target:
+            if r - l + 1 < best:
+                best = r - l + 1
+            total -= nums[l]
+            l += 1
+    if best == INT_MAX:
+        return 0
+    return best', false, 1),
+  ('prep-strings-shortest-subarray-contains-all', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    long shortestSubarrayContainsAll(long[] nums, long target) {
+        long sum = 0, best = Long.MAX_VALUE;
+        int l = 0;
+        for (int r = 0; r < nums.length; r++) {
+            sum += nums[r];
+            while (sum >= target) {
+                if (r - l + 1 < best) {
+                    best = r - l + 1;
+                }
+                sum -= nums[l];
+                l++;
+            }
+        }
+        if (best == Long.MAX_VALUE) {
+            return 0;
+        }
+        return best;
+    }
+}', false, 2),
   ('prep-strings-shortest-way-to-form-string', 'go', 'solution.go', 'package main
 func shortestWay(source string, target string) int {
 	res, j := 0, 0
@@ -13714,6 +25045,43 @@ func shortestWay(source string, target string) int {
 	return res
 }
 ', true, 0),
+  ('prep-strings-shortest-way-to-form-string', 'python', 'solution.py', 'def shortestWay(source: str, target: str) -> int:
+    src = source.encode(''utf-8'')
+    tgt = target.encode(''utf-8'')
+    res, j = 0, 0
+    while j < len(tgt):
+        prev = j
+        i = 0
+        while i < len(src) and j < len(tgt):
+            if src[i] == tgt[j]:
+                j += 1
+            i += 1
+        if j == prev:
+            return -1
+        res += 1
+    return res', false, 1),
+  ('prep-strings-shortest-way-to-form-string', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public int shortestWay(String source, String target) {
+        byte[] src = source.getBytes(StandardCharsets.UTF_8);
+        byte[] tgt = target.getBytes(StandardCharsets.UTF_8);
+        int res = 0, j = 0;
+        while (j < tgt.length) {
+            int prev = j;
+            for (int i = 0; i < src.length && j < tgt.length; i++) {
+                if (src[i] == tgt[j]) {
+                    j++;
+                }
+            }
+            if (j == prev) {
+                return -1;
+            }
+            res++;
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-strings-strings-differ-by-one-character', 'go', 'solution.go', 'package main
 func differByOne(dict []string) bool {
 	if len(dict) == 0 {
@@ -13733,6 +25101,64 @@ func differByOne(dict []string) bool {
 	return false
 }
 ', true, 0),
+  ('prep-strings-strings-differ-by-one-character', 'python', 'solution.py', 'def differByOne(dict_):
+    if len(dict_) == 0:
+        return False
+    words = [w.encode(''utf-8'') for w in dict_]
+    L = len(words[0])
+    for i in range(L):
+        seen = set()
+        for w in words:
+            # Faithful to Go''s byte slicing w[:i] + "*" + w[i+1:], which
+            # panics (slice bounds out of range) when i+1 > len(w).
+            if i + 1 > len(w):
+                raise IndexError("slice bounds out of range [{}:{}]".format(i + 1, len(w)))
+            p = w[:i] + b"*" + w[i + 1:]
+            if p in seen:
+                return True
+            seen.add(p)
+    return False', false, 1),
+  ('prep-strings-strings-differ-by-one-character', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+
+    boolean differByOne(String[] dict) {
+        if (dict.length == 0) {
+            return false;
+        }
+        byte[][] words = new byte[dict.length][];
+        for (int k = 0; k < dict.length; k++) {
+            words[k] = dict[k].getBytes(StandardCharsets.UTF_8);
+        }
+        int L = words[0].length;
+        for (int i = 0; i < L; i++) {
+            Set<String> seen = new HashSet<>();
+            for (byte[] w : words) {
+                // Faithful to Go''s byte slicing w[:i] + "*" + w[i+1:], which
+                // panics (slice bounds out of range) when i+1 > len(w).
+                if (i + 1 > w.length) {
+                    throw new IndexOutOfBoundsException(
+                        "slice bounds out of range [" + (i + 1) + ":" + w.length + "]");
+                }
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j < i; j++) {
+                    sb.append((char) (w[j] & 0xff));
+                }
+                sb.append(''*'');
+                for (int j = i + 1; j < w.length; j++) {
+                    sb.append((char) (w[j] & 0xff));
+                }
+                String p = sb.toString();
+                if (seen.contains(p)) {
+                    return true;
+                }
+                seen.add(p);
+            }
+        }
+        return false;
+    }
+}', false, 2),
   ('prep-strings-sum-of-prefix-scores-of-strings', 'go', 'solution.go', 'package main
 func sumPrefixScores(words []string) []int {
 	type node struct {
@@ -13762,6 +25188,63 @@ func sumPrefixScores(words []string) []int {
 	return res
 }
 ', true, 0),
+  ('prep-strings-sum-of-prefix-scores-of-strings', 'python', 'solution.py', 'from typing import List
+
+
+def sumPrefixScores(words: List[str]) -> List[int]:
+    root = {"ch": [None] * 26, "count": 0}
+    for w in words:
+        cur = root
+        b = w.encode("utf-8")
+        for i in range(len(b)):
+            c = b[i] - ord("a")
+            if cur["ch"][c] is None:
+                cur["ch"][c] = {"ch": [None] * 26, "count": 0}
+            cur = cur["ch"][c]
+            cur["count"] += 1
+    res = [0] * len(words)
+    for i, w in enumerate(words):
+        cur = root
+        b = w.encode("utf-8")
+        for j in range(len(b)):
+            cur = cur["ch"][b[j] - ord("a")]
+            res[i] += cur["count"]
+    return res', false, 1),
+  ('prep-strings-sum-of-prefix-scores-of-strings', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    static class Node {
+        Node[] ch = new Node[26];
+        long count = 0;
+    }
+
+    public long[] sumPrefixScores(String[] words) {
+        Node root = new Node();
+        for (String w : words) {
+            Node cur = root;
+            byte[] b = w.getBytes(StandardCharsets.UTF_8);
+            for (int i = 0; i < b.length; i++) {
+                int c = (b[i] & 0xff) - ''a'';
+                if (cur.ch[c] == null) {
+                    cur.ch[c] = new Node();
+                }
+                cur = cur.ch[c];
+                cur.count++;
+            }
+        }
+        long[] res = new long[words.length];
+        for (int i = 0; i < words.length; i++) {
+            Node cur = root;
+            byte[] b = words[i].getBytes(StandardCharsets.UTF_8);
+            for (int j = 0; j < b.length; j++) {
+                cur = cur.ch[(b[j] & 0xff) - ''a''];
+                res[i] += cur.count;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-strings-swap-adjacent-in-lr-string', 'go', 'solution.go', 'package main
 func canTransform(start string, target string) bool {
 	n := len(start)
@@ -13794,6 +25277,68 @@ func canTransform(start string, target string) bool {
 	return true
 }
 ', true, 0),
+  ('prep-strings-swap-adjacent-in-lr-string', 'python', 'solution.py', 'def can_transform(start: str, target: str) -> bool:
+    sb = start.encode(''utf-8'')
+    tb = target.encode(''utf-8'')
+    n = len(sb)
+    i, j = 0, 0
+    X = ord(''X'')
+    L = ord(''L'')
+    R = ord(''R'')
+    while i < n or j < n:
+        while i < n and sb[i] == X:
+            i += 1
+        while j < n and tb[j] == X:
+            j += 1
+        if (i == n) != (j == n):
+            return False
+        if i == n:
+            break
+        if sb[i] != tb[j]:
+            return False
+        if sb[i] == L and i < j:
+            return False
+        if sb[i] == R and i > j:
+            return False
+        i += 1
+        j += 1
+    return True', false, 1),
+  ('prep-strings-swap-adjacent-in-lr-string', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    boolean canTransform(String start, String target) {
+        byte[] sb = start.getBytes(StandardCharsets.UTF_8);
+        byte[] tb = target.getBytes(StandardCharsets.UTF_8);
+        int n = sb.length;
+        int i = 0, j = 0;
+        while (i < n || j < n) {
+            while (i < n && sb[i] == ''X'') {
+                i++;
+            }
+            while (j < n && tb[j] == ''X'') {
+                j++;
+            }
+            if ((i == n) != (j == n)) {
+                return false;
+            }
+            if (i == n) {
+                break;
+            }
+            if (sb[i] != tb[j]) {
+                return false;
+            }
+            if (sb[i] == ''L'' && i < j) {
+                return false;
+            }
+            if (sb[i] == ''R'' && i > j) {
+                return false;
+            }
+            i++;
+            j++;
+        }
+        return true;
+    }
+}', false, 2),
   ('prep-strings-swap-even-odd', 'go', 'solution.go', 'package main
 func swapEvenOdd(s string) string {
 	b := []byte(s)
@@ -13803,6 +25348,35 @@ func swapEvenOdd(s string) string {
 	return string(b)
 }
 ', true, 0),
+  ('prep-strings-swap-even-odd', 'python', 'solution.py', 'def swap_even_odd(s):
+    """Swap adjacent even/odd bytes of a string''s UTF-8 encoding.
+
+    Faithful to Go''s swapEvenOdd, which operates on raw bytes ([]byte(s))
+    and returns a byte-string that may not be valid UTF-8. We therefore
+    operate on and return bytes.
+    """
+    b = bytearray(s.encode(''utf-8'') if isinstance(s, str) else s)
+    i = 0
+    while i + 1 < len(b):
+        b[i], b[i + 1] = b[i + 1], b[i]
+        i += 2
+    return bytes(b)', false, 1),
+  ('prep-strings-swap-even-odd', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    // Swap adjacent even/odd bytes of the string''s UTF-8 encoding.
+    // Faithful to Go''s swapEvenOdd, which indexes by byte and returns a
+    // byte-string (possibly invalid UTF-8), so we return byte[].
+    byte[] swapEvenOdd(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i + 1 < b.length; i += 2) {
+            byte t = b[i];
+            b[i] = b[i + 1];
+            b[i + 1] = t;
+        }
+        return b;
+    }
+}', false, 2),
   ('prep-strings-text-justification', 'go', 'solution.go', 'package main
 import "strings"
 
@@ -13851,6 +25425,105 @@ func fullJustify(words []string, maxWidth int) []string {
 	return res
 }
 ', true, 0),
+  ('prep-strings-text-justification', 'python', 'solution.py', 'from typing import List
+
+
+def fullJustify(words: List[str], maxWidth: int) -> List[str]:
+    # Go indexes strings by BYTE (len(), WriteString/WriteByte are byte-based).
+    # Operate on UTF-8 bytes to match Go faithfully for non-ASCII input.
+    bwords = [w.encode("utf-8") for w in words]
+    res: List[bytes] = []
+    i = 0
+    n = len(bwords)
+    while i < n:
+        line_len = len(bwords[i])
+        j = i + 1
+        while j < n and line_len + 1 + len(bwords[j]) <= maxWidth:
+            line_len += 1 + len(bwords[j])
+            j += 1
+        num_words = j - i
+        sb = bytearray()
+        if j == n or num_words == 1:
+            sb += bwords[i]
+            for k in range(i + 1, j):
+                sb += b" "
+                sb += bwords[k]
+            while len(sb) < maxWidth:
+                sb += b" "
+        else:
+            total_spaces = maxWidth - (line_len - (num_words - 1))
+            per_gap = total_spaces // (num_words - 1)
+            extra = total_spaces % (num_words - 1)
+            for k in range(i, j):
+                sb += bwords[k]
+                if k < j - 1:
+                    gaps = per_gap
+                    if k - i < extra:
+                        gaps += 1
+                    for _ in range(gaps):
+                        sb += b" "
+        res.append(bytes(sb))
+        i = j
+    return [line.decode("utf-8") for line in res]', false, 1),
+  ('prep-strings-text-justification', 'java', 'Solution.java', 'import java.util.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    List<String> fullJustify(String[] words, int maxWidth) {
+        // Go indexes strings by BYTE; operate on UTF-8 bytes for faithfulness.
+        byte[][] bwords = new byte[words.length][];
+        for (int w = 0; w < words.length; w++) {
+            bwords[w] = words[w].getBytes(StandardCharsets.UTF_8);
+        }
+        List<byte[]> res = new ArrayList<>();
+        int i = 0;
+        int n = bwords.length;
+        while (i < n) {
+            int lineLen = bwords[i].length;
+            int j = i + 1;
+            while (j < n && lineLen + 1 + bwords[j].length <= maxWidth) {
+                lineLen += 1 + bwords[j].length;
+                j++;
+            }
+            int numWords = j - i;
+            ByteArrayOutputStream sb = new ByteArrayOutputStream();
+            if (j == n || numWords == 1) {
+                sb.write(bwords[i], 0, bwords[i].length);
+                for (int k = i + 1; k < j; k++) {
+                    sb.write((byte) '' '');
+                    sb.write(bwords[k], 0, bwords[k].length);
+                }
+                while (sb.size() < maxWidth) {
+                    sb.write((byte) '' '');
+                }
+            } else {
+                int totalSpaces = maxWidth - (lineLen - (numWords - 1));
+                int perGap = totalSpaces / (numWords - 1);
+                int extra = totalSpaces % (numWords - 1);
+                for (int k = i; k < j; k++) {
+                    sb.write(bwords[k], 0, bwords[k].length);
+                    if (k < j - 1) {
+                        int gaps = perGap;
+                        if (k - i < extra) {
+                            gaps++;
+                        }
+                        for (int g = 0; g < gaps; g++) {
+                            sb.write((byte) '' '');
+                        }
+                    }
+                }
+            }
+            res.add(sb.toByteArray());
+            i = j;
+        }
+        List<String> out = new ArrayList<>();
+        for (byte[] b : res) {
+            out.add(new String(b, StandardCharsets.UTF_8));
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-strings-valid-number', 'go', 'solution.go', 'package main
 func isNumber(s string) bool {
 	seenDigit, seenDot, seenExp := false, false, false
@@ -13880,6 +25553,60 @@ func isNumber(s string) bool {
 	return seenDigit
 }
 ', true, 0),
+  ('prep-strings-valid-number', 'python', 'solution.py', 'def is_number(s: str) -> bool:
+    b = s.encode(''utf-8'')
+    seen_digit = seen_dot = seen_exp = False
+    for i in range(len(b)):
+        c = b[i]
+        if 0x30 <= c <= 0x39:  # ''0''..''9''
+            seen_digit = True
+        elif c == 0x2B or c == 0x2D:  # ''+'' or ''-''
+            if i > 0 and b[i - 1] != 0x65 and b[i - 1] != 0x45:  # prev not ''e''/''E''
+                return False
+        elif c == 0x65 or c == 0x45:  # ''e'' or ''E''
+            if seen_exp or not seen_digit:
+                return False
+            seen_exp = True
+            seen_digit = False
+        elif c == 0x2E:  # ''.''
+            if seen_dot or seen_exp:
+                return False
+            seen_dot = True
+        else:
+            return False
+    return seen_digit', false, 1),
+  ('prep-strings-valid-number', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    public boolean isNumber(String s) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        boolean seenDigit = false, seenDot = false, seenExp = false;
+        for (int i = 0; i < b.length; i++) {
+            int c = b[i] & 0xFF;
+            if (c >= ''0'' && c <= ''9'') {
+                seenDigit = true;
+            } else if (c == ''+'' || c == ''-'') {
+                if (i > 0 && (b[i - 1] & 0xFF) != ''e'' && (b[i - 1] & 0xFF) != ''E'') {
+                    return false;
+                }
+            } else if (c == ''e'' || c == ''E'') {
+                if (seenExp || !seenDigit) {
+                    return false;
+                }
+                seenExp = true;
+                seenDigit = false;
+            } else if (c == ''.'') {
+                if (seenDot || seenExp) {
+                    return false;
+                }
+                seenDot = true;
+            } else {
+                return false;
+            }
+        }
+        return seenDigit;
+    }
+}', false, 2),
   ('prep-strings-word-break', 'go', 'solution.go', 'package main
 func wordBreak(s string, wordDict []string) bool {
 	words := map[string]bool{}
@@ -13900,6 +25627,45 @@ func wordBreak(s string, wordDict []string) bool {
 	return dp[n]
 }
 ', true, 0),
+  ('prep-strings-word-break', 'python', 'solution.py', 'def word_break(s, word_dict):
+    b = s.encode(''utf-8'')
+    words = set(w.encode(''utf-8'') for w in word_dict)
+    n = len(b)
+    dp = [False] * (n + 1)
+    dp[0] = True
+    for i in range(1, n + 1):
+        for j in range(0, i):
+            if dp[j] and b[j:i] in words:
+                dp[i] = True
+                break
+    return dp[n]', false, 1),
+  ('prep-strings-word-break', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        Set<String> words = new HashSet<>();
+        for (String w : wordDict) {
+            words.add(new String(w.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
+        }
+        int n = b.length;
+        boolean[] dp = new boolean[n + 1];
+        dp[0] = true;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (dp[j]) {
+                    String sub = new String(b, j, i - j, StandardCharsets.ISO_8859_1);
+                    if (words.contains(sub)) {
+                        dp[i] = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return dp[n];
+    }
+}', false, 2),
   ('prep-strings-word-wrap', 'go', 'solution.go', 'package main
 func wordWrap(words []string, maxWidth int) []string {
 	n := len(words)
@@ -13952,6 +25718,107 @@ func joinWords(words []string) string {
 	return out
 }
 ', true, 0),
+  ('prep-strings-word-wrap', 'python', 'solution.py', 'def word_wrap(words, max_width):
+    n = len(words)
+    if n == 0:
+        return None
+    # Go indexes strings by BYTE; len(word) in Go = UTF-8 byte length.
+    blen = [len(w.encode(''utf-8'')) for w in words]
+    INT_MAX = (1 << 63) - 1
+    dp = [0] * (n + 1)
+    nxt = [0] * n
+    for i in range(n - 1, -1, -1):
+        dp[i] = INT_MAX
+        length = 0
+        for j in range(i, n):
+            if j > i:
+                length += 1
+            length += blen[j]
+            if length > max_width:
+                break
+            cost = 0
+            if j < n - 1:
+                rem = max_width - length
+                cost = rem * rem + dp[j + 1]
+            if cost < dp[i]:
+                dp[i] = cost
+                nxt[i] = j + 1
+    out = []
+    i = 0
+    while i < n:
+        j = nxt[i] - 1
+        line = join_words(words[i:j + 1])
+        out.append(line)
+        i = nxt[i]
+    return out
+
+
+def join_words(words):
+    if len(words) == 0:
+        return ""
+    out = words[0]
+    for i in range(1, len(words)):
+        out += " " + words[i]
+    return out', false, 1),
+  ('prep-strings-word-wrap', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    static List<String> wordWrap(String[] words, int maxWidth) {
+        int n = words.length;
+        if (n == 0) {
+            return null;
+        }
+        int[] blen = new int[n];
+        for (int k = 0; k < n; k++) {
+            blen[k] = words[k].getBytes(StandardCharsets.UTF_8).length;
+        }
+        long[] dp = new long[n + 1];
+        int[] next = new int[n];
+        for (int i = n - 1; i >= 0; i--) {
+            dp[i] = Long.MAX_VALUE;
+            long length = 0;
+            for (int j = i; j < n; j++) {
+                if (j > i) {
+                    length++;
+                }
+                length += blen[j];
+                if (length > maxWidth) {
+                    break;
+                }
+                long cost = 0;
+                if (j < n - 1) {
+                    long rem = maxWidth - length;
+                    cost = rem * rem + dp[j + 1];
+                }
+                if (cost < dp[i]) {
+                    dp[i] = cost;
+                    next[i] = j + 1;
+                }
+            }
+        }
+        List<String> out = new ArrayList<>();
+        int i = 0;
+        while (i < n) {
+            int j = next[i] - 1;
+            String line = joinWords(Arrays.copyOfRange(words, i, j + 1));
+            out.add(line);
+            i = next[i];
+        }
+        return out;
+    }
+
+    static String joinWords(String[] words) {
+        if (words.length == 0) {
+            return "";
+        }
+        String out = words[0];
+        for (int i = 1; i < words.length; i++) {
+            out += " " + words[i];
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-trees-binary-search-tree-iterator', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -13987,6 +25854,75 @@ func (it *BSTIterator) HasNext() bool {
 	return len(it.stack) > 0
 }
 ', true, 0),
+  ('prep-trees-binary-search-tree-iterator', 'python', 'solution.py', 'from typing import Optional, List
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None, right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class BSTIterator:
+    def __init__(self, root: Optional[TreeNode]):
+        self.stack: List[TreeNode] = []
+        self._push_left(root)
+
+    def _push_left(self, node: Optional[TreeNode]) -> None:
+        while node is not None:
+            self.stack.append(node)
+            node = node.left
+
+    def next(self) -> int:
+        top = self.stack.pop()
+        self._push_left(top.right)
+        return top.val
+
+    def has_next(self) -> bool:
+        return len(self.stack) > 0', false, 1),
+  ('prep-trees-binary-search-tree-iterator', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    // Not used directly, but provided so the file is self-contained.
+    public static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public static class BSTIterator {
+        private final Deque<TreeNode> stack = new ArrayDeque<>();
+
+        public BSTIterator(TreeNode root) {
+            pushLeft(root);
+        }
+
+        private void pushLeft(TreeNode node) {
+            while (node != null) {
+                stack.push(node);
+                node = node.left;
+            }
+        }
+
+        public long next() {
+            TreeNode top = stack.pop();
+            pushLeft(top.right);
+            return top.val;
+        }
+
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+    }
+}', false, 2),
   ('prep-trees-binary-tree-maximum-path-sum', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14021,6 +25957,83 @@ func maxPathSum(root *TreeNode) int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-binary-tree-maximum-path-sum', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None, right: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class Solution:
+    def maxPathSum(self, root: Optional[TreeNode]) -> int:
+        res = -1 << 31
+
+        def dfs(node: Optional[TreeNode]) -> int:
+            nonlocal res
+            if node is None:
+                return 0
+            left = dfs(node.left)
+            right = dfs(node.right)
+            if left < 0:
+                left = 0
+            if right < 0:
+                right = 0
+            if node.val + left + right > res:
+                res = node.val + left + right
+            if left > right:
+                return node.val + left
+            return node.val + right
+
+        dfs(root)
+        return res', false, 1),
+  ('prep-trees-binary-tree-maximum-path-sum', 'java', 'Solution.java', 'import java.util.*;
+
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode() {}
+    TreeNode(int val) { this.val = val; }
+    TreeNode(int val, TreeNode left, TreeNode right) {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+class Solution {
+    private long res;
+
+    public long maxPathSum(TreeNode root) {
+        res = -1L << 31;
+        dfs(root);
+        return res;
+    }
+
+    private long dfs(TreeNode node) {
+        if (node == null) {
+            return 0;
+        }
+        long left = dfs(node.left);
+        long right = dfs(node.right);
+        if (left < 0) {
+            left = 0;
+        }
+        if (right < 0) {
+            right = 0;
+        }
+        if (node.val + left + right > res) {
+            res = node.val + left + right;
+        }
+        if (left > right) {
+            return node.val + left;
+        }
+        return node.val + right;
+    }
+}', false, 2),
   ('prep-trees-binary-tree-right-side-view', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14045,6 +26058,63 @@ func rightSideView(root *TreeNode) []int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-binary-tree-right-side-view', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def rightSideView(root: Optional[TreeNode]) -> List[int]:
+    res: List[int] = []
+
+    def dfs(node: Optional[TreeNode], depth: int) -> None:
+        if node is None:
+            return
+        if depth == len(res):
+            res.append(node.val)
+        dfs(node.right, depth + 1)
+        dfs(node.left, depth + 1)
+
+    dfs(root, 0)
+    return res', false, 1),
+  ('prep-trees-binary-tree-right-side-view', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public List<Long> rightSideView(TreeNode root) {
+        List<Long> res = new ArrayList<>();
+        dfs(root, 0, res);
+        return res;
+    }
+
+    private void dfs(TreeNode node, int depth, List<Long> res) {
+        if (node == null) {
+            return;
+        }
+        if (depth == res.size()) {
+            res.add(node.val);
+        }
+        dfs(node.right, depth + 1, res);
+        dfs(node.left, depth + 1, res);
+    }
+}', false, 2),
   ('prep-trees-binary-tree-traversal-iteratively', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14126,6 +26196,82 @@ func verticalOrder(root *TreeNode) [][]int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-binary-tree-vertical-order-traversal', 'python', 'solution.py', 'from collections import deque, defaultdict
+from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def verticalOrder(root: Optional[TreeNode]) -> Optional[List[List[int]]]:
+    if root is None:
+        return None
+    cols = defaultdict(list)
+    minC, maxC = 0, 0
+    q = deque()
+    q.append((root, 0))
+    while q:
+        node, col = q.popleft()
+        cols[col].append(node.val)
+        if col < minC:
+            minC = col
+        if col > maxC:
+            maxC = col
+        if node.left is not None:
+            q.append((node.left, col - 1))
+        if node.right is not None:
+            q.append((node.right, col + 1))
+    res = []
+    for c in range(minC, maxC + 1):
+        res.append(cols[c])
+    return res', false, 1),
+  ('prep-trees-binary-tree-vertical-order-traversal', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public List<List<Long>> verticalOrder(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        Map<Integer, List<Long>> cols = new HashMap<>();
+        int minC = 0, maxC = 0;
+        Deque<Object[]> queue = new ArrayDeque<>();
+        queue.add(new Object[]{root, 0});
+        while (!queue.isEmpty()) {
+            Object[] cur = queue.poll();
+            TreeNode node = (TreeNode) cur[0];
+            int col = (Integer) cur[1];
+            cols.computeIfAbsent(col, k -> new ArrayList<>()).add(node.val);
+            if (col < minC) minC = col;
+            if (col > maxC) maxC = col;
+            if (node.left != null) queue.add(new Object[]{node.left, col - 1});
+            if (node.right != null) queue.add(new Object[]{node.right, col + 1});
+        }
+        List<List<Long>> res = new ArrayList<>(maxC - minC + 1);
+        for (int c = minC; c <= maxC; c++) {
+            List<Long> got = cols.get(c);
+            res.add(got == null ? new ArrayList<>() : got);
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-trees-binary-tree-zigzag-level-order-traversal', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14164,6 +26310,89 @@ func zigzagLevelOrder(root *TreeNode) [][]int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-binary-tree-zigzag-level-order-traversal', 'python', 'solution.py', 'from typing import List, Optional
+from collections import deque
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def zigzagLevelOrder(root: Optional[TreeNode]) -> List[List[int]]:
+    if root is None:
+        return []
+    res: List[List[int]] = []
+    q = deque([root])
+    ltr = True
+    while q:
+        sz = len(q)
+        level = [0] * sz
+        for i in range(sz):
+            node = q.popleft()
+            idx = i
+            if not ltr:
+                idx = sz - 1 - i
+            level[idx] = node.val
+            if node.left is not None:
+                q.append(node.left)
+            if node.right is not None:
+                q.append(node.right)
+        res.append(level)
+        ltr = not ltr
+    return res
+', false, 1),
+  ('prep-trees-binary-tree-zigzag-level-order-traversal', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        int val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(int val) { this.val = val; }
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        if (root == null) {
+            return new ArrayList<>();
+        }
+        List<List<Integer>> res = new ArrayList<>();
+        Deque<TreeNode> q = new ArrayDeque<>();
+        q.add(root);
+        boolean ltr = true;
+        while (!q.isEmpty()) {
+            int sz = q.size();
+            Integer[] level = new Integer[sz];
+            for (int i = 0; i < sz; i++) {
+                TreeNode node = q.poll();
+                int idx = i;
+                if (!ltr) {
+                    idx = sz - 1 - i;
+                }
+                level[idx] = node.val;
+                if (node.left != null) {
+                    q.add(node.left);
+                }
+                if (node.right != null) {
+                    q.add(node.right);
+                }
+            }
+            res.add(Arrays.asList(level));
+            ltr = !ltr;
+        }
+        return res;
+    }
+}
+', false, 2),
   ('prep-trees-convert-binary-search-tree-to-sorted-doubly-linked-list', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14197,6 +26426,83 @@ func treeToDoublyList(root *TreeNode) *TreeNode {
 	return first
 }
 ', true, 0),
+  ('prep-trees-convert-binary-search-tree-to-sorted-doubly-linked-list', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None, right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class Solution:
+    def treeToDoublyList(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        if root is None:
+            return None
+        self.first = None
+        self.last = None
+
+        def inorder(node: Optional[TreeNode]) -> None:
+            if node is None:
+                return
+            inorder(node.left)
+            if self.last is not None:
+                self.last.right = node
+                node.left = self.last
+            else:
+                self.first = node
+            self.last = node
+            inorder(node.right)
+
+        inorder(root)
+        self.first.left = self.last
+        self.last.right = self.first
+        return self.first', false, 1),
+  ('prep-trees-convert-binary-search-tree-to-sorted-doubly-linked-list', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val; this.left = left; this.right = right;
+        }
+    }
+
+    private TreeNode first;
+    private TreeNode last;
+
+    public TreeNode treeToDoublyList(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        first = null;
+        last = null;
+        inorder(root);
+        first.left = last;
+        last.right = first;
+        return first;
+    }
+
+    private void inorder(TreeNode node) {
+        if (node == null) {
+            return;
+        }
+        inorder(node.left);
+        if (last != null) {
+            last.right = node;
+            node.left = last;
+        } else {
+            first = node;
+        }
+        last = node;
+        inorder(node.right);
+    }
+}', false, 2),
   ('prep-trees-convert-binary-tree-to-doubly', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14231,6 +26537,84 @@ func convertBinaryTreeToDoubly(root *TreeNode) *DoublyNode {
 	return head
 }
 ', true, 0),
+  ('prep-trees-convert-binary-tree-to-doubly', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None, right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class DoublyNode:
+    def __init__(self, val: int = 0, prev: ''Optional[DoublyNode]'' = None, nxt: ''Optional[DoublyNode]'' = None):
+        self.val = val
+        self.prev = prev
+        self.next = nxt
+
+
+def convertBinaryTreeToDoubly(root: Optional[TreeNode]) -> Optional[DoublyNode]:
+    state = {"head": None, "prev": None}
+
+    def dfs(node: Optional[TreeNode]) -> None:
+        if node is None:
+            return
+        dfs(node.left)
+        cur = DoublyNode(val=node.val)
+        if state["head"] is None:
+            state["head"] = cur
+        if state["prev"] is not None:
+            state["prev"].next = cur
+            cur.prev = state["prev"]
+        state["prev"] = cur
+        dfs(node.right)
+
+    dfs(root)
+    return state["head"]', false, 1),
+  ('prep-trees-convert-binary-tree-to-doubly', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode(long val) { this.val = val; }
+    }
+
+    static class DoublyNode {
+        long val;
+        DoublyNode prev, next;
+        DoublyNode(long val) { this.val = val; }
+    }
+
+    private DoublyNode head;
+    private DoublyNode prev;
+
+    public DoublyNode convertBinaryTreeToDoubly(TreeNode root) {
+        head = null;
+        prev = null;
+        dfs(root);
+        return head;
+    }
+
+    private void dfs(TreeNode node) {
+        if (node == null) {
+            return;
+        }
+        dfs(node.left);
+        DoublyNode cur = new DoublyNode(node.val);
+        if (head == null) {
+            head = cur;
+        }
+        if (prev != null) {
+            prev.next = cur;
+            cur.prev = prev;
+        }
+        prev = cur;
+        dfs(node.right);
+    }
+}', false, 2),
   ('prep-trees-convert-sorted-array-to-bst', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14252,6 +26636,48 @@ func convertSortedArrayToBst(nums []int) *TreeNode {
 	return build(0, len(nums)-1)
 }
 ', true, 0),
+  ('prep-trees-convert-sorted-array-to-bst', 'python', 'solution.py', 'class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def convert_sorted_array_to_bst(nums):
+    def build(l, r):
+        if l > r:
+            return None
+        m = (l + r) // 2
+        node = TreeNode(nums[m])
+        node.left = build(l, m - 1)
+        node.right = build(m + 1, r)
+        return node
+
+    return build(0, len(nums) - 1)', false, 1),
+  ('prep-trees-convert-sorted-array-to-bst', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode(long val) { this.val = val; }
+    }
+
+    public TreeNode convertSortedArrayToBst(long[] nums) {
+        return build(nums, 0, nums.length - 1);
+    }
+
+    private TreeNode build(long[] nums, int l, int r) {
+        if (l > r) {
+            return null;
+        }
+        int m = (l + r) / 2;
+        TreeNode node = new TreeNode(nums[m]);
+        node.left = build(nums, l, m - 1);
+        node.right = build(nums, m + 1, r);
+        return node;
+    }
+}', false, 2),
   ('prep-trees-convert-sorted-linked-list-to-bst', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14285,6 +26711,84 @@ func convertSortedLinkedListToBst(head *ListNode) *TreeNode {
 	return build(0, n-1)
 }
 ', true, 0),
+  ('prep-trees-convert-sorted-linked-list-to-bst', 'python', 'solution.py', 'from typing import Optional
+
+
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def convert_sorted_linked_list_to_bst(head: Optional[ListNode]) -> Optional[TreeNode]:
+    n = 0
+    cur = head
+    while cur is not None:
+        n += 1
+        cur = cur.next
+
+    state = {"cur": head}
+
+    def build(l: int, r: int) -> Optional[TreeNode]:
+        if l > r:
+            return None
+        m = (l + r) // 2
+        left = build(l, m - 1)
+        node = TreeNode(state["cur"].val)
+        state["cur"] = state["cur"].next
+        node.left = left
+        node.right = build(m + 1, r)
+        return node
+
+    return build(0, n - 1)', false, 1),
+  ('prep-trees-convert-sorted-linked-list-to-bst', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class ListNode {
+        long val;
+        ListNode next;
+        ListNode(long val) { this.val = val; }
+        ListNode(long val, ListNode next) { this.val = val; this.next = next; }
+    }
+
+    public static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode(long val) { this.val = val; }
+    }
+
+    private ListNode cur;
+
+    public TreeNode convertSortedLinkedListToBst(ListNode head) {
+        int n = 0;
+        for (ListNode c = head; c != null; c = c.next) {
+            n++;
+        }
+        cur = head;
+        return build(0, n - 1);
+    }
+
+    private TreeNode build(int l, int r) {
+        if (l > r) {
+            return null;
+        }
+        int m = (l + r) / 2;
+        TreeNode left = build(l, m - 1);
+        TreeNode node = new TreeNode(cur.val);
+        cur = cur.next;
+        node.left = left;
+        node.right = build(m + 1, r);
+        return node;
+    }
+}', false, 2),
   ('prep-trees-count-good-nodes-in-binary-tree', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14308,6 +26812,59 @@ func goodNodes(root *TreeNode) int {
 	return dfs(root, root.Val)
 }
 ', true, 0),
+  ('prep-trees-count-good-nodes-in-binary-tree', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def goodNodes(root: Optional[TreeNode]) -> int:
+    def dfs(node: Optional[TreeNode], maxVal: int) -> int:
+        if node is None:
+            return 0
+        cnt = 0
+        if node.val >= maxVal:
+            cnt = 1
+            maxVal = node.val
+        return cnt + dfs(node.left, maxVal) + dfs(node.right, maxVal)
+
+    return dfs(root, root.val)', false, 1),
+  ('prep-trees-count-good-nodes-in-binary-tree', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public static class TreeNode {
+        int val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(int val) { this.val = val; }
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public int goodNodes(TreeNode root) {
+        return dfs(root, root.val);
+    }
+
+    private int dfs(TreeNode node, long maxVal) {
+        if (node == null) {
+            return 0;
+        }
+        int cnt = 0;
+        if (node.val >= maxVal) {
+            cnt = 1;
+            maxVal = node.val;
+        }
+        return cnt + dfs(node.left, maxVal) + dfs(node.right, maxVal);
+    }
+}', false, 2),
   ('prep-trees-find-distance-of-two-nodes', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14352,6 +26909,92 @@ func depth(root, target *TreeNode) int {
 	return -1
 }
 ', true, 0),
+  ('prep-trees-find-distance-of-two-nodes', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def findDistanceOfTwoNodes(root: Optional[TreeNode], p: Optional[TreeNode], q: Optional[TreeNode]) -> int:
+    lca = findLCA(root, p, q)
+    return depth(lca, p) + depth(lca, q)
+
+
+def findLCA(root: Optional[TreeNode], p: Optional[TreeNode], q: Optional[TreeNode]) -> Optional[TreeNode]:
+    if root is None or root is p or root is q:
+        return root
+    l = findLCA(root.left, p, q)
+    r = findLCA(root.right, p, q)
+    if l is not None and r is not None:
+        return root
+    if l is not None:
+        return l
+    return r
+
+
+def depth(root: Optional[TreeNode], target: Optional[TreeNode]) -> int:
+    if root is None:
+        return -1
+    if root is target:
+        return 0
+    d = depth(root.left, target)
+    if d >= 0:
+        return d + 1
+    d = depth(root.right, target)
+    if d >= 0:
+        return d + 1
+    return -1', false, 1),
+  ('prep-trees-find-distance-of-two-nodes', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode(long val) { this.val = val; }
+    }
+
+    public int findDistanceOfTwoNodes(TreeNode root, TreeNode p, TreeNode q) {
+        TreeNode lca = findLCA(root, p, q);
+        return depth(lca, p) + depth(lca, q);
+    }
+
+    TreeNode findLCA(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) {
+            return root;
+        }
+        TreeNode l = findLCA(root.left, p, q);
+        TreeNode r = findLCA(root.right, p, q);
+        if (l != null && r != null) {
+            return root;
+        }
+        if (l != null) {
+            return l;
+        }
+        return r;
+    }
+
+    int depth(TreeNode root, TreeNode target) {
+        if (root == null) {
+            return -1;
+        }
+        if (root == target) {
+            return 0;
+        }
+        int d = depth(root.left, target);
+        if (d >= 0) {
+            return d + 1;
+        }
+        d = depth(root.right, target);
+        if (d >= 0) {
+            return d + 1;
+        }
+        return -1;
+    }
+}', false, 2),
   ('prep-trees-nary-tree-distance-of-two-nodes', 'go', 'solution.go', 'package main
 type NaryNode struct {
 	Val      int
@@ -14405,6 +27048,116 @@ func findDistanceOfTwoNodes(root, a, b *NaryNode) int {
 	return levelDistance(lca, a) + levelDistance(lca, b)
 }
 ', true, 0),
+  ('prep-trees-nary-tree-distance-of-two-nodes', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class NaryNode:
+    def __init__(self, val: int, children: Optional[List["NaryNode"]] = None):
+        self.val = val
+        self.children = children if children is not None else []
+
+
+def find_lowest_common_ancestor(
+    root: Optional[NaryNode], a: Optional[NaryNode], b: Optional[NaryNode]
+) -> Optional[NaryNode]:
+    if root is None:
+        return None
+    if root is a or root is b:
+        return root
+    found = None
+    count = 0
+    for child in root.children:
+        lca = find_lowest_common_ancestor(child, a, b)
+        if lca is not None:
+            count += 1
+            found = lca
+    if count >= 2:
+        return root
+    return found
+
+
+def level_distance(root: Optional[NaryNode], target: Optional[NaryNode]) -> int:
+    if root is target:
+        return 0
+    level = 0
+    frontier = list(root.children) if root is not None else []
+    while len(frontier) > 0:
+        level += 1
+        nxt: List[NaryNode] = []
+        for node in frontier:
+            if node is target:
+                return level
+            nxt.extend(node.children)
+        frontier = nxt
+    return -1
+
+
+def find_distance_of_two_nodes(
+    root: Optional[NaryNode], a: Optional[NaryNode], b: Optional[NaryNode]
+) -> int:
+    lca = find_lowest_common_ancestor(root, a, b)
+    return level_distance(lca, a) + level_distance(lca, b)', false, 1),
+  ('prep-trees-nary-tree-distance-of-two-nodes', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class NaryNode {
+        long val;
+        List<NaryNode> children;
+
+        NaryNode(long val, List<NaryNode> children) {
+            this.val = val;
+            this.children = children;
+        }
+    }
+
+    NaryNode findLowestCommonAncestor(NaryNode root, NaryNode a, NaryNode b) {
+        if (root == null) {
+            return null;
+        }
+        if (root == a || root == b) {
+            return root;
+        }
+        NaryNode found = null;
+        int count = 0;
+        for (NaryNode child : root.children) {
+            NaryNode lca = findLowestCommonAncestor(child, a, b);
+            if (lca != null) {
+                count++;
+                found = lca;
+            }
+        }
+        if (count >= 2) {
+            return root;
+        }
+        return found;
+    }
+
+    int levelDistance(NaryNode root, NaryNode target) {
+        if (root == target) {
+            return 0;
+        }
+        int level = 0;
+        List<NaryNode> frontier = (root != null) ? root.children : new ArrayList<>();
+        while (frontier.size() > 0) {
+            level++;
+            List<NaryNode> next = new ArrayList<>();
+            for (NaryNode node : frontier) {
+                if (node == target) {
+                    return level;
+                }
+                next.addAll(node.children);
+            }
+            frontier = next;
+        }
+        return -1;
+    }
+
+    int findDistanceOfTwoNodes(NaryNode root, NaryNode a, NaryNode b) {
+        NaryNode lca = findLowestCommonAncestor(root, a, b);
+        return levelDistance(lca, a) + levelDistance(lca, b);
+    }
+}', false, 2),
   ('prep-trees-find-kth-largest-in-bst', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14430,6 +27183,72 @@ func findKthLargestInBst(root *TreeNode, k int) int {
 	return ans
 }
 ', true, 0),
+  ('prep-trees-find-kth-largest-in-bst', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None, right: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def find_kth_largest_in_bst(root: Optional[TreeNode], k: int) -> int:
+    ans = 0
+    state = {"k": k}
+
+    def dfs(node: Optional[TreeNode]) -> None:
+        if node is None or state["k"] == 0:
+            return
+        dfs(node.right)
+        state["k"] -= 1
+        if state["k"] == 0:
+            nonlocal ans
+            ans = node.val
+            return
+        dfs(node.left)
+
+    dfs(root)
+    return ans', false, 1),
+  ('prep-trees-find-kth-largest-in-bst', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    private long k;
+    private long ans;
+
+    public long findKthLargestInBst(TreeNode root, long k) {
+        this.ans = 0;
+        this.k = k;
+        dfs(root);
+        return ans;
+    }
+
+    private void dfs(TreeNode node) {
+        if (node == null || k == 0) {
+            return;
+        }
+        dfs(node.right);
+        k--;
+        if (k == 0) {
+            ans = node.val;
+            return;
+        }
+        dfs(node.left);
+    }
+}', false, 2),
   ('prep-trees-find-leaves-of-binary-tree', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14459,6 +27278,75 @@ func findLeaves(root *TreeNode) [][]int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-find-leaves-of-binary-tree', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None, right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class Solution:
+    def findLeaves(self, root: Optional[TreeNode]) -> List[List[int]]:
+        res: List[List[int]] = []
+
+        def dfs(node: Optional[TreeNode]) -> int:
+            if node is None:
+                return -1
+            h = dfs(node.left)
+            r = dfs(node.right)
+            if r > h:
+                h = r
+            h += 1
+            if h == len(res):
+                res.append([])
+            res[h].append(node.val)
+            return h
+
+        dfs(root)
+        return res', false, 1),
+  ('prep-trees-find-leaves-of-binary-tree', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public List<List<Long>> findLeaves(TreeNode root) {
+        List<List<Long>> res = new ArrayList<>();
+        dfs(root, res);
+        return res;
+    }
+
+    private int dfs(TreeNode node, List<List<Long>> res) {
+        if (node == null) {
+            return -1;
+        }
+        int h = dfs(node.left, res);
+        int r = dfs(node.right, res);
+        if (r > h) {
+            h = r;
+        }
+        h++;
+        if (h == res.size()) {
+            res.add(new ArrayList<>());
+        }
+        res.get(h).add(node.val);
+        return h;
+    }
+}', false, 2),
   ('prep-trees-nary-tree-lowest-common-ancestor', 'go', 'solution.go', 'package main
 type NaryNode struct {
 	Val      int
@@ -14487,6 +27375,72 @@ func findLowestCommonAncestor(root, a, b *NaryNode) *NaryNode {
 	return found
 }
 ', true, 0),
+  ('prep-trees-nary-tree-lowest-common-ancestor', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class NaryNode:
+    def __init__(self, val: int = 0, children: Optional[List["NaryNode"]] = None):
+        self.val = val
+        self.children = children if children is not None else []
+
+
+def find_lowest_common_ancestor(
+    root: Optional[NaryNode], a: Optional[NaryNode], b: Optional[NaryNode]
+) -> Optional[NaryNode]:
+    if root is None:
+        return None
+    if root is a or root is b:
+        return root
+    found: Optional[NaryNode] = None
+    count = 0
+    for child in root.children:
+        lca = find_lowest_common_ancestor(child, a, b)
+        if lca is not None:
+            count += 1
+            found = lca
+    if count >= 2:
+        return root
+    return found', false, 1),
+  ('prep-trees-nary-tree-lowest-common-ancestor', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class NaryNode {
+        long val;
+        List<NaryNode> children;
+
+        NaryNode(long val) {
+            this.val = val;
+            this.children = new ArrayList<>();
+        }
+
+        NaryNode(long val, List<NaryNode> children) {
+            this.val = val;
+            this.children = children;
+        }
+    }
+
+    public NaryNode findLowestCommonAncestor(NaryNode root, NaryNode a, NaryNode b) {
+        if (root == null) {
+            return null;
+        }
+        if (root == a || root == b) {
+            return root;
+        }
+        NaryNode found = null;
+        int count = 0;
+        for (NaryNode child : root.children) {
+            NaryNode lca = findLowestCommonAncestor(child, a, b);
+            if (lca != null) {
+                count++;
+                found = lca;
+            }
+        }
+        if (count >= 2) {
+            return root;
+        }
+        return found;
+    }
+}', false, 2),
   ('prep-trees-flip-tree', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14501,6 +27455,44 @@ func flipTree(root *TreeNode) *TreeNode {
 	return root
 }
 ', true, 0),
+  ('prep-trees-flip-tree', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def flipTree(root: Optional[TreeNode]) -> Optional[TreeNode]:
+    if root is None:
+        return None
+    root.left, root.right = flipTree(root.right), flipTree(root.left)
+    return root
+', false, 1),
+  ('prep-trees-flip-tree', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode(long val) { this.val = val; }
+    }
+
+    static TreeNode flipTree(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        TreeNode newLeft = flipTree(root.right);
+        TreeNode newRight = flipTree(root.left);
+        root.left = newLeft;
+        root.right = newRight;
+        return root;
+    }
+}
+', false, 2),
   ('prep-trees-get-diameter', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14528,6 +27520,64 @@ func getDiameter(root *TreeNode) int {
 	return best
 }
 ', true, 0),
+  ('prep-trees-get-diameter', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None, right: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def get_diameter(root: Optional[TreeNode]) -> int:
+    best = 0
+
+    def height(node: Optional[TreeNode]) -> int:
+        nonlocal best
+        if node is None:
+            return 0
+        l = height(node.left)
+        r = height(node.right)
+        if l + r > best:
+            best = l + r
+        if l > r:
+            return l + 1
+        return r + 1
+
+    height(root)
+    return best', false, 1),
+  ('prep-trees-get-diameter', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        int val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(int val) { this.val = val; }
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public int getDiameter(TreeNode root) {
+        int[] best = new int[]{0};
+        height(root, best);
+        return best[0];
+    }
+
+    private int height(TreeNode node, int[] best) {
+        if (node == null) return 0;
+        int l = height(node.left, best);
+        int r = height(node.right, best);
+        if (l + r > best[0]) best[0] = l + r;
+        if (l > r) return l + 1;
+        return r + 1;
+    }
+}', false, 2),
   ('prep-trees-nary-tree-diameter', 'go', 'solution.go', 'package main
 type NaryNode struct {
 	Val      int
@@ -14575,6 +27625,104 @@ func getDiameter(root *NaryNode) int {
 	return diameter
 }
 ', true, 0),
+  ('prep-trees-nary-tree-diameter', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class NaryNode:
+    def __init__(self, val: int, children: Optional[List["NaryNode"]] = None):
+        self.val = val
+        self.children = children if children is not None else []
+
+
+def get_height(root: Optional[NaryNode]) -> int:
+    if root is None:
+        return -1
+    max_child = -1
+    for child in root.children:
+        h = get_height(child)
+        if h > max_child:
+            max_child = h
+    return max_child + 1
+
+
+def get_diameter(root: Optional[NaryNode]) -> int:
+    if root is None:
+        return 0
+    max1, max2 = -1, -1
+    for child in root.children:
+        h = get_height(child)
+        if h > max1:
+            max2 = max1
+            max1 = h
+        elif h > max2:
+            max2 = h
+    diameter = 0
+    if max1 >= 0 and max2 >= 0:
+        diameter = max1 + max2 + 2
+    elif max1 >= 0:
+        diameter = max1 + 1
+    for child in root.children:
+        d = get_diameter(child)
+        if d > diameter:
+            diameter = d
+    return diameter', false, 1),
+  ('prep-trees-nary-tree-diameter', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class NaryNode {
+        int val;
+        List<NaryNode> children;
+
+        NaryNode(int val, List<NaryNode> children) {
+            this.val = val;
+            this.children = children;
+        }
+    }
+
+    int getHeight(NaryNode root) {
+        if (root == null) {
+            return -1;
+        }
+        int maxChild = -1;
+        for (NaryNode child : root.children) {
+            int h = getHeight(child);
+            if (h > maxChild) {
+                maxChild = h;
+            }
+        }
+        return maxChild + 1;
+    }
+
+    int getDiameter(NaryNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int max1 = -1, max2 = -1;
+        for (NaryNode child : root.children) {
+            int h = getHeight(child);
+            if (h > max1) {
+                max2 = max1;
+                max1 = h;
+            } else if (h > max2) {
+                max2 = h;
+            }
+        }
+        int diameter = 0;
+        if (max1 >= 0 && max2 >= 0) {
+            diameter = max1 + max2 + 2;
+        } else if (max1 >= 0) {
+            diameter = max1 + 1;
+        }
+        for (NaryNode child : root.children) {
+            int d = getDiameter(child);
+            if (d > diameter) {
+                diameter = d;
+            }
+        }
+        return diameter;
+    }
+}', false, 2),
   ('prep-trees-get-height', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14593,6 +27741,51 @@ func getHeight(root *TreeNode) int {
 	return r + 1
 }
 ', true, 0),
+  ('prep-trees-get-height', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def get_height(root: Optional[TreeNode]) -> int:
+    if root is None:
+        return 0
+    l = get_height(root.left)
+    r = get_height(root.right)
+    if l > r:
+        return l + 1
+    return r + 1', false, 1),
+  ('prep-trees-get-height', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class TreeNode {
+        int val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(int val) { this.val = val; }
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public int getHeight(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int l = getHeight(root.left);
+        int r = getHeight(root.right);
+        if (l > r) {
+            return l + 1;
+        }
+        return r + 1;
+    }
+}', false, 2),
   ('prep-trees-nary-tree-height', 'go', 'solution.go', 'package main
 type NaryNode struct {
 	Val      int
@@ -14612,6 +27805,51 @@ func getHeight(root *NaryNode) int {
 	return height + 1
 }
 ', true, 0),
+  ('prep-trees-nary-tree-height', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class NaryNode:
+    def __init__(self, val: int = 0, children: Optional[List["NaryNode"]] = None):
+        self.val = val
+        self.children = children if children is not None else []
+
+
+def get_height(root: Optional[NaryNode]) -> int:
+    if root is None:
+        return 0
+    height = 0
+    for child in root.children:
+        h = get_height(child)
+        if h > height:
+            height = h
+    return height + 1', false, 1),
+  ('prep-trees-nary-tree-height', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class NaryNode {
+        int val;
+        List<NaryNode> children;
+
+        NaryNode(int val, List<NaryNode> children) {
+            this.val = val;
+            this.children = children;
+        }
+    }
+
+    public int getHeight(NaryNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int height = 0;
+        for (NaryNode child : root.children) {
+            int h = getHeight(child);
+            if (h > height) {
+                height = h;
+            }
+        }
+        return height + 1;
+    }
+}', false, 2),
   ('prep-trees-inorder-successor-in-bst', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14633,6 +27871,55 @@ func inorderSuccessor(root *TreeNode, p *TreeNode) *TreeNode {
 	return res
 }
 ', true, 0),
+  ('prep-trees-inorder-successor-in-bst', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None,
+                 right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def inorderSuccessor(root: Optional[TreeNode], p: TreeNode) -> Optional[TreeNode]:
+    res: Optional[TreeNode] = None
+    cur = root
+    while cur is not None:
+        if p.val < cur.val:
+            res = cur
+            cur = cur.left
+        else:
+            cur = cur.right
+    return res', false, 1),
+  ('prep-trees-inorder-successor-in-bst', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+
+        TreeNode(long val) {
+            this.val = val;
+        }
+    }
+
+    public TreeNode inorderSuccessor(TreeNode root, TreeNode p) {
+        TreeNode res = null;
+        TreeNode cur = root;
+        while (cur != null) {
+            if (p.val < cur.val) {
+                res = cur;
+                cur = cur.left;
+            } else {
+                cur = cur.right;
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-trees-is-balanced', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14664,6 +27951,74 @@ func isBalanced(root *TreeNode) bool {
 	return check(root) != -1
 }
 ', true, 0),
+  ('prep-trees-is-balanced', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def isBalanced(root: Optional[TreeNode]) -> bool:
+    def check(node: Optional[TreeNode]) -> int:
+        if node is None:
+            return 0
+        l = check(node.left)
+        if l == -1:
+            return -1
+        r = check(node.right)
+        if r == -1:
+            return -1
+        if l - r > 1 or r - l > 1:
+            return -1
+        if l > r:
+            return l + 1
+        return r + 1
+
+    return check(root) != -1', false, 1),
+  ('prep-trees-is-balanced', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        int val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(int val) { this.val = val; }
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public boolean isBalanced(TreeNode root) {
+        return check(root) != -1;
+    }
+
+    private int check(TreeNode node) {
+        if (node == null) {
+            return 0;
+        }
+        int l = check(node.left);
+        if (l == -1) {
+            return -1;
+        }
+        int r = check(node.right);
+        if (r == -1) {
+            return -1;
+        }
+        if (l - r > 1 || r - l > 1) {
+            return -1;
+        }
+        if (l > r) {
+            return l + 1;
+        }
+        return r + 1;
+    }
+}', false, 2),
   ('prep-trees-is-bst', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14687,6 +28042,63 @@ func isBst(root *TreeNode) bool {
 	return valid(root, nil, nil)
 }
 ', true, 0),
+  ('prep-trees-is-bst', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None, right: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def is_bst(root: Optional[TreeNode]) -> bool:
+    def valid(node: Optional[TreeNode], lo: Optional[TreeNode], hi: Optional[TreeNode]) -> bool:
+        if node is None:
+            return True
+        if lo is not None and node.val <= lo.val:
+            return False
+        if hi is not None and node.val >= hi.val:
+            return False
+        return valid(node.left, lo, node) and valid(node.right, node, hi)
+
+    return valid(root, None, None)', false, 1),
+  ('prep-trees-is-bst', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+
+        TreeNode() {}
+
+        TreeNode(long val) { this.val = val; }
+
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public boolean isBst(TreeNode root) {
+        return valid(root, null, null);
+    }
+
+    private boolean valid(TreeNode node, TreeNode lo, TreeNode hi) {
+        if (node == null) {
+            return true;
+        }
+        if (lo != null && node.val <= lo.val) {
+            return false;
+        }
+        if (hi != null && node.val >= hi.val) {
+            return false;
+        }
+        return valid(node.left, lo, node) && valid(node.right, node, hi);
+    }
+}', false, 2),
   ('prep-trees-is-complete', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14714,6 +28126,77 @@ func isComplete(root *TreeNode) bool {
 	return true
 }
 ', true, 0),
+  ('prep-trees-is-complete', 'python', 'solution.py', 'from collections import deque
+from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None,
+                 right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def isComplete(root: Optional[TreeNode]) -> bool:
+    if root is None:
+        return True
+    q = deque([root])
+    end = False
+    while q:
+        node = q.popleft()
+        if node is None:
+            end = True
+        else:
+            if end:
+                return False
+            q.append(node.left)
+            q.append(node.right)
+    return True
+', false, 1),
+  ('prep-trees-is-complete', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public boolean isComplete(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+        // Go''s BFS queue holds nil children; ArrayDeque forbids nulls, so use an
+        // ArrayList with a head index as the FIFO queue.
+        ArrayList<TreeNode> q = new ArrayList<>();
+        q.add(root);
+        int head = 0;
+        boolean end = false;
+        while (head < q.size()) {
+            TreeNode node = q.get(head);
+            head++;
+            if (node == null) {
+                end = true;
+            } else {
+                if (end) {
+                    return false;
+                }
+                q.add(node.left);
+                q.add(node.right);
+            }
+        }
+        return true;
+    }
+}
+', false, 2),
   ('prep-trees-is-subtree', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14740,6 +28223,66 @@ func sameTree(a, b *TreeNode) bool {
 	return sameTree(a.Left, b.Left) && sameTree(a.Right, b.Right)
 }
 ', true, 0),
+  ('prep-trees-is-subtree', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None, right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def isSubtree(root: Optional[TreeNode], sub: Optional[TreeNode]) -> bool:
+    if root is None:
+        return sub is None
+    if sameTree(root, sub):
+        return True
+    return isSubtree(root.left, sub) or isSubtree(root.right, sub)
+
+
+def sameTree(a: Optional[TreeNode], b: Optional[TreeNode]) -> bool:
+    if a is None and b is None:
+        return True
+    if a is None or b is None or a.val != b.val:
+        return False
+    return sameTree(a.left, b.left) and sameTree(a.right, b.right)', false, 1),
+  ('prep-trees-is-subtree', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public boolean isSubtree(TreeNode root, TreeNode sub) {
+        if (root == null) {
+            return sub == null;
+        }
+        if (sameTree(root, sub)) {
+            return true;
+        }
+        return isSubtree(root.left, sub) || isSubtree(root.right, sub);
+    }
+
+    private boolean sameTree(TreeNode a, TreeNode b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null || a.val != b.val) {
+            return false;
+        }
+        return sameTree(a.left, b.left) && sameTree(a.right, b.right);
+    }
+}', false, 2),
   ('prep-trees-is-symmetric', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14760,6 +28303,58 @@ func isSymmetric(root *TreeNode) bool {
 	return mirror(root, root)
 }
 ', true, 0),
+  ('prep-trees-is-symmetric', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None, right: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def isSymmetric(root: Optional[TreeNode]) -> bool:
+    def mirror(a: Optional[TreeNode], b: Optional[TreeNode]) -> bool:
+        if a is None and b is None:
+            return True
+        if a is None or b is None or a.val != b.val:
+            return False
+        return mirror(a.left, b.right) and mirror(a.right, b.left)
+
+    return mirror(root, root)', false, 1),
+  ('prep-trees-is-symmetric', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        long val;
+        TreeNode left, right;
+
+        TreeNode() {}
+
+        TreeNode(long val) { this.val = val; }
+
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public boolean isSymmetric(TreeNode root) {
+        return mirror(root, root);
+    }
+
+    private boolean mirror(TreeNode a, TreeNode b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null || a.val != b.val) {
+            return false;
+        }
+        return mirror(a.left, b.right) && mirror(a.right, b.left);
+    }
+}', false, 2),
   ('prep-trees-level-order', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -14791,6 +28386,77 @@ func levelOrder(root *TreeNode) [][]int {
 	return out
 }
 ', true, 0),
+  ('prep-trees-level-order', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None, right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def levelOrder(root: Optional[TreeNode]) -> Optional[List[List[int]]]:
+    if root is None:
+        return None
+    out: List[List[int]] = []
+    q: List[TreeNode] = [root]
+    while len(q) > 0:
+        sz = len(q)
+        level = [0] * sz
+        for i in range(sz):
+            node = q[0]
+            q = q[1:]
+            level[i] = node.val
+            if node.left is not None:
+                q.append(node.left)
+            if node.right is not None:
+                q.append(node.right)
+        out.append(level)
+    return out
+', false, 1),
+  ('prep-trees-level-order', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public List<List<Long>> levelOrder(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        List<List<Long>> out = new ArrayList<>();
+        Deque<TreeNode> q = new ArrayDeque<>();
+        q.addLast(root);
+        while (q.size() > 0) {
+            int sz = q.size();
+            List<Long> level = new ArrayList<>(Collections.nCopies(sz, 0L));
+            for (int i = 0; i < sz; i++) {
+                TreeNode node = q.pollFirst();
+                level.set(i, node.val);
+                if (node.left != null) {
+                    q.addLast(node.left);
+                }
+                if (node.right != null) {
+                    q.addLast(node.right);
+                }
+            }
+            out.add(level);
+        }
+        return out;
+    }
+}
+', false, 2),
   ('prep-trees-nary-tree-level-order', 'go', 'solution.go', 'package main
 type NaryNode struct {
 	Val      int
@@ -14816,6 +28482,67 @@ func levelOrder(root *NaryNode) [][]int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-nary-tree-level-order', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class NaryNode:
+    def __init__(self, val: int = 0, children: Optional[List["NaryNode"]] = None):
+        self.val = val
+        self.children = children if children is not None else []
+
+
+def level_order(root: Optional[NaryNode]) -> Optional[List[List[int]]]:
+    if root is None:
+        return None
+    res: List[List[int]] = []
+    level: List[NaryNode] = [root]
+    while len(level) > 0:
+        row = [0] * len(level)
+        nxt: List[NaryNode] = []
+        for i, node in enumerate(level):
+            row[i] = node.val
+            nxt.extend(node.children)
+        res.append(row)
+        level = nxt
+    return res', false, 1),
+  ('prep-trees-nary-tree-level-order', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class NaryNode {
+        long val;
+        List<NaryNode> children;
+
+        NaryNode() {
+            this.children = new ArrayList<>();
+        }
+
+        NaryNode(long val, List<NaryNode> children) {
+            this.val = val;
+            this.children = (children != null) ? children : new ArrayList<>();
+        }
+    }
+
+    public List<List<Long>> levelOrder(NaryNode root) {
+        if (root == null) {
+            return null;
+        }
+        List<List<Long>> res = new ArrayList<>();
+        List<NaryNode> level = new ArrayList<>();
+        level.add(root);
+        while (level.size() > 0) {
+            List<Long> row = new ArrayList<>(Collections.nCopies(level.size(), 0L));
+            List<NaryNode> next = new ArrayList<>();
+            for (int i = 0; i < level.size(); i++) {
+                NaryNode node = level.get(i);
+                row.set(i, node.val);
+                next.addAll(node.children);
+            }
+            res.add(row);
+            level = next;
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-trees-longest-path-with-different-adjacent-characters', 'go', 'solution.go', 'package main
 func longestPath(parent []int, s string) int {
 	n := len(parent)
@@ -14847,6 +28574,76 @@ func longestPath(parent []int, s string) int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-longest-path-with-different-adjacent-characters', 'python', 'solution.py', 'from typing import List
+import sys
+
+sys.setrecursionlimit(1 << 20)
+
+
+class Solution:
+    def longestPath(self, parent: List[int], s: str) -> int:
+        b = s.encode("utf-8")  # Go indexes strings by byte
+        n = len(parent)
+        adj = [[] for _ in range(n)]
+        for i in range(1, n):
+            adj[parent[i]].append(i)
+        res = 0
+
+        def dfs(node: int) -> int:
+            nonlocal res
+            max1, max2 = 0, 0
+            for child in adj[node]:
+                child_len = dfs(child)
+                if b[child] != b[node]:
+                    if child_len > max1:
+                        max2 = max1
+                        max1 = child_len
+                    elif child_len > max2:
+                        max2 = child_len
+            if max1 + max2 + 1 > res:
+                res = max1 + max2 + 1
+            return max1 + 1
+
+        dfs(0)
+        return res', false, 1),
+  ('prep-trees-longest-path-with-different-adjacent-characters', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class Solution {
+    private int res;
+    private List<List<Integer>> adj;
+    private byte[] bs;
+
+    public int longestPath(int[] parent, String s) {
+        bs = s.getBytes(StandardCharsets.UTF_8); // Go indexes strings by byte
+        int n = parent.length;
+        adj = new ArrayList<>();
+        for (int i = 0; i < n; i++) adj.add(new ArrayList<>());
+        for (int i = 1; i < n; i++) adj.get(parent[i]).add(i);
+        res = 0;
+        dfs(0);
+        return res;
+    }
+
+    private int dfs(int node) {
+        int max1 = 0, max2 = 0;
+        for (int child : adj.get(node)) {
+            int childLen = dfs(child);
+            if (bs[child] != bs[node]) {
+                if (childLen > max1) {
+                    max2 = max1;
+                    max1 = childLen;
+                } else if (childLen > max2) {
+                    max2 = childLen;
+                }
+            }
+        }
+        if (max1 + max2 + 1 > res) {
+            res = max1 + max2 + 1;
+        }
+        return max1 + 1;
+    }
+}', false, 2),
   ('prep-trees-lowest-common-ancestor-of-a-binary-tree', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -14928,6 +28725,43 @@ func lowestCommonAncestor(p *Node, q *Node) *Node {
 	return a
 }
 ', true, 0),
+  ('prep-trees-lowest-common-ancestor-of-a-binary-tree-iii', 'python', 'solution.py', 'class Node:
+    def __init__(self, val=0, left=None, right=None, parent=None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.parent = parent
+
+
+def lowestCommonAncestor(p, q):
+    a, b = p, q
+    while a is not b:
+        a = q if a is None else a.parent
+        b = p if b is None else b.parent
+    return a', false, 1),
+  ('prep-trees-lowest-common-ancestor-of-a-binary-tree-iii', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class Node {
+        long val;
+        Node left;
+        Node right;
+        Node parent;
+
+        Node(long val) {
+            this.val = val;
+        }
+    }
+
+    public Node lowestCommonAncestor(Node p, Node q) {
+        Node a = p, b = q;
+        while (a != b) {
+            a = (a == null) ? q : a.parent;
+            b = (b == null) ? p : b.parent;
+        }
+        return a;
+    }
+}', false, 2),
   ('prep-trees-nary-tree-monarchy-succession', 'go', 'solution.go', 'package main
 type Member struct {
 	Name       string
@@ -15015,6 +28849,174 @@ func preorderSuccessors(root *Member) []string {
 	return res
 }
 ', true, 0),
+  ('prep-trees-nary-tree-monarchy-succession', 'python', 'solution.py', 'from typing import List, Optional, Dict
+
+
+class Member:
+    def __init__(self, name: str):
+        self.name = name
+        self.successors: List["Member"] = []
+
+
+class Monarchy:
+    def __init__(self):
+        self.members: Dict[str, Member] = {}
+        self.king: Optional[Member] = None
+
+
+def split_fields(s: str) -> List[str]:
+    out: List[str] = []
+    cur = ""
+    for ch in s:  # Go `range` over string iterates code points; only '' ''/''\t'' split
+        if ch == " " or ch == "\t":
+            if cur != "":
+                out.append(cur)
+                cur = ""
+        else:
+            cur += ch
+    if cur != "":
+        out.append(cur)
+    return out
+
+
+def build_monarchy_map(lines: List[str]) -> Monarchy:
+    m = Monarchy()
+    for line in lines:
+        parts = split_fields(line)
+        if len(parts) < 2:
+            continue
+        parent_name = parts[0]
+        if m.members.get(parent_name) is None:
+            m.members[parent_name] = Member(parent_name)
+        if parent_name == "monarch" or m.king is None:
+            m.king = m.members[parent_name]
+        for i in range(1, len(parts)):
+            child_name = parts[i]
+            if m.members.get(child_name) is None:
+                m.members[child_name] = Member(child_name)
+            m.members[parent_name].successors.append(m.members[child_name])
+    return m
+
+
+def build_monarchy_tree(root: Member) -> None:
+    for succ in root.successors:
+        build_monarchy_tree(succ)
+
+
+def preorder_successors(root: Optional[Member]) -> Optional[List[str]]:
+    if root is None:
+        return None
+    res: List[str] = []
+    stack: List[Member] = [root]
+    while stack:
+        curr = stack.pop()
+        res.append(curr.name)
+        for i in range(len(curr.successors) - 1, -1, -1):
+            stack.append(curr.successors[i])
+    return res
+
+
+def monarchy_succession_order(lines: List[str]) -> Optional[List[str]]:
+    m = build_monarchy_map(lines)
+    if m.king is None:
+        return None
+    build_monarchy_tree(m.king)
+    return preorder_successors(m.king)', false, 1),
+  ('prep-trees-nary-tree-monarchy-succession', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class Member {
+        String name;
+        List<Member> successors = new ArrayList<>();
+        Member(String name) { this.name = name; }
+    }
+
+    static class Monarchy {
+        Map<String, Member> members = new HashMap<>();
+        Member king = null;
+    }
+
+    static List<String> splitFields(String s) {
+        List<String> out = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        int i = 0;
+        int n = s.length();
+        while (i < n) {
+            int cp = s.codePointAt(i);          // Go `range` yields runes (code points)
+            if (cp == '' '' || cp == ''\t'') {
+                if (cur.length() != 0) {
+                    out.add(cur.toString());
+                    cur.setLength(0);
+                }
+            } else {
+                cur.appendCodePoint(cp);
+            }
+            i += Character.charCount(cp);
+        }
+        if (cur.length() != 0) {
+            out.add(cur.toString());
+        }
+        return out;
+    }
+
+    static Monarchy buildMonarchyMap(List<String> lines) {
+        Monarchy m = new Monarchy();
+        for (String line : lines) {
+            List<String> parts = splitFields(line);
+            if (parts.size() < 2) {
+                continue;
+            }
+            String parentName = parts.get(0);
+            if (m.members.get(parentName) == null) {
+                m.members.put(parentName, new Member(parentName));
+            }
+            if (parentName.equals("monarch") || m.king == null) {
+                m.king = m.members.get(parentName);
+            }
+            for (int i = 1; i < parts.size(); i++) {
+                String childName = parts.get(i);
+                if (m.members.get(childName) == null) {
+                    m.members.put(childName, new Member(childName));
+                }
+                m.members.get(parentName).successors.add(m.members.get(childName));
+            }
+        }
+        return m;
+    }
+
+    static void buildMonarchyTree(Member root) {
+        for (Member succ : root.successors) {
+            buildMonarchyTree(succ);
+        }
+    }
+
+    static List<String> preorderSuccessors(Member root) {
+        if (root == null) {
+            return null;
+        }
+        List<String> res = new ArrayList<>();
+        Deque<Member> stack = new ArrayDeque<>();
+        stack.addLast(root);
+        while (!stack.isEmpty()) {
+            Member curr = stack.removeLast();
+            res.add(curr.name);
+            for (int i = curr.successors.size() - 1; i >= 0; i--) {
+                stack.addLast(curr.successors.get(i));
+            }
+        }
+        return res;
+    }
+
+    static List<String> monarchySuccessionOrder(List<String> lines) {
+        Monarchy m = buildMonarchyMap(lines);
+        if (m.king == null) {
+            return null;
+        }
+        buildMonarchyTree(m.king);
+        return preorderSuccessors(m.king);
+    }
+}', false, 2),
   ('prep-trees-nary-tree-traversal-iteratively', 'go', 'solution.go', 'package main
 type NaryNode struct {
 	Val      int
@@ -15120,6 +29122,76 @@ func populateNextPointersToRight(root *TreeNode) *TreeNode {
 	return root
 }
 ', true, 0),
+  ('prep-trees-populate-next-pointers-to-right', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None,
+                 right: "Optional[TreeNode]" = None, next: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+
+
+def populate_next_pointers_to_right(root: "Optional[TreeNode]") -> "Optional[TreeNode]":
+    if root is None:
+        return None
+    leftmost = root
+    while leftmost.left is not None:
+        cur = leftmost
+        next_left = None
+        while cur is not None:
+            if cur.left is not None:
+                cur.left.next = cur.right
+                if cur.next is not None:
+                    cur.right.next = cur.next.left
+                if next_left is None:
+                    next_left = cur.left
+            cur = cur.next
+        leftmost = next_left
+    return root', false, 1),
+  ('prep-trees-populate-next-pointers-to-right', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class TreeNode {
+        long val;
+        TreeNode left, right, next;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right, TreeNode next) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+            this.next = next;
+        }
+    }
+
+    public TreeNode populateNextPointersToRight(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        TreeNode leftmost = root;
+        while (leftmost.left != null) {
+            TreeNode cur = leftmost;
+            TreeNode nextLeft = null;
+            while (cur != null) {
+                if (cur.left != null) {
+                    cur.left.next = cur.right;
+                    if (cur.next != null) {
+                        cur.right.next = cur.next.left;
+                    }
+                    if (nextLeft == null) {
+                        nextLeft = cur.left;
+                    }
+                }
+                cur = cur.next;
+            }
+            leftmost = nextLeft;
+        }
+        return root;
+    }
+}', false, 2),
   ('prep-trees-print-all-root-to-leaf-paths', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -15172,6 +29244,64 @@ func printLeaves(root *TreeNode) []int {
 	return out
 }
 ', true, 0),
+  ('prep-trees-print-leaves', 'python', 'solution.py', 'from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def printLeaves(root: Optional[TreeNode]) -> List[int]:
+    out: List[int] = []
+
+    def dfs(node: Optional[TreeNode]) -> None:
+        if node is None:
+            return
+        if node.left is None and node.right is None:
+            out.append(node.val)
+            return
+        dfs(node.left)
+        dfs(node.right)
+
+    dfs(root)
+    return out', false, 1),
+  ('prep-trees-print-leaves', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public List<Long> printLeaves(TreeNode root) {
+        List<Long> out = new ArrayList<>();
+        dfs(root, out);
+        return out;
+    }
+
+    private void dfs(TreeNode node, List<Long> out) {
+        if (node == null) {
+            return;
+        }
+        if (node.left == null && node.right == null) {
+            out.add(node.val);
+            return;
+        }
+        dfs(node.left, out);
+        dfs(node.right, out);
+    }
+}', false, 2),
   ('prep-trees-print-side-view', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -15203,6 +29333,73 @@ func printSideView(root *TreeNode) []int {
 	return out
 }
 ', true, 0),
+  ('prep-trees-print-side-view', 'python', 'solution.py', 'from collections import deque
+from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None, right: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def printSideView(root: Optional[TreeNode]) -> Optional[List[int]]:
+    if root is None:
+        return None
+    out: List[int] = []
+    q: deque = deque([root])
+    while q:
+        sz = len(q)
+        for i in range(sz):
+            node = q.popleft()
+            if i == sz - 1:
+                out.append(node.val)
+            if node.left is not None:
+                q.append(node.left)
+            if node.right is not None:
+                q.append(node.right)
+    return out', false, 1),
+  ('prep-trees-print-side-view', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public List<Long> printSideView(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        List<Long> out = new ArrayList<>();
+        Deque<TreeNode> q = new ArrayDeque<>();
+        q.add(root);
+        while (!q.isEmpty()) {
+            int sz = q.size();
+            for (int i = 0; i < sz; i++) {
+                TreeNode node = q.poll();
+                if (i == sz - 1) {
+                    out.add(node.val);
+                }
+                if (node.left != null) {
+                    q.add(node.left);
+                }
+                if (node.right != null) {
+                    q.add(node.right);
+                }
+            }
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-trees-print-vertical', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -15246,6 +29443,84 @@ func printVertical(root *TreeNode) [][]int {
 	return out
 }
 ', true, 0),
+  ('prep-trees-print-vertical', 'python', 'solution.py', 'from collections import deque
+from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: ''Optional[TreeNode]'' = None, right: ''Optional[TreeNode]'' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def printVertical(root: Optional[TreeNode]) -> Optional[List[List[int]]]:
+    if root is None:
+        return None
+    cols = {}
+    minC, maxC = 0, 0
+    q = deque()
+    q.append((root, 0))
+    while q:
+        node, col = q.popleft()
+        cols.setdefault(col, []).append(node.val)
+        if col < minC:
+            minC = col
+        if col > maxC:
+            maxC = col
+        if node.left is not None:
+            q.append((node.left, col - 1))
+        if node.right is not None:
+            q.append((node.right, col + 1))
+    out = []
+    for c in range(minC, maxC + 1):
+        if c in cols:
+            out.append(cols[c])
+    return out', false, 1),
+  ('prep-trees-print-vertical', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode(long val) { this.val = val; }
+    }
+
+    public List<List<Long>> printVertical(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        Map<Integer, List<Long>> cols = new HashMap<>();
+        int minC = 0, maxC = 0;
+        Deque<TreeNode> nodeQ = new ArrayDeque<>();
+        Deque<Integer> colQ = new ArrayDeque<>();
+        nodeQ.add(root);
+        colQ.add(0);
+        while (!nodeQ.isEmpty()) {
+            TreeNode node = nodeQ.poll();
+            int col = colQ.poll();
+            cols.computeIfAbsent(col, k -> new ArrayList<>()).add(node.val);
+            if (col < minC) minC = col;
+            if (col > maxC) maxC = col;
+            if (node.left != null) {
+                nodeQ.add(node.left);
+                colQ.add(col - 1);
+            }
+            if (node.right != null) {
+                nodeQ.add(node.right);
+                colQ.add(col + 1);
+            }
+        }
+        List<List<Long>> out = new ArrayList<>();
+        for (int c = minC; c <= maxC; c++) {
+            if (cols.containsKey(c)) {
+                out.add(cols.get(c));
+            }
+        }
+        return out;
+    }
+}', false, 2),
   ('prep-trees-recover-binary-search-tree', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val   int
@@ -15274,6 +29549,77 @@ func recoverTree(root *TreeNode) {
 	first.Val, second.Val = second.Val, first.Val
 }
 ', true, 0),
+  ('prep-trees-recover-binary-search-tree', 'python', 'solution.py', 'from typing import Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class Solution:
+    def recoverTree(self, root: Optional[TreeNode]) -> None:
+        first = second = prev = None
+
+        def inorder(node: Optional[TreeNode]) -> None:
+            nonlocal first, second, prev
+            if node is None:
+                return
+            inorder(node.left)
+            if prev is not None and prev.val > node.val:
+                if first is None:
+                    first = prev
+                second = node
+            prev = node
+            inorder(node.right)
+
+        inorder(root)
+        first.val, second.val = second.val, first.val', false, 1),
+  ('prep-trees-recover-binary-search-tree', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    private TreeNode first, second, prev;
+
+    public void recoverTree(TreeNode root) {
+        first = null;
+        second = null;
+        prev = null;
+        inorder(root);
+        int tmp = first.val;
+        first.val = second.val;
+        second.val = tmp;
+    }
+
+    private void inorder(TreeNode node) {
+        if (node == null) {
+            return;
+        }
+        inorder(node.left);
+        if (prev != null && prev.val > node.val) {
+            if (first == null) {
+                first = prev;
+            }
+            second = node;
+        }
+        prev = node;
+        inorder(node.right);
+    }
+
+    public static class TreeNode {
+        int val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(int val) { this.val = val; }
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+}', false, 2),
   ('prep-trees-serialize-and-deserialize', 'go', 'solution.go', 'package main
 type TreeNode struct {
 	Val         int
@@ -15387,6 +29733,245 @@ func deserializeTree(data string) *TreeNode {
 	return build()
 }
 ', true, 0),
+  ('prep-trees-serialize-and-deserialize', 'python', 'solution.py', 'from typing import List, Optional, Tuple
+
+
+class TreeNode:
+    def __init__(self, val: int = 0, left: "Optional[TreeNode]" = None, right: "Optional[TreeNode]" = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def serializeAndDeserialize(root: Optional[TreeNode]) -> Tuple[str, Optional[TreeNode]]:
+    if root is None:
+        return "", None
+    parts: List[str] = []
+    q: List[Optional[TreeNode]] = [root]
+    head = 0
+    while head < len(q):
+        node = q[head]
+        head += 1
+        if node is None:
+            parts.append("#")
+            continue
+        parts.append(_itoa(node.val))
+        q.append(node.left)
+        q.append(node.right)
+    data = _join_comma(parts)
+    return data, _deserialize_tree(data)
+
+
+def _itoa(n: int) -> str:
+    if n == 0:
+        return "0"
+    neg = False
+    if n < 0:
+        neg = True
+        n = -n
+    d: List[int] = []
+    while n > 0:
+        d.append(ord(''0'') + n % 10)
+        n //= 10
+    if neg:
+        d.append(ord(''-''))
+    d.reverse()
+    return bytes(d).decode(''ascii'')
+
+
+def _join_comma(parts: List[str]) -> str:
+    if len(parts) == 0:
+        return ""
+    out = parts[0]
+    for i in range(1, len(parts)):
+        out += "," + parts[i]
+    return out
+
+
+def _split_comma(s: str) -> List[str]:
+    b = s.encode(''utf-8'')
+    out: List[str] = []
+    start = 0
+    for i in range(len(b) + 1):
+        if i == len(b) or b[i] == ord('',''):
+            out.append(b[start:i].decode(''utf-8''))
+            start = i + 1
+    return out
+
+
+def _atoi(s: str) -> int:
+    if s == "#" or s == "":
+        return 0
+    b = s.encode(''utf-8'')
+    neg = False
+    i = 0
+    if b[0] == ord(''-''):
+        neg = True
+        i = 1
+    n = 0
+    while i < len(b):
+        n = n * 10 + (b[i] - ord(''0''))
+        i += 1
+    if neg:
+        return -n
+    return n
+
+
+def _deserialize_tree(data: str) -> Optional[TreeNode]:
+    if data == "":
+        return None
+    vals = _split_comma(data)
+    idx = [0]
+
+    def build() -> Optional[TreeNode]:
+        if idx[0] >= len(vals) or vals[idx[0]] == "#":
+            idx[0] += 1
+            return None
+        node = TreeNode(_atoi(vals[idx[0]]))
+        idx[0] += 1
+        node.left = build()
+        node.right = build()
+        return node
+
+    return build()', false, 1),
+  ('prep-trees-serialize-and-deserialize', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    // Serializes the tree in level order (BFS, "#" for null) and returns both the
+    // serialized string and the tree obtained by deserializing that string as a
+    // preorder encoding. Mirrors Go''s (string, *TreeNode) return.
+    static Object[] serializeAndDeserialize(TreeNode root) {
+        if (root == null) {
+            return new Object[]{"", null};
+        }
+        List<String> parts = new ArrayList<>();
+        // Go''s queue holds nils, so a plain list (not ArrayDeque) is used as the queue.
+        List<TreeNode> queue = new ArrayList<>();
+        queue.add(root);
+        int head = 0;
+        while (head < queue.size()) {
+            TreeNode node = queue.get(head);
+            head++;
+            if (node == null) {
+                parts.add("#");
+                continue;
+            }
+            parts.add(itoa(node.val));
+            queue.add(node.left);
+            queue.add(node.right);
+        }
+        String data = joinComma(parts);
+        return new Object[]{data, deserializeTree(data)};
+    }
+
+    static String itoa(long n) {
+        if (n == 0) {
+            return "0";
+        }
+        boolean neg = false;
+        if (n < 0) {
+            neg = true;
+            n = -n;
+        }
+        List<Byte> d = new ArrayList<>();
+        while (n > 0) {
+            d.add((byte) (''0'' + (int) (n % 10)));
+            n /= 10;
+        }
+        if (neg) {
+            d.add((byte) ''-'');
+        }
+        for (int i = 0, j = d.size() - 1; i < j; i++, j--) {
+            byte t = d.get(i);
+            d.set(i, d.get(j));
+            d.set(j, t);
+        }
+        byte[] arr = new byte[d.size()];
+        for (int i = 0; i < d.size(); i++) arr[i] = d.get(i);
+        return new String(arr, StandardCharsets.UTF_8);
+    }
+
+    static String joinComma(List<String> parts) {
+        if (parts.size() == 0) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder(parts.get(0));
+        for (int i = 1; i < parts.size(); i++) {
+            out.append(",").append(parts.get(i));
+        }
+        return out.toString();
+    }
+
+    static List<String> splitComma(String s) {
+        List<String> out = new ArrayList<>();
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        int start = 0;
+        for (int i = 0; i <= b.length; i++) {
+            if (i == b.length || b[i] == '','') {
+                out.add(new String(b, start, i - start, StandardCharsets.UTF_8));
+                start = i + 1;
+            }
+        }
+        return out;
+    }
+
+    static long atoi(String s) {
+        if (s.equals("#") || s.equals("")) {
+            return 0;
+        }
+        byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        boolean neg = false;
+        int i = 0;
+        if (b[0] == ''-'') {
+            neg = true;
+            i = 1;
+        }
+        long n = 0;
+        for (; i < b.length; i++) {
+            n = n * 10 + (b[i] - ''0'');
+        }
+        if (neg) {
+            return -n;
+        }
+        return n;
+    }
+
+    private static int idx;
+
+    static TreeNode deserializeTree(String data) {
+        if (data.equals("")) {
+            return null;
+        }
+        List<String> vals = splitComma(data);
+        idx = 0;
+        return build(vals);
+    }
+
+    private static TreeNode build(List<String> vals) {
+        if (idx >= vals.size() || vals.get(idx).equals("#")) {
+            idx++;
+            return null;
+        }
+        TreeNode node = new TreeNode(atoi(vals.get(idx)));
+        idx++;
+        node.left = build(vals);
+        node.right = build(vals);
+        return node;
+    }
+}', false, 2),
   ('prep-trees-serialize-and-deserialize-binary-tree', 'go', 'solution.go', 'package main
 import (
 	"strconv"
@@ -15436,6 +30021,101 @@ func (c *Codec) deserialize(data string) *TreeNode {
 	return dfs()
 }
 ', true, 0),
+  ('prep-trees-serialize-and-deserialize-binary-tree', 'python', 'solution.py', 'import sys
+sys.setrecursionlimit(100000)
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class Codec:
+    def serialize(self, root):
+        parts = []
+
+        def dfs(node):
+            if node is None:
+                parts.append("null,")
+                return
+            parts.append(str(node.val) + ",")
+            dfs(node.left)
+            dfs(node.right)
+
+        dfs(root)
+        return "".join(parts)
+
+    def deserialize(self, data):
+        tokens = data.split(",")
+        self._idx = 0
+
+        def dfs():
+            if self._idx >= len(tokens) or tokens[self._idx] == "" or tokens[self._idx] == "null":
+                self._idx += 1
+                return None
+            val = int(tokens[self._idx])
+            self._idx += 1
+            node = TreeNode(val)
+            node.left = dfs()
+            node.right = dfs()
+            return node
+
+        return dfs()', false, 1),
+  ('prep-trees-serialize-and-deserialize-binary-tree', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    // Go''s `int` is 64-bit; use `long` for TreeNode.Val to match faithfully.
+    static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+    }
+
+    public static class Codec {
+        public String serialize(TreeNode root) {
+            StringBuilder sb = new StringBuilder();
+            serDfs(root, sb);
+            return sb.toString();
+        }
+
+        private void serDfs(TreeNode node, StringBuilder sb) {
+            if (node == null) {
+                sb.append("null,");
+                return;
+            }
+            sb.append(Long.toString(node.val)).append(",");
+            serDfs(node.left, sb);
+            serDfs(node.right, sb);
+        }
+
+        private String[] tokens;
+        private int idx;
+
+        public TreeNode deserialize(String data) {
+            // limit -1 preserves the trailing empty token, matching Go''s strings.Split.
+            tokens = data.split(",", -1);
+            idx = 0;
+            return desDfs();
+        }
+
+        private TreeNode desDfs() {
+            if (idx >= tokens.length || tokens[idx].equals("") || tokens[idx].equals("null")) {
+                idx++;
+                return null;
+            }
+            long val = Long.parseLong(tokens[idx]);
+            idx++;
+            TreeNode node = new TreeNode(val);
+            node.left = desDfs();
+            node.right = desDfs();
+            return node;
+        }
+    }
+}', false, 2),
   ('prep-trees-step-by-step-directions-from-a-binary-tree-node-to-another', 'go', 'solution.go', 'package main
 import "strings"
 
@@ -15494,6 +30174,48 @@ func sumOfNodes(root *TreeNode) int {
 	return root.Val + sumOfNodes(root.Left) + sumOfNodes(root.Right)
 }
 ', true, 0),
+  ('prep-trees-sum-of-nodes', 'python', 'solution.py', 'class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def _wrap64(x):
+    # Emulate Go''s 64-bit signed int wraparound (Go''s `int` is 64-bit).
+    x &= (1 << 64) - 1
+    if x >= (1 << 63):
+        x -= 1 << 64
+    return x
+
+
+def sum_of_nodes(root):
+    if root is None:
+        return 0
+    return _wrap64(root.val + sum_of_nodes(root.left) + sum_of_nodes(root.right))', false, 1),
+  ('prep-trees-sum-of-nodes', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    static class TreeNode {
+        long val;
+        TreeNode left, right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public long sumOfNodes(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        return root.val + sumOfNodes(root.left) + sumOfNodes(root.right);
+    }
+}', false, 2),
   ('prep-trees-vertical-order-traversal-of-a-binary-tree', 'go', 'solution.go', 'package main
 import "sort"
 
@@ -15552,6 +30274,114 @@ func verticalTraversal(root *TreeNode) [][]int {
 	return res
 }
 ', true, 0),
+  ('prep-trees-vertical-order-traversal-of-a-binary-tree', 'python', 'solution.py', 'from collections import deque
+from typing import Optional, List
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def verticalTraversal(root: Optional[TreeNode]) -> Optional[List[List[int]]]:
+    if root is None:
+        return None
+    cols = {}
+    minC, maxC = 0, 0
+    q = deque([(root, 0, 0)])  # (node, r, c)
+    while q:
+        node, r, c = q.popleft()
+        cols.setdefault(c, []).append((r, node.val))
+        if c < minC:
+            minC = c
+        if c > maxC:
+            maxC = c
+        if node.left is not None:
+            q.append((node.left, r + 1, c - 1))
+        if node.right is not None:
+            q.append((node.right, r + 1, c + 1))
+    res = []
+    for c in range(minC, maxC + 1):
+        pts = cols.get(c, [])
+        # sort by row, then by value (matches Go sort.Slice comparator)
+        pts.sort(key=lambda p: (p[0], p[1]))
+        res.append([val for (_, val) in pts])
+    return res', false, 1),
+  ('prep-trees-vertical-order-traversal-of-a-binary-tree', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    public static class TreeNode {
+        long val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(long val) { this.val = val; }
+        TreeNode(long val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    // pt = (row, val)
+    private static final class Pt {
+        long row;
+        long val;
+        Pt(long row, long val) { this.row = row; this.val = val; }
+    }
+
+    private static final class Item {
+        TreeNode node;
+        long r;
+        long c;
+        Item(TreeNode node, long r, long c) { this.node = node; this.r = r; this.c = c; }
+    }
+
+    public List<List<Long>> verticalTraversal(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        Map<Long, List<Pt>> cols = new HashMap<>();
+        long minC = 0, maxC = 0;
+        Deque<Item> q = new ArrayDeque<>();
+        q.add(new Item(root, 0, 0));
+        while (!q.isEmpty()) {
+            Item cur = q.pollFirst();
+            cols.computeIfAbsent(cur.c, k -> new ArrayList<>()).add(new Pt(cur.r, cur.node.val));
+            if (cur.c < minC) {
+                minC = cur.c;
+            }
+            if (cur.c > maxC) {
+                maxC = cur.c;
+            }
+            if (cur.node.left != null) {
+                q.add(new Item(cur.node.left, cur.r + 1, cur.c - 1));
+            }
+            if (cur.node.right != null) {
+                q.add(new Item(cur.node.right, cur.r + 1, cur.c + 1));
+            }
+        }
+        List<List<Long>> res = new ArrayList<>();
+        for (long c = minC; c <= maxC; c++) {
+            List<Pt> pts = cols.getOrDefault(c, new ArrayList<>());
+            pts.sort((a, b) -> {
+                if (a.row == b.row) {
+                    return Long.compare(a.val, b.val);
+                }
+                return Long.compare(a.row, b.row);
+            });
+            List<Long> vals = new ArrayList<>(pts.size());
+            for (Pt p : pts) {
+                vals.add(p.val);
+            }
+            res.add(vals);
+        }
+        return res;
+    }
+}', false, 2),
   ('prep-tries-find-distinct-palindromic-sub', 'go', 'solution.go', 'package main
 type SuffixTrieNode struct {
 	children map[rune]*SuffixTrieNode
@@ -15605,6 +30435,114 @@ func findDistinctPalindromicSub(s string) int {
 	return findPaliSub(root, "", make(map[string]bool))
 }
 ', true, 0),
+  ('prep-tries-find-distinct-palindromic-sub', 'python', 'solution.py', 'class SuffixTrieNode:
+    def __init__(self):
+        self.children = {}
+
+
+def build_suffix_trie(data):
+    root = SuffixTrieNode()
+    n = len(data)
+    for i in range(n):
+        node = root
+        for j in range(i, n):
+            ch = data[j]  # byte value 0-255, used as rune key (Go: rune(s[j]))
+            if ch not in node.children:
+                node.children[ch] = SuffixTrieNode()
+            node = node.children[ch]
+    return root
+
+
+def _is_palindrome_bytes(b):
+    i, j = 0, len(b) - 1
+    while i < j:
+        if b[i] != b[j]:
+            return False
+        i += 1
+        j -= 1
+    return True
+
+
+def find_pali_sub(node, acc_bytes, seen):
+    if node is None:
+        return 0
+    count = 0
+    if _is_palindrome_bytes(acc_bytes) and len(acc_bytes) > 0 and bytes(acc_bytes) not in seen:
+        seen.add(bytes(acc_bytes))
+        count += 1
+    for ch, child in node.children.items():
+        # Go: s + string(ch) where ch is rune(byte); string(rune) is UTF-8 encoding of codepoint ch.
+        appended = chr(ch).encode(''utf-8'')
+        count += find_pali_sub(child, acc_bytes + appended, seen)
+    return count
+
+
+def find_distinct_palindromic_sub(s):
+    data = s.encode(''utf-8'')  # Go indexes strings by byte
+    root = build_suffix_trie(data)
+    return find_pali_sub(root, b"", set())', false, 1),
+  ('prep-tries-find-distinct-palindromic-sub', 'java', 'Solution.java', 'import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+class Solution {
+    static class SuffixTrieNode {
+        Map<Integer, SuffixTrieNode> children = new HashMap<>();
+    }
+
+    static SuffixTrieNode buildSuffixTrie(byte[] data) {
+        SuffixTrieNode root = new SuffixTrieNode();
+        for (int i = 0; i < data.length; i++) {
+            SuffixTrieNode node = root;
+            for (int j = i; j < data.length; j++) {
+                int ch = data[j] & 0xFF; // byte value 0-255 as rune key (Go: rune(s[j]))
+                SuffixTrieNode child = node.children.get(ch);
+                if (child == null) {
+                    child = new SuffixTrieNode();
+                    node.children.put(ch, child);
+                }
+                node = child;
+            }
+        }
+        return root;
+    }
+
+    static boolean isPalindromeBytes(byte[] b) {
+        for (int i = 0, j = b.length - 1; i < j; i++, j--) {
+            if (b[i] != b[j]) return false;
+        }
+        return true;
+    }
+
+    static byte[] concat(byte[] a, byte[] b) {
+        byte[] r = new byte[a.length + b.length];
+        System.arraycopy(a, 0, r, 0, a.length);
+        System.arraycopy(b, 0, r, a.length, b.length);
+        return r;
+    }
+
+    static int findPaliSub(SuffixTrieNode node, byte[] acc, Set<String> seen) {
+        if (node == null) return 0;
+        int count = 0;
+        String key = new String(acc, StandardCharsets.ISO_8859_1); // raw-byte identity key
+        if (isPalindromeBytes(acc) && acc.length > 0 && !seen.contains(key)) {
+            seen.add(key);
+            count++;
+        }
+        for (Map.Entry<Integer, SuffixTrieNode> e : node.children.entrySet()) {
+            int ch = e.getKey();
+            // Go: s + string(rune(ch)) -> UTF-8 encoding of codepoint ch.
+            byte[] appended = new String(Character.toChars(ch)).getBytes(StandardCharsets.UTF_8);
+            count += findPaliSub(e.getValue(), concat(acc, appended), seen);
+        }
+        return count;
+    }
+
+    static int findDistinctPalindromicSub(String s) {
+        byte[] data = s.getBytes(StandardCharsets.UTF_8); // Go indexes strings by byte
+        SuffixTrieNode root = buildSuffixTrie(data);
+        return findPaliSub(root, new byte[0], new HashSet<String>());
+    }
+}', false, 2),
   ('prep-tries-implement-trie-methods', 'go', 'solution.go', 'package main
 type TrieNode struct {
 	children [26]*TrieNode
@@ -15655,6 +30593,100 @@ func (t *Trie) startsWith(prefix string) bool {
 	return node != nil
 }
 ', true, 0),
+  ('prep-tries-implement-trie-methods', 'python', 'solution.py', 'class TrieNode:
+    def __init__(self):
+        self.children = [None] * 26
+        self.is_end = False
+
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        b = word.encode(''utf-8'')
+        for i in range(len(b)):
+            idx = b[i] - ord(''a'')
+            if node.children[idx] is None:
+                node.children[idx] = TrieNode()
+            node = node.children[idx]
+        node.is_end = True
+
+    def search(self, word):
+        node = self.root
+        b = word.encode(''utf-8'')
+        for i in range(len(b)):
+            idx = b[i] - ord(''a'')
+            if node.children[idx] is None:
+                return False
+            node = node.children[idx]
+        return node is not None and node.is_end
+
+    def starts_with(self, prefix):
+        node = self.root
+        b = prefix.encode(''utf-8'')
+        for i in range(len(b)):
+            idx = b[i] - ord(''a'')
+            if node.children[idx] is None:
+                return False
+            node = node.children[idx]
+        return node is not None', false, 1),
+  ('prep-tries-implement-trie-methods', 'java', 'Solution.java', 'import java.nio.charset.StandardCharsets;
+
+class Solution {
+    static class TrieNode {
+        TrieNode[] children = new TrieNode[26];
+        boolean isEnd = false;
+    }
+
+    static class Trie {
+        TrieNode root;
+
+        Trie() {
+            root = new TrieNode();
+        }
+
+        void insert(String word) {
+            TrieNode node = root;
+            byte[] b = word.getBytes(StandardCharsets.UTF_8);
+            for (int i = 0; i < b.length; i++) {
+                int idx = (b[i] & 0xff) - ''a'';
+                if (node.children[idx] == null) {
+                    node.children[idx] = new TrieNode();
+                }
+                node = node.children[idx];
+            }
+            node.isEnd = true;
+        }
+
+        boolean search(String word) {
+            TrieNode node = root;
+            byte[] b = word.getBytes(StandardCharsets.UTF_8);
+            for (int i = 0; i < b.length; i++) {
+                int idx = (b[i] & 0xff) - ''a'';
+                if (node.children[idx] == null) {
+                    return false;
+                }
+                node = node.children[idx];
+            }
+            return node != null && node.isEnd;
+        }
+
+        boolean startsWith(String prefix) {
+            TrieNode node = root;
+            byte[] b = prefix.getBytes(StandardCharsets.UTF_8);
+            for (int i = 0; i < b.length; i++) {
+                int idx = (b[i] & 0xff) - ''a'';
+                if (node.children[idx] == null) {
+                    return false;
+                }
+                node = node.children[idx];
+            }
+            return node != null;
+        }
+    }
+}', false, 2),
   ('prep-tries-longest-repeated-substring', 'go', 'solution.go', 'package main
 import (
 	"sort"

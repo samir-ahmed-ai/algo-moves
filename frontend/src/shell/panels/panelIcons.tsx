@@ -15,6 +15,8 @@ import {
   AlertTriangle,
   PenLine,
   Puzzle,
+  PencilLine,
+  Users,
   Award,
   GraduationCap,
   Keyboard,
@@ -63,6 +65,8 @@ const ICON: Record<string, ReactNode> = {
   cheatsheet: <ScrollText className={PANEL_ICON} />,
   projects: <FolderOpen className={PANEL_ICON} />,
   notes: <StickyNote className={PANEL_ICON} />,
+  whiteboard: <PencilLine className={PANEL_ICON} />,
+  'collab-code': <Users className={PANEL_ICON} />,
   complexity: <TrendingUp className={PANEL_ICON} />,
   edgecases: <AlertTriangle className={PANEL_ICON} />,
 };
@@ -97,6 +101,8 @@ const KIND_ACCENT: Record<string, string> = {
   cheatsheet: 'var(--text-3)',
   projects: 'var(--accent)',
   notes: 'var(--edge-active)',
+  whiteboard: 'var(--team1-stroke)',
+  'collab-code': 'var(--team2-stroke)',
   complexity: 'var(--accent)',
   edgecases: 'var(--edge-active)',
 };

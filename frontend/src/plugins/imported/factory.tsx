@@ -3,7 +3,7 @@ import { definePlugin, type Frame, type InspectorProps, type ProblemPlugin, type
 import { wireTeachingStack, codePiecesFromSource, type PracticeBundle } from '../_shared/pluginKit';
 import { resolveSimulator } from './simulators';
 import { resolvePracticeBundle } from './practice';
-import { PROBLEM_PORTS } from './story/archipelago';
+import { PROBLEM_PORTS } from './languagePorts';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText, CollapsibleDetails } from '../_shared/vizKit';
 

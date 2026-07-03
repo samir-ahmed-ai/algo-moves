@@ -7,6 +7,8 @@ import { EditorPanelBody } from './EditorPanelBody';
 import { InspectorPanelBody } from './InspectorPanelBody';
 import { MetricsBody } from './MetricsPanelBody';
 import { NotesPanelBody } from './NotesPanelBody';
+import { WhiteboardPanelBody } from './WhiteboardPanelBody';
+import { CollabEditorPanelBody } from '@/shell/study/CollabCodeStudio';
 import { ProblemPanelBody } from './ProblemPanelBody';
 import { VizPanelBody } from './VizPanelBody';
 import { ProjectsPanelBody } from './ProjectsPanelBody';
@@ -58,6 +60,8 @@ export const PANEL_BODIES: Record<string, ComponentType> = {
   cheatsheet: CheatPanelBody,
   projects: ProjectsPanelBody,
   notes: NotesPanelBody,
+  whiteboard: WhiteboardPanelBody,
+  'collab-code': CollabEditorPanelBody,
   complexity: ComplexityPanelBody,
   edgecases: EdgeCasesPanelBody,
   copy: CopyPanelBody,

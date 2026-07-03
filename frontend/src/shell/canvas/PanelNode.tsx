@@ -15,6 +15,7 @@ const CHAIN_TINTS = [
   'ring-[color-mix(in_srgb,var(--team2-stroke)_40%,transparent)]',
 ] as const;
 import { CodeStudioProvider, CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
+import { CollabCodeStudioBody, CollabCodeStudioToolbar } from '@/shell/study/CollabCodeStudio';
 import { useCanvasStatic } from './CanvasContext';
 import { PanelBody as PanelBodyShell, type HeaderDensity } from './nodeui';
 import { PanelBody } from '@/shell/panels';
@@ -43,6 +44,8 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   const isReassemble = data.kind === 'reassemble';
   const isRecall = data.kind === 'recall';
   const isCode = data.kind === 'code' || data.kind === 'scratch' || isReassemble || isRecall;
+  const isCollabCode = data.kind === 'collab-code';
+  const isWhiteboard = data.kind === 'whiteboard';
   const isProblem = data.kind === 'problem';
   const showTargetHandle = !isProblem;
   const headerData = isProblem && mode === 'visualize' ? { ...data, title: item.title } : data;
@@ -96,9 +99,10 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   const handleCls = handleDotClass;
 
   const vizCanvas = isViz && mode === 'visualize';
+  const boardCanvas = isWhiteboard && mode === 'visualize';
   const showNodeTransport = vizCanvas && (present || tweaks.controls);
-  const visualizeFlush = mode === 'visualize' && (isProblem || isViz || isCode);
-  const flushBody = vizCanvas || (mode === 'visualize' && isProblem);
+  const visualizeFlush = mode === 'visualize' && (isProblem || isViz || isCode || isWhiteboard);
+  const flushBody = vizCanvas || boardCanvas || (mode === 'visualize' && isProblem);
 
   const headerProps = {
     id,
@@ -135,6 +139,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
       className={cn(
         'panel-node relative flex h-auto flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
         isCode && !collapsed && 'min-h-0 flex-1',
+        (isCollabCode || isWhiteboard) && !collapsed && 'min-h-[360px]',
         'w-full',
         selected && 'selected',
         chainTint && `ring-1 ${chainTint}`,
@@ -164,7 +169,8 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
             ? 'gap-0 px-[var(--node-px,0.75rem)]'
             : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
           isCode && !collapsed && 'min-h-0 flex-1 overflow-hidden',
-          !vizCanvas && 'overflow-hidden',
+          (isCollabCode || isWhiteboard) && !collapsed && 'min-h-[320px] flex-1 overflow-hidden',
+          !vizCanvas && !boardCanvas && 'overflow-hidden',
         )}
       >
         {!collapsed && isCode ? (
@@ -182,6 +188,18 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
             </div>
             <CodeStudioFooter />
           </CodeStudioProvider>
+        ) : !collapsed && isCollabCode ? (
+          <>
+            <PanelNodeHeader
+              {...headerProps}
+              inlineToolbar={
+                <div className="nodrag flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
+                  <CollabCodeStudioToolbar />
+                </div>
+              }
+            />
+            <CollabCodeStudioBody />
+          </>
         ) : (
           <>
             <PanelNodeHeader
@@ -199,7 +217,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
               <PanelBodyShell
                 density={headerDensity}
                 fill={isViz && !vizCanvas}
-                flush={flushBody}
+                flush={flushBody || boardCanvas}
                 narrow={narrowBody}
                 style={!isViz && bodyCap ? { maxWidth: bodyCap } : undefined}
               >

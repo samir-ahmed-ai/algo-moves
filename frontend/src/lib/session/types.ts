@@ -7,6 +7,9 @@ export type SessionRole = 'host' | 'guest' | 'spectator';
 export interface InterviewSettings {
   hideHints: boolean;
   hideSolutions: boolean;
+  guestCanEditBoard?: boolean;
+  guestCanEditCode?: boolean;
+  guestCanMoveNodes?: boolean;
 }
 
 export interface SessionMeta {

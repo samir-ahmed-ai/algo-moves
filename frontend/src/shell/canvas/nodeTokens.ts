@@ -55,6 +55,8 @@ const SIZE: Record<string, PanelSize> = {
   reassemble: { w: 1300, estH: 600 },
   recall: { w: 1300, estH: 725 },
   scratch: { w: 1300, estH: 650 },
+  whiteboard: { w: 900, estH: 620 },
+  'collab-code': { w: 720, estH: 480 },
   quiz: { w: STRUDEL_NODE_W, estH: 250, cap: 475 },
   simulate: { w: 600, estH: 600, cap: 700 },
 };
@@ -92,6 +94,8 @@ const KIND_TIER: Record<string, NodeTier> = {
   reassemble: 'board',
   recall: 'board',
   scratch: 'board',
+  whiteboard: 'board',
+  'collab-code': 'board',
   quiz: 'standard',
   simulate: 'board',
 };

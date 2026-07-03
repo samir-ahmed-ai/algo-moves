@@ -16,6 +16,13 @@ export interface PanelNodeData extends Record<string, unknown> {
   locked?: boolean;
   /** Per-node appearance overrides (stroke, fill, opacity, corners). */
   style?: PanelNodeStyle;
+  /** Persisted sub-document (whiteboard scene or shared editor) for solo/offline. */
+  subDoc?: {
+    nodeId: string;
+    kind: 'whiteboard' | 'collab-code';
+    rev: number;
+    payload: unknown;
+  };
 }
 
 export type PanelFlowNode = Node<PanelNodeData, 'panel'>;

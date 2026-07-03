@@ -52,6 +52,7 @@
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.34.1",
     "@dagrejs/dagre": "^3.0.0",
+    "@excalidraw/excalidraw": "^0.18.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-switch": "^1.1.1",
     "@replit/codemirror-vim": "^6.3.0",

@@ -6,6 +6,7 @@ import { prepCodePieces } from './prepCodePieces';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from './prepScene';
 import { resolvePrepSimulator } from './prepSimulators';
 import { defaultPrepQuiz } from './prepQuiz';
+import { PROBLEM_PORTS } from './languagePorts';
 
 /**
  * One record in the generated prep manifest (see scripts/import-prep.mjs). These
@@ -67,6 +68,9 @@ export function makePrepPlugin(p: PrepProblem): ProblemPlugin<any, any> {
   };
   const code = { text: p.code, lang: 'go', file: 'solution.go' };
   const extraCode = p.variants.map((v) => ({ text: v.text, lang: 'go', file: `variants/${v.file}` }));
+  const ports = PROBLEM_PORTS[p.id];
+  if (ports?.python) extraCode.push({ text: ports.python, lang: 'python', file: 'solution.py' });
+  if (ports?.java) extraCode.push({ text: ports.java, lang: 'java', file: 'Solution.java' });
   const codePieces = codePiecesFromSource(p.code) ?? prepCodePieces(p.code) ?? undefined;
   const fallbackQuiz = defaultPrepQuiz(p);
 

@@ -14,15 +14,20 @@ import {
   LogOut,
   ClipboardList,
   UserCheck,
+  Link2,
+  LayoutTemplate,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
+import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils/cn';
 import { catalog } from '@/content';
 import { useWorkspace } from '@/store/workspace';
+import { buildInviteUrl } from '@/store/navigation/shareState';
 import { chromeText } from '../../chromeUi';
 import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '../nodeui';
 import { useRoomComms } from '../../games/net/useRoomComms';
 import { useCanvasCollab } from './CanvasCollabProvider';
+import { buildInterviewBoardNodes } from '../interviewLayout';
 import type { CanvasWidget } from '../widgets/types';
 
 const QUICK_REACTIONS = ['👍', '🔥', '😂', '🎉', '👏', '🧠'];
@@ -31,7 +36,8 @@ const QUICK_REACTIONS = ['👍', '🔥', '😂', '🎉', '👏', '🧠'];
 
 export function SessionBody() {
   const collab = useCanvasCollab();
-  const { activeItemId } = useWorkspace();
+  const { activeItemId, mode, theme, palette, themePreset, dir } = useWorkspace();
+  const { setNodes, setEdges } = useReactFlow();
   const {
     isCollaborating,
     startSession,
@@ -49,10 +55,24 @@ export function SessionBody() {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [interviewBusy, setInterviewBusy] = useState(false);
+  const [boardBusy, setBoardBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   const activeItem = catalog.getItem(activeItemId);
   const canInterview = !!activeItem?.pluginId;
+
+  const shareBase = {
+    item: session.kind === 'interview' ? activeItemId : undefined,
+    focus: 'canvas' as const,
+    mode,
+    theme,
+    palette,
+    themePreset,
+    dir,
+    sessionKind: (session.kind === 'interview' ? 'interview' : 'collab') as 'interview' | 'collab',
+  };
 
   const start = async () => {
     setBusy(true);
@@ -73,6 +93,21 @@ export function SessionBody() {
     }
   };
 
+  const startInterviewBoard = async () => {
+    setBoardBusy(true);
+    try {
+      if (canInterview) {
+        await startInterviewSession(activeItemId);
+      } else {
+        await startSession();
+      }
+      setNodes(buildInterviewBoardNodes(canInterview));
+      setEdges([]);
+    } finally {
+      setBoardBusy(false);
+    }
+  };
+
   const join = () => {
     const c = code.trim();
     if (c) joinSession(c);
@@ -86,6 +121,17 @@ export function SessionBody() {
       setTimeout(() => setCopied(false), 1600);
     } catch {
       /* clipboard blocked; code is still visible */
+    }
+  };
+
+  const copyInvite = async () => {
+    if (!room) return;
+    try {
+      await navigator.clipboard.writeText(buildInviteUrl(shareBase, room));
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 1600);
+    } catch {
+      /* clipboard blocked */
     }
   };
 
@@ -119,10 +165,21 @@ export function SessionBody() {
           <UserCheck className="h-3 w-3" />
           Start interview
         </button>
+        <button
+          type="button"
+          onClick={startInterviewBoard}
+          disabled={boardBusy}
+          className={cn(
+            'inline-flex items-center justify-center gap-1.5 border border-accent/40 bg-accent/10 px-2.5 py-1.5 font-medium text-accent transition-colors hover:bg-accent/15 disabled:opacity-40',
+            RADIUS_CTRL,
+            chromeText.sm,
+          )}
+        >
+          <LayoutTemplate className="h-3 w-3" />
+          Start interview board
+        </button>
         <p className={cn('text-ink3', chromeText.xs)}>
-          {canInterview
-            ? `Shares “${activeItem?.title ?? activeItemId}” with candidates.`
-            : 'Open a problem to host an interview session.'}
+          Spawns whiteboard + collab code studio{canInterview ? ` for “${activeItem?.title ?? activeItemId}”.` : '.'}
         </p>
         <div className="flex items-center gap-1.5">
           <input
@@ -187,7 +244,38 @@ export function SessionBody() {
           <LogOut className="h-3 w-3" />
           Leave
         </button>
+        <button
+          type="button"
+          onClick={copyInvite}
+          title="Copy invite link"
+          className={cn(
+            'inline-flex items-center gap-1 px-2 py-1 font-medium text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+            RADIUS_CTRL,
+            chromeText.xs,
+          )}
+        >
+          {inviteCopied ? <Check className="h-3 w-3 text-good" /> : <Link2 className="h-3 w-3" />}
+          Invite link
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowQr((v) => !v)}
+          className={cn(
+            'inline-flex items-center gap-1 px-2 py-1 font-medium text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+            RADIUS_CTRL,
+            chromeText.xs,
+          )}
+        >
+          QR
+        </button>
       </div>
+
+      {showQr && room ? (
+        <div className={cn('flex flex-col items-center gap-2 border border-edge bg-panel2 p-3', RADIUS_SHELL)}>
+          <QRCodeSVG value={buildInviteUrl(shareBase, room)} size={128} bgColor="transparent" fgColor="currentColor" className="text-ink" />
+          <span className={cn('text-center text-ink3', chromeText.xs)}>Scan to join the session</span>
+        </div>
+      ) : null}
 
       <div className="flex items-center gap-1.5 text-ink3">
         <Eye className="h-3 w-3" />
