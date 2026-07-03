@@ -150,29 +150,32 @@ make backend-test    # framing + hub + a real two-client socket relay test
 
 ### Deploying to Railway
 
-Deploy the **frontend** and **game server** on [Railway](https://railway.com). No secrets or production URLs in the repo — set them in the Railway dashboard (and optional GitHub Actions secrets for CI deploy).
+Deploy the **frontend** and **game server** on [Railway](https://railway.com). Pushes to **`main`** auto-deploy via Railway's GitHub integration — no GitHub Actions deploy workflow and no Railway tokens in GitHub secrets. CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) still runs tests on push/PR.
 
-1. Create a Railway project with two services: **frontend** (root `/frontend`) and **backend** (root `/backend`).
-2. Generate a public domain for each service (Settings → Networking).
-3. Set **service variables** in the Railway dashboard:
+1. Create a Railway project with three services: **frontend**, **backend**, and **Postgres** (database plugin).
+2. **Connect GitHub** for each app service (Settings → Source):
+   - Link your GitHub repo
+   - **Root Directory:** `backend` or `frontend` (required for this monorepo)
+   - **Branch:** `main`
+   - Enable **Deploy on push**
+3. Generate a public domain for frontend and backend (Settings → Networking).
+4. Set **service variables** in the Railway dashboard:
 
    | Service | Variable | Example value |
    |---------|----------|---------------|
    | **backend** | `ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
+   | **backend** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (use **Add Reference**) |
+   | **backend** | `RUN_MIGRATIONS` | `true` |
    | **frontend** | `VITE_GAMES_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
 
    Use your exact Railway service names in the `${{…}}` references.
 
-4. **Deploy locally** after backend or frontend changes:
+5. **Manual deploy fallback** (emergency only, from repo root with Railway CLI):
 
    ```bash
-   export RAILWAY_TOKEN="<project-token-from-railway-dashboard>"
-   export RAILWAY_PROJECT_ID="<your-project-id>"
    railway up backend --path-as-root --service backend --detach
    railway up frontend --path-as-root --service frontend --detach
    ```
-
-5. **Optional — auto-deploy on push:** add GitHub secrets `RAILWAY_TOKEN`, `RAILWAY_BACKEND_SERVICE_ID`, and `RAILWAY_FRONTEND_SERVICE_ID`; pushes to `main` run [`.github/workflows/deploy-railway.yml`](.github/workflows/deploy-railway.yml).
 
 See [`backend/README.md`](backend/README.md) for endpoint and Docker details.
 

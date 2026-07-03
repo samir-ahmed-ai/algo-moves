@@ -54,7 +54,7 @@ Room codes are minted by the Go server (`GET /new`). The host picks the shared g
 
 Stdlib-only Go service: pairs two players into a room, relays JSON, stores host shared state. See [`backend/README.md`](../backend/README.md).
 
-Deploy both apps with Docker on Railway ([`deploy-railway.yml`](../.github/workflows/deploy-railway.yml) or local `railway up`). The frontend build injects `VITE_GAMES_SERVER_URL` from Railway service variables so browsers reach the game server.
+Deploy both apps on Railway with GitHub connected per service (`backend/` and `frontend/` root directories, branch `main`). The frontend build injects `VITE_GAMES_SERVER_URL` from Railway service variables so browsers reach the game server.
 
 ## Canvas (`frontend/src/shell/canvas/`)
 
