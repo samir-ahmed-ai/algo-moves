@@ -193,10 +193,6 @@ function preserveLocalData(data: PanelNodeData): Partial<PanelNodeData> {
   return out as Partial<PanelNodeData>;
 }
 
-export function emptyDoc(): CanvasDoc {
-  return { v: 1, rev: 0, nodes: [], edges: [], removedPanels: [], removedEdges: [], comments: [] };
-}
-
 /** Runtime guard for an inbound `state` payload. */
 export function isCanvasDoc(value: unknown): value is CanvasDoc {
   const d = value as Partial<CanvasDoc> | null;

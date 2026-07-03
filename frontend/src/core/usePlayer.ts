@@ -44,11 +44,12 @@ export function usePlayer(total: number): Player {
   const [reversed, setReversed] = useState(false);
   const timer = useRef<number | null>(null);
 
-  // The interval tick reads through this instead of closing over state directly,
-  // so toggling a breakpoint/loop/direction mid-playback doesn't reset the timer
-  // — only isPlaying/total/speed (below) should restart it.
-  const latest = useRef({ index, loopStart, loopEnd, breakpoints, reversed });
-  latest.current = { index, loopStart, loopEnd, breakpoints, reversed };
+  // The interval tick and togglePlay read through this instead of closing over
+  // state directly, so toggling a breakpoint/loop/direction mid-playback doesn't
+  // reset the timer, and togglePlay keeps a stable identity like next/prev/goTo
+  // — only total/speed (below) should restart the interval.
+  const latest = useRef({ index, isPlaying, loopStart, loopEnd, breakpoints, reversed });
+  latest.current = { index, isPlaying, loopStart, loopEnd, breakpoints, reversed };
 
   const clear = useCallback(() => {
     if (timer.current !== null) {
@@ -113,14 +114,15 @@ export function usePlayer(total: number): Player {
 
   const togglePlay = useCallback(() => {
     // Resuming (not pausing): rewind into the loop segment, or from the end.
-    if (!isPlaying) {
+    if (!latest.current.isPlaying) {
       setIndex((i) => {
-        if (loopEnd !== null && (i >= loopEnd || i < (loopStart ?? 0))) return loopStart ?? 0;
+        const { loopStart: ls, loopEnd: le } = latest.current;
+        if (le !== null && (i >= le || i < (ls ?? 0))) return ls ?? 0;
         return i >= total - 1 ? 0 : i;
       });
     }
     setPlaying((p) => !p);
-  }, [isPlaying, total, loopStart, loopEnd]);
+  }, [total]);
 
   const clearLoop = useCallback(() => {
     setLoopStart(null);

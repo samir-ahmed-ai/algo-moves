@@ -241,7 +241,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     if (player.index >= displayFrames.length && displayFrames.length > 0) {
       player.goTo(displayFrames.length - 1);
     }
-  }, [displayFrames.length, player]);
+  }, [displayFrames.length, player.index, player.goTo]);
 
   // Fit content accounting for chrome; allow zoom up to 100%.
   const fitCanvas = useCallback(
@@ -573,7 +573,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
       persist();
       requestFitCanvas();
     },
-    [key, edgeOpts, persist, player, setNodes, setEdges, requestFitCanvas],
+    [key, edgeOpts, persist, player.setSpeed, setNodes, setEdges, requestFitCanvas],
   );
 
   const applyWorkflowPreset = useCallback(
