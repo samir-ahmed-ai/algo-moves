@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { catalog, type TrackId } from '@/content';
 import { normalizeCanvasMode, type CanvasMode } from '@/core';
-import { isMobileHash, writeMobileHash } from '@/shell/mobile/mobileHash';
-import { isVimHash, writeVimHash } from '@/shell/vim/engine/vimHash';
-import { isGamesHash, writeGamesHash } from '@/shell/games/engine/gamesHash';
+import {
+  isMobileHash,
+  writeMobileHash,
+  isVimHash,
+  writeVimHash,
+  isGamesHash,
+  writeGamesHash,
+} from '@/lib/navigation';
 import { initialBrowseFromHash } from '@/store/navigation/browseNavigation';
 import { writeStorageText } from '@/store/persistence/storage';
 import type { ShareState } from '@/store/navigation/shareState';

@@ -3,7 +3,7 @@ import { Check, ChevronDown, Copy, Smartphone, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { cn } from '@/lib/utils/cn';
-import { buildMobileModeUrl } from '../mobile/mobileHash';
+import { buildMobileModeUrl } from '@/lib/navigation';
 import { isSwipeQrPromoDismissed, markSwipeQrPromoDismissed } from './swipeQrPromoState';
 
 export function SwipeModeQrPromo({ onOpenDevice }: { onOpenDevice: () => void }) {

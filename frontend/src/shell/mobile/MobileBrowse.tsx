@@ -19,7 +19,7 @@ import { CategoryGrid } from '../browse/CategoryGrid';
 import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';
 import { ProblemGlyph } from './ProblemGlyph';
 import { loadMobileSession } from './mobileSession';
-import { writeMobileHash } from './mobileHash';
+import { writeMobileHash } from '@/lib/navigation';
 
 export function MobileBrowse({
   onPick,

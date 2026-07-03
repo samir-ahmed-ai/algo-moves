@@ -89,11 +89,6 @@ const KNOWN_VIOLATIONS = new Set([
   'store/workspace/workspace.tsx :: @/shell/canvas/layout', // #14
   'store/workspace/workspace.tsx :: @/shell/canvas/CanvasTools', // #14
   'store/workspace/useChromeState.ts :: @/shell/SidebarShell', // #14 — SIDEBAR_* -> design/layout leaf
-  // Tranche 1 — hash routing utilities moved to @/lib/navigation
-  'store/workspace/useAppNavigation.ts :: @/shell/mobile/mobileHash', // #15
-  'store/workspace/useAppNavigation.ts :: @/shell/vim/engine/vimHash', // #15
-  'store/workspace/useAppNavigation.ts :: @/shell/games/engine/gamesHash', // #15
-  'store/navigation/browseNavigation.ts :: @/shell/mobile/mobileHash', // #15
   // Tranche 1 — split-pane constants moved out of store into lib
   'components/SplitCodeEditor.tsx :: @/store/user-prefs', // split constants belong in lib
 ]);

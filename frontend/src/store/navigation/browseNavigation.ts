@@ -1,6 +1,6 @@
 import { catalog } from '@/content';
 import type { TrackId } from '@/content';
-import { parseMobileHash, isMobileHash } from '@/shell/mobile/mobileHash';
+import { parseMobileHash, isMobileHash } from '@/lib/navigation';
 
 export interface BrowseNavigationState {
   trackId: TrackId | null;

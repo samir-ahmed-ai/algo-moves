@@ -7,7 +7,7 @@ import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
 import { useAuth } from '../data/AuthProvider';
 import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net/gameServer';
-import { writeGamesHash } from '../engine/gamesHash';
+import { writeGamesHash } from '@/lib/navigation';
 import { Avatar } from '../ui/Avatar';
 import { TouchButton } from '../ui/gamesUi';
 

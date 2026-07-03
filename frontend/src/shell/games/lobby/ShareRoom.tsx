@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Check, Copy, Link as LinkIcon } from 'lucide-react';
 import { getArcadeStrings, type GameLocale } from '../locale';
-import { buildGamesUrl } from '../engine/gamesHash';
+import { buildGamesUrl } from '@/lib/navigation';
 import { TouchButton } from '../ui/gamesUi';
 import { COPY_FEEDBACK_MS } from '@/shell/copyFeedback';
 

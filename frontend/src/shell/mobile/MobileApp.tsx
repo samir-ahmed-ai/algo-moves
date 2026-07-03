@@ -4,7 +4,7 @@ import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from
 import { useWorkspace } from '@/store/workspace';
 import { MobileBrowse } from './MobileBrowse';
 import { MobileDeck } from './MobileDeck';
-import { isMobileHash, parseMobileHash, writeMobileHash } from './mobileHash';
+import { isMobileHash, parseMobileHash, writeMobileHash } from '@/lib/navigation';
 
 interface DeckTarget {
   topic: Topic;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isVimHash, parseVimHash } from '../vimHash';
+import { isVimHash, parseVimHash } from './vimHash';
 
 describe('vimHash', () => {
   it('parses bare vim hash', () => {
