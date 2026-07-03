@@ -14,7 +14,7 @@ import { useWorkspace } from '@/store/workspace';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { courseIcon } from './courseIcon';
-import { Chip, EmptyState, Label, Meter, difficultyTone } from './canvas/nodeui';
+import { Chip, EmptyState, Label, Meter, difficultyTone } from './canvas/ui/nodeui';
 import { chromeText } from './chromeUi';
 import { ProblemGrid } from './browse/ProblemGrid';
 import { BrowseBreadcrumb } from './browse/BrowseBreadcrumb';

@@ -23,7 +23,7 @@ import { useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { ChromeLabel, chromeText } from '../chromeUi';
-import { Btn, Chip, EmptyState, difficultyTone } from '../canvas/nodeui';
+import { Btn, Chip, EmptyState, difficultyTone } from '../canvas/ui/nodeui';
 import {
   CanvasActionsProvider,
   CanvasFrameProvider,
@@ -33,11 +33,11 @@ import {
 } from '../canvas/CanvasContext';
 import { CodeStudioProvider, useCodeStudio } from './CodeStudio';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
-import { SplitCodeEditor } from '../../components/SplitCodeEditor';
+import { SplitCodeEditor } from '../../components/code/SplitCodeEditor';
 import { AssembleModes } from '../canvas/components/AssembleModes';
-import { ProblemOverviewBody } from '@/shell/panels/ProblemOverviewBody';
-import { PanelBody } from '../canvas/PanelNode';
-import { useQuizHostRelay } from '@/shell/canvas/collab/useQuizHostRelay';
+import { ProblemOverviewBody } from '@/shell/panels/problem/ProblemOverviewBody';
+import { PanelBody } from '../canvas/nodes/PanelNode';
+import { useQuizHostRelay } from '@/shell/canvas/collab/sync/useQuizHostRelay';
 import {
   flatOrder,
   isTabAvailable,

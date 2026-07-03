@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Edge } from '@xyflow/react';
-import type { PanelFlowNode } from '../PanelNode';
+import type { PanelFlowNode } from '../../nodes/PanelNode';
 import type { CanvasComment, EditOp } from './collabProtocol';
 import {
   applyEditToComments,

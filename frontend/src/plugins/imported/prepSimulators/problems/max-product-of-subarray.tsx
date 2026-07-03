@@ -2,7 +2,7 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
-import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
+import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 
 interface MaxProductInput {
   nums: number[];

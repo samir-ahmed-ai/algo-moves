@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useCanvasStatic } from '../../canvas/CanvasContext';
 import { readStorageJson, writeStorageJson } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
-import { CheckRow, Hint, Meter, Pill } from '../../canvas/nodeui';
+import { CheckRow, Hint, Meter, Pill } from '../../canvas/ui/nodeui';
 
 /** #58 Edge-case finder: a checklist of cases that break naive solutions. */
 export function EdgeCasesPanelBody() {

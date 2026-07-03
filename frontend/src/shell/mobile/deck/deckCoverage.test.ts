@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { catalog } from '../../content';
+import { catalog } from '../../../content';
 import { deckSummary } from './deckModel';
 
 /** Dev report: mobile deck coverage per topic (run via `node scripts/check-mobile-decks.mjs`). */

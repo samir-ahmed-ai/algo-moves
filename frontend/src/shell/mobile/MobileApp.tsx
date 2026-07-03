@@ -3,7 +3,7 @@ import { Home, Moon, Sparkles, Sun } from 'lucide-react';
 import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { MobileBrowse } from './MobileBrowse';
-import { MobileDeck } from './MobileDeck';
+import { MobileDeck } from './deck/MobileDeck';
 import { isMobileHash, parseMobileHash, writeMobileHash } from '@/lib/navigation';
 
 interface DeckTarget {

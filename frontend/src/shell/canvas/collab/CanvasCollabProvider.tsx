@@ -19,7 +19,7 @@ import type { Peer, Role } from '@/shell/realtime';
 import { collabSession, defaultSession, interviewSession, type InterviewSettings, type SessionMeta } from '@/lib/session';
 import { extractSessionMeta } from '@/shell/realtime/roomState';
 import { readRoomFromUrl, readShareFromUrl, writeShareToUrl } from '@/store/navigation/shareState';
-import { canEditSubDoc } from './subdocPermissions';
+import { canEditSubDoc } from './protocol/subdocPermissions';
 import {
   CANVAS_TAG,
   isCanvasOp,
@@ -29,7 +29,7 @@ import {
   type CanvasCommentReply,
   type CanvasOp,
   type EditOp,
-} from './collabProtocol';
+} from './protocol/collabProtocol';
 import {
   SUBDOC_TAG,
   emptyEditorPayload,
@@ -40,14 +40,14 @@ import {
   type SubDocSnapshot,
   type WhiteboardPayload,
   type EditorPayload,
-} from './subdocProtocol';
+} from './protocol/subdocProtocol';
 import {
   applyEditorPatch,
   applyWhiteboardPatch,
   snapshotFromPayload,
-} from './subdocMerge';
+} from './protocol/subdocMerge';
 import { extractSubDocs } from '@/shell/realtime/roomState';
-import { isQuizOp, toHostQuizEntry, type HostQuizEntry } from './quizProtocol';
+import { isQuizOp, toHostQuizEntry, type HostQuizEntry } from './protocol/quizProtocol';
 
 /** Live, ephemeral state for one remote collaborator. */
 export interface PeerPresence {

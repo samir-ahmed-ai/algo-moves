@@ -1,5 +1,5 @@
-import { useCanvasFrame, useCanvasStatic } from '../canvas/CanvasContext';
-import { Chip, ControlsAccordion, Label, Meter, Stat, StatGrid } from '../canvas/nodeui';
+import { useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
+import { Chip, ControlsAccordion, Label, Meter, Stat, StatGrid } from '../../canvas/ui/nodeui';
 
 export function MetricsBody() {
   const { plugin } = useCanvasStatic();

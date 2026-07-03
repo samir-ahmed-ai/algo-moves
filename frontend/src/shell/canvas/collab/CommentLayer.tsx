@@ -3,7 +3,7 @@ import { useReactFlow } from '@xyflow/react';
 import { MessageSquarePlus, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../../chromeUi';
-import { RADIUS_CTRL } from '../nodeui';
+import { RADIUS_CTRL } from '../ui/nodeui';
 import { useCanvasCollab } from './CanvasCollabProvider';
 
 interface Draft {

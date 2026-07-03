@@ -4,9 +4,9 @@ import { useWorkspace } from '@/store/workspace';
 import { chromeText } from '../../chromeUi';
 import { SECTION_MAX } from '../../SidebarShell';
 import { useCanvasStatic, useCanvasFrame } from '../CanvasContext';
-import { InspectorPaneContent, MetricsBody, ReplayContent } from '../PanelNode';
-import { HudBtn } from '../CanvasTools';
-import { RADIUS_CTRL } from '../nodeui';
+import { InspectorPaneContent, MetricsBody, ReplayContent } from '../nodes/PanelNode';
+import { HudBtn } from '../ui/CanvasTools';
+import { RADIUS_CTRL } from '../ui/nodeui';
 import { SectionBadge } from './WidgetSection';
 import type { CanvasWidget } from './types';
 

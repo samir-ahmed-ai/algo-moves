@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type { Edge } from '@xyflow/react';
-import type { PanelFlowNode } from './PanelNode';
-import { styleSig, type PanelNodeStyle } from './panelStyle';
+import type { PanelFlowNode } from '../nodes/PanelNode';
+import { styleSig, type PanelNodeStyle } from '../nodes/panelStyle';
 
 /**
  * Undo/redo of canvas edits (#82), extracted from CanvasStage.

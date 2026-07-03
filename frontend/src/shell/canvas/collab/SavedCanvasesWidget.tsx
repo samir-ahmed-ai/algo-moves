@@ -12,7 +12,7 @@ import {
   fetchCanvas,
   listCanvases,
   type SavedCanvasSummary,
-} from './canvasStore';
+} from './sync/canvasStore';
 
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();

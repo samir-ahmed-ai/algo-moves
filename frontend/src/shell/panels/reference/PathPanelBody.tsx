@@ -4,7 +4,7 @@ import { useWorkspace } from '@/store/workspace';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Chip, Hint, Meter, nodeIconGlyph, nodeTextWrap, Pill, Row } from '../../canvas/nodeui';
+import { Chip, Hint, Meter, nodeIconGlyph, nodeTextWrap, Pill, Row } from '../../canvas/ui/nodeui';
 
 /** #62 Learning path: ordered sequence with mastery + jump-to. */
 export function PathPanelBody() {

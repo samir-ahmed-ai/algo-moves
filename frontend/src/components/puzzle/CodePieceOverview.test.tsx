@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { CodePieceOverview } from './CodePieceOverview';
 import { dedentForDisplay } from '@/lib/code';
-import { codePieces } from '../plugins/n-queens/practice';
+import { codePieces } from '../../plugins/selection-sort/practice';
 
 describe('CodePieceOverview', () => {
   it('renders every section with role caption and index', () => {

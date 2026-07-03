@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNodeId, useReactFlow } from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
-import { useCanvasCollab } from './CanvasCollabProvider';
+import { useCanvasCollab } from '../CanvasCollabProvider';
 import {
   SUBDOC_TAG,
   emptyEditorPayload,
@@ -9,9 +9,9 @@ import {
   type EditorPayload,
   type SubDocKind,
   type WhiteboardPayload,
-} from './subdocProtocol';
-import { diffWhiteboardElements, snapshotFromPayload } from './subdocMerge';
-import { canEditSubDoc } from './subdocPermissions';
+} from '../protocol/subdocProtocol';
+import { diffWhiteboardElements, snapshotFromPayload } from '../protocol/subdocMerge';
+import { canEditSubDoc } from '../protocol/subdocPermissions';
 
 function defaultPayload(kind: SubDocKind): WhiteboardPayload | EditorPayload {
   return kind === 'whiteboard' ? emptyWhiteboardPayload() : emptyEditorPayload();

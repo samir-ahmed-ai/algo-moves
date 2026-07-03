@@ -17,7 +17,7 @@ import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
 import { useCanvasFrame } from '../../canvas/CanvasContext';
-import { nodeIconGlyph, nodeText, RADIUS_CTRL } from '../../canvas/nodeui';
+import { nodeIconGlyph, nodeText, RADIUS_CTRL } from '../../canvas/ui/nodeui';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 4];
 

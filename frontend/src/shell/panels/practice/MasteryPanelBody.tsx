@@ -3,7 +3,7 @@ import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useProgress, statFor, setMastered } from '@/store/persistence';
 import { useCanvasActions, useCanvasStatic } from '../../canvas/CanvasContext';
-import { Btn, Label, Meter, Stat, StatGrid, StreakPips, nodeText } from '../../canvas/nodeui';
+import { Btn, Label, Meter, Stat, StatGrid, StreakPips, nodeText } from '../../canvas/ui/nodeui';
 import { PRACTICE_ADVANCE_MS } from '../shared/practiceConstants';
 
 /** #51 Mastery meter + streaks (localStorage-backed, per problem). */

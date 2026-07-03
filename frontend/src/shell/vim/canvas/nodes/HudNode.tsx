@@ -2,7 +2,7 @@ import { Keyboard, Terminal } from 'lucide-react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useSyncNodeHandles } from '../hooks/useSyncNodeHandles';
 import { MAZE_HUD_SOURCE_HANDLE } from '../layout/orbitSlots';
-import { nodeTextWrap } from '../../../canvas/nodeui';
+import { nodeTextWrap } from '../../../canvas/ui/nodeui';
 import { cn } from '@/lib/utils/cn';
 import { MotionsPanelContent } from '../../ui/panels/MotionsPanelContent';
 import { StatusPanelContent } from '../../ui/panels/StatusPanelContent';

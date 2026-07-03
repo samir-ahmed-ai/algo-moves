@@ -26,23 +26,23 @@ import { usePlayer } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
-import { togglePanelCollapse } from './panelCollapse';
+import { togglePanelCollapse } from './nodes/panelCollapse';
 import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
-import { CanvasToolbar } from './CanvasToolbar';
-import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from './PanelNode';
-import { RemovableEdge } from './RemovableEdge';
-import { ContextMenu, LaserPointer, type MenuItem } from './CanvasTools';
-import { CanvasFloatingHud } from './CanvasFloatingHud';
-import { TracePreviewPanel } from './TracePreviewPanel';
-import { EffectNode, createEffectByType } from './EffectNode';
+import { CanvasToolbar } from './ui/CanvasToolbar';
+import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from './nodes/PanelNode';
+import { RemovableEdge } from './edges/RemovableEdge';
+import { ContextMenu, LaserPointer, type MenuItem } from './ui/CanvasTools';
+import { CanvasFloatingHud } from './ui/CanvasFloatingHud';
+import { TracePreviewPanel } from './ui/TracePreviewPanel';
+import { EffectNode, createEffectByType } from './nodes/EffectNode';
 import { ConnectedComponentsProvider } from '@/lib/canvas';
 import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
 import { EFFECTS } from '../../effects/registry';
 import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
 import type { ShareState } from '@/store/navigation';
-import { applyAlign, applyDistribute, type AlignKind } from './align';
-import { FIT_VIEW_DURATION_MS } from './canvasTokens';
+import { applyAlign, applyDistribute, type AlignKind } from './layout/align';
+import { FIT_VIEW_DURATION_MS } from './ui/canvasTokens';
 import {
   buildEdges,
   buildNodes,
@@ -66,20 +66,20 @@ import {
   styleEdges,
   type BgVariant,
   type LayoutPreset,
-} from './layout';
-import { snapNodeLayout } from './nodeSnapshot';
-import { buildCanvasFrame } from './canvasFrame';
-import { sanitizeVisualizeEdges } from './edgeSanitization';
-import { useCanvasLayoutPersistence, type Saved } from './useCanvasLayoutPersistence';
-import { useCanvasHistory } from './useCanvasHistory';
-import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts';
-import { useCanvasEdgeConnection } from './useCanvasEdgeConnection';
-import { useCanvasDnD, DND_KEY } from './useCanvasDnD';
-import { useCanvasNodeMutations } from './useCanvasNodeMutations';
+} from './layout/layout';
+import { snapNodeLayout } from './nodes/nodeSnapshot';
+import { buildCanvasFrame } from './frame/canvasFrame';
+import { sanitizeVisualizeEdges } from './edges/edgeSanitization';
+import { useCanvasLayoutPersistence, type Saved } from './hooks/useCanvasLayoutPersistence';
+import { useCanvasHistory } from './hooks/useCanvasHistory';
+import { useCanvasKeyboardShortcuts } from './hooks/useCanvasKeyboardShortcuts';
+import { useCanvasEdgeConnection } from './edges/useCanvasEdgeConnection';
+import { useCanvasDnD, DND_KEY } from './hooks/useCanvasDnD';
+import { useCanvasNodeMutations } from './hooks/useCanvasNodeMutations';
 import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProvider';
-import { useCanvasDocSync } from './collab/useCanvasDocSync';
-import { useCanvasFollow } from './collab/useCanvasFollow';
-import { canMoveCanvasNodes } from './collab/subdocPermissions';
+import { useCanvasDocSync } from './collab/sync/useCanvasDocSync';
+import { useCanvasFollow } from './collab/sync/useCanvasFollow';
+import { canMoveCanvasNodes } from './collab/protocol/subdocPermissions';
 import { CanvasCollabOverlays } from './collab/CanvasCollabOverlays';
 import { CommentLayer } from './collab/CommentLayer';
 
@@ -992,4 +992,4 @@ export function CanvasStage(props: CanvasStageProps) {
 }
 
 /** Re-export kept for widget registry / saved-canvas flows (not mounted in standalone canvas). */
-export { UnifiedRightSidebar } from './UnifiedRightSidebar';
+export { UnifiedRightSidebar } from './ui/UnifiedRightSidebar';

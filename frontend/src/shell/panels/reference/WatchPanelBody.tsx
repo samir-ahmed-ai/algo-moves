@@ -1,6 +1,6 @@
 import { LineChart } from 'lucide-react';
 import { useCanvasFrame } from '../../canvas/CanvasContext';
-import { ControlsAccordion, EmptyState, Pill, Spark, Stat } from '../../canvas/nodeui';
+import { ControlsAccordion, EmptyState, Pill, Spark, Stat } from '../../canvas/ui/nodeui';
 
 /** #38/#42 Watch: sparkline + current value for each numeric state field. */
 export function WatchPanelBody() {

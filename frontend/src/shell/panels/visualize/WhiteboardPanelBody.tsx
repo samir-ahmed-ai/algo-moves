@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { ExcalidrawWrapper } from '@/components/ExcalidrawWrapper';
-import { useSubDocSync } from '@/shell/canvas/collab/useSubDocSync';
-import type { WhiteboardPayload } from '@/shell/canvas/collab/subdocProtocol';
+import { ExcalidrawWrapper } from '@/components/shared/ExcalidrawWrapper';
+import { useSubDocSync } from '@/shell/canvas/collab/sync/useSubDocSync';
+import type { WhiteboardPayload } from '@/shell/canvas/collab/protocol/subdocProtocol';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 

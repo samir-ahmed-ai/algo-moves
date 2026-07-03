@@ -12,16 +12,16 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
-import type { Item } from '../../content';
+import type { Item } from '../../../content';
 import { recordAttempt, logMistake } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
-import { QuizChoiceLabel } from '../../components/QuizChoiceLabel';
-import { ReassemblePane } from '../../components/ReassemblePane';
+import { QuizChoiceLabel } from '../../../components/shared/QuizChoiceLabel';
+import { ReassemblePane } from '../../../components/puzzle/ReassemblePane';
 import { quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '@/lib/quiz';
 import { correctIndex, type GistCard as GistCardData, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
-import { GistScene } from './gistScenes';
-import { MobileVizShell } from './MobileVizShell';
+import { GistScene } from '../scenes/gistScenes';
+import { MobileVizShell } from '../MobileVizShell';
 import { tintFor } from './mobileCardTints';
 
 /* ------------------------------------------------------------------ shared */

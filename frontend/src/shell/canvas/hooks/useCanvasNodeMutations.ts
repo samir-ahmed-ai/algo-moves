@@ -1,8 +1,8 @@
 import { useCallback, type Dispatch, type MouseEvent, type SetStateAction } from 'react';
 import type { Edge, Node } from '@xyflow/react';
-import { togglePanelCollapse } from './panelCollapse';
-import { PanelFlowNode, type PanelNodeData } from './PanelNode';
-import { ACCENTS } from './layout';
+import { togglePanelCollapse } from '../nodes/panelCollapse';
+import { PanelFlowNode, type PanelNodeData } from '../nodes/PanelNode';
+import { ACCENTS } from '../layout/layout';
 
 /**
  * Per-node mutation handlers, extracted from CanvasStage. These depend only on the

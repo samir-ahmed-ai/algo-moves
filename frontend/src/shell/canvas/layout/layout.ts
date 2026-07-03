@@ -1,15 +1,15 @@
 import dagre from '@dagrejs/dagre';
 import { ConnectionLineType, MarkerType, Position, type Connection, type Edge, type Node, type XYPosition } from '@xyflow/react';
-import type { CanvasMode, ProblemPlugin } from '../../core';
+import type { CanvasMode, ProblemPlugin } from '../../../core';
 import {
   DOCK_ONLY_PANELS,
   modeBuiltins,
   modeOptional,
   panelCategory,
   panelTitle,
-} from '../../core/panelRegistry';
-import type { PanelFlowNode } from './PanelNode';
-import { getMeasuredHeight } from './measuredCache';
+} from '../../../core/panelRegistry';
+import type { PanelFlowNode } from '../nodes/PanelNode';
+import { getMeasuredHeight } from '../nodes/measuredCache';
 import {
   CANVAS_MARGIN,
   CANVAS_NODE_SEP,
@@ -17,14 +17,14 @@ import {
   MIN_VIEWPORT_HEIGHT,
   vizMinWidth,
   vizWireGap,
-} from './canvasTokens';
+} from '../ui/canvasTokens';
 import {
   layoutEstimate,
   layoutHeight,
   layoutSize,
   sizeOf,
   STRUDEL_NODE_W,
-} from './nodeTokens';
+} from '../nodes/nodeTokens';
 // Canvas layout/edge preference data + types are homed in the lib leaf so store
 // and lib can share them; re-exported here for layout.ts's existing consumers.
 import {
@@ -37,13 +37,13 @@ import {
   type EdgeOpts,
 } from '@/lib/canvas/layoutPrefs';
 
-export { layoutEstimate, layoutCap, layoutFixedWidth, layoutSize, nodeTier } from './nodeTokens';
-export { CANVAS_MARGIN, CANVAS_NODE_SEP, VIZ_WIRE_GAP } from './canvasTokens';
+export { layoutEstimate, layoutCap, layoutFixedWidth, layoutSize, nodeTier } from '../nodes/nodeTokens';
+export { CANVAS_MARGIN, CANVAS_NODE_SEP, VIZ_WIRE_GAP } from '../ui/canvasTokens';
 /** Persistence key for the standalone freeform canvas (not tied to a catalog item). */
 export const STANDALONE_CANVAS_KEY = 'standalone:visualize';
 export { LAYOUT_PRESETS, defaultEdgeOpts };
 export type { LayoutPreset, LayoutVisualizeOptions, BgVariant, EdgePathType, EdgeOpts };
-export { CATEGORY_ORDER, DOCK_ONLY_PANELS } from '../../core/panelRegistry';
+export { CATEGORY_ORDER, DOCK_ONLY_PANELS } from '../../../core/panelRegistry';
 
 /** Width of the right-side dock that hosts `mode:'visualize'` plugin tabs (e.g. Cases). */
 export const SIDE_DOCK_WIDTH = STRUDEL_NODE_W;

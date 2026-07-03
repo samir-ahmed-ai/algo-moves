@@ -3,9 +3,9 @@ import { ViewportPortal, useReactFlow } from '@xyflow/react';
 import { Check, MessageSquare, Send, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../../chromeUi';
-import { RADIUS_CTRL } from '../nodeui';
+import { RADIUS_CTRL } from '../ui/nodeui';
 import { useCanvasCollab, type PeerPresence } from './CanvasCollabProvider';
-import type { CanvasComment } from './collabProtocol';
+import type { CanvasComment } from './protocol/collabProtocol';
 
 /** SVG cursor glyph + name tag for one peer, positioned in flow coords. */
 function PeerCursor({ peer }: { peer: PeerPresence }) {

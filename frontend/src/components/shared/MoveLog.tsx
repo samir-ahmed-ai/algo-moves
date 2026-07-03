@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
-import type { Move } from '../core';
+import type { Move } from '../../core';
 
 export interface MoveLogProps {
   moves: Move[];

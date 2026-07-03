@@ -1,5 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import { ArrayBars, type BarTone } from '../../../../components/ArrayBars';
+import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';

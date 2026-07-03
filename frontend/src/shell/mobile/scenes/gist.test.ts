@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { catalog } from '../../content';
-import { shapeFor } from '../../content/problemShape';
-import { PROBLEM_GISTS, gistFor } from '../../content/gists';
+import { catalog } from '../../../content';
+import { shapeFor } from '../../../content/problemShape';
+import { PROBLEM_GISTS, gistFor } from '../../../content/gists';
 import { hasBespokeScene } from './gistScenes';
 
 const PRIORITY = ['backtracking', 'graph', 'binarySearch', 'dp'] as const;

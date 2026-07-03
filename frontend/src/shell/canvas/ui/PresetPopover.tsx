@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Sparkles, Check, LayoutGrid, Eye, Minimize2, Monitor, Presentation } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { chromeText } from '../chromeUi';
+import { chromeText } from '../../chromeUi';
 import { nodeText } from './nodeui';
-import { LAYOUT_PRESET_META, type LayoutPreset } from './layout';
+import { LAYOUT_PRESET_META, type LayoutPreset } from '../layout/layout';
 
 const PRESET_ICONS: Record<LayoutPreset, React.ReactNode> = {
   Full: <LayoutGrid className="h-4 w-4" />,

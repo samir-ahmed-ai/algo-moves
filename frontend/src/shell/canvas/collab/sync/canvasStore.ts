@@ -1,4 +1,4 @@
-import { arcadeFetch } from '../../games/data/arcadeClient';
+import { arcadeFetch } from '../../../games/data/arcadeClient';
 
 export interface SavedCanvasSummary {
   id: string;

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Copy, Lock, Unlock } from 'lucide-react';
 import type { EditorView } from '@codemirror/view';
-import { CodeMirrorEditor } from '@/components/CodeMirrorEditor';
-import { useSubDocSyncContext } from '@/shell/canvas/collab/SubDocSyncProvider';
-import { SUBDOC_TAG, type EditorPayload } from '@/shell/canvas/collab/subdocProtocol';
+import { CodeMirrorEditor } from '@/components/code/CodeMirrorEditor';
+import { useSubDocSyncContext } from '@/shell/canvas/collab/sync/SubDocSyncProvider';
+import { SUBDOC_TAG, type EditorPayload } from '@/shell/canvas/collab/protocol/subdocProtocol';
 import { useCanvasCollab } from '@/shell/canvas/collab/CanvasCollabProvider';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';

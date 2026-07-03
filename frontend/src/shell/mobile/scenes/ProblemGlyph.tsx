@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
-import type { Item } from '../../content';
+import type { Item } from '../../../content';
 import { cn } from '@/lib/utils/cn';
-import { glyphFor } from '../../content/problemShape';
+import { glyphFor } from '../../../content/problemShape';
 
 /**
  * The little mnemonic picture for a problem, drawn the exact same way the topic

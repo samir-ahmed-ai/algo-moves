@@ -2,18 +2,18 @@ import { Circle } from 'lucide-react';
 import { useStore, useReactFlow } from '@xyflow/react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
-import { ACCENTS } from './layout';
-import type { PanelFlowNode, PanelNodeData } from './PanelNode';
+import { ACCENTS } from '../layout/layout';
+import type { PanelFlowNode, PanelNodeData } from '../nodes/PanelNode';
 import {
   patchPanelStyle,
   type PanelCornerStyle,
   type PanelNodeStyle,
-} from './panelStyle';
+} from '../nodes/panelStyle';
 import { Btn, RADIUS_CTRL } from './nodeui';
-import { chromeText } from '../chromeUi';
+import { chromeText } from '../../chromeUi';
 import { InsField, InsGrid, InsSection, InsSelect } from './inspectorUi';
 
-export { useHasSelectedPanel } from './useHasSelectedPanel';
+export { useHasSelectedPanel } from '../nodes/useHasSelectedPanel';
 
 const FILL_SWATCHES: { v: string | undefined; label: string }[] = [
   { v: undefined, label: 'Default' },

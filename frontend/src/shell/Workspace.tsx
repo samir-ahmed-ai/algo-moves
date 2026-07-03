@@ -7,9 +7,9 @@ import { useNarration, useSoundCues, useWorkspacePlugin, useWorkspaceUrlState } 
 import { cn } from '@/lib/utils/cn';
 import { buildShareUrl } from '@/store/navigation';
 import { UnifiedLeftSidebar } from './UnifiedLeftSidebar';
-import { SettingsDialog } from './canvas/SettingsDialog';
-import { MobileTransportSheet } from './canvas/MobileTransportSheet';
-import { MobileSwipeReturn } from './mobile/MobileSwipeReturn';
+import { SettingsDialog } from './canvas/ui/SettingsDialog';
+import { MobileTransportSheet } from './canvas/ui/MobileTransportSheet';
+import { MobileSwipeReturn } from './mobile/deck/MobileSwipeReturn';
 import { TagChip } from './ui';
 import { ChromeHint, chromeText } from './chromeUi';
 import { ModeRouter, resolveWorkspaceSurface, useWorkspaceKeyboard } from '@/shell/workspace/index';

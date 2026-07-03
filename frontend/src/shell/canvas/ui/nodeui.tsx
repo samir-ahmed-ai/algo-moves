@@ -17,16 +17,16 @@ import {
   type RefObject,
 } from 'react';
 import { ChevronDown, GripVertical, MoreVertical, Search } from 'lucide-react';
-import { getTag } from '../../content/tags';
-import { TAG_KIND_COLOR } from '../../content/tagColors';
+import { getTag } from '../../../content/tags';
+import { TAG_KIND_COLOR } from '../../../content/tagColors';
 import { cn } from '@/lib/utils/cn';
-import { TONE_TEXT, TONE_BAR, TONE_CHIP, TONE_BANNER, TONE_LABEL } from './nodeUiTones';
+import { TONE_TEXT, TONE_BAR, TONE_CHIP, TONE_BANNER, TONE_LABEL } from '../nodes/nodeUiTones';
 // Typography/radius tokens live in the design leaf; shared form primitives +
 // VizFitBox/MiniTabs in the components leaf. Imported for internal use and
 // re-exported below so `nodeui` stays the canvas-facing entry point.
 import { nodeText, nodeTextWrap, nodeIconGlyph, RADIUS_CTRL, RADIUS_SHELL } from '@/design/typography';
-import { Label, Hint, Btn, Field, TextInput, TextArea, INPUT_CLS } from '@/components/formControls';
-import { VizFitBox, MiniTabs } from '@/components/vizFit';
+import { Label, Hint, Btn, Field, TextInput, TextArea, INPUT_CLS } from '@/components/shared/formControls';
+import { VizFitBox, MiniTabs } from '@/components/shared/vizFit';
 export { VizFitBox, MiniTabs };
 // Re-export the fit-measurement surface (moved to lib/canvas) for consumers.
 export {

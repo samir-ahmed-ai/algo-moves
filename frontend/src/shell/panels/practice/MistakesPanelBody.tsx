@@ -2,7 +2,7 @@ import { AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useProgress, clearMistakes } from '@/store/persistence';
 import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Banner, Btn, EmptyState, Pill, Section, Stat, StatGrid, nodeText } from '../../canvas/nodeui';
+import { Banner, Btn, EmptyState, Pill, Section, Stat, StatGrid, nodeText } from '../../canvas/ui/nodeui';
 
 /** #55 Mistake log: wrong predictions collected for review. */
 export function MistakesPanelBody() {

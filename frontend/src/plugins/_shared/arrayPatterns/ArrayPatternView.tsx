@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ArrayRow, type ArrayPointer } from '../../../components/ArrayRow';
+import { ArrayRow, type ArrayPointer } from '../../../components/board/ArrayRow';
 import { VizStage } from '../vizKit';
 
 export interface ArrayPatternViewProps {
@@ -25,4 +25,4 @@ export function ArrayPatternView({
   );
 }
 
-export { type ArrayPointer } from '../../../components/ArrayRow';
+export { type ArrayPointer } from '../../../components/board/ArrayRow';

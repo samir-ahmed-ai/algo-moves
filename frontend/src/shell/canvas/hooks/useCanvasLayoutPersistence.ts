@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { loadLayouts, saveLayouts, type LayoutEntry } from '@/store/canvas-layout';
-import { migrateLayouts } from './layoutMigration';
+import { migrateLayouts } from '../layout/layoutMigration';
 
 /** Persisted node positions/resizes per `${pluginId}:${mode}` key. */
 export type Saved = Record<string, { position: { x: number; y: number }; width?: number }>;

@@ -1,5 +1,5 @@
 import type { Node } from '@xyflow/react';
-import type { PanelNodeStyle } from '../canvas/panelStyle';
+import type { PanelNodeStyle } from '../canvas/nodes/panelStyle';
 
 export interface PanelNodeData extends Record<string, unknown> {
   kind: string;

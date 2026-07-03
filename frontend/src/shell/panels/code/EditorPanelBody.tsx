@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import type { InputBuilderKind } from '../../core/effectTypes';
-import { CategorySelectItems } from '../../components/CategorySelectItems';
-import { INPUT_BUILDERS } from '../../effects/inputBuilders';
-import { useCanvasFrame, useCanvasStatic } from '../canvas/CanvasContext';
-import { Btn, Chip, Field, Hint, nodeIconGlyph, Section, TextArea, TextInput, nodeText } from '../canvas/nodeui';
+import type { InputBuilderKind } from '../../../core/effectTypes';
+import { CategorySelectItems } from '../../../components/shared/CategorySelectItems';
+import { INPUT_BUILDERS } from '../../../effects/inputBuilders';
+import { useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
+import { Btn, Chip, Field, Hint, nodeIconGlyph, Section, TextArea, TextInput, nodeText } from '../../canvas/ui/nodeui';
 
 /** Input editor with optional visual builders (pad, beat, arpeggiator, etc.). */
 export function EditorPanelBody() {

@@ -27,7 +27,7 @@ import { compactLabel } from '../chromeUi';
 import { cn } from '@/lib/utils/cn';
 import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import { glyphFor } from '../../content/problemShape';
-import { Chip } from '../canvas/nodeui';
+import { Chip } from '../canvas/ui/nodeui';
 import { TrackGrid } from '../browse/TrackGrid';
 import { VimHeroPreview } from '../vim/ui/VimHeroPreview';
 

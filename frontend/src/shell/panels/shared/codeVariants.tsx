@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils/cn';
 import { Code2 } from 'lucide-react';
-import { nodeIconGlyph, nodeText, PanelHeaderAction, RADIUS_CTRL } from '../../canvas/nodeui';
+import { nodeIconGlyph, nodeText, PanelHeaderAction, RADIUS_CTRL } from '../../canvas/ui/nodeui';
 
 /** All language variants of a plugin's solution: the primary `code` plus `extraCode` (#71). */
 export function codeVariants(plugin: {

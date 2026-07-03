@@ -1,5 +1,5 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
-import { NaryTreeBoard } from '../../components/NaryTreeBoard';
+import { NaryTreeBoard } from '../../components/board/NaryTreeBoard';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';

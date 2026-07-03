@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { useSubDocSync, type SubDocSyncResult } from './useSubDocSync';
-import type { SubDocKind } from './subdocProtocol';
+import type { SubDocKind } from '../protocol/subdocProtocol';
 
 const SubDocSyncContext = createContext<SubDocSyncResult | null>(null);
 

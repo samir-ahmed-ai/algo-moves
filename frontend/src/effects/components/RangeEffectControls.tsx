@@ -1,4 +1,4 @@
-import { Field } from '@/components/formControls';
+import { Field } from '@/components/shared/formControls';
 import { nodeText } from '@/design/typography';
 import type { EffectControlsProps } from './EffectControls';
 

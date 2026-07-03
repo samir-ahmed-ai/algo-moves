@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { chromeText } from '../chromeUi';
+import { chromeText } from '../../chromeUi';
 import { RADIUS_CTRL } from './nodeui';
 
 /**

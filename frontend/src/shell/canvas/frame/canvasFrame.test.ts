@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { ProblemPlugin } from '../../core';
+import type { ProblemPlugin } from '../../../core';
 import { defaultEdgeOpts } from '@/lib/canvas/layoutPrefs';
 import { buildCanvasFrame, type CanvasFrameInput } from './canvasFrame';
-import { restoreNodeWidth } from './nodeSnapshot';
+import { restoreNodeWidth } from '../nodes/nodeSnapshot';
 
 const stubPlugin = { tabs: [], wires: {} } as unknown as ProblemPlugin<any, any>;
 

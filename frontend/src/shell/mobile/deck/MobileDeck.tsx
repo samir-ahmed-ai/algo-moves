@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, Layers } from 'lucide-react';
-import { catalog, type Topic } from '../../content';
+import { catalog, type Topic } from '../../../content';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { buildDeck, type MobileDeck as MobileDeckModel } from './deckModel';
-import { clearMobileSession, loadMobileSession, saveMobileSession } from './mobileSession';
+import { clearMobileSession, loadMobileSession, saveMobileSession } from '../mobileSession';
 import { useSwipe } from './useSwipe';
 import { newQuizRunSeed } from '@/lib/quiz';
 import { AnimateCardView, CompleteScreen, GistCardView, QuizCardView, ReassembleCardView } from './MobileCards';

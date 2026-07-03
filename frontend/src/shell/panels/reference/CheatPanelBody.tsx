@@ -1,7 +1,7 @@
 import { ScrollText } from 'lucide-react';
 import { patternsForTags } from '../../../content';
 import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Chip, DefRow, EmptyState } from '../../canvas/nodeui';
+import { Chip, DefRow, EmptyState } from '../../canvas/ui/nodeui';
 
 /** #66 Cheat sheet: terse one-liners for the problem's patterns. */
 export function CheatPanelBody() {

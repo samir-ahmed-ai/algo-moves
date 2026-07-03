@@ -4,9 +4,9 @@ import {
   isSessionMeta,
   type SessionMeta,
 } from '@/lib/session/types';
-import type { CanvasDoc } from '@/shell/canvas/collab/collabProtocol';
-import { isCanvasDoc } from '@/shell/canvas/collab/canvasDoc';
-import type { SubDocSnapshot } from '@/shell/canvas/collab/subdocProtocol';
+import type { CanvasDoc } from '@/shell/canvas/collab/protocol/collabProtocol';
+import { isCanvasDoc } from '@/shell/canvas/collab/protocol/canvasDoc';
+import type { SubDocSnapshot } from '@/shell/canvas/collab/protocol/subdocProtocol';
 
 export const ROOM_STATE_V = 1 as const;
 

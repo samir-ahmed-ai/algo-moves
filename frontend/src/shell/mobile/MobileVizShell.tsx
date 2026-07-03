@@ -4,7 +4,7 @@ import type { ProblemPlugin } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
 import { usePluginFrames } from '@/hooks';
 import { ErrorBoundary } from '../ErrorBoundary';
-import { VizFitBox } from '../canvas/nodeui';
+import { VizFitBox } from '../canvas/ui/nodeui';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
 export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {

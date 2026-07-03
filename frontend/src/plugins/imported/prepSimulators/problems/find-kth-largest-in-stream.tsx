@@ -1,5 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import { ArrayRow } from '../../../../components/ArrayRow';
+import { ArrayRow } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';

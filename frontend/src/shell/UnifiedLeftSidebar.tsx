@@ -24,9 +24,9 @@ import { cn } from '@/lib/utils/cn';
 import { matchesQuery } from '@/lib/utils/searchPredicate';
 import { chromeText } from './chromeUi';
 import { CatalogTree } from './CatalogTree';
-import { nodeIcon, panelAccent } from './canvas/PanelNode';
-import { Label } from './canvas/nodeui';
-import { CATEGORY_ORDER, nodeCategory } from './canvas/layout';
+import { nodeIcon, panelAccent } from './canvas/nodes/PanelNode';
+import { Label } from './canvas/ui/nodeui';
+import { CATEGORY_ORDER, nodeCategory } from './canvas/layout/layout';
 import { SIDEBAR_W, SidebarSection, CHROME_BTN_MD, SECTION_MAX, MobileDrawer } from './SidebarShell';
 
 const ESSENTIALS = new Set(['bigo', 'diff', 'watch', 'pattern', 'editor', 'notes', 'predict', 'mastery', 'hints']);

@@ -11,8 +11,8 @@ import {
   Timer,
   WrapText,
 } from 'lucide-react';
-import { ReassemblePane } from '../../components/ReassemblePane';
-import { SplitCodeEditor } from '../../components/SplitCodeEditor';
+import { ReassemblePane } from '../../components/puzzle/ReassemblePane';
+import { SplitCodeEditor } from '../../components/code/SplitCodeEditor';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { patternsForTags } from '../../content';
 import { extractSkeleton } from '@/lib/code';
@@ -34,14 +34,14 @@ import { chromeText } from '../chromeUi';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { useWorkspace } from '@/store/workspace';
 import { useCanvasStatic } from '../canvas/CanvasContext';
-import { nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu } from '../canvas/nodeui';
+import { nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu } from '../canvas/ui/nodeui';
 import { codeVariants, HeaderLangTabs } from '@/shell/panels/shared/codeVariants';
 import { CodeStudioContext } from './hooks/codeStudioContextStore';
 import { useCodeStudio } from './hooks/useCodeStudio';
 import { useCodeStudioTimer } from './hooks/useCodeStudioTimer';
 import { useCodeStudioRecallShortcuts } from './hooks/useCodeStudioRecallShortcuts';
 import { useCodeStudioMachine } from './hooks/useCodeStudioMachine';
-import { useQuizHostRelay } from '@/shell/canvas/collab/useQuizHostRelay';
+import { useQuizHostRelay } from '@/shell/canvas/collab/sync/useQuizHostRelay';
 
 export { useCodeStudio } from './hooks/useCodeStudio';
 

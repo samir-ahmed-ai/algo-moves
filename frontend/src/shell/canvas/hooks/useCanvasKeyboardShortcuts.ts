@@ -1,9 +1,9 @@
 import { useEffect, type MutableRefObject } from 'react';
 import type { FitViewOptions } from '@xyflow/react';
 import { isEditableTarget } from '@/lib/utils/keyboard';
-import type { PanelFlowNode } from './PanelNode';
-import { FIT_PADDING } from './layout';
-import { FIT_VIEW_DURATION_MS } from './canvasTokens';
+import type { PanelFlowNode } from '../nodes/PanelNode';
+import { FIT_PADDING } from '../layout/layout';
+import { FIT_VIEW_DURATION_MS } from '../ui/canvasTokens';
 
 /**
  * Canvas keyboard shortcuts, extracted from CanvasStage:

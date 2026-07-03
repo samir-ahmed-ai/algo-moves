@@ -1,9 +1,9 @@
 import { ListOrdered } from 'lucide-react';
 import { useWorkspace } from '@/store/workspace';
-import { MoveLog } from '../../components/MoveLog';
-import { useCanvasFrame } from '../canvas/CanvasContext';
-import { ControlsAccordion, EmptyState } from '../canvas/nodeui';
-import { Transport } from './shared/Transport';
+import { MoveLog } from '../../../components/shared/MoveLog';
+import { useCanvasFrame } from '../../canvas/CanvasContext';
+import { ControlsAccordion, EmptyState } from '../../canvas/ui/nodeui';
+import { Transport } from '../shared/Transport';
 
 export function ReplayContent({ columns = 2 }: { columns?: number }) {
   const { frames, player, frame } = useCanvasFrame();

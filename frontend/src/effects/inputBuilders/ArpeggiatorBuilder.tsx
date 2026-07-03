@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Btn, Field } from '@/components/formControls';
+import { Btn, Field } from '@/components/shared/formControls';
 
 const DIRECTIONS = ['up', 'down', 'up-down', 'down-up'] as const;
 

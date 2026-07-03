@@ -8,10 +8,10 @@ import {
   NotebookText,
 } from 'lucide-react';
 import { useWorkspace } from '@/store/workspace';
-import { useCanvasFrame } from './CanvasContext';
+import { useCanvasFrame } from '../CanvasContext';
 import { cn } from '@/lib/utils/cn';
-import { CHROME_BTN } from '../chrome';
-import { ChromeHint } from '../chromeUi';
+import { CHROME_BTN } from '../../chrome';
+import { ChromeHint } from '../../chromeUi';
 import { HudBtn } from './CanvasTools';
 
 const icon = 'h-2.5 w-2.5';

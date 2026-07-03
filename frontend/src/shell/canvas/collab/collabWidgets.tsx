@@ -25,10 +25,10 @@ import { catalog } from '@/content';
 import { useWorkspace } from '@/store/workspace';
 import { buildInviteUrl } from '@/store/navigation/shareState';
 import { chromeText } from '../../chromeUi';
-import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '../nodeui';
+import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '../ui/nodeui';
 import { useRoomComms } from '../../games/net/useRoomComms';
 import { useCanvasCollab } from './CanvasCollabProvider';
-import { buildInterviewBoardNodes, mergeInterviewNodes } from '../interviewLayout';
+import { buildInterviewBoardNodes, mergeInterviewNodes } from '../layout/interviewLayout';
 import type { PanelFlowNode } from '@/shell/panels/panelTypes';
 import type { CanvasWidget } from '../widgets/types';
 

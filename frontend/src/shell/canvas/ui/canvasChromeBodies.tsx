@@ -9,13 +9,13 @@ import {
   type CanvasHudProps,
 } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
-import { chromeText } from '../chromeUi';
-import { Toggle } from '../ui';
+import { chromeText } from '../../chromeUi';
+import { Toggle } from '../../ui';
 import { CanvasToolButtons, HudBtn } from './CanvasTools';
 import { PresetPopover } from './PresetPopover';
 import { WorkflowPresetPopover } from './WorkflowPresetPopover';
 import { Field, RADIUS_CTRL } from './nodeui';
-import type { BgVariant, EdgePathType } from './layout';
+import type { BgVariant, EdgePathType } from '../layout/layout';
 
 const CANVAS_TWEAKS = new Set(['moveLog', 'caption', 'controls']);
 

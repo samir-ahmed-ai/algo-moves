@@ -4,7 +4,7 @@ import { createInsertionSortRecorder, type SortInput, type InsertionSortState as
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
-import { ArrayBars, type BarTone } from '../../components/ArrayBars';
+import { ArrayBars, type BarTone } from '../../components/board/ArrayBars';
 import { InspectorRow, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 import { SortInspector } from '../_shared/sortInspector';
 

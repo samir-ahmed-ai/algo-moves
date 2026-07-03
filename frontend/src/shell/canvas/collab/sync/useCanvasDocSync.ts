@@ -3,9 +3,9 @@ import type { Edge } from '@xyflow/react';
 import { useGameRoom } from '@/shell/realtime';
 import { usePublishState } from '@/shell/realtime';
 import { buildCanvasRoomState, extractCanvasDoc } from '@/shell/realtime/roomState';
-import { useCanvasCollab } from './CanvasCollabProvider';
-import type { PanelFlowNode } from '../PanelNode';
-import { isCanvasOp, isEditOp, type CanvasDoc, type CanvasOp } from './collabProtocol';
+import { useCanvasCollab } from '../CanvasCollabProvider';
+import type { PanelFlowNode } from '../../nodes/PanelNode';
+import { isCanvasOp, isEditOp, type CanvasDoc, type CanvasOp } from '../protocol/collabProtocol';
 import {
   applyEditToComments,
   applyEditToEdges,
@@ -14,10 +14,10 @@ import {
   diffNodes,
   docSignature,
   mergeRemoteNodes,
-} from './canvasDoc';
-import { canMoveCanvasNodes } from './subdocPermissions';
-import { subDocSignature, type SubDocKind, type SubDocPayload } from './subdocProtocol';
-import { snapshotFromPayload } from './subdocMerge';
+} from '../protocol/canvasDoc';
+import { canMoveCanvasNodes } from '../protocol/subdocPermissions';
+import { subDocSignature, type SubDocKind, type SubDocPayload } from '../protocol/subdocProtocol';
+import { snapshotFromPayload } from '../protocol/subdocMerge';
 
 type SetNodes = (u: PanelFlowNode[] | ((prev: PanelFlowNode[]) => PanelFlowNode[])) => void;
 type SetEdges = (u: Edge[] | ((prev: Edge[]) => Edge[])) => void;

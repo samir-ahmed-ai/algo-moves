@@ -1,4 +1,4 @@
-import type { UiTone } from './nodeui';
+import type { UiTone } from '../ui/nodeui';
 
 // Tone → Tailwind/CSS-var lookup tables for the node design system, extracted from
 // nodeui.tsx. Pure design tokens; each maps a semantic UiTone to utility classes.

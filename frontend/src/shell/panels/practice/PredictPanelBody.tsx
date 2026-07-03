@@ -3,7 +3,7 @@ import { Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useProgress, statFor, recordAttempt, logMistake } from '@/store/persistence';
 import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
-import { Banner, Btn, Chip, EmptyState, Hint, Label, Option, nodeText } from '../../canvas/nodeui';
+import { Banner, Btn, Chip, EmptyState, Hint, Label, Option, nodeText } from '../../canvas/ui/nodeui';
 import {
   PREDICT_CORRECT_MS,
   PREDICT_MASTERY_FOCUS_MS,

@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
-import { chromeText } from '../chromeUi';
+import { chromeText } from '../../chromeUi';
 import { RADIUS_SHELL } from './nodeui';
-import { SessionBody } from './collab/collabWidgets';
+import { SessionBody } from '../collab/collabWidgets';
 
 interface CanvasToolbarProps {
   lock: boolean;

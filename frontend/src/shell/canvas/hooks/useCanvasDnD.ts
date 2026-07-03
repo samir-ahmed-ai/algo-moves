@@ -1,16 +1,16 @@
 import { useCallback, type DragEvent, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type { Edge } from '@xyflow/react';
-import type { CanvasMode, ProblemPlugin } from '../../core';
-import type { PanelFlowNode } from './PanelNode';
-import { createEffectByType } from './EffectNode';
-import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
-import { edgesForKind, nodeForKind, styleEdges, type EdgeOpts } from './layout';
-import { readProblemDrop } from './problemDnD';
+import type { CanvasMode, ProblemPlugin } from '../../../core';
+import type { PanelFlowNode } from '../nodes/PanelNode';
+import { createEffectByType } from '../nodes/EffectNode';
+import { EFFECT_DND_KEY } from '../../../hooks/useDragAndDrop';
+import { edgesForKind, nodeForKind, styleEdges, type EdgeOpts } from '../layout/layout';
+import { readProblemDrop } from '../nodes/problemDnD';
 
 /** MIME type for dragging a removed panel back onto the canvas. */
 export const DND_KEY = 'application/algomove';
 
-export { PROBLEM_DND_KEY, readProblemDrop } from './problemDnD';
+export { PROBLEM_DND_KEY, readProblemDrop } from '../nodes/problemDnD';
 
 /**
  * Canvas drag-and-drop, extracted from CanvasStage: drop a removed panel (or an

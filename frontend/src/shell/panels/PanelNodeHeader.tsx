@@ -18,9 +18,9 @@ import { useReactFlow } from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
 import { traceOutputForPanel } from '@/lib/canvas';
 import { resolveCodePieces } from '@/lib/code';
-import { ACCENTS, FIT_PADDING_FOCUS } from '../canvas/layout';
-import { FIT_VIEW_DURATION_MS } from '../canvas/canvasTokens';
-import { togglePanelCollapse } from '../canvas/panelCollapse';
+import { ACCENTS, FIT_PADDING_FOCUS } from '../canvas/layout/layout';
+import { FIT_VIEW_DURATION_MS } from '../canvas/ui/canvasTokens';
+import { togglePanelCollapse } from '../canvas/nodes/panelCollapse';
 import {
   PanelHeader,
   PanelHeaderAction,
@@ -32,7 +32,7 @@ import {
   nodeIconGlyph,
   type HeaderDensity,
   type PanelHeaderMenuItem,
-} from '../canvas/nodeui';
+} from '../canvas/ui/nodeui';
 import type { PanelFlowNode, PanelNodeData } from './panelTypes';
 import { panelAccent, panelKindIcon } from './panelIcons';
 import { HeaderPlay, HeaderStep } from './PanelHeaderControls';

@@ -3,7 +3,7 @@ import type { CodePiece } from '@/lib/code';
 import { pieceRoleMeta } from '@/lib/code';
 import { dedentForDisplay } from '@/lib/code';
 import { cn } from '@/lib/utils/cn';
-import { HighlightedCode } from './HighlightedCode';
+import { HighlightedCode } from '../code/HighlightedCode';
 
 export interface PuzzlePieceShellProps {
   piece: CodePiece;

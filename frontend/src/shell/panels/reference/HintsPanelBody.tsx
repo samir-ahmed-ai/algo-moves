@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Lightbulb } from 'lucide-react';
 import { patternsForTags } from '../../../content';
 import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Banner, Btn, ControlsAccordion, EmptyState, Hint, Meter } from '../../canvas/nodeui';
+import { Banner, Btn, ControlsAccordion, EmptyState, Hint, Meter } from '../../canvas/ui/nodeui';
 
 /** #40 Hint ladder: reveal progressively deeper hints. */
 export function HintsPanelBody() {

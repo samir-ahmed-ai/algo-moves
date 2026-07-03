@@ -1,5 +1,5 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
-import { GridBoard } from '../../../../components/GridBoard';
+import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';

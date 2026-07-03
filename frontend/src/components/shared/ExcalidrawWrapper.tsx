@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, type ComponentProps } from 'react';
 import { cn } from '@/lib/utils/cn';
-import type { WhiteboardElement, WhiteboardPayload } from '@/shell/canvas/collab/subdocProtocol';
+import type { WhiteboardElement, WhiteboardPayload } from '@/shell/canvas/collab/protocol/subdocProtocol';
 
 const LazyExcalidraw = lazy(async () => {
   const mod = await import('@excalidraw/excalidraw');

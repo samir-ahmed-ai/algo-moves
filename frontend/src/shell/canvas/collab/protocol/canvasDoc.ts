@@ -5,7 +5,7 @@
  * transform so it is trivially testable and reusable on both sides of the wire.
  */
 import type { Edge } from '@xyflow/react';
-import type { PanelFlowNode, PanelNodeData } from '../PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '../../nodes/PanelNode';
 import type { CanvasComment, CanvasDoc, EditOp } from './collabProtocol';
 
 /**

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download } from 'lucide-react';
-import { chromeText } from '../chromeUi';
+import { chromeText } from '../../chromeUi';
 import { downloadProjectState, type ProjectState } from '@/store/project-state';
 
 export function SaveProjectDialog({ state }: { state: ProjectState | null }) {

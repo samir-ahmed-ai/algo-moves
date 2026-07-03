@@ -3,11 +3,11 @@
  * of cards — animate → quiz questions → reassemble — and the runner walks
  * problem-by-problem so finishing one rolls straight into the next.
  */
-import { loadPlugin } from '../../core';
-import type { CodePiece, PluginCode, ProblemPlugin, QuizQuestion } from '../../core/types';
+import { loadPlugin } from '../../../core';
+import type { CodePiece, PluginCode, ProblemPlugin, QuizQuestion } from '../../../core/types';
 import { resolveCodePieces, MIN_REASSEMBLE_PIECES } from '@/lib/code';
-import type { Item, Topic } from '../../content';
-import { gistFor } from '../../content/gists';
+import type { Item, Topic } from '../../../content';
+import { gistFor } from '../../../content/gists';
 
 export type MobileCardKind = 'gist' | 'animate' | 'quiz' | 'reassemble';
 

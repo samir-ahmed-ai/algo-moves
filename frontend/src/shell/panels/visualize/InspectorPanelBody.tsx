@@ -1,6 +1,6 @@
 import { ScanSearch } from 'lucide-react';
-import { useCanvasFrame, useCanvasStatic } from '../canvas/CanvasContext';
-import { ControlsAccordion, EmptyState, Pill } from '../canvas/nodeui';
+import { useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
+import { ControlsAccordion, EmptyState, Pill } from '../../canvas/ui/nodeui';
 import { MetricsBody } from './MetricsPanelBody';
 
 export function InspectorPaneContent() {

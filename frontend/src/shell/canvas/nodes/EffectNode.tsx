@@ -2,14 +2,14 @@ import { useCallback } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import { Pause, Play, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { getEffect, type EffectDataMap } from '../../effects/registry';
-import { effectTraceSnippet } from '../../effects/registry';
-import type { PanelRunState } from '../../core/panelRegistry';
-import { Btn, nodeIconGlyph, nodeText } from './nodeui';
+import { getEffect, type EffectDataMap } from '../../../effects/registry';
+import { effectTraceSnippet } from '../../../effects/registry';
+import type { PanelRunState } from '../../../core/panelRegistry';
+import { Btn, nodeIconGlyph, nodeText } from '../ui/nodeui';
 import { NodeHeader, NodeHeaderAction, NodeHeaderActions, NodeHeaderTitle } from '@/shell/panels/NodeHeader';
-import { handleDotClass, portHandleStyle } from './canvasHandles';
+import { handleDotClass, portHandleStyle } from '../edges/canvasHandles';
 import { useConnectedComponentsOptional } from '@/lib/canvas';
-import { EffectControls } from '../../effects/components/EffectControls';
+import { EffectControls } from '../../../effects/components/EffectControls';
 
 const CHAIN_TINTS = [
   'ring-accent/30',

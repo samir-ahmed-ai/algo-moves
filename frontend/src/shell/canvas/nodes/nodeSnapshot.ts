@@ -1,5 +1,5 @@
 import type { PanelFlowNode, PanelNodeData } from './PanelNode';
-import { layoutFixedWidth } from './layout';
+import { layoutFixedWidth } from '../layout/layout';
 
 // Pure helpers for serializing/restoring a panel node's persisted position + width.
 // Extracted from CanvasStage to keep the persistence math testable and side-effect free.

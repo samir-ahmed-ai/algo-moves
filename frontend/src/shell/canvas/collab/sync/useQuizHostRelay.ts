@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useGameRoomOptional } from '@/shell/realtime';
-import { useCanvasCollabOptional } from './CanvasCollabProvider';
-import { buildQuizAnswerOp } from './quizProtocol';
+import { useCanvasCollabOptional } from '../CanvasCollabProvider';
+import { buildQuizAnswerOp } from '../protocol/quizProtocol';
 
 export interface QuizAnswerPayload {
   problemId: string;

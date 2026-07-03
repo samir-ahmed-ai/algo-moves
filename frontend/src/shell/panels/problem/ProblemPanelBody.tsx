@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { inputFrameCount, type InputFrameCounts } from '@/lib/canvas';
-import type { SampleInput } from '../../core/types';
-import { useCanvasStatic } from '../canvas/CanvasContext';
-import { stepExampleInput } from '../canvas/exampleInputNav';
+import type { SampleInput } from '../../../core/types';
+import { useCanvasStatic } from '../../canvas/CanvasContext';
+import { stepExampleInput } from '../../canvas/frame/exampleInputNav';
 import {
   Chip,
   Code,
@@ -16,7 +16,7 @@ import {
   Row,
   Section,
   useFlash,
-} from '../canvas/nodeui';
+} from '../../canvas/ui/nodeui';
 
 /** Compact preview of a sample input value. */
 function formatInputPreview(value: unknown): string {

@@ -1,6 +1,6 @@
 import { Position } from '@xyflow/react';
 import type { CSSProperties } from 'react';
-import { HANDLE_DOT_CLASS } from './canvasTokens';
+import { HANDLE_DOT_CLASS } from '../ui/canvasTokens';
 
 const OFFSET = 'var(--node-handle-offset, 10px)';
 

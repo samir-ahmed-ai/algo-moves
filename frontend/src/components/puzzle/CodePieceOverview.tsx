@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import type { CodePiece } from '@/lib/code';
 import { pieceGlyph, pieceRoleMeta } from '@/lib/code';
 import { dedentForDisplay } from '@/lib/code';
-import { HighlightedCode } from './HighlightedCode';
+import { HighlightedCode } from '../code/HighlightedCode';
 
 export interface CodePieceOverviewProps {
   pieces: CodePiece[];

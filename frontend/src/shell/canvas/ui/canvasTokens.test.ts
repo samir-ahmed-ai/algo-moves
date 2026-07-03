@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NODE_W, STRUDEL_NODE_W } from './nodeTokens';
+import { NODE_W, STRUDEL_NODE_W } from '../nodes/nodeTokens';
 import {
   CANVAS_NODE_SEP,
   VIZ_WIRE_GAP,

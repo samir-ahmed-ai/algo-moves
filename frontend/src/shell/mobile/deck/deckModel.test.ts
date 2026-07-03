@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { catalog } from '../../content';
-import { loadPlugin } from '../../core';
+import { catalog } from '../../../content';
+import { loadPlugin } from '../../../core';
 import { parseQuizChoiceLabel } from '@/lib/quiz';
 import { buildDeck, deckSummary } from './deckModel';
 

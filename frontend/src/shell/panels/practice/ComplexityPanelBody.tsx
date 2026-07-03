@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
-import { QuizChoiceLabel } from '../../../components/QuizChoiceLabel';
+import { QuizChoiceLabel } from '../../../components/shared/QuizChoiceLabel';
 import { COMPLEXITY_POOL, formatComplexityChoice, buildShuffledChoices } from '@/lib/quiz';
 import { patternsForTags } from '../../../content';
 import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Btn, EmptyState, Hint, Option, Section } from '../../canvas/nodeui';
+import { Btn, EmptyState, Hint, Option, Section } from '../../canvas/ui/nodeui';
 
 /** #57 Complexity quiz: pick the right Big-O (answer derived from the pattern card). */
 export function ComplexityPanelBody() {

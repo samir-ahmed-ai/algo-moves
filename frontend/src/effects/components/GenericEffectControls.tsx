@@ -1,5 +1,5 @@
 import { getEffect } from '../registry';
-import { Field } from '@/components/formControls';
+import { Field } from '@/components/shared/formControls';
 import { nodeText } from '@/design/typography';
 
 export function GenericEffectControls({

@@ -3,7 +3,7 @@ import { catalog } from '../../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { useCanvasActions } from '../../canvas/CanvasContext';
-import { Meter, Pill, Section, nodeText, nodeTextWrap } from '../../canvas/nodeui';
+import { Meter, Pill, Section, nodeText, nodeTextWrap } from '../../canvas/ui/nodeui';
 
 /** #60 Badges: award a badge per course when all its problems are mastered. */
 export function BadgesPanelBody() {

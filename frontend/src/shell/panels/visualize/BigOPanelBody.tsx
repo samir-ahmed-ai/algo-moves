@@ -1,6 +1,6 @@
 import { inputFrameCount } from '@/lib/canvas';
-import { useCanvasStatic } from '../canvas/CanvasContext';
-import { Hint, Meter, Stat } from '../canvas/nodeui';
+import { useCanvasStatic } from '../../canvas/CanvasContext';
+import { Hint, Meter, Stat } from '../../canvas/ui/nodeui';
 
 /** "Big-O race": operation count (frames) per sample input, current one highlighted. */
 export function BigOPanelBody() {

@@ -1,6 +1,6 @@
 import { Bookmark, BookmarkPlus, Trash2 } from 'lucide-react';
-import { useCanvasFrame } from '../canvas/CanvasContext';
-import { Btn, EmptyState, nodeIconGlyph, Pill, Row, Section, TextInput } from '../canvas/nodeui';
+import { useCanvasFrame } from '../../canvas/CanvasContext';
+import { Btn, EmptyState, nodeIconGlyph, Pill, Row, Section, TextInput } from '../../canvas/ui/nodeui';
 
 /** #41 Bookmarks: annotate any frame and jump back to it. */
 export function BookmarksPanelBody() {

@@ -2,8 +2,8 @@ import { useLayoutEffect, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
 import { useCanvasActions } from '../canvas/CanvasContext';
-import { layoutVisualizeCanvas } from '../canvas/layout';
-import { setMeasuredHeight } from '../canvas/measuredCache';
+import { layoutVisualizeCanvas } from '../canvas/layout/layout';
+import { setMeasuredHeight } from '../canvas/nodes/measuredCache';
 import type { PanelFlowNode } from './panelTypes';
 
 /** Sync React Flow node height from DOM measurement; width is layout/user controlled. */

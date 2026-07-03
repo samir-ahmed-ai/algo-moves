@@ -1,12 +1,12 @@
 import type { Edge } from '@xyflow/react';
-import type { ProblemPlugin } from '../../core';
+import type { ProblemPlugin } from '../../../core';
 import {
   buildEdges,
   DEPRECATED_VISUALIZE_EDGES,
   REQUIRED_VISUALIZE_EDGES,
   defaultEdgeOpts,
   styleEdges,
-} from './layout';
+} from '../layout/layout';
 
 /** Drop retired shell edges; restore required wires unless the user removed them. */
 export function sanitizeVisualizeEdges(

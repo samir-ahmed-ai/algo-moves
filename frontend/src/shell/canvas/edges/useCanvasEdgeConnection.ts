@@ -1,7 +1,7 @@
 import { useCallback, useRef, type Dispatch, type SetStateAction } from 'react';
 import { addEdge, reconnectEdge, type Connection, type Edge } from '@xyflow/react';
-import type { PanelFlowNode } from './PanelNode';
-import { edgeConnectionLabel, styleEdges, type EdgeOpts } from './layout';
+import type { PanelFlowNode } from '../nodes/PanelNode';
+import { edgeConnectionLabel, styleEdges, type EdgeOpts } from '../layout/layout';
 
 /**
  * Edge connect / reconnect / validation handlers, extracted from CanvasStage.

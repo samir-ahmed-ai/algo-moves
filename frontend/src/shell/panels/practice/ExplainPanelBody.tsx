@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { recordAttempt } from '@/store/persistence';
 import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
-import { Banner, Btn, Field, Hint, TextArea } from '../../canvas/nodeui';
+import { Banner, Btn, Field, Hint, TextArea } from '../../canvas/ui/nodeui';
 import { PRACTICE_ADVANCE_MS } from '../shared/practiceConstants';
 
 /** #52 Explain it back: write the invariant, reveal the reference, self-grade. */

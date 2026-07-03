@@ -12,8 +12,8 @@ import {
   AlignVerticalDistributeCenter,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { CHROME_BTN } from '../chrome';
-import type { AlignKind } from './align';
+import { CHROME_BTN } from '../../chrome';
+import type { AlignKind } from '../layout/align';
 import type { CanvasToolsProps } from '@/store/workspace';
 
 export type { CanvasToolsProps };

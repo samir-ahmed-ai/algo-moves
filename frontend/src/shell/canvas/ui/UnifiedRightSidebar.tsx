@@ -13,7 +13,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useWorkspace, type RightSidebarTab } from '@/store/workspace';
-import type { CanvasMode } from '../../core';
+import type { CanvasMode } from '../../../core';
 import { cn } from '@/lib/utils/cn';
 import {
   CollapsedRailButton,
@@ -25,18 +25,18 @@ import {
   CHROME_BTN_MD,
   MobileDrawer,
   SECTION_MAX,
-} from '../SidebarShell';
-import { useCanvasStatic, useCanvasFrame } from './CanvasContext';
+} from '../../SidebarShell';
+import { useCanvasStatic, useCanvasFrame } from '../CanvasContext';
 import { CanvasActionsBody, CanvasPropsBody, PanelsBody } from './canvasChromeBodies';
 import { TransportBar } from './TransportBar';
 import { NodePropertiesBody, useHasSelectedPanel } from './NodePropertiesBody';
-import { nodeIcon, panelAccent } from './PanelNode';
+import { nodeIcon, panelAccent } from '../nodes/PanelNode';
 import { Chip, RADIUS_CTRL } from './nodeui';
-import { chromeText } from '../chromeUi';
-import { sidePanelTabs } from './layout';
-import { widgetsForTab } from './widgets/registry';
-import { WidgetSection } from './widgets/WidgetSection';
-import { useCanvasCollabOptional } from './collab/CanvasCollabProvider';
+import { chromeText } from '../../chromeUi';
+import { sidePanelTabs } from '../layout/layout';
+import { widgetsForTab } from '../widgets/registry';
+import { WidgetSection } from '../widgets/WidgetSection';
+import { useCanvasCollabOptional } from '../collab/CanvasCollabProvider';
 
 const MODES: { id: CanvasMode; label: string; icon: ReactNode }[] = [
   { id: 'visualize', label: 'Visualize', icon: <Eye className="h-3 w-3" /> },

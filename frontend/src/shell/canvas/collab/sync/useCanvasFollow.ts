@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { useCanvasCollab } from './CanvasCollabProvider';
+import { useCanvasCollab } from '../CanvasCollabProvider';
 
 /**
  * Figma-style follow mode: while a peer is followed, mirror their viewport

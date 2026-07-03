@@ -1,6 +1,6 @@
 import type { Edge } from '@xyflow/react';
-import type { CanvasMode, ProblemPlugin } from '../../core';
-import type { PanelFlowNode } from './PanelNode';
+import type { CanvasMode, ProblemPlugin } from '../../../core';
+import type { PanelFlowNode } from '../nodes/PanelNode';
 import type { EdgeOpts, LayoutVisualizeOptions } from '@/lib/canvas/layoutPrefs';
 import {
   buildNodes,
@@ -9,8 +9,8 @@ import {
   layoutGraph,
   styleEdges,
   type LayoutDir,
-} from './layout';
-import { restoreNodeWidth } from './nodeSnapshot';
+} from '../layout/layout';
+import { restoreNodeWidth } from '../nodes/nodeSnapshot';
 
 /** Persisted per-node position + width (see useCanvasLayoutPersistence `Saved`). */
 export type SavedNodeLayout = Record<string, { position: { x: number; y: number }; width?: number }>;

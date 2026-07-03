@@ -1,11 +1,11 @@
 import { useRef } from 'react';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
-import { ErrorBoundary } from '../ErrorBoundary';
-import { useCanvasFrame, useCanvasStatic } from '../canvas/CanvasContext';
-import { ControlsAccordion, nodeText, nodeTextWrap, VizFitBox } from '../canvas/nodeui';
+import { ErrorBoundary } from '../../ErrorBoundary';
+import { useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
+import { ControlsAccordion, nodeText, nodeTextWrap, VizFitBox } from '../../canvas/ui/nodeui';
 import { BigOPanelBody } from './BigOPanelBody';
-import { Transport } from './shared/Transport';
+import { Transport } from '../shared/Transport';
 
 /** Live move caption — status bar at top of viz body (Strudel-style). */
 export function VizStatusBar() {

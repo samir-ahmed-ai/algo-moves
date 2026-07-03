@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { PanelFlowNode, PanelNodeData } from './PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '../nodes/PanelNode';
 import { CANVAS_MARGIN, layoutSize, layoutVisualizeCanvas } from './layout';
-import { vizMinWidth, vizWireGap } from './canvasTokens';
+import { vizMinWidth, vizWireGap } from '../ui/canvasTokens';
 
 function panel(
   kind: string,

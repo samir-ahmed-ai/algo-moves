@@ -2,12 +2,12 @@
 export { PanelBody, PANEL_BODIES } from './PanelBodyRouter';
 export type { PanelFlowNode, PanelNodeData } from './panelTypes';
 export { panelAccent, nodeIcon } from './panelIcons';
-export { InspectorPaneContent } from './InspectorPanelBody';
-export { ReplayContent } from './ReplayPanelBody';
-export { MetricsBody } from './MetricsPanelBody';
-export { ProblemOverviewBody } from './ProblemOverviewBody';
-export { ProblemPanelBody } from './ProblemPanelBody';
-export { VizPanelBody } from './VizPanelBody';
+export { InspectorPaneContent } from './visualize/InspectorPanelBody';
+export { ReplayContent } from './visualize/ReplayPanelBody';
+export { MetricsBody } from './visualize/MetricsPanelBody';
+export { ProblemOverviewBody } from './problem/ProblemOverviewBody';
+export { ProblemPanelBody } from './problem/ProblemPanelBody';
+export { VizPanelBody } from './visualize/VizPanelBody';
 export { PanelNodeHeader } from './PanelNodeHeader';
 export { HeaderExamplesNav } from './PanelHeaderControls';
 export { useFitContentSize } from './useFitContentSize';

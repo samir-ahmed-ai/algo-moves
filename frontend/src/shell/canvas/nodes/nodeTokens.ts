@@ -1,4 +1,4 @@
-import { MIN_VIEWPORT_HEIGHT } from './canvasTokens';
+import { MIN_VIEWPORT_HEIGHT } from '../ui/canvasTokens';
 import { getMeasuredHeight } from './measuredCache';
 import {
   NODE_W,

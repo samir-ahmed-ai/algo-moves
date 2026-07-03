@@ -2,7 +2,7 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
-import { GridBoard } from '../../../../components/GridBoard';
+import { GridBoard } from '../../../../components/board/GridBoard';
 
 interface SpiralInput {
   mat: number[][];

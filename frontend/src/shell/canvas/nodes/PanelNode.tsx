@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Handle, NodeResizer, NodeToolbar, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
-import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from './layout';
+import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from '../layout/layout';
 import { nodeTier } from './nodeTokens';
-import { handleDotClass, portHandleStyle } from './canvasHandles';
+import { handleDotClass, portHandleStyle } from '../edges/canvasHandles';
 import { useConnectedComponentsOptional } from '@/lib/canvas';
 import { panelBorderRadius, panelFill, panelOpacity, panelStroke } from './panelStyle';
 
@@ -16,23 +16,23 @@ const CHAIN_TINTS = [
 ] as const;
 import { CodeStudioProvider, CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
 import { CollabCodeStudioBody, CollabCodeStudioToolbar } from '@/shell/study/CollabCodeStudio';
-import { SubDocSyncProvider } from '@/shell/canvas/collab/SubDocSyncProvider';
-import { useCanvasStatic } from './CanvasContext';
-import { PanelBody as PanelBodyShell, type HeaderDensity } from './nodeui';
+import { SubDocSyncProvider } from '@/shell/canvas/collab/sync/SubDocSyncProvider';
+import { useCanvasStatic } from '../CanvasContext';
+import { PanelBody as PanelBodyShell, type HeaderDensity } from '../ui/nodeui';
 import { PanelBody } from '@/shell/panels';
 import { panelAccent } from '@/shell/panels/panelIcons';
 import type { PanelFlowNode } from '@/shell/panels/panelTypes';
 import { PanelNodeHeader } from '@/shell/panels/PanelNodeHeader';
 import { HeaderExamplesNav } from '@/shell/panels/PanelHeaderControls';
 import { useFitContentSize } from '@/shell/panels/useFitContentSize';
-import { VizPanelBody } from '@/shell/panels/VizPanelBody';
-import { TransportBar } from './TransportBarCore';
+import { VizPanelBody } from '@/shell/panels/visualize/VizPanelBody';
+import { TransportBar } from '../ui/TransportBarCore';
 
 export type { PanelFlowNode, PanelNodeData } from '@/shell/panels/panelTypes';
 export { panelAccent, nodeIcon } from '@/shell/panels/panelIcons';
-export { InspectorPaneContent } from '@/shell/panels/InspectorPanelBody';
-export { ReplayContent } from '@/shell/panels/ReplayPanelBody';
-export { MetricsBody } from '@/shell/panels/MetricsPanelBody';
+export { InspectorPaneContent } from '@/shell/panels/visualize/InspectorPanelBody';
+export { ReplayContent } from '@/shell/panels/visualize/ReplayPanelBody';
+export { MetricsBody } from '@/shell/panels/visualize/MetricsPanelBody';
 export { PanelBody } from '@/shell/panels/PanelBodyRouter';
 
 export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode>) {
