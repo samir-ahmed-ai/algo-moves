@@ -52,7 +52,7 @@ export function readLastItemId(): string | null {
 export type LayoutDir = 'TB' | 'LR';
 
 /** Active tab in the unified right sidebar. */
-export type RightSidebarTab = 'analysis' | 'canvas' | 'selection' | 'more';
+export type RightSidebarTab = 'analysis' | 'canvas' | 'selection' | 'collab' | 'more';
 
 /** Live canvas snapshot + apply hook registered by CanvasStage. */
 export interface CanvasProjectApi {

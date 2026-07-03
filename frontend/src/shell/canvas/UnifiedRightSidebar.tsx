@@ -1,26 +1,16 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import {
   Eye,
   GraduationCap,
   Play,
-  Sun,
-  Moon,
-  Gauge,
-  Contrast,
-  Download,
-  Info,
-  ExternalLink,
   PanelRight,
   PanelRightClose,
-  Sparkles,
-  Settings,
-  Paintbrush,
   Activity,
-  ScanSearch,
-  BarChart3,
+  Paintbrush,
   Sliders,
   SlidersHorizontal,
   MoreHorizontal,
+  Users,
 } from 'lucide-react';
 import { useWorkspace, type RightSidebarTab } from '@/store/workspace';
 import type { CanvasMode } from '../../core';
@@ -38,13 +28,15 @@ import {
 } from '../SidebarShell';
 import { useCanvasStatic, useCanvasFrame } from './CanvasContext';
 import { CanvasActionsBody, CanvasPropsBody, PanelsBody } from './canvasChromeBodies';
-import { HudBtn } from './CanvasTools';
 import { TransportBar } from './TransportBar';
 import { NodePropertiesBody, useHasSelectedPanel } from './NodePropertiesBody';
-import { InspectorPaneContent, MetricsBody, ReplayContent, nodeIcon, panelAccent } from './PanelNode';
+import { nodeIcon, panelAccent } from './PanelNode';
 import { Chip, RADIUS_CTRL } from './nodeui';
 import { chromeText } from '../chromeUi';
 import { sidePanelTabs } from './layout';
+import { widgetsForTab } from './widgets/registry';
+import { WidgetSection } from './widgets/WidgetSection';
+import { useCanvasCollabOptional } from './collab/CanvasCollabProvider';
 
 const MODES: { id: CanvasMode; label: string; icon: ReactNode }[] = [
   { id: 'visualize', label: 'Visualize', icon: <Eye className="h-3 w-3" /> },
@@ -55,45 +47,9 @@ const TAB_LABELS: Record<RightSidebarTab, string> = {
   analysis: 'Analysis',
   canvas: 'Canvas',
   selection: 'Selection',
+  collab: 'Collaborate',
   more: 'More',
 };
-
-function AboutBody() {
-  const { item } = useCanvasStatic();
-  const { setSettingsOpen } = useWorkspace();
-  return (
-    <div className={cn('flex flex-col gap-1.5 px-[var(--hpad)] leading-snug text-ink2', chromeText.sm)}>
-      <p className={cn('font-medium text-ink', chromeText.sm)}>{item.title}</p>
-      {item.summary && <p className={cn('text-ink3', chromeText.sm)}>{item.summary}</p>}
-      <button
-        type="button"
-        onClick={() => setSettingsOpen(true)}
-        className={cn(`inline-flex items-center gap-1 border border-edge px-1.5 py-1 text-ink2 transition-colors hover:border-accent hover:text-accent ${RADIUS_CTRL}`, chromeText.sm)}
-      >
-        <Settings className="h-2.5 w-2.5" />
-        Settings
-      </button>
-      <div className={cn('flex flex-col gap-0.5', chromeText.sm, 'text-ink3')}>
-        <span>· Drag a panel by its header; resize from its edges.</span>
-        <span>· Shift-drag to box-select; Delete removes the selection.</span>
-        <span>· Trash a panel; re-add it from the left sidebar.</span>
-        <span>· Click the ✕ on an edge to cut it.</span>
-        <span>· ←/→ step, space plays; toggle snap-to-grid in the Canvas tab.</span>
-      </div>
-      {item.source && (
-        <a
-          href={item.source.url}
-          target="_blank"
-          rel="noreferrer"
-          className={cn('inline-flex items-center gap-1 text-accent hover:underline', chromeText.sm)}
-        >
-          {item.source.label}
-          <ExternalLink className="h-3 w-3" />
-        </a>
-      )}
-    </div>
-  );
-}
 
 function PluginTabSectionBody({ tabId }: { tabId: string }) {
   const { plugin } = useCanvasStatic();
@@ -117,6 +73,7 @@ function RightCollapsedRail({
   onOpenPluginTab,
   pluginActiveId,
   selectionActive,
+  collabActive,
   showTransport,
 }: {
   onExpand: () => void;
@@ -125,6 +82,7 @@ function RightCollapsedRail({
   onOpenPluginTab: (tabId: string) => void;
   pluginActiveId: string | null;
   selectionActive: boolean;
+  collabActive: boolean;
   showTransport: boolean;
 }) {
   const btn = `grid ${CHROME_BTN_MD} place-items-center text-ink3 transition-colors hover:bg-panel2 hover:text-ink ${RADIUS_CTRL}`;
@@ -156,6 +114,14 @@ function RightCollapsedRail({
       >
         <Paintbrush className="h-3 w-3" />
       </CollapsedRailButton>
+      <CollapsedRailButton
+        title="Collaborate"
+        ariaLabel="Open collaboration"
+        onClick={() => onOpenTab('collab')}
+        active={collabActive}
+      >
+        <Users className={cn('h-3 w-3', collabActive && 'text-good')} />
+      </CollapsedRailButton>
       {pluginTabs.map((t) => (
         <CollapsedRailButton
           key={t.id}
@@ -175,7 +141,9 @@ function RightCollapsedRail({
 }
 
 /**
- * Docked right sidebar: tabbed analysis, canvas settings, selection, and more.
+ * Docked right sidebar. The Analysis, Collaborate and More tabs are assembled
+ * from the widget registry (see ./widgets) so features plug in without touching
+ * this file; the Canvas and Selection tabs stay bespoke.
  */
 export function UnifiedRightSidebar() {
   const {
@@ -187,20 +155,16 @@ export function UnifiedRightSidebar() {
     setMode,
     present,
     tweaks,
-    theme,
-    setTheme,
-    density,
-    cycleDensity,
-    palette,
-    setPalette,
     sidePanelTab,
     setSidePanelTab,
     canvasHud,
     setRightWide,
     isMobile,
   } = useWorkspace();
-  const { selectedNode, plugin, item } = useCanvasStatic();
+  const { plugin } = useCanvasStatic();
   const { frames, player } = useCanvasFrame();
+  const collab = useCanvasCollabOptional();
+  const collabActive = collab?.isCollaborating ?? false;
   const showGlobalTransport = present || (mode === 'visualize' && tweaks.controls);
 
   const pluginTabs = sidePanelTabs(plugin, mode);
@@ -209,11 +173,10 @@ export function UnifiedRightSidebar() {
     sidePanelTab && pluginTabs.some((t) => t.id === sidePanelTab) ? sidePanelTab : null;
   const selectionActive = useHasSelectedPanel();
   const stepLabel = frames.length ? `${player.index + 1} / ${frames.length}` : '0';
-  const [replayOpen, setReplayOpen] = useState(true);
-  const [inspectorOpen, setInspectorOpen] = useState(true);
-  const [metricsOpen, setMetricsOpen] = useState(true);
-  const [appearanceOpen, setAppearanceOpen] = useState(true);
-  const [aboutOpen, setAboutOpen] = useState(true);
+
+  const analysisWidgets = widgetsForTab('analysis');
+  const collabWidgets = widgetsForTab('collab');
+  const moreWidgets = widgetsForTab('more');
 
   const anyPluginOpen = pluginTabs.some(
     (t) => sidePanelTab === t.id || (!sidePanelTab && t.id === pluginTabs[0]?.id),
@@ -231,26 +194,6 @@ export function UnifiedRightSidebar() {
     }
   }, [sidePanelTab, hasPlugin, setRightOpen, setRightTab]);
 
-  const exportPng = async () => {
-    const el = document.querySelector('.react-flow') as HTMLElement | null;
-    if (!el) return;
-    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff';
-    try {
-      const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(el, {
-        backgroundColor: bgColor,
-        pixelRatio: 2,
-        filter: (n) => !(n instanceof HTMLElement && n.classList.contains('react-flow__panel')),
-      });
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `${item.id || 'algo-moves'}.png`;
-      a.click();
-    } catch {
-      // export unavailable
-    }
-  };
-
   const expand = (tab: RightSidebarTab = 'analysis', pluginTabId?: string) => {
     setRightOpen(true);
     setRightTab(tab);
@@ -265,9 +208,10 @@ export function UnifiedRightSidebar() {
         { id: 'analysis' as const, label: 'Analysis', icon: <Activity className="h-3 w-3" /> },
         { id: 'canvas' as const, label: 'Canvas', icon: <Sliders className="h-3 w-3" /> },
         { id: 'selection' as const, label: 'Selection', icon: <Paintbrush className="h-3 w-3" /> },
+        { id: 'collab' as const, label: 'Collab', icon: <Users className={cn('h-3 w-3', collabActive && 'text-good')} /> },
         { id: 'more' as const, label: 'More', icon: <MoreHorizontal className="h-3 w-3" /> },
       ] satisfies { id: RightSidebarTab; label: string; icon: ReactNode }[],
-    [],
+    [collabActive],
   );
 
   if (!canvasHud) return null;
@@ -281,6 +225,7 @@ export function UnifiedRightSidebar() {
         onOpenPluginTab={openPluginTab}
         pluginActiveId={pluginActiveId}
         selectionActive={selectionActive}
+        collabActive={collabActive}
         showTransport={showGlobalTransport}
       />
     );
@@ -335,58 +280,23 @@ export function UnifiedRightSidebar() {
       <div className={cn('ws-scroll min-h-0 flex-1 overflow-y-auto py-1', chromeText.sm)}>
         {rightTab === 'analysis' && (
           <div className="flex flex-col">
-            <SidebarSection
-              icon={<Activity className="h-3 w-3" />}
-              title="Replay"
-              open={replayOpen}
-              onToggle={() => setReplayOpen((o) => !o)}
-              maxHeightClass={SECTION_MAX.replay}
-              badge={stepLabel}
-            >
-              <div className="px-[var(--hpad)]">
-                <ReplayContent columns={2} />
-              </div>
-            </SidebarSection>
-
-            <SidebarSection
-              icon={<ScanSearch className="h-3 w-3" />}
-              title="Inspector"
-              open={inspectorOpen}
-              onToggle={() => setInspectorOpen((o) => !o)}
-              maxHeightClass={SECTION_MAX.inspector}
-              badge={selectedNode != null ? String(selectedNode) : undefined}
-            >
-              <div className="px-[var(--hpad)]">
-                <InspectorPaneContent />
-              </div>
-            </SidebarSection>
-
-            <SidebarSection
-              icon={<BarChart3 className="h-3 w-3" />}
-              title="Metrics"
-              open={metricsOpen}
-              onToggle={() => setMetricsOpen((o) => !o)}
-              maxHeightClass={SECTION_MAX.metrics}
-              badge={String(frames.length)}
-            >
-              <div className="px-[var(--hpad)]">
-                <MetricsBody />
-              </div>
-            </SidebarSection>
+            {analysisWidgets.map((w) => (
+              <WidgetSection key={w.id} widget={w} />
+            ))}
 
             {pluginTabs.map((t) => {
               const open = sidePanelTab === t.id || (!sidePanelTab && t.id === pluginTabs[0]?.id);
               return (
-              <SidebarSection
-                key={t.id}
-                icon={<span className="grid h-3 w-3 place-items-center">{nodeIcon(t.id)}</span>}
-                title={t.label}
-                open={open}
-                onToggle={() => setSidePanelTab(sidePanelTab === t.id ? null : t.id)}
-                maxHeightClass={SECTION_MAX.plugin}
-              >
-                {open && <PluginTabSectionBody tabId={t.id} />}
-              </SidebarSection>
+                <SidebarSection
+                  key={t.id}
+                  icon={<span className="grid h-3 w-3 place-items-center">{nodeIcon(t.id)}</span>}
+                  title={t.label}
+                  open={open}
+                  onToggle={() => setSidePanelTab(sidePanelTab === t.id ? null : t.id)}
+                  maxHeightClass={SECTION_MAX.plugin}
+                >
+                  {open && <PluginTabSectionBody tabId={t.id} />}
+                </SidebarSection>
               );
             })}
           </div>
@@ -423,47 +333,19 @@ export function UnifiedRightSidebar() {
 
         {rightTab === 'selection' && <NodePropertiesBody />}
 
+        {rightTab === 'collab' && (
+          <div className="flex flex-col">
+            {collabWidgets.map((w) => (
+              <WidgetSection key={w.id} widget={w} />
+            ))}
+          </div>
+        )}
+
         {rightTab === 'more' && (
           <div className="flex flex-col">
-            <SidebarSection
-              icon={<Sparkles className="h-3 w-3" />}
-              title="Appearance"
-              open={appearanceOpen}
-              onToggle={() => setAppearanceOpen((o) => !o)}
-              maxHeightClass={SECTION_MAX.appearance}
-            >
-              <div className="flex flex-wrap gap-0.5 px-[var(--hpad)]">
-                <HudBtn
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-                >
-                  {theme === 'dark' ? <Sun /> : <Moon />}
-                </HudBtn>
-                <HudBtn onClick={cycleDensity} title={`Density: ${density}`} active={density === 'ultra'}>
-                  <Gauge />
-                </HudBtn>
-                <HudBtn
-                  onClick={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
-                  title={palette === 'cb' ? 'Colour-blind palette: on' : 'Colour-blind palette: off'}
-                  active={palette === 'cb'}
-                >
-                  <Contrast />
-                </HudBtn>
-                <HudBtn onClick={exportPng} title="Export canvas as PNG">
-                  <Download />
-                </HudBtn>
-              </div>
-            </SidebarSection>
-
-            <SidebarSection
-              icon={<Info className="h-3 w-3" />}
-              title="About"
-              open={aboutOpen}
-              onToggle={() => setAboutOpen((o) => !o)}
-              maxHeightClass={SECTION_MAX.about}
-            >
-              <AboutBody />
-            </SidebarSection>
+            {moreWidgets.map((w) => (
+              <WidgetSection key={w.id} widget={w} />
+            ))}
 
             <div className="flex gap-0.5 px-[var(--hpad)] pt-1 sm:hidden [&_svg]:size-3">
               {MODES.map((m) => (

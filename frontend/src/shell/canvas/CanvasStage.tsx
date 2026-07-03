@@ -80,6 +80,11 @@ import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts';
 import { useCanvasEdgeConnection } from './useCanvasEdgeConnection';
 import { useCanvasDnD, DND_KEY } from './useCanvasDnD';
 import { useCanvasNodeMutations } from './useCanvasNodeMutations';
+import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProvider';
+import { useCanvasDocSync } from './collab/useCanvasDocSync';
+import { useCanvasFollow } from './collab/useCanvasFollow';
+import { CanvasCollabOverlays } from './collab/CanvasCollabOverlays';
+import { CommentLayer } from './collab/CommentLayer';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
@@ -201,6 +206,20 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
   const [dragOver, setDragOver] = useState(false);
 
+  // Real-time collaboration: publish/apply the shared document, mirror a
+  // followed peer's viewport. Inert (no network) until a session is joined.
+  const collab = useCanvasCollab();
+  useCanvasDocSync({ nodes, edges, setNodes, setEdges });
+  useCanvasFollow();
+  const onPanePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!collab.isCollaborating) return;
+      const p = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      collab.broadcastCursor(p.x, p.y);
+    },
+    [collab, screenToFlowPosition],
+  );
+
   const displayFrames = useWorkflowRunner({ baseFrames, nodes, edges });
 
   useEffect(() => {
@@ -266,6 +285,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   // Remember when the user deletes a shell edge (e.g. optional red problem→viz).
   useEffect(() => {
     if (builtKeyRef.current !== key || mode !== 'visualize') return;
+    if (collab.isCollaborating) return; // don't persist edges reconciled from a peer
     const shellIds = new Set(buildEdges(plugin, mode).map((e) => e.id));
     const present = new Set(edges.filter((e) => shellIds.has(e.id)).map((e) => e.id));
     const removed = new Set<string>();
@@ -326,6 +346,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   // Skip while a node is actively dragging — write once the drag settles.
   useEffect(() => {
     if (builtKeyRef.current !== key) return; // nodes belong to a key we're leaving — don't save
+    if (collab.isCollaborating) return; // shared-doc positions are ephemeral — don't overwrite local layout
     if (nodes.some((n) => n.dragging)) return;
     const snap: Saved = {};
     nodes.forEach((n) => {
@@ -335,7 +356,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     const presentIds = new Set(nodes.map((n) => n.id));
     removedRef.current[key] = new Set(modeNodeIds(plugin, mode).filter((id) => !presentIds.has(id)));
     persist();
-  }, [nodes, key, plugin, mode, persist]);
+  }, [nodes, key, plugin, mode, persist, collab.isCollaborating]);
 
   // ---- undo/redo of canvas edits (#82) ----
   const { historyRef, histIdxRef, undo, redo, resetHistory } = useCanvasHistory({
@@ -812,7 +833,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
         <CanvasActionsProvider value={canvasActions}>
         <div className="flex h-full min-h-0 w-full">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div ref={wrapperRef} className={cn('relative min-h-0 flex-1 bg-bg', dragOver && 'ring-2 ring-inset ring-good/40')}>
+        <div ref={wrapperRef} onPointerMove={onPanePointerMove} className={cn('relative min-h-0 flex-1 bg-bg', dragOver && 'ring-2 ring-inset ring-good/40')}>
           <ConnectedComponentsProvider nodeIds={nodes.map((n) => n.id)} edges={edges}>
           <ReactFlow
             style={{ width: '100%', height: '100%' }}
@@ -833,7 +854,10 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
             onPaneContextMenu={onPaneContextMenu}
             onSelectionContextMenu={onPaneContextMenu}
             onPaneClick={() => setMenu(null)}
-            onMove={() => setMenu(null)}
+            onMove={(_e, vp) => {
+              setMenu(null);
+              if (collab.isCollaborating) collab.broadcastViewport({ x: vp.x, y: vp.y, zoom: vp.zoom });
+            }}
             onNodesDelete={onNodesDelete}
             onEdgesDelete={onEdgesDelete}
             onBeforeDelete={onBeforeDelete}
@@ -892,6 +916,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
             />
             {!present && <CanvasProblemNav />}
             <CanvasFloatingHud />
+            <CanvasCollabOverlays />
+            <CommentLayer />
           </ReactFlow>
           </ConnectedComponentsProvider>
 
@@ -927,10 +953,12 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
 export function CanvasStage(props: CanvasStageProps) {
   return (
-    <ReactFlowProvider>
-      <div className="h-full min-h-0 w-full">
-        <Inner {...props} />
-      </div>
-    </ReactFlowProvider>
+    <CanvasCollabProvider>
+      <ReactFlowProvider>
+        <div className="h-full min-h-0 w-full">
+          <Inner {...props} />
+        </div>
+      </ReactFlowProvider>
+    </CanvasCollabProvider>
   );
 }

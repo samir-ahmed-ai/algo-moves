@@ -37,8 +37,8 @@ type Profile struct {
 }
 
 type GuestSession struct {
-	ProfileID    string `json:"profile_id"`
-	SessionToken string `json:"session_token"`
+	ProfileID    string  `json:"profile_id"`
+	SessionToken string  `json:"session_token"`
 	Profile      Profile `json:"profile"`
 }
 
@@ -343,6 +343,89 @@ func (s *Store) GetOrCreateDailyChallenge(ctx context.Context, date string) (map
 func (s *Store) SubmitDailyScore(ctx context.Context, profileID, date string, score int) error {
 	_, err := s.pool.Exec(ctx, `select public.submit_daily_score($1::uuid, $2::date, $3)`, profileID, date, score)
 	return err
+}
+
+// Canvas is a saved collaborative canvas document. Doc is opaque JSON.
+type Canvas struct {
+	ID             string          `json:"id"`
+	OwnerProfileID *string         `json:"ownerProfileId"`
+	RoomCode       *string         `json:"roomCode"`
+	Title          string          `json:"title"`
+	Doc            json.RawMessage `json:"doc"`
+	UpdatedAt      time.Time       `json:"updatedAt"`
+}
+
+func canvasDoc(doc json.RawMessage) string {
+	if len(doc) == 0 {
+		return "{}"
+	}
+	return string(doc)
+}
+
+func (s *Store) CreateCanvas(ctx context.Context, ownerID, title string, doc json.RawMessage, roomCode *string) (string, time.Time, error) {
+	var id string
+	var updated time.Time
+	err := s.pool.QueryRow(ctx, `
+		insert into public.canvases (owner_profile_id, title, doc, room_code)
+		values ($1, $2, $3::jsonb, $4)
+		returning id, updated_at`, ownerID, title, canvasDoc(doc), roomCode).Scan(&id, &updated)
+	return id, updated, err
+}
+
+func (s *Store) GetCanvas(ctx context.Context, id string) (*Canvas, error) {
+	var c Canvas
+	err := s.pool.QueryRow(ctx, `
+		select id, owner_profile_id, room_code, title, doc, updated_at
+		from public.canvases where id = $1`, id).
+		Scan(&c.ID, &c.OwnerProfileID, &c.RoomCode, &c.Title, &c.Doc, &c.UpdatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+// UpdateCanvas writes doc (and optionally title/room_code) for an owner-held
+// canvas. The bool is false when the id is missing or not owned by ownerID.
+func (s *Store) UpdateCanvas(ctx context.Context, id, ownerID string, doc json.RawMessage, title, roomCode *string) (time.Time, bool, error) {
+	var updated time.Time
+	err := s.pool.QueryRow(ctx, `
+		update public.canvases
+		set doc = $3::jsonb,
+		    title = coalesce($4, title),
+		    room_code = coalesce($5, room_code),
+		    updated_at = now()
+		where id = $1 and owner_profile_id = $2
+		returning updated_at`, id, ownerID, canvasDoc(doc), title, roomCode).Scan(&updated)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return time.Time{}, false, nil
+	}
+	if err != nil {
+		return time.Time{}, false, err
+	}
+	return updated, true, nil
+}
+
+func (s *Store) ListCanvases(ctx context.Context, ownerID string) ([]map[string]any, error) {
+	rows, err := s.pool.Query(ctx, `
+		select id, title, room_code, updated_at
+		from public.canvases where owner_profile_id = $1
+		order by updated_at desc limit 100`, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanRows(rows)
+}
+
+func (s *Store) DeleteCanvas(ctx context.Context, id, ownerID string) (bool, error) {
+	tag, err := s.pool.Exec(ctx, `delete from public.canvases where id = $1 and owner_profile_id = $2`, id, ownerID)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
 }
 
 func scanRows(rows pgx.Rows) ([]map[string]any, error) {
