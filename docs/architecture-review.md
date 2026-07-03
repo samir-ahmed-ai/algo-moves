@@ -258,20 +258,29 @@ Branch: `refactor/architecture-remediation`. Every commit verified with
   (#24 — locale-key naming diverges across games, high translation-typo risk),
   useReportOnce (#23 — reset-guard placement differs per game), per-game
   useXGame view-models (#35), spectator standardization (#03).
+- 🟡 **Tranche 3 — plugin infra (partial).** Deleted the unused `makeInspector`
+  abstraction (#65). Deferred: `createRecorder`/factory consolidation (#30/#31),
+  `verdictLastFrameTone` (#50), effect-controls cleanups.
+- ✅ **Tranche 4a/4b — canvas token/coupling relocation.** Inverted the design
+  token leaf: `@/design/nodeScale`, `@/design/canvasMetrics`, `@/design/vizText`
+  now own the canonical tokens (canvasTokens/nodeTokens/vizTokens re-export
+  down). Moved `AlignKind` + `CanvasToolsProps` and `SIDEBAR_*`/`BOTTOM_RAIL_H`
+  to leaves (`@/lib/canvas/layoutPrefs`, `@/design/sidebarMetrics`). **Boundary
+  debt 6 → 1.**
 
-### Remaining (needs care / user steer)
+### Remaining (the tests-first God-component phase)
 
-- **6 boundary debts** all blocked on relocating canvas token modules
-  (`canvasTokens`/`nodeTokens`/`vizTokens`/`vizFitMeasure`/`align`) out of
-  shell/canvas — a coherent unit best done with **Tranche 4**. Documented in
-  `check-boundaries.mjs`.
-- **Tranche 3 (plugin infra)** — mostly clean mechanical wins (delete unused
-  `makeInspector` #65, `verdictLastFrameTone` #50, GridToggleButton, generic
-  effect controls) plus larger `createRecorder`/factory consolidation (#30/#31).
-- **Tranche 4 (canvas SoC)** — decomposing CanvasStage (961), layout.ts (557),
-  and the wide contexts is **hard to reverse**; the completeness critic requires
-  **characterization tests written first** (history/persistence/refit). Recommend
-  landing those tests before touching CanvasStage.
+- **1 boundary debt** — `canvasTeachingUi` re-exports VizFitBox/MiniTabs from
+  nodeui; these depend on the `vizFitMeasure` canvas runtime, so they relocate
+  together with the CanvasStage decomposition below.
+- **Tranche 4 core (canvas SoC)** — decomposing CanvasStage (961), layout.ts
+  (557), and the wide contexts is **hard to reverse**. Approach (per the
+  completeness critic): (1) write characterization tests for CanvasStage
+  history/persistence/refit + CodeStudio contexts; (2) extract pure
+  `buildCanvasFrame` into layout.ts and a `useCanvasLifecycle` hook; (3) split
+  layout.ts + the wide contexts; (4) relocate VizFitBox/vizFitMeasure to clear
+  the final boundary debt. Best done as a focused, reviewable session.
 - **Tranche 5 (store + backend)** — createSyncStore unification (#52), move IO
   out of shell components (#61/#63), games-catalog table (#06), invariant tests.
+  Mostly independent of the canvas work; can land in parallel.
 
