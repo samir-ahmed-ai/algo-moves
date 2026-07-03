@@ -12,7 +12,6 @@ import {
   VizInspector,
   VizStatRow,
   captionFromMove,
-  makeInspector,
   useFrameState,
   vizText,
 } from './vizKit';
@@ -68,13 +67,6 @@ describe('captionFromMove', () => {
     };
     expect(captionFromMove(frame)).toBe('Start');
     expect(captionFromMove(null)).toBe('');
-  });
-});
-
-describe('makeInspector', () => {
-  it('builds an inspector component', () => {
-    const Inspector = makeInspector<{ v: number }>((s) => s.v);
-    expect(typeof Inspector).toBe('function');
   });
 });
 

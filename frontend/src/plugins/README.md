@@ -59,7 +59,7 @@ The **Practice tab quiz** and **Code Studio quiz phase** share one data source (
 |--------|------|
 | `_shared/practice.tsx` | `makeCasesPanel`, `makeQuizPanel`, `makeSimulatePanel` |
 | `_shared/pluginKit.ts` | `wireTeachingStack`, `PracticeBundle`, `codePiecesFromSource` |
-| `_shared/vizKit.tsx` | `vizText`, `VizHint`, `PathDisplay`, `CharCell`, `DpCell`, `makeInspector` |
+| `_shared/vizKit.tsx` | `vizText`, `VizHint`, `PathDisplay`, `CharCell`, `DpCell`, `VizInspector` |
 | `_shared/vizTokens.ts` | Typography tokens (`--node-fs*` / `--viz-*`) for plugin views |
 | `_shared/inspector.tsx` | Re-exports `InspectorRow` / `VarGrid` from vizKit |
 | `_shared/graphLayout.ts` | `circleLayout`, `gridLayout`, `layeredLayout` |

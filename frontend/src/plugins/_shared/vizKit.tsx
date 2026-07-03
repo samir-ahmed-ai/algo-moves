@@ -4,8 +4,8 @@
  * ESLint (optional): ban hardcoded `text-[Npx]` in `src/plugins/**` — use vizText / vizKit instead.
  * Enforced by: npm run check-plugin-typography
  */
-import type { ComponentType, CSSProperties, ReactNode } from 'react';
-import type { Frame, InspectorProps, PluginViewProps } from '../../core/types';
+import type { CSSProperties, ReactNode } from 'react';
+import type { Frame, PluginViewProps } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
 import { vizPad, vizText } from './vizTokens';
 
@@ -49,16 +49,6 @@ export function CollapsibleDetails({
       </pre>
     </details>
   );
-}
-
-/** Build a standard Inspector from state rows. */
-export function makeInspector<S>(
-  rows: (state: S) => ReactNode,
-): ComponentType<InspectorProps<S>> {
-  return function GeneratedInspector({ frame }: InspectorProps<S>) {
-    if (!frame) return <VizEmpty />;
-    return <VizInspector>{rows(frame.state)}</VizInspector>;
-  };
 }
 
 /** Muted helper line under viz boards. */
