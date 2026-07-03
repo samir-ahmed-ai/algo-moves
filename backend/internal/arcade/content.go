@@ -138,15 +138,18 @@ type ContentQuestion struct {
 }
 
 type ContentProblem struct {
-	ID         string            `json:"id"`
-	Title      string            `json:"title"`
-	Difficulty string            `json:"difficulty"`
-	Summary    string            `json:"summary,omitempty"`
-	Pattern    string            `json:"pattern,omitempty"`
-	SourceURL  string            `json:"sourceUrl,omitempty"`
-	Tags       []string          `json:"tags"`
-	Solutions  []ContentSolution `json:"solutions"`
-	Quiz       []ContentQuestion `json:"quiz"`
+	ID          string            `json:"id"`
+	Title       string            `json:"title"`
+	Difficulty  string            `json:"difficulty"`
+	Summary     string            `json:"summary,omitempty"`
+	Pattern     string            `json:"pattern,omitempty"`
+	SourceURL   string            `json:"sourceUrl,omitempty"`
+	Narrative   string            `json:"narrative,omitempty"`
+	RegionID    string            `json:"regionId,omitempty"`
+	RegionTitle string            `json:"regionTitle,omitempty"`
+	Tags        []string          `json:"tags"`
+	Solutions   []ContentSolution `json:"solutions"`
+	Quiz        []ContentQuestion `json:"quiz"`
 }
 
 // ContentProblemByID returns a full problem with its tags, per-language solutions
@@ -154,9 +157,14 @@ type ContentProblem struct {
 func (s *Store) ContentProblemByID(ctx context.Context, id string) (*ContentProblem, error) {
 	var p ContentProblem
 	err := s.pool.QueryRow(ctx, `
-		select id, title, difficulty, coalesce(summary,''), coalesce(pattern,''), coalesce(source_url,'')
-		from public.problems where id = $1`, id).
-		Scan(&p.ID, &p.Title, &p.Difficulty, &p.Summary, &p.Pattern, &p.SourceURL)
+		select p.id, p.title, p.difficulty, coalesce(p.summary,''), coalesce(p.pattern,''),
+		       coalesce(p.source_url,''), coalesce(p.narrative,''), coalesce(p.region_id,''),
+		       coalesce(r.title,'')
+		from public.problems p
+		left join public.story_regions r on r.id = p.region_id
+		where p.id = $1`, id).
+		Scan(&p.ID, &p.Title, &p.Difficulty, &p.Summary, &p.Pattern, &p.SourceURL,
+			&p.Narrative, &p.RegionID, &p.RegionTitle)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}

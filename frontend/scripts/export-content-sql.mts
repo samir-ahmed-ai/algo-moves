@@ -21,6 +21,7 @@ import { importedPlugins } from '@/plugins/imported';
 import { prepPlugins } from '@/plugins/imported/prep';
 import { goCoursePlugins } from '@/plugins/go-course';
 import { catalog } from '@/content';
+import { ARCHIPELAGO_REGIONS, PROBLEM_STORY } from '@/plugins/imported/story/archipelago';
 
 type Family = 'DataStructures' | 'Algorithms' | 'Design' | 'Go' | 'Other';
 
@@ -58,7 +59,7 @@ interface SolRow { problemId: string; lang: string; file: string; code: string; 
 interface QRow { id: string; problemId: string; prompt: string; explain: string | null; sort: number }
 interface ChoiceRow { id: string; questionId: string; label: string; correct: boolean; sort: number }
 
-const problemRows: { id: string; title: string; difficulty: string; summary: string | null; source: string | null }[] = [];
+const problemRows: { id: string; title: string; difficulty: string; summary: string | null; source: string | null; narrative: string | null; region: string | null }[] = [];
 const solRows: SolRow[] = [];
 const quizQRows: QRow[] = [];
 const choiceRows: ChoiceRow[] = [];
@@ -78,6 +79,8 @@ for (const plugins of GROUPS) {
       difficulty: m.difficulty,
       summary: m.summary ?? null,
       source: m.source ?? null,
+      narrative: PROBLEM_STORY[m.id]?.narrative ?? null,
+      region: PROBLEM_STORY[m.id]?.regionId ?? null,
     });
 
     for (const t of m.tags ?? []) {
@@ -113,6 +116,11 @@ for (const plugins of GROUPS) {
 const courseRows = catalog.courses.map((c, i) => ({
   id: c.id, title: c.title, summary: c.summary ?? null, icon: c.icon ?? null,
   group: groupOf(c.id), family: familyOf(c.id), sort: i,
+}));
+
+const storyRegionRows = ARCHIPELAGO_REGIONS.map((r) => ({
+  id: r.id, courseId: r.courseId, codeName: r.codeName, title: r.title,
+  subtitle: r.subtitle, blurb: r.blurb, sort: r.order,
 }));
 
 const topicRows = catalog.courses.flatMap((c) =>
@@ -156,11 +164,14 @@ const insert = (table: string, cols: string, rows: string[]) => {
 insert('public.courses', 'id, title, summary, icon, "group", family, sort_order',
   courseRows.map((c) => `(${q(c.id)}, ${q(c.title)}, ${q(c.summary)}, ${q(c.icon)}, ${q(c.group)}, ${q(c.family)}, ${num(c.sort)})`));
 
+insert('public.story_regions', 'id, course_id, code_name, title, subtitle, blurb, sort_order',
+  storyRegionRows.map((r) => `(${q(r.id)}, ${q(r.courseId)}, ${q(r.codeName)}, ${q(r.title)}, ${q(r.subtitle)}, ${q(r.blurb)}, ${num(r.sort)})`));
+
 insert('public.topics', 'id, course_id, title, summary, sort_order',
   topicRows.map((t) => `(${q(t.id)}, ${q(t.courseId)}, ${q(t.title)}, ${q(t.summary)}, ${num(t.sort)})`));
 
-insert('public.problems', 'id, title, difficulty, summary, source_url',
-  problemRows.map((p) => `(${q(p.id)}, ${q(p.title)}, ${q(p.difficulty)}, ${q(p.summary)}, ${q(p.source)})`));
+insert('public.problems', 'id, title, difficulty, summary, source_url, region_id, narrative',
+  problemRows.map((p) => `(${q(p.id)}, ${q(p.title)}, ${q(p.difficulty)}, ${q(p.summary)}, ${q(p.source)}, ${q(p.region)}, ${q(p.narrative)})`));
 
 insert('public.tags', 'id, label', [...tagSet].sort().map((t) => `(${q(t)}, ${q(t)})`));
 
@@ -188,9 +199,9 @@ const sql = L.join('\n');
 const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'db', 'content_seed.sql');
 const check = process.argv.includes('--check');
 const counts =
-  `${courseRows.length} courses, ${topicRows.length} topics, ${problemRows.length} problems, ` +
-  `${solRows.length} solutions, ${quizQRows.length} quiz questions, ${choiceRows.length} choices, ` +
-  `${itemRows.length} items, ${tagSet.size} tags`;
+  `${courseRows.length} courses, ${storyRegionRows.length} story regions, ${topicRows.length} topics, ` +
+  `${problemRows.length} problems, ${solRows.length} solutions, ${quizQRows.length} quiz questions, ` +
+  `${choiceRows.length} choices, ${itemRows.length} items, ${tagSet.size} tags`;
 
 if (check) {
   const current = existsSync(outPath) ? readFileSync(outPath, 'utf8') : null;

@@ -36,6 +36,19 @@ insert into public.courses (id, title, summary, icon, "group", family, sort_orde
   ('prep-database', 'Database · prep library', '1 Database problems from your prep study collection.', 'Database', 'prep', 'Other', 24),
   ('go-senior', 'Go — Senior Developer', 'Advanced Go for senior & staff interviews — concurrency, runtime & memory, generics, and system design. Each concept ships an advanced quiz, a coding drill, and a design question.', 'Boxes', 'go-course', 'Go', 25);
 
+insert into public.story_regions (id, course_id, code_name, title, subtitle, blurb, sort_order) values
+  ('archipelago-ripple-shallows', 'graphs', 'Region 1', 'The Ripple Shallows', 'BFS · unweighted paths & reachability', 'Calm shallow water where a dropped stone sends rings outward, one ring per second. That expanding ring IS breadth-first search by levels — the nearest islets light up first.', 1),
+  ('archipelago-fog-banks', 'graphs', 'Region 2', 'The Fog Banks', 'BFS · grids & state-spaces', 'A gridded sea of fog where you see only one tile ahead, so you must expand ring by ring, blind — even when the "tiles" are word-states or board positions rather than places.', 2),
+  ('archipelago-deep-trenches', 'graphs', 'Region 3', 'The Deep Trenches', 'DFS · dive, clone, enumerate, backtrack', 'Vertical cave-tunnels where you plunge all the way down one branch before surfacing — memoising, snapshotting and backtracking as you go.', 3),
+  ('archipelago-tide-flats', 'graphs', 'Region 4', 'The Tide Flats', 'Flood fill · grid connectivity', 'At low tide, land and water blur into one muddy plain. Wade onto a patch of land and flood it with dye to claim the whole connected island at once.', 4),
+  ('archipelago-mount-prerequisite', 'graphs', 'Region 5', 'Mount Prerequisite', 'Topological sort', 'A terraced volcano where you may lay a step only once every step beneath it is set — dependency order made physical.', 5),
+  ('archipelago-whirlpool-watch', 'graphs', 'Region 6', 'The Whirlpool Watch', 'Cycle detection', 'A lookout tower that spots currents looping back on themselves — a rope crossing an already-marked buoy, or a channel still spinning on your stack.', 6),
+  ('archipelago-coral-colonies', 'graphs', 'Region 7', 'The Coral Colonies', 'Union-Find · disjoint sets', 'Living reefs that fuse into ever-larger super-reefs; each reef knows only its elder polyp (the root). Merging is union; asking "same reef?" is find.', 7),
+  ('archipelago-lighthouse-straits', 'graphs', 'Region 8', 'The Lighthouse Straits', 'Weighted shortest paths', 'Channels with real distances and currents, where a greedy pilot always sails to the nearest unvisited lit buoy — Dijkstra at the helm, Floyd charting every hub.', 8),
+  ('archipelago-two-tone-atoll', 'graphs', 'Region 9', 'The Two-Tone Atoll', 'Bipartite coloring', 'A ring reef you try to paint in exactly two alternating hues; two touching same-coloured isles break the two-tone spell.', 9),
+  ('archipelago-fragile-bridges', 'graphs', 'Region 10', 'The Fragile Bridges', 'Bridges · Tarjan', 'Rope bridges where cutting the wrong one severs the archipelago; a surveyor times each island to find the links nothing can loop around.', 10),
+  ('archipelago-harbormasters-ledger', 'graphs', 'Region 11', 'The Harbormaster''s Ledger', 'Degree & greedy edge analysis', 'A dockside office tallying how many ferries touch each port, and squeezing the highest-value routes out of the busiest berths.', 11);
+
 insert into public.topics (id, course_id, title, summary, sort_order) values
   ('placement', 'backtracking', 'Constraint placement', 'Place items subject to constraints, backtracking on conflicts.', 0),
   ('enumeration', 'backtracking', 'Enumeration', 'Generate every combination by including/excluding each choice.', 1),
@@ -85,433 +98,433 @@ insert into public.topics (id, course_id, title, summary, sort_order) values
   ('go-senior-testing', 'go-senior', 'Testing & Reliability', '4 senior testing & reliability concepts.', 8),
   ('go-senior-design', 'go-senior', 'System Design in Go', '5 senior system design in go concepts.', 9);
 
-insert into public.problems (id, title, difficulty, summary, source_url) values
-  ('union-find', 'Union-Find · Kruskal MST', 'Medium', 'Kruskal''s MST driven by a disjoint-set: sort edges by weight, union endpoints in different sets (add to tree), skip same-set edges (cycle).', 'https://leetcode.com/problems/graph-valid-tree/'),
-  ('tree-traversals', 'Tree traversals', 'Easy', 'Pre/in/post-order DFS and level-order BFS on one binary tree, building the visit sequence step by step.', 'https://leetcode.com/problems/binary-tree-inorder-traversal/'),
-  ('trie', 'Trie (prefix tree)', 'Medium', 'Insert several words into a prefix tree, then search one — walking and creating child nodes per character.', 'https://leetcode.com/problems/implement-trie-prefix-tree/'),
-  ('binary-search', 'Binary search', 'Easy', 'Halve a sorted window each step: compare the middle, then keep the side that can contain the target.', 'https://leetcode.com/problems/binary-search/'),
-  ('two-sum-sorted', 'Two sum II (sorted)', 'Medium', 'Two pointers from both ends of a sorted array; the running sum decides which pointer to move inward.', 'https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/'),
-  ('max-subarray-sum-k', 'Max subarray sum (size k)', 'Medium', 'Fixed-size sliding window: seed the sum of the first k elements, then slide one step at a time, adding the entering value and dropping the leaving one to track the best window in O(n).', 'https://leetcode.com/problems/maximum-average-subarray-i/'),
-  ('longest-substring', 'Longest substring w/o repeat', 'Medium', 'A variable-size sliding window: expand right over fresh characters and shrink from the left whenever a duplicate appears, tracking the longest unique span.', 'https://leetcode.com/problems/longest-substring-without-repeating-characters/'),
-  ('reverse-linked-list', 'Reverse linked list', 'Easy', 'Walk the list once, flipping each node’s next pointer to its predecessor; the old tail becomes the new head.', 'https://leetcode.com/problems/reverse-linked-list/'),
-  ('linked-list-cycle', 'Linked list cycle', 'Easy', 'Run two pointers — a slow tortoise (1 step) and a fast hare (2 steps). If the hare falls off the end there is no cycle; if it ever catches the tortoise, the list loops.', 'https://leetcode.com/problems/linked-list-cycle/'),
-  ('bubble-sort', 'Bubble sort', 'Easy', 'Walk the array swapping adjacent out-of-order pairs; each pass floats the next-largest value to its final slot.', 'https://en.wikipedia.org/wiki/Bubble_sort'),
-  ('selection-sort', 'Selection sort', 'Easy', 'Each round, scan the unsorted suffix for its minimum and swap it into the next slot; the prefix grows sorted one element at a time.', 'https://en.wikipedia.org/wiki/Selection_sort'),
-  ('insertion-sort', 'Insertion sort', 'Easy', 'Grow a sorted prefix: take each next element as a key, shift larger sorted elements right, then drop the key into the gap.', 'https://en.wikipedia.org/wiki/Insertion_sort'),
-  ('quick-sort', 'Quick sort', 'Medium', 'Pick a pivot, partition smaller values left and larger right with Lomuto, seat the pivot, then sort each side — driven by an explicit range stack.', 'https://en.wikipedia.org/wiki/Quicksort'),
-  ('merge-sort', 'Merge sort', 'Medium', 'Treat each element as a sorted run, then repeatedly merge adjacent runs by comparing their fronts and writing the smaller value back, doubling run width each pass.', 'https://en.wikipedia.org/wiki/Merge_sort'),
-  ('heap-sort', 'Heap sort', 'Medium', 'Read the array as an in-place binary max-heap: build it by sifting down, then repeatedly swap the root to the tail and re-heapify the shrinking prefix.', 'https://en.wikipedia.org/wiki/Heapsort'),
-  ('heap-operations', 'Heap operations', 'Medium', 'Binary min-heap insert and extract-min on a complete tree, showing sift-up and sift-down step by step.', 'https://leetcode.com/problems/find-k-pairs-with-smallest-sums/'),
-  ('n-queens', 'N-Queens', 'Hard', 'Place one queen per row; try columns left to right, recurse when a spot is safe, and backtrack when a row runs out. Stops at the first full solution.', 'https://leetcode.com/problems/n-queens/'),
-  ('interval-scheduling', 'Interval scheduling (activity selection)', 'Medium', 'Sort intervals by end time, then greedily keep any interval that starts after the last one chosen to maximize the non-overlapping count.', 'https://leetcode.com/problems/non-overlapping-intervals/'),
-  ('imp-0-01-bfs-shortest-reach', 'BFS Shortest Reach', 'Medium', 'BFS from start node', null),
-  ('imp-0-02-clone-graph', 'Clone Graph', 'Medium', 'DFS clone with hash map', 'https://leetcode.com/problems/clone-graph/'),
-  ('imp-0-03-find-shortest-path-with-bfs', 'Find Shortest Path with BFS', 'Medium', 'BFS shortest path unweighted', 'Educational'),
-  ('imp-0-04-graph-traversal', 'Graph Traversal', 'Medium', 'DFS and BFS traversal', 'Educational'),
-  ('imp-0-05-has-path-from-source-to-destination', 'Has Path from Source to Destination', 'Easy', 'BFS reachability', 'Educational'),
-  ('imp-0-06-print-all-paths-from-source-to-destination', 'Print All Paths from Source to Destination', 'Medium', 'DFS path backtracking', 'Educational'),
-  ('imp-0-07-shortest-distance-from-all-buildings', 'Shortest Distance from All Buildings', 'Hard', 'BFS from each building', 'https://leetcode.com/problems/shortest-distance-from-all-buildings/'),
-  ('imp-0-08-topological-sort-with-dfs', 'Topological Sort with DFS', 'Medium', 'Topological sort DFS post-order', 'Educational'),
-  ('imp-1-subset-component', 'Subset Component', 'Hard', 'Subset DFS + 64-bit DSU', null),
-  ('imp-2-alien-dictionary', 'Alien Dictionary', 'Hard', 'BFS topological sort (Kahn''s)', 'https://leetcode.com/problems/alien-dictionary/'),
-  ('imp-3-remove-invalid-parentheses', 'Remove Invalid Parentheses', 'Hard', 'BFS level-by-level', 'https://leetcode.com/problems/remove-invalid-parentheses/'),
-  ('imp-4-floyd-city-of-blinding-lights', 'Floyd City of Blinding Lights', 'Medium', 'Floyd-Warshall all-pairs shortest paths', null),
-  ('imp-5-swim-in-rising-water', 'Swim in Rising Water', 'Hard', 'Dijkstra min-heap tracking max elevation', 'https://leetcode.com/problems/swim-in-rising-water/'),
-  ('imp-6-find-shortest-path-with-dijkstra-s', 'Find Shortest Path with Dijkstra''s', 'Medium', 'Dijkstra min-heap', 'Educational'),
-  ('imp-7-is-graph-bipartite', 'Is Graph Bipartite?', 'Medium', 'BFS 2-coloring', 'https://leetcode.com/problems/is-graph-bipartite/'),
-  ('imp-8-merging-communities', 'Merging Communities', 'Medium', 'Union-Find with path compression and union by size', null),
-  ('imp-9-similar-string-groups', 'Similar String Groups', 'Hard', 'Union-Find + pairwise similarity check', 'https://leetcode.com/problems/similar-string-groups/'),
-  ('imp-10-word-ladder', 'Word Ladder', 'Hard', 'BFS level-by-level', 'https://leetcode.com/problems/word-ladder/'),
-  ('imp-11-shortest-path-in-a-grid-with-obstacles-eliminati', 'Shortest Path in a Grid with Obstacles Elimination', 'Hard', 'BFS with (r,c,remaining) state', 'https://leetcode.com/problems/shortest-path-in-a-grid-with-obstacles-elimination/'),
-  ('imp-12-shortest-path-in-binary-matrix', 'Shortest Path in Binary Matrix', 'Medium', 'BFS 8-directional', 'https://leetcode.com/problems/shortest-path-in-binary-matrix/'),
-  ('imp-13-robot-room-cleaner', 'Robot Room Cleaner', 'Hard', 'DFS with relative coordinates', 'https://leetcode.com/problems/robot-room-cleaner/'),
-  ('imp-14-the-earliest-moment-when-everyone-become-friends', 'The Earliest Moment When Everyone Become Friends', 'Medium', 'Sort + Union-Find', 'https://leetcode.com/problems/the-earliest-moment-when-everyone-become-friends/'),
-  ('imp-15-find-all-possible-recipes-from-given-supplies', 'Find All Possible Recipes from Given Supplies', 'Medium', 'Topological sort (Kahn''s)', 'https://leetcode.com/problems/find-all-possible-recipes-from-given-supplies/'),
-  ('imp-16-detonate-the-maximum-bombs', 'Detonate the Maximum Bombs', 'Medium', 'Directed graph + DFS from each node', 'https://leetcode.com/problems/detonate-the-maximum-bombs/'),
-  ('imp-17-maximal-network-rank', 'Maximal Network Rank', 'Medium', 'Degree counting + edge set', 'https://leetcode.com/problems/maximal-network-rank/'),
-  ('imp-18-number-of-good-paths', 'Number of Good Paths', 'Hard', 'Union-Find + sort by value', 'https://leetcode.com/problems/number-of-good-paths/'),
-  ('imp-19-maximum-score-of-a-node-sequence', 'Maximum Score of a Node Sequence', 'Hard', 'Top-3 neighbors + edge enumeration', 'https://leetcode.com/problems/maximum-score-of-a-node-sequence/'),
-  ('imp-20-course-schedule', 'Course Schedule', 'Medium', 'Kahn BFS topological sort', 'https://leetcode.com/problems/course-schedule/'),
-  ('imp-22-find-degree-of-vertex', 'Find Degree of Vertex', 'Easy', 'Degree count from adjacency', 'Educational'),
-  ('imp-23-detect-cycle', 'Detect Cycle', 'Medium', 'Cycle detection DFS', 'Educational'),
-  ('imp-24-number-of-islands', 'Number of Islands', 'Medium', 'DFS flood fill', 'https://leetcode.com/problems/number-of-islands/'),
-  ('imp-25-critical-connections-in-a-network', 'Critical Connections in a Network', 'Hard', 'Tarjan''s DFS (disc/low arrays)', 'https://leetcode.com/problems/critical-connections-in-a-network/'),
-  ('imp-26-subsets', 'Subsets', 'Medium', 'Subsets via start-index recursion', 'https://leetcode.com/problems/subsets/'),
-  ('imp-27-combinations', 'Combinations', 'Medium', 'Combinations 1..n choose k', 'https://leetcode.com/problems/combinations/'),
-  ('imp-28-combination-of-subset-strings', 'Combination of Subset Strings', 'Medium', 'k-length strings from charset with reuse', 'https://leetcode.com/problems/letter-combinations-of-a-phone-number/'),
-  ('imp-29-combination-sum-ii', 'Combination Sum II', 'Medium', 'Combination sum without reuse, skip duplicates', 'https://leetcode.com/problems/combination-sum-ii/'),
-  ('imp-30-decode-numbers', 'Decode Numbers', 'Medium', 'DFS decode with dictionary prefix matching', 'https://leetcode.com/problems/decode-ways/'),
-  ('imp-31-expression-add-operators', 'Expression Add Operators', 'Hard', 'Backtracking with prevVal for * precedence', 'https://leetcode.com/problems/expression-add-operators/'),
-  ('imp-32-generate-binary-strings', 'Generate Binary Strings', 'Easy', 'DFS generate binary strings', 'https://leetcode.com/problems/binary-watch/'),
-  ('imp-33-strobogrammatic-number-ii', 'Strobogrammatic Number II', 'Medium', 'Two-pointer strobogrammatic generation', 'https://leetcode.com/problems/strobogrammatic-number-ii/'),
-  ('imp-34-generate-parentheses', 'Generate Parentheses', 'Medium', 'Backtracking valid parentheses', 'https://leetcode.com/problems/generate-parentheses/'),
-  ('imp-36-letter-combinations-of-a-phone-number', 'Letter Combinations of a Phone Number', 'Medium', 'Phone keypad letter combinations', 'https://leetcode.com/problems/letter-combinations-of-a-phone-number/'),
-  ('imp-37-maximum-length-of-a-concatenated-string-with-uni', 'Maximum Length of a Concatenated String with Unique Characters', 'Medium', 'Bitmask backtracking over unique strings', 'https://leetcode.com/problems/maximum-length-of-a-concatenated-string-with-unique-characters/'),
-  ('imp-38-nested-list-weight-sum', 'Nested List Weight Sum', 'Easy', 'DFS nested integer depth sum', 'https://leetcode.com/problems/nested-list-weight-sum/'),
-  ('imp-39-different-ways-to-add-parentheses', 'Different Ways to Add Parentheses', 'Medium', 'Divide-and-conquer with memoization', 'https://leetcode.com/problems/different-ways-to-add-parentheses/'),
-  ('imp-40-restore-ip-addresses', 'Restore IP Addresses', 'Medium', 'Backtracking IP address partition', 'https://leetcode.com/problems/restore-ip-addresses/'),
-  ('imp-41-permutations', 'Permutations', 'Medium', 'Swap-backtracking permutations', 'https://leetcode.com/problems/permutations/'),
-  ('imp-42-cartesian-product-of-multiple-arrays', 'Cartesian Product of Multiple Arrays', 'Medium', 'DFS cartesian product across lists', 'https://leetcode.com/problems/letter-combinations-of-a-phone-number/'),
-  ('imp-43-permutations', 'Permutations (string)', 'Medium', 'Swap-backtracking string permutations', 'https://leetcode.com/problems/permutations/'),
-  ('imp-44-word-search', 'Word Search', 'Medium', 'In-place marking DFS from every cell', 'https://leetcode.com/problems/word-search/'),
-  ('imp-45-word-search-ii', 'Word Search II', 'Hard', 'Trie-guided DFS from every cell', 'https://leetcode.com/problems/word-search-ii/'),
-  ('imp-46-search-in-rotated-sorted-array', 'Search in Rotated Sorted Array', 'Medium', 'Binary search on rotated array', 'https://leetcode.com/problems/search-in-rotated-sorted-array/'),
-  ('imp-47-maximum-length-of-ribbon-cut', 'Maximum Length of Ribbon Cut', 'Medium', 'Binary search on answer', 'https://leetcode.com/problems/maximum-length-of-ribbon-cut/'),
-  ('imp-48-find-smallest-letter-greater-than-target', 'Find Smallest Letter Greater Than Target', 'Easy', 'Binary search first greater', 'https://leetcode.com/problems/find-smallest-letter-greater-than-target/'),
-  ('imp-49-kth-largest-element-in-an-array', 'Kth Largest Element in an Array', 'Medium', 'Quickselect (Hoare partition)', 'https://leetcode.com/problems/kth-largest-element-in-an-array/'),
-  ('imp-50-find-right-interval', 'Find Right Interval', 'Medium', 'Binary search largest smaller', 'https://leetcode.com/problems/find-right-interval/'),
-  ('imp-51-missing-number-in-arithmetic-progression', 'Missing Number in Arithmetic Progression', 'Easy', 'Binary search missing AP term', 'https://leetcode.com/problems/missing-number/'),
-  ('imp-52-missing-number', 'Missing Number', 'Easy', 'Binary search missing consecutive', 'https://leetcode.com/problems/missing-number/'),
-  ('imp-53-find-first-and-last-position-of-element-in-sorte', 'Find First and Last Position of Element in Sorted Array', 'Medium', 'Binary search bounds', 'https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/'),
-  ('imp-54-find-peak-element', 'Find Peak Element', 'Medium', 'Binary search on slope', 'https://leetcode.com/problems/find-peak-element/'),
-  ('imp-55-leftmost-column-with-at-least-a-one', 'Leftmost Column with at Least a One', 'Medium', 'Top-right corner walk', 'https://leetcode.com/problems/leftmost-column-with-at-least-a-one/'),
-  ('imp-56-squares-of-a-sorted-array', 'Squares of a Sorted Array', 'Easy', 'Two pointers from ends', 'https://leetcode.com/problems/squares-of-a-sorted-array/'),
-  ('imp-57-check-if-an-original-string-exists-given-two-enc', 'Check if An Original String Exists Given Two Encoded Strings', 'Hard', 'Memoized DFS (i, j, diff)', 'https://leetcode.com/problems/check-if-an-original-string-exists-given-two-encoded-strings/'),
-  ('imp-58-climbing-stairs', 'Climbing Stairs', 'Easy', '1D DP / Fibonacci', 'https://leetcode.com/problems/climbing-stairs/'),
-  ('imp-59-coin-change', 'Coin Change', 'Medium', 'Unbounded knapsack / min coins DP', 'https://leetcode.com/problems/coin-change/'),
-  ('imp-60-coin-change-ii', 'Coin Change II', 'Medium', 'Unbounded knapsack / count ways DP', 'https://leetcode.com/problems/coin-change-ii/'),
-  ('imp-61-edit-distance', 'Edit Distance', 'Medium', '2D DP edit distance', 'https://leetcode.com/problems/edit-distance/'),
-  ('imp-62-filling-bookcase-shelves', 'Filling Bookcase Shelves', 'Medium', 'Bottom-Up DP', 'https://leetcode.com/problems/filling-bookcase-shelves/'),
-  ('imp-63-0-1-knapsack', '0/1 Knapsack', 'Medium', '0/1 Knapsack', 'https://leetcode.com/problems/partition-equal-subset-sum/'),
-  ('imp-64-perfect-squares', 'Perfect Squares', 'Medium', 'DP least perfect squares', 'https://leetcode.com/problems/perfect-squares/'),
-  ('imp-65-longest-common-subsequence', 'Longest Common Subsequence', 'Medium', '2D DP longest common subsequence', 'https://leetcode.com/problems/longest-common-subsequence/'),
-  ('imp-66-longest-increasing-subsequence', 'Longest Increasing Subsequence', 'Medium', 'LIS patience sorting / binary search', 'https://leetcode.com/problems/longest-increasing-subsequence/'),
-  ('imp-67-longest-palindromic-subsequence', 'Longest Palindromic Subsequence', 'Medium', 'Interval DP palindromic subsequence', 'https://leetcode.com/problems/longest-palindromic-subsequence/'),
-  ('imp-68-longest-string-chain', 'Longest String Chain', 'Medium', 'Sort by length + DP map', 'https://leetcode.com/problems/longest-string-chain/'),
-  ('imp-69-longest-valid-parentheses', 'Longest Valid Parentheses', 'Hard', 'Stack', 'https://leetcode.com/problems/longest-valid-parentheses/'),
-  ('imp-70-maximal-rectangle', 'Maximal Rectangle', 'Hard', 'Histogram DP + monotonic stack', 'https://leetcode.com/problems/maximal-rectangle/'),
-  ('imp-71-maximal-square', 'Maximal Square', 'Medium', 'Grid DP maximal square', 'https://leetcode.com/problems/maximal-square/'),
-  ('imp-72-maximum-and-sum-of-array', 'Maximum AND Sum of Array', 'Hard', 'Bitmask DP (base-3 state)', 'https://leetcode.com/problems/maximum-and-sum-of-array/'),
-  ('imp-73-maximum-number-of-points-with-cost', 'Maximum Number of Points with Cost', 'Hard', 'DP + left/right max sweep', 'https://leetcode.com/problems/maximum-number-of-points-with-cost/'),
-  ('imp-74-minimum-path-sum', 'Minimum Path Sum', 'Medium', 'Grid DP min path sum', 'https://leetcode.com/problems/minimum-path-sum/'),
-  ('imp-75-minimum-deletions-to-make-string-balanced', 'Minimum Deletions to Make String Balanced', 'Medium', 'Single pass DP', 'https://leetcode.com/problems/minimum-deletions-to-make-string-balanced/'),
-  ('imp-76-distinct-subsequences', 'Distinct Subsequences', 'Hard', '2D DP distinct subsequences', 'https://leetcode.com/problems/distinct-subsequences/'),
-  ('imp-77-unique-paths', 'Unique Paths', 'Medium', 'Grid DP unique paths', 'https://leetcode.com/problems/unique-paths/'),
-  ('imp-78-decode-ways', 'Decode Ways', 'Medium', '1D DP decode ways', 'https://leetcode.com/problems/decode-ways/'),
-  ('imp-79-partition-array-into-two-arrays-to-minimize-sum-', 'Partition Array Into Two Arrays to Minimize Sum Difference', 'Hard', 'Meet in the middle + binary search', 'https://leetcode.com/problems/partition-array-into-two-arrays-to-minimize-sum-difference/'),
-  ('imp-80-race-car', 'Race Car', 'Hard', 'BFS with (pos, speed) state', 'https://leetcode.com/problems/race-car/'),
-  ('imp-81-range-sum-query-2d-immutable', 'Range Sum Query 2D - Immutable', 'Medium', '2D prefix sum / range query', 'https://leetcode.com/problems/range-sum-query-2d-immutable/'),
-  ('imp-82-regular-expression-matching', 'Regular Expression Matching', 'Hard', 'Memoized DFS', 'https://leetcode.com/problems/regular-expression-matching/'),
-  ('imp-83-sentence-screen-fitting', 'Sentence Screen Fitting', 'Medium', 'Pointer simulation', 'https://leetcode.com/problems/sentence-screen-fitting/'),
-  ('imp-84-student-attendance-record-ii', 'Student Attendance Record II', 'Hard', 'DP with 6 states [2A][3L]', 'https://leetcode.com/problems/student-attendance-record-ii/'),
-  ('imp-85-valid-palindrome-iii', 'Valid Palindrome III', 'Hard', 'LPS space-optimized DP', 'https://leetcode.com/problems/valid-palindrome-iii/'),
-  ('prep-arrays-find-duplicate-and-missing', 'Find duplicate and missing', 'Medium', 'XOR + math', null),
-  ('prep-arrays-find-duplicate-number', 'Find duplicate number', 'Medium', 'Floyd cycle', null),
-  ('prep-arrays-find-intersection-of-two-sorted', 'Find intersection of two sorted', 'Medium', 'Two pointers', null),
-  ('prep-arrays-find-majority-element', 'Find majority element', 'Medium', 'Boyer-Moore voting', null),
-  ('prep-arrays-jump-game', 'Jump game', 'Medium', 'Greedy reach', null),
-  ('prep-arrays-max-product-of-subarray', 'Max product of subarray', 'Medium', 'Track min/max product', null),
-  ('prep-arrays-max-profit-selling-stocks', 'Max profit selling stocks', 'Medium', 'One pass min price', null),
-  ('prep-arrays-max-rectangle-in-histogram', 'Max rectangle in histogram', 'Medium', 'Monotonic stack', null),
-  ('prep-arrays-max-sum-of-subarray-size-k', 'Max sum of subarray size K', 'Medium', 'Sliding window', null),
-  ('prep-arrays-merge-two-sorted-arrays', 'Merge two sorted arrays', 'Medium', 'Merge from end', null),
-  ('prep-arrays-move-all-zeros-to-end', 'Move all zeros to end', 'Medium', 'Two pointers', null),
-  ('prep-arrays-next-permutation', 'Next permutation', 'Medium', 'Scan from right', null),
-  ('prep-arrays-remove-duplicates-in-place', 'Remove duplicates in place', 'Medium', 'Two pointers', null),
-  ('prep-arrays-reverse-array', 'Reverse array', 'Medium', 'Two pointers swap', null),
-  ('prep-arrays-rotate-array', 'Rotate array', 'Medium', 'Reverse segments', null),
-  ('prep-arrays-self-exclude-product', 'Self exclude product', 'Medium', 'Prefix + suffix pass', null),
-  ('prep-arrays-task-scheduler', 'Task scheduler', 'Medium', 'Heap + math', null),
-  ('prep-arrays-trap-most-water', 'Trap most water', 'Medium', 'Two pointers', null),
-  ('prep-arrays-trap-rain-water', 'Trap rain water', 'Medium', 'Two pointers', null),
-  ('prep-arrays-two-sum', 'Two sum', 'Medium', 'Hash map', null),
-  ('prep-database-department-top-three-salaries', 'Department Top Three Salaries', 'Medium', 'Database', null),
-  ('prep-design-amount-of-new-area-painted-each-day', 'Amount of New Area Painted Each Day', 'Medium', 'Jump Array', null),
-  ('prep-design-design-in-memory-file-system', 'Design In-Memory File System', 'Medium', 'Design', null),
-  ('prep-design-design-parking-system', 'Design Parking System', 'Medium', 'Design', null),
-  ('prep-design-design-tic-tac-toe', 'Design Tic-Tac-Toe', 'Medium', 'Design', null),
-  ('prep-design-detect-squares', 'Detect Squares', 'Medium', 'Design', null),
-  ('prep-design-dictionary-and-spell', 'Dictionary and spell', 'Medium', 'Trie dictionary + spell suggest', null),
-  ('prep-design-dot-product-of-two-sparse-vectors', 'Dot Product of Two Sparse Vectors', 'Medium', 'Design', null),
-  ('prep-design-exclusive-time-of-functions', 'Exclusive Time of Functions', 'Medium', 'Stack', null),
-  ('prep-design-design-an-expression-tree-with-evaluate-function', 'Expression Tree / Design an Expression Tree', 'Medium', 'Stack', null),
-  ('prep-design-find-median-from-data-stream', 'Find Median from Data Stream', 'Medium', 'Design', null),
-  ('prep-design-find-servers-that-handled-most-number-of-requests', 'Find Servers That Handled Most Number of Requests', 'Medium', 'Heap + Sorted Available Set', null),
-  ('prep-design-guess-the-word', 'Guess the Word', 'Medium', 'Design', null),
-  ('prep-design-insert-delete-getrandom-o1', 'Insert Delete GetRandom O(1)', 'Medium', 'Design', null),
-  ('prep-design-load-balancer', 'Load balancer', 'Medium', 'Round-robin load balancer', null),
-  ('prep-design-log-analyzer', 'Log analyzer', 'Medium', 'Log parsing aggregation', null),
-  ('prep-design-logger-rate-limiter', 'Logger Rate Limiter', 'Medium', 'Design', null),
-  ('prep-design-lru-cache', 'LRU Cache', 'Medium', 'Hash map + doubly linked list LRU', null),
-  ('prep-design-meeting-rooms-iii', 'Meeting Rooms III', 'Medium', 'Two Heaps', null),
-  ('prep-design-my-calendar-i', 'My Calendar I', 'Medium', 'Design', null),
-  ('prep-design-phone-directory', 'Phone directory', 'Medium', 'Trie phone directory autocomplete', null),
-  ('prep-design-random-pick-index', 'Random Pick Index', 'Medium', 'Design', null),
-  ('prep-design-random-pick-with-weight', 'Random Pick with Weight', 'Medium', 'Design', null),
-  ('prep-design-range-module', 'Range Module', 'Medium', 'Design', null),
-  ('prep-design-read-n-characters-given-read4-ii-call-multiple-times', 'Read N Characters Given Read4 II - Call Multiple Times', 'Medium', 'Design', null),
-  ('prep-design-rle-iterator', 'RLE Iterator', 'Medium', 'Design', null),
-  ('prep-design-sequentially-ordinal-rank-tracker', 'Sequentially Ordinal Rank Tracker', 'Medium', 'Design', null),
-  ('prep-design-snapshot-array', 'Snapshot Array', 'Medium', 'Design', null),
-  ('prep-design-stock-price-fluctuation', 'Stock Price Fluctuation', 'Medium', 'Design', null),
-  ('prep-design-tiny-url', 'Tiny url', 'Medium', 'Bijective tiny URL encode/decode', null),
-  ('prep-design-version-control-snapshot', 'Version control snapshot', 'Medium', 'Copy-on-write version snapshots', null),
-  ('prep-hash-maps-find-k-closest-to-center', 'find K closest to center', 'Medium', 'Sort by distance to origin', null),
-  ('prep-hash-maps-find-kth-largest', 'Find Kth largest', 'Medium', 'Quickselect / partition', null),
-  ('prep-hash-maps-find-most-popular-cost-books', 'Find most popular cost books', 'Medium', 'Two-pass frequency map', null),
-  ('prep-hash-maps-find-top-k-frequent-elements', 'Find top K frequent elements', 'Medium', 'Frequency map + bucket sort', null),
-  ('prep-hash-maps-find-top-k-tweet-words-in-last', 'Find top K tweet words in last', 'Medium', 'Sliding window + frequency map', null),
-  ('prep-hash-maps-find-x-to-make-array-sum-to-k', 'Find X to make array sum to K', 'Medium', 'Binary search on answer', null),
-  ('prep-hash-maps-find-year-with-most-population', 'Find year with most population', 'Medium', 'Sweep line / delta map', null),
-  ('prep-hash-maps-get-all-element-counts', 'Get all element counts', 'Medium', 'Frequency map', null),
-  ('prep-hash-maps-object-as-key', 'Object as key', 'Medium', 'Custom hash key / struct map', null),
-  ('prep-hash-maps-remove-duplicate-contacts', 'Remove duplicate contacts', 'Medium', 'Union-find via email index', null),
-  ('prep-hash-maps-sort-pairs', 'Sort pairs', 'Medium', 'Hash map chain reconstruction', null),
-  ('prep-intervals-count-intervals-range', 'Count intervals range', 'Medium', 'Sort + merge coverage', null),
-  ('prep-intervals-distance-of-nearest-stores', 'Distance of nearest stores', 'Medium', 'Brute-force nearest store by distance', null),
-  ('prep-intervals-draw-skyline', 'Draw skyline', 'Medium', 'Sweep line with height events', null),
-  ('prep-intervals-insert-interval', 'Insert interval', 'Medium', 'Three-segment interval insert', null),
-  ('prep-intervals-is-overlapped', 'Is overlapped', 'Medium', 'Axis-separated rectangle overlap', null),
-  ('prep-intervals-is-square', 'Is square', 'Medium', 'Compare six pairwise distances', null),
-  ('prep-intervals-meeting-rooms-ii', 'Meeting Rooms II', 'Medium', 'Sort Starts/Ends + Sweep', null),
-  ('prep-intervals-merge-intervals', 'Merge Intervals', 'Medium', 'Sort + Greedy Merge', null),
-  ('prep-intervals-schedule-meetings', 'Schedule meetings', 'Medium', 'Sort by start + adjacency check', null),
-  ('prep-intervals-weighted-job-scheduler', 'Weighted job scheduler', 'Medium', 'Sort by end + DP + binary search', null),
-  ('prep-linked-lists-add-two-numbers', 'Add two numbers', 'Medium', 'Digit carry', null),
-  ('prep-linked-lists-copy-list-with-random-pointer', 'Copy List with Random Pointer', 'Medium', 'Interweave (3-pass, no map)', null),
-  ('prep-linked-lists-deep-copy-random-pointers', 'Deep copy random pointers', 'Medium', 'Hash map clone', null),
-  ('prep-linked-lists-delete-every-kth-node-in-dll', 'Delete every Kth node in DLL', 'Medium', 'DLL walk delete', null),
-  ('prep-linked-lists-delete-node', 'Delete node', 'Medium', 'Copy next then delete', null),
-  ('prep-linked-lists-detect-loop', 'Detect loop', 'Medium', 'Floyd cycle', null),
-  ('prep-linked-lists-find-intersection-of-two-lists', 'Find intersection of two lists', 'Medium', 'Two pointers reset', null),
-  ('prep-linked-lists-find-node', 'Find node', 'Medium', 'Linear scan', null),
-  ('prep-linked-lists-flatten-doubly-linked-list', 'Flatten doubly linked list', 'Medium', 'DFS flatten', null),
-  ('prep-linked-lists-insert-into-a-sorted-circular-linked-list', 'Insert into a Sorted Circular Linked List', 'Medium', 'Circular Scan (3 cases)', null),
-  ('prep-linked-lists-last-men-standing', 'Last men standing', 'Medium', 'Josephus simulation', null),
-  ('prep-linked-lists-merge-k-sorted-lists', 'Merge K sorted lists', 'Medium', 'Min-heap merge', null),
-  ('prep-linked-lists-merge-two-sorted-lists', 'Merge two sorted lists', 'Medium', 'Merge two lists', null),
-  ('prep-linked-lists-print-from-end', 'Print from end', 'Medium', 'Recursion / stack', null),
-  ('prep-linked-lists-reverse-linked-list', 'Reverse linked list', 'Medium', 'Iterative reverse', null),
-  ('prep-linked-lists-reverse-nodes-in-k-group', 'Reverse Nodes in k-Group', 'Medium', 'Iterative Group Reversal', null),
-  ('prep-linked-lists-sort-linked-list', 'Sort linked list', 'Medium', 'Merge sort list', null),
-  ('prep-math-add-binary', 'Add binary', 'Medium', 'Binary string addition', null),
-  ('prep-math-add-two-big-string-numbers', 'Add two big string numbers', 'Medium', 'Big integer string addition', null),
-  ('prep-math-base-26-encoding', 'Base 26 encoding', 'Medium', 'Bijective base-26 encoding', null),
-  ('prep-math-basic-calculator-ii', 'Basic Calculator II', 'Medium', 'Stack', null),
-  ('prep-math-cinema-seat-allocation', 'Cinema Seat Allocation', 'Medium', 'Bitmask per Row', null),
-  ('prep-math-convert-decimal-to-base-n', 'Convert decimal to base N', 'Medium', 'Base conversion repeated divmod', null),
-  ('prep-math-convert-string-to-integer', 'Convert string to integer', 'Medium', 'atoi parse with overflow guard', null),
-  ('prep-math-count-set-bits-in-number', 'Count set bits in number', 'Medium', 'Brian Kernighan bit count', null),
-  ('prep-math-covert-integer-to-roman-numeral', 'Covert integer to roman numeral', 'Medium', 'Greedy roman numeral', null),
-  ('prep-math-factorial-number', 'Factorial number', 'Medium', 'Iterative factorial', null),
-  ('prep-math-fibonacci-number', 'Fibonacci number', 'Medium', 'Fibonacci iterative', null),
-  ('prep-math-find-missing-number', 'Find missing number', 'Medium', 'Gauss sum XOR trick', null),
-  ('prep-math-find-single-number', 'Find single number', 'Medium', 'Singleton XOR', null),
-  ('prep-math-fizzbuzz', 'Fizzbuzz', 'Medium', 'FizzBuzz conditional', null),
-  ('prep-math-hamming-distance', 'Hamming distance', 'Medium', 'XOR + popcount', null),
-  ('prep-math-integer-to-english-words', 'Integer to English Words', 'Medium', 'Chunk by 1000 + Lookup', null),
-  ('prep-math-is-binary', 'Is binary', 'Medium', 'Single-bit check', null),
-  ('prep-math-is-odd-number', 'Is odd number', 'Medium', 'Parity bit test', null),
-  ('prep-math-is-palindromic-number', 'Is palindromic number', 'Medium', 'Palindrome number', null),
-  ('prep-math-is-strobogrammatic-number', 'Is strobogrammatic number', 'Medium', 'Strobogrammatic map', null),
-  ('prep-math-k-closest-points-to-origin', 'K Closest Points to Origin', 'Medium', 'Sort', null),
-  ('prep-math-log-two', 'Log two', 'Medium', 'Integer log base 2', null),
-  ('prep-math-maximum-number-of-visible-points', 'Maximum Number of Visible Points', 'Medium', 'Sort + Sliding Window (atan2)', null),
-  ('prep-math-maximum-split-of-positive-even-integers', 'Maximum Split of Positive Even Integers', 'Medium', 'Greedy', null),
-  ('prep-math-maximum-swap', 'Maximum Swap', 'Medium', 'Greedy (last occurrence)', null),
-  ('prep-math-minimum-cost-to-set-cooking-time', 'Minimum Cost to Set Cooking Time', 'Medium', 'Enumerate 2 candidates', null),
-  ('prep-math-minimum-moves-to-equal-array-elements', 'Minimum Moves to Equal Array Elements', 'Medium', 'Math (sum - n*min)', null),
-  ('prep-math-multiply-string-numbers', 'Multiply string numbers', 'Medium', 'Grade-school multiplication', null),
-  ('prep-math-multiply-strings', 'Multiply Strings', 'Medium', 'Grade-school multiplication', null),
-  ('prep-math-next-greater-element-iii', 'Next Greater Element III', 'Medium', 'Next Permutation', null),
-  ('prep-math-powx-n', 'Pow(x, n)', 'Medium', 'Binary Exponentiation', null),
-  ('prep-math-power-two', 'Power two', 'Medium', 'Bit trick power of two', null),
-  ('prep-math-power-x-of-y', 'Power X of Y', 'Medium', 'Binary exponentiation', null),
-  ('prep-math-prime-number', 'Prime number', 'Medium', 'Primality trial division', null),
-  ('prep-math-random-number', 'Random number', 'Medium', 'Uniform random in range', null),
-  ('prep-math-random-number-not-in-array', 'Random number not in array', 'Medium', 'Rejection sampling / gap random', null),
-  ('prep-math-reverse-number', 'Reverse number', 'Medium', 'Digit reversal', null),
-  ('prep-math-square-root', 'Square root', 'Medium', 'Binary search sqrt', null),
-  ('prep-math-sum-of-digits', 'Sum of digits', 'Medium', 'Digit sum', null),
-  ('prep-matrices-battleships-in-a-board', 'Battleships in a Board', 'Medium', 'Single Pass', null),
-  ('prep-matrices-check-if-word-can-be-placed-in-crossword', 'Check if Word Can Be Placed In Crossword', 'Medium', 'Segment Extraction + Forward/Backward Match', null),
-  ('prep-matrices-diagonal-traverse', 'Diagonal Traverse', 'Medium', 'Simulation', null),
-  ('prep-matrices-fill-rows-and-columns-with-1s', 'Fill rows and columns with 1s', 'Medium', 'First row/col as markers', null),
-  ('prep-matrices-find-path-between-cells', 'Find path between cells', 'Medium', 'Grid DFS pathfinding', null),
-  ('prep-matrices-longest-increasing-path', 'Longest increasing path', 'Medium', 'DFS + memo longest increasing path', null),
-  ('prep-matrices-longest-increasing-path-in-a-matrix', 'Longest Increasing Path in a Matrix', 'Medium', 'DFS + Memoization', null),
-  ('prep-matrices-longest-line-of-consecutive-one-in-matrix', 'Longest Line of Consecutive One in Matrix', 'Medium', '4-direction DP', null),
-  ('prep-matrices-max-region', 'Max region', 'Medium', '8-direction DFS region size', null),
-  ('prep-matrices-min-distance-of-meeting-point', 'Min distance of meeting point', 'Medium', '1D meeting point two pointers', null),
-  ('prep-matrices-nearest-bikes', 'Nearest bikes', 'Medium', 'Nearest pair by Manhattan distance', null),
-  ('prep-matrices-print-matrix-in-spiral-order', 'Print matrix in spiral Order', 'Medium', 'Spiral four-boundary shrink', null),
-  ('prep-matrices-remove-all-ones-with-row-and-column-flips', 'Remove All Ones With Row and Column Flips', 'Medium', 'Row Comparison (same or inverse of row 0)', null),
-  ('prep-matrices-rotate-matrix-by-90-degrees', 'Rotate matrix by 90 degrees', 'Medium', 'Layer-by-layer 90° rotation', null),
-  ('prep-matrices-search-a-2d-matrix-ii', 'Search a 2D Matrix II', 'Medium', 'Staircase Search', null),
-  ('prep-matrices-search-in-sorted-matrix', 'Search in sorted matrix', 'Medium', 'Staircase search from top-right', null),
-  ('prep-matrices-spiral-matrix', 'Spiral Matrix', 'Medium', 'Boundary Simulation', null),
-  ('prep-matrices-word-search-on-board', 'Word search on board', 'Medium', 'Backtracking word search', null),
-  ('prep-prefix-sum-array-manipulation', 'Array Manipulation (HackerRank)', 'Medium', 'Difference Array + Prefix Sum', null),
-  ('prep-prefix-sum-continuous-subarray-sum', 'Continuous Subarray Sum', 'Medium', 'Prefix Sum Mod Map', null),
-  ('prep-prefix-sum-subarray-sum-equals-k', 'Subarray Sum Equals K', 'Medium', 'Prefix Sum Map', null),
-  ('prep-sliding-window-minimum-window-substring', 'Minimum Window Substring', 'Medium', 'Sliding Window with freq array', null),
-  ('prep-sorting-3sum', '3Sum', 'Medium', 'Sort + Two Pointers', null),
-  ('prep-sorting-equal-sum-arrays-with-minimum-number-of-operations', 'Equal Sum Arrays with Minimum Number of Operations', 'Medium', 'Greedy Contribution Counting', null),
-  ('prep-sorting-max-chunks-to-make-sorted-ii', 'Max Chunks To Make Sorted II', 'Medium', 'Monotonic Stack', null),
-  ('prep-sorting-minimum-deletions-to-make-character-frequencies-unique', 'Minimum Deletions to Make Character Frequencies Unique', 'Medium', 'Sort Frequencies + Greedy', null),
-  ('prep-sorting-sort-integers-by-the-power-value', 'Sort Integers by The Power Value', 'Medium', 'Memoized Collatz + Sort', null),
-  ('prep-sorting-the-number-of-weak-characters-in-the-game', 'The Number of Weak Characters in the Game', 'Medium', 'Sort (attack desc, defense asc) + Max Sweep', null),
-  ('prep-sorting-top-k-frequent-elements', 'Top K Frequent Elements', 'Medium', 'Bucket Sort', null),
-  ('prep-stacks-queues-basic-calculator', 'Basic Calculator', 'Medium', 'Stack (push res+sign on ''('')', null),
-  ('prep-stacks-queues-buildings-with-an-ocean-view', 'Buildings With an Ocean View', 'Medium', 'Right-to-Left Max Scan', null),
-  ('prep-stacks-queues-calculate-infix', 'Calculate infix', 'Medium', 'Dual-stack infix calculator', null),
-  ('prep-stacks-queues-calculate-postfix', 'Calculate postfix', 'Medium', 'Postfix evaluation stack', null),
-  ('prep-stacks-queues-decode-string', 'Decode String', 'Medium', 'Dual Stack (counts + strings)', null),
-  ('prep-stacks-queues-find-max-in-sliding-window', 'Find max in sliding window', 'Medium', 'Monotonic decreasing deque', null),
-  ('prep-stacks-queues-find-moving-average-in-sliding', 'Find moving average in sliding', 'Medium', 'Sliding window queue + running sum', null),
-  ('prep-stacks-queues-implement-queue-with-max', 'Implement queue with max', 'Medium', 'Queue + decreasing max deque', null),
-  ('prep-stacks-queues-implement-stack-with-min', 'Implement stack with min', 'Medium', 'Stack with auxiliary min stack', null),
-  ('prep-stacks-queues-infix-to-postfix', 'Infix to postfix', 'Medium', 'Shunting-yard (no parens)', null),
-  ('prep-stacks-queues-prefix-to-postfix', 'Prefix to postfix', 'Medium', 'Reverse scan prefix stack', null),
-  ('prep-stacks-queues-simplify-path', 'Simplify Path', 'Medium', 'Stack', null),
-  ('prep-stacks-queues-trapping-rain-water', 'Trapping Rain Water', 'Medium', 'Two Pointers', null),
-  ('prep-stacks-queues-validate-parentheses', 'Validate parentheses', 'Medium', 'Stack bracket matching', null),
-  ('prep-streams-io-add-spaces-around-parentheses-in', 'Add spaces around parentheses in', 'Medium', 'String builder scan', null),
-  ('prep-streams-io-binary-tree-in-order-iterator', 'Binary tree in-order iterator', 'Medium', 'Iterative inorder with stack', null),
-  ('prep-streams-io-check-palindrome-in-stream', 'Check palindrome in stream', 'Medium', 'Streaming palindrome stack', null),
-  ('prep-streams-io-clean-directories-recursively', 'Clean directories recursively', 'Medium', 'Recursive directory walk', null),
-  ('prep-streams-io-count-words-in-file', 'Count words in file', 'Medium', 'Scanner word tokenization', null),
-  ('prep-streams-io-file-line-iterator', 'File line iterator', 'Medium', 'Buffered line iterator', null),
-  ('prep-streams-io-find-files-size-larger-than-5m', 'Find files size larger than 5M', 'Medium', 'Filesystem walk with size filter', null),
-  ('prep-streams-io-find-kth-largest-in-stream', 'Find Kth largest in stream', 'Medium', 'Min-heap size k', null),
-  ('prep-streams-io-find-median-in-stream', 'Find median in stream', 'Medium', 'Two heaps median', null),
-  ('prep-streams-io-merge-k-sorted-streams-in-one', 'Merge K sorted streams in one', 'Medium', 'K-way merge with min-heap', null),
-  ('prep-streams-io-rate-limiter-iterator', 'Rate limiter iterator', 'Medium', 'Token bucket rate limiter', null),
-  ('prep-streams-io-reverse-content-of-file-in-place', 'Reverse content of file in place', 'Medium', 'In-place byte reversal', null),
-  ('prep-strings-count-words-obtained-after-adding-a-letter', 'Count Words Obtained After Adding a Letter', 'Medium', 'Bitmask Hash Set', null),
-  ('prep-strings-custom-sort-string', 'Custom Sort String', 'Medium', 'Counting', null),
-  ('prep-strings-find-all-subset-words', 'Find all subset words', 'Medium', 'Multiset match', null),
-  ('prep-strings-find-anagram-substring-indices', 'Find anagram substring indices', 'Medium', 'Sliding window freq', null),
-  ('prep-strings-find-and-replace-in-string', 'Find and Replace in String', 'Medium', 'Index Map', null),
-  ('prep-strings-find-first-unique-character', 'Find first unique character', 'Medium', 'Frequency map', null),
-  ('prep-strings-find-repeated-substrings-size-k', 'Find repeated substrings size K', 'Medium', 'Hash set substrings', null),
-  ('prep-strings-group-anagrams', 'Group anagrams', 'Medium', 'Hash by signature', null),
-  ('prep-strings-group-shifted-strings', 'Group Shifted Strings', 'Medium', 'Hash Map (diff key)', null),
-  ('prep-strings-is-anagram', 'Is anagram', 'Medium', 'Frequency count', null),
-  ('prep-strings-is-isomorphic', 'Is isomorphic', 'Medium', 'Bijection map', null),
-  ('prep-strings-is-palindrome', 'Is palindrome', 'Medium', 'Two pointers', null),
-  ('prep-strings-longest-common-prefix', 'Longest common prefix', 'Medium', 'Vertical scan', null),
-  ('prep-strings-longest-happy-string', 'Longest Happy String', 'Medium', 'Greedy (pick highest count)', null),
-  ('prep-strings-longest-palindromic-substring', 'Longest palindromic substring', 'Medium', 'Expand center', null),
-  ('prep-strings-longest-substring-with-unique', 'Longest substring with unique', 'Medium', 'Sliding window', null),
-  ('prep-strings-min-insertions-to-form-palin', 'Min insertions to form palin-', 'Medium', 'DP palindrome', null),
-  ('prep-strings-min-window-substring', 'Min window substring', 'Medium', 'Sliding window', null),
-  ('prep-strings-minimum-add-to-make-parentheses-valid', 'Minimum Add to Make Parentheses Valid', 'Medium', 'Counter', null),
-  ('prep-strings-minimum-remove-to-make-valid-parentheses', 'Minimum Remove to Make Valid Parentheses', 'Medium', 'Stack of unmatched indices', null),
-  ('prep-strings-minimum-time-difference', 'Minimum Time Difference', 'Medium', 'Sort + Wrap-around', null),
-  ('prep-strings-minimum-time-to-make-rope-colorful', 'Minimum Time to Make Rope Colorful', 'Medium', 'Greedy (keep max in group)', null),
-  ('prep-strings-number-of-matching-subsequences', 'Number of Matching Subsequences', 'Medium', 'Multi-pointer Buckets', null),
-  ('prep-strings-number-of-steps-to-reduce-a-number-in-binary-representation-', 'Number of Steps to Reduce a Number in Binary to One', 'Medium', 'Right-to-Left with Carry', null),
-  ('prep-strings-ransom-note', 'Ransom note', 'Medium', 'Char frequency', null),
-  ('prep-strings-reverse-words', 'Reverse words', 'Medium', 'Reverse in place', null),
-  ('prep-strings-reverse-words-in-a-string', 'Reverse Words in a String', 'Medium', 'Split + Reverse', null),
-  ('prep-strings-rotate-string', 'Rotate string', 'Medium', 'Double string trick', null),
-  ('prep-strings-run-length-encoding', 'Run length encoding', 'Medium', 'Run-length', null),
-  ('prep-strings-shortest-subarray-contains-all', 'Shortest subarray contains all', 'Medium', 'Sliding window', null),
-  ('prep-strings-shortest-way-to-form-string', 'Shortest Way to Form String', 'Medium', 'Two Pointers Greedy', null),
-  ('prep-strings-strings-differ-by-one-character', 'Strings Differ by One Character', 'Medium', 'Wildcard Hash Set', null),
-  ('prep-strings-sum-of-prefix-scores-of-strings', 'Sum of Prefix Scores of Strings', 'Medium', 'Trie (count at each node)', null),
-  ('prep-strings-swap-adjacent-in-lr-string', 'Swap Adjacent in LR String', 'Medium', 'Two Pointers', null),
-  ('prep-strings-swap-even-odd', 'Swap even odd', 'Medium', 'Adjacent swap', null),
-  ('prep-strings-text-justification', 'Text Justification', 'Medium', 'Greedy Line Packing', null),
-  ('prep-strings-valid-number', 'Valid Number', 'Medium', 'Single Pass Flags', null),
-  ('prep-strings-word-break', 'Word break', 'Medium', 'DP reachability', null),
-  ('prep-strings-word-wrap', 'Word wrap', 'Medium', 'Greedy line break', null),
-  ('prep-trees-binary-search-tree-iterator', 'Binary Search Tree Iterator', 'Medium', 'Controlled Inorder (stack of left spine)', null),
-  ('prep-trees-binary-tree-maximum-path-sum', 'Binary Tree Maximum Path Sum', 'Medium', 'Post-order DFS', null),
-  ('prep-trees-binary-tree-right-side-view', 'Binary Tree Right Side View', 'Medium', 'DFS right-first', null),
-  ('prep-trees-binary-tree-traversal-iteratively', 'Binary tree traversal iteratively', 'Medium', 'Stack iterative', null),
-  ('prep-trees-binary-tree-vertical-order-traversal', 'Binary Tree Vertical Order Traversal', 'Medium', 'BFS + Column Map', null),
-  ('prep-trees-binary-tree-zigzag-level-order-traversal', 'Binary Tree Zigzag Level Order Traversal', 'Medium', 'BFS + Direction Toggle', null),
-  ('prep-trees-convert-binary-search-tree-to-sorted-doubly-linked-list', 'Convert Binary Search Tree to Sorted Doubly Linked List', 'Medium', 'Inorder DFS (first/last tracking)', null),
-  ('prep-trees-convert-binary-tree-to-doubly', 'Convert binary tree to doubly', 'Medium', 'Inorder flatten', null),
-  ('prep-trees-convert-sorted-array-to-bst', 'Convert sorted array to BST', 'Medium', 'Mid divide BST', null),
-  ('prep-trees-convert-sorted-linked-list-to-bst', 'Convert sorted linked list to BST', 'Medium', 'Inorder simulation', null),
-  ('prep-trees-count-good-nodes-in-binary-tree', 'Count Good Nodes in Binary Tree', 'Medium', 'DFS with max tracking', null),
-  ('prep-trees-find-distance-of-two-nodes', 'Find distance of two nodes', 'Medium', 'LCA + heights', null),
-  ('prep-trees-nary-tree-distance-of-two-nodes', 'Find distance of two nodes', 'Medium', 'LCA + level distance BFS', null),
-  ('prep-trees-find-kth-largest-in-bst', 'Find Kth largest in BST', 'Medium', 'Reverse inorder', null),
-  ('prep-trees-find-leaves-of-binary-tree', 'Find Leaves of Binary Tree', 'Medium', 'Height-based DFS', null),
-  ('prep-trees-nary-tree-lowest-common-ancestor', 'Find lowest common ancestor', 'Medium', 'N-ary tree LCA post-order', null),
-  ('prep-trees-flip-tree', 'Flip tree', 'Medium', 'Swap children', null),
-  ('prep-trees-get-diameter', 'Get diameter', 'Medium', 'Post-order diameter', null),
-  ('prep-trees-nary-tree-diameter', 'Get diameter', 'Medium', 'N-ary tree diameter via top-2 heights', null),
-  ('prep-trees-get-height', 'Get height', 'Medium', 'Post-order height', null),
-  ('prep-trees-nary-tree-height', 'Get height', 'Medium', 'N-ary tree DFS height', null),
-  ('prep-trees-inorder-successor-in-bst', 'Inorder Successor in BST', 'Medium', 'BST Walk', null),
-  ('prep-trees-is-balanced', 'Is balanced', 'Medium', 'Balance check', null),
-  ('prep-trees-is-bst', 'Is BST', 'Medium', 'BST range check', null),
-  ('prep-trees-is-complete', 'Is complete', 'Medium', 'Level order fill', null),
-  ('prep-trees-is-subtree', 'Is subtree', 'Medium', 'Same tree check', null),
-  ('prep-trees-is-symmetric', 'Is symmetric', 'Medium', 'Mirror compare', null),
-  ('prep-trees-level-order', 'Level order', 'Medium', 'BFS levels', null),
-  ('prep-trees-nary-tree-level-order', 'Level order', 'Medium', 'N-ary BFS level order', null),
-  ('prep-trees-longest-path-with-different-adjacent-characters', 'Longest Path With Different Adjacent Characters', 'Medium', 'DFS tracking top-2 child contributions', null),
-  ('prep-trees-lowest-common-ancestor-of-a-binary-tree', 'Lowest Common Ancestor of a Binary Tree', 'Medium', 'Recursive DFS', null),
-  ('prep-trees-lowest-common-ancestor-of-a-binary-tree-iii', 'Lowest Common Ancestor of a Binary Tree III', 'Medium', 'Two Pointers (linked-list intersection trick)', null),
-  ('prep-trees-nary-tree-monarchy-succession', 'Monarchy succession order', 'Medium', 'Tree build + iterative pre-order', null),
-  ('prep-trees-nary-tree-traversal-iteratively', 'Nary tree traversal iteratively', 'Medium', 'N-ary iterative pre/post-order with stack', null),
-  ('prep-trees-path-sum-to-k', 'Path sum to K', 'Medium', 'Prefix sum on tree', null),
-  ('prep-trees-populate-next-pointers-to-right', 'Populate next pointers to right', 'Medium', 'Level order connect', null),
-  ('prep-trees-print-all-root-to-leaf-paths', 'Print all root to leaf paths', 'Medium', 'DFS path', null),
-  ('prep-trees-print-leaves', 'Print leaves', 'Medium', 'Post-order leaves', null),
-  ('prep-trees-print-side-view', 'Print side view', 'Medium', 'BFS rightmost', null),
-  ('prep-trees-print-vertical', 'Print vertical', 'Medium', 'Column map BFS', null),
-  ('prep-trees-recover-binary-search-tree', 'Recover Binary Search Tree', 'Medium', 'Inorder DFS (find two inversions)', null),
-  ('prep-trees-serialize-and-deserialize', 'Serialize and deserialize', 'Medium', 'BFS serialize', null),
-  ('prep-trees-serialize-and-deserialize-binary-tree', 'Serialize and Deserialize Binary Tree', 'Medium', 'Preorder DFS', null),
-  ('prep-trees-step-by-step-directions-from-a-binary-tree-node-to-another', 'Step-By-Step Directions From a Binary Tree Node to Another', 'Medium', 'Two Paths + LCA via Common Prefix', null),
-  ('prep-trees-sum-of-nodes', 'Sum of nodes', 'Medium', 'DFS sum', null),
-  ('prep-trees-vertical-order-traversal-of-a-binary-tree', 'Vertical Order Traversal of a Binary Tree', 'Medium', 'BFS + Sort per column', null),
-  ('prep-tries-find-distinct-palindromic-sub', 'Find distinct palindromic sub-', 'Medium', 'Suffix trie + palindrome check', null),
-  ('prep-tries-implement-trie-methods', 'Implement trie methods', 'Medium', 'Trie with 26-way branching', null),
-  ('prep-tries-longest-repeated-substring', 'Longest repeated substring', 'Medium', 'Suffix array + LCP scan', null),
-  ('go-conc-scheduler', 'Goroutines & the GMP scheduler', 'Hard', 'How Go''s M:N scheduler multiplexes millions of goroutines onto OS threads.', null),
-  ('go-conc-channels', 'Channels: buffered, unbuffered, closed, nil', 'Hard', 'Send/receive, close semantics, comma-ok, and the nil-channel trick that senior Go hinges on.', null),
-  ('go-conc-select', 'select, timeouts & non-blocking ops', 'Hard', 'How select picks ready cases, disables nil cases, and models timeouts/non-blocking I/O.', null),
-  ('go-conc-context', 'context: cancellation & deadlines', 'Hard', 'Propagate cancellation and deadlines across API boundaries without leaking goroutines.', null),
-  ('go-conc-sync', 'sync primitives: Mutex, RWMutex, WaitGroup, Once', 'Hard', 'Zero-value-ready locks that must never be copied, with subtle WaitGroup and Once semantics.', null),
-  ('go-conc-worker-pool', 'Worker pools, fan-in & fan-out', 'Hard', 'Bound concurrency with a fixed worker set; fan out over one channel, fan in results, close correctly.', null),
-  ('go-conc-hazards', 'Races, deadlocks & goroutine leaks', 'Hard', 'The four canonical concurrency failure modes and why the runtime can only catch some of them.', null),
-  ('go-conc-atomic', 'atomic operations & the sync/atomic types', 'Hard', 'Lock-free reads/writes with the typed atomics — and where their guarantees end.', null),
-  ('go-mem-stack-heap', 'Escape analysis: stack vs heap', 'Hard', 'How the compiler decides stack vs heap, and why it drives allocation cost.', null),
-  ('go-mem-gc', 'The garbage collector', 'Hard', 'Concurrent tricolor mark-sweep with a hybrid write barrier, tuned by GOGC and GOMEMLIMIT.', null),
-  ('go-mem-model', 'The Go memory model & happens-before', 'Hard', 'Happens-before is the only contract that makes cross-goroutine reads observe the right writes.', null),
-  ('go-mem-pool-alloc', 'Allocation control & sync.Pool', 'Hard', 'Cut allocations with sync.Pool, preallocation, and cache-aware layout — and know exactly when each backfires.', null),
-  ('go-iface-internals', 'Interface internals: iface, eface, itab', 'Hard', 'How Go represents interface values as two words and dispatches methods via the itab.', null),
-  ('go-iface-nil', 'The nil interface trap', 'Hard', 'A typed nil pointer wrapped in an interface is NOT equal to nil.', null),
-  ('go-iface-method-sets', 'Method sets: pointer vs value receivers', 'Hard', 'Why *T satisfies an interface but T often does not, and where addressability bites.', null),
-  ('go-iface-embedding', 'Embedding & composition', 'Hard', 'How promotion, overriding, and interface embedding work — and where ambiguity bites.', null),
-  ('go-iface-assertions', 'Type assertions & type switches', 'Hard', 'x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.', null),
-  ('go-gen-type-params', 'Type parameters & instantiation', 'Hard', 'How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.', null),
-  ('go-gen-constraints', 'Constraints, ~ and comparable', 'Hard', 'Type sets, union elements, ~underlying approximation, and the two flavors of comparable.', null),
-  ('go-gen-inference', 'Type inference & its limits', 'Hard', 'How Go infers type arguments from function args, and the hard limits where you must be explicit.', null),
-  ('go-gen-pitfalls', 'Generics pitfalls & when not to use', 'Hard', 'Know the hard limits of Go generics and when a plain interface beats a type parameter.', null),
-  ('go-err-wrapping', 'Wrapping with %w, errors.Is / As', 'Hard', 'Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.', null),
-  ('go-err-sentinel-typed', 'Sentinel vs typed errors', 'Hard', 'When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.', null),
-  ('go-err-panic-recover', 'panic, recover & defer semantics', 'Hard', 'How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.', null),
-  ('go-err-custom', 'Custom error types & Unwrap', 'Hard', 'Build custom error types that participate correctly in Is/As chains and joined trees.', null),
-  ('go-data-slice-internals', 'Slice header, len, cap & append growth', 'Hard', 'How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.', null),
-  ('go-data-slice-aliasing', 'Slice aliasing & the append gotcha', 'Hard', 'Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().', null),
-  ('go-data-maps', 'Map internals & iteration order', 'Hard', 'How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.', null),
-  ('go-data-strings-runes', 'Strings, bytes, runes & UTF-8', 'Hard', 'Strings are immutable byte sequences; indexing yields bytes, range yields runes.', null),
-  ('go-std-io', 'io.Reader / io.Writer composition', 'Hard', 'Compose small io interfaces to stream data through wrappers without buffering everything in memory.', null),
-  ('go-std-json', 'encoding/json quirks', 'Hard', 'Reflection-driven (un)marshaling: exported fields, tags, omitempty, embedding, and interface{} defaults.', null),
-  ('go-std-time', 'time: monotonic clocks & tickers', 'Hard', 'How time.Time carries a monotonic reading, and how Timers and Tickers behave under Go 1.23+ unbuffered-channel semantics.', null),
-  ('go-std-defer-idioms', 'defer patterns & resource cleanup', 'Hard', 'LIFO defers, loop pitfalls, error-preserving close, and defer cost under Go 1.26.', null),
-  ('go-perf-benchmarks', 'Benchmarks & benchstat', 'Hard', 'Write trustworthy microbenchmarks with testing.B and compare them statistically with benchstat.', null),
-  ('go-perf-pprof', 'pprof: CPU & heap profiling', 'Hard', 'Capture and read CPU and heap profiles with runtime/pprof and net/http/pprof, and interpret flat/cum and inuse/alloc samples.', null),
-  ('go-perf-allocations', 'Reducing allocations & inlining', 'Hard', 'Cut heap traffic and keep hot functions inlinable to speed up Go code.', null),
-  ('go-perf-datastructures', 'Choosing structures for performance', 'Hard', 'Pick data structures by memory layout and access pattern, not just Big-O.', null),
-  ('go-test-table', 'Table-driven tests & subtests', 'Hard', 'Structure cases as data, run each via t.Run, and diff want/got with cleanups and golden files.', null),
-  ('go-test-parallel', 't.Parallel, helpers & cleanup', 'Hard', 'How parallel subtests schedule, capture loop vars, and interleave with cleanup and t.TempDir.', null),
-  ('go-test-fuzz', 'Fuzzing', 'Hard', 'Native Go fuzzing: FuzzX targets, seed corpus, differential invariants, and persisted crashers.', null),
-  ('go-test-doubles', 'Test doubles & httptest', 'Hard', 'Design testable seams with interfaces, choose fakes over mocks, and drive HTTP code with httptest.', null),
-  ('go-design-rate-limiter', 'Design: token-bucket rate limiter', 'Hard', 'Token bucket with x/time/rate, per-key limiters, safe refill, and idle eviction.', null),
-  ('go-design-worker-pool', 'Design: bounded worker-pool service', 'Hard', 'Bound concurrency with fixed workers or a semaphore, apply backpressure, drain gracefully, and aggregate errors under cancellation.', null),
-  ('go-design-lru-cache', 'Design: concurrent LRU cache', 'Hard', 'Build an O(1) LRU with map + doubly linked list, then make it concurrent via sharding vs a single mutex.', null),
-  ('go-design-graceful-shutdown', 'Design: graceful shutdown', 'Hard', 'Drain in-flight requests on SIGTERM, then close dependencies in the right order.', null),
-  ('go-design-pipeline', 'Design: cancellable pipeline', 'Hard', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', null);
+insert into public.problems (id, title, difficulty, summary, source_url, region_id, narrative) values
+  ('union-find', 'Union-Find · Kruskal MST', 'Medium', 'Kruskal''s MST driven by a disjoint-set: sort edges by weight, union endpoints in different sets (add to tree), skip same-set edges (cycle).', 'https://leetcode.com/problems/graph-valid-tree/', null, null),
+  ('tree-traversals', 'Tree traversals', 'Easy', 'Pre/in/post-order DFS and level-order BFS on one binary tree, building the visit sequence step by step.', 'https://leetcode.com/problems/binary-tree-inorder-traversal/', null, null),
+  ('trie', 'Trie (prefix tree)', 'Medium', 'Insert several words into a prefix tree, then search one — walking and creating child nodes per character.', 'https://leetcode.com/problems/implement-trie-prefix-tree/', null, null),
+  ('binary-search', 'Binary search', 'Easy', 'Halve a sorted window each step: compare the middle, then keep the side that can contain the target.', 'https://leetcode.com/problems/binary-search/', null, null),
+  ('two-sum-sorted', 'Two sum II (sorted)', 'Medium', 'Two pointers from both ends of a sorted array; the running sum decides which pointer to move inward.', 'https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/', null, null),
+  ('max-subarray-sum-k', 'Max subarray sum (size k)', 'Medium', 'Fixed-size sliding window: seed the sum of the first k elements, then slide one step at a time, adding the entering value and dropping the leaving one to track the best window in O(n).', 'https://leetcode.com/problems/maximum-average-subarray-i/', null, null),
+  ('longest-substring', 'Longest substring w/o repeat', 'Medium', 'A variable-size sliding window: expand right over fresh characters and shrink from the left whenever a duplicate appears, tracking the longest unique span.', 'https://leetcode.com/problems/longest-substring-without-repeating-characters/', null, null),
+  ('reverse-linked-list', 'Reverse linked list', 'Easy', 'Walk the list once, flipping each node’s next pointer to its predecessor; the old tail becomes the new head.', 'https://leetcode.com/problems/reverse-linked-list/', null, null),
+  ('linked-list-cycle', 'Linked list cycle', 'Easy', 'Run two pointers — a slow tortoise (1 step) and a fast hare (2 steps). If the hare falls off the end there is no cycle; if it ever catches the tortoise, the list loops.', 'https://leetcode.com/problems/linked-list-cycle/', null, null),
+  ('bubble-sort', 'Bubble sort', 'Easy', 'Walk the array swapping adjacent out-of-order pairs; each pass floats the next-largest value to its final slot.', 'https://en.wikipedia.org/wiki/Bubble_sort', null, null),
+  ('selection-sort', 'Selection sort', 'Easy', 'Each round, scan the unsorted suffix for its minimum and swap it into the next slot; the prefix grows sorted one element at a time.', 'https://en.wikipedia.org/wiki/Selection_sort', null, null),
+  ('insertion-sort', 'Insertion sort', 'Easy', 'Grow a sorted prefix: take each next element as a key, shift larger sorted elements right, then drop the key into the gap.', 'https://en.wikipedia.org/wiki/Insertion_sort', null, null),
+  ('quick-sort', 'Quick sort', 'Medium', 'Pick a pivot, partition smaller values left and larger right with Lomuto, seat the pivot, then sort each side — driven by an explicit range stack.', 'https://en.wikipedia.org/wiki/Quicksort', null, null),
+  ('merge-sort', 'Merge sort', 'Medium', 'Treat each element as a sorted run, then repeatedly merge adjacent runs by comparing their fronts and writing the smaller value back, doubling run width each pass.', 'https://en.wikipedia.org/wiki/Merge_sort', null, null),
+  ('heap-sort', 'Heap sort', 'Medium', 'Read the array as an in-place binary max-heap: build it by sifting down, then repeatedly swap the root to the tail and re-heapify the shrinking prefix.', 'https://en.wikipedia.org/wiki/Heapsort', null, null),
+  ('heap-operations', 'Heap operations', 'Medium', 'Binary min-heap insert and extract-min on a complete tree, showing sift-up and sift-down step by step.', 'https://leetcode.com/problems/find-k-pairs-with-smallest-sums/', null, null),
+  ('n-queens', 'N-Queens', 'Hard', 'Place one queen per row; try columns left to right, recurse when a spot is safe, and backtrack when a row runs out. Stops at the first full solution.', 'https://leetcode.com/problems/n-queens/', null, null),
+  ('interval-scheduling', 'Interval scheduling (activity selection)', 'Medium', 'Sort intervals by end time, then greedily keep any interval that starts after the last one chosen to maximize the non-overlapping count.', 'https://leetcode.com/problems/non-overlapping-intervals/', null, null),
+  ('imp-0-01-bfs-shortest-reach', 'BFS Shortest Reach', 'Medium', 'BFS from start node', null, 'archipelago-ripple-shallows', 'You drop a single stone off the source islet and count the rings it takes to lap every other islet — each ring is worth 6 fathoms of open water. Islets no ring ever reaches stay dark on the chart at −1. That patient, level-by-level spread is breadth-first search: the shallows hand you the true unweighted distance to everything at once.'),
+  ('imp-0-02-clone-graph', 'Clone Graph', 'Medium', 'DFS clone with hash map', 'https://leetcode.com/problems/clone-graph/', 'archipelago-deep-trenches', 'You drop into the first tunnel of the Deep Trenches with a waterproof ledger in hand. Each cavern you touch, you sketch a fresh copy of it into the ledger before diving down its passages — so when a tunnel loops back to a chamber you''ve already charted, you flip to that page instead of drowning in an endless descent. Plunge one branch to its floor, snapshot every fork as you fall, and let the ledger''s memo turn a maze of cycles into a perfect mirror-world you carry back to the surface.'),
+  ('imp-0-03-find-shortest-path-with-bfs', 'Find Shortest Path with BFS', 'Medium', 'BFS shortest path unweighted', 'Educational', 'archipelago-ripple-shallows', 'Measuring the distance is not enough — you want the route home. So the moment a ripple first touches an islet you nail a breadcrumb buoy there, pointing back at whichever islet the ring came from (its predecessor). When the rings finally lap the destination dock, you walk the buoys backward and the shortest path draws itself.'),
+  ('imp-0-04-graph-traversal', 'Graph Traversal', 'Medium', 'DFS and BFS traversal', 'Educational', 'archipelago-ripple-shallows', 'Two crews chart the same waters. A diver plunges island to island, all the way down one chain before surfacing (depth-first). A signal-tower fans its rings out evenly, nearest islets first (breadth-first). Both crews share one logbook of visited islets, so no island is ever charted twice — the same map, two rhythms of exploring it.'),
+  ('imp-0-05-has-path-from-source-to-destination', 'Has Path from Source to Destination', 'Easy', 'BFS reachability', 'Educational', 'archipelago-ripple-shallows', 'The simplest question in the Shallows: can you even get there? Drop the stone at the source and let the rings spread, marking each islet so you never revisit it. The instant a ring laps the destination dock you stop and answer yes; if the water goes still first, no route exists.'),
+  ('imp-0-06-print-all-paths-from-source-to-destination', 'Print All Paths from Source to Destination', 'Medium', 'DFS path backtracking', 'Educational', 'archipelago-deep-trenches', 'You plunge from the source vent, torch marking each shaft visited so you never circle back on yourself. When your headlamp finally catches the destination floor, you press a wax rubbing of the exact route you took, then rise one shaft and try the next unexplored branch. Vent by vent you enumerate every distinct descent, clearing each mark as you surface so a later dive can reuse that tunnel — until the whole trench has surrendered all its paths.'),
+  ('imp-0-07-shortest-distance-from-all-buildings', 'Shortest Distance from All Buildings', 'Hard', 'BFS from each building', 'https://leetcode.com/problems/shortest-distance-from-all-buildings/', 'archipelago-fog-banks', 'Each lighthouse in the Fog Banks pulses its beam outward one ring at a time, and you can only ever see the next tile of sea before it vanishes into grey — so you count the fog-rings blindly, tallying at every open tile how far each beam traveled and how many lighthouses ever reached it. Obstacle-reefs swallow beams whole, walling off water no light can cross. When every lighthouse has finished pulsing, you moor at the one open tile that every beam touched and whose summed ring-count is smallest; if no such tile exists, the fog wins and you signal -1.'),
+  ('imp-0-08-topological-sort-with-dfs', 'Topological Sort with DFS', 'Medium', 'Topological sort DFS post-order', 'Educational', 'archipelago-mount-prerequisite', 'You stand at the foot of Mount Prerequisite, where no ledge may be laid until every step beneath it is already set. You climb each unfinished tier as far up its dependency chain as it will go, and only when a step has nothing left above it do you carve it and drop it onto your descending pile. When at last you flip that pile end-over-end, the mountain''s stairway falls into place from base to summit — every foothold resting on ground that was poured before it.'),
+  ('imp-1-subset-component', 'Subset Component', 'Hard', 'Subset DFS + 64-bit DSU', null, null, null),
+  ('imp-2-alien-dictionary', 'Alien Dictionary', 'Hard', 'BFS topological sort (Kahn''s)', 'https://leetcode.com/problems/alien-dictionary/', 'archipelago-mount-prerequisite', 'You stand at the foot of Mount Prerequisite, where an alien script must be carved into the volcano''s terraces — but no glyph may be set until every glyph it depends on is already in place beneath it. You read the sorted words two at a time, and each first-mismatched pair whispers a rule: this rune must sit lower than that one. Beginning with the runes no rule holds down, you lay each free glyph, lift the weight it held over its dependents, and let newly-freed runes rise to your hand — until either the whole tongue is terraced, or a ring of mutual dependence proves the mountain unclimbable and the script collapses to nothing.'),
+  ('imp-3-remove-invalid-parentheses', 'Remove Invalid Parentheses', 'Hard', 'BFS level-by-level', 'https://leetcode.com/problems/remove-invalid-parentheses/', 'archipelago-fog-banks', 'You drift into the Fog Banks holding a tangled string of brackets, and the mist lets you see only one edit ahead. You expand ring by ring — every string one deletion away forms the next ring of fog — never revisiting a tile you''ve already touched. The moment a whole ring reveals even one balanced string, you stop cold: that ring is the shallowest reach, the fewest removals, and you gather every valid sibling in it before the fog can close.'),
+  ('imp-4-floyd-city-of-blinding-lights', 'Floyd City of Blinding Lights', 'Medium', 'Floyd-Warshall all-pairs shortest paths', null, 'archipelago-lighthouse-straits', 'You climb the tallest lighthouse in the Straits and, one lit hub at a time, ask a single question: could routing every channel *through this beacon* shorten any voyage between any two ports? Beacon by beacon — k from one lantern to the last — the whole harbor''s distance chart tightens until every cell holds the true shortest passage, and unreachable waters keep their sentinel darkness at 1<<30. When a pilot radios "how far from buoy u to buoy v?", you read the answer straight off the finished chart, returning -1 for channels that were never lit or ports that don''t exist.'),
+  ('imp-5-swim-in-rising-water', 'Swim in Rising Water', 'Hard', 'Dijkstra min-heap tracking max elevation', 'https://leetcode.com/problems/swim-in-rising-water/', 'archipelago-lighthouse-straits', 'The tide is climbing across the Lighthouse Straits, and every buoy carries an elevation the water must reach before you can drift past it. As harbor pilot you always steer toward the lowest unclaimed buoy first, letting a min-heap hand you the cheapest next crossing while the flood line — your running maximum — creeps upward only when it must. The instant the far northeast beacon slips beneath your keel, that highest water line you were ever forced to endure is the earliest hour the whole channel became swimmable.'),
+  ('imp-6-find-shortest-path-with-dijkstra-s', 'Find Shortest Path with Dijkstra''s', 'Medium', 'Dijkstra min-heap', 'Educational', 'archipelago-lighthouse-straits', 'You take the helm in the Lighthouse Straits, where every channel carries a real distance and a stubborn current, and no two crossings cost the same. From your home berth you always cast off toward the nearest unvisited lit buoy, lock in its true shortest distance, then let its glow reveal shorter approaches to every buoy beyond — relaxing each channel as you go. Buoys the currents can never carry you to stay dark at infinite reach, and when the last reachable light is settled you moor for the night, your chart of shortest sailings complete.'),
+  ('imp-7-is-graph-bipartite', 'Is Graph Bipartite?', 'Medium', 'BFS 2-coloring', 'https://leetcode.com/problems/is-graph-bipartite/', 'archipelago-two-tone-atoll', 'You wade onto the first unpainted isle of the ring reef and daub it coral; every isle it touches you must paint teal, and every isle those touch, coral again — the two-tone spell rippling outward wave by wave through the lagoon. When your queue of freshly painted isles runs dry you leap the water to the next unpainted atoll and start the spell anew, so no cluster of the archipelago goes unchecked. But the moment your brush reaches across a bridge and finds an isle already wearing the same hue you were about to lay down, the spell shatters — two touching same-coloured isles mean this reef can never wear just two tones.'),
+  ('imp-8-merging-communities', 'Merging Communities', 'Medium', 'Union-Find with path compression and union by size', null, 'archipelago-coral-colonies', 'You drift over the Coral Colonies, where each living reef remembers only its elder polyp — the root of its lineage. When a warm current fuses two reefs, you graft the smaller colony''s elder beneath the larger''s, so no lineage ever grows needlessly deep; that is your union by size. When a diver asks "how vast is this reef?", you swim polyp to polyp, collapsing the chain of ancestry as you go, until you reach the elder — and the elder alone knows how many polyps its super-reef now holds.'),
+  ('imp-9-similar-string-groups', 'Similar String Groups', 'Hard', 'Union-Find + pairwise similarity check', 'https://leetcode.com/problems/similar-string-groups/', 'archipelago-coral-colonies', 'You drift between coral colonies where two reefs count as one living super-reef if their polyp-patterns match exactly or differ in precisely two spots — a single swap of two anemones. For every pair you tally the mismatches, bailing the instant a third difference appears, and when a reef qualifies you fuse it into its neighbor by hanging the smaller colony beneath the larger elder polyp. Each fusion collapses two roots into one and drops your colony count by exactly one; ask "same reef?" and you simply chase each polyp up to its elder. When the tide settles, the number of surviving elder polyps is the number of distinct super-reefs left in the archipelago.'),
+  ('imp-10-word-ladder', 'Word Ladder', 'Hard', 'BFS level-by-level', 'https://leetcode.com/problems/word-ladder/', 'archipelago-fog-banks', 'You stand on a word-tile in the Fog Banks, seeing only the tiles one letter-change away through the mist. You call out every single-letter variant of where you stand, and only the real tiles in the wordlist answer back out of the grey — you step onto each, then let the fog swallow it behind you so you never backtrack. Expanding ring by ring, counting each blind sweep as one more step, you reach the far shore of cog the instant its tile lights up, and the number of rings you crossed is your answer.'),
+  ('imp-11-shortest-path-in-a-grid-with-obstacles-eliminati', 'Shortest Path in a Grid with Obstacles Elimination', 'Hard', 'BFS with (r,c,remaining) state', 'https://leetcode.com/problems/shortest-path-in-a-grid-with-obstacles-elimination/', 'archipelago-fog-banks', 'You drift into the fog banks with exactly k fire-charges, and every wall of mist you burn through costs one. The sea only reveals the tile one step ahead, so you push outward ring by ring — but here a "place" is really a triple: where you stand AND how many charges you have left, so the same cell visited with more fuel is a fresh, unexplored world. The first ring that touches the far corner is your answer; run dry of both charges and open water, and the fog swallows you whole (-1).'),
+  ('imp-12-shortest-path-in-binary-matrix', 'Shortest Path in Binary Matrix', 'Medium', 'BFS 8-directional', 'https://leetcode.com/problems/shortest-path-in-binary-matrix/', 'archipelago-fog-banks', 'You drift onto the fog-drowned sea where only the tile beneath your hull is visible and clear water shows as 0, reef as 1. Unable to see the far corner, you cast your lantern outward in all eight compass directions at once, staining each newly-touched tile so you never revisit it, and you count the rings of light as they bloom outward. The moment a ring''s edge laps against the far corner you halt and read the ring number aloud — that count is your shortest crossing; and if start or end sits on reef, or the fog swallows every path before the light arrives, you turn back with -1.'),
+  ('imp-13-robot-room-cleaner', 'Robot Room Cleaner', 'Hard', 'DFS with relative coordinates', 'https://leetcode.com/problems/robot-room-cleaner/', 'archipelago-deep-trenches', 'You are dropped blind into the flooded cave with only a hand on the tunnel wall — no map, no coordinates, just the four directions clockwise from your nose. You plunge down one branch as far as it goes, cleaning each ledge and remembering it in your mind''s grid; when the tunnel dead-ends you spin a full 180, kick back exactly one cell, and spin back to face where you were, so the water never notices you left. Branch by branch you enumerate all four ways out of every ledge, and the perfect backtrack guarantees you always resurface at the very ledge — and the very heading — you dove from.'),
+  ('imp-14-the-earliest-moment-when-everyone-become-friends', 'The Earliest Moment When Everyone Become Friends', 'Medium', 'Sort + Union-Find', 'https://leetcode.com/problems/the-earliest-moment-when-everyone-become-friends/', 'archipelago-coral-colonies', 'You drift through the Coral Colonies clutching a stack of acquaintance-logs, each stamped with the tide-hour two polyps first touched. Replaying the logs in order of rising tide, you watch scattered reefs fuse — every handshake asks each polyp for its elder root, and if two elders differ, the smaller reef bows to the larger, its polyps re-rooted beneath the elder that survives. You count the living super-reefs as they shrink; the instant the count falls to one — every polyp sharing a single ancestor — you call out that tide-hour as the moment the whole colony became kin. If the last log passes and even one reef still drifts apart, you return -1: some polyp was never touched by the fusing tide.'),
+  ('imp-15-find-all-possible-recipes-from-given-supplies', 'Find All Possible Recipes from Given Supplies', 'Medium', 'Topological sort (Kahn''s)', 'https://leetcode.com/problems/find-all-possible-recipes-from-given-supplies/', 'archipelago-mount-prerequisite', 'You stand at the foot of Mount Prerequisite, where every recipe is a terrace that can only be laid once the terraces beneath it are set. Your supplies are the bedrock already fused to the slope; you fan out along each ingredient''s edges, decrementing the count of missing steps under every dependent dish. The instant a recipe''s last prerequisite locks into place its in-degree hits zero, and you carve it into the volcano and push it onto the queue so the terraces above can rise in turn — while any ring caught in a cycle stays forever unmade, its footing never complete.'),
+  ('imp-16-detonate-the-maximum-bombs', 'Detonate the Maximum Bombs', 'Medium', 'Directed graph + DFS from each node', 'https://leetcode.com/problems/detonate-the-maximum-bombs/', 'archipelago-deep-trenches', 'You wire each buried charge to every other blast it can reach — a directed fuse, because a wide-radius bomb ignites a distant one that could never fire back. Then you pick a charge, drop the match, and dive: down one fuse to the next detonation, then the next, cloning a fresh "already-blown" ledger for every starting spark so no chamber double-counts. When a branch dead-ends in solid rock you surface and try the next tunnel, and after igniting every possible first charge you keep only the deepest chain — the single spark that brings the most of the Trenches down.'),
+  ('imp-17-maximal-network-rank', 'Maximal Network Rank', 'Medium', 'Degree counting + edge set', 'https://leetcode.com/problems/maximal-network-rank/', 'archipelago-harbormasters-ledger', 'You stand at the harbormaster''s high desk, tallying every ferry that touches each port into a column of degree-marks in your ledger. To find the two berths whose combined traffic is richest, you weigh every pair of ports, summing their ferry-counts — but when a direct route already runs between them, you strike one mark so a shared ferry is never counted twice. The busiest pair that survives your careful double-entry bookkeeping is the maximal network rank, the crown jewel of your dockside empire.'),
+  ('imp-18-number-of-good-paths', 'Number of Good Paths', 'Hard', 'Union-Find + sort by value', 'https://leetcode.com/problems/number-of-good-paths/', 'archipelago-coral-colonies', 'You wade the Coral Colonies at low tide, ranking every reef by the brightness of its polyps. Starting with the dimmest and rising, you fuse each reef into its neighbor whenever the neighbor glows no brighter than it — always letting the brighter elder polyp become the root of the fused super-reef. When the tide crests over all reefs sharing one glow, you count how many now belong to each super-reef and tally every pair that can be walked without ever passing a brighter light: those are your good paths through the living coral.'),
+  ('imp-19-maximum-score-of-a-node-sequence', 'Maximum Score of a Node Sequence', 'Hard', 'Top-3 neighbors + edge enumeration', 'https://leetcode.com/problems/maximum-score-of-a-node-sequence/', 'archipelago-harbormasters-ledger', 'You stand at the harbormaster''s high desk, and for every port you keep only a short manifest: the three most valuable ferries that dock there, ranked by cargo worth. When a captain proposes a four-berth route along an existing ferry line, you don''t scan the whole harbor — you simply pair the richest arrival at one end with the richest departure at the other, skipping any ship already counted, and tally the gold. Because greed never needs more than three candidates per berth to guarantee the best chain, you settle the fattest four-port run in a single sweep of the ledger, stamping "-1" on any berth too sparse to hold a full crossing.'),
+  ('imp-20-course-schedule', 'Course Schedule', 'Medium', 'Kahn BFS topological sort', 'https://leetcode.com/problems/course-schedule/', 'archipelago-mount-prerequisite', 'You stand at the foot of Mount Prerequisite, where no terrace may be laid until every step beneath it has set. You count how many supports each ledge still waits on, then start only with the ground-level slabs that owe nothing, laying them in the order they came to hand. Each slab you set releases the ledges resting on it; when a ledge''s last support hardens, it joins your queue and you place it next. If the mountain ever loops back on itself — a step demanding a step above it — the pending ledges never drain to zero, and you know the climb was impossible from the start.'),
+  ('imp-22-find-degree-of-vertex', 'Find Degree of Vertex', 'Easy', 'Degree count from adjacency', 'Educational', 'archipelago-harbormasters-ledger', 'You lean over the Harbormaster''s ledger, and for each port you simply count the ferry lines scrawled beside its name — that tally is its degree, no arithmetic beyond running your finger down the entries. For the two-way canals you read a single column; for the one-way tide-locks you sum the arrivals column and the departures column, because a berth''s busyness is everything that touches it, inbound or out. A self-berthed ferry that loops back to its own dock leaves two marks in the directed book (one arrival, one departure), so it counts twice — the ledger never lies, it only counts what is written.'),
+  ('imp-23-detect-cycle', 'Detect Cycle', 'Medium', 'Cycle detection DFS', 'Educational', 'archipelago-whirlpool-watch', 'You climb the lookout tower above the churning straits, charting every current as your rope trails from buoy to buoy. In the undirected reckoning you drop a marker on each buoy you touch, and the sea only truly loops when your rope crosses an already-marked buoy that isn''t the one you just left — a genuine whirlpool, not the wake behind you. In the directed reckoning each channel flows one way, so you flag a buoy blue while it still spins on your stack and paint it black once its waters run clear; the moment your rope reaches a still-blue buoy, you''ve caught a current feeding back into itself and the whirlpool alarm rings.'),
+  ('imp-24-number-of-islands', 'Number of Islands', 'Medium', 'DFS flood fill', 'https://leetcode.com/problems/number-of-islands/', 'archipelago-tide-flats', 'You wade across the Tide Flats at low water, scanning the muddy plain cell by cell, top-left to bottom-right. The instant your boot finds an unclaimed patch of land marked ''1'', you crack a vial of dye and let it bleed outward — north, south, east, west — soaking every touching patch until the whole connected island darkens to ''0'' and can never be counted twice. Diagonal patches stay dry and separate, so each fresh splash of dye you''re forced to open marks exactly one more island claimed from the tide.'),
+  ('imp-25-critical-connections-in-a-network', 'Critical Connections in a Network', 'Hard', 'Tarjan''s DFS (disc/low arrays)', 'https://leetcode.com/problems/critical-connections-in-a-network/', 'archipelago-fragile-bridges', 'You are the surveyor of the Fragile Bridges, tramping island to island and stamping each with the moment you first set foot on it — its discovery time. As you rope your way deeper, every island quietly whispers back the earliest timestamp it can still reach by looping around through the tangle behind you; that whisper is its "low." When you retreat across a bridge and find the island beyond could never loop back to a moment as old as your own arrival, you know that rope is the only thread holding it to the archipelago — cut it and the world splits. Those are the critical connections, and you mark each one before the tide comes in.'),
+  ('imp-26-subsets', 'Subsets', 'Medium', 'Subsets via start-index recursion', 'https://leetcode.com/problems/subsets/', null, null),
+  ('imp-27-combinations', 'Combinations', 'Medium', 'Combinations 1..n choose k', 'https://leetcode.com/problems/combinations/', null, null),
+  ('imp-28-combination-of-subset-strings', 'Combination of Subset Strings', 'Medium', 'k-length strings from charset with reuse', 'https://leetcode.com/problems/letter-combinations-of-a-phone-number/', null, null),
+  ('imp-29-combination-sum-ii', 'Combination Sum II', 'Medium', 'Combination sum without reuse, skip duplicates', 'https://leetcode.com/problems/combination-sum-ii/', null, null),
+  ('imp-30-decode-numbers', 'Decode Numbers', 'Medium', 'DFS decode with dictionary prefix matching', 'https://leetcode.com/problems/decode-ways/', null, null),
+  ('imp-31-expression-add-operators', 'Expression Add Operators', 'Hard', 'Backtracking with prevVal for * precedence', 'https://leetcode.com/problems/expression-add-operators/', null, null),
+  ('imp-32-generate-binary-strings', 'Generate Binary Strings', 'Easy', 'DFS generate binary strings', 'https://leetcode.com/problems/binary-watch/', null, null),
+  ('imp-33-strobogrammatic-number-ii', 'Strobogrammatic Number II', 'Medium', 'Two-pointer strobogrammatic generation', 'https://leetcode.com/problems/strobogrammatic-number-ii/', null, null),
+  ('imp-34-generate-parentheses', 'Generate Parentheses', 'Medium', 'Backtracking valid parentheses', 'https://leetcode.com/problems/generate-parentheses/', null, null),
+  ('imp-36-letter-combinations-of-a-phone-number', 'Letter Combinations of a Phone Number', 'Medium', 'Phone keypad letter combinations', 'https://leetcode.com/problems/letter-combinations-of-a-phone-number/', null, null),
+  ('imp-37-maximum-length-of-a-concatenated-string-with-uni', 'Maximum Length of a Concatenated String with Unique Characters', 'Medium', 'Bitmask backtracking over unique strings', 'https://leetcode.com/problems/maximum-length-of-a-concatenated-string-with-unique-characters/', null, null),
+  ('imp-38-nested-list-weight-sum', 'Nested List Weight Sum', 'Easy', 'DFS nested integer depth sum', 'https://leetcode.com/problems/nested-list-weight-sum/', null, null),
+  ('imp-39-different-ways-to-add-parentheses', 'Different Ways to Add Parentheses', 'Medium', 'Divide-and-conquer with memoization', 'https://leetcode.com/problems/different-ways-to-add-parentheses/', null, null),
+  ('imp-40-restore-ip-addresses', 'Restore IP Addresses', 'Medium', 'Backtracking IP address partition', 'https://leetcode.com/problems/restore-ip-addresses/', null, null),
+  ('imp-41-permutations', 'Permutations', 'Medium', 'Swap-backtracking permutations', 'https://leetcode.com/problems/permutations/', null, null),
+  ('imp-42-cartesian-product-of-multiple-arrays', 'Cartesian Product of Multiple Arrays', 'Medium', 'DFS cartesian product across lists', 'https://leetcode.com/problems/letter-combinations-of-a-phone-number/', null, null),
+  ('imp-43-permutations', 'Permutations (string)', 'Medium', 'Swap-backtracking string permutations', 'https://leetcode.com/problems/permutations/', null, null),
+  ('imp-44-word-search', 'Word Search', 'Medium', 'In-place marking DFS from every cell', 'https://leetcode.com/problems/word-search/', null, null),
+  ('imp-45-word-search-ii', 'Word Search II', 'Hard', 'Trie-guided DFS from every cell', 'https://leetcode.com/problems/word-search-ii/', null, null),
+  ('imp-46-search-in-rotated-sorted-array', 'Search in Rotated Sorted Array', 'Medium', 'Binary search on rotated array', 'https://leetcode.com/problems/search-in-rotated-sorted-array/', null, null),
+  ('imp-47-maximum-length-of-ribbon-cut', 'Maximum Length of Ribbon Cut', 'Medium', 'Binary search on answer', 'https://leetcode.com/problems/maximum-length-of-ribbon-cut/', null, null),
+  ('imp-48-find-smallest-letter-greater-than-target', 'Find Smallest Letter Greater Than Target', 'Easy', 'Binary search first greater', 'https://leetcode.com/problems/find-smallest-letter-greater-than-target/', null, null),
+  ('imp-49-kth-largest-element-in-an-array', 'Kth Largest Element in an Array', 'Medium', 'Quickselect (Hoare partition)', 'https://leetcode.com/problems/kth-largest-element-in-an-array/', null, null),
+  ('imp-50-find-right-interval', 'Find Right Interval', 'Medium', 'Binary search largest smaller', 'https://leetcode.com/problems/find-right-interval/', null, null),
+  ('imp-51-missing-number-in-arithmetic-progression', 'Missing Number in Arithmetic Progression', 'Easy', 'Binary search missing AP term', 'https://leetcode.com/problems/missing-number/', null, null),
+  ('imp-52-missing-number', 'Missing Number', 'Easy', 'Binary search missing consecutive', 'https://leetcode.com/problems/missing-number/', null, null),
+  ('imp-53-find-first-and-last-position-of-element-in-sorte', 'Find First and Last Position of Element in Sorted Array', 'Medium', 'Binary search bounds', 'https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/', null, null),
+  ('imp-54-find-peak-element', 'Find Peak Element', 'Medium', 'Binary search on slope', 'https://leetcode.com/problems/find-peak-element/', null, null),
+  ('imp-55-leftmost-column-with-at-least-a-one', 'Leftmost Column with at Least a One', 'Medium', 'Top-right corner walk', 'https://leetcode.com/problems/leftmost-column-with-at-least-a-one/', null, null),
+  ('imp-56-squares-of-a-sorted-array', 'Squares of a Sorted Array', 'Easy', 'Two pointers from ends', 'https://leetcode.com/problems/squares-of-a-sorted-array/', null, null),
+  ('imp-57-check-if-an-original-string-exists-given-two-enc', 'Check if An Original String Exists Given Two Encoded Strings', 'Hard', 'Memoized DFS (i, j, diff)', 'https://leetcode.com/problems/check-if-an-original-string-exists-given-two-encoded-strings/', null, null),
+  ('imp-58-climbing-stairs', 'Climbing Stairs', 'Easy', '1D DP / Fibonacci', 'https://leetcode.com/problems/climbing-stairs/', null, null),
+  ('imp-59-coin-change', 'Coin Change', 'Medium', 'Unbounded knapsack / min coins DP', 'https://leetcode.com/problems/coin-change/', null, null),
+  ('imp-60-coin-change-ii', 'Coin Change II', 'Medium', 'Unbounded knapsack / count ways DP', 'https://leetcode.com/problems/coin-change-ii/', null, null),
+  ('imp-61-edit-distance', 'Edit Distance', 'Medium', '2D DP edit distance', 'https://leetcode.com/problems/edit-distance/', null, null),
+  ('imp-62-filling-bookcase-shelves', 'Filling Bookcase Shelves', 'Medium', 'Bottom-Up DP', 'https://leetcode.com/problems/filling-bookcase-shelves/', null, null),
+  ('imp-63-0-1-knapsack', '0/1 Knapsack', 'Medium', '0/1 Knapsack', 'https://leetcode.com/problems/partition-equal-subset-sum/', null, null),
+  ('imp-64-perfect-squares', 'Perfect Squares', 'Medium', 'DP least perfect squares', 'https://leetcode.com/problems/perfect-squares/', null, null),
+  ('imp-65-longest-common-subsequence', 'Longest Common Subsequence', 'Medium', '2D DP longest common subsequence', 'https://leetcode.com/problems/longest-common-subsequence/', null, null),
+  ('imp-66-longest-increasing-subsequence', 'Longest Increasing Subsequence', 'Medium', 'LIS patience sorting / binary search', 'https://leetcode.com/problems/longest-increasing-subsequence/', null, null),
+  ('imp-67-longest-palindromic-subsequence', 'Longest Palindromic Subsequence', 'Medium', 'Interval DP palindromic subsequence', 'https://leetcode.com/problems/longest-palindromic-subsequence/', null, null),
+  ('imp-68-longest-string-chain', 'Longest String Chain', 'Medium', 'Sort by length + DP map', 'https://leetcode.com/problems/longest-string-chain/', null, null),
+  ('imp-69-longest-valid-parentheses', 'Longest Valid Parentheses', 'Hard', 'Stack', 'https://leetcode.com/problems/longest-valid-parentheses/', null, null),
+  ('imp-70-maximal-rectangle', 'Maximal Rectangle', 'Hard', 'Histogram DP + monotonic stack', 'https://leetcode.com/problems/maximal-rectangle/', null, null),
+  ('imp-71-maximal-square', 'Maximal Square', 'Medium', 'Grid DP maximal square', 'https://leetcode.com/problems/maximal-square/', null, null),
+  ('imp-72-maximum-and-sum-of-array', 'Maximum AND Sum of Array', 'Hard', 'Bitmask DP (base-3 state)', 'https://leetcode.com/problems/maximum-and-sum-of-array/', null, null),
+  ('imp-73-maximum-number-of-points-with-cost', 'Maximum Number of Points with Cost', 'Hard', 'DP + left/right max sweep', 'https://leetcode.com/problems/maximum-number-of-points-with-cost/', null, null),
+  ('imp-74-minimum-path-sum', 'Minimum Path Sum', 'Medium', 'Grid DP min path sum', 'https://leetcode.com/problems/minimum-path-sum/', null, null),
+  ('imp-75-minimum-deletions-to-make-string-balanced', 'Minimum Deletions to Make String Balanced', 'Medium', 'Single pass DP', 'https://leetcode.com/problems/minimum-deletions-to-make-string-balanced/', null, null),
+  ('imp-76-distinct-subsequences', 'Distinct Subsequences', 'Hard', '2D DP distinct subsequences', 'https://leetcode.com/problems/distinct-subsequences/', null, null),
+  ('imp-77-unique-paths', 'Unique Paths', 'Medium', 'Grid DP unique paths', 'https://leetcode.com/problems/unique-paths/', null, null),
+  ('imp-78-decode-ways', 'Decode Ways', 'Medium', '1D DP decode ways', 'https://leetcode.com/problems/decode-ways/', null, null),
+  ('imp-79-partition-array-into-two-arrays-to-minimize-sum-', 'Partition Array Into Two Arrays to Minimize Sum Difference', 'Hard', 'Meet in the middle + binary search', 'https://leetcode.com/problems/partition-array-into-two-arrays-to-minimize-sum-difference/', null, null),
+  ('imp-80-race-car', 'Race Car', 'Hard', 'BFS with (pos, speed) state', 'https://leetcode.com/problems/race-car/', null, null),
+  ('imp-81-range-sum-query-2d-immutable', 'Range Sum Query 2D - Immutable', 'Medium', '2D prefix sum / range query', 'https://leetcode.com/problems/range-sum-query-2d-immutable/', null, null),
+  ('imp-82-regular-expression-matching', 'Regular Expression Matching', 'Hard', 'Memoized DFS', 'https://leetcode.com/problems/regular-expression-matching/', null, null),
+  ('imp-83-sentence-screen-fitting', 'Sentence Screen Fitting', 'Medium', 'Pointer simulation', 'https://leetcode.com/problems/sentence-screen-fitting/', null, null),
+  ('imp-84-student-attendance-record-ii', 'Student Attendance Record II', 'Hard', 'DP with 6 states [2A][3L]', 'https://leetcode.com/problems/student-attendance-record-ii/', null, null),
+  ('imp-85-valid-palindrome-iii', 'Valid Palindrome III', 'Hard', 'LPS space-optimized DP', 'https://leetcode.com/problems/valid-palindrome-iii/', null, null),
+  ('prep-arrays-find-duplicate-and-missing', 'Find duplicate and missing', 'Medium', 'XOR + math', null, null, null),
+  ('prep-arrays-find-duplicate-number', 'Find duplicate number', 'Medium', 'Floyd cycle', null, null, null),
+  ('prep-arrays-find-intersection-of-two-sorted', 'Find intersection of two sorted', 'Medium', 'Two pointers', null, null, null),
+  ('prep-arrays-find-majority-element', 'Find majority element', 'Medium', 'Boyer-Moore voting', null, null, null),
+  ('prep-arrays-jump-game', 'Jump game', 'Medium', 'Greedy reach', null, null, null),
+  ('prep-arrays-max-product-of-subarray', 'Max product of subarray', 'Medium', 'Track min/max product', null, null, null),
+  ('prep-arrays-max-profit-selling-stocks', 'Max profit selling stocks', 'Medium', 'One pass min price', null, null, null),
+  ('prep-arrays-max-rectangle-in-histogram', 'Max rectangle in histogram', 'Medium', 'Monotonic stack', null, null, null),
+  ('prep-arrays-max-sum-of-subarray-size-k', 'Max sum of subarray size K', 'Medium', 'Sliding window', null, null, null),
+  ('prep-arrays-merge-two-sorted-arrays', 'Merge two sorted arrays', 'Medium', 'Merge from end', null, null, null),
+  ('prep-arrays-move-all-zeros-to-end', 'Move all zeros to end', 'Medium', 'Two pointers', null, null, null),
+  ('prep-arrays-next-permutation', 'Next permutation', 'Medium', 'Scan from right', null, null, null),
+  ('prep-arrays-remove-duplicates-in-place', 'Remove duplicates in place', 'Medium', 'Two pointers', null, null, null),
+  ('prep-arrays-reverse-array', 'Reverse array', 'Medium', 'Two pointers swap', null, null, null),
+  ('prep-arrays-rotate-array', 'Rotate array', 'Medium', 'Reverse segments', null, null, null),
+  ('prep-arrays-self-exclude-product', 'Self exclude product', 'Medium', 'Prefix + suffix pass', null, null, null),
+  ('prep-arrays-task-scheduler', 'Task scheduler', 'Medium', 'Heap + math', null, null, null),
+  ('prep-arrays-trap-most-water', 'Trap most water', 'Medium', 'Two pointers', null, null, null),
+  ('prep-arrays-trap-rain-water', 'Trap rain water', 'Medium', 'Two pointers', null, null, null),
+  ('prep-arrays-two-sum', 'Two sum', 'Medium', 'Hash map', null, null, null),
+  ('prep-database-department-top-three-salaries', 'Department Top Three Salaries', 'Medium', 'Database', null, null, null),
+  ('prep-design-amount-of-new-area-painted-each-day', 'Amount of New Area Painted Each Day', 'Medium', 'Jump Array', null, null, null),
+  ('prep-design-design-in-memory-file-system', 'Design In-Memory File System', 'Medium', 'Design', null, null, null),
+  ('prep-design-design-parking-system', 'Design Parking System', 'Medium', 'Design', null, null, null),
+  ('prep-design-design-tic-tac-toe', 'Design Tic-Tac-Toe', 'Medium', 'Design', null, null, null),
+  ('prep-design-detect-squares', 'Detect Squares', 'Medium', 'Design', null, null, null),
+  ('prep-design-dictionary-and-spell', 'Dictionary and spell', 'Medium', 'Trie dictionary + spell suggest', null, null, null),
+  ('prep-design-dot-product-of-two-sparse-vectors', 'Dot Product of Two Sparse Vectors', 'Medium', 'Design', null, null, null),
+  ('prep-design-exclusive-time-of-functions', 'Exclusive Time of Functions', 'Medium', 'Stack', null, null, null),
+  ('prep-design-design-an-expression-tree-with-evaluate-function', 'Expression Tree / Design an Expression Tree', 'Medium', 'Stack', null, null, null),
+  ('prep-design-find-median-from-data-stream', 'Find Median from Data Stream', 'Medium', 'Design', null, null, null),
+  ('prep-design-find-servers-that-handled-most-number-of-requests', 'Find Servers That Handled Most Number of Requests', 'Medium', 'Heap + Sorted Available Set', null, null, null),
+  ('prep-design-guess-the-word', 'Guess the Word', 'Medium', 'Design', null, null, null),
+  ('prep-design-insert-delete-getrandom-o1', 'Insert Delete GetRandom O(1)', 'Medium', 'Design', null, null, null),
+  ('prep-design-load-balancer', 'Load balancer', 'Medium', 'Round-robin load balancer', null, null, null),
+  ('prep-design-log-analyzer', 'Log analyzer', 'Medium', 'Log parsing aggregation', null, null, null),
+  ('prep-design-logger-rate-limiter', 'Logger Rate Limiter', 'Medium', 'Design', null, null, null),
+  ('prep-design-lru-cache', 'LRU Cache', 'Medium', 'Hash map + doubly linked list LRU', null, null, null),
+  ('prep-design-meeting-rooms-iii', 'Meeting Rooms III', 'Medium', 'Two Heaps', null, null, null),
+  ('prep-design-my-calendar-i', 'My Calendar I', 'Medium', 'Design', null, null, null),
+  ('prep-design-phone-directory', 'Phone directory', 'Medium', 'Trie phone directory autocomplete', null, null, null),
+  ('prep-design-random-pick-index', 'Random Pick Index', 'Medium', 'Design', null, null, null),
+  ('prep-design-random-pick-with-weight', 'Random Pick with Weight', 'Medium', 'Design', null, null, null),
+  ('prep-design-range-module', 'Range Module', 'Medium', 'Design', null, null, null),
+  ('prep-design-read-n-characters-given-read4-ii-call-multiple-times', 'Read N Characters Given Read4 II - Call Multiple Times', 'Medium', 'Design', null, null, null),
+  ('prep-design-rle-iterator', 'RLE Iterator', 'Medium', 'Design', null, null, null),
+  ('prep-design-sequentially-ordinal-rank-tracker', 'Sequentially Ordinal Rank Tracker', 'Medium', 'Design', null, null, null),
+  ('prep-design-snapshot-array', 'Snapshot Array', 'Medium', 'Design', null, null, null),
+  ('prep-design-stock-price-fluctuation', 'Stock Price Fluctuation', 'Medium', 'Design', null, null, null),
+  ('prep-design-tiny-url', 'Tiny url', 'Medium', 'Bijective tiny URL encode/decode', null, null, null),
+  ('prep-design-version-control-snapshot', 'Version control snapshot', 'Medium', 'Copy-on-write version snapshots', null, null, null),
+  ('prep-hash-maps-find-k-closest-to-center', 'find K closest to center', 'Medium', 'Sort by distance to origin', null, null, null),
+  ('prep-hash-maps-find-kth-largest', 'Find Kth largest', 'Medium', 'Quickselect / partition', null, null, null),
+  ('prep-hash-maps-find-most-popular-cost-books', 'Find most popular cost books', 'Medium', 'Two-pass frequency map', null, null, null),
+  ('prep-hash-maps-find-top-k-frequent-elements', 'Find top K frequent elements', 'Medium', 'Frequency map + bucket sort', null, null, null),
+  ('prep-hash-maps-find-top-k-tweet-words-in-last', 'Find top K tweet words in last', 'Medium', 'Sliding window + frequency map', null, null, null),
+  ('prep-hash-maps-find-x-to-make-array-sum-to-k', 'Find X to make array sum to K', 'Medium', 'Binary search on answer', null, null, null),
+  ('prep-hash-maps-find-year-with-most-population', 'Find year with most population', 'Medium', 'Sweep line / delta map', null, null, null),
+  ('prep-hash-maps-get-all-element-counts', 'Get all element counts', 'Medium', 'Frequency map', null, null, null),
+  ('prep-hash-maps-object-as-key', 'Object as key', 'Medium', 'Custom hash key / struct map', null, null, null),
+  ('prep-hash-maps-remove-duplicate-contacts', 'Remove duplicate contacts', 'Medium', 'Union-find via email index', null, null, null),
+  ('prep-hash-maps-sort-pairs', 'Sort pairs', 'Medium', 'Hash map chain reconstruction', null, null, null),
+  ('prep-intervals-count-intervals-range', 'Count intervals range', 'Medium', 'Sort + merge coverage', null, null, null),
+  ('prep-intervals-distance-of-nearest-stores', 'Distance of nearest stores', 'Medium', 'Brute-force nearest store by distance', null, null, null),
+  ('prep-intervals-draw-skyline', 'Draw skyline', 'Medium', 'Sweep line with height events', null, null, null),
+  ('prep-intervals-insert-interval', 'Insert interval', 'Medium', 'Three-segment interval insert', null, null, null),
+  ('prep-intervals-is-overlapped', 'Is overlapped', 'Medium', 'Axis-separated rectangle overlap', null, null, null),
+  ('prep-intervals-is-square', 'Is square', 'Medium', 'Compare six pairwise distances', null, null, null),
+  ('prep-intervals-meeting-rooms-ii', 'Meeting Rooms II', 'Medium', 'Sort Starts/Ends + Sweep', null, null, null),
+  ('prep-intervals-merge-intervals', 'Merge Intervals', 'Medium', 'Sort + Greedy Merge', null, null, null),
+  ('prep-intervals-schedule-meetings', 'Schedule meetings', 'Medium', 'Sort by start + adjacency check', null, null, null),
+  ('prep-intervals-weighted-job-scheduler', 'Weighted job scheduler', 'Medium', 'Sort by end + DP + binary search', null, null, null),
+  ('prep-linked-lists-add-two-numbers', 'Add two numbers', 'Medium', 'Digit carry', null, null, null),
+  ('prep-linked-lists-copy-list-with-random-pointer', 'Copy List with Random Pointer', 'Medium', 'Interweave (3-pass, no map)', null, null, null),
+  ('prep-linked-lists-deep-copy-random-pointers', 'Deep copy random pointers', 'Medium', 'Hash map clone', null, null, null),
+  ('prep-linked-lists-delete-every-kth-node-in-dll', 'Delete every Kth node in DLL', 'Medium', 'DLL walk delete', null, null, null),
+  ('prep-linked-lists-delete-node', 'Delete node', 'Medium', 'Copy next then delete', null, null, null),
+  ('prep-linked-lists-detect-loop', 'Detect loop', 'Medium', 'Floyd cycle', null, null, null),
+  ('prep-linked-lists-find-intersection-of-two-lists', 'Find intersection of two lists', 'Medium', 'Two pointers reset', null, null, null),
+  ('prep-linked-lists-find-node', 'Find node', 'Medium', 'Linear scan', null, null, null),
+  ('prep-linked-lists-flatten-doubly-linked-list', 'Flatten doubly linked list', 'Medium', 'DFS flatten', null, null, null),
+  ('prep-linked-lists-insert-into-a-sorted-circular-linked-list', 'Insert into a Sorted Circular Linked List', 'Medium', 'Circular Scan (3 cases)', null, null, null),
+  ('prep-linked-lists-last-men-standing', 'Last men standing', 'Medium', 'Josephus simulation', null, null, null),
+  ('prep-linked-lists-merge-k-sorted-lists', 'Merge K sorted lists', 'Medium', 'Min-heap merge', null, null, null),
+  ('prep-linked-lists-merge-two-sorted-lists', 'Merge two sorted lists', 'Medium', 'Merge two lists', null, null, null),
+  ('prep-linked-lists-print-from-end', 'Print from end', 'Medium', 'Recursion / stack', null, null, null),
+  ('prep-linked-lists-reverse-linked-list', 'Reverse linked list', 'Medium', 'Iterative reverse', null, null, null),
+  ('prep-linked-lists-reverse-nodes-in-k-group', 'Reverse Nodes in k-Group', 'Medium', 'Iterative Group Reversal', null, null, null),
+  ('prep-linked-lists-sort-linked-list', 'Sort linked list', 'Medium', 'Merge sort list', null, null, null),
+  ('prep-math-add-binary', 'Add binary', 'Medium', 'Binary string addition', null, null, null),
+  ('prep-math-add-two-big-string-numbers', 'Add two big string numbers', 'Medium', 'Big integer string addition', null, null, null),
+  ('prep-math-base-26-encoding', 'Base 26 encoding', 'Medium', 'Bijective base-26 encoding', null, null, null),
+  ('prep-math-basic-calculator-ii', 'Basic Calculator II', 'Medium', 'Stack', null, null, null),
+  ('prep-math-cinema-seat-allocation', 'Cinema Seat Allocation', 'Medium', 'Bitmask per Row', null, null, null),
+  ('prep-math-convert-decimal-to-base-n', 'Convert decimal to base N', 'Medium', 'Base conversion repeated divmod', null, null, null),
+  ('prep-math-convert-string-to-integer', 'Convert string to integer', 'Medium', 'atoi parse with overflow guard', null, null, null),
+  ('prep-math-count-set-bits-in-number', 'Count set bits in number', 'Medium', 'Brian Kernighan bit count', null, null, null),
+  ('prep-math-covert-integer-to-roman-numeral', 'Covert integer to roman numeral', 'Medium', 'Greedy roman numeral', null, null, null),
+  ('prep-math-factorial-number', 'Factorial number', 'Medium', 'Iterative factorial', null, null, null),
+  ('prep-math-fibonacci-number', 'Fibonacci number', 'Medium', 'Fibonacci iterative', null, null, null),
+  ('prep-math-find-missing-number', 'Find missing number', 'Medium', 'Gauss sum XOR trick', null, null, null),
+  ('prep-math-find-single-number', 'Find single number', 'Medium', 'Singleton XOR', null, null, null),
+  ('prep-math-fizzbuzz', 'Fizzbuzz', 'Medium', 'FizzBuzz conditional', null, null, null),
+  ('prep-math-hamming-distance', 'Hamming distance', 'Medium', 'XOR + popcount', null, null, null),
+  ('prep-math-integer-to-english-words', 'Integer to English Words', 'Medium', 'Chunk by 1000 + Lookup', null, null, null),
+  ('prep-math-is-binary', 'Is binary', 'Medium', 'Single-bit check', null, null, null),
+  ('prep-math-is-odd-number', 'Is odd number', 'Medium', 'Parity bit test', null, null, null),
+  ('prep-math-is-palindromic-number', 'Is palindromic number', 'Medium', 'Palindrome number', null, null, null),
+  ('prep-math-is-strobogrammatic-number', 'Is strobogrammatic number', 'Medium', 'Strobogrammatic map', null, null, null),
+  ('prep-math-k-closest-points-to-origin', 'K Closest Points to Origin', 'Medium', 'Sort', null, null, null),
+  ('prep-math-log-two', 'Log two', 'Medium', 'Integer log base 2', null, null, null),
+  ('prep-math-maximum-number-of-visible-points', 'Maximum Number of Visible Points', 'Medium', 'Sort + Sliding Window (atan2)', null, null, null),
+  ('prep-math-maximum-split-of-positive-even-integers', 'Maximum Split of Positive Even Integers', 'Medium', 'Greedy', null, null, null),
+  ('prep-math-maximum-swap', 'Maximum Swap', 'Medium', 'Greedy (last occurrence)', null, null, null),
+  ('prep-math-minimum-cost-to-set-cooking-time', 'Minimum Cost to Set Cooking Time', 'Medium', 'Enumerate 2 candidates', null, null, null),
+  ('prep-math-minimum-moves-to-equal-array-elements', 'Minimum Moves to Equal Array Elements', 'Medium', 'Math (sum - n*min)', null, null, null),
+  ('prep-math-multiply-string-numbers', 'Multiply string numbers', 'Medium', 'Grade-school multiplication', null, null, null),
+  ('prep-math-multiply-strings', 'Multiply Strings', 'Medium', 'Grade-school multiplication', null, null, null),
+  ('prep-math-next-greater-element-iii', 'Next Greater Element III', 'Medium', 'Next Permutation', null, null, null),
+  ('prep-math-powx-n', 'Pow(x, n)', 'Medium', 'Binary Exponentiation', null, null, null),
+  ('prep-math-power-two', 'Power two', 'Medium', 'Bit trick power of two', null, null, null),
+  ('prep-math-power-x-of-y', 'Power X of Y', 'Medium', 'Binary exponentiation', null, null, null),
+  ('prep-math-prime-number', 'Prime number', 'Medium', 'Primality trial division', null, null, null),
+  ('prep-math-random-number', 'Random number', 'Medium', 'Uniform random in range', null, null, null),
+  ('prep-math-random-number-not-in-array', 'Random number not in array', 'Medium', 'Rejection sampling / gap random', null, null, null),
+  ('prep-math-reverse-number', 'Reverse number', 'Medium', 'Digit reversal', null, null, null),
+  ('prep-math-square-root', 'Square root', 'Medium', 'Binary search sqrt', null, null, null),
+  ('prep-math-sum-of-digits', 'Sum of digits', 'Medium', 'Digit sum', null, null, null),
+  ('prep-matrices-battleships-in-a-board', 'Battleships in a Board', 'Medium', 'Single Pass', null, null, null),
+  ('prep-matrices-check-if-word-can-be-placed-in-crossword', 'Check if Word Can Be Placed In Crossword', 'Medium', 'Segment Extraction + Forward/Backward Match', null, null, null),
+  ('prep-matrices-diagonal-traverse', 'Diagonal Traverse', 'Medium', 'Simulation', null, null, null),
+  ('prep-matrices-fill-rows-and-columns-with-1s', 'Fill rows and columns with 1s', 'Medium', 'First row/col as markers', null, null, null),
+  ('prep-matrices-find-path-between-cells', 'Find path between cells', 'Medium', 'Grid DFS pathfinding', null, null, null),
+  ('prep-matrices-longest-increasing-path', 'Longest increasing path', 'Medium', 'DFS + memo longest increasing path', null, null, null),
+  ('prep-matrices-longest-increasing-path-in-a-matrix', 'Longest Increasing Path in a Matrix', 'Medium', 'DFS + Memoization', null, null, null),
+  ('prep-matrices-longest-line-of-consecutive-one-in-matrix', 'Longest Line of Consecutive One in Matrix', 'Medium', '4-direction DP', null, null, null),
+  ('prep-matrices-max-region', 'Max region', 'Medium', '8-direction DFS region size', null, null, null),
+  ('prep-matrices-min-distance-of-meeting-point', 'Min distance of meeting point', 'Medium', '1D meeting point two pointers', null, null, null),
+  ('prep-matrices-nearest-bikes', 'Nearest bikes', 'Medium', 'Nearest pair by Manhattan distance', null, null, null),
+  ('prep-matrices-print-matrix-in-spiral-order', 'Print matrix in spiral Order', 'Medium', 'Spiral four-boundary shrink', null, null, null),
+  ('prep-matrices-remove-all-ones-with-row-and-column-flips', 'Remove All Ones With Row and Column Flips', 'Medium', 'Row Comparison (same or inverse of row 0)', null, null, null),
+  ('prep-matrices-rotate-matrix-by-90-degrees', 'Rotate matrix by 90 degrees', 'Medium', 'Layer-by-layer 90° rotation', null, null, null),
+  ('prep-matrices-search-a-2d-matrix-ii', 'Search a 2D Matrix II', 'Medium', 'Staircase Search', null, null, null),
+  ('prep-matrices-search-in-sorted-matrix', 'Search in sorted matrix', 'Medium', 'Staircase search from top-right', null, null, null),
+  ('prep-matrices-spiral-matrix', 'Spiral Matrix', 'Medium', 'Boundary Simulation', null, null, null),
+  ('prep-matrices-word-search-on-board', 'Word search on board', 'Medium', 'Backtracking word search', null, null, null),
+  ('prep-prefix-sum-array-manipulation', 'Array Manipulation (HackerRank)', 'Medium', 'Difference Array + Prefix Sum', null, null, null),
+  ('prep-prefix-sum-continuous-subarray-sum', 'Continuous Subarray Sum', 'Medium', 'Prefix Sum Mod Map', null, null, null),
+  ('prep-prefix-sum-subarray-sum-equals-k', 'Subarray Sum Equals K', 'Medium', 'Prefix Sum Map', null, null, null),
+  ('prep-sliding-window-minimum-window-substring', 'Minimum Window Substring', 'Medium', 'Sliding Window with freq array', null, null, null),
+  ('prep-sorting-3sum', '3Sum', 'Medium', 'Sort + Two Pointers', null, null, null),
+  ('prep-sorting-equal-sum-arrays-with-minimum-number-of-operations', 'Equal Sum Arrays with Minimum Number of Operations', 'Medium', 'Greedy Contribution Counting', null, null, null),
+  ('prep-sorting-max-chunks-to-make-sorted-ii', 'Max Chunks To Make Sorted II', 'Medium', 'Monotonic Stack', null, null, null),
+  ('prep-sorting-minimum-deletions-to-make-character-frequencies-unique', 'Minimum Deletions to Make Character Frequencies Unique', 'Medium', 'Sort Frequencies + Greedy', null, null, null),
+  ('prep-sorting-sort-integers-by-the-power-value', 'Sort Integers by The Power Value', 'Medium', 'Memoized Collatz + Sort', null, null, null),
+  ('prep-sorting-the-number-of-weak-characters-in-the-game', 'The Number of Weak Characters in the Game', 'Medium', 'Sort (attack desc, defense asc) + Max Sweep', null, null, null),
+  ('prep-sorting-top-k-frequent-elements', 'Top K Frequent Elements', 'Medium', 'Bucket Sort', null, null, null),
+  ('prep-stacks-queues-basic-calculator', 'Basic Calculator', 'Medium', 'Stack (push res+sign on ''('')', null, null, null),
+  ('prep-stacks-queues-buildings-with-an-ocean-view', 'Buildings With an Ocean View', 'Medium', 'Right-to-Left Max Scan', null, null, null),
+  ('prep-stacks-queues-calculate-infix', 'Calculate infix', 'Medium', 'Dual-stack infix calculator', null, null, null),
+  ('prep-stacks-queues-calculate-postfix', 'Calculate postfix', 'Medium', 'Postfix evaluation stack', null, null, null),
+  ('prep-stacks-queues-decode-string', 'Decode String', 'Medium', 'Dual Stack (counts + strings)', null, null, null),
+  ('prep-stacks-queues-find-max-in-sliding-window', 'Find max in sliding window', 'Medium', 'Monotonic decreasing deque', null, null, null),
+  ('prep-stacks-queues-find-moving-average-in-sliding', 'Find moving average in sliding', 'Medium', 'Sliding window queue + running sum', null, null, null),
+  ('prep-stacks-queues-implement-queue-with-max', 'Implement queue with max', 'Medium', 'Queue + decreasing max deque', null, null, null),
+  ('prep-stacks-queues-implement-stack-with-min', 'Implement stack with min', 'Medium', 'Stack with auxiliary min stack', null, null, null),
+  ('prep-stacks-queues-infix-to-postfix', 'Infix to postfix', 'Medium', 'Shunting-yard (no parens)', null, null, null),
+  ('prep-stacks-queues-prefix-to-postfix', 'Prefix to postfix', 'Medium', 'Reverse scan prefix stack', null, null, null),
+  ('prep-stacks-queues-simplify-path', 'Simplify Path', 'Medium', 'Stack', null, null, null),
+  ('prep-stacks-queues-trapping-rain-water', 'Trapping Rain Water', 'Medium', 'Two Pointers', null, null, null),
+  ('prep-stacks-queues-validate-parentheses', 'Validate parentheses', 'Medium', 'Stack bracket matching', null, null, null),
+  ('prep-streams-io-add-spaces-around-parentheses-in', 'Add spaces around parentheses in', 'Medium', 'String builder scan', null, null, null),
+  ('prep-streams-io-binary-tree-in-order-iterator', 'Binary tree in-order iterator', 'Medium', 'Iterative inorder with stack', null, null, null),
+  ('prep-streams-io-check-palindrome-in-stream', 'Check palindrome in stream', 'Medium', 'Streaming palindrome stack', null, null, null),
+  ('prep-streams-io-clean-directories-recursively', 'Clean directories recursively', 'Medium', 'Recursive directory walk', null, null, null),
+  ('prep-streams-io-count-words-in-file', 'Count words in file', 'Medium', 'Scanner word tokenization', null, null, null),
+  ('prep-streams-io-file-line-iterator', 'File line iterator', 'Medium', 'Buffered line iterator', null, null, null),
+  ('prep-streams-io-find-files-size-larger-than-5m', 'Find files size larger than 5M', 'Medium', 'Filesystem walk with size filter', null, null, null),
+  ('prep-streams-io-find-kth-largest-in-stream', 'Find Kth largest in stream', 'Medium', 'Min-heap size k', null, null, null),
+  ('prep-streams-io-find-median-in-stream', 'Find median in stream', 'Medium', 'Two heaps median', null, null, null),
+  ('prep-streams-io-merge-k-sorted-streams-in-one', 'Merge K sorted streams in one', 'Medium', 'K-way merge with min-heap', null, null, null),
+  ('prep-streams-io-rate-limiter-iterator', 'Rate limiter iterator', 'Medium', 'Token bucket rate limiter', null, null, null),
+  ('prep-streams-io-reverse-content-of-file-in-place', 'Reverse content of file in place', 'Medium', 'In-place byte reversal', null, null, null),
+  ('prep-strings-count-words-obtained-after-adding-a-letter', 'Count Words Obtained After Adding a Letter', 'Medium', 'Bitmask Hash Set', null, null, null),
+  ('prep-strings-custom-sort-string', 'Custom Sort String', 'Medium', 'Counting', null, null, null),
+  ('prep-strings-find-all-subset-words', 'Find all subset words', 'Medium', 'Multiset match', null, null, null),
+  ('prep-strings-find-anagram-substring-indices', 'Find anagram substring indices', 'Medium', 'Sliding window freq', null, null, null),
+  ('prep-strings-find-and-replace-in-string', 'Find and Replace in String', 'Medium', 'Index Map', null, null, null),
+  ('prep-strings-find-first-unique-character', 'Find first unique character', 'Medium', 'Frequency map', null, null, null),
+  ('prep-strings-find-repeated-substrings-size-k', 'Find repeated substrings size K', 'Medium', 'Hash set substrings', null, null, null),
+  ('prep-strings-group-anagrams', 'Group anagrams', 'Medium', 'Hash by signature', null, null, null),
+  ('prep-strings-group-shifted-strings', 'Group Shifted Strings', 'Medium', 'Hash Map (diff key)', null, null, null),
+  ('prep-strings-is-anagram', 'Is anagram', 'Medium', 'Frequency count', null, null, null),
+  ('prep-strings-is-isomorphic', 'Is isomorphic', 'Medium', 'Bijection map', null, null, null),
+  ('prep-strings-is-palindrome', 'Is palindrome', 'Medium', 'Two pointers', null, null, null),
+  ('prep-strings-longest-common-prefix', 'Longest common prefix', 'Medium', 'Vertical scan', null, null, null),
+  ('prep-strings-longest-happy-string', 'Longest Happy String', 'Medium', 'Greedy (pick highest count)', null, null, null),
+  ('prep-strings-longest-palindromic-substring', 'Longest palindromic substring', 'Medium', 'Expand center', null, null, null),
+  ('prep-strings-longest-substring-with-unique', 'Longest substring with unique', 'Medium', 'Sliding window', null, null, null),
+  ('prep-strings-min-insertions-to-form-palin', 'Min insertions to form palin-', 'Medium', 'DP palindrome', null, null, null),
+  ('prep-strings-min-window-substring', 'Min window substring', 'Medium', 'Sliding window', null, null, null),
+  ('prep-strings-minimum-add-to-make-parentheses-valid', 'Minimum Add to Make Parentheses Valid', 'Medium', 'Counter', null, null, null),
+  ('prep-strings-minimum-remove-to-make-valid-parentheses', 'Minimum Remove to Make Valid Parentheses', 'Medium', 'Stack of unmatched indices', null, null, null),
+  ('prep-strings-minimum-time-difference', 'Minimum Time Difference', 'Medium', 'Sort + Wrap-around', null, null, null),
+  ('prep-strings-minimum-time-to-make-rope-colorful', 'Minimum Time to Make Rope Colorful', 'Medium', 'Greedy (keep max in group)', null, null, null),
+  ('prep-strings-number-of-matching-subsequences', 'Number of Matching Subsequences', 'Medium', 'Multi-pointer Buckets', null, null, null),
+  ('prep-strings-number-of-steps-to-reduce-a-number-in-binary-representation-', 'Number of Steps to Reduce a Number in Binary to One', 'Medium', 'Right-to-Left with Carry', null, null, null),
+  ('prep-strings-ransom-note', 'Ransom note', 'Medium', 'Char frequency', null, null, null),
+  ('prep-strings-reverse-words', 'Reverse words', 'Medium', 'Reverse in place', null, null, null),
+  ('prep-strings-reverse-words-in-a-string', 'Reverse Words in a String', 'Medium', 'Split + Reverse', null, null, null),
+  ('prep-strings-rotate-string', 'Rotate string', 'Medium', 'Double string trick', null, null, null),
+  ('prep-strings-run-length-encoding', 'Run length encoding', 'Medium', 'Run-length', null, null, null),
+  ('prep-strings-shortest-subarray-contains-all', 'Shortest subarray contains all', 'Medium', 'Sliding window', null, null, null),
+  ('prep-strings-shortest-way-to-form-string', 'Shortest Way to Form String', 'Medium', 'Two Pointers Greedy', null, null, null),
+  ('prep-strings-strings-differ-by-one-character', 'Strings Differ by One Character', 'Medium', 'Wildcard Hash Set', null, null, null),
+  ('prep-strings-sum-of-prefix-scores-of-strings', 'Sum of Prefix Scores of Strings', 'Medium', 'Trie (count at each node)', null, null, null),
+  ('prep-strings-swap-adjacent-in-lr-string', 'Swap Adjacent in LR String', 'Medium', 'Two Pointers', null, null, null),
+  ('prep-strings-swap-even-odd', 'Swap even odd', 'Medium', 'Adjacent swap', null, null, null),
+  ('prep-strings-text-justification', 'Text Justification', 'Medium', 'Greedy Line Packing', null, null, null),
+  ('prep-strings-valid-number', 'Valid Number', 'Medium', 'Single Pass Flags', null, null, null),
+  ('prep-strings-word-break', 'Word break', 'Medium', 'DP reachability', null, null, null),
+  ('prep-strings-word-wrap', 'Word wrap', 'Medium', 'Greedy line break', null, null, null),
+  ('prep-trees-binary-search-tree-iterator', 'Binary Search Tree Iterator', 'Medium', 'Controlled Inorder (stack of left spine)', null, null, null),
+  ('prep-trees-binary-tree-maximum-path-sum', 'Binary Tree Maximum Path Sum', 'Medium', 'Post-order DFS', null, null, null),
+  ('prep-trees-binary-tree-right-side-view', 'Binary Tree Right Side View', 'Medium', 'DFS right-first', null, null, null),
+  ('prep-trees-binary-tree-traversal-iteratively', 'Binary tree traversal iteratively', 'Medium', 'Stack iterative', null, null, null),
+  ('prep-trees-binary-tree-vertical-order-traversal', 'Binary Tree Vertical Order Traversal', 'Medium', 'BFS + Column Map', null, null, null),
+  ('prep-trees-binary-tree-zigzag-level-order-traversal', 'Binary Tree Zigzag Level Order Traversal', 'Medium', 'BFS + Direction Toggle', null, null, null),
+  ('prep-trees-convert-binary-search-tree-to-sorted-doubly-linked-list', 'Convert Binary Search Tree to Sorted Doubly Linked List', 'Medium', 'Inorder DFS (first/last tracking)', null, null, null),
+  ('prep-trees-convert-binary-tree-to-doubly', 'Convert binary tree to doubly', 'Medium', 'Inorder flatten', null, null, null),
+  ('prep-trees-convert-sorted-array-to-bst', 'Convert sorted array to BST', 'Medium', 'Mid divide BST', null, null, null),
+  ('prep-trees-convert-sorted-linked-list-to-bst', 'Convert sorted linked list to BST', 'Medium', 'Inorder simulation', null, null, null),
+  ('prep-trees-count-good-nodes-in-binary-tree', 'Count Good Nodes in Binary Tree', 'Medium', 'DFS with max tracking', null, null, null),
+  ('prep-trees-find-distance-of-two-nodes', 'Find distance of two nodes', 'Medium', 'LCA + heights', null, null, null),
+  ('prep-trees-nary-tree-distance-of-two-nodes', 'Find distance of two nodes', 'Medium', 'LCA + level distance BFS', null, null, null),
+  ('prep-trees-find-kth-largest-in-bst', 'Find Kth largest in BST', 'Medium', 'Reverse inorder', null, null, null),
+  ('prep-trees-find-leaves-of-binary-tree', 'Find Leaves of Binary Tree', 'Medium', 'Height-based DFS', null, null, null),
+  ('prep-trees-nary-tree-lowest-common-ancestor', 'Find lowest common ancestor', 'Medium', 'N-ary tree LCA post-order', null, null, null),
+  ('prep-trees-flip-tree', 'Flip tree', 'Medium', 'Swap children', null, null, null),
+  ('prep-trees-get-diameter', 'Get diameter', 'Medium', 'Post-order diameter', null, null, null),
+  ('prep-trees-nary-tree-diameter', 'Get diameter', 'Medium', 'N-ary tree diameter via top-2 heights', null, null, null),
+  ('prep-trees-get-height', 'Get height', 'Medium', 'Post-order height', null, null, null),
+  ('prep-trees-nary-tree-height', 'Get height', 'Medium', 'N-ary tree DFS height', null, null, null),
+  ('prep-trees-inorder-successor-in-bst', 'Inorder Successor in BST', 'Medium', 'BST Walk', null, null, null),
+  ('prep-trees-is-balanced', 'Is balanced', 'Medium', 'Balance check', null, null, null),
+  ('prep-trees-is-bst', 'Is BST', 'Medium', 'BST range check', null, null, null),
+  ('prep-trees-is-complete', 'Is complete', 'Medium', 'Level order fill', null, null, null),
+  ('prep-trees-is-subtree', 'Is subtree', 'Medium', 'Same tree check', null, null, null),
+  ('prep-trees-is-symmetric', 'Is symmetric', 'Medium', 'Mirror compare', null, null, null),
+  ('prep-trees-level-order', 'Level order', 'Medium', 'BFS levels', null, null, null),
+  ('prep-trees-nary-tree-level-order', 'Level order', 'Medium', 'N-ary BFS level order', null, null, null),
+  ('prep-trees-longest-path-with-different-adjacent-characters', 'Longest Path With Different Adjacent Characters', 'Medium', 'DFS tracking top-2 child contributions', null, null, null),
+  ('prep-trees-lowest-common-ancestor-of-a-binary-tree', 'Lowest Common Ancestor of a Binary Tree', 'Medium', 'Recursive DFS', null, null, null),
+  ('prep-trees-lowest-common-ancestor-of-a-binary-tree-iii', 'Lowest Common Ancestor of a Binary Tree III', 'Medium', 'Two Pointers (linked-list intersection trick)', null, null, null),
+  ('prep-trees-nary-tree-monarchy-succession', 'Monarchy succession order', 'Medium', 'Tree build + iterative pre-order', null, null, null),
+  ('prep-trees-nary-tree-traversal-iteratively', 'Nary tree traversal iteratively', 'Medium', 'N-ary iterative pre/post-order with stack', null, null, null),
+  ('prep-trees-path-sum-to-k', 'Path sum to K', 'Medium', 'Prefix sum on tree', null, null, null),
+  ('prep-trees-populate-next-pointers-to-right', 'Populate next pointers to right', 'Medium', 'Level order connect', null, null, null),
+  ('prep-trees-print-all-root-to-leaf-paths', 'Print all root to leaf paths', 'Medium', 'DFS path', null, null, null),
+  ('prep-trees-print-leaves', 'Print leaves', 'Medium', 'Post-order leaves', null, null, null),
+  ('prep-trees-print-side-view', 'Print side view', 'Medium', 'BFS rightmost', null, null, null),
+  ('prep-trees-print-vertical', 'Print vertical', 'Medium', 'Column map BFS', null, null, null),
+  ('prep-trees-recover-binary-search-tree', 'Recover Binary Search Tree', 'Medium', 'Inorder DFS (find two inversions)', null, null, null),
+  ('prep-trees-serialize-and-deserialize', 'Serialize and deserialize', 'Medium', 'BFS serialize', null, null, null),
+  ('prep-trees-serialize-and-deserialize-binary-tree', 'Serialize and Deserialize Binary Tree', 'Medium', 'Preorder DFS', null, null, null),
+  ('prep-trees-step-by-step-directions-from-a-binary-tree-node-to-another', 'Step-By-Step Directions From a Binary Tree Node to Another', 'Medium', 'Two Paths + LCA via Common Prefix', null, null, null),
+  ('prep-trees-sum-of-nodes', 'Sum of nodes', 'Medium', 'DFS sum', null, null, null),
+  ('prep-trees-vertical-order-traversal-of-a-binary-tree', 'Vertical Order Traversal of a Binary Tree', 'Medium', 'BFS + Sort per column', null, null, null),
+  ('prep-tries-find-distinct-palindromic-sub', 'Find distinct palindromic sub-', 'Medium', 'Suffix trie + palindrome check', null, null, null),
+  ('prep-tries-implement-trie-methods', 'Implement trie methods', 'Medium', 'Trie with 26-way branching', null, null, null),
+  ('prep-tries-longest-repeated-substring', 'Longest repeated substring', 'Medium', 'Suffix array + LCP scan', null, null, null),
+  ('go-conc-scheduler', 'Goroutines & the GMP scheduler', 'Hard', 'How Go''s M:N scheduler multiplexes millions of goroutines onto OS threads.', null, null, null),
+  ('go-conc-channels', 'Channels: buffered, unbuffered, closed, nil', 'Hard', 'Send/receive, close semantics, comma-ok, and the nil-channel trick that senior Go hinges on.', null, null, null),
+  ('go-conc-select', 'select, timeouts & non-blocking ops', 'Hard', 'How select picks ready cases, disables nil cases, and models timeouts/non-blocking I/O.', null, null, null),
+  ('go-conc-context', 'context: cancellation & deadlines', 'Hard', 'Propagate cancellation and deadlines across API boundaries without leaking goroutines.', null, null, null),
+  ('go-conc-sync', 'sync primitives: Mutex, RWMutex, WaitGroup, Once', 'Hard', 'Zero-value-ready locks that must never be copied, with subtle WaitGroup and Once semantics.', null, null, null),
+  ('go-conc-worker-pool', 'Worker pools, fan-in & fan-out', 'Hard', 'Bound concurrency with a fixed worker set; fan out over one channel, fan in results, close correctly.', null, null, null),
+  ('go-conc-hazards', 'Races, deadlocks & goroutine leaks', 'Hard', 'The four canonical concurrency failure modes and why the runtime can only catch some of them.', null, null, null),
+  ('go-conc-atomic', 'atomic operations & the sync/atomic types', 'Hard', 'Lock-free reads/writes with the typed atomics — and where their guarantees end.', null, null, null),
+  ('go-mem-stack-heap', 'Escape analysis: stack vs heap', 'Hard', 'How the compiler decides stack vs heap, and why it drives allocation cost.', null, null, null),
+  ('go-mem-gc', 'The garbage collector', 'Hard', 'Concurrent tricolor mark-sweep with a hybrid write barrier, tuned by GOGC and GOMEMLIMIT.', null, null, null),
+  ('go-mem-model', 'The Go memory model & happens-before', 'Hard', 'Happens-before is the only contract that makes cross-goroutine reads observe the right writes.', null, null, null),
+  ('go-mem-pool-alloc', 'Allocation control & sync.Pool', 'Hard', 'Cut allocations with sync.Pool, preallocation, and cache-aware layout — and know exactly when each backfires.', null, null, null),
+  ('go-iface-internals', 'Interface internals: iface, eface, itab', 'Hard', 'How Go represents interface values as two words and dispatches methods via the itab.', null, null, null),
+  ('go-iface-nil', 'The nil interface trap', 'Hard', 'A typed nil pointer wrapped in an interface is NOT equal to nil.', null, null, null),
+  ('go-iface-method-sets', 'Method sets: pointer vs value receivers', 'Hard', 'Why *T satisfies an interface but T often does not, and where addressability bites.', null, null, null),
+  ('go-iface-embedding', 'Embedding & composition', 'Hard', 'How promotion, overriding, and interface embedding work — and where ambiguity bites.', null, null, null),
+  ('go-iface-assertions', 'Type assertions & type switches', 'Hard', 'x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.', null, null, null),
+  ('go-gen-type-params', 'Type parameters & instantiation', 'Hard', 'How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.', null, null, null),
+  ('go-gen-constraints', 'Constraints, ~ and comparable', 'Hard', 'Type sets, union elements, ~underlying approximation, and the two flavors of comparable.', null, null, null),
+  ('go-gen-inference', 'Type inference & its limits', 'Hard', 'How Go infers type arguments from function args, and the hard limits where you must be explicit.', null, null, null),
+  ('go-gen-pitfalls', 'Generics pitfalls & when not to use', 'Hard', 'Know the hard limits of Go generics and when a plain interface beats a type parameter.', null, null, null),
+  ('go-err-wrapping', 'Wrapping with %w, errors.Is / As', 'Hard', 'Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.', null, null, null),
+  ('go-err-sentinel-typed', 'Sentinel vs typed errors', 'Hard', 'When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.', null, null, null),
+  ('go-err-panic-recover', 'panic, recover & defer semantics', 'Hard', 'How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.', null, null, null),
+  ('go-err-custom', 'Custom error types & Unwrap', 'Hard', 'Build custom error types that participate correctly in Is/As chains and joined trees.', null, null, null),
+  ('go-data-slice-internals', 'Slice header, len, cap & append growth', 'Hard', 'How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.', null, null, null),
+  ('go-data-slice-aliasing', 'Slice aliasing & the append gotcha', 'Hard', 'Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().', null, null, null),
+  ('go-data-maps', 'Map internals & iteration order', 'Hard', 'How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.', null, null, null),
+  ('go-data-strings-runes', 'Strings, bytes, runes & UTF-8', 'Hard', 'Strings are immutable byte sequences; indexing yields bytes, range yields runes.', null, null, null),
+  ('go-std-io', 'io.Reader / io.Writer composition', 'Hard', 'Compose small io interfaces to stream data through wrappers without buffering everything in memory.', null, null, null),
+  ('go-std-json', 'encoding/json quirks', 'Hard', 'Reflection-driven (un)marshaling: exported fields, tags, omitempty, embedding, and interface{} defaults.', null, null, null),
+  ('go-std-time', 'time: monotonic clocks & tickers', 'Hard', 'How time.Time carries a monotonic reading, and how Timers and Tickers behave under Go 1.23+ unbuffered-channel semantics.', null, null, null),
+  ('go-std-defer-idioms', 'defer patterns & resource cleanup', 'Hard', 'LIFO defers, loop pitfalls, error-preserving close, and defer cost under Go 1.26.', null, null, null),
+  ('go-perf-benchmarks', 'Benchmarks & benchstat', 'Hard', 'Write trustworthy microbenchmarks with testing.B and compare them statistically with benchstat.', null, null, null),
+  ('go-perf-pprof', 'pprof: CPU & heap profiling', 'Hard', 'Capture and read CPU and heap profiles with runtime/pprof and net/http/pprof, and interpret flat/cum and inuse/alloc samples.', null, null, null),
+  ('go-perf-allocations', 'Reducing allocations & inlining', 'Hard', 'Cut heap traffic and keep hot functions inlinable to speed up Go code.', null, null, null),
+  ('go-perf-datastructures', 'Choosing structures for performance', 'Hard', 'Pick data structures by memory layout and access pattern, not just Big-O.', null, null, null),
+  ('go-test-table', 'Table-driven tests & subtests', 'Hard', 'Structure cases as data, run each via t.Run, and diff want/got with cleanups and golden files.', null, null, null),
+  ('go-test-parallel', 't.Parallel, helpers & cleanup', 'Hard', 'How parallel subtests schedule, capture loop vars, and interleave with cleanup and t.TempDir.', null, null, null),
+  ('go-test-fuzz', 'Fuzzing', 'Hard', 'Native Go fuzzing: FuzzX targets, seed corpus, differential invariants, and persisted crashers.', null, null, null),
+  ('go-test-doubles', 'Test doubles & httptest', 'Hard', 'Design testable seams with interfaces, choose fakes over mocks, and drive HTTP code with httptest.', null, null, null),
+  ('go-design-rate-limiter', 'Design: token-bucket rate limiter', 'Hard', 'Token bucket with x/time/rate, per-key limiters, safe refill, and idle eviction.', null, null, null),
+  ('go-design-worker-pool', 'Design: bounded worker-pool service', 'Hard', 'Bound concurrency with fixed workers or a semaphore, apply backpressure, drain gracefully, and aggregate errors under cancellation.', null, null, null),
+  ('go-design-lru-cache', 'Design: concurrent LRU cache', 'Hard', 'Build an O(1) LRU with map + doubly linked list, then make it concurrent via sharding vs a single mutex.', null, null, null),
+  ('go-design-graceful-shutdown', 'Design: graceful shutdown', 'Hard', 'Drain in-flight requests on SIGTERM, then close dependencies in the right order.', null, null, null),
+  ('go-design-pipeline', 'Design: cancellable pipeline', 'Hard', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', null, null, null);
 
 insert into public.tags (id, label) values
   ('API-design', 'API-design'),
@@ -2221,6 +2234,65 @@ func bfs(n int, edges [][]int, start int) []int {
 	return res
 }
 ', true, 0),
+  ('imp-0-01-bfs-shortest-reach', 'python', 'solution.py', 'from collections import deque
+
+
+def bfs(n, edges, start):
+    if start < 1 or start > n:
+        return [-1] * (n - 1)
+    adj = [[] for _ in range(n + 1)]
+    for a, b in edges:
+        adj[a].append(b)
+        adj[b].append(a)
+    dist = [-1] * (n + 1)
+    dist[start] = 0
+    q = deque([start])
+    while q:
+        cur = q.popleft()
+        for nb in adj[cur]:
+            if dist[nb] == -1:
+                dist[nb] = dist[cur] + 6
+                q.append(nb)
+    return [dist[i] for i in range(1, n + 1) if i != start]
+', false, 1),
+  ('imp-0-01-bfs-shortest-reach', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    int[] bfs(int n, int[][] edges, int start) {
+        if (start < 1 || start > n) {
+            int[] res = new int[n - 1];
+            Arrays.fill(res, -1);
+            return res;
+        }
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());
+        for (int[] e : edges) {
+            adj.get(e[0]).add(e[1]);
+            adj.get(e[1]).add(e[0]);
+        }
+        int[] dist = new int[n + 1];
+        Arrays.fill(dist, -1);
+        dist[start] = 0;
+        Deque<Integer> q = new ArrayDeque<>();
+        q.add(start);
+        while (!q.isEmpty()) {
+            int cur = q.poll();
+            for (int nb : adj.get(cur)) {
+                if (dist[nb] == -1) {
+                    dist[nb] = dist[cur] + 6;
+                    q.add(nb);
+                }
+            }
+        }
+        int[] res = new int[n - 1];
+        int k = 0;
+        for (int i = 1; i <= n; i++) {
+            if (i != start) res[k++] = dist[i];
+        }
+        return res;
+    }
+}
+', false, 2),
   ('imp-0-02-clone-graph', 'go', 'solution.go', 'package main
 
 type GraphNode struct {
@@ -2248,6 +2320,67 @@ func btCloneGraph(n *GraphNode, memo map[*GraphNode]*GraphNode) *GraphNode {
 	return copy
 }
 ', true, 0),
+  ('imp-0-02-clone-graph', 'python', 'solution.py', 'from typing import Optional, Dict, List
+
+
+class GraphNode:
+    def __init__(self, label: int):
+        self.label = label
+        self.neighbors: List["GraphNode"] = []
+
+
+def clone_graph(src: Optional[GraphNode]) -> Optional[GraphNode]:
+    if src is None:
+        return None
+    memo: Dict[GraphNode, GraphNode] = {}
+    return _bt_clone_graph(src, memo)
+
+
+def _bt_clone_graph(n: GraphNode, memo: Dict[GraphNode, GraphNode]) -> GraphNode:
+    if n in memo:
+        return memo[n]
+    copy = GraphNode(n.label)
+    memo[n] = copy
+    for nb in n.neighbors:
+        copy.neighbors.append(_bt_clone_graph(nb, memo))
+    return copy', false, 1),
+  ('imp-0-02-clone-graph', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+
+class Solution {
+
+    static class GraphNode {
+        int label;
+        List<GraphNode> neighbors = new ArrayList<>();
+
+        GraphNode(int label) {
+            this.label = label;
+        }
+    }
+
+    public GraphNode cloneGraph(GraphNode src) {
+        if (src == null) {
+            return null;
+        }
+        Map<GraphNode, GraphNode> memo = new IdentityHashMap<>();
+        return btCloneGraph(src, memo);
+    }
+
+    private GraphNode btCloneGraph(GraphNode n, Map<GraphNode, GraphNode> memo) {
+        GraphNode existing = memo.get(n);
+        if (existing != null) {
+            return existing;
+        }
+        GraphNode copy = new GraphNode(n.label);
+        memo.put(n, copy);
+        for (GraphNode nb : n.neighbors) {
+            copy.neighbors.add(btCloneGraph(nb, memo));
+        }
+        return copy;
+    }
+}', false, 2),
   ('imp-0-03-find-shortest-path-with-bfs', 'go', 'solution.go', 'package main
 
 func findShortestPathWithBfs(adj [][]int, src, dest int) []int {
@@ -2284,6 +2417,65 @@ func findShortestPathWithBfs(adj [][]int, src, dest int) []int {
 	return path
 }
 ', true, 0),
+  ('imp-0-03-find-shortest-path-with-bfs', 'python', 'solution.py', 'from collections import deque
+
+
+def find_shortest_path_with_bfs(adj, src, dest):
+    n = len(adj)
+    dist = [-1] * n
+    pred = [-1] * n
+    q = deque([src])
+    dist[src] = 0
+    while q:
+        v = q.popleft()
+        if v == dest:
+            break
+        for nb in adj[v]:
+            if dist[nb] == -1:
+                dist[nb] = dist[v] + 1
+                pred[nb] = v
+                q.append(nb)
+    if dist[dest] == -1:
+        return None
+    path = []
+    at = dest
+    while at != -1:
+        path.insert(0, at)
+        at = pred[at]
+    return path
+', false, 1),
+  ('imp-0-03-find-shortest-path-with-bfs', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    int[] findShortestPathWithBfs(int[][] adj, int src, int dest) {
+        int n = adj.length;
+        int[] dist = new int[n];
+        int[] pred = new int[n];
+        Arrays.fill(dist, -1);
+        Arrays.fill(pred, -1);
+        Deque<Integer> q = new ArrayDeque<>();
+        q.add(src);
+        dist[src] = 0;
+        while (!q.isEmpty()) {
+            int v = q.poll();
+            if (v == dest) break;
+            for (int nb : adj[v]) {
+                if (dist[nb] == -1) {
+                    dist[nb] = dist[v] + 1;
+                    pred[nb] = v;
+                    q.add(nb);
+                }
+            }
+        }
+        if (dist[dest] == -1) return null;
+        LinkedList<Integer> path = new LinkedList<>();
+        for (int at = dest; at != -1; at = pred[at]) path.addFirst(at);
+        int[] out = new int[path.size()];
+        for (int i = 0; i < out.length; i++) out[i] = path.get(i);
+        return out;
+    }
+}
+', false, 2),
   ('imp-0-04-graph-traversal', 'go', 'solution.go', 'package main
 
 type GraphNode struct {
@@ -2330,6 +2522,89 @@ func btGraphDfs(n *GraphNode, visited map[*GraphNode]bool, order *[]int) {
 	}
 }
 ', true, 0),
+  ('imp-0-04-graph-traversal', 'python', 'solution.py', 'from collections import deque
+
+
+class GraphNode:
+    def __init__(self, label):
+        self.label = label
+        self.neighbors = []
+
+
+def graph_traversal_dfs(src):
+    visited = set()
+    order = []
+
+    def dfs(node):
+        if node is None or id(node) in visited:
+            return
+        visited.add(id(node))
+        order.append(node.label)
+        for nb in node.neighbors:
+            dfs(nb)
+
+    dfs(src)
+    return order
+
+
+def graph_traversal_bfs(src):
+    if src is None:
+        return []
+    visited = {id(src)}
+    q = deque([src])
+    order = []
+    while q:
+        v = q.popleft()
+        order.append(v.label)
+        for nb in v.neighbors:
+            if id(nb) not in visited:
+                visited.add(id(nb))
+                q.append(nb)
+    return order
+', false, 1),
+  ('imp-0-04-graph-traversal', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    static class GraphNode {
+        int label;
+        List<GraphNode> neighbors = new ArrayList<>();
+        GraphNode(int label) { this.label = label; }
+    }
+
+    List<Integer> graphTraversalDFS(GraphNode src) {
+        List<Integer> order = new ArrayList<>();
+        dfs(src, Collections.newSetFromMap(new IdentityHashMap<>()), order);
+        return order;
+    }
+
+    private void dfs(GraphNode n, Set<GraphNode> visited, List<Integer> order) {
+        if (n == null || visited.contains(n)) return;
+        visited.add(n);
+        order.add(n.label);
+        for (GraphNode nb : n.neighbors) dfs(nb, visited, order);
+    }
+
+    List<Integer> graphTraversalBFS(GraphNode src) {
+        List<Integer> order = new ArrayList<>();
+        if (src == null) return order;
+        Set<GraphNode> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        visited.add(src);
+        Deque<GraphNode> q = new ArrayDeque<>();
+        q.add(src);
+        while (!q.isEmpty()) {
+            GraphNode v = q.poll();
+            order.add(v.label);
+            for (GraphNode nb : v.neighbors) {
+                if (!visited.contains(nb)) {
+                    visited.add(nb);
+                    q.add(nb);
+                }
+            }
+        }
+        return order;
+    }
+}
+', false, 2),
   ('imp-0-05-has-path-from-source-to-destination', 'go', 'solution.go', 'package main
 
 func hasPathFromSourceToDestina(adj [][]int, src, dest int) bool {
@@ -2355,6 +2630,48 @@ func hasPathFromSourceToDestina(adj [][]int, src, dest int) bool {
 	return false
 }
 ', true, 0),
+  ('imp-0-05-has-path-from-source-to-destination', 'python', 'solution.py', 'from collections import deque
+
+
+def has_path(adj, src, dest):
+    if src == dest:
+        return True
+    visited = [False] * len(adj)
+    q = deque([src])
+    visited[src] = True
+    while q:
+        v = q.popleft()
+        for nb in adj[v]:
+            if nb == dest:
+                return True
+            if not visited[nb]:
+                visited[nb] = True
+                q.append(nb)
+    return False
+', false, 1),
+  ('imp-0-05-has-path-from-source-to-destination', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    boolean hasPath(int[][] adj, int src, int dest) {
+        if (src == dest) return true;
+        boolean[] visited = new boolean[adj.length];
+        Deque<Integer> q = new ArrayDeque<>();
+        q.add(src);
+        visited[src] = true;
+        while (!q.isEmpty()) {
+            int v = q.poll();
+            for (int nb : adj[v]) {
+                if (nb == dest) return true;
+                if (!visited[nb]) {
+                    visited[nb] = true;
+                    q.add(nb);
+                }
+            }
+        }
+        return false;
+    }
+}
+', false, 2),
   ('imp-0-06-print-all-paths-from-source-to-destination', 'go', 'solution.go', 'package main
 
 func printAllPathsFromSourceToDestin(adj [][]int, src, dest int) [][]int {
@@ -2383,6 +2700,60 @@ func btPrintPaths(adj [][]int, v, dest int, visited []bool, path *[]int, res *[]
 	}
 }
 ', true, 0),
+  ('imp-0-06-print-all-paths-from-source-to-destination', 'python', 'solution.py', 'from typing import List
+
+
+def print_all_paths_from_source_to_destin(adj: List[List[int]], src: int, dest: int) -> List[List[int]]:
+    res: List[List[int]] = []
+    path: List[int] = [src]
+    visited = [False] * len(adj)
+    visited[src] = True
+    _bt_print_paths(adj, src, dest, visited, path, res)
+    return res
+
+
+def _bt_print_paths(adj, v, dest, visited, path, res):
+    if v == dest:
+        res.append(path[:])
+        return
+    for nb in adj[v]:
+        if not visited[nb]:
+            visited[nb] = True
+            path.append(nb)
+            _bt_print_paths(adj, nb, dest, visited, path, res)
+            path.pop()
+            visited[nb] = False', false, 1),
+  ('imp-0-06-print-all-paths-from-source-to-destination', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    List<List<Integer>> printAllPathsFromSourceToDestin(int[][] adj, int src, int dest) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        path.add(src);
+        boolean[] visited = new boolean[adj.length];
+        visited[src] = true;
+        btPrintPaths(adj, src, dest, visited, path, res);
+        return res;
+    }
+
+    void btPrintPaths(int[][] adj, int v, int dest, boolean[] visited, List<Integer> path, List<List<Integer>> res) {
+        if (v == dest) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int nb : adj[v]) {
+            if (!visited[nb]) {
+                visited[nb] = true;
+                path.add(nb);
+                btPrintPaths(adj, nb, dest, visited, path, res);
+                path.remove(path.size() - 1);
+                visited[nb] = false;
+            }
+        }
+    }
+}', false, 2),
   ('imp-0-07-shortest-distance-from-all-buildings', 'go', 'solution.go', 'package main
 
 func shortestDistance(grid [][]int) int {
@@ -2440,6 +2811,96 @@ func shortestDistance(grid [][]int) int {
 	return res
 }
 ', true, 0),
+  ('imp-0-07-shortest-distance-from-all-buildings', 'python', 'solution.py', 'from collections import deque
+from typing import List
+
+
+def shortestDistance(grid: List[List[int]]) -> int:
+    m, n = len(grid), len(grid[0])
+    total_dist = [[0] * n for _ in range(m)]
+    reach = [[0] * n for _ in range(m)]
+    buildings = 0
+    dirs = ((0, 1), (0, -1), (1, 0), (-1, 0))
+    for r in range(m):
+        for c in range(n):
+            if grid[r][c] == 1:
+                buildings += 1
+                vis = [[False] * n for _ in range(m)]
+                q = deque()
+                q.append((r, c))
+                vis[r][c] = True
+                dist = 0
+                while q:
+                    dist += 1
+                    sz = len(q)
+                    for _ in range(sz):
+                        cr, cc = q.popleft()
+                        for dr, dc in dirs:
+                            nr, nc = cr + dr, cc + dc
+                            if 0 <= nr < m and 0 <= nc < n and not vis[nr][nc] and grid[nr][nc] == 0:
+                                vis[nr][nc] = True
+                                total_dist[nr][nc] += dist
+                                reach[nr][nc] += 1
+                                q.append((nr, nc))
+    res = 1 << 30
+    for r in range(m):
+        for c in range(n):
+            if grid[r][c] == 0 and reach[r][c] == buildings and total_dist[r][c] < res:
+                res = total_dist[r][c]
+    if res == 1 << 30:
+        return -1
+    return res', false, 1),
+  ('imp-0-07-shortest-distance-from-all-buildings', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+
+class Solution {
+    public int shortestDistance(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[][] totalDist = new int[m][n];
+        int[][] reach = new int[m][n];
+        int buildings = 0;
+        int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == 1) {
+                    buildings++;
+                    boolean[][] vis = new boolean[m][n];
+                    ArrayDeque<int[]> q = new ArrayDeque<>();
+                    q.add(new int[]{r, c});
+                    vis[r][c] = true;
+                    int dist = 0;
+                    while (!q.isEmpty()) {
+                        dist++;
+                        int sz = q.size();
+                        for (int s = 0; s < sz; s++) {
+                            int[] cur = q.poll();
+                            for (int[] d : dirs) {
+                                int nr = cur[0] + d[0], nc = cur[1] + d[1];
+                                if (nr >= 0 && nr < m && nc >= 0 && nc < n && !vis[nr][nc] && grid[nr][nc] == 0) {
+                                    vis[nr][nc] = true;
+                                    totalDist[nr][nc] += dist;
+                                    reach[nr][nc]++;
+                                    q.add(new int[]{nr, nc});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        int res = 1 << 30;
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == 0 && reach[r][c] == buildings && totalDist[r][c] < res) {
+                    res = totalDist[r][c];
+                }
+            }
+        }
+        if (res == 1 << 30) {
+            return -1;
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-0-08-topological-sort-with-dfs', 'go', 'solution.go', 'package main
 
 func topologicalSortWithDfs(adj [][]int) []int {
@@ -2467,6 +2928,56 @@ func btTopoSort(adj [][]int, visited []bool, v int, stack *[]int) {
 	*stack = append(*stack, v)
 }
 ', true, 0),
+  ('imp-0-08-topological-sort-with-dfs', 'python', 'solution.py', 'from typing import List
+
+
+def topological_sort_with_dfs(adj: List[List[int]]) -> List[int]:
+    n = len(adj)
+    visited = [False] * n
+    stack: List[int] = []
+    for i in range(n):
+        if not visited[i]:
+            _bt_topo_sort(adj, visited, i, stack)
+    stack.reverse()
+    return stack
+
+
+def _bt_topo_sort(adj: List[List[int]], visited: List[bool], v: int, stack: List[int]) -> None:
+    visited[v] = True
+    for nb in adj[v]:
+        if not visited[nb]:
+            _bt_topo_sort(adj, visited, nb, stack)
+    stack.append(v)', false, 1),
+  ('imp-0-08-topological-sort-with-dfs', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    int[] topologicalSortWithDfs(int[][] adj) {
+        int n = adj.length;
+        boolean[] visited = new boolean[n];
+        List<Integer> stack = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                btTopoSort(adj, visited, i, stack);
+            }
+        }
+        int[] result = new int[stack.size()];
+        for (int i = 0, j = stack.size() - 1; j >= 0; i++, j--) {
+            result[i] = stack.get(j);
+        }
+        return result;
+    }
+
+    void btTopoSort(int[][] adj, boolean[] visited, int v, List<Integer> stack) {
+        visited[v] = true;
+        for (int nb : adj[v]) {
+            if (!visited[nb]) {
+                btTopoSort(adj, visited, nb, stack);
+            }
+        }
+        stack.add(v);
+    }
+}', false, 2),
   ('imp-1-subset-component', 'go', 'solution.go', 'package main
 
 import (
@@ -2580,6 +3091,91 @@ func alienOrder(words []string) string {
 	return string(res)
 }
 ', true, 0),
+  ('imp-2-alien-dictionary', 'python', 'solution.py', 'from collections import deque
+
+
+def alien_order(words):
+    adj = {}
+    in_deg = {}
+    for w in words:
+        for ch in w:
+            if ch not in adj:
+                adj[ch] = set()
+            in_deg.setdefault(ch, 0)
+    for i in range(len(words) - 1):
+        w1, w2 = words[i], words[i + 1]
+        if len(w1) > len(w2) and w1[:len(w2)] == w2:
+            return ""
+        for j in range(min(len(w1), len(w2))):
+            if w1[j] != w2[j]:
+                if w2[j] not in adj[w1[j]]:
+                    adj[w1[j]].add(w2[j])
+                    in_deg[w2[j]] += 1
+                break
+    q = deque(ch for ch in in_deg if in_deg[ch] == 0)
+    res = []
+    while q:
+        ch = q.popleft()
+        res.append(ch)
+        for nb in adj[ch]:
+            in_deg[nb] -= 1
+            if in_deg[nb] == 0:
+                q.append(nb)
+    if len(res) != len(in_deg):
+        return ""
+    return "".join(res)', false, 1),
+  ('imp-2-alien-dictionary', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public String alienOrder(String[] words) {
+        Map<Character, Set<Character>> adj = new HashMap<>();
+        Map<Character, Integer> inDeg = new HashMap<>();
+        for (String w : words) {
+            for (int i = 0; i < w.length(); i++) {
+                char c = w.charAt(i);
+                adj.putIfAbsent(c, new HashSet<>());
+                inDeg.putIfAbsent(c, 0);
+            }
+        }
+        for (int i = 0; i < words.length - 1; i++) {
+            String w1 = words[i], w2 = words[i + 1];
+            if (w1.length() > w2.length() && w1.substring(0, w2.length()).equals(w2)) {
+                return "";
+            }
+            for (int j = 0; j < w1.length() && j < w2.length(); j++) {
+                char a = w1.charAt(j), b = w2.charAt(j);
+                if (a != b) {
+                    if (!adj.get(a).contains(b)) {
+                        adj.get(a).add(b);
+                        inDeg.put(b, inDeg.get(b) + 1);
+                    }
+                    break;
+                }
+            }
+        }
+        Deque<Character> q = new ArrayDeque<>();
+        for (Map.Entry<Character, Integer> e : inDeg.entrySet()) {
+            if (e.getValue() == 0) {
+                q.add(e.getKey());
+            }
+        }
+        StringBuilder res = new StringBuilder();
+        while (!q.isEmpty()) {
+            char ch = q.poll();
+            res.append(ch);
+            for (char nb : adj.get(ch)) {
+                inDeg.put(nb, inDeg.get(nb) - 1);
+                if (inDeg.get(nb) == 0) {
+                    q.add(nb);
+                }
+            }
+        }
+        if (res.length() != inDeg.size()) {
+            return "";
+        }
+        return res.toString();
+    }
+}', false, 2),
   ('imp-3-remove-invalid-parentheses', 'go', 'solution.go', 'package main
 
 func removeInvalidParentheses(s string) []string {
@@ -2674,6 +3270,103 @@ func TestRemoveInvalidParenthesesAlternate(t *testing.T) {
 	}
 }
 ', false, 2),
+  ('imp-3-remove-invalid-parentheses', 'python', 'solution.py', 'from collections import deque
+from typing import List
+
+
+def remove_invalid_parentheses(s: str) -> List[str]:
+    vis = {s}
+    q = deque([s])
+    res: List[str] = []
+    found = False
+    while q and not found:
+        sz = len(q)
+        for _ in range(sz):
+            cur = q.popleft()
+            if is_valid(cur):
+                res.append(cur)
+                found = True
+            if found:
+                continue
+            for j in range(len(cur)):
+                if cur[j] != ''('' and cur[j] != '')'':
+                    continue
+                nxt = cur[:j] + cur[j + 1:]
+                if nxt not in vis:
+                    vis.add(nxt)
+                    q.append(nxt)
+    return res
+
+
+def is_valid(s: str) -> bool:
+    cnt = 0
+    for ch in s:
+        if ch == ''('':
+            cnt += 1
+        elif ch == '')'':
+            cnt -= 1
+        if cnt < 0:
+            return False
+    return cnt == 0', false, 3),
+  ('imp-3-remove-invalid-parentheses', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+class Solution {
+
+    public List<String> removeInvalidParentheses(String s) {
+        Set<String> vis = new HashSet<>();
+        vis.add(s);
+        Deque<String> q = new ArrayDeque<>();
+        q.add(s);
+        List<String> res = new ArrayList<>();
+        boolean found = false;
+        while (!q.isEmpty() && !found) {
+            int sz = q.size();
+            for (int i = 0; i < sz; i++) {
+                String cur = q.poll();
+                if (isValid(cur)) {
+                    res.add(cur);
+                    found = true;
+                }
+                if (found) {
+                    continue;
+                }
+                for (int j = 0; j < cur.length(); j++) {
+                    char c = cur.charAt(j);
+                    if (c != ''('' && c != '')'') {
+                        continue;
+                    }
+                    String next = cur.substring(0, j) + cur.substring(j + 1);
+                    if (!vis.contains(next)) {
+                        vis.add(next);
+                        q.add(next);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    private boolean isValid(String s) {
+        int cnt = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == ''('') {
+                cnt++;
+            } else if (c == '')'') {
+                cnt--;
+            }
+            if (cnt < 0) {
+                return false;
+            }
+        }
+        return cnt == 0;
+    }
+}', false, 4),
   ('imp-4-floyd-city-of-blinding-lights', 'go', 'solution.go', 'package main
 
 const INF = 1 << 30
@@ -2719,6 +3412,86 @@ func query(dist [][]int, u, v int) int {
 	return dist[u][v]
 }
 ', true, 0),
+  ('imp-4-floyd-city-of-blinding-lights', 'python', 'solution.py', 'from typing import List
+
+INF = 1 << 30
+
+
+def floyd_warshall(n: int, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
+    dist = [[INF] * (n + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        dist[i][i] = 0
+    for e in edges:
+        u, v, w = e[0], e[1], e[2]
+        dist[u][v] = w
+    for k in range(1, n + 1):
+        for i in range(1, n + 1):
+            for j in range(1, n + 1):
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+    results = [0] * len(queries)
+    for i, q in enumerate(queries):
+        u, v = q[0], q[1]
+        if u < 1 or u > n or v < 1 or v > n:
+            results[i] = -1
+        else:
+            results[i] = query(dist, u, v)
+    return results
+
+
+def query(dist: List[List[int]], u: int, v: int) -> int:
+    if dist[u][v] >= INF:
+        return -1
+    return dist[u][v]', false, 1),
+  ('imp-4-floyd-city-of-blinding-lights', 'java', 'Solution.java', 'import java.util.List;
+
+class Solution {
+
+    static final int INF = 1 << 30;
+
+    public int[] floydWarshall(int n, int[][] edges, int[][] queries) {
+        int[][] dist = new int[n + 1][n + 1];
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= n; j++) {
+                dist[i][j] = INF;
+            }
+            dist[i][i] = 0;
+        }
+        for (int[] e : edges) {
+            int u = e[0], v = e[1], w = e[2];
+            dist[u][v] = w;
+        }
+        for (int k = 1; k <= n; k++) {
+            for (int i = 1; i <= n; i++) {
+                for (int j = 1; j <= n; j++) {
+                    // long arithmetic mirrors Go''s 64-bit int and prevents INF+INF
+                    // from wrapping negative in int (which would relax spuriously).
+                    long through = (long) dist[i][k] + (long) dist[k][j];
+                    if (through < dist[i][j]) {
+                        dist[i][j] = (int) through;
+                    }
+                }
+            }
+        }
+        int[] results = new int[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            int u = queries[i][0], v = queries[i][1];
+            if (u < 1 || u > n || v < 1 || v > n) {
+                results[i] = -1;
+            } else {
+                results[i] = query(dist, u, v);
+            }
+        }
+        return results;
+    }
+
+    private int query(int[][] dist, int u, int v) {
+        if (dist[u][v] >= INF) {
+            return -1;
+        }
+        return dist[u][v];
+    }
+}', false, 2),
   ('imp-5-swim-in-rising-water', 'go', 'solution.go', 'package main
 
 import "container/heap"
@@ -2765,6 +3538,61 @@ func swimInWater(grid [][]int) int {
 	return res
 }
 ', true, 0),
+  ('imp-5-swim-in-rising-water', 'python', 'solution.py', 'import heapq
+from typing import List
+
+
+def swim_in_water(grid: List[List[int]]) -> int:
+    n = len(grid)
+    vis = [[False] * n for _ in range(n)]
+    heap = [(grid[0][0], 0, 0)]
+    vis[0][0] = True
+    dirs = ((0, 1), (0, -1), (1, 0), (-1, 0))
+    res = 0
+    while heap:
+        val, r, c = heapq.heappop(heap)
+        if val > res:
+            res = val
+        if r == n - 1 and c == n - 1:
+            return res
+        for dr, dc in dirs:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < n and 0 <= nc < n and not vis[nr][nc]:
+                vis[nr][nc] = True
+                heapq.heappush(heap, (grid[nr][nc], nr, nc))
+    return res', false, 1),
+  ('imp-5-swim-in-rising-water', 'java', 'Solution.java', 'import java.util.PriorityQueue;
+
+class Solution {
+    public int swimInWater(int[][] grid) {
+        int n = grid.length;
+        boolean[][] vis = new boolean[n][n];
+        // {value, row, col}, min-heap ordered by value
+        PriorityQueue<int[]> heap = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));
+        heap.offer(new int[]{grid[0][0], 0, 0});
+        vis[0][0] = true;
+        int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        int res = 0;
+        while (!heap.isEmpty()) {
+            int[] cur = heap.poll();
+            if (cur[0] > res) {
+                res = cur[0];
+            }
+            if (cur[1] == n - 1 && cur[2] == n - 1) {
+                return res;
+            }
+            for (int[] d : dirs) {
+                int nr = cur[1] + d[0];
+                int nc = cur[2] + d[1];
+                if (nr >= 0 && nr < n && nc >= 0 && nc < n && !vis[nr][nc]) {
+                    vis[nr][nc] = true;
+                    heap.offer(new int[]{grid[nr][nc], nr, nc});
+                }
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-6-find-shortest-path-with-dijkstra-s', 'go', 'solution.go', 'package main
 
 type WEdge struct {
@@ -2802,6 +3630,85 @@ func findShortestPathWithDijkstras(adj [][]WEdge, src int) []int {
 	return dist
 }
 ', true, 0),
+  ('imp-6-find-shortest-path-with-dijkstra-s', 'python', 'solution.py', 'from typing import List
+
+
+class WEdge:
+    def __init__(self, next: int, weight: int):
+        self.next = next
+        self.weight = weight
+
+
+INF = (1 << 63) - 1
+
+
+def find_shortest_path_with_dijkstras(adj: List[List[WEdge]], src: int) -> List[int]:
+    n = len(adj)
+    dist = [INF] * n
+    used = [False] * n
+    dist[src] = 0
+    for _ in range(n):
+        u = -1
+        best = INF
+        for v in range(n):
+            if not used[v] and dist[v] < best:
+                best = dist[v]
+                u = v
+        if u == -1:
+            break
+        used[u] = True
+        for e in adj[u]:
+            nd = dist[u] + e.weight
+            if nd < dist[e.next]:
+                dist[e.next] = nd
+    return dist', false, 1),
+  ('imp-6-find-shortest-path-with-dijkstra-s', 'java', 'Solution.java', 'import java.util.List;
+
+class Solution {
+
+    static class WEdge {
+        int next;
+        int weight;
+
+        WEdge(int next, int weight) {
+            this.next = next;
+            this.weight = weight;
+        }
+    }
+
+    static final long INF = Long.MAX_VALUE;
+
+    long[] findShortestPathWithDijkstras(List<List<WEdge>> adj, int src) {
+        int n = adj.size();
+        long[] dist = new long[n];
+        boolean[] used = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            dist[i] = INF;
+        }
+        dist[src] = 0;
+        for (int count = 0; count < n; count++) {
+            int u = -1;
+            long best = INF;
+            for (int v = 0; v < n; v++) {
+                if (!used[v] && dist[v] < best) {
+                    best = dist[v];
+                    u = v;
+                }
+            }
+            if (u == -1) {
+                break;
+            }
+            used[u] = true;
+            for (WEdge e : adj.get(u)) {
+                long nd = dist[u] + e.weight;
+                if (nd < dist[e.next]) {
+                    dist[e.next] = nd;
+                }
+            }
+        }
+        return dist;
+    }
+}', false, 2),
   ('imp-7-is-graph-bipartite', 'go', 'solution.go', 'package main
 
 func isBipartite(adj [][]int) bool {
@@ -2828,6 +3735,54 @@ func isBipartite(adj [][]int) bool {
 	return true
 }
 ', true, 0),
+  ('imp-7-is-graph-bipartite', 'python', 'solution.py', 'from collections import deque
+from typing import List
+
+
+def is_bipartite(adj: List[List[int]]) -> bool:
+    color = [0] * len(adj)
+    for i in range(len(adj)):
+        if color[i] != 0:
+            continue
+        q = deque([i])
+        color[i] = 1
+        while q:
+            v = q.popleft()
+            for nb in adj[v]:
+                if color[nb] == 0:
+                    color[nb] = 3 - color[v]
+                    q.append(nb)
+                elif color[nb] == color[v]:
+                    return False
+    return True', false, 1),
+  ('imp-7-is-graph-bipartite', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public boolean isBipartite(int[][] adj) {
+        int[] color = new int[adj.length];
+        for (int i = 0; i < adj.length; i++) {
+            if (color[i] != 0) {
+                continue;
+            }
+            Deque<Integer> q = new ArrayDeque<>();
+            q.add(i);
+            color[i] = 1;
+            while (!q.isEmpty()) {
+                int v = q.poll();
+                for (int nb : adj[v]) {
+                    if (color[nb] == 0) {
+                        color[nb] = 3 - color[v];
+                        q.add(nb);
+                    } else if (color[nb] == color[v]) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+}', false, 2),
   ('imp-8-merging-communities', 'go', 'solution.go', 'package main
 
 import (
@@ -2895,6 +3850,131 @@ func SolveMergingCommunities(r io.Reader, w io.Writer) {
 	}
 }
 ', true, 0),
+  ('imp-8-merging-communities', 'python', 'solution.py', 'import sys
+
+
+class DSU:
+    def __init__(self, n):
+        self.parent = list(range(n + 1))
+        self.size = [1] * (n + 1)
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        rx, ry = self.find(x), self.find(y)
+        if rx == ry:
+            return
+        if self.size[rx] < self.size[ry]:
+            rx, ry = ry, rx
+        self.parent[ry] = rx
+        self.size[rx] += self.size[ry]
+
+    def size_of(self, x):
+        return self.size[self.find(x)]
+
+
+def solve_merging_communities(r, w):
+    tokens = r.read().split()
+    it = iter(tokens)
+    try:
+        n = int(next(it))
+        q = int(next(it))
+    except StopIteration:
+        return
+    dsu = DSU(n)
+    for _ in range(q):
+        try:
+            op = next(it)
+        except StopIteration:
+            return
+        if op == "M":
+            u = int(next(it))
+            v = int(next(it))
+            dsu.union(u, v)
+        elif op == "Q":
+            u = int(next(it))
+            w.write(str(dsu.size_of(u)) + "\n")', false, 1),
+  ('imp-8-merging-communities', 'java', 'Solution.java', 'import java.io.Reader;
+import java.io.Writer;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.StreamTokenizer;
+
+class Solution {
+
+    static class DSU {
+        int[] parent;
+        int[] size;
+
+        DSU(int n) {
+            parent = new int[n + 1];
+            size = new int[n + 1];
+            for (int i = 0; i <= n; i++) {
+                parent[i] = i;
+                size[i] = 1;
+            }
+        }
+
+        int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+
+        void union(int x, int y) {
+            int rx = find(x), ry = find(y);
+            if (rx == ry) {
+                return;
+            }
+            if (size[rx] < size[ry]) {
+                int t = rx; rx = ry; ry = t;
+            }
+            parent[ry] = rx;
+            size[rx] += size[ry];
+        }
+
+        int sizeOf(int x) {
+            return size[find(x)];
+        }
+    }
+
+    static void solveMergingCommunities(Reader r, Writer w) throws IOException {
+        StreamTokenizer in = new StreamTokenizer(new BufferedReader(r));
+        in.ordinaryChars(0, 255);
+        in.wordChars(''A'', ''Z'');
+        in.wordChars(''a'', ''z'');
+        in.whitespaceChars(0, '' '');
+        in.parseNumbers();
+
+        if (in.nextToken() == StreamTokenizer.TT_EOF) return;
+        int n = (int) in.nval;
+        if (in.nextToken() == StreamTokenizer.TT_EOF) return;
+        int q = (int) in.nval;
+
+        DSU dsu = new DSU(n);
+        for (int i = 0; i < q; i++) {
+            if (in.nextToken() == StreamTokenizer.TT_EOF) return;
+            String op = in.sval;
+            if ("M".equals(op)) {
+                in.nextToken();
+                int u = (int) in.nval;
+                in.nextToken();
+                int v = (int) in.nval;
+                dsu.union(u, v);
+            } else if ("Q".equals(op)) {
+                in.nextToken();
+                int u = (int) in.nval;
+                w.write(Integer.toString(dsu.sizeOf(u)));
+                w.write("\n");
+            }
+        }
+        w.flush();
+    }
+}', false, 2),
   ('imp-9-similar-string-groups', 'go', 'solution.go', 'package main
 
 func numSimilarGroups(strs []string) int {
@@ -2945,6 +4025,97 @@ func similarGroupsUnion(parent, size []int, groups *int, x, y int) {
 	*groups--
 }
 ', true, 0),
+  ('imp-9-similar-string-groups', 'python', 'solution.py', 'from typing import List
+
+
+def num_similar_groups(strs: List[str]) -> int:
+    n = len(strs)
+    parent = list(range(n))
+    size = [1] * n
+    groups = [n]
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            diffs = 0
+            for k in range(len(strs[i])):
+                if strs[i][k] != strs[j][k]:
+                    diffs += 1
+                    if diffs > 2:
+                        break
+            if diffs == 0 or diffs == 2:
+                _similar_groups_union(parent, size, groups, i, j)
+    return groups[0]
+
+
+def _similar_groups_find(parent: List[int], x: int) -> int:
+    if parent[x] != x:
+        parent[x] = _similar_groups_find(parent, parent[x])
+    return parent[x]
+
+
+def _similar_groups_union(parent, size, groups, x, y):
+    rx = _similar_groups_find(parent, x)
+    ry = _similar_groups_find(parent, y)
+    if rx == ry:
+        return
+    if size[rx] < size[ry]:
+        rx, ry = ry, rx
+    parent[ry] = rx
+    size[rx] += size[ry]
+    groups[0] -= 1', false, 1),
+  ('imp-9-similar-string-groups', 'java', 'Solution.java', 'class Solution {
+
+    public int numSimilarGroups(String[] strs) {
+        int n = strs.length;
+        int[] parent = new int[n];
+        int[] size = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            size[i] = 1;
+        }
+        int[] groups = {n};
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int diffs = 0;
+                for (int k = 0; k < strs[i].length(); k++) {
+                    if (strs[i].charAt(k) != strs[j].charAt(k)) {
+                        diffs++;
+                        if (diffs > 2) {
+                            break;
+                        }
+                    }
+                }
+                if (diffs == 0 || diffs == 2) {
+                    similarGroupsUnion(parent, size, groups, i, j);
+                }
+            }
+        }
+        return groups[0];
+    }
+
+    private int similarGroupsFind(int[] parent, int x) {
+        if (parent[x] != x) {
+            parent[x] = similarGroupsFind(parent, parent[x]);
+        }
+        return parent[x];
+    }
+
+    private void similarGroupsUnion(int[] parent, int[] size, int[] groups, int x, int y) {
+        int rx = similarGroupsFind(parent, x);
+        int ry = similarGroupsFind(parent, y);
+        if (rx == ry) {
+            return;
+        }
+        if (size[rx] < size[ry]) {
+            int tmp = rx;
+            rx = ry;
+            ry = tmp;
+        }
+        parent[ry] = rx;
+        size[rx] += size[ry];
+        groups[0]--;
+    }
+}', false, 2),
   ('imp-10-word-ladder', 'go', 'solution.go', 'package main
 
 func ladderLength(beginWord string, endWord string, wordList []string) int {
@@ -2987,6 +4158,76 @@ func ladderLength(beginWord string, endWord string, wordList []string) int {
 	return 0
 }
 ', true, 0),
+  ('imp-10-word-ladder', 'python', 'solution.py', 'from collections import deque
+from typing import List
+
+
+def ladder_length(begin_word: str, end_word: str, word_list: List[str]) -> int:
+    word_set = set(word_list)
+    if end_word not in word_set:
+        return 0
+    q = deque([begin_word])
+    steps = 0
+    while q:
+        steps += 1
+        for _ in range(len(q)):
+            cur = q.popleft()
+            if cur == end_word:
+                return steps
+            buf = list(cur)
+            for j in range(len(buf)):
+                orig = buf[j]
+                for c in range(ord(''a''), ord(''z'') + 1):
+                    ch = chr(c)
+                    if ch == orig:
+                        continue
+                    buf[j] = ch
+                    w = ''''.join(buf)
+                    if w in word_set:
+                        q.append(w)
+                        word_set.discard(w)
+                buf[j] = orig
+    return 0', false, 1),
+  ('imp-10-word-ladder', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        Set<String> wordSet = new HashSet<>(wordList);
+        if (!wordSet.contains(endWord)) {
+            return 0;
+        }
+        Deque<String> q = new ArrayDeque<>();
+        q.add(beginWord);
+        int steps = 0;
+        while (!q.isEmpty()) {
+            steps++;
+            int sz = q.size();
+            for (int i = 0; i < sz; i++) {
+                String cur = q.poll();
+                if (cur.equals(endWord)) {
+                    return steps;
+                }
+                char[] buf = cur.toCharArray();
+                for (int j = 0; j < buf.length; j++) {
+                    char orig = buf[j];
+                    for (char c = ''a''; c <= ''z''; c++) {
+                        if (c == orig) {
+                            continue;
+                        }
+                        buf[j] = c;
+                        String w = new String(buf);
+                        if (wordSet.contains(w)) {
+                            q.add(w);
+                            wordSet.remove(w);
+                        }
+                    }
+                    buf[j] = orig;
+                }
+            }
+        }
+        return 0;
+    }
+}', false, 2),
   ('imp-11-shortest-path-in-a-grid-with-obstacles-eliminati', 'go', 'solution.go', 'package main
 
 func shortestPath(grid [][]int, k int) int {
@@ -3035,6 +4276,82 @@ func shortestPath(grid [][]int, k int) int {
 	return -1
 }
 ', true, 0),
+  ('imp-11-shortest-path-in-a-grid-with-obstacles-eliminati', 'python', 'solution.py', 'from collections import deque
+from typing import List
+
+
+def shortest_path(grid: List[List[int]], k: int) -> int:
+    m, n = len(grid), len(grid[0])
+    if m == 1 and n == 1:
+        return 0
+    if k >= m + n - 3:
+        return m + n - 2
+    vis = [[[False] * (k + 1) for _ in range(n)] for _ in range(m)]
+    q = deque([(0, 0, k)])
+    vis[0][0][k] = True
+    dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    steps = 0
+    while q:
+        steps += 1
+        for _ in range(len(q)):
+            r, c, rem = q.popleft()
+            for dr, dc in dirs:
+                nr, nc = r + dr, c + dc
+                if nr < 0 or nr >= m or nc < 0 or nc >= n:
+                    continue
+                next_rem = rem - grid[nr][nc]
+                if next_rem < 0 or vis[nr][nc][next_rem]:
+                    continue
+                if nr == m - 1 and nc == n - 1:
+                    return steps
+                vis[nr][nc][next_rem] = True
+                q.append((nr, nc, next_rem))
+    return -1', false, 1),
+  ('imp-11-shortest-path-in-a-grid-with-obstacles-eliminati', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+
+    public int shortestPath(int[][] grid, int k) {
+        int m = grid.length, n = grid[0].length;
+        if (m == 1 && n == 1) {
+            return 0;
+        }
+        if (k >= m + n - 3) {
+            return m + n - 2;
+        }
+        boolean[][][] vis = new boolean[m][n][k + 1];
+        Deque<int[]> q = new ArrayDeque<>();
+        q.add(new int[]{0, 0, k});
+        vis[0][0][k] = true;
+        int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        int steps = 0;
+        while (!q.isEmpty()) {
+            steps++;
+            int sz = q.size();
+            for (int i = 0; i < sz; i++) {
+                int[] cur = q.poll();
+                int r = cur[0], c = cur[1], rem = cur[2];
+                for (int[] d : dirs) {
+                    int nr = r + d[0], nc = c + d[1];
+                    if (nr < 0 || nr >= m || nc < 0 || nc >= n) {
+                        continue;
+                    }
+                    int nextRem = rem - grid[nr][nc];
+                    if (nextRem < 0 || vis[nr][nc][nextRem]) {
+                        continue;
+                    }
+                    if (nr == m - 1 && nc == n - 1) {
+                        return steps;
+                    }
+                    vis[nr][nc][nextRem] = true;
+                    q.add(new int[]{nr, nc, nextRem});
+                }
+            }
+        }
+        return -1;
+    }
+}', false, 2),
   ('imp-12-shortest-path-in-binary-matrix', 'go', 'solution.go', 'package main
 
 func shortestPathBinaryMatrix(grid [][]int) int {
@@ -3068,6 +4385,64 @@ func shortestPathBinaryMatrix(grid [][]int) int {
 	return -1
 }
 ', true, 0),
+  ('imp-12-shortest-path-in-binary-matrix', 'python', 'solution.py', 'from collections import deque
+from typing import List
+
+
+def shortestPathBinaryMatrix(grid: List[List[int]]) -> int:
+    n = len(grid)
+    if grid[0][0] != 0 or grid[n - 1][n - 1] != 0:
+        return -1
+    dirs = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+    q = deque([(0, 0)])
+    grid[0][0] = 1
+    steps = 1
+    while q:
+        for _ in range(len(q)):
+            r, c = q.popleft()
+            if r == n - 1 and c == n - 1:
+                return steps
+            for dr, dc in dirs:
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < n and 0 <= nc < n and grid[nr][nc] == 0:
+                    grid[nr][nc] = 1
+                    q.append((nr, nc))
+        steps += 1
+    return -1', false, 1),
+  ('imp-12-shortest-path-in-binary-matrix', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+
+class Solution {
+    public int shortestPathBinaryMatrix(int[][] grid) {
+        int n = grid.length;
+        if (grid[0][0] != 0 || grid[n - 1][n - 1] != 0) {
+            return -1;
+        }
+        int[][] dirs = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+        ArrayDeque<int[]> q = new ArrayDeque<>();
+        q.add(new int[]{0, 0});
+        grid[0][0] = 1;
+        int steps = 1;
+        while (!q.isEmpty()) {
+            int sz = q.size();
+            for (int i = 0; i < sz; i++) {
+                int[] cur = q.poll();
+                int r = cur[0], c = cur[1];
+                if (r == n - 1 && c == n - 1) {
+                    return steps;
+                }
+                for (int[] d : dirs) {
+                    int nr = r + d[0], nc = c + d[1];
+                    if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc] == 0) {
+                        grid[nr][nc] = 1;
+                        q.add(new int[]{nr, nc});
+                    }
+                }
+            }
+            steps++;
+        }
+        return -1;
+    }
+}', false, 2),
   ('imp-13-robot-room-cleaner', 'go', 'solution.go', 'package main
 
 type Robot interface {
@@ -3101,6 +4476,78 @@ func btCleanRoom(robot Robot, dirs [4][2]int, vis map[[2]int]bool, r, c, d int) 
 	}
 }
 ', true, 0),
+  ('imp-13-robot-room-cleaner', 'python', 'solution.py', 'from typing import Protocol
+
+
+class Robot(Protocol):
+    def move(self) -> bool: ...
+    def turnLeft(self) -> None: ...
+    def turnRight(self) -> None: ...
+    def clean(self) -> None: ...
+
+
+def cleanRoom(robot: "Robot") -> None:
+    dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+    vis: set[tuple[int, int]] = set()
+    _bt_clean_room(robot, dirs, vis, 0, 0, 0)
+
+
+def _bt_clean_room(robot, dirs, vis, r, c, d):
+    vis.add((r, c))
+    robot.clean()
+    for i in range(4):
+        nd = (d + i) % 4
+        nr, nc = r + dirs[nd][0], c + dirs[nd][1]
+        if (nr, nc) not in vis and robot.move():
+            _bt_clean_room(robot, dirs, vis, nr, nc, nd)
+            robot.turnRight()
+            robot.turnRight()
+            robot.move()
+            robot.turnRight()
+            robot.turnRight()
+        robot.turnRight()', false, 1),
+  ('imp-13-robot-room-cleaner', 'java', 'Solution.java', 'import java.util.HashSet;
+import java.util.Set;
+
+class Solution {
+
+    interface Robot {
+        boolean move();
+        void turnLeft();
+        void turnRight();
+        void clean();
+    }
+
+    static final int[][] DIRS = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+
+    public void cleanRoom(Robot robot) {
+        Set<Long> vis = new HashSet<>();
+        btCleanRoom(robot, vis, 0, 0, 0);
+    }
+
+    private void btCleanRoom(Robot robot, Set<Long> vis, int r, int c, int d) {
+        vis.add(encode(r, c));
+        robot.clean();
+        for (int i = 0; i < 4; i++) {
+            int nd = (d + i) % 4;
+            int nr = r + DIRS[nd][0];
+            int nc = c + DIRS[nd][1];
+            if (!vis.contains(encode(nr, nc)) && robot.move()) {
+                btCleanRoom(robot, vis, nr, nc, nd);
+                robot.turnRight();
+                robot.turnRight();
+                robot.move();
+                robot.turnRight();
+                robot.turnRight();
+            }
+            robot.turnRight();
+        }
+    }
+
+    private long encode(int r, int c) {
+        return (((long) r) << 32) ^ (c & 0xFFFFFFFFL);
+    }
+}', false, 2),
   ('imp-14-the-earliest-moment-when-everyone-become-friends', 'go', 'solution.go', 'package main
 
 import "sort"
@@ -3153,6 +4600,85 @@ func earliestAcqUnion(parent, size []int, groups *int, x, y int) {
 	*groups--
 }
 ', true, 0),
+  ('imp-14-the-earliest-moment-when-everyone-become-friends', 'python', 'solution.py', 'from typing import List
+
+
+def earliest_acq(logs: List[List[int]], n: int) -> int:
+    logs = sorted(logs, key=lambda l: l[0])
+    parent = list(range(n))
+    size = [1] * n
+    groups = n
+
+    def find(x: int) -> int:
+        if parent[x] != x:
+            parent[x] = find(parent[x])
+        return parent[x]
+
+    def union(x: int, y: int) -> None:
+        nonlocal groups
+        rx, ry = find(x), find(y)
+        if rx == ry:
+            return
+        if size[rx] < size[ry]:
+            rx, ry = ry, rx
+        parent[ry] = rx
+        size[rx] += size[ry]
+        groups -= 1
+
+    for l in logs:
+        union(l[1], l[2])
+        if groups == 1:
+            return l[0]
+    return -1', false, 1),
+  ('imp-14-the-earliest-moment-when-everyone-become-friends', 'java', 'Solution.java', 'import java.util.Arrays;
+import java.util.Comparator;
+
+class Solution {
+
+    private int[] parent;
+    private int[] size;
+    private int groups;
+
+    public int earliestAcq(int[][] logs, int n) {
+        Arrays.sort(logs, Comparator.comparingInt(l -> l[0]));
+        parent = new int[n];
+        size = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            size[i] = 1;
+        }
+        groups = n;
+        for (int[] l : logs) {
+            union(l[1], l[2]);
+            if (groups == 1) {
+                return l[0];
+            }
+        }
+        return -1;
+    }
+
+    private int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+
+    private void union(int x, int y) {
+        int rx = find(x), ry = find(y);
+        if (rx == ry) {
+            return;
+        }
+        if (size[rx] < size[ry]) {
+            int t = rx;
+            rx = ry;
+            ry = t;
+        }
+        parent[ry] = rx;
+        size[rx] += size[ry];
+        groups--;
+    }
+}', false, 2),
   ('imp-15-find-all-possible-recipes-from-given-supplies', 'go', 'solution.go', 'package main
 
 func findAllRecipes(recipes []string, ingredients [][]string, supplies []string) []string {
@@ -3185,6 +4711,64 @@ func findAllRecipes(recipes []string, ingredients [][]string, supplies []string)
 	return res
 }
 ', true, 0),
+  ('imp-15-find-all-possible-recipes-from-given-supplies', 'python', 'solution.py', 'from collections import defaultdict, deque
+from typing import List
+
+
+def find_all_recipes(recipes: List[str], ingredients: List[List[str]], supplies: List[str]) -> List[str]:
+    in_deg = {}
+    adj = defaultdict(list)
+    for i, r in enumerate(recipes):
+        in_deg[r] = len(ingredients[i])
+        for ing in ingredients[i]:
+            adj[ing].append(r)
+    q = deque(supplies)
+    res = []
+    while q:
+        cur = q.popleft()
+        for nb in adj[cur]:
+            in_deg[nb] -= 1
+            if in_deg[nb] == 0:
+                q.append(nb)
+                res.append(nb)
+    return res', false, 1),
+  ('imp-15-find-all-possible-recipes-from-given-supplies', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+class Solution {
+    List<String> findAllRecipes(List<String> recipes, List<List<String>> ingredients, List<String> supplies) {
+        Map<String, Integer> inDeg = new HashMap<>();
+        Map<String, List<String>> adj = new HashMap<>();
+        for (int i = 0; i < recipes.size(); i++) {
+            String r = recipes.get(i);
+            List<String> ings = ingredients.get(i);
+            inDeg.put(r, ings.size());
+            for (String ing : ings) {
+                adj.computeIfAbsent(ing, k -> new ArrayList<>()).add(r);
+            }
+        }
+        Deque<String> q = new ArrayDeque<>(supplies);
+        List<String> res = new ArrayList<>();
+        while (!q.isEmpty()) {
+            String cur = q.pollFirst();
+            List<String> nbs = adj.get(cur);
+            if (nbs == null) continue;
+            for (String nb : nbs) {
+                int d = inDeg.get(nb) - 1;
+                inDeg.put(nb, d);
+                if (d == 0) {
+                    q.addLast(nb);
+                    res.add(nb);
+                }
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-16-detonate-the-maximum-bombs', 'go', 'solution.go', 'package main
 
 func maximumDetonation(bombs [][]int) int {
@@ -3225,6 +4809,83 @@ func btDetonate(adj [][]int, vis []bool, u int) int {
 	return cnt
 }
 ', true, 0),
+  ('imp-16-detonate-the-maximum-bombs', 'python', 'solution.py', 'from typing import List
+
+
+def maximum_detonation(bombs: List[List[int]]) -> int:
+    n = len(bombs)
+    adj: List[List[int]] = [[] for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            dx = bombs[i][0] - bombs[j][0]
+            dy = bombs[i][1] - bombs[j][1]
+            r = bombs[i][2]
+            if dx * dx + dy * dy <= r * r:
+                adj[i].append(j)
+    res = 0
+    for i in range(n):
+        vis = [False] * n
+        cnt = _bt_detonate(adj, vis, i)
+        if cnt > res:
+            res = cnt
+    return res
+
+
+def _bt_detonate(adj: List[List[int]], vis: List[bool], u: int) -> int:
+    vis[u] = True
+    cnt = 1
+    for v in adj[u]:
+        if not vis[v]:
+            cnt += _bt_detonate(adj, vis, v)
+    return cnt', false, 1),
+  ('imp-16-detonate-the-maximum-bombs', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    public int maximumDetonation(int[][] bombs) {
+        int n = bombs.length;
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            adj.add(new ArrayList<>());
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == j) {
+                    continue;
+                }
+                long dx = (long) (bombs[i][0] - bombs[j][0]);
+                long dy = (long) (bombs[i][1] - bombs[j][1]);
+                long r = (long) bombs[i][2];
+                if (dx * dx + dy * dy <= r * r) {
+                    adj.get(i).add(j);
+                }
+            }
+        }
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            boolean[] vis = new boolean[n];
+            int cnt = btDetonate(adj, vis, i);
+            if (cnt > res) {
+                res = cnt;
+            }
+        }
+        return res;
+    }
+
+    private int btDetonate(List<List<Integer>> adj, boolean[] vis, int u) {
+        vis[u] = true;
+        int cnt = 1;
+        for (int v : adj.get(u)) {
+            if (!vis[v]) {
+                cnt += btDetonate(adj, vis, v);
+            }
+        }
+        return cnt;
+    }
+}', false, 2),
   ('imp-17-maximal-network-rank', 'go', 'solution.go', 'package main
 
 func maximalNetworkRank(n int, roads [][]int) int {
@@ -3254,6 +4915,55 @@ func maximalNetworkRank(n int, roads [][]int) int {
 	return res
 }
 ', true, 0),
+  ('imp-17-maximal-network-rank', 'python', 'solution.py', 'from typing import List
+
+
+def maximal_network_rank(n: int, roads: List[List[int]]) -> int:
+    deg = [0] * n
+    edges = set()
+    for u, v in roads:
+        deg[u] += 1
+        deg[v] += 1
+        a, b = (u, v) if u <= v else (v, u)
+        edges.add((a, b))
+    res = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            rank = deg[i] + deg[j]
+            if (i, j) in edges:
+                rank -= 1
+            if rank > res:
+                res = rank
+    return res', false, 1),
+  ('imp-17-maximal-network-rank', 'java', 'Solution.java', 'import java.util.HashSet;
+import java.util.Set;
+
+class Solution {
+    public int maximalNetworkRank(int n, int[][] roads) {
+        int[] deg = new int[n];
+        Set<Long> edges = new HashSet<>();
+        for (int[] r : roads) {
+            int u = r[0], v = r[1];
+            deg[u]++;
+            deg[v]++;
+            int a = Math.min(u, v), b = Math.max(u, v);
+            edges.add((long) a * 100000L + b);
+        }
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int rank = deg[i] + deg[j];
+                if (edges.contains((long) i * 100000L + j)) {
+                    rank--;
+                }
+                if (rank > res) {
+                    res = rank;
+                }
+            }
+        }
+        return res;
+    }
+}', false, 2),
   ('imp-18-number-of-good-paths', 'go', 'solution.go', 'package main
 
 import "sort"
@@ -3330,6 +5040,117 @@ func goodPathsUnion(parent, vals []int, x, y int) {
 	}
 }
 ', true, 0),
+  ('imp-18-number-of-good-paths', 'python', 'solution.py', 'from typing import List
+
+
+def number_of_good_paths(vals: List[int], edges: List[List[int]]) -> int:
+    n = len(vals)
+    parent = list(range(n))
+    adj: List[List[int]] = [[] for _ in range(n)]
+    for e in edges:
+        adj[e[0]].append(e[1])
+        adj[e[1]].append(e[0])
+
+    ids = sorted(range(n), key=lambda i: vals[i])
+
+    res = n
+    i = 0
+    while i < n:
+        j = i
+        while j < n and vals[ids[j]] == vals[ids[i]]:
+            j += 1
+        for k in range(i, j):
+            u = ids[k]
+            for v in adj[u]:
+                if vals[v] <= vals[u]:
+                    _union(parent, vals, u, v)
+        cnt = {}
+        for k in range(i, j):
+            r = _find(parent, ids[k])
+            cnt[r] = cnt.get(r, 0) + 1
+        for c in cnt.values():
+            res += c * (c - 1) // 2
+        i = j
+    return res
+
+
+def _find(parent: List[int], x: int) -> int:
+    if parent[x] != x:
+        parent[x] = _find(parent, parent[x])
+    return parent[x]
+
+
+def _union(parent: List[int], vals: List[int], x: int, y: int) -> None:
+    rx, ry = _find(parent, x), _find(parent, y)
+    if rx != ry:
+        if vals[rx] < vals[ry]:
+            parent[rx] = ry
+        else:
+            parent[ry] = rx', false, 1),
+  ('imp-18-number-of-good-paths', 'java', 'Solution.java', 'import java.util.*;
+
+class Solution {
+
+    int numberOfGoodPaths(int[] vals, int[][] edges) {
+        int n = vals.length;
+        int[] parent = new int[n];
+        for (int i = 0; i < n; i++) parent[i] = i;
+
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < n; i++) adj.add(new ArrayList<>());
+        for (int[] e : edges) {
+            adj.get(e[0]).add(e[1]);
+            adj.get(e[1]).add(e[0]);
+        }
+
+        Integer[] ids = new Integer[n];
+        for (int i = 0; i < n; i++) ids[i] = i;
+        Arrays.sort(ids, (a, b) -> Integer.compare(vals[a], vals[b]));
+
+        int res = n;
+        int i = 0;
+        while (i < n) {
+            int j = i;
+            while (j < n && vals[ids[j]] == vals[ids[i]]) j++;
+            for (int k = i; k < j; k++) {
+                int u = ids[k];
+                for (int v : adj.get(u)) {
+                    if (vals[v] <= vals[u]) {
+                        union(parent, vals, u, v);
+                    }
+                }
+            }
+            Map<Integer, Integer> cnt = new HashMap<>();
+            for (int k = i; k < j; k++) {
+                int r = find(parent, ids[k]);
+                cnt.merge(r, 1, Integer::sum);
+            }
+            for (int c : cnt.values()) {
+                res += c * (c - 1) / 2;
+            }
+            i = j;
+        }
+        return res;
+    }
+
+    int find(int[] parent, int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent, parent[x]);
+        }
+        return parent[x];
+    }
+
+    void union(int[] parent, int[] vals, int x, int y) {
+        int rx = find(parent, x), ry = find(parent, y);
+        if (rx != ry) {
+            if (vals[rx] < vals[ry]) {
+                parent[rx] = ry;
+            } else {
+                parent[ry] = rx;
+            }
+        }
+    }
+}', false, 2),
   ('imp-19-maximum-score-of-a-node-sequence', 'go', 'solution.go', 'package main
 
 func maximumScore(scores []int, edges [][]int) int {
@@ -3374,6 +5195,90 @@ func insertTop3(top []int, node int, scores []int) []int {
 	return top
 }
 ', true, 0),
+  ('imp-19-maximum-score-of-a-node-sequence', 'python', 'solution.py', 'from typing import List
+
+
+def maximum_score(scores: List[int], edges: List[List[int]]) -> int:
+    n = len(scores)
+    top3 = [[] for _ in range(n)]
+    for e in edges:
+        u, v = e[0], e[1]
+        top3[u] = _insert_top3(top3[u], v, scores)
+        top3[v] = _insert_top3(top3[v], u, scores)
+    res = -1
+    for e in edges:
+        u, v = e[0], e[1]
+        for a in top3[u]:
+            if a == v:
+                continue
+            for b in top3[v]:
+                if b == u or b == a:
+                    continue
+                s = scores[a] + scores[u] + scores[v] + scores[b]
+                if s > res:
+                    res = s
+    return res
+
+
+def _insert_top3(top: List[int], node: int, scores: List[int]) -> List[int]:
+    top.append(node)
+    for i in range(len(top) - 1, 0, -1):
+        if scores[top[i]] > scores[top[i - 1]]:
+            top[i], top[i - 1] = top[i - 1], top[i]
+    if len(top) > 3:
+        top = top[:3]
+    return top', false, 1),
+  ('imp-19-maximum-score-of-a-node-sequence', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    public int maximumScore(int[] scores, int[][] edges) {
+        int n = scores.length;
+        List<List<Integer>> top3 = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            top3.add(new ArrayList<>());
+        }
+        for (int[] e : edges) {
+            int u = e[0], v = e[1];
+            insertTop3(top3.get(u), v, scores);
+            insertTop3(top3.get(v), u, scores);
+        }
+        int res = -1;
+        for (int[] e : edges) {
+            int u = e[0], v = e[1];
+            for (int a : top3.get(u)) {
+                if (a == v) {
+                    continue;
+                }
+                for (int b : top3.get(v)) {
+                    if (b == u || b == a) {
+                        continue;
+                    }
+                    int s = scores[a] + scores[u] + scores[v] + scores[b];
+                    if (s > res) {
+                        res = s;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    private void insertTop3(List<Integer> top, int node, int[] scores) {
+        top.add(node);
+        for (int i = top.size() - 1; i > 0; i--) {
+            if (scores[top.get(i)] > scores[top.get(i - 1)]) {
+                int tmp = top.get(i);
+                top.set(i, top.get(i - 1));
+                top.set(i - 1, tmp);
+            }
+        }
+        if (top.size() > 3) {
+            top.remove(3);
+        }
+    }
+}', false, 2),
   ('imp-20-course-schedule', 'go', 'solution.go', 'package main
 
 func coursesOrder(numCourses int, prerequisites [][]int) []int {
@@ -3478,6 +5383,82 @@ func btCoursesTopo(adj [][]int, v int, state []int, order *[]int) bool {
 	return true
 }
 ', false, 2),
+  ('imp-20-course-schedule', 'python', 'solution.py', 'from collections import deque
+from typing import List, Optional
+
+
+def courses_order(num_courses: int, prerequisites: List[List[int]]) -> Optional[List[int]]:
+    adj: List[List[int]] = [[] for _ in range(num_courses)]
+    indeg: List[int] = [0] * num_courses
+    for course, pre in prerequisites:
+        adj[pre].append(course)
+        indeg[course] += 1
+
+    q = deque(i for i, d in enumerate(indeg) if d == 0)
+
+    order: List[int] = []
+    while q:
+        v = q.popleft()
+        order.append(v)
+        for nb in adj[v]:
+            indeg[nb] -= 1
+            if indeg[nb] == 0:
+                q.append(nb)
+
+    # Mirror the Go reference: a Go `var order []int` that is never appended
+    # to stays nil, so an empty valid ordering (num_courses == 0) is reported
+    # the same way as an impossible (cyclic) schedule.
+    if not order or len(order) != num_courses:
+        return None
+    return order', false, 3),
+  ('imp-20-course-schedule', 'java', 'Solution.java', 'import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
+class Solution {
+
+    int[] coursesOrder(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {
+            adj.add(new ArrayList<>());
+        }
+        int[] indeg = new int[numCourses];
+        for (int[] p : prerequisites) {
+            int course = p[0], pre = p[1];
+            adj.get(pre).add(course);
+            indeg[course]++;
+        }
+
+        Deque<Integer> q = new ArrayDeque<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indeg[i] == 0) {
+                q.add(i);
+            }
+        }
+
+        int[] order = new int[numCourses];
+        int count = 0;
+        while (!q.isEmpty()) {
+            int v = q.poll();
+            order[count++] = v;
+            for (int nb : adj.get(v)) {
+                indeg[nb]--;
+                if (indeg[nb] == 0) {
+                    q.add(nb);
+                }
+            }
+        }
+
+        // Mirror the Go reference: a Go `var order []int` that is never
+        // appended to stays nil, so an empty valid ordering (numCourses == 0)
+        // is reported the same way as an impossible (cyclic) schedule.
+        if (count == 0 || count != numCourses) {
+            return null;
+        }
+        return order;
+    }
+}', false, 4),
   ('imp-22-find-degree-of-vertex', 'go', 'solution.go', 'package main
 
 func findDegreeOfVertexUndirected(adj [][]int, v int) int {
@@ -3488,6 +5469,27 @@ func findDegreeOfVertexDirected(in, out [][]int, v int) int {
 	return len(in[v]) + len(out[v])
 }
 ', true, 0),
+  ('imp-22-find-degree-of-vertex', 'python', 'solution.py', 'from typing import List
+
+
+def find_degree_of_vertex_undirected(adj: List[List[int]], v: int) -> int:
+    return len(adj[v])
+
+
+def find_degree_of_vertex_directed(
+    in_adj: List[List[int]], out_adj: List[List[int]], v: int
+) -> int:
+    return len(in_adj[v]) + len(out_adj[v])', false, 1),
+  ('imp-22-find-degree-of-vertex', 'java', 'Solution.java', 'class Solution {
+
+    int findDegreeOfVertexUndirected(int[][] adj, int v) {
+        return adj[v].length;
+    }
+
+    int findDegreeOfVertexDirected(int[][] in, int[][] out, int v) {
+        return in[v].length + out[v].length;
+    }
+}', false, 2),
   ('imp-23-detect-cycle', 'go', 'solution.go', 'package main
 
 func detectCycleUndirected(adj [][]int) bool {
@@ -3538,6 +5540,95 @@ func btDetectCycleDirectedDfs(adj [][]int, state []int, v int) bool {
 	return false
 }
 ', true, 0),
+  ('imp-23-detect-cycle', 'python', 'solution.py', 'from typing import List
+
+
+def detect_cycle_undirected(adj: List[List[int]]) -> bool:
+    visited = [False] * len(adj)
+    for i in range(len(adj)):
+        if not visited[i] and _undirected_dfs(adj, visited, i, -1):
+            return True
+    return False
+
+
+def detect_cycle_directed(adj: List[List[int]]) -> bool:
+    state = [0] * len(adj)
+    for i in range(len(adj)):
+        if state[i] == 0 and _directed_dfs(adj, state, i):
+            return True
+    return False
+
+
+def _undirected_dfs(adj: List[List[int]], visited: List[bool], v: int, parent: int) -> bool:
+    visited[v] = True
+    for nb in adj[v]:
+        if not visited[nb]:
+            if _undirected_dfs(adj, visited, nb, v):
+                return True
+        elif nb != parent:
+            return True
+    return False
+
+
+def _directed_dfs(adj: List[List[int]], state: List[int], v: int) -> bool:
+    state[v] = 1
+    for nb in adj[v]:
+        if state[nb] == 1:
+            return True
+        if state[nb] == 0 and _directed_dfs(adj, state, nb):
+            return True
+    state[v] = 2
+    return False', false, 1),
+  ('imp-23-detect-cycle', 'java', 'Solution.java', 'class Solution {
+
+    boolean detectCycleUndirected(int[][] adj) {
+        boolean[] visited = new boolean[adj.length];
+        for (int i = 0; i < adj.length; i++) {
+            if (!visited[i] && undirectedDfs(adj, visited, i, -1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean detectCycleDirected(int[][] adj) {
+        int[] state = new int[adj.length];
+        for (int i = 0; i < adj.length; i++) {
+            if (state[i] == 0 && directedDfs(adj, state, i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean undirectedDfs(int[][] adj, boolean[] visited, int v, int parent) {
+        visited[v] = true;
+        for (int nb : adj[v]) {
+            if (!visited[nb]) {
+                if (undirectedDfs(adj, visited, nb, v)) {
+                    return true;
+                }
+            } else if (nb != parent) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean directedDfs(int[][] adj, int[] state, int v) {
+        state[v] = 1;
+        for (int nb : adj[v]) {
+            if (state[nb] == 1) {
+                return true;
+            }
+            if (state[nb] == 0 && directedDfs(adj, state, nb)) {
+                return true;
+            }
+        }
+        state[v] = 2;
+        return false;
+    }
+}', false, 2),
   ('imp-24-number-of-islands', 'go', 'solution.go', 'package main
 
 func numIslands(grid [][]byte) int {
@@ -3621,6 +5712,55 @@ func TestNumIslandsBFS(t *testing.T) {
 	}
 }
 ', false, 2),
+  ('imp-24-number-of-islands', 'python', 'solution.py', 'from typing import List
+
+
+def num_islands(grid: List[List[str]]) -> int:
+    m, n = len(grid), len(grid[0])
+    cnt = 0
+    for r in range(m):
+        for c in range(n):
+            if grid[r][c] == ''1'':
+                cnt += 1
+                _flood_fill(grid, m, n, r, c)
+    return cnt
+
+
+def _flood_fill(grid: List[List[str]], m: int, n: int, r: int, c: int) -> None:
+    if r < 0 or r >= m or c < 0 or c >= n or grid[r][c] != ''1'':
+        return
+    grid[r][c] = ''0''
+    _flood_fill(grid, m, n, r + 1, c)
+    _flood_fill(grid, m, n, r - 1, c)
+    _flood_fill(grid, m, n, r, c + 1)
+    _flood_fill(grid, m, n, r, c - 1)', false, 3),
+  ('imp-24-number-of-islands', 'java', 'Solution.java', 'class Solution {
+
+    int numIslands(char[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int cnt = 0;
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == ''1'') {
+                    cnt++;
+                    floodFill(grid, m, n, r, c);
+                }
+            }
+        }
+        return cnt;
+    }
+
+    void floodFill(char[][] grid, int m, int n, int r, int c) {
+        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != ''1'') {
+            return;
+        }
+        grid[r][c] = ''0'';
+        floodFill(grid, m, n, r + 1, c);
+        floodFill(grid, m, n, r - 1, c);
+        floodFill(grid, m, n, r, c + 1);
+        floodFill(grid, m, n, r, c - 1);
+    }
+}', false, 4),
   ('imp-25-critical-connections-in-a-network', 'go', 'solution.go', 'package main
 
 func criticalConnections(n int, connections [][]int) [][]int {
@@ -3662,6 +5802,88 @@ func btTarjan(adj [][]int, u, parent int, disc, low []int, timer *int, res *[][]
 	}
 }
 ', true, 0),
+  ('imp-25-critical-connections-in-a-network', 'python', 'solution.py', 'import sys
+from typing import List
+
+sys.setrecursionlimit(1_000_000)
+
+
+def critical_connections(n: int, connections: List[List[int]]) -> List[List[int]]:
+    adj: List[List[int]] = [[] for _ in range(n)]
+    for c in connections:
+        adj[c[0]].append(c[1])
+        adj[c[1]].append(c[0])
+    disc = [-1] * n
+    low = [-1] * n
+    timer = [0]
+    res: List[List[int]] = []
+    _bt_tarjan(adj, 0, -1, disc, low, timer, res)
+    return res
+
+
+def _bt_tarjan(adj, u, parent, disc, low, timer, res):
+    disc[u] = timer[0]
+    low[u] = timer[0]
+    timer[0] += 1
+    for v in adj[u]:
+        if v == parent:
+            continue
+        if disc[v] == -1:
+            _bt_tarjan(adj, v, u, disc, low, timer, res)
+            if low[v] < low[u]:
+                low[u] = low[v]
+            if low[v] > disc[u]:
+                res.append([u, v])
+        elif disc[v] < low[u]:
+            low[u] = disc[v]', false, 1),
+  ('imp-25-critical-connections-in-a-network', 'java', 'Solution.java', 'import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+
+    private int[] disc;
+    private int[] low;
+    private int timer;
+    private List<List<Integer>> res;
+    private List<List<Integer>> adj;
+
+    public List<List<Integer>> criticalConnections(int n, List<List<Integer>> connections) {
+        adj = new ArrayList<>();
+        for (int i = 0; i < n; i++) adj.add(new ArrayList<>());
+        for (List<Integer> c : connections) {
+            adj.get(c.get(0)).add(c.get(1));
+            adj.get(c.get(1)).add(c.get(0));
+        }
+        disc = new int[n];
+        low = new int[n];
+        for (int i = 0; i < n; i++) disc[i] = -1;
+        timer = 0;
+        res = new ArrayList<>();
+        btTarjan(0, -1);
+        return res;
+    }
+
+    private void btTarjan(int u, int parent) {
+        disc[u] = timer;
+        low[u] = timer;
+        timer++;
+        for (int v : adj.get(u)) {
+            if (v == parent) continue;
+            if (disc[v] == -1) {
+                btTarjan(v, u);
+                if (low[v] < low[u]) low[u] = low[v];
+                if (low[v] > disc[u]) {
+                    List<Integer> edge = new ArrayList<>();
+                    edge.add(u);
+                    edge.add(v);
+                    res.add(edge);
+                }
+            } else if (disc[v] < low[u]) {
+                low[u] = disc[v];
+            }
+        }
+    }
+}', false, 2),
   ('imp-26-subsets', 'go', 'solution.go', 'package main
 
 func allSubsets(a []int) [][]int {
