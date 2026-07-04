@@ -1,4 +1,6 @@
+export { CommandPalette, filterCommands, type CommandPaletteCommand } from './CommandPalette';
 export { ModeRouter } from './ModeRouter';
+export { ShortcutsOverlay, WORKSPACE_SHORTCUTS } from './ShortcutsOverlay';
 export {
   resolveWorkspaceFallbackTarget,
   resolveWorkspaceSurface,
