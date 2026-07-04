@@ -1,15 +1,15 @@
+import type { ReactNode } from 'react';
+import { ArrowLeft, Home, Loader2, SearchX } from 'lucide-react';
 import type { Frame, Player, ProblemPlugin } from '@/core';
 import type { Item } from '@/content';
-import type { TrackId } from '@/content';
 import { CategoryBoard, TrackCategoryBoard } from '../CategoryBoard';
 import { CanvasStage } from '../canvas/CanvasStage';
+import { Btn, EmptyState } from '../canvas/ui/nodeui';
 import { LearnStudio } from '@/shell/study';
 import { ProblemPage } from '@/shell/study';
-import { resolveWorkspaceSurface, type ModeRouterInput } from './surface';
+import { resolveWorkspaceFallbackTarget, resolveWorkspaceSurface, type ModeRouterInput } from './surface';
 
-export interface ModeRouterProps extends ModeRouterInput {
-  trackId: TrackId;
-  categoryId: string;
+export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready'> {
   plugin: ProblemPlugin<any, any> | null | undefined;
   item: Item;
   inputId: string;
@@ -19,20 +19,23 @@ export interface ModeRouterProps extends ModeRouterInput {
   frames: Frame<any>[];
   player: Player;
   frame: Frame<any> | undefined;
+  backToBrowse: () => void;
+  goHome: () => void;
 }
 
 export function ModeRouter(props: ModeRouterProps) {
-  const surface = resolveWorkspaceSurface(props);
+  const problemReady = !!props.plugin && !!props.frame;
+  const surface = resolveWorkspaceSurface({ ...props, ready: problemReady });
 
   switch (surface) {
     case 'track-board':
-      return <TrackCategoryBoard trackId={props.trackId} />;
+      return props.activeTrackId ? <TrackCategoryBoard trackId={props.activeTrackId} /> : null;
     case 'category-board':
-      return <CategoryBoard categoryId={props.categoryId} trackId={props.activeTrackId as TrackId | null} />;
+      return props.activeCategoryId ? <CategoryBoard categoryId={props.activeCategoryId} trackId={props.activeTrackId} /> : null;
     case 'canvas':
-      return props.problemFocused && props.ready ? (
+      return props.problemFocused && problemReady && props.plugin ? (
         <CanvasStage
-          plugin={props.plugin!}
+          plugin={props.plugin}
           item={props.item}
           inputId={props.inputId}
           setInputId={props.selectInput}
@@ -44,10 +47,11 @@ export function ModeRouter(props: ModeRouterProps) {
       ) : (
         <CanvasStage standalone />
       );
-    case 'play':
+    case 'play': {
+      if (!props.plugin || !props.frame) return null;
       return (
         <ProblemPage
-          plugin={props.plugin!}
+          plugin={props.plugin}
           item={props.item}
           inputId={props.inputId}
           setInputId={props.selectInput}
@@ -55,13 +59,15 @@ export function ModeRouter(props: ModeRouterProps) {
           setCustomInput={props.setCustomInput}
           frames={props.frames}
           player={props.player}
-          frame={props.frame!}
+          frame={props.frame}
         />
       );
-    case 'learn':
+    }
+    case 'learn': {
+      if (!props.plugin || !props.frame) return null;
       return (
         <LearnStudio
-          plugin={props.plugin!}
+          plugin={props.plugin}
           item={props.item}
           inputId={props.inputId}
           setInputId={props.selectInput}
@@ -69,10 +75,68 @@ export function ModeRouter(props: ModeRouterProps) {
           setCustomInput={props.setCustomInput}
           frames={props.frames}
           player={props.player}
-          frame={props.frame!}
+          frame={props.frame}
         />
       );
-    default:
-      return null;
+    }
+    case 'loading':
+      return (
+        <WorkspaceFallback
+          icon={<Loader2 className="animate-spin" />}
+          title={`Loading ${props.item.title}`}
+          hint="Preparing the workspace for this problem."
+          role="status"
+        />
+      );
+    case 'empty': {
+      const fallbackTarget = resolveWorkspaceFallbackTarget(props);
+      const returnsToCatalog = fallbackTarget === 'catalog';
+      return (
+        <WorkspaceFallback
+          icon={<SearchX />}
+          title="Preview unavailable"
+          hint={`${props.item.title} is not bound to an interactive preview yet.`}
+          actionLabel={returnsToCatalog ? 'Back to catalog' : 'Go home'}
+          actionIcon={returnsToCatalog ? <ArrowLeft className="h-3.5 w-3.5" /> : <Home className="h-3.5 w-3.5" />}
+          onAction={returnsToCatalog ? props.backToBrowse : props.goHome}
+        />
+      );
+    }
   }
+  return unreachableSurface(surface);
+}
+
+function unreachableSurface(surface: never): never {
+  throw new Error(`Unhandled workspace surface: ${surface}`);
+}
+
+function WorkspaceFallback({
+  icon,
+  title,
+  hint,
+  role,
+  actionLabel,
+  actionIcon,
+  onAction,
+}: {
+  icon: ReactNode;
+  title: string;
+  hint: string;
+  role?: 'status';
+  actionLabel?: string;
+  actionIcon?: ReactNode;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="grid h-full w-full place-items-center bg-bg p-6" role={role} aria-live={role ? 'polite' : undefined}>
+      <div className="flex flex-col items-center gap-1">
+        <EmptyState icon={icon} title={title} hint={hint} />
+        {onAction && actionLabel && (
+          <Btn className="-mt-2" icon={actionIcon} onClick={onAction}>
+            {actionLabel}
+          </Btn>
+        )}
+      </div>
+    </div>
+  );
 }

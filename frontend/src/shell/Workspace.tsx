@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { FileQuestion } from 'lucide-react';
 import { usePlayer } from '../core';
 import { catalog } from '../content';
 import { useWorkspace } from '@/store/workspace';
@@ -10,9 +9,8 @@ import { UnifiedLeftSidebar } from './UnifiedLeftSidebar';
 import { SettingsDialog } from './canvas/ui/SettingsDialog';
 import { MobileTransportSheet } from './canvas/ui/MobileTransportSheet';
 import { MobileSwipeReturn } from './mobile/deck/MobileSwipeReturn';
-import { TagChip } from './ui';
 import { ChromeHint, chromeText } from './chromeUi';
-import { ModeRouter, resolveWorkspaceSurface, useWorkspaceKeyboard } from '@/shell/workspace/index';
+import { ModeRouter, useWorkspaceKeyboard } from '@/shell/workspace/index';
 
 export function Workspace() {
   const {
@@ -25,6 +23,8 @@ export function Workspace() {
     activeCategoryId,
     problemFocused,
     mode,
+    backToBrowse,
+    goHome,
     mobileTransportOpen,
     setMobileTransportOpen,
   } = useWorkspace();
@@ -50,16 +50,6 @@ export function Workspace() {
   );
   const player = usePlayer(Math.max(baseFrames.length, 1));
   const frame = baseFrames[player.index] ?? baseFrames[0];
-  const ready = !!plugin && !!frame;
-
-  const surface = resolveWorkspaceSurface({
-    activeTrackId,
-    activeCategoryId,
-    problemFocused,
-    mode,
-    ready,
-    pluginLoading,
-  });
 
   useWorkspaceKeyboard({
     mode,
@@ -86,29 +76,24 @@ export function Workspace() {
       {!present && mode !== 'visualize' && <UnifiedLeftSidebar />}
 
       <div className="relative min-h-0 min-w-0 flex-1 h-full">
-        {(surface === 'track-board' || surface === 'category-board' || surface === 'canvas' || surface === 'play' || surface === 'learn') && (
-          <ModeRouter
-            activeTrackId={activeTrackId}
-            activeCategoryId={activeCategoryId}
-            problemFocused={problemFocused}
-            mode={mode}
-            ready={ready}
-            pluginLoading={pluginLoading}
-            trackId={activeTrackId!}
-            categoryId={activeCategoryId!}
-            plugin={plugin}
-            item={item}
-            inputId={inputId}
-            selectInput={selectInput}
-            customInput={customInput}
-            setCustomInput={setCustomInput}
-            frames={baseFrames}
-            player={player}
-            frame={frame}
-          />
-        )}
-        {surface === 'loading' && <LoadingPreview title={item.title} />}
-        {surface === 'empty' && <NoPreview title={item.title} tags={item.tags} />}
+        <ModeRouter
+          activeTrackId={activeTrackId}
+          activeCategoryId={activeCategoryId}
+          problemFocused={problemFocused}
+          mode={mode}
+          pluginLoading={pluginLoading}
+          plugin={plugin}
+          item={item}
+          inputId={inputId}
+          selectInput={selectInput}
+          customInput={customInput}
+          setCustomInput={setCustomInput}
+          frames={baseFrames}
+          player={player}
+          frame={frame}
+          backToBrowse={backToBrowse}
+          goHome={goHome}
+        />
       </div>
 
       {present && (
@@ -316,32 +301,6 @@ function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function LoadingPreview({ title }: { title: string }) {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-edge border-t-accent" />
-      <div className={cn('text-ink2', chromeText.base)}>Loading {title}…</div>
-    </div>
-  );
-}
-
-function NoPreview({ title, tags }: { title: string; tags: string[] }) {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
-      <FileQuestion className="h-6 w-6 text-ink3" />
-      <div className={cn('text-ink', chromeText.base)}>{title}</div>
-      <div className={cn('max-w-sm text-ink2', chromeText.base)}>
-        This item has no interactive preview yet — it isn’t bound to a plugin.
-      </div>
-      <div className="flex flex-wrap justify-center gap-1">
-        {tags.map((t) => (
-          <TagChip key={t} id={t} />
-        ))}
       </div>
     </div>
   );
