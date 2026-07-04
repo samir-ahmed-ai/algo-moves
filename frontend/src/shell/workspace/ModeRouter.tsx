@@ -110,28 +110,30 @@ function unreachableSurface(surface: never): never {
   throw new Error(`Unhandled workspace surface: ${surface}`);
 }
 
-function WorkspaceFallback({
-  icon,
-  title,
-  hint,
-  role,
-  actionLabel,
-  actionIcon,
-  onAction,
-}: {
+type WorkspaceFallbackProps = {
   icon: ReactNode;
   title: string;
   hint: string;
   role?: 'status';
-  actionLabel?: string;
-  actionIcon?: ReactNode;
-  onAction?: () => void;
-}) {
+} & (
+  | {
+      actionLabel: string;
+      actionIcon?: ReactNode;
+      onAction: () => void;
+    }
+  | {
+      actionLabel?: never;
+      actionIcon?: never;
+      onAction?: never;
+    }
+);
+
+function WorkspaceFallback({ icon, title, hint, role, actionLabel, actionIcon, onAction }: WorkspaceFallbackProps) {
   return (
     <div className="grid h-full w-full place-items-center bg-bg p-6" role={role} aria-live={role ? 'polite' : undefined}>
       <div className="flex flex-col items-center gap-1">
         <EmptyState icon={icon} title={title} hint={hint} />
-        {onAction && actionLabel && (
+        {actionLabel && (
           <Btn className="-mt-2" icon={actionIcon} onClick={onAction}>
             {actionLabel}
           </Btn>
