@@ -250,7 +250,7 @@ function TopBar({
 }) {
   const cs = useCodeStudio();
   const { item } = useCanvasStatic();
-  const { theme, setTheme, present, setPresent, enterCanvas } = useWorkspace();
+  const { theme, setTheme, present, setPresent, enterProblemInMode } = useWorkspace();
   const browseCrumb = browseBreadcrumbForItem(item.id, catalog);
 
   return (
@@ -260,7 +260,7 @@ function TopBar({
           <Menu className="h-4 w-4" />
         </IconBtn>
       )}
-      <IconBtn title="Open canvas" onClick={() => enterCanvas()}>
+      <IconBtn title="Open canvas" onClick={() => enterProblemInMode(item.id, 'visualize')}>
         <Network className="h-4 w-4" />
       </IconBtn>
       <GraduationCap className="hidden h-4 w-4 shrink-0 text-accent sm:block" />

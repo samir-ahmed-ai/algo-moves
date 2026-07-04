@@ -5,8 +5,10 @@ import type { EdgeOpts, LayoutVisualizeOptions } from '@/lib/canvas/layoutPrefs'
 import {
   buildNodes,
   buildEdges,
+  layoutVisualizeCanvas,
   layoutLearnCanvas,
   layoutGraph,
+  nodeForKind,
   styleEdges,
   type LayoutDir,
 } from '../layout/layout';
@@ -22,6 +24,8 @@ export interface CanvasFrameInput {
   removedEdges?: Set<string>;
   /** Restored positions/sizes from a previous session in this mode. */
   saved?: SavedNodeLayout;
+  /** Seed the first problem-backed visualize canvas with useful panels. */
+  seedProblemCanvas?: boolean;
   layoutOpts: LayoutVisualizeOptions;
   dir: LayoutDir;
   edgeOpts: EdgeOpts;
@@ -37,9 +41,19 @@ export function buildCanvasFrame(
   mode: CanvasMode,
   input: CanvasFrameInput,
 ): { nodes: PanelFlowNode[]; edges: Edge[] } {
-  const { removed, removedEdges, saved, dir, edgeOpts } = input;
+  const { removed, removedEdges, saved, seedProblemCanvas, dir, edgeOpts } = input;
 
   let nodes = buildNodes(plugin, mode);
+  const hasSavedLayout = !!saved && Object.keys(saved).length > 0;
+  const hasRemovedNodes = !!removed?.size;
+  const seededProblemCanvas = seedProblemCanvas && mode === 'visualize' && nodes.length === 0 && !hasSavedLayout && !hasRemovedNodes;
+  if (seededProblemCanvas) {
+    nodes = [
+      nodeForKind(plugin, 'problem', { x: 0, y: 0 }),
+      nodeForKind(plugin, 'viz', { x: 380, y: 0 }),
+      nodeForKind(plugin, 'code', { x: 760, y: 0 }),
+    ];
+  }
   if (removed?.size) nodes = nodes.filter((n) => !removed.has(n.id));
   const present = new Set(nodes.map((n) => n.id));
   const rmEdges = removedEdges ?? new Set<string>();
@@ -49,7 +63,9 @@ export function buildCanvasFrame(
 
   nodes =
     mode === 'visualize'
-      ? nodes
+      ? seededProblemCanvas
+        ? layoutVisualizeCanvas(nodes, input.layoutOpts)
+        : nodes
       : mode === 'learn'
         ? layoutLearnCanvas(nodes, raw)
         : layoutGraph(nodes, raw, dir);
@@ -70,4 +86,22 @@ export function buildCanvasFrame(
   }
 
   return { nodes, edges: styleEdges(raw, edgeOpts) };
+}
+
+export function organizeCurrentCanvasFrame(
+  plugin: ProblemPlugin<any, any>,
+  mode: CanvasMode,
+  nodes: PanelFlowNode[],
+  input: Pick<CanvasFrameInput, 'layoutOpts' | 'dir' | 'edgeOpts'>,
+): { nodes: PanelFlowNode[]; edges: Edge[] } {
+  const present = new Set(nodes.map((n) => n.id));
+  const raw = buildEdges(plugin, mode).filter((e) => present.has(e.source) && present.has(e.target));
+  let kept: PanelFlowNode[] = nodes.map((n) => ({ ...n, position: { x: 0, y: 0 }, selected: false }));
+  kept =
+    mode === 'visualize'
+      ? layoutVisualizeCanvas(kept, input.layoutOpts)
+      : mode === 'learn'
+        ? layoutLearnCanvas(kept, raw)
+        : layoutGraph(kept, raw, input.dir);
+  return { nodes: kept, edges: styleEdges(raw, input.edgeOpts) };
 }

@@ -45,7 +45,6 @@ import { applyAlign, applyDistribute, type AlignKind } from './layout/align';
 import { FIT_VIEW_DURATION_MS } from './ui/canvasTokens';
 import {
   buildEdges,
-  buildNodes,
   REQUIRED_VISUALIZE_EDGES,
   connectionLineType,
   edgeConnectionLabel,
@@ -54,8 +53,6 @@ import {
   FIT_PADDING_VIEW,
   edgesForKind,
   kindTitle,
-  layoutGraph,
-  layoutLearnCanvas,
   modeNodeIds,
   nextPracticePanel,
   sidePanelTabs,
@@ -68,7 +65,7 @@ import {
   type LayoutPreset,
 } from './layout/layout';
 import { snapNodeLayout } from './nodes/nodeSnapshot';
-import { buildCanvasFrame } from './frame/canvasFrame';
+import { buildCanvasFrame, organizeCurrentCanvasFrame } from './frame/canvasFrame';
 import { sanitizeVisualizeEdges } from './edges/edgeSanitization';
 import { useCanvasLayoutPersistence, type Saved } from './hooks/useCanvasLayoutPersistence';
 import { useCanvasHistory } from './hooks/useCanvasHistory';
@@ -232,11 +229,12 @@ function Inner({
         removed: removedRef.current[k],
         removedEdges: removedEdgesRef.current[k],
         saved: layoutRef.current[k],
+        seedProblemCanvas: !standalone,
         layoutOpts: layoutOpts(),
         dir,
         edgeOpts,
       }),
-    [plugin, edgeOpts, dir, layoutOpts],
+    [plugin, edgeOpts, dir, layoutOpts, standalone],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -407,6 +405,41 @@ function Inner({
     setEdges,
   });
 
+  const restoreProblemStarterPanels = useCallback(() => {
+    if (standalone || mode !== 'visualize') return;
+    delete layoutRef.current[key];
+    removedRef.current[key] = new Set();
+    removedEdgesRef.current[key] = new Set();
+    const built = buildCanvasFrame(plugin, mode, {
+      seedProblemCanvas: true,
+      layoutOpts: layoutOpts(),
+      dir,
+      edgeOpts,
+    });
+    if (built.nodes.length === 0) return;
+    builtKeyRef.current = key;
+    resetHistory();
+    setNodes(built.nodes);
+    setEdges(built.edges);
+    persist();
+    requestAnimationFrame(() => fitCanvas());
+  }, [standalone, mode, key, plugin, layoutOpts, dir, edgeOpts, resetHistory, setNodes, setEdges, persist, fitCanvas]);
+
+  const autoRestoredProblemCanvasRef = useRef(new Set<string>());
+  const suppressAutoRestoreForKey = useCallback(() => {
+    if (!standalone && mode === 'visualize') autoRestoredProblemCanvasRef.current.add(key);
+  }, [standalone, mode, key]);
+  useEffect(() => {
+    if (standalone || mode !== 'visualize' || nodes.length > 0) return;
+    if (autoRestoredProblemCanvasRef.current.has(key)) return;
+    const id = window.setTimeout(() => {
+      if (collab.isCollaborating || nodesRef.current.length > 0 || autoRestoredProblemCanvasRef.current.has(key)) return;
+      autoRestoredProblemCanvasRef.current.add(key);
+      restoreProblemStarterPanels();
+    }, 60);
+    return () => window.clearTimeout(id);
+  }, [standalone, mode, key, nodes.length, collab.isCollaborating, restoreProblemStarterPanels]);
+
   // Tidy: re-organize the CURRENT panels (keep removals + resizes, forget positions).
   const reset = useCallback(() => {
     const present = nodesRef.current;
@@ -415,21 +448,9 @@ function Inner({
     removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     removedEdgesRef.current[key] = new Set();
     delete layoutRef.current[key];
-    const sizeById = new Map(present.map((n) => [n.id, { width: n.width }]));
-    let kept = buildNodes(plugin, mode)
-      .filter((n) => presentIds.has(n.id))
-      .map((n) => {
-        const s = sizeById.get(n.id);
-        return s ? { ...n, width: s.width ?? n.width } : n;
-      });
-    const raw = buildEdges(plugin, mode).filter((e) => presentIds.has(e.source) && presentIds.has(e.target));
-    kept = mode === 'visualize'
-      ? layoutGraph(kept, raw, dir)
-      : mode === 'learn'
-        ? layoutLearnCanvas(kept, raw)
-        : layoutGraph(kept, raw, dir);
-    setNodes(kept);
-    setEdges(styleEdges(raw, edgeOpts));
+    const tidy = organizeCurrentCanvasFrame(plugin, mode, present as PanelFlowNode[], { layoutOpts: layoutOpts(), dir, edgeOpts });
+    setNodes(tidy.nodes);
+    setEdges(tidy.edges);
     requestAnimationFrame(() => fitCanvas());
   }, [plugin, mode, key, edgeOpts, dir, setNodes, setEdges, fitCanvas, layoutOpts]);
 
@@ -748,8 +769,16 @@ function Inner({
     [plugin, mode, ensureAndFocusPanel, setSidePanelTab],
   );
 
-  const { onNodeClick, recolorNode, minimizeNode, removeNode, toggleNodeLock } =
+  const { onNodeClick, recolorNode, minimizeNode, removeNode: removeNodeRaw, toggleNodeLock } =
     useCanvasNodeMutations({ setNodes, setEdges });
+
+  const removeNode = useCallback(
+    (id: string) => {
+      suppressAutoRestoreForKey();
+      removeNodeRaw(id);
+    },
+    [removeNodeRaw, suppressAutoRestoreForKey],
+  );
 
   const canvasActions = useMemo(
     () => ({ focusPanel: focusNode, advancePractice, spawnConnectedPanel, layoutVisualizeOptions: layoutOpts }),
@@ -841,10 +870,11 @@ function Inner({
 
   const onNodesDelete = useCallback(
     (deleted: Node[]) => {
+      suppressAutoRestoreForKey();
       const set = (removedRef.current[key] ??= new Set());
       for (const n of deleted) set.add((n.data as PanelNodeData | undefined)?.kind ?? n.id);
     },
-    [key],
+    [key, suppressAutoRestoreForKey],
   );
 
   const onEdgesDelete = useCallback(
@@ -967,9 +997,18 @@ function Inner({
 
           {nodes.length === 0 && (
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
-              <p className={cn('rounded-lg border border-edge bg-panel/80 px-4 py-2 text-ink2 shadow-sm backdrop-blur', chromeText.base)}>
-                Empty canvas — use + in the toolbar or right-click to add panels.
-              </p>
+              <div className={cn('flex flex-col items-center gap-2 rounded-lg border border-edge bg-panel/85 px-4 py-3 text-ink2 shadow-sm backdrop-blur', chromeText.base)}>
+                <p>Empty canvas — use + in the toolbar or right-click to add panels.</p>
+                {!standalone && mode === 'visualize' && (
+                  <button
+                    type="button"
+                    onClick={restoreProblemStarterPanels}
+                    className="pointer-events-auto rounded-full bg-accent px-3 py-1 text-[12px] font-semibold text-white"
+                  >
+                    Restore starter panels
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>

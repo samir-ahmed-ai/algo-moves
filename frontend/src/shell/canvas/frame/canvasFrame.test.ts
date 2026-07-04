@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ProblemPlugin } from '../../../core';
 import { defaultEdgeOpts } from '@/lib/canvas/layoutPrefs';
-import { buildCanvasFrame, type CanvasFrameInput } from './canvasFrame';
+import { buildCanvasFrame, organizeCurrentCanvasFrame, type CanvasFrameInput } from './canvasFrame';
 import { restoreNodeWidth } from '../nodes/nodeSnapshot';
 
 const stubPlugin = { tabs: [], wires: {} } as unknown as ProblemPlugin<any, any>;
@@ -18,6 +18,43 @@ describe('buildCanvasFrame', () => {
   it('starts with no built-in panels for visualize mode (freeform canvas)', () => {
     const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', baseInput);
     expect(nodes).toHaveLength(0);
+  });
+
+  it('seeds problem-backed visualize mode with useful starter panels', () => {
+    const { nodes, edges } = buildCanvasFrame(stubPlugin, 'visualize', {
+      ...baseInput,
+      seedProblemCanvas: true,
+    });
+    expect(nodes.map((n) => n.id)).toEqual(['problem', 'viz', 'code']);
+    expect(nodes[1].position.x).toBeGreaterThan(nodes[0].position.x);
+    expect(nodes[2].position.x).toBeGreaterThan(nodes[1].position.x);
+    expect(nodes[1].width).toBeGreaterThan(nodes[0].width ?? 0);
+    expect(edges.map((e) => e.id)).toEqual(['problem->viz', 'viz->code']);
+  });
+
+  it('does not reseed a problem canvas after the user removed panels', () => {
+    const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', {
+      ...baseInput,
+      seedProblemCanvas: true,
+      removed: new Set(['problem']),
+    });
+    expect(nodes).toHaveLength(0);
+  });
+
+  it('tidies current optional visualize panels instead of dropping them', () => {
+    const seeded = buildCanvasFrame(stubPlugin, 'visualize', {
+      ...baseInput,
+      seedProblemCanvas: true,
+    });
+    const messy = seeded.nodes.map((n, i) => ({
+      ...n,
+      position: { x: 800 - i * 40, y: 400 + i * 30 },
+      selected: true,
+    }));
+    const tidied = organizeCurrentCanvasFrame(stubPlugin, 'visualize', messy, baseInput);
+    expect(tidied.nodes.map((n) => n.id)).toEqual(['problem', 'viz', 'code']);
+    expect(tidied.nodes.every((n) => !n.selected)).toBe(true);
+    expect(tidied.edges.map((e) => e.id)).toEqual(['problem->viz', 'viz->code']);
   });
 
   it('styles every edge with the removable edge type when edges exist', () => {

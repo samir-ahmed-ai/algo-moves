@@ -202,7 +202,10 @@ const SHELL_WIRES: Record<CanvasMode, [string, string, string?][]> = {
     ['viz', 'reassemble'],
     ['viz', 'recall'],
   ],
-  visualize: [],
+  visualize: [
+    ['problem', 'viz'],
+    ['viz', 'code'],
+  ],
   learn: [
     ['predict', 'mastery'],
     ['mastery', 'code'],

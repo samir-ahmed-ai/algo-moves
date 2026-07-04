@@ -51,7 +51,7 @@ export const CATEGORY_ORDER: PanelCategory[] = [
 
 /** Unified panel registry — single source for titles, categories, and mode visibility. */
 export const panelsConfig: PanelConfigEntry[] = [
-  { id: 'problem', title: 'Problem', category: 'Problem', modes: [], optional: true },
+  { id: 'problem', title: 'Problem', category: 'Problem', modes: ['visualize'], optional: true },
   { id: 'viz', title: 'Visualizer', category: 'Visualize', modes: ['visualize'], optional: true },
   { id: 'replay', title: 'Replay', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },
   { id: 'inspector', title: 'Inspector', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },
