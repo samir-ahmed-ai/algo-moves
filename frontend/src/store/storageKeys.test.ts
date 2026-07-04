@@ -33,5 +33,6 @@ describe('STORAGE_KEYS', () => {
     expect(STORAGE_KEYS.NOTES('two-sum')).toBe('algo-moves:notes:two-sum');
     expect(STORAGE_KEYS.EDGE_CASES('two-sum')).toBe('algo-moves:edgecases:two-sum');
     expect(STORAGE_KEYS.RUSH_BEST('two-sum', 'recall')).toBe('algo-moves:rush-best:two-sum:recall');
+    expect(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', 'two-sum:0')).toBe('algo-moves:assemble-best:rush:two-sum:0');
   });
 });

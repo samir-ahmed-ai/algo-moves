@@ -4,6 +4,7 @@ import type { ProblemPlugin } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
 import { usePluginFrames } from '@/hooks';
 import { ErrorBoundary } from '../ErrorBoundary';
+import { FlipFrame } from '@/components/shared/FlipFrame';
 import { VizFitBox } from '../canvas/ui/nodeui';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
@@ -14,7 +15,9 @@ export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
   const hasFrames = baseFrames.length > 0;
   const frameType = frame?.move?.type ?? 'frame';
   const stepLabel = hasFrames ? `${player.index + 1}/${player.total}` : '0/0';
-  const hasMove = caption.length > 0;
+  // Reserve the caption slot for the whole run — frames without a note must
+  // not collapse it and jump the transport card's height every step.
+  const anyCaption = baseFrames.some((f) => f.move?.note?.trim() || f.move?.caption?.trim());
   const hasNext = hasFrames && player.index < player.total - 1;
   const hasPrev = player.index > 0;
   const railToneClass = player.isPlaying ? 'text-accent' : 'text-ink3';
@@ -39,10 +42,12 @@ export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
   return (
     <div className="mobile-viz-shell flex min-h-0 flex-1 flex-col">
       <div className="mobile-viz-board min-h-0 flex-1 overflow-hidden rounded-2xl border border-edge/60 bg-panel2/30 p-1" data-noswipe>
-        <VizFitBox className="h-full min-h-0 w-full" remeasureKey={`${player.index}-${frame.move.type}`}>
-          <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
-            <View frame={frame} />
-          </ErrorBoundary>
+        <VizFitBox className="h-full min-h-0 w-full" remeasureKey={`${plugin.meta.id}-${player.index}-${frame.move.type}`}>
+          <FlipFrame frameKey={player.index} resetKey={plugin.meta.id}>
+            <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
+              <View frame={frame} />
+            </ErrorBoundary>
+          </FlipFrame>
         </VizFitBox>
       </div>
 
@@ -93,13 +98,13 @@ export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
             {hasFrames ? `${frame.move.type}` : 'No frame'}
           </span>
         </div>
-        {hasMove ? (
+        {anyCaption ? (
           <p
-            className="mobile-viz-caption mt-2 font-mono text-[11px] text-ink3"
+            className="mobile-viz-caption mt-2 font-mono"
             key={`${player.index}-${frame?.move?.type ?? 'frame'}`}
-            title={caption}
+            title={caption || undefined}
           >
-            {caption}
+            {caption || ' '}
           </p>
         ) : null}
         <button

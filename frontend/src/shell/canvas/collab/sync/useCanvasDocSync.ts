@@ -90,20 +90,27 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
   const sig = isCollaborating && isHost ? docSignature(nodes, edges, comments) : '';
   const subSig = isCollaborating && isHost ? subDocSignature(subDocs) : '';
   const interviewSig = session.interview ? JSON.stringify(session.interview) : '';
-  usePublishState(isHost && isCollaborating, [sig, subSig, session.kind, session.activeProblemId, interviewSig], () => {
-    if (!sig && !subSig) return;
-    revRef.current += 1;
-    const doc: CanvasDoc = {
-      v: 1,
-      rev: revRef.current,
-      nodes: nodesRef.current,
-      edges: edgesRef.current,
-      removedPanels: [],
-      removedEdges: [],
-      comments: commentsRef.current,
-    };
-    publishState(buildCanvasRoomState(session, doc, subDocsRef.current));
-  });
+  const runtimeSig = session.interviewRuntime ? JSON.stringify(session.interviewRuntime) : '';
+  // Interview runtime (timer/lock/follow) must publish even on an empty board.
+  const isInterview = session.kind === 'interview';
+  usePublishState(
+    isHost && isCollaborating,
+    [sig, subSig, session.kind, session.activeProblemId, interviewSig, runtimeSig],
+    () => {
+      if (!sig && !subSig && !isInterview) return;
+      revRef.current += 1;
+      const doc: CanvasDoc = {
+        v: 1,
+        rev: revRef.current,
+        nodes: nodesRef.current,
+        edges: edgesRef.current,
+        removedPanels: [],
+        removedEdges: [],
+        comments: commentsRef.current,
+      };
+      publishState(buildCanvasRoomState(session, doc, subDocsRef.current));
+    },
+  );
 
   // ---- non-host: reconcile to the host snapshot (also seeds late joiners) ----
   // Applying the snapshot also advances the emission baselines to it, so applied

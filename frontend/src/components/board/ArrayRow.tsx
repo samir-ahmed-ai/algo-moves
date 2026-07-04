@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
+import { flipKeys } from './flipKeys';
 
 export interface ArrayPointer {
   /** Index the pointer sits under/over. -1 hides it (e.g. lo > hi). */
@@ -33,11 +34,13 @@ function Marker({ p }: { p: ArrayPointer }) {
  * under their index — for binary search, two-pointers and sliding windows.
  */
 export function ArrayRow({ values, cellTone, pointers = [], windowRange, label }: ArrayRowProps) {
+  const fid = useId();
   const n = values.length;
   const above = pointers.filter((p) => p.place === 'above' && p.i >= 0);
   const below = pointers.filter((p) => p.place !== 'above' && p.i >= 0);
   const cols = `repeat(${n}, minmax(34px, 1fr))`;
   const marksFor = (list: ArrayPointer[], i: number) => list.filter((p) => p.i === i);
+  const keys = flipKeys(values, fid);
 
   return (
     <div className="arow" style={{ gridTemplateColumns: cols }}>
@@ -51,7 +54,11 @@ export function ArrayRow({ values, cellTone, pointers = [], windowRange, label }
       {values.map((v, i) => {
         const inWin = windowRange && i >= windowRange[0] && i <= windowRange[1];
         return (
-          <div key={`c${i}`} className={`arow-cell ${cellTone?.(i) ?? ''} ${inWin ? 'in-window' : ''}`}>
+          <div
+            key={`c${i}`}
+            data-flip={keys[i]}
+            className={`arow-cell ${cellTone?.(i) ?? ''} ${inWin ? 'in-window' : ''}`}
+          >
             <span className="arow-val">{v}</span>
             <span className="arow-idx">{label ? label(i) : i}</span>
           </div>

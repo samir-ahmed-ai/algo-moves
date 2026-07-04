@@ -2,6 +2,7 @@ import {
   collabSession,
   defaultSession,
   isSessionMeta,
+  type InterviewRuntime,
   type SessionMeta,
 } from '@/lib/session/types';
 import type { CanvasDoc } from '@/shell/canvas/collab/protocol/collabProtocol';
@@ -47,6 +48,11 @@ export function extractSessionMeta(value: unknown): SessionMeta {
   if (isRoomEnvelope(value)) return value.session;
   if (isCanvasDoc(value)) return collabSession();
   return defaultSession('solo');
+}
+
+/** Convenience: pull the host-broadcast interview runtime (timer/lock/follow). */
+export function extractInterviewRuntime(value: unknown): InterviewRuntime | null {
+  return extractSessionMeta(value).interviewRuntime ?? null;
 }
 
 export function buildCanvasRoomState(

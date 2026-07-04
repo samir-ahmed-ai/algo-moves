@@ -195,6 +195,168 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	}
 }
 
+// Integration test for durable interview sessions — skipped unless DATABASE_URL is set.
+func TestArcadeInterviewFlow(t *testing.T) {
+	url := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+	if url == "" {
+		t.Skip("DATABASE_URL not set")
+	}
+	t.Setenv("DATABASE_URL", url)
+	t.Setenv("RUN_MIGRATIONS", "true")
+
+	ctx := context.Background()
+	svc, err := Open(ctx)
+	if err != nil {
+		t.Fatalf("open: %v", err)
+	}
+	if svc == nil || !svc.Enabled() {
+		t.Fatal("expected enabled arcade service")
+	}
+	defer svc.Close()
+
+	mux := http.NewServeMux()
+	svc.Register(mux)
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	token := newGuestToken(t, ts.URL)
+
+	// Create
+	create := doJSON(t, ts.URL, http.MethodPost, "/api/interviews", token, `{"title":"Onsite"}`)
+	if create.status != http.StatusOK {
+		t.Fatalf("create status: %d", create.status)
+	}
+	id, _ := create.body["id"].(string)
+	if id == "" {
+		t.Fatal("create: missing id")
+	}
+	if create.body["status"] != "active" {
+		t.Fatalf("create: status = %v", create.body["status"])
+	}
+	guestToken, _ := create.body["guestToken"].(string)
+	if guestToken == "" {
+		t.Fatal("create: missing guestToken")
+	}
+	if create.body["guestLinkEnabled"] != true {
+		t.Fatalf("create: guestLinkEnabled = %v", create.body["guestLinkEnabled"])
+	}
+
+	// Get (owner) — full fields present.
+	get := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/"+id, token, "")
+	if get.status != http.StatusOK {
+		t.Fatalf("get status: %d", get.status)
+	}
+	if _, ok := get.body["notes"]; !ok {
+		t.Fatal("get: notes missing from owner view")
+	}
+	if get.body["guestToken"] != guestToken {
+		t.Fatalf("get: guestToken = %v", get.body["guestToken"])
+	}
+
+	// List — summary omits heavy fields.
+	list := doJSONList(t, ts.URL, http.MethodGet, "/api/interviews", token, "")
+	if list.status != http.StatusOK {
+		t.Fatalf("list status: %d", list.status)
+	}
+	found := false
+	for _, row := range list.body {
+		if row["id"] == id {
+			found = true
+			if _, has := row["canvas"]; has {
+				t.Fatal("list: canvas should not be present in summary")
+			}
+			if _, has := row["notes"]; has {
+				t.Fatal("list: notes should not be present in summary")
+			}
+		}
+	}
+	if !found {
+		t.Fatal("list: created session not returned")
+	}
+
+	// Patch — partial update.
+	upd := doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, token,
+		`{"title":"Renamed","canvas":{"els":[]},"notes":"hi","canvasLocked":true,"roomCode":"WXYZ"}`)
+	if upd.status != http.StatusOK {
+		t.Fatalf("patch status: %d", upd.status)
+	}
+	if upd.body["title"] != "Renamed" || upd.body["notes"] != "hi" || upd.body["canvasLocked"] != true {
+		t.Fatalf("patch: unexpected body %v", upd.body)
+	}
+
+	// Public token GET — sanitized, no private fields.
+	pub := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", "")
+	if pub.status != http.StatusOK {
+		t.Fatalf("public status: %d", pub.status)
+	}
+	if pub.body["roomCode"] != "WXYZ" {
+		t.Fatalf("public: roomCode = %v", pub.body["roomCode"])
+	}
+	if _, ok := pub.body["canvas"]; !ok {
+		t.Fatal("public: canvas missing")
+	}
+	for _, k := range []string{"guestToken", "notes", "rubric", "questions", "recommendation"} {
+		if _, leaked := pub.body[k]; leaked {
+			t.Fatalf("public: leaked private field %q", k)
+		}
+	}
+
+	// Disable guest link — public GET 404s.
+	if r := doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, token, `{"guestLinkEnabled":false}`); r.status != http.StatusOK {
+		t.Fatalf("disable link status: %d", r.status)
+	}
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", ""); r.status != http.StatusNotFound {
+		t.Fatalf("public after disable: %d (want 404)", r.status)
+	}
+	// Re-enable for the end/reopen checks.
+	doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, token, `{"guestLinkEnabled":true}`)
+
+	// End — status ended, public GET 404 (not served when ended).
+	end := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/end", token, "")
+	if end.status != http.StatusOK || end.body["status"] != "ended" {
+		t.Fatalf("end: status %d body %v", end.status, end.body)
+	}
+	if end.body["endedAt"] == nil {
+		t.Fatal("end: endedAt should be set")
+	}
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", ""); r.status != http.StatusNotFound {
+		t.Fatalf("public after end: %d (want 404)", r.status)
+	}
+
+	// Reopen.
+	reopen := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/reopen", token, "")
+	if reopen.status != http.StatusOK || reopen.body["status"] != "active" {
+		t.Fatalf("reopen: status %d body %v", reopen.status, reopen.body)
+	}
+
+	// Rotate token — old token no longer resolves.
+	rot := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/rotate-token", token, "")
+	newToken, _ := rot.body["guestToken"].(string)
+	if rot.status != http.StatusOK || newToken == "" || newToken == guestToken {
+		t.Fatalf("rotate: status %d token %q", rot.status, newToken)
+	}
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", ""); r.status != http.StatusNotFound {
+		t.Fatalf("public with old token: %d (want 404)", r.status)
+	}
+
+	// Owner guard — another guest cannot see or mutate.
+	other := newGuestToken(t, ts.URL)
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/"+id, other, ""); r.status != http.StatusNotFound {
+		t.Fatalf("get by other: %d (want 404)", r.status)
+	}
+	if r := doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, other, `{"notes":"x"}`); r.status != http.StatusNotFound {
+		t.Fatalf("patch by other: %d (want 404)", r.status)
+	}
+	if r := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/end", other, ""); r.status != http.StatusNotFound {
+		t.Fatalf("end by other: %d (want 404)", r.status)
+	}
+
+	// Missing id — 404.
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/00000000-0000-0000-0000-000000000000", token, ""); r.status != http.StatusNotFound {
+		t.Fatalf("get missing: %d (want 404)", r.status)
+	}
+}
+
 func newGuestToken(t *testing.T, base string) string {
 	t.Helper()
 	res, err := http.Post(base+"/api/auth/guest", "application/json", nil)

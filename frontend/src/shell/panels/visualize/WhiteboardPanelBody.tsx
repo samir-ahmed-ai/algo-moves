@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ExcalidrawWrapper } from '@/components/shared/ExcalidrawWrapper';
 import { useSubDocSync } from '@/shell/canvas/collab/sync/useSubDocSync';
+import { useCanvasCollabOptional } from '@/shell/canvas/collab/CanvasCollabProvider';
 import type { WhiteboardPayload } from '@/shell/canvas/collab/protocol/subdocProtocol';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
@@ -8,6 +9,9 @@ import { chromeText } from '@/shell/chromeUi';
 export function WhiteboardPanelBody() {
   const sync = useSubDocSync('whiteboard');
   const payload = sync.payload as WhiteboardPayload;
+  const collab = useCanvasCollabOptional();
+  const applyRemoteViewport =
+    !!collab && !collab.isHost && collab.session.interviewRuntime?.hostFollow === true;
 
   const collaborators = useMemo(() => {
     const map = new Map<string, { username?: string; pointer?: { x: number; y: number; tool: 'pointer' } }>();
@@ -38,6 +42,7 @@ export function WhiteboardPanelBody() {
         isCollaborating={sync.isLive}
         initialData={payload}
         remoteRev={sync.rev}
+        applyRemoteViewport={applyRemoteViewport}
         collaborators={collaborators}
         onChange={(next) => sync.setPayload(next)}
         onPointerUpdate={sync.onPointerUpdate}

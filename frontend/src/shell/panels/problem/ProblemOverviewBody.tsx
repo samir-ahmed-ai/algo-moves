@@ -63,7 +63,7 @@ export function ProblemOverviewBody() {
       </aside>
       <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="ws-scroll min-h-0 flex-1 overflow-auto">
-          <VizPanelBody />
+          <VizPanelBody showTransport={false} />
         </div>
         <div className="flex shrink-0 justify-center border-t border-edge bg-panel/80 px-3 py-2 backdrop-blur">
           <TransportBar />

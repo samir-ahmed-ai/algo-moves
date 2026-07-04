@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, type ComponentProps } from 'react';
 import { cn } from '@/lib/utils/cn';
-import type { WhiteboardElement, WhiteboardPayload } from '@/shell/canvas/collab/protocol/subdocProtocol';
+import type { WhiteboardElement, WhiteboardPayload } from '@/lib/session/subdocProtocol';
 
 const LazyExcalidraw = lazy(async () => {
   const mod = await import('@excalidraw/excalidraw');
@@ -31,6 +31,9 @@ export interface ExcalidrawWrapperProps {
   initialData?: WhiteboardPayload;
   /** Monotonic revision — bump to trigger a remote updateScene. */
   remoteRev?: number;
+  /** Apply the remote scroll/zoom (follow-me). Off by default so remote element
+   * edits never yank a viewer's own pan. */
+  applyRemoteViewport?: boolean;
   collaborators?: Map<string, Collaborator>;
   onChange?: (payload: WhiteboardPayload) => void;
   onPointerUpdate?: (payload: { pointer: { x: number; y: number }; button: 'up' | 'down' }) => void;
@@ -59,6 +62,7 @@ export function ExcalidrawWrapper({
   isCollaborating = false,
   initialData,
   remoteRev,
+  applyRemoteViewport = false,
   collaborators,
   onChange,
   onPointerUpdate,
@@ -86,17 +90,27 @@ export function ExcalidrawWrapper({
     if (remoteRev <= appliedRev.current) return;
     appliedRev.current = remoteRev;
     applyingRemote.current = true;
+    // Never move the viewer's own pan/zoom on a remote element edit — only mirror
+    // the remote viewport when explicitly following (follow-me).
+    const remoteAppState = (initialData.appState ?? {}) as Record<string, unknown>;
+    const { scrollX, scrollY, zoom, ...restAppState } = remoteAppState;
+    const appState: Record<string, unknown> = {
+      viewBackgroundColor: 'transparent',
+      ...restAppState,
+    };
+    if (applyRemoteViewport) {
+      if (scrollX !== undefined) appState.scrollX = scrollX;
+      if (scrollY !== undefined) appState.scrollY = scrollY;
+      if (zoom !== undefined) appState.zoom = zoom;
+    }
     apiRef.current.updateScene({
       elements: initialData.elements as unknown[],
-      appState: {
-        viewBackgroundColor: 'transparent',
-        ...(initialData.appState ?? {}),
-      },
+      appState,
     });
     requestAnimationFrame(() => {
       applyingRemote.current = false;
     });
-  }, [remoteRev, initialData]);
+  }, [remoteRev, initialData, applyRemoteViewport]);
 
   // Update collaborator pointers
   useEffect(() => {

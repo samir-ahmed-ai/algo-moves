@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { nodeText, RADIUS_CTRL } from '@/design/typography';
 import {
@@ -34,7 +34,17 @@ export function VizFitBox({
   const selfRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState({ scale: 1, w: 0, h: 0, nw: 0, nh: 0 });
+  // Ease size/scale changes only after the first painted layout, so mount
+  // doesn't animate in from zero.
+  const [animReady, setAnimReady] = useState(false);
+  const lastMeasureW = useRef(0);
+  const syncRef = useRef<(() => void) | null>(null);
   const hug = layoutMode === 'hug';
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setAnimReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   useLayoutEffect(() => {
     const measureEl = hug && measureRef?.current ? measureRef.current : selfRef.current;
@@ -71,15 +81,48 @@ export function VizFitBox({
       // to the full stage (`boxH`) so a growing rail extends the box downward
       // without ever rescaling the board.
       const fit = computeVizFitLayout(nw, nh, cw, ch);
-      setLayout({ scale: fit.scale, w: fit.w, h: boxH * fit.scale, nw, nh: boxH });
+      lastMeasureW.current = cw;
+      const next = { scale: fit.scale, w: fit.w, h: Math.ceil(boxH * fit.scale), nw, nh: boxH };
+      // Bail on identical values: the eased box resize re-fires the observer
+      // for ~13 frames per step, and each converged tick must not re-render.
+      setLayout((prev) =>
+        prev.scale === next.scale && prev.w === next.w && prev.h === next.h
+          && prev.nw === next.nw && prev.nh === next.nh
+          ? prev
+          : next,
+      );
     };
 
-    const ro = new ResizeObserver(() => requestAnimationFrame(sync));
+    syncRef.current = sync;
+    sync();
+  }, [children, remeasureKey, hug, measureRef]);
+
+  // Persistent observer — created once per (hug, measureRef), NOT per frame.
+  // Re-observing every step would deliver the spec-mandated initial
+  // notification one rendered frame later, mid-FLIP, where translated movers
+  // inflate scrollWidth and jitter the fit. RO ignores transforms, so with a
+  // stable observation a pure position-morph step fires nothing.
+  useLayoutEffect(() => {
+    const measureEl = hug && measureRef?.current ? measureRef.current : selfRef.current;
+    const content = contentRef.current;
+    if (!measureEl || !content) return;
+    const ro = new ResizeObserver((entries) => {
+      // In hug mode the measure parent's *height* follows our own eased box —
+      // only width changes demand a re-fit, so ignore pure-height echoes.
+      if (
+        hug
+        && entries.every(
+          (e) => e.target === measureEl && Math.round(e.contentRect.width) === lastMeasureW.current,
+        )
+      ) {
+        return;
+      }
+      requestAnimationFrame(() => syncRef.current?.());
+    });
     ro.observe(measureEl);
     ro.observe(content);
-    sync();
     return () => ro.disconnect();
-  }, [children, remeasureKey, hug, measureRef]);
+  }, [hug, measureRef]);
 
   const scaled = layout.scale !== 1 && layout.nw > 0 && layout.nh > 0;
   const hugSize =
@@ -93,11 +136,13 @@ export function VizFitBox({
       className={cn(
         'relative flex items-center justify-center overflow-hidden',
         hug ? 'viz-board-col--hug shrink-0' : 'min-h-0 flex-1',
+        animReady && 'viz-fit-anim-size',
         className,
       )}
       style={hugSize}
     >
       <div
+        className={cn(animReady && 'viz-fit-anim-size')}
         style={{
           width: layout.w || undefined,
           height: layout.h || undefined,
@@ -107,6 +152,7 @@ export function VizFitBox({
       >
         <div
           ref={contentRef}
+          className={cn(animReady && 'viz-fit-anim-scale')}
           style={{
             width: scaled ? layout.nw : undefined,
             height: scaled ? layout.nh : undefined,

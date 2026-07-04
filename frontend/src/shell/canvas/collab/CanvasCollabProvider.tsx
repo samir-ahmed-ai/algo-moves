@@ -16,9 +16,24 @@ import { RoomCommsProvider } from '../../games/net/useRoomComms';
 import { fetchNewRoomCode, makeRoomCode, normalizeRoomCode } from '@/shell/realtime';
 import type { RoomStatus } from '@/shell/realtime';
 import type { Peer, Role } from '@/shell/realtime';
-import { collabSession, defaultSession, interviewSession, type InterviewSettings, type SessionMeta } from '@/lib/session';
+import {
+  collabSession,
+  defaultSession,
+  defaultInterviewRuntime,
+  emptyTimerState,
+  interviewSession,
+  DEFAULT_INTERVIEW_SETTINGS,
+  type InterviewRuntime,
+  type InterviewSettings,
+  type SessionMeta,
+} from '@/lib/session';
 import { extractSessionMeta } from '@/shell/realtime/roomState';
 import { readRoomFromUrl, readShareFromUrl, writeShareToUrl } from '@/store/navigation/shareState';
+import {
+  createInterviewSession,
+  updateInterviewSession,
+  type InterviewSummary,
+} from './sync/interviewApi';
 import { canEditSubDoc } from './protocol/subdocPermissions';
 import {
   CANVAS_TAG,
@@ -82,6 +97,20 @@ export interface CanvasCollabApi {
   leaveSession: () => void;
   /** Host-only: update interview permission settings (publishes to guests). */
   updateInterviewSettings: (patch: Partial<InterviewSettings>) => void;
+  /** Reconnect to a saved interview session (reuses its room + guest token). */
+  resumeInterviewSession: (row: InterviewSummary, name?: string) => void;
+
+  // ---- interview facilitation (host-only mutators; all clients read runtime) ----
+  /** Start/resume the shared countdown for `durationMs`. */
+  startTimer: (durationMs: number) => void;
+  pauseTimer: () => void;
+  resetTimer: () => void;
+  /** Lock the board — guests become view-only. */
+  setLocked: (locked: boolean) => void;
+  /** Toggle "follow me" — guests mirror the host viewport. */
+  setHostFollow: (on: boolean) => void;
+  /** Bind the live session to a durable REST session id / guest token. */
+  setSessionIdentity: (p: { sessionId?: string; guestToken?: string }) => void;
 
   // ---- presence ----
   peers: PeerPresence[];
@@ -366,7 +395,9 @@ function CollabState({ children }: { children: ReactNode }) {
   }, [connect, selfName]);
 
   const startInterviewSession = useCallback(async (problemId: string, name?: string): Promise<string | null> => {
-    setSessionMeta(interviewSession(problemId));
+    // Create the durable session first so we get a guest token + stable id.
+    // Degrades to an ad-hoc room (no durable features) when the backend has no DB.
+    const created = await createInterviewSession('Untitled interview').catch(() => null);
     let code: string | null = null;
     try {
       code = await fetchNewRoomCode();
@@ -374,9 +405,38 @@ function CollabState({ children }: { children: ReactNode }) {
       code = makeRoomCode();
     }
     if (!code) return null;
+    // Bind the durable session to this live room so guests can resolve it by token.
+    if (created?.id) void updateInterviewSession(created.id, { roomCode: code });
+    setSessionMeta(
+      interviewSession(problemId, DEFAULT_INTERVIEW_SETTINGS, {
+        sessionId: created?.id,
+        guestToken: created?.guestToken,
+      }),
+    );
     connect(code, name?.trim() || selfName, { capacity: 8 });
+    // Persist room + interview hint in the URL so a host refresh rejoins.
+    const share = readShareFromUrl() ?? {};
+    writeShareToUrl({ ...share, room: code, sessionKind: 'interview', guestToken: created?.guestToken });
     return code;
   }, [connect, selfName]);
+
+  const resumeInterviewSession = useCallback(
+    (row: InterviewSummary, name?: string) => {
+      if (!row.roomCode) return;
+      const runtime: InterviewRuntime = { ...defaultInterviewRuntime(), locked: row.canvasLocked };
+      setSessionMeta(
+        interviewSession('', DEFAULT_INTERVIEW_SETTINGS, {
+          sessionId: row.id,
+          guestToken: undefined,
+          runtime,
+        }),
+      );
+      connect(row.roomCode, name?.trim() || selfName, { capacity: 8 });
+      const share = readShareFromUrl() ?? {};
+      writeShareToUrl({ ...share, room: row.roomCode, sessionKind: 'interview' });
+    },
+    [connect, selfName],
+  );
 
   const joinSession = useCallback((code: string, name?: string) => {
     const norm = normalizeRoomCode(code);
@@ -384,10 +444,12 @@ function CollabState({ children }: { children: ReactNode }) {
     connect(norm, name?.trim() || selfName, { capacity: 8 });
   }, [connect, selfName]);
 
-  // Auto-join when the URL carries a room code (invite links).
+  // Auto-join when the URL carries a room code (invite links). Interview links
+  // are handled by the guest name-gate instead, so skip them here.
   const autoJoinRef = useRef(false);
   useEffect(() => {
     if (autoJoinRef.current || isCollaborating) return;
+    if (readShareFromUrl()?.sessionKind === 'interview') return;
     const code = readRoomFromUrl();
     if (!code || code.length < 4) return;
     autoJoinRef.current = true;
@@ -433,6 +495,61 @@ function CollabState({ children }: { children: ReactNode }) {
     [isHost],
   );
 
+  // Host-only runtime patch — reduces over interviewRuntime and re-publishes.
+  const patchRuntime = useCallback(
+    (reduce: (r: InterviewRuntime) => InterviewRuntime) => {
+      if (!isHost) return;
+      setSessionMeta((prev) => {
+        if (prev.kind !== 'interview') return prev;
+        return { ...prev, interviewRuntime: reduce(prev.interviewRuntime ?? defaultInterviewRuntime()) };
+      });
+    },
+    [isHost],
+  );
+
+  const startTimer = useCallback(
+    (durationMs: number) => {
+      const ms = Math.max(0, Math.round(durationMs));
+      patchRuntime((r) => ({ ...r, timer: { durationMs: ms, running: true, endsAt: Date.now() + ms, remainingMs: ms } }));
+    },
+    [patchRuntime],
+  );
+
+  const pauseTimer = useCallback(() => {
+    patchRuntime((r) => {
+      const remaining = r.timer.endsAt != null ? Math.max(0, r.timer.endsAt - Date.now()) : r.timer.remainingMs;
+      return { ...r, timer: { ...r.timer, running: false, endsAt: null, remainingMs: remaining } };
+    });
+  }, [patchRuntime]);
+
+  const resetTimer = useCallback(() => {
+    patchRuntime((r) => ({ ...r, timer: emptyTimerState() }));
+  }, [patchRuntime]);
+
+  const setLocked = useCallback(
+    (locked: boolean) => patchRuntime((r) => ({ ...r, locked })),
+    [patchRuntime],
+  );
+
+  const setHostFollow = useCallback(
+    (on: boolean) => patchRuntime((r) => ({ ...r, hostFollow: on })),
+    [patchRuntime],
+  );
+
+  const setSessionIdentity = useCallback(
+    (p: { sessionId?: string; guestToken?: string }) => {
+      setSessionMeta((prev) => {
+        if (prev.kind !== 'interview') return prev;
+        return {
+          ...prev,
+          sessionId: p.sessionId ?? prev.sessionId,
+          guestToken: p.guestToken ?? prev.guestToken,
+        };
+      });
+    },
+    [],
+  );
+
   // ---- comment actions (optimistic locally; folded by the host doc) ----
   const emitEdit = useCallback((op: EditOp) => emit(op), [emit]);
 
@@ -471,7 +588,8 @@ function CollabState({ children }: { children: ReactNode }) {
       status, room, role, self, players, isCollaborating, isHost,
       session: sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
-      updateInterviewSettings,
+      updateInterviewSettings, resumeInterviewSession,
+      startTimer, pauseTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
       peers, followId, setFollowId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
@@ -486,7 +604,8 @@ function CollabState({ children }: { children: ReactNode }) {
       status, room, role, self, players, isCollaborating, isHost,
       sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
-      updateInterviewSettings,
+      updateInterviewSettings, resumeInterviewSession,
+      startTimer, pauseTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
       peers, followId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,

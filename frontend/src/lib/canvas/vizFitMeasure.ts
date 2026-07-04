@@ -2,7 +2,9 @@
 // scaling logic is isolated from the design-system component and unit-testable.
 
 export const VIZ_FIT_PAD = 4;
-export const VIZ_FIT_MAX_UPSCALE = Number.POSITIVE_INFINITY;
+/* Cap upscaling so tiny inputs (3-cell arrays) don't blow up into blurry
+   oversized boards; 1.5x is the largest scale where text still reads crisp. */
+export const VIZ_FIT_MAX_UPSCALE = 1.5;
 
 export const VIZ_MEASURE_SELECTOR =
   '.board-area, .grid-board, .bars, .arow, .queue-tape, svg[role="img"]';
@@ -22,14 +24,22 @@ export function computeVizFitLayout(
 ): VizFitLayout {
   const availW = Math.max(1, containerWidth - pad * 2);
   const availH = Math.max(1, containerHeight - pad * 2);
-  let scale = Math.min(availW / nw, availH / nh, maxUpscale);
+  // Width gets 1px grace: measureIntrinsic concedes a pixel for scrollWidth
+  // truncation, and an exact-fit board must keep identity scale (a 0.997
+  // transform blurs every glyph) — the overshoot is clipped, not scaled away.
+  let scale = Math.min((availW + 1) / nw, availH / nh, maxUpscale);
   if (scale >= 1) {
-    scale = Math.round(scale * 4) / 4;
+    // Floor (never round) so the quantized scale can't exceed the fit and
+    // overflow the container; 1/8 steps keep resize ticks imperceptible.
+    scale = Math.floor(scale * 8) / 8;
   }
   return {
     scale,
-    w: nw * scale,
-    h: nh * scale,
+    // Ceil so the box never truncates the scaled content's last device pixel
+    // (fractional width + overflow:hidden shaved edge borders); clamp to the
+    // padded avail because FP can make nw*scale land an epsilon past it.
+    w: Math.min(availW, Math.ceil(nw * scale)),
+    h: Math.min(availH, Math.ceil(nh * scale)),
     nw,
     nh,
   };
@@ -49,7 +59,13 @@ function measureIntrinsic(el: HTMLElement): { w: number; h: number } {
   el.style.maxWidth = 'none';
   for (const main of mains) main.style.maxWidth = 'none';
 
-  const w = el.scrollWidth;
+  // scrollWidth truncates fractional layout widths, so a max-content measure
+  // lands up to 1px short of the true intrinsic size. Laying the board out at
+  // that truncated width makes any exact-fit flex line (e.g. a stat strip as
+  // the widest child) wrap by a sub-pixel. Concede the pixel — but keep 0 as
+  // the "layout not ready" sentinel the retry guards key on.
+  const sw = el.scrollWidth;
+  const w = sw === 0 ? 0 : sw + 1;
   const h = el.scrollHeight;
 
   el.style.width = prevWidth;
@@ -102,6 +118,8 @@ export function resolveMeasureSize(
     !hasPrimitive
     && nw >= containerWidth * 0.95
     && intrinsic.w > 0
+    // Strict <: for stage/board targets nw is already intrinsic.w, and this
+    // branch must not re-fire there or it clobbers the main-height override.
     && intrinsic.w < nw
   ) {
     nw = intrinsic.w;

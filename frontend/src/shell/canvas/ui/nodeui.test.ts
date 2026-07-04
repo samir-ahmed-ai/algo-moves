@@ -30,9 +30,16 @@ describe('computeVizFitLayout', () => {
     expect(fit.w).toBeLessThanOrEqual(600 - 32);
   });
 
-  it('rounds upscale to quarter steps instead of flooring to 1', () => {
+  it('quantizes upscale to eighth steps without exceeding the fit', () => {
     const fit = computeVizFitLayout(400, 400, 500, 500, 16, 8);
-    expect(fit.scale).toBe(1.25);
+    expect(fit.scale).toBe(1.125);
+    expect(fit.w).toBeLessThanOrEqual(500 - 32);
+    expect(fit.h).toBeLessThanOrEqual(500 - 32);
+  });
+
+  it('caps default upscale so tiny boards stay crisp', () => {
+    const fit = computeVizFitLayout(100, 100, 900, 900);
+    expect(fit.scale).toBe(1.5);
   });
 
   it('downscales oversized boards', () => {
@@ -40,6 +47,13 @@ describe('computeVizFitLayout', () => {
     expect(fit.scale).toBeLessThan(1);
     expect(fit.w).toBeLessThanOrEqual(400 - 32);
     expect(fit.h).toBeLessThanOrEqual(400 - 32);
+  });
+
+  it('keeps identity scale when the conceded measurement pixel overshoots an exact fit', () => {
+    // true intrinsic 400 measured as 401 (scrollWidth+1) in a 408px container (availW 400)
+    const fit = computeVizFitLayout(401, 300, 408, 400, 4);
+    expect(fit.scale).toBe(1);
+    expect(fit.w).toBe(400);
   });
 });
 
@@ -130,7 +144,8 @@ describe('resolveMeasureSize', () => {
   it('prefers intrinsic width for viz-stage over clamped scrollWidth', () => {
     const stage = createStageMock({ clampedScrollW: 400, intrinsicW: 524 });
     const { w } = resolveMeasureSize(stage, 400);
-    expect(w).toBe(524);
+    // +1: scrollWidth truncates fractional widths; the measure concedes the pixel
+    expect(w).toBe(525);
   });
 
   it('uses viz-stage-main height instead of inflated stage scrollHeight', () => {
@@ -141,7 +156,7 @@ describe('resolveMeasureSize', () => {
       mainH: 160,
     });
     const { w, h } = resolveMeasureSize(stage, 400);
-    expect(w).toBe(524);
+    expect(w).toBe(525);
     expect(h).toBe(160);
   });
 

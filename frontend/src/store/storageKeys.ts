@@ -35,6 +35,7 @@ export const STORAGE_KEYS = {
   NOTES: (itemId: string) => k('notes', itemId),
   EDGE_CASES: (itemId: string) => k('edgecases', itemId),
   RUSH_BEST: (itemId: string, variant: string | number) => k('rush-best', itemId, variant),
+  ASSEMBLE_GAME_BEST: (gameId: string, scope: string) => k('assemble-best', gameId, scope),
 
   // shell / mobile
   MOBILE_SESSION: k('mobile-session'),

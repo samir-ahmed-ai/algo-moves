@@ -79,6 +79,7 @@ import { useCanvasNodeMutations } from './hooks/useCanvasNodeMutations';
 import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProvider';
 import { useCanvasDocSync } from './collab/sync/useCanvasDocSync';
 import { useCanvasFollow } from './collab/sync/useCanvasFollow';
+import { InterviewHud } from './collab/interview/InterviewHud';
 import { canMoveCanvasNodes } from './collab/protocol/subdocPermissions';
 import { CanvasCollabOverlays } from './collab/CanvasCollabOverlays';
 import { CommentLayer } from './collab/CommentLayer';
@@ -945,6 +946,7 @@ function Inner({
             />
             {!present && <CanvasFloatingHud />}
             {!present && <CanvasToolbar lock={lock} onToggleLock={() => setLock((l) => !l)} onTidy={reset} />}
+            {!present && <InterviewHud />}
             <CanvasCollabOverlays />
             <CommentLayer />
           </ReactFlow>

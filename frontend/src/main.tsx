@@ -9,6 +9,10 @@ import './styles/theme-cb-layer.css';
 import './styles/learn-studio.css';
 import './styles/reassemble-puzzle.css';
 import './styles/mobile.css';
+import './styles/assemble-games.css';
+import './styles/assemble/snap-call.css';
+import './styles/assemble/imposter.css';
+import './styles/assemble/one-stroke.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

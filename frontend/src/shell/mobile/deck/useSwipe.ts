@@ -40,6 +40,7 @@ export function useSwipe({
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!enabled) return;
+      if (start.current !== null) return; // one gesture pointer at a time
       if ((e.target as HTMLElement).closest('[data-noswipe]')) return;
       start.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
       axis.current = null;
@@ -48,7 +49,7 @@ export function useSwipe({
   );
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!start.current) return;
+    if (!start.current || e.pointerId !== start.current.id) return;
     const ddx = e.clientX - start.current.x;
     const ddy = e.clientY - start.current.y;
     if (axis.current === null) {
@@ -73,6 +74,7 @@ export function useSwipe({
 
   const finish = useCallback(
     (e: React.PointerEvent) => {
+      if (!start.current || e.pointerId !== start.current.id) return;
       if (captured.current !== null) {
         try {
           (e.currentTarget as HTMLElement).releasePointerCapture(captured.current);
@@ -81,7 +83,6 @@ export function useSwipe({
         }
         captured.current = null;
       }
-      if (!start.current) return;
       const ddx = e.clientX - start.current.x;
       const wasX = axis.current === 'x';
       start.current = null;

@@ -1,6 +1,7 @@
 import type { CanvasWidget, WidgetTab } from './types';
 import { BUILTIN_WIDGETS } from './builtins';
 import { COLLAB_WIDGETS } from '../collab/collabWidgets';
+import { INTERVIEW_WIDGETS } from '../collab/interview/interviewWidgets';
 import { SAVED_CANVASES_WIDGET } from '../collab/SavedCanvasesWidget';
 
 /**
@@ -12,6 +13,7 @@ import { SAVED_CANVASES_WIDGET } from '../collab/SavedCanvasesWidget';
 export const CANVAS_WIDGETS: CanvasWidget[] = [
   ...BUILTIN_WIDGETS,
   ...COLLAB_WIDGETS,
+  ...INTERVIEW_WIDGETS,
   SAVED_CANVASES_WIDGET,
 ];
 

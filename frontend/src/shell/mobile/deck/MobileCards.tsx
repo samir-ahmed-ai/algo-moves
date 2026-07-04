@@ -17,6 +17,8 @@ import { recordAttempt, logMistake } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { QuizChoiceLabel } from '../../../components/shared/QuizChoiceLabel';
 import { ReassemblePane } from '../../../components/puzzle/ReassemblePane';
+import { ASSEMBLE_GAMES, defaultGameFor } from '../../../components/puzzle/assemble';
+import { assembleGameStatsStore } from '../../assembleGameStats';
 import { quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '@/lib/quiz';
 import { correctIndex, type GistCard as GistCardData, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
@@ -523,6 +525,8 @@ export function QuizCardView({
 
 /* -------------------------------------------------------------- reassemble */
 
+/** Classic tray rebuild plus the creative assemble trio; each problem opens on
+ *  a stable per-problem default game so a topic run rotates through all three. */
 export function ReassembleCardView({
   card,
   block,
@@ -537,14 +541,22 @@ export function ReassembleCardView({
   onOpenStudio?: () => void;
 }) {
   const { item } = block;
+  const lang = block.code?.lang ?? 'go';
+  const [gameId, setGameId] = useState(() => defaultGameFor(item.id).id);
+  const game = ASSEMBLE_GAMES.find((g) => g.id === gameId);
+  const GameIcon = game?.icon ?? Sparkles;
+  const gameScope = `${item.id}:${lang}`;
+  const gameStats = useMemo(() => assembleGameStatsStore(gameScope), [gameScope]);
   return (
     <div className="mobile-card-shell mobile-reassemble-card flex min-h-0 flex-1 flex-col px-2 pt-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 px-1">
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-accentbg text-accent">
-          <Sparkles className="h-4 w-4" />
+          <GameIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink3">Rebuild it</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink3">
+            {game ? game.name : 'Rebuild it'}
+          </div>
           <div className="truncate text-[15px] font-semibold text-ink">{item.title}</div>
         </div>
         {onOpenStudio && (
@@ -556,17 +568,66 @@ export function ReassembleCardView({
           Skip
         </button>
       </div>
-      {/* The pane owns its own drag/drop, so shield it from the deck's swipe gesture. */}
-      <div className="practice mobile-reassemble mt-3 flex min-h-0 flex-1 flex-col" data-noswipe>
-        <ReassemblePane
-          key={card.key}
-          pieces={card.pieces}
-          lang={block.code?.lang ?? 'go'}
-          variant="mobile"
-          resetOnWrong
-          onComplete={onComplete}
-        />
+      <div className="ws-scroll mt-2 flex shrink-0 items-center gap-1.5 overflow-x-auto px-1 pb-0.5" data-noswipe role="tablist" aria-label="Assemble game">
+        {ASSEMBLE_GAMES.map((g) => {
+          const Icon = g.icon;
+          const on = g.id === gameId;
+          return (
+            <button
+              key={g.id}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => setGameId(g.id)}
+              className={cn(
+                'inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors',
+                on ? 'bg-accentbg text-accent' : 'bg-panel2 text-ink3 hover:text-ink',
+              )}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {g.name}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={gameId === 'classic'}
+          onClick={() => setGameId('classic')}
+          className={cn(
+            'inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors',
+            gameId === 'classic' ? 'bg-accentbg text-accent' : 'bg-panel2 text-ink3 hover:text-ink',
+          )}
+        >
+          Classic
+        </button>
       </div>
+      {game ? (
+        /* Games own horizontal gestures (flick, trace), so shield the whole
+         * interaction area from the deck's swipe. */
+        <div className="mt-2 flex min-h-0 flex-1 flex-col px-1" data-noswipe>
+          <game.Component
+            key={`${card.key}:${game.id}`}
+            pieces={card.pieces}
+            lang={lang}
+            storageKey={gameScope}
+            stats={gameStats}
+            onContinue={onComplete}
+          />
+        </div>
+      ) : (
+        /* The pane owns its own drag/drop, so shield it from the deck's swipe gesture. */
+        <div className="practice mobile-reassemble mt-3 flex min-h-0 flex-1 flex-col" data-noswipe>
+          <ReassemblePane
+            key={card.key}
+            pieces={card.pieces}
+            lang={lang}
+            variant="mobile"
+            resetOnWrong
+            onComplete={onComplete}
+          />
+        </div>
+      )}
     </div>
   );
 }

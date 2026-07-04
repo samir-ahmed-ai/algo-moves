@@ -1,0 +1,124 @@
+/* Imposter — one block is lying. Mode-specific styles; the shared family
+ * motion grammar (asm-*) lives in styles/assemble-games.css. */
+
+/* ------------------------------ HUD round dots ---------------------------- */
+
+@keyframes impDotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.65; }
+}
+.imp-dot-current {
+  background: var(--accent-bg);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  animation: impDotPulse 1.4s ease-in-out infinite;
+}
+
+/* round dot fills with a coin flip when its round is fixed */
+@keyframes impDotFlip {
+  from { transform: rotateX(90deg); }
+  to { transform: rotateX(0deg); }
+}
+.imp-dot-flip {
+  animation: impDotFlip 300ms ease-out;
+}
+
+/* -------------------------------- heart pop -------------------------------- */
+
+@keyframes impHeartPop {
+  0% { transform: scale(1); opacity: 1; }
+  45% { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+.imp-heart-pop {
+  animation: impHeartPop 300ms ease-in forwards;
+}
+
+/* --------------------------- accusation feedback --------------------------- */
+
+/* correct accuse: the liar lifts off the column (a box-shadow would be clipped
+ * by the jigsaw clip-path, so the lift shadow is a drop-shadow filter) */
+.imp-lift {
+  transform: scale(1.03);
+  filter: drop-shadow(0 8px 18px hsl(0 0% 0% / 0.3));
+}
+@keyframes impAccentFlash {
+  from { background: var(--accent-bg); }
+}
+.imp-lift .blk-face {
+  animation: impAccentFlash 320ms ease-out;
+}
+.imp-row-lift {
+  z-index: 4;
+}
+
+/* healed block: the mutant code crossfades to the truth */
+@keyframes impHeal {
+  from { opacity: 0.2; }
+  to { opacity: 1; }
+}
+.imp-heal {
+  animation: impHeal 160ms ease-out;
+}
+
+/* next round crossfades in */
+@keyframes impRoundIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.imp-round-in {
+  animation: impRoundIn 260ms ease-out;
+}
+
+/* ------------------------- momentum-keeper spotlight ----------------------- */
+
+.imp-board .blk-row {
+  transition: opacity 480ms ease;
+}
+.imp-dim {
+  opacity: 0.5;
+}
+
+/* ------------------------------ fix sheet bits ----------------------------- */
+
+.imp-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+/* ------------------------------- win cascade ------------------------------- */
+
+/* stagger the family seam flash down the column, 50ms per block */
+.imp-win-cascade .asm-seam {
+  animation-delay: var(--imp-seam-delay, 0ms);
+}
+
+/* ---------------------------------- focus ---------------------------------- */
+
+.imp-board button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ------------------------------ reduced motion ----------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .imp-dot-current,
+  .imp-dot-flip {
+    animation: none;
+  }
+  .imp-heart-pop {
+    animation: impHeartFade 160ms ease-out forwards;
+  }
+  .imp-lift {
+    transform: none;
+  }
+  .imp-lift .blk-face {
+    animation-duration: 120ms;
+  }
+  /* imp-heal and imp-round-in stay — they are already plain crossfades */
+}
+@keyframes impHeartFade {
+  to { opacity: 0; }
+}

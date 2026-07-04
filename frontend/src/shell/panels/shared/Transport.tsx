@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
 import { useCanvasFrame } from '../../canvas/CanvasContext';
 import { nodeIconGlyph, nodeText, RADIUS_CTRL } from '../../canvas/ui/nodeui';
+import { moveToneChipClass } from './frameChips';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 4];
 
@@ -26,12 +27,7 @@ export function Transport() {
   const { tweaks, toggleTweak } = useWorkspace();
   const bookmarked = player.bookmarks.has(player.index);
   const frameType = frame.move?.type ?? 'frame';
-  const frameToneClass =
-    frame.move?.tone === 'good'
-      ? 'text-good border-good/50 bg-goodbg/30'
-      : frame.move?.tone === 'bad'
-        ? 'text-bad border-bad/50 bg-badbg/30'
-        : 'text-ink3 border-edge/60 bg-panel2/70';
+  const frameToneClass = moveToneChipClass(frame.move?.tone);
   const playBadge = player.isPlaying ? 'text-good border-good/60 bg-goodbg/30' : 'text-ink3 border-edge/65 bg-panel2/80';
   const toggleBookmark = () => {
     if (bookmarked) player.removeBookmark(player.index);
