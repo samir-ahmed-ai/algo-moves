@@ -13,13 +13,13 @@ import {
 } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { useWorkspace } from '@/store/workspace';
-import { Chip, difficultyTone } from '../canvas/nodeui';
+import { Chip, difficultyTone } from '../canvas/ui/nodeui';
 import { TrackGrid } from '../browse/TrackGrid';
 import { CategoryGrid } from '../browse/CategoryGrid';
 import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';
-import { ProblemGlyph } from './ProblemGlyph';
+import { ProblemGlyph } from './scenes/ProblemGlyph';
 import { loadMobileSession } from './mobileSession';
-import { writeMobileHash } from './mobileHash';
+import { writeMobileHash } from '@/lib/navigation';
 
 export function MobileBrowse({
   onPick,

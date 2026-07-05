@@ -9,10 +9,18 @@ export interface ShareState {
   /** Selected sample input id for the active problem. */
   input?: string;
   mode?: string;
+  /** `canvas` = standalone freeform canvas; `problem` (or omitted) = problem-focused workspace. */
+  focus?: 'problem' | 'canvas';
   theme?: string;
   palette?: string;
   themePreset?: string;
   dir?: string;
+  /** Realtime room code — auto-join on load when present. */
+  room?: string;
+  /** Hint for session kind when joining via invite link. */
+  sessionKind?: 'interview' | 'collab';
+  /** Public interview guest-invite token — resolves the room without a code. */
+  guestToken?: string;
 }
 
 /** Legacy catalog item ids → current item ids after imported-canonical migration. */
@@ -76,6 +84,30 @@ export function readShareFromUrl(): ShareState | null {
 
 export function buildShareUrl(s: ShareState): string {
   return `${location.origin}${location.pathname}#s=${encodeShare(s)}`;
+}
+
+/** Invite link for a live collab/interview room (includes workspace context + room code). */
+export function buildInviteUrl(s: ShareState, room: string): string {
+  const base = buildShareUrl({ ...s, room, focus: s.focus ?? 'canvas', mode: s.mode ?? 'visualize' });
+  return base;
+}
+
+/** Guest-invite link for a durable interview: carries the room + public token. */
+export function buildInterviewInviteUrl(s: ShareState, room: string, guestToken?: string): string {
+  return buildInviteUrl({ ...s, sessionKind: 'interview', guestToken }, room);
+}
+
+export function readRoomFromUrl(): string | null {
+  if (typeof location === 'undefined') return null;
+  const fromHash = getHashParam(location.hash, 'room');
+  if (fromHash) return fromHash.trim().toUpperCase();
+  const share = readShareFromUrl();
+  return share?.room?.trim().toUpperCase() ?? null;
+}
+
+export function readGuestTokenFromUrl(): string | null {
+  const share = readShareFromUrl();
+  return share?.guestToken?.trim() || null;
 }
 
 /** Merge workspace share state into the current hash, preserving route segments like #mobile. */

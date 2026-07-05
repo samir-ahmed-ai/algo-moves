@@ -27,7 +27,7 @@ import { compactLabel } from '../chromeUi';
 import { cn } from '@/lib/utils/cn';
 import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import { glyphFor } from '../../content/problemShape';
-import { Chip } from '../canvas/nodeui';
+import { Chip } from '../canvas/ui/nodeui';
 import { TrackGrid } from '../browse/TrackGrid';
 import { VimHeroPreview } from '../vim/ui/VimHeroPreview';
 
@@ -427,12 +427,14 @@ export function LandingPage() {
     setPalette,
     density,
     enterWorkspace,
+    enterCanvas,
+    enterProblemInMode,
     enterMobile,
     enterVim,
     enterGames,
     setActiveTrackId,
     setActiveCategoryId,
-    setMode,
+    setProblemFocused,
   } = useWorkspace();
   const isMobile = useIsMobile();
   const progress = useProgress();
@@ -464,11 +466,15 @@ export function LandingPage() {
   const browseTrack = (trackId: TrackId) => {
     setActiveTrackId(trackId);
     setActiveCategoryId(null);
+    setProblemFocused(false);
     enterWorkspace();
   };
-  const startIn = (mode: 'visualize' | 'learn') => {
-    setMode(mode);
-    if (firstProblem) enterWorkspace(firstProblem.id);
+  const startIn = (mode: 'play' | 'visualize' | 'learn') => {
+    if (mode === 'visualize') {
+      enterCanvas();
+      return;
+    }
+    if (firstProblem) enterProblemInMode(firstProblem.id, mode);
   };
 
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
@@ -733,9 +739,16 @@ export function LandingPage() {
         <SectionHeading
           eyebrow="Modes"
           title="Five ways to play & learn"
-          description="Visualize on the canvas, learn in the studio, drill in Swipe mode, train Vim motions, or challenge your partner in two-player games."
+          description="Step through problems on a focused page, learn in the studio, drill in Swipe mode, train Vim motions, or challenge your partner in two-player games."
         />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-stretch lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-stretch lg:grid-cols-6">
+          <FeatureCard
+            icon={<Play />}
+            title="Play"
+            body="Open a problem with inputs and step-by-step animation."
+            cta="Open a problem"
+            onClick={() => startIn('play')}
+          />
           <FeatureCard
             icon={<Eye />}
             title="Visualize"

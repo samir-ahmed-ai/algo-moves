@@ -10,12 +10,14 @@ import { ToastProvider } from './ui/Toast';
 import { useSoundMuted } from './ui/hooks';
 import { ConnectionDot } from './ui/effects';
 import { Avatar } from './ui/Avatar';
-import { parseGamesHash } from './engine/gamesHash';
+import { parseGamesHash } from '@/lib/navigation';
 import { Lobby } from './lobby/Lobby';
 import { RoomView } from './room/RoomView';
 import { ProgressOverlay } from './progress/ProgressOverlay';
+import { ensureSoundConfig } from './soundConfig';
 
 export function GamesPage() {
+  ensureSoundConfig();
   const { density } = useWorkspace();
   return (
     <AuthProvider>

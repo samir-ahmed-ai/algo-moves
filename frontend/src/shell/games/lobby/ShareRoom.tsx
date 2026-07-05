@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Check, Copy, Link as LinkIcon } from 'lucide-react';
 import { getArcadeStrings, type GameLocale } from '../locale';
-import { buildGamesUrl } from '../engine/gamesHash';
+import { buildGamesUrl } from '@/lib/navigation';
 import { TouchButton } from '../ui/gamesUi';
+import { COPY_FEEDBACK_MS } from '@/shell/copyFeedback';
 
 /** The pairing card: big room code, a QR to scan, and a copy-link button. */
 export function ShareRoom({ room, hint, locale }: { room: string; hint?: string; locale: GameLocale }) {
@@ -15,7 +16,7 @@ export function ShareRoom({ room, hint, locale }: { room: string; hint?: string;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     } catch {
       /* clipboard may be blocked; the code + QR still work */
     }

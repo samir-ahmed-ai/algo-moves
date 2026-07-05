@@ -1,4 +1,4 @@
-import type { LayoutPreset } from '../shell/canvas/layout';
+import type { LayoutPreset } from '../shell/canvas/layout/layout';
 import type { CanvasMode } from '../core';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
@@ -20,7 +20,7 @@ export const WORKFLOW_PRESET_ACTIONS: WorkflowPresetAction[] = [
     label: 'Trace study',
     description: 'Problem + viz + replay focus',
     mode: 'visualize',
-    layoutPreset: 'Study',
+    layoutPreset: 'TraceFocus',
     ensurePanels: ['replay', 'inspector'],
   },
   {
@@ -44,6 +44,14 @@ export const WORKFLOW_PRESET_ACTIONS: WorkflowPresetAction[] = [
     description: 'Theater layout + presentation',
     mode: 'visualize',
     layoutPreset: 'Demo',
+  },
+  {
+    id: 'interview',
+    label: 'Interview',
+    description: 'Host shares a problem; candidate works with quiz',
+    mode: 'visualize',
+    layoutPreset: 'Minimal',
+    ensurePanels: ['problem', 'viz', 'quiz'],
   },
 ];
 

@@ -1,9 +1,10 @@
-export * from '../shell/canvas/canvasTokens';
+export { nodeIconGlyph, nodeText } from './typography';
+export { vizText, vizPad } from './vizText';
+export { FIT_VIEW_DURATION_MS, MIN_VIEWPORT_HEIGHT, CANVAS_MARGIN } from './canvasMetrics';
 export {
-  LEGACY_STRUDEL_NODE_W,
+  NODE_W,
   NODE_MAX_W,
   NODE_UI_SCALE,
   STRUDEL_NODE_W,
-} from '../shell/canvas/nodeTokens';
-export { nodeIconGlyph, nodeText } from '../shell/canvas/nodeui';
-export { vizText, vizPad } from '../plugins/_shared/vizTokens';
+  LEGACY_STRUDEL_NODE_W,
+} from './nodeScale';

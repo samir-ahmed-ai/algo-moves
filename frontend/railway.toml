@@ -1,4 +1,5 @@
-# Railway config for the static frontend (set VITE_GAMES_SERVER_URL in the dashboard).
+# Railway config for the static frontend (no secrets - set VITE_GAMES_SERVER_URL
+# in the dashboard). Arcade persistence is handled by the backend + Postgres.
 # Service root directory in Railway: frontend
 
 [build]

@@ -150,18 +150,18 @@ func (c *Client) readPump(h *Hub, code string) {
 			continue // ignore malformed frames rather than dropping the game
 		}
 		switch in.T {
-		case "relay":
+		case typeRelay:
 			h.Relay(code, c, in.D)
-		case "state":
+		case typeState:
 			h.SetState(code, c, in.D)
-		case "seat":
+		case typeSeat:
 			var s struct {
 				Want string `json:"want"`
 			}
 			if json.Unmarshal(in.D, &s) == nil {
 				h.SetSeat(code, c, s.Want == "player")
 			}
-		case "ping":
+		case typePing:
 			// Optional application-level heartbeat; keepalive already handled.
 		}
 	}

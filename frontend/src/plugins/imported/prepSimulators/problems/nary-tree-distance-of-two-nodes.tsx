@@ -1,6 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
+import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
 

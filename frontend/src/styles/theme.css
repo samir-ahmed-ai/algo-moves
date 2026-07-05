@@ -165,10 +165,11 @@ button {
  * ------------------------------------------------------------------ */
 .viz-stage {
   --viz-rail-w: 128px;
+  --viz-stage-minh: 132px;
   flex-direction: row;
   align-items: stretch;
   gap: 14px;
-  min-height: 132px;
+  min-height: var(--viz-stage-minh);
 }
 .viz-stage-main {
   display: flex;
@@ -307,6 +308,116 @@ button {
   }
 }
 
+/* phase steps — top-down roadmap of algorithm stages */
+.viz-rail-steps {
+  display: flex;
+  flex-direction: column;
+}
+.viz-rail-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0 3px 2px;
+  color: var(--text-3);
+  opacity: 0.75;
+  transition:
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+.viz-rail-step + .viz-rail-step::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: -8px;
+  height: 12px;
+  width: 1px;
+  background: color-mix(in srgb, var(--edge) 60%, transparent);
+}
+.viz-rail-step-icon {
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+}
+/* Icon wrappers cap their svg — bare svgs inherit width:100% from `.board-area svg`. */
+.viz-rail-step-icon > svg,
+.viz-stat-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.viz-rail-step-core {
+  fill: transparent;
+  stroke: var(--edge);
+  stroke-width: 1.2;
+  transition:
+    fill 0.25s ease,
+    stroke 0.25s ease;
+}
+.viz-rail-step--done {
+  opacity: 0.9;
+  color: var(--text-2);
+}
+.viz-rail-step--done .viz-rail-step-core {
+  stroke: color-mix(in srgb, var(--good) 60%, var(--edge));
+  fill: color-mix(in srgb, var(--good) 20%, transparent);
+}
+.viz-rail-step-check {
+  fill: none;
+  stroke: var(--good);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 7;
+  animation: viz-step-check 0.35s ease-out backwards;
+}
+@keyframes viz-step-check {
+  from {
+    stroke-dashoffset: 7;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.viz-rail-step--current {
+  opacity: 1;
+  color: var(--accent);
+  font-weight: 600;
+}
+.viz-rail-step--current .viz-rail-step-core {
+  stroke: var(--accent);
+  fill: var(--accent);
+}
+.viz-rail-step-ping {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: viz-step-ping 1.8s ease-out infinite;
+}
+@keyframes viz-step-ping {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.8;
+  }
+  70%,
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viz-rail-step-ping {
+    animation: none;
+    opacity: 0;
+  }
+  .viz-rail-step-check {
+    animation: none;
+  }
+}
+
 /* compact stats */
 .viz-rail-group {
   display: flex;
@@ -349,6 +460,41 @@ button {
   color: var(--warn, var(--accent));
 }
 
+/* horizontal stat strip under the main animation */
+.viz-statstrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--edge) 45%, transparent);
+}
+.viz-statstrip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 40px;
+}
+
+/* tiny glyph before a stat label (rail or strip) */
+.viz-stat-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 3px;
+  vertical-align: -1.5px;
+  opacity: 0.85;
+  transition: color 0.25s ease;
+}
+
+/* invisible widest-value sizer (StatKV reserve) — width only, no height */
+.viz-stat-reserve {
+  display: block;
+  height: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
 /* running / final answer */
 .viz-rail-result {
   display: flex;
@@ -378,6 +524,126 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .viz-rail-chip {
     animation: none;
+  }
+}
+
+/* Narrow surfaces: shrink the fixed rail so the main animation keeps room.
+   Rail chips/stats already ellipsize, so a tighter column is safe. */
+@media (max-width: 520px) {
+  .viz-stage {
+    --viz-rail-w: 92px;
+    gap: 10px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Fit-box motion: VizFitBox resizes/rescales the board when its measured
+ * size changes between frames. Ease those changes so the board glides to
+ * its new footprint instead of popping. Size and scale share one curve so
+ * the outer box and inner transform stay in lockstep. (Reduced-motion is
+ * neutralized globally in index.css.)
+ * ------------------------------------------------------------------ */
+.viz-fit-anim-size {
+  transition:
+    width 0.22s cubic-bezier(0.2, 0.7, 0.3, 1),
+    height 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.viz-fit-anim-scale {
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* Live status-bar note — re-mounted per frame, eases in instead of popping. */
+.viz-status-note {
+  animation: viz-note-in 0.25s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* ------------------------------------------------------------------ *
+ * Move orbit — the circular step view arched over the animation.
+ * Ticks = frames (tone-colored), progress fills the arc, and the step
+ * text rides the curve: prev/next ghosted on the shoulders, the current
+ * caption at the apex. Font sizes are in SVG user units (viewBox 1000w).
+ * ------------------------------------------------------------------ */
+.move-orbit {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Cap width before max-height can bite: the drawing then never letterboxes
+     and the arc keeps a readable curvature on ultrawide panes. */
+  max-width: 1080px;
+  max-height: 132px;
+  margin: 2px auto 0;
+  flex: 0 0 auto;
+}
+/* Study-surface feature: inside 400px canvas nodes the arc text would be
+   micro-print and the node already has its own transport chrome. */
+.algo-canvas .panel-node .move-orbit {
+  display: none;
+}
+.move-orbit-track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--edge) 70%, transparent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.move-orbit-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.85;
+  transition: stroke-dasharray 0.2s ease;
+}
+.move-orbit-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 30;
+  cursor: pointer;
+  touch-action: none;
+}
+.move-orbit-tick {
+  opacity: 0.75;
+  pointer-events: none;
+  transition: fill 0.15s ease;
+}
+.move-orbit-halo {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 0.3;
+  pointer-events: none;
+  transition: cx 0.2s ease, cy 0.2s ease;
+}
+.move-orbit-cursor {
+  fill: var(--accent);
+  pointer-events: none;
+  transition: cx 0.2s ease, cy 0.2s ease;
+}
+.move-orbit-current {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 600;
+  fill: var(--text);
+  animation: viz-note-in 0.25s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.move-orbit-side {
+  font-family: var(--mono);
+  font-size: 15px;
+  fill: var(--text-3);
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.move-orbit-side:hover {
+  opacity: 1;
+}
+@keyframes viz-note-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 /* Viz board column: the board renders at its natural size inside a fit wrapper;
@@ -621,6 +887,11 @@ circle {
   background: var(--surface-2);
   font-family: var(--mono);
   font-size: var(--fs-xs, 12px);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.18s ease;
 }
 
 .move-log {
@@ -1599,6 +1870,14 @@ circle {
   border: 1px solid var(--border-strong);
   border-radius: 7px;
   background: var(--surface-2);
+  /* Same motion language as .bar / .grid-cell — highlight states ease
+     instead of flashing, so pointer moves are trackable frame-to-frame. */
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.18s ease,
+    box-shadow 0.15s ease;
 }
 .arow-val {
   font-family: var(--mono);
@@ -1639,6 +1918,7 @@ circle {
   line-height: 1.2;
   white-space: nowrap;
   color: var(--accent);
+  transition: color 0.15s ease;
 }
 .arow-ptr.ptr-good {
   color: var(--good);

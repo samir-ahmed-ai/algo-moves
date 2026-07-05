@@ -112,7 +112,8 @@ export const en: ArcadeStrings = {
     guest: 'Guest',
     level: (n) => `Level ${n}`,
     signIn: 'Sign in',
-    signInHint: 'Keep your stats, avatar and history across devices.',
+    signInHint: 'Your stats are saved on this device while you play.',
+    guestHint: 'Guest profile — stats stay on this browser until you sign out or clear site data.',
     keepStats: 'Keep my stats',
     email: 'Email address',
     sendLink: 'Send magic link',
@@ -133,7 +134,7 @@ export const en: ArcadeStrings = {
     unlocked: (a, b) => `${a} of ${b} unlocked`,
     history: 'Recent matches',
     noHistory: 'No matches yet.',
-    needsSupabase: 'Connect Supabase to save profiles and stats.',
+    needsDatabase: 'Connect Postgres on the game server to save profiles and stats.',
   },
   leaderboard: {
     title: 'Leaderboards',
@@ -146,7 +147,7 @@ export const en: ArcadeStrings = {
     player: 'Player',
     score: 'Score',
     empty: 'No ranked players yet — be the first!',
-    needsSupabase: 'Connect Supabase to see leaderboards.',
+    needsDatabase: 'Connect Postgres on the game server to see leaderboards.',
   },
   waitingReconnect: (name) => `Waiting for ${name} to reconnect…`,
 };

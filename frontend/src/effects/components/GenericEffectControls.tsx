@@ -1,5 +1,6 @@
 import { getEffect } from '../registry';
-import { Field, nodeText } from '../../shell/canvas/nodeui';
+import { Field } from '@/components/shared/formControls';
+import { nodeText } from '@/design/typography';
 
 export function GenericEffectControls({
   effectId,

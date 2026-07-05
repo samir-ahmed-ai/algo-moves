@@ -123,7 +123,8 @@ The project is split into two apps:
 
 ```
 ├── frontend/   React + Vite SPA — the whole learning app
-└── backend/    Go realtime game server for the two-player Games arcade (stdlib only)
+├── backend/    Go realtime game server + optional Postgres arcade API
+└── db/         Arcade Postgres schema (see db/README.md)
 ```
 
 A top-level `Makefile` wraps both (`make dev`, `make dev-all`, `make backend-dev`, `make build`, `make backend-test`, `make check`).

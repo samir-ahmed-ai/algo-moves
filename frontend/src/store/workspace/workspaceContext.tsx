@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { readShareFromUrl } from '@/store/navigation/shareState';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { readStorageJson } from '@/store/persistence/storage';
+import { workspaceSessionMeta } from '@/lib/session';
 import type { CanvasAddPanel, CanvasHudProps, CanvasProjectApi, LayoutDir, WorkspaceDefaults } from './workspace';
 import { DEFAULTS_KEY } from './workspaceConstants';
 import { WorkspaceContext } from './workspaceContextStore';
@@ -31,6 +32,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const chrome = useChromeState({ requestFitCanvas, isMobile, initialDir });
   const nav = useAppNavigation(shared);
 
+  const session = useMemo(
+    () => workspaceSessionMeta({ mode: nav.mode, problemFocused: nav.problemFocused }),
+    [nav.mode, nav.problemFocused],
+  );
+
   // Canvas registers its imperative API here so the shell chrome can drive it.
   const [canvasAdd, setCanvasAdd] = useState<CanvasAddPanel | null>(null);
   const [canvasProject, setCanvasProject] = useState<CanvasProjectApi | null>(null);
@@ -45,6 +51,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         ...appearance,
         ...chrome,
         ...nav,
+        session,
         canvasAdd,
         setCanvasAdd,
         canvasProject,

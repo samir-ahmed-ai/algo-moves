@@ -3,6 +3,7 @@ import { getArcadeStrings, useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
+import { usePublishState } from '../../net/usePublishState';
 import type { Peer } from '../../net/protocol';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
@@ -84,10 +85,7 @@ export function MindMeld() {
   }, []);
 
   // Host mirrors authoritative state to the room whenever it changes.
-  useEffect(() => {
-    if (isHost) publishState(state);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, isHost]);
+  usePublishState(isHost, [state], () => publishState(state));
 
   const resetMatch = useCallback(() => {
     commit(freshState());

@@ -21,11 +21,12 @@ import { catalog, browseBreadcrumbForItem, getSiblingItems, categoryIdForItem, t
 import { useProgress, statFor } from '@/store/persistence';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
+import { matchesQuery } from '@/lib/utils/searchPredicate';
 import { chromeText } from './chromeUi';
 import { CatalogTree } from './CatalogTree';
-import { nodeIcon, panelAccent } from './canvas/PanelNode';
-import { Label } from './canvas/nodeui';
-import { CATEGORY_ORDER, nodeCategory } from './canvas/layout';
+import { nodeIcon, panelAccent } from './canvas/nodes/PanelNode';
+import { Label } from './canvas/ui/nodeui';
+import { CATEGORY_ORDER, nodeCategory } from './canvas/layout/layout';
 import { SIDEBAR_W, SidebarSection, CHROME_BTN_MD, SECTION_MAX, MobileDrawer } from './SidebarShell';
 
 const ESSENTIALS = new Set(['bigo', 'diff', 'watch', 'pattern', 'editor', 'notes', 'predict', 'mastery', 'hints']);
@@ -47,12 +48,6 @@ const STATUS_DOT: Record<ItemStatus, string> = {
   'in-progress': 'var(--edge-active)',
   done: 'var(--good)',
 };
-
-function matchesSidebarSearch(query: string, ...fields: (string | undefined)[]): boolean {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return true;
-  return fields.some((f) => f?.toLowerCase().includes(needle));
-}
 
 function AddItem({
   kind,
@@ -155,6 +150,7 @@ export function UnifiedLeftSidebar() {
     openProblem,
     setActiveTrackId,
     setActiveCategoryId,
+    setProblemFocused,
     goHome,
     canvasAdd,
     isMobile,
@@ -185,7 +181,7 @@ export function UnifiedLeftSidebar() {
   const addableKinds = canvasAdd?.addableKinds ?? [];
   const filteredAddable = searching
     ? addableKinds.filter((k) =>
-        matchesSidebarSearch(sidebarSearch, k.title, k.id, nodeCategory(k.id)),
+        matchesQuery(sidebarSearch, k.title, k.id, nodeCategory(k.id)),
       )
     : addableKinds;
   const essentials = filteredAddable.filter((k) => ESSENTIALS.has(k.id));
@@ -205,7 +201,7 @@ export function UnifiedLeftSidebar() {
   const filteredProblems =
     showProblems && searching
       ? siblingItems.filter((it) =>
-          matchesSidebarSearch(sidebarSearch, it.title, it.id, it.difficulty),
+          matchesQuery(sidebarSearch, it.title, it.id, it.difficulty),
         )
       : siblingItems;
 
@@ -364,6 +360,7 @@ export function UnifiedLeftSidebar() {
                     const track = trackForCategory(catId);
                     if (track) setActiveTrackId(track.id);
                     setActiveCategoryId(catId);
+                    setProblemFocused(false);
                   }
                 }}
                 title="Open the category grid"

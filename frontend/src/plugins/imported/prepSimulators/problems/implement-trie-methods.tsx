@@ -2,7 +2,7 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
-import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
+import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 
 // A trie op we replay against the freshly built structure. `insert` grows the
 // tree; `search`/`startsWith` only walk it, returning a boolean.

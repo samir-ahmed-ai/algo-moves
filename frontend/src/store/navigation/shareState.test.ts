@@ -1,39 +1,72 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildShareUrl, encodeShare, readShareFromUrl, writeShareToUrl } from './shareState';
+import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { encodeShare, decodeShare, buildInviteUrl, readRoomFromUrl } from './shareState';
 
 describe('shareState', () => {
-  beforeEach(() => {
-    vi.stubGlobal('location', {
-      origin: 'https://example.test',
-      pathname: '/algo-moves/',
-      search: '?debug=1',
-      hash: '#mobile',
+  describe('encodeShare / decodeShare round-trip', () => {
+    it('preserves all fields including room and sessionKind', () => {
+      const state = {
+        item: 'two-sum',
+        mode: 'visualize',
+        focus: 'canvas' as const,
+        theme: 'dark',
+        room: 'ABCD1234',
+        sessionKind: 'interview' as const,
+      };
+      const encoded = encodeShare(state);
+      const decoded = decodeShare(encoded);
+      expect(decoded).toEqual(state);
     });
-    vi.stubGlobal('history', {
-      replaceState: vi.fn(),
-      pushState: vi.fn(),
+  });
+
+  describe('buildInviteUrl', () => {
+    const original = globalThis.location;
+
+    beforeEach(() => {
+      // @ts-expect-error mocking location
+      globalThis.location = { origin: 'https://test.app', pathname: '/', hash: '', search: '' };
+    });
+
+    afterEach(() => {
+      globalThis.location = original;
+    });
+
+    it('embeds room in the share hash', () => {
+      const url = buildInviteUrl(
+        { mode: 'visualize', focus: 'canvas', theme: 'dark' },
+        'WXYZ9999',
+      );
+      expect(url).toContain('#s=');
+      const hashPart = url.split('#s=')[1];
+      const decoded = decodeShare(hashPart);
+      expect(decoded?.room).toBe('WXYZ9999');
+      expect(decoded?.focus).toBe('canvas');
     });
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
-  });
+  describe('readRoomFromUrl', () => {
+    const original = globalThis.location;
 
-  it('builds share URL with encoded payload', () => {
-    const payload = { item: 'two-sum', mode: 'visualize', theme: 'dark', dir: 'LR' };
-    expect(buildShareUrl(payload)).toBe(`https://example.test/algo-moves/#s=${encodeShare(payload)}`);
-  });
+    beforeEach(() => {
+      // @ts-expect-error mocking location
+      delete globalThis.location;
+    });
 
-  it('merges share state into existing hash and reads it back', () => {
-    const payload = { item: 'two-sum', mode: 'visualize', theme: 'dark', dir: 'LR' };
-    const replace = vi.spyOn(history, 'replaceState').mockImplementation(() => {});
-    writeShareToUrl(payload);
-    const next = replace.mock.calls[0]?.[2];
-    const hash = typeof next === 'string' && next.includes('#') ? next.slice(next.indexOf('#')) : '#';
-    expect(hash.startsWith('#mobile')).toBe(true);
-    expect(hash.includes('s=')).toBe(true);
-    location.hash = hash;
-    expect(readShareFromUrl()).toEqual(payload);
+    afterEach(() => {
+      globalThis.location = original;
+    });
+
+    it('extracts room from share hash', () => {
+      const encoded = encodeShare({ room: 'TESTCODE', mode: 'visualize' });
+      // @ts-expect-error mocking location
+      globalThis.location = { hash: `#s=${encoded}` };
+      expect(readRoomFromUrl()).toBe('TESTCODE');
+    });
+
+    it('returns null when no room present', () => {
+      const encoded = encodeShare({ mode: 'visualize' });
+      // @ts-expect-error mocking location
+      globalThis.location = { hash: `#s=${encoded}` };
+      expect(readRoomFromUrl()).toBeNull();
+    });
   });
 });

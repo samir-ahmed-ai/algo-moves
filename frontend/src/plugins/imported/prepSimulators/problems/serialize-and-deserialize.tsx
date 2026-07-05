@@ -3,7 +3,7 @@ import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
-import { TreeBoard } from '../../../../components/TreeBoard';
+import { TreeBoard } from '../../../../components/board/TreeBoard';
 
 // Input is a level-order array (null = missing child), the shape TreeBoard consumes.
 interface SerdeInput {

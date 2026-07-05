@@ -1,6 +1,6 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { QueueTape } from '../../../../components/QueueTape';
+import { QueueTape } from '../../../../components/board/QueueTape';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';

@@ -3,7 +3,7 @@ import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
-import { GridBoard } from '../../../../components/GridBoard';
+import { GridBoard } from '../../../../components/board/GridBoard';
 
 interface WordSearchInput {
   board: string[][];

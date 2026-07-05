@@ -1,5 +1,5 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
-import { ArrayBars, type BarTone } from '../../components/ArrayBars';
+import { ArrayBars, type BarTone } from '../../components/board/ArrayBars';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { createSortRecorder, type SortInput, type SortState } from '../_shared/sortRecorder';
 import { verdictAlwaysOk } from '../_shared/verdictKit';

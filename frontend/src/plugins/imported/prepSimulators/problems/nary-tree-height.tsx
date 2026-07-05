@@ -3,7 +3,7 @@ import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
-import { NaryTreeBoard, type NaryNode } from '../../../../components/NaryTreeBoard';
+import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 
 // N-ary tree given as a flat node list: node 0 is the root, `children` are
 // indices into the same list. Mirrors the Go `NaryNode{ Val, Children }`.

@@ -1,7 +1,8 @@
+import type { SessionMeta } from '@/lib/session';
 import type { TrackId } from '@/content';
 import type { CanvasMode } from '@/core';
 import type { ThemePreset } from '@/styles/themes/registry';
-import type { LayoutPreset } from '@/shell/canvas/layout';
+import type { LayoutPreset } from '@/lib/canvas/layoutPrefs';
 import type {
   AppRoute,
   CanvasAddPanel,
@@ -64,8 +65,21 @@ export interface WorkspaceCtx {
   goHome: () => void;
   /** Enter the workspace; pass an item id to open that problem directly. */
   enterWorkspace: (itemId?: string) => void;
+  /** Open the standalone freeform canvas (no problem nodes). */
+  enterCanvas: () => void;
+  /** Alias for {@link enterCanvas} — collab / interview surface. */
+  enterCollabCanvas: () => void;
+  /** Open a problem in a specific workspace mode (play or learn). */
+  enterProblemInMode: (id: string, mode: CanvasMode) => void;
   /** Open a problem in the workspace and leave browse grids. */
   openProblem: (id: string) => void;
+  /** True while a problem page is open (hides browse grids). */
+  problemFocused: boolean;
+  setProblemFocused: (b: boolean) => void;
+  /** Return from a problem page to the browse grid when one is active. */
+  backToBrowse: () => void;
+  /** Product session kind derived from navigation (collab room overrides via {@link useWorkspaceSession}). */
+  session: SessionMeta;
   /** Enter the full-screen mobile swipe deck; pass a category id to open that category directly. */
   enterMobile: (categoryId?: string, itemId?: string) => void;
   /** Enter the Vim Dojo maze trainer; pass a level id to open that level directly. */

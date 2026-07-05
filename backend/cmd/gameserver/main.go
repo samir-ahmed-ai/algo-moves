@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"algomoves/gameserver/internal/arcade"
 	"algomoves/gameserver/internal/hub"
 	"algomoves/gameserver/internal/server"
 )
@@ -37,9 +38,18 @@ func main() {
 		}
 	}
 
+	ctx := context.Background()
+	arc, err := arcade.Open(ctx)
+	if err != nil {
+		log.Fatalf("arcade database: %v", err)
+	}
+	if arc != nil {
+		defer arc.Close()
+	}
+
 	srv := &http.Server{
 		Addr:              *addr,
-		Handler:           server.Handler(hub.NewWithMaxRooms(maxRooms)),
+		Handler:           server.Handler(hub.NewWithMaxRooms(maxRooms), arc),
 		ReadHeaderTimeout: 10 * time.Second,
 		// No overall write timeout: hijacked WebSocket connections are long-lived.
 	}

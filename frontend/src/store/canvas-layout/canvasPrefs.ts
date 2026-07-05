@@ -1,4 +1,4 @@
-import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '@/shell/canvas/layout';
+import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '@/lib/canvas/layoutPrefs';
 import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 

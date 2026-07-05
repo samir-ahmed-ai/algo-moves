@@ -1,4 +1,5 @@
-import { Field, nodeText } from '../../shell/canvas/nodeui';
+import { Field } from '@/components/shared/formControls';
+import { nodeText } from '@/design/typography';
 import type { EffectControlsProps } from './EffectControls';
 
 const PRESETS = [

@@ -3,7 +3,7 @@ import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { courseIcon } from '../courseIcon';
 import { chromeText } from '../chromeUi';
-import { Meter } from '../canvas/nodeui';
+import { Meter } from '../canvas/ui/nodeui';
 
 export function TrackGrid({ onPick }: { onPick: (trackId: TrackId) => void }) {
   const progress = useProgress();

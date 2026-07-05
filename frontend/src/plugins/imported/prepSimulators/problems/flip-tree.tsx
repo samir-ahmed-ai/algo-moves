@@ -2,7 +2,7 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
-import { TreeBoard } from '../../../../components/TreeBoard';
+import { TreeBoard } from '../../../../components/board/TreeBoard';
 
 interface FlipTreeInput {
   /** Level-order array; null marks an absent child. Children of i are 2i+1, 2i+2. */

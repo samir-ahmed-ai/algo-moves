@@ -3,7 +3,7 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
-import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
+import { ArrayRow, type ArrayPointer } from '../../components/board/ArrayRow';
 import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 export interface LSInput {

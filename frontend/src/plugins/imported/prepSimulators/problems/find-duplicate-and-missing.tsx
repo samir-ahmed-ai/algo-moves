@@ -1,9 +1,20 @@
 import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
+import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailStat,
+  RailSteps,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  VizStat,
+  VizStatStrip,
+  type RailStep,
+} from '../../../_shared/vizKit';
+import { IconBit, IconBucket, IconDup, IconGhost, IconRange, IconSpark, IconXor } from '../../../_shared/vizIcons';
 
 interface DupMissInput {
   nums: number[];
@@ -146,6 +157,15 @@ function record({ nums }: DupMissInput): Frame<DupMissState>[] {  const n = nums
   return frames;
 }
 
+const PHASE_STEPS: RailStep[] = [
+  { id: 'init', label: 'setup' },
+  { id: 'xorAll', label: 'xor fold' },
+  { id: 'split', label: 'pick bit' },
+  { id: 'bucket', label: 'buckets' },
+  { id: 'decide', label: 'decide' },
+  { id: 'done', label: 'done' },
+];
+
 function View({ frame }: PluginViewProps<DupMissState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
@@ -161,47 +181,72 @@ function View({ frame }: PluginViewProps<DupMissState>) {
     return '';
   };
 
-  const showBucket = s.phase === 'bucket' && s.bucketVal !== null;
   const showXor = s.phase === 'xorAll' || s.phase === 'split';
+  const bucketsLive = s.phase === 'bucket' || s.phase === 'decide' || s.phase === 'done';
+  const folding =
+    s.phase === 'xorAll' ? (s.expectVal ?? (s.scanI !== null ? s.nums[s.scanI] : null)) : null;
+  const routing =
+    s.phase === 'bucket' && s.bucketVal !== null
+      ? `${s.bucketVal} → ${s.bucketHasBit ? 'X' : 'Y'}`
+      : null;
+  const op = folding !== null ? `^ ${folding}` : (routing ?? '—');
+  // Widest possible xorAll rendering: all values stay below the next power of two.
+  const maxXor = (1 << s.n.toString(2).length) - 1;
+
+  const rail = (
+    <>
+      <RailSteps steps={PHASE_STEPS} activeId={s.phase} />
+      <RailGroup label="answer">
+        <RailStat k="dup" icon={<IconDup />} v={s.dup ?? '…'} tone={s.dup !== null ? 'bad' : undefined} />
+        <RailStat
+          k="missing"
+          icon={<IconGhost />}
+          v={s.missing ?? '…'}
+          tone={s.missing !== null ? 'good' : undefined}
+        />
+      </RailGroup>
+    </>
+  );
 
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        should hold 1..<span className="font-mono text-ink">{s.n}</span> · phase:{' '}
-        <span className="font-mono text-ink">{s.phase}</span>
-      </div>
+    <VizStage rail={rail} minHeight={290}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
-      {showXor && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          xorAll = <span className="text-ink">{s.xorAll}</span> (0b{s.xorAll.toString(2)})
-          {s.expectVal !== null && (
-            <span className="text-ink3"> · folding {s.expectVal}</span>
-          )}
-          {s.rightBit !== null && (
-            <span className="text-ink3"> · rightBit = {s.rightBit}</span>
-          )}
-        </div>
-      )}
-      {(s.phase === 'bucket' || s.phase === 'decide' || s.phase === 'done') && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          X = <span className="text-ink">{s.x}</span> · Y ={' '}
-          <span className="text-ink">{s.y}</span>
-          {showBucket && (
-            <span className="text-ink3">
-              {' '}
-              · {s.bucketVal} → bucket {s.bucketHasBit ? 'X' : 'Y'}
-            </span>
-          )}
-        </div>
-      )}
-      {s.dup !== null && s.missing !== null && (
-        <div className={cn('mt-1 font-mono', vizText.base)}>
-          <span className="text-bad">dup = {s.dup}</span>
-          {' · '}
-          <span className="text-good">missing = {s.missing}</span>
-        </div>
-      )}
-    </div>
+      <VizStatStrip>
+        <VizStat k="holds" icon={<IconRange />} v={`1..${s.n}`} />
+        <VizStat
+          k="op"
+          icon={<IconSpark />}
+          v={op}
+          tone={op !== '—' ? 'accent' : undefined}
+          reserve={`${s.n} → X`}
+        />
+        <VizStat
+          k="xorAll"
+          icon={<IconXor />}
+          v={`${s.xorAll} · 0b${s.xorAll.toString(2)}`}
+          tone={showXor ? 'accent' : undefined}
+          reserve={`${maxXor} · 0b${maxXor.toString(2)}`}
+        />
+        <VizStat
+          k="rightBit"
+          icon={<IconBit />}
+          v={s.rightBit ?? '—'}
+          tone={s.phase === 'split' ? 'accent' : undefined}
+        />
+        <VizStat
+          k="X"
+          icon={<IconBucket />}
+          v={bucketsLive ? s.x : '—'}
+          tone={s.bucketHasBit === true ? 'accent' : undefined}
+        />
+        <VizStat
+          k="Y"
+          icon={<IconBucket />}
+          v={bucketsLive ? s.y : '—'}
+          tone={s.bucketHasBit === false ? 'accent' : undefined}
+        />
+      </VizStatStrip>
+    </VizStage>
   );
 }
 

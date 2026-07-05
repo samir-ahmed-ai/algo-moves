@@ -3,7 +3,7 @@ import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
-import { TreeBoard } from '../../../../components/TreeBoard';
+import { TreeBoard } from '../../../../components/board/TreeBoard';
 
 interface RecoverInput {
   /** Level-order values; null marks an absent slot. Children of i are 2i+1, 2i+2. */

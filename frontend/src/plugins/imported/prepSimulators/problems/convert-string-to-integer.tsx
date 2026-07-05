@@ -3,7 +3,7 @@ import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
-import { ArrayRow, type ArrayPointer } from '../../../../components/ArrayRow';
+import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 
 interface AtoiInput {
   s: string;

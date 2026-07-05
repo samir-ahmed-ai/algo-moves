@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils/cn';
-import { ArrayRow } from '../../components/ArrayRow';
+import { ArrayRow } from '../../components/board/ArrayRow';
 import { vizText } from './vizKit';
 
 export interface DualHeapBoardProps {

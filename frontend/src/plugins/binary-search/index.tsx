@@ -1,5 +1,5 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
-import { ArrayRow, type ArrayPointer } from '../../components/ArrayRow';
+import { ArrayRow, type ArrayPointer } from '../../components/board/ArrayRow';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';

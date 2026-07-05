@@ -1,16 +1,16 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import type { Frame } from '@/core/types';
+import { getAudioContext } from '@/lib/utils/webAudio';
 
 /** #121 Plays a short tone on each new frame, pitched by the move's tone. */
 export function useSoundCues(enabled: boolean, frame: Frame | undefined) {
-  const audioRef = useRef<AudioContext | null>(null);
   const moveTone = frame?.move.tone;
   const moveType = frame?.move.type;
   useEffect(() => {
     if (!enabled || !moveType) return;
     try {
-      const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const ctx = audioRef.current ?? (audioRef.current = new Ctx());
+      const ctx = getAudioContext();
+      if (!ctx) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';

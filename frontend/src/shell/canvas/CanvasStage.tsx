@@ -21,36 +21,30 @@ import {
 } from '@xyflow/react';
 import { Crosshair, ChevronsDownUp, Trash2, Palette, Maximize, LayoutGrid, Lock } from 'lucide-react';
 import type { CanvasMode, Frame, Player, ProblemPlugin } from '../../core';
+import { createPanelByType } from '../../core/panelRegistry';
+import { usePlayer } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
-import { togglePanelCollapse } from './panelCollapse';
+import { togglePanelCollapse } from './nodes/panelCollapse';
 import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
-import { UnifiedRightSidebar } from './UnifiedRightSidebar';
-import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from './PanelNode';
-import { CanvasProblemNav } from './CanvasProblemNav';
-import { RemovableEdge } from './RemovableEdge';
-import { ContextMenu, LaserPointer, type MenuItem } from './CanvasTools';
-import { CanvasFloatingHud } from './CanvasFloatingHud';
-import { TracePreviewPanel } from './TracePreviewPanel';
-import { EffectNode, createEffectByType } from './EffectNode';
+import { CanvasToolbar } from './ui/CanvasToolbar';
+import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from './nodes/PanelNode';
+import { RemovableEdge } from './edges/RemovableEdge';
+import { ContextMenu, LaserPointer, type MenuItem } from './ui/CanvasTools';
+import { CanvasFloatingHud } from './ui/CanvasFloatingHud';
+import { TracePreviewPanel } from './ui/TracePreviewPanel';
+import { EffectNode, createEffectByType } from './nodes/EffectNode';
 import { ConnectedComponentsProvider } from '@/lib/canvas';
 import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
 import { EFFECTS } from '../../effects/registry';
 import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
-import {
-  FIRST_VISIT_PRESET_ID,
-  WORKFLOW_PRESET_ACTIONS,
-  hasSeenDemoWorkflow,
-  markDemoWorkflowSeen,
-} from '../../data/workflowPresets';
 import type { ShareState } from '@/store/navigation';
-import { applyAlign, applyDistribute, type AlignKind } from './align';
-import { FIT_VIEW_DURATION_MS } from './canvasTokens';
+import { applyAlign, applyDistribute, type AlignKind } from './layout/align';
+import { FIT_VIEW_DURATION_MS } from './ui/canvasTokens';
 import {
   buildEdges,
-  buildNodes,
   REQUIRED_VISUALIZE_EDGES,
   connectionLineType,
   edgeConnectionLabel,
@@ -59,29 +53,41 @@ import {
   FIT_PADDING_VIEW,
   edgesForKind,
   kindTitle,
-  layoutGraph,
-  layoutLearnCanvas,
-  layoutVisualizeCanvas,
   modeNodeIds,
   nextPracticePanel,
   sidePanelTabs,
   nodeForKind,
   presetRemoved,
+  standaloneNodeIds,
+  STANDALONE_CANVAS_KEY,
   styleEdges,
   type BgVariant,
   type LayoutPreset,
-} from './layout';
-import { snapNodeLayout, restoreNodeWidth } from './nodeSnapshot';
-import { sanitizeVisualizeEdges } from './edgeSanitization';
-import { useCanvasLayoutPersistence, type Saved } from './useCanvasLayoutPersistence';
-import { useCanvasHistory } from './useCanvasHistory';
-import { useCanvasKeyboardShortcuts } from './useCanvasKeyboardShortcuts';
-import { useCanvasEdgeConnection } from './useCanvasEdgeConnection';
-import { useCanvasDnD, DND_KEY } from './useCanvasDnD';
-import { useCanvasNodeMutations } from './useCanvasNodeMutations';
+} from './layout/layout';
+import { snapNodeLayout } from './nodes/nodeSnapshot';
+import { buildCanvasFrame, organizeCurrentCanvasFrame } from './frame/canvasFrame';
+import { sanitizeVisualizeEdges } from './edges/edgeSanitization';
+import { useCanvasLayoutPersistence, type Saved } from './hooks/useCanvasLayoutPersistence';
+import { useCanvasHistory } from './hooks/useCanvasHistory';
+import { useCanvasKeyboardShortcuts } from './hooks/useCanvasKeyboardShortcuts';
+import { useCanvasEdgeConnection } from './edges/useCanvasEdgeConnection';
+import { useCanvasDnD, DND_KEY } from './hooks/useCanvasDnD';
+import { useCanvasNodeMutations } from './hooks/useCanvasNodeMutations';
+import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProvider';
+import { useCanvasDocSync } from './collab/sync/useCanvasDocSync';
+import { useCanvasFollow } from './collab/sync/useCanvasFollow';
+import { InterviewHud } from './collab/interview/InterviewHud';
+import { GuestNameGate } from './collab/interview/GuestNameGate';
+import { useInterviewBoardPersistence } from './collab/interview/useInterviewBoardPersistence';
+import { canMoveCanvasNodes } from './collab/protocol/subdocPermissions';
+import { CanvasCollabOverlays } from './collab/CanvasCollabOverlays';
+import { CommentLayer } from './collab/CommentLayer';
 
 const nodeTypes: Record<string, typeof PanelNode> = { panel: PanelNode, effect: EffectNode as unknown as typeof PanelNode };
 const edgeTypes = { removable: RemovableEdge };
+
+/** Panel kinds that may be added multiple times (dynamic node ids). */
+const MULTI_INSTANCE_PANELS = new Set(['whiteboard', 'collab-code']);
 
 /** Custom in-progress connection line — a dashed accent curve with an end dot. */
 function DashedConnectionLine({ fromX, fromY, toX, toY }: ConnectionLineComponentProps) {
@@ -113,17 +119,56 @@ interface Menu {
 }
 
 interface CanvasStageProps {
-  plugin: ProblemPlugin<any, any>;
-  item: Item;
-  inputId: string;
-  setInputId: (id: string) => void;
-  customInput: unknown;
-  setCustomInput: (v: unknown) => void;
-  baseFrames: Frame<any>[];
-  player: Player;
+  standalone?: boolean;
+  plugin?: ProblemPlugin<any, any>;
+  item?: Item;
+  inputId?: string;
+  setInputId?: (id: string) => void;
+  customInput?: unknown;
+  setCustomInput?: (v: unknown) => void;
+  baseFrames?: Frame<any>[];
+  player?: Player;
 }
 
-function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput, baseFrames, player }: CanvasStageProps) {
+const STUB_PLUGIN = {
+  meta: { id: 'standalone', title: 'Canvas' },
+  tabs: [],
+  wires: {},
+  inputs: [],
+  record: () => [],
+} as unknown as ProblemPlugin<any, any>;
+
+const STUB_ITEM: Item = {
+  id: 'canvas',
+  kind: 'problem',
+  title: 'Canvas',
+  tags: [],
+  status: 'todo',
+  prereqs: [],
+  courseId: '',
+  topicId: '',
+};
+
+function Inner({
+  standalone = false,
+  plugin: pluginProp,
+  item: itemProp,
+  inputId: inputIdProp = '',
+  setInputId: setInputIdProp = () => {},
+  customInput: customInputProp = null,
+  setCustomInput: setCustomInputProp = () => {},
+  baseFrames: baseFramesProp,
+  player: playerProp,
+}: CanvasStageProps) {
+  const plugin = pluginProp ?? STUB_PLUGIN;
+  const item = itemProp ?? STUB_ITEM;
+  const internalPlayer = usePlayer(1);
+  const player = playerProp ?? internalPlayer;
+  const baseFrames = baseFramesProp ?? [];
+  const inputId = inputIdProp;
+  const setInputId = setInputIdProp;
+  const customInput = customInputProp;
+  const setCustomInput = setCustomInputProp;
   const {
     mode,
     present,
@@ -142,13 +187,12 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     requestFitCanvas,
     toggleFocusCanvas,
     setPresent,
-    rightOpen,
     setRightOpen,
-    rightTab,
     setRightTab,
+    enterProblemInMode,
   } = useWorkspace();
   const pluginId = plugin.meta.id;
-  const key = `${pluginId}:${mode}`;
+  const key = standalone ? STANDALONE_CANVAS_KEY : `${pluginId}:${mode}`;
   const [selectedNode, setSelectedNode] = useState<number | null>(null);
   useEffect(() => {
     setSelectedNode(null);
@@ -178,45 +222,21 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     [mode, layoutPreset, viewportSize],
   );
 
-  // Build the node+edge set for a mode, respecting removals, dagre layout, and saved positions/sizes.
+  // Build the node+edge set for a mode, respecting removals, dagre layout, and
+  // saved positions/sizes. Pure assembly lives in buildCanvasFrame; this wrapper
+  // only supplies the current per-mode removal/layout refs.
   const buildFor = useCallback(
-    (m: CanvasMode, k: string): { nodes: PanelFlowNode[]; edges: Edge[] } => {
-      const removed = removedRef.current[k];
-      let nodes = buildNodes(plugin, m);
-      if (removed?.size) nodes = nodes.filter((n) => !removed.has(n.id));
-      const present = new Set(nodes.map((n) => n.id));
-      const removedEdges = removedEdgesRef.current[k] ?? new Set<string>();
-      const raw = buildEdges(plugin, m)
-        .filter((e) => present.has(e.source) && present.has(e.target))
-        .filter((e) => !removedEdges.has(e.id));
-      nodes = m === 'visualize'
-        ? layoutVisualizeCanvas(nodes, layoutOpts())
-        : m === 'learn'
-          ? layoutLearnCanvas(nodes, raw)
-          : layoutGraph(nodes, raw, dir);
-      const saved = layoutRef.current[k];
-      if (saved) {
-        nodes = nodes.map((n) => {
-          if (!saved[n.id]) return n;
-          const kind = n.data.kind ?? n.id;
-          const width =
-            m === 'visualize' && kind === 'viz'
-              ? n.width
-              : restoreNodeWidth(kind, saved[n.id].width, n.width);
-          // Visualize / Learn: keep canonical stacked layout; restore widths only.
-          if (m === 'visualize' || m === 'learn') {
-            return { ...n, position: n.position, width };
-          }
-          return {
-            ...n,
-            position: saved[n.id].position,
-            width,
-          };
-        });
-      }
-      return { nodes, edges: styleEdges(raw, edgeOpts) };
-    },
-    [plugin, edgeOpts, dir, layoutOpts],
+    (m: CanvasMode, k: string): { nodes: PanelFlowNode[]; edges: Edge[] } =>
+      buildCanvasFrame(plugin, m, {
+        removed: removedRef.current[k],
+        removedEdges: removedEdgesRef.current[k],
+        saved: layoutRef.current[k],
+        seedProblemCanvas: !standalone,
+        layoutOpts: layoutOpts(),
+        dir,
+        edgeOpts,
+      }),
+    [plugin, edgeOpts, dir, layoutOpts, standalone],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -224,6 +244,21 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
   const [dragOver, setDragOver] = useState(false);
+
+  // Real-time collaboration: publish/apply the shared document, mirror a
+  // followed peer's viewport. Inert (no network) until a session is joined.
+  const collab = useCanvasCollab();
+  useCanvasDocSync({ nodes, edges, setNodes, setEdges });
+  useCanvasFollow();
+  useInterviewBoardPersistence();
+  const onPanePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!collab.isCollaborating) return;
+      const p = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      collab.broadcastCursor(p.x, p.y);
+    },
+    [collab, screenToFlowPosition],
+  );
 
   const displayFrames = useWorkflowRunner({ baseFrames, nodes, edges });
 
@@ -246,7 +281,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     if (player.index >= displayFrames.length && displayFrames.length > 0) {
       player.goTo(displayFrames.length - 1);
     }
-  }, [displayFrames.length, player]);
+  }, [displayFrames.length, player.index, player.goTo]);
 
   // Fit content accounting for chrome; allow zoom up to 100%.
   const fitCanvas = useCallback(
@@ -290,6 +325,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   // Remember when the user deletes a shell edge (e.g. optional red problem→viz).
   useEffect(() => {
     if (builtKeyRef.current !== key || mode !== 'visualize') return;
+    if (collab.isCollaborating) return; // don't persist edges reconciled from a peer
     const shellIds = new Set(buildEdges(plugin, mode).map((e) => e.id));
     const present = new Set(edges.filter((e) => shellIds.has(e.id)).map((e) => e.id));
     const removed = new Set<string>();
@@ -316,9 +352,8 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
       snap[n.id] = snapNodeLayout(n);
     });
     layoutRef.current[prevKeyRef.current] = snap;
-    removedRef.current[prevKeyRef.current] = new Set(
-      modeNodeIds(plugin, prevModeRef.current).filter((id) => !presentIds.has(id)),
-    );
+    const prevNodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, prevModeRef.current);
+    removedRef.current[prevKeyRef.current] = new Set(prevNodeIds.filter((id) => !presentIds.has(id)));
     prevKeyRef.current = key;
     prevModeRef.current = mode;
 
@@ -350,6 +385,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   // Skip while a node is actively dragging — write once the drag settles.
   useEffect(() => {
     if (builtKeyRef.current !== key) return; // nodes belong to a key we're leaving — don't save
+    if (collab.isCollaborating) return; // shared-doc positions are ephemeral — don't overwrite local layout
     if (nodes.some((n) => n.dragging)) return;
     const snap: Saved = {};
     nodes.forEach((n) => {
@@ -357,9 +393,10 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     });
     layoutRef.current[key] = snap;
     const presentIds = new Set(nodes.map((n) => n.id));
-    removedRef.current[key] = new Set(modeNodeIds(plugin, mode).filter((id) => !presentIds.has(id)));
+    const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
+    removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     persist();
-  }, [nodes, key, plugin, mode, persist]);
+  }, [nodes, key, plugin, mode, persist, collab.isCollaborating]);
 
   // ---- undo/redo of canvas edits (#82) ----
   const { historyRef, histIdxRef, undo, redo, resetHistory } = useCanvasHistory({
@@ -371,39 +408,60 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     setEdges,
   });
 
+  const restoreProblemStarterPanels = useCallback(() => {
+    if (standalone || mode !== 'visualize') return;
+    delete layoutRef.current[key];
+    removedRef.current[key] = new Set();
+    removedEdgesRef.current[key] = new Set();
+    const built = buildCanvasFrame(plugin, mode, {
+      seedProblemCanvas: true,
+      layoutOpts: layoutOpts(),
+      dir,
+      edgeOpts,
+    });
+    if (built.nodes.length === 0) return;
+    builtKeyRef.current = key;
+    resetHistory();
+    setNodes(built.nodes);
+    setEdges(built.edges);
+    persist();
+    requestAnimationFrame(() => fitCanvas());
+  }, [standalone, mode, key, plugin, layoutOpts, dir, edgeOpts, resetHistory, setNodes, setEdges, persist, fitCanvas]);
+
+  const autoRestoredProblemCanvasRef = useRef(new Set<string>());
+  const suppressAutoRestoreForKey = useCallback(() => {
+    if (!standalone && mode === 'visualize') autoRestoredProblemCanvasRef.current.add(key);
+  }, [standalone, mode, key]);
+  useEffect(() => {
+    if (standalone || mode !== 'visualize' || nodes.length > 0) return;
+    if (autoRestoredProblemCanvasRef.current.has(key)) return;
+    const id = window.setTimeout(() => {
+      if (collab.isCollaborating || nodesRef.current.length > 0 || autoRestoredProblemCanvasRef.current.has(key)) return;
+      autoRestoredProblemCanvasRef.current.add(key);
+      restoreProblemStarterPanels();
+    }, 60);
+    return () => window.clearTimeout(id);
+  }, [standalone, mode, key, nodes.length, collab.isCollaborating, restoreProblemStarterPanels]);
+
   // Tidy: re-organize the CURRENT panels (keep removals + resizes, forget positions).
   const reset = useCallback(() => {
     const present = nodesRef.current;
     const presentIds = new Set(present.map((n) => n.id));
-    removedRef.current[key] = new Set(modeNodeIds(plugin, mode).filter((id) => !presentIds.has(id)));
+    const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
+    removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     removedEdgesRef.current[key] = new Set();
     delete layoutRef.current[key];
-    const sizeById = new Map(present.map((n) => [n.id, { width: n.width }]));
-    let kept = buildNodes(plugin, mode)
-      .filter((n) => presentIds.has(n.id))
-      .map((n) => {
-        const s = sizeById.get(n.id);
-        return s ? { ...n, width: s.width ?? n.width } : n;
-      });
-    const raw = buildEdges(plugin, mode).filter((e) => presentIds.has(e.source) && presentIds.has(e.target));
-    kept = mode === 'visualize'
-      ? layoutVisualizeCanvas(kept, layoutOpts())
-      : mode === 'learn'
-        ? layoutLearnCanvas(kept, raw)
-        : layoutGraph(kept, raw, dir);
-    setNodes(kept);
-    setEdges(styleEdges(raw, edgeOpts));
+    const tidy = organizeCurrentCanvasFrame(plugin, mode, present as PanelFlowNode[], { layoutOpts: layoutOpts(), dir, edgeOpts });
+    setNodes(tidy.nodes);
+    setEdges(tidy.edges);
     requestAnimationFrame(() => fitCanvas());
   }, [plugin, mode, key, edgeOpts, dir, setNodes, setEdges, fitCanvas, layoutOpts]);
 
   // Re-fit when chrome dimensions change or focus-canvas toggles.
   useEffect(() => {
-    if (mode === 'visualize') {
-      setNodes((nds) => layoutVisualizeCanvas(nds as PanelFlowNode[], layoutOpts()));
-    }
     const id = requestAnimationFrame(() => fitCanvas(200));
     return () => cancelAnimationFrame(id);
-  }, [fitCanvasSignal, rightOpen, rightTab, layoutPreset, fitCanvas, mode, setNodes, layoutOpts]);
+  }, [fitCanvasSignal, fitCanvas]);
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -411,19 +469,14 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     let t: number | undefined;
     const ro = new ResizeObserver(() => {
       window.clearTimeout(t);
-      t = window.setTimeout(() => {
-        if (mode === 'visualize') {
-          setNodes((nds) => layoutVisualizeCanvas(nds as PanelFlowNode[], layoutOpts()));
-        }
-        fitCanvas(150);
-      }, 150);
+      t = window.setTimeout(() => fitCanvas(150), 150);
     });
     ro.observe(el);
     return () => {
       ro.disconnect();
       if (t) window.clearTimeout(t);
     };
-  }, [fitCanvas, mode, setNodes, layoutOpts]);
+  }, [fitCanvas]);
 
   // Re-layout the current panels only when the direction actually toggles (TB ↔ LR) (#75).
   const prevDirRef = useRef(dir);
@@ -461,6 +514,14 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   useCanvasKeyboardShortcuts({ fitView, undo, redo, toggleFocusCanvas, nodesRef });
 
   // ---- drag a removed panel back onto the canvas ----
+  const onProblemDrop = useCallback(
+    (itemId: string, _position: { x: number; y: number }) => {
+      // Scaffold: load problem in visualize mode; full frame placement at pointer is deferred.
+      enterProblemInMode(itemId, 'visualize');
+    },
+    [enterProblemInMode],
+  );
+
   const { onDragOver, onDragLeave, onDrop } = useCanvasDnD({
     plugin,
     mode,
@@ -473,14 +534,16 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     setDragOver,
     nodesRef,
     removedRef,
+    onProblemDrop,
   });
 
   const addableKinds = useMemo(() => {
     const present = new Set(nodes.map((n) => n.id));
-    return modeNodeIds(plugin, mode)
-      .filter((id) => !present.has(id))
+    const ids = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
+    return ids
+      .filter((id) => MULTI_INSTANCE_PANELS.has(id) || !present.has(id))
       .map((id) => ({ id, title: kindTitle(plugin, id) }));
-  }, [nodes, plugin, mode]);
+  }, [nodes, plugin, mode, standalone]);
 
   // ---- interaction state: lock / connect mode / scroll-pan / context menu ----
   // (wrapperRef is declared near the top, beside fitCanvas.)
@@ -498,20 +561,23 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
   // (drag still works; this is the no-aim path). Focuses the new node.
   const addKind = useCallback(
     (kind: string) => {
-      if (!kind || nodesRef.current.some((n) => n.id === kind)) return;
+      if (!kind) return;
+      if (!MULTI_INSTANCE_PANELS.has(kind) && nodesRef.current.some((n) => n.id === kind)) return;
       removedRef.current[key]?.delete(kind);
       const r = wrapperRef.current?.getBoundingClientRect();
       const center = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: 240, y: 240 };
       const position = screenToFlowPosition(center);
-      const node = nodeForKind(plugin, kind, position);
-      const present = new Set([...nodesRef.current.map((n) => n.id), kind]);
+      const node = MULTI_INSTANCE_PANELS.has(kind)
+        ? (createPanelByType(kind, position) as PanelFlowNode)
+        : nodeForKind(plugin, kind, position);
+      const present = new Set([...nodesRef.current.map((n) => n.id), node.id]);
       const newEdges = styleEdges(edgesForKind(plugin, mode, kind, present), edgeOpts).filter(
         (ne) => !edges.some((ee) => ee.id === ne.id),
       );
       setNodes((nds) => [...nds, node]);
       if (newEdges.length) setEdges((eds) => [...eds, ...newEdges]);
       requestAnimationFrame(() =>
-        requestAnimationFrame(() => fitView({ padding: FIT_PADDING_FOCUS, duration: FIT_VIEW_DURATION_MS, nodes: [{ id: kind }] })),
+        requestAnimationFrame(() => fitView({ padding: FIT_PADDING_FOCUS, duration: FIT_VIEW_DURATION_MS, nodes: [{ id: node.id }] })),
       );
     },
     [plugin, mode, key, edgeOpts, edges, screenToFlowPosition, setNodes, setEdges, fitView],
@@ -542,15 +608,14 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
   const shareSnapshot = useCallback(
     (): ShareState => ({
-      item: item.id,
-      input: inputId || undefined,
+      ...(standalone ? { focus: 'canvas' as const } : { item: item.id, input: inputId || undefined, focus: 'problem' as const }),
       mode,
       theme,
       palette,
       themePreset,
       dir,
     }),
-    [item.id, inputId, mode, theme, palette, themePreset, dir],
+    [standalone, item.id, inputId, mode, theme, palette, themePreset, dir],
   );
 
   const getProjectState = useCallback(
@@ -576,7 +641,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
       persist();
       requestFitCanvas();
     },
-    [key, edgeOpts, persist, player, setNodes, setEdges, requestFitCanvas],
+    [key, edgeOpts, persist, player.setSpeed, setNodes, setEdges, requestFitCanvas],
   );
 
   const applyWorkflowPreset = useCallback(
@@ -599,14 +664,6 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     setCanvasProject({ getProjectState, applyProjectState, applyWorkflowPreset });
     return () => setCanvasProject(null);
   }, [getProjectState, applyProjectState, applyWorkflowPreset, setCanvasProject]);
-
-  useEffect(() => {
-    if (mode !== 'visualize' || hasSeenDemoWorkflow()) return;
-    const demo = WORKFLOW_PRESET_ACTIONS.find((p) => p.id === FIRST_VISIT_PRESET_ID);
-    if (demo) applyWorkflowPreset(demo);
-    markDemoWorkflowSeen();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Edge connect / reconnect / validation.
   const { onConnect, onReconnectStart, onReconnect, onReconnectEnd, isValidConnection } =
@@ -669,17 +726,11 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
         });
       };
 
-      const applySelectRelayout = (nds: PanelFlowNode[]) => {
-        let next = nds.map((n) => {
+      const applySelectRelayout = (nds: PanelFlowNode[]) =>
+        nds.map((n) => {
           if (n.id === id && n.data.collapsed) return togglePanelCollapse(n);
           return { ...n, selected: n.id === id };
         });
-        if (mode === 'visualize') {
-          next = layoutVisualizeCanvas(next, layoutOpts());
-          next = next.map((n) => ({ ...n, selected: n.id === id }));
-        }
-        return next;
-      };
 
       const existing = nodesRef.current.find((n) => n.id === id);
       if (existing) {
@@ -721,8 +772,16 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
     [plugin, mode, ensureAndFocusPanel, setSidePanelTab],
   );
 
-  const { onNodeClick, recolorNode, minimizeNode, removeNode, toggleNodeLock } =
+  const { onNodeClick, recolorNode, minimizeNode, removeNode: removeNodeRaw, toggleNodeLock } =
     useCanvasNodeMutations({ setNodes, setEdges });
+
+  const removeNode = useCallback(
+    (id: string) => {
+      suppressAutoRestoreForKey();
+      removeNodeRaw(id);
+    },
+    [removeNodeRaw, suppressAutoRestoreForKey],
+  );
 
   const canvasActions = useMemo(
     () => ({ focusPanel: focusNode, advancePractice, spawnConnectedPanel, layoutVisualizeOptions: layoutOpts }),
@@ -814,10 +873,11 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
   const onNodesDelete = useCallback(
     (deleted: Node[]) => {
+      suppressAutoRestoreForKey();
       const set = (removedRef.current[key] ??= new Set());
       for (const n of deleted) set.add((n.data as PanelNodeData | undefined)?.kind ?? n.id);
     },
-    [key],
+    [key, suppressAutoRestoreForKey],
   );
 
   const onEdgesDelete = useCallback(
@@ -836,7 +896,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
         <CanvasActionsProvider value={canvasActions}>
         <div className="flex h-full min-h-0 w-full">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div ref={wrapperRef} className={cn('relative min-h-0 flex-1 bg-bg', dragOver && 'ring-2 ring-inset ring-good/40')}>
+        <div ref={wrapperRef} onPointerMove={onPanePointerMove} className={cn('relative min-h-0 flex-1 bg-bg', dragOver && 'ring-2 ring-inset ring-good/40')}>
           <ConnectedComponentsProvider nodeIds={nodes.map((n) => n.id)} edges={edges}>
           <ReactFlow
             style={{ width: '100%', height: '100%' }}
@@ -857,7 +917,10 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
             onPaneContextMenu={onPaneContextMenu}
             onSelectionContextMenu={onPaneContextMenu}
             onPaneClick={() => setMenu(null)}
-            onMove={() => setMenu(null)}
+            onMove={(_e, vp) => {
+              setMenu(null);
+              if (collab.isCollaborating) collab.broadcastViewport({ x: vp.x, y: vp.y, zoom: vp.zoom });
+            }}
             onNodesDelete={onNodesDelete}
             onEdgesDelete={onEdgesDelete}
             onBeforeDelete={onBeforeDelete}
@@ -876,7 +939,7 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
             reconnectRadius={18}
             proOptions={{ hideAttribution: true }}
             nodesConnectable={!lock}
-            nodesDraggable={!lock}
+            nodesDraggable={!lock && canMoveCanvasNodes({ role: collab.role, session: collab.session, isCollaborating: collab.isCollaborating })}
             elementsSelectable={!lock}
             connectOnClick={false}
             autoPanOnNodeDrag
@@ -914,8 +977,11 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
               className="!bottom-[calc(var(--chrome-bottom,0px)+8px)] !right-2 !m-0 hidden overflow-hidden rounded-md border border-edge shadow-[var(--shadow-md)] lg:block"
               style={{ width: 132, height: 92 }}
             />
-            {!present && <CanvasProblemNav />}
-            <CanvasFloatingHud />
+            {!present && <CanvasFloatingHud />}
+            {!present && <CanvasToolbar lock={lock} onToggleLock={() => setLock((l) => !l)} onTidy={reset} />}
+            {!present && <InterviewHud />}
+            <CanvasCollabOverlays />
+            <CommentLayer />
           </ReactFlow>
           </ConnectedComponentsProvider>
 
@@ -932,16 +998,26 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
           {present && <LaserPointer host={wrapperRef} />}
 
+          <GuestNameGate />
+
           {nodes.length === 0 && (
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
-              <p className={cn('rounded-lg border border-edge bg-panel/80 px-4 py-2 text-ink2 shadow-sm backdrop-blur', chromeText.base)}>
-                No {mode} panels — drag one in from the “＋” menu.
-              </p>
+              <div className={cn('flex flex-col items-center gap-2 rounded-lg border border-edge bg-panel/85 px-4 py-3 text-ink2 shadow-sm backdrop-blur', chromeText.base)}>
+                <p>Empty canvas — use + in the toolbar or right-click to add panels.</p>
+                {!standalone && mode === 'visualize' && (
+                  <button
+                    type="button"
+                    onClick={restoreProblemStarterPanels}
+                    className="pointer-events-auto rounded-full bg-accent px-3 py-1 text-[12px] font-semibold text-white"
+                  >
+                    Restore starter panels
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
         </div>
-        {!present && <UnifiedRightSidebar />}
         </div>
         </CanvasActionsProvider>
       </CanvasFrameProvider>
@@ -951,10 +1027,15 @@ function Inner({ plugin, item, inputId, setInputId, customInput, setCustomInput,
 
 export function CanvasStage(props: CanvasStageProps) {
   return (
-    <ReactFlowProvider>
-      <div className="h-full min-h-0 w-full">
-        <Inner {...props} />
-      </div>
-    </ReactFlowProvider>
+    <CanvasCollabProvider>
+      <ReactFlowProvider>
+        <div className="h-full min-h-0 w-full">
+          <Inner {...props} />
+        </div>
+      </ReactFlowProvider>
+    </CanvasCollabProvider>
   );
 }
+
+/** Re-export kept for widget registry / saved-canvas flows (not mounted in standalone canvas). */
+export { UnifiedRightSidebar } from './ui/UnifiedRightSidebar';

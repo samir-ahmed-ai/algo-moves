@@ -35,13 +35,28 @@ type Inbound struct {
 	D json.RawMessage `json:"d"`
 }
 
+// Message type tags, shared by the server→client builders below and the
+// readPump switch in client.go, centralized so the wire strings cannot drift
+// between producer and consumer.
+const (
+	typeWelcome    = "welcome"
+	typePeerJoin   = "peer-join"
+	typePeerLeave  = "peer-leave"
+	typeRoleChange = "role-change"
+	typeRelay      = "relay"
+	typeState      = "state"
+	typeSeat       = "seat"
+	typePing       = "ping"
+	typeError      = "error"
+)
+
 // The set of server → client message builders. Each returns marshalled JSON
 // ready to hand to Conn.WriteText. Keeping them as small helpers avoids
 // scattering map[string]any literals across the hub.
 
 func msgWelcome(self Peer, players, spectators []Peer, capacity int, state json.RawMessage) []byte {
 	return mustJSON(map[string]any{
-		"t":          "welcome",
+		"t":          typeWelcome,
 		"self":       self,
 		"players":    players,
 		"spectators": spectators,
@@ -51,29 +66,29 @@ func msgWelcome(self Peer, players, spectators []Peer, capacity int, state json.
 }
 
 func msgPeerJoin(p Peer) []byte {
-	return mustJSON(map[string]any{"t": "peer-join", "peer": p})
+	return mustJSON(map[string]any{"t": typePeerJoin, "peer": p})
 }
 
 func msgPeerLeave(p Peer) []byte {
-	return mustJSON(map[string]any{"t": "peer-leave", "peer": p})
+	return mustJSON(map[string]any{"t": typePeerLeave, "peer": p})
 }
 
 // msgRoleChange announces that a peer's role changed (host handoff after the
 // host leaves, or a spectator/player seat swap), so clients re-bucket it.
 func msgRoleChange(p Peer) []byte {
-	return mustJSON(map[string]any{"t": "role-change", "peer": p})
+	return mustJSON(map[string]any{"t": typeRoleChange, "peer": p})
 }
 
 func msgRelay(from string, d json.RawMessage) []byte {
-	return mustJSON(map[string]any{"t": "relay", "from": from, "d": rawOrNull(d)})
+	return mustJSON(map[string]any{"t": typeRelay, "from": from, "d": rawOrNull(d)})
 }
 
 func msgState(d json.RawMessage) []byte {
-	return mustJSON(map[string]any{"t": "state", "d": rawOrNull(d)})
+	return mustJSON(map[string]any{"t": typeState, "d": rawOrNull(d)})
 }
 
 func msgError(reason string) []byte {
-	return mustJSON(map[string]any{"t": "error", "msg": reason})
+	return mustJSON(map[string]any{"t": typeError, "msg": reason})
 }
 
 // rawOrNull renders an absent RawMessage as JSON null rather than empty bytes.

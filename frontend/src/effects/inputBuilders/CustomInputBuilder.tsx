@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Btn, Field, TextArea } from '../../shell/canvas/nodeui';
+import { Btn, Field, TextArea } from '@/components/shared/formControls';
 
 const EXAMPLES = [
   { label: 'Sorted array', json: '{"values":[1,3,5,7,9,11]}' },

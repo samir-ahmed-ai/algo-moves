@@ -1,0 +1,15 @@
+export {
+  loadPhase,
+  savePhase,
+  loadQuizProgress,
+  saveQuizProgress,
+  clearQuizProgress,
+  loadReassembleProgress,
+  saveReassembleProgress,
+  clearReassembleProgress,
+  nextPhase,
+  phaseSequence,
+  type CodeStudioPhase,
+  type QuizProgress,
+  type PhaseAvailability,
+} from '@/store/user-prefs/codeStudioPhase';

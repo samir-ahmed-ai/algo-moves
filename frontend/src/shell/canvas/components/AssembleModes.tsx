@@ -13,13 +13,26 @@ import {
   Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText } from '../nodeui';
-import { useCodeStudio } from '../CodeStudio';
+import { shuffle } from '@/lib/utils/shuffle';
+import { useIsMobile } from '@/lib/utils/useMediaQuery';
+import { ASSEMBLE_GAMES } from '@/components/puzzle/assemble';
+import { assembleGameStatsStore } from '@/shell/assembleGameStats';
+import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText } from '../ui/nodeui';
+import { useCodeStudio } from '@/shell/study/hooks/useCodeStudio';
 import { useCanvasStatic } from '../CanvasContext';
 import type { CodePiece } from '@/lib/code';
 import { blockKind, BLOCK_META } from '@/lib/code';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
+import {
+  assembleGameSeconds,
+  createAssembleGameStats,
+  isBetterAssembleTime,
+  resolveAssembleBestSeconds,
+  type AssembleGameStats,
+} from '@/components/puzzle/assemble/types';
+import { formatSecs } from '@/components/puzzle/assemble/gameShared';
+import { GameHud, HudChip } from '@/components/puzzle/assemble/gameUi';
 
 /* ----------------------------- shared helpers ----------------------------- */
 
@@ -43,14 +56,6 @@ function codeLines(ref: string): Line[] {
     .map((l) => ({ text: l.trim(), indent: indentUnits(l) }));
 }
 
-function shuffle<T>(a: T[]): T[] {
-  const r = a.slice();
-  for (let i = r.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [r[i], r[j]] = [r[j], r[i]];
-  }
-  return r;
-}
 
 /** Shuffle that avoids returning the already-correct order for short lists. */
 function scramble(ids: string[]): string[] {
@@ -370,14 +375,16 @@ function RushMode() {
   const pieces = cs.pieces!;
   const byId = useMemo(() => new Map(pieces.map((p) => [p.id, p])), [pieces]);
   const correct = pieces.map((p) => p.id);
-  const bestKey = STORAGE_KEYS.RUSH_BEST(useCanvasStatic().item.id, cs.active);
+  const { item } = useCanvasStatic();
+  const bestScope = `${item.id}:${cs.active}`;
+  const bestKey = STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', bestScope);
+  const legacyBestKey = STORAGE_KEYS.RUSH_BEST(item.id, cs.active);
 
   const [runKey, setRunKey] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [done, setDone] = useState(false);
   const [best, setBest] = useState<number | null>(() => {
-    const v = Number(readStorageText(bestKey, null));
-    return Number.isFinite(v) && v > 0 ? v : null;
+    return resolveAssembleBestSeconds(readStorageText(bestKey), readStorageText(legacyBestKey));
   });
   const start = useRef(Date.now());
 
@@ -393,35 +400,43 @@ function RushMode() {
     return () => window.clearInterval(t);
   }, [done, runKey]);
 
-  const finish = () => {
-    if (done) return;
-    const secs = (Date.now() - start.current) / 1000;
+  const finish = (): AssembleGameStats | undefined => {
+    if (done) return undefined;
+    const stats = createAssembleGameStats(start.current);
+    const secs = assembleGameSeconds(stats);
     setDone(true);
     setElapsed(secs);
-    if (best === null || secs < best) {
+    if (isBetterAssembleTime(secs, best)) {
       setBest(secs);
       writeStorageText(bestKey, String(secs));
+      writeStorageText(legacyBestKey, String(secs));
     }
+    return stats;
   };
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <Chip tone={done ? 'good' : 'accent'} mono>
-          <Timer className="mr-1 inline h-3 w-3" />
-          {elapsed.toFixed(1)}s
-        </Chip>
-        {best !== null && (
-          <Chip tone="muted" mono>
-            <Trophy className="mr-1 inline h-3 w-3" />
-            best {best.toFixed(1)}s
-          </Chip>
-        )}
-        <div className="flex-1" />
-        <Btn size="xs" variant="ghost" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => setRunKey((k) => k + 1)}>
-          Restart
-        </Btn>
-      </div>
+      <GameHud
+        left={
+          <HudChip tone={done ? 'good' : 'accent'}>
+            <Timer className="h-3 w-3" />
+            {formatSecs(elapsed * 1000)}
+          </HudChip>
+        }
+        center={
+          best !== null ? (
+            <HudChip>
+              <Trophy className="h-3 w-3" />
+              best {formatSecs(best * 1000)}
+            </HudChip>
+          ) : undefined
+        }
+        right={
+          <Btn size="xs" variant="ghost" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => setRunKey((k) => k + 1)}>
+            Restart
+          </Btn>
+        }
+      />
       <OrderBoard
         key={runKey}
         correctIds={correct}
@@ -761,11 +776,47 @@ function ParsonsMode() {
   );
 }
 
+/* ----------------------------- assemble games ------------------------------ */
+/* The creative trio (Snap Call / Imposter / One Stroke) — shared with the
+ * mobile deck, hosted here so the learning page gets the same games. */
+
+function GameMode({ id }: { id: string }) {
+  const cs = useCodeStudio();
+  const { item } = useCanvasStatic();
+  const game = ASSEMBLE_GAMES.find((g) => g.id === id);
+  const lang = cs.code?.lang;
+  const scope = `${item.id}:${lang ?? cs.active}`;
+  const stats = useMemo(() => assembleGameStatsStore(scope), [scope]);
+  if (!game) return null;
+  return (
+    <game.Component
+      key={`${item.id}:${cs.active}:${id}`}
+      pieces={cs.pieces!}
+      lang={lang}
+      storageKey={scope}
+      stats={stats}
+    />
+  );
+}
+
 /* ------------------------------- container -------------------------------- */
 
-type Mode = 'blocks' | 'blanks' | 'scramble' | 'parsons' | 'cloze' | 'rush' | 'firstletter';
+type Mode =
+  | 'snap-call'
+  | 'imposter'
+  | 'one-stroke'
+  | 'blocks'
+  | 'blanks'
+  | 'scramble'
+  | 'parsons'
+  | 'cloze'
+  | 'rush'
+  | 'firstletter';
+
+const GAME_MODE_IDS = new Set(ASSEMBLE_GAMES.map((g) => g.id));
 
 const MODES: { v: Mode; label: ReactNode }[] = [
+  ...ASSEMBLE_GAMES.map((g) => ({ v: g.id as Mode, label: g.name })),
   { v: 'blocks', label: 'Blocks' },
   { v: 'blanks', label: 'Fill blanks' },
   { v: 'scramble', label: 'Scramble' },
@@ -777,7 +828,8 @@ const MODES: { v: Mode; label: ReactNode }[] = [
 
 export function AssembleModes() {
   const cs = useCodeStudio();
-  const [mode, setMode] = useState<Mode>('blocks');
+  const isMobile = useIsMobile();
+  const [mode, setMode] = useState<Mode>(() => (isMobile ? 'snap-call' : 'blocks'));
 
   if (!cs.pieces || !cs.reference) {
     return (
@@ -792,15 +844,23 @@ export function AssembleModes() {
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-edge px-3 py-2">
         <MiniTabs value={mode} options={MODES} onChange={setMode} />
       </div>
-      <div className="ws-scroll min-h-0 flex-1 overflow-auto p-3">
-        {mode === 'blocks' && <BlocksMode />}
-        {mode === 'blanks' && <BlanksMode />}
-        {mode === 'scramble' && <ScrambleMode />}
-        {mode === 'parsons' && <ParsonsMode />}
-        {mode === 'cloze' && <ClozeMode />}
-        {mode === 'rush' && <RushMode />}
-        {mode === 'firstletter' && <FirstLetterMode />}
-      </div>
+      {GAME_MODE_IDS.has(mode) ? (
+        /* Games own their internal scrolling; One Stroke's grid must never sit
+         * inside a scroll container. */
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
+          <GameMode id={mode} />
+        </div>
+      ) : (
+        <div className="ws-scroll min-h-0 flex-1 overflow-auto p-3">
+          {mode === 'blocks' && <BlocksMode />}
+          {mode === 'blanks' && <BlanksMode />}
+          {mode === 'scramble' && <ScrambleMode />}
+          {mode === 'parsons' && <ParsonsMode />}
+          {mode === 'cloze' && <ClozeMode />}
+          {mode === 'rush' && <RushMode />}
+          {mode === 'firstletter' && <FirstLetterMode />}
+        </div>
+      )}
     </div>
   );
 }

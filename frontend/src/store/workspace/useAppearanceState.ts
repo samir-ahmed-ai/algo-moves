@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { normalizeThemePreset, type ThemePreset } from '@/styles/themes/registry';
 import type { ShareState } from '@/store/navigation/shareState';
-import type { LayoutPreset } from '@/shell/canvas/layout';
+import { normalizeLayoutPreset, type LayoutPreset } from '@/lib/canvas/layoutPrefs';
 import type { Density, Palette, Theme, Tweaks, WorkspaceDefaults } from './workspace';
 
 /** Theme, palette, density and display tweaks, plus the document-element sync effects. */
@@ -12,7 +12,9 @@ export function useAppearanceState(shared: ShareState | null, savedDefaults: Par
   const [themePreset, setThemePreset] = useState<ThemePreset>(
     normalizeThemePreset(savedDefaults.themePreset ?? shared?.themePreset),
   );
-  const [layoutPreset, setLayoutPreset] = useState<LayoutPreset>(savedDefaults.layoutPreset ?? 'Study');
+  const [layoutPreset, setLayoutPreset] = useState<LayoutPreset>(
+    normalizeLayoutPreset(savedDefaults.layoutPreset ?? 'TraceFocus'),
+  );
   const [tweaks, setTweaks] = useState<Tweaks>({
     moveLog: true,
     caption: true,

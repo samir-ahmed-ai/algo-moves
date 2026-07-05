@@ -11,12 +11,13 @@ import (
 	"strings"
 	"time"
 
+	"algomoves/gameserver/internal/arcade"
 	"algomoves/gameserver/internal/hub"
 	"algomoves/gameserver/internal/ws"
 )
 
-// Handler returns the HTTP handler serving /ws, /new, /healthz and /.
-func Handler(h *hub.Hub) http.Handler {
+// Handler returns the HTTP handler serving /ws, /new, /healthz, /api/* and /.
+func Handler(h *hub.Hub, arc *arcade.Service) http.Handler {
 	allowed := allowedOriginsFromEnv()
 	wsLimit := newIPRateLimiter(60, time.Minute)
 	newLimit := newIPRateLimiter(20, time.Minute)
@@ -31,7 +32,12 @@ func Handler(h *hub.Hub) http.Handler {
 	// configured: it exists for infra liveness probes (e.g. Railway's
 	// healthcheckPath) that are plain HTTP clients and never send an Origin
 	// header, not for browsers.
-	mux.HandleFunc("/healthz", corsJSON(healthHandler(h), allowed, nil, false))
+	mux.HandleFunc("/healthz", corsJSON(healthHandler(h, arc), allowed, nil, false))
+	if arc != nil && arc.Enabled() {
+		apiMux := http.NewServeMux()
+		arc.Register(apiMux)
+		mux.Handle("/api/", corsAPI(allowed, apiMux))
+	}
 	mux.HandleFunc("/", bannerHandler)
 	return mux
 }
@@ -47,7 +53,7 @@ func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 			http.Error(w, "missing or invalid room code", http.StatusBadRequest)
 			return
 		}
-		name := SanitizeName(r.URL.Query().Get("name"))
+		name := sanitizeName(r.URL.Query().Get("name"))
 		pid := sanitizePid(r.URL.Query().Get("pid"))
 		opts := hub.JoinOptions{
 			Capacity:    parseCapacity(r.URL.Query().Get("cap")),
@@ -75,13 +81,17 @@ func newCodeHandler(h *hub.Hub) http.HandlerFunc {
 	}
 }
 
-func healthHandler(h *hub.Hub) http.HandlerFunc {
+func healthHandler(h *hub.Hub, arc *arcade.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		writeJSON(w, map[string]any{"status": "ok", "rooms": h.RoomCount()})
+		body := map[string]any{"status": "ok", "rooms": h.RoomCount()}
+		if arc != nil && arc.Enabled() {
+			body["arcade"] = true
+		}
+		writeJSON(w, body)
 	}
 }
 
@@ -128,14 +138,34 @@ func corsJSON(next http.HandlerFunc, allowed []string, limiter *ipRateLimiter, r
 	}
 }
 
+// corsAPI wraps the /api subtree so the static frontend can call arcade endpoints.
+func corsAPI(allowed []string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		rejected := !originAllowed(origin, allowed)
+		if rejected {
+			http.Error(w, "origin not allowed", http.StatusForbidden)
+			return
+		}
+		setCORS(w, origin, allowed)
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Session-Token")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-// SanitizeName trims a display name and caps its length so a peer cannot inject
+// sanitizeName trims a display name and caps its length so a peer cannot inject
 // huge or control-laden strings into the other player's UI.
-func SanitizeName(raw string) string {
+func sanitizeName(raw string) string {
 	name := strings.TrimSpace(raw)
 	name = strings.Map(func(r rune) rune {
 		if r < 0x20 || r == 0x7f {

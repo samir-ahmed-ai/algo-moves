@@ -1,5 +1,5 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
-import { TreeBoard } from '../../components/TreeBoard';
+import { TreeBoard } from '../../components/board/TreeBoard';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';

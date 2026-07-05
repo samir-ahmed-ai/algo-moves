@@ -3,8 +3,8 @@ import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
-import { TreeBoard } from '../../components/TreeBoard';
-import { QueueTape } from '../../components/QueueTape';
+import { TreeBoard } from '../../components/board/TreeBoard';
+import { QueueTape } from '../../components/board/QueueTape';
 import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 type Op = { kind: 'insert'; value: number } | { kind: 'extract' };
