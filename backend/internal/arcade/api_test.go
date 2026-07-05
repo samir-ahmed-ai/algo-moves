@@ -433,3 +433,45 @@ func doJSONList(t *testing.T, base, method, path, token, payload string) jsonLis
 	_ = json.NewDecoder(res.Body).Decode(&out.body)
 	return out
 }
+
+// Integration test — skipped unless DATABASE_URL is set.
+func TestContentCatalogSeed(t *testing.T) {
+	url := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+	if url == "" {
+		t.Skip("DATABASE_URL not set")
+	}
+	t.Setenv("DATABASE_URL", url)
+	t.Setenv("RUN_MIGRATIONS", "true")
+	t.Setenv("RUN_CONTENT_SEED", "true")
+
+	ctx := context.Background()
+	svc, err := Open(ctx)
+	if err != nil {
+		t.Fatalf("open: %v", err)
+	}
+	if svc == nil || !svc.Enabled() {
+		t.Fatal("expected enabled arcade service")
+	}
+	defer svc.Close()
+
+	mux := http.NewServeMux()
+	svc.Register(mux)
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL + "/api/content/catalog")
+	if err != nil {
+		t.Fatalf("catalog get: %v", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("catalog status: %d", res.StatusCode)
+	}
+	var catalog []map[string]any
+	if err := json.NewDecoder(res.Body).Decode(&catalog); err != nil {
+		t.Fatalf("decode catalog: %v", err)
+	}
+	if len(catalog) == 0 {
+		t.Fatal("expected non-empty content catalog after RUN_CONTENT_SEED")
+	}
+}

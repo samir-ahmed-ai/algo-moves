@@ -14,6 +14,9 @@ import (
 //go:embed migrations/*.sql
 var migrationFS embed.FS
 
+//go:embed seeds/content_seed.sql
+var contentSeedSQL []byte
+
 // Migrate applies embedded SQL migrations in lexical order. Idempotent statements
 // (create if not exists, or replace) are safe to re-run on deploy.
 func Migrate(ctx context.Context, pool *pgxpool.Pool) error {
@@ -56,4 +59,16 @@ on conflict (id) do update set
   sort_order = excluded.sort_order`
 	_, err := pool.Exec(ctx, strings.TrimSpace(q))
 	return err
+}
+
+// SeedContent reloads the learning catalog from the embedded export. The SQL
+// truncates and repopulates content tables, so it is safe to re-run on deploy.
+func SeedContent(ctx context.Context, pool *pgxpool.Pool) error {
+	if len(contentSeedSQL) == 0 {
+		return fmt.Errorf("embedded content seed is empty — run export-content-sql and sync backend/internal/arcade/seeds/")
+	}
+	if _, err := pool.Exec(ctx, string(contentSeedSQL)); err != nil {
+		return fmt.Errorf("apply content seed: %w", err)
+	}
+	return nil
 }

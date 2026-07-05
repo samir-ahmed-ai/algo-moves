@@ -168,7 +168,8 @@ Deploy the **frontend** and **game server** on [Railway](https://railway.com). P
    |---------|----------|---------------|
    | **backend** | `ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
    | **backend** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (use **Add Reference**) |
-   | **backend** | `RUN_MIGRATIONS` | `true` |
+   | **backend** | `RUN_MIGRATIONS` | `true` — apply schema + achievement seed on every deploy; set `false` to skip |
+   | **backend** | `RUN_CONTENT_SEED` | `true` — reload learning catalog on every deploy; set `false` to skip |
    | **frontend** | `VITE_GAMES_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
 
    Use your exact Railway service names in the `${{…}}` references.

@@ -124,7 +124,8 @@ The repo includes [`railway.toml`](railway.toml) and [`Dockerfile`](Dockerfile).
 | -------- | ------- |
 | `ALLOWED_ORIGINS` | Comma-separated browser origins, e.g. `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
 | `DATABASE_URL` | Postgres connection string (reference Railway Postgres plugin) |
-| `RUN_MIGRATIONS` | `true` to apply schema + seed on startup |
+| `RUN_MIGRATIONS` | `true` to apply schema + achievement seed on startup |
+| `RUN_CONTENT_SEED` | `true` to reload the learning catalog (`/api/content/*`) on startup |
 | `PORT` | Set automatically by Railway |
 
 The **frontend** service uses root directory `frontend`, the same GitHub repo/branch, and `VITE_GAMES_SERVER_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}`.
@@ -142,7 +143,8 @@ railway up backend --path-as-root --service backend --detach
 | `PORT` | Listen port (default `:8080`) |
 | `ALLOWED_ORIGINS` | Comma-separated browser origins allowed for WebSocket upgrade and CORS. Empty = allow all (LAN dev). |
 | `DATABASE_URL` | Postgres URL for arcade persistence. Unset = realtime-only (no `/api`). |
-| `RUN_MIGRATIONS` | Apply embedded SQL migrations + achievement seed on startup (`true`/`1`). |
+| `RUN_MIGRATIONS` | Apply embedded SQL migrations + achievement seed on startup (`true`/`1`). Set `false` to skip. |
+| `RUN_CONTENT_SEED` | Reload learning catalog from embedded `content_seed.sql` on startup (`true`/`1`). Requires content schema (run migrations first on fresh DB). Set `false` to skip. |
 | `MAX_ROOMS` | Cap on concurrent rooms; new-room `/ws` joins are rejected past this (default `5000`). Reconnects to existing rooms are never blocked by this cap. |
 
 Rate limits (per client IP): 60 WebSocket upgrades/minute, 20 `/new` calls/minute.

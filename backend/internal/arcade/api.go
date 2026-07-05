@@ -30,7 +30,7 @@ func Open(ctx context.Context) (*Service, error) {
 		pool.Close()
 		return nil, err
 	}
-	if os.Getenv("RUN_MIGRATIONS") == "1" || os.Getenv("RUN_MIGRATIONS") == "true" {
+	if envEnabled("RUN_MIGRATIONS") {
 		if err := Migrate(ctx, pool); err != nil {
 			pool.Close()
 			return nil, err
@@ -39,7 +39,14 @@ func Open(ctx context.Context) (*Service, error) {
 			pool.Close()
 			return nil, err
 		}
-		log.Printf("arcade: migrations and seed applied")
+		log.Printf("arcade: migrations and achievement seed applied")
+	}
+	if envEnabled("RUN_CONTENT_SEED") {
+		if err := SeedContent(ctx, pool); err != nil {
+			pool.Close()
+			return nil, err
+		}
+		log.Printf("arcade: learning content seed applied")
 	}
 	log.Printf("arcade: connected to postgres")
 	return &Service{store: NewStore(pool)}, nil

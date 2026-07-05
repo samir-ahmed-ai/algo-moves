@@ -14,8 +14,9 @@ still runs for zero-config LAN play — you just don't get profiles/leaderboards
 2. Open the **backend** service → **Variables** → add a reference to the Postgres
    service's `DATABASE_URL` (Railway offers `${{Postgres.DATABASE_URL}}` or similar
    when you use **Add Reference**).
-3. Set `RUN_MIGRATIONS=true` on the backend so schema + achievement seed apply on
-   deploy (or run migrations manually — see below).
+3. Set on the backend (both accept `true`/`1`; set `false` to skip on a given deploy):
+   - `RUN_MIGRATIONS=true` — schema migrations + achievement seed
+   - `RUN_CONTENT_SEED=true` — reload learning catalog (`/api/content/*`)
 4. Redeploy the backend. `GET /healthz` should return `"arcade": true`.
 
 No frontend env vars are needed for persistence — the browser calls the backend
@@ -65,12 +66,14 @@ npm --prefix frontend run check-content-sql     # CI drift guard (in check:all)
 ```
 
 The seed is a single transaction that **truncates and reloads** the content
-tables, so re-running always converges to the current catalog. It is large, so
-it is **not** applied automatically on deploy — apply it explicitly:
+tables, so re-running always converges to the current catalog. On Railway, set
+`RUN_CONTENT_SEED=true` on the backend to apply it on every deploy (embedded in
+the Docker image). Locally:
 
 ```bash
 make content-seed                       # regenerate + apply to $DATABASE_URL
 # or: SEED_CONTENT=1 ./scripts/migrate-db.sh
+# or: RUN_CONTENT_SEED=true make backend-dev   (after export-content-sql syncs the embed copy)
 # or: psql "$DATABASE_URL" -f db/content_seed.sql
 ```
 

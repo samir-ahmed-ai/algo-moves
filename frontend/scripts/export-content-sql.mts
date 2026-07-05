@@ -197,6 +197,7 @@ L.push('');
 const sql = L.join('\n');
 
 const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'db', 'content_seed.sql');
+const embedPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'backend', 'internal', 'arcade', 'seeds', 'content_seed.sql');
 const check = process.argv.includes('--check');
 const counts =
   `${courseRows.length} courses, ${storyRegionRows.length} story regions, ${topicRows.length} topics, ` +
@@ -212,5 +213,6 @@ if (check) {
   console.log(`✓ content seed up to date (${counts}).`);
 } else {
   writeFileSync(outPath, sql);
-  console.log(`✓ wrote db/content_seed.sql — ${counts}.`);
+  writeFileSync(embedPath, sql);
+  console.log(`✓ wrote db/content_seed.sql and backend/internal/arcade/seeds/content_seed.sql — ${counts}.`);
 }

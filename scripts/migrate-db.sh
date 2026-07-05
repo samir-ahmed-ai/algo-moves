@@ -18,6 +18,10 @@ done
 
 echo "==> Syncing embedded backend copies..."
 cp "$ROOT/db/migrations/"*.sql "$ROOT/backend/internal/arcade/migrations/"
+mkdir -p "$ROOT/backend/internal/arcade/seeds"
+if [[ -f "$ROOT/db/content_seed.sql" ]]; then
+  cp "$ROOT/db/content_seed.sql" "$ROOT/backend/internal/arcade/seeds/content_seed.sql"
+fi
 
 echo "==> Seeding achievements..."
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$ROOT/db/seed.sql"
@@ -34,4 +38,4 @@ if [[ "${SEED_CONTENT:-}" == "1" || "${SEED_CONTENT:-}" == "true" ]]; then
   fi
 fi
 
-echo "==> Done. Set DATABASE_URL and RUN_MIGRATIONS=true on the Railway backend service."
+echo "==> Done. Set DATABASE_URL, RUN_MIGRATIONS, and RUN_CONTENT_SEED on the Railway backend service."
