@@ -29,6 +29,7 @@ import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
 import { togglePanelCollapse } from './nodes/panelCollapse';
 import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
 import { CanvasToolbar } from './ui/CanvasToolbar';
+import { CanvasDockPanel } from './ui/CanvasDockPanel';
 import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from './nodes/PanelNode';
 import { RemovableEdge } from './edges/RemovableEdge';
 import { ContextMenu, LaserPointer, type MenuItem } from './ui/CanvasTools';
@@ -42,6 +43,7 @@ import { EFFECTS } from '../../effects/registry';
 import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
 import type { ShareState } from '@/store/navigation';
 import { applyAlign, applyDistribute, type AlignKind } from './layout/align';
+import { applyCanvasSnap, visibleFlowRect, type CanvasSnapRegion } from './layout/canvasSnap';
 import { FIT_VIEW_DURATION_MS } from './ui/canvasTokens';
 import {
   buildEdges,
@@ -206,7 +208,7 @@ function Inner({
   // Per-(plugin, mode) persistence: dragged positions/resizes + which panels were trash-removed.
   const { layoutRef, removedRef, removedEdgesRef, persist } = useCanvasLayoutPersistence();
 
-  const { fitView, screenToFlowPosition } = useReactFlow();
+  const { fitView, screenToFlowPosition, getViewport } = useReactFlow();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const viewportSize = useCallback(() => {
@@ -671,6 +673,15 @@ function Inner({
 
   const align = useCallback((a: AlignKind) => setNodes((nds) => applyAlign(nds as PanelFlowNode[], a)), [setNodes]);
   const distribute = useCallback((d: 'h' | 'v') => setNodes((nds) => applyDistribute(nds as PanelFlowNode[], d)), [setNodes]);
+  const canvasSnap = useCallback(
+    (region: CanvasSnapRegion) => {
+      const vp = getViewport();
+      const size = viewportSize();
+      const visible = visibleFlowRect(vp, size.width, size.height);
+      setNodes((nds) => applyCanvasSnap(nds as PanelFlowNode[], region, visible));
+    },
+    [getViewport, viewportSize, setNodes],
+  );
 
   useEffect(() => {
     setCanvasHud({
@@ -682,6 +693,8 @@ function Inner({
       setSnap,
       onPreset: applyPreset,
       onTidy: reset,
+      onCanvasSnap: canvasSnap,
+      canCanvasSnap: selCount === 1,
       tools: {
         selCount,
         onAlign: align,
@@ -702,6 +715,7 @@ function Inner({
     setSnap,
     applyPreset,
     reset,
+    canvasSnap,
     selCount,
     align,
     distribute,
@@ -978,6 +992,7 @@ function Inner({
               style={{ width: 132, height: 92 }}
             />
             {!present && <CanvasFloatingHud />}
+            {!present && <CanvasDockPanel />}
             {!present && <CanvasToolbar lock={lock} onToggleLock={() => setLock((l) => !l)} onTidy={reset} />}
             {!present && <InterviewHud />}
             <CanvasCollabOverlays />
@@ -1003,7 +1018,7 @@ function Inner({
           {nodes.length === 0 && (
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
               <div className={cn('flex flex-col items-center gap-2 rounded-lg border border-edge bg-panel/85 px-4 py-3 text-ink2 shadow-sm backdrop-blur', chromeText.base)}>
-                <p>Empty canvas — use + in the toolbar or right-click to add panels.</p>
+                <p>Empty canvas — use the dock panel (top-left) or right-click to add panels.</p>
                 {!standalone && mode === 'visualize' && (
                   <button
                     type="button"

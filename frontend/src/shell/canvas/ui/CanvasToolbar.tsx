@@ -3,8 +3,6 @@ import {
   Home,
   Lock,
   Magnet,
-  Plus,
-  Sparkles,
   Undo2,
   Redo2,
   Users,
@@ -12,7 +10,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
-import { chromeText } from '../../chromeUi';
 import { RADIUS_SHELL } from './nodeui';
 import { SessionBody } from '../collab/collabWidgets';
 
@@ -36,13 +33,10 @@ function usePopoverDismiss(ref: RefObject<HTMLElement | null>, open: boolean, on
 
 /** Minimal floating toolbar for the standalone freeform canvas. */
 export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps) {
-  const { goHome, canvasAdd, canvasHud, present } = useWorkspace();
-  const [addOpen, setAddOpen] = useState(false);
+  const { goHome, canvasHud, present } = useWorkspace();
   const [collabOpen, setCollabOpen] = useState(false);
-  const addRef = useRef<HTMLDivElement>(null);
   const collabRef = useRef<HTMLDivElement>(null);
 
-  usePopoverDismiss(addRef, addOpen, () => setAddOpen(false));
   usePopoverDismiss(collabRef, collabOpen, () => setCollabOpen(false));
 
   if (present || !canvasHud) return null;
@@ -62,74 +56,6 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
       <button type="button" title="Home" aria-label="Home" onClick={() => goHome()} className={btnClass}>
         <Home className="h-4 w-4" />
       </button>
-
-      <div ref={addRef} className="relative">
-        <button
-          type="button"
-          title="Add panel or effect"
-          aria-label="Add panel or effect"
-          aria-expanded={addOpen}
-          onClick={() => setAddOpen((o) => !o)}
-          className={cn(btnClass, addOpen && 'bg-accentbg text-accent')}
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-        {addOpen && canvasAdd && (
-          <div
-            className={cn(
-              'absolute right-0 top-full z-20 mt-1 max-h-[min(360px,50vh)] w-52 overflow-y-auto border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
-              RADIUS_SHELL,
-            )}
-          >
-            {canvasAdd.addableKinds.length > 0 && (
-              <>
-                <p className={cn('px-2 py-1 font-semibold text-ink3', chromeText.xs)}>Panels</p>
-                {canvasAdd.addableKinds.map((k) => (
-                  <button
-                    key={k.id}
-                    type="button"
-                    onClick={() => {
-                      canvasAdd.onAddKind(k.id);
-                      setAddOpen(false);
-                    }}
-                    className={cn(
-                      'flex w-full rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
-                      chromeText.sm,
-                    )}
-                  >
-                    {k.title}
-                  </button>
-                ))}
-              </>
-            )}
-            {canvasAdd.addableEffects && canvasAdd.addableEffects.length > 0 && (
-              <>
-                <p className={cn('mt-1 px-2 py-1 font-semibold text-ink3', chromeText.xs)}>Effects</p>
-                {canvasAdd.addableEffects.map((e) => (
-                  <button
-                    key={e.id}
-                    type="button"
-                    onClick={() => {
-                      canvasAdd.onAddEffect?.(e.id);
-                      setAddOpen(false);
-                    }}
-                    className={cn(
-                      'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
-                      chromeText.sm,
-                    )}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
-                    {e.title}
-                  </button>
-                ))}
-              </>
-            )}
-            {!canvasAdd.addableKinds.length && !canvasAdd.addableEffects?.length && (
-              <p className={cn('px-2 py-2 text-ink3', chromeText.sm)}>Nothing to add</p>
-            )}
-          </div>
-        )}
-      </div>
 
       <div ref={collabRef} className="relative">
         <button

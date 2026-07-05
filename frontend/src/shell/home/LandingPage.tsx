@@ -509,7 +509,7 @@ export function LandingPage() {
             <button
               type="button"
               title="Open workspace"
-              onClick={() => enterWorkspace()}
+              onClick={() => enterCanvas()}
               className="ml-1 inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
               {compactLabel('Open workspace', 'Open', isMobile)}

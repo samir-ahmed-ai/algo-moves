@@ -7,7 +7,7 @@ import {
   type ThemePreset,
 } from '@/styles/themes/registry';
 import type { ProjectState } from '@/store/project-state/projectState';
-import type { AlignKind, BgVariant, EdgeOpts, LayoutPreset } from '@/lib/canvas/layoutPrefs';
+import type { AlignKind, BgVariant, CanvasSnapRegion, EdgeOpts, LayoutPreset } from '@/lib/canvas/layoutPrefs';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 import { readStorageText, writeStorageJson } from '@/store/persistence/storage';
 
@@ -28,7 +28,7 @@ export type Density = 'compact' | 'ultra' | 'spacious';
 export type Palette = 'default' | 'cb';
 /** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, or the two-player games arcade. */
 export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim' | 'games';
-export type { ThemePreset, LayoutPreset };
+export type { ThemePreset, LayoutPreset, CanvasSnapRegion };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 
 export interface WorkspaceDefaults {
@@ -81,6 +81,8 @@ export interface CanvasHudProps {
   setSnap: (b: boolean) => void;
   onPreset: (p: LayoutPreset) => void;
   onTidy: () => void;
+  onCanvasSnap: (region: CanvasSnapRegion) => void;
+  canCanvasSnap: boolean;
   tools: CanvasToolsProps;
 }
 

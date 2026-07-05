@@ -42,3 +42,16 @@ export const defaultEdgeOpts: EdgeOpts = {
 /** Node alignment directions for the canvas align/distribute tools. Pure type,
  * homed here so the store's CanvasToolsProps contract doesn't import shell. */
 export type AlignKind = 'left' | 'hcenter' | 'right' | 'top' | 'vmiddle' | 'bottom';
+
+/** Viewport snap regions for single-node canvas docking. */
+export type CanvasSnapRegion =
+  | 'left'
+  | 'right'
+  | 'top'
+  | 'bottom'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'center'
+  | 'maximize';

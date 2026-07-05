@@ -1,3 +1,4 @@
+export * from './CanvasDockPanel';
 export * from './CanvasFloatingHud';
 export * from './CanvasToolbar';
 export * from './CanvasTools';
