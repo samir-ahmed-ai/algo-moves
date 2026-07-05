@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -150,7 +150,135 @@ function Inspector({ frame }: InspectorProps<FirstUniqueState>) {
 export const manifestId = 'prep-strings-find-first-unique-character';
 export const title = 'Find first unique character';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find first unique character\"?",
+    choices: [
+      {
+        label: "Frequency map — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Pointers Greedy — different approach"
+      },
+      {
+        label: "Hash by signature — different approach"
+      },
+      {
+        label: "Greedy (keep max in group) — different approach"
+      }
+    ],
+    explain: "Count pass, then first char whose count is 1 in original order"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find first unique character), what strategy is established?",
+    choices: [
+      {
+        label: "Count pass, then first char whose — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find First Unique Character: return the index of the first character that appears exactly once. We do two passes — first count every character into a frequency map (O(1) space, at most 26/128 keys), then scan the string in original order for the first count of 1."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FOUND\" step (index ), what happens?",
+    choices: [
+      {
+        label: "Pass 2, index : '' — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Pass 2, index : '' has count  — it is unique. This is the first such character, so return index ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current index being inspected — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current index being inspected"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find first unique character\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n*m) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). freq map; scan original for cnt==1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Pass 2, index : '' appears — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Pass 2, index : '' appears  times — not unique. Keep scanning."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ffu1', label: '"leetcode"', value: { s: 'leetcode' } },
     { id: 'ffu2', label: '"aabb"', value: { s: 'aabb' } },

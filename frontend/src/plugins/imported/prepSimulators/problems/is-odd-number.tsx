@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -133,7 +133,135 @@ function Inspector({ frame }: InspectorProps<IsOddState>) {
 export const manifestId = 'prep-math-is-odd-number';
 export const title = 'Is odd number';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is odd number\"?",
+    choices: [
+      {
+        label: "Parity bit test — fits this problem",
+        correct: true
+      },
+      {
+        label: "Grade-school multiplication — different approach"
+      },
+      {
+        label: "Base conversion repeated divmod — different approach"
+      },
+      {
+        label: "Strobogrammatic map — different approach"
+      }
+    ],
+    explain: "Lowest bit set means the number is odd"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Is odd number), what strategy is established?",
+    choices: [
+      {
+        label: "Lowest bit set means the number — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Is Odd Number: decide if  is odd. A number's parity is decided entirely by its lowest binary bit — the 1s place. We never need to divide; the mask n & 1 reads that single bit in O(1) time and O(1) space."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"READ_LOW\" step (bit0=), what happens?",
+    choices: [
+      {
+        label: "Look only at the lowest bit — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Look only at the lowest bit (index , the 1s place): it is . This is exactly what n & 1 isolates — it zeroes out every higher bit and keeps just this one."
+  },
+  {
+    id: "state",
+    prompt: "What does the `bits` field track in the visualization state?",
+    choices: [
+      {
+        label: "binary digits, most-significant first — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `bits` in sync: binary digits, most-significant first"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is odd number\"?",
+    choices: [
+      {
+        label: "O(1) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+      },
+      {
+        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+      }
+    ],
+    explain: "O(1). O(1). return n&1 == 1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Compute the mask: & 1 = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Compute the mask:  & 1 = . AND-ing with 1 (binary …0001) discards all higher bits and returns the value of the lowest bit."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'io1', label: 'n = 7', value: { n: 7 } },
     { id: 'io2', label: 'n = 12', value: { n: 12 } },

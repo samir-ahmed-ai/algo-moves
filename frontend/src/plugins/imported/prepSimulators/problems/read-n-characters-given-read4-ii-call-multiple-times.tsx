@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -131,7 +131,115 @@ function Inspector({ frame }: InspectorProps<Read4State>) {
 export const manifestId = 'prep-design-read-n-characters-given-read4-ii-call-multiple-times';
 export const title = 'Read N Characters Given read4 II Call Multiple Times';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Read N Characters Given Read4 II - Call Multiple Times\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Log parsing aggregation — different approach"
+      },
+      {
+        label: "Copy-on-write version snapshots — different approach"
+      },
+      {
+        label: "Stack — different approach"
+      }
+    ],
+    explain: "See Read N Characters Given Read4 Ii Call Multiple Times pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Read N Characters Given Read4 II - Call Multiple Times), what strategy is established?",
+    choices: [
+      {
+        label: "See Read N Characters Given Read4 — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Read4 II: internal buf4 buffer. When i4==n4, call read4() to refill. Copy chars into user buf until n chars or EOF."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"READ\" step ( chars), what happens?",
+    choices: [
+      {
+        label: "Read(buf, ): copied char(s) \"\" — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Read(buf, ): copied  char(s) \"\" from buf4."
+  },
+  {
+    id: "state",
+    prompt: "What does the `chunks` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field chunks in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `chunks` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Read(buf, ): copied char(s) \"\" — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Read(buf, ): copied  char(s) \"\" from buf4."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'r4a',

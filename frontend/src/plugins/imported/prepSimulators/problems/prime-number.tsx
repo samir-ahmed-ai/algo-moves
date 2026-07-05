@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -184,7 +184,135 @@ function Inspector({ frame }: InspectorProps<PrimeState>) {
 export const manifestId = 'prep-math-prime-number';
 export const title = 'Prime number';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Prime number\"?",
+    choices: [
+      {
+        label: "Primality trial division — fits this problem",
+        correct: true
+      },
+      {
+        label: "Math (sum - n*min) — different approach"
+      },
+      {
+        label: "Base conversion repeated divmod — different approach"
+      },
+      {
+        label: "Palindrome number — different approach"
+      }
+    ],
+    explain: "Test divisors only up to sqrt(n)"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Prime number), what strategy is established?",
+    choices: [
+      {
+        label: "Test divisors only up to sqrt(n) — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Primality test by trial division: is  prime? We only need to test divisors up to √, because any factor larger than √ pairs with a smaller one we'd already have found. Time O(√n), space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"COMPOSITE\" step ( | ), what happens?",
+    choices: [
+      {
+        label: "= ×  — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " =  × , so  has a divisor other than 1 and itself.  is not prime."
+  },
+  {
+    id: "state",
+    prompt: "What does the `divisors` field track in the visualization state?",
+    choices: [
+      {
+        label: "candidate odd divisors 3, 5 — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `divisors` in sync: candidate odd divisors 3, 5, 7 … up to sqrt(n)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Prime number\"?",
+    choices: [
+      {
+        label: "O(sqrt(n)) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m*n) time, O(m+n) space — wrong order of growth"
+      },
+      {
+        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+      }
+    ],
+    explain: "O(sqrt(n)). O(1). n<2 false; even -> n==2; test odd i with i*i<=n"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "= ×  — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: " =  × , so  has a divisor other than 1 and itself.  is not prime."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'pn29', label: 'n = 29', value: { n: 29 } },
     { id: 'pn91', label: 'n = 91', value: { n: 91 } },

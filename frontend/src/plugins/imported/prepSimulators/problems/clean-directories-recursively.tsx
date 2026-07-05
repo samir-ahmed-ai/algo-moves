@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -152,7 +152,115 @@ function Inspector({ frame }: InspectorProps<CleanDirsState>) {
 export const manifestId = 'prep-streams-io-clean-directories-recursively';
 export const title = 'Clean directories recursively';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Clean directories recursively\"?",
+    choices: [
+      {
+        label: "Recursive directory walk — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two heaps median — different approach"
+      },
+      {
+        label: "Buffered line iterator — different approach"
+      },
+      {
+        label: "Token bucket rate limiter — different approach"
+      }
+    ],
+    explain: "Recurse depth-first; delete each directory once it's empty"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"CHECK\" step ( entries left), what happens?",
+    choices: [
+      {
+        label: "After recursing children, re-read \"\": entr — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "After recursing children, re-read \"\":  entr remain."
+  },
+  {
+    id: "state",
+    prompt: "What does the `tree` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field tree in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `tree` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Clean directories recursively\"?",
+    choices: [
+      {
+        label: "O(entries) time, O(depth) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(entries) time, O(matches) space — wrong order of growth"
+      }
+    ],
+    explain: "O(entries). O(depth). recurse children; if no entries remain -> Remove(root)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Walk complete. Removed empty director: []. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Walk complete. Removed  empty director: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'cd1',

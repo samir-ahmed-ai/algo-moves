@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -264,7 +264,115 @@ function Inspector({ frame }: InspectorProps<IsSquareState>) {
 export const manifestId = 'prep-intervals-is-square';
 export const title = 'Is square';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is square\"?",
+    choices: [
+      {
+        label: "Compare six pairwise distances — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sweep line with height events — different approach"
+      },
+      {
+        label: "Sort by start + adjacency check — different approach"
+      },
+      {
+        label: "Axis-separated rectangle overlap — different approach"
+      }
+    ],
+    explain: "A square has 4 equal sides, 2 equal diagonals, and side != diagonal"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"CHECK\" step (counts[]=), what happens?",
+    choices: [
+      {
+        label: "Check 1 — sides: d1 = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Check 1 — sides: d1 =  must occur exactly 4 times (the four edges). It occurs  time(s), so this check is ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `dists` field track in the visualization state?",
+    choices: [
+      {
+        label: "the 6 pairwise squared distances — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `dists` in sync: the 6 pairwise squared distances computed so far"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is square\"?",
+    choices: [
+      {
+        label: "O(1) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1). O(1). 6 pairwise dists; counts[side]==4 && counts[diag]==2 && side!=diag"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Check 3 — distinctness: the side — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Check 3 — distinctness: the side d1 =  and diagonal d2 =  must differ; otherwise the shape is degenerate. They are , so this check is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'sq1',

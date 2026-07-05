@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -160,7 +160,115 @@ function Inspector({ frame }: InspectorProps<TinyState>) {
 export const manifestId = 'prep-design-tiny-url';
 export const title = 'Tiny URL';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Tiny url\"?",
+    choices: [
+      {
+        label: "Bijective tiny URL encode/decode — fits this problem",
+        correct: true
+      },
+      {
+        label: "Copy-on-write version snapshots — different approach"
+      },
+      {
+        label: "Trie dictionary + spell suggest — different approach"
+      },
+      {
+        label: "Hash map + doubly linked list LRU — different approach"
+      }
+    ],
+    explain: "Counter -> base62 code; two maps wire short<->long both ways"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ENCODE\" step (id ), what happens?",
+    choices: [
+      {
+        label: "encode(\"\"): nextID= → base62 \"\" → — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "encode(\"\"): nextID= → base62 \"\" → short URL . Store both directions in maps."
+  },
+  {
+    id: "state",
+    prompt: "What does the `host` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field host in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `host` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Tiny url\"?",
+    choices: [
+      {
+        label: "O(1) time, O(urls) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(logs) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) get/put time, O(capacity) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1). O(urls). encode: id++ -> base62; decode: toShort lookup"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. URL(s) encoded. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done.  URL(s) encoded."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'tiny1',

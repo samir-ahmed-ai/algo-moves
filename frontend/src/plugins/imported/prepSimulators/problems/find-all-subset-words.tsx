@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -188,7 +188,135 @@ function Inspector({ frame }: InspectorProps<SubsetWordsState>) {
 export const manifestId = 'prep-strings-find-all-subset-words';
 export const title = 'Find all subset words';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find all subset words\"?",
+    choices: [
+      {
+        label: "Multiset match — fits this problem",
+        correct: true
+      },
+      {
+        label: "Char frequency — different approach"
+      },
+      {
+        label: "Counting — different approach"
+      },
+      {
+        label: "Greedy line break — different approach"
+      }
+    ],
+    explain: "Each word's letters must fit inside text's letter pile"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find all subset words), what strategy is established?",
+    choices: [
+      {
+        label: "Each word's letters must fit inside — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find all subset words: a word qualifies if its letters all fit inside text's letter pile. First tally how many of each letter text=\"\" has, then test each word against that pile. Time O(n), Space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FIT\" step ('' <=), what happens?",
+    choices: [
+      {
+        label: "Letter '' is needed time(s) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Letter '' is needed  time(s) so far and the text pile has  — it still fits ( ≤ ). Move to the next letter."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cnt` field track in the visualization state?",
+    choices: [
+      {
+        label: "text letter pile (sorted — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cnt` in sync: text letter pile (sorted by letter)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find all subset words\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(n^2) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). count text; word letter freq must stay <= text"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every letter of \"\" fit inside — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every letter of \"\" fit inside the text pile, so \"\" is a subset word. Add it to the result."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'fsw1',

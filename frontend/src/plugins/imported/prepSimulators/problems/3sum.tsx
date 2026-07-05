@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
@@ -271,7 +271,135 @@ function Inspector({ frame }: InspectorProps<ThreeSumState>) {
 export const manifestId = 'prep-sorting-3sum';
 export const title = '3Sum';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"3Sum\"?",
+    choices: [
+      {
+        label: "Sort + Two Pointers — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort (attack desc, defense asc) + Max — different approach"
+      },
+      {
+        label: "Monotonic Stack — different approach"
+      },
+      {
+        label: "Memoized Collatz + Sort — different approach"
+      }
+    ],
+    explain: "Sort, then fix `nums[i]`, use two pointers `l=i+1, r=n-1` for the remaining pair"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (3Sum), what strategy is established?",
+    choices: [
+      {
+        label: "Sort, then fix `nums[i]`, use two — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "3Sum: find every unique triplet that sums to 0. Strategy: sort the array, then for each fixed anchor nums[i] walk two pointers (l from the left, r from the right) inward to find the remaining pair."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FIX_I\" step (anchor ), what happens?",
+    choices: [
+      {
+        label: "Fix the anchor nums[] = . — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Fix the anchor nums[] = . Set l =  (just right of the anchor) and r =  (the last element); we need nums[l] + nums[r] = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nums` field track in the visualization state?",
+    choices: [
+      {
+        label: "the working array (sorted — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `nums` in sync: the working array (sorted after the sort phase)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"3Sum\"?",
+    choices: [
+      {
+        label: "O(n²) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n²). O(1). Sort, then fix `nums[i]`, use two pointers `l=i+1, r=n-1` for the remaining pair; Skip duplicates: if `nums[i] == nums[i-1]`, skip `i`; after finding a triplet,"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Sum is above 0, so we — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Sum  is above 0, so we need a smaller value. Because the array is sorted, moving r leftward (r → ) decreases the sum."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ts1', label: '[-1,0,1,2,-1,-4]', value: { nums: [-1, 0, 1, 2, -1, -4] } },
     { id: 'ts2', label: '[0,0,0,0]', value: { nums: [0, 0, 0, 0] } },

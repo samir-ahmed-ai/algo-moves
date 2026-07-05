@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -210,7 +210,135 @@ const SAMPLE_B: NaryInput = {
   ],
 };
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Level order\"?",
+    choices: [
+      {
+        label: "N-ary BFS level order — fits this problem",
+        correct: true
+      },
+      {
+        label: "Tree build + iterative pre-order — different approach"
+      },
+      {
+        label: "DFS with max tracking — different approach"
+      },
+      {
+        label: "BFS + Sort per column — different approach"
+      }
+    ],
+    explain: "Process the whole frontier, gathering all children into the next level"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Level order), what strategy is established?",
+    choices: [
+      {
+        label: "Process the whole frontier, gathering — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Level order BFS: process the whole current frontier one level at a time. Start the frontier with just the root ()."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"READ\" step (+), what happens?",
+    choices: [
+      {
+        label: "Read node : append its value — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Read node : append its value to the level- row and push its  child () onto the next frontier."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nodes` field track in the visualization state?",
+    choices: [
+      {
+        label: "the whole tree, flat — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `nodes` in sync: the whole tree, flat"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Level order\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) amortized time, O(h) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). row = frontier vals; next frontier = all children"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The frontier is empty, so every — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The frontier is empty, so every node has been placed. The level order is  —  level. Time O(n), Space O(n)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'lo-a', label: '1 → (3,2,4) → (5,6)', value: SAMPLE_A },
     { id: 'lo-b', label: '1 → (2,3) → (4,5,6)', value: SAMPLE_B },

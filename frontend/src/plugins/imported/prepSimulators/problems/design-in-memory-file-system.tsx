@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -155,7 +155,55 @@ function Inspector({ frame }: InspectorProps<FsState>) {
 export const manifestId = 'prep-design-design-in-memory-file-system';
 export const title = 'Design In-Memory File System';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Design In-Memory File System\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Heaps — different approach"
+      },
+      {
+        label: "Round-robin load balancer — different approach"
+      },
+      {
+        label: "Bijective tiny URL encode/decode — different approach"
+      }
+    ],
+    explain: "See Design In Memory File System pattern"
+  },
+  {
+    id: "state",
+    prompt: "What does the `tree` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field tree in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `tree` on every emit so each frame shows the algorithm mid-step."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'fs1',

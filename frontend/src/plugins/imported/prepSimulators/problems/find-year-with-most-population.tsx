@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -240,7 +240,135 @@ function Inspector({ frame }: InspectorProps<PopulationState>) {
 export const manifestId = 'prep-hash-maps-find-year-with-most-population';
 export const title = 'Find year with most population';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find year with most population\"?",
+    choices: [
+      {
+        label: "Sweep line / delta map — fits this problem",
+        correct: true
+      },
+      {
+        label: "Binary search on answer — different approach"
+      },
+      {
+        label: "Two-pass frequency map — different approach"
+      },
+      {
+        label: "Custom hash key / struct map — different approach"
+      }
+    ],
+    explain: "+1 at birth, -1 at death+1; sweep years tracking running population"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find year with most population), what strategy is established?",
+    choices: [
+      {
+        label: "+1 at birth, -1 at death+1; — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find the year with the most people alive. Each person spans [birth, death]. Instead of touching every year of every life, we record only the changes: +1 the year someone is born, −1 the year after they die. Then a single sweep of the change points gives the running population."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SORT\" step ( change years), what happens?",
+    choices: [
+      {
+        label: "The delta map is complete. Collect — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "The delta map is complete. Collect its keys and sort them: []. These are the only years where the population can change, so we sweep them left to right with a prefix sum."
+  },
+  {
+    id: "state",
+    prompt: "What does the `intervals` field track in the visualization state?",
+    choices: [
+      {
+        label: "the raw input intervals — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `intervals` in sync: the raw input intervals"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find year with most population\"?",
+    choices: [
+      {
+        label: "O(p log p) time, O(y) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(t log t) time, O(t) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(p log p). O(y). delta[birth]++, delta[death+1]--; prefix-sum, track peak year"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The sweep is finished. The maximum — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The sweep is finished. The maximum running population was , first reached in year . Return ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'pop1',

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { ArrayRow } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -136,7 +136,135 @@ function Inspector({ frame }: InspectorProps<KthStreamState>) {
 export const manifestId = 'prep-streams-io-find-kth-largest-in-stream';
 export const title = 'Find Kth largest in stream';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find Kth largest in stream\"?",
+    choices: [
+      {
+        label: "Min-heap size k — fits this problem",
+        correct: true
+      },
+      {
+        label: "Filesystem walk with size filter — different approach"
+      },
+      {
+        label: "Recursive directory walk — different approach"
+      },
+      {
+        label: "K-way merge with min-heap — different approach"
+      }
+    ],
+    explain: "Min-heap of the k largest seen; its root is the kth largest"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find Kth largest in stream), what strategy is established?",
+    choices: [
+      {
+        label: "Min-heap of the k largest seen; — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Kth largest in stream: maintain a min-heap of size k holding the k largest values seen. The root (smallest of those k) is the kth largest."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ADD\" step (push ), what happens?",
+    choices: [
+      {
+        label: "Stream add : push into min-heap. — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Stream add : push into min-heap."
+  },
+  {
+    id: "state",
+    prompt: "What does the `k` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field k in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `k` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find Kth largest in stream\"?",
+    choices: [
+      {
+        label: "O(n log k) time, O(k) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(file size) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log k). O(k). push val; if size>k popMin; answer is heap[0]"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Return heap[0] = — the kth — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Return heap[0] =  — the kth largest after adding ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'kts1', label: 'k=3, init=[4,5], stream=[8,2,9]', value: { k: 3, init: [4, 5], stream: [8, 2, 9] } },
     { id: 'kts2', label: 'k=2, init=[], stream=[3,1,4,1,5]', value: { k: 2, init: [], stream: [3, 1, 4, 1, 5] } },

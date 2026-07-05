@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -201,7 +201,135 @@ function Inspector({ frame }: InspectorProps<PrefixScoresState>) {
 export const manifestId = 'prep-strings-sum-of-prefix-scores-of-strings';
 export const title = 'Sum of Prefix Scores of Strings';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Sum of Prefix Scores of Strings\"?",
+    choices: [
+      {
+        label: "Trie (count at each node) — fits this problem",
+        correct: true
+      },
+      {
+        label: "Greedy Line Packing — different approach"
+      },
+      {
+        label: "Two pointers — different approach"
+      },
+      {
+        label: "Reverse in place — different approach"
+      }
+    ],
+    explain: "See Sum Of Prefix Scores Of Strings pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Sum of Prefix Scores of Strings), what strategy is established?",
+    choices: [
+      {
+        label: "See Sum Of Prefix Scores — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Sum of Prefix Scores: the score of a word is the number of (word, prefix) pairs whose prefix equals a prefix of that word — i.e. how many words share each of its prefixes, summed over all its prefixes. We insert every word into a trie, counting how many words pass through each node, then re-walk each word adding those counts."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SCORE\" step (score \"\"), what happens?",
+    choices: [
+      {
+        label: "Now score \"\". Re-walk — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Now score \"\". Re-walk it from the root and add up the counter at each prefix node — that sum is the word's prefix score."
+  },
+  {
+    id: "state",
+    prompt: "What does the `wi` field track in the visualization state?",
+    choices: [
+      {
+        label: "current word index — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `wi` in sync: current word index"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Sum of Prefix Scores of Strings\"?",
+    choices: [
+      {
+        label: "O(n·L) time, O(n·L) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n*m) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O( time, O(words) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n·L). O(n·L). Sum Of Prefix Scores Of Strings"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All words scored. The prefix scores — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All words scored. The prefix scores are [], which sum to ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sp1', label: '["abc","ab","bc","b"]', value: { words: ['abc', 'ab', 'bc', 'b'] } },
     { id: 'sp2', label: '["abcd","ab","bc","cba"]', value: { words: ['abcd', 'ab', 'bc', 'cba'] } },

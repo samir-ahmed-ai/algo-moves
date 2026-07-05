@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -194,7 +194,135 @@ function Inspector({ frame }: InspectorProps<RotateState>) {
 export const manifestId = 'prep-strings-rotate-string';
 export const title = 'Rotate string';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Rotate string\"?",
+    choices: [
+      {
+        label: "Double string trick — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bijection map — different approach"
+      },
+      {
+        label: "Char frequency — different approach"
+      },
+      {
+        label: "Multiset match — different approach"
+      }
+    ],
+    explain: "goal is a window hiding inside s+s"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Rotate string), what strategy is established?",
+    choices: [
+      {
+        label: "goal is a window hiding inside — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Rotate String: goal is a rotation of s iff both have equal length AND goal appears somewhere inside s + s. Every rotation of s is a length- window hiding in the doubled string."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WINDOW\" step (start=), what happens?",
+    choices: [
+      {
+        label: "Try the window starting at index — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Try the window starting at index : double[..] = \"\". Compare it to goal character by character."
+  },
+  {
+    id: "state",
+    prompt: "What does the `double` field track in the visualization state?",
+    choices: [
+      {
+        label: "s + s, split — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `double` in sync: s + s, split into chars — the track we slide the window along"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Rotate string\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). len equal AND goal is substring of s+s"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The whole window double[..] equals \"\". — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The whole window double[..] equals \"\". goal is a rotation of s — return true."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'rs1', label: '"abcde" → "cdeab"', value: { s: 'abcde', goal: 'cdeab' } },
     { id: 'rs2', label: '"abcde" → "abced"', value: { s: 'abcde', goal: 'abced' } },

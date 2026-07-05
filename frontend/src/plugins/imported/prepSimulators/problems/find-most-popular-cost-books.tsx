@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -180,7 +180,135 @@ function Inspector({ frame }: InspectorProps<BooksState>) {
 export const manifestId = 'prep-hash-maps-find-most-popular-cost-books';
 export const title = 'Find most popular cost books';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find most popular cost books\"?",
+    choices: [
+      {
+        label: "Two-pass frequency map — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sliding window + frequency map — different approach"
+      },
+      {
+        label: "Union-find via email index — different approach"
+      },
+      {
+        label: "Sort by distance to origin — different approach"
+      }
+    ],
+    explain: "Count costs, find the mode cost, then gather its books"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find most popular cost books), what strategy is established?",
+    choices: [
+      {
+        label: "Count costs, find the mode cost — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find Most Popular Cost Books: among  books, find the cost shared by the most books, then list every book at that cost. Pass 1 tallies a frequency map of costs, pass 2 picks the mode, pass 3 collects matching ids."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PICK\" step (best =  (×)), what happens?",
+    choices: [
+      {
+        label: "The most popular cost is step — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "The most popular cost is , shared by  book. Now collect every book at cost ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `costs` field track in the visualization state?",
+    choices: [
+      {
+        label: "bookList[i].cost — the row — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `costs` in sync: bookList[i].cost — the row of values shown"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find most popular cost books\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) per op time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) average time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). costCount++; pick max-count cost; collect ids at that cost"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. The books at the most — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. The books at the most popular cost  are []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'mpc1',

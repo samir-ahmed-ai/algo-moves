@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
@@ -164,7 +164,135 @@ function Inspector({ frame }: InspectorProps<PowerValueState>) {
 export const manifestId = 'prep-sorting-sort-integers-by-the-power-value';
 export const title = 'Sort Integers by The Power Value';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Sort Integers by The Power Value\"?",
+    choices: [
+      {
+        label: "Memoized Collatz + Sort — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort (attack desc, defense asc) + Max — different approach"
+      },
+      {
+        label: "Greedy Contribution Counting — different approach"
+      },
+      {
+        label: "Sort Frequencies + Greedy — different approach"
+      }
+    ],
+    explain: "Compute Collatz power for each number with memoization (recursive)"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Sort Integers by The Power Value), what strategy is established?",
+    choices: [
+      {
+        label: "Compute Collatz power for each number — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Sort Integers by The Power Value: list every integer in [, ], then sort them by Collatz power (the number of steps to reach 1, halving evens and doing 3n+1 on odds), breaking ties by the smaller value. The answer is the k-th element (k=)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SHIFT\" step ( > ), what happens?",
+    choices: [
+      {
+        label: "has key (power , value ) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " has key (power , value ) which outranks the key (power , value ), so shift  one slot right to make room."
+  },
+  {
+    id: "state",
+    prompt: "What does the `values` field track in the visualization state?",
+    choices: [
+      {
+        label: "the integers, in current (partially — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `values` in sync: the integers, in current (partially sorted) order"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Sort Integers by The Power Value\"?",
+    choices: [
+      {
+        label: "O(n·log n·C) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n·log n·C). O(n). Compute Collatz power for each number with memoization (recursive); Sort `[lo..hi]` by `(power, value)`, return k-th element"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Fully sorted by (power, value). — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Fully sorted by (power, value). The k-th element (index ) is  — that is the answer."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'pv1', label: 'lo=12, hi=15, k=2', value: { lo: 12, hi: 15, k: 2 } },
     { id: 'pv2', label: 'lo=7, hi=11, k=4', value: { lo: 7, hi: 11, k: 4 } },

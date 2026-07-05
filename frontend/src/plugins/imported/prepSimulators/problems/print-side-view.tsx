@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -170,7 +170,135 @@ function Inspector({ frame }: InspectorProps<SideViewState>) {
 export const manifestId = 'prep-trees-print-side-view';
 export const title = 'Print side view';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Print side view\"?",
+    choices: [
+      {
+        label: "BFS rightmost — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Pointers (linked-list intersection — different approach"
+      },
+      {
+        label: "DFS with max tracking — different approach"
+      },
+      {
+        label: "BFS + Sort per column — different approach"
+      }
+    ],
+    explain: "Take the last node seen on each BFS level"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Print side view), what strategy is established?",
+    choices: [
+      {
+        label: "Take the last node seen — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Right-side view: standing to the RIGHT of the tree, we see only the last node on each level. We BFS level by level; on every level the final node dequeued (i === sz − 1) is the one we can see."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step (skip ), what happens?",
+    choices: [
+      {
+        label: "Position i = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Position i =  is not the last on this level (sz − 1 = ), so node  is hidden behind a node further right. Dequeue it but do not add it to the view."
+  },
+  {
+    id: "state",
+    prompt: "What does the `queue` field track in the visualization state?",
+    choices: [
+      {
+        label: "node indices still waiting — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `queue` in sync: node indices still waiting in the BFS queue"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Print side view\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) amortized time, O(h) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). i==sz-1 -> append node.Val"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The queue is empty — every — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The queue is empty — every level has been processed. The side view, top to bottom, is []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // Level-order:      1
     //                 /   \

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -146,7 +146,135 @@ function Inspector({ frame }: InspectorProps<LongestUniqueState>) {
 export const manifestId = 'prep-strings-longest-substring-with-unique';
 export const title = 'Longest substring with unique';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Longest substring with unique\"?",
+    choices: [
+      {
+        label: "Sliding window — fits this problem",
+        correct: true
+      },
+      {
+        label: "Split + Reverse — different approach"
+      },
+      {
+        label: "Sliding window freq — different approach"
+      },
+      {
+        label: "Counter — different approach"
+      }
+    ],
+    explain: "Window jumps its left edge past the last duplicate"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Longest substring with unique), what strategy is established?",
+    choices: [
+      {
+        label: "Window jumps its left edge past — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Longest substring with all-unique characters. Slide a window over \"\" with left edge l and right edge r, remembering the last index each character appeared at. Whenever the incoming character was already inside the window, jump l past that old copy so the window stays duplicate-free."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"READ\" step (read ''), what happens?",
+    choices: [
+      {
+        label: "Read '' at index . — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Read '' at index . It is not present in the current window [..], so the window is still all-unique — no need to move l."
+  },
+  {
+    id: "state",
+    prompt: "What does the `l` field track in the visualization state?",
+    choices: [
+      {
+        label: "left edge of the current — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `l` in sync: left edge of the current window"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Longest substring with unique\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O( time, O(words) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). last[c]>=l -> l=last[c]+1; track r-l+1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Scanned the whole string. The longest — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Scanned the whole string. The longest window that stayed all-unique had length ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'lsu1', label: '"abcabcbb" → 3', value: { s: 'abcabcbb' } },
     { id: 'lsu2', label: '"pwwkew" → 3', value: { s: 'pwwkew' } },

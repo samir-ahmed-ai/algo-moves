@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -156,7 +156,135 @@ function Inspector({ frame }: InspectorProps<DifferState>) {
 export const manifestId = 'prep-strings-strings-differ-by-one-character';
 export const title = 'Strings Differ by One Character';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Strings Differ by One Character\"?",
+    choices: [
+      {
+        label: "Wildcard Hash Set — fits this problem",
+        correct: true
+      },
+      {
+        label: "Double string trick — different approach"
+      },
+      {
+        label: "Frequency map — different approach"
+      },
+      {
+        label: "Stack of unmatched indices — different approach"
+      }
+    ],
+    explain: "See Strings Differ By One Character pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Strings Differ by One Character), what strategy is established?",
+    choices: [
+      {
+        label: "See Strings Differ By One Character — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Strings Differ by One Character: is there a pair of words that match everywhere except at exactly one position? For each column we blank that column with \"*\"; two words sharing the same blanked key differ only at that column."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FOUND\" step (), what happens?",
+    choices: [
+      {
+        label: "Word (\"\") makes key \"\", which — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Word  (\"\") makes key \"\", which word  (\"\") already produced this column. They agree everywhere except column , so they differ by exactly one character. Answer: true."
+  },
+  {
+    id: "state",
+    prompt: "What does the `L` field track in the visualization state?",
+    choices: [
+      {
+        label: "shared word length — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `L` in sync: shared word length"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Strings Differ by One Character\"?",
+    choices: [
+      {
+        label: "O(n·L) time, O(n·L) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n*k) time, O(n*k) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n·L). O(n·L). Strings Differ By One Character"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Word (\"\") blanks column to key — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Word  (\"\") blanks column  to key \"\". It is new for this column, so remember it and continue."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sdoc1', label: '[abcd, acbd, aacd]', value: { dict: ['abcd', 'acbd', 'aacd'] } },
     { id: 'sdoc2', label: '[ab, cd, yz]', value: { dict: ['ab', 'cd', 'yz'] } },

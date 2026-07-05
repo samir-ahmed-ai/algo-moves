@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -191,7 +191,115 @@ function Inspector({ frame }: InspectorProps<ZigzagState>) {
 export const manifestId = 'prep-trees-binary-tree-zigzag-level-order-traversal';
 export const title = 'Binary Tree Zigzag Level Order Traversal';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Binary Tree Zigzag Level Order Traversal\"?",
+    choices: [
+      {
+        label: "BFS + Direction Toggle — fits this problem",
+        correct: true
+      },
+      {
+        label: "Inorder DFS (first/last tracking) — different approach"
+      },
+      {
+        label: "Inorder DFS (find two inversions) — different approach"
+      },
+      {
+        label: "Post-order height — different approach"
+      }
+    ],
+    explain: "Standard BFS level-by-level. For each level, place values at index `i` (left-to-right) or `levelSize-1-i` (right-to-left"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PLACE\" step ( → slot ), what happens?",
+    choices: [
+      {
+        label: "Dequeue node (position in this level) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Dequeue node  (position  in this level) and place its value at slot  because the level fills ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `visited` field track in the visualization state?",
+    choices: [
+      {
+        label: "node indices already — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `visited` in sync: node indices already dequeued and recorded"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Binary Tree Zigzag Level Order Traversal\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). Standard BFS level-by-level. For each level, place values at index `i` (left-to-right) or `levelSize-1-i` (right-to-left); Toggle `leftToRight` flag each level"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every level has been processed. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every level has been processed. The zigzag level order is []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'zz1', label: '[3,9,20,null,null,15,7]', value: { tree: [3, 9, 20, null, null, 15, 7] } },
     { id: 'zz2', label: '[1,2,3,4,5,6,7]', value: { tree: [1, 2, 3, 4, 5, 6, 7] } },

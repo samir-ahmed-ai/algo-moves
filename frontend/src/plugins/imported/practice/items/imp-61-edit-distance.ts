@@ -74,7 +74,7 @@ export const bundle: PracticeBundle = {
           "label": "The index of the current — character being processed"
         },
         {
-          "label": "Placeholder values — the main fill"
+          "label": "Zero-initialized cells — overwritten before the main fill"
         },
         {
           "label": "The minimum number of insertions — needed when one string is empty"

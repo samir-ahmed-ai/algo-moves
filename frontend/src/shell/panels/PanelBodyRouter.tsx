@@ -29,7 +29,8 @@ import { PatternPanelBody } from './reference/PatternPanelBody';
 import { WatchPanelBody } from './reference/WatchPanelBody';
 import { TabBody } from './shared/TabBody';
 
-/** Panels whose content is rendered elsewhere (e.g. Code Studio node) render nothing here. */
+/** Panels whose content is rendered elsewhere (e.g. Code Studio node) render nothing here.
+ *  NullBody kinds with chrome metadata in core/panelNodeChrome.ts: workbench, code, scratch. */
 const NullBody: ComponentType = () => null;
 
 /**

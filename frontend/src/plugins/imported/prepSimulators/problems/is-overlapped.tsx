@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -201,7 +201,115 @@ function Inspector({ frame }: InspectorProps<OverlapState>) {
 export const manifestId = 'prep-intervals-is-overlapped';
 export const title = 'Is overlapped';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is overlapped\"?",
+    choices: [
+      {
+        label: "Axis-separated rectangle overlap — fits this problem",
+        correct: true
+      },
+      {
+        label: "Compare six pairwise distances — different approach"
+      },
+      {
+        label: "Brute-force nearest store by distance — different approach"
+      },
+      {
+        label: "Sort + Greedy Merge — different approach"
+      }
+    ],
+    explain: "Overlap iff both the x-ranges and the y-ranges intersect with positive area"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"EDGES_Y\" step (max(,)=), what happens?",
+    choices: [
+      {
+        label: "Rightmost bottom edge: max(, ) = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Rightmost bottom edge: max(, ) = . Any shared Y range must start here."
+  },
+  {
+    id: "state",
+    prompt: "What does the `axis` field track in the visualization state?",
+    choices: [
+      {
+        label: "axis currently under inspection — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `axis` in sync: axis currently under inspection"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is overlapped\"?",
+    choices: [
+      {
+        label: "O(1) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1). O(1). min(rights) > max(lefts) on both X and Y"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Lowest top edge: min(, ) = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Lowest top edge: min(, ) = . Any shared Y range must end here."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ov-yes',

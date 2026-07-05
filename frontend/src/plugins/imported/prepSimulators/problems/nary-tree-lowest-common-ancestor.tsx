@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -234,7 +234,135 @@ function computeLca(tree: (number | null)[], a: number, b: number): number | nul
   return idx === -1 ? null : (tree[idx] as number);
 }
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find lowest common ancestor\"?",
+    choices: [
+      {
+        label: "N-ary tree LCA post-order — fits this problem",
+        correct: true
+      },
+      {
+        label: "BFS serialize — different approach"
+      },
+      {
+        label: "N-ary tree DFS height — different approach"
+      },
+      {
+        label: "N-ary iterative pre/post-order with stack — different approach"
+      }
+    ],
+    explain: "The node where two different children each return a hit is the LCA"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find lowest common ancestor), what strategy is established?",
+    choices: [
+      {
+        label: "The node where two different children — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Lowest Common Ancestor of  and : recurse post-order. Each node reports whether it (or its subtree) contained a target. The deepest node where two different children each report a hit is the LCA."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MISS\" step (child of  empty), what happens?",
+    choices: [
+      {
+        label: "That child subtree of node held — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "That child subtree of node  held neither target — nothing to propagate. Keep the hit count at ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "node index currently being visited — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: node index currently being visited"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find lowest common ancestor\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). count child hits; >=2 -> root; ==1 -> propagate found"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The recursion settled on node — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The recursion settled on node  as the lowest common ancestor of  and ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'lca1', label: 'LCA(7, 4) → 2', value: { tree: SAMPLE_TREE, a: 7, b: 4 } },
     { id: 'lca2', label: 'LCA(6, 4) → 5', value: { tree: SAMPLE_TREE, a: 6, b: 4 } },

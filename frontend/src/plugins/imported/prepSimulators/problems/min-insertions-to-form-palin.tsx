@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -164,7 +164,135 @@ function Inspector({ frame }: InspectorProps<PalinState>) {
 export const manifestId = 'prep-strings-min-insertions-to-form-palin';
 export const title = 'Min insertions to form palin-';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Min insertions to form palin-\"?",
+    choices: [
+      {
+        label: "DP palindrome — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Pointers — different approach"
+      },
+      {
+        label: "Frequency count — different approach"
+      },
+      {
+        label: "Char frequency — different approach"
+      }
+    ],
+    explain: "Answer is n minus the longest palindromic subsequence"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Min insertions to form palin-), what strategy is established?",
+    choices: [
+      {
+        label: "Answer is n minus the longest — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Minimum insertions to make \"\" a palindrome. The trick: the fewest insertions equals n − LPS, where LPS is the Longest Palindromic Subsequence. We build LPS with an interval DP where dp[l][r] is the LPS length of the substring s[l..r]."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step (dp[][]=), what happens?",
+    choices: [
+      {
+        label: "s[]='' differs from s[]='', so drop — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "s[]='' differs from s[]='', so drop one end and keep the better subsequence. dp[][] = max(dp[][]=, dp[][]=) = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `chars` field track in the visualization state?",
+    choices: [
+      {
+        label: "the input split into characters — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `chars` in sync: the input split into characters"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Min insertions to form palin-\"?",
+    choices: [
+      {
+        label: "O(n^2) time, O(n^2) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n^2). O(n^2). LPS interval DP; match -> +2 inside, else max(drop end); n-dp[0][n-1]"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The whole-string cell dp[0][] = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The whole-string cell dp[0][] =  is the longest palindromic subsequence length. Every character NOT in it needs a mirror inserted, so the answer is n − LPS =  −  = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'mip1', label: '"leetcode"', value: { s: 'leetcode' } },
     { id: 'mip2', label: '"mbadm"', value: { s: 'mbadm' } },

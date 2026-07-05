@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
@@ -161,7 +161,135 @@ function Inspector({ frame }: InspectorProps<StroboState>) {
 export const manifestId = 'prep-math-is-strobogrammatic-number';
 export const title = 'Is strobogrammatic number';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is strobogrammatic number\"?",
+    choices: [
+      {
+        label: "Strobogrammatic map — fits this problem",
+        correct: true
+      },
+      {
+        label: "Uniform random in range — different approach"
+      },
+      {
+        label: "Gauss sum XOR trick — different approach"
+      },
+      {
+        label: "Enumerate 2 candidates — different approach"
+      }
+    ],
+    explain: "Two pointers; each outer pair must map via 0/1/8/6/9"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Is strobogrammatic number), what strategy is established?",
+    choices: [
+      {
+        label: "Two pointers; each outer pair must — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Is Strobogrammatic: the number must read the same after rotating the whole string 180°. Walk two pointers inward — each outer digit d[lo] must rotate to exactly d[hi] using the map 0→0, 1→1, 8→8, 6→9, 9→6."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MATCH\" step (= ✓), what happens?",
+    choices: [
+      {
+        label: "Match: rotating \"\" gives \"\", which — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Match: rotating \"\" gives \"\", which equals d[]=\"\". This pair is symmetric. Step both pointers inward."
+  },
+  {
+    id: "state",
+    prompt: "What does the `lo` field track in the visualization state?",
+    choices: [
+      {
+        label: "outer-left pointer — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `lo` in sync: outer-left pointer"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is strobogrammatic number\"?",
+    choices: [
+      {
+        label: "O(log n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(√n) time, O(√n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(log n). O(1). pairs map; outer chars must map to each other or fail"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Match: rotating \"\" gives \"\", which — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Match: rotating \"\" gives \"\", which equals d[]=\"\". This pair is symmetric. Step both pointers inward."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'st1', label: '"69" → true', value: { s: '69' } },
     { id: 'st2', label: '"962" → false', value: { s: '962' } },

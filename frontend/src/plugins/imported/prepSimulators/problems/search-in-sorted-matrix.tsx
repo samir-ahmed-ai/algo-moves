@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -161,7 +161,135 @@ function Inspector({ frame }: InspectorProps<MatrixState>) {
 export const manifestId = 'prep-matrices-search-in-sorted-matrix';
 export const title = 'Search in sorted matrix';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Search in sorted matrix\"?",
+    choices: [
+      {
+        label: "Staircase search from top-right — fits this problem",
+        correct: true
+      },
+      {
+        label: "Grid DFS pathfinding — different approach"
+      },
+      {
+        label: "1D meeting point two pointers — different approach"
+      },
+      {
+        label: "Segment Extraction + Forward/Backward — different approach"
+      }
+    ],
+    explain: "Start top-right; go left when too big, down when too small"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Search in sorted matrix), what strategy is established?",
+    choices: [
+      {
+        label: "Start top-right; go left when too — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Staircase search: each row is sorted left→right and each column top→bottom. Start at the top-right corner (i=0, j=) — the only cell that is both the largest in its row and the smallest in its column, which makes every comparison decisive."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"LEFT\" step (j-- → ), what happens?",
+    choices: [
+      {
+        label: "> , so this whole column — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " > , so this whole column is too big at and above this corner — everything below in column  is even larger. Discard the column and move left: j becomes ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current row — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current row"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Search in sorted matrix\"?",
+    choices: [
+      {
+        label: "O(m+n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(1) extra space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m+n). O(1). i,j=0,n-1; >key -> j--, else i++"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "< , so this whole row — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: " < , so this whole row is too small from this corner leftward — everything to the left in row  is even smaller. Discard the row and move down: i becomes ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ssm1',

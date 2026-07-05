@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -183,7 +183,135 @@ function Inspector({ frame }: InspectorProps<HistogramState>) {
 export const manifestId = 'prep-arrays-max-rectangle-in-histogram';
 export const title = 'Max rectangle in histogram';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Max rectangle in histogram\"?",
+    choices: [
+      {
+        label: "Monotonic stack — fits this problem",
+        correct: true
+      },
+      {
+        label: "Reverse segments — different approach"
+      },
+      {
+        label: "Boyer-Moore voting — different approach"
+      },
+      {
+        label: "Merge from end — different approach"
+      }
+    ],
+    explain: "Increasing stack of bars; a shorter bar pops and settles rectangles"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Max rectangle in histogram), what strategy is established?",
+    choices: [
+      {
+        label: "Increasing stack of bars; a shorter — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Max Rectangle in Histogram: find the largest axis-aligned rectangle that fits under the bar heights. We keep a stack of indices whose heights are strictly increasing; a shorter bar makes the taller ones \"settle\" their widest possible rectangle."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"POP\" step (area=×=), what happens?",
+    choices: [
+      {
+        label: "Pop bar (height ). It spans — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Pop bar  (height ). It spans from just right of index  up to , a width of . Its rectangle area is  ×  = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current bar (or sentinel = — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current bar (or sentinel = heights.length)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Max rectangle in histogram\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n+m) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). push indices; on drop pop top, width=i-stack.top-1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every bar has settled. The largest — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every bar has settled. The largest rectangle has area ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'mh1', label: '[2,1,5,6,2,3]', value: { heights: [2, 1, 5, 6, 2, 3] } },
     { id: 'mh2', label: '[2,4]', value: { heights: [2, 4] } },

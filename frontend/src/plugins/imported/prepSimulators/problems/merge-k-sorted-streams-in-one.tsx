@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -151,7 +151,135 @@ function Inspector({ frame }: InspectorProps<MergeStreamsState>) {
 export const manifestId = 'prep-streams-io-merge-k-sorted-streams-in-one';
 export const title = 'Merge K sorted streams in one';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Merge K sorted streams in one\"?",
+    choices: [
+      {
+        label: "K-way merge with min-heap — fits this problem",
+        correct: true
+      },
+      {
+        label: "In-place byte reversal — different approach"
+      },
+      {
+        label: "Streaming palindrome stack — different approach"
+      },
+      {
+        label: "Min-heap size k — different approach"
+      }
+    ],
+    explain: "Min-heap holds each stream's head; pop min, push that stream's next"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Merge K sorted streams in one), what strategy is established?",
+    choices: [
+      {
+        label: "Min-heap holds each stream's head; pop — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Merge K sorted streams: seed a min-heap with the first element of each non-empty stream. Repeatedly popMin, append to output, push that stream's next."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"POP\" step (take ), what happens?",
+    choices: [
+      {
+        label: "PopMin: value from stream (index ). — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "PopMin: value  from stream  (index ). Append to merged output."
+  },
+  {
+    id: "state",
+    prompt: "What does the `streams` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field streams in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `streams` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Merge K sorted streams in one\"?",
+    choices: [
+      {
+        label: "O(total * log k) time, O(k) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(entries) time, O(depth) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) per add time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(total * log k). O(k). seed heap with first of each; pop -> append -> push next from same stream"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Heap empty — all streams exhausted. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Heap empty — all streams exhausted. Merged sorted output: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'mks1',

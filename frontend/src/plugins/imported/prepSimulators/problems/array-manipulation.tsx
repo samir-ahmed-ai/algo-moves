@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -188,7 +188,132 @@ function computeAnswer({ n, queries }: ArrayManipulationInput): number {
 export const manifestId = 'prep-prefix-sum-array-manipulation';
 export const title = 'Array Manipulation (HackerRank)';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Array Manipulation (HackerRank)\"?",
+    choices: [
+      {
+        label: "Difference Array + Prefix Sum — fits this problem",
+        correct: true
+      },
+      {
+        label: "Prefix Sum Map — different approach"
+      },
+      {
+        label: "Prefix Sum Mod Map — different approach"
+      }
+    ],
+    explain: "Use a **difference array**: for each query `[a,b,k]`, do `diff[a] += k` and `diff[b+1] -= k`"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Array Manipulation (HackerRank)), what strategy is established?",
+    choices: [
+      {
+        label: "Use a **difference array**: — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Array Manipulation: start with  zeros, then apply  range-add queries [a,b,k] (each adds k to positions a..b). Instead of touching every cell per query, keep a difference array: diff[a] += k and diff[b+1] -= k mark only the two boundaries where the running total changes."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"QUERY\" step ([,,+]), what happens?",
+    choices: [
+      {
+        label: "Query = add to positions ... — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Query  = add  to positions ... We record diff[] +=  (the value rises here) and diff[] -=  (it falls right after position ). Only two indices change, regardless of how wide the range is."
+  },
+  {
+    id: "state",
+    prompt: "What does the `diff` field track in the visualization state?",
+    choices: [
+      {
+        label: "difference array, length n + — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `diff` in sync: difference array, length n + 2 (1-indexed; index 0 unused)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Array Manipulation (HackerRank)\"?",
+    choices: [
+      {
+        label: "O(n+m) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n+m). O(n). Use a **difference array**: for each query `[a,b,k]`, do `diff[a] += k` and `diff[b+1] -= k`; Prefix sum of the difference array reconstructs the actual values"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The sweep is complete. The largest — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The sweep is complete. The largest value any position ever held is  — that is the answer, found in O(n+m) time using only the difference array."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'am1',

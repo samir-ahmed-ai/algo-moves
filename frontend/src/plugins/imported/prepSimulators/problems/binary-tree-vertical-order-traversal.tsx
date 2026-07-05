@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -171,7 +171,115 @@ function Inspector({ frame }: InspectorProps<VerticalOrderState>) {
 export const manifestId = 'prep-trees-binary-tree-vertical-order-traversal';
 export const title = 'Binary Tree Vertical Order Traversal';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Binary Tree Vertical Order Traversal\"?",
+    choices: [
+      {
+        label: "BFS + Column Map — fits this problem",
+        correct: true
+      },
+      {
+        label: "DFS with max tracking — different approach"
+      },
+      {
+        label: "DFS sum — different approach"
+      },
+      {
+        label: "BST range check — different approach"
+      }
+    ],
+    explain: "BFS with column tracking: root=col 0, left=col-1, right=col+1"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ENQUEUE\" step (→col ), what happens?",
+    choices: [
+      {
+        label: "Node has a left child . — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Node  has a left child . A left child sits one column to the left, so it goes to column . Enqueue it."
+  },
+  {
+    id: "state",
+    prompt: "What does the `visited` field track in the visualization state?",
+    choices: [
+      {
+        label: "node indices already popped + — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `visited` in sync: node indices already popped + recorded"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Binary Tree Vertical Order Traversal\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(h+k) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). BFS with column tracking: root=col 0, left=col-1, right=col+1; BFS naturally gives top-to-bottom, left-to-right order within same column"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The queue is empty. Reading columns — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The queue is empty. Reading columns left to right gives the answer: ${result.map((c) => "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'vo1',

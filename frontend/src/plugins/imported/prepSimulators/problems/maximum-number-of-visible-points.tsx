@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -186,7 +186,135 @@ function Inspector({ frame }: InspectorProps<VisibleState>) {
 export const manifestId = 'prep-math-maximum-number-of-visible-points';
 export const title = 'Maximum Number of Visible Points';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Maximum Number of Visible Points\"?",
+    choices: [
+      {
+        label: "Sort + Sliding Window (atan2) — fits this problem",
+        correct: true
+      },
+      {
+        label: "Binary Exponentiation — different approach"
+      },
+      {
+        label: "Brian Kernighan bit count — different approach"
+      },
+      {
+        label: "Sort — different approach"
+      }
+    ],
+    explain: "See Maximum Number Of Visible Points pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Maximum Number of Visible Points), what strategy is established?",
+    choices: [
+      {
+        label: "See Maximum Number Of Visible Points — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Maximum Number of Visible Points: standing at [, ] we can rotate a wedge of °.  point(s) sit exactly on us and are always counted. The other  point(s) become polar angles: °."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"BEST\" step (best=), what happens?",
+    choices: [
+      {
+        label: "Window [, ] holds point(s) within — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Window [, ] holds  point(s) within ° — a new maximum. best = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `same` field track in the visualization state?",
+    choices: [
+      {
+        label: "points sitting exactly — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `same` in sync: points sitting exactly on the location — always visible"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Maximum Number of Visible Points\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(max(len)) time, O(max(len)) space — wrong order of growth"
+      },
+      {
+        label: "O(log exp) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(n). Maximum Number Of Visible Points"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "There are no points away — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "There are no points away from our location, so only the  coincident point(s) are visible. Answer = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'vp1',

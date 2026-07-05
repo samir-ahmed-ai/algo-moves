@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -136,7 +136,115 @@ function Inspector({ frame }: InspectorProps<PhoneState>) {
 export const manifestId = 'prep-design-phone-directory';
 export const title = 'Phone directory';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Phone directory\"?",
+    choices: [
+      {
+        label: "Trie phone directory autocomplete — fits this problem",
+        correct: true
+      },
+      {
+        label: "Log parsing aggregation — different approach"
+      },
+      {
+        label: "Stack — different approach"
+      },
+      {
+        label: "Two Heaps — different approach"
+      }
+    ],
+    explain: "Map number->name plus a digit trie holding names for prefix suggestions"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ADD\" step (→), what happens?",
+    choices: [
+      {
+        label: "addContact(\"\", \"\"): store in map — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "addContact(\"\", \"\"): store in map and append name along digit trie path."
+  },
+  {
+    id: "state",
+    prompt: "What does the `contacts` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field contacts in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `contacts` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Phone directory\"?",
+    choices: [
+      {
+        label: "O(digits) time, O(contacts) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(lines) time, O(unique keys) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(digits). O(contacts). store contacts; each digit node keeps names; suggest returns node.names"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ph1',

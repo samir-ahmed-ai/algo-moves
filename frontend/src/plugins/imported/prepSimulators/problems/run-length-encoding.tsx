@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -152,7 +152,135 @@ function encode(s: string): string {
 export const manifestId = 'prep-strings-run-length-encoding';
 export const title = 'Run length encoding';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Run length encoding\"?",
+    choices: [
+      {
+        label: "Run-length — fits this problem",
+        correct: true
+      },
+      {
+        label: "DP reachability — different approach"
+      },
+      {
+        label: "Greedy (pick highest count) — different approach"
+      },
+      {
+        label: "Double string trick — different approach"
+      }
+    ],
+    explain: "Squash each equal run into char+count"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Run length encoding), what strategy is established?",
+    choices: [
+      {
+        label: "Squash each equal run into char+count — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Run-length encoding squashes each maximal run of equal characters into character+count. Seed the first run: character '' with run = 1, starting at index 0."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"RESET\" step (c='' run=1), what happens?",
+    choices: [
+      {
+        label: "Begin a new run: character '' — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Begin a new run: character '' with run = 1, starting at index ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `chars` field track in the visualization state?",
+    choices: [
+      {
+        label: "input split into characters — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `chars` in sync: input split into characters"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Run length encoding\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). same -> run++; else flush char,run and reset"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The scan is over, but — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The scan is over, but the last run '' has not been written yet. Flush it now. Encoded result: \"\"."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'rle1', label: '"aaabbc"', value: { s: 'aaabbc' } },
     { id: 'rle2', label: '"wwwwaaa"', value: { s: 'wwwwaaa' } },

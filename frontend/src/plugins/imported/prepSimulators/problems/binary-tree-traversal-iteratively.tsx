@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -115,7 +115,115 @@ function Inspector({ frame }: InspectorProps<TraversalState>) {
 export const manifestId = 'prep-trees-binary-tree-traversal-iteratively';
 export const title = 'Binary tree traversal iteratively';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Binary tree traversal iteratively\"?",
+    choices: [
+      {
+        label: "Stack iterative — fits this problem",
+        correct: true
+      },
+      {
+        label: "Prefix sum on tree — different approach"
+      },
+      {
+        label: "Reverse inorder — different approach"
+      },
+      {
+        label: "Mirror compare — different approach"
+      }
+    ],
+    explain: "Push the whole left spine, pop to visit, then dive right"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"VISIT\" step (visit ), what happens?",
+    choices: [
+      {
+        label: "Left is exhausted, so pop node — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Left is exhausted, so pop node  and visit it — append  to the output. In-order visits the left subtree, then the node, then the right subtree."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cur` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the current node — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cur` in sync: index of the current node (2i+1/2i+2 layout); null = walked off the tree"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Binary tree traversal iteratively\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h+k) time, O(h) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). for cur: push & go left; pop visit; cur=right"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Both cur and the stack — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Both cur and the stack are empty, so every node is visited. The in-order sequence is []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // In-order of this tree is [4, 2, 5, 1, 3].
     { id: 'bt1', label: 'in-order of small tree', value: { tree: [1, 2, 3, 4, 5] } },

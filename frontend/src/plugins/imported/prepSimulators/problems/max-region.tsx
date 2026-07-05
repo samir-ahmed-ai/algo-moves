@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -141,7 +141,135 @@ function Inspector({ frame }: InspectorProps<MaxRegionState>) {
 export const manifestId = 'prep-matrices-max-region';
 export const title = 'Max region';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Max region\"?",
+    choices: [
+      {
+        label: "8-direction DFS region size — fits this problem",
+        correct: true
+      },
+      {
+        label: "Boundary Simulation — different approach"
+      },
+      {
+        label: "4-direction DP — different approach"
+      },
+      {
+        label: "Layer-by-layer 90° rotation — different approach"
+      }
+    ],
+    explain: "Flood fill including diagonals; track the largest component"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Max region), what strategy is established?",
+    choices: [
+      {
+        label: "Flood fill including diagonals; track — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Max Region: find the largest blob of connected 1s, where connectivity counts all 8 neighbours (orthogonal AND diagonal). Scan the grid; every time we hit an unclaimed 1 we flood-fill its whole region and measure its area, keeping the biggest. Time O(m·n), Space O(m·n) for the recursion stack."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"VISIT\" step (area=), what happens?",
+    choices: [
+      {
+        label: "Visit (, ) — — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Visit (, ) — it is part of this region, so add 1. Region area is now . Next, look at all 8 neighbours and queue any that are still unclaimed land."
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "current cell DFS is inspecting — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: current cell DFS is inspecting"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Max region\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(m·n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(m·n). 8 neighbors; area=1+sum(dfs); keep max"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every cell has been scanned. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every cell has been scanned. The largest 8-connected region has area ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'mr1',

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -130,7 +130,115 @@ function Inspector({ frame }: InspectorProps<HeightState>) {
 export const manifestId = 'prep-trees-get-height';
 export const title = 'Get height';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Get height\"?",
+    choices: [
+      {
+        label: "Post-order height — fits this problem",
+        correct: true
+      },
+      {
+        label: "Same tree check — different approach"
+      },
+      {
+        label: "Stack iterative — different approach"
+      },
+      {
+        label: "BFS rightmost — different approach"
+      }
+    ],
+    explain: "Height is 1 plus the taller child"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"RIGHT\" step (R()=), what happens?",
+    choices: [
+      {
+        label: "Right subtree of node has height — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Right subtree of node  has height . Node  is 1 plus the taller child."
+  },
+  {
+    id: "state",
+    prompt: "What does the `current` field track in the visualization state?",
+    choices: [
+      {
+        label: "node index we are looking — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `current` in sync: node index we are looking at right now"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Get height\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). nil->0; return 1+max(L,R)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every subtree has been measured. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every subtree has been measured. The root returns , so the tree's height is . Time O(n) — each node is visited once; Space O(h) for the recursion stack."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'gh1', label: '[3,9,20,·,·,15,7]', value: { tree: [3, 9, 20, null, null, 15, 7] } },
     { id: 'gh2', label: '[1,2,3,4,·,·,·,8]', value: { tree: [1, 2, 3, 4, null, null, null, 8] } },

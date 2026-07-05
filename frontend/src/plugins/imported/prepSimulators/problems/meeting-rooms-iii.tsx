@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -153,7 +153,135 @@ function Inspector({ frame }: InspectorProps<MeetState>) {
 export const manifestId = 'prep-design-meeting-rooms-iii';
 export const title = 'Meeting Rooms III';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Meeting Rooms III\"?",
+    choices: [
+      {
+        label: "Two Heaps — fits this problem",
+        correct: true
+      },
+      {
+        label: "Round-robin load balancer — different approach"
+      },
+      {
+        label: "Copy-on-write version snapshots — different approach"
+      },
+      {
+        label: "Trie dictionary + spell suggest — different approach"
+      }
+    ],
+    explain: "See Meeting Rooms Iii pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Meeting Rooms III), what strategy is established?",
+    choices: [
+      {
+        label: "See Meeting Rooms Iii pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Meeting Rooms III: min-heap avail rooms, busy heap by end time. Assign earliest free room; if none, delay meeting on earliest-ending room."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"DELAY\" step (room ), what happens?",
+    choices: [
+      {
+        label: "Meeting [,]: all busy — reuse — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Meeting [,]: all busy — reuse room , ends at . cnt[]=."
+  },
+  {
+    id: "state",
+    prompt: "What does the `n` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field n in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Meeting Rooms III\"?",
+    choices: [
+      {
+        label: "O(m log n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(versions) get time, O(changes) space — wrong order of growth"
+      },
+      {
+        label: "O(logs) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m log n). O(n). Meeting Rooms Iii"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. Room held the most meetings — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. Room  held the most meetings (). Counts: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'mr1',

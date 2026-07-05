@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
@@ -166,7 +166,135 @@ function fib(n: number): number {
   return cur;
 }
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Fibonacci number\"?",
+    choices: [
+      {
+        label: "Fibonacci iterative — fits this problem",
+        correct: true
+      },
+      {
+        label: "XOR + popcount — different approach"
+      },
+      {
+        label: "Grade-school multiplication — different approach"
+      },
+      {
+        label: "Base conversion repeated divmod — different approach"
+      }
+    ],
+    explain: "Slide the pair (a,b) -> (b, a+b)"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Fibonacci number), what strategy is established?",
+    choices: [
+      {
+        label: "Slide the pair (a,b) -> (b — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Fibonacci: F(n) = F(n−1) + F(n−2). We iterate in O(n) time and O(1) space, carrying just two rolling values (prev, cur) and sliding the pair (a, b) → (b, a+b) each step."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SEED\" step (prev=0, cur=1), what happens?",
+    choices: [
+      {
+        label: "Seed the pair with the first — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Seed the pair with the first two Fibonacci numbers: prev = F(0) = 0 and cur = F(1) = 1. We now roll forward from i = 2."
+  },
+  {
+    id: "state",
+    prompt: "What does the `seq` field track in the visualization state?",
+    choices: [
+      {
+        label: "Fibonacci values computed so far — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `seq` in sync: Fibonacci values computed so far, seq[k] = F(k)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Fibonacci number\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). prev,cur=0,1; cur=prev+cur; n<=1 return n"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The window reached i = . — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The window reached i = . cur now holds F() = , which is the answer."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'fib7', label: 'n = 7', value: { n: 7 } },
     { id: 'fib0', label: 'n = 0', value: { n: 0 } },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -143,7 +143,135 @@ function Inspector({ frame }: InspectorProps<LastMenState>) {
 export const manifestId = 'prep-linked-lists-last-men-standing';
 export const title = 'Last men standing';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Last men standing\"?",
+    choices: [
+      {
+        label: "Josephus simulation — fits this problem",
+        correct: true
+      },
+      {
+        label: "Merge two lists — different approach"
+      },
+      {
+        label: "DLL walk delete — different approach"
+      },
+      {
+        label: "DFS flatten — different approach"
+      }
+    ],
+    explain: "Stand in a circle; skip k-1, drop the kth, repeat to the survivor"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Last men standing), what strategy is established?",
+    choices: [
+      {
+        label: "Stand in a circle; skip k-1 — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Josephus circle:  people stand in a ring numbered 1... Starting the count, every -th person is eliminated; repeat until one survivor remains. We simulate a circular linked list where cur walks k−1 steps then drops cur.Next."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MARK\" step (drop ), what happens?",
+    choices: [
+      {
+        label: "cur is on person ; — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "cur is on person ; the very next person, , is the k-th in this count and gets eliminated. In the list this is cur.Next = cur.Next.Next."
+  },
+  {
+    id: "state",
+    prompt: "What does the `curIdx` field track in the visualization state?",
+    choices: [
+      {
+        label: "position of `cur` within ring — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `curIdx` in sync: position of `cur` within ring"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Last men standing\"?",
+    choices: [
+      {
+        label: "O(n*k) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n*k). O(1). advance k-1 steps; cur.Next=cur.Next.Next"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "One person is left: person — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "One person is left: person  is the last one standing. With n=, k= the answer is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'lms1', label: 'n=5, k=2', value: { n: 5, k: 2 } },
     { id: 'lms2', label: 'n=7, k=3', value: { n: 7, k: 3 } },

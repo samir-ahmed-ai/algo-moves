@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -122,7 +122,135 @@ function Inspector({ frame }: InspectorProps<DecodeState>) {
 export const manifestId = 'prep-stacks-queues-decode-string';
 export const title = 'Decode String';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Decode String\"?",
+    choices: [
+      {
+        label: "Dual Stack (counts + strings) — fits this problem",
+        correct: true
+      },
+      {
+        label: "Stack (push res+sign on '(') — different approach"
+      },
+      {
+        label: "Sliding window queue + running sum — different approach"
+      },
+      {
+        label: "Stack — different approach"
+      }
+    ],
+    explain: "Two stacks: one for counts, one for strings built so far"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Decode String), what strategy is established?",
+    choices: [
+      {
+        label: "Two stacks: one for counts, one — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Decode String: expand a pattern like k[...] into k copies of the inner string. We use two stacks — one for the repeat counts, one for the strings built so far — plus a running number \"num\" and the current string \"cur\"."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"CHAR\" step (cur=\"\"), what happens?",
+    choices: [
+      {
+        label: "'' is a plain letter — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "'' is a plain letter, so append it to the current string: cur = \"\"."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the char — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: index of the char being processed (null before/after the scan)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Decode String\"?",
+    choices: [
+      {
+        label: "O(n·maxK) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) amortized time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n·maxK). O(n). Two stacks: one for counts, one for strings built so far; On `[`: push current count and current string, reset both"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "End of input. Both stacks — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "End of input. Both stacks are empty and cur holds the fully decoded string: \"\"."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ds1', label: '"3[a2[c]]"', value: { s: '3[a2[c]]' } },
     { id: 'ds2', label: '"2[abc]3[cd]"', value: { s: '2[abc]3[cd]' } },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -184,7 +184,135 @@ function Inspector({ frame }: InspectorProps<TopKState>) {
 export const manifestId = 'prep-hash-maps-find-top-k-frequent-elements';
 export const title = 'Find top K frequent elements';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find top K frequent elements\"?",
+    choices: [
+      {
+        label: "Frequency map + bucket sort — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sliding window + frequency map — different approach"
+      },
+      {
+        label: "Union-find via email index — different approach"
+      },
+      {
+        label: "Sort by distance to origin — different approach"
+      }
+    ],
+    explain: "Bucket numbers by their frequency, then scan buckets high to low"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find top K frequent elements), what strategy is established?",
+    choices: [
+      {
+        label: "Bucket numbers by their frequency, then — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Top K Frequent: return the  values that appear most often in the array. Plan: count every value, drop each value into a bucket keyed by its count, then sweep buckets from highest count down — that is O(n) time and O(n) space, no sorting needed."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SWEEP\" step (bucket[]), what happens?",
+    choices: [
+      {
+        label: "Sweeping from the top: bucket holds — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Sweeping from the top: bucket  holds the values seen  time(s). Anything here is at least as frequent as anything in lower buckets, so pull from it first."
+  },
+  {
+    id: "state",
+    prompt: "What does the `scan` field track in the visualization state?",
+    choices: [
+      {
+        label: "index in `a` being read — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `scan` in sync: index in `a` being read while counting"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find top K frequent elements\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) per op time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) average time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). freq map; buckets[cnt]; collect from top until k"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Collected value(s) from the densest — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Collected  value(s) from the densest buckets first, so the answer is [] — the  most frequent elements."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'tk1', label: '[1,1,1,2,2,3], k=2', value: { a: [1, 1, 1, 2, 2, 3], k: 2 } },
     { id: 'tk2', label: '[4,4,5,5,5,6], k=2', value: { a: [4, 4, 5, 5, 5, 6], k: 2 } },

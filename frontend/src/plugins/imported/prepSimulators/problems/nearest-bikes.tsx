@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
@@ -196,7 +196,115 @@ function Inspector({ frame }: InspectorProps<NearestBikesState>) {
 export const manifestId = 'prep-matrices-nearest-bikes';
 export const title = 'Nearest bikes';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Nearest bikes\"?",
+    choices: [
+      {
+        label: "Nearest pair by Manhattan distance — fits this problem",
+        correct: true
+      },
+      {
+        label: "1D meeting point two pointers — different approach"
+      },
+      {
+        label: "Segment Extraction + Forward/Backward — different approach"
+      },
+      {
+        label: "Staircase search from top-right — different approach"
+      }
+    ],
+    explain: "Minimum Manhattan distance over every worker-bike pair"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SCANNED\" step (W B), what happens?",
+    choices: [
+      {
+        label: "Scan complete: worker(s) and bike(s) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Scan complete:  worker(s) and  bike(s) collected. Now compare every worker against every bike and keep the smallest distance."
+  },
+  {
+    id: "state",
+    prompt: "What does the `grid` field track in the visualization state?",
+    choices: [
+      {
+        label: "row-major chars — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `grid` in sync: row-major chars"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Nearest bikes\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(m·n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(1) extra space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(m·n). collect X/Y cells; best=min |dr|+|dc|"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every worker-bike pair has been compared. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every worker-bike pair has been compared. The minimum Manhattan distance is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'nb1',

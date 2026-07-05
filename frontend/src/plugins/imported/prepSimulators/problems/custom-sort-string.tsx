@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -227,7 +227,135 @@ function computeAnswer({ order, s }: CustomSortInput): string {
 export const manifestId = 'prep-strings-custom-sort-string';
 export const title = 'Custom Sort String';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Custom Sort String\"?",
+    choices: [
+      {
+        label: "Counting — fits this problem",
+        correct: true
+      },
+      {
+        label: "Single Pass Flags — different approach"
+      },
+      {
+        label: "Greedy (pick highest count) — different approach"
+      },
+      {
+        label: "Double string trick — different approach"
+      }
+    ],
+    explain: "See Custom Sort String pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Custom Sort String), what strategy is established?",
+    choices: [
+      {
+        label: "See Custom Sort String pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Custom Sort String: rearrange \"\" so its characters follow the precedence given by \"\". Characters of s that don't appear in order keep any relative position, appended at the end. We do this by counting, not comparing."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"TAKE\" step (+), what happens?",
+    choices: [
+      {
+        label: "'' comes next in the order — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "'' comes next in the order and still has  left, so append one '' to the result and decrement its count to . Result is now \"\"."
+  },
+  {
+    id: "state",
+    prompt: "What does the `counts` field track in the visualization state?",
+    choices: [
+      {
+        label: "remaining count for every distinct — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `counts` in sync: remaining count for every distinct char (in stable display order)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Custom Sort String\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(a+b+c) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O( time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). Custom Sort String"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "'' never appeared in the order — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "'' never appeared in the order, so it goes after the ordered characters. Append one '' (count → ). Result is now \"\"."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'css1', label: 'order="cba", s="abcd"', value: { order: 'cba', s: 'abcd' } },
     { id: 'css2', label: 'order="bcafg", s="abcd"', value: { order: 'bcafg', s: 'abcd' } },

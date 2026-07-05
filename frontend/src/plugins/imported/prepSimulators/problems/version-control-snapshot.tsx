@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -134,7 +134,115 @@ function Inspector({ frame }: InspectorProps<VcState>) {
 export const manifestId = 'prep-design-version-control-snapshot';
 export const title = 'Version control snapshot';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Version control snapshot\"?",
+    choices: [
+      {
+        label: "Copy-on-write version snapshots — fits this problem",
+        correct: true
+      },
+      {
+        label: "Stack — different approach"
+      },
+      {
+        label: "Two Heaps — different approach"
+      },
+      {
+        label: "Jump Array — different approach"
+      }
+    ],
+    explain: "Stack of maps; each set pushes a fresh copied snapshot layer"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SET\" step (=), what happens?",
+    choices: [
+      {
+        label: "set(\"\", ): copy-on-write → version . — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "set(\"\", ): copy-on-write → version ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `history` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field history in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `history` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Version control snapshot\"?",
+    choices: [
+      {
+        label: "O(versions) get time, O(changes) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(versions) get. O(changes). copy latest, set key, append; get reads history[version]"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. Current version = . — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. Current version = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'vc1',

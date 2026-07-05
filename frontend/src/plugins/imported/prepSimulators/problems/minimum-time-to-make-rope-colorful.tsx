@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -168,7 +168,135 @@ function computeMinCost(colors: string, neededTime: number[]): number {
   return cost;
 }
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Minimum Time to Make Rope Colorful\"?",
+    choices: [
+      {
+        label: "Greedy (keep max in group) — fits this problem",
+        correct: true
+      },
+      {
+        label: "Vertical scan — different approach"
+      },
+      {
+        label: "Double string trick — different approach"
+      },
+      {
+        label: "Index Map — different approach"
+      }
+    ],
+    explain: "See Minimum Time To Make Rope Colorful pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Minimum Time to Make Rope Colorful), what strategy is established?",
+    choices: [
+      {
+        label: "See Minimum Time To Make Rope — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Make Rope Colorful: remove balloons so no two adjacent share a colour, at minimum total removal time. Greedily scan left to right — within each run of equal colours we must keep exactly one balloon, so we keep the costliest and pay for the rest."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"CLOSE\" step (+ cost=), what happens?",
+    choices: [
+      {
+        label: "Balloon is colour '', different — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Balloon  is colour '', different from ''. The previous group closes: keep the costliest (max=) and remove the rest, paying sum − max =  −  = . Running answer = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `colors` field track in the visualization state?",
+    choices: [
+      {
+        label: "the balloon colours, one char — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `colors` in sync: the balloon colours, one char per cell"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Minimum Time to Make Rope Colorful\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(a+b+c) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O( time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). Minimum Time To Make Rope Colorful"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The array ends, so close — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The array ends, so close the final group: pay sum − max =  −  = . Total minimum time = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'rope1',

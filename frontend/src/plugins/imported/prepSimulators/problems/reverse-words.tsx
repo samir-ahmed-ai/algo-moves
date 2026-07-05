@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -200,7 +200,135 @@ export const title = 'Reverse words';
 // reverse each word span back. Does NOT collapse interior spaces, so the samples
 // avoid double spaces to keep the board readable. The verdict reads the real
 // computed result straight off the last emitted frame.
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Reverse words\"?",
+    choices: [
+      {
+        label: "Reverse in place — fits this problem",
+        correct: true
+      },
+      {
+        label: "Expand center — different approach"
+      },
+      {
+        label: "Two Pointers Greedy — different approach"
+      },
+      {
+        label: "Hash set substrings — different approach"
+      }
+    ],
+    explain: "Reverse the whole string, then reverse each word back"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Reverse words), what strategy is established?",
+    choices: [
+      {
+        label: "Reverse the whole string, then reverse — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Reverse Words: reverse the order of the words in \"\" while keeping each word's letters intact. Trick: reverse the whole string, then reverse every word back — all in place, O(1) extra space."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WORD\" step (span [..]), what happens?",
+    choices: [
+      {
+        label: "The span [..] is a single — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "The span [..] is a single character (or empty), so there is nothing to flip — it already reads correctly."
+  },
+  {
+    id: "state",
+    prompt: "What does the `chars` field track in the visualization state?",
+    choices: [
+      {
+        label: "current byte array (post-trim shrink — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `chars` in sync: current byte array (post-trim shrink applied)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Reverse words\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(n^2) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n*m) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). trim; rev(all); rev(each word span)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every word span has been flipped — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every word span has been flipped back, so the answer is \"\" — the words in reverse order with their letters intact."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'rw1', label: '"the sky is"', value: { s: 'the sky is' } },
     { id: 'rw2', label: '"  hi bob  "', value: { s: '  hi bob  ' } },

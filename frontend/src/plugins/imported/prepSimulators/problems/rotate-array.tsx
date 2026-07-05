@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -137,7 +137,135 @@ function Inspector({ frame }: InspectorProps<RotateState>) {
 export const manifestId = 'prep-arrays-rotate-array';
 export const title = 'Rotate array';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Rotate array\"?",
+    choices: [
+      {
+        label: "Reverse segments — fits this problem",
+        correct: true
+      },
+      {
+        label: "XOR + math — different approach"
+      },
+      {
+        label: "Heap + math — different approach"
+      },
+      {
+        label: "Track min/max product — different approach"
+      }
+    ],
+    explain: "Reverse the whole array, then un-reverse the two pieces"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Rotate array), what strategy is established?",
+    choices: [
+      {
+        label: "Reverse the whole array, then un-reverse — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Rotate right by . Since rotating by n returns the array to itself, only k % n =  %  =  matters. We rotate in place with three reversals: reverse the whole array, then reverse the first k, then reverse the rest."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SWAP\" step (swap ↔), what happens?",
+    choices: [
+      {
+        label: "Swap nums[] and nums[]: and trade — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Swap nums[] and nums[]:  and  trade places, then move the left pointer right and the right pointer left."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nums` field track in the visualization state?",
+    choices: [
+      {
+        label: "current array contents (mutated — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `nums` in sync: current array contents (mutated as we reverse)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Rotate array\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). k%=n; reverse(0,n-1); reverse(0,k-1); reverse(k,n-1)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All three reversals are complete. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All three reversals are complete. The array is now rotated right by : []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ra1', label: '[1,2,3,4,5,6,7] k=3', value: { nums: [1, 2, 3, 4, 5, 6, 7], k: 3 } },
     { id: 'ra2', label: '[-1,-100,3,99] k=2', value: { nums: [-1, -100, 3, 99], k: 2 } },

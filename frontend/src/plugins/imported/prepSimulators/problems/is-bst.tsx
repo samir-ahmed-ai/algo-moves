@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -170,7 +170,115 @@ function Inspector({ frame }: InspectorProps<IsBstState>) {
 export const manifestId = 'prep-trees-is-bst';
 export const title = 'Is BST';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is BST\"?",
+    choices: [
+      {
+        label: "BST range check — fits this problem",
+        correct: true
+      },
+      {
+        label: "Level order fill — different approach"
+      },
+      {
+        label: "DFS right-first — different approach"
+      },
+      {
+        label: "Post-order leaves — different approach"
+      }
+    ],
+    explain: "Each node must sit inside an open (lo,hi) window narrowed on the way down"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FAIL\" step ( ≥ ), what happens?",
+    choices: [
+      {
+        label: "Node is not less than — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Node  is not less than its upper bound  (needs  < ). It lies to the left of an ancestor whose value it must undercut, so this is NOT a BST."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cur` field track in the visualization state?",
+    choices: [
+      {
+        label: "node index currently being checked — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cur` in sync: node index currently being checked"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is BST\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) amortized time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). left gets hi=node, right gets lo=node"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Node fits its window < < — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Node  fits its window  <  < . Recurse: the left subtree inherits hi =  (everything left must stay below ); the right subtree inherits lo =  (everything right must stay above )."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // A valid BST:            5
     //                       /   \

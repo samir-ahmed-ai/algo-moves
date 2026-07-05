@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -190,7 +190,135 @@ function Inspector({ frame }: InspectorProps<SqrtState>) {
 export const manifestId = 'prep-math-square-root';
 export const title = 'Square root';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Square root\"?",
+    choices: [
+      {
+        label: "Binary search sqrt — fits this problem",
+        correct: true
+      },
+      {
+        label: "XOR + popcount — different approach"
+      },
+      {
+        label: "Grade-school multiplication — different approach"
+      },
+      {
+        label: "atoi parse with overflow guard — different approach"
+      }
+    ],
+    explain: "Binary search the answer in [1, x/2]"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Square root), what strategy is established?",
+    choices: [
+      {
+        label: "Binary search the answer in [1 — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Square Root: compute floor(√) — the largest integer whose square is at most . Instead of scanning, we binary-search the answer in the range [1, ⌊x/2⌋]. Time O(log x), Space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MID\" step (mid=), what happens?",
+    choices: [
+      {
+        label: "Pick mid = lo + (hi−lo)/2 — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Pick mid = lo + (hi−lo)/2 = . Test whether mid fits: compare mid ≤ ⌊/mid⌋ = ⌊/⌋ =  (an overflow-safe way to ask mid·mid ≤ )."
+  },
+  {
+    id: "state",
+    prompt: "What does the `ans` field track in the visualization state?",
+    choices: [
+      {
+        label: "best integer whose square — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `ans` in sync: best integer whose square is <= x so far"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Square root\"?",
+    choices: [
+      {
+        label: "O(log x) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(log x). O(1). mid<=x/mid -> ans=mid, lo=mid+1; else hi=mid-1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "lo passed hi, so the search — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "lo passed hi, so the search is done. The largest integer whose square is ≤  is . floor(√) = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sqrt16', label: 'x = 16', value: { x: 16 } },
     { id: 'sqrt8', label: 'x = 8', value: { x: 8 } },

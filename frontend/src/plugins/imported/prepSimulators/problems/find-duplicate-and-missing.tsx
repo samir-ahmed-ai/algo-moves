@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -270,7 +270,135 @@ function Inspector({ frame }: InspectorProps<DupMissState>) {
 export const manifestId = 'prep-arrays-find-duplicate-and-missing';
 export const title = 'Find duplicate and missing';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find duplicate and missing\"?",
+    choices: [
+      {
+        label: "XOR + math — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two pointers swap — different approach"
+      },
+      {
+        label: "Boyer-Moore voting — different approach"
+      },
+      {
+        label: "Sliding window — different approach"
+      }
+    ],
+    explain: "XOR all numbers and 1..n leaves dup^missing; a set bit splits them into two buckets"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find duplicate and missing), what strategy is established?",
+    choices: [
+      {
+        label: "XOR all numbers and 1..n leaves — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find the duplicate and the missing value. The array should hold 1.. exactly once, but one number appears twice and another is absent. XOR every index 1.. with every array value: matched numbers cancel, leaving dup XOR missing. O(n) time, O(1) space."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"RIGHT_BIT\" step (rightBit=), what happens?",
+    choices: [
+      {
+        label: "xorAll = () equals dup XOR — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "xorAll =  () equals dup XOR missing. Its lowest set bit is rightBit = xorAll & -xorAll =  (). dup and missing differ in this bit, so it splits them into two buckets."
+  },
+  {
+    id: "state",
+    prompt: "What does the `scanI` field track in the visualization state?",
+    choices: [
+      {
+        label: "index into nums currently folded — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `scanI` in sync: index into nums currently folded in"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find duplicate and missing\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n+m) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). xor 1..n and arr; rightBit=x&-x; xor each bucket; nums[x-1]==x decides order"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Answer: is the duplicate — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Answer:  is the duplicate and  is the missing value. Done in one pass over the data with only a handful of integers — O(n) time, O(1) space."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'dm1', label: '[1,2,2,4] → dup 2, miss 3', value: { nums: [1, 2, 2, 4] } },
     { id: 'dm2', label: '[1,2,4,4,5] → dup 4, miss 3', value: { nums: [1, 2, 4, 4, 5] } },

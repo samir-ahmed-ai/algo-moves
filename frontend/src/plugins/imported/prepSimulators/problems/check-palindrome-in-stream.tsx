@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -156,7 +156,115 @@ function Inspector({ frame }: InspectorProps<PalStreamState>) {
 export const manifestId = 'prep-streams-io-check-palindrome-in-stream';
 export const title = 'Check palindrome in stream';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Check palindrome in stream\"?",
+    choices: [
+      {
+        label: "Streaming palindrome stack — fits this problem",
+        correct: true
+      },
+      {
+        label: "String builder scan — different approach"
+      },
+      {
+        label: "Filesystem walk with size filter — different approach"
+      },
+      {
+        label: "In-place byte reversal — different approach"
+      }
+    ],
+    explain: "Cancel matching letters off a stack; empty at the end means palindrome"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PUSH\" step (push ''), what happens?",
+    choices: [
+      {
+        label: "Letter '': no matching top — — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Letter '': no matching top — push onto the stack and mark \\"
+  },
+  {
+    id: "state",
+    prompt: "What does the `stream` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field stream in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `stream` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Check palindrome in stream\"?",
+    choices: [
+      {
+        label: "O(1) amortized per letter time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log k) time, O(k) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(file size) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1) amortized per letter. O(n). top==ch -> pop (matched) else push; ok && stack empty"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Letter '': no matching top — — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Letter '': no matching top — push onto the stack and mark \\"
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ps1', label: '"abccba"', value: { chars: 'abccba' } },
     { id: 'ps2', label: '"abc"', value: { chars: 'abc' } },

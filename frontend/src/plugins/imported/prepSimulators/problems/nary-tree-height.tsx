@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -175,7 +175,135 @@ function Inspector({ frame }: InspectorProps<HeightState>) {
 export const manifestId = 'prep-trees-nary-tree-height';
 export const title = 'Get height';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Get height\"?",
+    choices: [
+      {
+        label: "N-ary tree DFS height — fits this problem",
+        correct: true
+      },
+      {
+        label: "N-ary BFS level order — different approach"
+      },
+      {
+        label: "Inorder DFS (first/last tracking) — different approach"
+      },
+      {
+        label: "BFS serialize — different approach"
+      }
+    ],
+    explain: "Height = 1 + the tallest child subtree"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Get height), what strategy is established?",
+    choices: [
+      {
+        label: "Height = 1 + the tallest — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Get the height of this -node N-ary tree. Rule: nil → 0, otherwise a node's height is 1 + the maximum height among its children. We compute it with a post-order DFS from the root."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"UPDATE\" step (best=), what happens?",
+    choices: [
+      {
+        label: "Child returned height , which beats — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Child  returned height , which beats the previous best () for node . Update this node's tallest-child height to ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "node currently being processed — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: node currently being processed"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Get height\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). nil -> 0; return 1 + max(getHeight(child))"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The root returned  — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The root returned , so the whole tree's height is . Time O(n) — every node is visited once; Space O(h) for the recursion stack."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'h1',

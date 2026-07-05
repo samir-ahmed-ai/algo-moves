@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -204,7 +204,115 @@ function computeBalanced(tree: Cell[]): boolean {
   return check(0) !== -1;
 }
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is balanced\"?",
+    choices: [
+      {
+        label: "Balance check — fits this problem",
+        correct: true
+      },
+      {
+        label: "LCA + heights — different approach"
+      },
+      {
+        label: "Same tree check — different approach"
+      },
+      {
+        label: "Stack iterative — different approach"
+      }
+    ],
+    explain: "Height-return doubles as a flag: -1 means imbalance found"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"RIGHT\" step (R=), what happens?",
+    choices: [
+      {
+        label: "Right subtree of node has height — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Right subtree of node  has height . Compare the two: is | − | ≤ 1?"
+  },
+  {
+    id: "state",
+    prompt: "What does the `visiting` field track in the visualization state?",
+    choices: [
+      {
+        label: "node whose subtree we — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `visiting` in sync: node whose subtree we are currently entering"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is balanced\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). child -1 or |L-R|>1 -> return -1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Node is balanced here (| − — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Node  is balanced here (| − | ≤ 1). Its height is max(, ) + 1 = , which we return to its parent."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ib-balanced',

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -168,7 +168,135 @@ function Inspector({ frame }: InspectorProps<ReverseState>) {
 export const manifestId = 'prep-linked-lists-reverse-linked-list';
 export const title = 'Reverse linked list';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Reverse linked list\"?",
+    choices: [
+      {
+        label: "Iterative reverse — fits this problem",
+        correct: true
+      },
+      {
+        label: "DFS flatten — different approach"
+      },
+      {
+        label: "Digit carry — different approach"
+      },
+      {
+        label: "Recursion / stack — different approach"
+      }
+    ],
+    explain: "Flip each Next to point back at prev as you walk"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Reverse linked list), what strategy is established?",
+    choices: [
+      {
+        label: "Flip each Next to point back — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Reverse a singly linked list in place. We walk it once with three pointers: prev starts at nil, head (cur) starts at the first node, and next is a scratch pointer. Each step flips one node's link to point backward."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FLIP\" step (→), what happens?",
+    choices: [
+      {
+        label: "Flip the link: head.Next = prev — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Flip the link: head.Next = prev, so node  now points back at  instead of forward. This is the actual reversal."
+  },
+  {
+    id: "state",
+    prompt: "What does the `values` field track in the visualization state?",
+    choices: [
+      {
+        label: "node values, fixed positions left→right — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `values` in sync: node values, fixed positions left→right (original order)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Reverse linked list\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). next=head.Next; head.Next=prev; prev=head; head=next"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "head reached nil, so the walk — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "head reached nil, so the walk is complete. prev now points at the old tail, which is the new head of the reversed list. Return prev. Time O(n), Space O(1)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'rl1', label: '1 → 2 → 3 → 4 → 5', value: { values: [1, 2, 3, 4, 5] } },
     { id: 'rl2', label: '7 → 8 → 9', value: { values: [7, 8, 9] } },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -178,7 +178,115 @@ function Inspector({ frame }: InspectorProps<BstState>) {
 export const manifestId = 'prep-trees-convert-binary-search-tree-to-sorted-doubly-linked-list';
 export const title = 'Convert Binary Search Tree to Sorted Doubly Linked List';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Convert Binary Search Tree to Sorted Doubly Linked List\"?",
+    choices: [
+      {
+        label: "Inorder DFS (first/last tracking) — fits this problem",
+        correct: true
+      },
+      {
+        label: "Post-order diameter — different approach"
+      },
+      {
+        label: "Recursive DFS — different approach"
+      },
+      {
+        label: "Inorder simulation — different approach"
+      }
+    ],
+    explain: "In-order traversal: at each node, link `last.Right = node` and `node.Left = last`"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ADVANCE\" step (last = ), what happens?",
+    choices: [
+      {
+        label: "Mark as the most recent node — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Mark  as the most recent node (last = ). Its right subtree will be linked next."
+  },
+  {
+    id: "state",
+    prompt: "What does the `status` field track in the visualization state?",
+    choices: [
+      {
+        label: "per-node visit status by tree — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `status` in sync: per-node visit status by tree index"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Convert Binary Search Tree to Sorted Doubly Linked List\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). In-order traversal: at each node, link `last.Right = node` and `node.Left = last`; Track `first` (smallest) and `last` (most recent). After traversal, connect `"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Traversal done. Close the circle: — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Traversal done. Close the circle: first.Left = last (.Left = ) and last.Right = first (.Right = ). Return first () as the head."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // Level-order BST: 4 / (2,5) / (1,3) -> in-order 1 2 3 4 5
     { id: 'bst1', label: 'BST [4,2,5,1,3]', value: { tree: [4, 2, 5, 1, 3] } },

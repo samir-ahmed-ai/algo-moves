@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -202,7 +202,115 @@ function Inspector({ frame }: InspectorProps<LcaState>) {
 export const manifestId = 'prep-trees-lowest-common-ancestor-of-a-binary-tree';
 export const title = 'Lowest Common Ancestor of a Binary Tree';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Lowest Common Ancestor of a Binary Tree\"?",
+    choices: [
+      {
+        label: "Recursive DFS — fits this problem",
+        correct: true
+      },
+      {
+        label: "Level order fill — different approach"
+      },
+      {
+        label: "Stack iterative — different approach"
+      },
+      {
+        label: "BFS rightmost — different approach"
+      }
+    ],
+    explain: "Recursive DFS: if `root == nil || root == p || root == q`, return `root`"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SPLIT\" step (LCA = ), what happens?",
+    choices: [
+      {
+        label: "Node received a target from BOTH — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Node  received a target from BOTH sides:  came up the left,  came up the right. p and q live in different subtrees here, so node  is their lowest common ancestor."
+  },
+  {
+    id: "state",
+    prompt: "What does the `current` field track in the visualization state?",
+    choices: [
+      {
+        label: "node index currently being visited — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `current` in sync: node index currently being visited (pre-order enter)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Lowest Common Ancestor of a Binary Tree\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). Recursive DFS: if `root == nil || root == p || root == q`, return `root`; Recurse left and right. If both return non-nil → root is the LCA"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Only the left side returned something — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Only the left side returned something (); the right returned nil. Node  passes that non-nil result straight up — both targets (or the single one found so far) are on the left."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // Tree: [3,5,1,6,2,0,8,null,null,7,4]; p = node 5 (index 1), q = node 1 (index 2) → LCA 3.
     { id: 'lca1', label: 'LCA(5,1) → 3', value: { tree: [3, 5, 1, 6, 2, 0, 8, null, null, 7, 4], p: 1, q: 2 } },

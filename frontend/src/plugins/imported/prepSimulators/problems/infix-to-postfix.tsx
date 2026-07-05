@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -157,7 +157,135 @@ function Inspector({ frame }: InspectorProps<InfixState>) {
 export const manifestId = 'prep-stacks-queues-infix-to-postfix';
 export const title = 'Infix to postfix';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Infix to postfix\"?",
+    choices: [
+      {
+        label: "Shunting-yard (no parens) — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Pointers — different approach"
+      },
+      {
+        label: "Postfix evaluation stack — different approach"
+      },
+      {
+        label: "Stack with auxiliary min stack — different approach"
+      }
+    ],
+    explain: "Operands flow straight to output; operators wait on a precedence stack"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Infix to postfix), what strategy is established?",
+    choices: [
+      {
+        label: "Operands flow straight to output; — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Infix → postfix via the shunting-yard scan (no parentheses). Operands flow straight to the output; operators wait on a precedence stack. Rule: before pushing operator c, pop every stacked operator whose precedence is ≥ prec(c)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PUSH\" step (push ), what happens?",
+    choices: [
+      {
+        label: "Now push operator '' (precedence ) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Now push operator '' (precedence ) onto the stack — it waits there until a lower- or equal-precedence operator, or the end, forces it out. Stack: []."
+  },
+  {
+    id: "state",
+    prompt: "What does the `exp` field track in the visualization state?",
+    choices: [
+      {
+        label: "the raw infix expression, characters — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `exp` in sync: the raw infix expression, characters only (no spaces shown in tokens)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Infix to postfix\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) per op time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). pop ops with prec>=cur before pushing cur; flush at end"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. The postfix (reverse-Polish) form — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. The postfix (reverse-Polish) form of \"\" is \"\". Time O(n), space O(n) for the operator stack."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'itp1', label: '2+3*4', value: { exp: '2+3*4' } },
     { id: 'itp2', label: '4*2+3-1', value: { exp: '4*2+3-1' } },

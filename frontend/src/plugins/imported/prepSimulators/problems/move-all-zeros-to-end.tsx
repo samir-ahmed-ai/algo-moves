@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -147,7 +147,135 @@ function Inspector({ frame }: InspectorProps<ZerosState>) {
 export const manifestId = 'prep-arrays-move-all-zeros-to-end';
 export const title = 'Move all zeros to end';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Move all zeros to end\"?",
+    choices: [
+      {
+        label: "Two pointers — fits this problem",
+        correct: true
+      },
+      {
+        label: "Merge from end — different approach"
+      },
+      {
+        label: "XOR + math — different approach"
+      },
+      {
+        label: "Heap + math — different approach"
+      }
+    ],
+    explain: "Write-pointer w rakes non-zeros to the front; tail back-filled with zeros"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Move all zeros to end), what strategy is established?",
+    choices: [
+      {
+        label: "Write-pointer w rakes non-zeros — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Move Zeros: shift every non-zero to the front in order, then pad the tail with zeros — all in place, O(n) time and O(1) space. A write pointer w marks the next slot to receive a non-zero; it starts at 0."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"RAKED\" step (w=), what happens?",
+    choices: [
+      {
+        label: "First pass done: indices [0, ) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "First pass done: indices [0, ) now hold every non-zero in original order. The remaining  slot(s) from index  onward must become zeros."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nums` field track in the visualization state?",
+    choices: [
+      {
+        label: "live array, mutated in place — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `nums` in sync: live array, mutated in place as the algorithm runs"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Move all zeros to end\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). if v!=0: nums[w]=v,w++; then zero-fill from w"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Finished: non-zeros sit in front — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Finished: non-zeros sit in front in their original order and all zeros are pushed to the end — []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'mz1', label: '[0,1,0,3,12]', value: { nums: [0, 1, 0, 3, 12] } },
     { id: 'mz2', label: '[4,0,0,5,0,6]', value: { nums: [4, 0, 0, 5, 0, 6] } },

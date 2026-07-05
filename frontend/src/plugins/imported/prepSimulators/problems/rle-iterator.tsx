@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -118,7 +118,115 @@ function Inspector({ frame }: InspectorProps<RleState>) {
 export const manifestId = 'prep-design-rle-iterator';
 export const title = 'RLE Iterator';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"RLE Iterator\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Trie dictionary + spell suggest — different approach"
+      },
+      {
+        label: "Hash map + doubly linked list LRU — different approach"
+      },
+      {
+        label: "Heap + Sorted Available Set — different approach"
+      }
+    ],
+    explain: "See Rle Iterator pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (RLE Iterator), what strategy is established?",
+    choices: [
+      {
+        label: "See Rle Iterator pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "RLE Iterator: encoding is [count,val,count,val,...]. Next(n) consumes counts; returns val when enough remain, else -1."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"NEXT\" step (n= → ), what happens?",
+    choices: [
+      {
+        label: "Next(): consume from pair [,] → — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Next(): consume  from pair [,] → return ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `enc` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field enc in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `enc` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Next(): consume from pair [,] → — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Next(): consume  from pair [,] → return ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'rle1',

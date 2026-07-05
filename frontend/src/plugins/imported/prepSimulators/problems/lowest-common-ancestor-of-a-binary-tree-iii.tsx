@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -194,7 +194,135 @@ function Inspector({ frame }: InspectorProps<LcaState>) {
 export const manifestId = 'prep-trees-lowest-common-ancestor-of-a-binary-tree-iii';
 export const title = 'Lowest Common Ancestor of a Binary Tree III';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Lowest Common Ancestor of a Binary Tree III\"?",
+    choices: [
+      {
+        label: "Two Pointers (linked-list intersection — fits this problem",
+        correct: true
+      },
+      {
+        label: "Same tree check — different approach"
+      },
+      {
+        label: "BFS + Column Map — different approach"
+      },
+      {
+        label: "Column map BFS — different approach"
+      }
+    ],
+    explain: "Same trick as \"intersection of two linked lists\": two pointers `a` and `b` start at `p` and `q`"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Lowest Common Ancestor of a Binary Tree III), what strategy is established?",
+    choices: [
+      {
+        label: "Same trick as \"intersection of two — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "LCA III uses only parent pointers (no root). Same trick as intersecting two linked lists: pointer a starts at p (), pointer b starts at q (). Each walks up to its parent; when one falls off the top it restarts at the other's start, so both travel the same total distance and meet at the LCA."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"UP_B\" step (b:  → ), what happens?",
+    choices: [
+      {
+        label: "Move pointer b up — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Move pointer b up from  to its parent ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `p` field track in the visualization state?",
+    choices: [
+      {
+        label: "start of pointer — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `p` in sync: start of pointer a"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Lowest Common Ancestor of a Binary Tree III\"?",
+    choices: [
+      {
+        label: "O(h) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(h). O(1). Same trick as \"intersection of two linked lists\": two pointers `a` and `b` start at `p` and `q`; When one reaches `nil`, redirect it to the other's start"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "p and q are the same — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "p and q are the same node, so the LCA is that node itself ()."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'lca3-1',

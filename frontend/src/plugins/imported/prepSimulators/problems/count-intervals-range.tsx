@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -191,7 +191,135 @@ function Inspector({ frame }: InspectorProps<CountRangeState>) {
 export const manifestId = 'prep-intervals-count-intervals-range';
 export const title = 'Count intervals range';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Count intervals range\"?",
+    choices: [
+      {
+        label: "Sort + merge coverage — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort by end + DP + binary search — different approach"
+      },
+      {
+        label: "Brute-force nearest store by distance — different approach"
+      },
+      {
+        label: "Sort Starts/Ends + Sweep — different approach"
+      }
+    ],
+    explain: "Merge touching intervals; sum each merged group's span"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Count intervals range), what strategy is established?",
+    choices: [
+      {
+        label: "Merge touching intervals; sum each merged — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Count Intervals Range: total number of distinct integers covered by the union of these intervals. Sort by start, then sweep left to right merging intervals that touch or overlap (start ≤ end+1), adding end−start+1 for each merged group."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"STOP\" step (gap before ), what happens?",
+    choices: [
+      {
+        label: "starts at > end+1 (+1), leaving — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " starts at  > end+1 (+1), leaving a gap. The current group [,] is complete."
+  },
+  {
+    id: "state",
+    prompt: "What does the `sorted` field track in the visualization state?",
+    choices: [
+      {
+        label: "intervals after sorting by start — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `sorted` in sync: intervals after sorting by start"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Count intervals range\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(1). sort by start; extend while start<=end+1; add end-start+1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Swept all intervals. The merged groups — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Swept all intervals. The merged groups ${merged.map((m) => "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'cir1',

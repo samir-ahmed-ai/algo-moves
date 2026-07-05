@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -425,7 +425,106 @@ function Inspector({ frame }: InspectorProps<DeptTopThreeState>) {
 export const manifestId = 'prep-database-department-top-three-salaries';
 export const title = 'Department Top Three Salaries';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Department Top Three Salaries\"?",
+    choices: [
+      {
+        label: "Database — fits this problem",
+        correct: true
+      }
+    ],
+    explain: "`DENSE_RANK() OVER (PARTITION BY departmentId ORDER BY salary DESC)` assigns rank without gaps for ties"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Department Top Three Salaries), what strategy is established?",
+    choices: [
+      {
+        label: "`DENSE_RANK() OVER (PARTITION — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Department Top Three Salaries: for each department, find employees whose salary is among the top three distinct salary tiers (DENSE_RANK ≤ 3). Equivalent to \\"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"DEPT_DONE\" step ( row(s)), what happens?",
+    choices: [
+      {
+        label: "Finished \"\": employee(s) qualify — — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Finished \"\":  employee(s) qualify — ${deptHighEarners.map((r) => "
+  },
+  {
+    id: "state",
+    prompt: "What does the `grouped` field track in the visualization state?",
+    choices: [
+      {
+        label: "[deptId, deptName, employeeCount] — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `grouped` in sync: [deptId, deptName, employeeCount]"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Query complete. row(s) returned across — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Query complete.  row(s) returned across all departments."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'dts1',

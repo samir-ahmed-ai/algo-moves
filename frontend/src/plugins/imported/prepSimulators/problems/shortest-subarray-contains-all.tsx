@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -150,7 +150,135 @@ function Inspector({ frame }: InspectorProps<ShortestState>) {
 export const manifestId = 'prep-strings-shortest-subarray-contains-all';
 export const title = 'Shortest subarray contains all';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Shortest subarray contains all\"?",
+    choices: [
+      {
+        label: "Sliding window — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort + Wrap-around — different approach"
+      },
+      {
+        label: "Adjacent swap — different approach"
+      },
+      {
+        label: "Bijection map — different approach"
+      }
+    ],
+    explain: "Grow right, shrink left while the running sum still reaches target"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Shortest subarray contains all), what strategy is established?",
+    choices: [
+      {
+        label: "Grow right, shrink left while — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Shortest subarray reaching a target sum. Slide a window: grow the right edge to add elements, and shrink from the left while the window sum still reaches , recording the smallest length seen."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"GROW\" step (+nums[]=), what happens?",
+    choices: [
+      {
+        label: "Grow the window: add nums[] = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Grow the window: add nums[] = . The window is [..] with sum ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `l` field track in the visualization state?",
+    choices: [
+      {
+        label: "left edge of the window — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `l` in sync: left edge of the window"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Shortest subarray contains all\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). sum>=target -> record r-l+1, sum-=nums[l], l++"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Grow the window: add nums[] = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Grow the window: add nums[] = . The window is [..] with sum ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ssc1', label: '[2,3,1,2,4,3] → 7', value: { nums: [2, 3, 1, 2, 4, 3], target: 7 } },
     { id: 'ssc2', label: '[1,1,1,1] → 6', value: { nums: [1, 1, 1, 1], target: 6 } },

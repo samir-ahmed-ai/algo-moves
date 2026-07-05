@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -216,7 +216,135 @@ function Inspector({ frame }: InspectorProps<FlattenState>) {
 export const manifestId = 'prep-linked-lists-flatten-doubly-linked-list';
 export const title = 'Flatten doubly linked list';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Flatten doubly linked list\"?",
+    choices: [
+      {
+        label: "DFS flatten — fits this problem",
+        correct: true
+      },
+      {
+        label: "Josephus simulation — different approach"
+      },
+      {
+        label: "Interweave (3-pass, no map) — different approach"
+      },
+      {
+        label: "Iterative Group Reversal — different approach"
+      }
+    ],
+    explain: "DFS preorder: splice each child list in before moving to the sibling"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Flatten doubly linked list), what strategy is established?",
+    choices: [
+      {
+        label: "DFS preorder: splice each child list — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Flatten the multilevel doubly linked list into a single level. We DFS in preorder: each time a node has a child, splice that whole child sublist in right after it, then continue with the saved next. We keep a running tail \"prev\" and link prev↔node as we go."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"DESCEND\" step (child of ), what happens?",
+    choices: [
+      {
+        label: "has a child list. Recurse — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " has a child list. Recurse into the child first (DFS), flatten it, and remember its tail so we can re-attach the saved next afterwards."
+  },
+  {
+    id: "state",
+    prompt: "What does the `prevPos` field track in the visualization state?",
+    choices: [
+      {
+        label: "position in `chain` — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `prevPos` in sync: position in `chain` of the running tail (`prev`)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Flatten doubly linked list\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). link prev<->node; recurse child then next; keep tail as prev"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every level is spliced into one — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every level is spliced into one chain. The flattened order is . Time O(n) — each node visited once; Space O(h) — recursion depth is the multilevel height."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       // 1 - 2 - 3 - 4 with 2 owning a child sublist 7 - 8 - 9.

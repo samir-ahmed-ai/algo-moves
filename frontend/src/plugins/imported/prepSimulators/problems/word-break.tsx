@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -170,7 +170,135 @@ function Inspector({ frame }: InspectorProps<WordBreakState>) {
 export const manifestId = 'prep-strings-word-break';
 export const title = 'Word break';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Word break\"?",
+    choices: [
+      {
+        label: "DP reachability — fits this problem",
+        correct: true
+      },
+      {
+        label: "Vertical scan — different approach"
+      },
+      {
+        label: "Split + Reverse — different approach"
+      },
+      {
+        label: "Index Map — different approach"
+      }
+    ],
+    explain: "dp[i] true if some cut j leaves dp[j] reachable and s[j:i] is a word"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Word break), what strategy is established?",
+    choices: [
+      {
+        label: "dp[i] true if some cut j — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Word Break: can \"\" be cut into a sequence of dictionary words? dp[i] means the prefix s[0:i] is fully segmentable. We fill dp left to right in O(n²) time and O(n) space."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SET\" step (dp[]=true), what happens?",
+    choices: [
+      {
+        label: "Match! The prefix s[0:] is segmentable — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Match! The prefix s[0:] is segmentable and \"\" is a word, so \"\" is segmentable too. Set dp[] = true and stop scanning cuts for i=."
+  },
+  {
+    id: "state",
+    prompt: "What does the `dp` field track in the visualization state?",
+    choices: [
+      {
+        label: "dp[i] = prefix s[0:i] — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `dp` in sync: dp[i] = prefix s[0:i] is fully segmentable; dp has length s.length + 1"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Word break\"?",
+    choices: [
+      {
+        label: "O(n^2) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n*m) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O( time, O(words) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n^2). O(n). dp[0]=true; dp[i]|=dp[j] && dict[s[j:i]]"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "No cut worked for i=: — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "No cut worked for i=: the prefix \"\" cannot be split into dictionary words. dp[] stays false."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'wb1',

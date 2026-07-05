@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -121,7 +121,135 @@ function Inspector({ frame }: InspectorProps<SwapState>) {
 export const manifestId = 'prep-strings-swap-even-odd';
 export const title = 'Swap even odd';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Swap even odd\"?",
+    choices: [
+      {
+        label: "Adjacent swap — fits this problem",
+        correct: true
+      },
+      {
+        label: "Run-length — different approach"
+      },
+      {
+        label: "Hash set substrings — different approach"
+      },
+      {
+        label: "Sort + Wrap-around — different approach"
+      }
+    ],
+    explain: "Swap neighbors two at a time"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Swap even odd), what strategy is established?",
+    choices: [
+      {
+        label: "Swap neighbors two at a time — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Swap Even Odd: walk the string two characters at a time and swap each adjacent pair (index i with i+1). We step i += 2 so every neighbouring couple is swapped exactly once."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SWAP\" step (), what happens?",
+    choices: [
+      {
+        label: "Swap them: index and become '' — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Swap them: index  and  become '' and ''. Now advance i += 2 to the next pair."
+  },
+  {
+    id: "state",
+    prompt: "What does the `chars` field track in the visualization state?",
+    choices: [
+      {
+        label: "working char array (mutated — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `chars` in sync: working char array (mutated as we swap)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Swap even odd\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n*m) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). i+=2: swap b[i],b[i+1]"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Swap them: index and become '' — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Swap them: index  and  become '' and ''. Now advance i += 2 to the next pair."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'se1', label: '"abcdef"', value: { s: 'abcdef' } },
     { id: 'se2', label: '"algorithm"', value: { s: 'algorithm' } },

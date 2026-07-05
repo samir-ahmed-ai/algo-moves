@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -179,7 +179,135 @@ function Inspector({ frame }: InspectorProps<KGroupState>) {
 export const manifestId = 'prep-linked-lists-reverse-nodes-in-k-group';
 export const title = 'Reverse Nodes in k-Group';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Reverse Nodes in k-Group\"?",
+    choices: [
+      {
+        label: "Iterative Group Reversal — fits this problem",
+        correct: true
+      },
+      {
+        label: "Iterative reverse — different approach"
+      },
+      {
+        label: "Two pointers reset — different approach"
+      },
+      {
+        label: "Min-heap merge — different approach"
+      }
+    ],
+    explain: "Use a dummy node before head. For each group:"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Reverse Nodes in k-Group), what strategy is established?",
+    choices: [
+      {
+        label: "Use a dummy node before head. — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Reverse Nodes in k-Group: walk the list and reverse every block of  consecutive nodes, leaving any final block shorter than  untouched. A dummy node (D) sits before the head so the first group has a stable predecessor."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"REVERSE\" step (swap ↔), what happens?",
+    choices: [
+      {
+        label: "Reversing the group with the prev/cur — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Reversing the group with the prev/cur finger dance: flip the order of the values at the two ends of the remaining slice (positions  and )."
+  },
+  {
+    id: "state",
+    prompt: "What does the `groupPrev` field track in the visualization state?",
+    choices: [
+      {
+        label: "node before the group — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `groupPrev` in sync: node before the group being processed"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Reverse Nodes in k-Group\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n*k) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). Use a dummy node before head. For each group:"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Group reversed. The anchor now points — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Group reversed. The anchor now points at the old kth node (value ), and the old group head (value ) becomes the anchor for the next group."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'kg1', label: '[1,2,3,4,5], k=2', value: { values: [1, 2, 3, 4, 5], k: 2 } },
     { id: 'kg2', label: '[1,2,3,4,5], k=3', value: { values: [1, 2, 3, 4, 5], k: 3 } },

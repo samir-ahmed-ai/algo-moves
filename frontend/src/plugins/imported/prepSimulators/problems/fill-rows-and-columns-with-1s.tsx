@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
@@ -179,7 +179,135 @@ function Inspector({ frame }: InspectorProps<FillState>) {
 export const manifestId = 'prep-matrices-fill-rows-and-columns-with-1s';
 export const title = 'Fill rows and columns with 1s';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Fill rows and columns with 1s\"?",
+    choices: [
+      {
+        label: "First row/col as markers — fits this problem",
+        correct: true
+      },
+      {
+        label: "Layer-by-layer 90° rotation — different approach"
+      },
+      {
+        label: "DFS + memo longest increasing path — different approach"
+      },
+      {
+        label: "Nearest pair by Manhattan distance — different approach"
+      }
+    ],
+    explain: "Use row0 and col0 as marker lanes for which rows/cols become 1"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Fill rows and columns with 1s), what strategy is established?",
+    choices: [
+      {
+        label: "Use row0 and col0 as marker — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Goal: for every cell that holds a 1, set its whole row and whole column to 1. We do it in O(1) extra space by reusing row 0 and column 0 as marker lanes — but first we must remember whether they already contained a 1 of their own."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"APPLY\" step (fill ,), what happens?",
+    choices: [
+      {
+        label: "mat[][0] = or mat[0][] = flags — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "mat[][0] =  or mat[0][] =  flags this cell, so set mat[][] = 1"
+  },
+  {
+    id: "state",
+    prompt: "What does the `mat` field track in the visualization state?",
+    choices: [
+      {
+        label: "current matrix snapshot — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `mat` in sync: current matrix snapshot"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Fill rows and columns with 1s\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(1). flag row0/col0 first; mark from inside; apply; then borders"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every row and column that originally — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every row and column that originally held a 1 is now completely filled, using only row 0 and column 0 as scratch space. The matrix now has  ones."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'fr1',

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -169,7 +169,115 @@ function Inspector({ frame }: InspectorProps<LevelOrderState>) {
 export const manifestId = 'prep-trees-level-order';
 export const title = 'Level order';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Level order\"?",
+    choices: [
+      {
+        label: "BFS levels — fits this problem",
+        correct: true
+      },
+      {
+        label: "BST Walk — different approach"
+      },
+      {
+        label: "Controlled Inorder (stack of left spine) — different approach"
+      },
+      {
+        label: "Level order connect — different approach"
+      }
+    ],
+    explain: "Queue processed in level-size snapshots"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PUSH\" step (push ), what happens?",
+    choices: [
+      {
+        label: "Node has a left child . — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Node  has a left child . Enqueue it — it belongs to the next level."
+  },
+  {
+    id: "state",
+    prompt: "What does the `queue` field track in the visualization state?",
+    choices: [
+      {
+        label: "node indices currently waiting — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `queue` in sync: node indices currently waiting in the BFS queue"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Level order\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). sz=len(q); pop sz nodes, push their children"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every node has been visited. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every node has been visited. The traversal produced  level(s): ${out.map((l) => "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'lo1', label: '[3,9,20,·,·,15,7]', value: { tree: [3, 9, 20, null, null, 15, 7] } },
     { id: 'lo2', label: '[1,2,3,4,5,6,7]', value: { tree: [1, 2, 3, 4, 5, 6, 7] } },

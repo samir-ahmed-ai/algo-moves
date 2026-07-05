@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -229,7 +229,115 @@ function Inspector({ frame }: InspectorProps<DistState>) {
 export const manifestId = 'prep-trees-find-distance-of-two-nodes';
 export const title = 'Find distance of two nodes';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find distance of two nodes\"?",
+    choices: [
+      {
+        label: "LCA + heights — fits this problem",
+        correct: true
+      },
+      {
+        label: "BFS + Direction Toggle — different approach"
+      },
+      {
+        label: "Inorder DFS (find two inversions) — different approach"
+      },
+      {
+        label: "Post-order height — different approach"
+      }
+    ],
+    explain: "Distance = depth(p)+depth(q) measured down from their LCA"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"LCA\" step (pass up ), what happens?",
+    choices: [
+      {
+        label: "Only one side found a target — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Only one side found a target under node , so we pass that candidate () up unchanged."
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "node currently under inspection (ring) — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: node currently under inspection (ring)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find distance of two nodes\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). find LCA; sum depth from lca to each node"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Distance = depth(LCA→) + depth(LCA→) = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Distance = depth(LCA→) + depth(LCA→) =  +  = . That is the number of edges on the path between the two nodes."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'fd1',

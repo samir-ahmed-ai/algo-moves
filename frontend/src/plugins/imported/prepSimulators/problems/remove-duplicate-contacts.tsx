@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -199,7 +199,135 @@ function Inspector({ frame }: InspectorProps<ContactsState>) {
 export const manifestId = 'prep-hash-maps-remove-duplicate-contacts';
 export const title = 'Remove duplicate contacts';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Remove duplicate contacts\"?",
+    choices: [
+      {
+        label: "Union-find via email index — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sliding window + frequency map — different approach"
+      },
+      {
+        label: "Hash map chain reconstruction — different approach"
+      },
+      {
+        label: "Quickselect / partition — different approach"
+      }
+    ],
+    explain: "Any shared email unions two contacts into one group"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Remove duplicate contacts), what strategy is established?",
+    choices: [
+      {
+        label: "Any shared email unions two contacts — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Remove duplicate contacts: two contacts are the same person if they share any email. We use union-find — each contact starts as its own group, and any shared email unions two groups into one."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"OWN_EMAIL\" step ( → id ), what happens?",
+    choices: [
+      {
+        label: "Email \"\" is new, so contact — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Email \"\" is new, so contact # claims it: emailOwner[\"\"] = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `ids` field track in the visualization state?",
+    choices: [
+      {
+        label: "contact ids in input order — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `ids` in sync: contact ids in input order (the ArrayRow cells)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Remove duplicate contacts\"?",
+    choices: [
+      {
+        label: "O(n·e·α(n)) time, O(n·e) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n·e·α(n)). O(n·e). emailOwner seen -> union; else claim; emit one per root"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. input contacts collapse to unique — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done.  input contacts collapse to  unique : ${roots.map((r) => "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'rdc1',

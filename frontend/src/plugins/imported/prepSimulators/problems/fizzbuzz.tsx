@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -146,7 +146,115 @@ function Inspector({ frame }: InspectorProps<FizzBuzzState>) {
 export const manifestId = 'prep-math-fizzbuzz';
 export const title = 'Fizzbuzz';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Fizzbuzz\"?",
+    choices: [
+      {
+        label: "FizzBuzz conditional — fits this problem",
+        correct: true
+      },
+      {
+        label: "Primality trial division — different approach"
+      },
+      {
+        label: "Fibonacci iterative — different approach"
+      },
+      {
+        label: "Greedy (last occurrence) — different approach"
+      }
+    ],
+    explain: "Check %15 first, then %3, then %5"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Fizzbuzz), what strategy is established?",
+    choices: [
+      {
+        label: "Check %15 first, then %3, then — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "FizzBuzz: for every number 1.. we print \"FizzBuzz\" if it is divisible by 15, else \"Fizz\" if divisible by 3, else \"Buzz\" if divisible by 5, otherwise the number itself. Order matters — the 15 check must come first."
+  },
+  {
+    id: "state",
+    prompt: "What does the `out` field track in the visualization state?",
+    choices: [
+      {
+        label: "filled results so far; '' — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `out` in sync: filled results so far; '' = not filled yet"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Fizzbuzz\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log x) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). 15 FizzBuzz; 3 Fizz; 5 Buzz; else the number"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every number from 1 — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every number from 1 to  has been classified and placed. The output array holds  strings — that is the complete FizzBuzz sequence."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'fb5', label: 'n = 5', value: { n: 5 } },
     { id: 'fb8', label: 'n = 8', value: { n: 8 } },

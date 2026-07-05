@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -227,7 +227,135 @@ function Inspector({ frame }: InspectorProps<MatchState>) {
 export const manifestId = 'prep-strings-number-of-matching-subsequences';
 export const title = 'Number of Matching Subsequences';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Number of Matching Subsequences\"?",
+    choices: [
+      {
+        label: "Multi-pointer Buckets — fits this problem",
+        correct: true
+      },
+      {
+        label: "Expand center — different approach"
+      },
+      {
+        label: "Two Pointers Greedy — different approach"
+      },
+      {
+        label: "Hash set substrings — different approach"
+      }
+    ],
+    explain: "See Number Of Matching Subsequences pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Number of Matching Subsequences), what strategy is established?",
+    choices: [
+      {
+        label: "See Number Of Matching Subsequences — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Number of Matching Subsequences: count how many of the  words are subsequences of \"\". Each word waits in the bucket of the next character it needs; every word starts in the bucket of its first letter."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MATCH\" step (\"\"), what happens?",
+    choices: [
+      {
+        label: "\"\" consumed its last character '' — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "\"\" consumed its last character '' — it is a full subsequence of \"\". Count it. Total so far: ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `s` field track in the visualization state?",
+    choices: [
+      {
+        label: "the source string, one char — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `s` in sync: the source string, one char per array cell"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Number of Matching Subsequences\"?",
+    choices: [
+      {
+        label: "O( time, O(words) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+      }
+    ],
+    explain: "O(. O(words). Number Of Matching Subsequences"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Finished scanning \"\". of word(s) — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Finished scanning \"\".  of  word(s) were subsequences${\n      matched.length ? "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'nms1', label: 's="abcde", words=[a,bb,acd,ace]', value: { s: 'abcde', words: ['a', 'bb', 'acd', 'ace'] } },
     { id: 'nms2', label: 's="dsahjpjauf", words=[ahjpjau,ja,ahbwzgqnuk,tnmlanowax]', value: { s: 'dsahjpjauf', words: ['ahjpjau', 'ja', 'ahbwzgqnuk', 'tnmlanowax'] } },

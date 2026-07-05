@@ -3,6 +3,7 @@ import { Handle, NodeResizer, NodeToolbar, Position, useReactFlow, useUpdateNode
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { panelAccent } from '@/core/panelAccent';
+import { panelNodeChrome } from '@/core/panelNodeChrome';
 import { PanelNodeBodySlot } from '@/core/panelNodeRegistry';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import type { HeaderDensity } from '@/core/panelNodeBodyTypes';
@@ -24,30 +25,29 @@ const CHAIN_TINTS = [
 
 export function PanelNode({ id, data, selected, width, height }: NodeProps<PanelFlowNode>) {
   const nodeStyle = data.style;
+  const kind = data.kind ?? id;
+  const chrome = panelNodeChrome(kind);
   const kindAccent = panelAccent(data.kind);
   const accent = panelStroke(nodeStyle, data.accent ?? kindAccent);
   const { dir, mode, density, present, tweaks, sidePanelTab, setSidePanelTab, setRightOpen, setRightTab } = useWorkspace();
   const { plugin, item } = useCanvasStatic();
   const isViz = data.kind === 'viz';
-  const isReassemble = data.kind === 'reassemble';
-  const isRecall = data.kind === 'recall';
-  const isCode = data.kind === 'code' || data.kind === 'scratch' || isReassemble || isRecall;
-  const isCollabCode = data.kind === 'collab-code';
   const isWhiteboard = data.kind === 'whiteboard';
   const isProblem = data.kind === 'problem';
   const isWorkbench = data.kind === 'workbench';
-  const showTargetHandle = !isProblem && !isWorkbench;
+  const isCodeLike = !!chrome.codeLike;
+  const showTargetHandle = !chrome.hideTargetHandle;
   const headerData =
     (isProblem || isWorkbench) && mode === 'visualize' ? { ...data, title: item.title } : data;
   const collapsed = !!data.collapsed;
   const showSourceHandle = !collapsed;
   const locked = !!data.locked;
   const headerDensity: HeaderDensity = density === 'spacious' ? 'spacious' : density === 'ultra' ? 'ultra' : 'compact';
-  const maxPanelW = layoutFixedWidth(data.kind ?? id);
-  const bodyCap = layoutCap(data.kind ?? id);
-  const narrowBody = nodeTier(data.kind ?? id) === 'narrow';
+  const maxPanelW = layoutFixedWidth(kind);
+  const bodyCap = layoutCap(kind);
+  const narrowBody = nodeTier(kind) === 'narrow';
   const snapFill = !!data.snapFill && mode === 'visualize';
-  const panelRef = useFitContentSize(id, data.kind ?? id, collapsed, !snapFill);
+  const panelRef = useFitContentSize(id, kind, collapsed, !snapFill);
   const [showBigO, setShowBigO] = useState(false);
   const { setNodes } = useReactFlow();
   const cc = useConnectedComponentsOptional();
@@ -83,7 +83,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
     }
   };
   const isQuiz = data.kind === 'quiz';
-  const showSideToggle = sideTabs.length > 0 && (isWorkbench || isProblem || isViz || isCode || isQuiz);
+  const showSideToggle = sideTabs.length > 0 && (isWorkbench || isProblem || isViz || isCodeLike || isQuiz);
   const sideLabel = sideTabs[0]?.label ?? 'panel';
   const targetPos = mode === 'visualize' ? Position.Left : mode === 'learn' ? Position.Top : dir === 'LR' ? Position.Left : Position.Top;
   const sourcePos = mode === 'visualize' ? Position.Right : mode === 'learn' ? Position.Bottom : dir === 'LR' ? Position.Right : Position.Bottom;
@@ -93,8 +93,9 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const boardCanvas = isWhiteboard && mode === 'visualize';
   const showNodeTransport = vizCanvas && (present || tweaks.controls);
   const visualizeFlush =
-    mode === 'visualize' && (isWorkbench || isProblem || isViz || isCode || isWhiteboard);
+    mode === 'visualize' && (isWorkbench || isProblem || isViz || isCodeLike || isWhiteboard);
   const flushBody = vizCanvas || boardCanvas || (mode === 'visualize' && (isProblem || isWorkbench));
+  const bodyFlex = !!(chrome.bodyFlex || chrome.codeLike);
 
   const headerProps = {
     id,
@@ -131,9 +132,8 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
       className={cn(
         'panel-node relative flex flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
         snapFill ? 'h-full min-h-0' : 'h-auto',
-        isCode && !collapsed && 'min-h-0 flex-1',
-        isWorkbench && !collapsed && 'min-h-[480px]',
-        (isCollabCode || isWhiteboard) && !collapsed && 'min-h-[360px]',
+        isCodeLike && !collapsed && 'min-h-0 flex-1',
+        chrome.panelMinClass && !collapsed && chrome.panelMinClass,
         'w-full',
         selected && 'selected',
         chainTint && `ring-1 ${chainTint}`,
@@ -163,9 +163,8 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
           visualizeFlush
             ? 'gap-0 px-[var(--node-px,0.75rem)]'
             : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
-          isCode && !collapsed && 'min-h-0 flex-1 overflow-hidden',
-          isWorkbench && !collapsed && 'min-h-0 flex-1 overflow-hidden',
-          (isCollabCode || isWhiteboard) && !collapsed && 'min-h-[320px] flex-1 overflow-hidden',
+          bodyFlex && !collapsed && 'min-h-0 flex-1 overflow-hidden',
+          chrome.bodyMinClass && !collapsed && `${chrome.bodyMinClass} flex-1 overflow-hidden`,
           snapFill && !collapsed && 'min-h-0 flex-1 overflow-hidden',
           !vizCanvas && !boardCanvas && !snapFill && 'overflow-hidden',
         )}
@@ -200,7 +199,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
         )
       )}
 
-      {!collapsed && showSourceHandle && !isWorkbench && (
+      {!collapsed && showSourceHandle && !chrome.hideSourceHandle && (
         <Handle type="source" position={sourcePos} className={handleCls} style={portHandleStyle(sourcePos)} />
       )}
     </div>

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
@@ -217,7 +217,135 @@ function Inspector({ frame }: InspectorProps<WeakState>) {
 export const manifestId = 'prep-sorting-the-number-of-weak-characters-in-the-game';
 export const title = 'The Number of Weak Characters in the Game';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"The Number of Weak Characters in the Game\"?",
+    choices: [
+      {
+        label: "Sort (attack desc, defense asc) + Max — fits this problem",
+        correct: true
+      },
+      {
+        label: "Memoized Collatz + Sort — different approach"
+      },
+      {
+        label: "Greedy Contribution Counting — different approach"
+      },
+      {
+        label: "Sort Frequencies + Greedy — different approach"
+      }
+    ],
+    explain: "Sort by attack **descending**, ties by defense **ascending**"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (The Number of Weak Characters in the Game), what strategy is established?",
+    choices: [
+      {
+        label: "Sort by attack **descending**, ties — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Weak Characters: a character is weak if some OTHER character has strictly greater attack AND strictly greater defense. We sort by attack descending (ties by defense ascending), then sweep once tracking the largest defense seen so far."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SWAP\" step (<->), what happens?",
+    choices: [
+      {
+        label: "Swap the winner into slot . — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Swap the winner into slot . Now positions 0… are locked in attack-descending order."
+  },
+  {
+    id: "state",
+    prompt: "What does the `props` field track in the visualization state?",
+    choices: [
+      {
+        label: "current ordering (bars show attack — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `props` in sync: current ordering (bars show attack, label shows defense)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"The Number of Weak Characters in the Game\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(1). Sort by attack **descending**, ties by defense **ascending**; Sweep left-to-right tracking `maxDef`; if `defense < maxDef`, it's weak"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Sweep complete. character weak. Time O(n — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Sweep complete.  character weak. Time O(n log n) for the sort, Space O(1) extra."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'wc1',

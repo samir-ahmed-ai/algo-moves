@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -119,7 +119,95 @@ function Inspector({ frame }: InspectorProps<CalState>) {
 export const manifestId = 'prep-design-my-calendar-i';
 export const title = 'My Calendar I';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"My Calendar I\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Trie phone directory autocomplete — different approach"
+      },
+      {
+        label: "Jump Array — different approach"
+      },
+      {
+        label: "Log parsing aggregation — different approach"
+      }
+    ],
+    explain: "See My Calendar I pattern"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"BOOK\" step (ok [,)), what happens?",
+    choices: [
+      {
+        label: "Book(,): no overlap → append event. — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Book(,): no overlap → append event. Calendar has  booking(s)."
+  },
+  {
+    id: "state",
+    prompt: "What does the `events` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field events in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `events` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. booking(s) on calendar. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done.  booking(s) on calendar."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'cal1',

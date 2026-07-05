@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -230,7 +230,135 @@ function Inspector({ frame }: InspectorProps<LongestPathState>) {
 export const manifestId = 'prep-trees-longest-path-with-different-adjacent-characters';
 export const title = 'Longest Path With Different Adjacent Characters';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Longest Path With Different Adjacent Characters\"?",
+    choices: [
+      {
+        label: "DFS tracking top-2 child contributions — fits this problem",
+        correct: true
+      },
+      {
+        label: "BFS rightmost — different approach"
+      },
+      {
+        label: "Swap children — different approach"
+      },
+      {
+        label: "Recursive DFS — different approach"
+      }
+    ],
+    explain: "DFS: for each node, track the two longest child contributions where `s[child] != s[node]`"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Longest Path With Different Adjacent Characters), what strategy is established?",
+    choices: [
+      {
+        label: "DFS: for each node, track — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Longest Path With Different Adjacent Characters: find the longest downward path whose adjacent nodes never share the same character. DFS returns the longest single downward chain from each node; the answer is the best \"V\" path (two chains) through any node."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"BLOCK\" step (''==''), what happens?",
+    choices: [
+      {
+        label: "Child shares character '' with node — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Child  shares character '' with node , so the edge to it is forbidden — its chain contributes nothing here."
+  },
+  {
+    id: "state",
+    prompt: "What does the `parent` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field parent in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `parent` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Longest Path With Different Adjacent Characters\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). DFS: for each node, track the two longest child contributions where `s[child] != s[node]`; Path through node = `max1 + max2 + 1`; return `max1 + 1` upward"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every node is resolved. The longest — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every node is resolved. The longest path with all-different adjacent characters has length  node(s)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'lp1',

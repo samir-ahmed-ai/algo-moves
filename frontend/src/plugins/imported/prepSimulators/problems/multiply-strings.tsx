@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -170,7 +170,135 @@ function Inspector({ frame }: InspectorProps<MultiplyState>) {
 export const manifestId = 'prep-math-multiply-strings';
 export const title = 'Multiply Strings';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Multiply Strings\"?",
+    choices: [
+      {
+        label: "Grade-school multiplication — fits this problem",
+        correct: true
+      },
+      {
+        label: "Strobogrammatic map — different approach"
+      },
+      {
+        label: "Uniform random in range — different approach"
+      },
+      {
+        label: "Gauss sum XOR trick — different approach"
+      }
+    ],
+    explain: "See Multiply Strings pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Multiply Strings), what strategy is established?",
+    choices: [
+      {
+        label: "See Multiply Strings pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Multiply Strings: compute  ×  without bignum. Digit i of num1 times digit j of num2 always lands in slots i+j and i+j+1 of a pos array of length m+n = ."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ADD\" step (sum=), what happens?",
+    choices: [
+      {
+        label: "Add the product to whatever already — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Add the product to whatever already sits in the ones slot pos[]=: sum =  +  = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `pos` field track in the visualization state?",
+    choices: [
+      {
+        label: "grade-school accumulator, length m+n — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `pos` in sync: grade-school accumulator, length m+n"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Multiply Strings\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(m+n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(d) time, O(d) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(m+n). Multiply Strings"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Read pos left-to-right, dropping leading — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Read pos left-to-right, dropping leading zeros: the product  ×  = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ms1', label: '"12" × "34"', value: { num1: '12', num2: '34' } },
     { id: 'ms2', label: '"123" × "45"', value: { num1: '123', num2: '45' } },

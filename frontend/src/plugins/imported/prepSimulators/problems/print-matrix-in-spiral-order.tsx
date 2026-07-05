@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -147,7 +147,135 @@ function Inspector({ frame }: InspectorProps<SpiralState>) {
 export const manifestId = 'prep-matrices-print-matrix-in-spiral-order';
 export const title = 'Print matrix in spiral Order';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Print matrix in spiral Order\"?",
+    choices: [
+      {
+        label: "Spiral four-boundary shrink — fits this problem",
+        correct: true
+      },
+      {
+        label: "Row Comparison (same or inverse of row 0) — different approach"
+      },
+      {
+        label: "First row/col as markers — different approach"
+      },
+      {
+        label: "Backtracking word search — different approach"
+      }
+    ],
+    explain: "Peel top row, right col, bottom row, left col; shrink the four bounds"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Print matrix in spiral Order), what strategy is established?",
+    choices: [
+      {
+        label: "Peel top row, right col, bottom — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Spiral order: peel the outer ring of a × matrix, then shrink the four boundaries inward and repeat. Bounds start at rows [..] and cols [..]."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"BOTTOM\" step (), what happens?",
+    choices: [
+      {
+        label: "Bottom row: walk right → left — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Bottom row: walk right → left across row , appending  from (, )."
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "cell just appended this frame — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: cell just appended this frame"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Print matrix in spiral Order\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) per axis time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(1). loop while bounds valid; shrink startR/endR/startC/endC each lap"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Bounds crossed (startR > endR — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Bounds crossed (startR > endR or startC > endC), so every cell has been peeled. Spiral order: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'sp1',

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -243,7 +243,115 @@ function Inspector({ frame }: InspectorProps<SchedulerState>) {
 export const manifestId = 'prep-intervals-weighted-job-scheduler';
 export const title = 'Weighted job scheduler';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Weighted job scheduler\"?",
+    choices: [
+      {
+        label: "Sort by end + DP + binary search — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort + merge coverage — different approach"
+      },
+      {
+        label: "Compare six pairwise distances — different approach"
+      },
+      {
+        label: "Sweep line with height events — different approach"
+      }
+    ],
+    explain: "Sort by end; dp = max(skip, take + best earlier non-overlapping job)"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"TAKE\" step (take=), what happens?",
+    choices: [
+      {
+        label: "Latest non-overlapping job is (ends ≤ — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Latest non-overlapping job is  (ends  ≤ ). Taking job  yields its profit  + dp[] (=) = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `jobs` field track in the visualization state?",
+    choices: [
+      {
+        label: "sorted by end time — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `jobs` in sync: sorted by end time"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Weighted job scheduler\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(n). sort by end; dp[i]=max(dp[i-1], profit+dp[lastNonOverlap])"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The table is complete. dp[] = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The table is complete. dp[] =  is the maximum total profit from any set of non-overlapping jobs."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'wjs1',

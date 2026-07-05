@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -231,7 +231,135 @@ function Inspector({ frame }: InspectorProps<CrosswordState>) {
 export const manifestId = 'prep-matrices-check-if-word-can-be-placed-in-crossword';
 export const title = 'Check if Word Can Be Placed In Crossword';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Check if Word Can Be Placed In Crossword\"?",
+    choices: [
+      {
+        label: "Segment Extraction + Forward/Backward — fits this problem",
+        correct: true
+      },
+      {
+        label: "Single Pass — different approach"
+      },
+      {
+        label: "Staircase Search — different approach"
+      },
+      {
+        label: "DFS + Memoization — different approach"
+      }
+    ],
+    explain: "See Check If Word Can Be Placed In Crossword pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Check if Word Can Be Placed In Crossword), what strategy is established?",
+    choices: [
+      {
+        label: "See Check If Word — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Check if Word Can Be Placed In Crossword: slide \"\" into any horizontal or vertical slot. Scan every row, then every column, breaking each line into segments at '#' walls, and test each full-length segment forward and backward. Time O(m·n), Space O(max(m,n))."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PLACE\" step (row  ), what happens?",
+    choices: [
+      {
+        label: "\"\" fits this horizontal slot — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "\"\" fits this horizontal slot in row  (). The word can be placed — return true."
+  },
+  {
+    id: "state",
+    prompt: "What does the `board` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field board in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `board` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Check if Word Can Be Placed In Crossword\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(max(m,n)) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n·4^s) time, O(s) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(max(m,n)). Check If Word Can Be Placed In Crossword"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "\"\" fits this vertical slot — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "\"\" fits this vertical slot in column  (). The word can be placed — return true."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'cw1',

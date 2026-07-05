@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { QueueTape } from '../../../../components/board/QueueTape';
 import type { ProblemSimulator } from '../types';
@@ -137,7 +137,135 @@ function Inspector({ frame }: InspectorProps<RateLimitState>) {
 export const manifestId = 'prep-streams-io-rate-limiter-iterator';
 export const title = 'Rate limiter iterator';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Rate limiter iterator\"?",
+    choices: [
+      {
+        label: "Token bucket rate limiter — fits this problem",
+        correct: true
+      },
+      {
+        label: "In-place byte reversal — different approach"
+      },
+      {
+        label: "Streaming palindrome stack — different approach"
+      },
+      {
+        label: "Min-heap size k — different approach"
+      }
+    ],
+    explain: "Bucket refills tokens by elapsed time; spend one per item"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Rate limiter iterator), what strategy is established?",
+    choices: [
+      {
+        label: "Bucket refills tokens by elapsed time; — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Rate limiter iterator: token bucket starts full at burst=. \\"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"YIELD\" step (→ ), what happens?",
+    choices: [
+      {
+        label: "tokens ≥ 1 — spend 1 — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "tokens ≥ 1 — spend 1 token, yield source[] = . Remaining tokens = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `source` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field source in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `source` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Rate limiter iterator\"?",
+    choices: [
+      {
+        label: "O(1) per item time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(entries) time, O(depth) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1) per item. O(1). tokens=min(burst, tokens+elapsed*rate); wait until tokens>=1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Source exhausted. Rate-limited output: []. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Source exhausted. Rate-limited output: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'rl1',

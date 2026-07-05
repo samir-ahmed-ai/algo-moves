@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -182,7 +182,135 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
 export const manifestId = 'prep-hash-maps-find-k-closest-to-center';
 export const title = 'find K closest to center';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"find K closest to center\"?",
+    choices: [
+      {
+        label: "Sort by distance to origin — fits this problem",
+        correct: true
+      },
+      {
+        label: "Hash map chain reconstruction — different approach"
+      },
+      {
+        label: "Two-pass frequency map — different approach"
+      },
+      {
+        label: "Frequency map — different approach"
+      }
+    ],
+    explain: "Sort points by squared distance, take the first k"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (find K closest to center), what strategy is established?",
+    choices: [
+      {
+        label: "Sort points by squared distance, take — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find the  points closest to the origin. Distance to (0,0) is sqrt(x²+y²), but ordering only needs the squared distance x²+y² — so we skip the sqrt and sort by that, then take the first ."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SWAP\" step (place ), what happens?",
+    choices: [
+      {
+        label: "Move the closest remaining point (dist² — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Move the closest remaining point  (dist² = ) into position . Positions 0… are now in sorted order."
+  },
+  {
+    id: "state",
+    prompt: "What does the `order` field track in the visualization state?",
+    choices: [
+      {
+        label: "current arrangement of points (sorted — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `order` in sync: current arrangement of points (sorted view as it forms)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"find K closest to center\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(t log t) time, O(t) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(n). compare x*x+y*y (no sqrt); slice [:k]"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The points are fully sorted — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The points are fully sorted by squared distance. Take the first  — these are the  points closest to the origin."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'kc1',

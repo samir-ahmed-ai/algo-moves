@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -186,7 +186,135 @@ function Inspector({ frame }: InspectorProps<SkylineState>) {
 export const manifestId = 'prep-intervals-draw-skyline';
 export const title = 'Draw skyline';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Draw skyline\"?",
+    choices: [
+      {
+        label: "Sweep line with height events — fits this problem",
+        correct: true
+      },
+      {
+        label: "Brute-force nearest store by distance — different approach"
+      },
+      {
+        label: "Sort + Greedy Merge — different approach"
+      },
+      {
+        label: "Axis-separated rectangle overlap — different approach"
+      }
+    ],
+    explain: "Sweep x events; keep a multiset of active heights; emit when the max changes"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Draw skyline), what strategy is established?",
+    choices: [
+      {
+        label: "Sweep x events; keep a multiset — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Draw Skyline (sweep line): each building [L,R,h] becomes two x-events — a start (encoded as −h) and an end (encoded as +h). Sorting by (x, signedHeight) makes starts win ties so a taller building opens before a shorter one closes. We keep a multiset of active heights {0:1} and emit a key-point whenever the tallest active height changes."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"EMIT\" step ((,)), what happens?",
+    choices: [
+      {
+        label: "The tallest active height changed — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "The tallest active height changed from  to , so the skyline turns here: emit key-point (, ). This marks where the visible roofline steps up or down."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cur` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the event — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cur` in sync: index of the event being processed"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Draw skyline\"?",
+    choices: [
+      {
+        label: "O(n^2) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n^2). O(n). start=-h, end=+h; sort by (x,height); track height counts; record max changes"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All events processed. The skyline — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All events processed. The skyline is the  emitted key-points: ${result.map((p) => "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'sk1',

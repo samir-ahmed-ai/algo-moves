@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -154,7 +154,115 @@ function Inspector({ frame }: InspectorProps<DiameterState>) {
 export const manifestId = 'prep-trees-get-diameter';
 export const title = 'Get diameter';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Get diameter\"?",
+    choices: [
+      {
+        label: "Post-order diameter — fits this problem",
+        correct: true
+      },
+      {
+        label: "DFS tracking top-2 child contributions — different approach"
+      },
+      {
+        label: "Inorder flatten — different approach"
+      },
+      {
+        label: "Preorder DFS — different approach"
+      }
+    ],
+    explain: "Longest path bends through a node = leftHeight + rightHeight"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"RETURN\" step (h=), what happens?",
+    choices: [
+      {
+        label: "Node returns its own height — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Node  returns its own height to its parent: 1 + max(L, R) = 1 + max(, ) = . This is how tall the subtree rooted at  is."
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "node currently being processed (ring) — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: node currently being processed (ring)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Get diameter\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) amortized time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(h) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). height dfs; best=max(best,L+R); return 1+max(L,R)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every node has been processed. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every node has been processed. The diameter is the largest L + R found:  edge${\n      bestNode !== null ? "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'gd1', label: '[1,2,3,4,5]', value: { tree: [1, 2, 3, 4, 5] } },
     { id: 'gd2', label: 'chain [1,2,·,3]', value: { tree: [1, 2, null, 3] } },

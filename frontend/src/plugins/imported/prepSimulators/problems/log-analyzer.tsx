@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -98,7 +98,135 @@ function Inspector({ frame }: InspectorProps<LogState>) {
 export const manifestId = 'prep-design-log-analyzer';
 export const title = 'Log analyzer';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Log analyzer\"?",
+    choices: [
+      {
+        label: "Log parsing aggregation — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Heaps — different approach"
+      },
+      {
+        label: "Heap + Sorted Available Set — different approach"
+      },
+      {
+        label: "Bijective tiny URL encode/decode — different approach"
+      }
+    ],
+    explain: "Parse each line; bucket counts by log level"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Log analyzer), what strategy is established?",
+    choices: [
+      {
+        label: "Parse each line; bucket counts — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Log Analyzer: ingest each line, parse level from first token, increment counters. report() returns TOTAL + per-level counts."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"REPORT\" step ( total), what happens?",
+    choices: [
+      {
+        label: "report(): TOTAL=, levels: — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "report(): TOTAL=, levels: ${Object.entries(byLevel).map(([k, v]) => "
+  },
+  {
+    id: "state",
+    prompt: "What does the `total` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field total in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `total` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Log analyzer\"?",
+    choices: [
+      {
+        label: "O(lines) time, O(unique keys) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(total painted) time, O(max coordinate) — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(lines). O(unique keys). Fields; level=upper(first); ByLevel[level]++"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "report(): TOTAL=, levels: — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "report(): TOTAL=, levels: ${Object.entries(byLevel).map(([k, v]) => "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'log1',

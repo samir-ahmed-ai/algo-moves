@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -176,7 +176,135 @@ function Inspector({ frame }: InspectorProps<MergeState>) {
 export const manifestId = 'prep-arrays-merge-two-sorted-arrays';
 export const title = 'Merge two sorted arrays';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Merge two sorted arrays\"?",
+    choices: [
+      {
+        label: "Merge from end — fits this problem",
+        correct: true
+      },
+      {
+        label: "Monotonic stack — different approach"
+      },
+      {
+        label: "Prefix + suffix pass — different approach"
+      },
+      {
+        label: "Greedy reach — different approach"
+      }
+    ],
+    explain: "Fill a from the back, dropping in the larger tail each step"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Merge two sorted arrays), what strategy is established?",
+    choices: [
+      {
+        label: "Fill a from the back, dropping — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Merge  values of b into a, which holds  real values followed by  empty slots. Walk all three pointers from the back: i over a's prefix, j over b, k over a's write position. Writing largest-first means we never overwrite an a-value we still need."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WRITE\" step (a[]=), what happens?",
+    choices: [
+      {
+        label: "Place at a[] and step i — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Place  at a[] and step i back to ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `a` field track in the visualization state?",
+    choices: [
+      {
+        label: "a, mutated in place — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `a` in sync: a, mutated in place as we merge from the back"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Merge two sorted arrays\"?",
+    choices: [
+      {
+        label: "O(n+m) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n+m). O(1). i,j,k from ends; place larger of a[i],b[j] at k--"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "j has run out, so every — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "j has run out, so every b-value is placed. Any a-values below k were already in order and never needed to move. a is now fully sorted: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'm1',

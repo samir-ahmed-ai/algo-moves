@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -138,7 +138,135 @@ function Inspector({ frame }: InspectorProps<ReverseArrayState>) {
 export const manifestId = 'prep-arrays-reverse-array';
 export const title = 'Reverse array';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Reverse array\"?",
+    choices: [
+      {
+        label: "Two pointers swap — fits this problem",
+        correct: true
+      },
+      {
+        label: "Reverse segments — different approach"
+      },
+      {
+        label: "Boyer-Moore voting — different approach"
+      },
+      {
+        label: "Sliding window — different approach"
+      }
+    ],
+    explain: "Mirror swap marching inward from both ends"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Reverse array), what strategy is established?",
+    choices: [
+      {
+        label: "Mirror swap marching inward from both — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Reverse the array in place. Put one pointer i at the left end and another pointer j at the right end, then march them toward each other swapping the values they sit on."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"CENTER\" step (i=j=), what happens?",
+    choices: [
+      {
+        label: "i and j meet — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "i and j meet at the middle index . A single middle element stays where it is, so there is nothing to swap."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "left pointer — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: left pointer"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Reverse array\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). i<j: swap, i++ j--"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The array is fully reversed — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The array is fully reversed in place: []. Time O(n), Space O(1)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ra1', label: '[1,2,3,4,5]', value: { nums: [1, 2, 3, 4, 5] } },
     { id: 'ra2', label: '[7,3,9,2]', value: { nums: [7, 3, 9, 2] } },

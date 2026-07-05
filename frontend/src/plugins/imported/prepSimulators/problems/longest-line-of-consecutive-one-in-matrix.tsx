@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
@@ -140,7 +140,135 @@ function Inspector({ frame }: InspectorProps<LineState>) {
 export const manifestId = 'prep-matrices-longest-line-of-consecutive-one-in-matrix';
 export const title = 'Longest Line of Consecutive One in Matrix';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Longest Line of Consecutive One in Matrix\"?",
+    choices: [
+      {
+        label: "4-direction DP — fits this problem",
+        correct: true
+      },
+      {
+        label: "Staircase search from top-right — different approach"
+      },
+      {
+        label: "DFS + Memoization — different approach"
+      },
+      {
+        label: "Row Comparison (same or inverse of row 0) — different approach"
+      }
+    ],
+    explain: "See Longest Line Of Consecutive One In Matrix pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Longest Line of Consecutive One in Matrix), what strategy is established?",
+    choices: [
+      {
+        label: "See Longest Line Of Consecutive One — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Longest Line of Consecutive One: find the longest run of 1s in any of 4 directions — horizontal →, vertical ↓, diagonal ↘, or anti-diagonal ↙. We sweep the matrix once, and for each 1 we extend the run from its neighbours, keeping only the previous row in memory."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ZERO\" step ((,)=0), what happens?",
+    choices: [
+      {
+        label: "Cell (,) is a 0 — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Cell (,) is a 0, so no line can pass through it. All four direction lengths reset to 0 here."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cur` field track in the visualization state?",
+    choices: [
+      {
+        label: "current cell being processed — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cur` in sync: current cell being processed"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Longest Line of Consecutive One in Matrix\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) per axis time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(n). Longest Line Of Consecutive One In Matrix"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Sweep complete. The longest line — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Sweep complete. The longest line of consecutive 1s in any direction is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'lloc1',

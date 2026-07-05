@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -180,7 +180,115 @@ function Inspector({ frame }: InspectorProps<PathSumState>) {
 export const manifestId = 'prep-trees-binary-tree-maximum-path-sum';
 export const title = 'Binary Tree Maximum Path Sum';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Binary Tree Maximum Path Sum\"?",
+    choices: [
+      {
+        label: "Post-order DFS — fits this problem",
+        correct: true
+      },
+      {
+        label: "Mirror compare — different approach"
+      },
+      {
+        label: "BFS + Direction Toggle — different approach"
+      },
+      {
+        label: "Column map BFS — different approach"
+      }
+    ],
+    explain: "Post-order DFS: at each node, compute `left` and `right` subtree max gains (floor at 0 to drop negatives)"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"THROUGH\" step (through = ), what happens?",
+    choices: [
+      {
+        label: "A path turning at node — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "A path turning at node  is worth  +  +  = , which does not beat the current best of . Leave the global maximum unchanged."
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "node index currently being processed — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: node index currently being processed (post-order)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Binary Tree Maximum Path Sum\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h+k) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). Post-order DFS: at each node, compute `left` and `right` subtree max gains (floor at 0 to drop negatives); Update global max with `node.Val + left + right` (the"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every node has been visited — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every node has been visited in post-order. The largest path sum found anywhere in the tree is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'bmps1', label: '[-10,9,20,null,null,15,7] → 42', value: { tree: [-10, 9, 20, null, null, 15, 7] } },
     { id: 'bmps2', label: '[1,2,3] → 6', value: { tree: [1, 2, 3] } },

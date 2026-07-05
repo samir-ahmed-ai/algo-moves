@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -150,7 +150,135 @@ function Inspector({ frame }: InspectorProps<SuccessorState>) {
 export const manifestId = 'prep-trees-inorder-successor-in-bst';
 export const title = 'Inorder Successor in BST';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Inorder Successor in BST\"?",
+    choices: [
+      {
+        label: "BST Walk — fits this problem",
+        correct: true
+      },
+      {
+        label: "Tree build + iterative pre-order — different approach"
+      },
+      {
+        label: "DFS with max tracking — different approach"
+      },
+      {
+        label: "BFS + Sort per column — different approach"
+      }
+    ],
+    explain: "Walk from root: if `p.Val < curr.Val`, `curr` is a candidate → go left. Otherwise go right."
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Inorder Successor in BST), what strategy is established?",
+    choices: [
+      {
+        label: "Walk from root: if `p.Val < — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Inorder Successor in BST: find the node with the smallest value strictly greater than . We never touch p's own subtree — we just walk down from the root using the BST order. Whenever p < cur we could still improve, so we record cur as a candidate and go left; otherwise cur is too small, so we go right."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"GO_RIGHT\" step (skip ), what happens?",
+    choices: [
+      {
+        label: "p () ≥ cur () — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "p () ≥ cur (), so  is not greater than p and cannot be the successor. Any larger value lies in the right subtree, so move right and keep the current res."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cur` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the node we — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cur` in sync: index of the node we are standing on (null once we fall off)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Inorder Successor in BST\"?",
+    choices: [
+      {
+        label: "O(h) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(h+k) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) amortized time, O(h) space — wrong order of growth"
+      }
+    ],
+    explain: "O(h). O(1). Walk from root: if `p.Val < curr.Val`, `curr` is a candidate → go left. Otherwise go right.; Last candidate when going left is the answer."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "We walked off the tree. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "We walked off the tree. The last candidate we saved is , which is the in-order successor of . (In-order values:  — right after  comes .)"
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'isb1',

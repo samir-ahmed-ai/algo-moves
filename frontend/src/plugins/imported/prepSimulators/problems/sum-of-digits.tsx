@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -156,7 +156,135 @@ function Inspector({ frame }: InspectorProps<SumOfDigitsState>) {
 export const manifestId = 'prep-math-sum-of-digits';
 export const title = 'Sum of digits';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Sum of digits\"?",
+    choices: [
+      {
+        label: "Digit sum — fits this problem",
+        correct: true
+      },
+      {
+        label: "Big integer string addition — different approach"
+      },
+      {
+        label: "Digit reversal — different approach"
+      },
+      {
+        label: "XOR + popcount — different approach"
+      }
+    ],
+    explain: "Strip digits one at a time with %10 and /10"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Sum of digits), what strategy is established?",
+    choices: [
+      {
+        label: "Strip digits one at a time — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Sum of digits: add up every decimal digit of . We strip one digit at a time from the right using n % 10, then drop it with n / 10, until nothing is left. Time O(log n), space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PEEL\" step (+ → sum=), what happens?",
+    choices: [
+      {
+        label: "Peel the last digit: % 10 — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Peel the last digit:  % 10 = . Add it to the running total → sum = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `original` field track in the visualization state?",
+    choices: [
+      {
+        label: "the input value, kept — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `original` in sync: the input value, kept for display"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Sum of digits\"?",
+    choices: [
+      {
+        label: "O(log n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(d) time, O(d) space — wrong order of growth"
+      }
+    ],
+    explain: "O(log n). O(1). sum=0; while n>0 { sum+=n%10; n/=10 }"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "n reached 0 — every digit — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "n reached 0 — every digit has been added. The digit sum of  is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sod1', label: 'n = 12345', value: { n: 12345 } },
     { id: 'sod2', label: 'n = -908', value: { n: -908 } },

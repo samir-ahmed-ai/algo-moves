@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
@@ -165,7 +165,135 @@ function Inspector({ frame }: InspectorProps<AddTwoState>) {
 export const manifestId = 'prep-linked-lists-add-two-numbers';
 export const title = 'Add two numbers';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Add two numbers\"?",
+    choices: [
+      {
+        label: "Digit carry — fits this problem",
+        correct: true
+      },
+      {
+        label: "Recursion / stack — different approach"
+      },
+      {
+        label: "Floyd cycle — different approach"
+      },
+      {
+        label: "Josephus simulation — different approach"
+      }
+    ],
+    explain: "Add the digit lists position by position with a carry"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Add two numbers), what strategy is established?",
+    choices: [
+      {
+        label: "Add the digit lists position — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Add Two Numbers: each list stores a number's digits least-significant first, so position 0 is the ones place. Walk both chains together, adding digit by digit and carrying overflow — exactly how you add by hand. Time O(max(n,m)), Space O(1) extra."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WRITE\" step (node , carry ), what happens?",
+    choices: [
+      {
+        label: "Write sum % 10 = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Write sum % 10 =  as the new node at position , and carry =  / 10 =  into the next position."
+  },
+  {
+    id: "state",
+    prompt: "What does the `pos` field track in the visualization state?",
+    choices: [
+      {
+        label: "current digit position being added — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `pos` in sync: current digit position being added"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Add two numbers\"?",
+    choices: [
+      {
+        label: "O(max(n,m)) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log k) time, O(k) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(max(n,m)). O(1). sum=carry+l1+l2; node sum%10; carry=sum/10"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Both chains are exhausted — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Both chains are exhausted and the carry is 0, so the result is complete. Reading the digits low-to-high gives the chain []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // 342 + 465 = 807  ->  [2,4,3] + [5,6,4] = [7,0,8]
     { id: 'atn1', label: '342 + 465', value: { l1: [2, 4, 3], l2: [5, 6, 4] } },

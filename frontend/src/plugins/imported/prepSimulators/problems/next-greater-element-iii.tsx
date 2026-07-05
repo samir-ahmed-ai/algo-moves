@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -225,7 +225,135 @@ function Inspector({ frame }: InspectorProps<NgeState>) {
 export const manifestId = 'prep-math-next-greater-element-iii';
 export const title = 'Next Greater Element III';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Next Greater Element III\"?",
+    choices: [
+      {
+        label: "Next Permutation — fits this problem",
+        correct: true
+      },
+      {
+        label: "Base conversion repeated divmod — different approach"
+      },
+      {
+        label: "Palindrome number — different approach"
+      },
+      {
+        label: "Primality trial division — different approach"
+      }
+    ],
+    explain: "See Next Greater Element Iii pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Next Greater Element III), what strategy is established?",
+    choices: [
+      {
+        label: "See Next Greater Element Iii pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Next Greater Element III: find the smallest number greater than  that uses exactly the same digits. This is the \"next permutation\" of the digit string — O(d) in the digit count d."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SWAP\" step (swap ↔), what happens?",
+    choices: [
+      {
+        label: "Swap the pivot with digits[]: now — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Swap the pivot with digits[]: now index  holds . The prefix is fixed at the smallest possible increase; the suffix is still descending (largest)."
+  },
+  {
+    id: "state",
+    prompt: "What does the `digits` field track in the visualization state?",
+    choices: [
+      {
+        label: "current arrangement of digits (mutated — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `digits` in sync: current arrangement of digits (mutated over time)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Next Greater Element III\"?",
+    choices: [
+      {
+        label: "O(d) time, O(d) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m*n) time, O(m+n) space — wrong order of growth"
+      },
+      {
+        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+      },
+      {
+        label: "O(log x) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(d). O(d). Next Greater Element Iii"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The suffix is now ascending. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The suffix is now ascending. The digits spell , the smallest number greater than  using the same digits."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'nge1', label: 'n = 12443322', value: { n: 12443322 } },
     { id: 'nge2', label: 'n = 21 (none)', value: { n: 21 } },

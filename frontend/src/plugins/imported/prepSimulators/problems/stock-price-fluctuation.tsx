@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -153,7 +153,95 @@ function Inspector({ frame }: InspectorProps<StockState>) {
 export const manifestId = 'prep-design-stock-price-fluctuation';
 export const title = 'Stock Price Fluctuation';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Stock Price Fluctuation\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Trie dictionary + spell suggest — different approach"
+      },
+      {
+        label: "Hash map + doubly linked list LRU — different approach"
+      },
+      {
+        label: "Heap + Sorted Available Set — different approach"
+      }
+    ],
+    explain: "See Stock Price Fluctuation pattern"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"UPDATE\" step (@=), what happens?",
+    choices: [
+      {
+        label: "Update(, ): store price, push lazy — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Update(, ): store price, push lazy heaps, latestTime=."
+  },
+  {
+    id: "state",
+    prompt: "What does the `records` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field records in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `records` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Update(, ): store price, push lazy — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Update(, ): store price, push lazy heaps, latestTime=."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'stk1',

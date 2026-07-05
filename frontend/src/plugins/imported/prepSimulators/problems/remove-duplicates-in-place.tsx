@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -150,7 +150,135 @@ function Inspector({ frame }: InspectorProps<RemoveDupState>) {
 export const manifestId = 'prep-arrays-remove-duplicates-in-place';
 export const title = 'Remove duplicates in place';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Remove duplicates in place\"?",
+    choices: [
+      {
+        label: "Two pointers — fits this problem",
+        correct: true
+      },
+      {
+        label: "Merge from end — different approach"
+      },
+      {
+        label: "XOR + math — different approach"
+      },
+      {
+        label: "Heap + math — different approach"
+      }
+    ],
+    explain: "Sorted line; w writes only when value differs from the one before"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Remove duplicates in place), what strategy is established?",
+    choices: [
+      {
+        label: "Sorted line; w writes — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Remove Duplicates: the array is already sorted, so identical values sit next to each other. The write pointer w marks where the next unique value goes; the read pointer i scans forward. Time O(n), Space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WRITE\" step (nums[]=), what happens?",
+    choices: [
+      {
+        label: "differs from step — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " differs from , so it is unique. Write it to nums[] and advance the write pointer to . The prefix nums[0..] now holds the distinct values so far."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nums` field track in the visualization state?",
+    choices: [
+      {
+        label: "current array contents (mutated — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `nums` in sync: current array contents (mutated in place by the write pointer)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Remove duplicates in place\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). if nums[i]!=nums[i-1]: nums[w]=nums[i], w++"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The scan is finished. The write — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The scan is finished. The write pointer ended at , so there are  unique values occupying nums[0..]. Return  as the new length."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'rd1', label: '[1,1,2,2,3]', value: { nums: [1, 1, 2, 2, 3] } },
     { id: 'rd2', label: '[0,0,1,1,1,2,3]', value: { nums: [0, 0, 1, 1, 1, 2, 3] } },

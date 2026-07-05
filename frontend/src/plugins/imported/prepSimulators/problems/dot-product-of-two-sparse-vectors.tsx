@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -149,7 +149,115 @@ function Inspector({ frame }: InspectorProps<SparseState>) {
 export const manifestId = 'prep-design-dot-product-of-two-sparse-vectors';
 export const title = 'Dot Product of Two Sparse Vectors';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Dot Product of Two Sparse Vectors\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bijective tiny URL encode/decode — different approach"
+      },
+      {
+        label: "Trie dictionary + spell suggest — different approach"
+      },
+      {
+        label: "Hash map + doubly linked list LRU — different approach"
+      }
+    ],
+    explain: "See Dot Product Of Two Sparse Vectors pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Dot Product of Two Sparse Vectors), what strategy is established?",
+    choices: [
+      {
+        label: "See Dot Product Of Two Sparse — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Sparse Vector Dot Product: store (index,value) pairs. Merge-walk both sorted lists — multiply when indices match."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step (skip v1 @), what happens?",
+    choices: [
+      {
+        label: "Index only in vec1 — advance — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Index  only in vec1 — advance i."
+  },
+  {
+    id: "state",
+    prompt: "What does the `pairs1` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field pairs1 in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `pairs1` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Dot product = . Only overlapping — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Dot product = . Only overlapping indices contributed."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'sp1',

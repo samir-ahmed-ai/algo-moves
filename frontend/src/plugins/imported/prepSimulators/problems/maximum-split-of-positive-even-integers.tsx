@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -162,7 +162,135 @@ function Inspector({ frame }: InspectorProps<SplitState>) {
 export const manifestId = 'prep-math-maximum-split-of-positive-even-integers';
 export const title = 'Maximum Split of Positive Even Integers';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Maximum Split of Positive Even Integers\"?",
+    choices: [
+      {
+        label: "Greedy — fits this problem",
+        correct: true
+      },
+      {
+        label: "Rejection sampling / gap random — different approach"
+      },
+      {
+        label: "Singleton XOR — different approach"
+      },
+      {
+        label: "Math (sum - n*min) — different approach"
+      }
+    ],
+    explain: "See Maximum Split Of Positive Even Integers pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Maximum Split of Positive Even Integers), what strategy is established?",
+    choices: [
+      {
+        label: "See Maximum Split Of Positive Even — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Maximum Split of Positive Even Integers: pick as many DISTINCT positive even integers as possible that add up to . Greedily take the smallest unused evens 2, 4, 6, … while they still fit, then patch the remainder onto the last one."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"STOP\" step (+>), what happens?",
+    choices: [
+      {
+        label: "Stop the greedy loop: sum (=) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Stop the greedy loop: sum (=) + cur (=) =  would exceed . We can't add a fresh even number, but there may be leftover  to absorb."
+  },
+  {
+    id: "state",
+    prompt: "What does the `res` field track in the visualization state?",
+    choices: [
+      {
+        label: "chosen even integers so far — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `res` in sync: chosen even integers so far"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Maximum Split of Positive Even Integers\"?",
+    choices: [
+      {
+        label: "O(√n) time, O(√n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(bits set) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m*n) time, O(m+n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(√n). O(√n). Maximum Split Of Positive Even Integers"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Dump the remaining onto the LAST — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Dump the remaining  onto the LAST element so the total hits  exactly. It stays even (even + even) and still larger than every earlier element, so all values remain distinct. Final list: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'mse12', label: 'finalSum = 12', value: { finalSum: 12 } },
     { id: 'mse7', label: 'finalSum = 7 (odd)', value: { finalSum: 7 } },

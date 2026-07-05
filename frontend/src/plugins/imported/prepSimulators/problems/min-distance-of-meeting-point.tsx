@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
@@ -264,7 +264,135 @@ function solve(grid: number[][]): number {
 export const manifestId = 'prep-matrices-min-distance-of-meeting-point';
 export const title = 'Min distance of meeting point';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Min distance of meeting point\"?",
+    choices: [
+      {
+        label: "1D meeting point two pointers — fits this problem",
+        correct: true
+      },
+      {
+        label: "Single Pass — different approach"
+      },
+      {
+        label: "Staircase Search — different approach"
+      },
+      {
+        label: "DFS + memo longest increasing path — different approach"
+      }
+    ],
+    explain: "Project points onto each axis; the optimal meeting line is the median"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Min distance of meeting point), what strategy is established?",
+    choices: [
+      {
+        label: "Project points onto each axis; — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Every 1-cell is a person who must walk (Manhattan steps) to one shared meeting cell. Manhattan distance splits cleanly: total cost = (cost along rows) + (cost along columns), so we solve each axis independently. There are  people on this × grid."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PINCH\" step (+), what happens?",
+    choices: [
+      {
+        label: "Pair the outermost s a[lo]= — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Pair the outermost s a[lo]= and a[hi]=. Sliding everyone in this span of  gaps toward the center closes min(, )= on each gap, adding ×=. Running  distance = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `rows` field track in the visualization state?",
+    choices: [
+      {
+        label: "grid height — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `rows` in sync: grid height"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Min distance of meeting point\"?",
+    choices: [
+      {
+        label: "O(n log n) per axis time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n·4^s) time, O(s) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(m·n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n) per axis. O(n). sort coords; two-pointer add min*(hi-lo); sum both axes"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Add the two axes: minimum total — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Add the two axes: minimum total distance = rowDist () + colDist () = . The best meeting point is (median row, median column). Time O(n log n) per axis, space O(n)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'md1',

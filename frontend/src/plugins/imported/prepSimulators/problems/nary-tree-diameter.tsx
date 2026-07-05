@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -213,7 +213,135 @@ function Inspector({ frame }: InspectorProps<DiaState>) {
 export const manifestId = 'prep-trees-nary-tree-diameter';
 export const title = 'Get diameter';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Get diameter\"?",
+    choices: [
+      {
+        label: "N-ary tree diameter via top-2 heights — fits this problem",
+        correct: true
+      },
+      {
+        label: "DFS path — different approach"
+      },
+      {
+        label: "Height-based DFS — different approach"
+      },
+      {
+        label: "N-ary BFS level order — different approach"
+      }
+    ],
+    explain: "Through a node = its two tallest child heights + 2; also check child diameters"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Get diameter), what strategy is established?",
+    choices: [
+      {
+        label: "Through a node = its two — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "N-ary tree diameter: the longest path between any two nodes. At each node the candidate is its two tallest child heights + 2; we also carry up each child's own diameter and keep the global max. Time O(n), Space O(h)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"HEIGHT\" step (h()=), what happens?",
+    choices: [
+      {
+        label: "Child has height . Track — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Child  has height . Track the two tallest child heights so far: top1=${max2 >= 0 ? "
+  },
+  {
+    id: "state",
+    prompt: "What does the `active` field track in the visualization state?",
+    choices: [
+      {
+        label: "node currently being processed (team-1 — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `active` in sync: node currently being processed (team-1 ring)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Get diameter\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). top1 + top2 + 2, compared against max child diameter"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every node has been resolved. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every node has been resolved. The overall diameter of the tree is  edges."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // Level-order (binary slots): root 1 has children 2 and 3; 2 has child 4;
     // 4 has child 6; 3 has child 5. The through-root path is 1's two branches.

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -182,7 +182,135 @@ function Inspector({ frame }: InspectorProps<AnagramState>) {
 export const manifestId = 'prep-strings-is-anagram';
 export const title = 'Is anagram';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is anagram\"?",
+    choices: [
+      {
+        label: "Frequency count — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bitmask Hash Set — different approach"
+      },
+      {
+        label: "DP reachability — different approach"
+      },
+      {
+        label: "Expand center — different approach"
+      }
+    ],
+    explain: "Same letter tally; ++ for s, -- for t cancels to zero"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Is anagram), what strategy is established?",
+    choices: [
+      {
+        label: "Same letter tally; ++ for s — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Is Anagram: two strings are anagrams if they use exactly the same letters the same number of times. We keep one shared tally: ++ for every letter of s and -- for every letter of t. If every count cancels to zero, they match."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"TALLY\" step (+ −), what happens?",
+    choices: [
+      {
+        label: "Index : add s[]='' (++) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Index : add s[]='' (++) and subtract t[]='' (−−). The tally now reads  for '' and  for ''."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current index scanned in both — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current index scanned in both strings"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is anagram\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). len match; ++s[i] --t[i]; all counts zero"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Zero-check: letter '' cancelled to 0 — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Zero-check: letter '' cancelled to 0 — s and t use it equally often. Keep checking the remaining letters."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ia1', label: '"anagram" vs "nagaram"', value: { s: 'anagram', t: 'nagaram' } },
     { id: 'ia2', label: '"rat" vs "car"', value: { s: 'rat', t: 'car' } },

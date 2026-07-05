@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -222,7 +222,135 @@ const SAMPLE_NODES: NaryNode[] = [
   { label: '8', children: [] },        // 7
 ];
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find distance of two nodes\"?",
+    choices: [
+      {
+        label: "LCA + level distance BFS — fits this problem",
+        correct: true
+      },
+      {
+        label: "BST range check — different approach"
+      },
+      {
+        label: "Post-order DFS — different approach"
+      },
+      {
+        label: "DFS path — different approach"
+      }
+    ],
+    explain: "Distance = depth(a) + depth(b) measured down from their LCA"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find distance of two nodes), what strategy is established?",
+    choices: [
+      {
+        label: "Distance = depth(a) + depth(b) measured — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Distance of two nodes in an n-ary tree. Plan: find the lowest common ancestor (LCA) of  and , then add the two downward level distances from the LCA. Answer = levelDistance(lca, a) + levelDistance(lca, b). Time O(n), Space O(h)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"LEVEL_ZERO\" step ( is the LCA), what happens?",
+    choices: [
+      {
+        label: "Measuring from the LCA down — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Measuring from the LCA  down to : it is the LCA itself, so the level distance is 0."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nodes` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field nodes in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `nodes` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find distance of two nodes\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). find LCA; levelDistance(lca,a) + levelDistance(lca,b)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Combine the two downward distances: — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Combine the two downward distances: levelDistance(, ) =  and levelDistance(, ) = . The distance between  and  is  +  = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'nd1',

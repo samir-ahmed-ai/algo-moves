@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -212,7 +212,115 @@ function Inspector({ frame }: InspectorProps<SubtreeState>) {
 export const manifestId = 'prep-trees-is-subtree';
 export const title = 'Is subtree';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is subtree\"?",
+    choices: [
+      {
+        label: "Same tree check — fits this problem",
+        correct: true
+      },
+      {
+        label: "N-ary tree diameter via top-2 heights — different approach"
+      },
+      {
+        label: "Tree build + iterative pre-order — different approach"
+      },
+      {
+        label: "DFS with max tracking — different approach"
+      }
+    ],
+    explain: "At each node test whether sub matches starting here"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FOUND\" step (found @), what happens?",
+    choices: [
+      {
+        label: "sameTree returned true — the pattern — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "sameTree returned true — the pattern is rooted exactly at root node . isSubtree is true."
+  },
+  {
+    id: "state",
+    prompt: "What does the `anchor` field track in the visualization state?",
+    choices: [
+      {
+        label: "root index we're currently testing — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `anchor` in sync: root index we're currently testing sameTree from"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is subtree\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). sameTree(root,sub) OR recurse left/right"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "No match anchored at . Recurse — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "No match anchored at . Recurse into its children (left first, then right) to keep searching."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'sub-yes',

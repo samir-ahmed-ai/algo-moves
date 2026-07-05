@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -137,7 +137,135 @@ function Inspector({ frame }: InspectorProps<MajorityState>) {
 export const manifestId = 'prep-arrays-find-majority-element';
 export const title = 'Find majority element';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find majority element\"?",
+    choices: [
+      {
+        label: "Boyer-Moore voting — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two pointers swap — different approach"
+      },
+      {
+        label: "Two pointers — different approach"
+      },
+      {
+        label: "Sliding window — different approach"
+      }
+    ],
+    explain: "Crowd brawl: each rival cancels one vote; last one standing is the majority"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find majority element), what strategy is established?",
+    choices: [
+      {
+        label: "Crowd brawl: each rival cancels one — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Boyer-Moore voting: a majority element appears more than n/2 times. Sweep once keeping a single candidate and a vote count — matching votes add, rival votes cancel, and the last one standing wins."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"VOTE_UP\" step (count=), what happens?",
+    choices: [
+      {
+        label: "nums[] = matches the candidate  — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "nums[] =  matches the candidate , so add one vote. count = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "index currently being voted — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: index currently being voted on"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find majority element\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n+m) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). count==0 picks new cand; +1 if same else -1"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The sweep is over — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The sweep is over and  is the last one standing — it is the majority element. Time O(n), Space O(1)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'me1', label: '[2,2,1,1,1,2,2]', value: { nums: [2, 2, 1, 1, 1, 2, 2] } },
     { id: 'me2', label: '[3,3,4,2,3,3,3]', value: { nums: [3, 3, 4, 2, 3, 3, 3] } },

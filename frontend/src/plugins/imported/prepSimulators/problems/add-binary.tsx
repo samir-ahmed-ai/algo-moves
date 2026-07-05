@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -164,7 +164,135 @@ function Inspector({ frame }: InspectorProps<AddBinaryState>) {
 export const manifestId = 'prep-math-add-binary';
 export const title = 'Add binary';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Add binary\"?",
+    choices: [
+      {
+        label: "Binary string addition — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bit trick power of two — different approach"
+      },
+      {
+        label: "Iterative factorial — different approach"
+      },
+      {
+        label: "Sort + Sliding Window (atan2) — different approach"
+      }
+    ],
+    explain: "Add right-to-left with a carry bit (base 2)"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Add binary), what strategy is established?",
+    choices: [
+      {
+        label: "Add right-to-left with a carry bit — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Add binary: add the two binary strings \"\" and \"\" like grade-school addition, but in base 2. Walk both from the rightmost bit, keeping a carry."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"EMIT\" step (bit , carry ), what happens?",
+    choices: [
+      {
+        label: "Prepend bit to the answer, giving — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Prepend bit  to the answer, giving \"\". Carry  moves into the next column to the left."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current index into a (-1 — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current index into a (-1 = past the front)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Add binary\"?",
+    choices: [
+      {
+        label: "O(max(len)) time, O(max(len)) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(sqrt(n)) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(max(len)). O(max(len)). sum=a+b+carry; bit=sum%2; carry=sum/2; reverse"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "No bits and no carry remain. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "No bits and no carry remain. Reversing the LSB-first bits gives the sum \"\"."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ab1', label: '"11" + "1"', value: { a: '11', b: '1' } },
     { id: 'ab2', label: '"1010" + "1011"', value: { a: '1010', b: '1011' } },

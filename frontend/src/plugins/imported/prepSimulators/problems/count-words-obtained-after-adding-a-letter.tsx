@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -187,7 +187,135 @@ function Inspector({ frame }: InspectorProps<WordCountState>) {
 export const manifestId = 'prep-strings-count-words-obtained-after-adding-a-letter';
 export const title = 'Count Words Obtained After Adding a Letter';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Count Words Obtained After Adding a Letter\"?",
+    choices: [
+      {
+        label: "Bitmask Hash Set — fits this problem",
+        correct: true
+      },
+      {
+        label: "Vertical scan — different approach"
+      },
+      {
+        label: "Split + Reverse — different approach"
+      },
+      {
+        label: "Index Map — different approach"
+      }
+    ],
+    explain: "See Count Words Obtained After Adding A Letter pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Count Words Obtained After Adding a Letter), what strategy is established?",
+    choices: [
+      {
+        label: "See Count Words Obtained After Adding — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Each word is reduced to a 26-bit mask (bit k set if letter 'a'+k appears). A target is obtainable when removing exactly one of its letters yields a mask that exists in the start-word set. Build that set first."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"NONE\" step (\"\" no), what happens?",
+    choices: [
+      {
+        label: "No single-letter removal of \"\" matched — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "No single-letter removal of \"\" matched a start word, so it is not obtainable. Move to the next target."
+  },
+  {
+    id: "state",
+    prompt: "What does the `startMasks` field track in the visualization state?",
+    choices: [
+      {
+        label: "bitmask set built from startWords — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `startMasks` in sync: bitmask set built from startWords"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Count Words Obtained After Adding a Letter\"?",
+    choices: [
+      {
+        label: "O(n·26) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n*m) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O( time, O(words) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n·26). O(n). Count Words Obtained After Adding A Letter"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every target word checked. of target — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every target word checked.  of  target words can be formed by adding one letter to some start word."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'cw1',

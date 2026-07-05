@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -172,7 +172,115 @@ function Inspector({ frame }: InspectorProps<TrapState>) {
 export const manifestId = 'prep-arrays-trap-rain-water';
 export const title = 'Trap rain water';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Trap rain water\"?",
+    choices: [
+      {
+        label: "Two pointers — fits this problem",
+        correct: true
+      },
+      {
+        label: "Monotonic stack — different approach"
+      },
+      {
+        label: "Reverse segments — different approach"
+      },
+      {
+        label: "Greedy reach — different approach"
+      }
+    ],
+    explain: "Two walls close in; the shorter wall decides trapped water"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Trap rain water), what strategy is established?",
+    choices: [
+      {
+        label: "Two walls close in; the shorter — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Trap Rain Water: two pointers close in from both ends. leftMax/rightMax track the tallest wall seen so far from each side. We always move the pointer on the SHORTER wall, because that side limits how much water its cells can hold."
+  },
+  {
+    id: "state",
+    prompt: "What does the `l` field track in the visualization state?",
+    choices: [
+      {
+        label: "left pointer — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `l` in sync: left pointer"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Trap rain water\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). move shorter side; add sideMax-height"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The pointers have met (l = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The pointers have met (l = r = ), so every cell has been accounted for. Total trapped water = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'trw1', label: '[4,2,0,3,2,5]', value: { height: [4, 2, 0, 3, 2, 5] } },
     { id: 'trw2', label: '[3,0,2,0,4]', value: { height: [3, 0, 2, 0, 4] } },

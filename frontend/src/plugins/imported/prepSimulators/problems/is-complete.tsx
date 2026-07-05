@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -171,7 +171,115 @@ function Inspector({ frame }: InspectorProps<IsCompleteState>) {
 export const manifestId = 'prep-trees-is-complete';
 export const title = 'Is complete';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is complete\"?",
+    choices: [
+      {
+        label: "Level order fill — fits this problem",
+        correct: true
+      },
+      {
+        label: "Inorder flatten — different approach"
+      },
+      {
+        label: "Preorder DFS — different approach"
+      },
+      {
+        label: "N-ary tree DFS height — different approach"
+      }
+    ],
+    explain: "BFS including nils; once a gap appears, no real node may follow"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"VISIT\" step (visit ), what happens?",
+    choices: [
+      {
+        label: "Dequeued real node . Enqueue — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Dequeued real node . Enqueue its children: left ${\n        leftEntry != null ? "
+  },
+  {
+    id: "state",
+    prompt: "What does the `queue` field track in the visualization state?",
+    choices: [
+      {
+        label: "remaining BFS queue (node indices; — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `queue` in sync: remaining BFS queue (node indices; null = missing-child marker)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is complete\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) amortized time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(h) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). queue with nils; nil sets end flag; real node after end -> false"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Dequeued real node . Enqueue — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Dequeued real node . Enqueue its children: left ${\n        leftEntry != null ? "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // Complete: every level full, last level fills left-to-right (no gaps).
     { id: 'ic1', label: '[1,2,3,4,5,6] → complete', value: { tree: [1, 2, 3, 4, 5, 6] } },

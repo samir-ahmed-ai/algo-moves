@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -125,7 +125,115 @@ function Inspector({ frame }: InspectorProps<SnapState>) {
 export const manifestId = 'prep-design-snapshot-array';
 export const title = 'Snapshot Array';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Snapshot Array\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Hash map + doubly linked list LRU — different approach"
+      },
+      {
+        label: "Heap + Sorted Available Set — different approach"
+      },
+      {
+        label: "Trie phone directory autocomplete — different approach"
+      }
+    ],
+    explain: "See Snapshot Array pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Snapshot Array), what strategy is established?",
+    choices: [
+      {
+        label: "See Snapshot Array pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Snapshot Array: each index stores [(snapId,val),...]. Set updates latest entry or appends; Snap() increments sid; Get binary-searches history."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SNAP\" step (id=), what happens?",
+    choices: [
+      {
+        label: "Snap(): snapshot id saved, sid→. — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Snap(): snapshot id  saved, sid→."
+  },
+  {
+    id: "state",
+    prompt: "What does the `length` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field length in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `length` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'sa1',

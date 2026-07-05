@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -170,7 +170,135 @@ function Inspector({ frame }: InspectorProps<MaxProductState>) {
 export const manifestId = 'prep-arrays-max-product-of-subarray';
 export const title = 'Max product of subarray';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Max product of subarray\"?",
+    choices: [
+      {
+        label: "Track min/max product — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two pointers — different approach"
+      },
+      {
+        label: "Sliding window — different approach"
+      },
+      {
+        label: "Prefix + suffix pass — different approach"
+      }
+    ],
+    explain: "Carry both max and min because a negative flips them"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Max product of subarray), what strategy is established?",
+    choices: [
+      {
+        label: "Carry both max and min because — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Max Product Subarray: find the largest product of any contiguous run. We carry BOTH a running max and a running min, because multiplying by a negative flips the largest into the smallest. Seed all three with nums[0] = ."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PICK\" step (cMax=), what happens?",
+    choices: [
+      {
+        label: "Pick curMax = max(, , ) — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Pick curMax = max(, , ) =  and curMin = min(, , ) = . These are the best/worst products of any run ending exactly at index ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current index being folded — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current index being folded in"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Max product of subarray\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n+m) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). neg -> swap max/min; curMax=max(v,max*v,min*v)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every index has been folded in. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every index has been folded in. The largest product of any contiguous subarray is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'mp1', label: '[2,3,-2,4]', value: { nums: [2, 3, -2, 4] } },
     { id: 'mp2', label: '[-2,3,-4]', value: { nums: [-2, 3, -4] } },

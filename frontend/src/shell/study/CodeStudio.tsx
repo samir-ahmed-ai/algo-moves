@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useCallback, useMemo, useState, type ReactNode } from 'react';
 import {
   Check,
   Copy,
@@ -35,13 +35,29 @@ import { chromeText } from '../chromeUi';
 import { COPY_FEEDBACK_MS } from '../copyFeedback';
 import { useWorkspace } from '@/store/workspace';
 import { codeVariants, HeaderLangTabs } from '@/shell/panels/shared/codeVariants';
-import { CodeStudioContext } from './hooks/codeStudioContextStore';
-import { useCodeStudio } from './hooks/useCodeStudio';
+import {
+  CodeStudioContentContext,
+  CodeStudioDraftContext,
+  CodeStudioEditorContext,
+  CodeStudioPhaseContext,
+} from './hooks/codeStudioContextStore';
+import {
+  useCodeStudioContent,
+  useCodeStudioDraft,
+  useCodeStudioEditor,
+  useCodeStudioPhase,
+} from './hooks/useCodeStudio';
 import { useCodeStudioTimer } from './hooks/useCodeStudioTimer';
 import { useCodeStudioRecallShortcuts } from './hooks/useCodeStudioRecallShortcuts';
 import { useCodeStudioMachine } from './hooks/useCodeStudioMachine';
 
-export { useCodeStudio } from './hooks/useCodeStudio';
+export {
+  useCodeStudio,
+  useCodeStudioContent,
+  useCodeStudioDraft,
+  useCodeStudioEditor,
+  useCodeStudioPhase,
+} from './hooks/useCodeStudio';
 
 const PHASE_LABEL: Record<CodeStudioPhase, string> = {
   quiz: 'Quiz',
@@ -182,7 +198,7 @@ export function CodeStudioProvider({
     setBlind,
   });
 
-  const copyRef = async () => {
+  const copyRef = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(reference);
       setCopied(true);
@@ -190,61 +206,114 @@ export function CodeStudioProvider({
     } catch {
       /* clipboard unavailable */
     }
-  };
+  }, [reference]);
+
+  const contentValue = useMemo(
+    () => ({
+      variants,
+      active,
+      setActive,
+      code,
+      reference,
+      timeLabel,
+      spaceLabel,
+      stat,
+      theme: (theme === 'dark' ? 'dark' : 'light') as 'dark' | 'light',
+    }),
+    [variants, active, code, reference, timeLabel, spaceLabel, stat, theme],
+  );
+
+  const phaseValue = useMemo(
+    () => ({
+      phase,
+      phaseSeq,
+      nextLabel: PHASE_LABEL[nextPhase(phase, av)],
+      goToPhase,
+      advance,
+      quiz,
+      hasQuiz,
+      savedQuizProgress,
+      onQuizProgress,
+      onQuizContinue,
+      pieces,
+      hasReassemble,
+      phaseTransition,
+      resetReassemble,
+      reassembleKey,
+      onReassembleComplete,
+      savedReassembleProgress,
+      phaseLocked: !!phaseLock,
+    }),
+    [
+      phase,
+      phaseSeq,
+      av,
+      goToPhase,
+      advance,
+      quiz,
+      hasQuiz,
+      savedQuizProgress,
+      onQuizProgress,
+      onQuizContinue,
+      pieces,
+      hasReassemble,
+      phaseTransition,
+      resetReassemble,
+      reassembleKey,
+      onReassembleComplete,
+      savedReassembleProgress,
+      phaseLock,
+    ],
+  );
+
+  const draftValue = useMemo(
+    () => ({
+      draft,
+      persistDraft,
+      skeleton,
+      blind,
+      setBlind,
+      peek,
+      setPeek,
+      timerRunning,
+      setTimerRunning,
+      timerLabel,
+      score,
+    }),
+    [
+      draft,
+      persistDraft,
+      skeleton,
+      blind,
+      peek,
+      timerRunning,
+      timerLabel,
+      score,
+    ],
+  );
+
+  const editorValue = useMemo(
+    () => ({
+      editorPrefs,
+      setEditorPrefs,
+      copied,
+      copyRef,
+    }),
+    [editorPrefs, setEditorPrefs, copied, copyRef],
+  );
 
   if (variants.length === 0) {
     return <p className={cn('px-3 py-2 text-ink3', chromeText.base)}>No source for this problem.</p>;
   }
 
   return (
-    <CodeStudioContext.Provider
-      value={{
-        variants,
-        active,
-        setActive,
-        code,
-        reference,
-        draft,
-        persistDraft,
-        skeleton,
-        blind,
-        setBlind,
-        peek,
-        setPeek,
-        copied,
-        copyRef,
-        editorPrefs,
-        setEditorPrefs,
-        timerRunning,
-        setTimerRunning,
-        timerLabel,
-        score,
-        timeLabel,
-        spaceLabel,
-        stat,
-        theme: theme === 'dark' ? 'dark' : 'light',
-        phase,
-        phaseSeq,
-        nextLabel: PHASE_LABEL[nextPhase(phase, av)],
-        goToPhase,
-        advance,
-        quiz,
-        hasQuiz,
-        savedQuizProgress,
-        onQuizProgress,
-        onQuizContinue,
-        pieces,
-        hasReassemble,
-        phaseTransition,
-        resetReassemble,
-        reassembleKey,
-        onReassembleComplete,
-        savedReassembleProgress,
-        phaseLocked: !!phaseLock,
-      }}
-    >
-      {children}
-    </CodeStudioContext.Provider>
+    <CodeStudioContentContext.Provider value={contentValue}>
+      <CodeStudioPhaseContext.Provider value={phaseValue}>
+        <CodeStudioDraftContext.Provider value={draftValue}>
+          <CodeStudioEditorContext.Provider value={editorValue}>{children}</CodeStudioEditorContext.Provider>
+        </CodeStudioDraftContext.Provider>
+      </CodeStudioPhaseContext.Provider>
+    </CodeStudioContentContext.Provider>
   );
 }
 
@@ -290,22 +359,11 @@ function RecallToolbarInline({
 
 /** Inline header controls — icon-only with tooltips. */
 export function CodeStudioToolbar() {
+  const { variants, active, setActive } = useCodeStudioContent();
+  const { blind, setBlind, peek, setPeek, persistDraft, skeleton, timerRunning, setTimerRunning } =
+    useCodeStudioDraft();
+  const { copied, copyRef, editorPrefs, setEditorPrefs } = useCodeStudioEditor();
   const {
-    variants,
-    active,
-    setActive,
-    blind,
-    setBlind,
-    peek,
-    setPeek,
-    copied,
-    copyRef,
-    persistDraft,
-    skeleton,
-    editorPrefs,
-    setEditorPrefs,
-    timerRunning,
-    setTimerRunning,
     phase,
     phaseSeq,
     goToPhase,
@@ -315,7 +373,7 @@ export function CodeStudioToolbar() {
     hasReassemble,
     resetReassemble,
     phaseLocked,
-  } = useCodeStudio();
+  } = useCodeStudioPhase();
 
   if (phaseLocked) {
     const recallOverflow = [
@@ -481,19 +539,13 @@ export function CodeStudioToolbar() {
 }
 
 export function CodeStudioBody() {
+  const { reference, code, theme, active } = useCodeStudioContent();
+  const { draft, blind, peek, persistDraft } = useCodeStudioDraft();
+  const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
   const {
-    reference,
-    draft,
-    code,
-    theme,
-    editorPrefs,
-    blind,
-    peek,
-    persistDraft,
     phase,
     phaseTransition,
     pieces,
-    active,
     reassembleKey,
     onReassembleComplete,
     savedReassembleProgress,
@@ -502,9 +554,8 @@ export function CodeStudioBody() {
     onQuizProgress,
     onQuizContinue,
     nextLabel,
-    setEditorPrefs,
     phaseLocked,
-  } = useCodeStudio();
+  } = useCodeStudioPhase();
   const { item } = useCanvasStatic();
   const { themePreset } = useWorkspace();
   const { onAnswer: relayQuizAnswer } = useQuizHostRelay(item.id);
@@ -572,7 +623,9 @@ const PHASE_HINT: Record<CodeStudioPhase, string> = {
 };
 
 export function CodeStudioFooter() {
-  const { stat, timeLabel, spaceLabel, phase, score, timerRunning, timerLabel } = useCodeStudio();
+  const { stat, timeLabel, spaceLabel } = useCodeStudioContent();
+  const { score, timerRunning, timerLabel } = useCodeStudioDraft();
+  const { phase } = useCodeStudioPhase();
 
   return (
     <div className="nodrag flex shrink-0 flex-wrap items-center gap-2 border-t border-edge/60 px-2 py-1.5">

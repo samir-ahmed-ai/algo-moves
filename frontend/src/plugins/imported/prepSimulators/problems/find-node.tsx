@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -124,7 +124,135 @@ function Inspector({ frame }: InspectorProps<FindNodeState>) {
 export const manifestId = 'prep-linked-lists-find-node';
 export const title = 'Find node';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find node\"?",
+    choices: [
+      {
+        label: "Linear scan — fits this problem",
+        correct: true
+      },
+      {
+        label: "Floyd cycle — different approach"
+      },
+      {
+        label: "Min-heap merge — different approach"
+      },
+      {
+        label: "Hash map clone — different approach"
+      }
+    ],
+    explain: "Walk the list until a node's value matches"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find node), what strategy is established?",
+    choices: [
+      {
+        label: "Walk the list until a node's — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find node: walk the linked list from the head, one node at a time, and return the first node whose value equals . A single linear scan — O(n) time, O(1) space."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FOUND\" step (match @), what happens?",
+    choices: [
+      {
+        label: "Match — the node at position — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Match — the node at position  holds , which equals . Return this node."
+  },
+  {
+    id: "state",
+    prompt: "What does the `head` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the node `head` — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `head` in sync: index of the node `head` currently points at; null = past the end"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find node\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). while head: head.Val==val? else head=head.Next"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "!= , so this — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: " != , so this is not the node. Advance: head = head.Next, moving on to the next link in the chain."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'fn1', label: '[3,1,4,1,5] find 4', value: { list: [3, 1, 4, 1, 5], val: 4 } },
     { id: 'fn2', label: '[2,7,8] find 9', value: { list: [2, 7, 8], val: 9 } },

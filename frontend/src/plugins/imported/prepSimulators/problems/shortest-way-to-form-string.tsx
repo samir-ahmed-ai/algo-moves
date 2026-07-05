@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -192,7 +192,135 @@ function Inspector({ frame }: InspectorProps<ShortestWayState>) {
 export const manifestId = 'prep-strings-shortest-way-to-form-string';
 export const title = 'Shortest Way to Form String';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Shortest Way to Form String\"?",
+    choices: [
+      {
+        label: "Two Pointers Greedy — fits this problem",
+        correct: true
+      },
+      {
+        label: "Index Map — different approach"
+      },
+      {
+        label: "Counter — different approach"
+      },
+      {
+        label: "Two Pointers — different approach"
+      }
+    ],
+    explain: "See Shortest Way To Form String pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Shortest Way to Form String), what strategy is established?",
+    choices: [
+      {
+        label: "See Shortest Way To Form String — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Shortest Way to Form String: build target \"\" by concatenating subsequences of source \"\". Greedily sweep source left-to-right, matching as many target chars as possible per pass; each full sweep costs one subsequence."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step (source[]=''), what happens?",
+    choices: [
+      {
+        label: "source[] = '' does not equal — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "source[] = '' does not equal target[] = ''. Skip this source character and keep scanning; j stays at ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "pointer scanning source — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: pointer scanning source"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Shortest Way to Form String\"?",
+    choices: [
+      {
+        label: "O( time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O( time, O(words) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(. O(1). Shortest Way To Form String"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "target \"\" is fully formed using — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "target \"\" is fully formed using  subsequence of source. Answer = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sw1', label: '"abc" → "abcbc"', value: { source: 'abc', target: 'abcbc' } },
     { id: 'sw2', label: '"xyz" → "xzyxz"', value: { source: 'xyz', target: 'xzyxz' } },

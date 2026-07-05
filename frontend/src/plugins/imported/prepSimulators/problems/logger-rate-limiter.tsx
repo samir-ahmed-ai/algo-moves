@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -122,7 +122,95 @@ function Inspector({ frame }: InspectorProps<LoggerState>) {
 export const manifestId = 'prep-design-logger-rate-limiter';
 export const title = 'Logger Rate Limiter';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Logger Rate Limiter\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Copy-on-write version snapshots — different approach"
+      },
+      {
+        label: "Stack — different approach"
+      },
+      {
+        label: "Two Heaps — different approach"
+      }
+    ],
+    explain: "See Logger Rate Limiter pattern"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PRINT\" step (print @), what happens?",
+    choices: [
+      {
+        label: "ts=, msg=\"\": ${last === undefined ? — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "ts=, msg=\"\": ${last === undefined ? 'first time' : "
+  },
+  {
+    id: "state",
+    prompt: "What does the `logs` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field logs in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `logs` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. distinct message(s) recorded — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done.  distinct message(s) recorded in the map."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'log1',

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -197,7 +197,135 @@ function Inspector({ frame }: InspectorProps<LpsState>) {
 export const manifestId = 'prep-strings-longest-palindromic-substring';
 export const title = 'Longest palindromic substring';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Longest palindromic substring\"?",
+    choices: [
+      {
+        label: "Expand center — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bitmask Hash Set — different approach"
+      },
+      {
+        label: "DP reachability — different approach"
+      },
+      {
+        label: "Greedy (pick highest count) — different approach"
+      }
+    ],
+    explain: "Every index is a mirror center; grow outward while chars match"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Longest palindromic substring), what strategy is established?",
+    choices: [
+      {
+        label: "Every index is a mirror center; — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Longest Palindromic Substring by expand-from-center: every index is a possible mirror center. For each center we grow a window outward while the two edge characters match, then keep the longest span seen. Time O(n^2), Space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"STOP\" step (edge), what happens?",
+    choices: [
+      {
+        label: "A pointer ran off the end — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "A pointer ran off the end (l=, r=), so the window can't grow further. The palindrome found is \"\" (length )."
+  },
+  {
+    id: "state",
+    prompt: "What does the `l` field track in the visualization state?",
+    choices: [
+      {
+        label: "left edge of the current — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `l` in sync: left edge of the current expansion"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Longest palindromic substring\"?",
+    choices: [
+      {
+        label: "O(n^2) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(a+b+c) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n*k) time, O(n*k) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n^2). O(1). expand(i,i) and expand(i,i+1); keep longest span"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All centers have been expanded. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All  centers have been expanded. The longest palindromic substring is \"\" (length ), starting at index ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'lps1', label: '"babad"', value: { s: 'babad' } },
     { id: 'lps2', label: '"cbbd"', value: { s: 'cbbd' } },

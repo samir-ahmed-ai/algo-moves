@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -266,7 +266,115 @@ function Inspector({ frame }: InspectorProps<DirectionsState>) {
 export const manifestId = 'prep-trees-step-by-step-directions-from-a-binary-tree-node-to-another';
 export const title = 'Step-By-Step Directions From a Binary Tree Node to Another';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Step-By-Step Directions From a Binary Tree Node to Another\"?",
+    choices: [
+      {
+        label: "Two Paths + LCA via Common Prefix — fits this problem",
+        correct: true
+      },
+      {
+        label: "Reverse inorder — different approach"
+      },
+      {
+        label: "Mirror compare — different approach"
+      },
+      {
+        label: "BFS + Direction Toggle — different approach"
+      }
+    ],
+    explain: "Find root-to-start path and root-to-dest path (as sequences of 'L'/'R')"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"LCA\" step (LCA=), what happens?",
+    choices: [
+      {
+        label: "The common prefix ends at length — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "The common prefix ends at length  because . Node  is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch."
+  },
+  {
+    id: "state",
+    prompt: "What does the `current` field track in the visualization state?",
+    choices: [
+      {
+        label: "node index currently being visited — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `current` in sync: node index currently being visited"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Step-By-Step Directions From a Binary Tree Node to Another\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). Find root-to-start path and root-to-dest path (as sequences of 'L'/'R'); Strip the common prefix (LCA). Remaining start path → all 'U's, append remaining dest p"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The common prefix ends at length — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The common prefix ends at length  because . Node  is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // Tree: [5,1,2,3,null,6,4]; start = 3, dest = 6 → "UURL".
     // 3 is at L,L (index 3); 6 is at R,L (index 5). LCA = root 5.

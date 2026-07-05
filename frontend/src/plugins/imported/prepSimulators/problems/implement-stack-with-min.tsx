@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { QueueTape } from '../../../../components/board/QueueTape';
 import type { ProblemSimulator } from '../types';
@@ -198,7 +198,115 @@ function Inspector({ frame }: InspectorProps<MinStackState>) {
 export const manifestId = 'prep-stacks-queues-implement-stack-with-min';
 export const title = 'Implement stack with min';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Implement stack with min\"?",
+    choices: [
+      {
+        label: "Stack with auxiliary min stack — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sliding window queue + running sum — different approach"
+      },
+      {
+        label: "Two Pointers — different approach"
+      },
+      {
+        label: "Postfix evaluation stack — different approach"
+      }
+    ],
+    explain: "Each node carries the running min beside its value"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"POP\" step (popped ), what happens?",
+    choices: [
+      {
+        label: "Returned . The stack is back — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Returned . The stack is back to  cell(s); the running-min of the new top is already correct, no recomputation needed."
+  },
+  {
+    id: "state",
+    prompt: "What does the `vals` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field vals in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `vals` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Implement stack with min\"?",
+    choices: [
+      {
+        label: "O(1) per op time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) amortized time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1) per op. O(n). push min(val, top.min); Min() reads top.min"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Min() just reads the running-min stored — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Min() just reads the running-min stored in the top cell: . No scan of the whole stack is needed — that is why it is O(1)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ms1',

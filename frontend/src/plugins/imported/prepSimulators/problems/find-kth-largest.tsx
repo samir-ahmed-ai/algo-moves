@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -237,7 +237,135 @@ function computeKth(nums: number[], k: number): number {
   return a[lo];
 }
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find Kth largest\"?",
+    choices: [
+      {
+        label: "Quickselect / partition — fits this problem",
+        correct: true
+      },
+      {
+        label: "Binary search on answer — different approach"
+      },
+      {
+        label: "Hash map chain reconstruction — different approach"
+      },
+      {
+        label: "Two-pass frequency map — different approach"
+      }
+    ],
+    explain: "Partition around a pivot; recurse only the side holding index n-k"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find Kth largest), what strategy is established?",
+    choices: [
+      {
+        label: "Partition around a pivot; recurse — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find the th largest value via Quickselect. In fully sorted order the kth largest sits at index n − k =  −  = , so we hunt for whatever value ends up at index  — without sorting the whole array."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PLACE\" step (pivot@), what happens?",
+    choices: [
+      {
+        label: "Swap the pivot into the boundary — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Swap the pivot into the boundary slot . Now a[] =  is in its final sorted position: everything left is ≤ it, everything right is > it."
+  },
+  {
+    id: "state",
+    prompt: "What does the `a` field track in the visualization state?",
+    choices: [
+      {
+        label: "live array (mutated by partition — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `a` in sync: live array (mutated by partition swaps)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find Kth largest\"?",
+    choices: [
+      {
+        label: "O(n) average time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(t log t) time, O(t) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n) average. O(1). target=n-k; partition; move lo/hi toward p"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The window collapsed to a single — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The window collapsed to a single cell at index  = target , so a[] =  is the th largest value."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'kth1', label: '[3,2,1,5,6,4], k=2', value: { nums: [3, 2, 1, 5, 6, 4], k: 2 } },
     { id: 'kth2', label: '[3,2,3,1,2,4,5,5], k=4 → 3', value: { nums: [3, 2, 3, 1, 2, 4, 5, 5], k: 4 } },

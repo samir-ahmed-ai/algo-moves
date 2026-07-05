@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -218,7 +218,135 @@ function Inspector({ frame }: InspectorProps<PathState>) {
 export const manifestId = 'prep-matrices-find-path-between-cells';
 export const title = 'Find path between cells';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find path between cells\"?",
+    choices: [
+      {
+        label: "Grid DFS pathfinding — fits this problem",
+        correct: true
+      },
+      {
+        label: "Row Comparison (same or inverse of row 0) — different approach"
+      },
+      {
+        label: "First row/col as markers — different approach"
+      },
+      {
+        label: "Backtracking word search — different approach"
+      }
+    ],
+    explain: "DFS in 4 directions building a path, backtracking on dead ends"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find path between cells), what strategy is established?",
+    choices: [
+      {
+        label: "DFS in 4 directions building — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find a path from the start cell (,) to the destination (,) through open cells (0). Cells marked 1 are walls. We run DFS in the order right, down, left, up, pushing each cell onto the path and backtracking (popping) when a branch dead-ends."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FOUND\" step (reached (,)), what happens?",
+    choices: [
+      {
+        label: "Cell (,) is the destination. — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Cell (,) is the destination. The whole path from start to here is the answer — unwind the recursion returning true."
+  },
+  {
+    id: "state",
+    prompt: "What does the `visited` field track in the visualization state?",
+    choices: [
+      {
+        label: "cells we have committed — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `visited` in sync: cells we have committed to and explored from"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find path between cells\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(m·n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) per axis time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(max(m,n)) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(m·n). append cell; dest -> true; else recurse; pop on failure"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every direction out of (,) dead-ended — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every direction out of (,) dead-ended, so pop it off the path and backtrack to the previous cell."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'fp1',

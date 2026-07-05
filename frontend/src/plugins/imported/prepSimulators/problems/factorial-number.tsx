@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -145,7 +145,135 @@ function factorialNumber(n: number): number {
   return result;
 }
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Factorial number\"?",
+    choices: [
+      {
+        label: "Iterative factorial — fits this problem",
+        correct: true
+      },
+      {
+        label: "atoi parse with overflow guard — different approach"
+      },
+      {
+        label: "Sort — different approach"
+      },
+      {
+        label: "Uniform random in range — different approach"
+      }
+    ],
+    explain: "Multiply 1..n into an accumulator"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Factorial number), what strategy is established?",
+    choices: [
+      {
+        label: "Multiply 1..n into an accumulator — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Factorial number: compute n! = 1·2·3·…·n iteratively. Start an accumulator result = 1, then fold each factor from 2 up to  into it. Time O(n), Space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MUL\" step (× → ), what happens?",
+    choices: [
+      {
+        label: "Multiply factor into the accumulator: — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Multiply factor  into the accumulator: result =  ×  = . This folds  into the running product 1·2·…·."
+  },
+  {
+    id: "state",
+    prompt: "What does the `factors` field track in the visualization state?",
+    choices: [
+      {
+        label: "the multiplicands 2..n laid out — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `factors` in sync: the multiplicands 2..n laid out as a row"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Factorial number\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(d) time, O(d) space — wrong order of growth"
+      },
+      {
+        label: "O(bits set) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). result=1; for i=2..n result*=i"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All factors up — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All factors up to  have been multiplied in. ! = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'fn5', label: 'n = 5', value: { n: 5 } },
     { id: 'fn0', label: 'n = 0', value: { n: 0 } },

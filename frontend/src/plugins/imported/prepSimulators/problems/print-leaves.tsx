@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -137,7 +137,115 @@ function Inspector({ frame }: InspectorProps<LeavesState>) {
 export const manifestId = 'prep-trees-print-leaves';
 export const title = 'Print leaves';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Print leaves\"?",
+    choices: [
+      {
+        label: "Post-order leaves — fits this problem",
+        correct: true
+      },
+      {
+        label: "Level order fill — different approach"
+      },
+      {
+        label: "Stack iterative — different approach"
+      },
+      {
+        label: "BFS rightmost — different approach"
+      }
+    ],
+    explain: "Collect every node that has no children"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"LEAF\" step (leaf ), what happens?",
+    choices: [
+      {
+        label: "Both children are nil, so node — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Both children are nil, so node  is a leaf. Append  to the output → []."
+  },
+  {
+    id: "state",
+    prompt: "What does the `current` field track in the visualization state?",
+    choices: [
+      {
+        label: "node index currently being visited — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `current` in sync: node index currently being visited (ring)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Print leaves\"?",
+    choices: [
+      {
+        label: "O(n) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(h). both children nil -> append val"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Traversal complete. The leaves, left — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Traversal complete. The leaves, left to right, are []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'pl1',

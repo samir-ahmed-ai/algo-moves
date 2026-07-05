@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
@@ -242,7 +242,135 @@ function Inspector({ frame }: InspectorProps<EqualSumState>) {
 export const manifestId = 'prep-sorting-equal-sum-arrays-with-minimum-number-of-operations';
 export const title = 'Equal Sum Arrays with Minimum Number of Operations';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Equal Sum Arrays with Minimum Number of Operations\"?",
+    choices: [
+      {
+        label: "Greedy Contribution Counting — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bucket Sort — different approach"
+      },
+      {
+        label: "Sort Frequencies + Greedy — different approach"
+      },
+      {
+        label: "Sort (attack desc, defense asc) + Max — different approach"
+      }
+    ],
+    explain: "If `min_possible_sum > max_possible_sum` of the other → `-1`"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Equal Sum Arrays with Minimum Number of Operations), what strategy is established?",
+    choices: [
+      {
+        label: "If `min_possible_sum > max_possible_sum` — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Each value is a die in 1..6. We want sum(nums1) = sum(nums2) using the fewest single-die changes. Start sums: nums1=, nums2=."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step (bucket  empty), what happens?",
+    choices: [
+      {
+        label: "Bucket is empty — no die — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Bucket  is empty — no die can move the gap by . Drop to the next-smaller contribution."
+  },
+  {
+    id: "state",
+    prompt: "What does the `c` field track in the visualization state?",
+    choices: [
+      {
+        label: "contribution bucket currently — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `c` in sync: contribution bucket currently being processed (5..1)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Equal Sum Arrays with Minimum Number of Operations\"?",
+    choices: [
+      {
+        label: "O(n+m) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n·log n·C) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n+m). O(1). If `min_possible_sum > max_possible_sum` of the other → `-1`; Make `nums1` the smaller sum. For each element: max contribution = `6-x` (increase) or `x-1` (decr"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The gap is fully closed using — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The gap is fully closed using the largest contributions first. Minimum operations = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'es1', label: '[1,2,3,4,5,6] vs [1,1,2,2,2,2]', value: { nums1: [1, 2, 3, 4, 5, 6], nums2: [1, 1, 2, 2, 2, 2] } },
     { id: 'es2', label: '[1,1,1,1,1,1,1] vs [6]', value: { nums1: [1, 1, 1, 1, 1, 1, 1], nums2: [6] } },

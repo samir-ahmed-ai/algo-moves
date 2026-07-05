@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -198,7 +198,135 @@ function Inspector({ frame }: InspectorProps<AtoiState>) {
 export const manifestId = 'prep-math-convert-string-to-integer';
 export const title = 'Convert string to integer';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Convert string to integer\"?",
+    choices: [
+      {
+        label: "atoi parse with overflow guard — fits this problem",
+        correct: true
+      },
+      {
+        label: "Binary search sqrt — different approach"
+      },
+      {
+        label: "Chunk by 1000 + Lookup — different approach"
+      },
+      {
+        label: "Next Permutation — different approach"
+      }
+    ],
+    explain: "Skip spaces, read sign, consume digits, clamp on overflow"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Convert string to integer), what strategy is established?",
+    choices: [
+      {
+        label: "Skip spaces, read sign, consume digits — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Parse the string \"\" into an integer, mimicking atoi: skip leading spaces, read an optional sign, then consume digits left to right building result = result*10 + digit, clamping on overflow."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SIGN\" step (sign=+1), what happens?",
+    choices: [
+      {
+        label: "No explicit sign at index  — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "No explicit sign at index , so the number defaults to positive."
+  },
+  {
+    id: "state",
+    prompt: "What does the `chars` field track in the visualization state?",
+    choices: [
+      {
+        label: "each character of s, rendered — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `chars` in sync: each character of s, rendered as an ArrayRow cell"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Convert string to integer\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(d) time, O(d) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). guard result>(max-digit)/10 -> clamp; result=result*10+digit"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Cursor reached a non-digit — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Cursor reached a non-digit or the end of the string. Apply the sign to get the final answer ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'atoi1', label: '"   -042"', value: { s: '   -042' } },
     { id: 'atoi2', label: '"91283472332" (overflow)', value: { s: '91283472332' } },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -185,7 +185,135 @@ function Inspector({ frame }: InspectorProps<NearestState>) {
 export const manifestId = 'prep-intervals-distance-of-nearest-stores';
 export const title = 'Distance of nearest stores';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Distance of nearest stores\"?",
+    choices: [
+      {
+        label: "Brute-force nearest store by distance — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort by end + DP + binary search — different approach"
+      },
+      {
+        label: "Sort + merge coverage — different approach"
+      },
+      {
+        label: "Sort Starts/Ends + Sweep — different approach"
+      }
+    ],
+    explain: "For each customer, the minimum squared distance to any store"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Distance of nearest stores), what strategy is established?",
+    choices: [
+      {
+        label: "For each customer, the minimum squared — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Distance of nearest stores: for every customer we brute-force the squared Euclidean distance (dx²+dy²) to each of the  stores and keep the smallest. No square roots are taken — comparing squared distances preserves the ordering. Time O(s·c), Space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"KEEP\" step (d= ≥ ), what happens?",
+    choices: [
+      {
+        label: "Store gives distance² = , which — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Store   gives distance² = , which is not closer than the current best (). Keep best unchanged."
+  },
+  {
+    id: "state",
+    prompt: "What does the `ci` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of customer currently — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `ci` in sync: index of customer currently being processed"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Distance of nearest stores\"?",
+    choices: [
+      {
+        label: "O(s * c) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(s * c). O(1). brute force dx^2+dy^2; keep the min per customer"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every customer is resolved. The result — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every customer is resolved. The result array of nearest squared distances is []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'dns1',

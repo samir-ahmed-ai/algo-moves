@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -141,7 +141,115 @@ function Inspector({ frame }: InspectorProps<FindLargeState>) {
 export const manifestId = 'prep-streams-io-find-files-size-larger-than-5m';
 export const title = 'Find files size larger than 5M';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find files size larger than 5M\"?",
+    choices: [
+      {
+        label: "Filesystem walk with size filter — fits this problem",
+        correct: true
+      },
+      {
+        label: "Buffered line iterator — different approach"
+      },
+      {
+        label: "In-place byte reversal — different approach"
+      },
+      {
+        label: "Streaming palindrome stack — different approach"
+      }
+    ],
+    explain: "Walk every file; collect paths over the size threshold"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step (), what happens?",
+    choices: [
+      {
+        label: "File \"\" size ≤ 5M — — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "File \"\" size  ≤ 5M — skip."
+  },
+  {
+    id: "state",
+    prompt: "What does the `entries` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field entries in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `entries` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find files size larger than 5M\"?",
+    choices: [
+      {
+        label: "O(entries) time, O(matches) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(entries) time, O(depth) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(entries). O(matches). filepath.Walk; skip dirs; Size()>5*1024*1024"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Walk complete. Found file(s) larger than — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Walk complete. Found  file(s) larger than 5M: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ff1',

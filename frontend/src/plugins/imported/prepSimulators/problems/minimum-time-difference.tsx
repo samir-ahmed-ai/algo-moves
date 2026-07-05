@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -167,7 +167,135 @@ function Inspector({ frame }: InspectorProps<MtdState>) {
 export const manifestId = 'prep-strings-minimum-time-difference';
 export const title = 'Minimum Time Difference';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Minimum Time Difference\"?",
+    choices: [
+      {
+        label: "Sort + Wrap-around — fits this problem",
+        correct: true
+      },
+      {
+        label: "Stack of unmatched indices — different approach"
+      },
+      {
+        label: "Adjacent swap — different approach"
+      },
+      {
+        label: "Bijection map — different approach"
+      }
+    ],
+    explain: "See Minimum Time Difference pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Minimum Time Difference), what strategy is established?",
+    choices: [
+      {
+        label: "See Minimum Time Difference pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Minimum Time Difference: find the smallest gap (in minutes) between any two clock times on a 24h circle. First convert each \"HH:MM\" to minutes since midnight."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FILL\" step (m ✓), what happens?",
+    choices: [
+      {
+        label: "Adjacent gap → = − = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Adjacent gap  →  =  −  =  min. That beats the previous best, so the new minimum is  min."
+  },
+  {
+    id: "state",
+    prompt: "What does the `timePoints` field track in the visualization state?",
+    choices: [
+      {
+        label: "original, unsorted labels for reference — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `timePoints` in sync: original, unsorted labels for reference"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Minimum Time Difference\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n*k) time, O(n*k) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(n). Minimum Time Difference"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All adjacent gaps and the wrap-around — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All adjacent gaps and the wrap-around are checked. The minimum time difference is  minute."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'mtd1', label: '["23:59","00:00"]', value: { timePoints: ['23:59', '00:00'] } },
     {

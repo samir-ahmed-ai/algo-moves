@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -180,7 +180,135 @@ function Inspector({ frame }: InspectorProps<AddState>) {
 export const manifestId = 'prep-math-add-two-big-string-numbers';
 export const title = 'Add two big string numbers';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Add two big string numbers\"?",
+    choices: [
+      {
+        label: "Big integer string addition — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort — different approach"
+      },
+      {
+        label: "Uniform random in range — different approach"
+      },
+      {
+        label: "Singleton XOR — different approach"
+      }
+    ],
+    explain: "Same as binary add, but base 10"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Add two big string numbers), what strategy is established?",
+    choices: [
+      {
+        label: "Same as binary add, but base — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Big-integer addition: the numbers are too long for a machine int, so we add them digit by digit as strings. Walk both numbers from the least-significant digit (the right end), keeping a running carry."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WRITE\" step (digit=, carry=), what happens?",
+    choices: [
+      {
+        label: "Keep sum % 10 = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Keep sum % 10 =  as this column's output digit, and carry sum / 10 =  into the next column. Digits collected so far (least-significant first): ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current digit index — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current digit index into a (from the right)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Add two big string numbers\"?",
+    choices: [
+      {
+        label: "O(max(len)) time, O(max(len)) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(d) time, O(d) space — wrong order of growth"
+      },
+      {
+        label: "O(bits set) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(max(len)). O(max(len)). sum=a+b+carry; digit=sum%10; carry=sum/10; reverse"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every column is processed — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every column is processed and the carry is gone. The digits were appended least-significant first, so reverse them to get the answer: ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'add1', label: '"456" + "77"', value: { a: '456', b: '77' } },
     { id: 'add2', label: '"999" + "1"', value: { a: '999', b: '1' } },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -141,7 +141,135 @@ function Inspector({ frame }: InspectorProps<InsertState>) {
 export const manifestId = 'prep-intervals-insert-interval';
 export const title = 'Insert interval';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Insert interval\"?",
+    choices: [
+      {
+        label: "Three-segment interval insert — fits this problem",
+        correct: true
+      },
+      {
+        label: "Compare six pairwise distances — different approach"
+      },
+      {
+        label: "Brute-force nearest store by distance — different approach"
+      },
+      {
+        label: "Sort + Greedy Merge — different approach"
+      }
+    ],
+    explain: "Before / overlap-merge / after segments around the new interval"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Insert interval), what strategy is established?",
+    choices: [
+      {
+        label: "Before / overlap-merge / after segments — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Insert Interval: the existing intervals  are sorted and non-overlapping. We splice in  using three segments — copy everything strictly before it, absorb every overlap into x, then copy everything after."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PLACE\" step (place ), what happens?",
+    choices: [
+      {
+        label: "No more overlaps. The fully merged — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "No more overlaps. The fully merged interval  now goes into the result at position ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `x` field track in the visualization state?",
+    choices: [
+      {
+        label: "the new interval — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `x` in sync: the new interval as it grows by absorbing overlaps"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Insert interval\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). copy before; absorb overlaps into x; copy the rest"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. The result stays sorted — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. The result  stays sorted and non-overlapping. Time O(n), space O(n) for the output list."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ii1',

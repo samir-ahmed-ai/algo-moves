@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -158,7 +158,135 @@ function Inspector({ frame }: InspectorProps<KthLargestState>) {
 export const manifestId = 'prep-trees-find-kth-largest-in-bst';
 export const title = 'Find Kth largest in BST';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find Kth largest in BST\"?",
+    choices: [
+      {
+        label: "Reverse inorder — fits this problem",
+        correct: true
+      },
+      {
+        label: "Inorder DFS (find two inversions) — different approach"
+      },
+      {
+        label: "Post-order height — different approach"
+      },
+      {
+        label: "Tree build + iterative pre-order — different approach"
+      }
+    ],
+    explain: "Right-node-left visit lists values descending; stop at the kth"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find Kth largest in BST), what strategy is established?",
+    choices: [
+      {
+        label: "Right-node-left visit lists values — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find the  largest value in the BST. A reverse in-order walk (right → node → left) visits values in descending order, so the  node we touch is the answer. Time O(h+k), Space O(h)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"VISIT\" step ( is #), what happens?",
+    choices: [
+      {
+        label: "Count node : this — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Count node : this is the  largest value visited, so k has reached 0. The answer is ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `k` field track in the visualization state?",
+    choices: [
+      {
+        label: "the original k (for display) — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `k` in sync: the original k (for display)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find Kth largest in BST\"?",
+    choices: [
+      {
+        label: "O(h+k) time, O(h) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(h+k). O(h). dfs right; k--; k==0 -> ans; dfs left"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Count node — — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Count node  — that is the  largest so far. k drops to , so keep going: now recurse into the LEFT subtree (smaller values)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     // BST level-order:        5
     //                       /   \

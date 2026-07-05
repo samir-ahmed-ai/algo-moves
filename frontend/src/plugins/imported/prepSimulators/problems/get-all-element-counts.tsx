@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -121,7 +121,135 @@ function Inspector({ frame }: InspectorProps<CountsState>) {
 export const manifestId = 'prep-hash-maps-get-all-element-counts';
 export const title = 'Get all element counts';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Get all element counts\"?",
+    choices: [
+      {
+        label: "Frequency map — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sweep line / delta map — different approach"
+      },
+      {
+        label: "Frequency map + bucket sort — different approach"
+      },
+      {
+        label: "Union-find via email index — different approach"
+      }
+    ],
+    explain: "Tally every value into a count map"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Get all element counts), what strategy is established?",
+    choices: [
+      {
+        label: "Tally every value into a count — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Get all element counts: walk the array once and tally every value into a hash map. counts[x]++ builds a frequency map of how many times each value appears. Time O(n), Space O(n)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"BUMP\" step (counts[]=), what happens?",
+    choices: [
+      {
+        label: "counts[] is now . The map — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "counts[] is now . The map remembers every distinct value and how often it has appeared so far."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current index being tallied — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current index being tallied"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Get all element counts\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) per op time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). counts[x]++"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The whole array is tallied. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The whole array is tallied. The frequency map holds  distinct value with their counts — that is the answer."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'gec1', label: '[1,2,2,3,3,3]', value: { a: [1, 2, 2, 3, 3, 3] } },
     { id: 'gec2', label: '[5,5,1,5,2,1]', value: { a: [5, 5, 1, 5, 2, 1] } },

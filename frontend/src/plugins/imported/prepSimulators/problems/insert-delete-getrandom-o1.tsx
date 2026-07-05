@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -167,7 +167,95 @@ function Inspector({ frame }: InspectorProps<RsState>) {
 export const manifestId = 'prep-design-insert-delete-getrandom-o1';
 export const title = 'Insert Delete GetRandom O(1)';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Insert Delete GetRandom O(1)\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bijective tiny URL encode/decode — different approach"
+      },
+      {
+        label: "Trie dictionary + spell suggest — different approach"
+      },
+      {
+        label: "Hash map + doubly linked list LRU — different approach"
+      }
+    ],
+    explain: "See Insert Delete Getrandom O1 pattern"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"REMOVE\" step (swap ), what happens?",
+    choices: [
+      {
+        label: "Remove() at index : swap — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Remove() at index : swap with last element  at index  so deletion is O(1)."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nums` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field nums in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. Set holds {} with element(s). — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. Set holds {} with  element(s)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'rs1',

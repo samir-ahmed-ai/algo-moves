@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -203,7 +203,115 @@ function Inspector({ frame }: InspectorProps<DetectLoopState>) {
 export const manifestId = 'prep-linked-lists-detect-loop';
 export const title = 'Detect loop';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Detect loop\"?",
+    choices: [
+      {
+        label: "Floyd cycle — fits this problem",
+        correct: true
+      },
+      {
+        label: "Josephus simulation — different approach"
+      },
+      {
+        label: "Interweave (3-pass, no map) — different approach"
+      },
+      {
+        label: "Iterative Group Reversal — different approach"
+      }
+    ],
+    explain: "Fast laps slow inside the loop; reset one to head, walk in lockstep to the entry"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WALK\" step (slow=, fast=), what happens?",
+    choices: [
+      {
+        label: "Walk in lockstep: slow → index — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Walk in lockstep: slow → index , fast → index . They are still apart, so keep advancing both by one."
+  },
+  {
+    id: "state",
+    prompt: "What does the `loopAt` field track in the visualization state?",
+    choices: [
+      {
+        label: "where the chain reconnects (-1 — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `loopAt` in sync: where the chain reconnects (-1 = none)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Detect loop\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). meet -> slow=head; advance both by 1 until equal"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "slow and fast meet again — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "slow and fast meet again at index  (value ) — that is the start of the loop. Return this node."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'dl1',

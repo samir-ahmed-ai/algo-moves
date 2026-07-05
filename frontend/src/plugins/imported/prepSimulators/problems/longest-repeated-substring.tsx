@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -239,7 +239,132 @@ function Inspector({ frame }: InspectorProps<LrsState>) {
 export const manifestId = 'prep-tries-longest-repeated-substring';
 export const title = 'Longest repeated substring';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Longest repeated substring\"?",
+    choices: [
+      {
+        label: "Suffix array + LCP scan — fits this problem",
+        correct: true
+      },
+      {
+        label: "Suffix trie + palindrome check — different approach"
+      },
+      {
+        label: "Trie with 26-way branching — different approach"
+      }
+    ],
+    explain: "Sort all suffixes; the longest common prefix of an adjacent pair is the repeat"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Longest repeated substring), what strategy is established?",
+    choices: [
+      {
+        label: "Sort all suffixes; the longest common — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Longest Repeated Substring: build a trie of every suffix of \"\" (with a terminal '' so each suffix ends at its own leaf). A repeated substring is exactly a path shared by two or more suffixes — a trie node with 2+ children. The deepest such branching node spells the answer."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"WALK\" step (follow ''), what happens?",
+    choices: [
+      {
+        label: "Edge '' already exists — reuse — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Edge '' already exists — reuse it. Reaching node \"\" a second time means this prefix is shared: it is a repeated substring candidate."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nodes` field track in the visualization state?",
+    choices: [
+      {
+        label: "flat trie; node 0 — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `nodes` in sync: flat trie; node 0 is the root"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Longest repeated substring\"?",
+    choices: [
+      {
+        label: "O(s^2 log s) time, O(s) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(s) insert, O(s) search/prefix time — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(s^2 log s). O(s). sort suffixes; take max lcp over adjacent pairs"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "No edge '' yet — create — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "No edge '' yet — create a new node for \"\". A brand-new branch means this exact prefix has not been seen before."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'lrs1', label: '"abab" → "ab"', value: { str: 'abab' } },
     { id: 'lrs2', label: '"banana" → "ana"', value: { str: 'banana' } },

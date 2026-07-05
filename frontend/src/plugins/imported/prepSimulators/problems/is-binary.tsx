@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -188,7 +188,135 @@ function Inspector({ frame }: InspectorProps<IsBinaryState>) {
 export const manifestId = 'prep-math-is-binary';
 export const title = 'Is binary';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is binary\"?",
+    choices: [
+      {
+        label: "Single-bit check — fits this problem",
+        correct: true
+      },
+      {
+        label: "Binary exponentiation — different approach"
+      },
+      {
+        label: "Iterative factorial — different approach"
+      },
+      {
+        label: "Greedy — different approach"
+      }
+    ],
+    explain: "At most one bit set means n&(n-1) is zero"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Is binary), what strategy is established?",
+    choices: [
+      {
+        label: "At most one bit set means — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Is Binary asks whether n is a power of two — a number with exactly one bit set. The trick is a single-bit check: n > 0 && (n & (n-1)) == 0. Time O(1), space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MINUS\" step (n-1=), what happens?",
+    choices: [
+      {
+        label: "Subtracting one flips the lowest set — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Subtracting one flips the lowest set bit of  to 0 and turns every bit below it into 1. So n-1 = . If  had a single set bit, that bit is now gone and all lower bits are 1 — the two numbers share no bits."
+  },
+  {
+    id: "state",
+    prompt: "What does the `sign` field track in the visualization state?",
+    choices: [
+      {
+        label: "-1 = not yet checked — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `sign` in sync: -1 = not yet checked, 0 = fails n>0, 1 = passes n>0"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is binary\"?",
+    choices: [
+      {
+        label: "O(1) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) worst case time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1). O(1). n>0 && n&(n-1)==0"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Bit : n has and n-1 — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Bit : n has  and n-1 has , so their AND is ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ib1', label: 'n = 8', value: { n: 8 } },
     { id: 'ib2', label: 'n = 6', value: { n: 6 } },

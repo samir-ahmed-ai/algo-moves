@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -185,7 +185,135 @@ function Inspector({ frame }: InspectorProps<PowState>) {
 export const manifestId = 'prep-math-powx-n';
 export const title = 'Pow(x, n)';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Pow(x, n)\"?",
+    choices: [
+      {
+        label: "Binary Exponentiation — fits this problem",
+        correct: true
+      },
+      {
+        label: "Strobogrammatic map — different approach"
+      },
+      {
+        label: "Uniform random in range — different approach"
+      },
+      {
+        label: "Gauss sum XOR trick — different approach"
+      }
+    ],
+    explain: "See Powx N pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Pow(x, n)), what strategy is established?",
+    choices: [
+      {
+        label: "See Powx N pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Pow(x, n): compute ^ with binary exponentiation. Read the exponent's bits from lowest to highest; each iteration squares the base and multiplies it into the result whenever the current bit is 1. Time O(log n), Space O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step (bit =0), what happens?",
+    choices: [
+      {
+        label: "Bit of |n| is 0 — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Bit  of |n| is 0, so x^ is not part of the exponent. Leave res =  unchanged."
+  },
+  {
+    id: "state",
+    prompt: "What does the `x` field track in the visualization state?",
+    choices: [
+      {
+        label: "original exponent input, for display — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `x` in sync: original exponent input, for display"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Pow(x, n)\"?",
+    choices: [
+      {
+        label: "O(log n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(d) time, O(d) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(log n). O(1). Powx N"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All bits processed. ^ = . — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All bits processed. ^ = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'pow1', label: '2^10', value: { x: 2, n: 10 } },
     { id: 'pow2', label: '2^-3', value: { x: 2, n: -3 } },

@@ -15,31 +15,19 @@ export interface CodeVariant {
   file?: string;
 }
 
-export interface CodeStudioContextValue {
+export interface CodeStudioContentContextValue {
   variants: CodeVariant[];
   active: number;
   setActive: (i: number) => void;
   code: CodeVariant | undefined;
   reference: string;
-  draft: string;
-  persistDraft: (v: string) => void;
-  skeleton: string;
-  blind: boolean;
-  setBlind: (v: boolean | ((b: boolean) => boolean)) => void;
-  peek: boolean;
-  setPeek: (v: boolean) => void;
-  copied: boolean;
-  copyRef: () => Promise<void>;
-  editorPrefs: EditorPrefs;
-  setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
-  timerRunning: boolean;
-  setTimerRunning: (v: boolean | ((r: boolean) => boolean)) => void;
-  timerLabel: string;
-  score: number;
   timeLabel: string | undefined;
   spaceLabel: string | undefined;
   stat: ReturnType<typeof statFor>;
   theme: 'dark' | 'light' | undefined;
+}
+
+export interface CodeStudioPhaseContextValue {
   phase: CodeStudioPhase;
   phaseSeq: CodeStudioPhase[];
   /** Human label of the phase that follows the current one (e.g. "Structure"). */
@@ -63,4 +51,36 @@ export interface CodeStudioContextValue {
   phaseLocked: boolean;
 }
 
-export const CodeStudioContext = createContext<CodeStudioContextValue | null>(null);
+export interface CodeStudioDraftContextValue {
+  draft: string;
+  persistDraft: (v: string) => void;
+  skeleton: string;
+  blind: boolean;
+  setBlind: (v: boolean | ((b: boolean) => boolean)) => void;
+  peek: boolean;
+  setPeek: (v: boolean) => void;
+  timerRunning: boolean;
+  setTimerRunning: (v: boolean | ((r: boolean) => boolean)) => void;
+  timerLabel: string;
+  score: number;
+}
+
+export interface CodeStudioEditorContextValue {
+  editorPrefs: EditorPrefs;
+  setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
+  copied: boolean;
+  copyRef: () => Promise<void>;
+}
+
+export type CodeStudioContextValue = CodeStudioContentContextValue &
+  CodeStudioPhaseContextValue &
+  CodeStudioDraftContextValue &
+  CodeStudioEditorContextValue;
+
+export const CodeStudioContentContext = createContext<CodeStudioContentContextValue | null>(null);
+export const CodeStudioPhaseContext = createContext<CodeStudioPhaseContextValue | null>(null);
+export const CodeStudioDraftContext = createContext<CodeStudioDraftContextValue | null>(null);
+export const CodeStudioEditorContext = createContext<CodeStudioEditorContextValue | null>(null);
+
+/** @deprecated Use slice contexts; kept for backward compatibility during migration. */
+export const CodeStudioContext = CodeStudioContentContext;

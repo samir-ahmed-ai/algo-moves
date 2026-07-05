@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -244,7 +244,115 @@ function Inspector({ frame }: InspectorProps<IntersectState>) {
 export const manifestId = 'prep-linked-lists-find-intersection-of-two-lists';
 export const title = 'Find intersection of two lists';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find intersection of two lists\"?",
+    choices: [
+      {
+        label: "Two pointers reset — fits this problem",
+        correct: true
+      },
+      {
+        label: "Josephus simulation — different approach"
+      },
+      {
+        label: "Interweave (3-pass, no map) — different approach"
+      },
+      {
+        label: "Iterative Group Reversal — different approach"
+      }
+    ],
+    explain: "Each pointer hops to the other list's head; they meet at the junction"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"FOUND\" step (node ), what happens?",
+    choices: [
+      {
+        label: "pa == pb at the shared — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "pa == pb at the shared node  — that is the intersection where both lists merge. Return it."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cells` field track in the visualization state?",
+    choices: [
+      {
+        label: "the rendered chain, left → — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cells` in sync: the rendered chain, left → right"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find intersection of two lists\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). pa: a then b, pb: b then a, until pa==pb"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "pa == pb at the shared — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "pa == pb at the shared node  — that is the intersection where both lists merge. Return it."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'fi1',

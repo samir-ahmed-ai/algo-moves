@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -149,7 +149,135 @@ function Inspector({ frame }: InspectorProps<MovingAvgState>) {
 export const manifestId = 'prep-stacks-queues-find-moving-average-in-sliding';
 export const title = 'Find moving average in sliding';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find moving average in sliding\"?",
+    choices: [
+      {
+        label: "Sliding window queue + running sum — fits this problem",
+        correct: true
+      },
+      {
+        label: "Dual Stack (counts + strings) — different approach"
+      },
+      {
+        label: "Reverse scan prefix stack — different approach"
+      },
+      {
+        label: "Right-to-Left Max Scan — different approach"
+      }
+    ],
+    explain: "Fixed-size window slides; answer is sum/size"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find moving average in sliding), what strategy is established?",
+    choices: [
+      {
+        label: "Fixed-size window slides; answer — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Moving Average: keep a queue holding at most k= of the most recent values plus their running sum. Each Next(v) appends v and adds it to the sum, evicts the oldest if the window overflows, then returns sum ÷ window length — all in O(1)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"EVICT\" step (−), what happens?",
+    choices: [
+      {
+        label: "The window exceeded k=, so evict — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "The window exceeded k=, so evict the oldest value  from the front and subtract it: sum = . The window is back down to  value."
+  },
+  {
+    id: "state",
+    prompt: "What does the `window` field track in the visualization state?",
+    choices: [
+      {
+        label: "current contents of the sliding — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `window` in sync: current contents of the sliding window (front = index 0)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find moving average in sliding\"?",
+    choices: [
+      {
+        label: "O(1) per next time, O(k) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(k) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1) per next. O(k). append val and add; if over size evict front; return sum/len"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Return the average over the current — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Return the average over the current window: sum  ÷  = . This is the result of Next()."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ma1', label: 'k=3 · [1,10,3,5]', value: { size: 3, stream: [1, 10, 3, 5] } },
     { id: 'ma2', label: 'k=2 · [4,4,8,2,6]', value: { size: 2, stream: [4, 4, 8, 2, 6] } },

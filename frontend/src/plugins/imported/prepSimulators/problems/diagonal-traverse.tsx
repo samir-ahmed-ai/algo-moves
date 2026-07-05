@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
@@ -127,7 +127,135 @@ function Inspector({ frame }: InspectorProps<DiagonalState>) {
 export const manifestId = 'prep-matrices-diagonal-traverse';
 export const title = 'Diagonal Traverse';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Diagonal Traverse\"?",
+    choices: [
+      {
+        label: "Simulation — fits this problem",
+        correct: true
+      },
+      {
+        label: "8-direction DFS region size — different approach"
+      },
+      {
+        label: "Layer-by-layer 90° rotation — different approach"
+      },
+      {
+        label: "DFS + memo longest increasing path — different approach"
+      }
+    ],
+    explain: "See Diagonal Traverse pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Diagonal Traverse), what strategy is established?",
+    choices: [
+      {
+        label: "See Diagonal Traverse pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Diagonal Traverse: walk the × matrix along its anti-diagonals in a zig-zag. Start at (0,0) heading . Each diagonal is read in alternating direction. Time O(m·n), O(1) extra."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"STEP\" step (↗ to (,)), what happens?",
+    choices: [
+      {
+        label: "Continue up-right: r−1, c+1 → (,). — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Continue up-right: r−1, c+1 → (,). Still inside the grid, keep going ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `r` field track in the visualization state?",
+    choices: [
+      {
+        label: "current row — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `r` in sync: current row"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Diagonal Traverse\"?",
+    choices: [
+      {
+        label: "O(m·n) time, O(1) extra space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m·n). O(1) extra. Diagonal Traverse"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every one of the cells — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every one of the  cells has been read exactly once. The diagonal order is []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'dt1',

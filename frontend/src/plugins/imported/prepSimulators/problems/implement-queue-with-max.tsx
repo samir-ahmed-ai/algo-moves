@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -194,7 +194,115 @@ function Inspector({ frame }: InspectorProps<QueueMaxState>) {
 export const manifestId = 'prep-stacks-queues-implement-queue-with-max';
 export const title = 'Implement queue with max';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Implement queue with max\"?",
+    choices: [
+      {
+        label: "Queue + decreasing max deque — fits this problem",
+        correct: true
+      },
+      {
+        label: "Dual-stack infix calculator — different approach"
+      },
+      {
+        label: "Stack with auxiliary min stack — different approach"
+      },
+      {
+        label: "Stack bracket matching — different approach"
+      }
+    ],
+    explain: "A decreasing deque shadows the queue; its front is always the max"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"DEQ_POP\" step (→ ), what happens?",
+    choices: [
+      {
+        label: ": remove and return the front — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: ": remove and return the front value  from the FIFO queue."
+  },
+  {
+    id: "state",
+    prompt: "What does the `queue` field track in the visualization state?",
+    choices: [
+      {
+        label: "FIFO, front at index 0 — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `queue` in sync: FIFO, front at index 0"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Implement queue with max\"?",
+    choices: [
+      {
+        label: "O(1) amortized time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1) amortized. O(n). enqueue drops smaller tail; dequeue drops front if it leaves"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "All operations replayed. The deque front — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "All operations replayed. The deque front gives Max() in O(1) amortised time; each value is pushed and popped from the deque at most once, so total work is O(n)."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'qm1',

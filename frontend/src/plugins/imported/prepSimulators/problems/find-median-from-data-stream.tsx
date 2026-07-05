@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
 import type { DualHeapMedianState } from '../../../_shared/dualHeapMedianRecord';
@@ -71,7 +71,35 @@ function Inspector({ frame }: InspectorProps<MedianState>) {
 export const manifestId = 'prep-design-find-median-from-data-stream';
 export const title = 'Find Median From Data Stream';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find Median from Data Stream\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Log parsing aggregation — different approach"
+      },
+      {
+        label: "Copy-on-write version snapshots — different approach"
+      },
+      {
+        label: "Stack — different approach"
+      }
+    ],
+    explain: "See Find Median From Data Stream pattern"
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'med1',

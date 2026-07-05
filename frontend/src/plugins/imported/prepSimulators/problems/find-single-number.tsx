@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -162,7 +162,115 @@ function Inspector({ frame }: InspectorProps<SingleNumberState>) {
 export const manifestId = 'prep-math-find-single-number';
 export const title = 'Find single number';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find single number\"?",
+    choices: [
+      {
+        label: "Singleton XOR — fits this problem",
+        correct: true
+      },
+      {
+        label: "Base conversion repeated divmod — different approach"
+      },
+      {
+        label: "Strobogrammatic map — different approach"
+      },
+      {
+        label: "Primality trial division — different approach"
+      }
+    ],
+    explain: "Pairs cancel under XOR; the lonely value survives"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"XOR\" step (acc^=), what happens?",
+    choices: [
+      {
+        label: "Fold in nums[] = : acc — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Fold in nums[] = : acc =  ^  = . XOR compares bit by bit — matching bits become 0, differing bits become 1.${\n        canceled\n          ? "
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the value — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: index of the value being folded in this frame"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find single number\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+      },
+      {
+        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+      },
+      {
+        label: "O(log x) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). acc=0; acc^=each num; return acc"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every duplicate paired off to 0 — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every duplicate paired off to 0, so what remains is the single number: . This ran in O(n) time and O(1) space — one accumulator, one pass."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sn1', label: '[4,1,2,1,2] → 4', value: { nums: [4, 1, 2, 1, 2] } },
     { id: 'sn2', label: '[7,3,5,3,7] → 5', value: { nums: [7, 3, 5, 3, 7] } },

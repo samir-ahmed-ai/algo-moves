@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -196,7 +196,135 @@ function Inspector({ frame }: InspectorProps<CopyListState>) {
 export const manifestId = 'prep-linked-lists-copy-list-with-random-pointer';
 export const title = 'Copy List with Random Pointer';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Copy List with Random Pointer\"?",
+    choices: [
+      {
+        label: "Interweave (3-pass, no map) — fits this problem",
+        correct: true
+      },
+      {
+        label: "DLL walk delete — different approach"
+      },
+      {
+        label: "Merge sort list — different approach"
+      },
+      {
+        label: "DFS flatten — different approach"
+      }
+    ],
+    explain: "**Interweave** technique (O(1) space, no hashmap): insert cloned node right after each original"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Copy List with Random Pointer), what strategy is established?",
+    choices: [
+      {
+        label: "**Interweave** technique (O(1) space — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Copy List with Random Pointer using the Interweave trick (O(1) extra space, no hash map). Each clone is woven in right after its original so we can find it in place. The chain below already shows clones (lighter cells) sitting after each original."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"RANDOM\" step (clone→), what happens?",
+    choices: [
+      {
+        label: "Original .Random points at original (slot — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Original .Random points at original  (slot ). Its clone must point at the COPY of , which is the next slot (). Set clone.Random = original.Random.Next."
+  },
+  {
+    id: "state",
+    prompt: "What does the `cur` field track in the visualization state?",
+    choices: [
+      {
+        label: "current slot under inspection — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `cur` in sync: current slot under inspection"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Copy List with Random Pointer\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(max(n,m)) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). **Interweave** technique (O(1) space, no hashmap): insert cloned node right after each original; Pass 2: set `curr.Next.Random = curr.Random.Next` (clone's rand"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done — the deep copy [] — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done — the deep copy [] is fully detached with its own Next and Random pointers, all in O(n) time and O(1) extra space."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'cl1',

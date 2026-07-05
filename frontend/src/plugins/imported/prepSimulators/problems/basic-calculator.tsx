@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -159,7 +159,135 @@ function Inspector({ frame }: InspectorProps<CalcState>) {
 export const manifestId = 'prep-stacks-queues-basic-calculator';
 export const title = 'Basic Calculator';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Basic Calculator\"?",
+    choices: [
+      {
+        label: "Stack (push res+sign on '(') — fits this problem",
+        correct: true
+      },
+      {
+        label: "Stack with auxiliary min stack — different approach"
+      },
+      {
+        label: "Stack bracket matching — different approach"
+      },
+      {
+        label: "Monotonic decreasing deque — different approach"
+      }
+    ],
+    explain: "Track running `res` and `sign` (+1 or -1)"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Basic Calculator), what strategy is established?",
+    choices: [
+      {
+        label: "Track running `res` and `sign` (+1 — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Basic Calculator: evaluate \"\" with +, −, parentheses and spaces. Keep a running res and a sign (+1 or −1). On '(' we push res and sign onto a stack and reset; on ')' we fold the inner result back into the saved outer state."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SIGN\" step (sign = −1), what happens?",
+    choices: [
+      {
+        label: "Saw '−', so the next number — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Saw '−', so the next number is subtracted: set sign = −1. res stays ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the char — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: index of the char being processed"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Basic Calculator\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n·maxK) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). Track running `res` and `sign` (+1 or -1); On `(`: push `res` and `sign` to stack, reset both"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Reached the end of the string. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Reached the end of the string. The fully evaluated expression \"\" = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'bc1', label: '(1+(4+5+2)-3)', value: { s: '(1+(4+5+2)-3)' } },
     { id: 'bc2', label: '1-(2+3)', value: { s: '1-(2+3)' } },

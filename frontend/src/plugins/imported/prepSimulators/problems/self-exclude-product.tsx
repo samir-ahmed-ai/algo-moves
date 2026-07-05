@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -165,7 +165,135 @@ function Inspector({ frame }: InspectorProps<SelfExcludeState>) {
 export const manifestId = 'prep-arrays-self-exclude-product';
 export const title = 'Self exclude product';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Self exclude product\"?",
+    choices: [
+      {
+        label: "Prefix + suffix pass — fits this problem",
+        correct: true
+      },
+      {
+        label: "Monotonic stack — different approach"
+      },
+      {
+        label: "Reverse segments — different approach"
+      },
+      {
+        label: "Greedy reach — different approach"
+      }
+    ],
+    explain: "Left-product pass fills out[i], right-product pass multiplies it"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Self exclude product), what strategy is established?",
+    choices: [
+      {
+        label: "Left-product pass fills out[i] — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Self exclude product: out[i] should be the product of every element except nums[i]. We do it in two passes with no division — a left-to-right prefix pass, then a right-to-left suffix pass. Time O(n), space O(1) extra."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SUFFIX\" step (out[]=), what happens?",
+    choices: [
+      {
+        label: "out[] = prefix() × suffix() = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "out[] = prefix() × suffix() = . Multiplying the left product by the right product gives the product of all elements except nums[]."
+  },
+  {
+    id: "state",
+    prompt: "What does the `out` field track in the visualization state?",
+    choices: [
+      {
+        label: "null = not filled yet — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `out` in sync: null = not filled yet (only step 0 is seeded first)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Self exclude product\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n+m) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). out[i]=prefix products; then *= suffix going right-to-left"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Fold nums[] (=) into the running — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Fold nums[] (=) into the running suffix so the next (more-left) index sees everything to its right: suffix = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sep1', label: '[1,2,3,4]', value: { nums: [1, 2, 3, 4] } },
     { id: 'sep2', label: '[2,3,5]', value: { nums: [2, 3, 5] } },

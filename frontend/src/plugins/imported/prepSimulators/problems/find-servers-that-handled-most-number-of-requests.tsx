@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -183,7 +183,135 @@ function Inspector({ frame }: InspectorProps<SrvState>) {
 export const manifestId = 'prep-design-find-servers-that-handled-most-number-of-requests';
 export const title = 'Find Servers That Handled Most Number of Requests';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find Servers That Handled Most Number of Requests\"?",
+    choices: [
+      {
+        label: "Heap + Sorted Available Set — fits this problem",
+        correct: true
+      },
+      {
+        label: "Trie dictionary + spell suggest — different approach"
+      },
+      {
+        label: "Two Heaps — different approach"
+      },
+      {
+        label: "Round-robin load balancer — different approach"
+      }
+    ],
+    explain: "See Find Servers That Handled Most Number Of Requests pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find Servers That Handled Most Number of Requests), what strategy is established?",
+    choices: [
+      {
+        label: "See Find Servers That Handled Most — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Busiest Servers: min-heap of busy servers by freeTime. avail sorted list; assign request i to server at/after i%k (wrap)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"ASSIGN\" step (srv ), what happens?",
+    choices: [
+      {
+        label: "Request at t=: target= → server — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Request  at t=: target= → server , busy until . cnt[]=."
+  },
+  {
+    id: "state",
+    prompt: "What does the `k` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field k in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `k` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find Servers That Handled Most Number of Requests\"?",
+    choices: [
+      {
+        label: "O(n log k) time, O(k) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(total painted) time, O(max coordinate) — wrong order of growth"
+      }
+    ],
+    explain: "O(n log k). O(k). Find Servers That Handled Most Number Of Requests"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. Max requests handled = . — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. Max requests handled = . Busiest server(s): []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'srv1',

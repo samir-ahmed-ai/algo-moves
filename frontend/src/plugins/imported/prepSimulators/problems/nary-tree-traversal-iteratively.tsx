@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -168,7 +168,115 @@ const sample2: NaryTreeInput = {
   ],
 };
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Nary tree traversal iteratively\"?",
+    choices: [
+      {
+        label: "N-ary iterative pre/post-order with stack — fits this problem",
+        correct: true
+      },
+      {
+        label: "N-ary tree DFS height — different approach"
+      },
+      {
+        label: "Prefix sum on tree — different approach"
+      },
+      {
+        label: "LCA + level distance BFS — different approach"
+      }
+    ],
+    explain: "Pre-order: pop, emit, push children reversed; post-order: prepend value"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"EMIT\" step (emit ), what happens?",
+    choices: [
+      {
+        label: "Append to the result. Output — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Append  to the result. Output so far: []."
+  },
+  {
+    id: "state",
+    prompt: "What does the `labels` field track in the visualization state?",
+    choices: [
+      {
+        label: "node value labels, index-aligned — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `labels` in sync: node value labels, index-aligned with input nodes"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Nary tree traversal iteratively\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n^2) time, O(h) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). pre: pop->emit->push reversed kids; post: prepend value on pop"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Stack is empty — traversal complete. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Stack is empty — traversal complete. Pre-order result: []."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'nary1', label: 'root 1 · [2,3,4] kids', value: sample1 },
     { id: 'nary2', label: 'root 10 · deeper', value: sample2 },

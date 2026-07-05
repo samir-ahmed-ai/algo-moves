@@ -26,6 +26,8 @@
     "import-problems": "node scripts/import-problems.mjs",
     "scaffold-prep-sim": "node scripts/scaffold-prep-simulator.mjs",
     "check-prep-sim-coverage": "node scripts/check-prep-simulator-coverage.mjs",
+    "check-prep-quiz-coverage": "node scripts/check-prep-quiz-coverage.mjs",
+    "generate-prep-practice-quiz": "node scripts/generate-prep-practice-quiz.mjs",
     "check-mobile-decks": "node scripts/check-mobile-decks.mjs",
     "check-orphans": "node scripts/check-orphans.mjs",
     "generate-themes": "node scripts/generate-themes.mjs",
@@ -39,7 +41,7 @@
     "check-content-sql": "vite-node scripts/export-content-sql.mts -- --check",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "check:lint": "eslint src",
-    "check:all": "npm run check:boundaries && npm run check-simulators && npm run check-prep-sim-coverage && npm run check-plugin-typography && npm run check:tokens && npm run check:quiz-labels && npm run check-plugin-meta && npm run check-content-sql && npm run check:lint",
+    "check:all": "npm run check:boundaries && npm run check-simulators && npm run check-prep-sim-coverage && npm run check-prep-quiz-coverage && npm run check-plugin-typography && npm run check:tokens && npm run check:quiz-labels && npm run check-plugin-meta && npm run check-content-sql && npm run check:lint",
     "draft-quiz-from-frames": "node scripts/draft-quiz-from-frames.mjs",
     "test": "vitest run && npm run check-orphans"
   },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -190,7 +190,135 @@ function Inspector({ frame }: InspectorProps<MultiplyState>) {
 export const manifestId = 'prep-math-multiply-string-numbers';
 export const title = 'Multiply string numbers';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Multiply string numbers\"?",
+    choices: [
+      {
+        label: "Grade-school multiplication — fits this problem",
+        correct: true
+      },
+      {
+        label: "Base conversion repeated divmod — different approach"
+      },
+      {
+        label: "Palindrome number — different approach"
+      },
+      {
+        label: "Primality trial division — different approach"
+      }
+    ],
+    explain: "Each digit product a[i]*b[j] lands at result[i+j+1]"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Multiply string numbers), what strategy is established?",
+    choices: [
+      {
+        label: "Each digit product a[i]*b[j] lands — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Grade-school multiplication of \"\" × \"\". We keep a result array of  digit slots. The product of num1[i] and num2[j] always lands at slot i+j+1, with any carry spilling into slot i+j."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"CARRY\" step ([]= +[]), what happens?",
+    choices: [
+      {
+        label: "Write the units digit sum%10 = — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Write the units digit sum%10 =  into slot , and carry sum/10 =  up into slot i+j= (now )."
+  },
+  {
+    id: "state",
+    prompt: "What does the `result` field track in the visualization state?",
+    choices: [
+      {
+        label: "digits of the running product — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `result` in sync: digits of the running product, most-significant first"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Multiply string numbers\"?",
+    choices: [
+      {
+        label: "O(m*n) time, O(m+n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+      },
+      {
+        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+      },
+      {
+        label: "O(log x) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m*n). O(m+n). result[i+j+1]+=mul; carry to [i+j]; strip leading zeros"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The grid is complete. Reading result — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The grid is complete. Reading result from slot  onward gives \"\". So  ×  = ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ms1', label: '"12" × "34"', value: { num1: '12', num2: '34' } },
     { id: 'ms2', label: '"123" × "45"', value: { num1: '123', num2: '45' } },

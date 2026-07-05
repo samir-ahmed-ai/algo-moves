@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -194,7 +194,115 @@ function Inspector({ frame }: InspectorProps<SerializeState>) {
 export const manifestId = 'prep-trees-serialize-and-deserialize-binary-tree';
 export const title = 'Serialize and Deserialize Binary Tree';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Serialize and Deserialize Binary Tree\"?",
+    choices: [
+      {
+        label: "Preorder DFS — fits this problem",
+        correct: true
+      },
+      {
+        label: "DFS with max tracking — different approach"
+      },
+      {
+        label: "BFS + Sort per column — different approach"
+      },
+      {
+        label: "BST range check — different approach"
+      }
+    ],
+    explain: "**Serialize**: preorder DFS, write `val,` or `null,` for nil nodes"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"READ_NIL\" step (token \"\"), what happens?",
+    choices: [
+      {
+        label: "Deserialize reads token \"\" at cursor — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Deserialize reads token \"\" at cursor . It's null → this slot is empty, return nil and advance the cursor."
+  },
+  {
+    id: "state",
+    prompt: "What does the `current` field track in the visualization state?",
+    choices: [
+      {
+        label: "index in `tree` — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `current` in sync: index in `tree` of the node under focus (null = a nil slot)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Serialize and Deserialize Binary Tree\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(h) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) amortized time, O(h) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). **Serialize**: preorder DFS, write `val,` or `null,` for nil nodes; **Deserialize**: split by `,`, preorder DFS with a shared index counter"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Deserialize reads token \"\" at cursor — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Deserialize reads token \"\" at cursor . Construct node , advance the cursor, then rebuild its left child, then its right child."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'sd1', label: '[1,2,3,null,null,4,5]', value: { tree: [1, 2, 3, null, null, 4, 5] } },
     { id: 'sd2', label: '[5,3,8,1,4]', value: { tree: [5, 3, 8, 1, 4] } },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -138,7 +138,135 @@ function Inspector({ frame }: InspectorProps<MeetingRoomsState>) {
 export const manifestId = 'prep-intervals-meeting-rooms-ii';
 export const title = 'Meeting Rooms II';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Meeting Rooms II\"?",
+    choices: [
+      {
+        label: "Sort Starts/Ends + Sweep — fits this problem",
+        correct: true
+      },
+      {
+        label: "Brute-force nearest store by distance — different approach"
+      },
+      {
+        label: "Sort + Greedy Merge — different approach"
+      },
+      {
+        label: "Three-segment interval insert — different approach"
+      }
+    ],
+    explain: "Separate starts and ends, sort each independently"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Meeting Rooms II), what strategy is established?",
+    choices: [
+      {
+        label: "Separate starts and ends, sort — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Meeting Rooms II: find the maximum number of meetings overlapping at any instant — that is how many rooms we need. We split every interval into its start time and its end time and treat the two as independent sorted timelines."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"NEED\" step (rooms=), what happens?",
+    choices: [
+      {
+        label: "Meeting starting at begins — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Meeting starting at  begins before the earliest end  ( < ), so no room has freed up yet — allocate a new room. rooms = ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "current start being processed — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: current start being processed"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Meeting Rooms II\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(n). Separate starts and ends, sort each independently; Sweep through starts: if `starts[i] < ends[endIdx]`, a new room is needed; else reuse a room (`endIdx++`)"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every start has been swept. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every start has been swept. The most rooms held simultaneously was , so the answer is  meeting room."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'mr1',

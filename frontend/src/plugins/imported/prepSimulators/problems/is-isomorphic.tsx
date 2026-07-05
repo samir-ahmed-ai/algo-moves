@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -178,7 +178,135 @@ function Inspector({ frame }: InspectorProps<IsIsomorphicState>) {
 export const manifestId = 'prep-strings-is-isomorphic';
 export const title = 'Is isomorphic';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is isomorphic\"?",
+    choices: [
+      {
+        label: "Bijection map — fits this problem",
+        correct: true
+      },
+      {
+        label: "Frequency map — different approach"
+      },
+      {
+        label: "Sort + Wrap-around — different approach"
+      },
+      {
+        label: "Adjacent swap — different approach"
+      }
+    ],
+    explain: "Two-way letter mapping s<->t must never contradict"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Is isomorphic), what strategy is established?",
+    choices: [
+      {
+        label: "Two-way letter mapping s<->t must never — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Is Isomorphic: two strings are isomorphic when characters in s can be replaced to get t with a consistent one-to-one mapping. Walk both strings in lockstep, enforcing s[i]→t[i] and t[i]→s[i] at every position."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"CONFLICT\" step (← ≠ ), what happens?",
+    choices: [
+      {
+        label: "Conflict: '' is already mapped back — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Conflict: '' is already mapped back from '', but here '' also maps to ''. Two different characters cannot map onto the same one. Not isomorphic."
+  },
+  {
+    id: "state",
+    prompt: "What does the `s` field track in the visualization state?",
+    choices: [
+      {
+        label: "characters of s — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `s` in sync: characters of s"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is isomorphic\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n^2) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). m1[a]==b and m2[b]==a else conflict"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Consistent — record ''→'' — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Consistent — record ''→'' in the s→t table and ''→'' in the t→s table. Continue to the next index."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'iso1', label: '"egg" vs "add"', value: { s: 'egg', t: 'add' } },
     { id: 'iso2', label: '"foo" vs "bar"', value: { s: 'foo', t: 'bar' } },

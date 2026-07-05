@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -224,7 +224,135 @@ function Inspector({ frame }: InspectorProps<WordWrapState>) {
 export const manifestId = 'prep-strings-word-wrap';
 export const title = 'Word wrap';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Word wrap\"?",
+    choices: [
+      {
+        label: "Greedy line break — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two pointers — different approach"
+      },
+      {
+        label: "Reverse in place — different approach"
+      },
+      {
+        label: "Sliding window freq — different approach"
+      }
+    ],
+    explain: "DP packs words per line, paying slack^2 for each line"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Word wrap), what strategy is established?",
+    choices: [
+      {
+        label: "DP packs words per line, paying — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Word Wrap: pack these  words into lines no wider than . Each non-last line pays slack² (the leftover space squared). dp[i] = the minimum total cost to wrap words[i..end], solved right-to-left so dp[i+1..] are already known."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"TRY\" step (cost=), what happens?",
+    choices: [
+      {
+        label: "Line = words .. (\"\"), width — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Line = words .. (\"\"), width , slack . Cost = slack² + dp[] = ² +  = . Break after word ?"
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "line-start word being solved (outer — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: line-start word being solved (outer loop)"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Word wrap\"?",
+    choices: [
+      {
+        label: "O(n^2) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n^2). O(n). dp[i]=min over j of (rem^2 + dp[j+1]); next[i] records the cut"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Table complete. dp[0] = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Table complete. dp[0] =  is the minimum total slack² cost. Follow next[] from word 0 to read off the wrapped lines shown below."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'ww1',

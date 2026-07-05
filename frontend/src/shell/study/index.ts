@@ -7,6 +7,10 @@ export {
   CodeStudioFooter,
   CodeStudioToolbar,
   useCodeStudio,
+  useCodeStudioContent,
+  useCodeStudioDraft,
+  useCodeStudioEditor,
+  useCodeStudioPhase,
 } from './CodeStudio';
 export { CodeStudioQuiz, type CodeStudioQuizProps } from './CodeStudioQuiz';
 export {

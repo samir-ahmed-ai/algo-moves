@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
@@ -210,7 +210,132 @@ function Inspector({ frame }: InspectorProps<TrieState>) {
 export const manifestId = 'prep-tries-implement-trie-methods';
 export const title = 'Implement trie methods';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Implement trie methods\"?",
+    choices: [
+      {
+        label: "Trie with 26-way branching — fits this problem",
+        correct: true
+      },
+      {
+        label: "Suffix trie + palindrome check — different approach"
+      },
+      {
+        label: "Suffix array + LCP scan — different approach"
+      }
+    ],
+    explain: "Each char descends one level; isEnd flags a complete word"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Implement trie methods), what strategy is established?",
+    choices: [
+      {
+        label: "Each char descends one level; isEnd — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Implement a trie (prefix tree). Every node has up to 26 children, one per lowercase letter; an isEnd flag marks where a full word ends. insert creates missing nodes, search walks then checks isEnd, startsWith only walks."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"END\" step (isEnd(\"\")), what happens?",
+    choices: [
+      {
+        label: "Reached the last letter of \"\". — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Reached the last letter of \"\". Mark this node isEnd = true so a later search knows a full word ends here."
+  },
+  {
+    id: "state",
+    prompt: "What does the `labels` field track in the visualization state?",
+    choices: [
+      {
+        label: "per-node display label (root = — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `labels` in sync: per-node display label (root = \"•\")"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Implement trie methods\"?",
+    choices: [
+      {
+        label: "O(s) insert, O(s) search/prefix time — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(s^2 log s) time, O(s) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(s) insert, O(s) search/prefix. O(s) insert, O(1) search/prefix. insert creates nodes; search walks + isEnd; startsWith walks only"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Every letter of the prefix \"\" — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Every letter of the prefix \"\" exists in the trie, so startsWith returns true — regardless of whether this node is isEnd."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'trie1',

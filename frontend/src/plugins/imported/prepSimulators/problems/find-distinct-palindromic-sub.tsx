@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -226,7 +226,132 @@ function Inspector({ frame }: InspectorProps<PaliState>) {
 export const manifestId = 'prep-tries-find-distinct-palindromic-sub';
 export const title = 'Find distinct palindromic sub-';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Find distinct palindromic sub-\"?",
+    choices: [
+      {
+        label: "Suffix trie + palindrome check — fits this problem",
+        correct: true
+      },
+      {
+        label: "Suffix array + LCP scan — different approach"
+      },
+      {
+        label: "Trie with 26-way branching — different approach"
+      }
+    ],
+    explain: "Insert every suffix; DFS each trie path and count distinct palindromes"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Find distinct palindromic sub-), what strategy is established?",
+    choices: [
+      {
+        label: "Insert every suffix; DFS each trie — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Find distinct palindromic substrings of \"\". We insert every suffix into a suffix trie so that each root→node path spells a distinct substring, then DFS the trie and count the paths that are palindromes."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"COUNT\" step (\"\" #), what happens?",
+    choices: [
+      {
+        label: "The path \"\" reads the same — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "The path \"\" reads the same both ways, and we have not seen it before — record it as distinct palindrome # and increment the count."
+  },
+  {
+    id: "state",
+    prompt: "What does the `nodes` field track in the visualization state?",
+    choices: [
+      {
+        label: "flat trie: node 0 — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `nodes` in sync: flat trie: node 0 is the empty-string root"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Find distinct palindromic sub-\"?",
+    choices: [
+      {
+        label: "O(s^2) time, O(s^2) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(s) insert, O(s) search/prefix time — wrong order of growth"
+      }
+    ],
+    explain: "O(s^2). O(s^2). at each node test s[i:] is palindrome; dedupe via seen set"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "The DFS is complete. We found — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "The DFS is complete. We found  distinct palindromic substring of \"\"${seen.length ? "
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'aba', label: 's = "aba"', value: { s: 'aba' } },
     { id: 'aabb', label: 's = "aabb"', value: { s: 'aabb' } },

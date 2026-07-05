@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
@@ -213,7 +213,126 @@ function compute(input: MinWindowInput): string {
   return minLen > s.length ? '' : s.slice(minStart, minStart + minLen);
 }
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Minimum Window Substring\"?",
+    choices: [
+      {
+        label: "Sliding Window with freq array — fits this problem",
+        correct: true
+      }
+    ],
+    explain: "Use a frequency array `[128]int` for `t`. Track `required` = total chars still needed"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Minimum Window Substring), what strategy is established?",
+    choices: [
+      {
+        label: "Use a frequency array `[128]int` — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Minimum Window Substring: find the shortest slice of s that contains every character of t (with multiplicity). We slide a window [l, r] over s, tracking need = how many of t's characters are still missing."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"COMPLETE\" step (len=), what happens?",
+    choices: [
+      {
+        label: "Window [, ] is complete but — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Window [, ] is complete but length  is not shorter than the current best (), so keep the old best and try to shrink."
+  },
+  {
+    id: "state",
+    prompt: "What does the `s` field track in the visualization state?",
+    choices: [
+      {
+        label: "characters of s, one per — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `s` in sync: characters of s, one per array cell"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Minimum Window Substring\"?",
+    choices: [
+      {
+        label: "O(m+n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m+n). O(1). Use a frequency array `[128]int` for `t`. Track `required` = total chars still needed; Expand right: if `freq[ch] > 0` before decrement → a needed char found, `"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Window [, ] is complete but — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Window [, ] is complete but length  is not shorter than the current best (), so keep the old best and try to shrink."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'mw1', label: 's="ADBECBANC", t="ABC"', value: { s: 'ADBECBANC', t: 'ABC' } },
     { id: 'mw2', label: 's="aa", t="aa"', value: { s: 'aa', t: 'aa' } },

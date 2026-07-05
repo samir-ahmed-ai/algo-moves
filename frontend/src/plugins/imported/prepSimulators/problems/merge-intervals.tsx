@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -185,7 +185,115 @@ function Inspector({ frame }: InspectorProps<MergeState>) {
 export const manifestId = 'prep-intervals-merge-intervals';
 export const title = 'Merge Intervals';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Merge Intervals\"?",
+    choices: [
+      {
+        label: "Sort + Greedy Merge — fits this problem",
+        correct: true
+      },
+      {
+        label: "Sort by end + DP + binary search — different approach"
+      },
+      {
+        label: "Sort + merge coverage — different approach"
+      },
+      {
+        label: "Compare six pairwise distances — different approach"
+      }
+    ],
+    explain: "Sort by start time, then greedily merge: if `curr[0] <= last[1]`, extend `last[1] = max(last[1], curr[1])`"
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"EXTEND\" step (), what happens?",
+    choices: [
+      {
+        label: "overlaps the open interval because — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " overlaps the open interval because its start  ≤ open end . Its end  reaches further, so extend the open interval's right edge to  → ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `sorted` field track in the visualization state?",
+    choices: [
+      {
+        label: "intervals after sort by start — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `sorted` in sync: intervals after sort by start"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Merge Intervals\"?",
+    choices: [
+      {
+        label: "O(n log n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(s * c) time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m+n) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n log n). O(n). Sort by start time, then greedily merge: if `curr[0] <= last[1]`, extend `last[1] = max(last[1], curr[1])`; Otherwise, start a new interval"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Sweep complete. The overlapping intervals — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Sweep complete. The overlapping intervals collapsed into  disjoint interval: ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'mi1',

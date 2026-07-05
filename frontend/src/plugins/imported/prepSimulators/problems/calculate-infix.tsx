@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
@@ -230,7 +230,135 @@ function Inspector({ frame }: InspectorProps<InfixState>) {
 export const manifestId = 'prep-stacks-queues-calculate-infix';
 export const title = 'Calculate infix';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Calculate infix\"?",
+    choices: [
+      {
+        label: "Dual-stack infix calculator — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Pointers — different approach"
+      },
+      {
+        label: "Dual Stack (counts + strings) — different approach"
+      },
+      {
+        label: "Shunting-yard (no parens) — different approach"
+      }
+    ],
+    explain: "Two stacks (numbers and ops); flush pending ops by precedence"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Calculate infix), what strategy is established?",
+    choices: [
+      {
+        label: "Two stacks (numbers and ops); flush — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Calculate Infix: evaluate \"\" with operator precedence using two stacks — one for numbers, one for operators. Time O(n), Space O(n)."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PUSH_OP\" step (push ), what happens?",
+    choices: [
+      {
+        label: "No higher- or equal-precedence operator — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "No higher- or equal-precedence operator pending, so push '' onto the operator stack to wait for its right operand."
+  },
+  {
+    id: "state",
+    prompt: "What does the `i` field track in the visualization state?",
+    choices: [
+      {
+        label: "index of the char we — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `i` in sync: index of the char we are looking at"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Calculate infix\"?",
+    choices: [
+      {
+        label: "O(n) time, O(n) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(1) per op time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n²) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(n) time, O(k) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(n). parse multi-digit; apply pending ops with prec>=cur; flush"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Both stacks are drained. The single — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Both stacks are drained. The single remaining number  is the value of \"\"."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ci1', label: '"2+3*4"', value: { exp: '2+3*4' } },
     { id: 'ci2', label: '"10+2*6-3"', value: { exp: '10+2*6-3' } },

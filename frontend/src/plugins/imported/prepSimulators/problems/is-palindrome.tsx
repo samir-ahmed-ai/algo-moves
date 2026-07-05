@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -174,7 +174,135 @@ function Inspector({ frame }: InspectorProps<PalindromeState>) {
 export const manifestId = 'prep-strings-is-palindrome';
 export const title = 'Is palindrome';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Is palindrome\"?",
+    choices: [
+      {
+        label: "Two pointers — fits this problem",
+        correct: true
+      },
+      {
+        label: "Index Map — different approach"
+      },
+      {
+        label: "Stack of unmatched indices — different approach"
+      },
+      {
+        label: "Two Pointers — different approach"
+      }
+    ],
+    explain: "l and r march inward, skipping junk, comparing lowercased"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Is palindrome), what strategy is established?",
+    choices: [
+      {
+        label: "l and r march inward, skipping — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Is Palindrome: does the string read the same forwards and backwards, ignoring case and any non-alphanumeric characters? Two pointers l=0 and r= march inward, skipping junk and comparing lowercased characters."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"MISMATCH\" step ('' ≠ ''), what happens?",
+    choices: [
+      {
+        label: "Compare lowercased characters: ''→'' — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Compare lowercased characters: ''→'' at index  versus ''→'' at index . They differ, so the string is NOT a palindrome — return false."
+  },
+  {
+    id: "state",
+    prompt: "What does the `chars` field track in the visualization state?",
+    choices: [
+      {
+        label: "the string split — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `chars` in sync: the string split into a per-cell char array"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Is palindrome\"?",
+    choices: [
+      {
+        label: "O(n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O( time, O(1) space — wrong order of growth"
+      },
+      {
+        label: "O(n*k) time, O(n*k) space — wrong order of growth"
+      },
+      {
+        label: "O(n³) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(n). O(1). skip non-alnum both ends; toLower compare; l++ r--"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Compare lowercased characters: ''→'' — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Compare lowercased characters: ''→'' at index  versus ''→'' at index . They match, so move both pointers inward: l++ → , r-- → ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ip1', label: '"Ab_a!"', value: { s: 'Ab_a!' } },
     { id: 'ip2', label: '"race"', value: { s: 'race' } },

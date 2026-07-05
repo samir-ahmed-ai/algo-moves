@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -174,7 +174,135 @@ function Inspector({ frame }: InspectorProps<CookingTimeState>) {
 export const manifestId = 'prep-math-minimum-cost-to-set-cooking-time';
 export const title = 'Minimum Cost to Set Cooking Time';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Minimum Cost to Set Cooking Time\"?",
+    choices: [
+      {
+        label: "Enumerate 2 candidates — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bit trick power of two — different approach"
+      },
+      {
+        label: "Greedy roman numeral — different approach"
+      },
+      {
+        label: "Integer log base 2 — different approach"
+      }
+    ],
+    explain: "See Minimum Cost To Set Cooking Time pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Minimum Cost to Set Cooking Time), what strategy is established?",
+    choices: [
+      {
+        label: "See Minimum Cost To Set Cooking — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Minimum Cost to Set Cooking Time: a microwave shows mm:ss. We type  seconds as digits. Each keypress costs pushCost=; moving the finger to a different key costs moveCost=. The finger starts on digit . We try two ways to split the time and keep the cheaper one."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"PUSH\" step (push  (+)), what happens?",
+    choices: [
+      {
+        label: "Press key : cost += pushCost — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Press key : cost += pushCost (). Running cost = . The finger stays on ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `digits` field track in the visualization state?",
+    choices: [
+      {
+        label: "the 1-4 digits the current — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `digits` in sync: the 1-4 digits the current candidate types"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Minimum Cost to Set Cooking Time\"?",
+    choices: [
+      {
+        label: "O(1) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(log n) space — wrong order of growth"
+      },
+      {
+        label: "O(sqrt(n)) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1). O(1). Minimum Cost To Set Cooking Time"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Compare the two candidates: A = — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Compare the two candidates: A = , B = . The cheaper one is candidate  with cost . That is the minimum cost."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'mcsct1',

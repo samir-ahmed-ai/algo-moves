@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -146,7 +146,135 @@ function Inspector({ frame }: InspectorProps<RomanState>) {
 export const manifestId = 'prep-math-covert-integer-to-roman-numeral';
 export const title = 'Covert integer to roman numeral';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Covert integer to roman numeral\"?",
+    choices: [
+      {
+        label: "Greedy roman numeral — fits this problem",
+        correct: true
+      },
+      {
+        label: "Bit trick power of two — different approach"
+      },
+      {
+        label: "Iterative factorial — different approach"
+      },
+      {
+        label: "Sort + Sliding Window (atan2) — different approach"
+      }
+    ],
+    explain: "Greedily subtract the largest symbol value that fits"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Covert integer to roman numeral), what strategy is established?",
+    choices: [
+      {
+        label: "Greedily subtract the largest symbol value — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Integer → Roman: greedily subtract the largest symbol value that still fits. We walk the value table (1000, 900, 500, 400, …, 1) once, and for each value repeatedly emit its symbol while it is ≤ the remaining number."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"SKIP\" step ( < ), what happens?",
+    choices: [
+      {
+        label: "Now < , so no longer — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "Now  < , so  no longer fits. Move down to the next-smaller symbol."
+  },
+  {
+    id: "state",
+    prompt: "What does the `original` field track in the visualization state?",
+    choices: [
+      {
+        label: "the number we started — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `original` in sync: the number we started with"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Covert integer to roman numeral\"?",
+    choices: [
+      {
+        label: "O(1) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(m·n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(log n) time, O(log n) space — wrong order of growth"
+      },
+      {
+        label: "O(sqrt(n)) time, O(1) space — wrong order of growth"
+      }
+    ],
+    explain: "O(1). O(1). values/symbols incl 900,400,90,40,9,4; while num>=v emit symbol"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Remaining number is 0 — everything — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Remaining number is 0 — everything has been converted. The Roman numeral is complete: \"\"."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'roman1', label: '1994 → MCMXCIV', value: { num: 1994 } },
     { id: 'roman2', label: '58 → LVIII', value: { num: 58 } },

@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
@@ -153,7 +153,135 @@ function Inspector({ frame }: InspectorProps<SearchState>) {
 export const manifestId = 'prep-matrices-search-a-2d-matrix-ii';
 export const title = 'Search a 2D Matrix II';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Search a 2D Matrix II\"?",
+    choices: [
+      {
+        label: "Staircase Search — fits this problem",
+        correct: true
+      },
+      {
+        label: "1D meeting point two pointers — different approach"
+      },
+      {
+        label: "Segment Extraction + Forward/Backward — different approach"
+      },
+      {
+        label: "Staircase search from top-right — different approach"
+      }
+    ],
+    explain: "See Search A 2D Matrix Ii pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Search a 2D Matrix II), what strategy is established?",
+    choices: [
+      {
+        label: "See Search A 2D Matrix Ii — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Search a 2D Matrix II: every row is sorted left-to-right and every column top-to-bottom. Start at the top-right corner (,) — the only spot that is the largest in its row and smallest in its column, which lets each comparison rule out a whole row or column."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"LEFT\" step ( > ), what happens?",
+    choices: [
+      {
+        label: "is bigger than . Everything below — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: " is bigger than . Everything below in column  is even larger, so this whole column is ruled out — slide left to column ."
+  },
+  {
+    id: "state",
+    prompt: "What does the `r` field track in the visualization state?",
+    choices: [
+      {
+        label: "current row — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder keeps `r` in sync: current row"
+  },
+  {
+    id: "complexity",
+    prompt: "What are the time and space complexities for \"Search a 2D Matrix II\"?",
+    choices: [
+      {
+        label: "O(m+n) time, O(1) space — standard bounds here",
+        correct: true
+      },
+      {
+        label: "O(n log n) time, O(n) space — wrong order of growth"
+      },
+      {
+        label: "O(m·n) time, O(1) extra space — wrong order of growth"
+      },
+      {
+        label: "O(1) time, O(n) space — wrong order of growth"
+      }
+    ],
+    explain: "O(m+n). O(1). Search A 2D Matrix Ii"
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "is smaller than . Everything — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: " is smaller than . Everything to the left in row  is even smaller, so this whole row is ruled out — drop down to row ."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'sm1',

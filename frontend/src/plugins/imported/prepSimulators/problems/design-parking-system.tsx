@@ -1,4 +1,4 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -117,7 +117,115 @@ function Inspector({ frame }: InspectorProps<ParkingState>) {
 export const manifestId = 'prep-design-design-parking-system';
 export const title = 'Design Parking System';
 
+
+
+
+
+
+const practiceQuiz: QuizQuestion[] = [
+  {
+    id: "pattern",
+    prompt: "Which approach fits \"Design Parking System\"?",
+    choices: [
+      {
+        label: "Design — fits this problem",
+        correct: true
+      },
+      {
+        label: "Two Heaps — different approach"
+      },
+      {
+        label: "Round-robin load balancer — different approach"
+      },
+      {
+        label: "Bijective tiny URL encode/decode — different approach"
+      }
+    ],
+    explain: "See Design Parking System pattern"
+  },
+  {
+    id: "init",
+    prompt: "At the start of a run (Design Parking System), what strategy is established?",
+    choices: [
+      {
+        label: "See Design Parking System pattern — described in INIT caption",
+        correct: true
+      },
+      {
+        label: "Precomputed final answer — before scanning input"
+      },
+      {
+        label: "Descending sort required — as mandatory first step"
+      },
+      {
+        label: "Every element visited upfront — marked from the start"
+      }
+    ],
+    explain: "Parking System: slots[1..3] track remaining big/medium/small spots. AddCar(type) decrements if available."
+  },
+  {
+    id: "key-step",
+    prompt: "On the \"REJECT\" step ( full), what happens?",
+    choices: [
+      {
+        label: "AddCar(=): no spots left → return — this move caption",
+        correct: true
+      },
+      {
+        label: "Run terminates immediately — no further frames"
+      },
+      {
+        label: "Pointers reset to zero — restart scan"
+      },
+      {
+        label: "Remaining input skipped — early return path"
+      }
+    ],
+    explain: "AddCar(=): no  spots left → return false."
+  },
+  {
+    id: "state",
+    prompt: "What does the `slots` field track in the visualization state?",
+    choices: [
+      {
+        label: "Field slots in state — updated each frame",
+        correct: true
+      },
+      {
+        label: "Fixed display label — unchanged each frame"
+      },
+      {
+        label: "Shuffle seed value — for random ordering"
+      },
+      {
+        label: "Failure error code — set once at end"
+      }
+    ],
+    explain: "The recorder snapshots `slots` on every emit so each frame shows the algorithm mid-step."
+  },
+  {
+    id: "outcome",
+    prompt: "When the run completes, what does the final step convey?",
+    choices: [
+      {
+        label: "Done. Remaining: big=, medium=, small=. — final DONE caption",
+        correct: true
+      },
+      {
+        label: "Incomplete partial result — more steps needed"
+      },
+      {
+        label: "Input left unchanged — no mutations applied"
+      },
+      {
+        label: "Aborted run on failure — infinite loop detected"
+      }
+    ],
+    explain: "Done. Remaining: big=, medium=, small=."
+  }
+];
 export const simulator: ProblemSimulator = {
+  practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'park1',
