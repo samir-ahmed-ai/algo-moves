@@ -1,4 +1,4 @@
-import type { LayoutPreset } from '../shell/canvas/layout/layout';
+import type { LayoutPreset } from '@/shell/canvas';
 import type { CanvasMode } from '../core';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';

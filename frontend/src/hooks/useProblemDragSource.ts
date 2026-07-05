@@ -1,6 +1,6 @@
 import { useCallback, type DragEvent } from 'react';
-import { PROBLEM_DND_KEY, encodeProblemDrag } from '@/shell/canvas/nodes/problemDnD';
 
+import { PROBLEM_DND_KEY, encodeProblemDrag } from '@/shell/canvas';
 /** Drag source props for catalog problem cards → canvas drop (scaffold). */
 export function useProblemDragSource(itemId: string) {
   const onDragStart = useCallback(

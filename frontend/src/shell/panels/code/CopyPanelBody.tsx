@@ -1,10 +1,9 @@
 import { useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Btn, Code, Hint, nodeIconGlyph } from '../../canvas/ui/nodeui';
 import { COPY_FEEDBACK_MS } from '../../copyFeedback';
 import { codeVariants, LangTabs } from '../shared/codeVariants';
 
+import { useCanvasStatic, Btn, Code, Hint, nodeIconGlyph } from '@/shell/canvas';
 export function CopyPanelBody() {
   const { plugin } = useCanvasStatic();
   const variants = codeVariants(plugin);

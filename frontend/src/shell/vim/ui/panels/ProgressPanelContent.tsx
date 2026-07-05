@@ -1,9 +1,9 @@
-import { useVimGame } from '../../canvas/VimGameProvider';
 import { ReferenceSection } from '../ReferenceSection';
 import { VimProgressBar } from '../vimUi';
 import { cn } from '@/lib/utils/cn';
 import { VIM_LEVEL_IDS, chaptersFromLevels, VIM_LEVELS } from '../../engine';
 
+import { useVimGame } from '../../canvas/VimGameProvider';
 export function ProgressPanelContent({ compact = false }: { compact?: boolean }) {
   const { progress, completedCount } = useVimGame();
   const chapters = chaptersFromLevels(VIM_LEVELS);

@@ -30,7 +30,7 @@ import { useCanvasStatic, useCanvasFrame } from '../CanvasContext';
 import { CanvasActionsBody, CanvasPropsBody, PanelsBody } from './canvasChromeBodies';
 import { TransportBar } from './TransportBar';
 import { NodePropertiesBody, useHasSelectedPanel } from './NodePropertiesBody';
-import { nodeIcon, panelAccent } from '../nodes/PanelNode';
+import { nodeIcon, panelAccent } from '@/shell/panels';
 import { Chip, RADIUS_CTRL } from './nodeui';
 import { chromeText } from '../../chromeUi';
 import { sidePanelTabs } from '../layout/layout';

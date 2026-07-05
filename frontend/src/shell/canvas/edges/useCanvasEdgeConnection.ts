@@ -1,6 +1,6 @@
 import { useCallback, useRef, type Dispatch, type SetStateAction } from 'react';
 import { addEdge, reconnectEdge, type Connection, type Edge } from '@xyflow/react';
-import type { PanelFlowNode } from '../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { edgeConnectionLabel, styleEdges, type EdgeOpts } from '../layout/layout';
 
 /**

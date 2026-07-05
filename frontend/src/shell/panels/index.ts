@@ -10,6 +10,5 @@ export { ProblemPanelBody } from './problem/ProblemPanelBody';
 export { VizPanelBody } from './visualize/VizPanelBody';
 export { PanelNodeHeader } from './PanelNodeHeader';
 export { HeaderExamplesNav } from './PanelHeaderControls';
-export { useFitContentSize } from './useFitContentSize';
 export { codeVariants, HeaderLangTabs } from './shared/codeVariants';
 export { NodeHeader, NodeHeaderAction, NodeHeaderActions, NodeHeaderTitle } from './NodeHeader';

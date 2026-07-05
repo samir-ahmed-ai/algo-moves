@@ -3,9 +3,8 @@ import { Network, Columns2 } from 'lucide-react';
 import { ProblemPanelBody } from '../problem/ProblemPanelBody';
 import { VizPanelBody } from '../visualize/VizPanelBody';
 import { CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
-import { TransportBar } from '../../canvas/ui/TransportBarCore';
-import { nodeIconGlyph } from '../../canvas/ui/nodeui';
 
+import { TransportBar, nodeIconGlyph } from '@/shell/canvas';
 function WorkbenchSectionHeader({
   label,
   icon,

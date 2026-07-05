@@ -1,10 +1,10 @@
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { useVimGame } from '../canvas/VimGameProvider';
 import { LevelPanelContent } from './panels/LevelPanelContent';
 import { ProgressPanelContent } from './panels/ProgressPanelContent';
 
+import { useVimGame } from '../canvas/VimGameProvider';
 export function VimMobileTopBar() {
   const { level } = useVimGame();
   const [open, setOpen] = useState(false);

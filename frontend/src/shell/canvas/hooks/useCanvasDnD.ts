@@ -1,7 +1,7 @@
 import { useCallback, type DragEvent, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type { Edge } from '@xyflow/react';
 import type { CanvasMode, ProblemPlugin } from '../../../core';
-import type { PanelFlowNode } from '../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { createEffectByType } from '../nodes/EffectNode';
 import { EFFECT_DND_KEY } from '../../../hooks/useDragAndDrop';
 import { edgesForKind, nodeForKind, styleEdges, type EdgeOpts } from '../layout/layout';

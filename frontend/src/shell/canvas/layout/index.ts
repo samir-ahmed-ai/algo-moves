@@ -3,3 +3,7 @@ export * from './canvasSnap';
 export * from './interviewLayout';
 export * from './layout';
 export * from './layoutMigration';
+export * from './layoutPresets';
+export * from './layoutWiring';
+export * from './layoutAlgorithms';
+export * from './edgeStyles';

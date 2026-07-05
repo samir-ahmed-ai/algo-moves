@@ -1,7 +1,7 @@
 import { Map } from 'lucide-react';
-import { useVimGame } from '../canvas/VimGameProvider';
 import { LevelPanelContent } from './panels/LevelPanelContent';
 
+import { useVimGame } from '../canvas/VimGameProvider';
 export function VimLevelSidebar() {
   const { level } = useVimGame();
 

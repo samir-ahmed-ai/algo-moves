@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { nodeText, nodeTextWrap } from '../canvas/ui/nodeui';
 
+import { nodeText, nodeTextWrap } from '@/shell/canvas';
 /** Composable panel header primitives (Strudel node-header pattern). */
 
 export function NodeHeader({ children, className }: { children: ReactNode; className?: string }) {

@@ -38,7 +38,8 @@
     "export-content-sql": "vite-node scripts/export-content-sql.mts",
     "check-content-sql": "vite-node scripts/export-content-sql.mts -- --check",
     "check:boundaries": "node scripts/check-boundaries.mjs",
-    "check:all": "npm run check:boundaries && npm run check-simulators && npm run check-prep-sim-coverage && npm run check-plugin-typography && npm run check:tokens && npm run check:quiz-labels && npm run check-plugin-meta && npm run check-content-sql",
+    "check:lint": "eslint src",
+    "check:all": "npm run check:boundaries && npm run check-simulators && npm run check-prep-sim-coverage && npm run check-plugin-typography && npm run check:tokens && npm run check:quiz-labels && npm run check-plugin-meta && npm run check-content-sql && npm run check:lint",
     "draft-quiz-from-frames": "node scripts/draft-quiz-from-frames.mjs",
     "test": "vitest run && npm run check-orphans"
   },
@@ -68,14 +69,20 @@
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@types/lz-string": "^1.3.34",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.1",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
+    "typescript-eslint": "^8.46.4",
     "vite": "^5.4.10",
     "vitest": "^2.1.8"
   }

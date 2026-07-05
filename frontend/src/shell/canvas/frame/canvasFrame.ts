@@ -1,6 +1,6 @@
 import type { Edge } from '@xyflow/react';
 import type { CanvasMode, ProblemPlugin } from '../../../core';
-import type { PanelFlowNode } from '../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import type { EdgeOpts, LayoutVisualizeOptions } from '@/lib/canvas/layoutPrefs';
 import {
   buildNodes,

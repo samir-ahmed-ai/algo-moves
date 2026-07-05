@@ -83,6 +83,16 @@ internal/ws         RFC 6455 handshake + framing (stdlib only)
 internal/hub        rooms, presence, relay, shared state
 internal/server     HTTP routes (testable handler)
 internal/arcade     Postgres store + `/api/*` REST handlers
+  api.go            service lifecycle + route registration
+  http.go           JSON helpers + session auth
+  api_auth.go       guest auth + profiles
+  api_matches.go    stats, matches, leaderboard, achievements
+  api_social.go     rooms, friends, daily challenge
+  api_canvas.go     saved canvas CRUD
+  api_interview.go  interview sessions
+  content.go        learning catalog reads
+  migrate.go        embedded migrations + seeds
+  store.go          Postgres queries
 ```
 
 See [`../db/README.md`](../db/README.md) for Railway Postgres setup.

@@ -13,14 +13,14 @@ import {
   Trash2,
   TrendingUp,
 } from 'lucide-react';
-import { useReactFlow } from '@xyflow/react';
-import { useWorkspace } from '@/store/workspace';
-import { traceOutputForPanel } from '@/lib/canvas';
-import { resolveCodePieces } from '@/lib/code';
-import { ACCENTS, FIT_PADDING_FOCUS } from '../canvas/layout/layout';
-import { FIT_VIEW_DURATION_MS } from '../canvas/ui/canvasTokens';
-import { togglePanelCollapse } from '../canvas/nodes/panelCollapse';
 import {
+  ACCENTS,
+  FIT_PADDING_FOCUS,
+  FIT_VIEW_DURATION_MS,
+  togglePanelCollapse,
+  useCanvasActions,
+  useCanvasFrame,
+  useCanvasStatic,
   PanelHeader,
   PanelHeaderAction,
   PanelHeaderActions,
@@ -31,11 +31,14 @@ import {
   nodeIconGlyph,
   type HeaderDensity,
   type PanelHeaderMenuItem,
-} from '../canvas/ui/nodeui';
+} from '@/shell/canvas';
+import { useReactFlow } from '@xyflow/react';
+import { useWorkspace } from '@/store/workspace';
+import { traceOutputForPanel } from '@/lib/canvas';
+import { resolveCodePieces } from '@/lib/code';
 import type { PanelFlowNode, PanelNodeData } from './panelTypes';
 import { panelAccent, panelKindIcon } from './panelIcons';
 import { HeaderPlay, HeaderStep } from './PanelHeaderControls';
-import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../canvas/CanvasContext';
 
 /** Renders at most two header action buttons; dev-only warning if exceeded. */
 function HeaderActionSlots({ children }: { children: ReactNode }) {

@@ -1,8 +1,7 @@
 import { ScrollText } from 'lucide-react';
 import { patternsForTags } from '../../../content';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Chip, DefRow, EmptyState } from '../../canvas/ui/nodeui';
 
+import { useCanvasStatic, Chip, DefRow, EmptyState } from '@/shell/canvas';
 /** #66 Cheat sheet: terse one-liners for the problem's patterns. */
 export function CheatPanelBody() {
   const { item } = useCanvasStatic();

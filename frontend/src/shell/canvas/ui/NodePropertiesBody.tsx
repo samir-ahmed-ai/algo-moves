@@ -3,7 +3,7 @@ import { useStore, useReactFlow } from '@xyflow/react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { ACCENTS } from '../layout/layout';
-import type { PanelFlowNode, PanelNodeData } from '../nodes/PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 import {
   patchPanelStyle,
   type PanelCornerStyle,

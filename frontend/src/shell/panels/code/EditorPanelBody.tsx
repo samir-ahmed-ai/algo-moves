@@ -4,9 +4,8 @@ import { cn } from '@/lib/utils/cn';
 import type { InputBuilderKind } from '../../../core/effectTypes';
 import { CategorySelectItems } from '../../../components/shared/CategorySelectItems';
 import { INPUT_BUILDERS } from '../../../effects/inputBuilders';
-import { useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
-import { Btn, Chip, Field, Hint, nodeIconGlyph, Section, TextArea, TextInput, nodeText } from '../../canvas/ui/nodeui';
 
+import { useCanvasFrame, useCanvasStatic, Btn, Chip, Field, Hint, nodeIconGlyph, Section, TextArea, TextInput, nodeText } from '@/shell/canvas';
 /** Input editor with optional visual builders (pad, beat, arpeggiator, etc.). */
 export function EditorPanelBody() {
   const { plugin, inputId, setInputId, customInput, setCustomInput } = useCanvasStatic();

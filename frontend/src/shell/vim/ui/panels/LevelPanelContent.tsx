@@ -1,10 +1,10 @@
 import { Check, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { useVimGame } from '../../canvas/VimGameProvider';
 import { LessonSection } from '../LessonSection';
 import { VimBadge } from '../vimUi';
 import { VIM_LEVELS, VIM_LEVEL_IDS, chaptersFromLevels, isLevelUnlocked } from '../../engine';
 
+import { useVimGame } from '../../canvas/VimGameProvider';
 export function LevelPanelContent({ compact = false }: { compact?: boolean }) {
   const { levelId, progress, selectLevel } = useVimGame();
   const chapters = chaptersFromLevels(VIM_LEVELS);

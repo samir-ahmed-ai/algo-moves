@@ -1,11 +1,6 @@
-export type PanelCornerStyle = 'theme' | 'sharp' | 'soft' | 'round';
+import type { PanelCornerStyle, PanelNodeStyle } from '@/core/panelFlowTypes';
 
-export interface PanelNodeStyle {
-  opacity?: number;
-  fill?: string;
-  stroke?: string;
-  corners?: PanelCornerStyle;
-}
+export type { PanelCornerStyle, PanelNodeStyle } from '@/core/panelFlowTypes';
 
 const CORNER_RADIUS: Record<PanelCornerStyle, string> = {
   theme: 'var(--radius)',

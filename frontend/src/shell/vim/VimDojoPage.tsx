@@ -1,13 +1,13 @@
 import { Contrast, Home, Keyboard, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
-import { VimGameProvider, useVimGame } from './canvas/VimGameProvider';
-import { VimDojoCanvas } from './canvas/VimDojoCanvas';
 import { VIM_LEVEL_IDS } from './engine';
 import { VimLevelSidebar } from './ui/VimLevelSidebar';
 import { VimProgressSidebar } from './ui/VimProgressSidebar';
 import { VimMobileProgressStrip, VimMobileTopBar } from './ui/VimMobileChrome';
 
+import { VimGameProvider, useVimGame } from './canvas/VimGameProvider';
+import { VimDojoCanvas } from './canvas/VimDojoCanvas';
 function FloatingChrome() {
   const { theme, setTheme, palette, setPalette, goHome } = useWorkspace();
   const { completedCount } = useVimGame();

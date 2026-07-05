@@ -3,9 +3,8 @@ import { TrendingUp } from 'lucide-react';
 import { QuizChoiceLabel } from '../../../components/shared/QuizChoiceLabel';
 import { COMPLEXITY_POOL, formatComplexityChoice, buildShuffledChoices } from '@/lib/quiz';
 import { patternsForTags } from '../../../content';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Btn, EmptyState, Hint, Option, Section } from '../../canvas/ui/nodeui';
 
+import { useCanvasStatic, Btn, EmptyState, Hint, Option, Section } from '@/shell/canvas';
 /** #57 Complexity quiz: pick the right Big-O (answer derived from the pattern card). */
 export function ComplexityPanelBody() {
   const { item } = useCanvasStatic();

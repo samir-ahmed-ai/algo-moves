@@ -9,15 +9,17 @@ import { useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';
 import { ChromeLabel, chromeText } from '../chromeUi';
-import { Btn, Chip, difficultyTone } from '../canvas/ui/nodeui';
 import {
+  Btn,
+  Chip,
+  difficultyTone,
+  TransportBar,
   CanvasFrameProvider,
   CanvasStaticProvider,
   useCanvasStatic,
-} from '../canvas/CanvasContext';
+} from '@/shell/canvas';
 import { ProblemPanelBody } from '@/shell/panels/problem/ProblemPanelBody';
 import { VizPanelBody } from '@/shell/panels/visualize/VizPanelBody';
-import { TransportBar } from '../canvas/ui/TransportBarCore';
 
 export interface ProblemPageProps {
   plugin: ProblemPlugin<any, any>;

@@ -2,9 +2,8 @@ import { Award } from 'lucide-react';
 import { catalog } from '../../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
-import { useCanvasActions } from '../../canvas/CanvasContext';
-import { Meter, Pill, Section, nodeText, nodeTextWrap } from '../../canvas/ui/nodeui';
 
+import { useCanvasActions, Meter, Pill, Section, nodeText, nodeTextWrap } from '@/shell/canvas';
 /** #60 Badges: award a badge per course when all its problems are mastered. */
 export function BadgesPanelBody() {
   const progress = useProgress();

@@ -45,6 +45,7 @@ psql "$DATABASE_URL" -f db/migrations/001_arcade_schema.sql
 psql "$DATABASE_URL" -f db/migrations/002_arcade_functions.sql
 psql "$DATABASE_URL" -f db/migrations/003_canvas_schema.sql
 psql "$DATABASE_URL" -f db/migrations/004_content_schema.sql
+psql "$DATABASE_URL" -f db/migrations/005_interview_schema.sql
 psql "$DATABASE_URL" -f db/seed.sql
 ```
 

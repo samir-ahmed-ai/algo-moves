@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PanelFlowNode, PanelNodeData } from '../nodes/PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 import { CANVAS_MARGIN, layoutVisualizeCanvas } from './layout';
 
 function panel(

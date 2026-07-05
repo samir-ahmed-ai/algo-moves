@@ -3,4 +3,4 @@ export * from './useCanvasHistory';
 export * from './useCanvasKeyboardShortcuts';
 export * from './useCanvasLayoutPersistence';
 export * from './useCanvasNodeMutations';
-export * from './usePhaseTransition';
+export * from './useFitContentSize';

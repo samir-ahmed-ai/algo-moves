@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
-import { Hint, Label, Pill, TextArea } from '../../canvas/ui/nodeui';
 
+import { useCanvasStatic, Hint, Label, Pill, TextArea } from '@/shell/canvas';
 /** #118 Notes: freeform markdown-ish notes pinned per problem (localStorage). */
 export function NotesPanelBody() {
   const { item } = useCanvasStatic();

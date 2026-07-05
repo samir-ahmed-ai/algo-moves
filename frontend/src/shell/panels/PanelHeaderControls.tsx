@@ -1,8 +1,6 @@
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
-import { useCanvasFrame, useCanvasStatic } from '../canvas/CanvasContext';
-import { exampleInputIndex, stepExampleInput } from '../canvas/frame/exampleInputNav';
-import { PanelHeaderAction, PanelHeaderMeta, nodeIconGlyph } from '../canvas/ui/nodeui';
 
+import { useCanvasFrame, useCanvasStatic, exampleInputIndex, stepExampleInput, PanelHeaderAction, PanelHeaderMeta, nodeIconGlyph } from '@/shell/canvas';
 /** Live step counter for a node header — its own frame-subscribing leaf so it can
  *  update on every step without re-rendering the whole node. */
 export function HeaderStep() {

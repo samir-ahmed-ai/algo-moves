@@ -3,12 +3,11 @@ import { ArrowLeft, Home, Loader2, RotateCcw, SearchX } from 'lucide-react';
 import type { Frame, Player, ProblemPlugin } from '@/core';
 import type { Item } from '@/content';
 import { CategoryBoard, TrackCategoryBoard } from '../CategoryBoard';
-import { CanvasStage } from '../canvas/CanvasStage';
-import { Btn, EmptyState } from '../canvas/ui/nodeui';
 import { LearnStudio } from '@/shell/study';
 import { ProblemPage } from '@/shell/study';
 import { resolveWorkspaceFallbackTarget, resolveWorkspaceSurface, type ModeRouterInput } from './surface';
 
+import { CanvasStage, Btn, EmptyState } from '@/shell/canvas';
 export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready' | 'runtimeError'> {
   plugin: ProblemPlugin<any, any> | null | undefined;
   item: Item;

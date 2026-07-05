@@ -13,11 +13,10 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
+import { useCanvasFrame, nodeIconGlyph, nodeText, RADIUS_CTRL } from '@/shell/canvas';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
-import { useCanvasFrame } from '../../canvas/CanvasContext';
-import { nodeIconGlyph, nodeText, RADIUS_CTRL } from '../../canvas/ui/nodeui';
 import { moveToneChipClass } from './frameChips';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 4];

@@ -24,7 +24,7 @@ flowchart TB
 
 ```typescript
 import { STRUDEL_NODE_W, spacing, vizText } from '../design/tokens';
-import { nodeText } from '../shell/canvas/nodeui';
+import { Chip, Meter, Pill } from '@/design/components';
 import { VizInspector, InspectorRow } from '../plugins/_shared/vizKit';
 ```
 

@@ -26,9 +26,8 @@ fi
 echo "==> Seeding achievements..."
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$ROOT/db/seed.sql"
 
-# Learning content is large, so it is NOT auto-applied on every deploy. Opt in
-# with SEED_CONTENT=1 (or run `make content-seed`). Regenerate the file first
-# with `npm --prefix frontend run export-content-sql` when catalog content changes.
+# Learning content: opt in locally with SEED_CONTENT=1. On Railway, set
+# RUN_CONTENT_SEED=true on the backend to apply the embedded copy on deploy.
 if [[ "${SEED_CONTENT:-}" == "1" || "${SEED_CONTENT:-}" == "true" ]]; then
   if [[ -f "$ROOT/db/content_seed.sql" ]]; then
     echo "==> Seeding learning content (courses/problems/solutions/quizzes)..."

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { collabSession, defaultSession, interviewSession, isSessionMeta } from '@/lib/session';
 import { buildCanvasRoomState, extractCanvasDoc, extractSessionMeta, isRoomEnvelope } from '@/shell/realtime/roomState';
-import type { CanvasDoc } from '@/shell/canvas/collab/protocol/collabProtocol';
 
+import { CanvasDoc } from '@/shell/canvas';
 const sampleDoc: CanvasDoc = {
   v: 1,
   rev: 1,

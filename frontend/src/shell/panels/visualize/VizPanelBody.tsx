@@ -2,14 +2,13 @@ import { useRef } from 'react';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { ErrorBoundary } from '../../ErrorBoundary';
-import { useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
-import { ControlsAccordion, nodeText, VizFitBox } from '../../canvas/ui/nodeui';
 import { FlipFrame } from '@/components/shared/FlipFrame';
 import { MoveOrbit } from '@/components/shared/MoveOrbit';
 import { BigOPanelBody } from './BigOPanelBody';
 import { Transport } from '../shared/Transport';
 import { moveToneChipClass } from '../shared/frameChips';
 
+import { useCanvasFrame, useCanvasStatic, ControlsAccordion, nodeText, VizFitBox } from '@/shell/canvas';
 /**
  * Live move caption — status bar at top of viz body (Strudel-style).
  * Constant footprint: single line, truncating note, permanently reserved

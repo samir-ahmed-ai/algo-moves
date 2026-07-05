@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils/cn';
 import { usePluginFrames } from '@/hooks';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { FlipFrame } from '@/components/shared/FlipFrame';
-import { VizFitBox } from '../canvas/ui/nodeui';
+import { VizFitBox } from '@/components/shared/vizFit';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
 export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {

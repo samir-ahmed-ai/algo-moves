@@ -2,11 +2,11 @@ import { Keyboard, Terminal } from 'lucide-react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useSyncNodeHandles } from '../hooks/useSyncNodeHandles';
 import { MAZE_HUD_SOURCE_HANDLE } from '../layout/orbitSlots';
-import { nodeTextWrap } from '../../../canvas/ui/nodeui';
 import { cn } from '@/lib/utils/cn';
 import { MotionsPanelContent } from '../../ui/panels/MotionsPanelContent';
 import { StatusPanelContent } from '../../ui/panels/StatusPanelContent';
 
+import { nodeTextWrap } from '@/shell/canvas';
 const HIDDEN_HANDLE = '!pointer-events-none !opacity-0 !h-1 !w-1 !min-h-0 !min-w-0 !border-0';
 
 export function HudNode({ id }: NodeProps) {

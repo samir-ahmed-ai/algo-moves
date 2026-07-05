@@ -13,7 +13,7 @@ import {
 } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { useWorkspace } from '@/store/workspace';
-import { Chip, difficultyTone } from '../canvas/ui/nodeui';
+import { Chip, difficultyTone } from '@/design/components';
 import { TrackGrid } from '../browse/TrackGrid';
 import { CategoryGrid } from '../browse/CategoryGrid';
 import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';

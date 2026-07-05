@@ -1,4 +1,4 @@
-import type { PanelFlowNode, PanelNodeData } from './PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 
 /** Toggle panel minimize; restores `fullHeight` when expanding. */
 export function togglePanelCollapse(n: PanelFlowNode, minHeight = 36): PanelFlowNode {

@@ -5,12 +5,10 @@ import { useWorkspace, normalizeThemePreset } from '@/store/workspace';
 import { useProjects, saveProject, deleteProject } from '@/store/persistence';
 import type { ShareState } from '@/store/navigation';
 import { buildMinimalProjectState, type ProjectState } from '@/store/project-state';
-import { ShareUrlPopover } from '../../canvas/ui/ShareUrlPopover';
-import { SaveProjectDialog } from '../../canvas/ui/SaveProjectDialog';
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
-import { Btn, EmptyState, Field, nodeIconGlyph, Row, Section, TextInput, Pill, nodeText, nodeTextWrap, RADIUS_CTRL } from '../../canvas/ui/nodeui';
 
+import { ShareUrlPopover, SaveProjectDialog, Btn, EmptyState, Field, nodeIconGlyph, Row, Section, TextInput, Pill, nodeText, nodeTextWrap, RADIUS_CTRL } from '@/shell/canvas';
 /** Projects: save/load named workspace snapshots with full canvas state when available. */
 export function ProjectsPanelBody() {
   const ws = useWorkspace();

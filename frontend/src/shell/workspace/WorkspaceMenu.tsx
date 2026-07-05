@@ -9,11 +9,11 @@ import {
   Settings,
   Zap,
 } from 'lucide-react';
+import { RADIUS_SHELL } from '@/shell/canvas';
 import { catalog, getSiblingItems } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
-import { RADIUS_SHELL } from '../canvas/ui/nodeui';
 import { usePopoverDismiss } from '../ui/usePopoverDismiss';
 import { ExplorerSheet, type ExplorerFocus } from './ExplorerSheet';
 

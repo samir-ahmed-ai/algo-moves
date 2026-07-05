@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type { Edge } from '@xyflow/react';
-import type { PanelFlowNode } from '../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { styleSig, type PanelNodeStyle } from '../nodes/panelStyle';
 
 /**

@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { STRUDEL_NODE_W } from '../shell/canvas/nodes/nodeTokens';
-import { vizMinWidth, vizWireGap } from '../shell/canvas/ui/canvasTokens';
-import { LAYOUT_PRESET_META } from '../shell/canvas/layout/layout';
+import { STRUDEL_NODE_W, vizMinWidth, vizWireGap, LAYOUT_PRESET_META } from '@/shell/canvas';
 import { VizEmpty, VizHint, vizText } from '../plugins/_shared/vizKit';
 
 describe('layout integration', () => {

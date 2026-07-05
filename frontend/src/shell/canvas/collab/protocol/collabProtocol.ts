@@ -15,7 +15,7 @@
  * mechanics live in {@link ./canvasDoc}.
  */
 import type { Edge } from '@xyflow/react';
-import type { PanelFlowNode, PanelNodeData } from '../../nodes/PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 
 /** Discriminator every collaboration message carries. */
 export const CANVAS_TAG = '__canvas' as const;

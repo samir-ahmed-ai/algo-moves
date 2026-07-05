@@ -1,11 +1,9 @@
 import { useMemo } from 'react';
 import { ExcalidrawWrapper } from '@/components/shared/ExcalidrawWrapper';
-import { useSubDocSync } from '@/shell/canvas/collab/sync/useSubDocSync';
-import { useCanvasCollabOptional } from '@/shell/canvas/collab/CanvasCollabProvider';
-import type { WhiteboardPayload } from '@/shell/canvas/collab/protocol/subdocProtocol';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 
+import { useSubDocSync, useCanvasCollabOptional, WhiteboardPayload } from '@/shell/canvas';
 export function WhiteboardPanelBody() {
   const sync = useSubDocSync('whiteboard');
   const payload = sync.payload as WhiteboardPayload;

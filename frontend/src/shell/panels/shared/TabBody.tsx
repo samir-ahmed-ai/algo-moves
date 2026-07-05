@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
 
+import { useCanvasStatic } from '@/shell/canvas';
 export function TabBody({ kind }: { kind: string }) {
   const { plugin } = useCanvasStatic();
   const { theme, density } = useWorkspace();

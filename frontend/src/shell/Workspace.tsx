@@ -3,11 +3,10 @@ import { useWorkspace } from '@/store/workspace';
 import { useNarration, useSoundCues } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { WorkspaceMenu } from './workspace/WorkspaceMenu';
-import { SettingsDialog } from './canvas/ui/SettingsDialog';
-import { MobileTransportSheet } from './canvas/ui/MobileTransportSheet';
 import { MobileSwipeReturn } from './mobile/deck/MobileSwipeReturn';
 import { CommandPalette, ModeRouter, PresentationModeHint, ShortcutsOverlay, useWorkspaceKeyboard, useWorkspaceRuntime } from '@/shell/workspace/index';
 
+import { SettingsDialog, MobileTransportSheet } from '@/shell/canvas';
 export function Workspace() {
   const {
     density,

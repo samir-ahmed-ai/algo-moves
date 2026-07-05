@@ -1,8 +1,7 @@
 import { GitCompare } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { useCanvasFrame } from '../../canvas/CanvasContext';
-import { Banner, ControlsAccordion, EmptyState, Pill, nodeText } from '../../canvas/ui/nodeui';
 
+import { useCanvasFrame, Banner, ControlsAccordion, EmptyState, Pill, nodeText } from '@/shell/canvas';
 /** #20 Frame diff: which parts of the state changed this step. */
 export function DiffPanelBody() {
   const { frames, player } = useCanvasFrame();

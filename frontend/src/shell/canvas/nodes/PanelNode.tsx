@@ -2,11 +2,18 @@ import { useEffect, useState } from 'react';
 import { Handle, NodeResizer, NodeToolbar, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
+import { panelAccent } from '@/core/panelAccent';
+import { PanelNodeBodySlot } from '@/core/panelNodeRegistry';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
+import type { HeaderDensity } from '@/core/panelNodeBodyTypes';
 import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from '../layout/layout';
 import { nodeTier } from './nodeTokens';
 import { handleDotClass, portHandleStyle } from '../edges/canvasHandles';
 import { useConnectedComponentsOptional } from '@/lib/canvas';
 import { panelBorderRadius, panelFill, panelOpacity, panelStroke } from './panelStyle';
+import { useCanvasStatic } from '../CanvasContext';
+import { useFitContentSize } from '../hooks/useFitContentSize';
+import { TransportBar } from '../ui/TransportBarCore';
 
 const CHAIN_TINTS = [
   'ring-accent/30',
@@ -14,27 +21,6 @@ const CHAIN_TINTS = [
   'ring-[color-mix(in_srgb,var(--team1-stroke)_40%,transparent)]',
   'ring-[color-mix(in_srgb,var(--team2-stroke)_40%,transparent)]',
 ] as const;
-import { CodeStudioProvider, CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
-import { CollabCodeStudioBody, CollabCodeStudioToolbar } from '@/shell/study/CollabCodeStudio';
-import { SubDocSyncProvider } from '@/shell/canvas/collab/sync/SubDocSyncProvider';
-import { useCanvasStatic } from '../CanvasContext';
-import { PanelBody as PanelBodyShell, type HeaderDensity } from '../ui/nodeui';
-import { PanelBody } from '@/shell/panels';
-import { panelAccent } from '@/shell/panels/panelIcons';
-import type { PanelFlowNode } from '@/shell/panels/panelTypes';
-import { PanelNodeHeader } from '@/shell/panels/PanelNodeHeader';
-import { HeaderExamplesNav } from '@/shell/panels/PanelHeaderControls';
-import { useFitContentSize } from '@/shell/panels/useFitContentSize';
-import { VizPanelBody } from '@/shell/panels/visualize/VizPanelBody';
-import { WorkbenchPanelBody } from '@/shell/panels/workbench';
-import { TransportBar } from '../ui/TransportBarCore';
-
-export type { PanelFlowNode, PanelNodeData } from '@/shell/panels/panelTypes';
-export { panelAccent, nodeIcon } from '@/shell/panels/panelIcons';
-export { InspectorPaneContent } from '@/shell/panels/visualize/InspectorPanelBody';
-export { ReplayContent } from '@/shell/panels/visualize/ReplayPanelBody';
-export { MetricsBody } from '@/shell/panels/visualize/MetricsPanelBody';
-export { PanelBody } from '@/shell/panels/PanelBodyRouter';
 
 export function PanelNode({ id, data, selected, width, height }: NodeProps<PanelFlowNode>) {
   const nodeStyle = data.style;
@@ -184,75 +170,20 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
           !vizCanvas && !boardCanvas && !snapFill && 'overflow-hidden',
         )}
       >
-        {!collapsed && isWorkbench ? (
-          <CodeStudioProvider>
-            <PanelNodeHeader
-              {...headerProps}
-              inlineToolbar={
-                <div className="nodrag flex min-w-0 flex-1 items-center gap-1">
-                  <HeaderExamplesNav />
-                </div>
-              }
-            />
-            <WorkbenchPanelBody showBigO={showBigO} onBigOOpenChange={setShowBigO} />
-          </CodeStudioProvider>
-        ) : !collapsed && isCode ? (
-          <CodeStudioProvider phaseLock={isReassemble ? 'reassemble' : isRecall ? 'recall' : undefined}>
-            <PanelNodeHeader
-              {...headerProps}
-              inlineToolbar={
-                <div className="nodrag flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
-                  <CodeStudioToolbar />
-                </div>
-              }
-            />
-            <div className="nowheel flex min-h-0 flex-1 flex-col overflow-hidden">
-              <CodeStudioBody />
-            </div>
-            <CodeStudioFooter />
-          </CodeStudioProvider>
-        ) : !collapsed && isCollabCode ? (
-          <SubDocSyncProvider kind="collab-code">
-            <PanelNodeHeader
-              {...headerProps}
-              inlineToolbar={
-                <div className="nodrag flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
-                  <CollabCodeStudioToolbar />
-                </div>
-              }
-            />
-            <CollabCodeStudioBody />
-          </SubDocSyncProvider>
-        ) : (
-          <>
-            <PanelNodeHeader
-              {...headerProps}
-              inlineToolbar={
-                isProblem && !collapsed ? (
-                  <div className="nodrag flex shrink-0 items-center gap-0.5">
-                    <HeaderExamplesNav />
-                  </div>
-                ) : undefined
-              }
-            />
-
-            {!collapsed && (
-              <PanelBodyShell
-                density={headerDensity}
-                fill={isViz && !vizCanvas}
-                flush={flushBody || boardCanvas}
-                narrow={narrowBody}
-                style={!isViz && bodyCap ? { maxWidth: bodyCap } : undefined}
-              >
-                {isViz ? (
-                  <VizPanelBody showBigO={showBigO} onBigOOpenChange={setShowBigO} />
-                ) : (
-                  <PanelBody kind={data.kind} />
-                )}
-              </PanelBodyShell>
-            )}
-          </>
-        )}
+        <PanelNodeBodySlot
+          id={id}
+          data={data}
+          headerProps={headerProps}
+          headerDensity={headerDensity}
+          flushBody={flushBody}
+          vizCanvas={vizCanvas}
+          boardCanvas={boardCanvas}
+          narrowBody={narrowBody}
+          bodyCap={bodyCap}
+          showBigO={showBigO}
+          onBigOOpenChange={setShowBigO}
+          collapsed={collapsed}
+        />
       </div>
 
       {vizCanvas ? (

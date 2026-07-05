@@ -4,7 +4,7 @@ import { useGameRoom } from '@/shell/realtime';
 import { usePublishState } from '@/shell/realtime';
 import { buildCanvasRoomState, extractCanvasDoc } from '@/shell/realtime/roomState';
 import { useCanvasCollab } from '../CanvasCollabProvider';
-import type { PanelFlowNode } from '../../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { isCanvasOp, isEditOp, type CanvasDoc, type CanvasOp } from '../protocol/collabProtocol';
 import {
   applyEditToComments,

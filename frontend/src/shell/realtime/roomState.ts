@@ -5,9 +5,8 @@ import {
   type InterviewRuntime,
   type SessionMeta,
 } from '@/lib/session/types';
-import type { CanvasDoc } from '@/shell/canvas/collab/protocol/collabProtocol';
-import { isCanvasDoc } from '@/shell/canvas/collab/protocol/canvasDoc';
-import type { SubDocSnapshot } from '@/shell/canvas/collab/protocol/subdocProtocol';
+import type { CanvasDoc, SubDocSnapshot } from '@/shell/canvas';
+import { isCanvasDoc } from '@/shell/canvas';
 
 export const ROOM_STATE_V = 1 as const;
 

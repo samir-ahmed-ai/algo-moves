@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import '@/shell/panels/registerPanelNode';
 import App from './App';
 import '@xyflow/react/dist/style.css';
 import './index.css';

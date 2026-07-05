@@ -3,10 +3,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { Frame, ProblemPlugin } from '@/core';
 import type { Item } from '@/content';
 import { WorkspaceProvider } from '@/store/workspace';
-import { CanvasStaticProvider, CanvasFrameProvider } from '@/shell/canvas/CanvasContext';
 import { CodeStudioProvider } from '@/shell/study/CodeStudio';
 import { WorkbenchPanelBody } from './WorkbenchPanelBody';
 
+import { CanvasStaticProvider, CanvasFrameProvider } from '@/shell/canvas';
 const stubPlugin = {
   meta: { id: 'test', title: 'Test' },
   tabs: [],

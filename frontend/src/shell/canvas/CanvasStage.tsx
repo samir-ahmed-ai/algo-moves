@@ -27,26 +27,33 @@ import { usePlayer } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
-import { togglePanelCollapse } from './nodes/panelCollapse';
-import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
-import { CanvasToolbar } from './ui/CanvasToolbar';
-import { CanvasDockPanel } from './ui/CanvasDockPanel';
-import { PanelNode, panelAccent, type PanelFlowNode, type PanelNodeData } from './nodes/PanelNode';
-import { RemovableEdge } from './edges/RemovableEdge';
-import { ContextMenu, LaserPointer, type MenuItem } from './ui/CanvasTools';
-import { CanvasFloatingHud } from './ui/CanvasFloatingHud';
-import { TracePreviewPanel } from './ui/TracePreviewPanel';
-import { EffectNode, createEffectByType } from './nodes/EffectNode';
 import { ConnectedComponentsProvider } from '@/lib/canvas';
 import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
 import { EFFECTS } from '../../effects/registry';
 import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
 import type { ShareState } from '@/store/navigation';
-import { applyAlign, applyDistribute, type AlignKind } from './layout/align';
-import { applyCanvasSnap, visibleFlowRect, type CanvasSnapRegion } from './layout/canvasSnap';
-import { FIT_VIEW_DURATION_MS } from './ui/canvasTokens';
+import { togglePanelCollapse } from './nodes';
+import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
 import {
+  CanvasToolbar,
+  CanvasDockPanel,
+  ContextMenu,
+  LaserPointer,
+  type MenuItem,
+  CanvasFloatingHud,
+  TracePreviewPanel,
+  FIT_VIEW_DURATION_MS,
+} from './ui';
+import { PanelNode, panelAccent, EffectNode, createEffectByType, type PanelFlowNode, type PanelNodeData, snapNodeLayout, setMeasuredHeight } from './nodes';
+import { RemovableEdge, sanitizeVisualizeEdges, useCanvasEdgeConnection } from './edges';
+import {
+  applyAlign,
+  applyDistribute,
+  type AlignKind,
+  applyCanvasSnap,
+  visibleFlowRect,
+  type CanvasSnapRegion,
   buildEdges,
   REQUIRED_VISUALIZE_EDGES,
   connectionLineType,
@@ -66,17 +73,17 @@ import {
   styleEdges,
   type BgVariant,
   type LayoutPreset,
-} from './layout/layout';
-import { snapNodeLayout } from './nodes/nodeSnapshot';
-import { setMeasuredHeight } from './nodes/measuredCache';
-import { buildCanvasFrame, organizeCurrentCanvasFrame } from './frame/canvasFrame';
-import { sanitizeVisualizeEdges } from './edges/edgeSanitization';
-import { useCanvasLayoutPersistence, type Saved } from './hooks/useCanvasLayoutPersistence';
-import { useCanvasHistory } from './hooks/useCanvasHistory';
-import { useCanvasKeyboardShortcuts } from './hooks/useCanvasKeyboardShortcuts';
-import { useCanvasEdgeConnection } from './edges/useCanvasEdgeConnection';
-import { useCanvasDnD, DND_KEY } from './hooks/useCanvasDnD';
-import { useCanvasNodeMutations } from './hooks/useCanvasNodeMutations';
+} from './layout';
+import { buildCanvasFrame, organizeCurrentCanvasFrame } from './frame';
+import {
+  useCanvasLayoutPersistence,
+  type Saved,
+  useCanvasHistory,
+  useCanvasKeyboardShortcuts,
+  useCanvasDnD,
+  DND_KEY,
+  useCanvasNodeMutations,
+} from './hooks';
 import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProvider';
 import { useCanvasDocSync } from './collab/sync/useCanvasDocSync';
 import { useCanvasFollow } from './collab/sync/useCanvasFollow';

@@ -1,7 +1,6 @@
 import { inputFrameCount } from '@/lib/canvas';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Hint, Meter, Stat } from '../../canvas/ui/nodeui';
 
+import { useCanvasStatic, Hint, Meter, Stat } from '@/shell/canvas';
 /** "Big-O race": operation count (frames) per sample input, current one highlighted. */
 export function BigOPanelBody() {
   const { plugin, inputId, inputFrameCounts } = useCanvasStatic();

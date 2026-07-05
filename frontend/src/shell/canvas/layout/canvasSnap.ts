@@ -1,7 +1,7 @@
 import type { Viewport } from '@xyflow/react';
 import { CANVAS_MARGIN } from '../ui/canvasTokens';
 import { layoutFixedWidth } from '../nodes/nodeTokens';
-import type { PanelFlowNode } from '../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 
 import type { CanvasSnapRegion } from '@/lib/canvas/layoutPrefs';
 

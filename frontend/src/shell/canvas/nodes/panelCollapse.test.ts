@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PanelFlowNode, PanelNodeData } from './PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 import { togglePanelCollapse } from './panelCollapse';
 
 function panel(

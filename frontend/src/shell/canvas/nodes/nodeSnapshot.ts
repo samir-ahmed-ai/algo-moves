@@ -1,4 +1,4 @@
-import type { PanelFlowNode, PanelNodeData } from './PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 import { layoutFixedWidth } from '../layout/layout';
 
 // Pure helpers for serializing/restoring a panel node's persisted position + width.

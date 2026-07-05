@@ -1,6 +1,6 @@
 import type { MazeGrid, Pos } from '../engine/vimMotions';
-import { MAZE_CELL_SIZE, MAZE_GRID_GAP, mazeBoardDimensions, mazeNodeSize } from '../canvas/layout/mazeMetrics';
 
+import { MAZE_CELL_SIZE, MAZE_GRID_GAP, mazeBoardDimensions, mazeNodeSize } from '../canvas/layout/mazeMetrics';
 export { mazeBoardDimensions, mazeNodeSize, MAZE_CELL_SIZE, MAZE_GRID_GAP };
 
 export interface MazeBoardProps {

@@ -13,9 +13,9 @@ import {
   type PhaseAvailability,
   type QuizProgress,
 } from '@/store/user-prefs';
+import { usePhaseTransition } from './usePhaseTransition';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { recordAttempt } from '@/store/persistence';
-import { usePhaseTransition } from '../../canvas/hooks/usePhaseTransition';
 
 /**
  * The Code Studio phase state machine (Quiz → Structure → Recall), extracted from

@@ -20,7 +20,9 @@ import { ChevronDown, GripVertical, MoreVertical, Search } from 'lucide-react';
 import { getTag } from '../../../content/tags';
 import { TAG_KIND_COLOR } from '../../../content/tagColors';
 import { cn } from '@/lib/utils/cn';
-import { TONE_TEXT, TONE_BAR, TONE_CHIP, TONE_BANNER, TONE_LABEL } from '../nodes/nodeUiTones';
+import { TONE_TEXT, TONE_BANNER, TONE_LABEL, difficultyTone, type UiTone } from '@/design/tone';
+import { Chip, Meter, Pill } from '@/design/components';
+export { Chip, Meter, Pill, difficultyTone, type UiTone };
 // Typography/radius tokens live in the design leaf; shared form primitives +
 // VizFitBox/MiniTabs in the components leaf. Imported for internal use and
 // re-exported below so `nodeui` stays the canvas-facing entry point.
@@ -38,19 +40,9 @@ export {
 
 export type HeaderDensity = 'compact' | 'ultra' | 'spacious';
 
-export type UiTone = 'default' | 'accent' | 'good' | 'bad' | 'muted';
-
 // Re-export the moved design tokens + form primitives (see imports above).
 export { nodeText, nodeTextWrap, nodeIconGlyph, RADIUS_CTRL, RADIUS_SHELL };
 export { Label, Hint, Btn, Field, TextInput, TextArea };
-
-/** Maps a difficulty label to the shared chip tone vocabulary. */
-export function difficultyTone(d?: string): UiTone {
-  const k = (d ?? '').toLowerCase();
-  if (k === 'easy') return 'good';
-  if (k === 'hard') return 'bad';
-  return 'accent';
-}
 
 
 /* ------------------------------------------------------------------ labels */
@@ -170,32 +162,6 @@ export function StatGrid({ children, cols = 2 }: { children: ReactNode; cols?: n
   );
 }
 
-/* ------------------------------------------------------------------ meters */
-
-
-/** Animated progress bar. */
-export function Meter({
-  value,
-  max = 1,
-  tone = 'good',
-  height = 6,
-}: {
-  value: number;
-  max?: number;
-  tone?: UiTone;
-  height?: number;
-}) {
-  const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) * 100 : 0;
-  return (
-    <div className="w-full overflow-hidden rounded-full bg-panel2" style={{ height }}>
-      <div
-        className="h-full rounded-full transition-[width] duration-500 ease-out"
-        style={{ width: `${pct}%`, background: TONE_BAR[tone] }}
-      />
-    </div>
-  );
-}
-
 /* ------------------------------------------------------------------- chips */
 
 /** Tag pill using canvas node tokens (scales with `.algo-canvas .panel-node`). */
@@ -216,33 +182,6 @@ export function NodeTagChip({ id }: { id: string }) {
     </span>
   );
 }
-
-export function Chip({
-  children,
-  tone = 'default',
-  mono = false,
-  className,
-}: {
-  children: ReactNode;
-  tone?: UiTone;
-  mono?: boolean;
-  className?: string;
-}) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 rounded-full px-[calc(var(--node-px,0.75rem)*0.5)] py-[calc(var(--node-py,0.5625rem)*0.35)] font-medium leading-none',
-        nodeText.xs,
-        mono && 'font-mono tabular-nums',
-        TONE_CHIP[tone],
-        className,
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
 
 /** Term + definition row for glossary and cheat-sheet entries. */
 export function DefRow({
@@ -345,39 +284,6 @@ export function Option({
     >
       {children}
     </button>
-  );
-}
-
-/* -------------------------------------------------------------------- pill */
-
-/** Small mono counter / index chip (used for counts and list indices). */
-export function Pill({
-  children,
-  tone = 'muted',
-  active = false,
-  onClick,
-  title,
-}: {
-  children: ReactNode;
-  tone?: UiTone;
-  active?: boolean;
-  onClick?: () => void;
-  title?: string;
-}) {
-  const cls = active ? 'bg-accentbg text-accent' : TONE_CHIP[tone];
-  const base = cn(
-    'inline-flex min-w-[1.4rem] items-center justify-center px-1.5 py-0.5 font-mono tabular-nums leading-none',
-    nodeText.xs,
-    RADIUS_CTRL,
-  );
-  return onClick ? (
-    <button type="button" onClick={onClick} title={title} className={cn('nodrag transition-colors', base, cls, 'hover:opacity-80')}>
-      {children}
-    </button>
-  ) : (
-    <span className={cn(base, cls)} title={title}>
-      {children}
-    </span>
   );
 }
 

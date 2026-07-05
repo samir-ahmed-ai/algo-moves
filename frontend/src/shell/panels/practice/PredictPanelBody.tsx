@@ -2,13 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useProgress, statFor, recordAttempt, logMistake } from '@/store/persistence';
-import { useCanvasActions, useCanvasFrame, useCanvasStatic } from '../../canvas/CanvasContext';
-import { Banner, Btn, Chip, EmptyState, Hint, Label, Option, nodeText } from '../../canvas/ui/nodeui';
 import {
   PREDICT_CORRECT_MS,
   PREDICT_MASTERY_FOCUS_MS,
   TIME_LIMIT,
 } from '../shared/practiceConstants';
+import { useCanvasActions, useCanvasFrame, useCanvasStatic, Banner, Btn, Chip, EmptyState, Hint, Label, Option, nodeText } from '@/shell/canvas';
 import { buildShuffledChoices } from '@/lib/quiz';
 
 /** #33 Predict-the-next-move: a generic challenge built from the recorder frames. */

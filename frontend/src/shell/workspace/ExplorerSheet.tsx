@@ -15,6 +15,7 @@ import {
   Code2,
   X,
 } from 'lucide-react';
+import { nodeIcon, panelAccent, Label, RADIUS_SHELL, CATEGORY_ORDER, nodeCategory } from '@/shell/canvas';
 import {
   catalog,
   browseBreadcrumbForItem,
@@ -29,9 +30,6 @@ import { cn } from '@/lib/utils/cn';
 import { matchesQuery } from '@/lib/utils/searchPredicate';
 import { chromeText } from '../chromeUi';
 import { CatalogTree } from '../CatalogTree';
-import { nodeIcon, panelAccent } from '../canvas/nodes/PanelNode';
-import { Label, RADIUS_SHELL } from '../canvas/ui/nodeui';
-import { CATEGORY_ORDER, nodeCategory } from '../canvas/layout/layout';
 import { SidebarSection, SECTION_MAX, MobileDrawer } from '../SidebarShell';
 
 const ESSENTIALS = new Set(['bigo', 'diff', 'watch', 'pattern', 'editor', 'notes', 'predict', 'mastery', 'hints']);

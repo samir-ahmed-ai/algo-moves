@@ -3,7 +3,7 @@ import { Trophy } from 'lucide-react';
 import type { Difficulty, Item } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
-import { Chip, Meter, Pill, difficultyTone } from '../canvas/ui/nodeui';
+import { Chip, Meter, Pill, difficultyTone } from '@/design/components';
 import { chromeText } from '../chromeUi';
 import { glyphFor } from '../../content/problemShape';
 import { useProblemDragSource } from '@/hooks/useProblemDragSource';

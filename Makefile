@@ -1,4 +1,4 @@
-.PHONY: help install dev build preview typecheck check clean \
+.PHONY: help install dev build preview typecheck check clean backend-clean \
         backend-dev backend-build backend-test dev-all db-migrate content-seed
 
 NPM := npm --prefix frontend
@@ -46,6 +46,9 @@ backend-build: ## Compile the Go game server binary into backend/bin/
 backend-test: ## Run backend Go tests
 	cd $(BACKEND_DIR) && $(GO) test ./...
 
+backend-clean: ## Remove Go build artifacts and test caches
+	cd $(BACKEND_DIR) && $(GO) clean -testcache && rm -rf bin
+
 db-migrate: ## Apply arcade + content schema to DATABASE_URL (see db/README.md)
 	./scripts/migrate-db.sh
 
@@ -53,8 +56,7 @@ content-seed: ## Regenerate db/content_seed.sql from the catalog and apply it to
 	$(NPM) run export-content-sql
 	SEED_CONTENT=1 ./scripts/migrate-db.sh
 
-clean: ## Remove build artifacts and caches (frontend + backend)
+clean: backend-clean ## Remove build artifacts and caches (frontend + backend)
 	rm -rf frontend/dist frontend/node_modules/.vite \
 	       frontend/tsconfig.tsbuildinfo frontend/tsconfig.node.tsbuildinfo \
-	       frontend/vite.config.js frontend/vite.config.d.ts \
-	       backend/bin
+	       frontend/vite.config.js frontend/vite.config.d.ts

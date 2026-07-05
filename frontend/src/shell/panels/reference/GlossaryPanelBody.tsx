@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { BookMarked } from 'lucide-react';
 import { GLOSSARY } from '../../../content';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { ControlsAccordion, DefRow, EmptyState, SearchInput } from '../../canvas/ui/nodeui';
 
+import { useCanvasStatic, ControlsAccordion, DefRow, EmptyState, SearchInput } from '@/shell/canvas';
 /** #65 Glossary with terms relevant to the current problem surfaced first. */
 export function GlossaryPanelBody() {
   const { item } = useCanvasStatic();

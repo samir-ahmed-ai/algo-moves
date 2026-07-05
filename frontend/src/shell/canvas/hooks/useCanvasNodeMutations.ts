@@ -1,7 +1,7 @@
 import { useCallback, type Dispatch, type MouseEvent, type SetStateAction } from 'react';
 import type { Edge, Node } from '@xyflow/react';
 import { togglePanelCollapse } from '../nodes/panelCollapse';
-import { PanelFlowNode, type PanelNodeData } from '../nodes/PanelNode';
+import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 import { ACCENTS } from '../layout/layout';
 
 /**

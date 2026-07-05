@@ -2,9 +2,8 @@ import { type ReactNode } from 'react';
 import { GraduationCap } from 'lucide-react';
 import { patternsForTags } from '../../../content';
 import { cn } from '@/lib/utils/cn';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { Banner, Chip, EmptyState, Label, Section, nodeText } from '../../canvas/ui/nodeui';
 
+import { useCanvasStatic, Banner, Chip, EmptyState, Label, Section, nodeText } from '@/shell/canvas';
 function PatField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>

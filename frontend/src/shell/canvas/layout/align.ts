@@ -1,4 +1,4 @@
-import type { PanelFlowNode } from '../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { layoutEstimate } from '../nodes/nodeTokens';
 import { getMeasuredHeight } from '../nodes/measuredCache';
 import type { AlignKind } from '@/lib/canvas/layoutPrefs';

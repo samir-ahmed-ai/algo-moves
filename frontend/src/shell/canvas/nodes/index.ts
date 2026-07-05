@@ -1,5 +1,7 @@
 export * from './EffectNode';
-export * from './PanelNode';
+export { PanelNode } from './PanelNode';
+export type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
+export { panelAccent } from '@/core/panelAccent';
 export * from './measuredCache';
 export * from './nodeSnapshot';
 export * from './nodeTokens';

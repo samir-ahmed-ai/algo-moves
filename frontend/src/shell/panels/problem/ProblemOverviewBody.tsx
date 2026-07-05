@@ -2,11 +2,10 @@ import { useEffect } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
-import { useCanvasFrame } from '../../canvas/CanvasContext';
 import { ProblemPanelBody } from './ProblemPanelBody';
 import { VizPanelBody } from '../visualize/VizPanelBody';
-import { TransportBar } from '../../canvas/ui/TransportBarCore';
 
+import { useCanvasFrame, TransportBar } from '@/shell/canvas';
 /** Learn Overview tab — problem statement beside the live animation board. */
 export function ProblemOverviewBody() {
   const isMobile = useIsMobile();

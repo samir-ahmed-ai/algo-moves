@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyCanvasSnap, regionRect, visibleFlowRect, type FlowRect } from './canvasSnap';
-import type { PanelFlowNode } from '../nodes/PanelNode';
+import type { PanelFlowNode } from '@/core/panelFlowTypes';
 
 const VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const CONTAINER = { width: 1000, height: 800 };

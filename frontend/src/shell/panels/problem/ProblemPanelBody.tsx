@@ -3,9 +3,9 @@ import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { inputFrameCount, type InputFrameCounts } from '@/lib/canvas';
 import type { SampleInput } from '../../../core/types';
-import { useCanvasStatic } from '../../canvas/CanvasContext';
-import { stepExampleInput } from '../../canvas/frame/exampleInputNav';
 import {
+  useCanvasStatic,
+  stepExampleInput,
   Chip,
   Code,
   ControlsAccordion,
@@ -16,7 +16,7 @@ import {
   Row,
   Section,
   useFlash,
-} from '../../canvas/ui/nodeui';
+} from '@/shell/canvas';
 
 /** Compact preview of a sample input value. */
 function formatInputPreview(value: unknown): string {

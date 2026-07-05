@@ -1,6 +1,6 @@
-import { useVimGame } from '../canvas/VimGameProvider';
 import { VimCallout } from './vimUi';
 
+import { useVimGame } from '../canvas/VimGameProvider';
 export function LessonSection() {
   const { level } = useVimGame();
 

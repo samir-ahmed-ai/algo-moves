@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { useVimGame } from '../canvas/VimGameProvider';
 
+import { useVimGame } from '../canvas/VimGameProvider';
 function splitCombo(label: string): string[] {
   return label.split('+').filter(Boolean);
 }

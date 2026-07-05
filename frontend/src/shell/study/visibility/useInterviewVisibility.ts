@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { useCanvasCollabOptional } from '@/shell/canvas/collab/CanvasCollabProvider';
 import type { InterviewSettings, SessionRole } from '@/lib/session';
 
+import { useCanvasCollabOptional } from '@/shell/canvas';
 /** Panels always hidden from candidates regardless of settings. */
 const ALWAYS_HIDDEN = new Set(['source']);
 
