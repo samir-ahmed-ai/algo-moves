@@ -8,7 +8,7 @@ flowchart TB
   design --> shell["Shell chrome — --fs / --fs-sm / --hpad"]
   design --> canvas["Canvas nodes — --node-fs* / --node-px"]
   design --> viz["Plugin viz — vizText / vizPad"]
-  shell --> sidebars["UnifiedLeftSidebar, docks, transport"]
+  shell --> sidebars["WorkspaceMenu, docks, transport"]
   canvas --> panelNode["PanelNode + panels/*"]
   viz --> simulators["91 simulators + 18 native plugins"]
 ```

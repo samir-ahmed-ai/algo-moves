@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useRef, useState } from 'react';
 import {
   Home,
   Lock,
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
+import { usePopoverDismiss } from '../../ui/usePopoverDismiss';
 import { RADIUS_SHELL } from './nodeui';
 import { SessionBody } from '../collab/collabWidgets';
 
@@ -17,18 +18,6 @@ interface CanvasToolbarProps {
   lock: boolean;
   onToggleLock: () => void;
   onTidy: () => void;
-}
-
-function usePopoverDismiss(ref: RefObject<HTMLElement | null>, open: boolean, onClose: () => void) {
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: MouseEvent) => {
-      if (ref.current?.contains(e.target as Node)) return;
-      onClose();
-    };
-    document.addEventListener('mousedown', onPointerDown);
-    return () => document.removeEventListener('mousedown', onPointerDown);
-  }, [open, onClose, ref]);
 }
 
 /** Minimal floating toolbar for the standalone freeform canvas. */

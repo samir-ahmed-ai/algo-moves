@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useRef, useState } from 'react';
 import {
   ChevronDown,
   Sparkles,
@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace, type CanvasSnapRegion } from '@/store/workspace';
 import { chromeText } from '../../chromeUi';
+import { usePopoverDismiss } from '../../ui/usePopoverDismiss';
 import { RADIUS_SHELL } from './nodeui';
 
 const CELL = 'grid h-7 w-7 place-items-center rounded-sm text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-30';
@@ -92,18 +93,6 @@ const SNAP_PAD: SnapCell[][] = [
     { kind: 'snap', region: 'bottom-right', title: 'Bottom right', icon: { x: 6, y: 6, w: 5.5, h: 5.5 } },
   ],
 ];
-
-function usePopoverDismiss(ref: RefObject<HTMLElement | null>, open: boolean, onClose: () => void) {
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: MouseEvent) => {
-      if (ref.current?.contains(e.target as Node)) return;
-      onClose();
-    };
-    document.addEventListener('mousedown', onPointerDown);
-    return () => document.removeEventListener('mousedown', onPointerDown);
-  }, [open, onClose, ref]);
-}
 
 function SnapMenuCell({
   cell,

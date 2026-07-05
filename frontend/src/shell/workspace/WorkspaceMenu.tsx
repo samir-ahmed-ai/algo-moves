@@ -1,0 +1,182 @@
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  FileText,
+  HelpCircle,
+  Home,
+  Library,
+  Menu,
+  Plus,
+  Settings,
+  Zap,
+} from 'lucide-react';
+import { catalog, getSiblingItems } from '../../content';
+import { useWorkspace } from '@/store/workspace';
+import { cn } from '@/lib/utils/cn';
+import { chromeText } from '../chromeUi';
+import { RADIUS_SHELL } from '../canvas/ui/nodeui';
+import { usePopoverDismiss } from '../ui/usePopoverDismiss';
+import { ExplorerSheet, type ExplorerFocus } from './ExplorerSheet';
+
+function MenuDivider() {
+  return <div className="my-1 border-t border-edge" role="separator" />;
+}
+
+function MenuRow({
+  icon,
+  label,
+  shortcut,
+  accent,
+  onClick,
+}: {
+  icon: ReactNode;
+  label: string;
+  shortcut?: string;
+  accent?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className={cn(
+        'flex w-full min-h-[var(--row)] items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition-colors hover:bg-panel2',
+        accent ? 'text-accent' : 'text-ink2 hover:text-ink',
+      )}
+    >
+      <span className={cn('grid h-4 w-4 shrink-0 place-items-center', accent && 'text-accent')}>{icon}</span>
+      <span className={cn('min-w-0 flex-1 truncate', chromeText.sm, accent && 'font-medium text-accent')}>{label}</span>
+      {shortcut ? <span className={cn('shrink-0 tabular-nums text-ink3', chromeText.xs)}>{shortcut}</span> : null}
+    </button>
+  );
+}
+
+export interface WorkspaceMenuProps {
+  onOpenPalette: () => void;
+  onOpenHelp: () => void;
+}
+
+export function WorkspaceMenu({ onOpenPalette, onOpenHelp }: WorkspaceMenuProps) {
+  const { menuOpen, setMenuOpen, goHome, canvasAdd, setSettingsOpen, activeItemId, focusCanvas } = useWorkspace();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [explorerOpen, setExplorerOpen] = useState(false);
+  const [explorerFocus, setExplorerFocus] = useState<ExplorerFocus>(null);
+
+  const siblingItems = getSiblingItems(activeItemId, catalog);
+  const showProblems = siblingItems.length >= 2;
+  const showAdd = canvasAdd != null;
+
+  const closeAll = useCallback(() => {
+    setMenuOpen(false);
+    setExplorerOpen(false);
+  }, [setMenuOpen]);
+
+  usePopoverDismiss(rootRef, menuOpen || explorerOpen, closeAll);
+
+  useEffect(() => {
+    if (focusCanvas) setExplorerOpen(false);
+  }, [focusCanvas]);
+
+  useEffect(() => {
+    if (!menuOpen && !explorerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      closeAll();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen, explorerOpen, closeAll]);
+
+  const openExplorer = (focus: ExplorerFocus) => {
+    setExplorerFocus(focus);
+    setExplorerOpen(true);
+    setMenuOpen(false);
+  };
+
+  const pick = (fn: () => void) => {
+    fn();
+    closeAll();
+  };
+
+  return (
+    <div ref={rootRef} className="nodrag absolute left-3 top-3 z-20 flex items-start gap-2">
+      <div className="relative">
+        <button
+          type="button"
+          title="Menu"
+          aria-label="Menu"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={cn(
+            'grid h-9 w-9 place-items-center border border-edge bg-panel2 text-ink shadow-[var(--shadow-md)] transition-colors hover:bg-panel hover:text-ink',
+            RADIUS_SHELL,
+            menuOpen && 'bg-panel text-ink',
+          )}
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+
+        {menuOpen && (
+          <div
+            role="menu"
+            aria-label="Workspace menu"
+            className={cn(
+              'absolute left-0 top-full z-30 mt-1.5 w-56 border border-edge bg-panel p-1.5 shadow-[var(--shadow-lg)]',
+              RADIUS_SHELL,
+            )}
+          >
+            <MenuRow icon={<Home className="h-4 w-4" />} label="Home" onClick={() => pick(goHome)} />
+            <MenuRow
+              icon={<Zap className="h-4 w-4" />}
+              label="Command palette"
+              shortcut="⌘K"
+              accent
+              onClick={() => pick(onOpenPalette)}
+            />
+            <MenuRow icon={<HelpCircle className="h-4 w-4" />} label="Help" shortcut="?" onClick={() => pick(onOpenHelp)} />
+
+            <MenuDivider />
+
+            <MenuRow
+              icon={<Library className="h-4 w-4" />}
+              label="Catalog"
+              onClick={() => openExplorer('catalog')}
+            />
+            {showProblems && (
+              <MenuRow
+                icon={<FileText className="h-4 w-4" />}
+                label="Problems"
+                onClick={() => openExplorer('problems')}
+              />
+            )}
+            {showAdd && (
+              <MenuRow
+                icon={<Plus className="h-4 w-4" />}
+                label="Add panel"
+                onClick={() => openExplorer('add')}
+              />
+            )}
+
+            <MenuDivider />
+
+            <MenuRow
+              icon={<Settings className="h-4 w-4" />}
+              label="Settings"
+              onClick={() => pick(() => setSettingsOpen(true))}
+            />
+          </div>
+        )}
+      </div>
+
+      {explorerOpen && (
+        <ExplorerSheet
+          open={explorerOpen}
+          focus={explorerFocus}
+          onClose={() => setExplorerOpen(false)}
+        />
+      )}
+    </div>
+  );
+}

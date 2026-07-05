@@ -52,9 +52,6 @@ export const CATEGORY_ORDER: PanelCategory[] = [
 /** Unified panel registry — single source for titles, categories, and mode visibility. */
 export const panelsConfig: PanelConfigEntry[] = [
   { id: 'workbench', title: 'Workbench', category: 'Problem', modes: ['visualize'], optional: true },
-  /** Legacy ids — migrated to workbench; kept for saved layouts and PanelBodyRouter. */
-  { id: 'problem', title: 'Problem', category: 'Problem', modes: ['visualize'], optional: true },
-  { id: 'viz', title: 'Visualization', category: 'Visualize', modes: ['visualize'], optional: true },
   { id: 'replay', title: 'Replay', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },
   { id: 'inspector', title: 'Inspector', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },
   { id: 'metrics', title: 'Metrics', category: 'Visualize', modes: ['visualize'], sidebarOnly: true },

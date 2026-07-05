@@ -118,7 +118,7 @@ html {
   --node-fs-2xs: var(--fs-2xs);
   --node-fs-tight: var(--fs-tight);
   --node-fs-title: var(--fs-title);
-  --chrome-left: 32px;
+  --chrome-left: 0px;
   --chrome-right: 32px;
   --chrome-bottom: 0px;
   --chrome-top: 0px;

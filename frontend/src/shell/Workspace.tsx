@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useWorkspace } from '@/store/workspace';
 import { useNarration, useSoundCues } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { UnifiedLeftSidebar } from './UnifiedLeftSidebar';
+import { WorkspaceMenu } from './workspace/WorkspaceMenu';
 import { SettingsDialog } from './canvas/ui/SettingsDialog';
 import { MobileTransportSheet } from './canvas/ui/MobileTransportSheet';
 import { MobileSwipeReturn } from './mobile/deck/MobileSwipeReturn';
@@ -55,9 +55,13 @@ export function Workspace() {
         !tweaks.animate && '[&_*]:!transition-none [&_*]:!animate-none',
       )}
     >
-      {!present && mode !== 'visualize' && <UnifiedLeftSidebar />}
-
       <div className="relative min-h-0 min-w-0 flex-1 h-full">
+        {!present && mode !== 'visualize' && (
+          <WorkspaceMenu
+            onOpenPalette={() => setPaletteOpen(true)}
+            onOpenHelp={() => setHelpOpen(true)}
+          />
+        )}
         <ModeRouter
           activeTrackId={activeTrackId}
           activeCategoryId={activeCategoryId}

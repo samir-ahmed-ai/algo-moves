@@ -41,6 +41,8 @@ describe('panelRegistry', () => {
   it('workbench is optional in visualize mode', () => {
     const optional = panelsConfig.filter((p) => p.modes.includes('visualize') && p.optional);
     expect(optional.some((p) => p.id === 'workbench')).toBe(true);
+    expect(optional.some((p) => p.id === 'problem')).toBe(false);
+    expect(optional.some((p) => p.id === 'viz')).toBe(false);
   });
 
   it('every config entry has id and title', () => {

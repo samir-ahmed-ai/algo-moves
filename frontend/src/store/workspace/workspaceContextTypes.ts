@@ -30,8 +30,8 @@ export interface WorkspaceCtx {
   setLayoutPreset: (p: LayoutPreset) => void;
   tweaks: Tweaks;
   toggleTweak: (k: keyof Tweaks) => void;
-  leftOpen: boolean;
-  setLeftOpen: (b: boolean) => void;
+  menuOpen: boolean;
+  setMenuOpen: (b: boolean) => void;
   rightOpen: boolean;
   setRightOpen: (b: boolean) => void;
   rightWide: boolean;

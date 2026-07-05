@@ -10,7 +10,7 @@ export interface ChromeStateOptions {
 
 /** Sidebar / chrome layout state plus the chrome-dimension CSS-variable sync. */
 export function useChromeState({ requestFitCanvas, isMobile, initialDir }: ChromeStateOptions) {
-  const [leftOpen, setLeftOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const [rightWide, setRightWide] = useState(false);
   const [present, setPresent] = useState(() => typeof location !== 'undefined' && /[?&]embed\b/.test(location.search));
@@ -23,7 +23,7 @@ export function useChromeState({ requestFitCanvas, isMobile, initialDir }: Chrom
     setFocusCanvas((f) => {
       const next = !f;
       if (next) {
-        setLeftOpen(false);
+        setMenuOpen(false);
         setRightOpen(false);
       }
       requestFitCanvas();
@@ -40,22 +40,19 @@ export function useChromeState({ requestFitCanvas, isMobile, initialDir }: Chrom
       root.style.setProperty('--chrome-bottom', '0px');
       return;
     }
-    // On mobile the sidebars float over the canvas as drawers, so they never
-    // reserve flex width — keep the chrome offsets at the slim rail size.
-    const left = !isMobile && leftOpen && !focusCanvas ? `${SIDEBAR_W}px` : `${SIDEBAR_RAIL_W}px`;
+    root.style.setProperty('--chrome-left', '0px');
     let right = `${SIDEBAR_RAIL_W}px`;
     if (!isMobile && rightOpen && !focusCanvas) {
       right = `${rightWide ? SIDEBAR_WIDE_W : SIDEBAR_W}px`;
     }
-    root.style.setProperty('--chrome-left', left);
     root.style.setProperty('--chrome-right', right);
     root.style.setProperty('--chrome-bottom', '0px');
     root.style.setProperty('--bottom-rail-h', `${BOTTOM_RAIL_H}px`);
-  }, [present, leftOpen, rightOpen, rightWide, focusCanvas, isMobile]);
+  }, [present, rightOpen, rightWide, focusCanvas, isMobile]);
 
   return {
-    leftOpen,
-    setLeftOpen,
+    menuOpen,
+    setMenuOpen,
     rightOpen,
     setRightOpen,
     rightWide,
