@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { CanvasMode } from '@/core';
-import { ModeRouter, type ModeRouterProps } from './ModeRouter';
+import { ModeRouter, resolveRuntimeErrorRecovery, type ModeRouterProps } from './ModeRouter';
 import { resolveWorkspaceFallbackTarget, resolveWorkspaceSurface } from './surface';
 
 describe('resolveWorkspaceSurface', () => {
@@ -36,9 +36,10 @@ describe('resolveWorkspaceSurface', () => {
 
   it.each([
     { pluginLoading: true, expected: 'loading' },
+    { runtimeError: true, expected: 'error' },
     { pluginLoading: false, expected: 'empty' },
-  ] as const)('routes unavailable problem-backed visualize mode to $expected', ({ pluginLoading, expected }) => {
-    expect(surface({ mode: 'visualize', ready: false, pluginLoading })).toBe(expected);
+  ] as const)('routes unavailable problem-backed visualize mode to $expected', ({ pluginLoading, runtimeError, expected }) => {
+    expect(surface({ mode: 'visualize', ready: false, pluginLoading: !!pluginLoading, runtimeError })).toBe(expected);
   });
 
   it.each([
@@ -66,7 +67,34 @@ describe('resolveWorkspaceFallbackTarget', () => {
   });
 });
 
+describe('resolveRuntimeErrorRecovery', () => {
+  it.each([
+    { input: { customInput: { nums: [1] }, inputId: 'sample', firstInputId: 'sample' }, expected: 'reset-custom-input' },
+    { input: { customInput: null, inputId: 'other', firstInputId: 'sample' }, expected: 'first-sample' },
+    { input: { customInput: null, inputId: 'sample', firstInputId: 'sample' }, expected: 'none' },
+    { input: { customInput: null, inputId: 'sample', firstInputId: undefined }, expected: 'none' },
+  ] as const)('returns $expected', ({ input, expected }) => {
+    expect(resolveRuntimeErrorRecovery(input)).toBe(expected);
+  });
+});
+
 describe('ModeRouter fallbacks', () => {
+  const plugin: NonNullable<ModeRouterProps['plugin']> = {
+    meta: {
+      id: 'demo',
+      title: 'Demo',
+      difficulty: 'Easy',
+      tags: [],
+      summary: 'Demo',
+    },
+    inputs: [
+      { id: 'sample', label: 'Sample', value: 1 },
+      { id: 'other', label: 'Other', value: 2 },
+    ],
+    record: () => [],
+    View: () => null,
+  };
+
   const props: ModeRouterProps = {
     activeTrackId: null,
     activeCategoryId: null,
@@ -90,6 +118,7 @@ describe('ModeRouter fallbacks', () => {
     customInput: null,
     setCustomInput: () => {},
     frames: [],
+    runtimeError: null,
     player: {} as ModeRouterProps['player'],
     frame: undefined,
     backToBrowse: () => {},
@@ -108,6 +137,39 @@ describe('ModeRouter fallbacks', () => {
     expect(html).toContain('Preview unavailable');
     expect(html).toContain('not bound to an interactive preview');
     expect(html).toContain('Back to catalog');
+  });
+
+  it('renders recorder failures as a runtime error state', () => {
+    const html = renderToStaticMarkup(createElement(ModeRouter, { ...props, pluginLoading: false, runtimeError: 'bad input' }));
+    expect(html).toContain('role="status"');
+    expect(html).toContain('Preview could not render');
+    expect(html).toContain('bad input');
+  });
+
+  it('offers to reset custom input after recorder failures', () => {
+    const html = renderToStaticMarkup(
+      createElement(ModeRouter, {
+        ...props,
+        plugin,
+        pluginLoading: false,
+        customInput: { nums: [1] },
+        runtimeError: 'bad input',
+      }),
+    );
+    expect(html).toContain('Reset custom input');
+  });
+
+  it('offers to use the first sample after a selected sample fails', () => {
+    const html = renderToStaticMarkup(
+      createElement(ModeRouter, {
+        ...props,
+        plugin,
+        pluginLoading: false,
+        inputId: 'other',
+        runtimeError: 'bad input',
+      }),
+    );
+    expect(html).toContain('Use first sample');
   });
 
   it('sends unavailable standalone context back home', () => {

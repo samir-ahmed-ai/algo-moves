@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
@@ -16,12 +17,14 @@ export const WORKSPACE_SHORTCUTS: { keys: string[]; label: string }[] = [
 ];
 
 export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
+  const titleId = useId();
+
   return (
     <div
       className="absolute inset-0 z-50 grid place-items-center bg-black/40 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
-      aria-label="keyboard shortcuts"
+      aria-labelledby={titleId}
       aria-modal="true"
     >
       <div
@@ -29,7 +32,9 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-2 flex items-center justify-between">
-          <span className={cn('font-semibold text-ink', chromeText.base)}>Keyboard shortcuts</span>
+          <h2 id={titleId} className={cn('font-semibold text-ink', chromeText.base)}>
+            Keyboard shortcuts
+          </h2>
           <button
             type="button"
             onClick={onClose}

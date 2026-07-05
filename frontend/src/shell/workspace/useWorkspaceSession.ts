@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { SessionMeta } from '@/lib/session';
 import { useWorkspace } from '@/store/workspace';
 import { useCanvasCollabOptional } from '@/shell/canvas/collab/CanvasCollabProvider';
-import { workspaceSessionMeta } from '@/lib/session';
+import { workspaceSessionMeta } from './sessionBridge';
 
 /**
  * Merges workspace navigation with optional collab room session metadata.

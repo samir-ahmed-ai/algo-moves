@@ -58,7 +58,8 @@ export function buildQuestionCardElements(
 ): WhiteboardElement[] {
   const groupId = `qg-${Date.now().toString(36)}-${rand().toString(36)}`;
   const label = category ? `[${category}] ` : '';
-  const body = wrap(`${label}${text}`.trim());
+  const raw = `${label}${text}`.trim();
+  const body = wrap(raw);
   const lineCount = body.split('\n').length;
   const textHeight = lineCount * LINE_HEIGHT_PX;
   const height = textHeight + PAD * 2;
@@ -93,7 +94,7 @@ export function buildQuestionCardElements(
     textAlign: 'left',
     verticalAlign: 'top',
     containerId: null,
-    originalText: body,
+    originalText: raw,
     lineHeight: 1.25,
     baseline: 14,
   };

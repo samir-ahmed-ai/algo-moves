@@ -1,15 +1,12 @@
-import { useMemo, useState } from 'react';
-import { usePlayer } from '../core';
-import { catalog } from '../content';
+import { useState } from 'react';
 import { useWorkspace } from '@/store/workspace';
-import { useNarration, useSoundCues, useWorkspacePlugin, useWorkspaceUrlState } from '@/hooks';
+import { useNarration, useSoundCues } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { UnifiedLeftSidebar } from './UnifiedLeftSidebar';
 import { SettingsDialog } from './canvas/ui/SettingsDialog';
 import { MobileTransportSheet } from './canvas/ui/MobileTransportSheet';
 import { MobileSwipeReturn } from './mobile/deck/MobileSwipeReturn';
-import { chromeText } from './chromeUi';
-import { CommandPalette, ModeRouter, ShortcutsOverlay, useWorkspaceKeyboard } from '@/shell/workspace/index';
+import { CommandPalette, ModeRouter, PresentationModeHint, ShortcutsOverlay, useWorkspaceKeyboard, useWorkspaceRuntime } from '@/shell/workspace/index';
 
 export function Workspace() {
   const {
@@ -26,29 +23,13 @@ export function Workspace() {
     goHome,
     mobileTransportOpen,
     setMobileTransportOpen,
+    toggleFocusCanvas,
   } = useWorkspace();
   const narrate = tweaks.narrate;
   const [helpOpen, setHelpOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-
-  const item = catalog.getItem(activeItemId) ?? catalog.items[0];
-  const pluginId = item?.pluginId;
-
-  // The heavy plugin implementation loads on demand (its group's chunk); show a
-  // loading state until its chunk resolves.
-  const { plugin, pluginLoading } = useWorkspacePlugin(pluginId);
-
-  // Sample input + share/project URL hydration (writes the share hash on change).
-  const { inputId, customInput, setCustomInput, selectInput } = useWorkspaceUrlState(plugin, activeItemId);
-
-  const input = plugin?.inputs.find((i) => i.id === inputId) ?? plugin?.inputs[0];
-  const effectiveValue = customInput ?? input?.value;
-  const baseFrames = useMemo(
-    () => (plugin && effectiveValue != null ? plugin.record(effectiveValue) : []),
-    [plugin, effectiveValue],
-  );
-  const player = usePlayer(Math.max(baseFrames.length, 1));
-  const frame = baseFrames[player.index] ?? baseFrames[0];
+  const { item, plugin, pluginLoading, inputId, customInput, setCustomInput, selectInput, frames, runtimeError, player, frame } =
+    useWorkspaceRuntime(activeItemId);
 
   useWorkspaceKeyboard({
     mode,
@@ -56,8 +37,10 @@ export function Workspace() {
     setPresent,
     player,
     helpOpen,
+    paletteOpen,
     setHelpOpen,
     setPaletteOpen,
+    toggleFocusCanvas,
   });
 
   // Text-to-speech narration + per-step sound cues.
@@ -87,7 +70,8 @@ export function Workspace() {
           selectInput={selectInput}
           customInput={customInput}
           setCustomInput={setCustomInput}
-          frames={baseFrames}
+          frames={frames}
+          runtimeError={runtimeError}
           player={player}
           frame={frame}
           backToBrowse={backToBrowse}
@@ -95,11 +79,7 @@ export function Workspace() {
         />
       </div>
 
-      {present && (
-        <div className={cn('pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-edge bg-panel/90 px-2 py-0.5 text-ink3 shadow backdrop-blur', chromeText.sm)}>
-          Presentation mode · press <span className="font-mono text-ink2">Esc</span> or <span className="font-mono text-ink2">F</span> to exit
-        </div>
-      )}
+      {present && <PresentationModeHint />}
 
       {helpOpen && <ShortcutsOverlay onClose={() => setHelpOpen(false)} />}
       {paletteOpen && <CommandPalette inputId={inputId} onClose={() => setPaletteOpen(false)} />}

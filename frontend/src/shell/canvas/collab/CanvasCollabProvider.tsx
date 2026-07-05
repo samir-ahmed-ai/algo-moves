@@ -34,6 +34,7 @@ import {
   updateInterviewSession,
   type InterviewSummary,
 } from './sync/interviewApi';
+import { clearInterviewHost, markInterviewHost } from './interview/interviewHost';
 import { canEditSubDoc } from './protocol/subdocPermissions';
 import {
   CANVAS_TAG,
@@ -101,9 +102,11 @@ export interface CanvasCollabApi {
   resumeInterviewSession: (row: InterviewSummary, name?: string) => void;
 
   // ---- interview facilitation (host-only mutators; all clients read runtime) ----
-  /** Start/resume the shared countdown for `durationMs`. */
+  /** Start the shared countdown for `durationMs` (sets it as the full length). */
   startTimer: (durationMs: number) => void;
   pauseTimer: () => void;
+  /** Resume a paused timer, preserving its original full duration. */
+  resumeTimer: () => void;
   resetTimer: () => void;
   /** Lock the board — guests become view-only. */
   setLocked: (locked: boolean) => void;
@@ -115,7 +118,7 @@ export interface CanvasCollabApi {
   // ---- presence ----
   peers: PeerPresence[];
   followId: string | null;
-  setFollowId: (id: string | null) => void;
+  setFollowId: Dispatch<SetStateAction<string | null>>;
   /** Throttled local-presence broadcasters, called from the canvas pane. */
   broadcastCursor: (x: number, y: number) => void;
   broadcastSelection: (ids: string[]) => void;
@@ -413,10 +416,13 @@ function CollabState({ children }: { children: ReactNode }) {
         guestToken: created?.guestToken,
       }),
     );
+    markInterviewHost(code);
     connect(code, name?.trim() || selfName, { capacity: 8 });
-    // Persist room + interview hint in the URL so a host refresh rejoins.
+    // Persist room + interview hint in the URL so a host refresh rejoins. The
+    // guest token is deliberately NOT written here — it belongs only in the
+    // shareable guest invite link, never the host's own address bar/history.
     const share = readShareFromUrl() ?? {};
-    writeShareToUrl({ ...share, room: code, sessionKind: 'interview', guestToken: created?.guestToken });
+    writeShareToUrl({ ...share, room: code, sessionKind: 'interview' });
     return code;
   }, [connect, selfName]);
 
@@ -431,6 +437,7 @@ function CollabState({ children }: { children: ReactNode }) {
           runtime,
         }),
       );
+      markInterviewHost(row.roomCode);
       connect(row.roomCode, name?.trim() || selfName, { capacity: 8 });
       const share = readShareFromUrl() ?? {};
       writeShareToUrl({ ...share, room: row.roomCode, sessionKind: 'interview' });
@@ -474,6 +481,7 @@ function CollabState({ children }: { children: ReactNode }) {
     setSubDocs({});
     setSubDocCursors({});
     setSessionMeta(defaultSession('solo'));
+    clearInterviewHost();
     autoJoinRef.current = false;
 
     // Strip room/sessionKind from URL so refresh doesn't re-join
@@ -519,6 +527,16 @@ function CollabState({ children }: { children: ReactNode }) {
     patchRuntime((r) => {
       const remaining = r.timer.endsAt != null ? Math.max(0, r.timer.endsAt - Date.now()) : r.timer.remainingMs;
       return { ...r, timer: { ...r.timer, running: false, endsAt: null, remainingMs: remaining } };
+    });
+  }, [patchRuntime]);
+
+  // Resume a paused timer WITHOUT shrinking its full duration (Reset still
+  // restores the original length).
+  const resumeTimer = useCallback(() => {
+    patchRuntime((r) => {
+      const ms = r.timer.remainingMs > 0 ? r.timer.remainingMs : r.timer.durationMs;
+      if (ms <= 0) return r;
+      return { ...r, timer: { ...r.timer, running: true, endsAt: Date.now() + ms } };
     });
   }, [patchRuntime]);
 
@@ -589,7 +607,7 @@ function CollabState({ children }: { children: ReactNode }) {
       session: sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
       updateInterviewSettings, resumeInterviewSession,
-      startTimer, pauseTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
+      startTimer, pauseTimer, resumeTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
       peers, followId, setFollowId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
@@ -605,7 +623,7 @@ function CollabState({ children }: { children: ReactNode }) {
       sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
       updateInterviewSettings, resumeInterviewSession,
-      startTimer, pauseTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
+      startTimer, pauseTimer, resumeTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
       peers, followId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,

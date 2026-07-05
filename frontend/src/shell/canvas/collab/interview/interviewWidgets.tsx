@@ -123,6 +123,18 @@ function RoomControlsBody() {
   const [status, setStatus] = useState<'active' | 'ended'>('active');
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
+  const loadedId = useRef<string>();
+
+  // Hydrate the toggle + lifecycle state from the durable session (esp. on resume).
+  useEffect(() => {
+    if (!sessionId || loadedId.current === sessionId) return;
+    loadedId.current = sessionId;
+    void getInterviewSession(sessionId).then((s) => {
+      if (!s) return;
+      setStatus(s.status);
+      setGuestLinkEnabled(s.guestLinkEnabled);
+    });
+  }, [sessionId]);
 
   const shareBase = { focus: 'canvas' as const, mode, theme, palette, themePreset, dir };
   const inviteUrl = room
@@ -294,13 +306,13 @@ function QuestionsBody() {
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
   const [text, setText] = useState('');
   const [category, setCategory] = useState<QuestionCategory>('general');
-  const loaded = useRef(false);
+  const loadedId = useRef<string>();
 
   useEffect(() => {
-    if (!sessionId || loaded.current) return;
-    loaded.current = true;
+    if (!sessionId || loadedId.current === sessionId) return;
+    loadedId.current = sessionId;
     void getInterviewSession(sessionId).then((s) => {
-      if (s?.questions?.length) setQuestions(s.questions);
+      setQuestions(s?.questions ?? []);
     });
   }, [sessionId]);
 
@@ -397,13 +409,13 @@ function NotesBody() {
   const sessionId = session.sessionId;
   const patch = usePatchSession(sessionId);
   const [notes, setNotes] = useState('');
-  const loaded = useRef(false);
+  const loadedId = useRef<string>();
 
   useEffect(() => {
-    if (!sessionId || loaded.current) return;
-    loaded.current = true;
+    if (!sessionId || loadedId.current === sessionId) return;
+    loadedId.current = sessionId;
     void getInterviewSession(sessionId).then((s) => {
-      if (s) setNotes(s.notes ?? '');
+      setNotes(s?.notes ?? '');
     });
   }, [sessionId]);
 
@@ -433,14 +445,14 @@ function RubricBody() {
   const [rubric, setRubric] = useState<RubricCriterion[]>(() => DEFAULT_RUBRIC.map((r) => ({ ...r, id: newId() })));
   const [recommendation, setRecommendation] = useState<Recommendation>('');
   const [customLabel, setCustomLabel] = useState('');
-  const loaded = useRef(false);
+  const loadedId = useRef<string>();
 
   useEffect(() => {
-    if (!sessionId || loaded.current) return;
-    loaded.current = true;
+    if (!sessionId || loadedId.current === sessionId) return;
+    loadedId.current = sessionId;
     void getInterviewSession(sessionId).then((s) => {
-      if (s?.rubric?.length) setRubric(s.rubric);
-      if (s?.recommendation) setRecommendation(s.recommendation);
+      setRubric(s?.rubric?.length ? s.rubric : DEFAULT_RUBRIC.map((r) => ({ ...r, id: newId() })));
+      setRecommendation(s?.recommendation ?? '');
     });
   }, [sessionId]);
 

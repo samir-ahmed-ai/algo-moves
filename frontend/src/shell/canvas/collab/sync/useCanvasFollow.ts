@@ -23,9 +23,10 @@ export function useCanvasFollow(): void {
       setFollowId(hostId);
       autoPinned.current = true;
     } else if (autoPinned.current) {
-      // Release only the auto-pin so a manual follow the guest set isn't clobbered.
+      // Release only the auto-pin — if the guest manually followed someone else
+      // in the meantime, leave that selection intact.
       autoPinned.current = false;
-      setFollowId(null);
+      setFollowId((cur) => (cur === hostId ? null : cur));
     }
   }, [hostFollow, hostId, isHost, setFollowId]);
 

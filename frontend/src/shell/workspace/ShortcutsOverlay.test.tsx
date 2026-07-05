@@ -7,6 +7,7 @@ describe('ShortcutsOverlay', () => {
     const html = renderToStaticMarkup(<ShortcutsOverlay onClose={() => {}} />);
 
     expect(html).toContain('role="dialog"');
+    expect(html).toContain('aria-labelledby');
     expect(html).toContain('Keyboard shortcuts');
     for (const shortcut of WORKSPACE_SHORTCUTS) {
       expect(html).toContain(shortcut.label);

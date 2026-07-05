@@ -77,6 +77,8 @@ import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProv
 import { useCanvasDocSync } from './collab/sync/useCanvasDocSync';
 import { useCanvasFollow } from './collab/sync/useCanvasFollow';
 import { InterviewHud } from './collab/interview/InterviewHud';
+import { GuestNameGate } from './collab/interview/GuestNameGate';
+import { useInterviewBoardPersistence } from './collab/interview/useInterviewBoardPersistence';
 import { canMoveCanvasNodes } from './collab/protocol/subdocPermissions';
 import { CanvasCollabOverlays } from './collab/CanvasCollabOverlays';
 import { CommentLayer } from './collab/CommentLayer';
@@ -248,6 +250,7 @@ function Inner({
   const collab = useCanvasCollab();
   useCanvasDocSync({ nodes, edges, setNodes, setEdges });
   useCanvasFollow();
+  useInterviewBoardPersistence();
   const onPanePointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (!collab.isCollaborating) return;
@@ -994,6 +997,8 @@ function Inner({
           {menu && !present && <ContextMenu x={menu.x} y={menu.y} items={menu.items} onClose={() => setMenu(null)} />}
 
           {present && <LaserPointer host={wrapperRef} />}
+
+          <GuestNameGate />
 
           {nodes.length === 0 && (
             <div className="pointer-events-none absolute inset-0 grid place-items-center">

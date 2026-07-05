@@ -23,7 +23,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils/cn';
 import { catalog } from '@/content';
 import { useWorkspace } from '@/store/workspace';
-import { buildInviteUrl } from '@/store/navigation/shareState';
+import { buildInviteUrl, buildInterviewInviteUrl } from '@/store/navigation/shareState';
 import { chromeText } from '../../chromeUi';
 import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '../ui/nodeui';
 import { useRoomComms } from '../../games/net/useRoomComms';
@@ -76,6 +76,8 @@ export function SessionBody() {
     dir,
     sessionKind: (isInterview ? 'interview' : 'collab') as 'interview' | 'collab',
   };
+  const inviteUrl = (r: string) =>
+    isInterview ? buildInterviewInviteUrl(shareBase, r, session.guestToken) : buildInviteUrl(shareBase, r);
 
   const start = async () => {
     setBusy(true);
@@ -135,7 +137,7 @@ export function SessionBody() {
   const copyInvite = async () => {
     if (!room) return;
     try {
-      await navigator.clipboard.writeText(buildInviteUrl(shareBase, room));
+      await navigator.clipboard.writeText(inviteUrl(room));
       setInviteCopied(true);
       setTimeout(() => setInviteCopied(false), 1600);
     } catch {
@@ -280,7 +282,7 @@ export function SessionBody() {
 
       {showQr && room ? (
         <div className={cn('flex flex-col items-center gap-2 border border-edge bg-panel2 p-3', RADIUS_SHELL)}>
-          <QRCodeSVG value={buildInviteUrl(shareBase, room)} size={128} bgColor="transparent" fgColor="currentColor" className="text-ink" />
+          <QRCodeSVG value={inviteUrl(room)} size={128} bgColor="transparent" fgColor="currentColor" className="text-ink" />
           <span className={cn('text-center text-ink3', chromeText.xs)}>Scan to join the session</span>
         </div>
       ) : null}

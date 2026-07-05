@@ -10,7 +10,7 @@ import (
 
 // Advisory size bounds mirroring the interview-canvas reference.
 const (
-	maxInterviewCanvas = 2 << 20  // 2 MiB
+	maxInterviewCanvas = 2 << 20   // 2 MiB
 	maxInterviewJSON   = 256 << 10 // 256 KiB (questions / rubric)
 	maxInterviewNotes  = 100_000
 	maxInterviewTitle  = 200
@@ -63,10 +63,11 @@ func (s *Service) handleInterviews(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleInterview: item routes under /api/interviews/.
-//   token/{token}          GET   public sanitized read (guest join)
-//   {id}                   GET   owner full read
-//   {id}                   PATCH owner partial update
-//   {id}/end|reopen|rotate-token  POST owner actions
+//
+//	token/{token}          GET   public sanitized read (guest join)
+//	{id}                   GET   owner full read
+//	{id}                   PATCH owner partial update
+//	{id}/end|reopen|rotate-token  POST owner actions
 func (s *Service) handleInterview(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	path := strings.TrimPrefix(r.URL.Path, "/api/interviews/")

@@ -17,6 +17,8 @@ export function canEditSubDoc(ctx: SubDocPermissionContext, kind: SubDocKind): b
   if (ctx.role === 'host') return true;
   if (ctx.role === 'spectator') return false;
   if (ctx.session.kind !== 'interview') return true;
+  // A locked board (host toggle, broadcast via the envelope) makes guests view-only.
+  if (ctx.session.interviewRuntime?.locked) return false;
   const settings = guestInterviewSettings(ctx.session);
   if (kind === 'whiteboard') return settings.guestCanEditBoard !== false;
   if (kind === 'collab-code') return settings.guestCanEditCode !== false;
@@ -28,5 +30,6 @@ export function canMoveCanvasNodes(ctx: SubDocPermissionContext): boolean {
   if (ctx.role === 'host') return true;
   if (ctx.role === 'spectator') return false;
   if (ctx.session.kind !== 'interview') return true;
+  if (ctx.session.interviewRuntime?.locked) return false;
   return guestInterviewSettings(ctx.session).guestCanMoveNodes === true;
 }

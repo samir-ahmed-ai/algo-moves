@@ -19,7 +19,7 @@ function formatMs(ms: number): string {
  * from the host-broadcast `endsAt`); only the host gets the controls popover.
  */
 export function TimerWidget() {
-  const { session, isHost, startTimer, pauseTimer, resetTimer } = useCanvasCollab();
+  const { session, isHost, startTimer, pauseTimer, resumeTimer, resetTimer } = useCanvasCollab();
   const timer = session.interviewRuntime?.timer;
   const canControl = isHost && session.kind === 'interview';
   const [now, setNow] = useState(() => Date.now());
@@ -147,7 +147,7 @@ export function TimerWidget() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => startTimer(timer.remainingMs > 0 ? timer.remainingMs : timer.durationMs)}
+                  onClick={resumeTimer}
                   disabled={timer.remainingMs <= 0 && timer.durationMs <= 0}
                   className={cn('inline-flex flex-1 items-center justify-center gap-1 border border-edge bg-panel2 py-1 font-medium text-ink2 hover:text-ink disabled:opacity-40', RADIUS_CTRL, chromeText.sm)}
                 >

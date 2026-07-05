@@ -43,8 +43,9 @@ export function useSendToBoard(): SendToBoard {
     (text: string, category?: string) => {
       const board = findBoard();
       if (!board || !isHost) return false;
-      const count = Object.keys(subDocs).length;
-      const at = { x: 80 + (count % 3) * 40, y: 80 + (count % 5) * 40 };
+      // Stagger by the number of cards already on the board so they don't stack.
+      const n = board.payload.elements?.length ?? 0;
+      const at = { x: 80 + (n % 6) * 28, y: 80 + (n % 9) * 28 };
       const cards = buildQuestionCardElements(text, at, category);
       const nextPayload: WhiteboardPayload = {
         ...board.payload,

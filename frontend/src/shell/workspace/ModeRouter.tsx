@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft, Home, Loader2, SearchX } from 'lucide-react';
+import { ArrowLeft, Home, Loader2, RotateCcw, SearchX } from 'lucide-react';
 import type { Frame, Player, ProblemPlugin } from '@/core';
 import type { Item } from '@/content';
 import { CategoryBoard, TrackCategoryBoard } from '../CategoryBoard';
@@ -9,7 +9,7 @@ import { LearnStudio } from '@/shell/study';
 import { ProblemPage } from '@/shell/study';
 import { resolveWorkspaceFallbackTarget, resolveWorkspaceSurface, type ModeRouterInput } from './surface';
 
-export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready'> {
+export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready' | 'runtimeError'> {
   plugin: ProblemPlugin<any, any> | null | undefined;
   item: Item;
   inputId: string;
@@ -17,15 +17,28 @@ export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready'> {
   customInput: unknown;
   setCustomInput: (v: unknown) => void;
   frames: Frame<any>[];
+  runtimeError: string | null;
   player: Player;
   frame: Frame<any> | undefined;
   backToBrowse: () => void;
   goHome: () => void;
 }
 
+export type RuntimeErrorRecovery = 'none' | 'reset-custom-input' | 'first-sample';
+
+export function resolveRuntimeErrorRecovery(input: {
+  customInput: unknown;
+  inputId: string;
+  firstInputId?: string;
+}): RuntimeErrorRecovery {
+  if (input.customInput != null) return 'reset-custom-input';
+  if (input.firstInputId && input.inputId !== input.firstInputId) return 'first-sample';
+  return 'none';
+}
+
 export function ModeRouter(props: ModeRouterProps) {
   const problemReady = !!props.plugin && !!props.frame;
-  const surface = resolveWorkspaceSurface({ ...props, ready: problemReady });
+  const surface = resolveWorkspaceSurface({ ...props, ready: problemReady, runtimeError: !!props.runtimeError });
 
   switch (surface) {
     case 'track-board':
@@ -88,6 +101,8 @@ export function ModeRouter(props: ModeRouterProps) {
           role="status"
         />
       );
+    case 'error':
+      return renderRuntimeErrorFallback(props);
     case 'empty': {
       const fallbackTarget = resolveWorkspaceFallbackTarget(props);
       const returnsToCatalog = fallbackTarget === 'catalog';
@@ -104,6 +119,54 @@ export function ModeRouter(props: ModeRouterProps) {
     }
   }
   return unreachableSurface(surface);
+}
+
+function renderRuntimeErrorFallback(props: ModeRouterProps) {
+  const recovery = resolveRuntimeErrorRecovery({
+    customInput: props.customInput,
+    inputId: props.inputId,
+    firstInputId: props.plugin?.inputs[0]?.id,
+  });
+
+  if (recovery === 'reset-custom-input') {
+    return (
+      <WorkspaceFallback
+        icon={<SearchX />}
+        title="Preview could not render"
+        hint={props.runtimeError ?? 'Try another sample input or reset your custom edits.'}
+        actionLabel="Reset custom input"
+        actionIcon={<RotateCcw className="h-3.5 w-3.5" />}
+        onAction={() => props.setCustomInput(null)}
+        role="status"
+      />
+    );
+  }
+
+  if (recovery === 'first-sample') {
+    const firstInputId = props.plugin?.inputs[0]?.id;
+    if (firstInputId) {
+      return (
+        <WorkspaceFallback
+          icon={<SearchX />}
+          title="Preview could not render"
+          hint={props.runtimeError ?? 'Try another sample input or reset your custom edits.'}
+          actionLabel="Use first sample"
+          actionIcon={<RotateCcw className="h-3.5 w-3.5" />}
+          onAction={() => props.selectInput(firstInputId)}
+          role="status"
+        />
+      );
+    }
+  }
+
+  return (
+    <WorkspaceFallback
+      icon={<SearchX />}
+      title="Preview could not render"
+      hint={props.runtimeError ?? 'Try another sample input or reset your custom edits.'}
+      role="status"
+    />
+  );
 }
 
 function unreachableSurface(surface: never): never {
