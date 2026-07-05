@@ -2,11 +2,13 @@
 # in the dashboard). Arcade persistence is handled by the backend + Postgres.
 # Service root directory in Railway: frontend
 # Deploys on push to main when files under frontend/ change.
+# Watch patterns are repo-root-relative (see Railway monorepo docs), not relative
+# to this service's root directory.
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
-watchPatterns = ["**"]
+watchPatterns = ["frontend/**"]
 
 [deploy]
 healthcheckPath = "/"

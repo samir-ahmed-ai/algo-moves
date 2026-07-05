@@ -157,8 +157,10 @@ Deploy the **frontend** and **game server** on [Railway](https://railway.com). P
 2. **Connect GitHub** for each app service (Settings → Source):
    - Link your GitHub repo
    - **Root Directory:** `backend` or `frontend` (required for this monorepo)
+   - **Config file path:** `/backend/railway.toml` or `/frontend/railway.toml` (repo-root absolute path)
    - **Branch:** `main`
    - Enable **Deploy on push**
+   - **Watch paths:** leave empty in the dashboard — `watchPatterns` in each service's `railway.toml` already scopes deploys (`frontend/**` / `backend/**`). Patterns are repo-root-relative; do not use `**` or `src/**` here.
 3. Generate a public domain for frontend and backend (Settings → Networking).
 4. Set **service variables** in the Railway dashboard:
 
