@@ -1,6 +1,16 @@
 import { useId, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Frame } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
+import {
+  ORBIT_PATH_D,
+  ORBIT_T_MAX,
+  ORBIT_T_MIN,
+  ORBIT_VIEWBOX,
+  orbitPoint,
+  truncateOrbitText,
+} from './orbitArc';
+
+export { orbitPoint, truncateOrbitText } from './orbitArc';
 
 /*
  * MoveOrbit — the circular step view: an arc curved around the top of the
@@ -10,27 +20,12 @@ import { cn } from '@/lib/utils/cn';
  * drag along the arc to seek.
  */
 
-const P0 = { x: 40, y: 132 };
-const P1 = { x: 500, y: 4 };
-const P2 = { x: 960, y: 132 };
-/** Ticks live on t ∈ [T_MIN, T_MAX] so the arc ends stay clear. */
-const T_MIN = 0.06;
-const T_MAX = 0.94;
 const MAX_TICKS = 72;
-
-/** Point on the quadratic arc at parameter t. */
-export function orbitPoint(t: number): { x: number; y: number } {
-  const u = 1 - t;
-  return {
-    x: u * u * P0.x + 2 * u * t * P1.x + t * t * P2.x,
-    y: u * u * P0.y + 2 * u * t * P1.y + t * t * P2.y,
-  };
-}
 
 /** Arc parameter for frame i of total. */
 export function orbitT(i: number, total: number): number {
   if (total <= 1) return 0.5;
-  return T_MIN + (i / (total - 1)) * (T_MAX - T_MIN);
+  return ORBIT_T_MIN + (i / (total - 1)) * (ORBIT_T_MAX - ORBIT_T_MIN);
 }
 
 /** Decimated tick indices for long runs; always keeps the last frame. */
@@ -80,11 +75,6 @@ export function orbitTFromX(x: number): number {
   return (lo + hi) / 2;
 }
 
-export function truncateOrbitText(s: string, max: number): string {
-  const t = s.trim();
-  return t.length <= max ? t : `${t.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
-}
-
 function frameText(f: Frame | undefined): string {
   return f ? (f.move.caption?.trim() || f.move.note?.trim() || '') : '';
 }
@@ -108,7 +98,6 @@ export function MoveOrbit({
   const cur = truncateOrbitText(frameText(frames[index]), 56);
   const prev = index > 0 ? truncateOrbitText(frameText(frames[index - 1]), 26) : '';
   const next = index < total - 1 ? truncateOrbitText(frameText(frames[index + 1]), 26) : '';
-  const d = `M ${P0.x} ${P0.y} Q ${P1.x} ${P1.y} ${P2.x} ${P2.y}`;
   const tCur = orbitT(index, total);
   const curPt = orbitPoint(tCur);
   const ticks = orbitTickIndices(total);
@@ -127,7 +116,7 @@ export function MoveOrbit({
     if (!ctm) return;
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
     const t = orbitTFromX(p.x);
-    const frac = Math.min(1, Math.max(0, (t - T_MIN) / (T_MAX - T_MIN)));
+    const frac = Math.min(1, Math.max(0, (t - ORBIT_T_MIN) / (ORBIT_T_MAX - ORBIT_T_MIN)));
     onSeek(Math.round(frac * (total - 1)));
   };
 
@@ -135,13 +124,13 @@ export function MoveOrbit({
     <svg
       ref={svgRef}
       className={cn('move-orbit', className)}
-      viewBox="0 28 1000 118"
+      viewBox={ORBIT_VIEWBOX}
       role="group"
       aria-label={`step ${index + 1} of ${total}`}
     >
-      <path id={pathId} d={d} className="move-orbit-track" pathLength={1} />
+      <path id={pathId} d={ORBIT_PATH_D} className="move-orbit-track" pathLength={1} />
       <path
-        d={d}
+        d={ORBIT_PATH_D}
         className="move-orbit-progress"
         pathLength={1}
         style={{ strokeDasharray: `${orbitArcFraction(tCur)} 1` }}
@@ -149,7 +138,7 @@ export function MoveOrbit({
       {/* wide invisible hit band: click / drag anywhere on the arc to scrub */}
       {onSeek && (
         <path
-          d={d}
+          d={ORBIT_PATH_D}
           className="nodrag move-orbit-hit"
           onPointerDown={(e) => {
             seekFromPointer(e);

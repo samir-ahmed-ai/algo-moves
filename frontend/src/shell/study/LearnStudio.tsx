@@ -37,7 +37,13 @@ import {
   type CanvasActions,
 } from '@/shell/canvas';
 import { AssembleModes } from './components/AssembleModes';
-import { CodeStudioProvider, useCodeStudio } from './CodeStudio';
+import {
+  CodeStudioProvider,
+  useCodeStudioContent,
+  useCodeStudioDraft,
+  useCodeStudioEditor,
+  useCodeStudioPhase,
+} from './CodeStudio';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { SplitCodeEditor } from '../../components/code/SplitCodeEditor';
 import { ProblemOverviewBody } from '@/shell/panels/problem/ProblemOverviewBody';
@@ -126,16 +132,17 @@ function initialTab(itemId: string, avail: StudioTab[]): string {
 }
 
 function StudioShell() {
-  const cs = useCodeStudio();
+  const { hasQuiz, hasReassemble } = useCodeStudioPhase();
+  const { reference } = useCodeStudioContent();
   const { item } = useCanvasStatic();
   const isMobile = useIsMobile();
 
   const avail = useMemo(
     () =>
       STUDIO_TABS.filter((t) =>
-        isTabAvailable(t, { hasQuiz: cs.hasQuiz, hasPieces: cs.hasReassemble, hasSource: !!cs.reference }),
+        isTabAvailable(t, { hasQuiz, hasPieces: hasReassemble, hasSource: !!reference }),
       ),
-    [cs.hasQuiz, cs.hasReassemble, cs.reference],
+    [hasQuiz, hasReassemble, reference],
   );
   const order = useMemo(() => flatOrder(avail), [avail]);
   const stages = useMemo(() => STUDIO_GROUPS.filter((g) => avail.some((t) => t.group === g.id)), [avail]);
@@ -251,7 +258,7 @@ function TopBar({
   isMobile: boolean;
   onMenu: () => void;
 }) {
-  const cs = useCodeStudio();
+  const { variants, active: activeVariant, setActive } = useCodeStudioContent();
   const { item } = useCanvasStatic();
   const { theme, setTheme, present, setPresent, enterProblemInMode } = useWorkspace();
   const browseCrumb = browseBreadcrumbForItem(item.id, catalog);
@@ -279,17 +286,17 @@ function TopBar({
       </div>
       {!isMobile && item.difficulty && <Chip tone={difficultyTone(item.difficulty)}>{item.difficulty}</Chip>}
 
-      {cs.variants.length > 1 && (
+      {variants.length > 1 && (
         <div className="flex shrink-0 items-center gap-0.5">
-          {cs.variants.map((v, i) => (
+          {variants.map((v, i) => (
             <button
               key={i}
               type="button"
-              onClick={() => cs.setActive(i)}
+              onClick={() => setActive(i)}
               className={cn(
                 'rounded-md px-1.5 py-1 font-medium transition-colors',
                 chromeText.sm,
-                i === cs.active ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
+                i === activeVariant ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
               )}
             >
               {(v.lang ?? 'text').toUpperCase()}
@@ -449,59 +456,74 @@ function StageBody({
 }
 
 function QuizContent() {
-  const cs = useCodeStudio();
+  const { active } = useCodeStudioContent();
+  const { quiz, savedQuizProgress, nextLabel, onQuizProgress, onQuizContinue } = useCodeStudioPhase();
   const { item } = useCanvasStatic();
   const { onAnswer: relayQuizAnswer } = useQuizHostRelay(item.id);
-  if (!cs.quiz) {
+  if (!quiz) {
     return <EmptyState icon={<GraduationCap className="h-4 w-4" />} title="No quiz" hint="This problem has no quiz." />;
   }
   return (
     <CodeStudioQuiz
-      key={`quiz-${item.id}-${cs.active}`}
-      quiz={cs.quiz}
+      key={`quiz-${item.id}-${active}`}
+      quiz={quiz}
       itemId={item.id}
-      initial={cs.savedQuizProgress}
-      nextLabel={cs.nextLabel}
-      onProgress={cs.onQuizProgress}
-      onContinue={cs.onQuizContinue}
+      initial={savedQuizProgress}
+      nextLabel={nextLabel}
+      onProgress={onQuizProgress}
+      onContinue={onQuizContinue}
       onAnswer={relayQuizAnswer}
     />
   );
 }
 
 function RecallBody() {
-  const cs = useCodeStudio();
+  const { reference, code } = useCodeStudioContent();
+  const {
+    draft,
+    score,
+    blind,
+    setBlind,
+    peek,
+    setPeek,
+    persistDraft,
+    skeleton,
+    timerRunning,
+    setTimerRunning,
+    timerLabel,
+  } = useCodeStudioDraft();
+  const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
   const isMobile = useIsMobile();
   const { theme, themePreset } = useWorkspace();
-  if (!cs.reference) {
+  if (!reference) {
     return (
       <div className="grid min-h-0 flex-1 place-items-center p-6">
         <EmptyState icon={<ScanEye className="h-4 w-4" />} title="No source" hint="This problem has no solution to recall." />
       </div>
     );
   }
-  const pct = Math.round(cs.score);
-  const blindTitle = cs.blind ? 'Blind recall' : 'Reference mode';
+  const pct = Math.round(score);
+  const blindTitle = blind ? 'Blind recall' : 'Reference mode';
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 flex-nowrap items-center gap-1 overflow-x-auto border-b border-edge px-2 py-1">
         <Btn
           size="xs"
-          variant={cs.blind ? 'primary' : 'ghost'}
-          icon={cs.blind ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          variant={blind ? 'primary' : 'ghost'}
+          icon={blind ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           title={blindTitle}
-          onClick={() => cs.setBlind((b) => !b)}
+          onClick={() => setBlind((b) => !b)}
         >
-          {isMobile ? null : cs.blind ? 'Blind' : 'Reference'}
+          {isMobile ? null : blind ? 'Blind' : 'Reference'}
         </Btn>
         <Btn
           size="xs"
           variant="ghost"
           icon={<ScanEye className="h-3.5 w-3.5" />}
           title="Hold to peek at reference"
-          onMouseDown={() => cs.setPeek(true)}
-          onMouseUp={() => cs.setPeek(false)}
-          onMouseLeave={() => cs.setPeek(false)}
+          onMouseDown={() => setPeek(true)}
+          onMouseUp={() => setPeek(false)}
+          onMouseLeave={() => setPeek(false)}
         >
           {isMobile ? null : 'Peek'}
         </Btn>
@@ -510,18 +532,18 @@ function RecallBody() {
           variant="ghost"
           icon={<RotateCcw className="h-3.5 w-3.5" />}
           title="Reset to skeleton"
-          onClick={() => cs.persistDraft(cs.skeleton)}
+          onClick={() => persistDraft(skeleton)}
         >
           {isMobile ? null : 'Reset'}
         </Btn>
         <Btn
           size="xs"
-          variant={cs.timerRunning ? 'good' : 'ghost'}
+          variant={timerRunning ? 'good' : 'ghost'}
           icon={<Timer className="h-3.5 w-3.5" />}
-          title={cs.timerRunning ? 'Stop recall timer' : 'Start recall timer'}
-          onClick={() => cs.setTimerRunning((r) => !r)}
+          title={timerRunning ? 'Stop recall timer' : 'Start recall timer'}
+          onClick={() => setTimerRunning((r) => !r)}
         >
-          {isMobile ? null : cs.timerLabel}
+          {isMobile ? null : timerLabel}
         </Btn>
         <div className="flex-1" />
         <Chip tone={pct >= 80 ? 'good' : pct >= 50 ? 'accent' : 'muted'} mono>
@@ -530,18 +552,18 @@ function RecallBody() {
       </div>
       <div className="min-h-0 flex-1">
         <SplitCodeEditor
-          reference={cs.reference}
-          draft={cs.draft}
-          lang={cs.code?.lang}
+          reference={reference}
+          draft={draft}
+          lang={code?.lang}
           dark={theme === 'dark'}
           themeKey={themePreset}
-          vim={cs.editorPrefs.vim}
-          wrap={cs.editorPrefs.wrap}
-          hideLeft={cs.blind}
-          peekLeft={cs.peek}
-          splitPct={cs.editorPrefs.splitPct}
-          onSplitPctChange={(splitPct) => cs.setEditorPrefs({ splitPct })}
-          onDraftChange={cs.persistDraft}
+          vim={editorPrefs.vim}
+          wrap={editorPrefs.wrap}
+          hideLeft={blind}
+          peekLeft={peek}
+          splitPct={editorPrefs.splitPct}
+          onSplitPctChange={(splitPct) => setEditorPrefs({ splitPct })}
+          onDraftChange={persistDraft}
         />
       </div>
     </div>

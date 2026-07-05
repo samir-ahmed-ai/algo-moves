@@ -716,9 +716,19 @@
   }
 }
 
-/* gist (problem intro) card — big scene + one-line ask + countdown */
+/* gist (problem intro) card — big scene + arched ask + countdown */
 .mobile-gist-card {
   min-height: 0;
+}
+.mobile-gist-visual {
+  min-height: 0;
+  gap: 0;
+}
+.mobile-gist-visual .gist-arc-caption {
+  flex: 0 0 auto;
+  max-width: 100%;
+  max-height: 96px;
+  margin: 0 auto -6px;
 }
 .mobile-gist-stage {
   min-height: 168px;
@@ -728,9 +738,6 @@
   display: block;
   height: 100%;
   width: 100%;
-}
-.mobile-gist-ask {
-  text-wrap: balance;
 }
 
 .mobile-gist-stage::after {

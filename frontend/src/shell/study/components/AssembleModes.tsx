@@ -18,7 +18,7 @@ import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { ASSEMBLE_GAMES } from '@/components/puzzle/assemble';
 import { assembleGameStatsStore } from '@/shell/assembleGameStats';
 import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText, useCanvasStatic } from '@/shell/canvas';
-import { useCodeStudio } from '@/shell/study/hooks/useCodeStudio';
+import { useCodeStudioContent, useCodeStudioPhase } from '@/shell/study/hooks/useCodeStudio';
 import type { CodePiece } from '@/lib/code';
 import { blockKind, BLOCK_META } from '@/lib/code';
 import { readStorageText, writeStorageText } from '@/store/persistence';
@@ -253,11 +253,12 @@ function PuzzleBlock({
 }
 
 function BlocksMode() {
-  const cs = useCodeStudio();
-  const pieces = cs.pieces!;
-  const correctIds = useMemo(() => pieces.map((p) => p.id), [pieces]);
-  const byId = useMemo(() => new Map(pieces.map((p) => [p.id, p])), [pieces]);
-  const resetSig = `${cs.reference.length}:${pieces.length}`;
+  const { reference } = useCodeStudioContent();
+  const { pieces } = useCodeStudioPhase();
+  const resolved = pieces!;
+  const correctIds = useMemo(() => resolved.map((p) => p.id), [resolved]);
+  const byId = useMemo(() => new Map(resolved.map((p) => [p.id, p])), [resolved]);
+  const resetSig = `${reference.length}:${resolved.length}`;
 
   const [order, setOrder] = useState<string[]>(() => scramble(correctIds));
   const prev = useRef(resetSig);
@@ -341,14 +342,14 @@ function BlocksMode() {
 }
 
 function ScrambleMode() {
-  const cs = useCodeStudio();
-  const lines = useMemo(() => codeLines(cs.reference), [cs.reference]);
+  const { reference } = useCodeStudioContent();
+  const lines = useMemo(() => codeLines(reference), [reference]);
   const correct = lines.map((_, i) => `l${i}`);
   const byId = useMemo(() => new Map(correct.map((id, i) => [id, lines[i]])), [correct, lines]);
   return (
     <OrderBoard
       correctIds={correct}
-      resetSig={`${cs.reference.length}:scr`}
+      resetSig={`${reference.length}:scr`}
       renderRow={(id) => {
         const l = byId.get(id)!;
         return <Mono indent={l.indent}>{l.text}</Mono>;
@@ -370,14 +371,15 @@ function ScrambleMode() {
 }
 
 function RushMode() {
-  const cs = useCodeStudio();
-  const pieces = cs.pieces!;
-  const byId = useMemo(() => new Map(pieces.map((p) => [p.id, p])), [pieces]);
-  const correct = pieces.map((p) => p.id);
+  const { active, reference } = useCodeStudioContent();
+  const { pieces } = useCodeStudioPhase();
+  const resolved = pieces!;
+  const byId = useMemo(() => new Map(resolved.map((p) => [p.id, p])), [resolved]);
+  const correct = resolved.map((p) => p.id);
   const { item } = useCanvasStatic();
-  const bestScope = `${item.id}:${cs.active}`;
+  const bestScope = `${item.id}:${active}`;
   const bestKey = STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', bestScope);
-  const legacyBestKey = STORAGE_KEYS.RUSH_BEST(item.id, cs.active);
+  const legacyBestKey = STORAGE_KEYS.RUSH_BEST(item.id, active);
 
   const [runKey, setRunKey] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -439,7 +441,7 @@ function RushMode() {
       <OrderBoard
         key={runKey}
         correctIds={correct}
-        resetSig={`${cs.reference.length}:rush:${runKey}`}
+        resetSig={`${reference.length}:rush:${runKey}`}
         onSolved={finish}
         renderRow={(id) => <Mono>{byId.get(id)!.code}</Mono>}
         footer={({ solved, correctCount, total }) =>
@@ -455,10 +457,10 @@ function RushMode() {
 }
 
 function FirstLetterMode() {
-  const cs = useCodeStudio();
-  const lines = useMemo(() => codeLines(cs.reference), [cs.reference]);
+  const { reference } = useCodeStudioContent();
+  const lines = useMemo(() => codeLines(reference), [reference]);
   const [vals, setVals] = useState<string[]>(() => lines.map(() => ''));
-  useEffect(() => setVals(lines.map(() => '')), [cs.reference, lines]);
+  useEffect(() => setVals(lines.map(() => '')), [reference, lines]);
   const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
 
   let done = 0;
@@ -525,10 +527,10 @@ function buildCloze(ref: string): ClozeSeg[][] {
 }
 
 function ClozeMode() {
-  const cs = useCodeStudio();
-  const segments = useMemo(() => buildCloze(cs.reference), [cs.reference]);
+  const { reference } = useCodeStudioContent();
+  const segments = useMemo(() => buildCloze(reference), [reference]);
   const [vals, setVals] = useState<Record<string, string>>({});
-  useEffect(() => setVals({}), [cs.reference]);
+  useEffect(() => setVals({}), [reference]);
 
   const blanks = segments.flat().filter((s): s is Extract<ClozeSeg, { t: 'blank' }> => s.t === 'blank');
   const bank = Array.from(new Set(blanks.map((b) => b.answer))).sort();
@@ -582,21 +584,22 @@ function ClozeMode() {
 }
 
 function BlanksMode() {
-  const cs = useCodeStudio();
-  const pieces = cs.pieces!;
-  const [filled, setFilled] = useState<(string | null)[]>(() => pieces.map(() => null));
+  const { reference } = useCodeStudioContent();
+  const { pieces } = useCodeStudioPhase();
+  const resolved = pieces!;
+  const [filled, setFilled] = useState<(string | null)[]>(() => resolved.map(() => null));
   const [sel, setSel] = useState<number | null>(null);
   const [wrong, setWrong] = useState<number | null>(null);
   useEffect(() => {
-    setFilled(pieces.map(() => null));
+    setFilled(resolved.map(() => null));
     setSel(null);
-  }, [cs.reference, pieces]);
+  }, [reference, resolved]);
 
-  const tray = pieces.filter((_, i) => !filled.includes(pieces[i].id));
+  const tray = resolved.filter((_, i) => !filled.includes(resolved[i].id));
   const place = (pieceId: string) => {
     const slot = sel ?? filled.findIndex((f) => f === null);
     if (slot < 0) return;
-    if (pieces[slot].id === pieceId) {
+    if (resolved[slot].id === pieceId) {
       setFilled((f) => f.map((x, i) => (i === slot ? pieceId : x)));
       setSel(null);
     } else {
@@ -610,7 +613,7 @@ function BlanksMode() {
     <div className="flex flex-col gap-3 lg:flex-row">
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Label>Skeleton</Label>
-        {pieces.map((p, i) => {
+        {resolved.map((p, i) => {
           const got = filled[i];
           return (
             <button
@@ -637,7 +640,7 @@ function BlanksMode() {
             </button>
           );
         })}
-        <Meter value={done} max={pieces.length} tone={done === pieces.length ? 'good' : 'accent'} />
+        <Meter value={done} max={resolved.length} tone={done === resolved.length ? 'good' : 'accent'} />
       </div>
       <div className="flex w-full shrink-0 flex-col gap-1.5 lg:w-[44%]">
         <Label>Blocks</Label>
@@ -661,8 +664,8 @@ function BlanksMode() {
 }
 
 function ParsonsMode() {
-  const cs = useCodeStudio();
-  const base = useMemo(() => codeLines(cs.reference), [cs.reference]);
+  const { reference } = useCodeStudioContent();
+  const base = useMemo(() => codeLines(reference), [reference]);
 
   // Correct lines plus a couple of near-miss distractors.
   const { items, correctIds } = useMemo(() => {
@@ -780,17 +783,18 @@ function ParsonsMode() {
  * mobile deck, hosted here so the learning page gets the same games. */
 
 function GameMode({ id }: { id: string }) {
-  const cs = useCodeStudio();
+  const { active, code } = useCodeStudioContent();
+  const { pieces } = useCodeStudioPhase();
   const { item } = useCanvasStatic();
   const game = ASSEMBLE_GAMES.find((g) => g.id === id);
-  const lang = cs.code?.lang;
-  const scope = `${item.id}:${lang ?? cs.active}`;
+  const lang = code?.lang;
+  const scope = `${item.id}:${lang ?? active}`;
   const stats = useMemo(() => assembleGameStatsStore(scope), [scope]);
   if (!game) return null;
   return (
     <game.Component
-      key={`${item.id}:${cs.active}:${id}`}
-      pieces={cs.pieces!}
+      key={`${item.id}:${active}:${id}`}
+      pieces={pieces!}
       lang={lang}
       storageKey={scope}
       stats={stats}
@@ -826,11 +830,12 @@ const MODES: { v: Mode; label: ReactNode }[] = [
 ];
 
 export function AssembleModes() {
-  const cs = useCodeStudio();
+  const { reference } = useCodeStudioContent();
+  const { pieces } = useCodeStudioPhase();
   const isMobile = useIsMobile();
   const [mode, setMode] = useState<Mode>(() => (isMobile ? 'snap-call' : 'blocks'));
 
-  if (!cs.pieces || !cs.reference) {
+  if (!pieces || !reference) {
     return (
       <div className="grid min-h-0 flex-1 place-items-center p-6">
         <EmptyState icon={<Puzzle className="h-4 w-4" />} title="Nothing to assemble" hint="This problem has no source to break into pieces." />

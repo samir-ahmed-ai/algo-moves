@@ -22,6 +22,7 @@ import { assembleGameStatsStore } from '../../assembleGameStats';
 import { quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '@/lib/quiz';
 import { correctIndex, type GistCard as GistCardData, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
+import { GistArcCaption } from '../../../components/shared/GistArcCaption';
 import { GistScene } from '../scenes/gistScenes';
 import { MobileVizShell } from '../MobileVizShell';
 import { tintFor } from './mobileCardTints';
@@ -185,11 +186,14 @@ export function GistCardView({
         <TimerRing remaining={remaining} total={GIST_SECONDS} paused={paused} onToggle={togglePause} />
       </div>
 
-      <div
-        className="mobile-gist-stage relative mt-2 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-3xl border border-edge/60 bg-panel2/40 text-ink2"
-        data-noswipe
-      >
-        <GistScene key={item.id} item={item} className="h-full w-full" />
+      <div className="mobile-gist-visual mt-2 flex min-h-0 flex-1 flex-col">
+        <GistArcCaption primary={card.gist} secondary={item.title} />
+        <div
+          className="mobile-gist-stage relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-3xl border border-edge/60 bg-panel2/40 text-ink2"
+          data-noswipe
+        >
+          <GistScene key={item.id} item={item} className="h-full w-full" />
+        </div>
       </div>
 
       <div className="shrink-0 pt-4">
@@ -202,10 +206,6 @@ export function GistCardView({
           )}
           <DiffChip item={item} />
         </div>
-        <h2 className="mobile-gist-ask mt-2 text-[20px] font-semibold leading-snug tracking-tight text-ink">
-          {card.gist}
-        </h2>
-        <p className="mt-1 text-[13px] text-ink3">{item.title}</p>
       </div>
 
       <div className="mt-4 flex shrink-0 flex-col gap-2 pb-1">
