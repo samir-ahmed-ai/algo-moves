@@ -18,10 +18,10 @@ describe('interviewLayout', () => {
       expect(kinds).toContain('notes');
     });
 
-    it('includes problem panel when options specify it', () => {
+    it('includes workbench panel when options specify it', () => {
       const nodes = buildInterviewBoardNodes({ includeProblem: true, includeNotes: false });
       const kinds = nodes.map((n) => n.data.kind);
-      expect(kinds).toContain('problem');
+      expect(kinds).toContain('workbench');
       expect(kinds).not.toContain('notes');
     });
   });

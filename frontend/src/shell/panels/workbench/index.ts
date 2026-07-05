@@ -1,0 +1,1 @@
+export { WorkbenchPanelBody } from './WorkbenchPanelBody';

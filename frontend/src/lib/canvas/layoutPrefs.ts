@@ -54,4 +54,7 @@ export type CanvasSnapRegion =
   | 'bottom-left'
   | 'bottom-right'
   | 'center'
-  | 'maximize';
+  | 'maximize'
+  | 'first-third'
+  | 'center-third'
+  | 'last-third';

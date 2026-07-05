@@ -24,9 +24,9 @@ export function buildInterviewBoardNodes(opts: InterviewBoardOptions | boolean =
     nodes.splice(1, 0, notes);
   }
   if (resolved.includeProblem) {
-    const problem = createPanelByType('problem', { x: 1000, y: 40 }) as PanelFlowNode;
-    problem.width = 480;
-    nodes.push(problem);
+    const workbench = createPanelByType('workbench', { x: 1000, y: 40 }) as PanelFlowNode;
+    workbench.width = 1200;
+    nodes.push(workbench);
   }
   return nodes;
 }

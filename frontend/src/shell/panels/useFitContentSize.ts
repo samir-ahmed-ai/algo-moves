@@ -32,7 +32,7 @@ export function useFitContentSize(id: string, kind: string, collapsed: boolean, 
           return { ...n, height: h };
         });
         if (!changed) return nds;
-        if (mode === 'visualize' && kind === 'problem') {
+        if (mode === 'visualize' && kind === 'workbench') {
           return layoutVisualizeCanvas(mapped as PanelFlowNode[], layoutVisualizeOptions());
         }
         return mapped;

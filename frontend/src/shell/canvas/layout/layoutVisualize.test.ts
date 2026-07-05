@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PanelFlowNode, PanelNodeData } from '../nodes/PanelNode';
-import { CANVAS_MARGIN, layoutSize, layoutVisualizeCanvas } from './layout';
-import { vizMinWidth, vizWireGap } from '../ui/canvasTokens';
+import { CANVAS_MARGIN, layoutVisualizeCanvas } from './layout';
 
 function panel(
   kind: string,
@@ -11,91 +10,37 @@ function panel(
     id: kind,
     type: 'panel',
     position: { x: 0, y: 0 },
-    width: 400,
-    height: kind === 'viz' ? 600 : kind === 'problem' ? 180 : 100,
+    width: kind === 'workbench' ? 1400 : 400,
+    height: kind === 'workbench' ? 800 : 100,
     data: { kind, title: kind } as PanelNodeData,
     ...overrides,
   } as PanelFlowNode;
 }
 
-function expectCenteredAgainstViz(laid: PanelFlowNode[], colH: number, problem?: PanelFlowNode) {
-  const viz = laid.find((n) => n.data.kind === 'viz');
-  expect(viz).toBeDefined();
-
-  const vizY = viz!.position.y;
-  const vizH = viz!.height ?? 0;
-  const stackY = vizY + Math.max(0, (vizH - colH) / 2);
-
-  if (problem) {
-    expect(problem.position.y).toBeCloseTo(stackY, 0);
-  }
-
-  const colMid = stackY + colH / 2;
-  expect(colMid).toBeCloseTo(vizY + vizH / 2, 0);
-}
-
 describe('layoutVisualizeCanvas', () => {
-  it('centers the unified problem panel against the visualizer', () => {
-    const nodes = [
-      panel('problem', { height: 256 }),
-      panel('viz', { height: 640, width: 720 }),
-    ];
+  it('fills the viewport with the workbench node', () => {
     const viewport = { width: 1200, height: 800 };
-    const laid = layoutVisualizeCanvas(nodes, { viewport });
+    const laid = layoutVisualizeCanvas([panel('workbench')], { viewport });
+    const wb = laid.find((n) => n.data.kind === 'workbench')!;
 
-    const problem = laid.find((n) => n.data.kind === 'problem')!;
-
-    expect(problem.height).toBe(256);
-    expectCenteredAgainstViz(laid, 256, problem);
+    expect(wb.position).toEqual({ x: CANVAS_MARGIN, y: CANVAS_MARGIN });
+    expect(wb.width).toBe(viewport.width - CANVAS_MARGIN * 2);
+    expect(wb.height).toBe(800);
   });
 
-  it('centers a lone problem panel against the visualizer', () => {
-    const nodes = [panel('problem', { height: 200 }), panel('viz', { height: 500, width: 720 })];
-    const laid = layoutVisualizeCanvas(nodes, { viewport: { width: 1200, height: 700 } });
-    const problem = laid.find((n) => n.data.kind === 'problem')!;
-
-    expectCenteredAgainstViz(laid, 200, problem);
-  });
-
-  it('re-centers the left column when problem height changes without viewport', () => {
+  it('lays optional panels to the right of the workbench', () => {
     const viewport = { width: 1200, height: 800 };
-    const initial = layoutVisualizeCanvas(
-      [panel('problem', { height: 160 }), panel('viz')],
-      { viewport },
-    );
-    const viz = initial.find((n) => n.data.kind === 'viz')!;
-    const tallerProblem = layoutVisualizeCanvas(
-      [
-        panel('problem', { height: 240, position: initial.find((n) => n.data.kind === 'problem')!.position }),
-        { ...viz, height: viz.height, width: viz.width },
-      ],
-    );
-    const problem = tallerProblem.find((n) => n.data.kind === 'problem')!;
+    const laid = layoutVisualizeCanvas([panel('workbench'), panel('notes')], { viewport });
+    const wb = laid.find((n) => n.data.kind === 'workbench')!;
+    const notes = laid.find((n) => n.data.kind === 'notes')!;
 
-    expectCenteredAgainstViz(tallerProblem, 240, problem);
+    expect(notes.position.x).toBeGreaterThan(wb.position.x + (wb.width ?? 0));
+    expect(notes.position.y).toBeCloseTo(CANVAS_MARGIN + (800 - 100) / 2, 0);
   });
 
-  it('hugs the visualizer to its content height and centers it in the viewport', () => {
-    const nodes = [panel('problem'), panel('viz', { height: 320 })];
-    const availH = 800 - CANVAS_MARGIN * 2;
-    const laid = layoutVisualizeCanvas(nodes, { viewport: { width: 1200, height: 800 } });
-    const viz = laid.find((n) => n.data.kind === 'viz')!;
-
-    expect(viz.height).toBe(320);
-    expect(viz.position.y).toBeCloseTo(CANVAS_MARGIN + (availH - 320) / 2, 0);
-  });
-
-  it('expands the visualizer to fill remaining viewport width', () => {
-    const viewport = { width: 1200, height: 800 };
-    const laid = layoutVisualizeCanvas(
-      [panel('problem'), panel('viz', { width: 400 })],
-      { viewport },
-    );
-    const viz = laid.find((n) => n.data.kind === 'viz')!;
-    const colW = layoutSize('problem', viewport).w;
-    const wireGap = vizWireGap(colW);
-    const availW = Math.max(vizMinWidth(colW), viewport.width - CANVAS_MARGIN * 2 - colW - wireGap);
-
-    expect(viz.width).toBe(availW);
+  it('lays out nodes in a row when no workbench is present', () => {
+    const laid = layoutVisualizeCanvas([panel('notes'), panel('whiteboard')]);
+    expect(laid).toHaveLength(2);
+    expect(laid[1].position.x).toBeGreaterThan(laid[0].position.x);
   });
 });

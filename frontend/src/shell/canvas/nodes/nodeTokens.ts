@@ -25,6 +25,7 @@ function scaleEstH(base: number): number {
  * `estH` is the initial dagre height before ResizeObserver measures.
  */
 const SIZE: Record<string, PanelSize> = {
+  workbench: { w: 1400, estH: scaleEstH(800) },
   problem: { w: STRUDEL_NODE_W, estH: scaleEstH(380), cap: NODE_MAX_W },
   viz: { w: STRUDEL_NODE_W, estH: 550 },
   replay: { w: STRUDEL_NODE_W, estH: 450, cap: STRUDEL_NODE_W },
@@ -64,6 +65,7 @@ const SIZE: Record<string, PanelSize> = {
 const DEFAULT_SIZE: PanelSize = { w: STRUDEL_NODE_W, estH: 350, cap: STRUDEL_NODE_W };
 
 const KIND_TIER: Record<string, NodeTier> = {
+  workbench: 'wide',
   problem: 'narrow',
   viz: 'board',
   replay: 'standard',
@@ -141,6 +143,9 @@ export function layoutSize(kind: string, viewport?: { width: number; height: num
     const availW = Math.max(STRUDEL_NODE_W, viewport.width * 0.55);
     if (kind === 'viz') {
       return { w: availW, estH: availH, cap };
+    }
+    if (kind === 'workbench') {
+      return { w: Math.max(1400, viewport.width - 48), estH: availH, cap };
     }
   }
 

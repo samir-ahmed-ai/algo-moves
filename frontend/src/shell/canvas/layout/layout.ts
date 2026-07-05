@@ -9,19 +9,14 @@ import {
   panelTitle,
 } from '../../../core/panelRegistry';
 import type { PanelFlowNode } from '../nodes/PanelNode';
-import { getMeasuredHeight } from '../nodes/measuredCache';
 import {
   CANVAS_MARGIN,
   CANVAS_NODE_SEP,
-  canvasNodeSep,
   MIN_VIEWPORT_HEIGHT,
-  vizMinWidth,
-  vizWireGap,
 } from '../ui/canvasTokens';
 import {
   layoutEstimate,
   layoutHeight,
-  layoutSize,
   sizeOf,
   STRUDEL_NODE_W,
 } from '../nodes/nodeTokens';
@@ -132,27 +127,27 @@ export const LAYOUT_PRESET_META: Record<
   Full: {
     label: 'Full',
     description: 'Every panel — maximum context',
-    sketch: '[P][V][+][+][+]',
+    sketch: '[W][+][+][+]',
   },
   TraceFocus: {
     label: 'Trace focus',
-    description: 'Core learn panels — problem path + code',
-    sketch: '[P][V] · predict · code',
+    description: 'Core learn panels — workbench + practice',
+    sketch: '[W] · predict · code',
   },
   Minimal: {
     label: 'Minimal',
     description: 'Bare essentials, no extras',
-    sketch: '[P][V]',
+    sketch: '[W]',
   },
   Theater: {
     label: 'Theater',
-    description: 'Wide visualizer — tighter wire corridor',
-    sketch: '[P]|████████V████████|',
+    description: 'Wide workbench — presentation layout',
+    sketch: '[████████W████████]',
   },
   Demo: {
     label: 'Demo',
     description: 'Theater layout + presentation hint',
-    sketch: '[P]|████V████| 🎯',
+    sketch: '[████W████] 🎯',
   },
 };
 
@@ -186,8 +181,13 @@ export function nodeForKind(
   return makeNode(id, kindTitle(plugin, id), position);
 }
 
-/** Obsolete shell edges from before the unified problem panel; stripped on load. */
-export const DEPRECATED_VISUALIZE_EDGES = new Set(['examples->problem', 'examples->viz']);
+/** Obsolete shell edges from before the unified workbench panel; stripped on load. */
+export const DEPRECATED_VISUALIZE_EDGES = new Set([
+  'examples->problem',
+  'examples->viz',
+  'problem->viz',
+  'viz->code',
+]);
 
 /** Shell edges always restored on sanitize (data path). */
 export const REQUIRED_VISUALIZE_EDGES = new Set<string>();
@@ -196,16 +196,8 @@ export const REQUIRED_VISUALIZE_EDGES = new Set<string>();
 export const VIZ_INPUT_HANDLE = 'viz-in';
 
 const SHELL_WIRES: Record<CanvasMode, [string, string, string?][]> = {
-  play: [
-    ['problem', 'viz'],
-    ['viz', 'code'],
-    ['viz', 'reassemble'],
-    ['viz', 'recall'],
-  ],
-  visualize: [
-    ['problem', 'viz'],
-    ['viz', 'code'],
-  ],
+  play: [],
+  visualize: [],
   learn: [
     ['predict', 'mastery'],
     ['mastery', 'code'],
@@ -324,33 +316,7 @@ function findKind(nodes: PanelFlowNode[], kind: string) {
   return nodes.find((n) => n.id === kind || n.data.kind === kind);
 }
 
-/** Vertically center a stack of height `colH` within a span of height `spanH`. */
-function centerStackY(colY: number, spanH: number, colH: number): number {
-  return colY + Math.max(0, (spanH - colH) / 2);
-}
-
-/** Position the unified problem panel in the left column. */
-function layoutLeftColumn(
-  problem: PanelFlowNode | undefined,
-  x: number,
-  y: number,
-): { nodes: PanelFlowNode[]; colW: number; colH: number } {
-  const fixedW = layoutEstimate('problem').w;
-  if (!problem) return { nodes: [], colW: fixedW, colH: 0 };
-
-  const problemNode = rowHandles({
-    ...problem,
-    position: { x, y } as XYPosition,
-    width: fixedW,
-  });
-  return { nodes: [problemNode], colW: fixedW, colH: nodeH(problemNode) };
-}
-
-function leftColumnHeight(problem: PanelFlowNode | undefined): number {
-  return problem ? nodeH(problem) : 0;
-}
-
-/** Visualize mode: unified problem panel on the left, vertically centered against the visualizer. */
+/** Visualize mode: unified workbench fills the viewport; optional panels lay out to the right. */
 export function layoutVisualizeCanvas(
   nodes: PanelFlowNode[],
   options?: LayoutVisualizeOptions,
@@ -358,50 +324,31 @@ export function layoutVisualizeCanvas(
   if (nodes.length === 0) return nodes;
 
   const vp = options?.viewport;
-  const theater = options?.preset === 'Theater' || options?.preset === 'Demo';
-  const problem = findKind(nodes, 'problem');
-  const viz = findKind(nodes, 'viz');
-  const rest = nodes.filter((n) => n !== problem && n !== viz);
+  const workbench = findKind(nodes, 'workbench');
+  const rest = nodes.filter((n) => n !== workbench);
 
-  const colW = vp ? layoutSize('problem', vp).w : layoutEstimate('problem').w;
-  const nodeSep = canvasNodeSep(colW);
-  const wireGap = vizWireGap(colW, theater ? 'theater' : 'default');
   const colX = CANVAS_MARGIN;
   const colY = CANVAS_MARGIN;
 
-  if (problem && viz && vp) {
-    const availW = Math.max(
-      vizMinWidth(colW),
-      vp.width - CANVAS_MARGIN * 2 - colW - wireGap,
-    );
+  if (workbench && vp) {
+    const availW = Math.max(STRUDEL_NODE_W * 2, vp.width - CANVAS_MARGIN * 2);
     const availH = Math.max(MIN_VIEWPORT_HEIGHT, vp.height - CANVAS_MARGIN * 2);
-    const colH = leftColumnHeight(problem);
-    const stackY = centerStackY(colY, availH, colH);
-
-    const { nodes: colNodes } = layoutLeftColumn(problem, colX, stackY);
-
-    const vizX = colX + colW + wireGap;
-    // The visualizer hugs its board + rail (measured) rather than stretching to
-    // the full viewport height, so it no longer leaves a tall empty node.
-    // Centre it against the same span as the left column.
-    const vizH = Math.min(availH, viz.measured?.height ?? getMeasuredHeight(viz.id) ?? nodeH(viz));
-    const vizY = colY + Math.max(0, (availH - vizH) / 2);
+    const wbH = Math.max(availH, nodeH(workbench));
     const positioned: PanelFlowNode[] = [
-      ...colNodes,
       rowHandles({
-        ...viz,
-        position: { x: vizX, y: vizY },
+        ...workbench,
+        position: { x: colX, y: colY },
         width: availW,
-        height: vizH,
+        height: wbH,
       }),
     ];
 
-    let x = vizX + availW + nodeSep;
+    let x = colX + availW + CANVAS_NODE_SEP;
     for (const n of rest) {
       positioned.push(
         rowHandles({
           ...n,
-          position: { x, y: colY + Math.max(0, (availH - nodeH(n)) / 2) },
+          position: { x, y: colY + Math.max(0, (wbH - nodeH(n)) / 2) },
         }),
       );
       x += nodeW(n) + CANVAS_NODE_SEP;
@@ -409,48 +356,37 @@ export function layoutVisualizeCanvas(
     return positioned;
   }
 
-  const colH = leftColumnHeight(problem);
-  const vizH = viz ? Math.max(nodeH(viz), colH) : colH;
-  const stackY = viz ? centerStackY(colY, vizH, colH) : colY;
-  const { nodes: colNodes } = layoutLeftColumn(problem, colX, stackY);
-  const positioned: PanelFlowNode[] = [...colNodes];
-
-  let x = colX + colW + wireGap;
-  const rowH = Math.max(colH, viz ? nodeH(viz) : 0, ...rest.map((n) => nodeH(n)));
-
-  if (viz) {
-    positioned.push(
+  if (workbench) {
+    const wbH = nodeH(workbench);
+    const positioned: PanelFlowNode[] = [
       rowHandles({
-        ...viz,
-        position: { x, y: colY },
-        height: Math.max(nodeH(viz), colH),
+        ...workbench,
+        position: { x: colX, y: colY },
+        width: nodeW(workbench),
+        height: wbH,
       }),
-    );
-    x += nodeW(viz) + CANVAS_NODE_SEP;
+    ];
+    let x = colX + nodeW(workbench) + CANVAS_NODE_SEP;
+    for (const n of rest) {
+      positioned.push(
+        rowHandles({
+          ...n,
+          position: { x, y: colY + Math.max(0, (wbH - nodeH(n)) / 2) },
+        }),
+      );
+      x += nodeW(n) + CANVAS_NODE_SEP;
+    }
+    return positioned;
   }
 
-  for (const n of rest) {
-    positioned.push(
-      rowHandles({
-        ...n,
-        position: { x, y: colY + Math.max(0, (rowH - nodeH(n)) / 2) },
-      }),
-    );
-    x += nodeW(n) + CANVAS_NODE_SEP;
-  }
-
-  // Nodes with no problem/viz match (edge case): lay out in a row
-  if (positioned.length === 0) {
-    let rx = CANVAS_MARGIN;
-    const rH = Math.max(...nodes.map((n) => nodeH(n)));
-    return nodes.map((n) => {
-      const pos = { x: rx, y: CANVAS_MARGIN + Math.max(0, (rH - nodeH(n)) / 2) };
-      rx += nodeW(n) + CANVAS_NODE_SEP;
-      return rowHandles({ ...n, position: pos });
-    });
-  }
-
-  return positioned;
+  // No workbench: lay out remaining panels in a row.
+  let rx = CANVAS_MARGIN;
+  const rH = Math.max(...nodes.map((n) => nodeH(n)));
+  return nodes.map((n) => {
+    const pos = { x: rx, y: CANVAS_MARGIN + Math.max(0, (rH - nodeH(n)) / 2) };
+    rx += nodeW(n) + CANVAS_NODE_SEP;
+    return rowHandles({ ...n, position: pos });
+  });
 }
 
 /** Learn mode: compact practice panels in a top row, wide Code Studio anchored below. */

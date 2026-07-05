@@ -68,6 +68,12 @@ describe('regionRect', () => {
     expect(r.x).toBeCloseTo(12 + (976 - 976 * 0.6) / 2);
     expect(r.y).toBeCloseTo(12 + (776 - 776 * 0.6) / 2);
   });
+
+  it('splits vertical thirds', () => {
+    expect(regionRect('first-third', VISIBLE).width).toBeCloseTo(976 / 3);
+    expect(regionRect('center-third', VISIBLE).x).toBeCloseTo(12 + 976 / 3);
+    expect(regionRect('last-third', VISIBLE).x).toBeCloseTo(12 + (2 * 976) / 3);
+  });
 });
 
 describe('applyCanvasSnap', () => {
@@ -94,6 +100,7 @@ describe('applyCanvasSnap', () => {
     expect(snapped.position).toEqual({ x: 12, y: 12 });
     expect(snapped.width).toBe(976);
     expect(snapped.height).toBe(776);
+    expect(snapped.data.snapFill).toBe(true);
   });
 
   it('respects layoutFixedWidth cap', () => {

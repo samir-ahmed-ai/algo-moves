@@ -1,5 +1,5 @@
 import type { LayoutEntry } from '@/store/canvas-layout';
-import { DOCK_ONLY_PANELS } from './layout';
+import { DEPRECATED_VISUALIZE_EDGES, DOCK_ONLY_PANELS } from './layout';
 
 // Pure migrations for persisted canvas layouts. Extracted from CanvasStage so the
 // legacy-format upgrades stay unit-testable and out of the render component.
@@ -39,7 +39,33 @@ export function migrateVisualizeLayoutEntry(entry: LayoutEntry): LayoutEntry {
   delete nodes.examples;
   if (!removed.includes('examples')) removed.push('examples');
 
-  return { nodes, removed };
+  // Migrate legacy problem + viz + code trio into unified workbench.
+  const legacyCore = ['problem', 'viz', 'code'] as const;
+  const hasLegacyCore = legacyCore.some((id) => nodes[id]);
+  if (hasLegacyCore && !nodes.workbench) {
+    const saved = legacyCore.map((id) => nodes[id]).filter(Boolean);
+    const leftmost = saved.reduce(
+      (best, cur) => (!best || cur!.position.x < best.position.x ? cur! : best),
+      saved[0],
+    );
+    const combinedW = saved.reduce((sum, cur) => sum + (cur!.width ?? 0), 0);
+    nodes.workbench = {
+      position: leftmost?.position ?? { x: 0, y: 0 },
+      ...(combinedW > 0 ? { width: combinedW } : {}),
+    };
+  }
+  for (const id of legacyCore) {
+    if (nodes[id]) delete nodes[id];
+    if (!removed.includes(id)) removed.push(id);
+  }
+
+  const removedEdges = entry.removedEdges?.filter((id) => !DEPRECATED_VISUALIZE_EDGES.has(id));
+
+  return {
+    nodes,
+    removed,
+    ...(removedEdges !== undefined ? { removedEdges } : {}),
+  };
 }
 
 /** Migrate legacy code+scratch layouts to unified Code Studio. */

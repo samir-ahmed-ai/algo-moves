@@ -12,7 +12,7 @@ export function snapNodeWidth(n: PanelFlowNode): number | undefined {
 export function snapNodeLayout(n: PanelFlowNode): { position: { x: number; y: number }; width?: number } {
   const kind = (n.data as PanelNodeData | undefined)?.kind ?? n.id;
   const entry: { position: { x: number; y: number }; width?: number } = { position: n.position };
-  if (kind !== 'viz') {
+  if (kind !== 'viz' && kind !== 'workbench') {
     const w = snapNodeWidth(n);
     if (w != null) entry.width = w;
   }

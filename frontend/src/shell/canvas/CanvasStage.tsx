@@ -18,6 +18,7 @@ import {
   type ConnectionLineComponentProps,
   type Edge,
   type Node,
+  type NodeChange,
 } from '@xyflow/react';
 import { Crosshair, ChevronsDownUp, Trash2, Palette, Maximize, LayoutGrid, Lock } from 'lucide-react';
 import type { CanvasMode, Frame, Player, ProblemPlugin } from '../../core';
@@ -67,6 +68,7 @@ import {
   type LayoutPreset,
 } from './layout/layout';
 import { snapNodeLayout } from './nodes/nodeSnapshot';
+import { setMeasuredHeight } from './nodes/measuredCache';
 import { buildCanvasFrame, organizeCurrentCanvasFrame } from './frame/canvasFrame';
 import { sanitizeVisualizeEdges } from './edges/edgeSanitization';
 import { useCanvasLayoutPersistence, type Saved } from './hooks/useCanvasLayoutPersistence';
@@ -246,6 +248,29 @@ function Inner({
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
   const [dragOver, setDragOver] = useState(false);
+
+  const handleNodesChange = useCallback(
+    (changes: NodeChange<PanelFlowNode>[]) => {
+      onNodesChange(changes);
+      const manualIds = new Set<string>();
+      for (const c of changes) {
+        if (c.type === 'position' && 'dragging' in c && c.dragging === false) manualIds.add(c.id);
+        if (c.type === 'dimensions') manualIds.add(c.id);
+      }
+      if (!manualIds.size) return;
+      setNodes((nds) => {
+        let changed = false;
+        const next = nds.map((n) => {
+          if (!manualIds.has(n.id) || !n.data.snapFill) return n;
+          changed = true;
+          const { snapFill: _, ...rest } = n.data;
+          return { ...n, data: rest };
+        });
+        return changed ? next : nds;
+      });
+    },
+    [onNodesChange, setNodes],
+  );
 
   // Real-time collaboration: publish/apply the shared document, mirror a
   // followed peer's viewport. Inert (no network) until a session is joined.
@@ -678,7 +703,12 @@ function Inner({
       const vp = getViewport();
       const size = viewportSize();
       const visible = visibleFlowRect(vp, size.width, size.height);
-      setNodes((nds) => applyCanvasSnap(nds as PanelFlowNode[], region, visible));
+      setNodes((nds) => {
+        const next = applyCanvasSnap(nds as PanelFlowNode[], region, visible);
+        const snapped = next.find((n) => n.selected);
+        if (snapped?.height != null) setMeasuredHeight(snapped.id, snapped.height);
+        return next;
+      });
     },
     [getViewport, viewportSize, setNodes],
   );
@@ -916,7 +946,7 @@ function Inner({
             style={{ width: '100%', height: '100%' }}
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
+            onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onReconnect={onReconnect}

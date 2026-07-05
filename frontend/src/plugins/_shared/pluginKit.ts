@@ -97,7 +97,7 @@ export function wireTeachingStack<I, S>(config: TeachingStackConfig<I, S>): Teac
 
   const wires: PluginWires = {};
   if (practice.cases?.good.length) {
-    wires.visualize = [['problem', 'cases']];
+    wires.visualize = [['workbench', 'cases']];
   }
   if (quiz?.length && inputs.length > 0) {
     wires.practice = [

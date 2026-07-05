@@ -51,7 +51,7 @@ export const WORKFLOW_PRESET_ACTIONS: WorkflowPresetAction[] = [
     description: 'Host shares a problem; candidate works with quiz',
     mode: 'visualize',
     layoutPreset: 'Minimal',
-    ensurePanels: ['problem', 'viz', 'quiz'],
+    ensurePanels: ['workbench', 'quiz'],
   },
 ];
 

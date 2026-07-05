@@ -38,6 +38,7 @@ const NullBody: ComponentType = () => null;
  * core/panelRegistry `panelsConfig`); unregistered kinds fall back to <TabBody>.
  */
 export const PANEL_BODIES: Record<string, ComponentType> = {
+  workbench: NullBody,
   problem: ProblemPanelBody,
   viz: VizPanelBody,
   replay: ReplayPanelBody,

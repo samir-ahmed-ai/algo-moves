@@ -26,6 +26,7 @@ import { PanelNodeHeader } from '@/shell/panels/PanelNodeHeader';
 import { HeaderExamplesNav } from '@/shell/panels/PanelHeaderControls';
 import { useFitContentSize } from '@/shell/panels/useFitContentSize';
 import { VizPanelBody } from '@/shell/panels/visualize/VizPanelBody';
+import { WorkbenchPanelBody } from '@/shell/panels/workbench';
 import { TransportBar } from '../ui/TransportBarCore';
 
 export type { PanelFlowNode, PanelNodeData } from '@/shell/panels/panelTypes';
@@ -35,7 +36,7 @@ export { ReplayContent } from '@/shell/panels/visualize/ReplayPanelBody';
 export { MetricsBody } from '@/shell/panels/visualize/MetricsPanelBody';
 export { PanelBody } from '@/shell/panels/PanelBodyRouter';
 
-export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode>) {
+export function PanelNode({ id, data, selected, width, height }: NodeProps<PanelFlowNode>) {
   const nodeStyle = data.style;
   const kindAccent = panelAccent(data.kind);
   const accent = panelStroke(nodeStyle, data.accent ?? kindAccent);
@@ -48,8 +49,10 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   const isCollabCode = data.kind === 'collab-code';
   const isWhiteboard = data.kind === 'whiteboard';
   const isProblem = data.kind === 'problem';
-  const showTargetHandle = !isProblem;
-  const headerData = isProblem && mode === 'visualize' ? { ...data, title: item.title } : data;
+  const isWorkbench = data.kind === 'workbench';
+  const showTargetHandle = !isProblem && !isWorkbench;
+  const headerData =
+    (isProblem || isWorkbench) && mode === 'visualize' ? { ...data, title: item.title } : data;
   const collapsed = !!data.collapsed;
   const showSourceHandle = !collapsed;
   const locked = !!data.locked;
@@ -57,7 +60,8 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   const maxPanelW = layoutFixedWidth(data.kind ?? id);
   const bodyCap = layoutCap(data.kind ?? id);
   const narrowBody = nodeTier(data.kind ?? id) === 'narrow';
-  const panelRef = useFitContentSize(id, data.kind ?? id, collapsed, true);
+  const snapFill = !!data.snapFill && mode === 'visualize';
+  const panelRef = useFitContentSize(id, data.kind ?? id, collapsed, !snapFill);
   const [showBigO, setShowBigO] = useState(false);
   const { setNodes } = useReactFlow();
   const cc = useConnectedComponentsOptional();
@@ -93,7 +97,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
     }
   };
   const isQuiz = data.kind === 'quiz';
-  const showSideToggle = sideTabs.length > 0 && (isProblem || isViz || isCode || isQuiz);
+  const showSideToggle = sideTabs.length > 0 && (isWorkbench || isProblem || isViz || isCode || isQuiz);
   const sideLabel = sideTabs[0]?.label ?? 'panel';
   const targetPos = mode === 'visualize' ? Position.Left : mode === 'learn' ? Position.Top : dir === 'LR' ? Position.Left : Position.Top;
   const sourcePos = mode === 'visualize' ? Position.Right : mode === 'learn' ? Position.Bottom : dir === 'LR' ? Position.Right : Position.Bottom;
@@ -102,8 +106,9 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
   const vizCanvas = isViz && mode === 'visualize';
   const boardCanvas = isWhiteboard && mode === 'visualize';
   const showNodeTransport = vizCanvas && (present || tweaks.controls);
-  const visualizeFlush = mode === 'visualize' && (isProblem || isViz || isCode || isWhiteboard);
-  const flushBody = vizCanvas || boardCanvas || (mode === 'visualize' && isProblem);
+  const visualizeFlush =
+    mode === 'visualize' && (isWorkbench || isProblem || isViz || isCode || isWhiteboard);
+  const flushBody = vizCanvas || boardCanvas || (mode === 'visualize' && (isProblem || isWorkbench));
 
   const headerProps = {
     id,
@@ -138,8 +143,10 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
     <div
       ref={panelRef}
       className={cn(
-        'panel-node relative flex h-auto flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
+        'panel-node relative flex flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
+        snapFill ? 'h-full min-h-0' : 'h-auto',
         isCode && !collapsed && 'min-h-0 flex-1',
+        isWorkbench && !collapsed && 'min-h-[480px]',
         (isCollabCode || isWhiteboard) && !collapsed && 'min-h-[360px]',
         'w-full',
         selected && 'selected',
@@ -152,6 +159,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
         opacity: nodeStyle?.opacity != null ? panelOpacity(nodeStyle) : locked ? 0.95 : undefined,
         backgroundColor: panelFill(nodeStyle),
         ...(width != null ? { width } : {}),
+        ...(snapFill && height != null ? { height, minHeight: height } : {}),
       }}
     >
       {!collapsed && !locked && (
@@ -170,11 +178,25 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
             ? 'gap-0 px-[var(--node-px,0.75rem)]'
             : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
           isCode && !collapsed && 'min-h-0 flex-1 overflow-hidden',
+          isWorkbench && !collapsed && 'min-h-0 flex-1 overflow-hidden',
           (isCollabCode || isWhiteboard) && !collapsed && 'min-h-[320px] flex-1 overflow-hidden',
-          !vizCanvas && !boardCanvas && 'overflow-hidden',
+          snapFill && !collapsed && 'min-h-0 flex-1 overflow-hidden',
+          !vizCanvas && !boardCanvas && !snapFill && 'overflow-hidden',
         )}
       >
-        {!collapsed && isCode ? (
+        {!collapsed && isWorkbench ? (
+          <CodeStudioProvider>
+            <PanelNodeHeader
+              {...headerProps}
+              inlineToolbar={
+                <div className="nodrag flex min-w-0 flex-1 items-center gap-1">
+                  <HeaderExamplesNav />
+                </div>
+              }
+            />
+            <WorkbenchPanelBody showBigO={showBigO} onBigOOpenChange={setShowBigO} />
+          </CodeStudioProvider>
+        ) : !collapsed && isCode ? (
           <CodeStudioProvider phaseLock={isReassemble ? 'reassemble' : isRecall ? 'recall' : undefined}>
             <PanelNodeHeader
               {...headerProps}
@@ -247,7 +269,7 @@ export function PanelNode({ id, data, selected, width }: NodeProps<PanelFlowNode
         )
       )}
 
-      {!collapsed && showSourceHandle && (
+      {!collapsed && showSourceHandle && !isWorkbench && (
         <Handle type="source" position={sourcePos} className={handleCls} style={portHandleStyle(sourcePos)} />
       )}
     </div>

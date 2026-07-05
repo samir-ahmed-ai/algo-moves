@@ -20,7 +20,7 @@ const plugins = await loadAllPlugins();
 const pluginById = new Map(plugins.map((p) => [p.meta.id, p]));
 
 const BUILTIN_PANELS = new Set([
-  'problem', 'viz', 'replay', 'inspector', 'metrics', 'bigo', 'predict', 'mastery',
+  'workbench', 'replay', 'inspector', 'metrics', 'bigo', 'predict', 'mastery',
   'mistakes', 'explain', 'badges', 'bookmarks', 'editor', 'pattern', 'glossary',
   'diff', 'watch', 'hints', 'path', 'cheatsheet', 'projects', 'notes', 'complexity',
   'edgecases', 'code', 'scratch', 'copy',

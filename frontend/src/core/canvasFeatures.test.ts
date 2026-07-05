@@ -28,21 +28,19 @@ describe('normalizeCanvasMode', () => {
 
 describe('panelRegistry', () => {
   it('has entries for core visualize panels', () => {
-    expect(getPanelConfig('viz')).toBeDefined();
-    expect(getPanelConfig('problem')).toBeDefined();
-    expect(panelTitle('viz')).toBe('Visualizer');
+    expect(getPanelConfig('workbench')).toBeDefined();
+    expect(panelTitle('workbench')).toBe('Workbench');
   });
 
   it('visualize mode has no built-in panels (freeform canvas)', () => {
     const builtins = modeBuiltins('visualize');
-    expect(builtins).not.toContain('problem');
-    expect(builtins).not.toContain('viz');
+    expect(builtins).not.toContain('workbench');
     expect(builtins).toHaveLength(0);
   });
 
-  it('viz is optional in visualize mode', () => {
+  it('workbench is optional in visualize mode', () => {
     const optional = panelsConfig.filter((p) => p.modes.includes('visualize') && p.optional);
-    expect(optional.some((p) => p.id === 'viz')).toBe(true);
+    expect(optional.some((p) => p.id === 'workbench')).toBe(true);
   });
 
   it('every config entry has id and title', () => {

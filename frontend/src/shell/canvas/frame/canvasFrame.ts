@@ -48,11 +48,7 @@ export function buildCanvasFrame(
   const hasRemovedNodes = !!removed?.size;
   const seededProblemCanvas = seedProblemCanvas && mode === 'visualize' && nodes.length === 0 && !hasSavedLayout && !hasRemovedNodes;
   if (seededProblemCanvas) {
-    nodes = [
-      nodeForKind(plugin, 'problem', { x: 0, y: 0 }),
-      nodeForKind(plugin, 'viz', { x: 380, y: 0 }),
-      nodeForKind(plugin, 'code', { x: 760, y: 0 }),
-    ];
+    nodes = [nodeForKind(plugin, 'workbench', { x: 0, y: 0 })];
   }
   if (removed?.size) nodes = nodes.filter((n) => !removed.has(n.id));
   const present = new Set(nodes.map((n) => n.id));
@@ -75,7 +71,7 @@ export function buildCanvasFrame(
       if (!saved[n.id]) return n;
       const kind = n.data.kind ?? n.id;
       const width =
-        mode === 'visualize' && kind === 'viz'
+        mode === 'visualize' && (kind === 'viz' || kind === 'workbench')
           ? n.width
           : restoreNodeWidth(kind, saved[n.id].width, n.width);
       if (mode === 'learn') {

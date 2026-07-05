@@ -55,7 +55,14 @@ export function NodePropertiesBody() {
   const kind = data.kind ?? '';
   // The fit-to-content observer overrides width/height on auto-sized nodes, so
   // numeric editing only sticks where that observer is off (resizable nodes).
-  const resizable = !readOnly && ((kind === 'viz' && mode === 'visualize') || kind === 'code' || kind === 'scratch' || kind === 'reassemble' || kind === 'recall');
+  const resizable =
+    !readOnly &&
+    ((kind === 'workbench' && mode === 'visualize') ||
+      (kind === 'viz' && mode === 'visualize') ||
+      kind === 'code' ||
+      kind === 'scratch' ||
+      kind === 'reassemble' ||
+      kind === 'recall');
   const w = Math.round(node.measured?.width ?? node.width ?? 0);
   const h = Math.round(node.measured?.height ?? node.height ?? 0);
   const opacity = style.opacity ?? 100;

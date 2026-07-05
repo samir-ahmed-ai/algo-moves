@@ -20,23 +20,22 @@ describe('buildCanvasFrame', () => {
     expect(nodes).toHaveLength(0);
   });
 
-  it('seeds problem-backed visualize mode with useful starter panels', () => {
+  it('seeds problem-backed visualize mode with the unified workbench', () => {
     const { nodes, edges } = buildCanvasFrame(stubPlugin, 'visualize', {
       ...baseInput,
       seedProblemCanvas: true,
     });
-    expect(nodes.map((n) => n.id)).toEqual(['problem', 'viz', 'code']);
-    expect(nodes[1].position.x).toBeGreaterThan(nodes[0].position.x);
-    expect(nodes[2].position.x).toBeGreaterThan(nodes[1].position.x);
-    expect(nodes[1].width).toBeGreaterThan(nodes[0].width ?? 0);
-    expect(edges.map((e) => e.id)).toEqual(['problem->viz', 'viz->code']);
+    expect(nodes.map((n) => n.id)).toEqual(['workbench']);
+    expect(nodes[0].width).toBeGreaterThan(1000);
+    expect(nodes[0].height).toBeGreaterThan(700);
+    expect(edges).toHaveLength(0);
   });
 
   it('does not reseed a problem canvas after the user removed panels', () => {
     const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', {
       ...baseInput,
       seedProblemCanvas: true,
-      removed: new Set(['problem']),
+      removed: new Set(['workbench']),
     });
     expect(nodes).toHaveLength(0);
   });
@@ -52,9 +51,9 @@ describe('buildCanvasFrame', () => {
       selected: true,
     }));
     const tidied = organizeCurrentCanvasFrame(stubPlugin, 'visualize', messy, baseInput);
-    expect(tidied.nodes.map((n) => n.id)).toEqual(['problem', 'viz', 'code']);
+    expect(tidied.nodes.map((n) => n.id)).toEqual(['workbench']);
     expect(tidied.nodes.every((n) => !n.selected)).toBe(true);
-    expect(tidied.edges.map((e) => e.id)).toEqual(['problem->viz', 'viz->code']);
+    expect(tidied.edges).toHaveLength(0);
   });
 
   it('styles every edge with the removable edge type when edges exist', () => {
@@ -96,7 +95,7 @@ describe('buildCanvasFrame', () => {
 
   it('restores saved width via restoreNodeWidth for non-viz nodes in learn mode', () => {
     const { nodes: base } = buildCanvasFrame(stubPlugin, 'learn', baseInput);
-    const target = base.find((n) => kindOf(n) !== 'viz');
+    const target = base.find((n) => kindOf(n) !== 'workbench');
     if (!target) return;
     const saved = { [target.id]: { position: target.position, width: 300 } };
     const { nodes } = buildCanvasFrame(stubPlugin, 'learn', { ...baseInput, saved });

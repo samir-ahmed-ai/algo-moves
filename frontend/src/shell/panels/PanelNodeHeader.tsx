@@ -1,7 +1,6 @@
 import { Children, type ReactNode, useMemo } from 'react';
 import {
   ChevronsDownUp,
-  Code2,
   Crosshair,
   FileQuestion,
   FileText,
@@ -87,6 +86,7 @@ export function PanelNodeHeader({
   const { plugin } = useCanvasStatic();
   const locked = !!data.locked;
   const isViz = data.kind === 'viz';
+  const isWorkbench = data.kind === 'workbench';
   const hasCode = !!plugin.code;
   const hasReassemble = useMemo(() => {
     const reference = plugin.code?.text ?? '';
@@ -146,14 +146,24 @@ export function PanelNodeHeader({
       icon: locked ? <LockOpen className={nodeIconGlyph} /> : <Lock className={nodeIconGlyph} />,
       onClick: toggleLock,
     },
-    ...(isViz && mode === 'visualize'
+    ...(isWorkbench && mode === 'visualize'
       ? [
           {
-            label: 'Add Code Studio panel',
-            icon: <Code2 className={nodeIconGlyph} />,
-            disabled: !hasCode,
-            onClick: () => spawnConnectedPanel('code', id),
+            label: 'Add Structure panel',
+            icon: <Puzzle className={nodeIconGlyph} />,
+            disabled: !hasReassemble,
+            onClick: () => spawnConnectedPanel('reassemble', id),
           },
+          {
+            label: 'Add Recall panel',
+            icon: <Keyboard className={nodeIconGlyph} />,
+            disabled: !hasCode,
+            onClick: () => spawnConnectedPanel('recall', id),
+          },
+        ]
+      : []),
+    ...(isViz && mode === 'visualize'
+      ? [
           {
             label: 'Add Structure panel',
             icon: <Puzzle className={nodeIconGlyph} />,
@@ -186,7 +196,7 @@ export function PanelNodeHeader({
     },
   ];
 
-  const showInlineSideToggle = showSideToggle && !isViz;
+  const showInlineSideToggle = showSideToggle && !isViz && !isWorkbench;
 
   return (
     <PanelHeader selected={selected} collapsed={collapsed} locked={locked} density={density} className={headerClassName}>
@@ -221,7 +231,7 @@ export function PanelNodeHeader({
                 <HeaderPlay />
               </>
             )}
-            {isViz && mode === 'visualize' && (
+            {(isViz || isWorkbench) && mode === 'visualize' && (
               <PanelHeaderAction
                 variant="toggle"
                 active={showBigO}
@@ -243,7 +253,7 @@ export function PanelNodeHeader({
             )}
           </HeaderActionSlots>
         )}
-        {isViz && <HeaderStep />}
+        {(isViz || isWorkbench) && <HeaderStep />}
         <PanelHeaderMenu items={menuItems} />
       </PanelHeaderActions>
     </PanelHeader>

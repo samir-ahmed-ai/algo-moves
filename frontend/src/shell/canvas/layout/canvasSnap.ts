@@ -59,6 +59,12 @@ export function regionRect(region: CanvasSnapRegion, visible: FlowRect): FlowRec
     }
     case 'maximize':
       return { x, y, width, height };
+    case 'first-third':
+      return { x, y, width: width / 3, height };
+    case 'center-third':
+      return { x: x + width / 3, y, width: width / 3, height };
+    case 'last-third':
+      return { x: x + (2 * width) / 3, y, width: width / 3, height };
   }
 }
 
@@ -89,6 +95,7 @@ export function applyCanvasSnap(
       position: { x: target.x, y: target.y },
       width,
       height,
+      data: { ...n.data, snapFill: true },
     };
   });
 }

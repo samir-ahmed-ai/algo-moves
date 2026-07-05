@@ -14,6 +14,8 @@ export interface PanelNodeData extends Record<string, unknown> {
   runState?: 'running' | 'paused' | 'stopped';
   /** Locked panels cannot be dragged, resized, or removed. */
   locked?: boolean;
+  /** When true, panel fills the snapped viewport height instead of auto-sizing to content. */
+  snapFill?: boolean;
   /** Per-node appearance overrides (stroke, fill, opacity, corners). */
   style?: PanelNodeStyle;
   /** Persisted sub-document (whiteboard scene or shared editor) for solo/offline. */
