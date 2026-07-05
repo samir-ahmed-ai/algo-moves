@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildOpenProblemCommand, filterCommands, resolveCommandSelection, type CommandPaletteCommand } from './CommandPalette';
+import {
+  buildCommandPaletteSections,
+  buildOpenProblemCommand,
+  filterCommands,
+  resolveCommandSelection,
+  type CommandPaletteCommand,
+} from './CommandPalette';
 
 describe('filterCommands', () => {
   const commands: CommandPaletteCommand[] = [
@@ -93,5 +99,38 @@ describe('resolveCommandSelection', () => {
 
   it('stays at zero for an empty command list', () => {
     expect(resolveCommandSelection(4, 0, 'ArrowDown')).toBe(0);
+  });
+});
+
+describe('buildCommandPaletteSections', () => {
+  const commands: CommandPaletteCommand[] = [
+    { id: 'mode:play', label: 'Mode: Play', hint: 'action', run: () => {} },
+    { id: 'settings', label: 'Open settings', hint: 'action', run: () => {} },
+    { id: 'share', label: 'Copy share link', hint: 'action', run: () => {} },
+  ];
+
+  it('surfaces recent commands first when the query is empty', () => {
+    expect(buildCommandPaletteSections(commands, '', ['share', 'mode:play'])).toEqual([
+      {
+        id: 'recent',
+        label: 'Recent',
+        commands: [commands[2], commands[0]],
+      },
+      {
+        id: 'all',
+        label: 'All commands',
+        commands: [commands[1]],
+      },
+    ]);
+  });
+
+  it('collapses to a single results section while searching', () => {
+    expect(buildCommandPaletteSections(commands, 'settings', ['share'])).toEqual([
+      {
+        id: 'results',
+        label: 'Results',
+        commands: [commands[1]],
+      },
+    ]);
   });
 });

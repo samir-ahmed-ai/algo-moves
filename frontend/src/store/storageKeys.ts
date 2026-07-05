@@ -43,6 +43,9 @@ export const STORAGE_KEYS = {
   // shell / home
   SWIPE_QR_DISMISSED: k('swipe-qr-dismissed'),
 
+  // shell / workspace
+  COMMAND_PALETTE_RECENTS: k('command-palette-recents'),
+
   // shell / vim
   VIM_PROGRESS: k('vim-dojo'),
 

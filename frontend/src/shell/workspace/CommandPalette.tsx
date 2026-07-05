@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils/cn';
 import { buildShareUrl } from '@/store/navigation';
 import { useWorkspace } from '@/store/workspace';
 import { ChromeHint, chromeText } from '../chromeUi';
+import { readCommandPaletteRecentIds, recordCommandPaletteRecentId } from './commandPaletteHistory';
 
 export interface CommandPaletteCommand {
   id: string;
@@ -11,6 +12,12 @@ export interface CommandPaletteCommand {
   hint?: string;
   keywords?: string[];
   run: () => void;
+}
+
+export interface CommandPaletteSection {
+  id: string;
+  label: string;
+  commands: CommandPaletteCommand[];
 }
 
 export function filterCommands(commands: CommandPaletteCommand[], query: string): CommandPaletteCommand[] {
@@ -92,6 +99,25 @@ function parseCommandSelectionKey(key: string): CommandSelectionKey | null {
   return key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End' ? key : null;
 }
 
+export function buildCommandPaletteSections(
+  commands: CommandPaletteCommand[],
+  query: string,
+  recentCommandIds: string[],
+): CommandPaletteSection[] {
+  const filtered = filterCommands(commands, query);
+  if (filtered.length === 0) return [];
+  if (query.trim()) return [{ id: 'results', label: 'Results', commands: filtered }];
+
+  const byId = new Map(filtered.map((command) => [command.id, command] as const));
+  const recentCommands = recentCommandIds.map((id) => byId.get(id)).filter((command): command is CommandPaletteCommand => !!command);
+  const recentIds = new Set(recentCommands.map((command) => command.id));
+  const sections: CommandPaletteSection[] = [];
+  if (recentCommands.length > 0) sections.push({ id: 'recent', label: 'Recent', commands: recentCommands });
+  const allCommands = filtered.filter((command) => !recentIds.has(command.id));
+  if (allCommands.length > 0) sections.push({ id: 'all', label: 'All commands', commands: allCommands });
+  return sections;
+}
+
 export function CommandPalette({ inputId, onClose }: { inputId: string; onClose: () => void }) {
   const {
     activeItemId,
@@ -112,6 +138,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
   } = useWorkspace();
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
+  const [recentCommandIds, setRecentCommandIds] = useState(() => readCommandPaletteRecentIds());
   const listboxId = useId();
   const titleId = useId();
 
@@ -226,13 +253,19 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
     themePreset,
   ]);
 
-  const filtered = useMemo(() => filterCommands(commands, q), [commands, q]);
-  const clampedSel = filtered.length ? Math.min(sel, filtered.length - 1) : 0;
-  const activeCommand = filtered[clampedSel];
+  const sections = useMemo(() => buildCommandPaletteSections(commands, q, recentCommandIds), [commands, q, recentCommandIds]);
+  const visibleCommands = useMemo(() => sections.flatMap((section) => section.commands), [sections]);
+  const commandIndexById = useMemo(
+    () => new Map(visibleCommands.map((command, index) => [command.id, index] as const)),
+    [visibleCommands],
+  );
+  const clampedSel = visibleCommands.length ? Math.min(sel, visibleCommands.length - 1) : 0;
+  const activeCommand = visibleCommands[clampedSel];
   const optionId = (index: number) => `${listboxId}-option-${index}`;
   const activeOptionId = activeCommand ? optionId(clampedSel) : undefined;
   const exec = (command?: CommandPaletteCommand) => {
     if (!command) return;
+    setRecentCommandIds(recordCommandPaletteRecentId(command.id));
     command.run();
     onClose();
   };
@@ -268,7 +301,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
             const selectionKey = parseCommandSelectionKey(e.key);
             if (selectionKey) {
               e.preventDefault();
-              setSel((s) => resolveCommandSelection(s, filtered.length, selectionKey));
+              setSel((s) => resolveCommandSelection(s, visibleCommands.length, selectionKey));
             } else if (e.key === 'Enter') {
               e.preventDefault();
               exec(activeCommand);
@@ -287,29 +320,42 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
           aria-label="Search commands"
         />
         <div className="sr-only" aria-live="polite">
-          {filtered.length === 0 ? 'No matching commands' : `${filtered.length} command${filtered.length === 1 ? '' : 's'} available`}
+          {visibleCommands.length === 0
+            ? 'No matching commands'
+            : `${visibleCommands.length} command${visibleCommands.length === 1 ? '' : 's'} available`}
         </div>
         <div id={listboxId} className="ws-scroll max-h-[50vh] overflow-auto py-0.5" role="listbox" aria-label="Commands">
-          {filtered.length === 0 ? (
+          {visibleCommands.length === 0 ? (
             <div className={cn('px-3 py-2 text-ink3', chromeText.base)}>No matches.</div>
           ) : (
-            filtered.map((command, index) => (
-              <button
-                id={optionId(index)}
-                key={command.id}
-                type="button"
-                role="option"
-                aria-selected={index === clampedSel}
-                onMouseEnter={() => setSel(index)}
-                onClick={() => exec(command)}
-                className={cn(
-                  'flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left',
-                  index === clampedSel ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2',
-                )}
-              >
-                <span className="truncate">{command.label}</span>
-                {command.hint && <ChromeHint className="shrink-0">{command.hint}</ChromeHint>}
-              </button>
+            sections.map((section) => (
+              <div key={section.id}>
+                <div className={cn('px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink3', chromeText.base)}>
+                  {section.label}
+                </div>
+                {section.commands.map((command) => {
+                  const index = commandIndexById.get(command.id);
+                  if (index == null) return null;
+                  return (
+                    <button
+                      id={optionId(index)}
+                      key={command.id}
+                      type="button"
+                      role="option"
+                      aria-selected={index === clampedSel}
+                      onMouseEnter={() => setSel(index)}
+                      onClick={() => exec(command)}
+                      className={cn(
+                        'flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left',
+                        index === clampedSel ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2',
+                      )}
+                    >
+                      <span className="truncate">{command.label}</span>
+                      {command.hint && <ChromeHint className="shrink-0">{command.hint}</ChromeHint>}
+                    </button>
+                  );
+                })}
+              </div>
             ))
           )}
         </div>
