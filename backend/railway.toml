@@ -1,5 +1,6 @@
 # Railway config for the game server. Set ALLOWED_ORIGINS and DATABASE_URL in
 # the dashboard. Service root directory in Railway: /backend
+# Deploys on push to main when files under backend/ change.
 
 [build]
 builder = "DOCKERFILE"
