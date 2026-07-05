@@ -26,7 +26,7 @@ import { createPanelByType } from '../../core/panelRegistry';
 import { usePlayer } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
-import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout';
+import { loadCanvasPrefs } from '@/store/canvas-layout';
 import { ConnectedComponentsProvider } from '@/lib/canvas';
 import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
@@ -45,8 +45,8 @@ import {
   TracePreviewPanel,
   FIT_VIEW_DURATION_MS,
 } from './ui';
-import { PanelNode, panelAccent, EffectNode, createEffectByType, type PanelFlowNode, type PanelNodeData, snapNodeLayout, setMeasuredHeight } from './nodes';
-import { RemovableEdge, sanitizeVisualizeEdges, useCanvasEdgeConnection } from './edges';
+import { PanelNode, panelAccent, EffectNode, createEffectByType, type PanelFlowNode, type PanelNodeData, setMeasuredHeight } from './nodes';
+import { RemovableEdge, useCanvasEdgeConnection } from './edges';
 import {
   applyAlign,
   applyDistribute,
@@ -54,10 +54,7 @@ import {
   applyCanvasSnap,
   visibleFlowRect,
   type CanvasSnapRegion,
-  buildEdges,
-  REQUIRED_VISUALIZE_EDGES,
   connectionLineType,
-  edgeConnectionLabel,
   FIT_PADDING,
   FIT_PADDING_FOCUS,
   FIT_PADDING_VIEW,
@@ -74,11 +71,10 @@ import {
   type BgVariant,
   type LayoutPreset,
 } from './layout';
-import { buildCanvasFrame, organizeCurrentCanvasFrame } from './frame';
+import { buildCanvasFrame } from './frame';
 import {
   useCanvasLayoutPersistence,
-  type Saved,
-  useCanvasHistory,
+  useCanvasLifecycle,
   useCanvasKeyboardShortcuts,
   useCanvasDnD,
   DND_KEY,
@@ -296,28 +292,6 @@ function Inner({
 
   const displayFrames = useWorkflowRunner({ baseFrames, nodes, edges });
 
-  useEffect(() => {
-    setEdges((eds) => {
-      let changed = false;
-      const enriched = eds.map((e) => {
-        if ((e.data as { label?: string })?.label) return e;
-        changed = true;
-        return { ...e, data: { ...e.data, label: edgeConnectionLabel(e, nodes) } };
-      });
-      if (!changed) return eds;
-      return styleEdges(enriched, edgeOpts, nodes);
-    });
-  }, [nodes, edges, edgeOpts, setEdges]);
-
-  const frame = displayFrames[player.index] ?? displayFrames[0];
-
-  useEffect(() => {
-    if (player.index >= displayFrames.length && displayFrames.length > 0) {
-      player.goTo(displayFrames.length - 1);
-    }
-  }, [displayFrames.length, player.index, player.goTo]);
-
-  // Fit content accounting for chrome; allow zoom up to 100%.
   const fitCanvas = useCallback(
     (duration = FIT_VIEW_DURATION_MS) => {
       fitView({ padding: FIT_PADDING, duration, maxZoom: 1.0 });
@@ -325,200 +299,47 @@ function Inner({
     [fitView],
   );
 
-  // The <ReactFlow fitView> prop fits before the custom panel nodes are measured,
-  // so after a page refresh the view lands mis-fit. Re-fit once ReactFlow reports
-  // every node as measured — guarded to fire only on the initial mount (mode/plugin
-  // switches run their own fit in the effect below).
   const nodesInitialized = useNodesInitialized();
-  const didInitialFit = useRef(false);
-  useEffect(() => {
-    if (!nodesInitialized || didInitialFit.current) return;
-    didInitialFit.current = true;
-    const id = requestAnimationFrame(() => fitCanvas(0));
-    return () => cancelAnimationFrame(id);
-  }, [nodesInitialized, fitCanvas]);
 
-  const nodesRef = useRef(nodes);
-  nodesRef.current = nodes;
-  const prevKeyRef = useRef(key);
-  const prevModeRef = useRef<CanvasMode>(mode);
-  const builtKeyRef = useRef(key);
-  const mounted = useRef(false);
-
-  // Strip legacy examples edges; restore required problem→viz unless user removed it.
-  useEffect(() => {
-    if (mode !== 'visualize') return;
-    const present = new Set(nodesRef.current.map((n) => n.id));
-    const removedEdges = removedEdgesRef.current[key] ?? new Set<string>();
-    setEdges((eds) => {
-      const next = sanitizeVisualizeEdges(eds, plugin, present, edgeOpts, removedEdges);
-      return next.length === eds.length && next.every((e, i) => e.id === eds[i]?.id) ? eds : next;
-    });
-  }, [plugin, mode, key, edgeOpts, setEdges]);
-
-  // Remember when the user deletes a shell edge (e.g. optional red problem→viz).
-  useEffect(() => {
-    if (builtKeyRef.current !== key || mode !== 'visualize') return;
-    if (collab.isCollaborating) return; // don't persist edges reconciled from a peer
-    const shellIds = new Set(buildEdges(plugin, mode).map((e) => e.id));
-    const present = new Set(edges.filter((e) => shellIds.has(e.id)).map((e) => e.id));
-    const removed = new Set<string>();
-    for (const id of shellIds) {
-      if (!present.has(id) && !REQUIRED_VISUALIZE_EDGES.has(id)) removed.add(id);
-    }
-    const cur = removedEdgesRef.current[key] ?? new Set<string>();
-    const same = removed.size === cur.size && [...removed].every((id) => cur.has(id));
-    if (same) return;
-    removedEdgesRef.current[key] = removed;
-    persist();
-  }, [edges, plugin, mode, key, persist]);
-
-  // Snapshot the layout + removals of the mode we leave; build the mode we enter.
-  useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return; // initial fit is handled by the <ReactFlow fitView> prop (measurement-safe)
-    }
-    const present = nodesRef.current;
-    const presentIds = new Set(present.map((n) => n.id));
-    const snap: Saved = {};
-    present.forEach((n) => {
-      snap[n.id] = snapNodeLayout(n);
-    });
-    layoutRef.current[prevKeyRef.current] = snap;
-    const prevNodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, prevModeRef.current);
-    removedRef.current[prevKeyRef.current] = new Set(prevNodeIds.filter((id) => !presentIds.has(id)));
-    prevKeyRef.current = key;
-    prevModeRef.current = mode;
-
-    const built = buildFor(mode, key);
-    builtKeyRef.current = key;
-    resetHistory();
-    setNodes(built.nodes);
-    setEdges(built.edges);
-    const id = requestAnimationFrame(() => fitCanvas());
-    return () => cancelAnimationFrame(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pluginId, mode]);
-
-  useEffect(() => {
-    saveCanvasPrefs({ edgeOpts, bg });
-  }, [edgeOpts, bg]);
-
-  // Re-style edges when the user changes edge appearance (skip the mount no-op restyle).
-  const edgeMounted = useRef(false);
-  useEffect(() => {
-    if (!edgeMounted.current) {
-      edgeMounted.current = true;
-      return;
-    }
-    setEdges((eds) => styleEdges(eds, edgeOpts));
-  }, [edgeOpts, setEdges]);
-
-  // Persist the current layout (positions/sizes + removed panels) to localStorage (#73).
-  // Skip while a node is actively dragging — write once the drag settles.
-  useEffect(() => {
-    if (builtKeyRef.current !== key) return; // nodes belong to a key we're leaving — don't save
-    if (collab.isCollaborating) return; // shared-doc positions are ephemeral — don't overwrite local layout
-    if (nodes.some((n) => n.dragging)) return;
-    const snap: Saved = {};
-    nodes.forEach((n) => {
-      snap[n.id] = snapNodeLayout(n);
-    });
-    layoutRef.current[key] = snap;
-    const presentIds = new Set(nodes.map((n) => n.id));
-    const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
-    removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
-    persist();
-  }, [nodes, key, plugin, mode, persist, collab.isCollaborating]);
-
-  // ---- undo/redo of canvas edits (#82) ----
-  const { historyRef, histIdxRef, undo, redo, resetHistory } = useCanvasHistory({
+  const {
+    nodesRef,
+    builtKeyRef,
+    historyRef,
+    histIdxRef,
+    undo,
+    redo,
+    restoreProblemStarterPanels,
+    suppressAutoRestoreForKey,
+    reset,
+  } = useCanvasLifecycle({
     nodes,
     edges,
-    historyKey: key,
-    builtKeyRef,
     setNodes,
     setEdges,
+    key,
+    pluginId,
+    mode,
+    plugin,
+    standalone,
+    edgeOpts,
+    bg,
+    dir,
+    layoutRef,
+    removedRef,
+    removedEdgesRef,
+    persist,
+    buildFor,
+    layoutOpts,
+    fitCanvas,
+    fitCanvasSignal,
+    wrapperRef,
+    collab,
+    displayFrames,
+    player,
+    nodesInitialized,
   });
 
-  const restoreProblemStarterPanels = useCallback(() => {
-    if (standalone || mode !== 'visualize') return;
-    delete layoutRef.current[key];
-    removedRef.current[key] = new Set();
-    removedEdgesRef.current[key] = new Set();
-    const built = buildCanvasFrame(plugin, mode, {
-      seedProblemCanvas: true,
-      layoutOpts: layoutOpts(),
-      dir,
-      edgeOpts,
-    });
-    if (built.nodes.length === 0) return;
-    builtKeyRef.current = key;
-    resetHistory();
-    setNodes(built.nodes);
-    setEdges(built.edges);
-    persist();
-    requestAnimationFrame(() => fitCanvas());
-  }, [standalone, mode, key, plugin, layoutOpts, dir, edgeOpts, resetHistory, setNodes, setEdges, persist, fitCanvas]);
-
-  const autoRestoredProblemCanvasRef = useRef(new Set<string>());
-  const suppressAutoRestoreForKey = useCallback(() => {
-    if (!standalone && mode === 'visualize') autoRestoredProblemCanvasRef.current.add(key);
-  }, [standalone, mode, key]);
-  useEffect(() => {
-    if (standalone || mode !== 'visualize' || nodes.length > 0) return;
-    if (autoRestoredProblemCanvasRef.current.has(key)) return;
-    const id = window.setTimeout(() => {
-      if (collab.isCollaborating || nodesRef.current.length > 0 || autoRestoredProblemCanvasRef.current.has(key)) return;
-      autoRestoredProblemCanvasRef.current.add(key);
-      restoreProblemStarterPanels();
-    }, 60);
-    return () => window.clearTimeout(id);
-  }, [standalone, mode, key, nodes.length, collab.isCollaborating, restoreProblemStarterPanels]);
-
-  // Tidy: re-organize the CURRENT panels (keep removals + resizes, forget positions).
-  const reset = useCallback(() => {
-    const present = nodesRef.current;
-    const presentIds = new Set(present.map((n) => n.id));
-    const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
-    removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
-    removedEdgesRef.current[key] = new Set();
-    delete layoutRef.current[key];
-    const tidy = organizeCurrentCanvasFrame(plugin, mode, present as PanelFlowNode[], { layoutOpts: layoutOpts(), dir, edgeOpts });
-    setNodes(tidy.nodes);
-    setEdges(tidy.edges);
-    requestAnimationFrame(() => fitCanvas());
-  }, [plugin, mode, key, edgeOpts, dir, setNodes, setEdges, fitCanvas, layoutOpts]);
-
-  // Re-fit when chrome dimensions change or focus-canvas toggles.
-  useEffect(() => {
-    const id = requestAnimationFrame(() => fitCanvas(200));
-    return () => cancelAnimationFrame(id);
-  }, [fitCanvasSignal, fitCanvas]);
-
-  useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    let t: number | undefined;
-    const ro = new ResizeObserver(() => {
-      window.clearTimeout(t);
-      t = window.setTimeout(() => fitCanvas(150), 150);
-    });
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-      if (t) window.clearTimeout(t);
-    };
-  }, [fitCanvas]);
-
-  // Re-layout the current panels only when the direction actually toggles (TB ↔ LR) (#75).
-  const prevDirRef = useRef(dir);
-  useEffect(() => {
-    if (prevDirRef.current === dir) return;
-    prevDirRef.current = dir;
-    reset();
-  }, [dir, reset]);
+  const frame = displayFrames[player.index] ?? displayFrames[0];
 
   // Apply a named layout preset (#74): set which panels are shown, then re-organize.
   const applyPreset = useCallback(

@@ -43,6 +43,23 @@ function buildBoundaryZones() {
 
 const boundaryZones = buildBoundaryZones();
 
+/**
+ * Cross-feature shell zones — start narrow: home/browse/mobile may use the canvas
+ * public barrel (@/shell/canvas → index.ts) but not deep canvas internals.
+ */
+const SHELL_CANVAS_BARREL_FEATURES = ['home', 'browse', 'mobile'];
+
+function buildShellFeatureZones() {
+  return SHELL_CANVAS_BARREL_FEATURES.map((feature) => ({
+    target: `./src/shell/${feature}`,
+    from: `./src/shell/canvas`,
+    except: ['./index.ts'],
+    message: `Shell feature boundary: shell/${feature} must import canvas via @/shell/canvas, not deep paths`,
+  }));
+}
+
+const shellFeatureZones = buildShellFeatureZones();
+
 export default tseslint.config(
   {
     ignores: [
@@ -88,7 +105,7 @@ export default tseslint.config(
       'no-useless-escape': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-hooks/rules-of-hooks': 'off',
-      'import/no-restricted-paths': ['error', { zones: boundaryZones }],
+      'import/no-restricted-paths': ['error', { zones: [...boundaryZones, ...shellFeatureZones] }],
       'import/no-cycle': ['error', { maxDepth: Infinity, ignoreExternal: true }],
     },
   },
