@@ -1,6 +1,8 @@
 import type { Item } from './types';
 import type { SampleInput } from '../core/types';
-import { gistFor } from './gists';
+import { PROBLEM_GISTS, gistFor } from './gists';
+import { PREP_DATA } from '@/plugins/imported/prepManifest';
+import { PLUGIN_META } from '@/plugins/_generated/pluginMeta';
 
 export interface ProblemBriefCase {
   label: string;
@@ -14,109 +16,132 @@ export interface ProblemBrief {
   cases: ProblemBriefCase[];
 }
 
+const prepById = new Map(PREP_DATA.map((p) => [p.id, p]));
+const metaById = new Map(PLUGIN_META.map((m) => [m.id, m]));
+
 /** Hand-tuned problem intros and example writeups, keyed by item id or plugin id. */
 export const PROBLEM_BRIEFS: Record<string, ProblemBrief> = {
-  'prep-arrays-find-duplicate-number': {
-    statements: [
-      'Given n + 1 integers in the range 1…n, exactly one value appears twice — find it without modifying the array.',
-      'Treat each index as a jump link i → nums[i]; a duplicate creates a cycle, and Floyd\'s tortoise-and-hare finds the entrance in O(n) time with O(1) extra space.',
-    ],
-    cases: [
-      {
-        label: 'Example 1',
-        input: 'nums = [1, 3, 4, 2, 2]',
-        output: '2',
-        note: 'Following jump links eventually loops on index 2 — the duplicated value is 2.',
-      },
-      {
-        label: 'Example 2',
-        input: 'nums = [3, 1, 3, 4, 2]',
-        output: '3',
-        note: 'Two positions hold 3; cycle detection lands on 3 without a hash set.',
-      },
-    ],
-  },
   'linked-list-cycle': {
     statements: [
       'Given the head of a linked list, decide whether it contains a cycle.',
       'Use fast and slow pointers: if they ever meet, a cycle exists; if fast reaches null, the list is acyclic.',
     ],
-    cases: [
-      {
-        label: 'Example 1',
-        input: '3 → 2 → 0 → -4 ↩ (tail connects to node index 1)',
-        output: 'true',
-        note: 'Slow and fast collide inside the loop.',
-      },
-      {
-        label: 'Example 2',
-        input: '1 → 2 (no back edge)',
-        output: 'false',
-        note: 'Fast reaches the end before any collision.',
-      },
-    ],
+    cases: [],
   },
   'binary-search': {
     statements: [
       'Find the index of target in a sorted array, or return -1 if it is absent.',
       'Compare against the midpoint each step and discard the half that cannot contain the target.',
     ],
-    cases: [
-      {
-        label: 'Example 1',
-        input: 'nums = [-1, 0, 3, 5, 9, 12], target = 9',
-        output: '4',
-        note: 'Mid comparisons shrink [0,5] → [3,5] → hit index 4.',
-      },
-      {
-        label: 'Example 2',
-        input: 'nums = [-1, 0, 3, 5, 9, 12], target = 2',
-        output: '-1',
-        note: 'Window collapses with no match.',
-      },
-    ],
+    cases: [],
   },
   'climbing-stairs': {
     statements: [
       'Count how many distinct ways you can climb n stairs when each step is 1 or 2.',
       'Each landing depends only on the previous two — fill dp[i] = dp[i-1] + dp[i-2] left to right.',
     ],
-    cases: [
-      {
-        label: 'Example 1',
-        input: 'n = 2',
-        output: '2',
-        note: '1+1 or a single 2-step.',
-      },
-      {
-        label: 'Example 2',
-        input: 'n = 3',
-        output: '3',
-        note: '1+1+1, 1+2, or 2+1.',
-      },
-    ],
+    cases: [],
   },
   subsets: {
     statements: [
       'Return every possible subset of the distinct integers in nums.',
       'At each index, branch: include the element or skip it, then backtrack.',
     ],
-    cases: [
-      {
-        label: 'Example 1',
-        input: 'nums = [1, 2, 3]',
-        output: '[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]',
-        note: '2³ subsets from three independent include/skip choices.',
-      },
-      {
-        label: 'Example 2',
-        input: 'nums = [0]',
-        output: '[[],[0]]',
-        note: 'Single element yields empty set plus {0}.',
-      },
-    ],
+    cases: [],
   },
 };
+
+function ensurePeriod(s: string): string {
+  const t = s.trim();
+  if (!t) return t;
+  return /[.!?]$/.test(t) ? t : `${t}.`;
+}
+
+function gistForItem(item: Item): string | undefined {
+  return (
+    PROBLEM_GISTS[item.id] ?? (item.pluginId ? PROBLEM_GISTS[item.pluginId] : undefined)
+  );
+}
+
+function prepForItem(item: Item) {
+  return prepById.get(item.id) ?? (item.pluginId ? prepById.get(item.pluginId) : undefined);
+}
+
+function metaForItem(item: Item) {
+  return metaById.get(item.pluginId ?? item.id);
+}
+
+/** Split a plugin meta summary into a second statement when it carries detail after ':' or '.'. */
+function secondFromSummary(summary: string, first: string): string | undefined {
+  const trimmed = summary.trim();
+  if (!trimmed || trimmed.length < 12) return undefined;
+
+  const colonIdx = trimmed.indexOf(': ');
+  if (colonIdx > 0 && colonIdx < trimmed.length - 3) {
+    const second = trimmed.slice(colonIdx + 2).trim();
+    if (second.length >= 12 && !first.includes(second)) return ensurePeriod(second);
+  }
+
+  const dotMatch = trimmed.match(/^[^.!?]+[.!?]\s+(.+)$/s);
+  if (dotMatch?.[1]) {
+    const second = dotMatch[1].trim();
+    if (second.length >= 12 && !first.includes(second)) return ensurePeriod(second);
+  }
+
+  if (trimmed.length >= 12 && trimmed !== first && !first.includes(trimmed)) {
+    return ensurePeriod(trimmed);
+  }
+
+  return undefined;
+}
+
+function fallbackSecond(item: Item, first: string): string {
+  const meta = metaForItem(item);
+  if (meta?.summary) {
+    const fromMeta = secondFromSummary(meta.summary, first);
+    if (fromMeta) return fromMeta;
+  }
+  if (item.summary && item.summary.length > 4) {
+    const fromItem = secondFromSummary(item.summary, first);
+    if (fromItem) return fromItem;
+  }
+  const prep = prepForItem(item);
+  if (prep?.pattern) {
+    return ensurePeriod(`Core pattern: ${prep.pattern}`);
+  }
+  return 'Use the animation to watch how state evolves step by step.';
+}
+
+/** Resolve two problem-specific sentences for the info panel. */
+export function statementsFor(item: Item): [string, string] {
+  const curated =
+    PROBLEM_BRIEFS[item.id] ?? (item.pluginId ? PROBLEM_BRIEFS[item.pluginId] : undefined);
+  if (curated?.statements.length >= 2) {
+    return [curated.statements[0], curated.statements[1]];
+  }
+
+  const prep = prepForItem(item);
+  if (prep) {
+    const ask = gistForItem(item) ?? `Solve "${prep.title}" on the given input.`;
+    const insight = ensurePeriod(prep.visual || prep.acquired.split('—')[0] || prep.pattern);
+    return [ensurePeriod(ask), insight];
+  }
+
+  const gist = gistForItem(item);
+  if (gist) {
+    return [ensurePeriod(gist), fallbackSecond(item, gist)];
+  }
+
+  const meta = metaForItem(item);
+  if (meta?.summary && meta.summary.length > 12) {
+    const first = ensurePeriod(gistFor(item));
+    const second = secondFromSummary(meta.summary, first) ?? fallbackSecond(item, first);
+    return [first, second];
+  }
+
+  const lines = [ensurePeriod(gistFor(item)), fallbackSecond(item, gistFor(item))];
+  return [lines[0], lines[1]];
+}
 
 function formatBriefInput(value: unknown): string {
   if (value == null) return '';
@@ -126,20 +151,6 @@ function formatBriefInput(value: unknown): string {
   } catch {
     return String(value);
   }
-}
-
-function fallbackStatements(item: Item): string[] {
-  const lines: string[] = [];
-  const gist = gistFor(item);
-  if (gist) lines.push(gist);
-  if (item.summary && item.summary.length > 4 && !lines.includes(item.summary)) {
-    lines.push(item.summary.endsWith('.') ? item.summary : `${item.summary}.`);
-  }
-  if (lines.length === 0) lines.push('Study the examples, then identify the pattern that drives the solution.');
-  if (lines.length === 1) {
-    lines.push('Use the animation to watch how state evolves step by step.');
-  }
-  return lines.slice(0, 2);
 }
 
 function casesFromInputs(inputs: SampleInput[]): ProblemBriefCase[] {
@@ -155,9 +166,9 @@ function casesFromInputs(inputs: SampleInput[]): ProblemBriefCase[] {
 export function briefFor(item: Item, inputs: SampleInput[] = []): ProblemBrief {
   const curated =
     PROBLEM_BRIEFS[item.id] ?? (item.pluginId ? PROBLEM_BRIEFS[item.pluginId] : undefined);
-  if (curated) return curated;
+  const statements = curated?.statements ?? [...statementsFor(item)];
   return {
-    statements: fallbackStatements(item),
-    cases: casesFromInputs(inputs),
+    statements,
+    cases: curated?.cases ?? casesFromInputs(inputs),
   };
 }

@@ -6,7 +6,7 @@ import type { SampleInput } from '../../../core/types';
 import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { HighlightedCode } from '@/components/code/HighlightedCode';
 import { TONE_BAR } from '@/design/tone';
-import { catalog, categoryIdForItem, getCategoryById, briefFor } from '@/content';
+import { briefFor } from '@/content';
 import {
   useCanvasStatic,
   stepExampleInput,
@@ -21,7 +21,7 @@ import {
   Section,
   useFlash,
 } from '@/shell/canvas';
-import { InfoCases, InfoParagraphs, PanelInfoButton } from './PanelInfoButton';
+import { ProblemBriefBody } from './problemBriefBody';
 
 /** Compact preview of a sample input value. */
 function formatInputPreview(value: unknown): string {
@@ -231,33 +231,6 @@ function ExampleInputPicker() {
   );
 }
 
-/** Resolve the browse category for the active problem. */
-function useProblemCategory() {
-  const { item } = useCanvasStatic();
-  const { activeCategoryId } = useWorkspace();
-
-  return useMemo(() => {
-    const catId = activeCategoryId ?? categoryIdForItem(item.id, catalog);
-    return catId ? getCategoryById(catId) : undefined;
-  }, [activeCategoryId, item.id]);
-}
-
-/** Category framing shown above the problem statement when browsing from a category. */
-function CategoryInfoButton() {
-  const category = useProblemCategory();
-  const blurb = category?.description ?? category?.summary;
-  if (!category || !blurb) return null;
-
-  return (
-    <div className="mb-2 flex items-center gap-1.5">
-      <span className={cn('font-medium uppercase tracking-wide text-ink3', nodeText.xs)}>{category.title}</span>
-      <PanelInfoButton label={`About ${category.title}`} title={category.title}>
-        <InfoParagraphs lines={blurb.split(/(?<=[.!?])\s+/).filter(Boolean)} />
-      </PanelInfoButton>
-    </div>
-  );
-}
-
 /** Problem node: statement metadata and sample-input picker. */
 export function ProblemPanelBody() {
   const { item, plugin } = useCanvasStatic();
@@ -269,11 +242,12 @@ export function ProblemPanelBody() {
   const problemBrief = useMemo(() => briefFor(item, plugin.inputs), [item, plugin.inputs]);
 
   const tone = difficultyTone(item.difficulty);
+  const hasProblemBrief = problemBrief.statements.length > 0;
+  const showHeaderDivider = hasOverview || hasProblemBrief || !inVisualize;
 
   return (
     <div className="flex flex-col">
-      {!inVisualize && <CategoryInfoButton />}
-      {hasOverview && (
+      {(hasOverview || hasProblemBrief || !inVisualize) && (
         <Section title={inVisualize ? 'Overview' : undefined} bordered={false}>
           {!inVisualize && (
             <div
@@ -285,25 +259,15 @@ export function ProblemPanelBody() {
                   {item.title}
                 </span>
                 {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
-                <PanelInfoButton label={`About ${item.title}`} title={item.title}>
-                  <InfoParagraphs lines={problemBrief.statements} />
-                  <InfoCases cases={problemBrief.cases} />
-                </PanelInfoButton>
               </div>
             </div>
           )}
-          {inVisualize && (
-            <div className="mb-1.5 flex flex-wrap items-center gap-[var(--node-gap,6px)]">
-              {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
-              <PanelInfoButton label={`About ${item.title}`} title={item.title}>
-                <InfoParagraphs lines={problemBrief.statements} />
-                <InfoCases cases={problemBrief.cases} />
-              </PanelInfoButton>
+          {inVisualize && item.difficulty && (
+            <div className="mb-1.5">
+              <Chip tone={tone}>{item.difficulty}</Chip>
             </div>
           )}
-          {item.summary && (
-            <p className={cn(nodeText.sm, 'leading-relaxed text-ink')}>{item.summary}</p>
-          )}
+          {hasProblemBrief && <ProblemBriefBody statements={problemBrief.statements} />}
           {item.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-[var(--node-gap,6px)]">
               {item.tags.map((t) => (
@@ -325,7 +289,7 @@ export function ProblemPanelBody() {
           </div>
         </ControlsAccordion>
       )}
-      <div className={cn(hasOverview && 'mt-3 border-t border-edge pt-3')}>
+      <div className={cn(showHeaderDivider && 'mt-3 border-t border-edge pt-3')}>
         <ExampleInputPicker />
       </div>
     </div>

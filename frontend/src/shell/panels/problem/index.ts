@@ -9,4 +9,4 @@ export * from './studioSplitLayout';
 export * from './overviewColumns';
 export * from './OverviewViewSwitch';
 export * from './useOverviewView';
-export * from './PanelInfoButton';
+export * from './problemBriefBody';

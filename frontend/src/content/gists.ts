@@ -92,6 +92,35 @@ export const PROBLEM_GISTS: Record<string, string> = {
   'imp-80-race-car': 'Find the fewest accelerate/reverse moves to reach the target position.',
   'imp-84-student-attendance-record-ii': 'Count length-n attendance records that still earn an award.',
   /* PRIORITY_GISTS_END */
+
+  // Arrays · prep library
+  'prep-arrays-find-duplicate-and-missing':
+    'Given n+1 numbers from 1..n, find the duplicated value and the missing one.',
+  'prep-arrays-find-duplicate-number':
+    'Given n+1 integers in the range 1..n, find the single duplicate without modifying the array.',
+  'prep-arrays-find-intersection-of-two-sorted': 'Return every value that appears in both sorted arrays.',
+  'prep-arrays-find-majority-element': 'Find the element that appears more than half the time in the array.',
+  'prep-arrays-jump-game': 'Decide whether you can reach the last index by jumping up to nums[i] from each position.',
+  'prep-arrays-max-product-of-subarray':
+    'Find the largest product of any contiguous subarray in the given array.',
+  'prep-arrays-max-profit-selling-stocks': 'Find the maximum profit from one buy and one sell on the price array.',
+  'prep-arrays-max-rectangle-in-histogram': 'Find the largest rectangle area in a histogram of bar heights.',
+  'prep-arrays-max-sum-of-subarray-size-k': 'Find the maximum sum among all contiguous subarrays of exactly size k.',
+  'prep-arrays-merge-two-sorted-arrays': 'Merge nums2 into nums1 in sorted order using O(1) extra space.',
+  'prep-arrays-move-all-zeros-to-end':
+    'Move all zeros to the end while keeping the relative order of non-zero elements.',
+  'prep-arrays-next-permutation':
+    'Rearrange nums into the lexicographically next greater permutation, or the lowest if none exists.',
+  'prep-arrays-remove-duplicates-in-place':
+    'Remove duplicates from a sorted array in place and return the new length.',
+  'prep-arrays-reverse-array': 'Reverse the array in place using O(1) extra space.',
+  'prep-arrays-rotate-array': 'Rotate the array to the right by k steps in place.',
+  'prep-arrays-self-exclude-product': 'Return an array where each element is the product of all other numbers in nums.',
+  'prep-arrays-task-scheduler':
+    'Find the least number of CPU intervals needed to schedule all tasks with n cooldown slots.',
+  'prep-arrays-trap-most-water': 'Find the maximum water two vertical lines can trap together.',
+  'prep-arrays-trap-rain-water': 'Compute how much rain water is trapped between elevation bars after raining.',
+  'prep-arrays-two-sum': 'Find two indices whose values sum to the target.',
 };
 
 /** Last-resort ask when a problem carries no usable summary. */
