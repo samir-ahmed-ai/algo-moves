@@ -56,12 +56,17 @@ export default {
           from: { opacity: '0' },
           to: { opacity: '1' },
         },
+        'auth-popover-in': {
+          from: { opacity: '0', transform: 'translateY(-6px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'auth-in': 'auth-in 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
         'auth-backdrop-in': 'auth-backdrop-in 0.2s ease-out',
+        'auth-popover-in': 'auth-popover-in 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },
   },

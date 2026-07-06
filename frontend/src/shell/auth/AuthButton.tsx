@@ -20,6 +20,7 @@ export function AuthButton({
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
+  const signInRef = useRef<HTMLButtonElement>(null);
 
   if (!configured) return null;
   if (loading) {
@@ -65,7 +66,7 @@ export function AuthButton({
 
   return (
     <>
-      <div className={cn('flex items-center gap-1.5', className)}>
+      <div className={cn('relative flex items-center gap-1.5', className)}>
         {onOpenProfile ? (
           <button
             type="button"
@@ -82,12 +83,16 @@ export function AuthButton({
           </button>
         ) : null}
         <button
+          ref={signInRef}
           type="button"
-          onClick={() => setAuthOpen(true)}
+          aria-expanded={authOpen}
+          aria-haspopup="dialog"
+          onClick={() => setAuthOpen((open) => !open)}
           className={cn(
             'inline-flex min-h-9 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-white touch-manipulation',
             'bg-accent shadow-[0_1px_2px_hsl(0_0%_0%/0.1),0_2px_8px_hsl(var(--accent-h,220)_80%_40%/0.2)]',
             'transition-all hover:opacity-95 active:scale-[0.98]',
+            authOpen && 'ring-2 ring-accent/30 ring-offset-2 ring-offset-bg',
             compact ? 'px-2.5' : 'px-3.5',
           )}
         >
@@ -95,7 +100,7 @@ export function AuthButton({
           {s.signIn}
         </button>
       </div>
-      <AuthPopover open={authOpen} onOpenChange={setAuthOpen} />
+      <AuthPopover open={authOpen} onOpenChange={setAuthOpen} anchorRef={signInRef} />
     </>
   );
 }

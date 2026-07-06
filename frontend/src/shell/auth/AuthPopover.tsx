@@ -1,5 +1,26 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { AlertCircle, Eye, EyeOff, Loader2, LogOut, Shield, X } from 'lucide-react';
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+} from 'react';
+import {
+  AlertCircle,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  LogOut,
+  Mail,
+  Shield,
+  User,
+  X,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from '@/shell/BrandLogo';
 import { formatAuthError } from './formatAuthError';
@@ -9,6 +30,9 @@ import { useAuth } from './AuthProvider';
 type AuthTab = 'login' | 'signup';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MOBILE_BREAKPOINT = 640;
+const POPOVER_GAP = 8;
+const VIEWPORT_MARGIN = 16;
 
 function passwordStrength(password: string): 'weak' | 'fair' | 'strong' | null {
   if (!password) return null;
@@ -23,16 +47,57 @@ function passwordStrength(password: string): 'weak' | 'fair' | 'strong' | null {
   return 'weak';
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT,
+  );
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  return isMobile;
+}
+
+function computeAnchoredStyle(
+  anchor: HTMLElement,
+  panel: HTMLElement,
+): Pick<CSSProperties, 'top' | 'right'> {
+  const rect = anchor.getBoundingClientRect();
+  const panelRect = panel.getBoundingClientRect();
+  const viewportW = window.innerWidth;
+  const viewportH = window.innerHeight;
+
+  let top = rect.bottom + POPOVER_GAP;
+  if (top + panelRect.height > viewportH - VIEWPORT_MARGIN) {
+    top = Math.max(VIEWPORT_MARGIN, rect.top - POPOVER_GAP - panelRect.height);
+  }
+
+  let right = viewportW - rect.right;
+  const leftEdge = viewportW - right - panelRect.width;
+  if (leftEdge < VIEWPORT_MARGIN) {
+    right = viewportW - VIEWPORT_MARGIN - panelRect.width;
+  }
+  right = Math.max(VIEWPORT_MARGIN, right);
+
+  return { top, right };
+}
+
 export function AuthPopover({
   open,
   onOpenChange,
   initialTab = 'login',
+  anchorRef,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialTab?: AuthTab;
+  anchorRef?: RefObject<HTMLElement | null>;
 }) {
   const { signInEmail, signUpEmail } = useAuth();
+  const isMobile = useIsMobile();
   const [tab, setTab] = useState<AuthTab>(initialTab);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,12 +107,18 @@ export function AuthPopover({
   const [error, setError] = useState<string | null>(null);
   const [shakeError, setShakeError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [anchoredStyle, setAnchoredStyle] = useState<Pick<CSSProperties, 'top' | 'right'> | null>(
+    null,
+  );
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const emailId = useId();
   const nameId = useId();
   const passwordId = useId();
   const errorId = useId();
+
+  const useAnchoredPopover = Boolean(anchorRef?.current) && !isMobile;
+  const useSheetLayout = isMobile || !anchorRef?.current;
 
   const emailInvalid = emailTouched && email.trim().length > 0 && !EMAIL_RE.test(email.trim());
   const strength = tab === 'signup' ? passwordStrength(password) : null;
@@ -67,14 +138,47 @@ export function AuthPopover({
     }
   }, [open, initialTab]);
 
+  useLayoutEffect(() => {
+    if (!open || !useAnchoredPopover || !anchorRef?.current || !panelRef.current) {
+      setAnchoredStyle(null);
+      return;
+    }
+
+    const updatePosition = () => {
+      const anchor = anchorRef.current;
+      const panel = panelRef.current;
+      if (!anchor || !panel) return;
+      setAnchoredStyle(computeAnchoredStyle(anchor, panel));
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [open, useAnchoredPopover, anchorRef, tab]);
+
   useEffect(() => {
-    if (!open) return;
+    if (!open || !useAnchoredPopover) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (panelRef.current?.contains(t) || anchorRef?.current?.contains(t)) return;
+      onOpenChange(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open, useAnchoredPopover, anchorRef, onOpenChange]);
+
+  useEffect(() => {
+    if (!open || !useSheetLayout) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [open, useSheetLayout]);
 
   useEffect(() => {
     if (!open) return;
@@ -151,157 +255,155 @@ export function AuthPopover({
     }
   };
 
-  return (
+  const panel = (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-[6px] animate-auth-backdrop-in sm:items-center sm:p-4"
-      onClick={() => onOpenChange(false)}
+      ref={panelRef}
+      role="dialog"
+      aria-modal={useSheetLayout ? 'true' : 'false'}
+      aria-labelledby={titleId}
+      aria-describedby={error ? errorId : undefined}
+      style={useAnchoredPopover && anchoredStyle ? anchoredStyle : undefined}
+      className={cn(
+        'relative w-full max-w-[22rem] overflow-hidden border border-edge bg-bg shadow-theme-xl ring-1 ring-accent/10',
+        useAnchoredPopover
+          ? cn(
+              'fixed z-[60] animate-auth-popover-in rounded-[1.15rem]',
+              !anchoredStyle && 'invisible',
+            )
+          : cn(
+              'animate-auth-in',
+              useSheetLayout
+                ? 'max-w-none rounded-t-[1.25rem] [padding-bottom:max(1.25rem,env(safe-area-inset-bottom))] sm:max-w-[22rem] sm:rounded-[1.25rem]'
+                : 'rounded-[1.25rem]',
+            ),
+      )}
+      onClick={(e) => e.stopPropagation()}
     >
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={error ? errorId : undefined}
-        className={cn(
-          'relative w-full max-w-[24rem] overflow-hidden rounded-t-[1.25rem] border border-edge bg-bg shadow-theme-xl animate-auth-in',
-          'sm:rounded-[1.25rem]',
-          '[padding-bottom:max(1.25rem,env(safe-area-inset-bottom))]',
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div aria-hidden className="auth-modal-glow pointer-events-none absolute inset-x-0 top-0 h-28" />
+      <div aria-hidden className="auth-modal-glow pointer-events-none absolute inset-x-0 top-0 h-24" />
 
-        <div className="relative px-5 pb-5 pt-6 sm:px-6 sm:pt-7">
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="absolute end-4 top-4 grid h-9 w-9 place-items-center rounded-xl text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
-            aria-label={s.close}
-          >
-            <X className="h-4 w-4" />
-          </button>
+      <div className="relative px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
+        <button
+          type="button"
+          onClick={() => onOpenChange(false)}
+          className="absolute end-3.5 top-3.5 grid h-8 w-8 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+          aria-label={s.close}
+        >
+          <X className="h-4 w-4" />
+        </button>
 
-          <div className="mb-5 flex flex-col items-center text-center">
-            <BrandLogo className="h-11 w-11 ring-2 ring-accent/15 ring-offset-2 ring-offset-bg" />
-            <h2 id={titleId} className="mt-3 text-xl font-bold tracking-tight text-ink">
-              {tab === 'login' ? s.welcomeBack : s.createAccount}
-            </h2>
-            <p className="mt-1.5 max-w-[18rem] text-sm leading-snug text-ink3">
-              {tab === 'login' ? s.loginSubtitle : s.signupSubtitle}
-            </p>
-          </div>
+        <div className="mb-4 flex flex-col items-center text-center">
+          <BrandLogo className="h-9 w-9 ring-2 ring-accent/15 ring-offset-2 ring-offset-bg" />
+          <h2 id={titleId} className="mt-2.5 text-lg font-bold tracking-tight text-ink">
+            {tab === 'login' ? s.welcomeBack : s.createAccount}
+          </h2>
+          <p className="mt-1 max-w-[16rem] text-[13px] leading-snug text-ink3">
+            {tab === 'login' ? s.loginSubtitle : s.signupSubtitle}
+          </p>
+        </div>
 
-          <div
-            role="tablist"
-            aria-label="Account mode"
-            className="mb-5 grid grid-cols-2 gap-1 rounded-xl border border-edge bg-panel2 p-1"
-          >
-            <TabChip active={tab === 'login'} onClick={() => switchTab('login')}>
-              {s.logIn}
-            </TabChip>
-            <TabChip active={tab === 'signup'} onClick={() => switchTab('signup')}>
-              {s.signUp}
-            </TabChip>
-          </div>
+        <AuthTabList tab={tab} onSwitch={switchTab} />
 
-          <form
-            className="flex flex-col gap-3.5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void submit();
-            }}
-          >
-            {tab === 'signup' ? (
-              <AuthField
-                id={nameId}
-                label={s.displayName}
-                value={displayName}
-                onChange={setDisplayName}
-                placeholder={s.namePlaceholder}
-                autoComplete="name"
-                required
-              />
-            ) : null}
-
+        <form
+          className="flex flex-col gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submit();
+          }}
+        >
+          {tab === 'signup' ? (
             <AuthField
-              id={emailId}
-              label={s.email}
-              type="email"
-              value={email}
-              onChange={setEmail}
-              onBlur={() => setEmailTouched(true)}
-              placeholder={s.emailPlaceholder}
-              autoComplete="email"
+              id={nameId}
+              label={s.displayName}
+              value={displayName}
+              onChange={setDisplayName}
+              placeholder={s.namePlaceholder}
+              autoComplete="name"
               required
-              invalid={emailInvalid}
-              error={emailInvalid ? s.invalidEmail : undefined}
+              leading={<User className="h-4 w-4" />}
             />
+          ) : null}
 
-            <AuthField
-              id={passwordId}
-              label={s.password}
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={setPassword}
-              placeholder={tab === 'signup' ? s.passwordSignupPlaceholder : s.passwordLoginPlaceholder}
-              autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
-              required
-              trailing={
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
-                  aria-label={showPassword ? s.hidePassword : s.showPassword}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              }
-              footer={
-                tab === 'signup' && strength ? (
-                  <PasswordStrengthMeter strength={strength} />
-                ) : null
-              }
-            />
+          <AuthField
+            id={emailId}
+            label={s.email}
+            type="email"
+            value={email}
+            onChange={setEmail}
+            onBlur={() => setEmailTouched(true)}
+            placeholder={s.emailPlaceholder}
+            autoComplete="email"
+            required
+            invalid={emailInvalid}
+            error={emailInvalid ? s.invalidEmail : undefined}
+            leading={<Mail className="h-4 w-4" />}
+          />
 
-            {error ? (
-              <p
-                id={errorId}
-                role="alert"
-                aria-live="assertive"
-                className={cn(
-                  'flex items-start gap-2 rounded-xl border border-bad/35 bg-badbg px-3 py-2.5 text-sm text-bad',
-                  shakeError && 'animate-[shake_0.45s_ease-in-out]',
-                )}
+          <AuthField
+            id={passwordId}
+            label={s.password}
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={setPassword}
+            placeholder={tab === 'signup' ? s.passwordSignupPlaceholder : s.passwordLoginPlaceholder}
+            autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
+            required
+            leading={<Lock className="h-4 w-4" />}
+            trailing={
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPassword((v) => !v)}
+                className="grid h-8 w-8 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+                aria-label={showPassword ? s.hidePassword : s.showPassword}
               >
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                <span>{error}</span>
-              </p>
-            ) : null}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
+            footer={
+              tab === 'signup' && strength ? <PasswordStrengthMeter strength={strength} /> : null
+            }
+          />
 
-            <button
-              type="submit"
-              disabled={!canSubmit}
+          {error ? (
+            <p
+              id={errorId}
+              role="alert"
+              aria-live="assertive"
               className={cn(
-                'mt-0.5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-semibold text-white',
-                'shadow-[0_1px_2px_hsl(0_0%_0%/0.12),0_4px_12px_hsl(var(--accent-h,220)_80%_40%/0.25)]',
-                'transition-all hover:opacity-95 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
+                'flex items-start gap-2 rounded-xl border border-bad/35 bg-badbg px-3 py-2.5 text-sm text-bad',
+                shakeError && 'animate-[shake_0.45s_ease-in-out]',
               )}
             >
-              {busy ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {tab === 'login' ? s.signingIn : s.creatingAccount}
-                </>
-              ) : tab === 'login' ? (
-                s.logIn
-              ) : (
-                s.createAccountCta
-              )}
-            </button>
-          </form>
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </p>
+          ) : null}
 
-          <p className="mt-5 text-center text-xs text-ink3">
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={cn(
+              'mt-0.5 inline-flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-semibold text-white',
+              'shadow-[0_1px_2px_hsl(0_0%_0%/0.12),0_4px_12px_hsl(var(--accent-h,220)_80%_40%/0.25)]',
+              'transition-all hover:opacity-95 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
+            )}
+          >
+            {busy ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {tab === 'login' ? s.signingIn : s.creatingAccount}
+              </>
+            ) : (
+              <>
+                {tab === 'login' ? s.logIn : s.createAccountCta}
+                <ArrowRight className="h-4 w-4 opacity-90" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-4 border-t border-edge pt-4">
+          <p className="text-center text-xs text-ink3">
             {tab === 'login' ? s.noAccount : s.hasAccount}{' '}
             <button
               type="button"
@@ -313,6 +415,46 @@ export function AuthPopover({
           </p>
         </div>
       </div>
+    </div>
+  );
+
+  if (useAnchoredPopover) {
+    return panel;
+  }
+
+  return (
+    <div
+      className={cn(
+        'fixed inset-0 z-50 flex justify-center p-0 animate-auth-backdrop-in',
+        useSheetLayout
+          ? 'items-end bg-black/40 backdrop-blur-[4px] sm:items-center sm:bg-black/50 sm:p-4 sm:backdrop-blur-[6px]'
+          : 'items-center bg-black/50 p-4 backdrop-blur-[6px]',
+      )}
+      onClick={() => onOpenChange(false)}
+    >
+      {panel}
+    </div>
+  );
+}
+
+function AuthTabList({ tab, onSwitch }: { tab: AuthTab; onSwitch: (tab: AuthTab) => void }) {
+  return (
+    <div
+      role="tablist"
+      aria-label="Account mode"
+      className="relative mb-4 grid grid-cols-2 rounded-xl border border-edge bg-panel2 p-1"
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-y-1 start-1 w-[calc(50%-4px)] rounded-lg bg-panel shadow-theme-sm ring-1 ring-edge/80 transition-transform duration-200 ease-out"
+        style={{ transform: tab === 'signup' ? 'translateX(calc(100% + 4px))' : 'translateX(0)' }}
+      />
+      <TabChip active={tab === 'login'} onClick={() => onSwitch('login')}>
+        {s.logIn}
+      </TabChip>
+      <TabChip active={tab === 'signup'} onClick={() => onSwitch('signup')}>
+        {s.signUp}
+      </TabChip>
     </div>
   );
 }
@@ -333,10 +475,8 @@ function TabChip({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        'min-h-10 rounded-lg text-sm font-semibold transition-all duration-200',
-        active
-          ? 'bg-panel text-ink shadow-theme-sm ring-1 ring-edge/80'
-          : 'text-ink3 hover:text-ink2',
+        'relative z-[1] min-h-9 rounded-lg text-sm font-semibold transition-colors duration-200',
+        active ? 'text-ink' : 'text-ink3 hover:text-ink2',
       )}
     >
       {children}
@@ -377,6 +517,7 @@ function AuthField({
   required,
   invalid,
   error,
+  leading,
   trailing,
   footer,
 }: {
@@ -391,15 +532,21 @@ function AuthField({
   required?: boolean;
   invalid?: boolean;
   error?: string;
+  leading?: ReactNode;
   trailing?: ReactNode;
   footer?: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5 text-start">
-      <label className="text-xs font-semibold uppercase tracking-wide text-ink3" htmlFor={id}>
+      <label className="text-[11px] font-semibold uppercase tracking-wide text-ink3" htmlFor={id}>
         {label}
       </label>
       <div className="relative">
+        {leading ? (
+          <div className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink3/80">
+            {leading}
+          </div>
+        ) : null}
         <input
           id={id}
           type={type}
@@ -412,9 +559,10 @@ function AuthField({
           aria-invalid={invalid || undefined}
           aria-describedby={error && id ? `${id}-error` : undefined}
           className={cn(
-            'min-h-11 w-full rounded-xl border bg-panel px-3 text-sm text-ink outline-none transition-all',
+            'min-h-11 w-full rounded-xl border bg-panel text-sm text-ink outline-none transition-all',
             'placeholder:text-ink3/70 focus:border-accent focus:ring-2 focus:ring-accent/20',
-            trailing ? 'pe-11' : undefined,
+            leading ? 'ps-10' : 'px-3',
+            trailing ? 'pe-11' : leading ? 'pe-3' : undefined,
             invalid ? 'border-bad/50 focus:border-bad focus:ring-bad/15' : 'border-edge',
           )}
         />
@@ -438,7 +586,7 @@ export function AuthUserMenu({
 }: {
   open: boolean;
   onClose: () => void;
-  anchorRef: React.RefObject<HTMLElement | null>;
+  anchorRef: RefObject<HTMLElement | null>;
   onOpenProfile?: () => void;
 }) {
   const { profile, signOut } = useAuth();
@@ -472,7 +620,7 @@ export function AuthUserMenu({
       ref={menuRef}
       role="menu"
       aria-label="Account menu"
-      className="absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-in rounded-xl border border-edge bg-panel p-1.5 shadow-theme-lg"
+      className="absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-popover-in rounded-xl border border-edge bg-panel p-1.5 shadow-theme-lg"
     >
       <div className="border-b border-edge px-2.5 py-2">
         <p className="truncate text-sm font-semibold text-ink">{profile.display_name}</p>

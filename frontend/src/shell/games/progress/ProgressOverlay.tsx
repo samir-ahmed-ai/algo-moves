@@ -119,6 +119,7 @@ function ProfileTab() {
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [authOpen, setAuthOpen] = useState(false);
+  const authBtnRef = useRef<HTMLButtonElement>(null);
   const localName = readStorageText(STORAGE_KEYS.GAMES_NAME, '')?.trim() ?? '';
 
   const loadLocal = useCallback(() => {
@@ -261,9 +262,15 @@ function ProfileTab() {
         <div className="rounded-[var(--radius)] border border-edge bg-panel/60 p-3">
           <p className="text-sm text-ink3">{t.profile.guestHint}</p>
           <button
+            ref={authBtnRef}
             type="button"
-            onClick={() => setAuthOpen(true)}
-            className="mt-3 inline-flex min-h-9 items-center rounded-md bg-accent px-3 text-sm font-semibold text-white hover:opacity-90"
+            aria-expanded={authOpen}
+            aria-haspopup="dialog"
+            onClick={() => setAuthOpen((open) => !open)}
+            className={cn(
+              'mt-3 inline-flex min-h-9 items-center rounded-xl bg-accent px-3 text-sm font-semibold text-white transition-all hover:opacity-90',
+              authOpen && 'ring-2 ring-accent/30 ring-offset-2 ring-offset-bg',
+            )}
           >
             {t.profile.signIn}
           </button>
@@ -274,7 +281,12 @@ function ProfileTab() {
           >
             <LogOut className="h-3.5 w-3.5" /> {t.profile.signOut}
           </button>
-          <AuthPopover open={authOpen} onOpenChange={setAuthOpen} initialTab="signup" />
+          <AuthPopover
+            open={authOpen}
+            onOpenChange={setAuthOpen}
+            initialTab="signup"
+            anchorRef={authBtnRef}
+          />
         </div>
       ) : (
         <button

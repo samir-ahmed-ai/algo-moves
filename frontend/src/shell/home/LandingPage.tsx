@@ -80,7 +80,7 @@ function IconButton({
       aria-label={title}
       onClick={onClick}
       className={cn(
-        'grid h-8 w-8 place-items-center rounded-md border transition-colors [&>svg]:h-4 [&>svg]:w-4',
+        'grid h-8 w-8 place-items-center rounded-xl border transition-colors [&>svg]:h-4 [&>svg]:w-4',
         active
           ? 'border-accent bg-accentbg text-accent'
           : 'border-edge text-ink3 hover:bg-panel2 hover:text-ink',
@@ -118,7 +118,7 @@ function PlayMenu({ onVim, onGames }: { onVim: () => void; onGames: () => void }
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm transition-colors',
+          'inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm transition-colors',
           open
             ? 'border-accent/60 bg-accentbg text-accent'
             : 'border-edge text-ink2 hover:border-accent/50 hover:text-ink',
@@ -133,7 +133,7 @@ function PlayMenu({ onVim, onGames }: { onVim: () => void; onGames: () => void }
           <div className="fixed inset-0 z-30" aria-hidden onClick={() => setOpen(false)} />
           <div
             role="menu"
-            className="absolute right-0 z-40 mt-1.5 w-48 overflow-hidden rounded-lg border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]"
+            className="absolute end-0 z-40 mt-1.5 w-48 overflow-hidden rounded-xl border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]"
           >
             <PlayMenuItem icon={<Keyboard className="h-4 w-4" />} title="Vim Dojo" hint="Keyboard maze trainer" onClick={() => pick(onVim)} />
             <PlayMenuItem icon={<Gamepad2 className="h-4 w-4" />} title="Games" hint="Two-player games" onClick={() => pick(onGames)} />
@@ -608,7 +608,7 @@ export function LandingPage() {
               type="button"
               title="Open workspace"
               onClick={() => enterCanvas()}
-              className="ml-1 inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              className="ml-1 inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
               {compactLabel('Open workspace', 'Open', isMobile)}
               <ArrowRight className="h-3.5 w-3.5" />
@@ -637,7 +637,7 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
-                  className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
                 >
                   <Play className="h-4 w-4" />
                   {lastItem
