@@ -1,7 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Loader2, LogOut, Shield, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { useAuth } from '@/shell/games/data/AuthProvider';
+import { formatAuthError } from './formatAuthError';
+import { authStrings as s } from './strings';
+import { useAuth } from './AuthProvider';
 
 type AuthTab = 'login' | 'signup';
 
@@ -71,7 +73,7 @@ export function AuthPopover({
           ? await signInEmail(email.trim(), password)
           : await signUpEmail(email.trim(), password, displayName.trim());
       if (result.error) {
-        setError(result.error);
+        setError(formatAuthError(result.error));
         return;
       }
       onOpenChange(false);
@@ -92,12 +94,12 @@ export function AuthPopover({
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label={tab === 'login' ? 'Log in' : 'Sign up'}
+        aria-label={tab === 'login' ? s.logIn : s.signUp}
         className="w-full max-w-sm rounded-2xl border border-edge bg-bg p-5 shadow-[var(--shadow-xl)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between gap-2">
-          <h2 className="text-lg font-bold text-ink">{tab === 'login' ? 'Welcome back' : 'Create account'}</h2>
+          <h2 className="text-lg font-bold text-ink">{tab === 'login' ? s.welcomeBack : s.createAccount}</h2>
           <button
             type="button"
             onClick={() => onOpenChange(false)}
@@ -110,10 +112,10 @@ export function AuthPopover({
 
         <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-edge bg-panel2 p-1">
           <TabChip active={tab === 'login'} onClick={() => { setTab('login'); setError(null); }}>
-            Log in
+            {s.logIn}
           </TabChip>
           <TabChip active={tab === 'signup'} onClick={() => { setTab('signup'); setError(null); }}>
-            Sign up
+            {s.signUp}
           </TabChip>
         </div>
 
@@ -127,30 +129,30 @@ export function AuthPopover({
           {tab === 'signup' ? (
             <AuthField
               id={nameId}
-              label="Display name"
+              label={s.displayName}
               value={displayName}
               onChange={setDisplayName}
-              placeholder="Ahmed"
+              placeholder={s.namePlaceholder}
               autoComplete="name"
             />
           ) : null}
           <AuthField
             id={emailId}
-            label="Email"
+            label={s.email}
             type="email"
             value={email}
             onChange={setEmail}
-            placeholder="you@example.com"
+            placeholder={s.emailPlaceholder}
             autoComplete="email"
             required
           />
           <AuthField
             id={passwordId}
-            label="Password"
+            label={s.password}
             type="password"
             value={password}
             onChange={setPassword}
-            placeholder={tab === 'signup' ? 'At least 8 characters' : 'Your password'}
+            placeholder={tab === 'signup' ? s.passwordSignupPlaceholder : s.passwordLoginPlaceholder}
             autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
             required
           />
@@ -165,12 +167,12 @@ export function AuthPopover({
             className="mt-1 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {tab === 'login' ? 'Log in' : 'Create account'}
+            {tab === 'login' ? s.logIn : s.createAccountCta}
           </button>
         </form>
 
         <p className="mt-4 text-center text-xs text-ink3">
-          {tab === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+          {tab === 'login' ? s.noAccount : s.hasAccount}{' '}
           <button
             type="button"
             className="font-semibold text-accent hover:underline"
@@ -179,7 +181,7 @@ export function AuthPopover({
               setError(null);
             }}
           >
-            {tab === 'login' ? 'Sign up' : 'Log in'}
+            {tab === 'login' ? s.signUp : s.logIn}
           </button>
         </p>
       </div>
@@ -267,8 +269,18 @@ export function AuthUserMenu({
       if (menuRef.current?.contains(t) || anchorRef.current?.contains(t)) return;
       onClose();
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
     document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [open, onClose, anchorRef]);
 
   if (!open || !profile) return null;
@@ -276,6 +288,8 @@ export function AuthUserMenu({
   return (
     <div
       ref={menuRef}
+      role="menu"
+      aria-label="Account menu"
       className="absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] rounded-xl border border-edge bg-panel p-1.5 shadow-[var(--shadow-lg)]"
     >
       <div className="border-b border-edge px-2.5 py-2">
@@ -283,12 +297,12 @@ export function AuthUserMenu({
         {profile.email ? <p className="truncate text-xs text-ink3">{profile.email}</p> : null}
         {profile.is_admin ? (
           <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent">
-            <Shield className="h-3 w-3" /> Admin
+            <Shield className="h-3 w-3" /> {s.admin}
           </span>
         ) : null}
       </div>
       {onOpenProfile ? (
-        <MenuRow onClick={() => { onOpenProfile(); onClose(); }}>Profile & stats</MenuRow>
+        <MenuRow onClick={() => { onOpenProfile(); onClose(); }}>{s.profileStats}</MenuRow>
       ) : null}
       <MenuRow
         danger
@@ -297,7 +311,7 @@ export function AuthUserMenu({
           onClose();
         }}
       >
-        <LogOut className="h-3.5 w-3.5" /> Sign out
+        <LogOut className="h-3.5 w-3.5" /> {s.signOut}
       </MenuRow>
     </div>
   );
@@ -315,6 +329,7 @@ function MenuRow({
   return (
     <button
       type="button"
+      role="menuitem"
       onClick={onClick}
       className={cn(
         'flex w-full min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm transition-colors hover:bg-panel2',

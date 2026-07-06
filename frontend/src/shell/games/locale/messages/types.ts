@@ -114,11 +114,6 @@ export type ArcadeStrings = {
     signIn: string;
     signInHint: string;
     guestHint: string;
-    keepStats: string;
-    email: string;
-    sendLink: string;
-    linkSent: string;
-    continueWithGoogle: string;
     signedIn: string;
     signOut: string;
     editName: string;

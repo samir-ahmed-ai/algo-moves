@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
 import { Loader2, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { useAuth } from '@/shell/games/data/AuthProvider';
+import { useAuth } from './AuthProvider';
 import { Avatar } from '@/shell/games/ui/Avatar';
+import { authStrings as s } from './strings';
 import { AuthPopover, AuthUserMenu } from './AuthPopover';
 
 export function AuthButton({
@@ -67,8 +68,8 @@ export function AuthButton({
         {onOpenProfile ? (
           <button
             type="button"
-            title="Stats"
-            aria-label="Stats"
+            title={s.stats}
+            aria-label={s.stats}
             onClick={onOpenProfile}
             className="grid h-9 w-9 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation"
           >
@@ -84,7 +85,7 @@ export function AuthButton({
           onClick={() => setAuthOpen(true)}
           className="inline-flex min-h-9 items-center rounded-xl border border-edge bg-panel px-3 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent touch-manipulation"
         >
-          Sign in
+          {s.signIn}
         </button>
       </div>
       <AuthPopover open={authOpen} onOpenChange={setAuthOpen} />

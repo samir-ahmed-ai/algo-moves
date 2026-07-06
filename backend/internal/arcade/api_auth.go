@@ -113,7 +113,7 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if p == nil {
-		writeErr(w, http.StatusNotFound, "account not found")
+		writeErr(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
 	if hash == "" {
@@ -131,14 +131,16 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if updated == nil {
-		writeErr(w, http.StatusNotFound, "account not found")
+		writeErr(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
-	writeJSON(w, http.StatusOK, GuestSession{
+	sess := GuestSession{
 		ProfileID:    updated.ID,
 		SessionToken: token,
 		Profile:      *updated,
-	})
+	}
+	s.refreshSessionProfile(r.Context(), &sess)
+	writeJSON(w, http.StatusOK, sess)
 }
 
 func (s *Service) handleGuest(w http.ResponseWriter, r *http.Request) {
