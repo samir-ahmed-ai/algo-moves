@@ -1,4 +1,4 @@
-import type { GoTopic } from '../go-course/types';
+import type { GoTopic } from '../../go-course/types';
 
 // OpenRTB course — Module 8: Creatives & Ad Tags
 export const creativesTags: GoTopic = {

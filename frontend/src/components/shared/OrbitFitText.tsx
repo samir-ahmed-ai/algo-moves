@@ -35,7 +35,7 @@ export function OrbitFitText({
     fontSize: max,
     lines: text.trim() ? [{ text: text.trim(), stretch: true }] : [],
   }));
-  const [renderSize, setRenderSize] = useState(max);
+  const [renderSize, setRenderSize] = useState<number>(max);
 
   useLayoutEffect(() => {
     const el = measureRef.current;

@@ -205,7 +205,7 @@ export function fitOrbitMultilineLayout(
   for (let size = max; size >= min; size--) {
     const width = measureLine(trimmed, size);
     if (width <= budget) {
-      return { fontSize: size, lines: orbitLinesWithStretch([trimmed], (line) => width, budget) };
+      return { fontSize: size, lines: orbitLinesWithStretch([trimmed], () => width, budget) };
     }
   }
 

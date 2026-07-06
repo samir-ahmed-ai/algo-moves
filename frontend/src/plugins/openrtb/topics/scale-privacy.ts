@@ -1,4 +1,4 @@
-import type { GoTopic } from '../go-course/types';
+import type { GoTopic } from '../../go-course/types';
 
 // OpenRTB course — Module 9: Scale, Privacy & System Design
 export const scalePrivacy: GoTopic = {

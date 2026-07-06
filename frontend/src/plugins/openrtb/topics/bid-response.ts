@@ -1,4 +1,4 @@
-import type { GoTopic } from '../go-course/types';
+import type { GoTopic } from '../../go-course/types';
 
 // OpenRTB course — Module 3: BidResponse & Auction Settlement
 export const bidResponse: GoTopic = {

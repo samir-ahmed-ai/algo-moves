@@ -1,4 +1,4 @@
-import type { GoTopic } from '../go-course/types';
+import type { GoTopic } from '../../go-course/types';
 
 // OpenRTB course — Module 7: Clicks, Impressions & Tracking
 export const tracking: GoTopic = {

@@ -1,4 +1,4 @@
-import type { GoTopic } from '../go-course/types';
+import type { GoTopic } from '../../go-course/types';
 
 // OpenRTB course — Module 5: Ad Exchange & Auction in Go
 export const exchangeAuction: GoTopic = {
