@@ -33,6 +33,11 @@ export const en: ArcadeStrings = {
     createRoomError: 'Could not create a room.',
     lanHint:
       'LAN mode: run make backend-dev and open this site on your machine\'s IP. For internet play, set VITE_GAMES_SERVER_URL at build time.',
+    yourRoom: 'Your room',
+    yourRoomHint: 'Friends can always join you with this code.',
+    hostMyRoom: 'Host my room',
+    copyCode: 'Copy code',
+    codeCopied: 'Copied!',
   },
   waitingRoom: {
     waitingTitle: 'Waiting for your partner…',

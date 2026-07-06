@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Eye, Loader2, Plus, Users } from 'lucide-react';
+import { AlertCircle, Copy, Eye, Loader2, Plus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { buildGamesUrl, writeGamesHash } from '@/lib/navigation';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
 import { useAuth } from '../data/AuthProvider';
+import { getPersonalRoomCode } from '../data/arcadeClient';
 import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net/gameServer';
-import { writeGamesHash } from '@/lib/navigation';
 import { Avatar } from '../ui/Avatar';
 import { Glyph, TouchButton } from '../ui/gamesUi';
 import { GAMES } from '../registry';
@@ -35,6 +36,8 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
   const [tab, setTab] = useState<'create' | 'join'>(prefillRoom ? 'join' : 'create');
   const [capacity, setCapacity] = useState(2);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const personalRoomCode = useMemo(() => getPersonalRoomCode(), []);
   const nameOk = name.trim().length > 0;
   const configuredServer = hasConfiguredServer();
 
@@ -63,6 +66,36 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       connect(code, name.trim(), { capacity });
     } catch (e) {
       setCreateError(e instanceof Error ? e.message : t.lobby.createRoomError);
+    }
+  };
+
+  const hostPersonalRoom = async () => {
+    if (!nameOk) return;
+    setCreateError(null);
+    try {
+      await prepare();
+      const code = normalizeRoomCode(personalRoomCode);
+      writeGamesHash({ room: code });
+      connect(code, name.trim(), { capacity });
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : t.lobby.createRoomError);
+    }
+  };
+
+  const copyPersonalCode = async () => {
+    const code = normalizeRoomCode(personalRoomCode);
+    try {
+      await navigator.clipboard.writeText(buildGamesUrl(code));
+      setCopiedCode(true);
+      window.setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      try {
+        await navigator.clipboard.writeText(code);
+        setCopiedCode(true);
+        window.setTimeout(() => setCopiedCode(false), 2000);
+      } catch {
+        // ignore clipboard failures
+      }
     }
   };
 
@@ -118,6 +151,36 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
           />
         </div>
       </label>
+
+      <div className="rounded-2xl border border-edge bg-panel p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest text-ink3">{t.lobby.yourRoom}</p>
+            <p className="mt-1 font-mono text-3xl font-bold uppercase tracking-[0.35em] text-ink">
+              {normalizeRoomCode(personalRoomCode)}
+            </p>
+            <p className="mt-2 text-xs text-ink3">{t.lobby.yourRoomHint}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void copyPersonalCode()}
+            className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl border border-edge bg-panel2 px-3 text-xs font-semibold text-ink3 hover:text-ink"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            {copiedCode ? t.lobby.codeCopied : t.lobby.copyCode}
+          </button>
+        </div>
+        <TouchButton
+          variant="primary"
+          size="lg"
+          className="mt-4"
+          busy={connecting}
+          disabled={!nameOk}
+          onClick={hostPersonalRoom}
+        >
+          {connecting ? t.lobby.creatingRoom : t.lobby.hostMyRoom}
+        </TouchButton>
+      </div>
 
       {/* Create / Join tabs */}
       <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">

@@ -1,4 +1,6 @@
 import { gameServerHttpBase } from '../net/gameServer';
+import { readStorageText, writeStorageText } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
 /**
  * Arcade persistence talks to the Go backend's /api/* routes, backed by
@@ -23,6 +25,38 @@ export function setSessionToken(token: string): void {
 export function clearSessionToken(): void {
   if (typeof localStorage === 'undefined') return;
   localStorage.removeItem(SESSION_KEY);
+}
+
+/** Stable browser guest id used to derive a personal room code offline. */
+export function getOrCreateLocalGuestId(): string {
+  const existing = readStorageText(STORAGE_KEYS.GAMES_GUEST_ID);
+  if (existing) return existing;
+  const id = crypto.randomUUID();
+  writeStorageText(STORAGE_KEYS.GAMES_GUEST_ID, id);
+  return id;
+}
+
+function derivePersonalRoomCode(guestId: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < guestId.length; i++) {
+    hash ^= guestId.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).toUpperCase().padStart(6, '0').slice(0, 6);
+}
+
+/** Personal room code for this browser — stable even without Postgres. */
+export function getPersonalRoomCode(): string {
+  const saved = readStorageText(STORAGE_KEYS.GAMES_PERSONAL_ROOM);
+  if (saved) return saved;
+  const code = derivePersonalRoomCode(getOrCreateLocalGuestId());
+  writeStorageText(STORAGE_KEYS.GAMES_PERSONAL_ROOM, code);
+  return code;
+}
+
+export function setPersonalRoomCode(code: string): void {
+  if (!code.trim()) return;
+  writeStorageText(STORAGE_KEYS.GAMES_PERSONAL_ROOM, code.trim().toUpperCase());
 }
 
 /** Whether the game server has arcade persistence (Postgres) enabled. */

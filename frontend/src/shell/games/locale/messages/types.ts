@@ -30,6 +30,11 @@ export type ArcadeStrings = {
     roomCodePlaceholder: string;
     createRoomError: string;
     lanHint: string;
+    yourRoom: string;
+    yourRoomHint: string;
+    hostMyRoom: string;
+    copyCode: string;
+    codeCopied: string;
   };
   waitingRoom: {
     waitingTitle: string;

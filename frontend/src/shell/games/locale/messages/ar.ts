@@ -33,6 +33,11 @@ export const ar: ArcadeStrings = {
     createRoomError: 'تعذّر إنشاء الغرفة.',
     lanHint:
       'وضع الشبكة المحلية: شغّل make backend-dev وافتح الموقع على عنوان IP جهازك. للعب عبر الإنترنت، عيّن VITE_GAMES_SERVER_URL عند البناء.',
+    yourRoom: 'غرفتك',
+    yourRoomHint: 'يمكن لأصدقائك الانضمام إليك دائماً بهذا الرمز.',
+    hostMyRoom: 'استضافة غرفتي',
+    copyCode: 'نسخ الرمز',
+    codeCopied: 'تم النسخ!',
   },
   waitingRoom: {
     waitingTitle: 'بانتظار شريكك…',

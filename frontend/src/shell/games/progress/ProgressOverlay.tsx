@@ -12,10 +12,13 @@ import {
   listAchievements,
   listUnlockedAchievementIds,
 } from '../data/db';
+import { buildLocalLeaderboard, getLocalHistory, type LocalMatchRecord } from '../data/localHistory';
 import { GAMES } from '../registry';
 import { localizedGameMeta } from '../gameMeta';
 import { Avatar } from '../ui/Avatar';
 import { TouchButton } from '../ui/gamesUi';
+import { readStorageText } from '@/store/persistence';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 import type { Achievement, GameStats, LeaderboardEntry, MatchHistoryEntry } from '../data/types';
 
 type Tab = 'profile' | 'leaderboard';
@@ -103,10 +106,6 @@ function TabButton({
   );
 }
 
-function Unconfigured({ message }: { message: string }) {
-  return <p className="rounded-[var(--radius)] border border-edge bg-panel2 p-4 text-center text-sm text-ink3">{message}</p>;
-}
-
 function ProfileTab() {
   const { locale } = useGamesLocale();
   const t = useMemo(() => getArcadeStrings(locale), [locale]);
@@ -115,10 +114,17 @@ function ProfileTab() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [unlocked, setUnlocked] = useState<string[]>([]);
   const [history, setHistory] = useState<MatchHistoryEntry[]>([]);
+  const [localHistory, setLocalHistory] = useState<LocalMatchRecord[]>([]);
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
+  const localName = readStorageText(STORAGE_KEYS.GAMES_NAME, '')?.trim() ?? '';
+
+  const loadLocal = useCallback(() => {
+    setLocalHistory(getLocalHistory(10));
+  }, []);
 
   const load = useCallback(async () => {
+    loadLocal();
     if (!configured) return;
     const id = await ensureSignedIn();
     if (!id) return;
@@ -132,14 +138,67 @@ function ProfileTab() {
     setAchievements(a);
     setUnlocked(u);
     setHistory(h);
-  }, [configured, ensureSignedIn]);
+  }, [configured, ensureSignedIn, loadLocal]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   if (authLoading) return <p className="py-6 text-center text-sm text-ink3">…</p>;
-  if (!configured) return <Unconfigured message={t.profile.needsDatabase} />;
+
+  if (!configured) {
+    const displayName = localName || t.profile.guest;
+    const myRows = getLocalHistory().filter((row) => row.myName === displayName);
+    const totalWins = myRows.filter((row) => row.placement === 1).length;
+    const totalLosses = myRows.filter((row) => row.placement !== 1).length;
+
+    return (
+      <div className="flex flex-col gap-5">
+        <div className="flex items-center gap-3">
+          <Avatar seed={displayName} name={displayName} size={56} />
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-bold text-ink">{displayName}</p>
+            <p className="text-xs text-ink3">{t.profile.signInHint}</p>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">{t.profile.stats}</p>
+          {myRows.length === 0 ? (
+            <p className="text-sm text-ink3">{t.profile.noStats}</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              <StatCell label={t.profile.wins} value={totalWins} tone="good" />
+              <StatCell label={t.profile.losses} value={totalLosses} tone="bad" />
+              <StatCell label={t.profile.played} value={myRows.length} tone="accent" />
+            </div>
+          )}
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">{t.profile.history}</p>
+          {localHistory.length === 0 ? (
+            <p className="text-sm text-ink3">{t.profile.noHistory}</p>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {localHistory.map((h) => {
+                const game = GAMES.find((g) => g.id === h.gameId);
+                const won = h.placement === 1;
+                return (
+                  <li key={h.id} className="flex items-center justify-between text-sm">
+                    <span className="text-ink2">{game ? localizedGameMeta(game, locale).title : h.gameId}</span>
+                    <span className={won ? 'font-semibold text-good' : 'text-ink3'}>
+                      {won ? t.profile.wins : t.profile.losses}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const name = profile?.display_name ?? t.profile.guest;
   const totalWins = stats.reduce((n, s) => n + s.wins, 0);
@@ -323,10 +382,31 @@ function LeaderboardTab() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!configured) return;
     let alive = true;
     setLoading(true);
     const run = async () => {
+      if (!configured) {
+        const since =
+          period === 'all'
+            ? undefined
+            : new Date(Date.now() - (period === 'week' ? 7 : 1) * 86400000);
+        const localRows = buildLocalLeaderboard({ gameId, since }).map((row) => ({
+          rank: row.rank,
+          profile_id: row.name,
+          display_name: row.name,
+          avatar_seed: row.name,
+          level: 1,
+          wins: row.wins,
+          losses: row.losses,
+          matches_played: row.matchesPlayed,
+        }));
+        if (alive) {
+          setRows(localRows);
+          setLoading(false);
+        }
+        return;
+      }
+
       let data: LeaderboardEntry[];
       if (period === 'all') {
         data = gameId ? await leaderboardGame(gameId) : await leaderboardGlobal();
@@ -346,7 +426,6 @@ function LeaderboardTab() {
   }, [configured, period, gameId]);
 
   if (authLoading) return <p className="py-6 text-center text-sm text-ink3">…</p>;
-  if (!configured) return <Unconfigured message={t.leaderboard.needsDatabase} />;
 
   return (
     <div className="flex flex-col gap-3">
@@ -389,7 +468,7 @@ function LeaderboardTab() {
               <Avatar seed={r.avatar_seed ?? r.profile_id} name={r.display_name} size={28} />
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{r.display_name}</span>
               <span className="text-sm font-semibold tabular-nums text-accent">
-                {r.mmr ?? r.wins ?? r.xp ?? 0}
+                {configured ? (r.mmr ?? r.wins ?? r.xp ?? 0) : (r.wins ?? 0)}
               </span>
             </li>
           ))}

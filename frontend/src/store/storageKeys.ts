@@ -54,6 +54,9 @@ export const STORAGE_KEYS = {
   GAMES_LOCALE: k('games', 'locale'),
   GAMES_NAME: k('games', 'name'),
   GAMES_MUTED: k('games', 'muted'),
+  GAMES_GUEST_ID: k('games', 'guest-id'),
+  GAMES_PERSONAL_ROOM: k('games', 'personal-room'),
+  GAMES_LOCAL_HISTORY: k('games', 'local-history'),
 
   // data
   DEMO_WORKFLOW: k('demo-workflow'),

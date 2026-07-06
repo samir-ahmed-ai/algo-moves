@@ -12,6 +12,7 @@ import {
   clearSessionToken,
   getSessionToken,
   isArcadeConfigured,
+  setPersonalRoomCode,
   setSessionToken,
 } from './arcadeClient';
 import { getProfile, updateProfile } from './db';
@@ -44,6 +45,10 @@ type GuestSession = {
   session_token: string;
   profile: Profile;
 };
+
+function syncPersonalRoom(profile: Profile | null | undefined): void {
+  if (profile?.personal_room_code) setPersonalRoomCode(profile.personal_room_code);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [configured, setConfigured] = useState(false);
@@ -79,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserId(me.id);
           setIsAnonymous(me.is_anonymous);
           setProfile(me);
+          syncPersonalRoom(me);
         } else {
           clearSessionToken();
         }
@@ -100,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserId(me.id);
         setIsAnonymous(me.is_anonymous);
         setProfile(me);
+        syncPersonalRoom(me);
         return me.id;
       }
       clearSessionToken();
@@ -117,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserId(sess.profile_id);
       setIsAnonymous(true);
       setProfile(sess.profile);
+      syncPersonalRoom(sess.profile);
       return sess.profile_id;
     })();
     return signingIn.current;

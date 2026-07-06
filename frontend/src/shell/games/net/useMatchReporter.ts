@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useGameRoom } from './useGameRoom';
 import { useRoomComms } from './useRoomComms';
 import { submitMatchResult } from '../data/db';
+import { saveLocalMatch } from '../data/localHistory';
 import type { RoomMode, SubmitMatchResult } from '../data/types';
 
 /** One participant's finish, keyed by their live connection (peer) id. */
@@ -23,7 +24,7 @@ export function useMatchReporter(gameId: string): {
   isReporter: boolean;
   report: (participants: ReportedParticipant[], opts?: { mode?: RoomMode; metadata?: Record<string, unknown> }) => Promise<SubmitMatchResult | null>;
 } {
-  const { role, room, players, sharedState } = useGameRoom();
+  const { role, room, players, sharedState, self } = useGameRoom();
   const { identities, reportResult } = useRoomComms();
   const isReporter = role === 'host';
 
@@ -35,24 +36,50 @@ export function useMatchReporter(gameId: string): {
       const mode =
         opts?.mode ??
         ((sharedState as { mode?: RoomMode } | null)?.mode ?? 'duel');
+      const resolved = participants.map((p) => {
+        const id = identities[p.peerId];
+        const name = id?.name ?? players.find((pl) => pl.id === p.peerId)?.name ?? 'Player';
+        return {
+          profileId: id?.profileId ?? null,
+          displayName: name,
+          placement: p.placement,
+          score: p.score ?? 0,
+          peerId: p.peerId,
+        };
+      });
+
+      if (self) {
+        const me = resolved.find((p) => p.peerId === self.id);
+        if (me) {
+          saveLocalMatch({
+            id: crypto.randomUUID(),
+            gameId,
+            date: new Date().toISOString(),
+            myName: me.displayName,
+            myScore: me.score,
+            placement: me.placement,
+            totalPlayers: resolved.length,
+            opponents: resolved
+              .filter((p) => p.peerId !== self.id)
+              .map((p) => ({ name: p.displayName, score: p.score, placement: p.placement })),
+          });
+        }
+      }
+
       return submitMatchResult({
         gameId,
         roomCode: room,
         mode,
-        participants: participants.map((p) => {
-          const id = identities[p.peerId];
-          const name = id?.name ?? players.find((pl) => pl.id === p.peerId)?.name ?? 'Player';
-          return {
-            profileId: id?.profileId ?? null,
-            displayName: name,
-            placement: p.placement,
-            score: p.score,
-          };
-        }),
+        participants: resolved.map(({ profileId, displayName, placement, score }) => ({
+          profileId,
+          displayName,
+          placement,
+          score,
+        })),
         metadata: opts?.metadata,
       });
     },
-    [isReporter, gameId, room, players, identities, sharedState, reportResult],
+    [isReporter, gameId, room, players, identities, sharedState, reportResult, self],
   );
 
   return { isReporter, report };

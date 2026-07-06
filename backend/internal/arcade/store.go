@@ -7,9 +7,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -26,14 +28,15 @@ func NewStore(pool *pgxpool.Pool) *Store {
 func (s *Store) Pool() *pgxpool.Pool { return s.pool }
 
 type Profile struct {
-	ID          string    `json:"id"`
-	DisplayName string    `json:"display_name"`
-	AvatarSeed  string    `json:"avatar_seed"`
-	IsAnonymous bool      `json:"is_anonymous"`
-	XP          int       `json:"xp"`
-	Level       int       `json:"level"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID               string    `json:"id"`
+	DisplayName      string    `json:"display_name"`
+	AvatarSeed       string    `json:"avatar_seed"`
+	PersonalRoomCode string    `json:"personal_room_code"`
+	IsAnonymous      bool      `json:"is_anonymous"`
+	XP               int       `json:"xp"`
+	Level            int       `json:"level"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 type GuestSession struct {
@@ -50,52 +53,90 @@ func newSessionToken() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
+func newPersonalRoomCode() (string, error) {
+	b := make([]byte, 3)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return strings.ToUpper(hex.EncodeToString(b)), nil
+}
+
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
+
+func scanProfile(row pgx.Row) (*Profile, error) {
+	var p Profile
+	err := row.Scan(
+		&p.ID, &p.DisplayName, &p.AvatarSeed, &p.PersonalRoomCode,
+		&p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+const profileSelectCols = `
+	id::text, display_name, avatar_seed, personal_room_code,
+	is_anonymous, xp, level, created_at, updated_at`
+
 func (s *Store) CreateGuest(ctx context.Context) (*GuestSession, error) {
 	token, err := newSessionToken()
 	if err != nil {
 		return nil, err
 	}
-	var p Profile
-	err = s.pool.QueryRow(ctx, `
-		insert into public.profiles (session_token, is_anonymous)
-		values ($1, true)
-		returning id::text, display_name, avatar_seed, is_anonymous, xp, level, created_at, updated_at`,
-		token,
-	).Scan(&p.ID, &p.DisplayName, &p.AvatarSeed, &p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt)
-	if err != nil {
+	const maxAttempts = 8
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		code, err := newPersonalRoomCode()
+		if err != nil {
+			return nil, err
+		}
+		row := s.pool.QueryRow(ctx, `
+			insert into public.profiles (session_token, is_anonymous, personal_room_code)
+			values ($1, true, $2)
+			returning `+profileSelectCols,
+			token, code,
+		)
+		p, err := scanProfile(row)
+		if err == nil {
+			return &GuestSession{ProfileID: p.ID, SessionToken: token, Profile: *p}, nil
+		}
+		if isUniqueViolation(err) {
+			continue
+		}
 		return nil, err
 	}
-	return &GuestSession{ProfileID: p.ID, SessionToken: token, Profile: p}, nil
+	return nil, fmt.Errorf("could not allocate personal room code")
 }
 
 func (s *Store) ProfileByToken(ctx context.Context, token string) (*Profile, error) {
-	var p Profile
-	err := s.pool.QueryRow(ctx, `
-		select id::text, display_name, avatar_seed, is_anonymous, xp, level, created_at, updated_at
-		from public.profiles where session_token = $1`, token,
-	).Scan(&p.ID, &p.DisplayName, &p.AvatarSeed, &p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt)
+	row := s.pool.QueryRow(ctx, `
+		select `+profileSelectCols+`
+		from public.profiles where session_token = $1`, token)
+	p, err := scanProfile(row)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &p, nil
+	return p, nil
 }
 
 func (s *Store) ProfileByID(ctx context.Context, id string) (*Profile, error) {
-	var p Profile
-	err := s.pool.QueryRow(ctx, `
-		select id::text, display_name, avatar_seed, is_anonymous, xp, level, created_at, updated_at
-		from public.profiles where id = $1`, id,
-	).Scan(&p.ID, &p.DisplayName, &p.AvatarSeed, &p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt)
+	row := s.pool.QueryRow(ctx, `
+		select `+profileSelectCols+`
+		from public.profiles where id = $1`, id)
+	p, err := scanProfile(row)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &p, nil
+	return p, nil
 }
 
 func (s *Store) ProfilesByIDs(ctx context.Context, ids []string) ([]Profile, error) {
@@ -103,7 +144,7 @@ func (s *Store) ProfilesByIDs(ctx context.Context, ids []string) ([]Profile, err
 		return nil, nil
 	}
 	rows, err := s.pool.Query(ctx, `
-		select id::text, display_name, avatar_seed, is_anonymous, xp, level, created_at, updated_at
+		select `+profileSelectCols+`
 		from public.profiles where id = any($1)`, ids)
 	if err != nil {
 		return nil, err
@@ -112,7 +153,10 @@ func (s *Store) ProfilesByIDs(ctx context.Context, ids []string) ([]Profile, err
 	var out []Profile
 	for rows.Next() {
 		var p Profile
-		if err := rows.Scan(&p.ID, &p.DisplayName, &p.AvatarSeed, &p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(
+			&p.ID, &p.DisplayName, &p.AvatarSeed, &p.PersonalRoomCode,
+			&p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		out = append(out, p)
@@ -121,22 +165,22 @@ func (s *Store) ProfilesByIDs(ctx context.Context, ids []string) ([]Profile, err
 }
 
 func (s *Store) UpdateProfile(ctx context.Context, id string, displayName, avatarSeed *string) (*Profile, error) {
-	var p Profile
-	err := s.pool.QueryRow(ctx, `
+	row := s.pool.QueryRow(ctx, `
 		update public.profiles set
 		  display_name = coalesce($2, display_name),
 		  avatar_seed  = coalesce($3, avatar_seed)
 		where id = $1
-		returning id::text, display_name, avatar_seed, is_anonymous, xp, level, created_at, updated_at`,
+		returning `+profileSelectCols,
 		id, displayName, avatarSeed,
-	).Scan(&p.ID, &p.DisplayName, &p.AvatarSeed, &p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt)
+	)
+	p, err := scanProfile(row)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &p, nil
+	return p, nil
 }
 
 func (s *Store) GameStats(ctx context.Context, profileID string) ([]map[string]any, error) {
