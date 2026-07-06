@@ -170,7 +170,7 @@ export function NodeTagChip({ id }: { id: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded bg-panel2 px-[calc(var(--node-px,0.75rem)*0.5)] py-[calc(var(--node-py,0.5625rem)*0.35)] text-ink2',
+        'inline-flex items-center gap-1 rounded-full bg-panel2 px-[calc(var(--node-px,0.75rem)*0.5)] py-[calc(var(--node-py,0.5625rem)*0.35)] text-ink2 ring-1 ring-inset ring-edge transition-colors hover:bg-edge/50 hover:text-ink',
         nodeText.xs,
       )}
     >

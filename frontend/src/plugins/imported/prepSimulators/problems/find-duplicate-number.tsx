@@ -290,8 +290,18 @@ const practiceQuiz: QuizQuestion[] = [
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'fd1', label: '[1,3,4,2,2]', value: { nums: [1, 3, 4, 2, 2] } },
-    { id: 'fd2', label: '[3,1,3,4,2]', value: { nums: [3, 1, 3, 4, 2] } },
+    {
+      id: 'fd1',
+      label: '[1,3,4,2,2]',
+      value: { nums: [1, 3, 4, 2, 2] },
+      hint: 'Jump links form a cycle; the entrance index is the duplicate value 2.',
+    },
+    {
+      id: 'fd2',
+      label: '[3,1,3,4,2]',
+      value: { nums: [3, 1, 3, 4, 2] },
+      hint: 'Two indices store 3 — Floyd finds it without extra memory.',
+    },
   ] satisfies SampleInput<DupInput>[],
   record,
   View,

@@ -77,6 +77,11 @@ export function CategoryBoard({
             </Label>
             <h2 className={cn('truncate font-medium text-ink', chromeText.base)}>{heading}</h2>
             {blurb && <p className={cn('mt-0.5 line-clamp-1 text-ink2', chromeText.tight)}>{blurb}</p>}
+            {category?.description && (
+              <p className={cn('mt-1.5 max-w-3xl leading-relaxed text-ink2', chromeText.sm)}>
+                {category.description}
+              </p>
+            )}
           </div>
           {total > 0 && (
             <div className="relative ml-auto flex shrink-0 items-center gap-2">

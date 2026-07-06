@@ -44,7 +44,7 @@ function ProblemCard({
       aria-label={`Open ${item.title}, ${item.difficulty ?? 'unrated'}${isMastered ? ', mastered' : ''}`}
       style={{ animationDelay: delay }}
       className={cn(
-        'bp-note group relative flex min-h-[168px] flex-col items-center overflow-hidden rounded-lg border border-edge bg-panel pt-[3px] text-center transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
+        'bp-note group relative flex min-h-[188px] flex-col items-center overflow-hidden rounded-lg border border-edge bg-panel pt-[3px] text-center transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
         isMastered && 'border-good/40',
       )}
     >
@@ -77,9 +77,12 @@ function ProblemCard({
           />
         </div>
 
-        <div className={cn('mt-2 line-clamp-2 font-medium leading-snug text-ink2 group-hover:text-ink', chromeText.base)}>
+        <div className={cn('mt-2 line-clamp-1 font-medium leading-snug text-ink2 group-hover:text-ink', chromeText.base)}>
           {item.title}
         </div>
+        {item.summary && (
+          <p className={cn('mt-1 line-clamp-2 leading-snug text-ink3', chromeText.sm)}>{item.summary}</p>
+        )}
         {item.difficulty && (
           <Chip tone={difficultyTone(item.difficulty)} mono className={cn('mt-1 !px-1.5 !py-0', chromeText.xs)}>
             {item.difficulty}

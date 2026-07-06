@@ -24,6 +24,8 @@ export interface BrowseCategory {
   id: string;
   title: string;
   summary?: string;
+  /** Longer, two-sentence framing shown on the category board header. */
+  description?: string;
   icon?: string;
   sources: BrowseCategorySource[];
 }
@@ -59,6 +61,8 @@ const CATEGORIES: BrowseCategory[] = [
     id: 'arrays',
     title: 'Arrays',
     summary: 'Searching, two pointers, and array manipulation.',
+    description:
+      'Linear sequences are the foundation of most algorithm problems; master in-place manipulation with two-pointer and sliding-window sweeps. Recognizing sorted-order structure and index arithmetic unlocks clean O(n) solutions.',
     icon: 'Table',
     sources: [
       { courseId: 'arrays', topicIds: ['searching'] },
@@ -134,6 +138,8 @@ const CATEGORIES: BrowseCategory[] = [
     id: 'backtracking',
     title: 'Backtracking',
     summary: 'Explore decision trees depth-first, undo dead ends.',
+    description:
+      'Explore every candidate solution by building it one choice at a time, pruning branches the moment a constraint is violated. The recursion tree expresses the full search space; backtracking keeps it tractable.',
     icon: 'GitBranch',
     sources: [{ courseId: 'backtracking' }],
   },
@@ -141,6 +147,8 @@ const CATEGORIES: BrowseCategory[] = [
     id: 'graphs',
     title: 'Graphs',
     summary: 'Traverse, colour, order, and search weighted graphs.',
+    description:
+      'Model problems as nodes connected by edges, then traverse with BFS for shortest paths and DFS for connectivity and cycle detection. Core patterns — topological sort, bipartite checking, union-find — unlock most graph interview problems.',
     icon: 'Network',
     sources: [{ courseId: 'graphs' }],
   },
@@ -148,6 +156,8 @@ const CATEGORIES: BrowseCategory[] = [
     id: 'binary-search',
     title: 'Binary Search',
     summary: 'Halve the search space on sorted data.',
+    description:
+      'Eliminate half the search space each step by evaluating a monotonic predicate at the midpoint. Applies far beyond sorted arrays — any answer space with a yes/no boundary can be binary-searched.',
     icon: 'Search',
     sources: [{ courseId: 'binary-search' }],
   },
@@ -155,6 +165,8 @@ const CATEGORIES: BrowseCategory[] = [
     id: 'dynamic-programming',
     title: 'Dynamic Programming',
     summary: 'Tabulate overlapping subproblems for optimal answers.',
+    description:
+      'Identify overlapping subproblems and cache their results to avoid redundant recomputation. Build the solution bottom-up by filling a table where each cell depends only on previously computed entries.',
     icon: 'Table',
     sources: [{ courseId: 'dynamic-programming' }],
   },

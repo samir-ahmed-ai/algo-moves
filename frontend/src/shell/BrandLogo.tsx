@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils/cn';
-
-const LOGO_SRC = '/assets/logo.png';
+import { EagleMark } from './EagleMark';
 
 const SIZE = {
   sm: 'h-6 w-6',
@@ -15,10 +14,8 @@ export function BrandLogo({
   className?: string;
 }) {
   return (
-    <img
-      src={LOGO_SRC}
-      alt="Algo Moves"
-      className={cn('shrink-0 rounded-full object-cover', SIZE[size], className)}
+    <EagleMark
+      className={cn('shrink-0 rounded-[22%] shadow-sm', SIZE[size], className)}
     />
   );
 }

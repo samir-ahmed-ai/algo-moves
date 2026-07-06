@@ -1,4 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#3d9a8f"/>
-  <path d="M10 16l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#52c4b4"/>
+      <stop offset="100%" stop-color="#27877b"/>
+    </linearGradient>
+    <linearGradient id="bd" x1="18" y1="18" x2="52" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e6660"/>
+      <stop offset="100%" stop-color="#0d3530"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100" height="100" rx="22" fill="url(#bg)"/>
+
+  <!-- Dark body / wing fan -->
+  <path d="M 8 70 C 13 52 17 34 20 18 C 24 18 28 24 28 37 C 28 50 24 62 20 73 Z" fill="url(#bd)"/>
+  <path d="M 18 70 C 24 77 32 86 38 94 L 52 94 C 48 80 44 68 44 60 C 38 56 28 56 22 62 Z" fill="url(#bd)"/>
+
+  <!-- White head + neck (bald eagle) -->
+  <path d="M 44 16 C 56 11, 70 18, 73 29 C 75 36, 71 44, 65 50 C 59 56, 52 60, 46 66 C 42 70, 38 74, 35 78 C 27 78, 19 67, 17 54 C 15 41, 19 26, 31 18 C 36 15, 41 15, 44 16 Z" fill="white"/>
+
+  <!-- Eye -->
+  <circle cx="62" cy="28" r="6.2" fill="#143d38"/>
+  <circle cx="62" cy="28" r="4" fill="#06201c"/>
+  <circle cx="59.6" cy="25.6" r="1.8" fill="white" opacity="0.9"/>
+
+  <!-- Upper beak + hook -->
+  <path d="M 68 22 L 88 30 C 93 34, 93 44, 88 49 C 84 53, 80 50, 78 45 L 68 40 L 63 37 Z" fill="#e8c040"/>
+  <path d="M 88 49 C 91 55, 88 62, 83 59 C 79 56, 79 51, 78 45 Z" fill="#c9a420"/>
+
+  <!-- Lower mandible -->
+  <path d="M 63 37 L 68 40 L 76 44 C 74 48, 68 51, 63 49 C 58 47, 57 43, 59 40 Z" fill="#e8c040" opacity="0.85"/>
+
+  <!-- Crown crest feathers -->
+  <path d="M 40 17 L 36 8 M 48 14 L 46 5 M 56 15 L 58 6" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.55"/>
 </svg>

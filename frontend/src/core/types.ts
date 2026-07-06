@@ -19,6 +19,8 @@ export interface SampleInput<I = unknown> {
   id: string;
   label: string;
   value: I;
+  /** Plain-language note shown in the problem info popover. */
+  hint?: string;
 }
 
 export interface PluginMeta {

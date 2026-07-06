@@ -85,16 +85,21 @@ export function MobileBrowse({
         <button
           type="button"
           onClick={() => startDeck(categoryId, it.id)}
-          className="flex w-full items-center gap-3 border-b border-edge px-3 py-2.5 text-left last:border-b-0 transition-colors active:bg-panel2"
+          className="flex w-full items-start gap-3 border-b border-edge px-3 py-2.5 text-left last:border-b-0 transition-colors active:bg-panel2"
         >
-          <ProblemGlyph item={it} className="h-7 w-7 shrink-0 text-ink2" />
-          <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{it.title}</span>
+          <ProblemGlyph item={it} className="mt-0.5 h-7 w-7 shrink-0 text-ink2" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[14px] font-medium text-ink">{it.title}</span>
+            {it.summary && (
+              <span className="mt-0.5 block line-clamp-2 text-[12px] leading-snug text-ink3">{it.summary}</span>
+            )}
+          </span>
           {it.difficulty && (
             <Chip tone={difficultyTone(it.difficulty)} mono className="!px-1.5 !py-0 shrink-0 text-[10px]">
               {it.difficulty}
             </Chip>
           )}
-          {done && <Check className="h-4 w-4 shrink-0 text-good" />}
+          {done && <Check className="mt-0.5 h-4 w-4 shrink-0 text-good" />}
         </button>
       </li>
     );

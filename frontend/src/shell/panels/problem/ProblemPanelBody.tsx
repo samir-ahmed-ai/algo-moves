@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { inputFrameCount, type InputFrameCounts } from '@/lib/canvas';
 import type { SampleInput } from '../../../core/types';
 import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { HighlightedCode } from '@/components/code/HighlightedCode';
+import { TONE_BAR } from '@/design/tone';
+import { catalog, categoryIdForItem, getCategoryById, briefFor } from '@/content';
 import {
   useCanvasStatic,
   stepExampleInput,
@@ -19,6 +21,7 @@ import {
   Section,
   useFlash,
 } from '@/shell/canvas';
+import { InfoCases, InfoParagraphs, PanelInfoButton } from './PanelInfoButton';
 
 /** Compact preview of a sample input value. */
 function formatInputPreview(value: unknown): string {
@@ -34,7 +37,7 @@ function formatInputPreview(value: unknown): string {
 
 function StepBadge({ count }: { count: number }) {
   return (
-    <span className="shrink-0 rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[10px] tabular-nums text-ink3">
+    <span className="ml-auto shrink-0 rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[10px] tabular-nums text-ink3">
       {count > 0 ? `${count} step${count === 1 ? '' : 's'}` : '0'}
     </span>
   );
@@ -116,14 +119,14 @@ function ExampleList({
             onClick={() => onSelect(i.id)}
             className={cn(
               nodeText.base,
-              on ? '' : 'text-ink2',
-              on && flash && 'ring-1 ring-accent/40',
+              on ? 'ring-2 ring-accent/30' : 'text-ink2',
+              on && flash && 'ring-2 ring-accent/50',
             )}
           >
             <span
               className={cn(
-                'grid size-[17px] shrink-0 place-items-center rounded-full border',
-                on ? 'border-accent bg-accentbg text-accent' : 'border-edge bg-panel2/60 text-ink3',
+                'grid size-[17px] shrink-0 place-items-center rounded-full border text-[10px] font-semibold',
+                on ? 'border-accent bg-accent text-white' : 'border-edge bg-panel2/60 text-ink3',
               )}
             >
               {idx + 1}
@@ -175,7 +178,7 @@ function ExampleInputPicker() {
   if (inputs.length <= 1) {
     if (!preview) return null;
     return (
-      <ControlsAccordion title="Input preview" defaultOpen>
+      <ControlsAccordion title="Input preview" defaultOpen bodyClassName="pt-1 [&_pre]:p-3">
         <Code text={preview} />
       </ControlsAccordion>
     );
@@ -190,7 +193,7 @@ function ExampleInputPicker() {
         title="Examples"
         bordered={false}
         right={
-          <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[10px] tabular-nums text-ink3">
+          <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-ink2">
             {activeIdx + 1} / {inputs.length}
           </span>
         }
@@ -214,11 +217,43 @@ function ExampleInputPicker() {
           />
         )}
         {preview && (
-          <ControlsAccordion title="Input preview" defaultOpen className="mt-1.5 border-t-0">
+          <ControlsAccordion
+            title="Input preview"
+            defaultOpen
+            className="mt-1.5 border-t-0"
+            bodyClassName="pt-1 [&_pre]:p-3"
+          >
             <Code text={preview} />
           </ControlsAccordion>
         )}
       </Section>
+    </div>
+  );
+}
+
+/** Resolve the browse category for the active problem. */
+function useProblemCategory() {
+  const { item } = useCanvasStatic();
+  const { activeCategoryId } = useWorkspace();
+
+  return useMemo(() => {
+    const catId = activeCategoryId ?? categoryIdForItem(item.id, catalog);
+    return catId ? getCategoryById(catId) : undefined;
+  }, [activeCategoryId, item.id]);
+}
+
+/** Category framing shown above the problem statement when browsing from a category. */
+function CategoryInfoButton() {
+  const category = useProblemCategory();
+  const blurb = category?.description ?? category?.summary;
+  if (!category || !blurb) return null;
+
+  return (
+    <div className="mb-2 flex items-center gap-1.5">
+      <span className={cn('font-medium uppercase tracking-wide text-ink3', nodeText.xs)}>{category.title}</span>
+      <PanelInfoButton label={`About ${category.title}`} title={category.title}>
+        <InfoParagraphs lines={blurb.split(/(?<=[.!?])\s+/).filter(Boolean)} />
+      </PanelInfoButton>
     </div>
   );
 }
@@ -231,25 +266,46 @@ export function ProblemPanelBody() {
   const conceptCourse = isConceptCourse(item);
   const referenceCode = inVisualize && conceptCourse ? plugin.code?.text : undefined;
   const hasOverview = !!(item.difficulty || item.summary || item.tags.length > 0);
+  const problemBrief = useMemo(() => briefFor(item, plugin.inputs), [item, plugin.inputs]);
+
+  const tone = difficultyTone(item.difficulty);
 
   return (
     <div className="flex flex-col">
+      {!inVisualize && <CategoryInfoButton />}
       {hasOverview && (
         <Section title={inVisualize ? 'Overview' : undefined} bordered={false}>
           {!inVisualize && (
+            <div
+              className="mb-2 border-l-2 pl-2.5"
+              style={{ borderLeftColor: item.difficulty ? TONE_BAR[tone] : 'transparent' }}
+            >
+              <div className="flex flex-wrap items-center gap-[var(--node-gap,6px)]">
+                <span className={cn(nodeText.title, 'text-base font-bold leading-tight text-ink')}>
+                  {item.title}
+                </span>
+                {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
+                <PanelInfoButton label={`About ${item.title}`} title={item.title}>
+                  <InfoParagraphs lines={problemBrief.statements} />
+                  <InfoCases cases={problemBrief.cases} />
+                </PanelInfoButton>
+              </div>
+            </div>
+          )}
+          {inVisualize && (
             <div className="mb-1.5 flex flex-wrap items-center gap-[var(--node-gap,6px)]">
-              <span className={cn(nodeText.title, 'font-semibold leading-tight text-ink')}>{item.title}</span>
-              {item.difficulty && <Chip tone={difficultyTone(item.difficulty)}>{item.difficulty}</Chip>}
+              {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
+              <PanelInfoButton label={`About ${item.title}`} title={item.title}>
+                <InfoParagraphs lines={problemBrief.statements} />
+                <InfoCases cases={problemBrief.cases} />
+              </PanelInfoButton>
             </div>
           )}
-          {inVisualize && item.difficulty && (
-            <div className="mb-1.5">
-              <Chip tone={difficultyTone(item.difficulty)}>{item.difficulty}</Chip>
-            </div>
+          {item.summary && (
+            <p className={cn(nodeText.sm, 'leading-relaxed text-ink')}>{item.summary}</p>
           )}
-          {item.summary && <p className={cn(nodeText.sm, 'leading-relaxed text-ink2')}>{item.summary}</p>}
           {item.tags.length > 0 && (
-            <div className="mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
+            <div className="mt-2 flex flex-wrap gap-[var(--node-gap,6px)]">
               {item.tags.map((t) => (
                 <NodeTagChip key={t} id={t} />
               ))}
@@ -269,7 +325,9 @@ export function ProblemPanelBody() {
           </div>
         </ControlsAccordion>
       )}
-      <ExampleInputPicker />
+      <div className={cn(hasOverview && 'mt-3 border-t border-edge pt-3')}>
+        <ExampleInputPicker />
+      </div>
     </div>
   );
 }

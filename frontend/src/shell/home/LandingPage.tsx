@@ -34,8 +34,8 @@ import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { compactLabel } from '../chromeUi';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from '@/shell/BrandLogo';
+import { EagleMark } from '@/shell/EagleMark';
 import { AuthButton } from '@/shell/auth';
-import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import { glyphFor } from '../../content/problemShape';
 import { Chip } from '@/design/components';
 import { TrackGrid } from '../browse/TrackGrid';
@@ -138,6 +138,64 @@ function PlayMenu({ onVim, onGames }: { onVim: () => void; onGames: () => void }
           >
             <PlayMenuItem icon={<Keyboard className="h-4 w-4" />} title="Vim Dojo" hint="Keyboard maze trainer" onClick={() => pick(onVim)} />
             <PlayMenuItem icon={<Gamepad2 className="h-4 w-4" />} title="Games" hint="Two-player games" onClick={() => pick(onGames)} />
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+/** Primary CTA dropdown — Swipe mode first, then workspace in a new tab. */
+function OpenMenu({ onMobile, onWorkspace }: { onMobile: () => void; onWorkspace: () => void }) {
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const pick = (fn: () => void) => {
+    setOpen(false);
+    fn();
+  };
+
+  return (
+    <div className="relative ml-1">
+      <button
+        type="button"
+        title="Open"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+      >
+        {compactLabel('Open', 'Open', isMobile)}
+        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+      </button>
+      {open ? (
+        <>
+          <div className="fixed inset-0 z-30" aria-hidden onClick={() => setOpen(false)} />
+          <div
+            role="menu"
+            className="absolute end-0 z-40 mt-1.5 w-52 overflow-hidden rounded-xl border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]"
+          >
+            <PlayMenuItem
+              icon={<Smartphone className="h-4 w-4" />}
+              title="Swipe mode"
+              hint="Mobile practice deck"
+              onClick={() => pick(onMobile)}
+            />
+            <PlayMenuItem
+              icon={<LayoutGrid className="h-4 w-4" />}
+              title="Open workspace"
+              hint="Canvas in a new tab"
+              onClick={() => pick(onWorkspace)}
+            />
           </div>
         </>
       ) : null}
@@ -350,6 +408,74 @@ function WorkspacePreview({ featured }: { featured: Item[] }) {
   );
 }
 
+/* ----------------------------------------------------------------- makers */
+
+interface Maker {
+  name: string;
+  role: string;
+  photo?: string;
+  facts: [string, string, string, string, string];
+  links?: { label: string; href: string }[];
+}
+
+const MAKERS: Maker[] = [
+  {
+    name: 'Ahmed Abdelmaaboud',
+    role: 'Creator & Senior Go Engineer',
+    photo: `${import.meta.env.BASE_URL}assets/ahmed.png`,
+    facts: [
+      '10+ years shipping Go services that process millions of events daily.',
+      'Built an OpenRTB bidder, GPS scoring pipelines, and LLM MCP servers — all in production.',
+      'I built this because LeetCode alone never got me where I needed to be.',
+      'Polyglot fluent in Go, Java, Scala, and Python — and the whiteboard.',
+      'Senior engineer by day. Algorithm grinder by night.',
+    ],
+    links: [{ label: 'ahmed.amer.samir@gmail.com', href: 'mailto:ahmed.amer.samir@gmail.com' }],
+  },
+];
+
+function MakerCard({ name, role, photo, facts, links }: Maker) {
+  return (
+    <div className="flex w-full max-w-2xl flex-col gap-5 rounded-[var(--radius)] border border-edge bg-panel/60 p-6 sm:flex-row sm:gap-7">
+      {photo ? (
+        <div className="shrink-0 self-start">
+          <img
+            src={photo}
+            alt={name}
+            className="h-24 w-24 rounded-2xl border border-edge object-cover object-top shadow-[var(--shadow-md)] sm:h-28 sm:w-28"
+          />
+        </div>
+      ) : null}
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{role}</p>
+        <h3 className="mt-0.5 text-xl font-semibold tracking-tight text-ink">{name}</h3>
+        <ul className="mt-4 space-y-2">
+          {facts.map((fact) => (
+            <li key={fact} className="flex items-start gap-2.5 text-sm leading-snug text-ink2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+              {fact}
+            </li>
+          ))}
+        </ul>
+        {links && links.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-3">
+            {links.map(({ label, href }) => (
+              <a
+                key={href}
+                href={href}
+                className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
+              >
+                {label}
+                <ArrowRight className="h-3 w-3" />
+              </a>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 /* ----------------------------------------------------------------- landing */
 
 const MBM_WORDS = ['move', 'by', 'move.'] as const;
@@ -407,13 +533,15 @@ function LandingSplit({
 }
 
 function SplitCopy({
+  brand,
   eyebrow,
   title,
   description,
   children,
   as = 'h2',
 }: {
-  eyebrow?: string;
+  brand?: ReactNode;
+  eyebrow?: ReactNode;
   title: ReactNode;
   description: string;
   children?: ReactNode;
@@ -422,6 +550,7 @@ function SplitCopy({
   const Heading = as;
   return (
     <div className="@container flex min-w-0 flex-col justify-center">
+      {brand ? <div className="mb-5">{brand}</div> : null}
       {eyebrow ? (
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">{eyebrow}</p>
       ) : null}
@@ -590,7 +719,6 @@ export function LandingPage() {
             <span className="truncate font-semibold tracking-tight">Algo Moves</span>
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            {!isMobile && <SwipeModeQrPromo onOpenDevice={() => enterMobile()} />}
             <IconButton
               title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -606,15 +734,7 @@ export function LandingPage() {
             </IconButton>
             <PlayMenu onVim={() => enterVim()} onGames={() => enterGames()} />
             <AuthButton />
-            <button
-              type="button"
-              title="Open workspace"
-              onClick={() => openCanvas()}
-              className="ml-1 inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              {compactLabel('Open workspace', 'Open', isMobile)}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+            <OpenMenu onMobile={() => enterMobile()} onWorkspace={() => openCanvas()} />
           </div>
         </div>
       </header>
@@ -626,7 +746,23 @@ export function LandingPage() {
           <LandingSplit>
             <SplitCopy
               as="h1"
-              eyebrow="Interview prep"
+              brand={
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div
+                      aria-hidden
+                      className="absolute -inset-3 rounded-3xl bg-accent/25 blur-2xl"
+                    />
+                    <EagleMark className="relative h-20 w-20 rounded-2xl shadow-[var(--shadow-xl)] sm:h-24 sm:w-24" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+                      Interview prep
+                    </p>
+                    <p className="mt-1 text-sm text-ink3">Master every algorithm move by move</p>
+                  </div>
+                </div>
+              }
               title={
                 <>
                   Algorithms{' '}
@@ -847,13 +983,31 @@ export function LandingPage() {
         </div>
       </LandingSection>
 
+      {/* about the makers */}
+      <LandingSection tone="muted" bordered={false}>
+        <SectionHeading
+          eyebrow="The Makers"
+          title="Built by engineers, for engineers"
+          description="The people who built this tool to solve their own interview prep problems."
+        />
+        <div className="flex flex-wrap justify-center gap-6">
+          {MAKERS.map((m) => (
+            <MakerCard key={m.name} {...m} />
+          ))}
+        </div>
+      </LandingSection>
+
       {/* footer */}
       <footer className="border-t border-edge bg-panel/20">
-        <div className={cn(LANDING_INNER, 'py-8 text-center sm:py-10')}>
-          <span className="inline-flex items-center gap-2 font-semibold tracking-tight text-ink">
-            <BrandLogo />
-            Algo Moves
-          </span>
+        <div className={cn(LANDING_INNER, 'py-10 text-center sm:py-14')}>
+          <div className="relative mb-4 inline-block">
+            <div
+              aria-hidden
+              className="absolute -inset-4 rounded-3xl bg-accent/20 blur-2xl"
+            />
+            <EagleMark className="relative h-16 w-16 rounded-2xl shadow-[var(--shadow-xl)]" />
+          </div>
+          <p className="font-semibold tracking-tight text-ink text-lg">Algo Moves</p>
           <p className="mx-auto mt-2 max-w-md text-sm text-ink3">
             Step through interview algorithms until they stick.
           </p>
