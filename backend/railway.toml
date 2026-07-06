@@ -9,6 +9,7 @@
 #   ALLOWED_ORIGINS    — frontend public URL
 #   RUN_MIGRATIONS     — true/1 to apply schema on startup; false to skip
 #   RUN_CONTENT_SEED   — true/1 to reload learning catalog on startup; false to skip
+#   PLATFORM_ADMIN_EMAIL / PLATFORM_ADMIN_PASSWORD — bootstrap platform admin on startup
 
 [build]
 builder = "DOCKERFILE"

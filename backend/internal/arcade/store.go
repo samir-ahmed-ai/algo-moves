@@ -300,6 +300,19 @@ func (s *Store) SetAdmin(ctx context.Context, email string) (bool, error) {
 	return tag.RowsAffected() > 0, nil
 }
 
+func (s *Store) UpdatePasswordHash(ctx context.Context, email, passwordHash string) error {
+	email = strings.TrimSpace(strings.ToLower(email))
+	tag, err := s.pool.Exec(ctx, `
+		update public.profiles set password_hash = $2 where lower(email) = $1`, email, passwordHash)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("profile not found for %s", email)
+	}
+	return nil
+}
+
 func (s *Store) GameStats(ctx context.Context, profileID string) ([]map[string]any, error) {
 	rows, err := s.pool.Query(ctx, `
 		select profile_id, game_id, mmr, wins, losses, draws, streak, best_streak, matches_played, updated_at
