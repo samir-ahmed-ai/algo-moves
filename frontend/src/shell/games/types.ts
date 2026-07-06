@@ -25,6 +25,8 @@ export interface GameDef {
   maxPlayers?: number;
   /** A CSS color used to accent the game's card and player identity. */
   accent?: string;
+  /** Audience this game is designed for. Drives the category filter in the game picker. */
+  category?: 'couple' | 'party';
   /** The game surface. Rendered only when the room is connected. */
   Component: ComponentType;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Eye, Gamepad2, Loader2, Plus, Users } from 'lucide-react';
+import { AlertCircle, Eye, Loader2, Plus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
@@ -10,9 +10,20 @@ import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net
 import { writeGamesHash } from '@/lib/navigation';
 import { Avatar } from '../ui/Avatar';
 import { TouchButton } from '../ui/gamesUi';
+import { GAMES } from '../registry';
+import { Glyph } from '../ui/gamesUi';
 
 const NAME_KEY = STORAGE_KEYS.GAMES_NAME;
 const CAPACITIES = [2, 4, 6, 8];
+
+const GAME_ACCENT_COLORS: Record<string, string> = {
+  'would-you-rather': '#e879a0',
+  'number-duel': '#6366f1',
+  'tic-tac-toe': '#0ea5e9',
+  'rock-paper-scissors': '#f59e0b',
+  'mind-meld': '#8b5cf6',
+  'reaction-duel': '#10b981',
+};
 
 /** Pre-connection screen: pick a name + avatar, then create or join a room. */
 export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
@@ -69,42 +80,48 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
-      <div className="text-center">
-        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-accent text-white shadow-[var(--shadow-lg)]">
-          <Gamepad2 className="h-7 w-7" />
-        </span>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink">{t.lobby.title}</h1>
-        <p className="mt-1 text-sm text-ink2">{t.lobby.subtitle}</p>
-      </div>
+      {/* Hero */}
+      <HeroBanner />
+
+      {/* Game preview strip */}
+      <GamePreviewStrip />
 
       {bannerError ? (
-        <div className="flex items-start gap-2 rounded-[var(--radius)] border border-bad/40 bg-bad/10 p-3 text-sm text-bad">
+        <div className="flex items-start gap-2 rounded-2xl border border-bad/40 bg-bad/10 p-3 text-sm text-bad">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{bannerError}</span>
         </div>
       ) : null}
 
       {!configuredServer ? (
-        <p className="rounded-[var(--radius)] border border-edge bg-panel2 px-3 py-2 text-start text-xs text-ink3">
+        <p className="rounded-2xl border border-edge bg-panel2 px-3 py-2.5 text-start text-xs text-ink3">
           {t.lobby.lanHint}
         </p>
       ) : null}
 
-      <label className="flex flex-col gap-1.5 text-start">
-        <span className="text-xs font-semibold uppercase tracking-wide text-ink3">{t.lobby.yourName}</span>
+      {/* Name input */}
+      <label className="flex flex-col gap-2 text-start">
+        <span className="text-xs font-bold uppercase tracking-widest text-ink3">{t.lobby.yourName}</span>
         <div className="flex items-center gap-3">
-          {name.trim() ? <Avatar seed={name.trim()} name={name.trim()} size={44} /> : null}
+          {name.trim() ? (
+            <div className="shrink-0">
+              <Avatar seed={name.trim()} name={name.trim()} size={48} />
+            </div>
+          ) : (
+            <div className="h-12 w-12 shrink-0 rounded-full bg-panel2 border-2 border-dashed border-edge2" />
+          )}
           <input
             value={name}
             onChange={(e) => setName(e.target.value.slice(0, 24))}
             placeholder={t.lobby.namePlaceholder}
-            className="min-h-12 flex-1 rounded-[var(--radius)] border border-edge bg-panel px-4 text-base text-ink outline-none focus:border-accent"
+            className="min-h-14 flex-1 rounded-2xl border-2 border-edge bg-panel px-4 text-lg font-semibold text-ink outline-none focus:border-accent transition-colors"
             autoComplete="given-name"
           />
         </div>
       </label>
 
-      <div className="grid grid-cols-2 gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1">
+      {/* Create / Join tabs */}
+      <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
         <TabButton active={tab === 'create'} onClick={() => setTab('create')} icon={<Plus className="h-4 w-4" />}>
           {t.lobby.createTab}
         </TabButton>
@@ -114,24 +131,29 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       </div>
 
       {tab === 'create' ? (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-ink3">{t.room.capacity}</span>
-            <div className="grid grid-cols-4 gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-ink3">{t.room.capacity}</span>
+            <div className="grid grid-cols-4 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
               {CAPACITIES.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCapacity(c)}
                   className={cn(
-                    'min-h-10 rounded-[calc(var(--radius)-2px)] text-sm font-semibold transition-colors',
-                    capacity === c ? 'bg-panel text-ink shadow-sm' : 'text-ink3 hover:text-ink',
+                    'min-h-11 rounded-xl text-sm font-bold transition-all touch-manipulation',
+                    capacity === c
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'text-ink3 hover:text-ink',
                   )}
                 >
                   {c}
                 </button>
               ))}
             </div>
+            {capacity === 2 && (
+              <p className="text-xs text-accent font-medium text-center">💕 Perfect for two!</p>
+            )}
           </div>
           <TouchButton variant="primary" size="lg" busy={connecting} disabled={!nameOk} onClick={createRoom}>
             {connecting ? t.lobby.creatingRoom : t.lobby.createRoom}
@@ -146,7 +168,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
             inputMode="text"
             autoCapitalize="characters"
             dir="ltr"
-            className="min-h-14 rounded-[var(--radius)] border border-edge bg-panel text-center font-mono text-2xl font-bold uppercase tracking-[0.3em] text-ink outline-none focus:border-accent"
+            className="min-h-[68px] rounded-2xl border-2 border-edge bg-panel text-center font-mono text-3xl font-bold uppercase tracking-[0.35em] text-ink outline-none focus:border-accent transition-colors"
           />
           <TouchButton
             variant="primary"
@@ -173,11 +195,66 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
         <button
           type="button"
           onClick={disconnect}
-          className="mx-auto inline-flex min-h-11 items-center gap-1.5 px-4 text-sm text-ink3 hover:text-ink"
+          className="mx-auto inline-flex min-h-11 items-center gap-2 px-4 text-sm text-ink3 hover:text-ink"
         >
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t.lobby.cancel}
         </button>
       ) : null}
+    </div>
+  );
+}
+
+function HeroBanner() {
+  return (
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent via-accent/80 to-purple-600 p-6 text-white shadow-[var(--shadow-lg)]">
+      {/* Decorative circles */}
+      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
+      <div className="pointer-events-none absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-white/10" />
+      <div className="relative flex flex-col items-center gap-2 text-center">
+        <div className="flex gap-2 text-3xl">
+          <span className="animate-[bounce_1.2s_ease-in-out_infinite]">🎮</span>
+          <span className="animate-[bounce_1.2s_ease-in-out_0.2s_infinite]">💕</span>
+          <span className="animate-[bounce_1.2s_ease-in-out_0.4s_infinite]">🎲</span>
+        </div>
+        <h1 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">Games Arcade</h1>
+        <p className="text-sm text-white/80 max-w-[220px] leading-snug">
+          Play together, anywhere. Real-time games for two.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function GamePreviewStrip() {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs font-bold uppercase tracking-widest text-ink3 px-0.5">Games available</p>
+      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch]">
+        {GAMES.map((game) => {
+          const color = GAME_ACCENT_COLORS[game.id] ?? 'var(--accent)';
+          const isCouple = game.category === 'couple';
+          return (
+            <div
+              key={game.id}
+              className="flex shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-edge bg-panel px-3 py-2.5 text-center"
+              style={{ minWidth: 80 }}
+            >
+              <span
+                className="grid h-10 w-10 place-items-center rounded-xl"
+                style={{ background: `${color}20`, color }}
+              >
+                <Glyph markup={game.glyph} className="h-5 w-5" />
+              </span>
+              <span className="text-[10px] font-bold text-ink leading-tight text-center" style={{ maxWidth: 68 }}>
+                {game.title.length > 12 ? game.title.slice(0, 11) + '…' : game.title}
+              </span>
+              {isCouple && (
+                <span className="rounded-full bg-pink-500/10 px-1.5 py-px text-[9px] font-bold text-pink-500">♥ 2P</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -197,10 +274,10 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={
-        'inline-flex min-h-10 items-center justify-center gap-2 rounded-[calc(var(--radius)-2px)] text-sm font-semibold transition-colors ' +
-        (active ? 'bg-panel text-ink shadow-sm' : 'text-ink3 hover:text-ink')
-      }
+      className={cn(
+        'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all touch-manipulation',
+        active ? 'bg-panel text-ink shadow-sm' : 'text-ink3 hover:text-ink',
+      )}
     >
       {icon}
       {children}

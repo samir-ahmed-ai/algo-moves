@@ -9,6 +9,7 @@ const numberDuel: GameDef = {
   minutes: '~3 min',
   pace: 'turns',
   glyph: '<path d="M15 19l9-9 9 9"/><path d="M15 29l9 9 9-9"/><circle cx="24" cy="24" r="2.5"/>',
+  category: 'couple',
   Component: NumberDuel,
 };
 

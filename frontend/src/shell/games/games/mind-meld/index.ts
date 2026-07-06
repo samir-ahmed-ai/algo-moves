@@ -12,6 +12,7 @@ const mindMeld: GameDef = {
   maxPlayers: 8,
   glyph:
     '<path d="M22 14c-5 0-9 3-9 8 0 3 2 6 5 7v5l5-3"/><path d="M26 14c5 0 9 3 9 8 0 3-2 6-5 7v5l-5-3"/><path d="M20 22c0 2 4 2 4 0M28 22c0 2-4 2-4 0"/>',
+  category: 'party',
   Component: MindMeld,
 };
 

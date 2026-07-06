@@ -53,20 +53,25 @@ function Arcade() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-edge bg-bg/85 backdrop-blur [padding-top:env(safe-area-inset-top)]">
-        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 px-4 py-2.5">
+      <header className="sticky top-0 z-20 border-b border-edge bg-bg/90 backdrop-blur-md [padding-top:env(safe-area-inset-top)]">
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 px-3 py-2.5 sm:px-4">
           <button
             type="button"
             title={t.header.home}
             onClick={goHome}
-            className="grid h-11 w-11 place-items-center rounded-md border border-edge text-ink3 hover:bg-panel2 hover:text-ink"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation sm:h-11 sm:w-11"
           >
             <Home className="h-4 w-4" />
           </button>
 
-          <span className="font-semibold tracking-tight">{t.header.games}</span>
+          {/* Gradient title */}
+          <span
+            className="font-extrabold tracking-tight bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent select-none"
+          >
+            {t.header.games}
+          </span>
 
-          <div className="ms-auto flex items-center gap-1.5">
+          <div className="ms-auto flex items-center gap-1 sm:gap-1.5">
             {room ? (
               <RoomPill
                 room={room}
@@ -105,10 +110,10 @@ function Arcade() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-3 py-5 sm:px-4 sm:py-6">
         {reconnecting ? (
-          <div className="mb-4 flex items-center justify-center gap-2 rounded-[var(--radius)] border border-edge bg-panel2 px-3 py-2 text-sm text-ink3">
-            <span className="h-2 w-2 animate-pulse rounded-full" style={{ background: 'var(--edge-active)' }} />
+          <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl border border-edge bg-panel2 px-3 py-2.5 text-sm text-ink3">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
             {t.header.reconnecting}
           </div>
         ) : null}
@@ -145,7 +150,7 @@ function IconButton({
       aria-label={title}
       onClick={onClick}
       className={cn(
-        'grid h-11 w-11 place-items-center rounded-md border border-edge text-ink3 hover:bg-panel2 hover:text-ink',
+        'grid h-10 w-10 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation transition-colors sm:h-11 sm:w-11',
         danger && 'hover:border-bad/50 hover:text-bad',
       )}
     >
@@ -162,7 +167,7 @@ function ProfileButton({ onClick, label }: { onClick: () => void; label: string 
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="grid h-11 w-11 place-items-center rounded-md border border-edge text-ink3 hover:bg-panel2 hover:text-ink"
+      className="grid h-10 w-10 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation transition-colors sm:h-11 sm:w-11"
     >
       {configured && profile ? (
         <Avatar seed={profile.avatar_seed} name={profile.display_name} size={24} />
@@ -192,7 +197,7 @@ function RoomPill({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-semibold',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-bold',
         reconnecting
           ? 'border-edge bg-panel2 text-ink3'
           : filled
@@ -201,9 +206,9 @@ function RoomPill({
       )}
     >
       <ConnectionDot status={open ? 'open' : reconnecting ? 'connecting' : 'closed'} />
-      <span dir="ltr">{room}</span>
+      <span dir="ltr" className="hidden sm:inline">{room}</span>
       <span className="opacity-70">
-        · {players}/{capacity}
+        {players}/{capacity}
         {spectators > 0 ? ` · 👁${spectators}` : ''}
       </span>
     </span>
@@ -228,7 +233,7 @@ function LanguageSelect({
       title={disabled ? labels.hostOnly : labels.label}
       aria-label={labels.label}
       onChange={(e) => onChange(e.target.value as GameLocale)}
-      className="h-11 min-w-[5.5rem] cursor-pointer rounded-md border border-edge bg-panel px-2 text-sm font-semibold text-ink outline-none hover:bg-panel2 focus:border-accent disabled:cursor-not-allowed disabled:opacity-40"
+      className="h-10 min-w-[4.5rem] cursor-pointer rounded-xl border border-edge bg-panel px-2 text-sm font-bold text-ink outline-none hover:bg-panel2 focus:border-accent disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:min-w-[5.5rem]"
     >
       <option value="ar">{labels.arabic}</option>
       <option value="en">{labels.english}</option>

@@ -23,7 +23,7 @@ export function ShareRoom({ room, hint, locale }: { room: string; hint?: string;
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/70 p-5">
+    <div className="flex flex-col items-center gap-4 rounded-2xl border border-edge bg-panel/70 p-5">
       <div className="text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink3">{t.shareRoom.roomCode}</p>
         <p dir="ltr" className="mt-1 font-mono text-4xl font-bold tracking-[0.3em] text-accent">

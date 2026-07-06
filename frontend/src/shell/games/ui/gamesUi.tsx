@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
+import { useEffect, useRef, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -31,8 +31,8 @@ const TOUCH_VARIANTS: Record<TouchVariant, string> = {
 };
 
 const TOUCH_SIZES: Record<TouchSize, string> = {
-  md: 'min-h-11 px-4 py-2.5 text-sm gap-2 rounded-[var(--radius)]',
-  lg: 'min-h-14 px-6 py-3.5 text-base gap-2.5 rounded-[calc(var(--radius)+2px)]',
+  md: 'min-h-11 px-4 py-2.5 text-sm gap-2 rounded-2xl sm:min-h-11',
+  lg: 'min-h-14 px-6 py-3.5 text-base gap-2.5 rounded-2xl sm:min-h-14',
 };
 
 /** A large, finger-friendly button. Defaults are sized for phones and iPads. */
@@ -57,8 +57,8 @@ export function TouchButton({
       type="button"
       disabled={disabled || busy}
       className={cn(
-        'inline-flex select-none items-center justify-center border font-semibold tracking-tight transition-all',
-        'touch-manipulation active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex select-none items-center justify-center border font-bold tracking-tight transition-all',
+        'touch-manipulation active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50',
         TOUCH_SIZES[size],
         TOUCH_VARIANTS[variant],
         className,
@@ -94,7 +94,7 @@ export function ChoiceCard({
       onClick={onClick}
       style={accent ? ({ '--accent': accent } as CSSProperties) : undefined}
       className={cn(
-        'flex select-none flex-col items-center justify-center gap-2 rounded-[var(--radius)] border-2 p-4 text-center',
+        'flex select-none flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 text-center min-h-[110px]',
         'transition-all touch-manipulation active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40',
         selected
           ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_3px_var(--accent-bg)]'
@@ -112,7 +112,7 @@ export function TurnBadge({ tone = 'wait', children }: { tone?: 'you' | 'peer' |
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
+        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide',
         tone === 'you' && 'bg-accentbg text-accent',
         tone === 'peer' && 'bg-panel2 text-ink2',
         tone === 'wait' && 'bg-panel2 text-ink3',
@@ -123,7 +123,7 @@ export function TurnBadge({ tone = 'wait', children }: { tone?: 'you' | 'peer' |
   );
 }
 
-/** End-of-round outcome banner. */
+/** End-of-round outcome banner — includes a subtle confetti sparkle on win. */
 export function ResultBanner({
   tone,
   title,
@@ -136,14 +136,15 @@ export function ResultBanner({
   return (
     <div
       className={cn(
-        'rounded-[var(--radius)] border p-4 text-center',
-        tone === 'win' && 'border-good/50 bg-good/10 text-good',
+        'relative overflow-hidden rounded-2xl border p-5 text-center',
+        tone === 'win' && 'border-good/50 bg-goodbg text-good',
         tone === 'lose' && 'border-bad/50 bg-bad/10 text-bad',
         tone === 'draw' && 'border-edge bg-panel2 text-ink2',
       )}
     >
-      <div className="text-lg font-bold tracking-tight">{title}</div>
-      {detail ? <div className="mt-1 text-sm opacity-90">{detail}</div> : null}
+      {tone === 'win' && <ConfettiSparkle />}
+      <div className="relative text-xl font-extrabold tracking-tight">{title}</div>
+      {detail ? <div className="relative mt-1.5 text-sm opacity-90">{detail}</div> : null}
     </div>
   );
 }
@@ -161,4 +162,76 @@ export function WaitingForPeer({ message }: { message: string }) {
 /** A vertical stack of game content, centered and width-capped for readability. */
 export function GameBody({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn('mx-auto flex w-full max-w-md flex-col gap-5', className)}>{children}</div>;
+}
+
+/** Small pill badge for couple / party category. */
+export function CategoryBadge({ category }: { category: 'couple' | 'party' }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
+        category === 'couple' && 'bg-pink-500/10 text-pink-500',
+        category === 'party' && 'bg-amber-500/10 text-amber-600',
+      )}
+    >
+      {category === 'couple' ? '♥ For Two' : '🎉 Party'}
+    </span>
+  );
+}
+
+/** Fading swipe-gesture hint that disappears after a few seconds. */
+export function SwipeHint({ message }: { message: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const t = setTimeout(() => {
+      el.style.transition = 'opacity 0.6s';
+      el.style.opacity = '0';
+    }, 3000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className="flex items-center justify-center gap-2 text-xs text-ink3 py-1"
+    >
+      <span className="animate-[swipeArrow_1s_ease-in-out_infinite]">👆</span>
+      <span>{message}</span>
+      <style>{`
+        @keyframes swipeArrow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/** CSS-only confetti sparkle overlay for win banners (no npm package). */
+function ConfettiSparkle() {
+  const particles = ['💕', '✨', '🎉', '⭐', '💫'];
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      {Array.from({ length: 8 }, (_, i) => (
+        <span
+          key={i}
+          className="absolute text-sm"
+          style={{
+            left: `${10 + i * 11}%`,
+            top: '-10%',
+            animation: `confettiFall ${0.8 + (i % 3) * 0.3}s ease-in ${(i * 0.07).toFixed(2)}s both`,
+          }}
+        >
+          {particles[i % particles.length]}
+        </span>
+      ))}
+      <style>{`
+        @keyframes confettiFall {
+          from { transform: translateY(0) rotate(0deg); opacity: 1; }
+          to   { transform: translateY(80px) rotate(180deg); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
 }
