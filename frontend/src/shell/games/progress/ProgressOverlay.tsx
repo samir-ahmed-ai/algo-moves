@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X, Trophy, User as UserIcon, Pencil, LogOut } from 'lucide-react';
+import { X, Trophy, User as UserIcon, Pencil, LogOut, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useAuth } from '../data/AuthProvider';
+import { AuthPopover } from '@/shell/auth';
 import {
   getGameStats,
   getMatchHistory,
@@ -109,7 +110,7 @@ function TabButton({
 function ProfileTab() {
   const { locale } = useGamesLocale();
   const t = useMemo(() => getArcadeStrings(locale), [locale]);
-  const { configured, loading: authLoading, profile, isAnonymous, ensureSignedIn, updateMyProfile, signOut } = useAuth();
+  const { configured, loading: authLoading, profile, isAnonymous, userId, ensureSignedIn, updateMyProfile, signOut } = useAuth();
   const [stats, setStats] = useState<GameStats[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [unlocked, setUnlocked] = useState<string[]>([]);
@@ -117,6 +118,7 @@ function ProfileTab() {
   const [localHistory, setLocalHistory] = useState<LocalMatchRecord[]>([]);
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
+  const [authOpen, setAuthOpen] = useState(false);
   const localName = readStorageText(STORAGE_KEYS.GAMES_NAME, '')?.trim() ?? '';
 
   const loadLocal = useCallback(() => {
@@ -138,7 +140,7 @@ function ProfileTab() {
     setAchievements(a);
     setUnlocked(u);
     setHistory(h);
-  }, [configured, ensureSignedIn, loadLocal]);
+  }, [configured, ensureSignedIn, loadLocal, userId, isAnonymous]);
 
   useEffect(() => {
     void load();
@@ -245,6 +247,12 @@ function ProfileTab() {
           <p className="text-xs text-ink3">
             {t.profile.level(profile?.level ?? 1)} · {profile?.xp ?? 0} XP
           </p>
+          {profile?.email ? <p className="truncate text-xs text-ink3">{profile.email}</p> : null}
+          {profile?.is_admin ? (
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent">
+              <Shield className="h-3 w-3" /> Admin
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -254,11 +262,19 @@ function ProfileTab() {
           <p className="text-sm text-ink3">{t.profile.guestHint}</p>
           <button
             type="button"
+            onClick={() => setAuthOpen(true)}
+            className="mt-3 inline-flex min-h-9 items-center rounded-md bg-accent px-3 text-sm font-semibold text-white hover:opacity-90"
+          >
+            {t.profile.signIn}
+          </button>
+          <button
+            type="button"
             onClick={() => void signOut()}
-            className="mt-3 inline-flex min-h-9 items-center gap-1.5 text-xs text-ink3 hover:text-bad"
+            className="mt-3 ms-3 inline-flex min-h-9 items-center gap-1.5 text-xs text-ink3 hover:text-bad"
           >
             <LogOut className="h-3.5 w-3.5" /> {t.profile.signOut}
           </button>
+          <AuthPopover open={authOpen} onOpenChange={setAuthOpen} initialTab="signup" />
         </div>
       ) : (
         <button

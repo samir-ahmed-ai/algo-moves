@@ -10,7 +10,7 @@ export function AuthButton({
   compact,
   className,
 }: {
-  /** Games arcade: open the progress overlay. */
+  /** Games arcade: open the progress overlay from the user menu. */
   onOpenProfile?: () => void;
   compact?: boolean;
   className?: string;
@@ -23,7 +23,7 @@ export function AuthButton({
   if (!configured) return null;
   if (loading) {
     return (
-      <span className={cn('inline-grid h-9 w-9 place-items-center text-ink3', className)}>
+      <span className={cn('inline-grid h-9 w-9 place-items-center text-ink3', className)} aria-hidden>
         <Loader2 className="h-4 w-4 animate-spin" />
       </span>
     );
@@ -37,17 +37,9 @@ export function AuthButton({
         <button
           ref={anchorRef}
           type="button"
-          onClick={() => {
-            if (onOpenProfile && !menuOpen) {
-              onOpenProfile();
-              return;
-            }
-            setMenuOpen((v) => !v);
-          }}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            setMenuOpen(true);
-          }}
+          aria-expanded={menuOpen}
+          aria-haspopup="menu"
+          onClick={() => setMenuOpen((open) => !open)}
           className={cn(
             'inline-flex min-h-9 items-center gap-2 rounded-xl border border-edge bg-panel2 px-2 text-ink3 transition-colors hover:bg-panel hover:text-ink touch-manipulation',
             compact ? 'max-w-[8rem]' : 'max-w-[10rem]',
@@ -72,7 +64,7 @@ export function AuthButton({
   return (
     <>
       <div className={cn('flex items-center gap-1.5', className)}>
-        {onOpenProfile && profile ? (
+        {onOpenProfile ? (
           <button
             type="button"
             title="Stats"
@@ -80,17 +72,11 @@ export function AuthButton({
             onClick={onOpenProfile}
             className="grid h-9 w-9 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation"
           >
-            <Avatar seed={profile.avatar_seed} name={profile.display_name} size={24} />
-          </button>
-        ) : onOpenProfile ? (
-          <button
-            type="button"
-            title="Stats"
-            aria-label="Stats"
-            onClick={onOpenProfile}
-            className="grid h-9 w-9 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation"
-          >
-            <Trophy className="h-4 w-4" />
+            {profile ? (
+              <Avatar seed={profile.avatar_seed} name={profile.display_name} size={24} />
+            ) : (
+              <Trophy className="h-4 w-4" />
+            )}
           </button>
         ) : null}
         <button

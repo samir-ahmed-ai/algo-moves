@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Loader2, LogOut, Shield, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/shell/games/data/AuthProvider';
@@ -22,6 +22,9 @@ export function AuthPopover({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const emailId = useId();
+  const nameId = useId();
+  const passwordId = useId();
 
   useEffect(() => {
     if (open) {
@@ -29,6 +32,21 @@ export function AuthPopover({
       setError(null);
     }
   }, [open, initialTab]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const focusTarget = panelRef.current?.querySelector<HTMLElement>('input:not([type="hidden"])');
+    focusTarget?.focus();
+  }, [open, tab]);
 
   useEffect(() => {
     if (!open) return;
@@ -108,6 +126,7 @@ export function AuthPopover({
         >
           {tab === 'signup' ? (
             <AuthField
+              id={nameId}
               label="Display name"
               value={displayName}
               onChange={setDisplayName}
@@ -116,6 +135,7 @@ export function AuthPopover({
             />
           ) : null}
           <AuthField
+            id={emailId}
             label="Email"
             type="email"
             value={email}
@@ -125,6 +145,7 @@ export function AuthPopover({
             required
           />
           <AuthField
+            id={passwordId}
             label="Password"
             type="password"
             value={password}
@@ -190,6 +211,7 @@ function TabChip({
 }
 
 function AuthField({
+  id,
   label,
   type = 'text',
   value,
@@ -198,6 +220,7 @@ function AuthField({
   autoComplete,
   required,
 }: {
+  id?: string;
   label: string;
   type?: string;
   value: string;
@@ -207,9 +230,10 @@ function AuthField({
   required?: boolean;
 }) {
   return (
-    <label className="flex flex-col gap-1.5 text-start">
+    <label className="flex flex-col gap-1.5 text-start" htmlFor={id}>
       <span className="text-xs font-semibold uppercase tracking-wide text-ink3">{label}</span>
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -287,14 +287,17 @@ func (s *Store) RotateSessionToken(ctx context.Context, profileID string) (strin
 	return token, p, nil
 }
 
-func (s *Store) SetAdmin(ctx context.Context, email string) error {
+func (s *Store) SetAdmin(ctx context.Context, email string) (bool, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
 	if email == "" {
-		return nil
+		return false, nil
 	}
-	_, err := s.pool.Exec(ctx, `
+	tag, err := s.pool.Exec(ctx, `
 		update public.profiles set is_admin = true where lower(email) = $1`, email)
-	return err
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
 }
 
 func (s *Store) GameStats(ctx context.Context, profileID string) ([]map[string]any, error) {

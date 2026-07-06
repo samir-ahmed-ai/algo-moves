@@ -1,12 +1,16 @@
 package arcade
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"os"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+const bcryptCost = 12
 
 func validEmail(email string) bool {
 	email = strings.TrimSpace(strings.ToLower(email))
@@ -18,6 +22,28 @@ func validEmail(email string) bool {
 		return false
 	}
 	return strings.Contains(email[at+1:], ".")
+}
+
+func (s *Service) maybePromotePlatformAdmin(ctx context.Context, email string) {
+	adminEmail := strings.TrimSpace(strings.ToLower(os.Getenv("PLATFORM_ADMIN_EMAIL")))
+	email = strings.TrimSpace(strings.ToLower(email))
+	if adminEmail == "" || email != adminEmail {
+		return
+	}
+	if _, err := s.store.SetAdmin(ctx, email); err != nil {
+		return
+	}
+}
+
+func (s *Service) refreshSessionProfile(ctx context.Context, sess *GuestSession) {
+	if sess == nil {
+		return
+	}
+	p, err := s.store.ProfileByID(ctx, sess.ProfileID)
+	if err != nil || p == nil {
+		return
+	}
+	sess.Profile = *p
 }
 
 func (s *Service) handleSignup(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +70,7 @@ func (s *Service) handleSignup(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "password must be at least 8 characters")
 		return
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "could not hash password")
 		return
@@ -58,6 +84,8 @@ func (s *Service) handleSignup(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "could not create account")
 		return
 	}
+	s.maybePromotePlatformAdmin(r.Context(), email)
+	s.refreshSessionProfile(r.Context(), sess)
 	writeJSON(w, http.StatusOK, sess)
 }
 
@@ -96,6 +124,7 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
+	s.maybePromotePlatformAdmin(r.Context(), email)
 	token, updated, err := s.store.RotateSessionToken(r.Context(), p.ID)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "could not create session")

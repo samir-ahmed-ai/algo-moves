@@ -1,6 +1,6 @@
 import { WorkspaceProvider, useWorkspace } from '@/store/workspace';
 import { ReplayStoreProvider } from '@/store/replay';
-import { AuthProvider } from '@/shell/games/data/AuthProvider';
+import { AuthProvider } from '@/shell/auth';
 import { Workspace } from './shell/Workspace';
 import { LandingPage } from './shell/home/LandingPage';
 import { MobileApp } from './shell/mobile/MobileApp';
