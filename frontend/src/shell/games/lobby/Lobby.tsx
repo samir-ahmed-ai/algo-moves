@@ -9,9 +9,8 @@ import { useAuth } from '../data/AuthProvider';
 import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net/gameServer';
 import { writeGamesHash } from '@/lib/navigation';
 import { Avatar } from '../ui/Avatar';
-import { TouchButton } from '../ui/gamesUi';
+import { Glyph, TouchButton } from '../ui/gamesUi';
 import { GAMES } from '../registry';
-import { Glyph } from '../ui/gamesUi';
 
 const NAME_KEY = STORAGE_KEYS.GAMES_NAME;
 const CAPACITIES = [2, 4, 6, 8];

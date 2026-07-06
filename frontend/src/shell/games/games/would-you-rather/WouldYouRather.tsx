@@ -261,6 +261,7 @@ export function WouldYouRather() {
           peerName={peer?.name ?? s.partner}
           answeredCount={Object.keys(row).filter((id) => playerIds.includes(id)).length}
           total={players.length}
+          prompt={prompt}
           onPick={(choice) => {
             if (isSpectator || myPick !== null || state.phase !== 'picking') return;
             playCue('click');
@@ -355,6 +356,7 @@ function PickingPanel({
   peerName,
   answeredCount,
   total,
+  prompt,
   onPick,
 }: {
   isSpectator: boolean;
@@ -364,6 +366,7 @@ function PickingPanel({
   peerName: string;
   answeredCount: number;
   total: number;
+  prompt: { a: string; b: string };
   onPick: (choice: WyrChoice) => void;
 }) {
   const s = WYR_STRINGS;
@@ -382,17 +385,18 @@ function PickingPanel({
           {isSpectator
             ? `${answeredCount}/${total} answered`
             : picked
-              ? WYR_STRINGS.waitingFor(peerName)
+              ? s.waitingFor(peerName)
               : s.pickOne}
         </TurnBadge>
       </div>
 
-      {/* Two large tap targets stacked vertically on mobile */}
+      {/* Two large tap targets stacked vertically — each echoes its option text */}
       <div className="flex flex-col gap-3">
         {(['a', 'b'] as WyrChoice[]).map((choice) => (
           <OptionButton
             key={choice}
             choice={choice}
+            text={choice === 'a' ? prompt.a : prompt.b}
             selected={myPick === choice}
             disabled={isSpectator || picked}
             onClick={() => onPick(choice)}
@@ -405,11 +409,13 @@ function PickingPanel({
 
 function OptionButton({
   choice,
+  text,
   selected,
   disabled,
   onClick,
 }: {
   choice: WyrChoice;
+  text: string;
   selected: boolean;
   disabled: boolean;
   onClick: () => void;
@@ -420,21 +426,22 @@ function OptionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 min-h-[72px] w-full rounded-2xl border-2 px-5 py-4 text-start transition-all touch-manipulation active:scale-[0.98] disabled:pointer-events-none',
+        'flex items-start gap-3 min-h-[72px] w-full rounded-2xl border-2 px-5 py-4 text-start transition-all touch-manipulation active:scale-[0.98] disabled:pointer-events-none',
         selected
-          ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_3px_var(--accent-bg)]'
-          : 'border-edge bg-panel text-ink hover:border-accent/50 hover:bg-panel2',
+          ? 'border-accent bg-accentbg shadow-[0_0_0_3px_var(--accent-bg)]'
+          : 'border-edge bg-panel hover:border-accent/50 hover:bg-panel2',
         disabled && !selected && 'opacity-50',
       )}
     >
       <span className={cn(
-        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold border-2',
+        'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold border-2',
         selected ? 'border-accent bg-accent text-white' : 'border-edge2 text-ink3',
       )}>
         {choice.toUpperCase()}
       </span>
-      <span className="text-sm font-semibold leading-snug">
-        {selected ? '✓ Your pick!' : choice === 'a' ? 'This one' : 'That one'}
+      <span className={cn('flex-1 text-sm font-semibold leading-snug', selected ? 'text-accent' : 'text-ink')}>
+        {text}
+        {selected && <span className="ms-2 text-xs opacity-70">✓ Picked!</span>}
       </span>
     </button>
   );
