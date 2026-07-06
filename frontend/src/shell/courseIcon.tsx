@@ -29,6 +29,7 @@ import {
   Gauge,
   FlaskConical,
   Blocks,
+  Megaphone,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -64,6 +65,7 @@ const ICONS: Record<string, LucideIcon> = {
   Gauge,
   FlaskConical,
   Blocks,
+  Megaphone,
 };
 
 export function courseIcon(name?: string): LucideIcon {

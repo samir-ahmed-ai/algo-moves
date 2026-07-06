@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Home, Moon, Sparkles, Sun } from 'lucide-react';
+import { Home, Moon, Sun } from 'lucide-react';
+import { BrandLogo } from '@/shell/BrandLogo';
 import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { MobileBrowse } from './MobileBrowse';
@@ -186,9 +187,7 @@ export function MobileApp() {
                 <Home className="h-4 w-4" />
               </button>
               <div className="flex flex-1 items-center justify-center gap-1.5">
-                <span className="grid h-6 w-6 place-items-center rounded-md bg-accent text-white">
-                  <Sparkles className="h-3.5 w-3.5" />
-                </span>
+                <BrandLogo size="sm" />
                 <span className="text-[14px] font-semibold tracking-tight">Algo Moves</span>
               </div>
               {ThemeBtn}

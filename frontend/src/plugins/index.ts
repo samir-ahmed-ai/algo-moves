@@ -35,9 +35,9 @@ import { longestSubstringPlugin } from './longest-substring';
  * append it to `curatedPlugins` below — the loader, sidebar, player and move log
  * pick it up. After changing any plugin's metadata, run `npm run build-plugin-meta`.
  */
-export type PluginGroup = 'curated' | 'imported' | 'prep' | 'go-course';
+export type PluginGroup = 'curated' | 'imported' | 'prep' | 'go-course' | 'openrtb';
 
-export const PLUGIN_GROUPS: PluginGroup[] = ['curated', 'imported', 'prep', 'go-course'];
+export const PLUGIN_GROUPS: PluginGroup[] = ['curated', 'imported', 'prep', 'go-course', 'openrtb'];
 
 /** Hand-authored problems, statically linked into the entry bundle. */
 export const curatedPlugins: ProblemPlugin<any, any>[] = [
@@ -65,11 +65,12 @@ export const curatedPlugins: ProblemPlugin<any, any>[] = [
  * Per-group loaders. `curated` resolves synchronously; the generated groups are
  * dynamic import()s so their manifests + factories land in their own chunk.
  * Registered plugin folders (checked by scripts/check-orphans.mjs): './imported',
- * './imported/prep', './go-course'.
+ * './imported/prep', './go-course', './openrtb'.
  */
 export const GROUP_LOADERS: Record<PluginGroup, () => Promise<ProblemPlugin<any, any>[]>> = {
   curated: async () => curatedPlugins,
   imported: () => import('./imported').then((m) => m.importedPlugins),
   prep: () => import('./imported/prep').then((m) => m.prepPlugins),
   'go-course': () => import('./go-course').then((m) => m.goCoursePlugins),
+  openrtb: () => import('./openrtb').then((m) => m.openrtbPlugins),
 };

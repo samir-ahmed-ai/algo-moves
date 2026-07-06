@@ -80,9 +80,10 @@ export function VizFitBox({
       // Scale is derived from the main animation height (`nh`); the box is sized
       // to the full stage (`boxH`) so a growing rail extends the box downward
       // without ever rescaling the board.
-      const fit = computeVizFitLayout(nw, nh, cw, ch);
+      const fitH = hug ? nh : boxH;
+      const fit = computeVizFitLayout(nw, fitH, cw, ch);
       lastMeasureW.current = cw;
-      const next = { scale: fit.scale, w: fit.w, h: Math.ceil(boxH * fit.scale), nw, nh: boxH };
+      const next = { scale: fit.scale, w: fit.w, h: fit.h, nw, nh: boxH };
       // Bail on identical values: the eased box resize re-fires the observer
       // for ~13 frames per step, and each converged tick must not re-render.
       setLayout((prev) =>

@@ -18,6 +18,7 @@ import {
   CanvasStaticProvider,
   useCanvasStatic,
 } from '@/shell/canvas';
+import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { ProblemPanelBody } from '@/shell/panels/problem/ProblemPanelBody';
 import { VizPanelBody } from '@/shell/panels/visualize/VizPanelBody';
 
@@ -73,6 +74,8 @@ export function ProblemPage({
 
 function ProblemPageShell() {
   const isMobile = useIsMobile();
+  const { item } = useCanvasStatic();
+  const conceptCourse = isConceptCourse(item);
 
   return (
     <div className="flex h-full w-full flex-col bg-bg">
@@ -86,7 +89,11 @@ function ProblemPageShell() {
         <aside
           className={cn(
             'ws-scroll shrink-0 overflow-y-auto border-edge bg-panel/40',
-            isMobile ? 'max-h-[40vh] border-b' : 'w-[min(380px,38vw)] border-r',
+            isMobile
+              ? 'max-h-[40vh] border-b'
+              : conceptCourse
+                ? 'w-[min(440px,42vw)] border-r'
+                : 'w-[min(380px,38vw)] border-r',
           )}
         >
           <div className="p-3 sm:p-4">
@@ -96,7 +103,7 @@ function ProblemPageShell() {
           </div>
         </aside>
         <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="ws-scroll min-h-0 flex-1 overflow-auto">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <VizPanelBody showTransport={false} />
           </div>
           <div className="flex shrink-0 justify-center border-t border-edge bg-panel/80 px-3 py-2 backdrop-blur">

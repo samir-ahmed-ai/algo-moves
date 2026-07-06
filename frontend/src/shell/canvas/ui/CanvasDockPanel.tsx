@@ -1,13 +1,5 @@
 import { useRef, useState } from 'react';
-import {
-  ChevronDown,
-  Sparkles,
-  StickyNote,
-  PencilLine,
-  Users,
-  Bookmark,
-  FolderOpen,
-} from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace, type CanvasSnapRegion } from '@/store/workspace';
 import { chromeText } from '../../chromeUi';
@@ -15,12 +7,6 @@ import { usePopoverDismiss } from '../../ui/usePopoverDismiss';
 import { RADIUS_SHELL } from './nodeui';
 
 const CELL = 'grid h-7 w-7 place-items-center rounded-sm text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-30';
-
-const QUICK_ADD = [
-  { id: 'notes', title: 'Add notes', icon: StickyNote },
-  { id: 'whiteboard', title: 'Add whiteboard', icon: PencilLine },
-  { id: 'collab-code', title: 'Add collab code', icon: Users },
-] as const;
 
 type IconRect = { x: number; y: number; w: number; h: number };
 
@@ -153,22 +139,14 @@ function SnapMenuCell({
   );
 }
 
-/** Top-left dock: add strip + Rectangle-style 3×3 snap pad. */
+/** Top-left dock: Rectangle-style 3×3 snap pad. */
 export function CanvasDockPanel() {
-  const { canvasAdd, canvasHud, present, mode } = useWorkspace();
-  const [moreOpen, setMoreOpen] = useState(false);
+  const { canvasHud, present, mode } = useWorkspace();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const moreRef = useRef<HTMLDivElement>(null);
 
-  usePopoverDismiss(moreRef, moreOpen, () => setMoreOpen(false));
-
-  if (present || mode !== 'visualize' || !canvasHud || !canvasAdd) return null;
+  if (present || mode !== 'visualize' || !canvasHud) return null;
 
   const { onCanvasSnap, canCanvasSnap } = canvasHud;
-  const overflowKinds = canvasAdd.addableKinds.filter(
-    (k) => !QUICK_ADD.some((q) => q.id === k.id),
-  );
-  const hasOverflow = overflowKinds.length > 0 || (canvasAdd.addableEffects?.length ?? 0) > 0;
 
   const snap = (region: CanvasSnapRegion) => {
     onCanvasSnap(region);
@@ -178,83 +156,10 @@ export function CanvasDockPanel() {
   return (
     <div
       className={cn(
-        'nodrag absolute left-3 top-3 z-10 flex flex-col gap-1 border border-edge bg-panel/95 p-1.5 shadow-[var(--shadow-lg)] backdrop-blur',
+        'nodrag absolute left-3 top-3 z-10 border border-edge bg-panel/95 p-1.5 shadow-[var(--shadow-lg)] backdrop-blur',
         RADIUS_SHELL,
       )}
     >
-      <div className="flex items-center gap-0.5">
-        {QUICK_ADD.map(({ id, title, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            title={title}
-            aria-label={title}
-            onClick={() => canvasAdd.onAddKind(id)}
-            className={CELL}
-          >
-            <Icon className="h-3.5 w-3.5" />
-          </button>
-        ))}
-        {hasOverflow && (
-          <div ref={moreRef} className="relative">
-            <button
-              type="button"
-              title="More panels"
-              aria-label="More panels"
-              aria-expanded={moreOpen}
-              onClick={() => setMoreOpen((o) => !o)}
-              className={cn(CELL, moreOpen && 'bg-accentbg text-accent')}
-            >
-              <ChevronDown className="h-3.5 w-3.5" />
-            </button>
-            {moreOpen && (
-              <div
-                className={cn(
-                  'absolute left-0 top-full z-30 mt-0.5 max-h-[min(280px,40vh)] w-44 overflow-y-auto border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
-                  RADIUS_SHELL,
-                )}
-              >
-                {overflowKinds.map((k) => (
-                  <button
-                    key={k.id}
-                    type="button"
-                    onClick={() => {
-                      canvasAdd.onAddKind(k.id);
-                      setMoreOpen(false);
-                    }}
-                    className={cn(
-                      'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
-                      chromeText.sm,
-                    )}
-                  >
-                    {k.id === 'bookmarks' && <Bookmark className="h-3.5 w-3.5 shrink-0" />}
-                    {k.id === 'projects' && <FolderOpen className="h-3.5 w-3.5 shrink-0" />}
-                    {k.title}
-                  </button>
-                ))}
-                {canvasAdd.addableEffects?.map((e) => (
-                  <button
-                    key={e.id}
-                    type="button"
-                    onClick={() => {
-                      canvasAdd.onAddEffect?.(e.id);
-                      setMoreOpen(false);
-                    }}
-                    className={cn(
-                      'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
-                      chromeText.sm,
-                    )}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
-                    {e.title}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
       <div
         className="grid grid-cols-3 gap-0.5 rounded-md bg-panel2/50 p-0.5"
         title={canCanvasSnap ? 'Snap selected panel to region' : 'Select one panel to snap'}

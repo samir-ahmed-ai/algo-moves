@@ -565,7 +565,7 @@ export function CodeStudioBody() {
       <div
         key={phase}
         className={cn(
-          'flex min-h-0 flex-1 flex-col',
+          'flex min-h-0 flex-1 flex-col overflow-hidden',
           phaseTransition ? 'code-studio-phase-exit' : 'code-studio-phase-enter',
         )}
       >

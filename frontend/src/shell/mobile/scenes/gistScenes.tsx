@@ -35,6 +35,87 @@ function useFreezeIfReducedMotion(ref: React.RefObject<SVGSVGElement | null>) {
  * feels custom.
  */
 const SCENE_MARKUP: Partial<Record<ShapeKey, string>> = {
+  // Arrays (two-pointer / sliding window) — two pointer arrows walk toward each
+  // other on a sorted array; when they meet, the target cell pulses green.
+  array: `
+    <g stroke="currentColor" stroke-width="1.5" opacity="0.45">
+      <rect x="20" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+      <rect x="52" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+      <rect x="84" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+      <rect x="116" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+      <rect x="148" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+      <rect x="180" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+      <rect x="212" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+      <rect x="244" y="80" width="30" height="40" rx="3" fill="var(--panel)"/>
+    </g>
+    <rect x="148" y="78" width="30" height="44" rx="3" fill="var(--good)" fill-opacity="0.22" stroke="var(--good)" stroke-width="2">
+      <animate attributeName="fill-opacity" values="0.1;0.1;0.45;0.22" keyTimes="0;0.7;0.85;1" dur="3.6s" repeatCount="indefinite"/>
+    </rect>
+    <g fill="var(--accent)" stroke="none">
+      <polygon points="0,-10 8,0 -8,0">
+        <animateMotion path="M35 68 L163 68" keyPoints="0;0;1;1" keyTimes="0;0.05;0.72;1" calcMode="linear" dur="3.6s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+    <g fill="var(--accent)" stroke="none">
+      <polygon points="0,10 8,0 -8,0">
+        <animateMotion path="M259 132 L163 132" keyPoints="0;0;1;1" keyTimes="0;0.05;0.72;1" calcMode="linear" dur="3.6s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+    <path d="M20 140 h264" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+    <text x="24" y="158" font-size="12" fill="currentColor" opacity="0.5" font-family="ui-sans-serif,system-ui">L</text>
+    <text x="254" y="158" font-size="12" fill="currentColor" opacity="0.5" font-family="ui-sans-serif,system-ui">R</text>
+  `,
+  // Heap (max-heap) — a max-heap tree where the root node pulses with accent
+  // colour and the heap-property arrows ripple upward when a child is inserted.
+  heap: `
+    <g stroke="currentColor" stroke-width="2" fill="none" opacity="0.3">
+      <path d="M160 36 L90 104 M160 36 L230 104 M90 104 L58 166 M90 104 L122 166 M230 104 L198 166 M230 104 L262 166"/>
+    </g>
+    <g stroke="currentColor" stroke-width="2" fill="var(--panel)">
+      <circle cx="90" cy="104" r="16"/><circle cx="230" cy="104" r="16"/>
+      <circle cx="58" cy="166" r="13"/><circle cx="122" cy="166" r="13"/>
+      <circle cx="198" cy="166" r="13"/><circle cx="262" cy="166" r="13"/>
+    </g>
+    <circle cx="160" cy="36" r="18" fill="var(--accent)" stroke="none">
+      <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="fill-opacity" values="1;0.75;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <path d="M96 150 L91 116" stroke="var(--accent)" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.3;0.45;0.65;0.8" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M93 118 l-3 -8 l6 0z" fill="var(--accent)" opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.3;0.45;0.65;0.8" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M224 150 L229 116" stroke="var(--accent)" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.5;0.65;0.82;0.9" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <text x="149" y="41" font-size="14" fill="white" font-weight="700" font-family="ui-monospace,monospace" text-anchor="middle" dominant-baseline="middle">max</text>
+  `,
+  // Tree traversal — a small token visits nodes in DFS pre-order; visited
+  // nodes light up accent one by one, then the whole tree resets.
+  tree: `
+    <g stroke="currentColor" stroke-width="2" fill="none" opacity="0.3">
+      <path d="M160 30 L90 90 M160 30 L230 90 M90 90 L58 150 M90 90 L122 150 M230 90 L198 150 M230 90 L262 150"/>
+    </g>
+    <g stroke="currentColor" stroke-width="2" fill="var(--panel)">
+      <circle cx="90" cy="90" r="13"/><circle cx="230" cy="90" r="13"/>
+      <circle cx="58" cy="150" r="11"/><circle cx="122" cy="150" r="11"/>
+      <circle cx="198" cy="150" r="11"/><circle cx="262" cy="150" r="11"/>
+    </g>
+    <circle cx="160" cy="30" r="15" fill="var(--panel)" stroke="currentColor" stroke-width="2"/>
+    <g fill="var(--accent)" stroke="none">
+      <circle cx="160" cy="30" r="15" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.03;0.92;1" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="90" cy="90" r="13" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.15;0.18;0.92;1" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="58" cy="150" r="11" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.28;0.31;0.92;1" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="122" cy="150" r="11" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.42;0.45;0.92;1" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="230" cy="90" r="13" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.55;0.58;0.92;1" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="198" cy="150" r="11" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.68;0.71;0.92;1" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="262" cy="150" r="11" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.78;0.81;0.92;1" dur="5s" repeatCount="indefinite"/></circle>
+    </g>
+    <circle r="7" fill="white" stroke="var(--accent)" stroke-width="2">
+      <animateMotion path="M160 30 L90 90 L58 150 L90 90 L122 150 L90 90 L160 30 L230 90 L198 150 L230 90 L262 150 L230 90 L160 30" dur="5s" keyPoints="0;0.08;0.17;0.25;0.33;0.42;0.5;0.58;0.67;0.75;0.83;0.92;1" keyTimes="0;0.08;0.17;0.25;0.33;0.42;0.5;0.58;0.67;0.75;0.83;0.92;1" calcMode="linear" repeatCount="indefinite"/>
+    </circle>
+  `,
   // Backtracking — a token walks the search tree down the solution path; one
   // branch dead-ends (red ✗) and the winning leaf pulses green.
   backtracking: `

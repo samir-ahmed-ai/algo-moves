@@ -6,51 +6,9 @@ import { FlipFrame } from '@/components/shared/FlipFrame';
 import { MoveOrbit } from '@/components/shared/MoveOrbit';
 import { BigOPanelBody } from './BigOPanelBody';
 import { Transport } from '../shared/Transport';
-import { moveToneChipClass } from '../shared/frameChips';
 
+import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { useCanvasFrame, useCanvasStatic, ControlsAccordion, nodeText, VizFitBox } from '@/shell/canvas';
-/**
- * Live move caption — status bar at top of viz body (Strudel-style).
- * Constant footprint: single line, truncating note, permanently reserved
- * chip slots — the changing text must never reflow the board below it.
- */
-export function VizStatusBar() {
-  const { player, frame } = useCanvasFrame();
-  const note = frame.move?.note?.trim();
-  const frameType = frame.move?.type ?? 'frame';
-  const toneClass = moveToneChipClass(frame.move?.tone);
-  if (!note && player.total <= 1) return null;
-  const counterCh = `${String(player.total).length * 2 + 1}ch`;
-  return (
-    <div
-      className={cn(
-        'flex min-h-[30px] min-w-0 items-center gap-1.5 border-b border-edge/40 px-[var(--node-px,16px)] py-1',
-        nodeText.xs,
-        'font-mono text-ink3',
-      )}
-    >
-      <span
-        key={note || ''}
-        className="viz-status-note min-w-0 flex-1 truncate"
-        title={note || undefined}
-      >
-        {note || 'Step through the algorithm'}
-      </span>
-      <span className={cn('shrink-0 rounded-full border px-2 py-0.5', toneClass)}>{frameType}</span>
-      <span className="shrink-0 text-right font-mono tabular-nums" style={{ minWidth: counterCh }}>
-        {player.index + 1}/{player.total}
-      </span>
-      <span
-        className={cn(
-          'shrink-0 rounded-full border border-edge bg-panel2/50 px-2 py-0.5 tabular-nums transition-opacity',
-          player.speed === 1 && 'opacity-40',
-        )}
-      >
-        {player.speed}×
-      </span>
-    </div>
-  );
-}
 
 /**
  * Stacked: the board renders at natural size on the top row, the Controls rail
@@ -65,18 +23,25 @@ export function VizPanelBody({
   onBigOOpenChange?: (open: boolean) => void;
   showTransport?: boolean;
 }) {
-  const { plugin, inputId, selectedNode, setSelectedNode } = useCanvasStatic();
+  const { plugin, inputId, selectedNode, setSelectedNode, item } = useCanvasStatic();
   const { frames, frame, player } = useCanvasFrame();
   const { mode } = useWorkspace();
   const View = plugin.View;
   const inVisualize = mode === 'visualize';
+  const conceptCourse = isConceptCourse(item);
   const vizMeasureRef = useRef<HTMLDivElement>(null);
 
-  const viewEl = (
+  const viewInner = (
+    <ErrorBoundary resetKey={`${plugin.meta.id}:${inputId}`} label={plugin.meta.id}>
+      <View frame={frame} onSelectNode={setSelectedNode} selectedNode={selectedNode} />
+    </ErrorBoundary>
+  );
+
+  const viewEl = conceptCourse ? (
+    viewInner
+  ) : (
     <FlipFrame frameKey={player.index} resetKey={`${plugin.meta.id}:${inputId}`}>
-      <ErrorBoundary resetKey={`${plugin.meta.id}:${inputId}`} label={plugin.meta.id}>
-        <View frame={frame} onSelectNode={setSelectedNode} selectedNode={selectedNode} />
-      </ErrorBoundary>
+      {viewInner}
     </FlipFrame>
   );
 
@@ -87,11 +52,12 @@ export function VizPanelBody({
         nodeText.base,
         inVisualize
           ? 'gap-0'
-          : 'h-full min-h-[260px] gap-2',
+          : 'h-full min-h-0 gap-2',
       )}
     >
-      {!inVisualize && <VizStatusBar />}
-      {!inVisualize && <MoveOrbit frames={frames} index={player.index} onSeek={player.goTo} />}
+      {!inVisualize && !conceptCourse && (
+        <MoveOrbit frames={frames} index={player.index} onSeek={player.goTo} />
+      )}
       {inVisualize ? (
         <div ref={vizMeasureRef} className="flex min-w-0 justify-center">
           <VizFitBox
@@ -103,9 +69,13 @@ export function VizPanelBody({
             {viewEl}
           </VizFitBox>
         </div>
+      ) : conceptCourse ? (
+        <div className="viz-trace-panel flex min-h-0 flex-1 flex-col overflow-hidden rounded-[calc(var(--radius)-2px)] border border-edge/60 bg-panel2/30 p-2">
+          {viewEl}
+        </div>
       ) : (
         <VizFitBox
-          className="viz-board-col viz-board-col--fit min-h-[260px] flex-1 rounded-[calc(var(--radius)-2px)] border border-edge/60 bg-panel2/30"
+          className="viz-board-col viz-board-col--fit h-full min-h-0 flex-1 rounded-[calc(var(--radius)-2px)] border border-edge/60 bg-panel2/30"
           remeasureKey={`${inputId}-${player.index}-${frame.move.type}`}
         >
           {viewEl}

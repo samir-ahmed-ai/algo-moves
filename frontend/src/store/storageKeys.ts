@@ -25,6 +25,7 @@ export const STORAGE_KEYS = {
 
   // store / user-prefs
   EDITOR_PREFS: k('editor-prefs'),
+  OVERVIEW_LAYOUT: k('overview-layout'),
   CODE_PHASE: (itemId: string, langIdx: number) => k('code-phase', itemId, langIdx),
   REASSEMBLE_PROGRESS: (itemId: string, langIdx: number) => k('reassemble-progress', itemId, langIdx),
   CODE_QUIZ: (itemId: string, langIdx: number) => k('code-quiz', itemId, langIdx),

@@ -662,6 +662,37 @@
 .piece-drag-ghost .hl-sig-name { color: var(--vscode-hl-entry); }
 .piece-drag-ghost .hl-sig-name-func { color: var(--vscode-hl-func); }
 
+/* problem context strip (gist + quiz + reassemble cards) */
+.mobile-problem-context {
+  backdrop-filter: blur(4px);
+}
+
+/* enlarged explain box on wrong answer */
+.mobile-explain--prominent {
+  /* slightly elevated shadow to make it feel like a callout */
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--bad) 10%, transparent);
+}
+
+.mobile-explain--wrong {
+  animation: mobileExplainWrong 0.35s ease-out;
+}
+
+@keyframes mobileExplainWrong {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* reassemble hint strip */
+.mobile-reassemble-hint {
+  backdrop-filter: blur(4px);
+}
+
 /* animate card — viz board + transport */
 .mobile-animate-card {
   min-height: 0;
@@ -697,12 +728,12 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  line-height: 1.35;
+  line-height: 1.4;
   /* Reserve both clamp lines so 1-line vs 2-line notes don't resize the
      transport card frame-to-frame. */
-  min-height: 2.7em;
-  font-size: 12px;
-  color: var(--text-2);
+  min-height: 2.8em;
+  font-size: 13px;
+  color: var(--ink2);
   animation: mobile-caption-in 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 @keyframes mobile-caption-in {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Palette } from 'lucide-react';
-import { LayoutGrid, Maximize, Maximize2 } from 'lucide-react';
+import { Maximize, Maximize2 } from 'lucide-react';
 import {
   useWorkspace,
   tweakMeta,
@@ -11,7 +11,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../../chromeUi';
 import { Toggle } from '../../ui';
-import { CanvasToolButtons, HudBtn } from './CanvasTools';
+import { HudBtn } from './CanvasTools';
 import { PresetPopover } from './PresetPopover';
 import { WorkflowPresetPopover } from './WorkflowPresetPopover';
 import { Field, RADIUS_CTRL } from './nodeui';
@@ -211,7 +211,7 @@ export function CanvasPropsBody({ hud, compact }: { hud: CanvasHudProps; compact
   );
 }
 
-export function CanvasActionsBody({ hud }: { hud: CanvasHudProps }) {
+export function CanvasActionsBody() {
   const { canvasProject, focusCanvas, toggleFocusCanvas, requestFitCanvas } = useWorkspace();
 
   return (
@@ -225,13 +225,9 @@ export function CanvasActionsBody({ hud }: { hud: CanvasHudProps }) {
       <HudBtn onClick={requestFitCanvas} title="Fit view (Z)">
         <Maximize />
       </HudBtn>
-      <HudBtn onClick={hud.onTidy} title="Tidy layout — re-organize panels">
-        <LayoutGrid />
-      </HudBtn>
       <HudBtn onClick={toggleFocusCanvas} title="Focus canvas (C)" active={focusCanvas}>
         <Maximize2 />
       </HudBtn>
-      <CanvasToolButtons {...hud.tools} />
     </div>
   );
 }

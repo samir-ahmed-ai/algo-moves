@@ -80,9 +80,9 @@ export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin
   const code = { text: c.code, lang: 'go', file: 'main.go' };
   const codePieces = codePiecesFromSource(c.code);
 
-  // Concepts with an authored walkthrough get the animated code-trace player
-  // (active lines glow + auto-scroll, evolving state rail); the rest fall back
-  // to the Scene mnemonic reveal.
+  // Concepts with an authored walkthrough get the narrative walkthrough player
+  // (step caption + evolving state rail); the rest fall back to the Scene
+  // mnemonic reveal.
   if (c.walkthrough && c.walkthrough.length > 0) {
     return definePlugin<GoConcept, any>({
       meta,

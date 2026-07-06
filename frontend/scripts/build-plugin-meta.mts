@@ -19,6 +19,7 @@ import { curatedPlugins } from '@/plugins';
 import { importedPlugins, importedCourses } from '@/plugins/imported';
 import { prepPlugins, prepCourses } from '@/plugins/imported/prep';
 import { goCoursePlugins, goCourses, goBrowseCategories, GO_COURSE_ID } from '@/plugins/go-course';
+import { openrtbPlugins, openrtbCourses, openrtbBrowseCategories, OPENRTB_COURSE_ID } from '@/plugins/openrtb';
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'plugins', '_generated');
 
@@ -27,6 +28,7 @@ const GROUPS: [PluginGroup, ProblemPlugin<any, any>[]][] = [
   ['imported', importedPlugins],
   ['prep', prepPlugins],
   ['go-course', goCoursePlugins],
+  ['openrtb', openrtbPlugins],
 ];
 
 interface MetaEntry {
@@ -72,11 +74,15 @@ const coursesFile =
   BANNER +
   `import type { CourseDef } from '@/content/types';\n\n` +
   `export const GO_COURSE_ID = ${JSON.stringify(GO_COURSE_ID)};\n\n` +
+  `export const OPENRTB_COURSE_ID = ${JSON.stringify(OPENRTB_COURSE_ID)};\n\n` +
   `export const IMPORTED_COURSES: CourseDef[] = ${JSON.stringify(importedCourses, null, 2)};\n\n` +
   `export const PREP_COURSES: CourseDef[] = ${JSON.stringify(prepCourses, null, 2)};\n\n` +
   `export const GO_COURSES: CourseDef[] = ${JSON.stringify(goCourses, null, 2)};\n\n` +
+  `export const OPENRTB_COURSES: CourseDef[] = ${JSON.stringify(openrtbCourses, null, 2)};\n\n` +
   `export interface GoBrowseCategory {\n  id: string;\n  title: string;\n  summary: string;\n  icon: string;\n  courseTopicId: string;\n}\n\n` +
-  `export const GO_BROWSE_CATEGORIES: GoBrowseCategory[] = ${JSON.stringify(goBrowseCategories, null, 2)};\n`;
+  `export const GO_BROWSE_CATEGORIES: GoBrowseCategory[] = ${JSON.stringify(goBrowseCategories, null, 2)};\n\n` +
+  `export interface OpenRTBBrowseCategory {\n  id: string;\n  title: string;\n  summary: string;\n  icon: string;\n  courseTopicId: string;\n}\n\n` +
+  `export const OPENRTB_BROWSE_CATEGORIES: OpenRTBBrowseCategory[] = ${JSON.stringify(openrtbBrowseCategories, null, 2)};\n`;
 
 const targets: [string, string][] = [
   [join(outDir, 'pluginMeta.ts'), metaFile],

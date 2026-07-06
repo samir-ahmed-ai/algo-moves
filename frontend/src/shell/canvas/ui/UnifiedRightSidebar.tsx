@@ -332,7 +332,7 @@ export function UnifiedRightSidebar() {
             </section>
             <section>
               <p className={cn('mb-1 font-medium text-ink2', chromeText.sm)}>Actions</p>
-              <CanvasActionsBody hud={canvasHud} />
+              <CanvasActionsBody />
             </section>
             <section>
               <p className={cn('mb-1 flex items-center gap-1 font-medium text-ink2', chromeText.sm)}>

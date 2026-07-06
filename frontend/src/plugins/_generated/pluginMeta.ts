@@ -4785,5 +4785,561 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     ],
     "summary": "Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.",
     "group": "go-course"
+  },
+  {
+    "id": "ortb-foundations-ecosystem",
+    "title": "Programmatic Ad Tech Ecosystem",
+    "difficulty": "Easy",
+    "tags": [
+      "ad-tech",
+      "DSP",
+      "SSP",
+      "exchange",
+      "RTB",
+      "programmatic"
+    ],
+    "summary": "Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-foundations-rtb-flow",
+    "title": "The RTB Request-Response Flow",
+    "difficulty": "Easy",
+    "tags": [
+      "RTB",
+      "bid-request",
+      "bid-response",
+      "latency",
+      "OpenRTB"
+    ],
+    "summary": "Step-by-step journey from page load to impression served, with sub-100 ms timing.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-foundations-auction-types",
+    "title": "First-Price vs Second-Price Auctions",
+    "difficulty": "Medium",
+    "tags": [
+      "auction",
+      "first-price",
+      "second-price",
+      "clearing-price",
+      "programmatic"
+    ],
+    "summary": "Vickrey second-price vs first-price mechanics and why the industry shifted.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-foundations-supply-chain",
+    "title": "ads.txt, sellers.json & SupplyChain Object",
+    "difficulty": "Medium",
+    "tags": [
+      "ads.txt",
+      "sellers.json",
+      "schain",
+      "supply-chain",
+      "IVT",
+      "fraud"
+    ],
+    "summary": "IAB standards for authorised reseller disclosure and supply path transparency.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-request-object",
+    "title": "Top-Level BidRequest Object",
+    "difficulty": "Medium",
+    "tags": [
+      "BidRequest",
+      "OpenRTB",
+      "tmax",
+      "imp",
+      "at",
+      "wseat"
+    ],
+    "summary": "The root BidRequest struct: required fields, auction rules, and allowlists.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-request-imp",
+    "title": "Impression Object & Ad Formats",
+    "difficulty": "Medium",
+    "tags": [
+      "imp",
+      "banner",
+      "video",
+      "native",
+      "audio",
+      "pmp",
+      "OpenRTB"
+    ],
+    "summary": "The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-request-site-app",
+    "title": "Site, App, Device & User Context",
+    "difficulty": "Medium",
+    "tags": [
+      "site",
+      "app",
+      "device",
+      "user",
+      "geo",
+      "OpenRTB",
+      "context"
+    ],
+    "summary": "Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-request-26-fields",
+    "title": "OpenRTB 2.6 New Fields",
+    "difficulty": "Hard",
+    "tags": [
+      "OpenRTB-2.6",
+      "pod-bidding",
+      "podid",
+      "poddur",
+      "plcmt",
+      "CTV",
+      "channel"
+    ],
+    "summary": "Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-response-object",
+    "title": "BidResponse & SeatBid Objects",
+    "difficulty": "Easy",
+    "tags": [
+      "BidResponse",
+      "SeatBid",
+      "OpenRTB",
+      "nbr",
+      "cur"
+    ],
+    "summary": "Top-level BidResponse and the SeatBid grouping of bids by buyer seat.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-response-bid",
+    "title": "The Bid Object Deep Dive",
+    "difficulty": "Medium",
+    "tags": [
+      "Bid",
+      "adm",
+      "nurl",
+      "burl",
+      "lurl",
+      "crid",
+      "adomain",
+      "OpenRTB"
+    ],
+    "summary": "Every field of the OpenRTB Bid object and how exchanges and DSPs use them.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-response-settlement",
+    "title": "Win Notice, Billing Notice & Price Macros",
+    "difficulty": "Medium",
+    "tags": [
+      "nurl",
+      "burl",
+      "AUCTION_PRICE",
+      "macros",
+      "clearing-price",
+      "settlement"
+    ],
+    "summary": "How exchanges notify DSPs of wins/billing events and substitute price macros.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bid-response-nobid",
+    "title": "No-Bid Codes & Timeout Handling",
+    "difficulty": "Easy",
+    "tags": [
+      "no-bid",
+      "nbr",
+      "timeout",
+      "HTTP-204",
+      "OpenRTB"
+    ],
+    "summary": "HTTP 204 vs JSON no-bid, nbr reason codes, and graceful timeout behaviour.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bidder-server",
+    "title": "HTTP Bidder Server",
+    "difficulty": "Medium",
+    "tags": [
+      "net/http",
+      "bidder",
+      "OpenRTB",
+      "JSON",
+      "HTTP-server"
+    ],
+    "summary": "A minimal OpenRTB bidder: HTTP server, JSON decode, validate, encode response.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bidder-decision",
+    "title": "Bid Decision Logic & Targeting",
+    "difficulty": "Medium",
+    "tags": [
+      "targeting",
+      "bid-decision",
+      "CPM",
+      "campaign",
+      "audience",
+      "floor"
+    ],
+    "summary": "Evaluating targeting criteria, computing bid price, and respecting floor + budget.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bidder-concurrency",
+    "title": "Concurrency & Context Deadlines",
+    "difficulty": "Hard",
+    "tags": [
+      "context",
+      "goroutines",
+      "concurrency",
+      "deadline",
+      "tmax",
+      "RWMutex"
+    ],
+    "summary": "Using context.WithDeadline, goroutines, and safe shared state in a real bidder.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-bidder-benchmark",
+    "title": "Benchmarking the Hot Path",
+    "difficulty": "Hard",
+    "tags": [
+      "benchmark",
+      "pprof",
+      "allocations",
+      "JSON",
+      "performance",
+      "Go"
+    ],
+    "summary": "go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-exchange-fanout",
+    "title": "Fan-Out to N DSPs",
+    "difficulty": "Hard",
+    "tags": [
+      "fan-out",
+      "goroutines",
+      "exchange",
+      "concurrency",
+      "DSP",
+      "OpenRTB"
+    ],
+    "summary": "Sending a BidRequest to N DSPs concurrently and collecting responses within tmax.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-exchange-hedged",
+    "title": "Hedged Requests & Timeout Enforcement",
+    "difficulty": "Hard",
+    "tags": [
+      "hedged-requests",
+      "timeout",
+      "latency",
+      "p99",
+      "circuit-breaker"
+    ],
+    "summary": "Cut tail latency by sending backup requests to slow DSPs; enforce hard deadlines.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-exchange-auction",
+    "title": "First/Second-Price Auction Logic",
+    "difficulty": "Medium",
+    "tags": [
+      "auction",
+      "first-price",
+      "second-price",
+      "winner",
+      "clearing-price",
+      "floor"
+    ],
+    "summary": "Implement exchange-side auction: collect bids, enforce floor, select winner, compute clearing price.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-exchange-floors",
+    "title": "Floor Prices, Deals & Private Marketplace",
+    "difficulty": "Medium",
+    "tags": [
+      "floor",
+      "PMP",
+      "deals",
+      "preferred-deal",
+      "programmatic-guaranteed",
+      "bidfloor"
+    ],
+    "summary": "Publisher floor pricing, PMP deal types, and how deals are modelled in OpenRTB.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-serving-reverse-proxy",
+    "title": "Reverse Proxy with httputil",
+    "difficulty": "Medium",
+    "tags": [
+      "reverse-proxy",
+      "httputil",
+      "net/http",
+      "Director",
+      "ModifyResponse"
+    ],
+    "summary": "Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-serving-win-billing",
+    "title": "Win Notice (nurl) & Billing Notice (burl)",
+    "difficulty": "Medium",
+    "tags": [
+      "nurl",
+      "burl",
+      "win-notice",
+      "billing",
+      "server-to-server",
+      "OpenRTB"
+    ],
+    "summary": "Implementing exchange-side nurl + burl dispatch and DSP-side win/billing handlers.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-serving-markup",
+    "title": "Markup Serving & AUCTION_PRICE Macro",
+    "difficulty": "Medium",
+    "tags": [
+      "adm",
+      "AUCTION_PRICE",
+      "macros",
+      "markup",
+      "CDN",
+      "creative"
+    ],
+    "summary": "Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-serving-cdn",
+    "title": "CDN Creatives & Creative Auditing",
+    "difficulty": "Easy",
+    "tags": [
+      "CDN",
+      "creative",
+      "IURL",
+      "crid",
+      "brand-safety",
+      "audit"
+    ],
+    "summary": "Hosting creatives on CDN, the iurl audit snapshot, and brand-safety classification.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-tracking-impressions",
+    "title": "Impression Pixel Firing",
+    "difficulty": "Easy",
+    "tags": [
+      "impression",
+      "pixel",
+      "tracking",
+      "HTTP-GET",
+      "idempotent",
+      "deduplication"
+    ],
+    "summary": "How 1×1 impression pixels work, deduplication by impression ID, and server implementation.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-tracking-clicks",
+    "title": "Click Redirect Chains",
+    "difficulty": "Medium",
+    "tags": [
+      "click",
+      "redirect",
+      "tracking",
+      "HTTP-302",
+      "deduplication",
+      "attribution"
+    ],
+    "summary": "Click tracking redirect chain: ad server → DSP tracker → advertiser landing page.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-tracking-macros",
+    "title": "Tracking Macros & Substitution",
+    "difficulty": "Medium",
+    "tags": [
+      "macros",
+      "AUCTION_PRICE",
+      "substitution",
+      "tracking",
+      "OpenRTB",
+      "URL-encoding"
+    ],
+    "summary": "All OpenRTB standard macros, their substitution context, and safe URL encoding.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-tracking-reconciliation",
+    "title": "Billing Reconciliation & Discrepancy",
+    "difficulty": "Medium",
+    "tags": [
+      "reconciliation",
+      "discrepancy",
+      "billing",
+      "impression-counting",
+      "IAS",
+      "fraud"
+    ],
+    "summary": "Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-creative-banner",
+    "title": "Banner HTML & MRAID",
+    "difficulty": "Easy",
+    "tags": [
+      "banner",
+      "HTML",
+      "MRAID",
+      "creative",
+      "SafeFrame",
+      "adm"
+    ],
+    "summary": "Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-creative-vast",
+    "title": "VAST Video Ad Serving Template",
+    "difficulty": "Hard",
+    "tags": [
+      "VAST",
+      "video",
+      "VPAID",
+      "InLine",
+      "Wrapper",
+      "tracking-events"
+    ],
+    "summary": "VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-creative-native",
+    "title": "Native Ad Markup",
+    "difficulty": "Medium",
+    "tags": [
+      "native",
+      "OpenRTB-native",
+      "assets",
+      "title",
+      "image",
+      "link",
+      "mtype"
+    ],
+    "summary": "OpenRTB Native spec: request/response JSON, asset types, and rendering by publisher.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-scale-pacing",
+    "title": "Budget Pacing with Token Bucket",
+    "difficulty": "Hard",
+    "tags": [
+      "pacing",
+      "token-bucket",
+      "budget",
+      "rate-limiting",
+      "atomic",
+      "Go"
+    ],
+    "summary": "Token-bucket algorithm for smooth budget pacing per advertiser per time window.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-scale-frequency-cap",
+    "title": "Frequency Capping with Redis",
+    "difficulty": "Hard",
+    "tags": [
+      "frequency-cap",
+      "Redis",
+      "INCR",
+      "EXPIRE",
+      "consistent-hashing",
+      "user-tracking"
+    ],
+    "summary": "Per-user per-campaign impression caps using Redis INCR+EXPIRE or sliding windows.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-scale-logging",
+    "title": "Write-Behind Logging with Kafka",
+    "difficulty": "Hard",
+    "tags": [
+      "Kafka",
+      "write-behind",
+      "ring-buffer",
+      "logging",
+      "async",
+      "sampling"
+    ],
+    "summary": "Never block the hot path: ring buffer → background writer → Kafka → data warehouse.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-privacy-consent",
+    "title": "GDPR, TCF & Consent Strings",
+    "difficulty": "Hard",
+    "tags": [
+      "GDPR",
+      "TCF",
+      "consent",
+      "GPP",
+      "us_privacy",
+      "CCPA",
+      "OpenRTB"
+    ],
+    "summary": "TCF 2.2 consent strings in BidRequest, GDPR enforcement in bidders, and GPP/CCPA.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-privacy-identity",
+    "title": "Identity: IDFA, GAID, UID2 & Cookieless",
+    "difficulty": "Hard",
+    "tags": [
+      "identity",
+      "IDFA",
+      "GAID",
+      "UID2",
+      "cookieless",
+      "eids",
+      "LiveRamp"
+    ],
+    "summary": "Device IDs, cookie-sync, UID2, and identity in a cookieless world.",
+    "group": "openrtb"
+  },
+  {
+    "id": "ortb-design-capstone",
+    "title": "Capstone: Design an Ad Exchange",
+    "difficulty": "Hard",
+    "tags": [
+      "system-design",
+      "exchange",
+      "scalability",
+      "OpenRTB",
+      "architecture",
+      "capstone"
+    ],
+    "summary": "End-to-end design of an ad exchange: 1M RPS, sub-100 ms auctions, impression tracking, billing.",
+    "group": "openrtb"
   }
 ];

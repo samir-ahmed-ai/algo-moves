@@ -102,17 +102,6 @@ export function MobileDeck({
   const done = pIdx >= blocks.length;
   const block = done ? null : blocks[pIdx];
   const card = block?.cards[cIdx];
-  const deckStats = useMemo(() => {
-    let totalCards = 0;
-    const startsByProblem = blocks.map((b) => {
-      const start = totalCards;
-      totalCards += b.cards.length;
-      return start;
-    });
-    return { totalCards, startsByProblem };
-  }, [blocks]);
-  const problemStartIdx = deckStats.startsByProblem[pIdx] ?? 0;
-  const globalCardIndex = done ? deckStats.totalCards : problemStartIdx + cIdx + 1;
 
   // Fresh shuffle per problem so Q1 order does not repeat across the deck.
   useEffect(() => {
@@ -249,12 +238,9 @@ export function MobileDeck({
           </button>
           <div className="min-w-0 flex-1">
             <div className="truncate text-[13px] font-semibold text-ink">{topic.title}</div>
-            <div className="text-[11px] text-ink3">{done ? 'Topic complete' : `Problem ${pIdx + 1} of ${blocks.length}`}</div>
-            {!done && (
-              <div className="text-[10px] text-ink3">
-                Card {globalCardIndex} of {deckStats.totalCards} · {block?.cards[cIdx]?.kind ?? 'card'}
-              </div>
-            )}
+            <div className="text-[11px] text-ink3">
+              {done ? 'Topic complete' : `Problem ${pIdx + 1} of ${blocks.length}`}
+            </div>
           </div>
           {headerRight}
         </div>
@@ -299,6 +285,8 @@ export function MobileDeck({
           {done ? (
             <CompleteScreen
               topicTitle={topic.title}
+              totalQuiz={deck.totalQuiz}
+              problemCount={blocks.length}
               onRestart={restart}
               onExit={handleFinishExit}
               onNextCategory={nextTopic ? () => onGoTopic(nextTopic.id) : undefined}

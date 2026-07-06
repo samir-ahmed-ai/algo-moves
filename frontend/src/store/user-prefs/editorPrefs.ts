@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { readStorageJson } from '@/store/persistence/storage';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { createSyncStore } from '@/store/createSyncStore';
-import { clampSplitPct } from '@/lib/editor/splitLayout';
+import { clampCodeSplitPct } from '@/lib/editor/resizeSplit';
 
 export interface EditorPrefs {
   vim: boolean;
@@ -21,7 +21,7 @@ function load(): EditorPrefs {
   return {
     vim: Boolean(data.vim),
     wrap: Boolean(data.wrap),
-    splitPct: clampSplitPct(typeof data.splitPct === 'number' ? data.splitPct : DEFAULTS.splitPct),
+    splitPct: clampCodeSplitPct(typeof data.splitPct === 'number' ? data.splitPct : DEFAULTS.splitPct),
   };
 }
 
@@ -39,7 +39,7 @@ export function useEditorPrefs(): [EditorPrefs, (patch: Partial<EditorPrefs>) =>
   const current = store.use();
   const set = useCallback((patch: Partial<EditorPrefs>) => {
     const next = { ...store.get(), ...patch };
-    if (patch.splitPct !== undefined) next.splitPct = clampSplitPct(patch.splitPct);
+    if (patch.splitPct !== undefined) next.splitPct = clampCodeSplitPct(patch.splitPct);
     store.set(next);
   }, []);
   return [current, set];

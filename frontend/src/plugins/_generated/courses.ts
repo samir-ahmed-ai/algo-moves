@@ -4,6 +4,8 @@ import type { CourseDef } from '@/content/types';
 
 export const GO_COURSE_ID = "go-senior";
 
+export const OPENRTB_COURSE_ID = "openrtb-eng";
+
 export const IMPORTED_COURSES: CourseDef[] = [
   {
     "id": "lib-graph",
@@ -2869,6 +2871,339 @@ export const GO_COURSES: CourseDef[] = [
   }
 ];
 
+export const OPENRTB_COURSES: CourseDef[] = [
+  {
+    "id": "openrtb-eng",
+    "title": "OpenRTB & Ad Platform Engineering",
+    "summary": "Hands-on prep for Golang ads-platform roles — programmatic ecosystem, OpenRTB 2.6 bid request/response, bidder & exchange implementation, tracking, creatives, and at-scale system design. Each concept ships an advanced quiz, a Go coding drill, and a design question.",
+    "icon": "Megaphone",
+    "topics": [
+      {
+        "id": "openrtb-eng-ad-tech-foundations",
+        "title": "Ad Tech Foundations",
+        "summary": "4 OpenRTB ad tech foundations concepts.",
+        "items": [
+          {
+            "id": "ortb-foundations-ecosystem",
+            "kind": "problem",
+            "pluginId": "ortb-foundations-ecosystem",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-foundations-rtb-flow",
+            "kind": "problem",
+            "pluginId": "ortb-foundations-rtb-flow",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-foundations-auction-types",
+            "kind": "problem",
+            "pluginId": "ortb-foundations-auction-types",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-foundations-supply-chain",
+            "kind": "problem",
+            "pluginId": "ortb-foundations-supply-chain",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-bid-request",
+        "title": "OpenRTB BidRequest",
+        "summary": "4 OpenRTB openrtb bidrequest concepts.",
+        "items": [
+          {
+            "id": "ortb-bid-request-object",
+            "kind": "problem",
+            "pluginId": "ortb-bid-request-object",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bid-request-imp",
+            "kind": "problem",
+            "pluginId": "ortb-bid-request-imp",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bid-request-site-app",
+            "kind": "problem",
+            "pluginId": "ortb-bid-request-site-app",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bid-request-26-fields",
+            "kind": "problem",
+            "pluginId": "ortb-bid-request-26-fields",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-bid-response",
+        "title": "BidResponse & Settlement",
+        "summary": "4 OpenRTB bidresponse & settlement concepts.",
+        "items": [
+          {
+            "id": "ortb-bid-response-object",
+            "kind": "problem",
+            "pluginId": "ortb-bid-response-object",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bid-response-bid",
+            "kind": "problem",
+            "pluginId": "ortb-bid-response-bid",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bid-response-settlement",
+            "kind": "problem",
+            "pluginId": "ortb-bid-response-settlement",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bid-response-nobid",
+            "kind": "problem",
+            "pluginId": "ortb-bid-response-nobid",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-bidder-in-go",
+        "title": "Build a Bidder in Go",
+        "summary": "4 OpenRTB build a bidder in go concepts.",
+        "items": [
+          {
+            "id": "ortb-bidder-server",
+            "kind": "problem",
+            "pluginId": "ortb-bidder-server",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bidder-decision",
+            "kind": "problem",
+            "pluginId": "ortb-bidder-decision",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bidder-concurrency",
+            "kind": "problem",
+            "pluginId": "ortb-bidder-concurrency",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-bidder-benchmark",
+            "kind": "problem",
+            "pluginId": "ortb-bidder-benchmark",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-exchange-auction",
+        "title": "Ad Exchange & Auction",
+        "summary": "4 OpenRTB ad exchange & auction concepts.",
+        "items": [
+          {
+            "id": "ortb-exchange-fanout",
+            "kind": "problem",
+            "pluginId": "ortb-exchange-fanout",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-exchange-hedged",
+            "kind": "problem",
+            "pluginId": "ortb-exchange-hedged",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-exchange-auction",
+            "kind": "problem",
+            "pluginId": "ortb-exchange-auction",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-exchange-floors",
+            "kind": "problem",
+            "pluginId": "ortb-exchange-floors",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-reverse-proxy",
+        "title": "Reverse Proxy & Ad Serving",
+        "summary": "4 OpenRTB reverse proxy & ad serving concepts.",
+        "items": [
+          {
+            "id": "ortb-serving-reverse-proxy",
+            "kind": "problem",
+            "pluginId": "ortb-serving-reverse-proxy",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-serving-win-billing",
+            "kind": "problem",
+            "pluginId": "ortb-serving-win-billing",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-serving-markup",
+            "kind": "problem",
+            "pluginId": "ortb-serving-markup",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-serving-cdn",
+            "kind": "problem",
+            "pluginId": "ortb-serving-cdn",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-tracking",
+        "title": "Clicks, Impressions & Tracking",
+        "summary": "4 OpenRTB clicks, impressions & tracking concepts.",
+        "items": [
+          {
+            "id": "ortb-tracking-impressions",
+            "kind": "problem",
+            "pluginId": "ortb-tracking-impressions",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-tracking-clicks",
+            "kind": "problem",
+            "pluginId": "ortb-tracking-clicks",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-tracking-macros",
+            "kind": "problem",
+            "pluginId": "ortb-tracking-macros",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-tracking-reconciliation",
+            "kind": "problem",
+            "pluginId": "ortb-tracking-reconciliation",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-creatives-tags",
+        "title": "Creatives & Ad Tags",
+        "summary": "3 OpenRTB creatives & ad tags concepts.",
+        "items": [
+          {
+            "id": "ortb-creative-banner",
+            "kind": "problem",
+            "pluginId": "ortb-creative-banner",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-creative-vast",
+            "kind": "problem",
+            "pluginId": "ortb-creative-vast",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-creative-native",
+            "kind": "problem",
+            "pluginId": "ortb-creative-native",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      },
+      {
+        "id": "openrtb-eng-scale-privacy",
+        "title": "Scale, Privacy & System Design",
+        "summary": "6 OpenRTB scale, privacy & system design concepts.",
+        "items": [
+          {
+            "id": "ortb-scale-pacing",
+            "kind": "problem",
+            "pluginId": "ortb-scale-pacing",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-scale-frequency-cap",
+            "kind": "problem",
+            "pluginId": "ortb-scale-frequency-cap",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-scale-logging",
+            "kind": "problem",
+            "pluginId": "ortb-scale-logging",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-privacy-consent",
+            "kind": "problem",
+            "pluginId": "ortb-privacy-consent",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-privacy-identity",
+            "kind": "problem",
+            "pluginId": "ortb-privacy-identity",
+            "status": "todo",
+            "estimatedMinutes": 15
+          },
+          {
+            "id": "ortb-design-capstone",
+            "kind": "problem",
+            "pluginId": "ortb-design-capstone",
+            "status": "todo",
+            "estimatedMinutes": 15
+          }
+        ]
+      }
+    ]
+  }
+];
+
 export interface GoBrowseCategory {
   id: string;
   title: string;
@@ -2947,5 +3282,79 @@ export const GO_BROWSE_CATEGORIES: GoBrowseCategory[] = [
     "summary": "5 senior system design in go concepts.",
     "icon": "Blocks",
     "courseTopicId": "go-senior-design"
+  }
+];
+
+export interface OpenRTBBrowseCategory {
+  id: string;
+  title: string;
+  summary: string;
+  icon: string;
+  courseTopicId: string;
+}
+
+export const OPENRTB_BROWSE_CATEGORIES: OpenRTBBrowseCategory[] = [
+  {
+    "id": "openrtb-eng-ad-tech-foundations",
+    "title": "Ad Tech Foundations",
+    "summary": "4 OpenRTB ad tech foundations concepts.",
+    "icon": "Layers",
+    "courseTopicId": "openrtb-eng-ad-tech-foundations"
+  },
+  {
+    "id": "openrtb-eng-bid-request",
+    "title": "OpenRTB BidRequest",
+    "summary": "4 OpenRTB openrtb bidrequest concepts.",
+    "icon": "ArrowRight",
+    "courseTopicId": "openrtb-eng-bid-request"
+  },
+  {
+    "id": "openrtb-eng-bid-response",
+    "title": "BidResponse & Settlement",
+    "summary": "4 OpenRTB bidresponse & settlement concepts.",
+    "icon": "ArrowLeft",
+    "courseTopicId": "openrtb-eng-bid-response"
+  },
+  {
+    "id": "openrtb-eng-bidder-in-go",
+    "title": "Build a Bidder in Go",
+    "summary": "4 OpenRTB build a bidder in go concepts.",
+    "icon": "Code",
+    "courseTopicId": "openrtb-eng-bidder-in-go"
+  },
+  {
+    "id": "openrtb-eng-exchange-auction",
+    "title": "Ad Exchange & Auction",
+    "summary": "4 OpenRTB ad exchange & auction concepts.",
+    "icon": "Gavel",
+    "courseTopicId": "openrtb-eng-exchange-auction"
+  },
+  {
+    "id": "openrtb-eng-reverse-proxy",
+    "title": "Reverse Proxy & Ad Serving",
+    "summary": "4 OpenRTB reverse proxy & ad serving concepts.",
+    "icon": "Server",
+    "courseTopicId": "openrtb-eng-reverse-proxy"
+  },
+  {
+    "id": "openrtb-eng-tracking",
+    "title": "Clicks, Impressions & Tracking",
+    "summary": "4 OpenRTB clicks, impressions & tracking concepts.",
+    "icon": "MousePointer",
+    "courseTopicId": "openrtb-eng-tracking"
+  },
+  {
+    "id": "openrtb-eng-creatives-tags",
+    "title": "Creatives & Ad Tags",
+    "summary": "3 OpenRTB creatives & ad tags concepts.",
+    "icon": "FileCode",
+    "courseTopicId": "openrtb-eng-creatives-tags"
+  },
+  {
+    "id": "openrtb-eng-scale-privacy",
+    "title": "Scale, Privacy & System Design",
+    "summary": "6 OpenRTB scale, privacy & system design concepts.",
+    "icon": "Scale",
+    "courseTopicId": "openrtb-eng-scale-privacy"
   }
 ];

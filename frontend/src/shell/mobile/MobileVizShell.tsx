@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import type { ProblemPlugin } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
@@ -8,25 +8,33 @@ import { FlipFrame } from '@/components/shared/FlipFrame';
 import { VizFitBox } from '@/components/shared/vizFit';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
-export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
+export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; onWatched?: () => void }) {
   const { input, baseFrames, player, frame } = usePluginFrames(plugin);
   const View = plugin.View;
   const caption = (frame?.move?.note?.trim() || frame?.move?.caption?.trim()) ?? '';
   const hasFrames = baseFrames.length > 0;
-  const frameType = frame?.move?.type ?? 'frame';
   const stepLabel = hasFrames ? `${player.index + 1}/${player.total}` : '0/0';
   // Reserve the caption slot for the whole run — frames without a note must
   // not collapse it and jump the transport card's height every step.
   const anyCaption = baseFrames.some((f) => f.move?.note?.trim() || f.move?.caption?.trim());
   const hasNext = hasFrames && player.index < player.total - 1;
   const hasPrev = player.index > 0;
-  const railToneClass = player.isPlaying ? 'text-accent' : 'text-ink3';
+  const isAtEnd = hasFrames && player.index === player.total - 1;
+  const onWatchedRef = useRef(onWatched);
+  onWatchedRef.current = onWatched;
 
   useEffect(() => {
     if (!hasFrames) return;
     if (baseFrames.length > 1 && !player.isPlaying) player.togglePlay();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-play once per problem
   }, [plugin.meta.id]);
+
+  // Fire onWatched once the last frame is reached and playback stops.
+  useEffect(() => {
+    if (isAtEnd && !player.isPlaying) {
+      onWatchedRef.current?.();
+    }
+  }, [isAtEnd, player.isPlaying]);
 
   if (!input || !frame) {
     return (
@@ -41,7 +49,13 @@ export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
 
   return (
     <div className="mobile-viz-shell flex min-h-0 flex-1 flex-col">
-      <div className="mobile-viz-board min-h-0 flex-1 overflow-hidden rounded-2xl border border-edge/60 bg-panel2/30 p-1" data-noswipe>
+      <div
+        className={cn(
+          'mobile-viz-board min-h-0 flex-1 overflow-hidden rounded-2xl border bg-panel2/30 p-1 transition-colors duration-300',
+          isAtEnd ? 'border-good/60 bg-goodbg/10' : 'border-edge/60',
+        )}
+        data-noswipe
+      >
         <VizFitBox className="h-full min-h-0 w-full" remeasureKey={`${plugin.meta.id}-${player.index}-${frame.move.type}`}>
           <FlipFrame frameKey={player.index} resetKey={plugin.meta.id}>
             <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
@@ -79,7 +93,24 @@ export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
           >
             <SkipForward className="h-4 w-4" />
           </button>
-          <span className={cn('mobile-viz-chip ml-auto shrink-0', railToneClass)}>{stepLabel}</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span
+              className={cn(
+                'mobile-viz-chip',
+                isAtEnd ? 'text-good' : player.isPlaying ? 'text-accent' : 'text-ink3',
+              )}
+            >
+              {stepLabel}
+            </span>
+            <button
+              type="button"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-panel2/80 text-ink3 transition-colors hover:bg-panel2"
+              onClick={player.reset}
+              aria-label="Replay from start"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
         <input
           type="range"
@@ -91,30 +122,15 @@ export function MobileVizShell({ plugin }: { plugin: ProblemPlugin }) {
           className="mobile-viz-slider nodrag mt-2 h-1 w-full cursor-pointer accent-accent"
           aria-label="Replay step"
         />
-        <div className="mt-2 flex min-w-0 items-center gap-1.5">
-          <span className="mobile-viz-chip">{frameType}</span>
-          <span className={cn('mobile-viz-chip', railToneClass)}>{player.isPlaying ? 'Playing' : 'Paused'}</span>
-          <span className="ml-auto shrink-0 text-[11px] text-ink3">
-            {hasFrames ? `${frame.move.type}` : 'No frame'}
-          </span>
-        </div>
-        {anyCaption ? (
+        {anyCaption && (
           <p
-            className="mobile-viz-caption mt-2 font-mono"
+            className="mobile-viz-caption mt-2"
             key={`${player.index}-${frame?.move?.type ?? 'frame'}`}
             title={caption || undefined}
           >
-            {caption || ' '}
+            {caption || '\u00a0'}
           </p>
-        ) : null}
-        <button
-          type="button"
-          className="mt-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-panel2/80 text-ink3 transition-colors hover:bg-panel2"
-          onClick={player.reset}
-          aria-label="Replay from start"
-        >
-          <RotateCcw className="h-4 w-4" />
-        </button>
+        )}
       </div>
     </div>
   );

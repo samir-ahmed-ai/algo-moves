@@ -4,7 +4,9 @@ import { ProblemPanelBody } from '../problem/ProblemPanelBody';
 import { VizPanelBody } from '../visualize/VizPanelBody';
 import { CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
 
-import { TransportBar, nodeIconGlyph } from '@/shell/canvas';
+import { TransportBar, nodeIconGlyph, useCanvasStatic } from '@/shell/canvas';
+import { cn } from '@/lib/utils/cn';
+import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 function WorkbenchSectionHeader({
   label,
   icon,
@@ -33,15 +35,23 @@ export function WorkbenchPanelBody({
   showBigO?: boolean;
   onBigOOpenChange?: (open: boolean) => void;
 }) {
+  const { item } = useCanvasStatic();
+  const conceptCourse = isConceptCourse(item);
+
   return (
-    <div className="workbench grid min-h-0 flex-1 grid-cols-[min(380px,34%)_1fr] overflow-hidden">
+    <div
+      className={cn(
+        'workbench grid min-h-0 flex-1 overflow-hidden',
+        conceptCourse ? 'grid-cols-[min(440px,42%)_1fr]' : 'grid-cols-[min(380px,34%)_1fr]',
+      )}
+    >
       <aside className="ws-scroll min-h-0 overflow-y-auto border-r border-edge/50 py-[var(--node-py,0.5625rem)]">
         <ProblemPanelBody />
       </aside>
       <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
         <section className="flex min-h-0 flex-[1.1] flex-col overflow-hidden border-b border-edge/50">
           <WorkbenchSectionHeader label="Visualizer" icon={<Network className={nodeIconGlyph} />} />
-          <div className="nowheel min-h-0 flex-1 overflow-auto">
+          <div className="nowheel flex min-h-0 flex-1 flex-col overflow-hidden">
             <VizPanelBody showBigO={showBigO} onBigOOpenChange={onBigOOpenChange} showTransport={false} />
           </div>
           <div className="nodrag flex shrink-0 justify-center border-t border-edge/40 bg-panel/80 px-3 py-1.5 backdrop-blur">

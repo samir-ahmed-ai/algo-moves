@@ -2,7 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { CodeMirrorEditor } from './CodeMirrorEditor';
 import { diffChangedLines } from '@/lib/code';
-import { clampSplitPct, SPLIT_MAX, SPLIT_MIN } from '@/lib/editor/splitLayout';
+import {
+  CODE_SPLIT_MAX,
+  CODE_SPLIT_MIN,
+} from '@/lib/editor/resizeSplit';
+import { useResizeSplit } from '@/hooks/useResizeSplit';
 import { cn } from '@/lib/utils/cn';
 import { nodeText } from '@/design/typography';
 
@@ -38,18 +42,18 @@ export function SplitCodeEditor({
   onDraftChange,
 }: SplitCodeEditorProps) {
   const showLeft = !hideLeft || peekLeft;
-  const [splitPct, setSplitPct] = useState(() => clampSplitPct(splitPctProp));
-  const splitRef = useRef(splitPct);
-  splitRef.current = splitPct;
-  const dragging = useRef(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const leftView = useRef<EditorView | null>(null);
   const rightView = useRef<EditorView | null>(null);
   const syncing = useRef(false);
 
-  useEffect(() => {
-    if (!dragging.current) setSplitPct(clampSplitPct(splitPctProp));
-  }, [splitPctProp]);
+  const { containerRef, splitPct, handleProps } = useResizeSplit({
+    direction: 'horizontal',
+    splitPct: splitPctProp,
+    onSplitPctChange,
+    minPct: CODE_SPLIT_MIN,
+    maxPct: CODE_SPLIT_MAX,
+    defaultPct: 50,
+  });
 
   const syncScroll = useCallback((from: EditorView, to: EditorView | null) => {
     if (!to || syncing.current) return;
@@ -97,37 +101,6 @@ export function SplitCodeEditor({
     return map;
   }, [reference, debouncedDraft, showLeft]);
 
-  const updateSplit = useCallback(
-    (pct: number, persist = false) => {
-      const clamped = clampSplitPct(pct);
-      splitRef.current = clamped;
-      setSplitPct(clamped);
-      if (persist) onSplitPctChange?.(clamped);
-    },
-    [onSplitPctChange],
-  );
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!dragging.current || !containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const pct = ((e.clientX - rect.left) / rect.width) * 100;
-      updateSplit(pct, false);
-    };
-    const onUp = () => {
-      if (dragging.current) {
-        dragging.current = false;
-        onSplitPctChange?.(splitRef.current);
-      }
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, [updateSplit, onSplitPctChange]);
-
   return (
     <div ref={containerRef} className="flex h-full min-h-0 flex-1 gap-0 overflow-hidden rounded-lg border border-edge">
       {showLeft && (
@@ -155,19 +128,10 @@ export function SplitCodeEditor({
             </div>
           </div>
           <div
-            role="separator"
-            aria-orientation="vertical"
-            aria-valuenow={Math.round(splitPct)}
-            aria-valuemin={SPLIT_MIN}
-            aria-valuemax={SPLIT_MAX}
-            title="Drag to resize · double-click to reset"
+            {...handleProps}
             className="nodrag flex w-2 shrink-0 cursor-col-resize items-stretch justify-center px-0.5"
-            onMouseDown={() => {
-              dragging.current = true;
-            }}
-            onDoubleClick={() => updateSplit(50, true)}
           >
-            <div className="split-handle w-px bg-edge transition-colors hover:bg-accent" />
+            <div className="split-handle h-full w-px bg-edge transition-colors hover:bg-accent" />
           </div>
         </>
       )}

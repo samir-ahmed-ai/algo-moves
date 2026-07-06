@@ -7,12 +7,17 @@ import {
   Redo2,
   Users,
   LayoutGrid,
+  Plus,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
+import { nodeIcon } from '@/shell/panels';
 import { usePopoverDismiss } from '../../ui/usePopoverDismiss';
+import { chromeText } from '../../chromeUi';
 import { RADIUS_SHELL } from './nodeui';
 import { SessionBody } from '../collab/collabWidgets';
+import { AlignDropdown } from './CanvasTools';
 
 interface CanvasToolbarProps {
   lock: boolean;
@@ -22,15 +27,21 @@ interface CanvasToolbarProps {
 
 /** Minimal floating toolbar for the standalone freeform canvas. */
 export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps) {
-  const { goHome, canvasHud, present } = useWorkspace();
+  const { goHome, canvasHud, canvasAdd, present, mode } = useWorkspace();
+  const [addOpen, setAddOpen] = useState(false);
   const [collabOpen, setCollabOpen] = useState(false);
+  const addRef = useRef<HTMLDivElement>(null);
   const collabRef = useRef<HTMLDivElement>(null);
 
+  usePopoverDismiss(addRef, addOpen, () => setAddOpen(false));
   usePopoverDismiss(collabRef, collabOpen, () => setCollabOpen(false));
 
   if (present || !canvasHud) return null;
 
   const { snap, setSnap, tools } = canvasHud;
+  const showAdd = mode === 'visualize' && canvasAdd != null;
+  const hasAddItems =
+    (canvasAdd?.addableKinds.length ?? 0) > 0 || (canvasAdd?.addableEffects?.length ?? 0) > 0;
 
   const btnClass =
     'grid h-8 w-8 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink';
@@ -42,6 +53,64 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
         RADIUS_SHELL,
       )}
     >
+      {showAdd && hasAddItems && (
+        <div ref={addRef} className="relative">
+          <button
+            type="button"
+            title="Add panel"
+            aria-label="Add panel"
+            aria-expanded={addOpen}
+            onClick={() => setAddOpen((o) => !o)}
+            className={cn(btnClass, addOpen && 'bg-accentbg text-accent')}
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+          {addOpen && canvasAdd && (
+            <div
+              className={cn(
+                'absolute right-0 top-full z-20 mt-1 max-h-[min(320px,50vh)] w-44 overflow-y-auto border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
+                RADIUS_SHELL,
+              )}
+            >
+              {canvasAdd.addableKinds.map((k) => (
+                <button
+                  key={k.id}
+                  type="button"
+                  onClick={() => {
+                    canvasAdd.onAddKind(k.id);
+                    setAddOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+                    chromeText.sm,
+                  )}
+                >
+                  <span className="grid h-3.5 w-3.5 shrink-0 place-items-center">{nodeIcon(k.id)}</span>
+                  {k.title}
+                </button>
+              ))}
+              {canvasAdd.addableEffects?.map((e) => (
+                <button
+                  key={e.id}
+                  type="button"
+                  onClick={() => {
+                    canvasAdd.onAddEffect?.(e.id);
+                    setAddOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+                    chromeText.sm,
+                  )}
+                >
+                  <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
+                  {e.title}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <button type="button" title="Home" aria-label="Home" onClick={() => goHome()} className={btnClass}>
         <Home className="h-4 w-4" />
       </button>
@@ -68,6 +137,8 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
           </div>
         )}
       </div>
+
+      <span className="mx-0.5 h-5 w-px bg-edge" aria-hidden />
 
       <button
         type="button"
@@ -100,6 +171,15 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
       >
         <Lock className="h-4 w-4" />
       </button>
+
+      {tools.selCount >= 2 && (
+        <AlignDropdown
+          selCount={tools.selCount}
+          onAlign={tools.onAlign}
+          onDistribute={tools.onDistribute}
+          triggerClassName={btnClass}
+        />
+      )}
 
       <span className="mx-0.5 h-5 w-px bg-edge" aria-hidden />
 

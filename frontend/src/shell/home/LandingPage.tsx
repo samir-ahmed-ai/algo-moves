@@ -11,25 +11,32 @@ import {
   GraduationCap,
   Keyboard,
   LayoutGrid,
+  Megaphone,
   Moon,
   Play,
   Smartphone,
-  Sparkles,
   Sun,
   Target,
   Trophy,
 } from 'lucide-react';
-import { catalog, getAllCategories, getTracks, browseBreadcrumbForItem, type Item, type TrackId } from '../../content';
+import {
+  catalog,
+  getAllCategories,
+  getTracks,
+  browseBreadcrumbForItem,
+  type Item,
+  type TrackId,
+} from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { readLastItemId, useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { compactLabel } from '../chromeUi';
 import { cn } from '@/lib/utils/cn';
+import { BrandLogo } from '@/shell/BrandLogo';
 import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import { glyphFor } from '../../content/problemShape';
 import { Chip } from '@/design/components';
 import { TrackGrid } from '../browse/TrackGrid';
-import { VimHeroPreview } from '../vim/ui/VimHeroPreview';
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`;
 
@@ -194,7 +201,7 @@ function FeatureCard({
     <button
       type="button"
       onClick={onClick}
-      className="group flex h-full flex-col items-start gap-2 rounded-[var(--radius)] border border-edge bg-panel/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)]"
+      className="group flex h-full flex-col items-start gap-2 rounded-[var(--radius)] border border-edge bg-panel/60 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)] sm:p-5"
     >
       <span className="grid h-10 w-10 place-items-center rounded-lg bg-accentbg text-accent [&>svg]:h-5 [&>svg]:w-5">
         {icon}
@@ -202,6 +209,81 @@ function FeatureCard({
       <span className="mt-1 font-semibold text-ink">{title}</span>
       <span className="text-sm leading-snug text-ink2">{body}</span>
       <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-medium text-accent">
+        {cta}
+        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+      </span>
+    </button>
+  );
+}
+
+function ModeStrip({
+  onPlay,
+  onVisualize,
+  onLearn,
+  onSwipe,
+  onVim,
+  onGames,
+}: {
+  onPlay: () => void;
+  onVisualize: () => void;
+  onLearn: () => void;
+  onSwipe: () => void;
+  onVim: () => void;
+  onGames: () => void;
+}) {
+  const pills = [
+    { icon: Play, label: 'Play', onClick: onPlay },
+    { icon: Eye, label: 'Visualize', onClick: onVisualize },
+    { icon: GraduationCap, label: 'Learn', onClick: onLearn },
+    { icon: Smartphone, label: 'Swipe', onClick: onSwipe },
+    { icon: Keyboard, label: 'Vim Dojo', onClick: onVim },
+    { icon: Gamepad2, label: 'Games', onClick: onGames },
+  ] as const;
+
+  return (
+    <div className="-mx-1 mt-4 overflow-x-auto pb-1">
+      <div className="flex min-w-min gap-2 px-1">
+        {pills.map(({ icon: Icon, label, onClick }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={onClick}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-1.5 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SpotlightCourseCard({
+  icon,
+  title,
+  body,
+  cta,
+  onClick,
+}: {
+  icon: ReactNode;
+  title: string;
+  body: string;
+  cta: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex flex-col items-start gap-3 rounded-[var(--radius)] border border-edge bg-panel/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)]"
+    >
+      <span className="grid h-11 w-11 place-items-center rounded-lg border border-edge bg-panel2 text-accent [&>svg]:h-5 [&>svg]:w-5">
+        {icon}
+      </span>
+      <span className="font-semibold text-ink">{title}</span>
+      <span className="text-sm leading-snug text-ink2">{body}</span>
+      <span className="mt-auto inline-flex items-center gap-1 pt-1 text-sm font-medium text-accent">
         {cta}
         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
       </span>
@@ -220,12 +302,12 @@ function WorkspacePreview({ featured }: { featured: Item[] }) {
           <span className="h-2.5 w-2.5 rounded-full opacity-70" style={{ background: 'var(--edge-active)' }} />
           <span className="h-2.5 w-2.5 rounded-full bg-good/70" />
         </span>
-        <span className="ml-1 flex items-center gap-1.5 font-mono text-xs text-ink3">
-          <Eye className="h-3 w-3" /> {nodes[0]?.title ?? 'Algorithm'} · Visualize
+        <span className="ml-1 flex min-w-0 items-center gap-1.5 truncate font-mono text-xs text-ink3">
+          <Eye className="h-3 w-3 shrink-0" /> {nodes[0]?.title ?? 'Algorithm'} · Visualize
         </span>
       </div>
       <div
-        className="relative grid flex-1 grid-cols-3 gap-3 p-4 sm:p-5"
+        className="relative grid flex-1 grid-cols-1 gap-2 p-3 xl:grid-cols-3 xl:gap-3 xl:p-5"
         style={{
           backgroundImage:
             'radial-gradient(circle at 1px 1px, var(--edge) 1px, transparent 0)',
@@ -238,17 +320,20 @@ function WorkspacePreview({ featured }: { featured: Item[] }) {
             <div
               key={item.id}
               className={cn(
-                'relative flex flex-col items-center gap-2 rounded-md border border-edge bg-panel px-2 py-3',
+                'relative flex flex-row items-center gap-2.5 rounded-md border border-edge bg-panel px-2.5 py-2',
+                'xl:flex-col xl:items-center xl:gap-2 xl:px-2 xl:py-3',
                 i === 1 && 'border-accent/60 shadow-[0_0_0_1px_var(--accent-bg)]',
               )}
             >
               <span className="absolute -top-1.5 left-2 font-mono text-[9px] text-ink3">{i + 1}</span>
               {markup ? (
-                <Glyph markup={markup} className="h-8 w-8 text-ink2" />
+                <Glyph markup={markup} className="h-6 w-6 shrink-0 text-ink2 xl:h-8 xl:w-8" />
               ) : (
-                <LayoutGrid className="h-8 w-8 text-ink3" />
+                <LayoutGrid className="h-6 w-6 shrink-0 text-ink3 xl:h-8 xl:w-8" />
               )}
-              <span className="line-clamp-1 text-center text-[11px] leading-tight text-ink3">{item.title}</span>
+              <span className="line-clamp-1 min-w-0 text-[11px] leading-tight text-ink3 xl:text-center">
+                {item.title}
+              </span>
             </div>
           );
         })}
@@ -309,8 +394,8 @@ function LandingSplit({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16',
-        reverse && '[&>*:first-child]:lg:order-2 [&>*:last-child]:lg:order-1',
+        'grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-10 lg:gap-12 xl:gap-16',
+        reverse && '[&>*:first-child]:md:order-2 [&>*:last-child]:md:order-1',
         className,
       )}
     >
@@ -458,6 +543,19 @@ export function LandingPage() {
     return { mastered, attempted, bestStreak };
   }, [problems, progress]);
 
+  const goConceptCount = useMemo(
+    () => catalog.items.filter((i) => i.pluginId?.startsWith('go-')).length,
+    [],
+  );
+  const openrtbConceptCount = useMemo(
+    () => catalog.items.filter((i) => i.pluginId?.startsWith('ortb-')).length,
+    [],
+  );
+  const prepProblemCount = useMemo(
+    () => problems.filter((i) => i.id.startsWith('prep-')).length,
+    [problems],
+  );
+
   const [lastId] = useState(() => readLastItemId());
   const lastItem = lastId ? catalog.getItem(lastId) : undefined;
   const firstProblem = problems[0];
@@ -485,9 +583,7 @@ export function LandingPage() {
       <header className="sticky top-0 z-20 border-b border-edge bg-bg/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3 sm:px-8">
           <div className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-white">
-              <Sparkles className="h-4 w-4" />
-            </span>
+            <BrandLogo />
             <span className="font-semibold tracking-tight">Algo Moves</span>
           </div>
           <div className="ml-auto flex items-center gap-1.5">
@@ -557,6 +653,14 @@ export function LandingPage() {
                   {compactLabel('Browse tracks', 'Browse', isMobile)}
                 </button>
               </div>
+              <ModeStrip
+                onPlay={() => startIn('play')}
+                onVisualize={() => startIn('visualize')}
+                onLearn={() => startIn('learn')}
+                onSwipe={() => enterMobile()}
+                onVim={() => enterVim()}
+                onGames={() => enterGames()}
+              />
             </SplitCopy>
             <SplitMedia>
               <WorkspacePreview featured={featured} />
@@ -565,118 +669,46 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* philosophy */}
+      {/* spotlight courses */}
       <LandingSection tone="muted">
-        <LandingSplit reverse>
-          <SplitCopy
-            eyebrow="Method"
-            title="Learn like AI trains"
-            description="Try, get feedback, repeat. Wrong answers restart the run — shuffle and streak until you master the pattern."
+        <SectionHeading
+          eyebrow="Specialized tracks"
+          title="Go deep with expert-level courses"
+          description="Senior Go engineering, OpenRTB ad platforms, and a full interview prep library — each with quizzes, code drills, and design questions."
+        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <SpotlightCourseCard
+            icon={<Code2 />}
+            title="Go — Senior Developer"
+            body={`${goConceptCount} concepts · concurrency, memory, generics, system design`}
+            cta="Open track"
+            onClick={() => browseTrack('go')}
           />
-          <SplitMedia>
-            <img
-              src={asset('learning-loop.svg')}
-              alt="The learning loop: watch, quiz, restart on wrong, master"
-              className={FRAMED_MEDIA}
-              width={800}
-              height={420}
-              loading="lazy"
-            />
-          </SplitMedia>
-        </LandingSplit>
+          <SpotlightCourseCard
+            icon={<Megaphone />}
+            title="OpenRTB & Ad Platform Engineering"
+            body={`${openrtbConceptCount} concepts · bidder, exchange, ad serving, privacy`}
+            cta="Open course"
+            onClick={() => browseTrack('openrtb')}
+          />
+          <SpotlightCourseCard
+            icon={<Target />}
+            title="Interview Preparation"
+            body={`${prepProblemCount} hand-authored problems across data structures & algorithms`}
+            cta="Browse"
+            onClick={() => browseTrack('interview-prep')}
+          />
+        </div>
       </LandingSection>
 
-      {/* vim dojo — compact promo */}
-      <LandingSection tone="muted" className="!py-8 sm:!py-10">
-        <button
-          type="button"
-          onClick={() => enterVim()}
-          className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)] sm:gap-5 sm:p-5"
-        >
-          <VimHeroPreview />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Keyboard mastery</p>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink sm:text-2xl">Vim Dojo</h2>
-            <p className="mt-1.5 text-sm leading-snug text-ink2">
-              Maze puzzles that teach h/j/k/l, words, finds, and jumps — no mouse.
-            </p>
-            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent">
-              Enter the Dojo
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </span>
-          </div>
-        </button>
-      </LandingSection>
-
-      {/* games — two-player arcade promo */}
-      <LandingSection className="!py-8 sm:!py-10">
-        <button
-          type="button"
-          onClick={() => enterGames()}
-          className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)] sm:gap-5 sm:p-5"
-        >
-          <span className="grid h-20 w-20 shrink-0 place-items-center rounded-[var(--radius)] border border-edge bg-accentbg sm:h-24 sm:w-24">
-            <span className="grid grid-cols-2 gap-1.5 text-2xl leading-none">
-              <span>🎯</span>
-              <span>✊</span>
-              <span>⚡</span>
-              <span>🧠</span>
-            </span>
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Play together</p>
-            <h2 className="mt-1 flex items-center gap-2 text-xl font-semibold tracking-tight text-ink sm:text-2xl">
-              <Gamepad2 className="h-5 w-5 text-accent" /> Two-player games
-            </h2>
-            <p className="mt-1.5 text-sm leading-snug text-ink2">
-              Number Duel, Rock-Paper-Scissors, Tic-Tac-Toe and more — share a room code and play from two
-              phones or iPads, in real time.
-            </p>
-            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent">
-              Start a room
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </span>
-          </div>
-        </button>
-      </LandingSection>
-
-      {/* mobile preview */}
-      <LandingSection>
-        <LandingSplit>
-          <SplitMedia>
-            <img
-              src={asset('mobile-swipe-deck.svg')}
-              alt="Swipe mode mobile deck for algorithm drilling"
-              className={cn(FRAMED_MEDIA, 'max-w-lg')}
-              width={800}
-              height={420}
-              loading="lazy"
-            />
-          </SplitMedia>
-          <SplitCopy
-            eyebrow="Mobile"
-            title="Drill on the go"
-            description="Swipe through animate, quiz, and rebuild cards — built for quick reps between meetings or on the commute."
-          >
-            <button
-              type="button"
-              onClick={() => enterMobile()}
-              className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
-            >
-              <Smartphone className="h-4 w-4" />
-              Open Swipe mode
-            </button>
-          </SplitCopy>
-        </LandingSplit>
-      </LandingSection>
-
+      {/* stats */}
       <LandingSection>
         <SectionHeading
           eyebrow="Progress"
           title="Your library at a glance"
           description="Tracks, categories, and problems — plus how far you've pushed your streak."
         />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:items-stretch lg:grid-cols-6">
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 sm:items-stretch">
           <StatCard icon={<BookOpen />} value={getTracks().length} label="Tracks" />
           <StatCard icon={<LayoutGrid />} value={getAllCategories().length} label="Categories" />
           <StatCard icon={<Code2 />} value={problems.length} label="Problems" />
@@ -686,62 +718,22 @@ export function LandingPage() {
         </div>
       </LandingSection>
 
-      {lastItem ? (
-        <LandingSection tone="muted">
-          <SectionHeading align="start" title="Continue where you left off" />
-          <button
-            type="button"
-            onClick={() => openItem(lastItem.id)}
-            className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)] sm:p-5"
-          >
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
-              {glyphFor(lastItem) ? (
-                <Glyph markup={glyphFor(lastItem)!} className="h-8 w-8 transition-colors group-hover:text-accent" />
-              ) : (
-                <LayoutGrid className="h-7 w-7" />
-              )}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="truncate font-semibold text-ink">{lastItem.title}</span>
-                {lastItem.difficulty && (
-                  <Chip tone={lastItem.difficulty === 'Easy' ? 'good' : lastItem.difficulty === 'Hard' ? 'bad' : 'accent'}>
-                    {lastItem.difficulty}
-                  </Chip>
-                )}
-                {statFor(progress, lastItem.id).mastered && (
-                  <Trophy className="h-4 w-4 text-good" aria-label="mastered" />
-                )}
-              </div>
-              <p className="mt-0.5 truncate text-xs text-ink3">
-                {lastBrowseCrumb?.track?.title}
-                {lastBrowseCrumb?.category ? ` › ${lastBrowseCrumb.category.title}` : ''}
-              </p>
-            </div>
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white">
-              Resume
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </span>
-          </button>
-        </LandingSection>
-      ) : null}
-
       <LandingSection id="courses" className="scroll-mt-16">
         <SectionHeading
           eyebrow="Catalog"
-          title="Browse by track"
-          description="Pick Data Structures, Algorithms, Design, or browse everything in Interview Preparation."
+          title="Browse all tracks"
+          description="Data Structures, Algorithms, Design, Go, and the full Interview Preparation library."
         />
         <TrackGrid onPick={browseTrack} />
       </LandingSection>
 
-      <LandingSection bordered={false}>
+      <LandingSection tone="muted">
         <SectionHeading
           eyebrow="Modes"
-          title="Five ways to play & learn"
-          description="Step through problems on a focused page, learn in the studio, drill in Swipe mode, train Vim motions, or challenge your partner in two-player games."
+          title="Six ways to play & learn"
+          description="Step through problems, learn in the studio, drill in Swipe mode, train Vim motions, or challenge your partner in two-player games."
         />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-stretch lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:items-stretch lg:grid-cols-6">
           <FeatureCard
             icon={<Play />}
             title="Play"
@@ -787,13 +779,75 @@ export function LandingPage() {
         </div>
       </LandingSection>
 
+      {/* method + continue */}
+      <LandingSection bordered={false}>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start lg:gap-12">
+          {lastItem ? (
+            <div>
+              <SectionHeading align="start" title="Continue where you left off" />
+              <button
+                type="button"
+                onClick={() => openItem(lastItem.id)}
+                className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)] sm:p-5"
+              >
+                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
+                  {glyphFor(lastItem) ? (
+                    <Glyph markup={glyphFor(lastItem)!} className="h-8 w-8 transition-colors group-hover:text-accent" />
+                  ) : (
+                    <LayoutGrid className="h-7 w-7" />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate font-semibold text-ink">{lastItem.title}</span>
+                    {lastItem.difficulty && (
+                      <Chip tone={lastItem.difficulty === 'Easy' ? 'good' : lastItem.difficulty === 'Hard' ? 'bad' : 'accent'}>
+                        {lastItem.difficulty}
+                      </Chip>
+                    )}
+                    {statFor(progress, lastItem.id).mastered && (
+                      <Trophy className="h-4 w-4 text-good" aria-label="mastered" />
+                    )}
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-ink3">
+                    {lastBrowseCrumb?.track?.title}
+                    {lastBrowseCrumb?.category ? ` › ${lastBrowseCrumb.category.title}` : ''}
+                  </p>
+                </div>
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white">
+                  Resume
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </button>
+            </div>
+          ) : null}
+          <div className={cn(!lastItem && 'lg:col-span-2')}>
+            <LandingSplit reverse={!!lastItem}>
+              <SplitCopy
+                eyebrow="Method"
+                title="Learn like AI trains"
+                description="Try, get feedback, repeat. Wrong answers restart the run — shuffle and streak until you master the pattern."
+              />
+              <SplitMedia>
+                <img
+                  src={asset('learning-loop.svg')}
+                  alt="The learning loop: watch, quiz, restart on wrong, master"
+                  className={FRAMED_MEDIA}
+                  width={800}
+                  height={420}
+                  loading="lazy"
+                />
+              </SplitMedia>
+            </LandingSplit>
+          </div>
+        </div>
+      </LandingSection>
+
       {/* footer */}
       <footer className="border-t border-edge bg-panel/20">
         <div className={cn(LANDING_INNER, 'py-8 text-center sm:py-10')}>
           <span className="inline-flex items-center gap-2 font-semibold tracking-tight text-ink">
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-white">
-              <Sparkles className="h-4 w-4" />
-            </span>
+            <BrandLogo />
             Algo Moves
           </span>
           <p className="mx-auto mt-2 max-w-md text-sm text-ink3">

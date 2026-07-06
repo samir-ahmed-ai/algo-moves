@@ -1,7 +1,18 @@
-import { GO_COURSE_ID, GO_BROWSE_CATEGORIES as goBrowseCategories } from '@/plugins/_generated/courses';
+import {
+  GO_COURSE_ID,
+  GO_BROWSE_CATEGORIES as goBrowseCategories,
+  OPENRTB_COURSE_ID,
+  OPENRTB_BROWSE_CATEGORIES as openrtbBrowseCategories,
+} from '@/plugins/_generated/courses';
 
 /** Top-level browse tracks — the entry points for organizing content. */
-export type TrackId = 'data-structures' | 'algorithms' | 'design' | 'go' | 'interview-prep';
+export type TrackId =
+  | 'data-structures'
+  | 'algorithms'
+  | 'design'
+  | 'go'
+  | 'openrtb'
+  | 'interview-prep';
 
 export interface BrowseCategorySource {
   courseId: string;
@@ -222,6 +233,17 @@ const CATEGORIES: BrowseCategory[] = [
       sources: [{ courseId: GO_COURSE_ID, topicIds: [c.courseTopicId] }],
     }),
   ),
+
+  // —— OpenRTB —— one category per OpenRTB course topic, generated from the course.
+  ...openrtbBrowseCategories.map(
+    (c): BrowseCategory => ({
+      id: c.id,
+      title: c.title,
+      summary: c.summary,
+      icon: c.icon,
+      sources: [{ courseId: OPENRTB_COURSE_ID, topicIds: [c.courseTopicId] }],
+    }),
+  ),
 ];
 
 const categoryById = new Map(CATEGORIES.map((c) => [c.id, c]));
@@ -249,6 +271,7 @@ const ALG_IDS = [
 const DESIGN_IDS = ['design'] as const;
 
 const GO_IDS = goBrowseCategories.map((c) => c.id);
+const OPENRTB_IDS = openrtbBrowseCategories.map((c) => c.id);
 
 const TRACKS: BrowseTrack[] = [
   {
@@ -280,11 +303,18 @@ const TRACKS: BrowseTrack[] = [
     categoryIds: [...GO_IDS],
   },
   {
+    id: 'openrtb',
+    title: 'OpenRTB & Ad Platform Engineering',
+    summary: 'Programmatic ads, OpenRTB 2.6, bidder/exchange, tracking, and privacy in Go.',
+    icon: 'Megaphone',
+    categoryIds: [...OPENRTB_IDS],
+  },
+  {
     id: 'interview-prep',
     title: 'Interview Preparation',
     summary: 'Every category — browse all problems by topic.',
     icon: 'Target',
-    categoryIds: [...DS_IDS, ...ALG_IDS, ...DESIGN_IDS, ...GO_IDS],
+    categoryIds: [...DS_IDS, ...ALG_IDS, ...DESIGN_IDS, ...GO_IDS, ...OPENRTB_IDS],
   },
 ];
 

@@ -3,6 +3,8 @@ import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { inputFrameCount, type InputFrameCounts } from '@/lib/canvas';
 import type { SampleInput } from '../../../core/types';
+import { isConceptCourse } from '@/lib/canvas/conceptCourse';
+import { HighlightedCode } from '@/components/code/HighlightedCode';
 import {
   useCanvasStatic,
   stepExampleInput,
@@ -223,9 +225,11 @@ function ExampleInputPicker() {
 
 /** Problem node: statement metadata and sample-input picker. */
 export function ProblemPanelBody() {
-  const { item } = useCanvasStatic();
+  const { item, plugin } = useCanvasStatic();
   const { mode } = useWorkspace();
   const inVisualize = mode === 'visualize';
+  const conceptCourse = isConceptCourse(item);
+  const referenceCode = inVisualize && conceptCourse ? plugin.code?.text : undefined;
   const hasOverview = !!(item.difficulty || item.summary || item.tags.length > 0);
 
   return (
@@ -252,6 +256,18 @@ export function ProblemPanelBody() {
             </div>
           )}
         </Section>
+      )}
+      {referenceCode && (
+        <ControlsAccordion title="Reference code" defaultOpen className="mt-1.5">
+          <div className="overflow-hidden rounded-lg border border-edge bg-[var(--surface-2)]">
+            <HighlightedCode
+              code={referenceCode}
+              lang={plugin.code?.lang ?? 'go'}
+              gutter
+              className="ws-scroll max-h-[420px] overflow-auto p-2 font-mono"
+            />
+          </div>
+        </ControlsAccordion>
       )}
       <ExampleInputPicker />
     </div>

@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
-  Undo2,
-  Redo2,
   AlignStartVertical,
   AlignCenterVertical,
   AlignEndVertical,
@@ -13,6 +11,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
+import { usePopoverDismiss } from '../../ui/usePopoverDismiss';
+import { RADIUS_SHELL } from './nodeui';
 import type { AlignKind } from '../layout/align';
 import type { CanvasToolsProps } from '@/store/workspace';
 
@@ -76,36 +76,101 @@ const ALIGN_BTNS: { kind: AlignKind; title: string; icon: ReactNode }[] = [
   { kind: 'bottom', title: 'Align bottom', icon: <AlignEndHorizontal /> },
 ];
 
-/** Undo / redo and (when selected) align controls — fits inside the compact tool strip. */
-export function CanvasToolButtons({ selCount, onAlign, onDistribute, canUndo, canRedo, onUndo, onRedo }: CanvasToolsProps) {
+const POP_BTN =
+  'grid h-7 w-7 place-items-center rounded-sm text-ink3 transition-colors hover:bg-panel2 hover:text-ink [&_svg]:size-3.5';
+
+export function AlignDropdown({
+  selCount,
+  onAlign,
+  onDistribute,
+  triggerClassName,
+}: Pick<CanvasToolsProps, 'selCount' | 'onAlign' | 'onDistribute'> & {
+  triggerClassName?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  usePopoverDismiss(ref, open, () => setOpen(false));
+
+  const pickAlign = (kind: AlignKind) => {
+    onAlign(kind);
+    setOpen(false);
+  };
+
+  const pickDistribute = (dir: 'h' | 'v') => {
+    onDistribute(dir);
+    setOpen(false);
+  };
+
+  const trigger = triggerClassName ? (
+    <button
+      type="button"
+      title="Align and distribute"
+      aria-label="Align and distribute"
+      aria-expanded={open}
+      onClick={() => setOpen((o) => !o)}
+      className={cn(triggerClassName, open && 'bg-accentbg text-accent')}
+    >
+      <AlignHorizontalDistributeCenter className="h-4 w-4" />
+    </button>
+  ) : (
+    <HudBtn onClick={() => setOpen((o) => !o)} title="Align and distribute" active={open}>
+      <AlignHorizontalDistributeCenter />
+    </HudBtn>
+  );
+
   return (
-    <>
-      <HudBtn onClick={onUndo} title="Undo (⌘Z)" disabled={!canUndo}>
-        <Undo2 />
-      </HudBtn>
-      <HudBtn onClick={onRedo} title="Redo (⌘⇧Z)" disabled={!canRedo}>
-        <Redo2 />
-      </HudBtn>
-      {selCount >= 2 && (
-        <>
-          {ALIGN_BTNS.map((b) => (
-            <HudBtn key={b.kind} onClick={() => onAlign(b.kind)} title={b.title}>
-              {b.icon}
-            </HudBtn>
-          ))}
+    <div ref={ref} className="relative">
+      {trigger}
+      {open && (
+        <div
+          className={cn(
+            'absolute right-0 top-full z-30 mt-1 border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
+            RADIUS_SHELL,
+          )}
+        >
+          <div className="grid grid-cols-3 gap-0.5">
+            {ALIGN_BTNS.map((b) => (
+              <button
+                key={b.kind}
+                type="button"
+                title={b.title}
+                aria-label={b.title}
+                onClick={() => pickAlign(b.kind)}
+                className={POP_BTN}
+              >
+                {b.icon}
+              </button>
+            ))}
+          </div>
           {selCount >= 3 && (
             <>
-              <HudBtn onClick={() => onDistribute('h')} title="Distribute horizontally">
-                <AlignHorizontalDistributeCenter />
-              </HudBtn>
-              <HudBtn onClick={() => onDistribute('v')} title="Distribute vertically">
-                <AlignVerticalDistributeCenter />
-              </HudBtn>
+              <div className="my-0.5 h-px bg-edge" aria-hidden />
+              <div className="grid grid-cols-2 gap-0.5">
+                <button
+                  type="button"
+                  title="Distribute horizontally"
+                  aria-label="Distribute horizontally"
+                  onClick={() => pickDistribute('h')}
+                  className={POP_BTN}
+                >
+                  <AlignHorizontalDistributeCenter />
+                </button>
+                <button
+                  type="button"
+                  title="Distribute vertically"
+                  aria-label="Distribute vertically"
+                  onClick={() => pickDistribute('v')}
+                  className={POP_BTN}
+                >
+                  <AlignVerticalDistributeCenter />
+                </button>
+              </div>
             </>
           )}
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }
 

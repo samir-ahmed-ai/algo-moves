@@ -34,7 +34,8 @@ insert into public.courses (id, title, summary, icon, "group", family, sort_orde
   ('prep-design', 'Design · prep library', '30 Design problems from your prep study collection.', 'Boxes', 'prep', 'Design', 22),
   ('prep-streams-io', 'Streams & I/O · prep library', '12 Streams & I/O problems from your prep study collection.', 'Waves', 'prep', 'Design', 23),
   ('prep-database', 'Database · prep library', '1 Database problems from your prep study collection.', 'Database', 'prep', 'Other', 24),
-  ('go-senior', 'Go — Senior Developer', 'Advanced Go for senior & staff interviews — concurrency, runtime & memory, generics, and system design. Each concept ships an advanced quiz, a coding drill, and a design question.', 'Boxes', 'go-course', 'Go', 25);
+  ('go-senior', 'Go — Senior Developer', 'Advanced Go for senior & staff interviews — concurrency, runtime & memory, generics, and system design. Each concept ships an advanced quiz, a coding drill, and a design question.', 'Boxes', 'go-course', 'Go', 25),
+  ('openrtb-eng', 'OpenRTB & Ad Platform Engineering', 'Hands-on prep for Golang ads-platform roles — programmatic ecosystem, OpenRTB 2.6 bid request/response, bidder & exchange implementation, tracking, creatives, and at-scale system design. Each concept ships an advanced quiz, a Go coding drill, and a design question.', 'Megaphone', 'openrtb', 'Go', 26);
 
 insert into public.story_regions (id, course_id, code_name, title, subtitle, blurb, sort_order) values
   ('archipelago-ripple-shallows', 'graphs', 'Region 1', 'The Ripple Shallows', 'BFS · unweighted paths & reachability', 'Calm shallow water where a dropped stone sends rings outward, one ring per second. That expanding ring IS breadth-first search by levels — the nearest islets light up first.', 1),
@@ -96,7 +97,16 @@ insert into public.topics (id, course_id, title, summary, sort_order) values
   ('go-senior-stdlib-idioms', 'go-senior', 'Standard Library & Idioms', '4 senior standard library & idioms concepts.', 6),
   ('go-senior-performance', 'go-senior', 'Performance & Profiling', '4 senior performance & profiling concepts.', 7),
   ('go-senior-testing', 'go-senior', 'Testing & Reliability', '4 senior testing & reliability concepts.', 8),
-  ('go-senior-design', 'go-senior', 'System Design in Go', '5 senior system design in go concepts.', 9);
+  ('go-senior-design', 'go-senior', 'System Design in Go', '5 senior system design in go concepts.', 9),
+  ('openrtb-eng-ad-tech-foundations', 'openrtb-eng', 'Ad Tech Foundations', '4 OpenRTB ad tech foundations concepts.', 0),
+  ('openrtb-eng-bid-request', 'openrtb-eng', 'OpenRTB BidRequest', '4 OpenRTB openrtb bidrequest concepts.', 1),
+  ('openrtb-eng-bid-response', 'openrtb-eng', 'BidResponse & Settlement', '4 OpenRTB bidresponse & settlement concepts.', 2),
+  ('openrtb-eng-bidder-in-go', 'openrtb-eng', 'Build a Bidder in Go', '4 OpenRTB build a bidder in go concepts.', 3),
+  ('openrtb-eng-exchange-auction', 'openrtb-eng', 'Ad Exchange & Auction', '4 OpenRTB ad exchange & auction concepts.', 4),
+  ('openrtb-eng-reverse-proxy', 'openrtb-eng', 'Reverse Proxy & Ad Serving', '4 OpenRTB reverse proxy & ad serving concepts.', 5),
+  ('openrtb-eng-tracking', 'openrtb-eng', 'Clicks, Impressions & Tracking', '4 OpenRTB clicks, impressions & tracking concepts.', 6),
+  ('openrtb-eng-creatives-tags', 'openrtb-eng', 'Creatives & Ad Tags', '3 OpenRTB creatives & ad tags concepts.', 7),
+  ('openrtb-eng-scale-privacy', 'openrtb-eng', 'Scale, Privacy & System Design', '6 OpenRTB scale, privacy & system design concepts.', 8);
 
 insert into public.problems (id, title, difficulty, summary, source_url, region_id, narrative) values
   ('union-find', 'Union-Find · Kruskal MST', 'Medium', 'Kruskal''s MST driven by a disjoint-set: sort edges by weight, union endpoints in different sets (add to tree), skip same-set edges (cycle).', 'https://leetcode.com/problems/graph-valid-tree/', null, null),
@@ -524,57 +534,185 @@ insert into public.problems (id, title, difficulty, summary, source_url, region_
   ('go-design-worker-pool', 'Design: bounded worker-pool service', 'Hard', 'Bound concurrency with fixed workers or a semaphore, apply backpressure, drain gracefully, and aggregate errors under cancellation.', null, null, null),
   ('go-design-lru-cache', 'Design: concurrent LRU cache', 'Hard', 'Build an O(1) LRU with map + doubly linked list, then make it concurrent via sharding vs a single mutex.', null, null, null),
   ('go-design-graceful-shutdown', 'Design: graceful shutdown', 'Hard', 'Drain in-flight requests on SIGTERM, then close dependencies in the right order.', null, null, null),
-  ('go-design-pipeline', 'Design: cancellable pipeline', 'Hard', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', null, null, null);
+  ('go-design-pipeline', 'Design: cancellable pipeline', 'Hard', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', null, null, null),
+  ('ortb-foundations-ecosystem', 'Programmatic Ad Tech Ecosystem', 'Easy', 'Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.', null, null, null),
+  ('ortb-foundations-rtb-flow', 'The RTB Request-Response Flow', 'Easy', 'Step-by-step journey from page load to impression served, with sub-100 ms timing.', null, null, null),
+  ('ortb-foundations-auction-types', 'First-Price vs Second-Price Auctions', 'Medium', 'Vickrey second-price vs first-price mechanics and why the industry shifted.', null, null, null),
+  ('ortb-foundations-supply-chain', 'ads.txt, sellers.json & SupplyChain Object', 'Medium', 'IAB standards for authorised reseller disclosure and supply path transparency.', null, null, null),
+  ('ortb-bid-request-object', 'Top-Level BidRequest Object', 'Medium', 'The root BidRequest struct: required fields, auction rules, and allowlists.', null, null, null),
+  ('ortb-bid-request-imp', 'Impression Object & Ad Formats', 'Medium', 'The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.', null, null, null),
+  ('ortb-bid-request-site-app', 'Site, App, Device & User Context', 'Medium', 'Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.', null, null, null),
+  ('ortb-bid-request-26-fields', 'OpenRTB 2.6 New Fields', 'Hard', 'Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.', null, null, null),
+  ('ortb-bid-response-object', 'BidResponse & SeatBid Objects', 'Easy', 'Top-level BidResponse and the SeatBid grouping of bids by buyer seat.', null, null, null),
+  ('ortb-bid-response-bid', 'The Bid Object Deep Dive', 'Medium', 'Every field of the OpenRTB Bid object and how exchanges and DSPs use them.', null, null, null),
+  ('ortb-bid-response-settlement', 'Win Notice, Billing Notice & Price Macros', 'Medium', 'How exchanges notify DSPs of wins/billing events and substitute price macros.', null, null, null),
+  ('ortb-bid-response-nobid', 'No-Bid Codes & Timeout Handling', 'Easy', 'HTTP 204 vs JSON no-bid, nbr reason codes, and graceful timeout behaviour.', null, null, null),
+  ('ortb-bidder-server', 'HTTP Bidder Server', 'Medium', 'A minimal OpenRTB bidder: HTTP server, JSON decode, validate, encode response.', null, null, null),
+  ('ortb-bidder-decision', 'Bid Decision Logic & Targeting', 'Medium', 'Evaluating targeting criteria, computing bid price, and respecting floor + budget.', null, null, null),
+  ('ortb-bidder-concurrency', 'Concurrency & Context Deadlines', 'Hard', 'Using context.WithDeadline, goroutines, and safe shared state in a real bidder.', null, null, null),
+  ('ortb-bidder-benchmark', 'Benchmarking the Hot Path', 'Hard', 'go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.', null, null, null),
+  ('ortb-exchange-fanout', 'Fan-Out to N DSPs', 'Hard', 'Sending a BidRequest to N DSPs concurrently and collecting responses within tmax.', null, null, null),
+  ('ortb-exchange-hedged', 'Hedged Requests & Timeout Enforcement', 'Hard', 'Cut tail latency by sending backup requests to slow DSPs; enforce hard deadlines.', null, null, null),
+  ('ortb-exchange-auction', 'First/Second-Price Auction Logic', 'Medium', 'Implement exchange-side auction: collect bids, enforce floor, select winner, compute clearing price.', null, null, null),
+  ('ortb-exchange-floors', 'Floor Prices, Deals & Private Marketplace', 'Medium', 'Publisher floor pricing, PMP deal types, and how deals are modelled in OpenRTB.', null, null, null),
+  ('ortb-serving-reverse-proxy', 'Reverse Proxy with httputil', 'Medium', 'Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.', null, null, null),
+  ('ortb-serving-win-billing', 'Win Notice (nurl) & Billing Notice (burl)', 'Medium', 'Implementing exchange-side nurl + burl dispatch and DSP-side win/billing handlers.', null, null, null),
+  ('ortb-serving-markup', 'Markup Serving & AUCTION_PRICE Macro', 'Medium', 'Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.', null, null, null),
+  ('ortb-serving-cdn', 'CDN Creatives & Creative Auditing', 'Easy', 'Hosting creatives on CDN, the iurl audit snapshot, and brand-safety classification.', null, null, null),
+  ('ortb-tracking-impressions', 'Impression Pixel Firing', 'Easy', 'How 1×1 impression pixels work, deduplication by impression ID, and server implementation.', null, null, null),
+  ('ortb-tracking-clicks', 'Click Redirect Chains', 'Medium', 'Click tracking redirect chain: ad server → DSP tracker → advertiser landing page.', null, null, null),
+  ('ortb-tracking-macros', 'Tracking Macros & Substitution', 'Medium', 'All OpenRTB standard macros, their substitution context, and safe URL encoding.', null, null, null),
+  ('ortb-tracking-reconciliation', 'Billing Reconciliation & Discrepancy', 'Medium', 'Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.', null, null, null),
+  ('ortb-creative-banner', 'Banner HTML & MRAID', 'Easy', 'Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.', null, null, null),
+  ('ortb-creative-vast', 'VAST Video Ad Serving Template', 'Hard', 'VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.', null, null, null),
+  ('ortb-creative-native', 'Native Ad Markup', 'Medium', 'OpenRTB Native spec: request/response JSON, asset types, and rendering by publisher.', null, null, null),
+  ('ortb-scale-pacing', 'Budget Pacing with Token Bucket', 'Hard', 'Token-bucket algorithm for smooth budget pacing per advertiser per time window.', null, null, null),
+  ('ortb-scale-frequency-cap', 'Frequency Capping with Redis', 'Hard', 'Per-user per-campaign impression caps using Redis INCR+EXPIRE or sliding windows.', null, null, null),
+  ('ortb-scale-logging', 'Write-Behind Logging with Kafka', 'Hard', 'Never block the hot path: ring buffer → background writer → Kafka → data warehouse.', null, null, null),
+  ('ortb-privacy-consent', 'GDPR, TCF & Consent Strings', 'Hard', 'TCF 2.2 consent strings in BidRequest, GDPR enforcement in bidders, and GPP/CCPA.', null, null, null),
+  ('ortb-privacy-identity', 'Identity: IDFA, GAID, UID2 & Cookieless', 'Hard', 'Device IDs, cookie-sync, UID2, and identity in a cookieless world.', null, null, null),
+  ('ortb-design-capstone', 'Capstone: Design an Ad Exchange', 'Hard', 'End-to-end design of an ad exchange: 1M RPS, sub-100 ms auctions, impression tracking, billing.', null, null, null);
 
 insert into public.tags (id, label) values
   ('API-design', 'API-design'),
+  ('AUCTION_PRICE', 'AUCTION_PRICE'),
+  ('Bid', 'Bid'),
+  ('BidRequest', 'BidRequest'),
+  ('BidResponse', 'BidResponse'),
+  ('CCPA', 'CCPA'),
+  ('CDN', 'CDN'),
+  ('CPM', 'CPM'),
+  ('CTV', 'CTV'),
+  ('DSP', 'DSP'),
+  ('Director', 'Director'),
+  ('EXPIRE', 'EXPIRE'),
+  ('GAID', 'GAID'),
+  ('GDPR', 'GDPR'),
   ('GMP', 'GMP'),
+  ('GPP', 'GPP'),
+  ('Go', 'Go'),
+  ('HTML', 'HTML'),
+  ('HTTP-204', 'HTTP-204'),
+  ('HTTP-302', 'HTTP-302'),
+  ('HTTP-GET', 'HTTP-GET'),
+  ('HTTP-server', 'HTTP-server'),
+  ('IAS', 'IAS'),
+  ('IDFA', 'IDFA'),
+  ('INCR', 'INCR'),
+  ('IURL', 'IURL'),
+  ('IVT', 'IVT'),
+  ('InLine', 'InLine'),
+  ('JSON', 'JSON'),
+  ('Kafka', 'Kafka'),
+  ('LiveRamp', 'LiveRamp'),
+  ('MRAID', 'MRAID'),
+  ('ModifyResponse', 'ModifyResponse'),
+  ('OpenRTB', 'OpenRTB'),
+  ('OpenRTB-2.6', 'OpenRTB-2.6'),
+  ('OpenRTB-native', 'OpenRTB-native'),
+  ('PMP', 'PMP'),
+  ('RTB', 'RTB'),
+  ('RWMutex', 'RWMutex'),
+  ('Redis', 'Redis'),
+  ('SSP', 'SSP'),
+  ('SafeFrame', 'SafeFrame'),
+  ('SeatBid', 'SeatBid'),
+  ('TCF', 'TCF'),
+  ('UID2', 'UID2'),
+  ('URL-encoding', 'URL-encoding'),
   ('Unwrap', 'Unwrap'),
+  ('VAST', 'VAST'),
+  ('VPAID', 'VPAID'),
+  ('Wrapper', 'Wrapper'),
+  ('ad-tech', 'ad-tech'),
   ('addressability', 'addressability'),
+  ('adm', 'adm'),
+  ('adomain', 'adomain'),
+  ('ads.txt', 'ads.txt'),
   ('aliasing', 'aliasing'),
   ('allocations', 'allocations'),
   ('api-design', 'api-design'),
+  ('app', 'app'),
   ('append', 'append'),
+  ('architecture', 'architecture'),
   ('array', 'array'),
+  ('assets', 'assets'),
+  ('async', 'async'),
+  ('at', 'at'),
+  ('atomic', 'atomic'),
+  ('attribution', 'attribution'),
+  ('auction', 'auction'),
+  ('audience', 'audience'),
+  ('audio', 'audio'),
+  ('audit', 'audit'),
   ('backpressure', 'backpressure'),
   ('backtracking', 'backtracking'),
+  ('banner', 'banner'),
+  ('benchmark', 'benchmark'),
   ('benchmarks', 'benchmarks'),
   ('benchstat', 'benchstat'),
   ('bfs', 'bfs'),
+  ('bid-decision', 'bid-decision'),
+  ('bid-request', 'bid-request'),
+  ('bid-response', 'bid-response'),
+  ('bidder', 'bidder'),
+  ('bidfloor', 'bidfloor'),
+  ('billing', 'billing'),
   ('binary-search', 'binary-search'),
   ('bit-manipulation', 'bit-manipulation'),
   ('bitmask', 'bitmask'),
+  ('brand-safety', 'brand-safety'),
   ('breadth-first-search', 'breadth-first-search'),
+  ('budget', 'budget'),
   ('bufio', 'bufio'),
+  ('burl', 'burl'),
   ('bytes', 'bytes'),
   ('cache', 'cache'),
   ('caching', 'caching'),
+  ('campaign', 'campaign'),
   ('cancellation', 'cancellation'),
+  ('capstone', 'capstone'),
+  ('channel', 'channel'),
   ('channels', 'channels'),
+  ('circuit-breaker', 'circuit-breaker'),
   ('cleanup', 'cleanup'),
+  ('clearing-price', 'clearing-price'),
+  ('click', 'click'),
   ('cmp.Ordered', 'cmp.Ordered'),
   ('coloring', 'coloring'),
   ('comparability', 'comparability'),
   ('comparable', 'comparable'),
   ('composition', 'composition'),
   ('concurrency', 'concurrency'),
+  ('consent', 'consent'),
+  ('consistent-hashing', 'consistent-hashing'),
   ('constraints', 'constraints'),
   ('context', 'context'),
+  ('cookieless', 'cookieless'),
   ('copy', 'copy'),
   ('corpus', 'corpus'),
+  ('creative', 'creative'),
+  ('crid', 'crid'),
+  ('cur', 'cur'),
   ('data-race', 'data-race'),
   ('data-structures', 'data-structures'),
   ('database', 'database'),
+  ('deadline', 'deadline'),
   ('deadlock', 'deadlock'),
+  ('deals', 'deals'),
   ('decorator', 'decorator'),
+  ('deduplication', 'deduplication'),
   ('defer', 'defer'),
   ('dependency-injection', 'dependency-injection'),
   ('design', 'design'),
+  ('device', 'device'),
   ('dfs', 'dfs'),
   ('dijkstra', 'dijkstra'),
+  ('discrepancy', 'discrepancy'),
   ('divide-and-conquer', 'divide-and-conquer'),
   ('dynamic-dispatch', 'dynamic-dispatch'),
   ('dynamic-programming', 'dynamic-programming'),
+  ('eids', 'eids'),
   ('embedding', 'embedding'),
   ('encoding', 'encoding'),
   ('encoding/json', 'encoding/json'),
@@ -585,16 +723,22 @@ insert into public.tags (id, label) values
   ('errors.Is', 'errors.Is'),
   ('errors.Join', 'errors.Join'),
   ('escape-analysis', 'escape-analysis'),
+  ('exchange', 'exchange'),
   ('fakes', 'fakes'),
   ('false-sharing', 'false-sharing'),
   ('fan-in', 'fan-in'),
   ('fan-out', 'fan-out'),
+  ('first-price', 'first-price'),
+  ('floor', 'floor'),
   ('floyd-warshall', 'floyd-warshall'),
   ('fmt.Errorf', 'fmt.Errorf'),
+  ('fraud', 'fraud'),
+  ('frequency-cap', 'frequency-cap'),
   ('fuzzing', 'fuzzing'),
   ('gc', 'gc'),
   ('gcshape', 'gcshape'),
   ('generics', 'generics'),
+  ('geo', 'geo'),
   ('go-cmp', 'go-cmp'),
   ('go-test', 'go-test'),
   ('go1.26', 'go1.26'),
@@ -611,8 +755,16 @@ insert into public.tags (id, label) values
   ('hash-table', 'hash-table'),
   ('hashing', 'hashing'),
   ('heap', 'heap'),
+  ('hedged-requests', 'hedged-requests'),
   ('http', 'http'),
   ('httptest', 'httptest'),
+  ('httputil', 'httputil'),
+  ('idempotent', 'idempotent'),
+  ('identity', 'identity'),
+  ('image', 'image'),
+  ('imp', 'imp'),
+  ('impression', 'impression'),
+  ('impression-counting', 'impression-counting'),
   ('inlining', 'inlining'),
   ('instantiation', 'instantiation'),
   ('interfaces', 'interfaces'),
@@ -620,10 +772,16 @@ insert into public.tags (id, label) values
   ('io', 'io'),
   ('itab', 'itab'),
   ('iteration', 'iteration'),
+  ('latency', 'latency'),
+  ('link', 'link'),
   ('linked-list', 'linked-list'),
   ('lock-free', 'lock-free'),
+  ('logging', 'logging'),
   ('loops', 'loops'),
+  ('lurl', 'lurl'),
+  ('macros', 'macros'),
   ('maps', 'maps'),
+  ('markup', 'markup'),
   ('math', 'math'),
   ('memory', 'memory'),
   ('memory-layout', 'memory-layout'),
@@ -632,36 +790,65 @@ insert into public.tags (id, label) values
   ('monomorphization', 'monomorphization'),
   ('monotonic', 'monotonic'),
   ('mst', 'mst'),
+  ('mtype', 'mtype'),
   ('mutex', 'mutex'),
+  ('native', 'native'),
+  ('nbr', 'nbr'),
+  ('net/http', 'net/http'),
   ('nil', 'nil'),
+  ('no-bid', 'no-bid'),
+  ('nurl', 'nurl'),
   ('observability', 'observability'),
   ('once', 'once'),
+  ('p99', 'p99'),
+  ('pacing', 'pacing'),
   ('panic', 'panic'),
   ('parallel', 'parallel'),
   ('performance', 'performance'),
   ('pipeline', 'pipeline'),
+  ('pixel', 'pixel'),
+  ('plcmt', 'plcmt'),
+  ('pmp', 'pmp'),
+  ('pod-bidding', 'pod-bidding'),
+  ('poddur', 'poddur'),
+  ('podid', 'podid'),
   ('pprof', 'pprof'),
+  ('preferred-deal', 'preferred-deal'),
   ('prefix-sum', 'prefix-sum'),
   ('priority-queue', 'priority-queue'),
   ('profiling', 'profiling'),
+  ('programmatic', 'programmatic'),
+  ('programmatic-guaranteed', 'programmatic-guaranteed'),
   ('queue', 'queue'),
   ('quickselect', 'quickselect'),
   ('race', 'race'),
   ('rate-limiting', 'rate-limiting'),
   ('receivers', 'receivers'),
+  ('reconciliation', 'reconciliation'),
   ('recover', 'recover'),
   ('recursion', 'recursion'),
+  ('redirect', 'redirect'),
   ('reflection', 'reflection'),
   ('reliability', 'reliability'),
   ('resource-cleanup', 'resource-cleanup'),
+  ('reverse-proxy', 'reverse-proxy'),
+  ('ring-buffer', 'ring-buffer'),
   ('runes', 'runes'),
   ('runtime', 'runtime'),
+  ('sampling', 'sampling'),
+  ('scalability', 'scalability'),
+  ('schain', 'schain'),
   ('scheduler', 'scheduler'),
+  ('second-price', 'second-price'),
   ('select', 'select'),
+  ('sellers.json', 'sellers.json'),
   ('sentinel', 'sentinel'),
   ('serialization', 'serialization'),
+  ('server-to-server', 'server-to-server'),
+  ('settlement', 'settlement'),
   ('signals', 'signals'),
   ('simulation', 'simulation'),
+  ('site', 'site'),
   ('slices', 'slices'),
   ('sliding-window', 'sliding-window'),
   ('sorting', 'sorting'),
@@ -671,7 +858,9 @@ insert into public.tags (id, label) values
   ('strings', 'strings'),
   ('struct-tags', 'struct-tags'),
   ('structs', 'structs'),
+  ('substitution', 'substitution'),
   ('subtests', 'subtests'),
+  ('supply-chain', 'supply-chain'),
   ('sync', 'sync'),
   ('sync.Pool', 'sync.Pool'),
   ('sync/atomic', 'sync/atomic'),
@@ -679,15 +868,21 @@ insert into public.tags (id, label) values
   ('system-design', 'system-design'),
   ('t.Cleanup', 't.Cleanup'),
   ('t.Run', 't.Run'),
+  ('targeting', 'targeting'),
   ('tarjan', 'tarjan'),
   ('testing', 'testing'),
   ('ticker', 'ticker'),
   ('tilde', 'tilde'),
   ('time', 'time'),
+  ('timeout', 'timeout'),
   ('timeouts', 'timeouts'),
   ('timer', 'timer'),
+  ('title', 'title'),
+  ('tmax', 'tmax'),
   ('token-bucket', 'token-bucket'),
   ('topological-sort', 'topological-sort'),
+  ('tracking', 'tracking'),
+  ('tracking-events', 'tracking-events'),
   ('tree', 'tree'),
   ('trie', 'trie'),
   ('two-pointers', 'two-pointers'),
@@ -699,10 +894,18 @@ insert into public.tags (id, label) values
   ('type-system', 'type-system'),
   ('typed-errors', 'typed-errors'),
   ('union-find', 'union-find'),
+  ('us_privacy', 'us_privacy'),
+  ('user', 'user'),
+  ('user-tracking', 'user-tracking'),
   ('utf8', 'utf8'),
+  ('video', 'video'),
   ('waitgroup', 'waitgroup'),
+  ('win-notice', 'win-notice'),
+  ('winner', 'winner'),
   ('worker-pool', 'worker-pool'),
   ('wrapping', 'wrapping'),
+  ('write-behind', 'write-behind'),
+  ('wseat', 'wseat'),
   ('x/time/rate', 'x/time/rate');
 
 insert into public.problem_tags (problem_id, tag_id) values
@@ -1539,7 +1742,230 @@ insert into public.problem_tags (problem_id, tag_id) values
   ('go-design-pipeline', 'pipeline'),
   ('go-design-pipeline', 'context'),
   ('go-design-pipeline', 'channels'),
-  ('go-design-pipeline', 'goroutine-leaks');
+  ('go-design-pipeline', 'goroutine-leaks'),
+  ('ortb-foundations-ecosystem', 'ad-tech'),
+  ('ortb-foundations-ecosystem', 'DSP'),
+  ('ortb-foundations-ecosystem', 'SSP'),
+  ('ortb-foundations-ecosystem', 'exchange'),
+  ('ortb-foundations-ecosystem', 'RTB'),
+  ('ortb-foundations-ecosystem', 'programmatic'),
+  ('ortb-foundations-rtb-flow', 'RTB'),
+  ('ortb-foundations-rtb-flow', 'bid-request'),
+  ('ortb-foundations-rtb-flow', 'bid-response'),
+  ('ortb-foundations-rtb-flow', 'latency'),
+  ('ortb-foundations-rtb-flow', 'OpenRTB'),
+  ('ortb-foundations-auction-types', 'auction'),
+  ('ortb-foundations-auction-types', 'first-price'),
+  ('ortb-foundations-auction-types', 'second-price'),
+  ('ortb-foundations-auction-types', 'clearing-price'),
+  ('ortb-foundations-auction-types', 'programmatic'),
+  ('ortb-foundations-supply-chain', 'ads.txt'),
+  ('ortb-foundations-supply-chain', 'sellers.json'),
+  ('ortb-foundations-supply-chain', 'schain'),
+  ('ortb-foundations-supply-chain', 'supply-chain'),
+  ('ortb-foundations-supply-chain', 'IVT'),
+  ('ortb-foundations-supply-chain', 'fraud'),
+  ('ortb-bid-request-object', 'BidRequest'),
+  ('ortb-bid-request-object', 'OpenRTB'),
+  ('ortb-bid-request-object', 'tmax'),
+  ('ortb-bid-request-object', 'imp'),
+  ('ortb-bid-request-object', 'at'),
+  ('ortb-bid-request-object', 'wseat'),
+  ('ortb-bid-request-imp', 'imp'),
+  ('ortb-bid-request-imp', 'banner'),
+  ('ortb-bid-request-imp', 'video'),
+  ('ortb-bid-request-imp', 'native'),
+  ('ortb-bid-request-imp', 'audio'),
+  ('ortb-bid-request-imp', 'pmp'),
+  ('ortb-bid-request-imp', 'OpenRTB'),
+  ('ortb-bid-request-site-app', 'site'),
+  ('ortb-bid-request-site-app', 'app'),
+  ('ortb-bid-request-site-app', 'device'),
+  ('ortb-bid-request-site-app', 'user'),
+  ('ortb-bid-request-site-app', 'geo'),
+  ('ortb-bid-request-site-app', 'OpenRTB'),
+  ('ortb-bid-request-site-app', 'context'),
+  ('ortb-bid-request-26-fields', 'OpenRTB-2.6'),
+  ('ortb-bid-request-26-fields', 'pod-bidding'),
+  ('ortb-bid-request-26-fields', 'podid'),
+  ('ortb-bid-request-26-fields', 'poddur'),
+  ('ortb-bid-request-26-fields', 'plcmt'),
+  ('ortb-bid-request-26-fields', 'CTV'),
+  ('ortb-bid-request-26-fields', 'channel'),
+  ('ortb-bid-response-object', 'BidResponse'),
+  ('ortb-bid-response-object', 'SeatBid'),
+  ('ortb-bid-response-object', 'OpenRTB'),
+  ('ortb-bid-response-object', 'nbr'),
+  ('ortb-bid-response-object', 'cur'),
+  ('ortb-bid-response-bid', 'Bid'),
+  ('ortb-bid-response-bid', 'adm'),
+  ('ortb-bid-response-bid', 'nurl'),
+  ('ortb-bid-response-bid', 'burl'),
+  ('ortb-bid-response-bid', 'lurl'),
+  ('ortb-bid-response-bid', 'crid'),
+  ('ortb-bid-response-bid', 'adomain'),
+  ('ortb-bid-response-bid', 'OpenRTB'),
+  ('ortb-bid-response-settlement', 'nurl'),
+  ('ortb-bid-response-settlement', 'burl'),
+  ('ortb-bid-response-settlement', 'AUCTION_PRICE'),
+  ('ortb-bid-response-settlement', 'macros'),
+  ('ortb-bid-response-settlement', 'clearing-price'),
+  ('ortb-bid-response-settlement', 'settlement'),
+  ('ortb-bid-response-nobid', 'no-bid'),
+  ('ortb-bid-response-nobid', 'nbr'),
+  ('ortb-bid-response-nobid', 'timeout'),
+  ('ortb-bid-response-nobid', 'HTTP-204'),
+  ('ortb-bid-response-nobid', 'OpenRTB'),
+  ('ortb-bidder-server', 'net/http'),
+  ('ortb-bidder-server', 'bidder'),
+  ('ortb-bidder-server', 'OpenRTB'),
+  ('ortb-bidder-server', 'JSON'),
+  ('ortb-bidder-server', 'HTTP-server'),
+  ('ortb-bidder-decision', 'targeting'),
+  ('ortb-bidder-decision', 'bid-decision'),
+  ('ortb-bidder-decision', 'CPM'),
+  ('ortb-bidder-decision', 'campaign'),
+  ('ortb-bidder-decision', 'audience'),
+  ('ortb-bidder-decision', 'floor'),
+  ('ortb-bidder-concurrency', 'context'),
+  ('ortb-bidder-concurrency', 'goroutines'),
+  ('ortb-bidder-concurrency', 'concurrency'),
+  ('ortb-bidder-concurrency', 'deadline'),
+  ('ortb-bidder-concurrency', 'tmax'),
+  ('ortb-bidder-concurrency', 'RWMutex'),
+  ('ortb-bidder-benchmark', 'benchmark'),
+  ('ortb-bidder-benchmark', 'pprof'),
+  ('ortb-bidder-benchmark', 'allocations'),
+  ('ortb-bidder-benchmark', 'JSON'),
+  ('ortb-bidder-benchmark', 'performance'),
+  ('ortb-bidder-benchmark', 'Go'),
+  ('ortb-exchange-fanout', 'fan-out'),
+  ('ortb-exchange-fanout', 'goroutines'),
+  ('ortb-exchange-fanout', 'exchange'),
+  ('ortb-exchange-fanout', 'concurrency'),
+  ('ortb-exchange-fanout', 'DSP'),
+  ('ortb-exchange-fanout', 'OpenRTB'),
+  ('ortb-exchange-hedged', 'hedged-requests'),
+  ('ortb-exchange-hedged', 'timeout'),
+  ('ortb-exchange-hedged', 'latency'),
+  ('ortb-exchange-hedged', 'p99'),
+  ('ortb-exchange-hedged', 'circuit-breaker'),
+  ('ortb-exchange-auction', 'auction'),
+  ('ortb-exchange-auction', 'first-price'),
+  ('ortb-exchange-auction', 'second-price'),
+  ('ortb-exchange-auction', 'winner'),
+  ('ortb-exchange-auction', 'clearing-price'),
+  ('ortb-exchange-auction', 'floor'),
+  ('ortb-exchange-floors', 'floor'),
+  ('ortb-exchange-floors', 'PMP'),
+  ('ortb-exchange-floors', 'deals'),
+  ('ortb-exchange-floors', 'preferred-deal'),
+  ('ortb-exchange-floors', 'programmatic-guaranteed'),
+  ('ortb-exchange-floors', 'bidfloor'),
+  ('ortb-serving-reverse-proxy', 'reverse-proxy'),
+  ('ortb-serving-reverse-proxy', 'httputil'),
+  ('ortb-serving-reverse-proxy', 'net/http'),
+  ('ortb-serving-reverse-proxy', 'Director'),
+  ('ortb-serving-reverse-proxy', 'ModifyResponse'),
+  ('ortb-serving-win-billing', 'nurl'),
+  ('ortb-serving-win-billing', 'burl'),
+  ('ortb-serving-win-billing', 'win-notice'),
+  ('ortb-serving-win-billing', 'billing'),
+  ('ortb-serving-win-billing', 'server-to-server'),
+  ('ortb-serving-win-billing', 'OpenRTB'),
+  ('ortb-serving-markup', 'adm'),
+  ('ortb-serving-markup', 'AUCTION_PRICE'),
+  ('ortb-serving-markup', 'macros'),
+  ('ortb-serving-markup', 'markup'),
+  ('ortb-serving-markup', 'CDN'),
+  ('ortb-serving-markup', 'creative'),
+  ('ortb-serving-cdn', 'CDN'),
+  ('ortb-serving-cdn', 'creative'),
+  ('ortb-serving-cdn', 'IURL'),
+  ('ortb-serving-cdn', 'crid'),
+  ('ortb-serving-cdn', 'brand-safety'),
+  ('ortb-serving-cdn', 'audit'),
+  ('ortb-tracking-impressions', 'impression'),
+  ('ortb-tracking-impressions', 'pixel'),
+  ('ortb-tracking-impressions', 'tracking'),
+  ('ortb-tracking-impressions', 'HTTP-GET'),
+  ('ortb-tracking-impressions', 'idempotent'),
+  ('ortb-tracking-impressions', 'deduplication'),
+  ('ortb-tracking-clicks', 'click'),
+  ('ortb-tracking-clicks', 'redirect'),
+  ('ortb-tracking-clicks', 'tracking'),
+  ('ortb-tracking-clicks', 'HTTP-302'),
+  ('ortb-tracking-clicks', 'deduplication'),
+  ('ortb-tracking-clicks', 'attribution'),
+  ('ortb-tracking-macros', 'macros'),
+  ('ortb-tracking-macros', 'AUCTION_PRICE'),
+  ('ortb-tracking-macros', 'substitution'),
+  ('ortb-tracking-macros', 'tracking'),
+  ('ortb-tracking-macros', 'OpenRTB'),
+  ('ortb-tracking-macros', 'URL-encoding'),
+  ('ortb-tracking-reconciliation', 'reconciliation'),
+  ('ortb-tracking-reconciliation', 'discrepancy'),
+  ('ortb-tracking-reconciliation', 'billing'),
+  ('ortb-tracking-reconciliation', 'impression-counting'),
+  ('ortb-tracking-reconciliation', 'IAS'),
+  ('ortb-tracking-reconciliation', 'fraud'),
+  ('ortb-creative-banner', 'banner'),
+  ('ortb-creative-banner', 'HTML'),
+  ('ortb-creative-banner', 'MRAID'),
+  ('ortb-creative-banner', 'creative'),
+  ('ortb-creative-banner', 'SafeFrame'),
+  ('ortb-creative-banner', 'adm'),
+  ('ortb-creative-vast', 'VAST'),
+  ('ortb-creative-vast', 'video'),
+  ('ortb-creative-vast', 'VPAID'),
+  ('ortb-creative-vast', 'InLine'),
+  ('ortb-creative-vast', 'Wrapper'),
+  ('ortb-creative-vast', 'tracking-events'),
+  ('ortb-creative-native', 'native'),
+  ('ortb-creative-native', 'OpenRTB-native'),
+  ('ortb-creative-native', 'assets'),
+  ('ortb-creative-native', 'title'),
+  ('ortb-creative-native', 'image'),
+  ('ortb-creative-native', 'link'),
+  ('ortb-creative-native', 'mtype'),
+  ('ortb-scale-pacing', 'pacing'),
+  ('ortb-scale-pacing', 'token-bucket'),
+  ('ortb-scale-pacing', 'budget'),
+  ('ortb-scale-pacing', 'rate-limiting'),
+  ('ortb-scale-pacing', 'atomic'),
+  ('ortb-scale-pacing', 'Go'),
+  ('ortb-scale-frequency-cap', 'frequency-cap'),
+  ('ortb-scale-frequency-cap', 'Redis'),
+  ('ortb-scale-frequency-cap', 'INCR'),
+  ('ortb-scale-frequency-cap', 'EXPIRE'),
+  ('ortb-scale-frequency-cap', 'consistent-hashing'),
+  ('ortb-scale-frequency-cap', 'user-tracking'),
+  ('ortb-scale-logging', 'Kafka'),
+  ('ortb-scale-logging', 'write-behind'),
+  ('ortb-scale-logging', 'ring-buffer'),
+  ('ortb-scale-logging', 'logging'),
+  ('ortb-scale-logging', 'async'),
+  ('ortb-scale-logging', 'sampling'),
+  ('ortb-privacy-consent', 'GDPR'),
+  ('ortb-privacy-consent', 'TCF'),
+  ('ortb-privacy-consent', 'consent'),
+  ('ortb-privacy-consent', 'GPP'),
+  ('ortb-privacy-consent', 'us_privacy'),
+  ('ortb-privacy-consent', 'CCPA'),
+  ('ortb-privacy-consent', 'OpenRTB'),
+  ('ortb-privacy-identity', 'identity'),
+  ('ortb-privacy-identity', 'IDFA'),
+  ('ortb-privacy-identity', 'GAID'),
+  ('ortb-privacy-identity', 'UID2'),
+  ('ortb-privacy-identity', 'cookieless'),
+  ('ortb-privacy-identity', 'eids'),
+  ('ortb-privacy-identity', 'LiveRamp'),
+  ('ortb-design-capstone', 'system-design'),
+  ('ortb-design-capstone', 'exchange'),
+  ('ortb-design-capstone', 'scalability'),
+  ('ortb-design-capstone', 'OpenRTB'),
+  ('ortb-design-capstone', 'architecture'),
+  ('ortb-design-capstone', 'capstone');
 
 insert into public.solutions (problem_id, language, file, code, is_primary, sort_order) values
   ('union-find', 'go', 'solution.go', 'package main
@@ -32940,6 +33366,3472 @@ func main() {
 	}
 	fmt.Println("partial sum:", sum)
 }
+', true, 0),
+  ('ortb-foundations-ecosystem', 'go', 'main.go', 'package main
+
+import "fmt"
+
+// Minimal domain types mirroring a programmatic ad stack.
+
+type Publisher struct{ ID, Domain string }
+type Advertiser struct{ ID, Name string }
+
+// SSP (Supply-Side Platform) manages publisher inventory.
+type SSP struct {
+	Publisher Publisher
+	FloorCPM  float64 // publisher-set minimum price in USD CPM
+}
+
+// AdExchange orchestrates the auction between SSP and registered DSPs.
+type AdExchange struct {
+	SSPs []SSP
+	DSPs []DSP
+}
+
+// DSP (Demand-Side Platform) bids on behalf of advertisers.
+type DSP struct {
+	ID          string
+	Advertiser  Advertiser
+	MaxBidCPM   float64
+}
+
+// Bid represents a single DSP bid for an impression.
+type Bid struct {
+	DSPID string
+	CPM   float64
+}
+
+// RunAuction returns the winning bid or nil when no bid clears the floor.
+func (ex *AdExchange) RunAuction(floor float64, bids []Bid) *Bid {
+	var winner *Bid
+	for i := range bids {
+		b := &bids[i]
+		if b.CPM < floor {
+			continue
+		}
+		if winner == nil || b.CPM > winner.CPM {
+			winner = b
+		}
+	}
+	return winner
+}
+
+func main() {
+	ex := AdExchange{
+		DSPs: []DSP{
+			{ID: "dsp-a", Advertiser: Advertiser{ID: "adv-1", Name: "Nike"}, MaxBidCPM: 3.50},
+			{ID: "dsp-b", Advertiser: Advertiser{ID: "adv-2", Name: "Adidas"}, MaxBidCPM: 2.80},
+		},
+	}
+
+	bids := []Bid{
+		{DSPID: "dsp-a", CPM: 3.50},
+		{DSPID: "dsp-b", CPM: 2.80},
+	}
+
+	winner := ex.RunAuction(1.00, bids)
+	if winner != nil {
+		fmt.Printf("Winner: %s at $%.2f CPM\n", winner.DSPID, winner.CPM)
+	} else {
+		fmt.Println("No bids cleared the floor")
+	}
+}
+', true, 0),
+  ('ortb-foundations-rtb-flow', 'go', 'main.go', 'package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+// Simplified RTB flow timer showing key milestones within the 100 ms budget.
+
+type Milestone struct {
+	Name    string
+	Elapsed time.Duration
+}
+
+func simulateRTBFlow(ctx context.Context) []Milestone {
+	start := time.Now()
+	var ms []Milestone
+
+	record := func(name string) {
+		ms = append(ms, Milestone{Name: name, Elapsed: time.Since(start)})
+	}
+
+	record("page load / ad tag fires")
+
+	// SSP assembles and forwards BidRequest
+	time.Sleep(3 * time.Millisecond)
+	record("SSP builds & sends BidRequest")
+
+	// Exchange routes to DSPs (in practice concurrent; serialised here for demo)
+	time.Sleep(5 * time.Millisecond)
+	record("Exchange fans out to DSPs")
+
+	// DSP targeting + bid decision
+	time.Sleep(40 * time.Millisecond)
+	record("DSP bid decisions received")
+
+	// Auction + winner selection
+	time.Sleep(2 * time.Millisecond)
+	record("Exchange picks winner")
+
+	// Win notice fires asynchronously; markup returned to SSP
+	time.Sleep(2 * time.Millisecond)
+	record("Markup returned to SSP / browser")
+
+	// Browser fetches creative and renders
+	time.Sleep(20 * time.Millisecond)
+	record("Creative rendered")
+
+	return ms
+}
+
+func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Millisecond)
+	defer cancel()
+
+	milestones := simulateRTBFlow(ctx)
+	for _, m := range milestones {
+		fmt.Printf("%6.1f ms  %s\n", float64(m.Elapsed.Microseconds())/1000, m.Name)
+	}
+}
+', true, 0),
+  ('ortb-foundations-auction-types', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+type Bid struct {
+	BuyerID string
+	CPM     float64
+}
+
+// FirstPriceAuction: winner pays their own bid (if above floor).
+// Returns winning bid or nil.
+func FirstPriceAuction(bids []Bid, floor float64) *Bid {
+	var winner *Bid
+	for i := range bids {
+		b := &bids[i]
+		if b.CPM < floor {
+			continue
+		}
+		if winner == nil || b.CPM > winner.CPM {
+			winner = b
+		}
+	}
+	return winner
+}
+
+// SecondPriceAuction: winner pays max(second-highest bid, floor).
+// Returns winner and clearing price.
+func SecondPriceAuction(bids []Bid, floor float64) (*Bid, float64) {
+	eligible := make([]Bid, 0, len(bids))
+	for _, b := range bids {
+		if b.CPM >= floor {
+			eligible = append(eligible, b)
+		}
+	}
+	if len(eligible) == 0 {
+		return nil, 0
+	}
+	sort.Slice(eligible, func(i, j int) bool {
+		return eligible[i].CPM > eligible[j].CPM
+	})
+	winner := &eligible[0]
+	clearingPrice := floor
+	if len(eligible) > 1 {
+		clearingPrice = eligible[1].CPM
+	}
+	return winner, clearingPrice
+}
+
+func main() {
+	bids := []Bid{
+		{BuyerID: "dsp-a", CPM: 3.50},
+		{BuyerID: "dsp-b", CPM: 2.80},
+		{BuyerID: "dsp-c", CPM: 1.20},
+	}
+	floor := 1.00
+
+	// First-price
+	w1 := FirstPriceAuction(bids, floor)
+	fmt.Printf("First-price  winner=%s  pays=$%.2f\n", w1.BuyerID, w1.CPM)
+
+	// Second-price
+	w2, clearing := SecondPriceAuction(bids, floor)
+	fmt.Printf("Second-price winner=%s  pays=$%.2f (bid=$%.2f)\n",
+		w2.BuyerID, clearing, w2.CPM)
+}
+', true, 0),
+  ('ortb-foundations-supply-chain', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// SupplyChain (schain) object embedded in a BidRequest.source.schain.
+// Each node represents one hop in the supply path (publisher → SSP → exchange).
+
+type SChainNode struct {
+	ASI    string  `json:"asi"`              // domain of the system (e.g. "pubmatic.com")
+	SID    string  `json:"sid"`              // seller''s account ID in the upstream system
+	RID    string  `json:"rid,omitempty"`    // request ID — allows log correlation
+	Name   string  `json:"name,omitempty"`
+	Domain string  `json:"domain,omitempty"`
+	HP     int     `json:"hp"`              // is this a direct buyer relationship? 1=yes
+}
+
+type SChain struct {
+	Complete int          `json:"complete"` // 1 = full unbroken chain provided
+	Nodes    []SChainNode `json:"nodes"`
+	Ver      string       `json:"ver"` // spec version, e.g. "1.0"
+}
+
+func main() {
+	// A supply chain with two hops:
+	// publisher sells via PubMatic, PubMatic routes through AppNexus.
+	chain := SChain{
+		Complete: 1,
+		Ver:      "1.0",
+		Nodes: []SChainNode{
+			{ASI: "pubmatic.com", SID: "pub-123", HP: 1, Name: "Publisher Co"},
+			{ASI: "appnexus.com", SID: "apn-456", HP: 1},
+		},
+	}
+
+	b, _ := json.MarshalIndent(chain, "", "  ")
+	fmt.Println(string(b))
+
+	// Validate: a complete chain must have at least one node with HP=1 (direct).
+	direct := 0
+	for _, n := range chain.Nodes {
+		if n.HP == 1 {
+			direct++
+		}
+	}
+	fmt.Printf("\nchain complete=%d  nodes=%d  direct-relationships=%d\n",
+		chain.Complete, len(chain.Nodes), direct)
+}
+', true, 0),
+  ('ortb-bid-request-object', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// OpenRTB 2.6 top-level BidRequest — abbreviated to essential fields.
+type BidRequest struct {
+	ID     string       `json:"id"`              // exchange-generated, globally unique
+	Imp    []Impression `json:"imp"`             // at least one required
+	Site   *Site        `json:"site,omitempty"`
+	App    *App         `json:"app,omitempty"`
+	Device *Device      `json:"device,omitempty"`
+	User   *User        `json:"user,omitempty"`
+	At     int          `json:"at,omitempty"`    // 1=first-price, 2=second-price (default 2)
+	TMax   int          `json:"tmax,omitempty"`  // max ms for DSP response
+	WSeat  []string     `json:"wseat,omitempty"` // allowlist of buyer seats
+	BSeat  []string     `json:"bseat,omitempty"` // blocklist of buyer seats
+	Cur    []string     `json:"cur,omitempty"`   // preferred currencies; default USD
+	BCat   []string     `json:"bcat,omitempty"`  // blocked IAB content categories
+	BAdv   []string     `json:"badv,omitempty"`  // blocked advertiser domains
+}
+
+type Impression struct {
+	ID     string  `json:"id"`
+	BidFloor float64 `json:"bidfloor,omitempty"`
+}
+
+type Site struct{ Page string `json:"page"` }
+type App  struct{ Bundle string `json:"bundle"` }
+type Device struct {
+	UA string `json:"ua,omitempty"`
+	IP string `json:"ip,omitempty"`
+}
+type User struct{ ID string `json:"id,omitempty"` }
+
+func main() {
+	req := BidRequest{
+		ID:   "req-001",
+		At:   1, // first-price
+		TMax: 100,
+		Imp:  []Impression{{ID: "imp-1", BidFloor: 0.50}},
+		Site: &Site{Page: "https://example.com/news"},
+		Device: &Device{UA: "Mozilla/5.0", IP: "203.0.113.1"},
+		BCat: []string{"IAB25", "IAB26"}, // illegal content, tobacco
+		Cur:  []string{"USD"},
+	}
+
+	b, _ := json.MarshalIndent(req, "", "  ")
+	fmt.Println(string(b))
+}
+', true, 0),
+  ('ortb-bid-request-imp', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// Imp represents one ad slot in a BidRequest.
+type Imp struct {
+	ID           string   `json:"id"`
+	Banner       *Banner  `json:"banner,omitempty"`
+	Video        *Video   `json:"video,omitempty"`
+	Native       *Native  `json:"native,omitempty"`
+	BidFloor     float64  `json:"bidfloor,omitempty"`
+	BidFloorCur  string   `json:"bidfloorcur,omitempty"`
+	Secure       int      `json:"secure,omitempty"`  // 1 = HTTPS required
+	Instl        int      `json:"instl,omitempty"`   // 1 = interstitial / full-screen
+	TagID        string   `json:"tagid,omitempty"`
+	PMP          *PMP     `json:"pmp,omitempty"`
+}
+
+type Banner struct {
+	W      int    `json:"w,omitempty"`
+	H      int    `json:"h,omitempty"`
+	Format []Format `json:"format,omitempty"`
+	Pos    int    `json:"pos,omitempty"` // 1=above fold, 3=below fold
+}
+
+type Format struct {
+	W int `json:"w"`
+	H int `json:"h"`
+}
+
+type Video struct {
+	MIMEs       []string `json:"mimes"`
+	MinDuration int      `json:"minduration,omitempty"`
+	MaxDuration int      `json:"maxduration,omitempty"`
+	Protocols   []int    `json:"protocols,omitempty"` // 2=VAST 2.0, 3=VAST 3.0, 5=VAST 2.0 wrapper
+	W           int      `json:"w,omitempty"`
+	H           int      `json:"h,omitempty"`
+	Linearity   int      `json:"linearity,omitempty"` // 1=linear/in-stream
+}
+
+type Native struct {
+	Request string `json:"request"` // serialised Native request JSON
+	Ver     string `json:"ver,omitempty"`
+}
+
+type PMP struct {
+	PrivateAuction int    `json:"private_auction,omitempty"` // 1=only deal bids allowed
+	Deals          []Deal `json:"deals,omitempty"`
+}
+
+type Deal struct {
+	ID          string   `json:"id"`
+	BidFloor    float64  `json:"bidfloor,omitempty"`
+	WSeat       []string `json:"wseat,omitempty"`
+	AT          int      `json:"at,omitempty"`
+}
+
+func main() {
+	imp := Imp{
+		ID:          "imp-1",
+		BidFloor:    1.50,
+		BidFloorCur: "USD",
+		Secure:      1,
+		Banner: &Banner{
+			W: 728, H: 90,
+			Format: []Format{{W: 728, H: 90}, {W: 970, H: 90}},
+			Pos:    1,
+		},
+		PMP: &PMP{
+			Deals: []Deal{
+				{ID: "deal-vip-001", BidFloor: 5.00, WSeat: []string{"dsp-a"}},
+			},
+		},
+	}
+
+	b, _ := json.MarshalIndent(imp, "", "  ")
+	fmt.Println(string(b))
+}
+', true, 0),
+  ('ortb-bid-request-site-app', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type Site struct {
+	Page      string    `json:"page,omitempty"`
+	Domain    string    `json:"domain,omitempty"`
+	Cat       []string  `json:"cat,omitempty"`  // IAB content categories
+	Publisher *Publisher `json:"publisher,omitempty"`
+}
+
+type App struct {
+	Bundle    string    `json:"bundle,omitempty"`  // e.g. "com.example.app"
+	StoreURL  string    `json:"storeurl,omitempty"`
+	Ver       string    `json:"ver,omitempty"`
+	Publisher *Publisher `json:"publisher,omitempty"`
+}
+
+type Publisher struct {
+	ID     string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Domain string `json:"domain,omitempty"`
+}
+
+type Geo struct {
+	Lat     float64 `json:"lat,omitempty"`
+	Lon     float64 `json:"lon,omitempty"`
+	Country string  `json:"country,omitempty"` // ISO 3166-1 alpha-3
+	Region  string  `json:"region,omitempty"`
+	City    string  `json:"city,omitempty"`
+	Type    int     `json:"type,omitempty"`    // 1=GPS, 2=IP, 3=user-provided
+}
+
+type Device struct {
+	UA          string `json:"ua,omitempty"`
+	IP          string `json:"ip,omitempty"`
+	OS          string `json:"os,omitempty"`
+	OSV         string `json:"osv,omitempty"`
+	DeviceType  int    `json:"devicetype,omitempty"` // 1=mobile/tablet, 2=PC, 3=TV
+	IFA         string `json:"ifa,omitempty"`        // IDFA/GAID
+	Geo         *Geo   `json:"geo,omitempty"`
+}
+
+type User struct {
+	ID       string    `json:"id,omitempty"`     // exchange-specific user ID
+	BuyerUID string    `json:"buyeruid,omitempty"` // DSP user ID (cookie-synced)
+	Yob      int       `json:"yob,omitempty"`     // year of birth
+	Gender   string    `json:"gender,omitempty"`  // "M", "F", "O"
+	Geo      *Geo      `json:"geo,omitempty"`     // home/registration location
+	Data     []Segment `json:"data,omitempty"`
+}
+
+type Segment struct {
+	ID   string    `json:"id"`
+	Name string    `json:"name,omitempty"`
+	Segment []struct {
+		ID    string `json:"id"`
+		Name  string `json:"name,omitempty"`
+		Value string `json:"value,omitempty"`
+	} `json:"segment,omitempty"`
+}
+
+func main() {
+	device := Device{
+		UA: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)",
+		IP: "203.0.113.42",
+		OS: "iOS", OSV: "17.0",
+		DeviceType: 1,
+		IFA: "6D92078A-8246-4BA4-AE5B-76104861E7DC",
+		Geo: &Geo{Country: "USA", Region: "NY", City: "New York", Type: 2},
+	}
+	user := User{
+		ID:       "exch-uid-9876",
+		BuyerUID: "dsp-user-5432",
+		Yob:      1990,
+	}
+
+	b, _ := json.MarshalIndent(map[string]any{"device": device, "user": user}, "", "  ")
+	fmt.Println(string(b))
+}
+', true, 0),
+  ('ortb-bid-request-26-fields', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// OpenRTB 2.6 Video impression with pod bidding and plcmt fields.
+type VideoImp struct {
+	ID          string   `json:"id"`
+	Video       *Video26 `json:"video,omitempty"`
+	BidFloor    float64  `json:"bidfloor,omitempty"`
+}
+
+type Video26 struct {
+	MIMEs         []string `json:"mimes"`
+	MinDuration   int      `json:"minduration,omitempty"`
+	MaxDuration   int      `json:"maxduration,omitempty"`
+	Protocols     []int    `json:"protocols,omitempty"`
+	W             int      `json:"w,omitempty"`
+	H             int      `json:"h,omitempty"`
+	// 2.6 pod bidding fields
+	PodID         string   `json:"podid,omitempty"`         // identifies the ad pod / commercial break
+	PodDur        int      `json:"poddur,omitempty"`        // total pod duration in seconds
+	PodSeq        int      `json:"podseq,omitempty"`        // 1=first slot, 3=last slot, 2=middle
+	MinCPMPerSec  float64  `json:"mincpmpersec,omitempty"` // floor: USD per second of ad duration
+	MaxSeq        int      `json:"maxseq,omitempty"`        // max ads in pod
+	// 2.6 placement clarification
+	Plcmt         int      `json:"plcmt,omitempty"`
+	// 1=in-stream (before/mid/post-roll), 2=in-banner, 3=in-article, 4=in-feed, 5=interstitial
+}
+
+// Content channel and network for CTV context (2.6 promoted from ext).
+type Channel struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Domain string `json:"domain,omitempty"`
+}
+type Network struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Domain string `json:"domain,omitempty"`
+}
+
+func main() {
+	// 120-second dynamic pod, at least $0.05/sec CPM floor
+	imp := VideoImp{
+		ID:       "pod-slot-1",
+		BidFloor: 1.50,
+		Video: &Video26{
+			MIMEs:        []string{"video/mp4"},
+			MinDuration:  15,
+			MaxDuration:  30,
+			Protocols:    []int{2, 3, 5},
+			W: 1920, H: 1080,
+			PodID:        "halftime-break",
+			PodDur:       120,
+			PodSeq:       1,
+			MinCPMPerSec: 0.05,
+			MaxSeq:       4,
+			Plcmt:        1, // in-stream
+		},
+	}
+
+	ch := Channel{Name: "ESPN", Domain: "espn.com"}
+	nw := Network{Name: "Disney", Domain: "disney.com"}
+
+	out := map[string]any{"imp": imp, "channel": ch, "network": nw}
+	b, _ := json.MarshalIndent(out, "", "  ")
+	fmt.Println(string(b))
+
+	// Validate: a 30s bid must offer at least 30 * 0.05 = $1.50 CPM
+	bidDuration := 30
+	minBid := float64(bidDuration) * imp.Video.MinCPMPerSec
+	fmt.Printf("\n30s ad minimum bid: $%.2f CPM (floor $%.2f)\n", minBid, imp.BidFloor)
+}
+', true, 0),
+  ('ortb-bid-response-object', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// OpenRTB 2.6 BidResponse hierarchy.
+
+type BidResponse struct {
+	ID      string    `json:"id"`                // mirrors BidRequest.id
+	SeatBid []SeatBid `json:"seatbid,omitempty"`
+	BidID   string    `json:"bidid,omitempty"`   // bidder-generated ID for this response
+	Cur     string    `json:"cur,omitempty"`     // currency for all bid prices (default "USD")
+	CustomData string `json:"customdata,omitempty"` // opaque; exchange stores and returns
+	NBR     *int      `json:"nbr,omitempty"`     // no-bid reason when returning empty seatbid
+}
+
+type SeatBid struct {
+	Bid   []Bid  `json:"bid"`
+	Seat  string `json:"seat,omitempty"`  // buyer seat / account ID
+	Group int    `json:"group,omitempty"` // 1 = all bids in this seatbid must win or none win
+}
+
+type Bid struct {
+	ID       string  `json:"id"`
+	ImpID    string  `json:"impid"`           // must match an imp.id from the BidRequest
+	Price    float64 `json:"price"`           // CPM in response currency
+	AdID     string  `json:"adid,omitempty"`
+	NURL     string  `json:"nurl,omitempty"`  // win notice URL
+	BURL     string  `json:"burl,omitempty"`  // billing notice URL
+	AdM      string  `json:"adm,omitempty"`   // ad markup (HTML, VAST, native JSON)
+	ADomain  []string `json:"adomain,omitempty"` // advertiser domains
+	Bundle   string  `json:"bundle,omitempty"`
+	IURL     string  `json:"iurl,omitempty"`  // image URL for creative audit
+	CID      string  `json:"cid,omitempty"`   // campaign ID
+	CrID     string  `json:"crid,omitempty"`  // creative ID
+	MType    int     `json:"mtype,omitempty"` // 1=banner, 2=video, 3=audio, 4=native
+	DealID   string  `json:"dealid,omitempty"`
+}
+
+func main() {
+	nbr := 3 // no-bid reason: known web spider
+	noResp := BidResponse{ID: "req-001", NBR: &nbr}
+	b, _ := json.MarshalIndent(noResp, "", "  ")
+	fmt.Println("No-bid response:", string(b))
+
+	resp := BidResponse{
+		ID:  "req-002",
+		Cur: "USD",
+		SeatBid: []SeatBid{
+			{
+				Seat: "seat-abc",
+				Bid: []Bid{
+					{
+						ID:      "bid-1",
+						ImpID:   "imp-1",
+						Price:   3.14,
+						AdM:     "<div>Ad creative here</div>",
+						ADomain: []string{"nike.com"},
+						CrID:    "cr-banner-001",
+						MType:   1, // banner
+						NURL:    "https://exchange.com/win?p=${AUCTION_PRICE}",
+						BURL:    "https://dsp.com/bill?p=${AUCTION_PRICE}&aid=${AUCTION_ID}",
+					},
+				},
+			},
+		},
+	}
+	b2, _ := json.MarshalIndent(resp, "", "  ")
+	fmt.Println("\nBid response:", string(b2))
+}
+', true, 0),
+  ('ortb-bid-response-bid', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"net/url"
+	"strings"
+)
+
+// MacroSubstitute replaces OpenRTB price macros in a URL or markup string.
+// The spec mandates URL-encoding for macro values that appear in query params.
+func MacroSubstitute(s string, macros map[string]string) string {
+	for k, v := range macros {
+		s = strings.ReplaceAll(s, "+k+", v)
+	}
+	return s
+}
+
+// MacroSubstituteURL URL-encodes macro values before substitution so they
+// don''t break query string parsing in tracking URLs.
+func MacroSubstituteURL(rawURL string, macros map[string]string) (string, error) {
+	for k, v := range macros {
+		rawURL = strings.ReplaceAll(rawURL, "+k+", url.QueryEscape(v))
+	}
+	_, err := url.Parse(rawURL)
+	return rawURL, err
+}
+
+// Bid object — key fields with doc comments.
+type Bid struct {
+	ID      string   // bidder-generated, unique per bid
+	ImpID   string   // must match a BidRequest.imp[].id
+	Price   float64  // CPM in BidResponse.cur (default USD)
+
+	AdM     string   // ad markup; mutually exclusive with nurl-based serving
+	NURL    string   // exchange calls this to notify win — may contain ${AUCTION_PRICE}
+	BURL    string   // exchange calls this on billing event
+	LURL    string   // exchange calls this on loss (optional)
+
+	ADomain []string // advertiser domains for brand safety (e.g. ["nike.com"])
+	Bundle  string   // app bundle for app-attributed ads
+	IURL    string   // image URL of creative for exchange audit
+	CID     string   // campaign ID
+	CrID    string   // creative ID — key for creative auditing/blocking
+	CatTax  int      // taxonomy version for Cat field
+	Cat     []string // content categories of the ad
+	MType   int      // markup type: 1=banner, 2=video, 3=audio, 4=native
+	DealID  string   // if won via a PMP deal, mirrors Deal.id
+	W, H    int      // dimensions of the winning creative
+}
+
+func main() {
+	bid := Bid{
+		ID:      "bid-xyz-001",
+		ImpID:   "imp-1",
+		Price:   5.25,
+		ADomain: []string{"sponsor.com"},
+		CrID:    "banner-300x250-v3",
+		MType:   1,
+		NURL:    "https://exchange.example.com/win?bid=${AUCTION_BID_ID}&p=${AUCTION_PRICE}&cur=${AUCTION_CURRENCY}",
+		BURL:    "https://dsp.example.com/bill?p=${AUCTION_PRICE}&aid=${AUCTION_ID}&seat=${AUCTION_SEAT_ID}",
+	}
+
+	macros := map[string]string{
+		"AUCTION_PRICE":    "5.25",
+		"AUCTION_BID_ID":   bid.ID,
+		"AUCTION_CURRENCY": "USD",
+		"AUCTION_ID":       "req-001",
+		"AUCTION_SEAT_ID":  "seat-abc",
+	}
+
+	nurl, _ := MacroSubstituteURL(bid.NURL, macros)
+	burl, _ := MacroSubstituteURL(bid.BURL, macros)
+
+	fmt.Println("NURL after substitution:")
+	fmt.Println(" ", nurl)
+	fmt.Println("BURL after substitution:")
+	fmt.Println(" ", burl)
+}
+', true, 0),
+  ('ortb-bid-response-settlement', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"net/url"
+	"strconv"
+	"strings"
+)
+
+// Standard OpenRTB price macros (subset).
+const (
+	MacroAuctionPrice    = "${AUCTION_PRICE}"
+	MacroAuctionID       = "${AUCTION_ID}"
+	MacroAuctionBidID    = "${AUCTION_BID_ID}"
+	MacroAuctionImpID    = "${AUCTION_IMP_ID}"
+	MacroAuctionSeatID   = "${AUCTION_SEAT_ID}"
+	MacroAuctionAdID     = "${AUCTION_AD_ID}"
+	MacroAuctionCurrency = "${AUCTION_CURRENCY}"
+	MacroAuctionLoss     = "${AUCTION_LOSS}"
+)
+
+// AuctionResult holds the data available after auction settlement.
+type AuctionResult struct {
+	AuctionID     string
+	BidID         string
+	ImpID         string
+	SeatID        string
+	AdID          string
+	ClearingPrice float64 // winning CPM after auction type applied
+	Currency      string
+}
+
+// SubstituteURL replaces all recognised macros in u with URL-encoded values.
+func SubstituteURL(u string, r AuctionResult) string {
+	priceStr := strconv.FormatFloat(r.ClearingPrice, ''f'', 6, 64)
+	replacer := strings.NewReplacer(
+		MacroAuctionPrice,    url.QueryEscape(priceStr),
+		MacroAuctionID,       url.QueryEscape(r.AuctionID),
+		MacroAuctionBidID,    url.QueryEscape(r.BidID),
+		MacroAuctionImpID,    url.QueryEscape(r.ImpID),
+		MacroAuctionSeatID,   url.QueryEscape(r.SeatID),
+		MacroAuctionAdID,     url.QueryEscape(r.AdID),
+		MacroAuctionCurrency, url.QueryEscape(r.Currency),
+	)
+	return replacer.Replace(u)
+}
+
+func main() {
+	result := AuctionResult{
+		AuctionID:     "req-001",
+		BidID:         "bid-xyz",
+		ImpID:         "imp-1",
+		SeatID:        "seat-a",
+		AdID:          "ad-5",
+		ClearingPrice: 3.141592,
+		Currency:      "USD",
+	}
+
+	nurl := "https://exchange.example.com/win?p=${AUCTION_PRICE}&aid=${AUCTION_ID}&bid=${AUCTION_BID_ID}"
+	burl := "https://dsp.example.com/bill?price=${AUCTION_PRICE}&cur=${AUCTION_CURRENCY}"
+
+	fmt.Println("NURL:", SubstituteURL(nurl, result))
+	fmt.Println("BURL:", SubstituteURL(burl, result))
+
+	// Verify clearing price is recoverable from the URL
+	q, _ := url.ParseQuery(strings.SplitN(SubstituteURL(nurl, result), "?", 2)[1])
+	priceBack, _ := strconv.ParseFloat(q.Get("p"), 64)
+	fmt.Printf("Recovered clearing price: %.6f\n", priceBack)
+}
+', true, 0),
+  ('ortb-bid-response-nobid', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+// NoBidReason codes (OpenRTB spec Table 6.22).
+type NoBidReason int
+
+const (
+	NBRUnknown           NoBidReason = 0
+	NBRTechnicalError    NoBidReason = 1
+	NBRInvalidRequest    NoBidReason = 2
+	NBRKnownSpider       NoBidReason = 3
+	NBRNonHumanTraffic   NoBidReason = 4
+	NBRDatacenterProxy   NoBidReason = 5
+	NBRUnsupportedFormat NoBidReason = 6
+	NBRBlockedPublisher  NoBidReason = 7
+	NBRUnmatchedUser     NoBidReason = 8
+	NBRDailyCapMet       NoBidReason = 9
+	NBRBidderExclusion   NoBidReason = 10
+)
+
+// respondNoBid writes the most appropriate no-bid HTTP response.
+//
+// Use HTTP 204 when you simply have no matching campaign. Use 200+nbr when
+// you want to communicate a policy reason the exchange can log for diagnostics.
+func respondNoBid(w http.ResponseWriter, reason *NoBidReason, reqID string) {
+	if reason == nil {
+		w.WriteHeader(http.StatusNoContent) // 204 — preferred for "no match"
+		return
+	}
+	nbr := int(*reason)
+	resp := struct {
+		ID  string `json:"id"`
+		NBR int    `json:"nbr"`
+	}{ID: reqID, NBR: nbr}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(resp)
+}
+
+func main() {
+	fmt.Println("No-bid reason codes:")
+	reasons := []NoBidReason{
+		NBRUnknown, NBRTechnicalError, NBRInvalidRequest,
+		NBRKnownSpider, NBRNonHumanTraffic, NBRDatacenterProxy,
+		NBRUnsupportedFormat, NBRBlockedPublisher, NBRUnmatchedUser,
+	}
+	names := []string{
+		"Unknown", "Technical Error", "Invalid Request",
+		"Known Spider", "Non-Human Traffic", "Datacenter/Proxy",
+		"Unsupported Format", "Blocked Publisher", "Unmatched User",
+	}
+	for i, r := range reasons {
+		fmt.Printf("  nbr=%2d  %s\n", r, names[i])
+	}
+
+	// Exchange timeout simulation
+	fmt.Println("\nIf no response arrives within tmax:")
+	fmt.Println("  Exchange treats as no-bid (nbr=1 implicitly).")
+	fmt.Println("  Exchange increments timeout counter for the DSP.")
+	fmt.Println("  High timeout rate may trigger DSP throttling or removal from auction.")
+}
+', true, 0),
+  ('ortb-bidder-server', 'go', 'main.go', 'package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"time"
+)
+
+// ---- Minimal OpenRTB type stubs ----
+
+type BidRequest struct {
+	ID   string       `json:"id"`
+	Imp  []Impression `json:"imp"`
+	TMax int          `json:"tmax,omitempty"`
+}
+
+type Impression struct {
+	ID       string  `json:"id"`
+	BidFloor float64 `json:"bidfloor,omitempty"`
+}
+
+type BidResponse struct {
+	ID      string    `json:"id"`
+	SeatBid []SeatBid `json:"seatbid,omitempty"`
+}
+
+type SeatBid struct {
+	Seat string `json:"seat,omitempty"`
+	Bid  []Bid  `json:"bid"`
+}
+
+type Bid struct {
+	ID    string  `json:"id"`
+	ImpID string  `json:"impid"`
+	Price float64 `json:"price"`
+	AdM   string  `json:"adm,omitempty"`
+	MType int     `json:"mtype,omitempty"`
+}
+
+// ---- Bidder server ----
+
+type Bidder struct {
+	SeatID  string
+	BaseCPM float64
+}
+
+// decideBid returns a Bid for the impression or nil if no bid.
+func (b *Bidder) decideBid(imp Impression) *Bid {
+	cpm := b.BaseCPM
+	if cpm < imp.BidFloor {
+		return nil // can''t clear floor
+	}
+	return &Bid{
+		ID:    fmt.Sprintf("bid-%s", imp.ID),
+		ImpID: imp.ID,
+		Price: cpm,
+		AdM:   "<div style=''width:300px;height:250px;background:#ccc''>Ad</div>",
+		MType: 1, // banner
+	}
+}
+
+func (b *Bidder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Always drain + close the body to allow connection reuse.
+	defer r.Body.Close()
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20)) // 1 MB limit
+	if err != nil {
+		http.Error(w, "bad body", http.StatusBadRequest)
+		return
+	}
+
+	var req BidRequest
+	if err := json.Unmarshal(body, &req); err != nil || len(req.Imp) == 0 {
+		w.WriteHeader(http.StatusNoContent) // treat malformed as no-bid
+		return
+	}
+
+	var bids []Bid
+	for _, imp := range req.Imp {
+		if bid := b.decideBid(imp); bid != nil {
+			bids = append(bids, *bid)
+		}
+	}
+
+	if len(bids) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	resp := BidResponse{
+		ID: req.ID,
+		SeatBid: []SeatBid{{Seat: b.SeatID, Bid: bids}},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func main() {
+	bidder := &Bidder{SeatID: "seat-demo", BaseCPM: 2.50}
+	srv := &http.Server{
+		Addr:         ":8090",
+		Handler:      http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/bid" {
+				bidder.ServeHTTP(w, r)
+				return
+			}
+			http.NotFound(w, r)
+		}),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	// Demonstrate in-process: send a test bid request.
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		imp := Impression{ID: "imp-1", BidFloor: 1.00}
+		bid := bidder.decideBid(imp)
+		if bid != nil {
+			fmt.Printf("Test bid: impid=%s price=%.2f\n", bid.ImpID, bid.Price)
+		}
+		// In production: send HTTP POST to http://localhost:8090/bid
+	}()
+
+	// Start server (blocks). In tests, use httptest.NewServer instead.
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	go srv.ListenAndServe() //nolint:errcheck
+	<-ctx.Done()
+	srv.Shutdown(context.Background()) //nolint:errcheck
+	fmt.Println("Bidder server demo complete")
+}
+', true, 0),
+  ('ortb-bidder-decision', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+// ---- Domain types ----
+
+type GeoTarget struct {
+	Countries []string
+	Regions   []string
+}
+
+type CampaignTarget struct {
+	Geo        GeoTarget
+	Categories []string  // IAB categories e.g. "IAB1" (Arts & Entertainment)
+	Segments   []string  // audience segment IDs
+	BaseCPM    float64
+	BudgetLeft float64
+}
+
+type Impression struct {
+	ID          string
+	BidFloor    float64
+	Categories  []string
+	GeoCountry  string
+	GeoRegion   string
+}
+
+type User struct {
+	Segments []string
+}
+
+// matchesGeo returns true if imp''s geo falls within the campaign target.
+func matchesGeo(imp Impression, t GeoTarget) bool {
+	if len(t.Countries) == 0 {
+		return true // no geo restriction
+	}
+	for _, c := range t.Countries {
+		if strings.EqualFold(c, imp.GeoCountry) {
+			return true
+		}
+	}
+	return false
+}
+
+// matchesCategory returns true if imp shares at least one IAB category.
+func matchesCategory(imp Impression, cats []string) bool {
+	if len(cats) == 0 {
+		return true
+	}
+	set := make(map[string]struct{}, len(imp.Categories))
+	for _, c := range imp.Categories {
+		set[c] = struct{}{}
+	}
+	for _, c := range cats {
+		if _, ok := set[c]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+// matchesAudience returns true if the user has at least one targeted segment.
+func matchesAudience(user User, segs []string) bool {
+	if len(segs) == 0 {
+		return true
+	}
+	set := make(map[string]struct{}, len(user.Segments))
+	for _, s := range user.Segments {
+		set[s] = struct{}{}
+	}
+	for _, s := range segs {
+		if _, ok := set[s]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+// DecideBid returns the winning CPM across all campaigns, or 0 if no bid.
+func DecideBid(imp Impression, user User, campaigns []CampaignTarget) float64 {
+	bestCPM := 0.0
+	for _, c := range campaigns {
+		if !matchesGeo(imp, c.Geo) {
+			continue
+		}
+		if !matchesCategory(imp, c.Categories) {
+			continue
+		}
+		if !matchesAudience(user, c.Segments) {
+			continue
+		}
+		if c.BudgetLeft <= 0 {
+			continue
+		}
+		if c.BaseCPM <= imp.BidFloor {
+			continue
+		}
+		if c.BaseCPM > bestCPM {
+			bestCPM = c.BaseCPM
+		}
+	}
+	return bestCPM
+}
+
+func main() {
+	campaigns := []CampaignTarget{
+		{
+			Geo:        GeoTarget{Countries: []string{"USA"}},
+			Categories: []string{"IAB1", "IAB7"},
+			Segments:   []string{"seg-sports", "seg-shoes"},
+			BaseCPM:    4.50,
+			BudgetLeft: 1000.00,
+		},
+		{
+			Geo:        GeoTarget{}, // global
+			Categories: []string{"IAB2"},
+			Segments:   []string{},
+			BaseCPM:    1.20,
+			BudgetLeft: 500.00,
+		},
+	}
+
+	imp := Impression{
+		ID: "imp-1", BidFloor: 1.00,
+		Categories: []string{"IAB7"},
+		GeoCountry: "USA",
+	}
+	user := User{Segments: []string{"seg-sports"}}
+
+	cpm := DecideBid(imp, user, campaigns)
+	fmt.Printf("Best CPM: $%.2f\n", cpm)
+}
+', true, 0),
+  ('ortb-bidder-concurrency', 'go', 'main.go', 'package main
+
+import (
+	"context"
+	"fmt"
+	"sync"
+	"time"
+)
+
+// CampaignCache is a thread-safe in-memory campaign store.
+// RWMutex allows many concurrent readers but one writer at a time —
+// perfect for a cache that is read millions of times and written occasionally.
+type CampaignCache struct {
+	mu        sync.RWMutex
+	campaigns map[string]float64 // campaignID → baseCPM
+}
+
+func (cc *CampaignCache) Get(id string) (float64, bool) {
+	cc.mu.RLock()
+	defer cc.mu.RUnlock()
+	v, ok := cc.campaigns[id]
+	return v, ok
+}
+
+func (cc *CampaignCache) Set(id string, cpm float64) {
+	cc.mu.Lock()
+	defer cc.mu.Unlock()
+	cc.campaigns[id] = cpm
+}
+
+// lookupAudience simulates a fast in-process audience segment lookup.
+func lookupAudience(ctx context.Context, userID string) ([]string, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case <-time.After(2 * time.Millisecond): // simulate 2ms lookup
+		return []string{"seg-sports", "seg-shoes"}, nil
+	}
+}
+
+// lookupFreqCap simulates checking a co-located Redis sidecar.
+func lookupFreqCap(ctx context.Context, userID, campaignID string) (int, error) {
+	select {
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	case <-time.After(3 * time.Millisecond): // simulate 3ms lookup
+		return 2, nil // user has seen this campaign 2 times today
+	}
+}
+
+// BidWithContext runs parallel lookups and cancels all of them if the
+// context deadline is exceeded before they complete.
+func BidWithContext(ctx context.Context, userID string, cache *CampaignCache) (float64, error) {
+	type result struct {
+		segs []string
+		freq int
+		err  error
+	}
+	ch := make(chan result, 1)
+
+	go func() {
+		var r result
+		// Run audience + freq-cap lookups concurrently.
+		var wg sync.WaitGroup
+		wg.Add(2)
+
+		var segs []string
+		var freq int
+		var errSeg, errFreq error
+
+		go func() {
+			defer wg.Done()
+			segs, errSeg = lookupAudience(ctx, userID)
+		}()
+		go func() {
+			defer wg.Done()
+			freq, errFreq = lookupFreqCap(ctx, userID, "camp-1")
+		}()
+
+		wg.Wait()
+		if errSeg != nil {
+			r.err = errSeg
+		} else if errFreq != nil {
+			r.err = errFreq
+		} else {
+			r.segs, r.freq = segs, freq
+		}
+		ch <- r
+	}()
+
+	select {
+	case <-ctx.Done():
+		return 0, fmt.Errorf("bid timed out: %w", ctx.Err())
+	case r := <-ch:
+		if r.err != nil {
+			return 0, r.err
+		}
+		if r.freq >= 5 {
+			return 0, nil // frequency capped
+		}
+		// Simplified: return CPM if user has matching segment.
+		for _, s := range r.segs {
+			if s == "seg-sports" {
+				cpm, _ := cache.Get("camp-1")
+				return cpm, nil
+			}
+		}
+		return 0, nil
+	}
+}
+
+func main() {
+	cache := &CampaignCache{campaigns: map[string]float64{"camp-1": 3.75}}
+
+	// Tight deadline — should succeed (lookups take 3 ms total, deadline 50 ms).
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+
+	cpm, err := BidWithContext(ctx, "user-42", cache)
+	fmt.Printf("CPM: %.2f  err: %v\n", cpm, err)
+
+	// Simulate timeout (deadline shorter than lookup time).
+	ctx2, cancel2 := context.WithTimeout(context.Background(), 1*time.Millisecond)
+	defer cancel2()
+	cpm2, err2 := BidWithContext(ctx2, "user-42", cache)
+	fmt.Printf("CPM: %.2f  err: %v\n", cpm2, err2)
+}
+', true, 0),
+  ('ortb-bidder-benchmark', 'go', 'main.go', 'package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"sync"
+	"testing"
+)
+
+// ---- Types ----
+type BidRequest  struct { ID string `json:"id"`; Imp []Imp `json:"imp"` }
+type Imp         struct { ID string `json:"id"`; BidFloor float64 `json:"bidfloor"` }
+type BidResponse struct { ID string `json:"id"`; SeatBid []SeatBid `json:"seatbid,omitempty"` }
+type SeatBid     struct { Bid []Bid `json:"bid"` }
+type Bid         struct { ID string `json:"id"`; ImpID string `json:"impid"`; Price float64 `json:"price"` }
+
+// ---- Unoptimised version: allocates a new decoder every call ----
+func processUnoptimised(body []byte) (*BidResponse, error) {
+	var req BidRequest
+	if err := json.Unmarshal(body, &req); err != nil {
+		return nil, err
+	}
+	var bids []Bid
+	for _, imp := range req.Imp {
+		bids = append(bids, Bid{ID: "b" + imp.ID, ImpID: imp.ID, Price: 2.50})
+	}
+	return &BidResponse{ID: req.ID, SeatBid: []SeatBid{{Bid: bids}}}, nil
+}
+
+// ---- Optimised version: pooled decoder, pre-allocated slice ----
+var decoderPool = sync.Pool{New: func() any { return json.NewDecoder(nil) }}
+
+func processOptimised(body []byte) (*BidResponse, error) {
+	dec := decoderPool.Get().(*json.Decoder)
+	dec.Reset(bytes.NewReader(body))
+	defer decoderPool.Put(dec)
+
+	var req BidRequest
+	if err := dec.Decode(&req); err != nil {
+		return nil, err
+	}
+	bids := make([]Bid, 0, len(req.Imp)) // pre-allocate capacity
+	for _, imp := range req.Imp {
+		bids = append(bids, Bid{ID: "b" + imp.ID, ImpID: imp.ID, Price: 2.50})
+	}
+	return &BidResponse{ID: req.ID, SeatBid: []SeatBid{{Bid: bids}}}, nil
+}
+
+// BenchmarkUnoptimised and BenchmarkOptimised can be run with:
+//   go test -bench=. -benchmem -count=5
+// Expected output: optimised should show fewer B/op and allocs/op.
+
+func BenchmarkUnoptimised(b *testing.B) {
+	body := []byte(`{"id":"req-1","imp":[{"id":"i1","bidfloor":1.0},{"id":"i2","bidfloor":0.5}]}`)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		processUnoptimised(body) //nolint:errcheck
+	}
+}
+
+func BenchmarkOptimised(b *testing.B) {
+	body := []byte(`{"id":"req-1","imp":[{"id":"i1","bidfloor":1.0},{"id":"i2","bidfloor":0.5}]}`)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		processOptimised(body) //nolint:errcheck
+	}
+}
+
+func main() {
+	// Quick sanity check (not a benchmark — run with go test -bench=. for real numbers)
+	body := []byte(`{"id":"req-1","imp":[{"id":"i1","bidfloor":1.0}]}`)
+	resp, err := processOptimised(body)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Printf("Response: id=%s bids=%d price=%.2f\n",
+		resp.ID, len(resp.SeatBid[0].Bid), resp.SeatBid[0].Bid[0].Price)
+	fmt.Println("Run ''go test -bench=. -benchmem'' for performance numbers.")
+	// Suppress unused benchmark symbols in main binary
+	_ = testing.B{}
+}
+', true, 0),
+  ('ortb-exchange-fanout', 'go', 'main.go', 'package main
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"sync"
+	"time"
+)
+
+type BidRequest struct {
+	ID   string `json:"id"`
+	TMax int    `json:"tmax"`
+}
+
+type BidResponse struct {
+	ID      string    `json:"id"`
+	SeatBid []SeatBid `json:"seatbid,omitempty"`
+}
+
+type SeatBid struct {
+	Seat string `json:"seat,omitempty"`
+	Bid  []Bid  `json:"bid"`
+}
+
+type Bid struct {
+	ImpID string  `json:"impid"`
+	Price float64 `json:"price"`
+}
+
+type DSPResult struct {
+	DSPID string
+	Resp  *BidResponse
+	Err   error
+}
+
+// callDSP sends the BidRequest to one DSP and sends the result on ch.
+// It respects ctx cancellation for early termination.
+func callDSP(ctx context.Context, dspID, endpoint string, req *BidRequest, ch chan<- DSPResult) {
+	body, _ := json.Marshal(req)
+	httpReq, _ := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 0} // ctx carries the deadline
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		ch <- DSPResult{DSPID: dspID, Err: err}
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNoContent {
+		ch <- DSPResult{DSPID: dspID} // explicit no-bid
+		return
+	}
+
+	var br BidResponse
+	if err := json.NewDecoder(resp.Body).Decode(&br); err != nil {
+		ch <- DSPResult{DSPID: dspID, Err: err}
+		return
+	}
+	ch <- DSPResult{DSPID: dspID, Resp: &br}
+}
+
+// FanOut sends req to all dsps concurrently and returns all bids received
+// before the context deadline expires.
+func FanOut(ctx context.Context, req *BidRequest, dsps map[string]string) []Bid {
+	ch := make(chan DSPResult, len(dsps)) // buffered — goroutines never block on send
+
+	var wg sync.WaitGroup
+	for id, endpoint := range dsps {
+		wg.Add(1)
+		go func(id, ep string) {
+			defer wg.Done()
+			callDSP(ctx, id, ep, req, ch)
+		}(id, endpoint)
+	}
+
+	// Close channel after all goroutines finish so the drain loop terminates.
+	go func() { wg.Wait(); close(ch) }()
+
+	var allBids []Bid
+	for r := range ch {
+		if r.Resp == nil {
+			continue
+		}
+		for _, sb := range r.Resp.SeatBid {
+			allBids = append(allBids, sb.Bid...)
+		}
+	}
+	return allBids
+}
+
+func main() {
+	req := &BidRequest{ID: "req-001", TMax: 80}
+
+	// In a real exchange, dsps map would come from a registry.
+	// Use placeholder URLs here for demo.
+	dsps := map[string]string{
+		"dsp-a": "http://dsp-a.internal/bid",
+		"dsp-b": "http://dsp-b.internal/bid",
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(),
+		time.Duration(req.TMax)*time.Millisecond)
+	defer cancel()
+
+	start := time.Now()
+	bids := FanOut(ctx, req, dsps)
+	fmt.Printf("Collected %d bids in %v\n", len(bids), time.Since(start).Round(time.Millisecond))
+}
+', true, 0),
+  ('ortb-exchange-hedged', 'go', 'main.go', 'package main
+
+import (
+	"context"
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+)
+
+// DSPCall simulates calling a DSP endpoint with variable latency.
+// In production this would be an HTTP POST with JSON body.
+type DSPCall func(ctx context.Context) (float64, error)
+
+// simulateDSP returns a DSPCall that responds after a random latency.
+func simulateDSP(name string, p50, jitter time.Duration) DSPCall {
+	return func(ctx context.Context) (float64, error) {
+		latency := p50 + time.Duration(rand.Int63n(int64(jitter)))
+		select {
+		case <-ctx.Done():
+			return 0, fmt.Errorf("%s: %w", name, ctx.Err())
+		case <-time.After(latency):
+			return 3.14, nil // mock CPM
+		}
+	}
+}
+
+// HedgedCall sends call to primary; if no response within hedgeDelay, also
+// sends to backup. Returns the first successful response.
+func HedgedCall(ctx context.Context, primary, backup DSPCall, hedgeDelay time.Duration) (float64, error) {
+	type result struct {
+		val float64
+		err error
+	}
+	ch := make(chan result, 2) // buffer 2 so both goroutines can send and exit
+
+	var once sync.Once
+	var wg sync.WaitGroup
+
+	launch := func(call DSPCall) {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			v, err := call(ctx)
+			once.Do(func() { ch <- result{v, err} }) // only first winner sends
+		}()
+	}
+
+	// Always start primary immediately.
+	launch(primary)
+
+	// Start backup after hedgeDelay if primary hasn''t responded.
+	hedgeTimer := time.NewTimer(hedgeDelay)
+	defer hedgeTimer.Stop()
+
+	go func() {
+		select {
+		case <-hedgeTimer.C:
+			launch(backup) // send hedge
+		case <-ctx.Done():
+		}
+	}()
+
+	// Wait for first result or context cancellation.
+	select {
+	case r := <-ch:
+		go func() { wg.Wait() }() // allow loser goroutine to finish
+		return r.val, r.err
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	}
+}
+
+func main() {
+	rand.Seed(42)
+
+	primary := simulateDSP("primary", 60*time.Millisecond, 30*time.Millisecond) // p50=60ms, sometimes 90ms
+	backup  := simulateDSP("backup",  20*time.Millisecond, 10*time.Millisecond) // p50=20ms (fast replica)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	start := time.Now()
+	cpm, err := HedgedCall(ctx, primary, backup, 40*time.Millisecond)
+	elapsed := time.Since(start)
+
+	fmt.Printf("CPM=%.2f err=%v elapsed=%v\n", cpm, err, elapsed.Round(time.Millisecond))
+}
+', true, 0),
+  ('ortb-exchange-auction', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+// AuctionType mirrors the OpenRTB "at" field.
+type AuctionType int
+
+const (
+	FirstPrice  AuctionType = 1
+	SecondPrice AuctionType = 2
+)
+
+// BidEntry represents one bid received from a DSP.
+type BidEntry struct {
+	DSPID string
+	ImpID string
+	Price float64 // CPM in USD
+	AdM   string
+}
+
+// AuctionResult is returned to the exchange after settlement.
+type AuctionResult struct {
+	Winner        *BidEntry
+	ClearingPrice float64
+	Losers        []BidEntry
+}
+
+// RunAuction selects a winner from eligible bids given floor and auction type.
+func RunAuction(bids []BidEntry, floor float64, at AuctionType) *AuctionResult {
+	// Filter: remove bids below floor.
+	eligible := bids[:0]
+	for _, b := range bids {
+		if b.Price >= floor {
+			eligible = append(eligible, b)
+		}
+	}
+	if len(eligible) == 0 {
+		return nil // no fill
+	}
+
+	// Sort descending by price.
+	sort.Slice(eligible, func(i, j int) bool {
+		return eligible[i].Price > eligible[j].Price
+	})
+
+	winner := eligible[0]
+	var clearingPrice float64
+
+	switch at {
+	case FirstPrice:
+		clearingPrice = winner.Price
+	case SecondPrice:
+		clearingPrice = floor
+		if len(eligible) > 1 {
+			clearingPrice = eligible[1].Price
+		}
+	default:
+		clearingPrice = winner.Price
+	}
+
+	result := &AuctionResult{
+		Winner:        &eligible[0],
+		ClearingPrice: clearingPrice,
+	}
+	if len(eligible) > 1 {
+		result.Losers = eligible[1:]
+	}
+	return result
+}
+
+func main() {
+	bids := []BidEntry{
+		{DSPID: "dsp-a", ImpID: "imp-1", Price: 5.00},
+		{DSPID: "dsp-b", ImpID: "imp-1", Price: 3.50},
+		{DSPID: "dsp-c", ImpID: "imp-1", Price: 1.20},
+		{DSPID: "dsp-d", ImpID: "imp-1", Price: 0.80}, // below floor
+	}
+	floor := 1.00
+
+	fmt.Println("=== First-Price Auction ===")
+	if r := RunAuction(bids, floor, FirstPrice); r != nil {
+		fmt.Printf("Winner: %s bid=$%.2f pays=$%.2f\n",
+			r.Winner.DSPID, r.Winner.Price, r.ClearingPrice)
+	}
+
+	fmt.Println("\n=== Second-Price Auction ===")
+	if r := RunAuction(bids, floor, SecondPrice); r != nil {
+		fmt.Printf("Winner: %s bid=$%.2f pays=$%.2f\n",
+			r.Winner.DSPID, r.Winner.Price, r.ClearingPrice)
+		for _, l := range r.Losers {
+			fmt.Printf("  Loser: %s bid=$%.2f\n", l.DSPID, l.Price)
+		}
+	}
+}
+', true, 0),
+  ('ortb-exchange-floors', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// Deal types (inferred from usage; ORTB doesn''t have a formal "type" field but
+// convention distinguishes by at=4 (fixed price) or at=1/2 plus wseat).
+const (
+	DealTypePG        = "programmatic_guaranteed" // at=4, fixed CPM, guaranteed impressions
+	DealTypePreferred = "preferred_deal"           // first-look, fixed CPM, non-guaranteed
+	DealTypePMP       = "pmp"                      // spot auction with private floor + wseat
+)
+
+type Deal struct {
+	ID          string   `json:"id"`
+	BidFloor    float64  `json:"bidfloor,omitempty"`
+	BidFloorCur string   `json:"bidfloorcur,omitempty"`
+	AT          int      `json:"at,omitempty"`    // 1=FP, 2=SP, 4=fixed-price
+	WSeat       []string `json:"wseat,omitempty"` // eligible buyer seats for this deal
+	WADomains   []string `json:"wadomain,omitempty"`
+}
+
+type PMP struct {
+	PrivateAuction int    `json:"private_auction,omitempty"` // 1 = deal-only auction
+	Deals          []Deal `json:"deals,omitempty"`
+}
+
+type Impression struct {
+	ID           string  `json:"id"`
+	BidFloor     float64 `json:"bidfloor,omitempty"`
+	BidFloorCur  string  `json:"bidfloorcur,omitempty"`
+	PMP          *PMP    `json:"pmp,omitempty"`
+}
+
+// selectDeal returns the deal the bid should reference, or "" for open auction.
+func selectDeal(imp Impression, buyerSeat string, bidCPM float64) string {
+	if imp.PMP == nil {
+		return "" // no deals on this impression
+	}
+	for _, d := range imp.PMP.Deals {
+		// Check seat eligibility.
+		eligible := len(d.WSeat) == 0
+		for _, s := range d.WSeat {
+			if s == buyerSeat {
+				eligible = true
+				break
+			}
+		}
+		if !eligible {
+			continue
+		}
+		// Check deal floor.
+		if d.BidFloor > 0 && bidCPM < d.BidFloor {
+			continue
+		}
+		return d.ID // return first matching deal
+	}
+	// Check if open auction is allowed.
+	if imp.PMP.PrivateAuction == 1 {
+		return "" // no deal matched and open auction not allowed
+	}
+	return "" // open auction
+}
+
+func main() {
+	imp := Impression{
+		ID:          "imp-1",
+		BidFloor:    1.00,
+		BidFloorCur: "USD",
+		PMP: &PMP{
+			PrivateAuction: 0, // open auction allowed alongside deals
+			Deals: []Deal{
+				{
+					ID:       "deal-vip",
+					BidFloor: 5.00,
+					AT:       1, // first-price
+					WSeat:    []string{"seat-abc", "seat-xyz"},
+				},
+				{
+					ID:       "deal-general",
+					BidFloor: 3.00,
+					AT:       2, // second-price
+					WSeat:    []string{}, // any seat
+				},
+			},
+		},
+	}
+
+	scenarios := []struct {
+		seat string
+		cpm  float64
+	}{
+		{"seat-abc", 6.00},  // eligible for VIP deal
+		{"seat-other", 3.50}, // eligible for general deal
+		{"seat-other", 2.00}, // below all deal floors, falls to open auction
+	}
+
+	for _, s := range scenarios {
+		deal := selectDeal(imp, s.seat, s.cpm)
+		if deal == "" {
+			fmt.Printf("seat=%s cpm=%.2f → open auction\n", s.seat, s.cpm)
+		} else {
+			fmt.Printf("seat=%s cpm=%.2f → deal: %s\n", s.seat, s.cpm, deal)
+		}
+	}
+
+	b, _ := json.MarshalIndent(imp.PMP, "", "  ")
+	fmt.Println("\nPMP object:", string(b))
+}
+', true, 0),
+  ('ortb-serving-reverse-proxy', 'go', 'main.go', 'package main
+
+import (
+	"bytes"
+	"io"
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
+	"time"
+)
+
+// newAdProxy creates a reverse proxy that:
+//   1. Forwards requests to the upstream ad server.
+//   2. Injects a tracking pixel into HTML responses.
+//   3. Logs errors gracefully instead of panicking.
+func newAdProxy(upstream string) *httputil.ReverseProxy {
+	target, err := url.Parse(upstream)
+	if err != nil {
+		log.Fatalf("invalid upstream URL: %v", err)
+	}
+
+	proxy := &httputil.ReverseProxy{
+		Director: func(req *http.Request) {
+			// Rewrite the request to target the upstream ad server.
+			req.URL.Scheme = target.Scheme
+			req.URL.Host = target.Host
+			req.Host = target.Host
+			// Forward the original path; strip internal routing prefix.
+			req.URL.Path = strings.TrimPrefix(req.URL.Path, "/ad")
+			if req.URL.Path == "" {
+				req.URL.Path = "/"
+			}
+			// Remove the X-Forwarded-For header that the stdlib adds by default
+			// to avoid leaking internal IP addresses to the ad server.
+			req.Header.Del("X-Forwarded-For")
+			req.Header.Set("X-Internal-Request", "1")
+		},
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost: 100,
+			IdleConnTimeout:     30 * time.Second,
+		},
+		ModifyResponse: func(resp *http.Response) error {
+			ct := resp.Header.Get("Content-Type")
+			if !strings.Contains(ct, "text/html") {
+				return nil // only inject into HTML responses
+			}
+			body, err := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if err != nil {
+				return err
+			}
+			// Inject a 1×1 impression pixel before </body>.
+			pixel := `<img src="https://track.example.com/imp?aid=123" width="1" height="1"/>`
+			modified := strings.Replace(string(body), "</body>", pixel+"</body>", 1)
+			resp.Body = io.NopCloser(bytes.NewBufferString(modified))
+			resp.ContentLength = int64(len(modified))
+			resp.Header.Del("Content-Encoding") // pixel injection may change size
+			return nil
+		},
+		ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+			log.Printf("proxy error: %v", err)
+			http.Error(w, "ad server unavailable", http.StatusBadGateway)
+		},
+	}
+	return proxy
+}
+
+func main() {
+	proxy := newAdProxy("https://ads.example.com")
+	mux := http.NewServeMux()
+	mux.Handle("/ad/", proxy)
+
+	srv := &http.Server{
+		Addr:         ":8080",
+		Handler:      mux,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	log.Println("Ad proxy listening on :8080")
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
+}
+', true, 0),
+  ('ortb-serving-win-billing', 'go', 'main.go', 'package main
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// ---- Exchange side: dispatch nurl / burl ----
+
+// FireNotice sends a GET request to noticeURL with macro substitutions.
+// It is always called in a background goroutine — never block the auction response.
+func FireNotice(noticeURL string, macros map[string]string) {
+	u := noticeURL
+	for k, v := range macros {
+		u = strings.ReplaceAll(u, "+k+", url.QueryEscape(v))
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		fmt.Printf("notice URL error: %v\n", err)
+		return
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Printf("notice fire error: %v\n", err)
+		return
+	}
+	resp.Body.Close()
+	fmt.Printf("notice fired: %s status=%d\n", u[:min(len(u), 80)], resp.StatusCode)
+}
+
+// OnAuctionWin fires the winner''s nurl in a background goroutine.
+// Returns immediately — the SSP response is not blocked.
+func OnAuctionWin(winnerNURL string, auctionID string, clearingPrice float64) {
+	if winnerNURL == "" {
+		return
+	}
+	go FireNotice(winnerNURL, map[string]string{
+		"AUCTION_ID":    auctionID,
+		"AUCTION_PRICE": strconv.FormatFloat(clearingPrice, ''f'', 6, 64),
+		"AUCTION_CURRENCY": "USD",
+	})
+}
+
+// OnBillingEvent fires the burl when the exchange renderer detects a billable impression.
+func OnBillingEvent(bURL string, auctionID string, clearingPrice float64) {
+	if bURL == "" {
+		return
+	}
+	go FireNotice(bURL, map[string]string{
+		"AUCTION_ID":    auctionID,
+		"AUCTION_PRICE": strconv.FormatFloat(clearingPrice, ''f'', 6, 64),
+	})
+}
+
+// ---- DSP side: win + billing handlers ----
+
+type WinEvent struct {
+	AuctionID     string
+	ClearingPrice float64
+	Currency      string
+}
+
+func HandleWinNotice(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	priceStr := q.Get("p")
+	if priceStr == "" {
+		priceStr = q.Get("price")
+	}
+	price, _ := strconv.ParseFloat(priceStr, 64)
+	event := WinEvent{
+		AuctionID:     q.Get("aid"),
+		ClearingPrice: price,
+		Currency:      "USD",
+	}
+	// In production: write to a ring buffer → Kafka for async processing.
+	fmt.Printf("[DSP] WIN: auction=%s clearing_price=%.4f\n", event.AuctionID, event.ClearingPrice)
+	w.WriteHeader(http.StatusOK)
+}
+
+func HandleBillingNotice(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	price, _ := strconv.ParseFloat(q.Get("p"), 64)
+	fmt.Printf("[DSP] BILL: auction=%s spend=%.4f\n", q.Get("aid"), price)
+	// Record billable spend here — this is the authoritative cost signal.
+	w.WriteHeader(http.StatusOK)
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func main() {
+	// Exchange side simulation.
+	nurl := "https://dsp.example.com/win?aid=${AUCTION_ID}&p=${AUCTION_PRICE}"
+	burl := "https://dsp.example.com/bill?aid=${AUCTION_ID}&p=${AUCTION_PRICE}"
+
+	OnAuctionWin(nurl, "req-001", 3.14)
+	time.Sleep(10 * time.Millisecond) // let goroutine fire in demo
+
+	OnBillingEvent(burl, "req-001", 3.14)
+	time.Sleep(10 * time.Millisecond)
+
+	fmt.Println("Notice dispatch complete (non-blocking)")
+}
+', true, 0),
+  ('ortb-serving-markup', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"net/url"
+	"strconv"
+	"strings"
+)
+
+// MacroValues holds all values available for substitution at auction time.
+type MacroValues struct {
+	AuctionID     string
+	ImpID         string
+	BidID         string
+	SeatID        string
+	AdID          string
+	ClearingPrice float64
+	Currency      string
+	LossReason    int // for ${AUCTION_LOSS} in lurl
+}
+
+// SubstituteMarkup replaces OpenRTB macros in ad markup (HTML body).
+// In markup bodies, macro values are used as-is (not URL-encoded).
+func SubstituteMarkup(markup string, v MacroValues) string {
+	priceStr := strconv.FormatFloat(v.ClearingPrice, ''f'', 6, 64)
+	r := strings.NewReplacer(
+		"${AUCTION_PRICE}",    priceStr,
+		"${AUCTION_ID}",       v.AuctionID,
+		"${AUCTION_IMP_ID}",   v.ImpID,
+		"${AUCTION_BID_ID}",   v.BidID,
+		"${AUCTION_SEAT_ID}",  v.SeatID,
+		"${AUCTION_AD_ID}",    v.AdID,
+		"${AUCTION_CURRENCY}", v.Currency,
+	)
+	return r.Replace(markup)
+}
+
+// SubstituteURL replaces OpenRTB macros in URLs.
+// Macro values in URL context MUST be URL-encoded.
+func SubstituteURL(rawURL string, v MacroValues) string {
+	priceStr := strconv.FormatFloat(v.ClearingPrice, ''f'', 6, 64)
+	r := strings.NewReplacer(
+		"${AUCTION_PRICE}",    url.QueryEscape(priceStr),
+		"${AUCTION_ID}",       url.QueryEscape(v.AuctionID),
+		"${AUCTION_IMP_ID}",   url.QueryEscape(v.ImpID),
+		"${AUCTION_BID_ID}",   url.QueryEscape(v.BidID),
+		"${AUCTION_SEAT_ID}",  url.QueryEscape(v.SeatID),
+		"${AUCTION_AD_ID}",    url.QueryEscape(v.AdID),
+		"${AUCTION_CURRENCY}", url.QueryEscape(v.Currency),
+		"${AUCTION_LOSS}",     url.QueryEscape(strconv.Itoa(v.LossReason)),
+	)
+	return r.Replace(rawURL)
+}
+
+func main() {
+	v := MacroValues{
+		AuctionID:     "req-001",
+		ImpID:         "imp-1",
+		BidID:         "bid-abc",
+		SeatID:        "seat-a",
+		AdID:          "ad-5",
+		ClearingPrice: 3.141592,
+		Currency:      "USD",
+	}
+
+	// Inline markup with ${AUCTION_PRICE} used for a tracking call.
+	adm := `<div><img src="https://px.track.com/imp?p=${AUCTION_PRICE}&aid=${AUCTION_ID}" width="1" height="1"/><a href="https://click.track.com/click?bid=${AUCTION_BID_ID}">Ad content</a></div>`
+
+	fmt.Println("=== Markup substitution ===")
+	fmt.Println(SubstituteMarkup(adm, v))
+
+	// URL-only macro substitution (for nurl / burl).
+	nurl := "https://exchange.com/win?p=${AUCTION_PRICE}&aid=${AUCTION_ID}"
+	lurl := "https://exchange.com/loss?reason=${AUCTION_LOSS}&aid=${AUCTION_ID}"
+
+	fmt.Println("\n=== URL substitution ===")
+	fmt.Println("nurl:", SubstituteURL(nurl, v))
+	v.LossReason = 1
+	fmt.Println("lurl:", SubstituteURL(lurl, v))
+}
+', true, 0),
+  ('ortb-serving-cdn', 'go', 'main.go', 'package main
+
+import (
+	"crypto/md5"
+	"fmt"
+	"sync"
+	"time"
+)
+
+// CreativeStatus tracks audit results per creative.
+type CreativeStatus int
+
+const (
+	StatusPending  CreativeStatus = iota
+	StatusApproved                // safe to serve
+	StatusBlocked                 // blocked: violates policy
+	StatusAudit                   // under review
+)
+
+// CreativeRecord stores the audit state for a DSP creative.
+type CreativeRecord struct {
+	CrID       string
+	DSPID      string
+	IURL       string
+	ADomains   []string
+	Status     CreativeStatus
+	SubmitTime time.Time
+	Reason     string // for blocked status
+}
+
+// CreativeAuditStore is a thread-safe in-memory store for creative audit states.
+type CreativeAuditStore struct {
+	mu      sync.RWMutex
+	records map[string]*CreativeRecord // key: dspID+":"+crid
+}
+
+func NewAuditStore() *CreativeAuditStore {
+	return &CreativeAuditStore{records: make(map[string]*CreativeRecord)}
+}
+
+func (s *CreativeAuditStore) key(dspID, crid string) string {
+	return dspID + ":" + crid
+}
+
+// Lookup returns the creative status. Unknown crids return StatusPending.
+func (s *CreativeAuditStore) Lookup(dspID, crid string) CreativeStatus {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if r, ok := s.records[s.key(dspID, crid)]; ok {
+		return r.Status
+	}
+	return StatusPending
+}
+
+// Submit queues a new creative for audit if not already known.
+func (s *CreativeAuditStore) Submit(cr CreativeRecord) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	k := s.key(cr.DSPID, cr.CrID)
+	if _, exists := s.records[k]; exists {
+		return false // already known, no action needed
+	}
+	cr.Status = StatusAudit
+	cr.SubmitTime = time.Now()
+	s.records[k] = &cr
+	return true // new — enqueue for async audit
+}
+
+// Approve or block a creative after audit completes.
+func (s *CreativeAuditStore) SetStatus(dspID, crid string, status CreativeStatus, reason string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	k := s.key(dspID, crid)
+	if r, ok := s.records[k]; ok {
+		r.Status = status
+		r.Reason = reason
+	}
+}
+
+// IURLHash returns an MD5 hash of the IURL to detect markup changes.
+func IURLHash(iurl string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(iurl)))[:8]
+}
+
+func main() {
+	store := NewAuditStore()
+
+	cr := CreativeRecord{
+		CrID:     "banner-300x250-v2",
+		DSPID:    "dsp-a",
+		IURL:     "https://cdn.dsp-a.com/creatives/banner-300x250-v2.jpg",
+		ADomains: []string{"nike.com"},
+	}
+
+	isNew := store.Submit(cr)
+	fmt.Printf("Creative submitted (new=%t) crid=%s\n", isNew, cr.CrID)
+	fmt.Printf("Status: %d (1=audit)\n", store.Lookup(cr.DSPID, cr.CrID))
+
+	// Simulate async audit completion.
+	store.SetStatus(cr.DSPID, cr.CrID, StatusApproved, "")
+	fmt.Printf("After audit: status=%d (1=approved)\n", store.Lookup(cr.DSPID, cr.CrID))
+
+	// Hash used to detect if DSP changed markup with same crid (fraud signal).
+	fmt.Printf("IURL hash: %s\n", IURLHash(cr.IURL))
+}
+', true, 0),
+  ('ortb-tracking-impressions', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"net/http"
+	"sync"
+	"sync/atomic"
+	"time"
+)
+
+// transparentGIF is a minimal 1×1 transparent GIF in 35 bytes.
+var transparentGIF = []byte{
+	0x47, 0x49, 0x46, 0x38, 0x39, 0x61, // GIF89a
+	0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00,
+	0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x21,
+	0xF9, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x2C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
+	0x01, 0x00, 0x00, 0x02, 0x02, 0x44, 0x01,
+	0x00, 0x3B,
+}
+
+// ImpressionTracker counts impressions and deduplicates within a time window.
+type ImpressionTracker struct {
+	total    atomic.Int64
+	mu       sync.Mutex
+	seen     map[string]time.Time // impression_id → first seen
+	dedupTTL time.Duration
+}
+
+func NewTracker(dedupTTL time.Duration) *ImpressionTracker {
+	t := &ImpressionTracker{
+		seen:     make(map[string]time.Time),
+		dedupTTL: dedupTTL,
+	}
+	// Periodically evict expired dedup entries to bound memory.
+	go func() {
+		tick := time.NewTicker(dedupTTL)
+		defer tick.Stop()
+		for range tick.C {
+			t.evict()
+		}
+	}()
+	return t
+}
+
+// Record returns true if this impression ID is new (not yet seen within TTL).
+func (t *ImpressionTracker) Record(impID string) bool {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if _, seen := t.seen[impID]; seen {
+		return false // duplicate
+	}
+	t.seen[impID] = time.Now()
+	t.total.Add(1)
+	return true
+}
+
+func (t *ImpressionTracker) evict() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	cutoff := time.Now().Add(-t.dedupTTL)
+	for id, ts := range t.seen {
+		if ts.Before(cutoff) {
+			delete(t.seen, id)
+		}
+	}
+}
+
+func (t *ImpressionTracker) Total() int64 { return t.total.Load() }
+
+// ServeHTTP handles GET /imp?aid=<auctionID>&iid=<impID>
+func (t *ImpressionTracker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	impID := q.Get("iid")
+	if impID == "" {
+		impID = q.Get("aid") // fallback
+	}
+
+	isNew := t.Record(impID)
+	if isNew {
+		fmt.Printf("[impression] new: %s  total=%d\n", impID, t.Total())
+	} else {
+		fmt.Printf("[impression] dup: %s\n", impID)
+	}
+
+	w.Header().Set("Content-Type", "image/gif")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.WriteHeader(http.StatusOK)
+	w.Write(transparentGIF) //nolint:errcheck
+}
+
+func main() {
+	tracker := NewTracker(30 * time.Second)
+
+	// Simulate pixel fires.
+	ids := []string{"imp-1", "imp-2", "imp-1", "imp-3", "imp-2"} // imp-1 and imp-2 are duplicates
+	for _, id := range ids {
+		tracker.Record(id)
+	}
+	fmt.Printf("Total unique impressions: %d\n", tracker.Total())
+
+	// Start HTTP server (demo).
+	http.Handle("/imp", tracker)
+	srv := &http.Server{Addr: ":8081", ReadTimeout: 2 * time.Second, WriteTimeout: 2 * time.Second}
+	go srv.ListenAndServe() //nolint:errcheck
+	time.Sleep(50 * time.Millisecond)
+	fmt.Println("Impression pixel server ready at http://localhost:8081/imp?iid=test")
+	srv.Close() //nolint:errcheck
+}
+', true, 0),
+  ('ortb-tracking-clicks', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"net/http"
+	"net/url"
+	"sync"
+	"time"
+)
+
+// ClickTracker records clicks with deduplication and fires a 302 redirect.
+type ClickTracker struct {
+	mu    sync.Mutex
+	seen  map[string]time.Time
+	total int64
+	ttl   time.Duration
+}
+
+func NewClickTracker(ttl time.Duration) *ClickTracker {
+	return &ClickTracker{seen: make(map[string]time.Time), ttl: ttl}
+}
+
+// Record returns true if this click is new (not a duplicate).
+func (ct *ClickTracker) Record(clickID string) bool {
+	ct.mu.Lock()
+	defer ct.mu.Unlock()
+	if ts, seen := ct.seen[clickID]; seen && time.Since(ts) < ct.ttl {
+		return false
+	}
+	ct.seen[clickID] = time.Now()
+	ct.total++
+	return true
+}
+
+// ServeHTTP: GET /click?cid=<clickID>&dest=<destinationURL>
+func (ct *ClickTracker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	clickID := q.Get("cid")
+	dest := q.Get("dest")
+
+	if clickID == "" {
+		http.Error(w, "missing cid", http.StatusBadRequest)
+		return
+	}
+	if dest == "" {
+		http.Error(w, "missing dest", http.StatusBadRequest)
+		return
+	}
+
+	// Validate destination URL to prevent open redirect abuse.
+	destURL, err := url.ParseRequestURI(dest)
+	if err != nil || (destURL.Scheme != "http" && destURL.Scheme != "https") {
+		http.Error(w, "invalid dest", http.StatusBadRequest)
+		return
+	}
+
+	isNew := ct.Record(clickID)
+	fmt.Printf("[click] cid=%s new=%t total=%d dest=%s\n", clickID, isNew, ct.total, dest)
+
+	// Use 302 (temporary redirect) — never 301 (permanent) for click tracking.
+	// 301 responses are cached by browsers and bypass click tracking on repeat visits.
+	http.Redirect(w, r, dest, http.StatusFound) // 302
+}
+
+func main() {
+	tracker := NewClickTracker(30 * time.Second)
+
+	// Simulate click chain: exchange click → DSP click → advertiser
+	// In practice, each hop is a real HTTP redirect followed by the next server.
+	clicks := []struct{ id, dest string }{
+		{"click-001", "https://dsp.example.com/click?cid=click-001&dest=https%3A%2F%2Fadvertiser.com%2Flanding"},
+		{"click-001", "https://dsp.example.com/click?cid=click-001&dest=https%3A%2F%2Fadvertiser.com%2Flanding"}, // duplicate
+		{"click-002", "https://advertiser.com/landing"},
+	}
+	for _, c := range clicks {
+		tracker.Record(c.id)
+	}
+	fmt.Printf("Total unique clicks: %d\n", tracker.total)
+
+	// Demonstrate redirect handler.
+	mux := http.NewServeMux()
+	mux.Handle("/click", tracker)
+	srv := &http.Server{Addr: ":8082", ReadTimeout: 2 * time.Second}
+	go srv.ListenAndServe() //nolint:errcheck
+	time.Sleep(50 * time.Millisecond)
+	fmt.Println("Click tracker ready. Try: /click?cid=test&dest=https://example.com")
+	srv.Close() //nolint:errcheck
+}
+', true, 0),
+  ('ortb-tracking-macros', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"net/url"
+	"strconv"
+	"strings"
+)
+
+// OpenRTB standard price macros (complete list).
+// Source: OpenRTB 2.6 §7.2
+var StandardMacros = []string{
+	"AUCTION_ID",        // exchange-unique auction ID
+	"AUCTION_BID_ID",    // bidder-generated bid ID
+	"AUCTION_IMP_ID",    // impression ID within the auction
+	"AUCTION_SEAT_ID",   // seat (account) ID of the buyer
+	"AUCTION_AD_ID",     // ad ID, from Bid.adid
+	"AUCTION_PRICE",     // clearing price in the response currency
+	"AUCTION_CURRENCY",  // response currency (default USD)
+	"AUCTION_MBR",       // member (DSP) ID, if applicable
+	"AUCTION_LOSS",      // loss reason code (in lurl only)
+}
+
+// MacroSet holds all substitution values for one auction.
+type MacroSet struct {
+	AuctionID  string
+	BidID      string
+	ImpID      string
+	SeatID     string
+	AdID       string
+	Price      float64
+	Currency   string
+	LossReason int
+}
+
+// Apply substitutes all macros in template.
+// urlEncode should be true when template is a URL.
+func (m MacroSet) Apply(template string, urlEncode bool) string {
+	priceStr := strconv.FormatFloat(m.Price, ''f'', 6, 64)
+	lossStr  := strconv.Itoa(m.LossReason)
+
+	values := map[string]string{
+		"AUCTION_ID":       m.AuctionID,
+		"AUCTION_BID_ID":   m.BidID,
+		"AUCTION_IMP_ID":   m.ImpID,
+		"AUCTION_SEAT_ID":  m.SeatID,
+		"AUCTION_AD_ID":    m.AdID,
+		"AUCTION_PRICE":    priceStr,
+		"AUCTION_CURRENCY": m.Currency,
+		"AUCTION_LOSS":     lossStr,
+	}
+
+	args := make([]string, 0, len(values)*2)
+	for k, v := range values {
+		val := v
+		if urlEncode {
+			val = url.QueryEscape(v)
+		}
+		args = append(args, "+k+", val)
+	}
+	return strings.NewReplacer(args...).Replace(template)
+}
+
+func main() {
+	ms := MacroSet{
+		AuctionID: "req-001", BidID: "bid-xyz", ImpID: "imp-1",
+		SeatID: "seat-a", AdID: "ad-5", Price: 3.141592,
+		Currency: "USD", LossReason: 0,
+	}
+
+	fmt.Println("=== Standard macros ===")
+	for _, m := range StandardMacros {
+		fmt.Printf("  ${%-20s} (in URL context)
+", m)
+	}
+
+	// URL substitution (nurl/burl/lurl).
+	nurl := "https://dsp.example.com/win?p=${AUCTION_PRICE}&aid=${AUCTION_ID}&bid=${AUCTION_BID_ID}&cur=${AUCTION_CURRENCY}"
+	fmt.Println("
+=== nurl substitution (URL-encoded) ===")
+	fmt.Println(ms.Apply(nurl, true))
+
+	// Markup body substitution (adm).
+	adm := `<img src="https://px.track.com/imp?p=${AUCTION_PRICE}&aid=${AUCTION_ID}"/>`
+	fmt.Println("
+=== adm substitution (not URL-encoded for body) ===")
+	fmt.Println(ms.Apply(adm, false))
+
+	// Loss notification.
+	ms.LossReason = 1 // technical error
+	lurl := "https://dsp.example.com/loss?reason=${AUCTION_LOSS}&aid=${AUCTION_ID}"
+	fmt.Println("
+=== lurl substitution ===")
+	fmt.Println(ms.Apply(lurl, true))
+}
+', true, 0),
+  ('ortb-tracking-reconciliation', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"math"
+)
+
+// ReconciliationReport computes impression discrepancy between two sources.
+type ReconciliationReport struct {
+	Period         string
+	ExchangeCount  int64   // nurl-based count (authoritative for billing)
+	DSPCount       int64   // pixel-based count from DSP''s server
+	ThirdPartyCount int64  // verification vendor count (IAS, DoubleVerify, Moat)
+}
+
+// Discrepancy returns the % discrepancy between exchange and DSP counts.
+// Positive means exchange > DSP (exchange overcounting or DSP undercounting).
+// Negative means DSP > exchange (unusual — may indicate duplicates on DSP side).
+func (r ReconciliationReport) Discrepancy() float64 {
+	if r.ExchangeCount == 0 {
+		return 0
+	}
+	return (float64(r.ExchangeCount-r.DSPCount) / float64(r.ExchangeCount)) * 100
+}
+
+// Severity returns an advisory for the discrepancy level.
+func (r ReconciliationReport) Severity() string {
+	d := math.Abs(r.Discrepancy())
+	switch {
+	case d <= 5:
+		return "Normal — within industry standard"
+	case d <= 10:
+		return "Acceptable — minor discrepancy"
+	case d <= 20:
+		return "Elevated — investigate root cause"
+	default:
+		return "CRITICAL — discrepancy exceeds 20%; billing dispute likely"
+	}
+}
+
+// CommonCauses returns likely explanations for the discrepancy.
+func (r ReconciliationReport) CommonCauses() []string {
+	d := r.Discrepancy()
+	if math.Abs(d) <= 5 {
+		return []string{"Normal network and rendering variability"}
+	}
+	if d > 0 { // exchange > DSP
+		return []string{
+			"Ad blocker or browser privacy mode blocked the impression pixel",
+			"Slow creative load — pixel fired after measurement window closed",
+			"IVT (bot traffic): exchange counted bid wins; bots don''t fire pixels",
+			"Network errors between browser and DSP tracking server",
+		}
+	}
+	// d < 0: DSP > exchange
+	return []string{
+		"Pixel duplication (page refresh, BFCache, prefetch)",
+		"DSP counting multiple pixel fires per impression",
+		"Timezone or reporting window mismatch",
+	}
+}
+
+func main() {
+	reports := []ReconciliationReport{
+		{Period: "2026-07-01", ExchangeCount: 100000, DSPCount: 96000, ThirdPartyCount: 95800},
+		{Period: "2026-07-02", ExchangeCount: 100000, DSPCount: 78000, ThirdPartyCount: 77500},
+		{Period: "2026-07-03", ExchangeCount: 100000, DSPCount: 102000, ThirdPartyCount: 99500},
+	}
+
+	for _, r := range reports {
+		fmt.Printf("Period: %s\n", r.Period)
+		fmt.Printf("  Exchange: %d | DSP: %d | 3P: %d\n",
+			r.ExchangeCount, r.DSPCount, r.ThirdPartyCount)
+		fmt.Printf("  Discrepancy: %.1f%%  [%s]\n", r.Discrepancy(), r.Severity())
+		if math.Abs(r.Discrepancy()) > 5 {
+			fmt.Printf("  Likely causes:\n")
+			for _, c := range r.CommonCauses() {
+				fmt.Printf("    - %s\n", c)
+			}
+		}
+		fmt.Println()
+	}
+}
+', true, 0),
+  ('ortb-creative-banner', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+// BannerCreative represents a banner ad creative with its markup and metadata.
+type BannerCreative struct {
+	CrID       string
+	Width      int
+	Height     int
+	AdMarkup   string // HTML string for Bid.adm
+	IsSecure   bool
+	IsMRAID    bool
+}
+
+// ValidateMarkup performs basic security checks on banner HTML markup.
+// In production, use a full HTML parser and allowlist-based sanitiser.
+func ValidateMarkup(markup string, requireSecure bool) error {
+	lower := strings.ToLower(markup)
+
+	// Block JavaScript URL schemes that bypass CSP.
+	if strings.Contains(lower, "javascript:") {
+		return fmt.Errorf("forbidden: javascript: URL scheme detected")
+	}
+
+	// Block data URIs (can embed executable content).
+	if strings.Contains(lower, "data:text/html") || strings.Contains(lower, "data:application") {
+		return fmt.Errorf("forbidden: data: URI with active content detected")
+	}
+
+	// Require HTTPS for all URLs when secure=1.
+	if requireSecure {
+		for _, token := range []string{"src="http:", "src=''http:", "href="http:", "href=''http:"} {
+			if strings.Contains(lower, token) {
+				return fmt.Errorf("security violation: HTTP URL in secure creative: %s", token)
+			}
+		}
+	}
+
+	return nil
+}
+
+// GenerateMRAIDTag creates a basic MRAID-compliant HTML tag for in-app rich media.
+// MRAID 3.0 is the standard for mobile in-app creatives.
+func GenerateMRAIDTag(cdnBase, crID string, w, h int) string {
+	return fmt.Sprintf(`<html><head>
+<meta name="viewport" content="width=device-width"/>
+<script src="mraid.js"></script>
+</head>
+<body style="margin:0;padding:0;background:transparent;">
+<div id="ad-%s" style="width:%dpx;height:%dpx;overflow:hidden;">
+  <img src="%s/%s/banner.jpg" width="%d" height="%d" alt="Advertisement"/>
+  <img src="https://px.track.com/imp?crid=%s" width="1" height="1"/>
+</div>
+<script>
+  if (typeof mraid !== ''undefined'') {
+    mraid.addEventListener(''ready'', function() {
+      // MRAID API available — in-app environment detected.
+      document.getElementById(''ad-%s'').addEventListener(''click'', function() {
+        mraid.open(''https://advertiser.example.com/landing'');
+      });
+    });
+  }
+</script>
+</body></html>`, crID, w, h, cdnBase, crID, w, h, crID, crID)
+}
+
+func main() {
+	// Standard display banner (728×90).
+	banner := BannerCreative{
+		CrID:  "banner-728x90-v1",
+		Width: 728, Height: 90,
+		IsSecure: true,
+		AdMarkup: `<div style="width:728px;height:90px;">
+  <a href="https://click.track.com/click?cid=xyz&dest=https%3A%2F%2Fadvertiser.com">
+    <img src="https://cdn.example.com/banner-728x90.jpg" width="728" height="90"/>
+  </a>
+  <img src="https://px.track.com/imp?crid=banner-728x90-v1" width="1" height="1"/>
+</div>`,
+	}
+
+	err := ValidateMarkup(banner.AdMarkup, banner.IsSecure)
+	fmt.Printf("Banner validation: err=%v\n", err)
+
+	// Test an insecure URL.
+	insecure := `<img src="http://cdn.example.com/ad.jpg"/>`
+	err = ValidateMarkup(insecure, true)
+	fmt.Printf("Insecure markup validation: err=%v\n", err)
+
+	// MRAID creative.
+	mraidTag := GenerateMRAIDTag("https://cdn.example.com/creatives", "mraid-300x250-v2", 300, 250)
+	fmt.Printf("\nMRAID tag length: %d bytes\n", len(mraidTag))
+	fmt.Println("First 200 chars:", mraidTag[:200])
+}
+', true, 0),
+  ('ortb-creative-vast', 'go', 'main.go', 'package main
+
+import (
+	"encoding/xml"
+	"fmt"
+)
+
+// Minimal VAST 4.x type definitions for InLine ads.
+
+type VAST struct {
+	XMLName xml.Name `xml:"VAST"`
+	Version string   `xml:"version,attr"`
+	Ads     []Ad     `xml:"Ad"`
+}
+
+type Ad struct {
+	ID     string `xml:"id,attr,omitempty"`
+	Inline *Inline `xml:"InLine"`
+}
+
+type Inline struct {
+	AdSystem   string     `xml:"AdSystem"`
+	AdTitle    string     `xml:"AdTitle"`
+	Impression []CDATA    `xml:"Impression"`
+	Creatives  []Creative `xml:"Creatives>Creative"`
+}
+
+type Creative struct {
+	ID     string  `xml:"id,attr,omitempty"`
+	Linear *Linear `xml:"Linear"`
+}
+
+type Linear struct {
+	Duration     string         `xml:"Duration"` // HH:MM:SS
+	MediaFiles   []MediaFile    `xml:"MediaFiles>MediaFile"`
+	TrackingEvents []TrackingEvent `xml:"TrackingEvents>Tracking"`
+	VideoClicks  *VideoClicks   `xml:"VideoClicks"`
+}
+
+type MediaFile struct {
+	Delivery string `xml:"delivery,attr"` // progressive or streaming
+	Type     string `xml:"type,attr"`     // MIME type
+	Width    int    `xml:"width,attr"`
+	Height   int    `xml:"height,attr"`
+	URL      string `xml:",chardata"`
+}
+
+type TrackingEvent struct {
+	Event string `xml:"event,attr"` // start, firstQuartile, midpoint, thirdQuartile, complete
+	URL   string `xml:",chardata"`
+}
+
+type VideoClicks struct {
+	ClickThrough string `xml:"ClickThrough"`
+	ClickTracking []string `xml:"ClickTracking"`
+}
+
+type CDATA struct {
+	URL string `xml:",chardata"`
+}
+
+func main() {
+	vast := VAST{
+		Version: "4.2",
+		Ads: []Ad{{
+			ID: "ad-001",
+			Inline: &Inline{
+				AdSystem: "ExampleDSP v1.0",
+				AdTitle:  "Nike Air Max Campaign",
+				Impression: []CDATA{
+					{URL: "https://px.track.com/vast-imp?aid=req-001&p=3.14"},
+				},
+				Creatives: []Creative{{
+					ID: "cr-video-30s",
+					Linear: &Linear{
+						Duration: "00:00:30",
+						MediaFiles: []MediaFile{{
+							Delivery: "progressive",
+							Type:     "video/mp4",
+							Width:    1920, Height: 1080,
+							URL: "https://cdn.example.com/nike-air-30s-1080p.mp4",
+						}},
+						TrackingEvents: []TrackingEvent{
+							{Event: "start",          URL: "https://track.example.com/vast?event=start&aid=req-001"},
+							{Event: "firstQuartile",  URL: "https://track.example.com/vast?event=q1&aid=req-001"},
+							{Event: "midpoint",       URL: "https://track.example.com/vast?event=mid&aid=req-001"},
+							{Event: "thirdQuartile",  URL: "https://track.example.com/vast?event=q3&aid=req-001"},
+							{Event: "complete",       URL: "https://track.example.com/vast?event=complete&aid=req-001"},
+						},
+						VideoClicks: &VideoClicks{
+							ClickThrough: "https://click.example.com/click?dest=https%3A%2F%2Fnike.com",
+						},
+					},
+				}},
+			},
+		}},
+	}
+
+	out, _ := xml.MarshalIndent(vast, "", "  ")
+	fmt.Println(xml.Header + string(out))
+}
+', true, 0),
+  ('ortb-creative-native', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// OpenRTB Native 1.2 — abbreviated key structures.
+
+// NativeRequest is serialised to JSON in Imp.native.request.
+type NativeRequest struct {
+	Ver     string       `json:"ver,omitempty"`     // "1.2"
+	Layout  int          `json:"layout,omitempty"`  // deprecated; use plcmttype
+	PlcmtType int        `json:"plcmttype,omitempty"` // 1=feed, 2=atomic, 3=outside-core, 4=recommendation
+	Assets  []NativeAssetReq `json:"assets"`
+}
+
+type NativeAssetReq struct {
+	ID       int          `json:"id"`
+	Required int          `json:"required,omitempty"` // 1=required
+	Title    *TitleAsset  `json:"title,omitempty"`
+	Img      *ImageAsset  `json:"img,omitempty"`
+	Data     *DataAsset   `json:"data,omitempty"`
+}
+
+type TitleAsset struct{ Len int `json:"len"` }
+type ImageAsset struct {
+	Type   int `json:"type,omitempty"` // 1=icon, 3=main image
+	WMin   int `json:"wmin,omitempty"`
+	HMin   int `json:"hmin,omitempty"`
+}
+type DataAsset struct {
+	Type int `json:"type"` // 1=sponsored, 2=desc, 12=cta
+	Len  int `json:"len,omitempty"`
+}
+
+// NativeResponse is serialised to JSON in Bid.adm (mtype=4).
+type NativeResponse struct {
+	Native NativeResponseBody `json:"native"`
+}
+
+type NativeResponseBody struct {
+	Ver        string          `json:"ver,omitempty"`
+	Assets     []NativeAssetResp `json:"assets"`
+	Link       NativeLink      `json:"link"`
+	ImpTrackers []string       `json:"imptrackers,omitempty"`
+}
+
+type NativeAssetResp struct {
+	ID    int               `json:"id"`
+	Title *TitleResp        `json:"title,omitempty"`
+	Img   *ImageResp        `json:"img,omitempty"`
+	Data  *DataResp         `json:"data,omitempty"`
+}
+
+type TitleResp struct{ Text string `json:"text"` }
+type ImageResp struct{ URL string `json:"url"`; W, H int `json:"w,h"` }
+type DataResp  struct{ Value string `json:"value"` }
+type NativeLink struct {
+	URL           string   `json:"url"`
+	ClickTrackers []string `json:"clicktrackers,omitempty"`
+}
+
+func main() {
+	// Request: publisher asks for title (max 25 chars), main image, description, and sponsored label.
+	nativeReq := NativeRequest{
+		Ver: "1.2",
+		PlcmtType: 1, // in-feed
+		Assets: []NativeAssetReq{
+			{ID: 1, Required: 1, Title: &TitleAsset{Len: 25}},
+			{ID: 2, Required: 1, Img: &ImageAsset{Type: 3, WMin: 600, HMin: 400}},
+			{ID: 3, Required: 0, Data: &DataAsset{Type: 2, Len: 90}},   // description
+			{ID: 4, Required: 1, Data: &DataAsset{Type: 1}},             // sponsored by
+		},
+	}
+
+	reqJSON, _ := json.MarshalIndent(nativeReq, "", "  ")
+	fmt.Println("=== Native Request (goes in Imp.native.request) ===")
+	fmt.Println(string(reqJSON))
+
+	// Response: DSP fills in the requested assets.
+	nativeResp := NativeResponse{
+		Native: NativeResponseBody{
+			Ver: "1.2",
+			Assets: []NativeAssetResp{
+				{ID: 1, Title: &TitleResp{Text: "Air Max — Just Do It"}},
+				{ID: 2, Img:   &ImageResp{URL: "https://cdn.nike.com/native/main.jpg", W: 1200, H: 800}},
+				{ID: 3, Data:  &DataResp{Value: "Experience the next generation of running shoes."}},
+				{ID: 4, Data:  &DataResp{Value: "Nike"}},
+			},
+			Link: NativeLink{
+				URL: "https://click.track.com/click?dest=https%3A%2F%2Fnike.com%2Fair-max",
+				ClickTrackers: []string{"https://px.track.com/click?crid=native-001"},
+			},
+			ImpTrackers: []string{"https://px.track.com/imp?crid=native-001&aid=req-001"},
+		},
+	}
+
+	respJSON, _ := json.MarshalIndent(nativeResp, "", "  ")
+	fmt.Println("
+=== Native Response (goes in Bid.adm, mtype=4) ===")
+	fmt.Println(string(respJSON))
+}
+', true, 0),
+  ('ortb-scale-pacing', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"sync/atomic"
+	"time"
+)
+
+// TokenBucketPacer implements smooth budget pacing using a token bucket.
+// Tokens represent micro-dollars (1 token = $0.000001 CPM) to use integer atomics.
+const tokenScale = 1_000_000 // 1 USD = 1,000,000 tokens
+
+type TokenBucketPacer struct {
+	tokens       atomic.Int64 // current tokens (micro-dollars)
+	maxTokens    int64        // daily budget in micro-dollars
+	refillPerMs  int64        // tokens to add per millisecond
+	lastRefill   int64        // Unix ms of last refill tick
+}
+
+// NewDailyPacer creates a pacer for a given daily budget in USD.
+func NewDailyPacer(dailyBudgetUSD float64) *TokenBucketPacer {
+	max := int64(dailyBudgetUSD * tokenScale)
+	p := &TokenBucketPacer{
+		maxTokens:   max,
+		refillPerMs: max / (24 * 60 * 60 * 1000), // tokens per millisecond
+		lastRefill:  time.Now().UnixMilli(),
+	}
+	p.tokens.Store(max) // start full (front-loaded) or start at 0 for smooth (adjust as needed)
+	return p
+}
+
+// refill adds tokens proportional to elapsed time since last refill.
+// Must be called before TryBid to keep the bucket current.
+func (p *TokenBucketPacer) refill() {
+	now := time.Now().UnixMilli()
+	last := atomic.SwapInt64(&p.lastRefill, now)
+	elapsed := now - last
+	if elapsed <= 0 {
+		return
+	}
+	add := elapsed * p.refillPerMs
+	for {
+		cur := p.tokens.Load()
+		next := cur + add
+		if next > p.maxTokens {
+			next = p.maxTokens
+		}
+		if p.tokens.CompareAndSwap(cur, next) {
+			break
+		}
+	}
+}
+
+// TryBid returns true if the campaign has budget to bid the given CPM.
+// On success it deducts the bid amount; on failure it leaves the bucket unchanged.
+func (p *TokenBucketPacer) TryBid(cpmUSD float64) bool {
+	p.refill()
+	cost := int64(cpmUSD * tokenScale)
+	for {
+		cur := p.tokens.Load()
+		if cur < cost {
+			return false // paced out
+		}
+		if p.tokens.CompareAndSwap(cur, cur-cost) {
+			return true
+		}
+	}
+}
+
+// RecordWin deducts the actual clearing price (after auction) from the bucket.
+func (p *TokenBucketPacer) RecordWin(clearingPriceUSD float64) {
+	cost := int64(clearingPriceUSD * tokenScale)
+	p.tokens.Add(-cost)
+}
+
+func (p *TokenBucketPacer) Budget() float64 {
+	return float64(p.tokens.Load()) / tokenScale
+}
+
+func main() {
+	pacer := NewDailyPacer(100.00) // $100/day budget
+	fmt.Printf("Initial budget: $%.4f\n", pacer.Budget())
+
+	// Simulate 5 bid attempts.
+	cpms := []float64{2.50, 3.00, 1.20, 4.00, 2.80}
+	for _, cpm := range cpms {
+		if pacer.TryBid(cpm) {
+			pacer.RecordWin(cpm) // in real system, only deduct on actual win
+			fmt.Printf("Bid $%.2f CPM → allowed. Remaining: $%.4f\n", cpm, pacer.Budget())
+		} else {
+			fmt.Printf("Bid $%.2f CPM → paced out. Remaining: $%.4f\n", cpm, pacer.Budget())
+		}
+	}
+
+	// Pacing rate: expected $100 / 86400s = $0.001157/s
+	fmt.Printf("\nRefill rate: $%.6f/ms\n",
+		float64(pacer.refillPerMs)/tokenScale)
+}
+', true, 0),
+  ('ortb-scale-frequency-cap', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"time"
+)
+
+// RedisFreqCap simulates Redis-backed frequency capping.
+// In production, replace with an actual go-redis client.
+
+type InMemoryRedis struct {
+	data    map[string]int64
+	expiry  map[string]time.Time
+}
+
+func NewInMemoryRedis() *InMemoryRedis {
+	return &InMemoryRedis{
+		data:   make(map[string]int64),
+		expiry: make(map[string]time.Time),
+	}
+}
+
+func (r *InMemoryRedis) INCR(key string) int64 {
+	if exp, ok := r.expiry[key]; ok && time.Now().After(exp) {
+		delete(r.data, key)
+		delete(r.expiry, key)
+	}
+	r.data[key]++
+	return r.data[key]
+}
+
+func (r *InMemoryRedis) EXPIRE(key string, ttl time.Duration) {
+	r.expiry[key] = time.Now().Add(ttl)
+}
+
+func (r *InMemoryRedis) GET(key string) (int64, bool) {
+	if exp, ok := r.expiry[key]; ok && time.Now().After(exp) {
+		return 0, false
+	}
+	v, ok := r.data[key]
+	return v, ok
+}
+
+// FreqCapChecker checks and increments frequency caps using Redis.
+type FreqCapChecker struct {
+	redis  *InMemoryRedis
+	window time.Duration
+}
+
+// freqKey creates a Redis key for a daily frequency cap.
+func freqKey(userID, campaignID string, window time.Duration) string {
+	// Bucket by day (for daily cap) or hour (for hourly cap).
+	now := time.Now().UTC()
+	var bucket string
+	if window >= 24*time.Hour {
+		bucket = now.Format("2006-01-02") // daily bucket
+	} else {
+		bucket = now.Format("2006-01-02T15") // hourly bucket
+	}
+	return fmt.Sprintf("fc:%s:%s:%s", userID, campaignID, bucket)
+}
+
+// CheckAndIncrement returns (allowed, currentCount).
+// If allowed is true, it has incremented the counter.
+func (fc *FreqCapChecker) CheckAndIncrement(userID, campaignID string, cap int64) (bool, int64) {
+	key := freqKey(userID, campaignID, fc.window)
+
+	// Pipeline-style: read current, check, increment only if under cap.
+	// In production use a Lua script for atomicity:
+	//   local v = redis.call(''GET'', KEYS[1]) or 0
+	//   if tonumber(v) >= tonumber(ARGV[1]) then return 0 end
+	//   redis.call(''INCR'', KEYS[1]); redis.call(''EXPIRE'', KEYS[1], ARGV[2])
+	//   return 1
+	cur, _ := fc.redis.GET(key)
+	if cur >= cap {
+		return false, cur // capped
+	}
+	newCount := fc.redis.INCR(key)
+	fc.redis.EXPIRE(key, fc.window) // reset TTL on each increment
+	return true, newCount
+}
+
+func main() {
+	checker := &FreqCapChecker{
+		redis:  NewInMemoryRedis(),
+		window: 24 * time.Hour,
+	}
+
+	userID     := "user-42"
+	campaignID := "camp-nike"
+	cap        := int64(3) // max 3 impressions/day
+
+	for i := 0; i < 5; i++ {
+		allowed, count := checker.CheckAndIncrement(userID, campaignID, cap)
+		fmt.Printf("Impression %d: allowed=%t count=%d\n", i+1, allowed, count)
+	}
+}
+', true, 0),
+  ('ortb-scale-logging', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+	"time"
+)
+
+// BidEvent is one log record written to the ring buffer.
+type BidEvent struct {
+	AuctionID string
+	DSPID     string
+	ImpID     string
+	Price     float64
+	Won       bool
+	Timestamp time.Time
+}
+
+// RingBuffer is a fixed-size, non-blocking circular buffer for bid events.
+// Overflow policy: drop oldest (overwrite). For high-priority events (wins),
+// prefer a separate, smaller ring with no drop.
+type RingBuffer struct {
+	buf    []BidEvent
+	head   atomic.Int64 // next write position
+	count  atomic.Int64 // number of events in buffer
+	cap    int64
+	mu     sync.Mutex   // protects Drain
+}
+
+func NewRingBuffer(capacity int64) *RingBuffer {
+	return &RingBuffer{buf: make([]BidEvent, capacity), cap: capacity}
+}
+
+// Append adds an event. If the buffer is full, it overwrites the oldest entry.
+func (r *RingBuffer) Append(e BidEvent) {
+	idx := r.head.Add(1) - 1
+	r.buf[idx%r.cap] = e
+	if r.count.Load() < r.cap {
+		r.count.Add(1)
+	}
+}
+
+// Drain returns all events since the last drain and resets the counter.
+func (r *RingBuffer) Drain() []BidEvent {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	n := r.count.Swap(0)
+	if n == 0 {
+		return nil
+	}
+	head := r.head.Load()
+	events := make([]BidEvent, n)
+	for i := int64(0); i < n; i++ {
+		idx := (head - n + i) % r.cap
+		if idx < 0 {
+			idx += r.cap
+		}
+		events[i] = r.buf[idx]
+	}
+	return events
+}
+
+// KafkaWriter simulates writing batches to Kafka.
+// In production use confluent-kafka-go or sarama.
+type KafkaWriter struct{ topic string }
+
+func (k *KafkaWriter) WriteBatch(events []BidEvent) error {
+	fmt.Printf("[kafka] topic=%s batch=%d first=%s\n",
+		k.topic, len(events), events[0].AuctionID)
+	return nil
+}
+
+// StartLogger runs the background writer goroutine.
+// It flushes the ring buffer every flushInterval or when drainThreshold is reached.
+func StartLogger(buf *RingBuffer, kw *KafkaWriter, flushInterval time.Duration, done <-chan struct{}) {
+	ticker := time.NewTicker(flushInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			if events := buf.Drain(); len(events) > 0 {
+				kw.WriteBatch(events) //nolint:errcheck
+			}
+		case <-done:
+			// Final flush on shutdown.
+			if events := buf.Drain(); len(events) > 0 {
+				kw.WriteBatch(events) //nolint:errcheck
+			}
+			return
+		}
+	}
+}
+
+func main() {
+	buf := NewRingBuffer(10_000)
+	kw  := &KafkaWriter{topic: "bid-events"}
+	done := make(chan struct{})
+
+	go StartLogger(buf, kw, 100*time.Millisecond, done)
+
+	// Simulate hot-path bid events.
+	for i := 0; i < 50; i++ {
+		buf.Append(BidEvent{
+			AuctionID: fmt.Sprintf("req-%03d", i),
+			DSPID:     "dsp-a",
+			Price:     2.50,
+			Won:       i%5 == 0,
+			Timestamp: time.Now(),
+		})
+	}
+
+	time.Sleep(150 * time.Millisecond) // let background goroutine flush
+	close(done)
+	time.Sleep(10 * time.Millisecond)
+	fmt.Println("Logger shutdown complete")
+}
+', true, 0),
+  ('ortb-privacy-consent', 'go', 'main.go', 'package main
+
+import (
+	"encoding/base64"
+	"fmt"
+)
+
+// Privacy fields in an OpenRTB BidRequest (simplified representation).
+type BidRequest struct {
+	ID   string
+	Regs *Regs
+	User *User
+}
+
+type Regs struct {
+	GDPR      int    `json:"gdpr,omitempty"`       // 0=no, 1=yes
+	USPrivacy string `json:"us_privacy,omitempty"` // CCPA string e.g. "1YNN"
+	GPP       string `json:"gpp,omitempty"`        // IAB GPP consent string
+	GPPSIDs   []int  `json:"gpp_sid,omitempty"`    // applicable GPP section IDs
+}
+
+type User struct {
+	Consent string `json:"consent,omitempty"` // TCF 2.x consent string (base64url)
+}
+
+// TCFConsent is a simplified view of a decoded TCF 2.x consent string.
+// Production: use a TCF decoder library (e.g. LiveRamp iabtcf-encoder).
+type TCFConsent struct {
+	VendorID      int
+	PurposesGranted []int // IAB purpose IDs consented
+	LIGranted     []int // legitimate interest granted
+}
+
+// CanBid returns true if the DSP can bid given GDPR context.
+// This simplified check does not replace a full TCF SDK.
+func CanBid(req *BidRequest, dspVendorID int, requiredPurposes []int) (bool, string) {
+	if req.Regs == nil || req.Regs.GDPR != 1 {
+		return true, "no GDPR scope" // not in GDPR scope
+	}
+	if req.User == nil || req.User.Consent == "" {
+		return false, "GDPR scope: no consent string"
+	}
+
+	// Decode and validate the TCF consent string.
+	// Real implementation: use github.com/InteractiveAdvertisingBureau/iabtcf-encoder
+	raw, err := base64.RawURLEncoding.DecodeString(req.User.Consent)
+	if err != nil || len(raw) < 10 {
+		return false, "GDPR scope: invalid consent string"
+	}
+
+	// Production: parse TC string to check vendor consent + purpose consent.
+	// Simplified check: assume consent string contains vendor+purposes for demo.
+	// In reality you''d decode bit vectors from the binary TCF format.
+	fmt.Printf("  TCF string decoded: %d bytes, vendor=%d, purposes=%v\n",
+		len(raw), dspVendorID, requiredPurposes)
+
+	// Dummy approval: if consent string length > 50 bytes, assume consented.
+	if len(raw) > 10 {
+		return true, "consent granted"
+	}
+	return false, "vendor or purpose consent not found"
+}
+
+// ParseUSPrivacy parses a CCPA (California Consumer Privacy Act) consent string.
+// Format: "1YNN" where [0]=spec version, [1]=has CCPA notice, [2]=opt-out of sale, [3]=LSPA
+func ParseUSPrivacy(s string) (version, notice, optOut, lspa byte) {
+	if len(s) < 4 {
+		return 0, 0, 0, 0
+	}
+	return s[0], s[1], s[2], s[3]
+}
+
+func main() {
+	// A fake but valid-length base64url string for demo.
+	fakeConsent := base64.RawURLEncoding.EncodeToString(make([]byte, 50))
+
+	req := &BidRequest{
+		ID:   "req-eu-001",
+		Regs: &Regs{GDPR: 1, USPrivacy: "1YNN"},
+		User: &User{Consent: fakeConsent},
+	}
+
+	allowed, reason := CanBid(req, 42, []int{1, 3, 4})
+	fmt.Printf("Can bid: %t (%s)\n", allowed, reason)
+
+	// CCPA: "1YNN" → version=1, notice=Y(yes), opt-out=N(no), lspa=N(no)
+	version, notice, optOut, lspa := ParseUSPrivacy(req.Regs.USPrivacy)
+	fmt.Printf("\nCCPA: version=%c notice=%c optOut=%c lspa=%c\n",
+		version, notice, optOut, lspa)
+	fmt.Printf("User opted out of data sale: %t\n", optOut == ''Y'')
+}
+', true, 0),
+  ('ortb-privacy-identity', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// ExtendedID (EID) per OpenRTB 2.6 §3.2.27.
+// User.eids[] carries multiple identity tokens from different ID systems.
+type ExtendedID struct {
+	Source string    `json:"source"`           // domain of the ID system
+	UIDs   []UID     `json:"uids"`
+}
+
+type UID struct {
+	ID    string `json:"id"`              // the identity token / hash
+	AType int    `json:"atype,omitempty"` // 1=person-based, 3=device-based
+	Ext   *UIDExt `json:"ext,omitempty"`
+}
+
+type UIDExt struct {
+	Stype string `json:"stype,omitempty"` // e.g. "commonid", "tdid"
+}
+
+// User with identity fields.
+type User struct {
+	ID       string       `json:"id,omitempty"`
+	BuyerUID string       `json:"buyeruid,omitempty"`
+	EIDs     []ExtendedID `json:"eids,omitempty"`
+}
+
+// Device with advertising ID fields.
+type Device struct {
+	UA         string `json:"ua,omitempty"`
+	IP         string `json:"ip,omitempty"`
+	OS         string `json:"os,omitempty"`
+	IFA        string `json:"ifa,omitempty"`   // IDFA or GAID
+	IFAType    string `json:"ifatype,omitempty"` // "idfa", "aaid", "ppid", etc.
+	LMT        int    `json:"lmt,omitempty"`    // 1 = user opted out of ad tracking
+	DeviceType int    `json:"devicetype,omitempty"` // 1=mobile, 2=PC, 3=CTV
+}
+
+// IdentityEnvironment classifies the request''s identity availability.
+type IdentityEnvironment string
+
+const (
+	IDEnvCookieSync   IdentityEnvironment = "cookie-sync"   // web with buyeruid
+	IDEnvDeviceID     IdentityEnvironment = "device-id"     // mobile with IFA
+	IDEnvUID2         IdentityEnvironment = "uid2"          // cookieless with UID2
+	IDEnvContextual   IdentityEnvironment = "contextual"    // no user ID available
+)
+
+// ClassifyIdentity returns the best identity signal available.
+func ClassifyIdentity(user *User, device *Device) IdentityEnvironment {
+	if device != nil && device.IFA != "" && device.LMT != 1 {
+		return IDEnvDeviceID
+	}
+	if user != nil && user.BuyerUID != "" {
+		return IDEnvCookieSync
+	}
+	if user != nil {
+		for _, eid := range user.EIDs {
+			if eid.Source == "uidapi.com" || eid.Source == "liveramp.com" {
+				return IDEnvUID2
+			}
+		}
+	}
+	return IDEnvContextual
+}
+
+func main() {
+	// Scenario 1: Mobile app — GAID present.
+	device1 := &Device{OS: "Android", IFA: "38400000-8cf0-11bd-b23e-10b96e40000d", IFAType: "aaid", LMT: 0}
+	user1 := &User{}
+	fmt.Printf("Mobile: %s\n", ClassifyIdentity(user1, device1))
+
+	// Scenario 2: Web — cookie-synced buyeruid.
+	device2 := &Device{OS: "Windows", UA: "Chrome/123", IP: "203.0.113.1"}
+	user2   := &User{BuyerUID: "dsp-user-9876"}
+	fmt.Printf("Web (cookie): %s\n", ClassifyIdentity(user2, device2))
+
+	// Scenario 3: UID2 token present (logged-in user, cookieless browser).
+	user3 := &User{
+		EIDs: []ExtendedID{
+			{
+				Source: "uidapi.com",
+				UIDs: []UID{{ID: "A4AAAAARfHPXn7...", AType: 1}},
+			},
+		},
+	}
+	device3 := &Device{UA: "Firefox/120"}
+	fmt.Printf("UID2 (cookieless): %s\n", ClassifyIdentity(user3, device3))
+
+	// Scenario 4: CTV — no persistent ID.
+	device4 := &Device{DeviceType: 3, OS: "tvOS"}
+	fmt.Printf("CTV: %s\n", ClassifyIdentity(nil, device4))
+
+	// Show EID structure.
+	b, _ := json.MarshalIndent(user3.EIDs, "", "  ")
+	fmt.Println("
+EIDs structure:", string(b))
+}
+', true, 0),
+  ('ortb-design-capstone', 'go', 'main.go', 'package main
+
+import (
+	"context"
+	"fmt"
+	"sort"
+	"sync"
+	"time"
+)
+
+// ---- Minimal exchange data types ----
+
+type BidRequest  struct{ ID, PublisherID string; TMax int; BidFloor float64 }
+type DSPBid      struct{ DSPID string; Price float64; AdM string }
+type AuctionWin  struct{ DSPID, AdM string; ClearingPrice float64 }
+
+// ---- DSP registry and scoring ----
+
+type DSPEntry struct {
+	ID       string
+	Endpoint string
+	WinRate  float64 // rolling 7-day win rate
+	P99MS    float64 // rolling p99 response latency
+}
+
+// SelectDSPs returns top-N DSPs scored by predicted win probability.
+func SelectDSPs(all []DSPEntry, n int) []DSPEntry {
+	scored := make([]DSPEntry, len(all))
+	copy(scored, all)
+	sort.Slice(scored, func(i, j int) bool {
+		// Simple score: win_rate * (1 - latency_penalty)
+		si := scored[i].WinRate * (1 - scored[i].P99MS/200)
+		sj := scored[j].WinRate * (1 - scored[j].P99MS/200)
+		return si > sj
+	})
+	if n > len(scored) {
+		n = len(scored)
+	}
+	return scored[:n]
+}
+
+// ---- Fan-out to DSPs ----
+
+// mockCallDSP simulates calling a DSP and returning a bid.
+func mockCallDSP(ctx context.Context, dsp DSPEntry, req BidRequest) *DSPBid {
+	select {
+	case <-ctx.Done():
+		return nil
+	case <-time.After(time.Duration(dsp.P99MS*0.5) * time.Millisecond):
+		if dsp.WinRate > 0.3 { // simulate some DSPs not bidding
+			return &DSPBid{DSPID: dsp.ID, Price: 2.0 + dsp.WinRate*3.0, AdM: "<ad/>"}
+		}
+		return nil
+	}
+}
+
+func FanOut(ctx context.Context, req BidRequest, dsps []DSPEntry) []DSPBid {
+	ch := make(chan *DSPBid, len(dsps))
+	var wg sync.WaitGroup
+	for _, dsp := range dsps {
+		wg.Add(1)
+		go func(d DSPEntry) {
+			defer wg.Done()
+			ch <- mockCallDSP(ctx, d, req)
+		}(dsp)
+	}
+	go func() { wg.Wait(); close(ch) }()
+
+	var bids []DSPBid
+	for b := range ch {
+		if b != nil {
+			bids = append(bids, *b)
+		}
+	}
+	return bids
+}
+
+// ---- Auction ----
+
+func RunFirstPriceAuction(bids []DSPBid, floor float64) *AuctionWin {
+	var winner *DSPBid
+	for i := range bids {
+		b := &bids[i]
+		if b.Price < floor {
+			continue
+		}
+		if winner == nil || b.Price > winner.Price {
+			winner = b
+		}
+	}
+	if winner == nil {
+		return nil
+	}
+	return &AuctionWin{DSPID: winner.DSPID, AdM: winner.AdM, ClearingPrice: winner.Price}
+}
+
+// ---- Exchange main flow ----
+
+func ProcessAuction(req BidRequest, allDSPs []DSPEntry) *AuctionWin {
+	ctx, cancel := context.WithTimeout(context.Background(),
+		time.Duration(req.TMax)*time.Millisecond)
+	defer cancel()
+
+	// Step 1: Select top 5 DSPs by score.
+	dsps := SelectDSPs(allDSPs, 5)
+
+	// Step 2: Fan-out.
+	bids := FanOut(ctx, req, dsps)
+
+	// Step 3: Auction.
+	winner := RunFirstPriceAuction(bids, req.BidFloor)
+	if winner == nil {
+		fmt.Println("No fill — no bids cleared floor")
+		return nil
+	}
+
+	// Step 4: Background win notice + billing events (not blocking).
+	go fmt.Printf("[nurl] → DSP %s clearing=$%.2f\n", winner.DSPID, winner.ClearingPrice)
+
+	return winner
+}
+
+func main() {
+	allDSPs := []DSPEntry{
+		{ID: "dsp-a", WinRate: 0.45, P99MS: 30},
+		{ID: "dsp-b", WinRate: 0.60, P99MS: 50},
+		{ID: "dsp-c", WinRate: 0.20, P99MS: 20},
+		{ID: "dsp-d", WinRate: 0.35, P99MS: 80},
+		{ID: "dsp-e", WinRate: 0.55, P99MS: 40},
+	}
+
+	req := BidRequest{ID: "req-001", PublisherID: "pub-1", TMax: 100, BidFloor: 1.00}
+
+	start := time.Now()
+	win := ProcessAuction(req, allDSPs)
+	elapsed := time.Since(start)
+
+	if win != nil {
+		fmt.Printf("Winner: %s price=$%.2f elapsed=%v\n",
+			win.DSPID, win.ClearingPrice, elapsed.Round(time.Millisecond))
+	}
+	time.Sleep(10 * time.Millisecond) // let goroutines finish in demo
+}
 ', true, 0);
 
 insert into public.quiz_questions (id, problem_id, prompt, explain, sort_order) values
@@ -35337,7 +39229,118 @@ insert into public.quiz_questions (id, problem_id, prompt, explain, sort_order) 
   ('go-design-pipeline::leak-on-early-break', 'go-design-pipeline', 'After main does `cancel(); break`, what actually lets the still-running `square` and `gen` goroutines terminate instead of leaking?', 'Goroutines are never GC''d while runnable, and closing a channel does not propagate upstream. Cancellation unblocks each blocked send via the ctx.Done() case, and the returning stages then close their own outputs.', 2),
   ('go-design-pipeline::shared-source-fanout', 'go-design-pipeline', 'Both `w1` and `w2` read from the same `source` channel. What is the semantic consequence of this fan-out?', 'Multiple receivers on one channel is safe; each sent value is handed to exactly one ready receiver. That is precisely how a single source is load-balanced across N workers.', 3),
   ('go-design-pipeline::unbuffered-cancel-visibility', 'go-design-pipeline', 'All stage channels are unbuffered. When main calls cancel() mid-range, why might a worker have already computed a value it can never deliver — and is that a leak?', 'On the next select both the send and the ctx.Done() case may be ready; if Done wins, the already-computed value is simply dropped and the goroutine returns. Dropping an in-flight value under cancellation is expected, not a leak.', 4),
-  ('go-design-pipeline::context-vs-done-channel', 'go-design-pipeline', 'Compared to threading an explicit `done chan struct{}` through every stage, what does using `context.Context` primarily add here?', 'A plain done channel only broadcasts stop. context.Context adds deadlines/timeouts (WithTimeout), cancellation propagation through a context tree, and request-scoped values, while still using the same select-on-Done() discipline.', 5);
+  ('go-design-pipeline::context-vs-done-channel', 'go-design-pipeline', 'Compared to threading an explicit `done chan struct{}` through every stage, what does using `context.Context` primarily add here?', 'A plain done channel only broadcasts stop. context.Context adds deadlines/timeouts (WithTimeout), cancellation propagation through a context tree, and request-scoped values, while still using the same select-on-Done() discipline.', 5),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'ortb-foundations-ecosystem', 'Which entity in the programmatic stack is responsible for packaging publisher inventory and setting floor prices before forwarding bid requests to the exchange?', 'The SSP is the sell-side broker: it connects publisher ad slots to exchanges (and sometimes directly to DSPs), enforces floor prices, manages brand safety rules, and maximises publisher yield. The exchange sits downstream of the SSP and runs the actual auction among multiple DSPs.', 0),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-header-bidding', 'ortb-foundations-ecosystem', 'Header bidding differs from waterfall mediation primarily because:', 'Waterfall mediation tries demand sources one at a time in priority order, missing revenue if a lower-tier buyer would outbid a higher-tier one. Header bidding invites all connected buyers simultaneously via a JS wrapper (or server-side equivalent), then passes the highest bid to the ad server alongside direct deals, maximising yield.', 1),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp', 'ortb-foundations-ecosystem', 'Which statement best describes the relationship between a bidder and a DSP?', 'A DSP is the full platform: campaign management, audience targeting, budget management, reporting, and the bidder. The bidder specifically is the hot-path service that receives a BidRequest from an exchange, evaluates it against active campaigns, and returns a BidResponse in under 100 ms. Large DSPs may have many bidder pods behind a load balancer.', 2),
+  ('ortb-foundations-rtb-flow::ortb-flow-tmax', 'ortb-foundations-rtb-flow', 'The tmax field in a BidRequest specifies:', 'tmax is an integer millisecond budget communicated from the exchange to the DSP. Bids arriving after tmax are discarded. A missing tmax means the exchange uses its own platform default. DSPs commonly target 50–80 ms internally to leave headroom for network RTT.', 0),
+  ('ortb-foundations-rtb-flow::ortb-flow-nurl-timing', 'ortb-foundations-rtb-flow', 'When should the exchange fire the nurl (win notice URL) to the winning DSP?', 'The nurl is fired by the exchange to the winning bidder as soon as the auction result is known, in order to notify the DSP it won. This is separate from the burl (billing notice), which fires when an actual billing event is detected (e.g. impression rendered past a viewability threshold). Some exchanges call nurl and return markup in the same moment; others use burl for financial settlement.', 1),
+  ('ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel', 'ortb-foundations-rtb-flow', 'An impression-tracking pixel in the creative markup is called by:', 'Impression pixels are HTML image tags or beacons embedded in the ad markup. The browser fires them (via HTTP GET to the tracking URL) when it renders the creative. This is why impression counts logged by the DSP''s tracking server and the exchange''s nurl-based counts can differ — browser rendering is client-side and best-effort.', 2),
+  ('ortb-foundations-auction-types::ortb-auction-dominant-strategy', 'ortb-foundations-auction-types', 'In a second-price sealed-bid (Vickrey) auction, the dominant strategy is:', 'In second-price auctions, bidding your true value is a dominant strategy: if you overbid you still pay the same clearing price, and if you underbid you may lose an impression you would have profitably won. This "truthfulness" property made second-price attractive theoretically, but in practice large buyers learned to shade even in second-price auctions.', 0),
+  ('ortb-foundations-auction-types::ortb-auction-industry-shift', 'ortb-foundations-auction-types', 'Why did major exchanges (Google, AppNexus, Index Exchange) shift from second-price to first-price auctions around 2017–2019?', 'With header bidding, the same impression entered multiple exchanges simultaneously; buyers had already mastered bid shading (paying less than their bid) making second-price a fiction. Exchanges moved to first-price for transparency and to align incentives: buyers pay what they bid, forcing the bid to reflect true value. Publishers benefited from higher clearing prices.', 1),
+  ('ortb-foundations-auction-types::ortb-auction-at-field', 'ortb-foundations-auction-types', 'In a BidRequest, the "at" field value of 1 means:', 'The OpenRTB spec defines "at" (auction type): 1 = first-price, 2 = second-price (default). Exchanges today almost universally use at=1 for open-auction inventory. Private marketplace deals may still use at=2 or negotiate clearing price separately.', 2),
+  ('ortb-foundations-supply-chain::ortb-adstxt-purpose', 'ortb-foundations-supply-chain', 'What does an ads.txt file published at a domain root (e.g. publisher.com/ads.txt) tell buyers?', 'ads.txt (Authorised Digital Sellers) is a plain-text file on the publisher''s domain. Each line declares a supply chain entity (ASI domain, publisher account ID, and relationship: DIRECT or RESELLER) authorised to sell inventory on that domain. DSPs and buyers check ads.txt to verify they aren''t buying spoofed or unauthorised inventory.', 0),
+  ('ortb-foundations-supply-chain::ortb-schain-complete', 'ortb-foundations-supply-chain', 'A BidRequest arrives with schain.complete = 0. What should a cautious buyer do?', 'complete=1 means every intermediary in the supply chain declared itself. complete=0 means one or more hops are missing. This is not necessarily fraud (legacy SSPs may not support schain), but cautious buyers should de-prioritise such inventory, avoid premium CPMs, and apply additional verification steps.', 1),
+  ('ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt', 'ortb-foundations-supply-chain', 'How does sellers.json complement ads.txt?', 'ads.txt is on the publisher''s server and says "exchange X has seller account Y for my domain." sellers.json is on the exchange''s server and says "seller account Y corresponds to this known company." Buyers can cross-reference both to confirm that the entity claiming to sell publisher.com inventory matches the exchange''s registered seller for that publisher.', 2),
+  ('ortb-bid-request-object::ortb-req-required', 'ortb-bid-request-object', 'Which fields in the top-level BidRequest are strictly required by the OpenRTB spec?', 'Per the OpenRTB 2.6 spec §3.2.1: "id" (globally unique request ID) and at least one "imp" (impression) object are the only required fields. site vs app is highly recommended but technically optional. tmax, device, and user enrich the request but are not required.', 0),
+  ('ortb-bid-request-object::ortb-req-at-default', 'ortb-bid-request-object', 'If the "at" (auction type) field is absent from a BidRequest, what should a bidder assume?', 'OpenRTB 2.6 §3.2.1 specifies at default = 2 (second-price). In practice, most exchanges today set at=1 explicitly (first-price). A well-behaved bidder should handle both, but per spec, absence → second-price.', 1),
+  ('ortb-bid-request-object::ortb-req-bcat', 'ortb-bid-request-object', 'The "bcat" field in a BidRequest contains:', 'bcat (blocked categories) contains IAB Tech Lab content category codes (e.g. IAB25 = Non-Standard Content, IAB26 = Illegal Content). These are publisher/exchange-enforced restrictions on creative categories. Separate fields handle blocked advertisers (badv) and blocked seats (bseat).', 2),
+  ('ortb-bid-request-imp::ortb-imp-format-multi', 'ortb-bid-request-imp', 'A publisher wants to accept either a 300×250 banner OR a 320×50 banner on the same slot. How should they express this in the Imp object?', 'The Banner.format array is the OpenRTB-standard way to express multiple acceptable sizes for a single slot. Setting Banner.w/h alongside format is also allowed (w/h is the preferred/default size). Using two Imp objects creates two independent auctions, which is a different thing.', 0),
+  ('ortb-bid-request-imp::ortb-imp-pmp', 'ortb-bid-request-imp', 'When Imp.pmp.private_auction = 1, a bidder that does NOT hold a deal for this impression should:', 'When private_auction=1 (or "private_auction": 1), the exchange will only accept bids that reference a deal ID in the pmp.deals array. Non-deal bids are rejected regardless of price. A bidder without a valid deal should either not bid or return an empty SeatBid.', 1),
+  ('ortb-bid-request-imp::ortb-imp-secure', 'ortb-bid-request-imp', 'What must a bidder ensure when Imp.secure = 1?', 'secure=1 means the publisher page is served over HTTPS and therefore requires the ad markup to also be HTTPS. A bidder returning HTTP URLs in the creative (image, click tracker, pixel) will cause mixed-content browser errors and the ad will be blocked. Set secure=1 in your bidder to only return HTTPS markup.', 2),
+  ('ortb-bid-request-site-app::ortb-context-site-vs-app', 'ortb-bid-request-site-app', 'Which BidRequest context object should be present for a mobile game served in-app?', 'App is for non-browser environments: iOS/Android apps, OTT/CTV apps. Site is for browser-based web inventory. Only one of the two should be present per BidRequest (the spec says both may be sent but that''s a publisher error). Bundle is the app''s package name (e.g. com.example.game) and is the primary identifier for app inventory.', 0),
+  ('ortb-bid-request-site-app::ortb-context-buyeruid', 'ortb-bid-request-site-app', 'What is the purpose of User.buyeruid in a BidRequest?', 'buyeruid is populated by the exchange from its cookie sync table: when a user visits publisher.com, the exchange and DSP perform a pixel-based cookie sync to map exchange user IDs to DSP user IDs. The exchange then embeds the DSP''s user ID in buyeruid so the DSP''s bidder can look up that user''s segments in its own database without a synchronous network call.', 1),
+  ('ortb-bid-request-site-app::ortb-context-device-ifa', 'ortb-bid-request-site-app', 'Device.ifa in an OpenRTB BidRequest contains:', 'IFA (Identifier For Advertising) is the resettable advertising ID issued by the OS. On iOS it''s IDFA (Identifier for Advertisers); on Android it''s GAID (Google Advertising ID). Publishers set Device.lmt (limit ad tracking) = 1 when the user has opted out. With iOS 14.5+ (ATT framework), most users opt out, making IFA largely unavailable on iOS.', 2),
+  ('ortb-bid-request-26-fields::ortb-26-mincpmpersec', 'ortb-bid-request-26-fields', 'A Video imp has mincpmpersec=0.08. A bidder wants to serve a 20-second ad. What is the minimum bid.price the exchange will accept?', 'mincpmpersec is a per-second floor expressed as CPM per second. For a 20-second creative: min bid = 20 × $0.08 = $1.60 CPM. The exchange enforces this as the effective floor for duration-based bids in pod auctions, allowing buyers to optimise CPM-per-second rather than a flat floor.', 0),
+  ('ortb-bid-request-26-fields::ortb-26-plcmt', 'ortb-bid-request-26-fields', 'Video.plcmt=1 in OpenRTB 2.6 means the video ad will run:', 'OpenRTB 2.6 replaced the old Video.placement field (which had overlapping values) with Video.plcmt: 1=in-stream (user initiated, with audio, alongside streaming video), 2=in-banner, 3=in-article, 4=in-feed, 5=interstitial/slider/floating. In-stream is the most premium video placement and typically commands the highest CPMs.', 1),
+  ('ortb-bid-request-26-fields::ortb-26-podseq', 'ortb-bid-request-26-fields', 'Video.podseq in a dynamic ad pod can be set to indicate:', 'podseq signals position constraints to buyers: podseq=1 means this slot is the first in the break (good for brand recall), podseq=3 means last (good for call-to-action), podseq=2 means any middle slot. This lets DSPs bid differently based on the competitive separation and recall value of each position within the pod.', 2),
+  ('ortb-bid-response-object::ortb-resp-empty', 'ortb-bid-response-object', 'How should a DSP signal "no bid" for an entire BidRequest in the most network-efficient way?', 'HTTP 204 No Content is the preferred no-bid signal — it requires no body parsing on the exchange side and is the most efficient. HTTP 200 with an empty seatbid or a non-zero nbr (no-bid reason) is also valid but wastes bandwidth on JSON parsing. Dropping the connection causes the exchange to wait until tmax and log a timeout error.', 0),
+  ('ortb-bid-response-object::ortb-resp-seatbid-group', 'ortb-bid-response-object', 'A SeatBid with group=1 containing two bids means:', 'group=1 in a SeatBid signals package bidding: the buyer wants to win all impressions in the SeatBid or none. This is used for sponsorships or campaigns that only make creative sense as a set. group=0 (default) means each bid is independent — a bidder may win some and lose others.', 1),
+  ('ortb-bid-response-object::ortb-resp-mtype', 'ortb-bid-response-object', 'Why is Bid.mtype important for a multi-format Imp?', 'When an Imp offers multiple formats (e.g. Banner + Native), the exchange needs to know which format the winning creative matches to correctly render it. mtype=1 → render as banner HTML, mtype=2 → pass to VAST player, mtype=4 → render as native. Omitting mtype on a multi-format Imp response may cause the exchange to reject or mis-render the ad.', 2),
+  ('ortb-bid-response-bid::ortb-bid-adm-vs-nurl', 'ortb-bid-response-bid', 'What is the key difference between serving markup via Bid.adm vs via Bid.nurl?', 'adm (ad markup) carries the creative inline in the JSON response — lower latency but larger payload. nurl (notice URL) is a callback the exchange fires after the auction to both notify the DSP of the win AND retrieve the markup from the DSP''s server. nurl-based serving decouples win notification from markup delivery, enabling dynamic creative generation.', 0),
+  ('ortb-bid-response-bid::ortb-bid-burl-vs-nurl', 'ortb-bid-response-bid', 'nurl is called at auction time; when is burl called?', 'burl (billing URL) is the financial signal: it fires when the exchange determines a billable impression has occurred. For display ads this is often render+3 seconds; for video it may be 50% viewability. burl fires independently of nurl — the DSP may receive nurl (won the auction) but not burl (impression never rendered), in which case no charge should be issued.', 1),
+  ('ortb-bid-response-bid::ortb-bid-crid-purpose', 'ortb-bid-response-bid', 'Why do exchanges store and check Bid.crid (creative ID)?', 'Exchanges maintain a creative library keyed by crid. New crid values trigger an audit pipeline (image classification, malware scan, brand-safety scoring). Publishers can then block specific creative IDs. Without a stable crid, an exchange can''t track which creatives have been audited or blocked.', 2),
+  ('ortb-bid-response-settlement::ortb-settlement-who-calls', 'ortb-bid-response-settlement', 'Who is responsible for calling the nurl after the auction?', 'nurl is called server-to-server by the exchange immediately after it selects the auction winner, before returning the ad markup to the publisher. This is different from impression pixels (called by the browser). Server-to-server ensures the DSP gets the win signal even if the browser never renders the ad.', 0),
+  ('ortb-bid-response-settlement::ortb-settlement-encode', 'ortb-bid-response-settlement', 'Why must ${AUCTION_PRICE} be URL-encoded when substituted into a query-string parameter?', 'Price values (numbers) are safe in URLs, but other macros like AUCTION_ID may contain characters that need encoding (spaces, +, &, etc.). More importantly, the AUCTION_PRICE itself may be in scientific notation in some implementations. The spec mandates URL-encoding for macro values in URL contexts to prevent malformed URLs. The receiving server URL-decodes the parameter before parsing the float.', 1),
+  ('ortb-bid-response-settlement::ortb-settlement-second-price-clearing', 'ortb-bid-response-settlement', 'In a second-price auction, what does ${AUCTION_PRICE} contain in the nurl call?', 'In a second-price auction, ${AUCTION_PRICE} in the nurl is the clearing price (what the winner pays), which equals max(second-highest-bid, floor). In a first-price auction, clearing price equals the winner''s bid. The DSP should record ${AUCTION_PRICE} (not their submitted bid) as their spend for accurate cost tracking.', 2),
+  ('ortb-bid-response-nobid::ortb-nobid-http204', 'ortb-bid-response-nobid', 'A bidder has no matching campaign for an impression. The most efficient response is:', 'HTTP 204 has no body — the exchange can process it with zero JSON parsing overhead. It''s preferred for the "no matching campaign" case which is the most common no-bid scenario (e.g. frequency capped, no audience match). HTTP 200 with structured JSON is useful when you want to communicate a specific reason code for exchange analytics.', 0),
+  ('ortb-bid-response-nobid::ortb-nobid-timeout-consequence', 'ortb-bid-response-nobid', 'What typically happens to a DSP that consistently responds after the exchange tmax deadline?', 'Exchanges enforce tmax strictly — late responses are discarded. DSPs with persistent timeouts waste exchange resources (open connections) and publisher revenue (no fill). Well-operated exchanges track p99 latency per DSP and may exclude DSPs that consistently miss tmax from auctions, or move them to a lower-priority tier.', 1),
+  ('ortb-bid-response-nobid::ortb-nobid-reason-unmatched', 'ortb-bid-response-nobid', 'A bidder returns nbr=8 (unmatched user). What does this indicate?', 'nbr=8 means the DSP received the BidRequest but User.buyeruid was absent or unknown in its own user database — the DSP can''t resolve the user to any audience segment. This is common in cookieless traffic or when cookie sync coverage is low. The exchange can use this signal to measure cookie sync health per DSP.', 2),
+  ('ortb-bidder-server::ortb-server-drain', 'ortb-bidder-server', 'Why must a bidder HTTP handler always drain and close r.Body even when returning HTTP 204?', 'Go''s net/http uses persistent connections by default. If a handler returns without consuming the request body, the server cannot reuse the connection for the next request — it must tear down the TCP connection instead. With 1M+ requests/sec the TCP connection churn this causes is catastrophic. Always defer r.Body.Close() and read (or discard with io.Copy(io.Discard, r.Body)).', 0),
+  ('ortb-bidder-server::ortb-server-content-type', 'ortb-bidder-server', 'An exchange sends a BidRequest with Content-Type: application/json. Your bidder responds without setting a Content-Type. The exchange may:', 'While exchanges are generally tolerant, missing Content-Type on the response is an integration error. Some strict exchanges reject responses with the wrong or absent Content-Type header. Always set "Content-Type: application/json" explicitly in your bidder response to comply with the OpenRTB spec and avoid integration issues.', 1),
+  ('ortb-bidder-server::ortb-server-readtimeout', 'ortb-bidder-server', 'Your bidder http.Server has ReadTimeout=5s and the exchange tmax=100ms. Why set ReadTimeout much higher than tmax?', 'ReadTimeout governs how long the server waits for the client to send the full request (headers + body). BidRequests can be large (enriched with user data) and the exchange → bidder connection may be slow on a bad network day. tmax is the bidder''s own logic deadline for computing and returning a bid. They are independent concerns: ReadTimeout protects against slow/broken exchange connections; internal bid computation is time-bounded by a context.WithDeadline derived from tmax.', 2),
+  ('ortb-bidder-decision::ortb-decision-order', 'ortb-bidder-decision', 'In a bid decision pipeline, why should cheap/fast filters run before expensive ones?', 'A typical targeting pipeline might have: geo check (O(1) string compare), category blocklist (O(1) set lookup), then audience match (O(1) in-process), then frequency cap check (network call to Redis). Fast-failing on geo + blocklist eliminates 50–80% of impressions before you ever touch the network, dramatically reducing p99 latency and Redis load.', 0),
+  ('ortb-bidder-decision::ortb-decision-multi-campaign', 'ortb-bidder-decision', 'Your DSP has 100 active campaigns that all match a given impression. What value should the bidder submit as Bid.price?', 'An exchange accepts one bid per seat per impression. Submit the highest CPM your DSP can justify across matching campaigns — this maximises win probability. Use that campaign''s creative in Bid.adm and CrID. If you need separate creatives per advertiser (competitive separation), you may submit multiple SeatBid entries with different seat IDs, but most implementations just use the top-CPM campaign.', 1),
+  ('ortb-bidder-decision::ortb-decision-floor', 'ortb-bidder-decision', 'Your campaign''s model predicts CPM=$2.00 but the Imp.bidfloor is $2.50. The correct action is:', 'Bids below bidfloor are rejected silently — bidding $2.00 against a $2.50 floor is a no-bid in practice. Never bid above your true valuation (in first-price) unless your bidding model accounts for it. The DSP should no-bid cleanly (HTTP 204) and save the network round-trip cost.', 2),
+  ('ortb-bidder-concurrency::ortb-conc-context-derive', 'ortb-bidder-concurrency', 'In an HTTP bidder handler, what should be used as the parent context for bid processing?', 'r.Context() is cancelled when the exchange closes the connection (timeout, disconnect). Deriving your bid context from r.Context() means all goroutines spawned for the bid automatically cancel if the exchange gave up — avoiding wasted CPU on lookups the exchange will never read. Then add a WithDeadline for tmax on top of r.Context().', 0),
+  ('ortb-bidder-concurrency::ortb-conc-rwmutex', 'ortb-bidder-concurrency', 'Why is sync.RWMutex more appropriate than sync.Mutex for a campaign cache accessed 100k times/sec?', 'sync.RWMutex allows any number of goroutines to hold a read lock simultaneously. Write locks are exclusive. In a bidder where campaign data is read millions of times between infrequent refreshes (every few seconds), RLock() contention is near-zero. With sync.Mutex every reader blocks every other reader — catastrophic throughput loss at 100k RPS.', 1),
+  ('ortb-bidder-concurrency::ortb-conc-goroutine-leak', 'ortb-bidder-concurrency', 'A bidder goroutine blocks on a channel receive with no context or timeout. If the exchange closes the connection, the goroutine will:', 'Go goroutines are not garbage collected while they are blocked. A goroutine waiting on a channel with no timeout will live forever if no sender ever sends. In a bidder under 50k RPS, even 0.1% goroutine leaks (50/sec) fill memory in minutes. Always use select with ctx.Done() or time.After to bound goroutine lifetime.', 2),
+  ('ortb-bidder-benchmark::ortb-bench-allocopt', 'ortb-bidder-benchmark', 'In a Go benchmark, -benchmem reports "1024 B/op 8 allocs/op". To reduce allocations in the JSON decode path, which technique is most effective?', 'json.Decoder and its internal buffers are allocated on each call. sync.Pool maintains a free list of reusable objects; Reset(newReader) repoints an existing Decoder to the new input without reallocation. This is the canonical pattern in high-throughput Go servers. Alternatively, use a zero-allocation JSON library (sonic, go-json) for the biggest wins.', 0),
+  ('ortb-bidder-benchmark::ortb-bench-pprof', 'ortb-bidder-benchmark', 'You run: go test -bench=BenchmarkBidder -cpuprofile=cpu.prof. How do you identify the hottest function?', '"go tool pprof cpu.prof" opens an interactive session. "top" shows the top CPU consumers by flat (self) and cum (cumulative) time. "list FuncName" shows the annotated source lines. "web" opens a visual flame graph in the browser. For allocation profiling use -memprofile=mem.prof and "go tool pprof mem.prof".', 1),
+  ('ortb-bidder-benchmark::ortb-bench-prealloc', 'ortb-bidder-benchmark', 'make([]Bid, 0, len(req.Imp)) instead of var bids []Bid reduces allocations because:', 'When a Go slice grows beyond its capacity, the runtime allocates a new, larger backing array and copies all elements. If you know the upper bound (len(req.Imp) impressions → at most len(req.Imp) bids), pre-allocating with make eliminates these growth copies. One allocation instead of O(log N) for N elements.', 2),
+  ('ortb-exchange-fanout::ortb-fanout-buffered', 'ortb-exchange-fanout', 'Why must the channel used for DSP results have a buffer equal to the number of DSPs?', 'After the context deadline fires, the fan-in loop may stop reading the channel. If the channel is unbuffered (or has a smaller buffer), goroutines trying to send their result will block forever — a goroutine leak. A buffer of cap=N means each goroutine can always complete its send and exit, even if nobody is reading the channel anymore.', 0),
+  ('ortb-exchange-fanout::ortb-fanout-smart-selection', 'ortb-exchange-fanout', 'A production exchange has 50 registered DSPs but only fans out to 5–10 per auction. What criterion is most commonly used to choose which DSPs to invite?', 'Fanning out to all 50 DSPs multiplies latency risk and compute cost. Smart DSP selection scores each DSP on predicted win probability for this impression type (based on recent performance, targeting overlap, and capacity signal). Only the top-N DSPs are invited. This is also called "demand prediction" or "DSP scoring." Well-run exchanges fan out to 5–15 DSPs.', 1),
+  ('ortb-exchange-fanout::ortb-fanout-goroutine-lifetime', 'ortb-exchange-fanout', 'After context deadline expires and your fan-in loop exits, DSP goroutines that haven''t finished yet will:', 'Context cancellation signals the http.Client to abort the in-flight request, so slow DSP goroutines will unblock quickly with a context error. They then try to send the error result to the buffered channel — this succeeds immediately since the buffer has capacity. Once they''ve sent, the goroutines exit. The channel is closed by the WaitGroup-tracking goroutine after all N workers finish.', 2),
+  ('ortb-exchange-hedged::ortb-hedge-latency-math', 'ortb-exchange-hedged', 'Your DSP has p50=30ms and p99=90ms responses. You hedge at t=40ms with a backup replica that has p50=25ms. The effective p99 of the hedged call is approximately:', 'If the primary takes longer than 40 ms (the p99 tail), the backup kicks in at t=40 ms. The backup adds its own p50 latency (25 ms), making the effective completion time ~65 ms for those requests. Requests where the primary responds before 40 ms still see primary latency (~30 ms). Net effect: p99 drops from 90 ms to ~65 ms.', 0),
+  ('ortb-exchange-hedged::ortb-hedge-cost', 'ortb-exchange-hedged', 'What is the main cost of hedged requests at scale?', 'When a primary response is slow, the backup call fires — adding an extra HTTP request to the DSP for each tail-latency event. If p99 tail is 5% of traffic and you hedge 5% of requests, you add ~5% load on DSP endpoints. In exchange integrations, it''s polite to inform DSPs that you hedge and only count one win per hedged pair. The DSP will receive two requests but should only process one win notice.', 1),
+  ('ortb-exchange-hedged::ortb-hedge-sync-once', 'ortb-exchange-hedged', 'sync.Once in the hedged request implementation ensures:', 'sync.Once.Do executes its argument function exactly once across all goroutines that call it. In the hedged implementation, both the primary and backup goroutines try to send their result via once.Do. The first to succeed sends; the second''s once.Do is a no-op. This guarantees exactly one result in the channel regardless of which goroutine finishes first.', 2),
+  ('ortb-exchange-auction::ortb-auction-tie', 'ortb-exchange-auction', 'Two DSPs submit identical bid prices in a first-price auction. How should the exchange resolve the tie?', 'Random tie-breaking is the industry standard because deterministic tie-breaking (first received, seat ID order, etc.) can be exploited — a DSP could time or craft bids to systematically win ties. Random selection across tied bids provides fairness and removes the incentive for gaming.', 0),
+  ('ortb-exchange-auction::ortb-auction-floor-enforcement', 'ortb-exchange-auction', 'A DSP bids $1.20 CPM and the Imp.bidfloor is $1.50 CPM. The exchange should:', 'The floor price is a hard constraint set by the publisher (via SSP). Any bid below floor is rejected before the auction even runs. This is non-negotiable — accepting below-floor bids would violate publisher monetisation guarantees and SSP contracts. The exchange must enforce this before running sort/selection logic.', 1),
+  ('ortb-exchange-auction::ortb-auction-deal-priority', 'ortb-exchange-auction', 'In an auction where both a PMP deal bid ($3.00 CPM) and an open auction bid ($5.00 CPM) compete, which wins?', 'Deal hierarchy: Programmatic Guaranteed > Preferred Deal (fixed-price, first-look) > Private Marketplace (PMP spot auction competing with open). A PMP spot auction deal at $3.00 competes in the same open auction and loses to $5.00. A Preferred Deal at $3.00 wins against a $5.00 open bid because the buyer has paid for first-look access. Programmatic Guaranteed is pre-sold at a fixed CPM and bypasses auction entirely.', 2),
+  ('ortb-exchange-floors::ortb-floor-bidfloorcur', 'ortb-exchange-floors', 'The Imp.bidfloorcur field is set to "EUR" and bidfloor is 2.00. A DSP bids 2.50 in USD. What should the exchange do?', 'When bidfloorcur differs from the BidResponse.cur, the exchange must normalize to a common currency before floor comparison. Most exchanges use real-time FX rates cached from a financial data source. DSPs should match their bid currency to the bidfloorcur to avoid ambiguity, or rely on the exchange to advertise the floor in the same currency they bid in.', 0),
+  ('ortb-exchange-floors::ortb-pmp-dealid-bid', 'ortb-exchange-floors', 'A DSP''s Bid includes a dealid that does not match any deal in Imp.pmp.deals. The exchange should:', 'A dealid in a Bid must reference an existing deal in the corresponding Imp.pmp.deals array. A dealid that doesn''t match is likely a DSP bug (stale deal ID, wrong impression). Exchanges should reject or flag such bids to protect deal integrity. Treating it as an open auction bid would violate the deal contract with the publisher.', 1),
+  ('ortb-exchange-floors::ortb-floor-dynamic', 'ortb-exchange-floors', 'Dynamic floors set by SSPs per-auction (different from static publisher floors) primarily benefit:', 'Dynamic floors (also called "optimised floors" or "price floors optimization") are SSP/exchange-generated floors that adjust per-auction based on predicted demand, user data, contextual signals, and historical prices. When demand is high (prime news event, sport), the floor rises to capture more revenue for the publisher. When demand is low, floors stay at the base to maintain fill rate.', 2),
+  ('ortb-serving-reverse-proxy::ortb-proxy-director', 'ortb-serving-reverse-proxy', 'In httputil.ReverseProxy, the Director function is called:', 'Director is a function(req *http.Request) called synchronously before each upstream request is sent. It should rewrite req.URL.Host/Scheme/Path, modify headers, etc. ModifyResponse is the counterpart for transforming the response. Director must not be used for expensive work since it blocks the proxy goroutine.', 0),
+  ('ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor', 'ortb-serving-reverse-proxy', 'Why might an ad proxy strip or carefully control the X-Forwarded-For header forwarded to the ad server?', 'By default, httputil.ReverseProxy adds the client IP to X-Forwarded-For. If the proxy chain has multiple hops, internal IPs may be visible to the external ad server. The ad server may also use X-Forwarded-For for geotargeting — an internal IP would break geo. Best practice: set X-Forwarded-For to the original client IP only, stripping internal hops.', 1),
+  ('ortb-serving-reverse-proxy::ortb-proxy-modifyresponse', 'ortb-serving-reverse-proxy', 'After ModifyResponse replaces resp.Body with a new buffer, what else must you update?', 'When you replace resp.Body, the Content-Length header still reflects the original body size. If the client uses Content-Length for buffering, it will read the wrong amount of data. Set resp.ContentLength = int64(len(newBody)) and delete Content-Encoding (since you''ve decompressed and re-encoded, any gzip/br encoding is now invalid).', 2),
+  ('ortb-serving-win-billing::ortb-win-goroutine', 'ortb-serving-win-billing', 'Why should nurl and burl calls always be made in fire-and-forget goroutines rather than in-line before responding to the SSP?', 'nurl/burl are HTTP GETs to the DSP''s tracking server. The DSP''s server may have variable latency (10–100 ms). Doing this synchronously would add that latency to the SSP''s critical path — adding to the user-visible time before the ad markup is returned. Fire-and-forget goroutines decouple notice delivery from the auction response path entirely.', 0),
+  ('ortb-serving-win-billing::ortb-win-retry', 'ortb-serving-win-billing', 'A DSP''s nurl endpoint returns HTTP 500. Should the exchange retry the nurl call?', 'nurl delivery failures directly affect the DSP''s revenue reporting — a missed nurl means the DSP doesn''t know it won. Best practice: 2–3 retries with exponential backoff (e.g. 100 ms, 500 ms). Limit total retry window to ~5 seconds to avoid holding goroutines. Note: burl retries are more critical than nurl since burl = billable event; missing burl = revenue leak.', 1),
+  ('ortb-serving-win-billing::ortb-win-clearing-price', 'ortb-serving-win-billing', 'The exchange fills ${AUCTION_PRICE} in the nurl with the clearing price. In a first-price auction, this equals:', 'In a first-price auction, the winner pays their bid — so ${AUCTION_PRICE} = winner''s bid. In a second-price auction, ${AUCTION_PRICE} = clearing price = max(floor, second-highest bid). The DSP should always record the macro value (not their own bid) as their actual spend for accurate cost tracking.', 2),
+  ('ortb-serving-markup::ortb-markup-who-substitutes', 'ortb-serving-markup', 'In the standard OpenRTB workflow, who performs ${AUCTION_PRICE} macro substitution?', 'The exchange owns the clearing price (which may differ from the submitted bid in second-price auctions) and therefore performs macro substitution. The DSP includes literal ${AUCTION_PRICE} in its adm/nurl — the exchange replaces it with the actual clearing price before forwarding to the SSP or calling the win notice URL.', 0),
+  ('ortb-serving-markup::ortb-markup-encoding', 'ortb-serving-markup', 'When ${AUCTION_PRICE} appears inside a URL query parameter in adm markup, how should it be substituted?', 'The OpenRTB spec is explicit: when macros appear as URL parameters, values must be URL-encoded to avoid breaking the URL structure. Prices are numeric and don''t contain special characters, but other macros (IDs with special chars) do. Apply consistent URL encoding for all macro values in URL contexts. In plain markup body text (non-URL context), use raw values.', 1),
+  ('ortb-serving-markup::ortb-markup-adm-vs-nurl-latency', 'ortb-serving-markup', 'Serving markup via adm (inline in BidResponse) vs nurl (exchange fetches from DSP on win) — which has lower latency for the publisher?', 'With adm, the exchange has the markup in hand as soon as it selects the winner — no extra network call needed. With nurl, the exchange must make an additional HTTP GET to the DSP''s server to retrieve the markup, adding 5–30 ms of DSP server latency. For low-latency exchange integrations, adm is preferred; nurl is used for dynamic creative generation or when markup is too large to embed in the BidResponse.', 2),
+  ('ortb-serving-cdn::ortb-cdn-iurl', 'ortb-serving-cdn', 'The Bid.iurl field contains:', 'iurl (Image URL) is a static snapshot of the creative intended for the exchange''s audit pipeline — not the live creative served to users. The exchange''s brand-safety crawler fetches this URL to scan for prohibited content, malware, or policy violations. It''s separate from the actual adm creative markup.', 0),
+  ('ortb-serving-cdn::ortb-cdn-crid-stability', 'ortb-serving-cdn', 'An exchange allows a DSP to skip creative audit for already-approved crid values. What attack does this create if crid is not stable?', 'If a DSP changes creative markup but reuses an already-approved crid, the exchange''s audit cache considers it safe and serves it immediately without re-review. This is a known attack: submit a benign ad to get the crid approved, then change the adm to serve malware or prohibited content. Defence: hash the adm or iurl on every bid and invalidate the approved status if the hash changes.', 1),
+  ('ortb-serving-cdn::ortb-cdn-https', 'ortb-serving-cdn', 'Why should CDN-hosted creative assets always be served over HTTPS?', 'Modern browsers (Chrome, Firefox, Safari) block "mixed content" — HTTP sub-resources loaded from an HTTPS page. Most publisher pages today are HTTPS. If a creative''s image, video, or JavaScript is served over HTTP, the browser will silently block it and the ad won''t render. This is why Imp.secure=1 exists: it signals that the publisher requires HTTPS-only creatives.', 2),
+  ('ortb-tracking-impressions::ortb-imp-pixel-when', 'ortb-tracking-impressions', 'An impression pixel embedded in ad markup is fired:', 'Impression pixels are HTML image tags (e.g. <img src="https://track.example.com/imp?id=...">). The browser fires an HTTP GET to the pixel URL when it renders the tag — typically during page load. This is a client-side event, which is why impression counts from pixels differ from exchange-side nurl counts (server-to-server).', 0),
+  ('ortb-tracking-impressions::ortb-imp-dedup', 'ortb-tracking-impressions', 'Why might a single ad impression fire the same pixel URL more than once?', 'Browser behaviour (preloading, BFCache, refresh) can trigger the same creative markup to render multiple times in a session. Without deduplication, the impression count would be inflated. DSPs deduplicate by impression ID + time window (e.g. same imp ID within 30 seconds counts as one). Exchanges do the same server-side for their own accounting.', 1),
+  ('ortb-tracking-impressions::ortb-imp-gif-response', 'ortb-tracking-impressions', 'Why does an impression tracking server return a 1×1 transparent GIF?', 'An <img> tag requires an image response. If the server returns an error (4xx/5xx) or a non-image response, some browsers log console errors or mark the element as broken. A 1×1 transparent GIF (35 bytes) is invisible to users, satisfies the browser''s image requirement, and signals a successful tracking event. Some modern trackers use HTTP 204 No Content via fetch() beacons instead of image pixels.', 2),
+  ('ortb-tracking-clicks::ortb-click-302-vs-301', 'ortb-tracking-clicks', 'A click tracking server must use HTTP 302 (not 301) for redirects. Why?', 'Browsers cache 301 (Moved Permanently) responses. On the second click of the same URL, the browser follows the cached redirect directly without contacting the click tracker, silently bypassing the attribution logging. HTTP 302 (Found / Temporary Redirect) is not cached by default, ensuring every click goes through the tracker. This is why all click tracking systems use 302.', 0),
+  ('ortb-tracking-clicks::ortb-click-openredirect', 'ortb-tracking-clicks', 'A click tracking endpoint blindly redirects to any URL passed in a "dest" query parameter. The security vulnerability is:', 'An open redirect allows an attacker to use your trusted domain as a proxy for a malicious URL: "https://ads.trusted.com/click?dest=https://phishing.com". Browsers and security tools may not flag the initial trusted URL. Mitigation: validate the destination against an allowlist of advertiser domains, or sign the destination URL with an HMAC so it can''t be tampered with.', 1),
+  ('ortb-tracking-clicks::ortb-click-attribution', 'ortb-tracking-clicks', 'A user clicks an ad on Monday and converts on Wednesday. Last-click attribution would credit:', 'Last-click attribution assigns 100% of conversion credit to the final click before the conversion event. It''s the simplest model and the default for most DSPs. Modern attribution models (data-driven, time-decay, first-click, multi-touch) attempt to distribute credit across all touchpoints more fairly. The click tracking chain creates the log of touchpoints that attribution systems consume.', 2),
+  ('ortb-tracking-macros::ortb-macro-lurl-use', 'ortb-tracking-macros', 'The ${AUCTION_LOSS} macro is only valid in which field?', 'AUCTION_LOSS contains the integer loss reason code (e.g. 1=internal error, 100=bid below floor, 200=creative filtered). It only has meaning in a loss notification context (lurl). Using it in nurl or burl is meaningless since those fire on win/billing events where there is no loss reason.', 0),
+  ('ortb-tracking-macros::ortb-macro-when-substitute', 'ortb-tracking-macros', 'A DSP includes ${AUCTION_PRICE} in its Bid.adm markup. When is this macro replaced?', 'The exchange is the only party that knows the clearing price at the time of substitution. The DSP doesn''t know if it won or at what clearing price until the exchange notifies it. Therefore, macros in adm are substituted by the exchange before forwarding markup to the SSP, not by the DSP and not by the browser.', 1),
+  ('ortb-tracking-macros::ortb-macro-missing', 'ortb-tracking-macros', 'Your exchange does not support the ${AUCTION_BID_ID} macro. The DSP includes it in a tracking URL. What happens?', 'Exchanges only substitute macros they support. Unsupported macros are left as-is in the output URL. The DSP''s tracking server then receives "${AUCTION_BID_ID}" literally, which it will fail to parse as a bid ID. Well-designed DSP tracking parsers should handle missing/malformed parameters gracefully.', 2),
+  ('ortb-tracking-reconciliation::ortb-reconcile-authority', 'ortb-tracking-reconciliation', 'When the exchange impression count and the DSP impression count differ for billing purposes, which is generally considered authoritative?', 'Exchange server-to-server counts (nurl/burl) are considered more authoritative than DSP pixel counts because they don''t depend on browser rendering, user connectivity, or ad blockers. Standard industry agreements use exchange counts for billing settlement, with a contractual discrepancy allowance of 5–10% for DSP pixel undercounting.', 0),
+  ('ortb-tracking-reconciliation::ortb-reconcile-ivt', 'ortb-tracking-reconciliation', 'Invalid traffic (IVT) — bots and non-human traffic — tends to create which type of discrepancy?', 'Sophisticated IVT (bots designed to inflate publisher revenue) triggers ad auctions and exchange nurl calls but may not execute JavaScript or fire browser pixels. This creates a gap where exchange counts are higher than DSP pixel counts. A large, sudden increase in exchange/DSP discrepancy is a strong IVT signal. Third-party verification vendors (IAS, DoubleVerify) specialise in detecting such patterns.', 1),
+  ('ortb-tracking-reconciliation::ortb-reconcile-window', 'ortb-tracking-reconciliation', 'DSP reports 90,000 impressions and exchange reports 100,000 for the same day. The contract allows 10% discrepancy. Should the DSP pay for 100,000 or 90,000?', 'Standard contract terms (IAB guidelines) state that the exchange''s server-side count is authoritative for billing, and a discrepancy of up to 10% is within the acceptable tolerance. The DSP pays for 100,000 impressions. If discrepancy were >10% (e.g. 90k vs 100k = 10% = borderline), the parties would typically negotiate or refer to a third-party verification vendor.', 2),
+  ('ortb-creative-banner::ortb-banner-mraid', 'ortb-creative-banner', 'MRAID (Mobile Rich Media Ad Interface Definitions) is needed for banner ads because:', 'In mobile apps, the WebView (where HTML ads run) is sandboxed. MRAID is a JavaScript API that provides access to native device features: expand(), close(), getVersion(), addEventListener("ready"), getState(), open(url). Without MRAID, a banner ad can''t expand to full-screen, detect when it''s in view, or open the native browser reliably. The SDK (MoPub, Google Mobile Ads) injects the MRAID script into the WebView.', 0),
+  ('ortb-creative-banner::ortb-banner-safeframe', 'ortb-creative-banner', 'What does a SafeFrame provide for banner ads on web pages?', 'SafeFrame is an IAB standard for a sandboxed iframe with a controlled communication channel ($sf.ext API). It prevents creative JavaScript from accessing the parent page''s DOM, cookies, or localStorage — protecting user privacy and publisher page security. Publishers use SafeFrame as a secure container for third-party ad creatives.', 1),
+  ('ortb-creative-banner::ortb-banner-mtype', 'ortb-creative-banner', 'A bid response sets mtype=1. What should the exchange/publisher ad server do with the adm?', 'mtype values: 1=banner (render HTML in iframe), 2=video (pass VAST XML to video player), 3=audio, 4=native (parse native JSON). The exchange/ad server must inspect mtype to know how to handle the adm. Without mtype on a multi-format impression, the server would have to guess the creative type, risking misrendering.', 2),
+  ('ortb-creative-vast::ortb-vast-inline-vs-wrapper', 'ortb-creative-vast', 'A VAST Wrapper ad differs from a VAST InLine ad in that:', 'VAST Wrapper chains multiple ad servers: the first VAST document is a Wrapper with a VASTAdTagURI pointing to the next VAST (another Wrapper or an InLine). The chain terminates at an InLine which contains the actual MediaFiles (video URLs) and creative. This allows ad verification vendors, third-party measurement, and multiple ad-server hops. Publishers typically limit wrapper chains to 3–5 levels to control latency.', 0),
+  ('ortb-creative-vast::ortb-vast-tracking-quartile', 'ortb-creative-vast', 'A user starts a 30-second video ad but closes the player at the 20-second mark. Which tracking events should fire?', 'VAST tracking events are fired at specific percentage marks of the ad duration: start (first frame), firstQuartile (25%), midpoint (50%), thirdQuartile (75%), complete (100%). At 20 seconds of a 30-second ad, the player has passed 66%, so start (0%), firstQuartile (7.5s), and midpoint (15s) fire. thirdQuartile fires at 22.5s — the user closed at 20s so it doesn''t fire. complete doesn''t fire.', 1),
+  ('ortb-creative-vast::ortb-vast-mtype', 'ortb-creative-vast', 'When a DSP returns VAST XML in Bid.adm, what must Bid.mtype be set to?', 'mtype=2 signals video (VAST/VPAID). The exchange/publisher ad server routes mtype=2 adm to the video player framework (IMA SDK, Prebid Video, etc.) which knows how to parse and execute VAST XML. Without mtype, the ad server would have to detect the content type by parsing the adm string, which is error-prone.', 2),
+  ('ortb-creative-native::ortb-native-who-renders', 'ortb-creative-native', 'Who is responsible for rendering a native ad from the OpenRTB Native response JSON?', 'This is the defining property of native advertising: the publisher controls rendering. The native JSON provides raw assets (title text, image URL, description, link) and the publisher''s template styles them to match its editorial look and feel. Two publishers showing the same native ad will present it differently.', 0),
+  ('ortb-creative-native::ortb-native-asset-type', 'ortb-creative-native', 'In a NativeAsset request, ImageAsset.type=3 means:', 'OpenRTB Native image type codes: 1=Icon (brand logo, typically square, 50×50 to 100×100), 3=Main image (hero image, typically 600×400 or larger). The DSP must provide images matching the requested type and minimum dimensions.', 1),
+  ('ortb-creative-native::ortb-native-imptrackers', 'ortb-creative-native', 'In a NativeResponse, imptrackers[] contains:', 'imptrackers is an array of URLs the publisher (or SDK) must fire as 1×1 pixel GETs when the native unit is rendered. This gives the DSP and third-party measurement vendors a client-side impression signal, separate from the exchange-side win notice. Publishers must fire all imptrackers in the response.', 2),
+  ('ortb-scale-pacing::ortb-pacing-smooth-vs-asap', 'ortb-scale-pacing', 'In "smooth pacing," a $1,000/day campaign at 9 AM should have spent approximately:', 'Smooth pacing distributes budget linearly across the day: at 9 AM (9/24 = 37.5% of the day), the campaign should have spent about 37.5% of $1,000 = $375. This prevents "morning burnout" where a campaign exhausts its budget in the first hours then goes dark for the rest of the day. Front-loading is an alternative when high early traffic is expected.', 0),
+  ('ortb-scale-pacing::ortb-pacing-atomic-cas', 'ortb-scale-pacing', 'The pacing implementation uses Compare-And-Swap (CAS) in a loop. Why is a loop necessary?', 'CAS (CompareAndSwap) atomically checks that the current value equals the expected value and only updates it if so. Under contention (multiple goroutines simultaneously updating the counter), one goroutine''s CAS will fail (the value changed before it could update). The loop retries with the freshly-loaded current value. This spin loop is correct and wait-free in the absence of starvation.', 1),
+  ('ortb-scale-pacing::ortb-pacing-per-dsp', 'ortb-scale-pacing', 'Should a DSP check budget pacing before or after the bid decision targeting logic?', 'Targeting checks are O(1) in-process lookups (nanoseconds). Budget pacing involves an atomic read + potential CAS. While both are fast, the fail-fast order should be: cheap targeting checks first (geo, category, audience match). If the impression doesn''t match any campaign, budget is irrelevant. Only perform the budget deduction when you''re about to commit to a bid.', 2),
+  ('ortb-scale-frequency-cap::ortb-freqcap-atomicity', 'ortb-scale-frequency-cap', 'The read-then-increment pattern for frequency capping (GET + INCR) has a race condition. What is it and how is it fixed?', 'Without atomicity, two simultaneous "check then increment" operations can both see count < cap, both allow the impression, and both increment — serving one extra impression. Fix with a Redis Lua script: the script runs atomically (single-threaded in Redis), performing GET, check, and INCR in one network round-trip. redis.call inside Lua is serialised.', 0),
+  ('ortb-scale-frequency-cap::ortb-freqcap-sliding', 'ortb-scale-frequency-cap', 'A sliding window frequency cap (last 24 hours, not daily calendar boundary) is more complex than fixed-window. What Redis data structure enables it?', 'Sliding window: ZADD key <unix_ms_timestamp> <unique_member> adds each impression with its timestamp as score. ZCOUNT key (now-86400000) now counts impressions in the last 24 hours. Periodically ZREMRANGEBYSCORE key 0 (now-86400000) prunes old entries. Each operation is O(log N) but gives exact sliding window semantics.', 1),
+  ('ortb-scale-frequency-cap::ortb-freqcap-consistent-hash', 'ortb-scale-frequency-cap', 'Why should frequency cap Redis lookups use consistent hashing to route to shards?', 'If "fc:user-42:camp-nike:2026-07-01" routes to Shard A on one pod and Shard B on another (inconsistent routing), the counter is split — each shard shows 2, but total is 4. The cap of 3 is exceeded without either shard knowing. Consistent hashing ensures every pod routes the same key to the same shard, maintaining a globally consistent count.', 2),
+  ('ortb-scale-logging::ortb-log-why-async', 'ortb-scale-logging', 'Why must Kafka/database writes happen asynchronously and not inline in the bid handler?', 'A Kafka produce call (with ack) typically takes 1–10 ms due to network + broker processing. In a bidder with 5 ms p99 target, inline Kafka writes would immediately destroy that SLA. Write-behind: append to a lock-free ring buffer (nanoseconds), return the bid response, and let a background goroutine batch-write to Kafka outside the hot path.', 0),
+  ('ortb-scale-logging::ortb-log-overflow', 'ortb-scale-logging', 'The ring buffer is full and a new bid event arrives. The best overflow policy for an ad exchange is:', 'Win events (nurl fires, billing) are revenue-critical — losing one means a DSP doesn''t know it won and can''t reconcile spend. Losing bid events are high-volume and lower priority — a 1% sample is statistically representative for analytics. Best practice: maintain two ring buffers — one high-priority (wins, small, never drop) and one best-effort (all bids, sample on overflow).', 1),
+  ('ortb-scale-logging::ortb-log-consumer-lag', 'ortb-scale-logging', 'Your Kafka consumer group for the bid-events topic shows increasing consumer lag. What does this indicate?', 'Consumer lag = (latest producer offset) - (latest consumer committed offset). Increasing lag means the producer is writing events faster than the consumer processes them. Fix: add consumer instances (if partitions > current consumers) or increase partition count (requires repartitioning) and scale consumers proportionally.', 2),
+  ('ortb-privacy-consent::ortb-privacy-gdpr-nobid', 'ortb-privacy-consent', 'You receive a BidRequest with regs.gdpr=1 but user.consent is missing. What should your DSP do?', 'Under GDPR, processing personal data (including user IDs and targeting) requires a legal basis — typically consent via TCF or legitimate interest. Without a consent string, you have no documented basis and must no-bid. Some DSPs have a policy to bid with contextual-only data (no user.id, no audience) even without consent, but this requires legal review.', 0),
+  ('ortb-privacy-consent::ortb-privacy-tcf-purposes', 'ortb-privacy-consent', 'TCF 2.x Purpose 3 is required for which activity?', 'TCF purposes: 1=Store/access info on device, 2=Select basic ads, 3=Create personalised ads profile, 4=Select personalised ads, 5=Create personalised content profile, 6=Select personalised content, 7=Measure ad performance, 8=Measure content performance, 9=Apply market research, 10=Develop/improve products. Behavioural ad targeting requires purposes 3 and 4.', 1),
+  ('ortb-privacy-consent::ortb-privacy-ccpa', 'ortb-privacy-consent', 'A CCPA us_privacy string of "1YYN" means:', 'CCPA us_privacy format: [0]=spec version (1), [1]=notice given (Y/N/-, Y=yes), [2]=opt-out of sale (Y=opted out, N=not opted out, -=unknown), [3]=LSPA signatory (Y/N). "1YYN": version=1, notice=Y (given), opt-out=Y (user opted out of sale), LSPA=N. DSP must not sell this user''s data to third parties.', 2),
+  ('ortb-privacy-identity::ortb-id-att', 'ortb-privacy-identity', 'After Apple''s App Tracking Transparency (ATT, iOS 14.5+), what happens to IDFA availability?', 'ATT requires app publishers to show a system prompt asking users to allow tracking (and therefore IDFA access). Most users (60–75%) chose "Ask App Not to Track" at launch. Device.ifa is empty/zeroed and Device.lmt=1 for opted-out users. Publishers fill Device.ifa with a Publisher Provided ID (PPID) as an alternative in some cases.', 0),
+  ('ortb-privacy-identity::ortb-id-uid2', 'ortb-privacy-identity', 'UID2 (The Trade Desk''s Unified ID 2.0) is designed to work in a cookieless world by:', 'UID2 flow: (1) user authenticates (login, newsletter signup) and consents to advertising use; (2) publisher sends hashed email (SHA-256 of lowercase email) to UID2 API; (3) UID2 API returns an opaque token; (4) publisher places token in BidRequest.user.eids[{source:"uidapi.com"}]; (5) DSPs with a UID2 API key can decrypt the token to a stable, pseudonymous ID for targeting. The raw email is never exposed in the bidstream.', 1),
+  ('ortb-privacy-identity::ortb-id-eids', 'ortb-privacy-identity', 'User.eids (Extended IDs) supports multiple ID sources. Why does this matter for DSPs?', 'The identity landscape is fragmented: some publishers use UID2, others LiveRamp ATS, others ID5. eids[] is an array of identity tokens from multiple systems in the same BidRequest. A DSP with a UID2 key picks up the UID2 token; a DSP with LiveRamp integration uses the RampID. No single ID system has universal coverage, so multi-ID support is essential.', 2),
+  ('ortb-design-capstone::ortb-capstone-hot-path', 'ortb-design-capstone', 'Which components should NEVER be in the synchronous hot path of an exchange auction?', 'The hot path must return the winning markup to the SSP within tmax (80–120 ms). Any I/O operation not strictly required for the auction result must be async: DB writes (use write-behind ring buffer), Kafka produces (background goroutine), win notices (fire-and-forget goroutine), and loss notices. In-process operations (JSON decode, targeting match, sort N≤10 bids) are fine in the hot path.', 0),
+  ('ortb-design-capstone::ortb-capstone-bottleneck', 'ortb-design-capstone', 'At 1M RPS, which single change typically yields the biggest latency improvement in a Go exchange?', 'A Redis lookup takes 0.5–2 ms per call. An in-process cache lookup takes nanoseconds. At 1M RPS, even 1 ms per request = 1,000 ms of aggregate latency per second across the fleet. Moving the most frequently accessed data (top-N DSP scores, user segment maps, targeting rules) to in-process caches (refreshed from Redis every 5–10 seconds) consistently yields the largest single latency improvement.', 1),
+  ('ortb-design-capstone::ortb-capstone-reconciliation', 'ortb-design-capstone', 'Your exchange bills advertisers based on burl (billing notice) counts. The DSP disputes the count saying their pixel count is 15% lower. Per IAB standards:', 'IAB guidelines recognise that server-to-server exchange counts (burl) and client-side DSP pixel counts will diverge due to ad blockers, browser issues, and network failures. Exchange burl count is authoritative for billing settlement. Most contracts allow 10–15% discrepancy without dispute. Above this threshold, parties may involve a third-party measurement vendor (IAS, DoubleVerify) as arbitrator.', 2);
 
 insert into public.quiz_choices (id, question_id, label, is_correct, sort_order) values
   ('union-find::category#0', 'union-find::category', 'Union-find — tracks connected components', true, 0),
@@ -44855,7 +48858,451 @@ insert into public.quiz_choices (id, question_id, label, is_correct, sort_order)
   ('go-design-pipeline::context-vs-done-channel#0', 'go-design-pipeline::context-vs-done-channel', 'Deadlines plus values — carries timeouts and request scope', true, 0),
   ('go-design-pipeline::context-vs-done-channel#1', 'go-design-pipeline::context-vs-done-channel', 'Faster cancellation — ctx.Done signals before a done channel', false, 1),
   ('go-design-pipeline::context-vs-done-channel#2', 'go-design-pipeline::context-vs-done-channel', 'Automatic goroutine cleanup — ctx joins and stops goroutines', false, 2),
-  ('go-design-pipeline::context-vs-done-channel#3', 'go-design-pipeline::context-vs-done-channel', 'Buffered cancellation — ctx queues cancel across stages', false, 3);
+  ('go-design-pipeline::context-vs-done-channel#3', 'go-design-pipeline::context-vs-done-channel', 'Buffered cancellation — ctx queues cancel across stages', false, 3),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role#0', 'ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'SSP — sell-side broker packaging publisher inventory and floors', true, 0),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role#1', 'ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'DSP — demand-side buyer bidding for advertiser campaigns', false, 1),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role#2', 'ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'Ad Exchange — neutral marketplace running auctions among DSPs', false, 2),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role#3', 'ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'DMP — audience data warehouse; not an auction participant', false, 3),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-header-bidding#0', 'ortb-foundations-ecosystem::ortb-ecosystem-header-bidding', 'Parallel bidding — all demand sources compete in one unified auction', true, 0),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-header-bidding#1', 'ortb-foundations-ecosystem::ortb-ecosystem-header-bidding', 'Single DSP invited — incorrect; many DSPs bid concurrently', false, 1),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-header-bidding#2', 'ortb-foundations-ecosystem::ortb-ecosystem-header-bidding', 'Fixed-price offer — publisher names price; demand sources accept or not', false, 2),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-header-bidding#3', 'ortb-foundations-ecosystem::ortb-ecosystem-header-bidding', 'No JS wrapper claim — header bidding also uses a client-side JS wrapper', false, 3),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp#0', 'ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp', 'Bidder = decision engine — evaluates imps, returns bid prices for DSP', true, 0),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp#1', 'ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp', 'Synonyms claim — bidder and DSP are separate; bidder is one component', false, 1),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp#2', 'ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp', 'Exchange-side claim — the bidder lives inside the DSP, not the exchange', false, 2),
+  ('ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp#3', 'ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp', 'Third-party claim — bidders are built in-house by the DSP', false, 3),
+  ('ortb-foundations-rtb-flow::ortb-flow-tmax#0', 'ortb-foundations-rtb-flow::ortb-flow-tmax', 'tmax — max milliseconds the exchange waits for DSP bids', true, 0),
+  ('ortb-foundations-rtb-flow::ortb-flow-tmax#1', 'ortb-foundations-rtb-flow::ortb-flow-tmax', 'Ad duration claim — tmax is max video length in seconds per ad', false, 1),
+  ('ortb-foundations-rtb-flow::ortb-flow-tmax#2', 'ortb-foundations-rtb-flow::ortb-flow-tmax', 'Browser timeout claim — tmax limits creative loading in the browser', false, 2),
+  ('ortb-foundations-rtb-flow::ortb-flow-tmax#3', 'ortb-foundations-rtb-flow::ortb-flow-tmax', 'Retry count claim — tmax counts SSP retries before no-billing', false, 3),
+  ('ortb-foundations-rtb-flow::ortb-flow-nurl-timing#0', 'ortb-foundations-rtb-flow::ortb-flow-nurl-timing', 'At auction time — fires as soon as winner is selected, before markup', true, 0),
+  ('ortb-foundations-rtb-flow::ortb-flow-nurl-timing#1', 'ortb-foundations-rtb-flow::ortb-flow-nurl-timing', 'After render claim — nurl fires only when browser displays creative', false, 1),
+  ('ortb-foundations-rtb-flow::ortb-flow-nurl-timing#2', 'ortb-foundations-rtb-flow::ortb-flow-nurl-timing', 'On click claim — nurl fires when the user clicks the ad unit', false, 2),
+  ('ortb-foundations-rtb-flow::ortb-flow-nurl-timing#3', 'ortb-foundations-rtb-flow::ortb-flow-nurl-timing', 'Billing period claim — nurl fires at end of each billing cycle', false, 3),
+  ('ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel#0', 'ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel', 'End-user browser — fires impression pixel on creative render', true, 0),
+  ('ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel#1', 'ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel', 'Exchange server — fires pixel at end of the auction server-side', false, 1),
+  ('ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel#2', 'ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel', 'SSP server — fires pixel after returning markup to publisher', false, 2),
+  ('ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel#3', 'ortb-foundations-rtb-flow::ortb-flow-who-calls-pixel', 'Bidder server — fires pixel after sending its BidResponse', false, 3),
+  ('ortb-foundations-auction-types::ortb-auction-dominant-strategy#0', 'ortb-foundations-auction-types::ortb-auction-dominant-strategy', 'Bid true value — you pay at most the second-highest bid anyway', true, 0),
+  ('ortb-foundations-auction-types::ortb-auction-dominant-strategy#1', 'ortb-foundations-auction-types::ortb-auction-dominant-strategy', 'Bid shading — shade below true value to cut the clearing price', false, 1),
+  ('ortb-foundations-auction-types::ortb-auction-dominant-strategy#2', 'ortb-foundations-auction-types::ortb-auction-dominant-strategy', 'Overbid strategy — bid above true value to beat rival buyers', false, 2),
+  ('ortb-foundations-auction-types::ortb-auction-dominant-strategy#3', 'ortb-foundations-auction-types::ortb-auction-dominant-strategy', 'Floor strategy — bid exactly floor price to minimise CPM spend', false, 3),
+  ('ortb-foundations-auction-types::ortb-auction-industry-shift#0', 'ortb-foundations-auction-types::ortb-auction-industry-shift', 'Header bidding — multi-exchange pressure made SP clearing unpredictable', true, 0),
+  ('ortb-foundations-auction-types::ortb-auction-industry-shift#1', 'ortb-foundations-auction-types::ortb-auction-industry-shift', 'IAB mandate claim — IAB did not mandate FP auctions in OpenRTB 2.5', false, 1),
+  ('ortb-foundations-auction-types::ortb-auction-industry-shift#2', 'ortb-foundations-auction-types::ortb-auction-industry-shift', 'Compute cost claim — second-price math is not too expensive at scale', false, 2),
+  ('ortb-foundations-auction-types::ortb-auction-industry-shift#3', 'ortb-foundations-auction-types::ortb-auction-industry-shift', 'Revenue claim — first-price does not always guarantee higher pub revenue', false, 3),
+  ('ortb-foundations-auction-types::ortb-auction-at-field#0', 'ortb-foundations-auction-types::ortb-auction-at-field', 'at=1 — first-price auction; winner pays their submitted bid', true, 0),
+  ('ortb-foundations-auction-types::ortb-auction-at-field#1', 'ortb-foundations-auction-types::ortb-auction-at-field', 'at=2 — second-price auction; winner pays second-highest bid', false, 1),
+  ('ortb-foundations-auction-types::ortb-auction-at-field#2', 'ortb-foundations-auction-types::ortb-auction-at-field', 'at=3 — fixed-price deal at negotiated rate', false, 2),
+  ('ortb-foundations-auction-types::ortb-auction-at-field#3', 'ortb-foundations-auction-types::ortb-auction-at-field', 'at=4 — programmatic guaranteed at pre-negotiated price', false, 3),
+  ('ortb-foundations-supply-chain::ortb-adstxt-purpose#0', 'ortb-foundations-supply-chain::ortb-adstxt-purpose', 'Authorised sellers — ad systems approved to sell publisher inventory', true, 0),
+  ('ortb-foundations-supply-chain::ortb-adstxt-purpose#1', 'ortb-foundations-supply-chain::ortb-adstxt-purpose', 'Advertiser blocklist — ads.txt does not list blocked advertisers', false, 1),
+  ('ortb-foundations-supply-chain::ortb-adstxt-purpose#2', 'ortb-foundations-supply-chain::ortb-adstxt-purpose', 'CPM floor claim — ads.txt does not encode price floors for formats', false, 2),
+  ('ortb-foundations-supply-chain::ortb-adstxt-purpose#3', 'ortb-foundations-supply-chain::ortb-adstxt-purpose', 'Privacy policy claim — ads.txt covers authorised sellers, not privacy', false, 3),
+  ('ortb-foundations-supply-chain::ortb-schain-complete#0', 'ortb-foundations-supply-chain::ortb-schain-complete', 'Incomplete path — some hops undeclared; apply stricter price scrutiny', true, 0),
+  ('ortb-foundations-supply-chain::ortb-schain-complete#1', 'ortb-foundations-supply-chain::ortb-schain-complete', 'Reject the bid request entirely — complete=0 is always fraud', false, 1),
+  ('ortb-foundations-supply-chain::ortb-schain-complete#2', 'ortb-foundations-supply-chain::ortb-schain-complete', 'Skip schain claim — flags supply quality and trust, not merely optional', false, 2),
+  ('ortb-foundations-supply-chain::ortb-schain-complete#3', 'ortb-foundations-supply-chain::ortb-schain-complete', 'Set bid price to floor — complete=0 implies a guaranteed deal', false, 3),
+  ('ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt#0', 'ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt', 'Publisher + exchange pair — bilateral verification of authorised sellers', true, 0),
+  ('ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt#1', 'ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt', 'Supersedes claim — ads.txt is not deprecated in any OpenRTB spec', false, 1),
+  ('ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt#2', 'ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt', 'Both-publisher claim — sellers.json is published by the exchange', false, 2),
+  ('ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt#3', 'ortb-foundations-supply-chain::ortb-sellersjson-vs-adstxt', 'Roles swapped claim — sellers.json maps sellers; ads.txt authorises them', false, 3),
+  ('ortb-bid-request-object::ortb-req-required#0', 'ortb-bid-request-object::ortb-req-required', 'id + imp[] — only required fields; everything else is optional', true, 0),
+  ('ortb-bid-request-object::ortb-req-required#1', 'ortb-bid-request-object::ortb-req-required', 'id + site/app + device — three objects always required', false, 1),
+  ('ortb-bid-request-object::ortb-req-required#2', 'ortb-bid-request-object::ortb-req-required', 'id + imp + tmax — deadline is mandatory in the spec', false, 2),
+  ('ortb-bid-request-object::ortb-req-required#3', 'ortb-bid-request-object::ortb-req-required', 'Required fields — user and auction type also required alongside id+imp', false, 3),
+  ('ortb-bid-request-object::ortb-req-at-default#0', 'ortb-bid-request-object::ortb-req-at-default', 'at=2 default — spec default is second-price when at is absent', true, 0),
+  ('ortb-bid-request-object::ortb-req-at-default#1', 'ortb-bid-request-object::ortb-req-at-default', 'First-price absence — absence means the newest format', false, 1),
+  ('ortb-bid-request-object::ortb-req-at-default#2', 'ortb-bid-request-object::ortb-req-at-default', 'Fixed-price deal — at is only omitted for guaranteed deals', false, 2),
+  ('ortb-bid-request-object::ortb-req-at-default#3', 'ortb-bid-request-object::ortb-req-at-default', 'Unknown — bidder must reject the request', false, 3),
+  ('ortb-bid-request-object::ortb-req-bcat#0', 'ortb-bid-request-object::ortb-req-bcat', 'bcat — IAB content categories the buyer must not respond to', true, 0),
+  ('ortb-bid-request-object::ortb-req-bcat#1', 'ortb-bid-request-object::ortb-req-bcat', 'badv claim — blocked advertiser domain names go in badv, not bcat', false, 1),
+  ('ortb-bid-request-object::ortb-req-bcat#2', 'ortb-bid-request-object::ortb-req-bcat', 'bseat claim — blocked buyer seat IDs go in bseat, not bcat', false, 2),
+  ('ortb-bid-request-object::ortb-req-bcat#3', 'ortb-bid-request-object::ortb-req-bcat', 'Allow list claim — bcat is a blocklist, not an allow list', false, 3),
+  ('ortb-bid-request-imp::ortb-imp-format-multi#0', 'ortb-bid-request-imp::ortb-imp-format-multi', 'Banner.format array — lists all acceptable sizes for the slot', true, 0),
+  ('ortb-bid-request-imp::ortb-imp-format-multi#1', 'ortb-bid-request-imp::ortb-imp-format-multi', 'Two Imp objects — creates two independent auctions, not one slot', false, 1),
+  ('ortb-bid-request-imp::ortb-imp-format-multi#2', 'ortb-bid-request-imp::ortb-imp-format-multi', 'Largest declared — DSP does not auto-scale banners to smaller sizes', false, 2),
+  ('ortb-bid-request-imp::ortb-imp-format-multi#3', 'ortb-bid-request-imp::ortb-imp-format-multi', 'Two BidRequests — each BidRequest is a separate auction entirely', false, 3),
+  ('ortb-bid-request-imp::ortb-imp-pmp#0', 'ortb-bid-request-imp::ortb-imp-pmp', 'No-bid required — only deal bids accepted when private_auction=1', true, 0),
+  ('ortb-bid-request-imp::ortb-imp-pmp#1', 'ortb-bid-request-imp::ortb-imp-pmp', 'Bid at floor — private_auction=1 just means a higher floor price', false, 1),
+  ('ortb-bid-request-imp::ortb-imp-pmp#2', 'ortb-bid-request-imp::ortb-imp-pmp', 'Bid normally — private_auction is a hint, not a hard rule', false, 2),
+  ('ortb-bid-request-imp::ortb-imp-pmp#3', 'ortb-bid-request-imp::ortb-imp-pmp', 'Call exchange API — to request a temporary deal on the fly', false, 3),
+  ('ortb-bid-request-imp::ortb-imp-secure#0', 'ortb-bid-request-imp::ortb-imp-secure', 'HTTPS required — all markup URLs (adm, nurl, pixels) must use HTTPS', true, 0),
+  ('ortb-bid-request-imp::ortb-imp-secure#1', 'ortb-bid-request-imp::ortb-imp-secure', 'TLS bid claim — the bid itself must be TLS-encrypted before sending', false, 1),
+  ('ortb-bid-request-imp::ortb-imp-secure#2', 'ortb-bid-request-imp::ortb-imp-secure', 'GDPR claim — secure=1 implies GDPR scope and consent requirement', false, 2),
+  ('ortb-bid-request-imp::ortb-imp-secure#3', 'ortb-bid-request-imp::ortb-imp-secure', 'Price flag claim — secure is a pricing flag, not a URL requirement', false, 3),
+  ('ortb-bid-request-site-app::ortb-context-site-vs-app#0', 'ortb-bid-request-site-app::ortb-context-site-vs-app', 'App — with bundle (reverse-domain package name) and optionally storeurl', true, 0),
+  ('ortb-bid-request-site-app::ortb-context-site-vs-app#1', 'ortb-bid-request-site-app::ortb-context-site-vs-app', 'Web-only claim — all inventory is web-based regardless of platform', false, 1),
+  ('ortb-bid-request-site-app::ortb-context-site-vs-app#2', 'ortb-bid-request-site-app::ortb-context-site-vs-app', 'Both present — Site and App may coexist in one BidRequest', false, 2),
+  ('ortb-bid-request-site-app::ortb-context-site-vs-app#3', 'ortb-bid-request-site-app::ortb-context-site-vs-app', 'Neither — in-app inventory uses the Dooh object instead', false, 3),
+  ('ortb-bid-request-site-app::ortb-context-buyeruid#0', 'ortb-bid-request-site-app::ortb-context-buyeruid', 'buyeruid — DSP''s user ID obtained via cookie sync with the exchange', true, 0),
+  ('ortb-bid-request-site-app::ortb-context-buyeruid#1', 'ortb-bid-request-site-app::ortb-context-buyeruid', 'Exchange UID claim — exchange-assigned persistent user identifier', false, 1),
+  ('ortb-bid-request-site-app::ortb-context-buyeruid#2', 'ortb-bid-request-site-app::ortb-context-buyeruid', 'UID2 token claim — it holds the IAB UID2 token for cookieless identity', false, 2),
+  ('ortb-bid-request-site-app::ortb-context-buyeruid#3', 'ortb-bid-request-site-app::ortb-context-buyeruid', 'SSP account claim — it is the SSP account ID for the publisher', false, 3),
+  ('ortb-bid-request-site-app::ortb-context-device-ifa#0', 'ortb-bid-request-site-app::ortb-context-device-ifa', 'Device.ifa — advertising identifier (IDFA on iOS, GAID on Android)', true, 0),
+  ('ortb-bid-request-site-app::ortb-context-device-ifa#1', 'ortb-bid-request-site-app::ortb-context-device-ifa', 'IP address claim — Device.ip holds IP, not Device.ifa', false, 1),
+  ('ortb-bid-request-site-app::ortb-context-device-ifa#2', 'ortb-bid-request-site-app::ortb-context-device-ifa', 'Fingerprint claim — Device.ifa is the ad ID, not a fingerprint hash', false, 2),
+  ('ortb-bid-request-site-app::ortb-context-device-ifa#3', 'ortb-bid-request-site-app::ortb-context-device-ifa', 'Carrier ID claim — carrier subscriber ID is in Device.carrier', false, 3),
+  ('ortb-bid-request-26-fields::ortb-26-mincpmpersec#0', 'ortb-bid-request-26-fields::ortb-26-mincpmpersec', '$1.60 CPM — minimum bid for 20s ad at $0.08/sec (20 × $0.08)', true, 0),
+  ('ortb-bid-request-26-fields::ortb-26-mincpmpersec#1', 'ortb-bid-request-26-fields::ortb-26-mincpmpersec', '$0.08 CPM — mincpmpersec is per-impression not per-second', false, 1),
+  ('ortb-bid-request-26-fields::ortb-26-mincpmpersec#2', 'ortb-bid-request-26-fields::ortb-26-mincpmpersec', '$0.80 CPM — spec divides mincpmpersec by 10 claim', false, 2),
+  ('ortb-bid-request-26-fields::ortb-26-mincpmpersec#3', 'ortb-bid-request-26-fields::ortb-26-mincpmpersec', 'bidfloor enforced — mincpmpersec is advisory and not strictly enforced', false, 3),
+  ('ortb-bid-request-26-fields::ortb-26-plcmt#0', 'ortb-bid-request-26-fields::ortb-26-plcmt', 'plcmt=1 — in-stream; pre/mid/post-roll alongside streaming video', true, 0),
+  ('ortb-bid-request-26-fields::ortb-26-plcmt#1', 'ortb-bid-request-26-fields::ortb-26-plcmt', 'In-banner claim — plcmt=2 is in-banner, not plcmt=1', false, 1),
+  ('ortb-bid-request-26-fields::ortb-26-plcmt#2', 'ortb-bid-request-26-fields::ortb-26-plcmt', 'Interstitial claim — plcmt=5 is interstitial, not plcmt=1', false, 2),
+  ('ortb-bid-request-26-fields::ortb-26-plcmt#3', 'ortb-bid-request-26-fields::ortb-26-plcmt', 'In-article claim — plcmt=3 is in-article, not plcmt=1', false, 3),
+  ('ortb-bid-request-26-fields::ortb-26-podseq#0', 'ortb-bid-request-26-fields::ortb-26-podseq', 'Pod position — 1=first slot, 2=any middle, 3=last in the break', true, 0),
+  ('ortb-bid-request-26-fields::ortb-26-podseq#1', 'ortb-bid-request-26-fields::ortb-26-podseq', 'Pod sequence — sequence number of the pod within content stream', false, 1),
+  ('ortb-bid-request-26-fields::ortb-26-podseq#2', 'ortb-bid-request-26-fields::ortb-26-podseq', 'Min ads claim — minimum number of ads in the pod', false, 2),
+  ('ortb-bid-request-26-fields::ortb-26-podseq#3', 'ortb-bid-request-26-fields::ortb-26-podseq', 'Tie-break claim — bid rank used for tie-breaking within the pod', false, 3),
+  ('ortb-bid-response-object::ortb-resp-empty#0', 'ortb-bid-response-object::ortb-resp-empty', 'HTTP 204 — no body; most efficient no-bid signal', true, 0),
+  ('ortb-bid-response-object::ortb-resp-empty#1', 'ortb-bid-response-object::ortb-resp-empty', 'HTTP 200 + empty seatbid — valid but wastes JSON parsing overhead', false, 1),
+  ('ortb-bid-response-object::ortb-resp-empty#2', 'ortb-bid-response-object::ortb-resp-empty', 'HTTP 200 + nbr — valid when communicating a specific reason code', false, 2),
+  ('ortb-bid-response-object::ortb-resp-empty#3', 'ortb-bid-response-object::ortb-resp-empty', 'Drop connection — causes exchange timeout and logs a DSP error', false, 3),
+  ('ortb-bid-response-object::ortb-resp-seatbid-group#0', 'ortb-bid-response-object::ortb-resp-seatbid-group', 'Package bid — all bids must win together or all are voided', true, 0),
+  ('ortb-bid-response-object::ortb-resp-seatbid-group#1', 'ortb-bid-response-object::ortb-resp-seatbid-group', 'First bid wins — only the first bid in each SeatBid can win', false, 1),
+  ('ortb-bid-response-object::ortb-resp-seatbid-group#2', 'ortb-bid-response-object::ortb-resp-seatbid-group', 'Package discount — exchange auctions bids together at lower price', false, 2),
+  ('ortb-bid-response-object::ortb-resp-seatbid-group#3', 'ortb-bid-response-object::ortb-resp-seatbid-group', 'Same imp claim — all bids must share the same impression ID', false, 3),
+  ('ortb-bid-response-object::ortb-resp-mtype#0', 'ortb-bid-response-object::ortb-resp-mtype', 'Format discriminator — tells exchange which adm type to render', true, 0),
+  ('ortb-bid-response-object::ortb-resp-mtype#1', 'ortb-bid-response-object::ortb-resp-mtype', 'Max CPM claim — mtype sets the maximum CPM the bidder will pay', false, 1),
+  ('ortb-bid-response-object::ortb-resp-mtype#2', 'ortb-bid-response-object::ortb-resp-mtype', 'Deal type claim — mtype identifies PMP vs open-auction deal', false, 2),
+  ('ortb-bid-response-object::ortb-resp-mtype#3', 'ortb-bid-response-object::ortb-resp-mtype', 'MIME type claim — mtype specifies the MIME type of the creative file', false, 3),
+  ('ortb-bid-response-bid::ortb-bid-adm-vs-nurl#0', 'ortb-bid-response-bid::ortb-bid-adm-vs-nurl', 'adm = inline markup — nurl = win notice URL; exchange fetches markup', true, 0),
+  ('ortb-bid-response-bid::ortb-bid-adm-vs-nurl#1', 'ortb-bid-response-bid::ortb-bid-adm-vs-nurl', 'Format split — adm is for banner; nurl is for video ads', false, 1),
+  ('ortb-bid-response-bid::ortb-bid-adm-vs-nurl#2', 'ortb-bid-response-bid::ortb-bid-adm-vs-nurl', 'Caller swap — nurl is called by browser; adm is called by exchange', false, 2),
+  ('ortb-bid-response-bid::ortb-bid-adm-vs-nurl#3', 'ortb-bid-response-bid::ortb-bid-adm-vs-nurl', 'Simultaneous claim — both deliver markup at the same time', false, 3),
+  ('ortb-bid-response-bid::ortb-bid-burl-vs-nurl#0', 'ortb-bid-response-bid::ortb-bid-burl-vs-nurl', 'On billable event — render or viewability threshold, not at auction', true, 0),
+  ('ortb-bid-response-bid::ortb-bid-burl-vs-nurl#1', 'ortb-bid-response-bid::ortb-bid-burl-vs-nurl', 'Right after nurl — burl and nurl fire in the same HTTP request', false, 1),
+  ('ortb-bid-response-bid::ortb-bid-burl-vs-nurl#2', 'ortb-bid-response-bid::ortb-bid-burl-vs-nurl', 'On click — burl fires when the user clicks the ad unit', false, 2),
+  ('ortb-bid-response-bid::ortb-bid-burl-vs-nurl#3', 'ortb-bid-response-bid::ortb-bid-burl-vs-nurl', 'Billing period — burl fires at end of daily or weekly cycle', false, 3),
+  ('ortb-bid-response-bid::ortb-bid-crid-purpose#0', 'ortb-bid-response-bid::ortb-bid-crid-purpose', 'Creative auditing — exchange scans and blocks per crid for brand safety', true, 0),
+  ('ortb-bid-response-bid::ortb-bid-crid-purpose#1', 'ortb-bid-response-bid::ortb-bid-crid-purpose', 'Bid dedup claim — crid is not used to deduplicate bids per impression', false, 1),
+  ('ortb-bid-response-bid::ortb-bid-crid-purpose#2', 'ortb-bid-response-bid::ortb-bid-crid-purpose', 'Campaign billing — crid maps to campaign for billing purposes', false, 2),
+  ('ortb-bid-response-bid::ortb-bid-crid-purpose#3', 'ortb-bid-response-bid::ortb-bid-crid-purpose', 'Competitive sep — crid enforces competitive separation on page', false, 3),
+  ('ortb-bid-response-settlement::ortb-settlement-who-calls#0', 'ortb-bid-response-settlement::ortb-settlement-who-calls', 'Exchange calls nurl — server-to-server win notification to DSP', true, 0),
+  ('ortb-bid-response-settlement::ortb-settlement-who-calls#1', 'ortb-bid-response-settlement::ortb-settlement-who-calls', 'Browser fires nurl — nurl is a server-side call, not a browser pixel', false, 1),
+  ('ortb-bid-response-settlement::ortb-settlement-who-calls#2', 'ortb-bid-response-settlement::ortb-settlement-who-calls', 'DSP polls exchange — nurl is push, not poll', false, 2),
+  ('ortb-bid-response-settlement::ortb-settlement-who-calls#3', 'ortb-bid-response-settlement::ortb-settlement-who-calls', 'SSP calls nurl — the SSP triggers nurl before returning markup', false, 3),
+  ('ortb-bid-response-settlement::ortb-settlement-encode#0', 'ortb-bid-response-settlement::ortb-settlement-encode', 'URL safety — special chars in other macros can break URL parsing', true, 0),
+  ('ortb-bid-response-settlement::ortb-settlement-encode#1', 'ortb-bid-response-settlement::ortb-settlement-encode', 'Base64 claim — spec requires base64, not URL-encoding, for macros', false, 1),
+  ('ortb-bid-response-settlement::ortb-settlement-encode#2', 'ortb-bid-response-settlement::ortb-settlement-encode', 'HTTPS-only claim — URL encoding is not restricted to HTTPS URLs', false, 2),
+  ('ortb-bid-response-settlement::ortb-settlement-encode#3', 'ortb-bid-response-settlement::ortb-settlement-encode', 'Log-hiding claim — URL encoding does not prevent price appearing in logs', false, 3),
+  ('ortb-bid-response-settlement::ortb-settlement-second-price-clearing#0', 'ortb-bid-response-settlement::ortb-settlement-second-price-clearing', 'Clearing price — max(floor, 2nd-highest bid), not the winner''s bid', true, 0),
+  ('ortb-bid-response-settlement::ortb-settlement-second-price-clearing#1', 'ortb-bid-response-settlement::ortb-settlement-second-price-clearing', 'Winner''s bid — AUCTION_PRICE equals the submitted bid in second-price', false, 1),
+  ('ortb-bid-response-settlement::ortb-settlement-second-price-clearing#2', 'ortb-bid-response-settlement::ortb-settlement-second-price-clearing', 'Floor price — AUCTION_PRICE equals the publisher-set floor value', false, 2),
+  ('ortb-bid-response-settlement::ortb-settlement-second-price-clearing#3', 'ortb-bid-response-settlement::ortb-settlement-second-price-clearing', 'Average bid — AUCTION_PRICE is the mean of all submitted bids', false, 3),
+  ('ortb-bid-response-nobid::ortb-nobid-http204#0', 'ortb-bid-response-nobid::ortb-nobid-http204', 'HTTP 204 — preferred; no JSON parsing overhead for the exchange', true, 0),
+  ('ortb-bid-response-nobid::ortb-nobid-http204#1', 'ortb-bid-response-nobid::ortb-nobid-http204', 'HTTP 200 + empty seatbid — valid but parses unnecessary JSON', false, 1),
+  ('ortb-bid-response-nobid::ortb-nobid-http204#2', 'ortb-bid-response-nobid::ortb-nobid-http204', 'HTTP 200 + nbr code — useful for communicating a specific reason', false, 2),
+  ('ortb-bid-response-nobid::ortb-nobid-http204#3', 'ortb-bid-response-nobid::ortb-nobid-http204', 'HTTP 400 claim — 400 signals request error, not a no-bid decision', false, 3),
+  ('ortb-bid-response-nobid::ortb-nobid-timeout-consequence#0', 'ortb-bid-response-nobid::ortb-nobid-timeout-consequence', 'Timeout logged — persistent high rates risk DSP exclusion from auctions', true, 0),
+  ('ortb-bid-response-nobid::ortb-nobid-timeout-consequence#1', 'ortb-bid-response-nobid::ortb-nobid-timeout-consequence', 'Advisory tmax — tmax is informational; exchange waits indefinitely', false, 1),
+  ('ortb-bid-response-nobid::ortb-nobid-timeout-consequence#2', 'ortb-bid-response-nobid::ortb-nobid-timeout-consequence', 'Floor raised — exchange bumps DSP bid floor to offset latency cost', false, 2),
+  ('ortb-bid-response-nobid::ortb-nobid-timeout-consequence#3', 'ortb-bid-response-nobid::ortb-nobid-timeout-consequence', 'Late-bid queue — late bids are queued for the next matching auction', false, 3),
+  ('ortb-bid-response-nobid::ortb-nobid-reason-unmatched#0', 'ortb-bid-response-nobid::ortb-nobid-reason-unmatched', 'nbr=8 — no cookie/device ID match; DSP cannot apply audience targeting', true, 0),
+  ('ortb-bid-response-nobid::ortb-nobid-reason-unmatched#1', 'ortb-bid-response-nobid::ortb-nobid-reason-unmatched', 'Fraud IP claim — nbr=8 is for fraud block, not unmatched user', false, 1),
+  ('ortb-bid-response-nobid::ortb-nobid-reason-unmatched#2', 'ortb-bid-response-nobid::ortb-nobid-reason-unmatched', 'Opt-out claim — opt-out is nbr=0 or separate consent handling', false, 2),
+  ('ortb-bid-response-nobid::ortb-nobid-reason-unmatched#3', 'ortb-bid-response-nobid::ortb-nobid-reason-unmatched', 'Format claim — format incompatibility is nbr=6, not nbr=8', false, 3),
+  ('ortb-bidder-server::ortb-server-drain#0', 'ortb-bidder-server::ortb-server-drain', 'TCP keep-alive — drain body to allow connection reuse for next request', true, 0),
+  ('ortb-bidder-server::ortb-server-drain#1', 'ortb-bidder-server::ortb-server-drain', 'Complete response — ensures exchange gets full body before close', false, 1),
+  ('ortb-bidder-server::ortb-server-drain#2', 'ortb-bidder-server::ortb-server-drain', 'Retry prevention claim — draining body does not prevent retries', false, 2),
+  ('ortb-bidder-server::ortb-server-drain#3', 'ortb-bidder-server::ortb-server-drain', 'Spec requirement claim — spec does not mandate explicit body ack', false, 3),
+  ('ortb-bidder-server::ortb-server-content-type#0', 'ortb-bidder-server::ortb-server-content-type', 'Parse failure — exchange rejects or warns on wrong Content-Type', true, 0),
+  ('ortb-bidder-server::ortb-server-content-type#1', 'ortb-bidder-server::ortb-server-content-type', 'Auto-detect claim — exchanges do not always auto-detect Content-Type', false, 1),
+  ('ortb-bidder-server::ortb-server-content-type#2', 'ortb-bidder-server::ortb-server-content-type', 'HTTP 415 claim — some exchanges return 415 on wrong Content-Type', false, 2),
+  ('ortb-bidder-server::ortb-server-content-type#3', 'ortb-bidder-server::ortb-server-content-type', 'Mirror header claim — response Content-Type must be set explicitly', false, 3),
+  ('ortb-bidder-server::ortb-server-readtimeout#0', 'ortb-bidder-server::ortb-server-readtimeout', 'ReadTimeout vs tmax — covers request read; tmax is DSP processing budget', true, 0),
+  ('ortb-bidder-server::ortb-server-readtimeout#1', 'ortb-bidder-server::ortb-server-readtimeout', 'They are the same thing — ReadTimeout should equal tmax', false, 1),
+  ('ortb-bidder-server::ortb-server-readtimeout#2', 'ortb-bidder-server::ortb-server-readtimeout', 'Read-not-write claim — ReadTimeout covers request reading, not write', false, 2),
+  ('ortb-bidder-server::ortb-server-readtimeout#3', 'ortb-bidder-server::ortb-server-readtimeout', 'Lower-than-tmax claim — ReadTimeout should exceed tmax, not be lower', false, 3),
+  ('ortb-bidder-decision::ortb-decision-order#0', 'ortb-bidder-decision::ortb-decision-order', 'Cheap checks first — fast-failing filters eliminate most imps cheaply', true, 0),
+  ('ortb-bidder-decision::ortb-decision-order#1', 'ortb-bidder-decision::ortb-decision-order', 'Spec mandate claim — OpenRTB spec does not mandate evaluation order', false, 1),
+  ('ortb-bidder-decision::ortb-decision-order#2', 'ortb-bidder-decision::ortb-decision-order', 'Higher CPM claim — cheap checks do not directly raise bid CPM', false, 2),
+  ('ortb-bidder-decision::ortb-decision-order#3', 'ortb-bidder-decision::ortb-decision-order', 'Scheduler claim — Go scheduler does not prioritise cheaper goroutines', false, 3),
+  ('ortb-bidder-decision::ortb-decision-multi-campaign#0', 'ortb-bidder-decision::ortb-decision-multi-campaign', 'The highest CPM among all matching campaigns — submit the maximum value', true, 0),
+  ('ortb-bidder-decision::ortb-decision-multi-campaign#1', 'ortb-bidder-decision::ortb-decision-multi-campaign', 'Average CPM claim — averaging campaigns does not maximise DSP yield', false, 1),
+  ('ortb-bidder-decision::ortb-decision-multi-campaign#2', 'ortb-bidder-decision::ortb-decision-multi-campaign', 'Multi-bid claim — OpenRTB allows only one bid per SeatBid per imp', false, 2),
+  ('ortb-bidder-decision::ortb-decision-multi-campaign#3', 'ortb-bidder-decision::ortb-decision-multi-campaign', 'The floor price — let the exchange determine the clearing CPM', false, 3),
+  ('ortb-bidder-decision::ortb-decision-floor#0', 'ortb-bidder-decision::ortb-decision-floor', 'No-bid — bidding below floor will be rejected by the exchange anyway', true, 0),
+  ('ortb-bidder-decision::ortb-decision-floor#1', 'ortb-bidder-decision::ortb-decision-floor', 'Bid $2.50 claim — exchange can''t infer true value from your bid price', false, 1),
+  ('ortb-bidder-decision::ortb-decision-floor#2', 'ortb-bidder-decision::ortb-decision-floor', 'Bid $2.00 claim — exchange does not round bids up to meet the floor', false, 2),
+  ('ortb-bidder-decision::ortb-decision-floor#3', 'ortb-bidder-decision::ortb-decision-floor', 'Bid $0 claim — exchange needs bids above the floor price, not at zero', false, 3),
+  ('ortb-bidder-concurrency::ortb-conc-context-derive#0', 'ortb-bidder-concurrency::ortb-conc-context-derive', 'r.Context() — cancellation propagates if exchange closes connection', true, 0),
+  ('ortb-bidder-concurrency::ortb-conc-context-derive#1', 'ortb-bidder-concurrency::ortb-conc-context-derive', 'context.Background() — bid runs independently of request lifecycle', false, 1),
+  ('ortb-bidder-concurrency::ortb-conc-context-derive#2', 'ortb-bidder-concurrency::ortb-conc-context-derive', 'context.TODO() — until a proper parent is established', false, 2),
+  ('ortb-bidder-concurrency::ortb-conc-context-derive#3', 'ortb-bidder-concurrency::ortb-conc-context-derive', 'Global context claim — shared global context ignores per-request cancels', false, 3),
+  ('ortb-bidder-concurrency::ortb-conc-rwmutex#0', 'ortb-bidder-concurrency::ortb-conc-rwmutex', 'RWMutex benefit — concurrent readers OK; Mutex serialises all access', true, 0),
+  ('ortb-bidder-concurrency::ortb-conc-rwmutex#1', 'ortb-bidder-concurrency::ortb-conc-rwmutex', 'Always faster claim — Mutex outperforms RWMutex in write-heavy code', false, 1),
+  ('ortb-bidder-concurrency::ortb-conc-rwmutex#2', 'ortb-bidder-concurrency::ortb-conc-rwmutex', 'sync.Mutex does not support concurrent access — only RWMutex does', false, 2),
+  ('ortb-bidder-concurrency::ortb-conc-rwmutex#3', 'ortb-bidder-concurrency::ortb-conc-rwmutex', 'Map requirement claim — Mutex also works for maps; RWMutex not required', false, 3),
+  ('ortb-bidder-concurrency::ortb-conc-goroutine-leak#0', 'ortb-bidder-concurrency::ortb-conc-goroutine-leak', 'Leak — block forever; goroutines accumulate until OOM', true, 0),
+  ('ortb-bidder-concurrency::ortb-conc-goroutine-leak#1', 'ortb-bidder-concurrency::ortb-conc-goroutine-leak', 'GC claim — goroutines are not GC''d; they must exit or be cancelled', false, 1),
+  ('ortb-bidder-concurrency::ortb-conc-goroutine-leak#2', 'ortb-bidder-concurrency::ortb-conc-goroutine-leak', 'Panic claim — goroutines don''t panic; they block indefinitely', false, 2),
+  ('ortb-bidder-concurrency::ortb-conc-goroutine-leak#3', 'ortb-bidder-concurrency::ortb-conc-goroutine-leak', 'Parent cancel claim — goroutine parent exit does not cancel children', false, 3),
+  ('ortb-bidder-benchmark::ortb-bench-allocopt#0', 'ortb-bidder-benchmark::ortb-bench-allocopt', 'sync.Pool — reuse json.Decoder instances to cut allocations per request', true, 0),
+  ('ortb-bidder-benchmark::ortb-bench-allocopt#1', 'ortb-bidder-benchmark::ortb-bench-allocopt', 'High GOGC claim — defers GC but doesn''t reduce allocation count', false, 1),
+  ('ortb-bidder-benchmark::ortb-bench-allocopt#2', 'ortb-bidder-benchmark::ortb-bench-allocopt', 'go:noinline claim — prevents inlining; doesn''t reduce allocs', false, 2),
+  ('ortb-bidder-benchmark::ortb-bench-allocopt#3', 'ortb-bidder-benchmark::ortb-bench-allocopt', 'Marshal claim — Marshal encodes, not decodes; wrong function', false, 3),
+  ('ortb-bidder-benchmark::ortb-bench-pprof#0', 'ortb-bidder-benchmark::ortb-bench-pprof', 'go tool pprof — type "top" for top CPU functions by cumulative time', true, 0),
+  ('ortb-bidder-benchmark::ortb-bench-pprof#1', 'ortb-bidder-benchmark::ortb-bench-pprof', 'go vet -profile claim — go vet does not accept pprof profiles', false, 1),
+  ('ortb-bidder-benchmark::ortb-bench-pprof#2', 'ortb-bidder-benchmark::ortb-bench-pprof', 'Text editor claim — pprof files are binary; use go tool pprof', false, 2),
+  ('ortb-bidder-benchmark::ortb-bench-pprof#3', 'ortb-bidder-benchmark::ortb-bench-pprof', 'go build -pprof claim — go build does not read pprof profiles', false, 3),
+  ('ortb-bidder-benchmark::ortb-bench-prealloc#0', 'ortb-bidder-benchmark::ortb-bench-prealloc', 'Pre-alloc capacity — avoids slice growth and backing-array copies', true, 0),
+  ('ortb-bidder-benchmark::ortb-bench-prealloc#1', 'ortb-bidder-benchmark::ortb-bench-prealloc', 'GC avoidance claim — make still allocates on heap; GC still scans', false, 1),
+  ('ortb-bidder-benchmark::ortb-bench-prealloc#2', 'ortb-bidder-benchmark::ortb-bench-prealloc', 'GC hint claim — len() is used for capacity hint, not GC scanning', false, 2),
+  ('ortb-bidder-benchmark::ortb-bench-prealloc#3', 'ortb-bidder-benchmark::ortb-bench-prealloc', 'Stack alloc claim — slice with cap always allocates on the heap', false, 3),
+  ('ortb-exchange-fanout::ortb-fanout-buffered#0', 'ortb-exchange-fanout::ortb-fanout-buffered', 'Buffered channel — goroutines send without blocking after deadline', true, 0),
+  ('ortb-exchange-fanout::ortb-fanout-buffered#1', 'ortb-exchange-fanout::ortb-fanout-buffered', 'Must-buffer claim — unbuffered channels work across goroutines too', false, 1),
+  ('ortb-exchange-fanout::ortb-fanout-buffered#2', 'ortb-exchange-fanout::ortb-fanout-buffered', 'Ordered results claim — buffered channels don''t guarantee arrival order', false, 2),
+  ('ortb-exchange-fanout::ortb-fanout-buffered#3', 'ortb-exchange-fanout::ortb-fanout-buffered', 'No unbuffered claim — unbuffered channels are valid in production', false, 3),
+  ('ortb-exchange-fanout::ortb-fanout-smart-selection#0', 'ortb-exchange-fanout::ortb-fanout-smart-selection', 'Targeting + history — win rate, fill rate, geo/format match per DSP', true, 0),
+  ('ortb-exchange-fanout::ortb-fanout-smart-selection#1', 'ortb-exchange-fanout::ortb-fanout-smart-selection', 'Alphabetical claim — DSP selection by name ignores targeting quality', false, 1),
+  ('ortb-exchange-fanout::ortb-fanout-smart-selection#2', 'ortb-exchange-fanout::ortb-fanout-smart-selection', 'Round-robin claim — rotation ignores DSP targeting match quality', false, 2),
+  ('ortb-exchange-fanout::ortb-fanout-smart-selection#3', 'ortb-exchange-fanout::ortb-fanout-smart-selection', 'Pre-paid claim — floor prepayment does not determine DSP selection', false, 3),
+  ('ortb-exchange-fanout::ortb-fanout-goroutine-lifetime#0', 'ortb-exchange-fanout::ortb-fanout-goroutine-lifetime', 'Complete + send — exits normally; buffered channel absorbs the result', true, 0),
+  ('ortb-exchange-fanout::ortb-fanout-goroutine-lifetime#1', 'ortb-exchange-fanout::ortb-fanout-goroutine-lifetime', 'Hang-forever claim — ctx cancels pending HTTP calls immediately', false, 1),
+  ('ortb-exchange-fanout::ortb-fanout-goroutine-lifetime#2', 'ortb-exchange-fanout::ortb-fanout-goroutine-lifetime', 'Runtime kill claim — Go runtime doesn''t kill goroutines on ctx done', false, 2),
+  ('ortb-exchange-fanout::ortb-fanout-goroutine-lifetime#3', 'ortb-exchange-fanout::ortb-fanout-goroutine-lifetime', 'Panic claim — goroutines send to buffered channel, which isn''t closed', false, 3),
+  ('ortb-exchange-hedged::ortb-hedge-latency-math#0', 'ortb-exchange-hedged::ortb-hedge-latency-math', '65 ms — hedge_delay + backup_p50 = 40 + 25 ms', true, 0),
+  ('ortb-exchange-hedged::ortb-hedge-latency-math#1', 'ortb-exchange-hedged::ortb-hedge-latency-math', '30 ms claim — hedging affects p50 by adding backup requests', false, 1),
+  ('ortb-exchange-hedged::ortb-hedge-latency-math#2', 'ortb-exchange-hedged::ortb-hedge-latency-math', '90 ms claim — hedging reduces p99 for requests past hedge_delay', false, 2),
+  ('ortb-exchange-hedged::ortb-hedge-latency-math#3', 'ortb-exchange-hedged::ortb-hedge-latency-math', '115 ms claim — hedging improves p99; not primary_p99 + backup_p50', false, 3),
+  ('ortb-exchange-hedged::ortb-hedge-cost#0', 'ortb-exchange-hedged::ortb-hedge-cost', 'Extra load — tail requests always fire two DSP calls', true, 0),
+  ('ortb-exchange-hedged::ortb-hedge-cost#1', 'ortb-exchange-hedged::ortb-hedge-cost', 'Double wins claim — only one bid wins; slower goroutine is dropped', false, 1),
+  ('ortb-exchange-hedged::ortb-hedge-cost#2', 'ortb-exchange-hedged::ortb-hedge-cost', 'Keep-alive claim — hedged requests work fine with HTTP/1.1 keep-alive', false, 2),
+  ('ortb-exchange-hedged::ortb-hedge-cost#3', 'ortb-exchange-hedged::ortb-hedge-cost', 'GC block claim — a timer goroutine does not prevent GC from running', false, 3),
+  ('ortb-exchange-hedged::ortb-hedge-sync-once#0', 'ortb-exchange-hedged::ortb-hedge-sync-once', 'First completes — sync.Once ensures only one goroutine sends the result', true, 0),
+  ('ortb-exchange-hedged::ortb-hedge-sync-once#1', 'ortb-exchange-hedged::ortb-hedge-sync-once', 'Primary wins claim — whichever finishes first wins; not always primary', false, 1),
+  ('ortb-exchange-hedged::ortb-hedge-sync-once#2', 'ortb-exchange-hedged::ortb-hedge-sync-once', 'Both run claim — both goroutines run; slower result is discarded', false, 2),
+  ('ortb-exchange-hedged::ortb-hedge-sync-once#3', 'ortb-exchange-hedged::ortb-hedge-sync-once', 'Concurrent-safe claim — sync.Once is safe for concurrent use', false, 3),
+  ('ortb-exchange-auction::ortb-auction-tie#0', 'ortb-exchange-auction::ortb-auction-tie', 'Random selection among tied bids — ensures fairness and prevents gaming', true, 0),
+  ('ortb-exchange-auction::ortb-auction-tie#1', 'ortb-exchange-auction::ortb-auction-tie', 'First bid received wins — simpler implementation', false, 1),
+  ('ortb-exchange-auction::ortb-auction-tie#2', 'ortb-exchange-auction::ortb-auction-tie', 'Largest seat ID claim — seat ID ordering is not standard tie-breaking', false, 2),
+  ('ortb-exchange-auction::ortb-auction-tie#3', 'ortb-exchange-auction::ortb-auction-tie', 'Both bids win — exchange serves two ads simultaneously', false, 3),
+  ('ortb-exchange-auction::ortb-auction-floor-enforcement#0', 'ortb-exchange-auction::ortb-auction-floor-enforcement', 'Reject below-floor — invalid bid; floor enforcement is independent', true, 0),
+  ('ortb-exchange-auction::ortb-auction-floor-enforcement#1', 'ortb-exchange-auction::ortb-auction-floor-enforcement', 'Bump clearing claim — exchange never bumps below-floor bids'' price', false, 1),
+  ('ortb-exchange-auction::ortb-auction-floor-enforcement#2', 'ortb-exchange-auction::ortb-auction-floor-enforcement', 'Conditional accept claim — below-floor bids are always rejected', false, 2),
+  ('ortb-exchange-auction::ortb-auction-floor-enforcement#3', 'ortb-exchange-auction::ortb-auction-floor-enforcement', 'Publisher forward claim — exchange enforces floor independently', false, 3),
+  ('ortb-exchange-auction::ortb-auction-deal-priority#0', 'ortb-exchange-auction::ortb-auction-deal-priority', 'Deal type determines priority — PG/preferred win outright; PMP competes', true, 0),
+  ('ortb-exchange-auction::ortb-auction-deal-priority#1', 'ortb-exchange-auction::ortb-auction-deal-priority', 'The open auction bid always wins — highest price wins', false, 1),
+  ('ortb-exchange-auction::ortb-auction-deal-priority#2', 'ortb-exchange-auction::ortb-auction-deal-priority', 'The deal bid always wins — deals have guaranteed priority', false, 2),
+  ('ortb-exchange-auction::ortb-auction-deal-priority#3', 'ortb-exchange-auction::ortb-auction-deal-priority', 'Separate auctions claim — exchange runs a unified deal-priority auction', false, 3),
+  ('ortb-exchange-floors::ortb-floor-bidfloorcur#0', 'ortb-exchange-floors::ortb-floor-bidfloorcur', 'FX conversion — convert DSP bid to floor currency before comparison', true, 0),
+  ('ortb-exchange-floors::ortb-floor-bidfloorcur#1', 'ortb-exchange-floors::ortb-floor-bidfloorcur', 'Accept the bid — 2.50 > 2.00 regardless of currency', false, 1),
+  ('ortb-exchange-floors::ortb-floor-bidfloorcur#2', 'ortb-exchange-floors::ortb-floor-bidfloorcur', 'Reject the bid — currency mismatch is always a hard rejection', false, 2),
+  ('ortb-exchange-floors::ortb-floor-bidfloorcur#3', 'ortb-exchange-floors::ortb-floor-bidfloorcur', 'Static rate claim — real-time FX rates should be used, not static', false, 3),
+  ('ortb-exchange-floors::ortb-pmp-dealid-bid#0', 'ortb-exchange-floors::ortb-pmp-dealid-bid', 'Reject invalid deal — dealid must match a valid BidRequest deal', true, 0),
+  ('ortb-exchange-floors::ortb-pmp-dealid-bid#1', 'ortb-exchange-floors::ortb-pmp-dealid-bid', 'Accept DSP price claim — exchange validates dealid against BidRequest', false, 1),
+  ('ortb-exchange-floors::ortb-pmp-dealid-bid#2', 'ortb-exchange-floors::ortb-pmp-dealid-bid', 'Open auction claim — unknown dealid bids must be rejected or demoted', false, 2),
+  ('ortb-exchange-floors::ortb-pmp-dealid-bid#3', 'ortb-exchange-floors::ortb-pmp-dealid-bid', 'Dynamic deal claim — exchanges don''t create deals on the fly', false, 3),
+  ('ortb-exchange-floors::ortb-floor-dynamic#0', 'ortb-exchange-floors::ortb-floor-dynamic', 'Publishers benefit — floors adjust to demand, capturing higher revenue', true, 0),
+  ('ortb-exchange-floors::ortb-floor-dynamic#1', 'ortb-exchange-floors::ortb-floor-dynamic', 'DSPs — dynamic floors give predictable CPMs for campaign planning', false, 1),
+  ('ortb-exchange-floors::ortb-floor-dynamic#2', 'ortb-exchange-floors::ortb-floor-dynamic', 'Exchanges — dynamic floors reduce the number of invalid bids to process', false, 2),
+  ('ortb-exchange-floors::ortb-floor-dynamic#3', 'ortb-exchange-floors::ortb-floor-dynamic', 'Advertisers — dynamic floors ensure creatives always pass brand safety', false, 3),
+  ('ortb-serving-reverse-proxy::ortb-proxy-director#0', 'ortb-serving-reverse-proxy::ortb-proxy-director', 'Before forwarding — Director mutates the outgoing *http.Request', true, 0),
+  ('ortb-serving-reverse-proxy::ortb-proxy-director#1', 'ortb-serving-reverse-proxy::ortb-proxy-director', 'After response claim — Director runs before forwarding, not after', false, 1),
+  ('ortb-serving-reverse-proxy::ortb-proxy-director#2', 'ortb-serving-reverse-proxy::ortb-proxy-director', 'Concurrent claim — Director runs before the upstream call, not during', false, 2),
+  ('ortb-serving-reverse-proxy::ortb-proxy-director#3', 'ortb-serving-reverse-proxy::ortb-proxy-director', 'Creation-time claim — Director is called per-request, not at creation', false, 3),
+  ('ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor#0', 'ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor', 'IP leak prevention — strips internal proxy IPs before forwarding', true, 0),
+  ('ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor#1', 'ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor', 'HTTPS-only claim — X-Forwarded-For is needed for HTTP and HTTPS alike', false, 1),
+  ('ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor#2', 'ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor', 'Caching claim — X-Forwarded-For does not cause ad server caching issues', false, 2),
+  ('ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor#3', 'ortb-serving-reverse-proxy::ortb-proxy-xforwardedfor', 'Auto-strip claim — httputil.ReverseProxy does not strip X-Forwarded-For', false, 3),
+  ('ortb-serving-reverse-proxy::ortb-proxy-modifyresponse#0', 'ortb-serving-reverse-proxy::ortb-proxy-modifyresponse', 'ContentLength field — update to match new body size after replacement', true, 0),
+  ('ortb-serving-reverse-proxy::ortb-proxy-modifyresponse#1', 'ortb-serving-reverse-proxy::ortb-proxy-modifyresponse', 'resp.StatusCode — ModifyResponse must return 200 OK', false, 1),
+  ('ortb-serving-reverse-proxy::ortb-proxy-modifyresponse#2', 'ortb-serving-reverse-proxy::ortb-proxy-modifyresponse', 'resp.Header["Transfer-Encoding"] — set to "identity"', false, 2),
+  ('ortb-serving-reverse-proxy::ortb-proxy-modifyresponse#3', 'ortb-serving-reverse-proxy::ortb-proxy-modifyresponse', 'Auto-recalc claim — proxy does not auto-recalculate Content-Length', false, 3),
+  ('ortb-serving-win-billing::ortb-win-goroutine#0', 'ortb-serving-win-billing::ortb-win-goroutine', 'Latency concern — nurl blocks on DSP network call, adding 10–50 ms', true, 0),
+  ('ortb-serving-win-billing::ortb-win-goroutine#1', 'ortb-serving-win-billing::ortb-win-goroutine', 'Spec requirement claim — OpenRTB spec does not require goroutines', false, 1),
+  ('ortb-serving-win-billing::ortb-win-goroutine#2', 'ortb-serving-win-billing::ortb-win-goroutine', 'Reachability claim — nurl endpoint is reachable right after auction', false, 2),
+  ('ortb-serving-win-billing::ortb-win-goroutine#3', 'ortb-serving-win-billing::ortb-win-goroutine', 'HTTP client claim — Go HTTP client works in regular functions too', false, 3),
+  ('ortb-serving-win-billing::ortb-win-retry#0', 'ortb-serving-win-billing::ortb-win-retry', 'Yes + backoff — 2–3 retries with exponential backoff; revenue-critical', true, 0),
+  ('ortb-serving-win-billing::ortb-win-retry#1', 'ortb-serving-win-billing::ortb-win-retry', 'Fire-and-forget claim — nurl needs only one attempt; no retry required', false, 1),
+  ('ortb-serving-win-billing::ortb-win-retry#2', 'ortb-serving-win-billing::ortb-win-retry', 'Double-billing claim — retrying nurl would double-bill the DSP', false, 2),
+  ('ortb-serving-win-billing::ortb-win-retry#3', 'ortb-serving-win-billing::ortb-win-retry', 'Yes — retry indefinitely until the DSP returns HTTP 200', false, 3),
+  ('ortb-serving-win-billing::ortb-win-clearing-price#0', 'ortb-serving-win-billing::ortb-win-clearing-price', 'Winner''s bid price — what the winning DSP actually pays in first-price', true, 0),
+  ('ortb-serving-win-billing::ortb-win-clearing-price#1', 'ortb-serving-win-billing::ortb-win-clearing-price', 'Second-highest bid — this is the clearing price in second-price auctions', false, 1),
+  ('ortb-serving-win-billing::ortb-win-clearing-price#2', 'ortb-serving-win-billing::ortb-win-clearing-price', 'Publisher floor — minimum CPM the publisher set for the slot', false, 2),
+  ('ortb-serving-win-billing::ortb-win-clearing-price#3', 'ortb-serving-win-billing::ortb-win-clearing-price', 'Average bid claim — clearing price is not an average of all bids', false, 3),
+  ('ortb-serving-markup::ortb-markup-who-substitutes#0', 'ortb-serving-markup::ortb-markup-who-substitutes', 'Exchange substitutes — replaces macros in adm/nurl before SSP delivery', true, 0),
+  ('ortb-serving-markup::ortb-markup-who-substitutes#1', 'ortb-serving-markup::ortb-markup-who-substitutes', 'DSP substitutes claim — DSPs embed macros; exchange replaces them', false, 1),
+  ('ortb-serving-markup::ortb-markup-who-substitutes#2', 'ortb-serving-markup::ortb-markup-who-substitutes', 'The publisher''s browser — it replaces macros when the creative renders', false, 2),
+  ('ortb-serving-markup::ortb-markup-who-substitutes#3', 'ortb-serving-markup::ortb-markup-who-substitutes', 'SSP substitutes claim — SSP receives markup after exchange substitution', false, 3),
+  ('ortb-serving-markup::ortb-markup-encoding#0', 'ortb-serving-markup::ortb-markup-encoding', 'URL-encoded — percent-encode the substituted value in URL contexts', true, 0),
+  ('ortb-serving-markup::ortb-markup-encoding#1', 'ortb-serving-markup::ortb-markup-encoding', 'Base64-encoded claim — base64 is not required; URL-encode is correct', false, 1),
+  ('ortb-serving-markup::ortb-markup-encoding#2', 'ortb-serving-markup::ortb-markup-encoding', 'Left raw claim — URL encoding required for macro values in URL context', false, 2),
+  ('ortb-serving-markup::ortb-markup-encoding#3', 'ortb-serving-markup::ortb-markup-encoding', 'HTML-entity claim — HTML entity encoding applies to markup, not macros', false, 3),
+  ('ortb-serving-markup::ortb-markup-adm-vs-nurl-latency#0', 'ortb-serving-markup::ortb-markup-adm-vs-nurl-latency', 'adm — markup is already in the BidResponse; no extra DSP round-trip', true, 0),
+  ('ortb-serving-markup::ortb-markup-adm-vs-nurl-latency#1', 'ortb-serving-markup::ortb-markup-adm-vs-nurl-latency', 'nurl latency claim — nurl adds a DSP round-trip, not removes it', false, 1),
+  ('ortb-serving-markup::ortb-markup-adm-vs-nurl-latency#2', 'ortb-serving-markup::ortb-markup-adm-vs-nurl-latency', 'Equal claim — exchange does not buffer markup for either path', false, 2),
+  ('ortb-serving-markup::ortb-markup-adm-vs-nurl-latency#3', 'ortb-serving-markup::ortb-markup-adm-vs-nurl-latency', 'nurl browser claim — adm does not require a separate browser fetch', false, 3),
+  ('ortb-serving-cdn::ortb-cdn-iurl#0', 'ortb-serving-cdn::ortb-cdn-iurl', 'Audit snapshot — static creative image for brand-safety review', true, 0),
+  ('ortb-serving-cdn::ortb-cdn-iurl#1', 'ortb-serving-cdn::ortb-cdn-iurl', 'Live creative URL — iurl is for audit only, not the served creative', false, 1),
+  ('ortb-serving-cdn::ortb-cdn-iurl#2', 'ortb-serving-cdn::ortb-cdn-iurl', 'Impression pixel — iurl is a creative snapshot, not a tracking pixel', false, 2),
+  ('ortb-serving-cdn::ortb-cdn-iurl#3', 'ortb-serving-cdn::ortb-cdn-iurl', 'Landing page — iurl is for audit, not the click-through destination', false, 3),
+  ('ortb-serving-cdn::ortb-cdn-crid-stability#0', 'ortb-serving-cdn::ortb-cdn-crid-stability', 'Creative substitution — approve benign then swap in malicious markup', true, 0),
+  ('ortb-serving-cdn::ortb-cdn-crid-stability#1', 'ortb-serving-cdn::ortb-cdn-crid-stability', 'Bid shading — the DSP underbids knowing the exchange won''t re-check', false, 1),
+  ('ortb-serving-cdn::ortb-cdn-crid-stability#2', 'ortb-serving-cdn::ortb-cdn-crid-stability', 'Frequency cap bypass — recycled crids reset user impression counts', false, 2),
+  ('ortb-serving-cdn::ortb-cdn-crid-stability#3', 'ortb-serving-cdn::ortb-cdn-crid-stability', 'Price floor bypass — old crids have lower floor prices cached', false, 3),
+  ('ortb-serving-cdn::ortb-cdn-https#0', 'ortb-serving-cdn::ortb-cdn-https', 'Mixed-content block — browsers block HTTP assets on HTTPS pages', true, 0),
+  ('ortb-serving-cdn::ortb-cdn-https#1', 'ortb-serving-cdn::ortb-cdn-https', 'HTTP/2 speed claim — HTTPS speed gain is unrelated to ad serving policy', false, 1),
+  ('ortb-serving-cdn::ortb-cdn-https#2', 'ortb-serving-cdn::ortb-cdn-https', 'Spec requirement claim — OpenRTB 2.6 does not mandate HTTPS for all URLs', false, 2),
+  ('ortb-serving-cdn::ortb-cdn-https#3', 'ortb-serving-cdn::ortb-cdn-https', 'Ad-blocker claim — ad blockers target domains, not HTTP vs HTTPS', false, 3),
+  ('ortb-tracking-impressions::ortb-imp-pixel-when#0', 'ortb-tracking-impressions::ortb-imp-pixel-when', 'Browser render — fires HTTP GET when it renders the <img> pixel tag', true, 0),
+  ('ortb-tracking-impressions::ortb-imp-pixel-when#1', 'ortb-tracking-impressions::ortb-imp-pixel-when', 'Exchange server — fires the pixel on auction winner selection', false, 1),
+  ('ortb-tracking-impressions::ortb-imp-pixel-when#2', 'ortb-tracking-impressions::ortb-imp-pixel-when', 'DSP server — fires the pixel when it sends the BidResponse', false, 2),
+  ('ortb-tracking-impressions::ortb-imp-pixel-when#3', 'ortb-tracking-impressions::ortb-imp-pixel-when', 'SSP — fires the pixel when it delivers markup to the browser', false, 3),
+  ('ortb-tracking-impressions::ortb-imp-dedup#0', 'ortb-tracking-impressions::ortb-imp-dedup', 'Browser re-render — preload, BFCache, or page reload re-renders markup', true, 0),
+  ('ortb-tracking-impressions::ortb-imp-dedup#1', 'ortb-tracking-impressions::ortb-imp-dedup', 'Exchange fires — exchange fires pixel per DSP, not per impression render', false, 1),
+  ('ortb-tracking-impressions::ortb-imp-dedup#2', 'ortb-tracking-impressions::ortb-imp-dedup', 'Macro substitution — each substitution does not fire a separate pixel', false, 2),
+  ('ortb-tracking-impressions::ortb-imp-dedup#3', 'ortb-tracking-impressions::ortb-imp-dedup', 'Shared URL — multiple impressions do not share the same pixel URL', false, 3),
+  ('ortb-tracking-impressions::ortb-imp-gif-response#0', 'ortb-tracking-impressions::ortb-imp-gif-response', 'Valid image — browser requires an image for <img>; 1x1 GIF is invisible', true, 0),
+  ('ortb-tracking-impressions::ortb-imp-gif-response#1', 'ortb-tracking-impressions::ortb-imp-gif-response', 'Size claim — GIF is not the smallest HTTP response format available', false, 1),
+  ('ortb-tracking-impressions::ortb-imp-gif-response#2', 'ortb-tracking-impressions::ortb-imp-gif-response', 'Retry claim — 204 No Content does not cause browsers to retry', false, 2),
+  ('ortb-tracking-impressions::ortb-imp-gif-response#3', 'ortb-tracking-impressions::ortb-imp-gif-response', 'Metadata claim — transparent GIFs carry no DSP audience data', false, 3),
+  ('ortb-tracking-clicks::ortb-click-302-vs-301#0', 'ortb-tracking-clicks::ortb-click-302-vs-301', '301 is cached permanently — repeat clicks bypass the tracker silently', true, 0),
+  ('ortb-tracking-clicks::ortb-click-302-vs-301#1', 'ortb-tracking-clicks::ortb-click-302-vs-301', 'Speed claim — 302 is not faster; both redirects involve a round-trip', false, 1),
+  ('ortb-tracking-clicks::ortb-click-302-vs-301#2', 'ortb-tracking-clicks::ortb-click-302-vs-301', 'TLS claim — 301 and 302 both work on HTTP and HTTPS', false, 2),
+  ('ortb-tracking-clicks::ortb-click-302-vs-301#3', 'ortb-tracking-clicks::ortb-click-302-vs-301', 'Spec claim — OpenRTB does not mandate HTTP 302 for click redirects', false, 3),
+  ('ortb-tracking-clicks::ortb-click-openredirect#0', 'ortb-tracking-clicks::ortb-click-openredirect', 'Open redirect — phishing URLs disguised under a trusted ad domain', true, 0),
+  ('ortb-tracking-clicks::ortb-click-openredirect#1', 'ortb-tracking-clicks::ortb-click-openredirect', 'CSRF — the redirect forges requests on behalf of the user', false, 1),
+  ('ortb-tracking-clicks::ortb-click-openredirect#2', 'ortb-tracking-clicks::ortb-click-openredirect', 'SQL injection claim — this is an open redirect, not SQL injection', false, 2),
+  ('ortb-tracking-clicks::ortb-click-openredirect#3', 'ortb-tracking-clicks::ortb-click-openredirect', 'Clickjacking — the redirect embeds an iFrame on the target page', false, 3),
+  ('ortb-tracking-clicks::ortb-click-attribution#0', 'ortb-tracking-clicks::ortb-click-attribution', 'The ad click on Monday — the last touchpoint before conversion', true, 0),
+  ('ortb-tracking-clicks::ortb-click-attribution#1', 'ortb-tracking-clicks::ortb-click-attribution', 'The impression on Sunday (if any) — the first touchpoint', false, 1),
+  ('ortb-tracking-clicks::ortb-click-attribution#2', 'ortb-tracking-clicks::ortb-click-attribution', 'The advertiser — conversions don''t credit ad interactions', false, 2),
+  ('ortb-tracking-clicks::ortb-click-attribution#3', 'ortb-tracking-clicks::ortb-click-attribution', 'The SSP — it served the impression that led to the click', false, 3),
+  ('ortb-tracking-macros::ortb-macro-lurl-use#0', 'ortb-tracking-macros::ortb-macro-lurl-use', 'Bid.lurl — loss notification URL, called by the exchange on bid loss', true, 0),
+  ('ortb-tracking-macros::ortb-macro-lurl-use#1', 'ortb-tracking-macros::ortb-macro-lurl-use', 'Bid.nurl — win notice URL', false, 1),
+  ('ortb-tracking-macros::ortb-macro-lurl-use#2', 'ortb-tracking-macros::ortb-macro-lurl-use', 'Bid.adm — ad markup body', false, 2),
+  ('ortb-tracking-macros::ortb-macro-lurl-use#3', 'ortb-tracking-macros::ortb-macro-lurl-use', 'Bid.burl — billing notice URL', false, 3),
+  ('ortb-tracking-macros::ortb-macro-when-substitute#0', 'ortb-tracking-macros::ortb-macro-when-substitute', 'Exchange on winner selection — only exchange knows the clearing price', true, 0),
+  ('ortb-tracking-macros::ortb-macro-when-substitute#1', 'ortb-tracking-macros::ortb-macro-when-substitute', 'Browser on creative render — browser has no access to clearing price', false, 1),
+  ('ortb-tracking-macros::ortb-macro-when-substitute#2', 'ortb-tracking-macros::ortb-macro-when-substitute', 'DSP before BidResponse — DSP does not know the clearing price yet', false, 2),
+  ('ortb-tracking-macros::ortb-macro-when-substitute#3', 'ortb-tracking-macros::ortb-macro-when-substitute', 'SSP on exchange response — SSP receives markup after substitution', false, 3),
+  ('ortb-tracking-macros::ortb-macro-missing#0', 'ortb-tracking-macros::ortb-macro-missing', 'Literal macro — DSP tracking receives the unsubstituted placeholder', true, 0),
+  ('ortb-tracking-macros::ortb-macro-missing#1', 'ortb-tracking-macros::ortb-macro-missing', 'HTTP 400 — the exchange rejects BidResponse with unsupported macro', false, 1),
+  ('ortb-tracking-macros::ortb-macro-missing#2', 'ortb-tracking-macros::ortb-macro-missing', 'Empty string — the exchange substitutes nothing for unknown macros', false, 2),
+  ('ortb-tracking-macros::ortb-macro-missing#3', 'ortb-tracking-macros::ortb-macro-missing', 'Param removed — the exchange strips unknown macros from URLs', false, 3),
+  ('ortb-tracking-reconciliation::ortb-reconcile-authority#0', 'ortb-tracking-reconciliation::ortb-reconcile-authority', 'Exchange authoritative — nurl/burl more reliable than client pixels', true, 0),
+  ('ortb-tracking-reconciliation::ortb-reconcile-authority#1', 'ortb-tracking-reconciliation::ortb-reconcile-authority', 'DSP authoritative — it has first-hand knowledge of its own bids and wins', false, 1),
+  ('ortb-tracking-reconciliation::ortb-reconcile-authority#2', 'ortb-tracking-reconciliation::ortb-reconcile-authority', 'Third-party vendor — it is a neutral party for discrepancy resolution', false, 2),
+  ('ortb-tracking-reconciliation::ortb-reconcile-authority#3', 'ortb-tracking-reconciliation::ortb-reconcile-authority', 'Average counts — neither party is authoritative alone', false, 3),
+  ('ortb-tracking-reconciliation::ortb-reconcile-ivt#0', 'ortb-tracking-reconciliation::ortb-reconcile-ivt', 'Exchange overcounts — bots fire nurl but skip browser pixel render', true, 0),
+  ('ortb-tracking-reconciliation::ortb-reconcile-ivt#1', 'ortb-tracking-reconciliation::ortb-reconcile-ivt', 'DSP overcounts — bots click repeatedly, inflating DSP pixel counts', false, 1),
+  ('ortb-tracking-reconciliation::ortb-reconcile-ivt#2', 'ortb-tracking-reconciliation::ortb-reconcile-ivt', 'Zero discrepancy claim — bots never perfectly replicate human pixels', false, 2),
+  ('ortb-tracking-reconciliation::ortb-reconcile-ivt#3', 'ortb-tracking-reconciliation::ortb-reconcile-ivt', 'Negative discrepancy — bots fire pixels without a corresponding bid win', false, 3),
+  ('ortb-tracking-reconciliation::ortb-reconcile-window#0', 'ortb-tracking-reconciliation::ortb-reconcile-window', '100,000 — exchange count authoritative; 10% within tolerance', true, 0),
+  ('ortb-tracking-reconciliation::ortb-reconcile-window#1', 'ortb-tracking-reconciliation::ortb-reconcile-window', '90,000 — the DSP pays only for impressions it measured', false, 1),
+  ('ortb-tracking-reconciliation::ortb-reconcile-window#2', 'ortb-tracking-reconciliation::ortb-reconcile-window', '95,000 — the average of both counts as a compromise', false, 2),
+  ('ortb-tracking-reconciliation::ortb-reconcile-window#3', 'ortb-tracking-reconciliation::ortb-reconcile-window', 'Disputed — both parties must agree on a common third-party count first', false, 3),
+  ('ortb-creative-banner::ortb-banner-mraid#0', 'ortb-creative-banner::ortb-banner-mraid', 'Native SDK bridge — MRAID gives in-app WebView expand/close/open APIs', true, 0),
+  ('ortb-creative-banner::ortb-banner-mraid#1', 'ortb-creative-banner::ortb-banner-mraid', 'iOS requirement — MRAID is not mandatory for all iOS banner ads', false, 1),
+  ('ortb-creative-banner::ortb-banner-mraid#2', 'ortb-creative-banner::ortb-banner-mraid', 'HTTPS enforcement — MRAID does not handle HTTPS policy for creatives', false, 2),
+  ('ortb-creative-banner::ortb-banner-mraid#3', 'ortb-creative-banner::ortb-banner-mraid', 'Video standard claim — VAST handles video; MRAID covers rich-media', false, 3),
+  ('ortb-creative-banner::ortb-banner-safeframe#0', 'ortb-creative-banner::ortb-banner-safeframe', 'Isolated iframe — prevents creative accessing publisher DOM or cookies', true, 0),
+  ('ortb-creative-banner::ortb-banner-safeframe#1', 'ortb-creative-banner::ortb-banner-safeframe', 'Slot overflow claim — SafeFrame sandboxes; it does not enlarge the slot', false, 1),
+  ('ortb-creative-banner::ortb-banner-safeframe#2', 'ortb-creative-banner::ortb-banner-safeframe', 'Server-side render claim — SafeFrame is browser-side, not server-side', false, 2),
+  ('ortb-creative-banner::ortb-banner-safeframe#3', 'ortb-creative-banner::ortb-banner-safeframe', 'Encryption claim — SafeFrame is an iframe sandbox, not encryption', false, 3),
+  ('ortb-creative-banner::ortb-banner-mtype#0', 'ortb-creative-banner::ortb-banner-mtype', 'Render as banner HTML — mtype=1 routes adm to iframe or SafeFrame', true, 0),
+  ('ortb-creative-banner::ortb-banner-mtype#1', 'ortb-creative-banner::ortb-banner-mtype', 'Pass to VAST player — mtype=2 routes adm to a video player instead', false, 1),
+  ('ortb-creative-banner::ortb-banner-mtype#2', 'ortb-creative-banner::ortb-banner-mtype', 'Parse as native — mtype=4 routes adm to the native JSON parser', false, 2),
+  ('ortb-creative-banner::ortb-banner-mtype#3', 'ortb-creative-banner::ortb-banner-mtype', 'Send to MRAID — MRAID handles in-app rich-media, not audio playback', false, 3),
+  ('ortb-creative-vast::ortb-vast-inline-vs-wrapper#0', 'ortb-creative-vast::ortb-vast-inline-vs-wrapper', 'Wrapper chains — VASTAdTagURI redirect; InLine has the actual assets', true, 0),
+  ('ortb-creative-vast::ortb-vast-inline-vs-wrapper#1', 'ortb-creative-vast::ortb-vast-inline-vs-wrapper', 'HTML5 vs Flash claim — both InLine and Wrapper support HTML5 video', false, 1),
+  ('ortb-creative-vast::ortb-vast-inline-vs-wrapper#2', 'ortb-creative-vast::ortb-vast-inline-vs-wrapper', 'Tracking events claim — InLine also supports TrackingEvents elements', false, 2),
+  ('ortb-creative-vast::ortb-vast-inline-vs-wrapper#3', 'ortb-creative-vast::ortb-vast-inline-vs-wrapper', 'Position claim — Wrapper and InLine do not encode ad break positions', false, 3),
+  ('ortb-creative-vast::ortb-vast-tracking-quartile#0', 'ortb-creative-vast::ortb-vast-tracking-quartile', '3 quartile events fire — start, firstQuartile, midpoint; complete missed', true, 0),
+  ('ortb-creative-vast::ortb-vast-tracking-quartile#1', 'ortb-creative-vast::ortb-vast-tracking-quartile', 'Start+complete events claim — quartile events are required by VAST spec', false, 1),
+  ('ortb-creative-vast::ortb-vast-tracking-quartile#2', 'ortb-creative-vast::ortb-vast-tracking-quartile', 'complete on close claim — complete fires at 100%, not on player close', false, 2),
+  ('ortb-creative-vast::ortb-vast-tracking-quartile#3', 'ortb-creative-vast::ortb-vast-tracking-quartile', 'firstQuartile claim — player stops at 20s, past the 25% mark', false, 3),
+  ('ortb-creative-vast::ortb-vast-mtype#0', 'ortb-creative-vast::ortb-vast-mtype', '2 — video', true, 0),
+  ('ortb-creative-vast::ortb-vast-mtype#1', 'ortb-creative-vast::ortb-vast-mtype', '1 — banner', false, 1),
+  ('ortb-creative-vast::ortb-vast-mtype#2', 'ortb-creative-vast::ortb-vast-mtype', '4 — native', false, 2),
+  ('ortb-creative-vast::ortb-vast-mtype#3', 'ortb-creative-vast::ortb-vast-mtype', '3 — audio, since VAST handles audio too', false, 3),
+  ('ortb-creative-native::ortb-native-who-renders#0', 'ortb-creative-native::ortb-native-who-renders', 'Publisher renders — assembles native assets into its own page design', true, 0),
+  ('ortb-creative-native::ortb-native-who-renders#1', 'ortb-creative-native::ortb-native-who-renders', 'DSP pre-renders claim — DSPs supply raw JSON, not pre-rendered HTML', false, 1),
+  ('ortb-creative-native::ortb-native-who-renders#2', 'ortb-creative-native::ortb-native-who-renders', 'Exchange converts claim — exchange passes native JSON as-is to the SSP', false, 2),
+  ('ortb-creative-native::ortb-native-who-renders#3', 'ortb-creative-native::ortb-native-who-renders', 'Browser built-in claim — browsers have no native ad rendering support', false, 3),
+  ('ortb-creative-native::ortb-native-asset-type#0', 'ortb-creative-native::ortb-native-asset-type', 'Main image — large hero image for the native ad unit', true, 0),
+  ('ortb-creative-native::ortb-native-asset-type#1', 'ortb-creative-native::ortb-native-asset-type', 'Icon image — the small brand logo (type=1 is icon)', false, 1),
+  ('ortb-creative-native::ortb-native-asset-type#2', 'ortb-creative-native::ortb-native-asset-type', 'Background image — type=3 is main image, not background', false, 2),
+  ('ortb-creative-native::ortb-native-asset-type#3', 'ortb-creative-native::ortb-native-asset-type', 'Audit screenshot — iurl handles creative audit, not ImageAsset.type', false, 3),
+  ('ortb-creative-native::ortb-native-imptrackers#0', 'ortb-creative-native::ortb-native-imptrackers', 'Client-side imp pixels — publisher fires these on native unit render', true, 0),
+  ('ortb-creative-native::ortb-native-imptrackers#1', 'ortb-creative-native::ortb-native-imptrackers', 'Win-notice URLs — exchange fires win notices, not imptrackers', false, 1),
+  ('ortb-creative-native::ortb-native-imptrackers#2', 'ortb-creative-native::ortb-native-imptrackers', 'Click destinations — link.url handles click URLs, not imptrackers', false, 2),
+  ('ortb-creative-native::ortb-native-imptrackers#3', 'ortb-creative-native::ortb-native-imptrackers', 'Asset cache URLs — imptrackers are tracking pixels, not CDN cache URLs', false, 3),
+  ('ortb-scale-pacing::ortb-pacing-smooth-vs-asap#0', 'ortb-scale-pacing::ortb-pacing-smooth-vs-asap', '$375 — 9/24 hours × $1,000 (proportional to time elapsed)', true, 0),
+  ('ortb-scale-pacing::ortb-pacing-smooth-vs-asap#1', 'ortb-scale-pacing::ortb-pacing-smooth-vs-asap', '$1,000 — smooth pacing spends all budget as fast as possible', false, 1),
+  ('ortb-scale-pacing::ortb-pacing-smooth-vs-asap#2', 'ortb-scale-pacing::ortb-pacing-smooth-vs-asap', '$0 — smooth pacing saves budget for peak hours', false, 2),
+  ('ortb-scale-pacing::ortb-pacing-smooth-vs-asap#3', 'ortb-scale-pacing::ortb-pacing-smooth-vs-asap', '$500 — smooth pacing targets midday spending', false, 3),
+  ('ortb-scale-pacing::ortb-pacing-atomic-cas#0', 'ortb-scale-pacing::ortb-pacing-atomic-cas', 'Contention retry — CAS fails under concurrent update; loop retries', true, 0),
+  ('ortb-scale-pacing::ortb-pacing-atomic-cas#1', 'ortb-scale-pacing::ortb-pacing-atomic-cas', 'Budget guard — the loop ensures the budget never goes negative', false, 1),
+  ('ortb-scale-pacing::ortb-pacing-atomic-cas#2', 'ortb-scale-pacing::ortb-pacing-atomic-cas', 'Cache propagation claim — CAS is for contention, not cache propagation', false, 2),
+  ('ortb-scale-pacing::ortb-pacing-atomic-cas#3', 'ortb-scale-pacing::ortb-pacing-atomic-cas', 'Go limitation claim — Go atomic has no per-function CAS call limit', false, 3),
+  ('ortb-scale-pacing::ortb-pacing-per-dsp#0', 'ortb-scale-pacing::ortb-pacing-per-dsp', 'After targeting — skip budget check for impressions that miss targeting', true, 0),
+  ('ortb-scale-pacing::ortb-pacing-per-dsp#1', 'ortb-scale-pacing::ortb-pacing-per-dsp', 'Before targeting — fail fast on empty budget before targeting compute', false, 1),
+  ('ortb-scale-pacing::ortb-pacing-per-dsp#2', 'ortb-scale-pacing::ortb-pacing-per-dsp', 'Simultaneously — in a separate goroutine alongside targeting logic', false, 2),
+  ('ortb-scale-pacing::ortb-pacing-per-dsp#3', 'ortb-scale-pacing::ortb-pacing-per-dsp', 'Never in bidder — budget managed by a separate billing service only', false, 3),
+  ('ortb-scale-frequency-cap::ortb-freqcap-atomicity#0', 'ortb-scale-frequency-cap::ortb-freqcap-atomicity', 'Race condition — two goroutines both allow, both increment; Lua fix', true, 0),
+  ('ortb-scale-frequency-cap::ortb-freqcap-atomicity#1', 'ortb-scale-frequency-cap::ortb-freqcap-atomicity', 'Shard mismatch — GET and INCR may route to different Redis shards', false, 1),
+  ('ortb-scale-frequency-cap::ortb-freqcap-atomicity#2', 'ortb-scale-frequency-cap::ortb-freqcap-atomicity', 'Thread safety — INCR is thread-safe in Redis; not the issue here', false, 2),
+  ('ortb-scale-frequency-cap::ortb-freqcap-atomicity#3', 'ortb-scale-frequency-cap::ortb-freqcap-atomicity', 'EXPIRE reset claim — EXPIRE sets TTL but does not reset counter value', false, 3),
+  ('ortb-scale-frequency-cap::ortb-freqcap-sliding#0', 'ortb-scale-frequency-cap::ortb-freqcap-sliding', 'Sorted Set — ZADD timestamp as score, ZCOUNT in [now-86400s, now] range', true, 0),
+  ('ortb-scale-frequency-cap::ortb-freqcap-sliding#1', 'ortb-scale-frequency-cap::ortb-freqcap-sliding', 'String + INCR — works for fixed windows; not rolling 24-hour windows', false, 1),
+  ('ortb-scale-frequency-cap::ortb-freqcap-sliding#2', 'ortb-scale-frequency-cap::ortb-freqcap-sliding', 'Hash with buckets — needs manual hourly summing; not native to Redis', false, 2),
+  ('ortb-scale-frequency-cap::ortb-freqcap-sliding#3', 'ortb-scale-frequency-cap::ortb-freqcap-sliding', 'List with LPUSH — LLEN returns total length, not a time-ranged count', false, 3),
+  ('ortb-scale-frequency-cap::ortb-freqcap-consistent-hash#0', 'ortb-scale-frequency-cap::ortb-freqcap-consistent-hash', 'Same-shard routing — avoids split counts for the same user-campaign key', true, 0),
+  ('ortb-scale-frequency-cap::ortb-freqcap-consistent-hash#1', 'ortb-scale-frequency-cap::ortb-freqcap-consistent-hash', 'Sort order claim — consistent hashing is not alphabetic sorting', false, 1),
+  ('ortb-scale-frequency-cap::ortb-freqcap-consistent-hash#2', 'ortb-scale-frequency-cap::ortb-freqcap-consistent-hash', 'Memory claim — consistent hashing controls routing, not memory per shard', false, 2),
+  ('ortb-scale-frequency-cap::ortb-freqcap-consistent-hash#3', 'ortb-scale-frequency-cap::ortb-freqcap-consistent-hash', 'Redis requirement claim — Redis does not mandate consistent hashing', false, 3),
+  ('ortb-scale-logging::ortb-log-why-async#0', 'ortb-scale-logging::ortb-log-why-async', 'Latency budget — 1-10ms Kafka write would triple p99 bid latency', true, 0),
+  ('ortb-scale-logging::ortb-log-why-async#1', 'ortb-scale-logging::ortb-log-why-async', 'Sync support claim — Kafka does support synchronous writes', false, 1),
+  ('ortb-scale-logging::ortb-log-why-async#2', 'ortb-scale-logging::ortb-log-why-async', 'Handler limit claim — Go HTTP handlers can initiate network calls', false, 2),
+  ('ortb-scale-logging::ortb-log-why-async#3', 'ortb-scale-logging::ortb-log-why-async', 'Spec requirement claim — OpenRTB does not mandate async Kafka writes', false, 3),
+  ('ortb-scale-logging::ortb-log-overflow#0', 'ortb-scale-logging::ortb-log-overflow', 'Prioritize wins — sample losers at 1%; never drop revenue win events', true, 0),
+  ('ortb-scale-logging::ortb-log-overflow#1', 'ortb-scale-logging::ortb-log-overflow', 'Block on drain — blocking the hot path defeats write-behind logging', false, 1),
+  ('ortb-scale-logging::ortb-log-overflow#2', 'ortb-scale-logging::ortb-log-overflow', 'Drop all events claim — win events cannot be dropped; revenue at risk', false, 2),
+  ('ortb-scale-logging::ortb-log-overflow#3', 'ortb-scale-logging::ortb-log-overflow', 'Dynamic resize claim — runtime buffer doubling risks out-of-memory', false, 3),
+  ('ortb-scale-logging::ortb-log-consumer-lag#0', 'ortb-scale-logging::ortb-log-consumer-lag', 'Consumers behind — producer rate exceeds consumers; scale up', true, 0),
+  ('ortb-scale-logging::ortb-log-consumer-lag#1', 'ortb-scale-logging::ortb-log-consumer-lag', 'Disk space alert — consumer lag indicates rate mismatch, not disk', false, 1),
+  ('ortb-scale-logging::ortb-log-consumer-lag#2', 'ortb-scale-logging::ortb-log-consumer-lag', 'Ring buffer claim — consumer lag is Kafka offsets, not ring buffer', false, 2),
+  ('ortb-scale-logging::ortb-log-consumer-lag#3', 'ortb-scale-logging::ortb-log-consumer-lag', 'No production claim — increasing lag proves production is outpacing', false, 3),
+  ('ortb-privacy-consent::ortb-privacy-gdpr-nobid#0', 'ortb-privacy-consent::ortb-privacy-gdpr-nobid', 'No-bid — missing consent string means no verifiable legal basis for GDPR', true, 0),
+  ('ortb-privacy-consent::ortb-privacy-gdpr-nobid#1', 'ortb-privacy-consent::ortb-privacy-gdpr-nobid', 'Bid normally claim — consent string is required in GDPR scope', false, 1),
+  ('ortb-privacy-consent::ortb-privacy-gdpr-nobid#2', 'ortb-privacy-consent::ortb-privacy-gdpr-nobid', 'Contextual bid claim — even contextual bidding needs legal review', false, 2),
+  ('ortb-privacy-consent::ortb-privacy-gdpr-nobid#3', 'ortb-privacy-consent::ortb-privacy-gdpr-nobid', 'Pop-up claim — pre-bid consent is required; not via creative pop-up', false, 3),
+  ('ortb-privacy-consent::ortb-privacy-tcf-purposes#0', 'ortb-privacy-consent::ortb-privacy-tcf-purposes', 'Personalised ads profile — building audience segments for ad targeting', true, 0),
+  ('ortb-privacy-consent::ortb-privacy-tcf-purposes#1', 'ortb-privacy-consent::ortb-privacy-tcf-purposes', 'Store/access info — that is TCF Purpose 1, not Purpose 3', false, 1),
+  ('ortb-privacy-consent::ortb-privacy-tcf-purposes#2', 'ortb-privacy-consent::ortb-privacy-tcf-purposes', 'Measure ad performance — that is TCF Purpose 7, not Purpose 3', false, 2),
+  ('ortb-privacy-consent::ortb-privacy-tcf-purposes#3', 'ortb-privacy-consent::ortb-privacy-tcf-purposes', 'Market research — that is TCF Purpose 9, not Purpose 3', false, 3),
+  ('ortb-privacy-consent::ortb-privacy-ccpa#0', 'ortb-privacy-consent::ortb-privacy-ccpa', 'Opted out of data sale — Y in position 3 means user opted out of sale', true, 0),
+  ('ortb-privacy-consent::ortb-privacy-ccpa#1', 'ortb-privacy-consent::ortb-privacy-ccpa', 'Opted in claim — Y in position 3 means opt-out, not opt-in', false, 1),
+  ('ortb-privacy-consent::ortb-privacy-ccpa#2', 'ortb-privacy-consent::ortb-privacy-ccpa', 'CCPA inapplicable claim — CCPA applies; notice=Y means given', false, 2),
+  ('ortb-privacy-consent::ortb-privacy-ccpa#3', 'ortb-privacy-consent::ortb-privacy-ccpa', 'No notice claim — position 2 Y means notice was provided to the user', false, 3),
+  ('ortb-privacy-identity::ortb-id-att#0', 'ortb-privacy-identity::ortb-id-att', 'Opt-in required — ~70% opted out; IDFA on ~30% of iOS traffic', true, 0),
+  ('ortb-privacy-identity::ortb-id-att#1', 'ortb-privacy-identity::ortb-id-att', 'Completely removed — IDFA is opt-in gated but not fully removed from iOS', false, 1),
+  ('ortb-privacy-identity::ortb-id-att#2', 'ortb-privacy-identity::ortb-id-att', 'PPID auto-replace claim — PPID is optional; ATT makes IDFA opt-in gated', false, 2),
+  ('ortb-privacy-identity::ortb-id-att#3', 'ortb-privacy-identity::ortb-id-att', 'Encrypted IDFA claim — ATT makes IDFA unavailable, not encrypted', false, 3),
+  ('ortb-privacy-identity::ortb-id-uid2#0', 'ortb-privacy-identity::ortb-id-uid2', 'Hashed email token — SHA-256 of email to opaque token; no raw email', true, 0),
+  ('ortb-privacy-identity::ortb-id-uid2#1', 'ortb-privacy-identity::ortb-id-uid2', 'Fingerprint claim — UID2 is email-based; fingerprinting is not used', false, 1),
+  ('ortb-privacy-identity::ortb-id-uid2#2', 'ortb-privacy-identity::ortb-id-uid2', 'localStorage claim — UID2 is server-side; not a browser localStorage ID', false, 2),
+  ('ortb-privacy-identity::ortb-id-uid2#3', 'ortb-privacy-identity::ortb-id-uid2', 'IP-based claim — UID2 uses hashed email, not IP or user-agent', false, 3),
+  ('ortb-privacy-identity::ortb-id-eids#0', 'ortb-privacy-identity::ortb-id-eids', 'Multi-ID support — DSP picks whichever ID system it has keys for', true, 0),
+  ('ortb-privacy-identity::ortb-id-eids#1', 'ortb-privacy-identity::ortb-id-eids', 'DMP segments claim — eids has identity tokens, not DMP data segments', false, 1),
+  ('ortb-privacy-identity::ortb-id-eids#2', 'ortb-privacy-identity::ortb-id-eids', 'buyeruid backup claim — eids is a richer multi-source identity layer', false, 2),
+  ('ortb-privacy-identity::ortb-id-eids#3', 'ortb-privacy-identity::ortb-id-eids', 'Signatures claim — eids has identity tokens, not bid-signing material', false, 3),
+  ('ortb-design-capstone::ortb-capstone-hot-path#0', 'ortb-design-capstone::ortb-capstone-hot-path', 'All writes async — DB, Kafka, and notice calls must be write-behind', true, 0),
+  ('ortb-design-capstone::ortb-capstone-hot-path#1', 'ortb-design-capstone::ortb-capstone-hot-path', 'DSP fan-out claim — fan-out calls are concurrent, not sequential', false, 1),
+  ('ortb-design-capstone::ortb-capstone-hot-path#2', 'ortb-design-capstone::ortb-capstone-hot-path', 'JSON decode claim — BidRequest decoding is required in the hot path', false, 2),
+  ('ortb-design-capstone::ortb-capstone-hot-path#3', 'ortb-design-capstone::ortb-capstone-hot-path', 'Auction math claim — sort of N≤10 bids is trivial and stays in-path', false, 3),
+  ('ortb-design-capstone::ortb-capstone-bottleneck#0', 'ortb-design-capstone::ortb-capstone-bottleneck', 'In-process cache — moves enrichment from Redis RTT to nanosecond lookups', true, 0),
+  ('ortb-design-capstone::ortb-capstone-bottleneck#1', 'ortb-design-capstone::ortb-capstone-bottleneck', 'Protobuf serialisation — helps latency less than eliminating Redis RTTs', false, 1),
+  ('ortb-design-capstone::ortb-capstone-bottleneck#2', 'ortb-design-capstone::ortb-capstone-bottleneck', 'GOMAXPROCS increase — exceeding CPU count adds context-switch overhead', false, 2),
+  ('ortb-design-capstone::ortb-capstone-bottleneck#3', 'ortb-design-capstone::ortb-capstone-bottleneck', 'Goroutine pools — per-DSP spawn cost is negligible compared to Redis RTT', false, 3),
+  ('ortb-design-capstone::ortb-capstone-reconciliation#0', 'ortb-design-capstone::ortb-capstone-reconciliation', 'Exchange count authoritative — 15% is within contract tolerance', true, 0),
+  ('ortb-design-capstone::ortb-capstone-reconciliation#1', 'ortb-design-capstone::ortb-capstone-reconciliation', 'Lower count claim — exchange count is authoritative, not DSP pixels', false, 1),
+  ('ortb-design-capstone::ortb-capstone-reconciliation#2', 'ortb-design-capstone::ortb-capstone-reconciliation', 'Always dispute claim — 15% is within many contracts'' tolerance', false, 2),
+  ('ortb-design-capstone::ortb-capstone-reconciliation#3', 'ortb-design-capstone::ortb-capstone-reconciliation', 'Split difference claim — contracts use exchange count, not an average', false, 3);
 
 insert into public.items (id, course_id, topic_id, problem_id, kind, title, summary, difficulty, estimated_minutes, prereqs, sort_order) values
   ('n-queens', 'backtracking', 'placement', 'n-queens', 'problem', 'N-Queens', 'Place one queen per row; try columns left to right, recurse when a spot is safe, and backtrack when a row runs out. Stops at the first full solution.', 'Hard', 25, '{}'::text[], 0),
@@ -45291,6 +49738,43 @@ insert into public.items (id, course_id, topic_id, problem_id, kind, title, summ
   ('go-design-worker-pool', 'go-senior', 'go-senior-design', 'go-design-worker-pool', 'problem', 'Design: bounded worker-pool service', 'Bound concurrency with fixed workers or a semaphore, apply backpressure, drain gracefully, and aggregate errors under cancellation.', 'Hard', 12, '{}'::text[], 430),
   ('go-design-lru-cache', 'go-senior', 'go-senior-design', 'go-design-lru-cache', 'problem', 'Design: concurrent LRU cache', 'Build an O(1) LRU with map + doubly linked list, then make it concurrent via sharding vs a single mutex.', 'Hard', 12, '{}'::text[], 431),
   ('go-design-graceful-shutdown', 'go-senior', 'go-senior-design', 'go-design-graceful-shutdown', 'problem', 'Design: graceful shutdown', 'Drain in-flight requests on SIGTERM, then close dependencies in the right order.', 'Hard', 12, '{}'::text[], 432),
-  ('go-design-pipeline', 'go-senior', 'go-senior-design', 'go-design-pipeline', 'problem', 'Design: cancellable pipeline', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', 'Hard', 12, '{}'::text[], 433);
+  ('go-design-pipeline', 'go-senior', 'go-senior-design', 'go-design-pipeline', 'problem', 'Design: cancellable pipeline', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', 'Hard', 12, '{}'::text[], 433),
+  ('ortb-foundations-ecosystem', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-ecosystem', 'problem', 'Programmatic Ad Tech Ecosystem', 'Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.', 'Easy', 15, '{}'::text[], 434),
+  ('ortb-foundations-rtb-flow', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-rtb-flow', 'problem', 'The RTB Request-Response Flow', 'Step-by-step journey from page load to impression served, with sub-100 ms timing.', 'Easy', 15, '{}'::text[], 435),
+  ('ortb-foundations-auction-types', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-auction-types', 'problem', 'First-Price vs Second-Price Auctions', 'Vickrey second-price vs first-price mechanics and why the industry shifted.', 'Medium', 15, '{}'::text[], 436),
+  ('ortb-foundations-supply-chain', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-supply-chain', 'problem', 'ads.txt, sellers.json & SupplyChain Object', 'IAB standards for authorised reseller disclosure and supply path transparency.', 'Medium', 15, '{}'::text[], 437),
+  ('ortb-bid-request-object', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-object', 'problem', 'Top-Level BidRequest Object', 'The root BidRequest struct: required fields, auction rules, and allowlists.', 'Medium', 15, '{}'::text[], 438),
+  ('ortb-bid-request-imp', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-imp', 'problem', 'Impression Object & Ad Formats', 'The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.', 'Medium', 15, '{}'::text[], 439),
+  ('ortb-bid-request-site-app', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-site-app', 'problem', 'Site, App, Device & User Context', 'Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.', 'Medium', 15, '{}'::text[], 440),
+  ('ortb-bid-request-26-fields', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-26-fields', 'problem', 'OpenRTB 2.6 New Fields', 'Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.', 'Hard', 15, '{}'::text[], 441),
+  ('ortb-bid-response-object', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-object', 'problem', 'BidResponse & SeatBid Objects', 'Top-level BidResponse and the SeatBid grouping of bids by buyer seat.', 'Easy', 15, '{}'::text[], 442),
+  ('ortb-bid-response-bid', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-bid', 'problem', 'The Bid Object Deep Dive', 'Every field of the OpenRTB Bid object and how exchanges and DSPs use them.', 'Medium', 15, '{}'::text[], 443),
+  ('ortb-bid-response-settlement', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-settlement', 'problem', 'Win Notice, Billing Notice & Price Macros', 'How exchanges notify DSPs of wins/billing events and substitute price macros.', 'Medium', 15, '{}'::text[], 444),
+  ('ortb-bid-response-nobid', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-nobid', 'problem', 'No-Bid Codes & Timeout Handling', 'HTTP 204 vs JSON no-bid, nbr reason codes, and graceful timeout behaviour.', 'Easy', 15, '{}'::text[], 445),
+  ('ortb-bidder-server', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-server', 'problem', 'HTTP Bidder Server', 'A minimal OpenRTB bidder: HTTP server, JSON decode, validate, encode response.', 'Medium', 15, '{}'::text[], 446),
+  ('ortb-bidder-decision', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-decision', 'problem', 'Bid Decision Logic & Targeting', 'Evaluating targeting criteria, computing bid price, and respecting floor + budget.', 'Medium', 15, '{}'::text[], 447),
+  ('ortb-bidder-concurrency', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-concurrency', 'problem', 'Concurrency & Context Deadlines', 'Using context.WithDeadline, goroutines, and safe shared state in a real bidder.', 'Hard', 15, '{}'::text[], 448),
+  ('ortb-bidder-benchmark', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-benchmark', 'problem', 'Benchmarking the Hot Path', 'go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.', 'Hard', 15, '{}'::text[], 449),
+  ('ortb-exchange-fanout', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-fanout', 'problem', 'Fan-Out to N DSPs', 'Sending a BidRequest to N DSPs concurrently and collecting responses within tmax.', 'Hard', 15, '{}'::text[], 450),
+  ('ortb-exchange-hedged', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-hedged', 'problem', 'Hedged Requests & Timeout Enforcement', 'Cut tail latency by sending backup requests to slow DSPs; enforce hard deadlines.', 'Hard', 15, '{}'::text[], 451),
+  ('ortb-exchange-auction', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-auction', 'problem', 'First/Second-Price Auction Logic', 'Implement exchange-side auction: collect bids, enforce floor, select winner, compute clearing price.', 'Medium', 15, '{}'::text[], 452),
+  ('ortb-exchange-floors', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-floors', 'problem', 'Floor Prices, Deals & Private Marketplace', 'Publisher floor pricing, PMP deal types, and how deals are modelled in OpenRTB.', 'Medium', 15, '{}'::text[], 453),
+  ('ortb-serving-reverse-proxy', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-reverse-proxy', 'problem', 'Reverse Proxy with httputil', 'Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.', 'Medium', 15, '{}'::text[], 454),
+  ('ortb-serving-win-billing', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-win-billing', 'problem', 'Win Notice (nurl) & Billing Notice (burl)', 'Implementing exchange-side nurl + burl dispatch and DSP-side win/billing handlers.', 'Medium', 15, '{}'::text[], 455),
+  ('ortb-serving-markup', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-markup', 'problem', 'Markup Serving & AUCTION_PRICE Macro', 'Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.', 'Medium', 15, '{}'::text[], 456),
+  ('ortb-serving-cdn', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-cdn', 'problem', 'CDN Creatives & Creative Auditing', 'Hosting creatives on CDN, the iurl audit snapshot, and brand-safety classification.', 'Easy', 15, '{}'::text[], 457),
+  ('ortb-tracking-impressions', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-impressions', 'problem', 'Impression Pixel Firing', 'How 1×1 impression pixels work, deduplication by impression ID, and server implementation.', 'Easy', 15, '{}'::text[], 458),
+  ('ortb-tracking-clicks', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-clicks', 'problem', 'Click Redirect Chains', 'Click tracking redirect chain: ad server → DSP tracker → advertiser landing page.', 'Medium', 15, '{}'::text[], 459),
+  ('ortb-tracking-macros', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-macros', 'problem', 'Tracking Macros & Substitution', 'All OpenRTB standard macros, their substitution context, and safe URL encoding.', 'Medium', 15, '{}'::text[], 460),
+  ('ortb-tracking-reconciliation', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-reconciliation', 'problem', 'Billing Reconciliation & Discrepancy', 'Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.', 'Medium', 15, '{}'::text[], 461),
+  ('ortb-creative-banner', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-banner', 'problem', 'Banner HTML & MRAID', 'Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.', 'Easy', 15, '{}'::text[], 462),
+  ('ortb-creative-vast', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-vast', 'problem', 'VAST Video Ad Serving Template', 'VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.', 'Hard', 15, '{}'::text[], 463),
+  ('ortb-creative-native', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-native', 'problem', 'Native Ad Markup', 'OpenRTB Native spec: request/response JSON, asset types, and rendering by publisher.', 'Medium', 15, '{}'::text[], 464),
+  ('ortb-scale-pacing', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-pacing', 'problem', 'Budget Pacing with Token Bucket', 'Token-bucket algorithm for smooth budget pacing per advertiser per time window.', 'Hard', 15, '{}'::text[], 465),
+  ('ortb-scale-frequency-cap', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-frequency-cap', 'problem', 'Frequency Capping with Redis', 'Per-user per-campaign impression caps using Redis INCR+EXPIRE or sliding windows.', 'Hard', 15, '{}'::text[], 466),
+  ('ortb-scale-logging', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-logging', 'problem', 'Write-Behind Logging with Kafka', 'Never block the hot path: ring buffer → background writer → Kafka → data warehouse.', 'Hard', 15, '{}'::text[], 467),
+  ('ortb-privacy-consent', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-privacy-consent', 'problem', 'GDPR, TCF & Consent Strings', 'TCF 2.2 consent strings in BidRequest, GDPR enforcement in bidders, and GPP/CCPA.', 'Hard', 15, '{}'::text[], 468),
+  ('ortb-privacy-identity', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-privacy-identity', 'problem', 'Identity: IDFA, GAID, UID2 & Cookieless', 'Device IDs, cookie-sync, UID2, and identity in a cookieless world.', 'Hard', 15, '{}'::text[], 469),
+  ('ortb-design-capstone', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-design-capstone', 'problem', 'Capstone: Design an Ad Exchange', 'End-to-end design of an ad exchange: 1M RPS, sub-100 ms auctions, impression tracking, billing.', 'Hard', 15, '{}'::text[], 470);
 
 commit;

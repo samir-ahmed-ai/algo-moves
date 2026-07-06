@@ -20,6 +20,7 @@ import { curatedPlugins } from '@/plugins';
 import { importedPlugins } from '@/plugins/imported';
 import { prepPlugins } from '@/plugins/imported/prep';
 import { goCoursePlugins } from '@/plugins/go-course';
+import { openrtbPlugins } from '@/plugins/openrtb';
 import { catalog } from '@/content';
 import { ARCHIPELAGO_REGIONS, PROBLEM_STORY } from '@/plugins/imported/story/archipelago';
 
@@ -36,14 +37,17 @@ const FAMILY: Record<string, Family> = {
   'prep-sliding-window': 'Algorithms', 'prep-sorting': 'Algorithms', 'prep-math': 'Algorithms',
   'prep-design': 'Design', 'prep-streams-io': 'Design',
   'go-senior': 'Go',
+  'openrtb-eng': 'Go',
   'prep-database': 'Other',
 };
 
 const familyOf = (id: string): Family =>
-  FAMILY[id] ?? (id.startsWith('go') ? 'Go' : id.startsWith('prep-') ? 'DataStructures' : 'Other');
+  FAMILY[id] ?? (id.startsWith('go') ? 'Go' : id.startsWith('ortb-') || id.startsWith('openrtb') ? 'Go' : id.startsWith('prep-') ? 'DataStructures' : 'Other');
 
 const groupOf = (id: string): string =>
-  id === 'go-senior' || id.startsWith('go-') ? 'go-course' : id.startsWith('prep-') ? 'prep' : 'curated';
+  id === 'go-senior' || id.startsWith('go-') ? 'go-course'
+  : id === 'openrtb-eng' || id.startsWith('openrtb-') || id.startsWith('ortb-') ? 'openrtb'
+  : id.startsWith('prep-') ? 'prep' : 'curated';
 
 // ---- SQL literal helpers (standard single-quote escaping; safe for any text) ----
 const q = (v: string | null | undefined): string => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
@@ -53,7 +57,7 @@ const arr = (a: string[]): string => (a.length ? `array[${a.map(q).join(',')}]::
 const jsonb = (v: unknown): string => `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`;
 
 // ---- Collect problems from every plugin group (first registration wins) ----
-const GROUPS: ProblemPlugin<any, any>[][] = [curatedPlugins, importedPlugins, prepPlugins, goCoursePlugins];
+const GROUPS: ProblemPlugin<any, any>[][] = [curatedPlugins, importedPlugins, prepPlugins, goCoursePlugins, openrtbPlugins];
 
 interface SolRow { problemId: string; lang: string; file: string; code: string; primary: boolean; sort: number }
 interface QRow { id: string; problemId: string; prompt: string; explain: string | null; sort: number }
@@ -197,7 +201,7 @@ L.push('');
 const sql = L.join('\n');
 
 const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'db', 'content_seed.sql');
-const embedPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'backend', 'internal', 'arcade', 'seeds', 'content_seed.sql');
+const embedPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'backend', 'internal', 'arcade', 'seeds', 'content_seed.sql');
 const check = process.argv.includes('--check');
 const counts =
   `${courseRows.length} courses, ${storyRegionRows.length} story regions, ${topicRows.length} topics, ` +

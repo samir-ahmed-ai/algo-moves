@@ -13,9 +13,10 @@ export interface GoStateChip {
 }
 
 /**
- * One step of a concept's animated code walkthrough. `focus` holds exact
- * substrings of code lines to highlight for the step; `state` is the evolving
- * program/mental state shown alongside.
+ * One step of a concept's narrative walkthrough. `focus` is an optional
+ * authoring anchor (exact code substrings — retained in content but not
+ * rendered in the UI); `state` is the evolving program/mental state shown
+ * alongside.
  */
 export interface GoTraceStep {
   title: string;
@@ -56,7 +57,7 @@ export interface GoConcept {
   design: GoDesignQuestion;
   /** Senior takeaways shown in the inspector. */
   keyPoints: string[];
-  /** Ordered animation steps tracing the code; omit to fall back to the Scene reveal. */
+  /** Ordered narrative walkthrough steps; omit to fall back to the Scene reveal. */
   walkthrough?: GoTraceStep[];
 }
 

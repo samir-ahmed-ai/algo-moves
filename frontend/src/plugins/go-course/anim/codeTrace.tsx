@@ -1,15 +1,12 @@
-import { useEffect, useRef, type ComponentType } from 'react';
+import { type ComponentType } from 'react';
 import { Flag, Sparkles } from 'lucide-react';
 import type { Frame, InspectorProps, PluginViewProps } from '../../../core/types';
 import { cn } from '@/lib/utils/cn';
-import { highlightSnippet } from '@/lib/editor';
 import { VizStage, RailSection, InspectorRow, VarGrid, VizEmpty, vizText } from '../../_shared/vizKit';
 import type { GoConcept, GoStateChip } from '../types';
 
 /** Resolved per-step state the View renders. */
 export interface TraceState {
-  lines: string[];
-  activeLines: number[];
   /** -1 = intro, 0..total-1 = steps, total = recap. */
   step: number;
   total: number;
@@ -18,35 +15,19 @@ export interface TraceState {
   chips: GoStateChip[];
 }
 
-/** Line indices whose text contains any of the step's focus substrings. */
-function activeLineIndices(lines: string[], focus: string[]): number[] {
-  const idx = new Set<number>();
-  for (const raw of focus) {
-    const needle = raw.trim();
-    if (!needle) continue;
-    lines.forEach((ln, i) => {
-      if (ln.includes(needle)) idx.add(i);
-    });
-  }
-  return [...idx].sort((a, b) => a - b);
-}
-
-const codeLines = (code: string): string[] => code.replace(/\n+$/, '').split('\n');
-
 /** One frame per walkthrough step, bracketed by an intro and a recap frame. */
 export function recordTrace(concept: GoConcept): Frame<TraceState>[] {
-  const lines = codeLines(concept.code);
   const steps = concept.walkthrough ?? [];
   const total = steps.length;
-  const base = { lines, total };
+  const base = { total };
   const frames: Frame<TraceState>[] = [];
 
   const introCaption = concept.visual || concept.summary || `${concept.title} — step through it`;
   const recapCaption = concept.memorize || concept.summary || concept.title;
 
   frames.push({
-    move: { type: 'START', note: `${concept.title} — press play to trace the code`, caption: introCaption },
-    state: { ...base, activeLines: [], step: -1, title: 'Start', caption: introCaption, chips: [] },
+    move: { type: 'START', note: `${concept.title} — press play to walk through`, caption: introCaption },
+    state: { ...base, step: -1, title: 'Start', caption: introCaption, chips: [] },
   });
 
   steps.forEach((s, i) => {
@@ -54,13 +35,13 @@ export function recordTrace(concept: GoConcept): Frame<TraceState>[] {
     const caption = s.caption || label;
     frames.push({
       move: { type: label.toUpperCase(), note: caption, caption },
-      state: { ...base, activeLines: activeLineIndices(lines, s.focus ?? []), step: i, title: label, caption, chips: s.state ?? [] },
+      state: { ...base, step: i, title: label, caption, chips: s.state ?? [] },
     });
   });
 
   frames.push({
     move: { type: 'RECALL', note: recapCaption, caption: recapCaption, tone: 'good' },
-    state: { ...base, activeLines: [], step: total, title: 'Recall', caption: recapCaption, chips: [] },
+    state: { ...base, step: total, title: 'Recall', caption: recapCaption, chips: [] },
   });
 
   return frames;
@@ -79,21 +60,13 @@ function StepBadge({ s }: { s: TraceState }) {
   );
 }
 
-/** Animated code walkthrough: active lines glow and auto-scroll, state chips update per step. */
+/** Narrative walkthrough: step caption and state chips update per frame. */
 export function TraceView({ frame }: PluginViewProps<TraceState>) {
   const s = frame.state;
-  const activeRef = useRef<HTMLDivElement>(null);
-  const firstActive = s.activeLines[0];
-
-  useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }, [s.step, firstActive]);
-
-  const activeSet = new Set(s.activeLines);
-  const hasActive = s.activeLines.length > 0;
 
   return (
     <VizStage
+      className="viz-stage--fill h-full min-h-0"
       railWidth={148}
       rail={
         <>
@@ -118,35 +91,14 @@ export function TraceView({ frame }: PluginViewProps<TraceState>) {
         </>
       }
     >
-      <div className="flex min-h-0 flex-col gap-2">
-        <div className={cn('font-semibold text-ink', vizText.base)}>{s.title}</div>
-
-        <div role="code" className="go-trace-code overflow-auto rounded-[var(--radius)] border border-edge bg-panel2/30 py-1.5 font-mono">
-          {s.lines.map((ln, i) => {
-            const active = activeSet.has(i);
-            const dim = hasActive && !active;
-            return (
-              <div
-                key={i}
-                ref={active && i === firstActive ? activeRef : undefined}
-                className={cn(
-                  'flex items-start gap-2 px-2 transition-all duration-300',
-                  active && 'bg-accentbg',
-                  dim && 'opacity-35',
-                )}
-                style={active ? { boxShadow: 'inset 2px 0 0 var(--accent)' } : undefined}
-              >
-                <span className={cn('w-6 shrink-0 select-none text-right tabular-nums', active ? 'text-accent' : 'text-ink3', vizText.sm)} aria-hidden>
-                  {i + 1}
-                </span>
-                <span className={cn('min-w-0 flex-1 whitespace-pre', vizText.sm)}>{highlightSnippet(ln.length ? ln : ' ', 'go')}</span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
+        <div className={cn('shrink-0 font-semibold text-ink', vizText.base)}>{s.title}</div>
 
         <div
-          className={cn('rounded-[var(--radius)] border-l-2 bg-panel2/40 px-2.5 py-1.5 leading-snug text-ink2 transition-all', vizText.base)}
+          className={cn(
+            'min-h-0 flex-1 overflow-auto rounded-[var(--radius)] border-l-2 bg-panel2/40 px-3 py-2.5 leading-relaxed text-ink2',
+            vizText.base,
+          )}
           style={{ borderColor: s.step >= s.total ? 'var(--good)' : 'var(--accent)' }}
         >
           {s.caption}

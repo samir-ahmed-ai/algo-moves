@@ -66,25 +66,12 @@ describe('go-course content integrity', () => {
   });
 });
 
-describe('go-course animation walkthroughs', () => {
-  it('every concept has an animated walkthrough of 3+ steps', () => {
+describe('go-course narrative walkthroughs', () => {
+  it('every concept has a walkthrough of 3+ steps', () => {
     for (const c of concepts) {
       expect(c.walkthrough, `${c.id} missing walkthrough`).toBeDefined();
       expect(c.walkthrough!.length, `${c.id} needs 3+ steps`).toBeGreaterThanOrEqual(3);
     }
-  });
-
-  it('every focus substring is an exact substring of the concept code', () => {
-    const bad: string[] = [];
-    for (const c of concepts) {
-      const lines = c.code.replace(/\n+$/, '').split('\n');
-      for (const step of c.walkthrough ?? []) {
-        for (const f of step.focus) {
-          if (!lines.some((ln) => ln.includes(f))) bad.push(`${c.id}: "${f}"`);
-        }
-      }
-    }
-    expect(bad, bad.slice(0, 12).join('\n')).toEqual([]);
   });
 
   it('recordTrace emits a frame per step (plus intro/recap) with non-empty notes', () => {
@@ -94,9 +81,6 @@ describe('go-course animation walkthroughs', () => {
       for (const f of frames) {
         expect(f.move.note.length, `${c.id} frame note`).toBeGreaterThan(0);
       }
-      // at least one step highlights code
-      const anyActive = frames.some((f) => f.state.activeLines.length > 0);
-      expect(anyActive, `${c.id} highlights no lines`).toBe(true);
     }
   });
 });

@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { ORBIT_PATH_D, ORBIT_VIEWBOX, truncateOrbitText } from './orbitArc';
+import { OrbitFitText } from './OrbitFitText';
+import { ORBIT_PATH_D, ORBIT_VIEWBOX } from './orbitArc';
 
 /** Static arched caption for mobile gist intro — same arc styling as MoveOrbit. */
 export function GistArcCaption({
@@ -13,8 +14,8 @@ export function GistArcCaption({
   className?: string;
 }) {
   const pathId = `gist-arc-${useId().replace(/[^a-zA-Z0-9-]/g, '')}`;
-  const cur = truncateOrbitText(primary, 56);
-  const side = secondary ? truncateOrbitText(secondary, 26) : '';
+  const cur = primary.trim();
+  const side = secondary?.trim() ?? '';
 
   return (
     <svg
@@ -25,17 +26,11 @@ export function GistArcCaption({
     >
       <path id={pathId} d={ORBIT_PATH_D} className="move-orbit-track" pathLength={1} />
       {side && (
-        <text className="move-orbit-side" dy={16}>
-          <textPath href={`#${pathId}`} startOffset="87%" textAnchor="middle">
-            {side}
-          </textPath>
-        </text>
+        <OrbitFitText text={side} pathId={pathId} slot="side" className="move-orbit-side" dy={8} />
       )}
-      <text className="move-orbit-current" dy={-17}>
-        <textPath href={`#${pathId}`} startOffset="50%" textAnchor="middle">
-          {cur}
-        </textPath>
-      </text>
+      {cur && (
+        <OrbitFitText text={cur} pathId={pathId} slot="center" className="move-orbit-current" dy={-9} />
+      )}
     </svg>
   );
 }
