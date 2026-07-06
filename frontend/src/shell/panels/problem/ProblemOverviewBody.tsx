@@ -16,9 +16,13 @@ import { useCanvasFrame, useCanvasStatic } from '@/shell/canvas';
 export function ProblemOverviewBody({
   nextLabel,
   onNext,
+  nextAllLabel,
+  onNextAll,
 }: {
   nextLabel?: string;
   onNext?: () => void;
+  nextAllLabel?: string;
+  onNextAll?: () => void;
 } = {}) {
   const isMobile = useIsMobile();
   const { player } = useCanvasFrame();
@@ -35,13 +39,15 @@ export function ProblemOverviewBody({
     : onNext;
   const showArcRail = hasRecall || !!nextLabel;
 
-  useStudioNextShortcut(handleFooterNext);
+  useStudioNextShortcut(handleFooterNext, onRecallFirst ? undefined : onNextAll);
 
   const footer = (
     <StudioNextFooter
       arcRail={showArcRail ? <StudioArcRail view={view} hasRecall={hasRecall} nextLabel={nextLabel} /> : undefined}
       nextLabel={footerLabel}
       onNext={handleFooterNext}
+      nextAllLabel={onRecallFirst ? undefined : nextAllLabel}
+      onNextAll={onRecallFirst ? undefined : onNextAll}
     />
   );
 

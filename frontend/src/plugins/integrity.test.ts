@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadAllPlugins, getPluginMeta } from '../core/registry';
 import { PLUGIN_META } from './_generated/pluginMeta';
+import { GENERATED_PROBLEM_BRIEFS } from '@/content/_generated/problemBriefs';
 import { quizLabelIssues } from '@/lib/quiz';
 import { defaultPrepQuiz } from './imported/prepQuiz';
 import { PREP_DATA } from './imported/prepManifest';
@@ -86,6 +87,11 @@ describe('generated plugin meta is in sync with implementations', () => {
   it('no generated meta entry is orphaned', () => {
     const orphans = PLUGIN_META.filter((m) => !pluginById.has(m.id)).map((m) => m.id);
     expect(orphans, `orphaned meta entries (no loadable plugin): ${orphans.join(', ')}`).toEqual([]);
+  });
+
+  it('every plugin has a generated problem brief', () => {
+    const missing = PLUGIN_META.filter((m) => !GENERATED_PROBLEM_BRIEFS[m.id]).map((m) => m.id);
+    expect(missing, `missing briefs — run npm run build-problem-briefs: ${missing.join(', ')}`).toEqual([]);
   });
 });
 

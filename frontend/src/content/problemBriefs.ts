@@ -1,8 +1,7 @@
 import type { Item } from './types';
 import type { SampleInput } from '../core/types';
 import { PROBLEM_GISTS, gistFor } from './gists';
-import { PREP_DATA } from '@/plugins/imported/prepManifest';
-import { PLUGIN_META } from '@/plugins/_generated/pluginMeta';
+import { GENERATED_PROBLEM_BRIEFS } from './_generated/problemBriefs';
 
 export interface ProblemBriefCase {
   label: string;
@@ -16,38 +15,31 @@ export interface ProblemBrief {
   cases: ProblemBriefCase[];
 }
 
-const prepById = new Map(PREP_DATA.map((p) => [p.id, p]));
-const metaById = new Map(PLUGIN_META.map((m) => [m.id, m]));
-
-/** Hand-tuned problem intros and example writeups, keyed by item id or plugin id. */
-export const PROBLEM_BRIEFS: Record<string, ProblemBrief> = {
+/** Hand-tuned overrides for weak generated asks or insights. Cases fall through to generated data. */
+export const PROBLEM_BRIEFS: Record<string, Partial<ProblemBrief>> = {
   'linked-list-cycle': {
     statements: [
       'Given the head of a linked list, decide whether it contains a cycle.',
       'Use fast and slow pointers: if they ever meet, a cycle exists; if fast reaches null, the list is acyclic.',
     ],
-    cases: [],
   },
   'binary-search': {
     statements: [
       'Find the index of target in a sorted array, or return -1 if it is absent.',
       'Compare against the midpoint each step and discard the half that cannot contain the target.',
     ],
-    cases: [],
   },
   'climbing-stairs': {
     statements: [
       'Count how many distinct ways you can climb n stairs when each step is 1 or 2.',
       'Each landing depends only on the previous two — fill dp[i] = dp[i-1] + dp[i-2] left to right.',
     ],
-    cases: [],
   },
   subsets: {
     statements: [
       'Return every possible subset of the distinct integers in nums.',
       'At each index, branch: include the element or skip it, then backtrack.',
     ],
-    cases: [],
   },
 };
 
@@ -63,12 +55,13 @@ function gistForItem(item: Item): string | undefined {
   );
 }
 
-function prepForItem(item: Item) {
-  return prepById.get(item.id) ?? (item.pluginId ? prepById.get(item.pluginId) : undefined);
+function overrideForItem(item: Item): Partial<ProblemBrief> | undefined {
+  return PROBLEM_BRIEFS[item.id] ?? (item.pluginId ? PROBLEM_BRIEFS[item.pluginId] : undefined);
 }
 
-function metaForItem(item: Item) {
-  return metaById.get(item.pluginId ?? item.id);
+function generatedForItem(item: Item) {
+  const id = item.pluginId ?? item.id;
+  return GENERATED_PROBLEM_BRIEFS[id];
 }
 
 /** Split a plugin meta summary into a second statement when it carries detail after ':' or '.'. */
@@ -96,58 +89,46 @@ function secondFromSummary(summary: string, first: string): string | undefined {
 }
 
 function fallbackSecond(item: Item, first: string): string {
-  const meta = metaForItem(item);
-  if (meta?.summary) {
-    const fromMeta = secondFromSummary(meta.summary, first);
-    if (fromMeta) return fromMeta;
-  }
   if (item.summary && item.summary.length > 4) {
     const fromItem = secondFromSummary(item.summary, first);
     if (fromItem) return fromItem;
   }
-  const prep = prepForItem(item);
-  if (prep?.pattern) {
-    return ensurePeriod(`Core pattern: ${prep.pattern}`);
-  }
   return 'Use the animation to watch how state evolves step by step.';
 }
 
-/** Resolve two problem-specific sentences for the info panel. */
-export function statementsFor(item: Item): [string, string] {
-  const curated =
-    PROBLEM_BRIEFS[item.id] ?? (item.pluginId ? PROBLEM_BRIEFS[item.pluginId] : undefined);
-  if (curated?.statements.length >= 2) {
-    return [curated.statements[0], curated.statements[1]];
-  }
-
-  const prep = prepForItem(item);
-  if (prep) {
-    const ask = gistForItem(item) ?? `Solve "${prep.title}" on the given input.`;
-    const insight = ensurePeriod(prep.visual || prep.acquired.split('—')[0] || prep.pattern);
-    return [ensurePeriod(ask), insight];
-  }
-
+/** Runtime fallback when generated data is missing (safety net). */
+function runtimeStatementsFor(item: Item): [string, string] {
   const gist = gistForItem(item);
   if (gist) {
     return [ensurePeriod(gist), fallbackSecond(item, gist)];
   }
 
-  const meta = metaForItem(item);
-  if (meta?.summary && meta.summary.length > 12) {
-    const first = ensurePeriod(gistFor(item));
-    const second = secondFromSummary(meta.summary, first) ?? fallbackSecond(item, first);
-    return [first, second];
+  const first = ensurePeriod(gistFor(item));
+  const second = secondFromSummary(item.summary ?? '', first) ?? fallbackSecond(item, first);
+  return [first, second];
+}
+
+/** Resolve two problem-specific sentences for the info panel. */
+export function statementsFor(item: Item): [string, string] {
+  const override = overrideForItem(item);
+  if (override?.statements && override.statements.length >= 2) {
+    return [override.statements[0], override.statements[1]];
   }
 
-  const lines = [ensurePeriod(gistFor(item)), fallbackSecond(item, gistFor(item))];
-  return [lines[0], lines[1]];
+  const generated = generatedForItem(item);
+  if (generated?.statements) {
+    return generated.statements;
+  }
+
+  return runtimeStatementsFor(item);
 }
 
 function formatBriefInput(value: unknown): string {
   if (value == null) return '';
   if (typeof value === 'string') return value;
   try {
-    return JSON.stringify(value);
+    const s = JSON.stringify(value);
+    return s.length > 160 ? `${s.slice(0, 157)}…` : s;
   } catch {
     return String(value);
   }
@@ -162,13 +143,20 @@ function casesFromInputs(inputs: SampleInput[]): ProblemBriefCase[] {
   }));
 }
 
-/** Resolve curated or fallback brief copy for the active problem. */
+/** Resolve example cases: override → generated → live plugin inputs. */
+export function casesFor(item: Item, inputs: SampleInput[] = []): ProblemBriefCase[] {
+  const override = overrideForItem(item);
+  const generated = generatedForItem(item);
+
+  if (override?.cases && override.cases.length > 0) return override.cases;
+  if (generated?.cases && generated.cases.length > 0) return generated.cases;
+  return casesFromInputs(inputs);
+}
+
+/** Resolve curated, generated, or fallback brief copy for the active problem. */
 export function briefFor(item: Item, inputs: SampleInput[] = []): ProblemBrief {
-  const curated =
-    PROBLEM_BRIEFS[item.id] ?? (item.pluginId ? PROBLEM_BRIEFS[item.pluginId] : undefined);
-  const statements = curated?.statements ?? [...statementsFor(item)];
   return {
-    statements,
-    cases: curated?.cases ?? casesFromInputs(inputs),
+    statements: [...statementsFor(item)],
+    cases: casesFor(item, inputs),
   };
 }

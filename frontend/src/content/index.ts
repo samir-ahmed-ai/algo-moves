@@ -23,4 +23,4 @@ export * from './navigation';
 export { PROBLEM_GLYPHS } from './glyphs';
 export { SHAPE_GLYPHS, glyphFor, shapeFor, type ShapeKey } from './problemShape';
 export { PROBLEM_GISTS, gistFor } from './gists';
-export { PROBLEM_BRIEFS, briefFor, statementsFor, type ProblemBrief, type ProblemBriefCase } from './problemBriefs';
+export { PROBLEM_BRIEFS, briefFor, casesFor, statementsFor, type ProblemBrief, type ProblemBriefCase } from './problemBriefs';

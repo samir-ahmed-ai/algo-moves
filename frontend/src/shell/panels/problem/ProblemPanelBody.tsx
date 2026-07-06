@@ -242,7 +242,7 @@ export function ProblemPanelBody() {
   const problemBrief = useMemo(() => briefFor(item, plugin.inputs), [item, plugin.inputs]);
 
   const tone = difficultyTone(item.difficulty);
-  const hasProblemBrief = problemBrief.statements.length > 0;
+  const hasProblemBrief = problemBrief.statements.length > 0 || problemBrief.cases.length > 0;
   const showHeaderDivider = hasOverview || hasProblemBrief || !inVisualize;
 
   return (
@@ -267,7 +267,9 @@ export function ProblemPanelBody() {
               <Chip tone={tone}>{item.difficulty}</Chip>
             </div>
           )}
-          {hasProblemBrief && <ProblemBriefBody statements={problemBrief.statements} />}
+          {hasProblemBrief && (
+            <ProblemBriefBody statements={problemBrief.statements} cases={problemBrief.cases} />
+          )}
           {item.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-[var(--node-gap,6px)]">
               {item.tags.map((t) => (

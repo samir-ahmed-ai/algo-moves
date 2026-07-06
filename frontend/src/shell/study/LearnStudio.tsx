@@ -35,6 +35,7 @@ import {
   type StudioGroupId,
   type StudioTab,
 } from './studioTabs';
+import { studioNextAllLabel } from './studioArcNav';
 
 export interface LearnStudioProps {
   plugin: ProblemPlugin<any, any>;
@@ -157,6 +158,8 @@ function StudioShell({
     return i >= 0 ? order[i + 1] : undefined;
   }, [order, activeId]);
 
+  const lastTab = order[order.length - 1];
+
   // Learn-mode wiring for the reused practice panels (predict / mastery / quiz…):
   // focusing one selects its view; finishing one auto-advances to the next view in
   // canonical order — mirroring how Visualize mode advances the practice canvas.
@@ -170,10 +173,11 @@ function StudioShell({
         const next = i >= 0 ? order[i + 1] : cont;
         if (next) go(next.id);
       },
+      advancePracticeAll: lastTab ? () => go(lastTab.id) : undefined,
       spawnConnectedPanel: () => {},
       layoutVisualizeOptions: () => ({}),
     }),
-    [avail, order, cont, go],
+    [avail, order, cont, go, lastTab],
   );
 
   if (!active) {
@@ -201,7 +205,7 @@ function StudioShell({
           onOpenHelp={onOpenHelp}
         />
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-          <StageBody avail={avail} active={active} cont={cont} onGo={go} />
+          <StageBody avail={avail} active={active} cont={cont} lastTab={lastTab} onGo={go} />
         </div>
       </div>
     </CanvasActionsProvider>
@@ -267,28 +271,44 @@ function StageBody({
   avail,
   active,
   cont,
+  lastTab,
   onGo,
 }: {
   avail: StudioTab[];
   active: StudioTab;
   cont: StudioTab | undefined;
+  lastTab: StudioTab | undefined;
   onGo: (id: string) => void;
 }) {
   const onNext = cont ? () => onGo(cont.id) : undefined;
+  const onNextAll = lastTab && cont ? () => onGo(lastTab.id) : undefined;
+  const nextAllLabel = studioNextAllLabel(lastTab, cont);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div key={active.id} className="lesson-swap flex min-h-0 flex-1 flex-col overflow-hidden">
         {active.render === 'overview' ? (
-          <ProblemOverviewBody nextLabel={cont?.label} onNext={onNext} />
+          <ProblemOverviewBody
+            nextLabel={cont?.label}
+            onNext={onNext}
+            nextAllLabel={nextAllLabel}
+            onNextAll={onNextAll}
+          />
         ) : active.render === 'quiz' ? (
-          <QuizStageBody availTabs={avail} activeTabId={active.id} />
+          <QuizStageBody
+            availTabs={avail}
+            activeTabId={active.id}
+            nextAllLabel={nextAllLabel}
+            onNextAll={onNextAll}
+          />
         ) : active.render === 'assemble' ? (
           <StudioAssembleStageBody
             availTabs={avail}
             activeTabId={active.id}
             nextLabel={cont?.label}
             onNext={onNext}
+            nextAllLabel={nextAllLabel}
+            onNextAll={onNextAll}
           />
         ) : (
           <StudioPanelStageBody
@@ -297,6 +317,8 @@ function StageBody({
             activeTabId={active.id}
             nextLabel={cont?.label}
             onNext={onNext}
+            nextAllLabel={nextAllLabel}
+            onNextAll={onNextAll}
           />
         )}
       </div>

@@ -2,13 +2,17 @@
 // Import every Go problem under ../algo/progress into a generated TS manifest the
 // app consumes via the generic `imported` plugin factory. Re-run after adding
 // problems: `node scripts/import-problems.mjs`. Deterministic — no network, no AI.
+//
+// Algo source path: ALGO_ROOT, PREP_ROOT/../, default ../algo, or sibling */algo
 import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveAlgoRoot } from './resolve-algo-path.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
-const PROGRESS = join(ROOT, '..', 'algo', 'progress');
+const { path: ALGO, via: algoVia } = resolveAlgoRoot(ROOT);
+const PROGRESS = join(ALGO, 'progress');
 
 const CATEGORY = {
   graph: { id: 'graph', title: 'Graph', course: 'Graph library', icon: 'Network' },
@@ -268,4 +272,5 @@ writeFileSync(join(dest, 'manifest.ts'), header);
 
 const byCat = {};
 for (const p of out) byCat[p.categoryTitle] = (byCat[p.categoryTitle] || 0) + 1;
+console.log(`Using algo source: ${ALGO} (${algoVia})`);
 console.log(`Imported ${out.length} problems →`, byCat);

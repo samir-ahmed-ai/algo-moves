@@ -16,16 +16,20 @@ export function StudioPanelStageBody({
   activeTabId,
   nextLabel,
   onNext,
+  nextAllLabel,
+  onNextAll,
 }: {
   kind: string;
   availTabs: StudioTab[];
   activeTabId: string;
   nextLabel?: string;
   onNext?: () => void;
+  nextAllLabel?: string;
+  onNextAll?: () => void;
 }) {
   const isMobile = useIsMobile();
 
-  useStudioNextShortcut(onNext);
+  useStudioNextShortcut(onNext, onNextAll);
 
   return (
     <StudioSplitLayout
@@ -34,6 +38,8 @@ export function StudioPanelStageBody({
           arcRail={<StudioArcRail availTabs={availTabs} activeTabId={activeTabId} />}
           nextLabel={nextLabel}
           onNext={onNext}
+          nextAllLabel={nextAllLabel}
+          onNextAll={onNextAll}
         />
       }
       problem={

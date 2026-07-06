@@ -1,6 +1,7 @@
 export * from './ProblemOverviewBody';
 export * from './ProblemPanelBody';
 export * from './QuizStageBody';
+export * from './QuizAssembleGames';
 export * from './StudioAssembleStageBody';
 export * from './StudioPanelStageBody';
 export * from './StudioArcRail';

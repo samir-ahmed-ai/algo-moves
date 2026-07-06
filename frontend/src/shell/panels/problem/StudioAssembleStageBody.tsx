@@ -15,15 +15,19 @@ export function StudioAssembleStageBody({
   activeTabId,
   nextLabel,
   onNext,
+  nextAllLabel,
+  onNextAll,
 }: {
   availTabs: StudioTab[];
   activeTabId: string;
   nextLabel?: string;
   onNext?: () => void;
+  nextAllLabel?: string;
+  onNextAll?: () => void;
 }) {
   const isMobile = useIsMobile();
 
-  useStudioNextShortcut(onNext);
+  useStudioNextShortcut(onNext, onNextAll);
 
   return (
     <StudioSplitLayout
@@ -32,6 +36,8 @@ export function StudioAssembleStageBody({
           arcRail={<StudioArcRail availTabs={availTabs} activeTabId={activeTabId} />}
           nextLabel={nextLabel}
           onNext={onNext}
+          nextAllLabel={nextAllLabel}
+          onNextAll={onNextAll}
         />
       }
       problem={
