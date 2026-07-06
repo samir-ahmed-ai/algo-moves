@@ -5,6 +5,8 @@ export interface Profile {
   display_name: string;
   avatar_seed: string;
   personal_room_code?: string;
+  email?: string;
+  is_admin?: boolean;
   is_anonymous: boolean;
   xp: number;
   level: number;

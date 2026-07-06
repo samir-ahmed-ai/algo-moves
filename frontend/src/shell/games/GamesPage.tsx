@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Home, LogOut, Moon, Sun, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { Home, LogOut, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { GamesLocaleProvider, getArcadeStrings, useGamesLocale, type GameLocale } from './locale';
 import { GameRoomProvider, useGameRoom } from './net/useGameRoom';
 import { RoomCommsProvider } from './net/useRoomComms';
-import { AuthProvider, useAuth } from './data/AuthProvider';
+import { AuthButton } from '@/shell/auth';
 import { ToastProvider } from './ui/Toast';
 import { useSoundMuted } from './ui/hooks';
 import { ConnectionDot } from './ui/effects';
-import { Avatar } from './ui/Avatar';
 import { parseGamesHash } from '@/lib/navigation';
 import { Lobby } from './lobby/Lobby';
 import { RoomView } from './room/RoomView';
@@ -20,20 +19,18 @@ export function GamesPage() {
   ensureSoundConfig();
   const { density } = useWorkspace();
   return (
-    <AuthProvider>
-      <GameRoomProvider>
-        <GamesLocaleProvider>
-          <ToastProvider>
-            <div
-              data-density={density}
-              className="ws-scroll flex h-full w-full flex-col overflow-y-auto bg-bg text-ink [padding-bottom:env(safe-area-inset-bottom)]"
-            >
-              <Arcade />
-            </div>
-          </ToastProvider>
-        </GamesLocaleProvider>
-      </GameRoomProvider>
-    </AuthProvider>
+    <GameRoomProvider>
+      <GamesLocaleProvider>
+        <ToastProvider>
+          <div
+            data-density={density}
+            className="ws-scroll flex h-full w-full flex-col overflow-y-auto bg-bg text-ink [padding-bottom:env(safe-area-inset-bottom)]"
+          >
+            <Arcade />
+          </div>
+        </ToastProvider>
+      </GamesLocaleProvider>
+    </GameRoomProvider>
   );
 }
 
@@ -83,7 +80,7 @@ function Arcade() {
               />
             ) : null}
 
-            <ProfileButton onClick={() => setShowProgress(true)} label={t.profile.title} />
+            <AuthButton compact onOpenProfile={() => setShowProgress(true)} />
 
             <IconButton
               title={muted ? t.room.soundOff : t.room.soundOn}
@@ -155,25 +152,6 @@ function IconButton({
       )}
     >
       {children}
-    </button>
-  );
-}
-
-function ProfileButton({ onClick, label }: { onClick: () => void; label: string }) {
-  const { profile, configured } = useAuth();
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      onClick={onClick}
-      className="grid h-10 w-10 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation transition-colors sm:h-11 sm:w-11"
-    >
-      {configured && profile ? (
-        <Avatar seed={profile.avatar_seed} name={profile.display_name} size={24} />
-      ) : (
-        <Trophy className="h-4 w-4" />
-      )}
     </button>
   );
 }

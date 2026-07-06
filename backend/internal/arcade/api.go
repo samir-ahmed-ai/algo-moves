@@ -15,6 +15,13 @@ type Service struct {
 	store *Store
 }
 
+func (s *Service) Store() *Store {
+	if s == nil {
+		return nil
+	}
+	return s.store
+}
+
 func Open(ctx context.Context) (*Service, error) {
 	url := strings.TrimSpace(os.Getenv("DATABASE_URL"))
 	if url == "" {
@@ -61,6 +68,8 @@ func (s *Service) Close() {
 // Register mounts /api/* routes on mux. Handlers are wrapped for CORS by server.
 func (s *Service) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/api/auth/guest", s.handleGuest)
+	mux.HandleFunc("/api/auth/signup", s.handleSignup)
+	mux.HandleFunc("/api/auth/login", s.handleLogin)
 	mux.HandleFunc("/api/auth/me", s.handleMe)
 	mux.HandleFunc("/api/profiles/", s.handleProfiles)
 	mux.HandleFunc("/api/stats/me", s.handleStatsMe)

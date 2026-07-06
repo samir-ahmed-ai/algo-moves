@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  arcadeAuthRequest,
   arcadeFetch,
   clearSessionToken,
   getSessionToken,
@@ -28,6 +29,8 @@ export interface AuthApi {
   /** Sign in as a guest if not already signed in. Safe to call repeatedly. */
   ensureSignedIn: () => Promise<string | null>;
   updateMyProfile: (patch: Partial<Pick<Profile, 'display_name' | 'avatar_seed'>>) => Promise<void>;
+  signUpEmail: (email: string, password: string, displayName: string) => Promise<{ error?: string }>;
+  signInEmail: (email: string, password: string) => Promise<{ error?: string }>;
   /** Upgrade an anonymous account by attaching an email (not available without OAuth provider). */
   linkEmail: (email: string) => Promise<{ error?: string }>;
   /** Upgrade / sign in via an OAuth provider (not available without OAuth provider). */
@@ -57,6 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const signingIn = useRef<Promise<string | null> | null>(null);
+
+  const applySession = useCallback((sess: GuestSession) => {
+    setSessionToken(sess.session_token);
+    setUserId(sess.profile_id);
+    setIsAnonymous(sess.profile.is_anonymous);
+    setProfile(sess.profile);
+    syncPersonalRoom(sess.profile);
+  }, []);
 
   const loadProfile = useCallback(async (id: string | null) => {
     if (!id) {
@@ -120,15 +131,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       signingIn.current = null;
       if (!sess) return null;
-      setSessionToken(sess.session_token);
-      setUserId(sess.profile_id);
-      setIsAnonymous(true);
-      setProfile(sess.profile);
-      syncPersonalRoom(sess.profile);
+      applySession(sess);
       return sess.profile_id;
     })();
     return signingIn.current;
-  }, [configured, userId]);
+  }, [configured, userId, applySession]);
+
+  const signUpEmail = useCallback<AuthApi['signUpEmail']>(
+    async (email, password, displayName) => {
+      if (!configured) return { error: 'not-configured' };
+      const res = await arcadeAuthRequest<GuestSession>('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, display_name: displayName }),
+      });
+      if (!res.ok) return { error: res.error };
+      applySession(res.data);
+      return {};
+    },
+    [configured, applySession],
+  );
+
+  const signInEmail = useCallback<AuthApi['signInEmail']>(
+    async (email, password) => {
+      if (!configured) return { error: 'not-configured' };
+      const res = await arcadeAuthRequest<GuestSession>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) return { error: res.error };
+      applySession(res.data);
+      return {};
+    },
+    [configured, applySession],
+  );
 
   const updateMyProfile = useCallback<AuthApi['updateMyProfile']>(
     async (patch) => {
@@ -167,6 +202,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAnonymous: configured ? isAnonymous : true,
     ensureSignedIn: configured ? ensureSignedIn : async () => null,
     updateMyProfile: configured ? updateMyProfile : noop,
+    signUpEmail: configured ? signUpEmail : async () => ({ error: 'not-configured' }),
+    signInEmail: configured ? signInEmail : async () => ({ error: 'not-configured' }),
     linkEmail: configured ? linkEmail : async () => ({ error: 'not-configured' }),
     linkOAuth: configured ? linkOAuth : async () => ({ error: 'not-configured' }),
     signOut: configured ? signOut : noop,

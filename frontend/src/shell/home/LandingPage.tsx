@@ -33,6 +33,7 @@ import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { compactLabel } from '../chromeUi';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from '@/shell/BrandLogo';
+import { AuthButton } from '@/shell/auth';
 import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import { glyphFor } from '../../content/problemShape';
 import { Chip } from '@/design/components';
@@ -602,6 +603,7 @@ export function LandingPage() {
               <Contrast />
             </IconButton>
             <PlayMenu onVim={() => enterVim()} onGames={() => enterGames()} />
+            <AuthButton />
             <button
               type="button"
               title="Open workspace"

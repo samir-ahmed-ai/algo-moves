@@ -1,5 +1,6 @@
 import { WorkspaceProvider, useWorkspace } from '@/store/workspace';
 import { ReplayStoreProvider } from '@/store/replay';
+import { AuthProvider } from '@/shell/games/data/AuthProvider';
 import { Workspace } from './shell/Workspace';
 import { LandingPage } from './shell/home/LandingPage';
 import { MobileApp } from './shell/mobile/MobileApp';
@@ -17,14 +18,16 @@ function Shell() {
 
 export default function App() {
   return (
-    <WorkspaceProvider>
-      <ReplayStoreProvider>
-        <div className="h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
-          <ErrorBoundary label="app">
-            <Shell />
-          </ErrorBoundary>
-        </div>
-      </ReplayStoreProvider>
-    </WorkspaceProvider>
+    <AuthProvider>
+      <WorkspaceProvider>
+        <ReplayStoreProvider>
+          <div className="h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
+            <ErrorBoundary label="app">
+              <Shell />
+            </ErrorBoundary>
+          </div>
+        </ReplayStoreProvider>
+      </WorkspaceProvider>
+    </AuthProvider>
   );
 }

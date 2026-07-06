@@ -32,6 +32,8 @@ type Profile struct {
 	DisplayName      string    `json:"display_name"`
 	AvatarSeed       string    `json:"avatar_seed"`
 	PersonalRoomCode string    `json:"personal_room_code"`
+	Email            string    `json:"email,omitempty"`
+	IsAdmin          bool      `json:"is_admin"`
 	IsAnonymous      bool      `json:"is_anonymous"`
 	XP               int       `json:"xp"`
 	Level            int       `json:"level"`
@@ -68,18 +70,24 @@ func isUniqueViolation(err error) bool {
 
 func scanProfile(row pgx.Row) (*Profile, error) {
 	var p Profile
+	var email pgtype.Text
 	err := row.Scan(
 		&p.ID, &p.DisplayName, &p.AvatarSeed, &p.PersonalRoomCode,
+		&email, &p.IsAdmin,
 		&p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
+	}
+	if email.Valid {
+		p.Email = email.String
 	}
 	return &p, nil
 }
 
 const profileSelectCols = `
 	id::text, display_name, avatar_seed, personal_room_code,
+	email, is_admin,
 	is_anonymous, xp, level, created_at, updated_at`
 
 func (s *Store) CreateGuest(ctx context.Context) (*GuestSession, error) {
@@ -153,11 +161,16 @@ func (s *Store) ProfilesByIDs(ctx context.Context, ids []string) ([]Profile, err
 	var out []Profile
 	for rows.Next() {
 		var p Profile
+		var email pgtype.Text
 		if err := rows.Scan(
 			&p.ID, &p.DisplayName, &p.AvatarSeed, &p.PersonalRoomCode,
+			&email, &p.IsAdmin,
 			&p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt,
 		); err != nil {
 			return nil, err
+		}
+		if email.Valid {
+			p.Email = email.String
 		}
 		out = append(out, p)
 	}
@@ -181,6 +194,107 @@ func (s *Store) UpdateProfile(ctx context.Context, id string, displayName, avata
 		return nil, err
 	}
 	return p, nil
+}
+
+func (s *Store) CreateEmailUser(ctx context.Context, email, passwordHash, displayName string) (*GuestSession, error) {
+	token, err := newSessionToken()
+	if err != nil {
+		return nil, err
+	}
+	email = strings.TrimSpace(strings.ToLower(email))
+	displayName = strings.TrimSpace(displayName)
+	if displayName == "" {
+		displayName = strings.Split(email, "@")[0]
+	}
+	const maxAttempts = 8
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		code, err := newPersonalRoomCode()
+		if err != nil {
+			return nil, err
+		}
+		row := s.pool.QueryRow(ctx, `
+			insert into public.profiles (
+			  session_token, is_anonymous, personal_room_code, email, password_hash, display_name
+			)
+			values ($1, false, $2, $3, $4, $5)
+			returning `+profileSelectCols,
+			token, code, email, passwordHash, displayName,
+		)
+		p, err := scanProfile(row)
+		if err == nil {
+			return &GuestSession{ProfileID: p.ID, SessionToken: token, Profile: *p}, nil
+		}
+		if isUniqueViolation(err) {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && strings.Contains(pgErr.ConstraintName, "email") {
+				return nil, fmt.Errorf("email already registered")
+			}
+			continue
+		}
+		return nil, err
+	}
+	return nil, fmt.Errorf("could not allocate personal room code")
+}
+
+func (s *Store) ProfileByEmail(ctx context.Context, email string) (*Profile, string, error) {
+	email = strings.TrimSpace(strings.ToLower(email))
+	var p Profile
+	var emailCol pgtype.Text
+	var hash pgtype.Text
+	err := s.pool.QueryRow(ctx, `
+		select `+profileSelectCols+`, password_hash
+		from public.profiles where lower(email) = $1`, email,
+	).Scan(
+		&p.ID, &p.DisplayName, &p.AvatarSeed, &p.PersonalRoomCode,
+		&emailCol, &p.IsAdmin,
+		&p.IsAnonymous, &p.XP, &p.Level, &p.CreatedAt, &p.UpdatedAt,
+		&hash,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, "", nil
+	}
+	if err != nil {
+		return nil, "", err
+	}
+	if emailCol.Valid {
+		p.Email = emailCol.String
+	}
+	passwordHash := ""
+	if hash.Valid {
+		passwordHash = hash.String
+	}
+	return &p, passwordHash, nil
+}
+
+func (s *Store) RotateSessionToken(ctx context.Context, profileID string) (string, *Profile, error) {
+	token, err := newSessionToken()
+	if err != nil {
+		return "", nil, err
+	}
+	row := s.pool.QueryRow(ctx, `
+		update public.profiles set session_token = $2
+		where id = $1
+		returning `+profileSelectCols,
+		profileID, token,
+	)
+	p, err := scanProfile(row)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", nil, nil
+	}
+	if err != nil {
+		return "", nil, err
+	}
+	return token, p, nil
+}
+
+func (s *Store) SetAdmin(ctx context.Context, email string) error {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if email == "" {
+		return nil
+	}
+	_, err := s.pool.Exec(ctx, `
+		update public.profiles set is_admin = true where lower(email) = $1`, email)
+	return err
 }
 
 func (s *Store) GameStats(ctx context.Context, profileID string) ([]map[string]any, error) {

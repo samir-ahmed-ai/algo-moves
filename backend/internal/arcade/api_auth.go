@@ -4,7 +4,113 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
+
+func validEmail(email string) bool {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if len(email) < 3 || len(email) > 254 {
+		return false
+	}
+	at := strings.LastIndex(email, "@")
+	if at < 1 || at >= len(email)-1 {
+		return false
+	}
+	return strings.Contains(email[at+1:], ".")
+}
+
+func (s *Service) handleSignup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	var body struct {
+		Email       string `json:"email"`
+		Password    string `json:"password"`
+		DisplayName string `json:"display_name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	email := strings.TrimSpace(strings.ToLower(body.Email))
+	password := body.Password
+	if !validEmail(email) {
+		writeErr(w, http.StatusBadRequest, "invalid email")
+		return
+	}
+	if len(password) < 8 {
+		writeErr(w, http.StatusBadRequest, "password must be at least 8 characters")
+		return
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "could not hash password")
+		return
+	}
+	sess, err := s.store.CreateEmailUser(r.Context(), email, string(hash), body.DisplayName)
+	if err != nil {
+		if strings.Contains(err.Error(), "email already registered") {
+			writeErr(w, http.StatusConflict, "email already registered")
+			return
+		}
+		writeErr(w, http.StatusInternalServerError, "could not create account")
+		return
+	}
+	writeJSON(w, http.StatusOK, sess)
+}
+
+func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	var body struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	email := strings.TrimSpace(strings.ToLower(body.Email))
+	if !validEmail(email) {
+		writeErr(w, http.StatusBadRequest, "invalid email")
+		return
+	}
+	p, hash, err := s.store.ProfileByEmail(r.Context(), email)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if p == nil {
+		writeErr(w, http.StatusNotFound, "account not found")
+		return
+	}
+	if hash == "" {
+		writeErr(w, http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(body.Password)); err != nil {
+		writeErr(w, http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+	token, updated, err := s.store.RotateSessionToken(r.Context(), p.ID)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "could not create session")
+		return
+	}
+	if updated == nil {
+		writeErr(w, http.StatusNotFound, "account not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, GuestSession{
+		ProfileID:    updated.ID,
+		SessionToken: token,
+		Profile:      *updated,
+	})
+}
 
 func (s *Service) handleGuest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

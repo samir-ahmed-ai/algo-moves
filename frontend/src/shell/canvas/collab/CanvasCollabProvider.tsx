@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react';
-import { AuthProvider, useAuth } from '../../games/data/AuthProvider';
+import { useAuth } from '../../games/data/AuthProvider';
 import { GameRoomProvider, useGameRoom } from '@/shell/realtime';
 import { RoomCommsProvider } from '../../games/net/useRoomComms';
 import { fetchNewRoomCode, makeRoomCode, normalizeRoomCode } from '@/shell/realtime';
@@ -665,13 +665,11 @@ function patchPeer(
  */
 export function CanvasCollabProvider({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      <GameRoomProvider>
-        <RoomCommsProvider>
-          <CollabState>{children}</CollabState>
-        </RoomCommsProvider>
-      </GameRoomProvider>
-    </AuthProvider>
+    <GameRoomProvider>
+      <RoomCommsProvider>
+        <CollabState>{children}</CollabState>
+      </RoomCommsProvider>
+    </GameRoomProvider>
   );
 }
 

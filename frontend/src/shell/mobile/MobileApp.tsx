@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Home, Moon, Sun } from 'lucide-react';
 import { BrandLogo } from '@/shell/BrandLogo';
+import { AuthButton } from '@/shell/auth';
 import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { MobileBrowse } from './MobileBrowse';
@@ -190,6 +191,7 @@ export function MobileApp() {
                 <BrandLogo size="sm" />
                 <span className="text-[14px] font-semibold tracking-tight">Algo Moves</span>
               </div>
+              <AuthButton compact />
               {ThemeBtn}
             </header>
             <MobileBrowse onPick={pick} />

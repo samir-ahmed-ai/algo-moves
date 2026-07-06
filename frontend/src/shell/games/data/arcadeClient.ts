@@ -102,3 +102,24 @@ export async function arcadeFetch<T>(
     return null;
   }
 }
+
+/** Auth endpoints return structured errors for popover UI. */
+export async function arcadeAuthRequest<T>(
+  path: string,
+  init: RequestInit,
+): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
+  const headers = new Headers(init.headers);
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  try {
+    const res = await fetch(`${gameServerHttpBase()}${path}`, { ...init, headers });
+    const body = (await res.json().catch(() => ({}))) as T & { error?: string };
+    if (!res.ok) {
+      return { ok: false, error: body.error ?? `Request failed (${res.status})` };
+    }
+    return { ok: true, data: body as T };
+  } catch {
+    return { ok: false, error: 'Network error — check your connection' };
+  }
+}

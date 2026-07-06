@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../chromeUi';
 import { usePopoverDismiss } from '../ui/usePopoverDismiss';
 import { ExplorerSheet, type ExplorerFocus } from './ExplorerSheet';
+import { AuthButton } from '@/shell/auth';
 
 function MenuDivider() {
   return <div className="my-1 border-t border-edge" role="separator" />;
@@ -101,6 +102,7 @@ export function WorkspaceMenu({ onOpenPalette, onOpenHelp }: WorkspaceMenuProps)
 
   return (
     <div ref={rootRef} className="nodrag absolute left-3 top-3 z-20 flex items-start gap-2">
+      <AuthButton compact />
       <div className="relative">
         <button
           type="button"

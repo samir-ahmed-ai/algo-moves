@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -45,6 +46,13 @@ func main() {
 	}
 	if arc != nil {
 		defer arc.Close()
+		if email := strings.TrimSpace(os.Getenv("PLATFORM_ADMIN_EMAIL")); email != "" {
+			if err := arc.Store().SetAdmin(ctx, email); err != nil {
+				log.Printf("arcade: admin bootstrap warning: %v", err)
+			} else {
+				log.Printf("arcade: admin granted for %s", email)
+			}
+		}
 	}
 
 	srv := &http.Server{
