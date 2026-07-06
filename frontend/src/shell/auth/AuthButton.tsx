@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Loader2, Trophy } from 'lucide-react';
+import { Loader2, LogIn, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from './AuthProvider';
 import { Avatar } from '@/shell/games/ui/Avatar';
@@ -42,7 +42,8 @@ export function AuthButton({
           aria-haspopup="menu"
           onClick={() => setMenuOpen((open) => !open)}
           className={cn(
-            'inline-flex min-h-9 items-center gap-2 rounded-xl border border-edge bg-panel2 px-2 text-ink3 transition-colors hover:bg-panel hover:text-ink touch-manipulation',
+            'inline-flex min-h-9 items-center gap-2 rounded-xl border border-edge bg-panel2 px-2 text-ink3 transition-all hover:bg-panel hover:text-ink touch-manipulation',
+            menuOpen && 'border-accent/40 ring-2 ring-accent/15',
             compact ? 'max-w-[8rem]' : 'max-w-[10rem]',
           )}
           title={profile.display_name}
@@ -71,7 +72,7 @@ export function AuthButton({
             title={s.stats}
             aria-label={s.stats}
             onClick={onOpenProfile}
-            className="grid h-9 w-9 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation"
+            className="grid h-9 w-9 place-items-center rounded-xl border border-edge text-ink3 transition-colors hover:bg-panel2 hover:text-ink touch-manipulation"
           >
             {profile ? (
               <Avatar seed={profile.avatar_seed} name={profile.display_name} size={24} />
@@ -83,8 +84,14 @@ export function AuthButton({
         <button
           type="button"
           onClick={() => setAuthOpen(true)}
-          className="inline-flex min-h-9 items-center rounded-xl border border-edge bg-panel px-3 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent touch-manipulation"
+          className={cn(
+            'inline-flex min-h-9 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-white touch-manipulation',
+            'bg-accent shadow-[0_1px_2px_hsl(0_0%_0%/0.1),0_2px_8px_hsl(var(--accent-h,220)_80%_40%/0.2)]',
+            'transition-all hover:opacity-95 active:scale-[0.98]',
+            compact ? 'px-2.5' : 'px-3.5',
+          )}
         >
+          <LogIn className="h-3.5 w-3.5 shrink-0 opacity-90" />
           {s.signIn}
         </button>
       </div>

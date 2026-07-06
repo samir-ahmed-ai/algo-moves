@@ -2676,3 +2676,10 @@ circle {
   background: var(--accent);
   border: 2px solid var(--surface);
 }
+
+.auth-modal-glow {
+  background:
+    radial-gradient(ellipse 80% 100% at 50% -20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent),
+    radial-gradient(ellipse 60% 80% at 50% 0%, color-mix(in srgb, var(--accent-bg) 55%, transparent), transparent);
+  mask-image: linear-gradient(to bottom, black 40%, transparent);
+}

@@ -48,10 +48,20 @@ export default {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        'auth-in': {
+          from: { opacity: '0', transform: 'scale(0.96) translateY(10px)' },
+          to: { opacity: '1', transform: 'scale(1) translateY(0)' },
+        },
+        'auth-backdrop-in': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'auth-in': 'auth-in 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+        'auth-backdrop-in': 'auth-backdrop-in 0.2s ease-out',
       },
     },
   },
