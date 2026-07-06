@@ -8,6 +8,7 @@ import { PanelNodeBodySlot } from '@/core/panelNodeRegistry';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import type { HeaderDensity } from '@/core/panelNodeBodyTypes';
 import { layoutCap, layoutFixedWidth, sidePanelTabs, VIZ_INPUT_HANDLE } from '../layout/layout';
+import { HOST_MIN_HEIGHT, HOST_MIN_WIDTH } from '../layout/layoutSlots';
 import { nodeTier } from './nodeTokens';
 import { handleDotClass, portHandleStyle } from '../edges/canvasHandles';
 import { useConnectedComponentsOptional } from '@/lib/canvas';
@@ -47,7 +48,10 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const bodyCap = layoutCap(kind);
   const narrowBody = nodeTier(kind) === 'narrow';
   const snapFill = !!data.snapFill && mode === 'visualize';
-  const panelRef = useFitContentSize(id, kind, collapsed, !snapFill);
+  const hasLayoutHost = !!data.layoutSlots?.some(Boolean);
+  const layoutHostMode = mode === 'visualize' && (!!data.layoutHost || hasLayoutHost);
+  const isSlottedChild = data.slotIndex != null && mode === 'visualize';
+  const panelRef = useFitContentSize(id, kind, collapsed, !snapFill && !layoutHostMode && !isSlottedChild);
   const [showBigO, setShowBigO] = useState(false);
   const { setNodes } = useReactFlow();
   const cc = useConnectedComponentsOptional();
@@ -132,6 +136,9 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
       className={cn(
         'panel-node relative flex flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
         snapFill ? 'h-full min-h-0' : 'h-auto',
+        hasLayoutHost && 'min-h-0',
+        layoutHostMode && 'overflow-visible',
+        isSlottedChild && 'overflow-hidden shadow-[var(--shadow-md)]',
         isCodeLike && !collapsed && 'min-h-0 flex-1',
         chrome.panelMinClass && !collapsed && chrome.panelMinClass,
         'w-full',
@@ -144,8 +151,11 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
         borderRadius: panelBorderRadius(nodeStyle?.corners),
         opacity: nodeStyle?.opacity != null ? panelOpacity(nodeStyle) : locked ? 0.95 : undefined,
         backgroundColor: panelFill(nodeStyle),
-        ...(width != null ? { width } : {}),
+        ...(width != null ? { width: Math.max(width, layoutHostMode ? HOST_MIN_WIDTH : 0) } : layoutHostMode ? { width: HOST_MIN_WIDTH } : {}),
         ...(snapFill && height != null ? { height, minHeight: height } : {}),
+        ...(layoutHostMode && !snapFill
+          ? { height: Math.max(height ?? 0, HOST_MIN_HEIGHT), minHeight: HOST_MIN_HEIGHT }
+          : {}),
       }}
     >
       {!collapsed && !locked && (
@@ -166,7 +176,8 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
           bodyFlex && !collapsed && 'min-h-0 flex-1 overflow-hidden',
           chrome.bodyMinClass && !collapsed && `${chrome.bodyMinClass} flex-1 overflow-hidden`,
           snapFill && !collapsed && 'min-h-0 flex-1 overflow-hidden',
-          !vizCanvas && !boardCanvas && !snapFill && 'overflow-hidden',
+          layoutHostMode && !collapsed && 'min-h-0 flex-1 overflow-visible',
+          !vizCanvas && !boardCanvas && !snapFill && !layoutHostMode && 'overflow-hidden',
         )}
       >
         <PanelNodeBodySlot
@@ -182,6 +193,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
           showBigO={showBigO}
           onBigOOpenChange={setShowBigO}
           collapsed={collapsed}
+          layoutHostMode={layoutHostMode}
         />
       </div>
 

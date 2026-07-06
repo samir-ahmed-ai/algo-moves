@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { WorkspaceProvider } from '@/store/workspace';
+import { AuthProvider } from '@/shell/auth';
 import { explorerSectionOpen, ExplorerSheet } from './ExplorerSheet';
 import { WorkspaceMenu } from './WorkspaceMenu';
 
@@ -55,9 +56,11 @@ describe('ExplorerSheet', () => {
 describe('WorkspaceMenu', () => {
   it('renders the hamburger trigger and closed menu state', () => {
     const html = renderToStaticMarkup(
-      <WorkspaceProvider>
-        <WorkspaceMenu onOpenPalette={() => {}} onOpenHelp={() => {}} />
-      </WorkspaceProvider>,
+      <AuthProvider>
+        <WorkspaceProvider>
+          <WorkspaceMenu onOpenPalette={() => {}} onOpenHelp={() => {}} />
+        </WorkspaceProvider>
+      </AuthProvider>,
     );
 
     expect(html).toContain('aria-label="Menu"');

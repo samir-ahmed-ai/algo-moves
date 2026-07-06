@@ -24,6 +24,12 @@ export interface PanelNodeData extends Record<string, unknown> {
   locked?: boolean;
   /** When true, panel fills the snapped viewport height instead of auto-sizing to content. */
   snapFill?: boolean;
+  /** 9 slot indices (0=top-left … 8=bottom-right). Values are child node ids. */
+  layoutSlots?: (string | null)[];
+  /** Which slot this node occupies when parented (0–8). */
+  slotIndex?: number;
+  /** Host shows a 3×3 layout frame instead of normal panel body. */
+  layoutHost?: boolean;
   /** Per-node appearance overrides (stroke, fill, opacity, corners). */
   style?: PanelNodeStyle;
   /** Persisted sub-document (whiteboard scene or shared editor) for solo/offline. */

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getLoadedPlugin, type ProblemPlugin } from '@/core';
 import { catalog } from '@/content';
 import { useWorkspace, normalizeThemePreset } from '@/store/workspace';
-import { readShareFromUrl, writeShareToUrl } from '@/store/navigation';
+import { resolveShareItemId, readShareFromUrl, writeShareToUrl } from '@/store/navigation';
 import { loadProjectFromUrl } from '@/store/project-state';
 
 /**
@@ -34,7 +34,8 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
     // waiting for it here would let the share-writer effect clobber the hash first.
     // The restore effect below validates/clamps it once the plugin resolves.
     const shared = readShareFromUrl();
-    if (shared?.item === activeItemId && shared.input) return shared.input;
+    const sharedItemId = resolveShareItemId(shared);
+    if (sharedItemId === activeItemId && shared?.input) return shared.input;
     return plugin?.inputs[0]?.id ?? '';
   });
   const [customInput, setCustomInput] = useState<unknown>(null);
@@ -48,8 +49,9 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
   useEffect(() => {
     if (!plugin) return;
     const shared = readShareFromUrl();
+    const sharedItemId = resolveShareItemId(shared);
     const fromUrl =
-      shared?.item === activeItemId && shared.input && plugin.inputs.some((i) => i.id === shared.input)
+      sharedItemId === activeItemId && shared?.input && plugin.inputs.some((i) => i.id === shared.input)
         ? shared.input
         : null;
     setInputId(fromUrl ?? plugin.inputs[0]?.id ?? '');
@@ -125,6 +127,7 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
     if (!activeItemId) return;
     writeShareToUrl({
       item: activeItemId,
+      id: plugin?.meta.number,
       input: inputId || undefined,
       mode,
       focus: 'problem',
@@ -134,7 +137,7 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
       dir,
       ...roomFields,
     });
-  }, [activeItemId, inputId, mode, theme, palette, themePreset, dir, problemFocused]);
+  }, [activeItemId, inputId, mode, theme, palette, themePreset, dir, problemFocused, plugin?.meta.number]);
 
   // Picking a different sample clears any custom edits.
   const selectInput = (id: string) => {

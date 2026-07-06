@@ -13,6 +13,9 @@ export interface WorkspaceKeyboardOptions {
   setHelpOpen: (v: boolean | ((h: boolean) => boolean)) => void;
   setPaletteOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   toggleFocusCanvas: () => void;
+  hasSiblingNav?: boolean;
+  onPrevProblem?: () => void;
+  onNextProblem?: () => void;
 }
 
 export type WorkspaceKeyboardAction =
@@ -28,7 +31,9 @@ export type WorkspaceKeyboardAction =
   | 'prev-frame'
   | 'toggle-play'
   | 'first-frame'
-  | 'last-frame';
+  | 'last-frame'
+  | 'prev-problem'
+  | 'next-problem';
 
 export interface WorkspaceKeyboardSnapshot {
   key: string;
@@ -39,6 +44,7 @@ export interface WorkspaceKeyboardSnapshot {
   present: boolean;
   helpOpen: boolean;
   paletteOpen: boolean;
+  hasSiblingNav?: boolean;
 }
 
 export function resolveWorkspaceKeyboardAction(input: WorkspaceKeyboardSnapshot): WorkspaceKeyboardAction {
@@ -75,6 +81,10 @@ export function resolveWorkspaceKeyboardAction(input: WorkspaceKeyboardSnapshot)
       return 'toggle-focus-canvas';
     case '?':
       return 'toggle-help';
+    case '[':
+      return input.hasSiblingNav ? 'prev-problem' : 'none';
+    case ']':
+      return input.hasSiblingNav ? 'next-problem' : 'none';
     default:
       return 'none';
   }
@@ -91,6 +101,9 @@ export function useWorkspaceKeyboard({
   setHelpOpen,
   setPaletteOpen,
   toggleFocusCanvas,
+  hasSiblingNav,
+  onPrevProblem,
+  onNextProblem,
 }: WorkspaceKeyboardOptions): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -103,6 +116,7 @@ export function useWorkspaceKeyboard({
         present,
         helpOpen,
         paletteOpen,
+        hasSiblingNav,
       });
       if (action === 'none') return;
       e.preventDefault();
@@ -144,6 +158,12 @@ export function useWorkspaceKeyboard({
         case 'last-frame':
           player.goTo(player.total - 1);
           break;
+        case 'prev-problem':
+          onPrevProblem?.();
+          break;
+        case 'next-problem':
+          onNextProblem?.();
+          break;
         default:
           unreachableKeyboardAction(action);
       }
@@ -164,6 +184,9 @@ export function useWorkspaceKeyboard({
     mode,
     setPaletteOpen,
     toggleFocusCanvas,
+    hasSiblingNav,
+    onPrevProblem,
+    onNextProblem,
   ]);
 }
 

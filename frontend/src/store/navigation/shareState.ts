@@ -1,11 +1,15 @@
 /**
  * Shareable URL state (#86/#92). The current workspace selection is encoded into
- * the URL hash (base64 JSON — no dependency) so a canvas state is just a link;
- * opening that link rehydrates the same problem/mode/theme. "Remix" is simply
- * opening someone's link and then editing.
+ * the URL hash (base64 JSON — no dependency) on `/workspace#s=...` so a canvas
+ * state is just a link; opening that link rehydrates the same problem/mode/theme.
  */
+import { buildAppUrl, getHashBody } from '@/lib/navigation/appRoute';
+import { catalog } from '@/content';
+import { getPluginMeta, listPluginMeta } from '@/core';
 export interface ShareState {
   item?: string;
+  /** Problem number from the manifest, e.g. "1.6". */
+  id?: string;
   /** Selected sample input id for the active problem. */
   input?: string;
   mode?: string;
@@ -21,6 +25,8 @@ export interface ShareState {
   sessionKind?: 'interview' | 'collab';
   /** Public interview guest-invite token — resolves the room without a code. */
   guestToken?: string;
+  /** Track id — restores the track-browse board when opening workspace from the landing page. */
+  trackId?: string;
 }
 
 /** Legacy catalog item ids → current item ids after imported-canonical migration. */
@@ -40,6 +46,21 @@ export function normalizeShareState(s: ShareState): ShareState {
   if (!s.item) return s;
   const next = LEGACY_ITEM_REDIRECTS[s.item] ?? s.item;
   return next === s.item ? s : { ...s, item: next };
+}
+
+const itemIdByNumber = new Map<string, string>(
+  listPluginMeta().flatMap((m) => (m.number ? [[m.number, m.id] as const] : [])),
+);
+
+/** Resolve the catalog item id from share state (`item` slug or manifest `id` number). */
+export function resolveShareItemId(shared: ShareState | null | undefined): string | undefined {
+  if (!shared) return undefined;
+  if (shared.item && catalog.getItem(shared.item)) return shared.item;
+  if (shared.id) {
+    const itemId = itemIdByNumber.get(shared.id);
+    if (itemId && catalog.getItem(itemId)) return itemId;
+  }
+  return undefined;
 }
 
 function getHashParam(hash: string, key: string): string | null {
@@ -83,7 +104,34 @@ export function readShareFromUrl(): ShareState | null {
 }
 
 export function buildShareUrl(s: ShareState): string {
-  return `${location.origin}${location.pathname}#s=${encodeShare(s)}`;
+  return `${location.origin}${buildAppUrl('workspace', `s=${encodeShare(s)}`)}`;
+}
+
+/**
+ * Build a standalone workspace entry URL for opening in a new tab.
+ * - canvas: pass no itemId and no trackId → standalone freeform canvas
+ * - problem: pass itemId (+ optional mode, defaults to 'learn')
+ * - track browse: pass trackId (no itemId) → track-board in workspace
+ */
+export function buildWorkspaceEntryUrl(input: {
+  theme?: string;
+  palette?: string;
+  themePreset?: string;
+  dir?: string;
+  itemId?: string;
+  mode?: string;
+  trackId?: string;
+}): string {
+  const { theme, palette, themePreset, dir, itemId, mode, trackId } = input;
+  const base = { theme, palette, themePreset, dir };
+  if (itemId) {
+    const id = getPluginMeta(itemId)?.number;
+    return buildShareUrl({ ...base, item: itemId, id, mode: mode ?? 'learn', focus: 'problem' });
+  }
+  if (trackId) {
+    return buildShareUrl({ ...base, trackId, focus: 'problem' });
+  }
+  return buildShareUrl({ ...base, mode: 'visualize', focus: 'canvas' });
 }
 
 /** Invite link for a live collab/interview room (includes workspace context + room code). */
@@ -110,21 +158,20 @@ export function readGuestTokenFromUrl(): string | null {
   return share?.guestToken?.trim() || null;
 }
 
-/** Merge workspace share state into the current hash, preserving route segments like #mobile. */
-function mergeShareHash(currentHash: string, encoded: string): string {
+/** Merge workspace share state into the current hash body. */
+function mergeShareHashBody(currentBody: string, encoded: string): string {
   const sharePart = `s=${encoded}`;
-  if (!currentHash || currentHash === '#') return `#${sharePart}`;
-  const raw = currentHash.startsWith('#') ? currentHash.slice(1) : currentHash;
-  const parts = raw.split('&').filter((p) => !p.startsWith('s='));
-  if (parts.length === 0 || (parts.length === 1 && parts[0].startsWith('s='))) return `#${sharePart}`;
-  return `#${parts.join('&')}&${sharePart}`;
+  if (!currentBody) return sharePart;
+  const parts = currentBody.split('&').filter((p) => !p.startsWith('s='));
+  if (parts.length === 0 || (parts.length === 1 && parts[0].startsWith('s='))) return sharePart;
+  return `${parts.join('&')}&${sharePart}`;
 }
 
-/** Keep the URL hash in sync with workspace state (refresh restores the same view). */
+/** Keep the URL in sync with workspace state (refresh restores the same view). */
 export function writeShareToUrl(s: ShareState) {
   if (typeof location === 'undefined') return;
-  const hash = mergeShareHash(location.hash, encodeShare(s));
-  const next = `${location.pathname}${location.search}${hash}`;
+  const hashBody = mergeShareHashBody(getHashBody(location.hash), encodeShare(s));
+  const next = buildAppUrl('workspace', hashBody, location.search);
   const cur = `${location.pathname}${location.search}${location.hash}`;
   if (cur !== next) history.replaceState(null, '', next);
 }

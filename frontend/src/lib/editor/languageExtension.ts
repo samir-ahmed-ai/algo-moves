@@ -1,4 +1,5 @@
 import { StreamLanguage, type LanguageSupport } from '@codemirror/language';
+import { java } from '@codemirror/legacy-modes/mode/clike';
 import { go } from '@codemirror/legacy-modes/mode/go';
 import { javascript } from '@codemirror/legacy-modes/mode/javascript';
 import { python } from '@codemirror/legacy-modes/mode/python';
@@ -16,6 +17,8 @@ export function languageExtension(lang?: string): StreamLanguage<unknown> | Lang
     case 'py':
     case 'python':
       return StreamLanguage.define(python);
+    case 'java':
+      return StreamLanguage.define(java);
     default:
       return null;
   }

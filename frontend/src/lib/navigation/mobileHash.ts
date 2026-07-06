@@ -1,4 +1,5 @@
 import type { TrackId } from '../../content';
+import { getHashBody, pagePath, readCurrentPage, writeAppUrl } from './appRoute';
 
 /** Parsed mobile deep-link target from the URL hash. */
 export interface MobileHashTarget {
@@ -9,18 +10,42 @@ export interface MobileHashTarget {
   itemId?: string;
 }
 
+/** @deprecated Legacy hash prefix — page name now lives in the pathname. */
+export const MOBILE_HASH_PREFIX = '#mobile';
+
+function decodeRoutePart(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function mobileRouteBody(hash: string, pathname?: string): string | null {
+  const raw = getHashBody(hash);
+  if (raw === 'mobile') return '';
+  if (raw.startsWith('mobile/')) return raw.slice('mobile/'.length);
+  if (pathname !== undefined ? readCurrentPage(pathname) === 'mobile' : readCurrentPage() === 'mobile') {
+    return raw;
+  }
+  if (raw.startsWith('track/') || raw.startsWith('topic/')) return raw;
+  return null;
+}
+
 /**
  * Parse mobile hash routes:
- * - `#mobile`
- * - `#mobile/track/{trackId}`
- * - `#mobile/track/{trackId}/category/{categoryId}`
- * - `#mobile/track/{trackId}/category/{categoryId}/item/{itemId}`
- * - `#mobile/topic/{topicId}` (legacy)
- * - `#mobile/topic/{topicId}/item/{itemId}` (legacy)
+ * - `/mobile#`
+ * - `/mobile#track/{trackId}`
+ * - `/mobile#track/{trackId}/category/{categoryId}`
+ * - `/mobile#track/{trackId}/category/{categoryId}/item/{itemId}`
+ * - `/mobile#topic/{topicId}` (legacy)
+ * - `/mobile#topic/{topicId}/item/{itemId}` (legacy)
+ *
+ * Legacy `#mobile/...` hashes are still accepted until normalized.
  */
-export function parseMobileHash(hash: string): MobileHashTarget | null {
-  if (!isMobileHash(hash)) return null;
-  const rest = hash.slice(MOBILE_HASH_PREFIX.length);
+export function parseMobileHash(hash: string, pathname?: string): MobileHashTarget | null {
+  const rest = mobileRouteBody(hash, pathname);
+  if (rest === null) return null;
   if (!rest) return {};
   const parts = rest.split('/').filter(Boolean);
 
@@ -46,46 +71,34 @@ export function parseMobileHash(hash: string): MobileHashTarget | null {
 
 /** Full URL that opens Swipe mode on the current origin (for QR / copy link). */
 export function buildMobileModeUrl(): string {
-  if (typeof location === 'undefined') return '#mobile';
-  return `${location.origin}${location.pathname}${location.search || ''}#mobile`;
+  if (typeof location === 'undefined') return pagePath('mobile');
+  return `${location.origin}${pagePath('mobile')}${location.search || ''}`;
 }
 
-/** Write the mobile hash without a full page reload. */
+/** Write the mobile route without a full page reload. */
 export function writeMobileHash(target?: MobileHashTarget | null, opts?: { replace?: boolean }) {
   if (typeof location === 'undefined') return;
-  let hash = '#mobile';
+  let hashBody = '';
   const trackId = target?.trackId;
   const categoryId = target?.categoryId;
   const defaultTrack: TrackId = 'interview-prep';
 
   if (trackId && categoryId) {
-    hash += `/track/${encodeURIComponent(trackId)}/category/${encodeURIComponent(categoryId)}`;
-    if (target.itemId) hash += `/item/${encodeURIComponent(target.itemId)}`;
+    hashBody += `track/${encodeURIComponent(trackId)}/category/${encodeURIComponent(categoryId)}`;
+    if (target.itemId) hashBody += `/item/${encodeURIComponent(target.itemId)}`;
   } else if (categoryId) {
-    hash += `/track/${encodeURIComponent(trackId ?? defaultTrack)}/category/${encodeURIComponent(categoryId)}`;
-    if (target.itemId) hash += `/item/${encodeURIComponent(target.itemId)}`;
+    hashBody += `track/${encodeURIComponent(trackId ?? defaultTrack)}/category/${encodeURIComponent(categoryId)}`;
+    if (target.itemId) hashBody += `/item/${encodeURIComponent(target.itemId)}`;
   } else if (target?.trackId) {
-    hash += `/track/${encodeURIComponent(target.trackId)}`;
+    hashBody += `track/${encodeURIComponent(target.trackId)}`;
   } else if (target?.topicId) {
-    hash += `/topic/${encodeURIComponent(target.topicId)}`;
-    if (target.itemId) hash += `/item/${encodeURIComponent(target.itemId)}`;
+    hashBody += `topic/${encodeURIComponent(target.topicId)}`;
+    if (target.itemId) hashBody += `/item/${encodeURIComponent(target.itemId)}`;
   }
-  const url = `${location.pathname}${location.search}${hash}`;
-  if (opts?.replace !== false) history.replaceState(null, '', url);
-  else history.pushState(null, '', url);
+  writeAppUrl('mobile', hashBody, opts);
 }
 
-export const MOBILE_HASH_PREFIX = '#mobile';
-
-/** Fast check for the mobile route family. */
-export function isMobileHash(hash: string): boolean {
-  return hash.startsWith(MOBILE_HASH_PREFIX);
-}
-
-function decodeRoutePart(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
+/** True when the current URL (or legacy hash) is the mobile route family. */
+export function isMobileHash(hash: string, pathname?: string): boolean {
+  return mobileRouteBody(hash, pathname) !== null;
 }

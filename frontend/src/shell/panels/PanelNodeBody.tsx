@@ -8,6 +8,7 @@ import { PanelNodeHeader } from './PanelNodeHeader';
 import { HeaderExamplesNav } from './PanelHeaderControls';
 import { VizPanelBody } from './visualize/VizPanelBody';
 import { WorkbenchPanelBody } from './workbench';
+import { LayoutHostFrame } from '@/shell/canvas/ui/LayoutHostFrame';
 
 export type { PanelNodeBodyProps } from '@/core/panelNodeBodyTypes';
 
@@ -23,9 +24,19 @@ export function PanelNodeBody({
   showBigO,
   onBigOOpenChange,
   collapsed,
+  layoutHostMode,
 }: PanelNodeBodyProps) {
   if (collapsed) {
     return <PanelNodeHeader {...headerProps} />;
+  }
+
+  if (layoutHostMode) {
+    return (
+      <>
+        <PanelNodeHeader {...headerProps} />
+        <LayoutHostFrame hostId={headerProps.id} slots={data.layoutSlots} />
+      </>
+    );
   }
 
   const isViz = data.kind === 'viz';

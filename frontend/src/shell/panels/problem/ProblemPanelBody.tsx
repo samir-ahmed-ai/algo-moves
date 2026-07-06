@@ -214,7 +214,7 @@ function ExampleInputPicker() {
           />
         )}
         {preview && (
-          <ControlsAccordion title="Input preview" defaultOpen={false} className="mt-1.5 border-t-0">
+          <ControlsAccordion title="Input preview" defaultOpen className="mt-1.5 border-t-0">
             <Code text={preview} />
           </ControlsAccordion>
         )}

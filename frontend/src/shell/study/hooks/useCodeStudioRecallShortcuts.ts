@@ -1,26 +1,31 @@
 import { useEffect, type Dispatch, type SetStateAction } from 'react';
-import type { CodeStudioPhase } from '@/store/user-prefs';
+import { cycleRecallReveal } from '@/lib/editor/recallProgress';
+import type { CodeStudioPhase, EditorPrefs } from '@/store/user-prefs';
 
 /**
  * Recall-phase keyboard shortcuts, extracted from CodeStudioProvider:
- *   ⌘/Ctrl + \        toggle blind mode
- *   ⌘/Ctrl + Shift + R  reset the editor to the skeleton
- *   ⌘/Ctrl + Shift + V  toggle Vim keybindings
+ *   ⌘/Ctrl + \          toggle blind mode
+ *   ⌘/Ctrl + Shift + R  clear the attempt editor
+ *   ⌘/Ctrl + .          toggle the recall pointer between line-mirror and diff-aligned
+ *   ⌘/Ctrl + Shift + .  cycle how much of the reference ahead is revealed (full/dim/blur/hidden)
+ *   ⌘/Ctrl + Shift + -/+  decrease/increase font size
  */
 export function useCodeStudioRecallShortcuts({
   phase,
-  skeleton,
   persistDraft,
-  vim,
-  setEditorPrefs,
   setBlind,
+  pointerMode,
+  recallReveal,
+  fontSize,
+  setEditorPrefs,
 }: {
   phase: CodeStudioPhase;
-  skeleton: string;
   persistDraft: (v: string) => void;
-  vim: boolean;
-  setEditorPrefs: (patch: { vim: boolean }) => void;
   setBlind: Dispatch<SetStateAction<boolean>>;
+  pointerMode: EditorPrefs['pointerMode'];
+  recallReveal: EditorPrefs['recallReveal'];
+  fontSize: EditorPrefs['fontSize'];
+  setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -32,14 +37,26 @@ export function useCodeStudioRecallShortcuts({
       }
       if (e.key === 'r' && e.shiftKey) {
         e.preventDefault();
-        persistDraft(skeleton);
+        persistDraft('');
       }
-      if (e.key === 'v' && e.shiftKey) {
+      if (e.key === '.' && e.shiftKey) {
         e.preventDefault();
-        setEditorPrefs({ vim: !vim });
+        setEditorPrefs({ recallReveal: cycleRecallReveal(recallReveal) });
+      }
+      if (e.key === '.' && !e.shiftKey) {
+        e.preventDefault();
+        setEditorPrefs({ pointerMode: pointerMode === 'diff' ? 'line' : 'diff' });
+      }
+      if ((e.key === '=' || e.key === '+') && e.shiftKey) {
+        e.preventDefault();
+        setEditorPrefs({ fontSize: fontSize + 1 });
+      }
+      if (e.key === '-' && e.shiftKey) {
+        e.preventDefault();
+        setEditorPrefs({ fontSize: fontSize - 1 });
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [phase, skeleton, persistDraft, vim, setEditorPrefs, setBlind]);
+  }, [phase, persistDraft, setBlind, pointerMode, recallReveal, fontSize, setEditorPrefs]);
 }

@@ -2,7 +2,7 @@ import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayPatternInspector, ArrayPatternView, type ArrayPointer } from '../../../_shared/arrayPatterns';
-import { RailGroup, RailStat, RailResult, RailStack, VizEmpty } from '../../../_shared/vizKit';
+import { RailGroup, RailStat, RailResult, RailStack, VizEmpty, type TreeNode } from '../../../_shared/vizKit';
 
 interface TwoSumInput {
   nums: number[];
@@ -89,6 +89,9 @@ function View({ frame }: PluginViewProps<TwoSumState>) {
 function Inspector({ frame }: InspectorProps<TwoSumState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
+  // `seen` is a value -> index map: show it as an indented, multi-row tree
+  // (one row per entry) instead of squeezing it onto a single flat line.
+  const seenRows: TreeNode[] = s.seen.map(([v, idx]) => ({ k: `value ${v}`, v: `index ${idx}` }));
   return (
     <ArrayPatternInspector
       rows={[
@@ -96,7 +99,7 @@ function Inspector({ frame }: InspectorProps<TwoSumState>) {
         ['i', s.i ?? '—'],
         ['nums[i]', s.i !== null ? s.nums[s.i] : '—'],
         ['need (target−v)', s.need ?? '—'],
-        ['map size', s.seen.length],
+        ['seen', seenRows.length > 0 ? seenRows : 'empty'],
         ['result', s.result ? `[${s.result.join(', ')}]` : s.done ? 'none' : '…'],
       ]}
     />

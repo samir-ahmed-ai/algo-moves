@@ -5,6 +5,7 @@ import type { PluginGroup } from '..';
 export interface PluginMetaEntry {
   id: string;
   title: string;
+  number?: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   tags: string[];
   summary: string;
@@ -239,6 +240,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-01-bfs-shortest-reach",
     "title": "BFS Shortest Reach",
+    "number": "0-01",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -250,6 +252,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-02-clone-graph",
     "title": "Clone Graph",
+    "number": "0-02",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -263,6 +266,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-03-find-shortest-path-with-bfs",
     "title": "Find Shortest Path with BFS",
+    "number": "0-03",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -275,6 +279,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-04-graph-traversal",
     "title": "Graph Traversal",
+    "number": "0-04",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -288,6 +293,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-05-has-path-from-source-to-destination",
     "title": "Has Path from Source to Destination",
+    "number": "0-05",
     "difficulty": "Easy",
     "tags": [
       "graph",
@@ -300,6 +306,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-06-print-all-paths-from-source-to-destination",
     "title": "Print All Paths from Source to Destination",
+    "number": "0-06",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -313,6 +320,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-07-shortest-distance-from-all-buildings",
     "title": "Shortest Distance from All Buildings",
+    "number": "0-07",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -326,6 +334,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-0-08-topological-sort-with-dfs",
     "title": "Topological Sort with DFS",
+    "number": "0-08",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -338,6 +347,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-1-subset-component",
     "title": "Subset Component",
+    "number": "1",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -350,6 +360,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-2-alien-dictionary",
     "title": "Alien Dictionary",
+    "number": "2",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -363,6 +374,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-3-remove-invalid-parentheses",
     "title": "Remove Invalid Parentheses",
+    "number": "3",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -376,6 +388,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-4-floyd-city-of-blinding-lights",
     "title": "Floyd City of Blinding Lights",
+    "number": "4",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -388,6 +401,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-5-swim-in-rising-water",
     "title": "Swim in Rising Water",
+    "number": "5",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -402,6 +416,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-6-find-shortest-path-with-dijkstra-s",
     "title": "Find Shortest Path with Dijkstra's",
+    "number": "6",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -415,6 +430,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-7-is-graph-bipartite",
     "title": "Is Graph Bipartite?",
+    "number": "7",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -428,6 +444,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-8-merging-communities",
     "title": "Merging Communities",
+    "number": "8",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -439,6 +456,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-9-similar-string-groups",
     "title": "Similar String Groups",
+    "number": "9",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -452,6 +470,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-10-word-ladder",
     "title": "Word Ladder",
+    "number": "10",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -465,6 +484,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-11-shortest-path-in-a-grid-with-obstacles-eliminati",
     "title": "Shortest Path in a Grid with Obstacles Elimination",
+    "number": "11",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -478,6 +498,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-12-shortest-path-in-binary-matrix",
     "title": "Shortest Path in Binary Matrix",
+    "number": "12",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -491,6 +512,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-13-robot-room-cleaner",
     "title": "Robot Room Cleaner",
+    "number": "13",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -504,6 +526,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-14-the-earliest-moment-when-everyone-become-friends",
     "title": "The Earliest Moment When Everyone Become Friends",
+    "number": "14",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -517,6 +540,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-15-find-all-possible-recipes-from-given-supplies",
     "title": "Find All Possible Recipes from Given Supplies",
+    "number": "15",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -530,6 +554,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-16-detonate-the-maximum-bombs",
     "title": "Detonate the Maximum Bombs",
+    "number": "16",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -542,6 +567,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-17-maximal-network-rank",
     "title": "Maximal Network Rank",
+    "number": "17",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -554,6 +580,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-18-number-of-good-paths",
     "title": "Number of Good Paths",
+    "number": "18",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -567,6 +594,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-19-maximum-score-of-a-node-sequence",
     "title": "Maximum Score of a Node Sequence",
+    "number": "19",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -579,6 +607,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-20-course-schedule",
     "title": "Course Schedule",
+    "number": "20",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -592,6 +621,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-22-find-degree-of-vertex",
     "title": "Find Degree of Vertex",
+    "number": "22",
     "difficulty": "Easy",
     "tags": [
       "graph"
@@ -603,6 +633,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-23-detect-cycle",
     "title": "Detect Cycle",
+    "number": "23",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -615,6 +646,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-24-number-of-islands",
     "title": "Number of Islands",
+    "number": "24",
     "difficulty": "Medium",
     "tags": [
       "graph",
@@ -629,6 +661,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-25-critical-connections-in-a-network",
     "title": "Critical Connections in a Network",
+    "number": "25",
     "difficulty": "Hard",
     "tags": [
       "graph",
@@ -642,6 +675,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-26-subsets",
     "title": "Subsets",
+    "number": "26",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -654,6 +688,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-27-combinations",
     "title": "Combinations",
+    "number": "27",
     "difficulty": "Medium",
     "tags": [
       "backtracking"
@@ -665,6 +700,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-28-combination-of-subset-strings",
     "title": "Combination of Subset Strings",
+    "number": "28",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -677,6 +713,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-29-combination-sum-ii",
     "title": "Combination Sum II",
+    "number": "29",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -689,6 +726,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-30-decode-numbers",
     "title": "Decode Numbers",
+    "number": "30",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -701,6 +739,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-31-expression-add-operators",
     "title": "Expression Add Operators",
+    "number": "31",
     "difficulty": "Hard",
     "tags": [
       "backtracking",
@@ -713,6 +752,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-32-generate-binary-strings",
     "title": "Generate Binary Strings",
+    "number": "32",
     "difficulty": "Easy",
     "tags": [
       "backtracking",
@@ -725,6 +765,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-33-strobogrammatic-number-ii",
     "title": "Strobogrammatic Number II",
+    "number": "33",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -737,6 +778,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-34-generate-parentheses",
     "title": "Generate Parentheses",
+    "number": "34",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -749,6 +791,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-36-letter-combinations-of-a-phone-number",
     "title": "Letter Combinations of a Phone Number",
+    "number": "36",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -761,6 +804,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-37-maximum-length-of-a-concatenated-string-with-uni",
     "title": "Maximum Length of a Concatenated String with Unique Characters",
+    "number": "37",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -773,6 +817,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-38-nested-list-weight-sum",
     "title": "Nested List Weight Sum",
+    "number": "38",
     "difficulty": "Easy",
     "tags": [
       "dfs",
@@ -785,6 +830,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-39-different-ways-to-add-parentheses",
     "title": "Different Ways to Add Parentheses",
+    "number": "39",
     "difficulty": "Medium",
     "tags": [
       "divide-and-conquer",
@@ -797,6 +843,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-40-restore-ip-addresses",
     "title": "Restore IP Addresses",
+    "number": "40",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -809,6 +856,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-41-permutations",
     "title": "Permutations",
+    "number": "41",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -821,6 +869,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-42-cartesian-product-of-multiple-arrays",
     "title": "Cartesian Product of Multiple Arrays",
+    "number": "42",
     "difficulty": "Medium",
     "tags": [
       "backtracking"
@@ -832,6 +881,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-43-permutations",
     "title": "Permutations (string)",
+    "number": "43",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -844,6 +894,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-44-word-search",
     "title": "Word Search",
+    "number": "44",
     "difficulty": "Medium",
     "tags": [
       "backtracking",
@@ -856,6 +907,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-45-word-search-ii",
     "title": "Word Search II",
+    "number": "45",
     "difficulty": "Hard",
     "tags": [
       "backtracking",
@@ -868,6 +920,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-46-search-in-rotated-sorted-array",
     "title": "Search in Rotated Sorted Array",
+    "number": "46",
     "difficulty": "Medium",
     "tags": [
       "binary-search"
@@ -879,6 +932,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-47-maximum-length-of-ribbon-cut",
     "title": "Maximum Length of Ribbon Cut",
+    "number": "47",
     "difficulty": "Medium",
     "tags": [
       "binary-search"
@@ -890,6 +944,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-48-find-smallest-letter-greater-than-target",
     "title": "Find Smallest Letter Greater Than Target",
+    "number": "48",
     "difficulty": "Easy",
     "tags": [
       "binary-search"
@@ -901,6 +956,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-49-kth-largest-element-in-an-array",
     "title": "Kth Largest Element in an Array",
+    "number": "49",
     "difficulty": "Medium",
     "tags": [
       "quickselect"
@@ -912,6 +968,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-50-find-right-interval",
     "title": "Find Right Interval",
+    "number": "50",
     "difficulty": "Medium",
     "tags": [
       "binary-search"
@@ -923,6 +980,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-51-missing-number-in-arithmetic-progression",
     "title": "Missing Number in Arithmetic Progression",
+    "number": "51",
     "difficulty": "Easy",
     "tags": [
       "binary-search"
@@ -934,6 +992,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-52-missing-number",
     "title": "Missing Number",
+    "number": "52",
     "difficulty": "Easy",
     "tags": [
       "binary-search"
@@ -945,6 +1004,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-53-find-first-and-last-position-of-element-in-sorte",
     "title": "Find First and Last Position of Element in Sorted Array",
+    "number": "53",
     "difficulty": "Medium",
     "tags": [
       "binary-search"
@@ -956,6 +1016,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-54-find-peak-element",
     "title": "Find Peak Element",
+    "number": "54",
     "difficulty": "Medium",
     "tags": [
       "binary-search"
@@ -967,6 +1028,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-55-leftmost-column-with-at-least-a-one",
     "title": "Leftmost Column with at Least a One",
+    "number": "55",
     "difficulty": "Medium",
     "tags": [
       "binary-search",
@@ -979,6 +1041,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-56-squares-of-a-sorted-array",
     "title": "Squares of a Sorted Array",
+    "number": "56",
     "difficulty": "Easy",
     "tags": [
       "two-pointers"
@@ -990,6 +1053,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-57-check-if-an-original-string-exists-given-two-enc",
     "title": "Check if An Original String Exists Given Two Encoded Strings",
+    "number": "57",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1002,6 +1066,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-58-climbing-stairs",
     "title": "Climbing Stairs",
+    "number": "58",
     "difficulty": "Easy",
     "tags": [
       "dynamic-programming",
@@ -1014,6 +1079,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-59-coin-change",
     "title": "Coin Change",
+    "number": "59",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1026,6 +1092,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-60-coin-change-ii",
     "title": "Coin Change II",
+    "number": "60",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming"
@@ -1037,6 +1104,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-61-edit-distance",
     "title": "Edit Distance",
+    "number": "61",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1049,6 +1117,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-62-filling-bookcase-shelves",
     "title": "Filling Bookcase Shelves",
+    "number": "62",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming"
@@ -1060,6 +1129,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-63-0-1-knapsack",
     "title": "0/1 Knapsack",
+    "number": "63",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming"
@@ -1071,6 +1141,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-64-perfect-squares",
     "title": "Perfect Squares",
+    "number": "64",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1083,6 +1154,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-65-longest-common-subsequence",
     "title": "Longest Common Subsequence",
+    "number": "65",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1095,6 +1167,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-66-longest-increasing-subsequence",
     "title": "Longest Increasing Subsequence",
+    "number": "66",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1107,6 +1180,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-67-longest-palindromic-subsequence",
     "title": "Longest Palindromic Subsequence",
+    "number": "67",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1119,6 +1193,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-68-longest-string-chain",
     "title": "Longest String Chain",
+    "number": "68",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1131,6 +1206,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-69-longest-valid-parentheses",
     "title": "Longest Valid Parentheses",
+    "number": "69",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1143,6 +1219,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-70-maximal-rectangle",
     "title": "Maximal Rectangle",
+    "number": "70",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1155,6 +1232,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-71-maximal-square",
     "title": "Maximal Square",
+    "number": "71",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1167,6 +1245,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-72-maximum-and-sum-of-array",
     "title": "Maximum AND Sum of Array",
+    "number": "72",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1179,6 +1258,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-73-maximum-number-of-points-with-cost",
     "title": "Maximum Number of Points with Cost",
+    "number": "73",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1191,6 +1271,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-74-minimum-path-sum",
     "title": "Minimum Path Sum",
+    "number": "74",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1203,6 +1284,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-75-minimum-deletions-to-make-string-balanced",
     "title": "Minimum Deletions to Make String Balanced",
+    "number": "75",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1215,6 +1297,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-76-distinct-subsequences",
     "title": "Distinct Subsequences",
+    "number": "76",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1227,6 +1310,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-77-unique-paths",
     "title": "Unique Paths",
+    "number": "77",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1239,6 +1323,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-78-decode-ways",
     "title": "Decode Ways",
+    "number": "78",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1251,6 +1336,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-79-partition-array-into-two-arrays-to-minimize-sum-",
     "title": "Partition Array Into Two Arrays to Minimize Sum Difference",
+    "number": "79",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1263,6 +1349,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-80-race-car",
     "title": "Race Car",
+    "number": "80",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1275,6 +1362,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-81-range-sum-query-2d-immutable",
     "title": "Range Sum Query 2D - Immutable",
+    "number": "81",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1287,6 +1375,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-82-regular-expression-matching",
     "title": "Regular Expression Matching",
+    "number": "82",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1299,6 +1388,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-83-sentence-screen-fitting",
     "title": "Sentence Screen Fitting",
+    "number": "83",
     "difficulty": "Medium",
     "tags": [
       "dynamic-programming",
@@ -1311,6 +1401,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-84-student-attendance-record-ii",
     "title": "Student Attendance Record II",
+    "number": "84",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming"
@@ -1322,6 +1413,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "imp-85-valid-palindrome-iii",
     "title": "Valid Palindrome III",
+    "number": "85",
     "difficulty": "Hard",
     "tags": [
       "dynamic-programming",
@@ -1334,6 +1426,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-find-duplicate-and-missing",
     "title": "Find duplicate and missing",
+    "number": "1.6",
     "difficulty": "Medium",
     "tags": [
       "array",
@@ -1345,6 +1438,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-find-duplicate-number",
     "title": "Find duplicate number",
+    "number": "1.7",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1355,6 +1449,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-find-intersection-of-two-sorted",
     "title": "Find intersection of two sorted",
+    "number": "1.9",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1365,6 +1460,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-find-majority-element",
     "title": "Find majority element",
+    "number": "1.4",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1375,6 +1471,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-jump-game",
     "title": "Jump game",
+    "number": "1.22",
     "difficulty": "Medium",
     "tags": [
       "array",
@@ -1386,6 +1483,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-max-product-of-subarray",
     "title": "Max product of subarray",
+    "number": "1.19",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1396,6 +1494,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-max-profit-selling-stocks",
     "title": "Max profit selling stocks",
+    "number": "1.21",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1406,6 +1505,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-max-rectangle-in-histogram",
     "title": "Max rectangle in histogram",
+    "number": "1.26",
     "difficulty": "Medium",
     "tags": [
       "array",
@@ -1417,6 +1517,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-max-sum-of-subarray-size-k",
     "title": "Max sum of subarray size K",
+    "number": "1.18",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1427,6 +1528,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-merge-two-sorted-arrays",
     "title": "Merge two sorted arrays",
+    "number": "1.10",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1437,6 +1539,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-move-all-zeros-to-end",
     "title": "Move all zeros to end",
+    "number": "1.5",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1447,6 +1550,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-next-permutation",
     "title": "Next permutation",
+    "number": "1.13",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1457,6 +1561,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-remove-duplicates-in-place",
     "title": "Remove duplicates in place",
+    "number": "1.8",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1467,6 +1572,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-reverse-array",
     "title": "Reverse array",
+    "number": "1.11",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1477,6 +1583,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-rotate-array",
     "title": "Rotate array",
+    "number": "1.12",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1487,6 +1594,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-self-exclude-product",
     "title": "Self exclude product",
+    "number": "1.20",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1497,6 +1605,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-task-scheduler",
     "title": "Task scheduler",
+    "number": "1.23",
     "difficulty": "Medium",
     "tags": [
       "array",
@@ -1509,6 +1618,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-trap-most-water",
     "title": "Trap most water",
+    "number": "1.25",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1519,6 +1629,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-trap-rain-water",
     "title": "Trap rain water",
+    "number": "1.24",
     "difficulty": "Medium",
     "tags": [
       "array"
@@ -1529,6 +1640,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-arrays-two-sum",
     "title": "Two sum",
+    "number": "1.14",
     "difficulty": "Medium",
     "tags": [
       "array",
@@ -1601,6 +1713,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-design-dictionary-and-spell",
     "title": "Dictionary and spell",
+    "number": "16.1",
     "difficulty": "Medium",
     "tags": [
       "design",
@@ -1685,6 +1798,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-design-load-balancer",
     "title": "Load balancer",
+    "number": "16.6",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -1695,6 +1809,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-design-log-analyzer",
     "title": "Log analyzer",
+    "number": "16.3",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -1746,6 +1861,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-design-phone-directory",
     "title": "Phone directory",
+    "number": "16.2",
     "difficulty": "Medium",
     "tags": [
       "design",
@@ -1837,6 +1953,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-design-tiny-url",
     "title": "Tiny url",
+    "number": "16.4",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -1847,6 +1964,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-design-version-control-snapshot",
     "title": "Version control snapshot",
+    "number": "16.5",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -1857,6 +1975,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-find-k-closest-to-center",
     "title": "find K closest to center",
+    "number": "5.10",
     "difficulty": "Medium",
     "tags": [
       "hash-map",
@@ -1868,6 +1987,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-find-kth-largest",
     "title": "Find Kth largest",
+    "number": "5.8",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1878,6 +1998,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-find-most-popular-cost-books",
     "title": "Find most popular cost books",
+    "number": "5.5",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1888,6 +2009,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-find-top-k-frequent-elements",
     "title": "Find top K frequent elements",
+    "number": "5.9",
     "difficulty": "Medium",
     "tags": [
       "hash-map",
@@ -1899,6 +2021,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-find-top-k-tweet-words-in-last",
     "title": "Find top K tweet words in last",
+    "number": "5.11",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1909,6 +2032,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-find-x-to-make-array-sum-to-k",
     "title": "Find X to make array sum to K",
+    "number": "5.7",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1919,6 +2043,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-find-year-with-most-population",
     "title": "Find year with most population",
+    "number": "5.6",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1929,6 +2054,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-get-all-element-counts",
     "title": "Get all element counts",
+    "number": "5.3",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1939,6 +2065,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-object-as-key",
     "title": "Object as key",
+    "number": "5.1",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1949,6 +2076,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-remove-duplicate-contacts",
     "title": "Remove duplicate contacts",
+    "number": "5.2",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1959,6 +2087,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-hash-maps-sort-pairs",
     "title": "Sort pairs",
+    "number": "5.4",
     "difficulty": "Medium",
     "tags": [
       "hash-map"
@@ -1969,6 +2098,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-count-intervals-range",
     "title": "Count intervals range",
+    "number": "10.3",
     "difficulty": "Medium",
     "tags": [
       "intervals",
@@ -1980,6 +2110,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-distance-of-nearest-stores",
     "title": "Distance of nearest stores",
+    "number": "10.9",
     "difficulty": "Medium",
     "tags": [
       "intervals"
@@ -1990,6 +2121,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-draw-skyline",
     "title": "Draw skyline",
+    "number": "10.8",
     "difficulty": "Medium",
     "tags": [
       "intervals"
@@ -2000,6 +2132,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-insert-interval",
     "title": "Insert interval",
+    "number": "10.2",
     "difficulty": "Medium",
     "tags": [
       "intervals"
@@ -2010,6 +2143,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-is-overlapped",
     "title": "Is overlapped",
+    "number": "10.6",
     "difficulty": "Medium",
     "tags": [
       "intervals"
@@ -2020,6 +2154,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-is-square",
     "title": "Is square",
+    "number": "10.7",
     "difficulty": "Medium",
     "tags": [
       "intervals"
@@ -2053,6 +2188,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-schedule-meetings",
     "title": "Schedule meetings",
+    "number": "10.4",
     "difficulty": "Medium",
     "tags": [
       "intervals",
@@ -2064,6 +2200,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-intervals-weighted-job-scheduler",
     "title": "Weighted job scheduler",
+    "number": "10.5",
     "difficulty": "Medium",
     "tags": [
       "intervals",
@@ -2075,6 +2212,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-add-two-numbers",
     "title": "Add two numbers",
+    "number": "3.16",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2095,6 +2233,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-deep-copy-random-pointers",
     "title": "Deep copy random pointers",
+    "number": "3.17",
     "difficulty": "Medium",
     "tags": [
       "linked-list",
@@ -2106,6 +2245,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-delete-every-kth-node-in-dll",
     "title": "Delete every Kth node in DLL",
+    "number": "3.4",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2116,6 +2256,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-delete-node",
     "title": "Delete node",
+    "number": "3.3",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2126,6 +2267,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-detect-loop",
     "title": "Detect loop",
+    "number": "3.2",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2136,6 +2278,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-find-intersection-of-two-lists",
     "title": "Find intersection of two lists",
+    "number": "3.10",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2146,6 +2289,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-find-node",
     "title": "Find node",
+    "number": "3.1",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2156,6 +2300,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-flatten-doubly-linked-list",
     "title": "Flatten doubly linked list",
+    "number": "3.15",
     "difficulty": "Medium",
     "tags": [
       "linked-list",
@@ -2177,6 +2322,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-last-men-standing",
     "title": "Last men standing",
+    "number": "3.5",
     "difficulty": "Medium",
     "tags": [
       "linked-list",
@@ -2188,6 +2334,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-merge-k-sorted-lists",
     "title": "Merge K sorted lists",
+    "number": "3.12",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2198,6 +2345,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-merge-two-sorted-lists",
     "title": "Merge two sorted lists",
+    "number": "3.11",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2208,6 +2356,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-print-from-end",
     "title": "Print from end",
+    "number": "3.6",
     "difficulty": "Medium",
     "tags": [
       "linked-list",
@@ -2220,6 +2369,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-reverse-linked-list",
     "title": "Reverse linked list",
+    "number": "3.7",
     "difficulty": "Medium",
     "tags": [
       "linked-list"
@@ -2240,6 +2390,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-linked-lists-sort-linked-list",
     "title": "Sort linked list",
+    "number": "3.13",
     "difficulty": "Medium",
     "tags": [
       "linked-list",
@@ -2251,6 +2402,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-add-binary",
     "title": "Add binary",
+    "number": "14.17",
     "difficulty": "Medium",
     "tags": [
       "math",
@@ -2262,6 +2414,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-add-two-big-string-numbers",
     "title": "Add two big string numbers",
+    "number": "14.18",
     "difficulty": "Medium",
     "tags": [
       "math",
@@ -2273,6 +2426,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-base-26-encoding",
     "title": "Base 26 encoding",
+    "number": "14.22",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2305,6 +2459,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-convert-decimal-to-base-n",
     "title": "Convert decimal to base N",
+    "number": "14.21",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2315,6 +2470,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-convert-string-to-integer",
     "title": "Convert string to integer",
+    "number": "14.20",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2325,6 +2481,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-count-set-bits-in-number",
     "title": "Count set bits in number",
+    "number": "14.24",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2335,6 +2492,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-covert-integer-to-roman-numeral",
     "title": "Covert integer to roman numeral",
+    "number": "14.23",
     "difficulty": "Medium",
     "tags": [
       "math",
@@ -2346,6 +2504,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-factorial-number",
     "title": "Factorial number",
+    "number": "14.4",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2356,6 +2515,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-fibonacci-number",
     "title": "Fibonacci number",
+    "number": "14.5",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2366,6 +2526,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-find-missing-number",
     "title": "Find missing number",
+    "number": "14.26",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2376,6 +2537,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-find-single-number",
     "title": "Find single number",
+    "number": "14.27",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2386,6 +2548,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-fizzbuzz",
     "title": "Fizzbuzz",
+    "number": "14.6",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2396,6 +2559,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-hamming-distance",
     "title": "Hamming distance",
+    "number": "14.25",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2416,6 +2580,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-is-binary",
     "title": "Is binary",
+    "number": "14.11",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2426,6 +2591,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-is-odd-number",
     "title": "Is odd number",
+    "number": "14.12",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2436,6 +2602,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-is-palindromic-number",
     "title": "Is palindromic number",
+    "number": "14.15",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2446,6 +2613,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-is-strobogrammatic-number",
     "title": "Is strobogrammatic number",
+    "number": "14.16",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2467,6 +2635,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-log-two",
     "title": "Log two",
+    "number": "14.9",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2530,6 +2699,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-multiply-string-numbers",
     "title": "Multiply string numbers",
+    "number": "14.19",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2570,6 +2740,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-power-two",
     "title": "Power two",
+    "number": "14.7",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2580,6 +2751,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-power-x-of-y",
     "title": "Power X of Y",
+    "number": "14.8",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2590,6 +2762,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-prime-number",
     "title": "Prime number",
+    "number": "14.1",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2600,6 +2773,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-random-number",
     "title": "Random number",
+    "number": "14.2",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2610,6 +2784,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-random-number-not-in-array",
     "title": "Random number not in array",
+    "number": "14.3",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2620,6 +2795,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-reverse-number",
     "title": "Reverse number",
+    "number": "14.13",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2630,6 +2806,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-square-root",
     "title": "Square root",
+    "number": "14.10",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2640,6 +2817,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-math-sum-of-digits",
     "title": "Sum of digits",
+    "number": "14.14",
     "difficulty": "Medium",
     "tags": [
       "math"
@@ -2681,6 +2859,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-fill-rows-and-columns-with-1s",
     "title": "Fill rows and columns with 1s",
+    "number": "8.4",
     "difficulty": "Medium",
     "tags": [
       "grid"
@@ -2691,6 +2870,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-find-path-between-cells",
     "title": "Find path between cells",
+    "number": "8.7",
     "difficulty": "Medium",
     "tags": [
       "grid",
@@ -2702,6 +2882,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-longest-increasing-path",
     "title": "Longest increasing path",
+    "number": "8.10",
     "difficulty": "Medium",
     "tags": [
       "grid",
@@ -2734,6 +2915,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-max-region",
     "title": "Max region",
+    "number": "8.9",
     "difficulty": "Medium",
     "tags": [
       "grid",
@@ -2745,6 +2927,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-min-distance-of-meeting-point",
     "title": "Min distance of meeting point",
+    "number": "8.5",
     "difficulty": "Medium",
     "tags": [
       "grid"
@@ -2755,6 +2938,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-nearest-bikes",
     "title": "Nearest bikes",
+    "number": "8.12",
     "difficulty": "Medium",
     "tags": [
       "grid"
@@ -2765,6 +2949,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-print-matrix-in-spiral-order",
     "title": "Print matrix in spiral Order",
+    "number": "8.3",
     "difficulty": "Medium",
     "tags": [
       "grid"
@@ -2785,6 +2970,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-rotate-matrix-by-90-degrees",
     "title": "Rotate matrix by 90 degrees",
+    "number": "8.2",
     "difficulty": "Medium",
     "tags": [
       "grid"
@@ -2805,6 +2991,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-search-in-sorted-matrix",
     "title": "Search in sorted matrix",
+    "number": "8.1",
     "difficulty": "Medium",
     "tags": [
       "grid"
@@ -2826,6 +3013,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-matrices-word-search-on-board",
     "title": "Word search on board",
+    "number": "8.8",
     "difficulty": "Medium",
     "tags": [
       "grid"
@@ -2971,6 +3159,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-calculate-infix",
     "title": "Calculate infix",
+    "number": "6.7",
     "difficulty": "Medium",
     "tags": [
       "stack"
@@ -2981,6 +3170,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-calculate-postfix",
     "title": "Calculate postfix",
+    "number": "6.6",
     "difficulty": "Medium",
     "tags": [
       "stack"
@@ -3001,6 +3191,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-find-max-in-sliding-window",
     "title": "Find max in sliding window",
+    "number": "6.11",
     "difficulty": "Medium",
     "tags": [
       "stack"
@@ -3011,6 +3202,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-find-moving-average-in-sliding",
     "title": "Find moving average in sliding",
+    "number": "6.12",
     "difficulty": "Medium",
     "tags": [
       "stack",
@@ -3022,6 +3214,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-implement-queue-with-max",
     "title": "Implement queue with max",
+    "number": "6.9",
     "difficulty": "Medium",
     "tags": [
       "stack",
@@ -3033,6 +3226,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-implement-stack-with-min",
     "title": "Implement stack with min",
+    "number": "6.2",
     "difficulty": "Medium",
     "tags": [
       "stack"
@@ -3043,6 +3237,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-infix-to-postfix",
     "title": "Infix to postfix",
+    "number": "6.4",
     "difficulty": "Medium",
     "tags": [
       "stack"
@@ -3053,6 +3248,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-prefix-to-postfix",
     "title": "Prefix to postfix",
+    "number": "6.5",
     "difficulty": "Medium",
     "tags": [
       "stack"
@@ -3083,6 +3279,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-stacks-queues-validate-parentheses",
     "title": "Validate parentheses",
+    "number": "6.3",
     "difficulty": "Medium",
     "tags": [
       "stack"
@@ -3093,6 +3290,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-add-spaces-around-parentheses-in",
     "title": "Add spaces around parentheses in",
+    "number": "15.5",
     "difficulty": "Medium",
     "tags": [
       "design",
@@ -3104,6 +3302,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-binary-tree-in-order-iterator",
     "title": "Binary tree in-order iterator",
+    "number": "15.10",
     "difficulty": "Medium",
     "tags": [
       "design",
@@ -3115,6 +3314,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-check-palindrome-in-stream",
     "title": "Check palindrome in stream",
+    "number": "15.9",
     "difficulty": "Medium",
     "tags": [
       "design",
@@ -3126,6 +3326,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-clean-directories-recursively",
     "title": "Clean directories recursively",
+    "number": "15.3",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3136,6 +3337,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-count-words-in-file",
     "title": "Count words in file",
+    "number": "15.1",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3146,6 +3348,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-file-line-iterator",
     "title": "File line iterator",
+    "number": "15.11",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3156,6 +3359,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-find-files-size-larger-than-5m",
     "title": "Find files size larger than 5M",
+    "number": "15.4",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3166,6 +3370,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-find-kth-largest-in-stream",
     "title": "Find Kth largest in stream",
+    "number": "15.6",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3176,6 +3381,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-find-median-in-stream",
     "title": "Find median in stream",
+    "number": "15.7",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3186,6 +3392,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-merge-k-sorted-streams-in-one",
     "title": "Merge K sorted streams in one",
+    "number": "15.8",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3196,6 +3403,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-rate-limiter-iterator",
     "title": "Rate limiter iterator",
+    "number": "15.12",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3206,6 +3414,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-streams-io-reverse-content-of-file-in-place",
     "title": "Reverse content of file in place",
+    "number": "15.2",
     "difficulty": "Medium",
     "tags": [
       "design"
@@ -3238,6 +3447,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-find-all-subset-words",
     "title": "Find all subset words",
+    "number": "2.6",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3248,6 +3458,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-find-anagram-substring-indices",
     "title": "Find anagram substring indices",
+    "number": "2.11",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3268,6 +3479,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-find-first-unique-character",
     "title": "Find first unique character",
+    "number": "2.4",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3278,6 +3490,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-find-repeated-substrings-size-k",
     "title": "Find repeated substrings size K",
+    "number": "2.5",
     "difficulty": "Medium",
     "tags": [
       "string",
@@ -3289,6 +3502,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-group-anagrams",
     "title": "Group anagrams",
+    "number": "2.12",
     "difficulty": "Medium",
     "tags": [
       "string",
@@ -3311,6 +3525,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-is-anagram",
     "title": "Is anagram",
+    "number": "2.10",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3321,6 +3536,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-is-isomorphic",
     "title": "Is isomorphic",
+    "number": "2.13",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3331,6 +3547,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-is-palindrome",
     "title": "Is palindrome",
+    "number": "2.14",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3341,6 +3558,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-longest-common-prefix",
     "title": "Longest common prefix",
+    "number": "2.17",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3362,6 +3580,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-longest-palindromic-substring",
     "title": "Longest palindromic substring",
+    "number": "2.15",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3372,6 +3591,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-longest-substring-with-unique",
     "title": "Longest substring with unique",
+    "number": "2.16",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3382,6 +3602,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-min-insertions-to-form-palin",
     "title": "Min insertions to form palin-",
+    "number": "2.19",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3392,6 +3613,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-min-window-substring",
     "title": "Min window substring",
+    "number": "2.18",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3465,6 +3687,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-ransom-note",
     "title": "Ransom note",
+    "number": "2.7",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3475,6 +3698,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-reverse-words",
     "title": "Reverse words",
+    "number": "2.2",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3495,6 +3719,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-rotate-string",
     "title": "Rotate string",
+    "number": "2.3",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3505,6 +3730,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-run-length-encoding",
     "title": "Run length encoding",
+    "number": "2.8",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3515,6 +3741,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-shortest-subarray-contains-all",
     "title": "Shortest subarray contains all",
+    "number": "2.20",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3568,6 +3795,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-swap-even-odd",
     "title": "Swap even odd",
+    "number": "2.9",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3599,6 +3827,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-word-break",
     "title": "Word break",
+    "number": "2.22",
     "difficulty": "Medium",
     "tags": [
       "string"
@@ -3609,6 +3838,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-strings-word-wrap",
     "title": "Word wrap",
+    "number": "2.21",
     "difficulty": "Medium",
     "tags": [
       "string",
@@ -3653,6 +3883,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-binary-tree-traversal-iteratively",
     "title": "Binary tree traversal iteratively",
+    "number": "4.14",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -3697,6 +3928,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-convert-binary-tree-to-doubly",
     "title": "Convert binary tree to doubly",
+    "number": "4.25",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3707,6 +3939,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-convert-sorted-array-to-bst",
     "title": "Convert sorted array to BST",
+    "number": "4.23",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3717,6 +3950,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-convert-sorted-linked-list-to-bst",
     "title": "Convert sorted linked list to BST",
+    "number": "4.24",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -3739,6 +3973,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-find-distance-of-two-nodes",
     "title": "Find distance of two nodes",
+    "number": "4.10",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3749,6 +3984,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-nary-tree-distance-of-two-nodes",
     "title": "Find distance of two nodes",
+    "number": "9.8",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -3760,6 +3996,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-find-kth-largest-in-bst",
     "title": "Find Kth largest in BST",
+    "number": "4.12",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3781,6 +4018,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-nary-tree-lowest-common-ancestor",
     "title": "Find lowest common ancestor",
+    "number": "9.7",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3791,6 +4029,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-flip-tree",
     "title": "Flip tree",
+    "number": "4.8",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3801,6 +4040,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-get-diameter",
     "title": "Get diameter",
+    "number": "4.2",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3811,6 +4051,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-nary-tree-diameter",
     "title": "Get diameter",
+    "number": "9.6",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3821,6 +4062,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-get-height",
     "title": "Get height",
+    "number": "4.1",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3831,6 +4073,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-nary-tree-height",
     "title": "Get height",
+    "number": "9.5",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -3852,6 +4095,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-is-balanced",
     "title": "Is balanced",
+    "number": "4.3",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3862,6 +4106,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-is-bst",
     "title": "Is BST",
+    "number": "4.4",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3872,6 +4117,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-is-complete",
     "title": "Is complete",
+    "number": "4.5",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3882,6 +4128,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-is-subtree",
     "title": "Is subtree",
+    "number": "4.6",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3892,6 +4139,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-is-symmetric",
     "title": "Is symmetric",
+    "number": "4.7",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3902,6 +4150,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-level-order",
     "title": "Level order",
+    "number": "4.15",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -3913,6 +4162,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-nary-tree-level-order",
     "title": "Level order",
+    "number": "9.10",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -3957,6 +4207,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-nary-tree-monarchy-succession",
     "title": "Monarchy succession order",
+    "number": "9.12",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3967,6 +4218,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-nary-tree-traversal-iteratively",
     "title": "Nary tree traversal iteratively",
+    "number": "9.9",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -3978,6 +4230,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-path-sum-to-k",
     "title": "Path sum to K",
+    "number": "4.20",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3988,6 +4241,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-populate-next-pointers-to-right",
     "title": "Populate next pointers to right",
+    "number": "4.13",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -3998,6 +4252,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-print-all-root-to-leaf-paths",
     "title": "Print all root to leaf paths",
+    "number": "4.19",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -4009,6 +4264,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-print-leaves",
     "title": "Print leaves",
+    "number": "4.18",
     "difficulty": "Medium",
     "tags": [
       "tree"
@@ -4019,6 +4275,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-print-side-view",
     "title": "Print side view",
+    "number": "4.17",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -4030,6 +4287,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-print-vertical",
     "title": "Print vertical",
+    "number": "4.16",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -4052,6 +4310,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-serialize-and-deserialize",
     "title": "Serialize and deserialize",
+    "number": "4.26",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -4084,6 +4343,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-trees-sum-of-nodes",
     "title": "Sum of nodes",
+    "number": "4.22",
     "difficulty": "Medium",
     "tags": [
       "tree",
@@ -4107,6 +4367,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-tries-find-distinct-palindromic-sub",
     "title": "Find distinct palindromic sub-",
+    "number": "9.3",
     "difficulty": "Medium",
     "tags": [
       "trie"
@@ -4117,6 +4378,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-tries-implement-trie-methods",
     "title": "Implement trie methods",
+    "number": "9.1",
     "difficulty": "Medium",
     "tags": [
       "trie"
@@ -4127,6 +4389,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
   {
     "id": "prep-tries-longest-repeated-substring",
     "title": "Longest repeated substring",
+    "number": "9.4",
     "difficulty": "Medium",
     "tags": [
       "trie",

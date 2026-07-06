@@ -39,6 +39,7 @@ import { resolveCodePieces } from '@/lib/code';
 import type { PanelFlowNode, PanelNodeData } from './panelTypes';
 import { panelAccent, panelKindIcon } from './panelIcons';
 import { HeaderPlay, HeaderStep } from './PanelHeaderControls';
+import { PanelHeaderLayoutMenu } from '@/shell/canvas/ui/PanelHeaderLayoutMenu';
 
 /** Renders at most two header action buttons; dev-only warning if exceeded. */
 function HeaderActionSlots({ children }: { children: ReactNode }) {
@@ -255,6 +256,9 @@ export function PanelNodeHeader({
               </PanelHeaderAction>
             )}
           </HeaderActionSlots>
+        )}
+        {selected && mode === 'visualize' && !locked && (
+          <PanelHeaderLayoutMenu hostId={id} slots={data.layoutSlots} />
         )}
         {(isViz || isWorkbench) && <HeaderStep />}
         <PanelHeaderMenu items={menuItems} />

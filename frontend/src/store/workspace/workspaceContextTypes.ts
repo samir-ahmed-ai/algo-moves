@@ -61,7 +61,7 @@ export interface WorkspaceCtx {
   setActiveCategoryId: (id: string | null) => void;
   /** Top-level view: 'home' = landing launchpad, 'workspace' = canvas/studio. */
   route: AppRoute;
-  /** Return to the home launchpad (writes #home). */
+  /** Return to the home launchpad (writes `/home`). */
   goHome: () => void;
   /** Enter the workspace; pass an item id to open that problem directly. */
   enterWorkspace: (itemId?: string) => void;

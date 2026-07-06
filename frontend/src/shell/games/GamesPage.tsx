@@ -40,7 +40,7 @@ function Arcade() {
   const t = useMemo(() => getArcadeStrings(locale), [locale]);
   const { status, room, capacity, playerCount, spectatorCount, disconnect, reconnecting } = useGameRoom();
   const [prefillRoom] = useState(() =>
-    typeof location === 'undefined' ? undefined : parseGamesHash(location.hash)?.room,
+    typeof location === 'undefined' ? undefined : parseGamesHash(location.hash, location.pathname)?.room,
   );
   const [muted, toggleMuted] = useSoundMuted();
   const [showProgress, setShowProgress] = useState(false);
@@ -63,12 +63,12 @@ function Arcade() {
 
           {/* Gradient title */}
           <span
-            className="font-extrabold tracking-tight bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent select-none"
+            className="min-w-0 flex-1 truncate font-extrabold tracking-tight bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent select-none"
           >
             {t.header.games}
           </span>
 
-          <div className="ms-auto flex items-center gap-1 sm:gap-1.5">
+          <div className="ms-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
             {room ? (
               <RoomPill
                 room={room}
@@ -175,7 +175,7 @@ function RoomPill({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-bold',
+        'inline-flex min-w-0 max-w-[8rem] shrink items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-bold sm:max-w-none',
         reconnecting
           ? 'border-edge bg-panel2 text-ink3'
           : filled
@@ -184,7 +184,7 @@ function RoomPill({
       )}
     >
       <ConnectionDot status={open ? 'open' : reconnecting ? 'connecting' : 'closed'} />
-      <span dir="ltr" className="hidden sm:inline">{room}</span>
+      <span dir="ltr" className="hidden truncate sm:inline">{room}</span>
       <span className="opacity-70">
         {players}/{capacity}
         {spectators > 0 ? ` · 👁${spectators}` : ''}

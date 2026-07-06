@@ -35,7 +35,8 @@ function buildLineDecorations(state: EditorState, lines: Map<number, string>) {
   return builder.finish();
 }
 
-const baseTheme = EditorView.theme({
+/** Shared editor chrome (font, gutters, diff/vim styling) — also reused by SplitCodeEditor's MergeView. */
+export const baseTheme = EditorView.theme({
   '&': { fontSize: 'var(--fs-xs, 12px)', borderRadius: 'var(--radius)', overflow: 'hidden', height: '100%' },
   '.cm-scroller': { fontFamily: 'var(--mono)', lineHeight: '1.5' },
   '.cm-gutters': { borderRight: '0.5px solid var(--border)' },

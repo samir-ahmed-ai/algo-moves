@@ -1,19 +1,21 @@
-import { Eye, EyeOff, Keyboard, RotateCcw, ScanEye, Timer } from 'lucide-react';
-import { SplitCodeEditor } from '@/components/code/SplitCodeEditor';
+import { ScanEye } from 'lucide-react';
+import { computeRecallProgress } from '@/lib/code';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { useWorkspace } from '@/store/workspace';
-import { Btn, Chip, EmptyState } from '@/shell/canvas';
-import { chromeText } from '@/shell/chromeUi';
+import { EmptyState } from '@/shell/canvas';
 import {
   useCodeStudioContent,
   useCodeStudioDraft,
   useCodeStudioEditor,
 } from '../CodeStudio';
+import { useRecallDraftChange } from '../hooks/useRecallDraftChange';
+import { RecallEditorShell } from './RecallEditorShell';
+import { RecallToolbar } from './RecallToolbar';
 
 /** Split reference/draft editor with recall toolbar — used by Learn Recall tab and Overview. */
 export function RecallPane({ className, showTitle }: { className?: string; showTitle?: boolean }) {
-  const { reference, code } = useCodeStudioContent();
+  const { reference, code, stat } = useCodeStudioContent();
   const {
     draft,
     score,
@@ -22,12 +24,12 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
     peek,
     setPeek,
     persistDraft,
-    skeleton,
     timerRunning,
     setTimerRunning,
     timerLabel,
   } = useCodeStudioDraft();
   const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
+  const { onDraftChange: recallDraftChange, mistakeTick } = useRecallDraftChange();
   const isMobile = useIsMobile();
   const { theme, themePreset } = useWorkspace();
 
@@ -39,78 +41,43 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
     );
   }
 
-  const pct = Math.round(score);
-  const blindTitle = blind ? 'Blind recall' : 'Reference mode';
+  const compact = editorPrefs.recallCompact || isMobile;
+  const progress = computeRecallProgress(reference, draft);
 
   return (
     <div className={cn('flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
-      <div className="flex h-9 shrink-0 flex-nowrap items-center gap-1 overflow-x-auto border-b border-edge px-3">
-        {showTitle && (
-          <>
-            <Keyboard className="h-4 w-4 shrink-0 text-accent" />
-            <span className={cn('mr-1 shrink-0 truncate font-medium text-ink', chromeText.sm)}>Recall</span>
-            <div className="mx-1 h-4 w-px shrink-0 bg-edge" />
-          </>
-        )}
-        <Btn
-          size="xs"
-          variant={blind ? 'primary' : 'ghost'}
-          icon={blind ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          title={blindTitle}
-          onClick={() => setBlind((b) => !b)}
-        >
-          {isMobile ? null : blind ? 'Blind' : 'Reference'}
-        </Btn>
-        <Btn
-          size="xs"
-          variant="ghost"
-          icon={<ScanEye className="h-3.5 w-3.5" />}
-          title="Hold to peek at reference"
-          onMouseDown={() => setPeek(true)}
-          onMouseUp={() => setPeek(false)}
-          onMouseLeave={() => setPeek(false)}
-        >
-          {isMobile ? null : 'Peek'}
-        </Btn>
-        <Btn
-          size="xs"
-          variant="ghost"
-          icon={<RotateCcw className="h-3.5 w-3.5" />}
-          title="Reset to skeleton"
-          onClick={() => persistDraft(skeleton)}
-        >
-          {isMobile ? null : 'Reset'}
-        </Btn>
-        <Btn
-          size="xs"
-          variant={timerRunning ? 'good' : 'ghost'}
-          icon={<Timer className="h-3.5 w-3.5" />}
-          title={timerRunning ? 'Stop recall timer' : 'Start recall timer'}
-          onClick={() => setTimerRunning((r) => !r)}
-        >
-          {isMobile ? null : timerLabel}
-        </Btn>
-        <div className="flex-1" />
-        <Chip tone={pct >= 80 ? 'good' : pct >= 50 ? 'accent' : 'muted'} mono>
-          {isMobile ? `${pct}%` : `${pct}% match`}
-        </Chip>
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <SplitCodeEditor
-          reference={reference}
-          draft={draft}
-          lang={code?.lang}
-          dark={theme === 'dark'}
-          themeKey={themePreset}
-          vim={editorPrefs.vim}
-          wrap={editorPrefs.wrap}
-          hideLeft={blind}
-          peekLeft={peek}
-          splitPct={editorPrefs.splitPct}
-          onSplitPctChange={(splitPct) => setEditorPrefs({ splitPct })}
-          onDraftChange={persistDraft}
-        />
-      </div>
+      <RecallToolbar
+        className="border-b border-edge px-2"
+        showTitle={showTitle}
+        blind={blind}
+        setBlind={setBlind}
+        peek={peek}
+        setPeek={setPeek}
+        persistDraft={persistDraft}
+        attemptCount={stat.attempts}
+        timerRunning={timerRunning}
+        setTimerRunning={setTimerRunning}
+        timerLabel={timerLabel}
+        editorPrefs={editorPrefs}
+        setEditorPrefs={setEditorPrefs}
+        compact={compact}
+        scorePct={Math.round(score)}
+        linesProgress={{ completed: progress.completedLines.length, total: progress.total }}
+      />
+      <RecallEditorShell
+        reference={reference}
+        draft={draft}
+        lang={code?.lang}
+        dark={theme === 'dark'}
+        themeKey={themePreset}
+        editorPrefs={editorPrefs}
+        setEditorPrefs={setEditorPrefs}
+        blind={blind}
+        peek={peek}
+        onDraftChange={recallDraftChange}
+        compact={compact}
+        mistakeTick={mistakeTick}
+      />
     </div>
   );
 }

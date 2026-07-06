@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { catalog, type Item } from '@/content';
+import { getPluginMeta } from '@/core';
 import { cn } from '@/lib/utils/cn';
 import { buildShareUrl } from '@/store/navigation';
 import { useWorkspace } from '@/store/workspace';
@@ -206,6 +207,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
               ? { mode, focus: 'canvas', theme, palette, themePreset, dir }
               : {
                   item: activeItemId,
+                  id: getPluginMeta(activeItemId)?.number,
                   input: inputId || undefined,
                   mode,
                   focus: 'problem',

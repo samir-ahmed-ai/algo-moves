@@ -29,6 +29,7 @@ import {
 } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { readLastItemId, useWorkspace } from '@/store/workspace';
+import { buildWorkspaceEntryUrl } from '@/store/navigation';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { compactLabel } from '../chromeUi';
 import { cn } from '@/lib/utils/cn';
@@ -493,7 +494,7 @@ function MoveByMoveAnimated({ className }: { className?: string }) {
         <svg viewBox="0 0 200 8" preserveAspectRatio="none">
           <path
             className="hero-mbm__wave-path"
-            d="M0 4 C25 0 25 8 50 4 S75 0 75 8 100 4 125 0 125 8 150 4 175 0 175 8 200 4"
+            d="M0 4 C25 0 25 8 50 4 C75 0 75 8 100 4 C125 0 125 8 150 4 C175 0 175 8 200 4"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
@@ -512,15 +513,11 @@ export function LandingPage() {
     palette,
     setPalette,
     density,
-    enterWorkspace,
-    enterCanvas,
-    enterProblemInMode,
+    themePreset,
+    dir,
     enterMobile,
     enterVim,
     enterGames,
-    setActiveTrackId,
-    setActiveCategoryId,
-    setProblemFocused,
   } = useWorkspace();
   const isMobile = useIsMobile();
   const progress = useProgress();
@@ -561,19 +558,24 @@ export function LandingPage() {
   const lastItem = lastId ? catalog.getItem(lastId) : undefined;
   const firstProblem = problems[0];
 
-  const openItem = (id: string) => enterWorkspace(id);
-  const browseTrack = (trackId: TrackId) => {
-    setActiveTrackId(trackId);
-    setActiveCategoryId(null);
-    setProblemFocused(false);
-    enterWorkspace();
-  };
+  const openInNewTab = (url: string) => window.open(url, '_blank', 'noopener,noreferrer');
+  const wsUrl = useMemo(
+    () => ({
+      canvas: () => buildWorkspaceEntryUrl({ theme, palette, themePreset, dir }),
+      problem: (itemId: string, mode = 'learn') =>
+        buildWorkspaceEntryUrl({ itemId, mode, theme, palette, themePreset, dir }),
+      track: (trackId: TrackId) =>
+        buildWorkspaceEntryUrl({ trackId, theme, palette, themePreset, dir }),
+    }),
+    [theme, palette, themePreset, dir],
+  );
+
+  const openCanvas = () => openInNewTab(wsUrl.canvas());
+  const openItem = (id: string) => openInNewTab(wsUrl.problem(id));
+  const browseTrack = (trackId: TrackId) => openInNewTab(wsUrl.track(trackId));
   const startIn = (mode: 'play' | 'visualize' | 'learn') => {
-    if (mode === 'visualize') {
-      enterCanvas();
-      return;
-    }
-    if (firstProblem) enterProblemInMode(firstProblem.id, mode);
+    if (mode === 'visualize') return openCanvas();
+    if (firstProblem) openInNewTab(wsUrl.problem(firstProblem.id, mode));
   };
 
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
@@ -582,12 +584,12 @@ export function LandingPage() {
     <div data-density={density} className="ws-scroll h-full w-full overflow-y-auto bg-bg text-ink">
       {/* top bar */}
       <header className="sticky top-0 z-20 border-b border-edge bg-bg/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3 sm:px-8">
-          <div className="flex items-center gap-2">
+        <div className="mx-auto flex max-w-6xl min-w-0 items-center gap-3 px-5 py-3 sm:px-8">
+          <div className="flex min-w-0 shrink items-center gap-2">
             <BrandLogo />
-            <span className="font-semibold tracking-tight">Algo Moves</span>
+            <span className="truncate font-semibold tracking-tight">Algo Moves</span>
           </div>
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
             {!isMobile && <SwipeModeQrPromo onOpenDevice={() => enterMobile()} />}
             <IconButton
               title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
@@ -607,7 +609,7 @@ export function LandingPage() {
             <button
               type="button"
               title="Open workspace"
-              onClick={() => enterCanvas()}
+              onClick={() => openCanvas()}
               className="ml-1 inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
               {compactLabel('Open workspace', 'Open', isMobile)}

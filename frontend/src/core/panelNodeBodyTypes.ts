@@ -34,4 +34,6 @@ export type PanelNodeBodyProps = {
   showBigO: boolean;
   onBigOOpenChange: (open: boolean) => void;
   collapsed: boolean;
+  /** When true, render the 3×3 layout frame instead of normal panel content. */
+  layoutHostMode?: boolean;
 };

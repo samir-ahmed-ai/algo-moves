@@ -24,11 +24,15 @@ import {
   EditorView,
 } from '@codemirror/view';
 
+export function lineNumberExtensions(enabled: boolean): Extension[] {
+  return enabled ? [lineNumbers(), highlightActiveLineGutter()] : [];
+}
+
 /** Core Code Studio extensions — mirrors basicSetup minus autocompletion. */
-export function coreEditorExtensions(langExt: Extension | null): Extension[] {
+export function coreEditorExtensions(langExt: Extension | null, opts?: { lineNumbers?: boolean }): Extension[] {
+  const showLineNumbers = opts?.lineNumbers !== false;
   return [
-    lineNumbers(),
-    highlightActiveLineGutter(),
+    ...lineNumberExtensions(showLineNumbers),
     highlightSpecialChars(),
     history(),
     foldGutter(),

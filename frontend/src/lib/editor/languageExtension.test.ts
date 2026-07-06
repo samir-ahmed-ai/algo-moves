@@ -6,6 +6,7 @@ describe('languageExtension', () => {
     expect(languageExtension('go')).not.toBeNull();
     expect(languageExtension('javascript')).not.toBeNull();
     expect(languageExtension('python')).not.toBeNull();
+    expect(languageExtension('java')).not.toBeNull();
   });
 
   it('normalizes case and aliases', () => {

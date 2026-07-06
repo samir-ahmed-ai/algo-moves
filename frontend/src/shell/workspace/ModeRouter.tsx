@@ -21,6 +21,8 @@ export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready' | 'runtim
   frame: Frame<any> | undefined;
   backToBrowse: () => void;
   goHome: () => void;
+  onOpenPalette?: () => void;
+  onOpenHelp?: () => void;
 }
 
 export type RuntimeErrorRecovery = 'none' | 'reset-custom-input' | 'first-sample';
@@ -72,6 +74,8 @@ export function ModeRouter(props: ModeRouterProps) {
           frames={props.frames}
           player={props.player}
           frame={props.frame}
+          onOpenPalette={props.onOpenPalette}
+          onOpenHelp={props.onOpenHelp}
         />
       );
     }
@@ -88,6 +92,8 @@ export function ModeRouter(props: ModeRouterProps) {
           frames={props.frames}
           player={props.player}
           frame={props.frame}
+          onOpenPalette={props.onOpenPalette}
+          onOpenHelp={props.onOpenHelp}
         />
       );
     }

@@ -24,7 +24,7 @@ import { STORAGE_KEYS } from '@/store/storageKeys';
 export type StudioGroupId = 'start' | 'build' | 'practice' | 'reference' | 'progress';
 
 /** How LearnStudio renders the tab body. */
-export type StudioRender = 'overview' | 'quiz' | 'assemble' | 'recall' | 'panel';
+export type StudioRender = 'overview' | 'quiz' | 'assemble' | 'panel';
 
 /** A tab is hidden unless the underlying studio data is present. */
 export type StudioNeed = 'quiz' | 'pieces' | 'source';
@@ -38,8 +38,6 @@ export interface StudioTab {
   /** PanelBody kind for `render: 'panel'` tabs. */
   kind?: string;
   need?: StudioNeed;
-  /** Full-bleed tabs that fill the Stage on their own (no Context Column). */
-  wide?: boolean;
 }
 
 export interface StudioGroup {
@@ -57,10 +55,10 @@ export const STUDIO_GROUPS: StudioGroup[] = [
 
 export const STUDIO_TABS: StudioTab[] = [
   // Start
-  { id: 'overview', label: 'Overview', icon: BookOpen, group: 'start', render: 'overview', wide: true },
+  { id: 'overview', label: 'Overview', icon: BookOpen, group: 'start', render: 'overview' },
   // Build & Recall
   { id: 'quiz', label: 'Quiz', icon: HelpCircle, group: 'build', render: 'quiz', need: 'quiz' },
-  { id: 'assemble', label: 'Assemble', icon: Puzzle, group: 'build', render: 'assemble', need: 'pieces', wide: true },
+  { id: 'assemble', label: 'Assemble', icon: Puzzle, group: 'build', render: 'assemble', need: 'pieces' },
   { id: 'source', label: 'Source', icon: Code2, group: 'build', render: 'panel', kind: 'copy', need: 'source' },
   // Practice
   { id: 'simulate', label: 'Simulate', icon: StepForward, group: 'practice', render: 'panel', kind: 'simulate' },

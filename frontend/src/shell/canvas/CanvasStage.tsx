@@ -15,10 +15,12 @@ import {
   useNodesState,
   useNodesInitialized,
   useReactFlow,
+  useUpdateNodeInternals,
   type ConnectionLineComponentProps,
   type Edge,
   type Node,
   type NodeChange,
+  type OnNodeDrag,
 } from '@xyflow/react';
 import { Crosshair, ChevronsDownUp, Trash2, Palette, Maximize, LayoutGrid, Lock } from 'lucide-react';
 import type { CanvasMode, Frame, Player, ProblemPlugin } from '../../core';
@@ -37,7 +39,6 @@ import { togglePanelCollapse } from './nodes';
 import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
 import {
   CanvasToolbar,
-  CanvasDockPanel,
   ContextMenu,
   LaserPointer,
   type MenuItem,
@@ -45,15 +46,12 @@ import {
   TracePreviewPanel,
   FIT_VIEW_DURATION_MS,
 } from './ui';
-import { PanelNode, panelAccent, EffectNode, createEffectByType, type PanelFlowNode, type PanelNodeData, setMeasuredHeight } from './nodes';
+import { PanelNode, panelAccent, EffectNode, createEffectByType, type PanelFlowNode, type PanelNodeData } from './nodes';
 import { RemovableEdge, useCanvasEdgeConnection } from './edges';
 import {
   applyAlign,
   applyDistribute,
   type AlignKind,
-  applyCanvasSnap,
-  visibleFlowRect,
-  type CanvasSnapRegion,
   connectionLineType,
   FIT_PADDING,
   FIT_PADDING_FOCUS,
@@ -71,6 +69,13 @@ import {
   type BgVariant,
   type LayoutPreset,
 } from './layout';
+import {
+  assignNodeToSlot,
+  findLayoutSlotAtPoint,
+  relayoutHostSlots,
+  unparentOnHostDelete,
+} from './layout/layoutSlots';
+import { setLayoutDropTarget } from './layout/layoutDropState';
 import { buildCanvasFrame } from './frame';
 import {
   useCanvasLayoutPersistence,
@@ -213,7 +218,8 @@ function Inner({
   // Per-(plugin, mode) persistence: dragged positions/resizes + which panels were trash-removed.
   const { layoutRef, removedRef, removedEdgesRef, persist } = useCanvasLayoutPersistence();
 
-  const { fitView, screenToFlowPosition, getViewport } = useReactFlow();
+  const { fitView, screenToFlowPosition } = useReactFlow();
+  const updateNodeInternals = useUpdateNodeInternals();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const viewportSize = useCallback(() => {
@@ -254,21 +260,38 @@ function Inner({
 
   const handleNodesChange = useCallback(
     (changes: NodeChange<PanelFlowNode>[]) => {
+      const removeIds = changes.filter((c) => c.type === 'remove').map((c) => c.id);
+      if (removeIds.length) {
+        setNodes((nds) => unparentOnHostDelete(nds, new Set(removeIds)));
+      }
+
       onNodesChange(changes);
       const manualIds = new Set<string>();
+      const relayoutIds = new Set<string>();
       for (const c of changes) {
         if (c.type === 'position' && 'dragging' in c && c.dragging === false) manualIds.add(c.id);
-        if (c.type === 'dimensions') manualIds.add(c.id);
+        if (c.type === 'dimensions') {
+          manualIds.add(c.id);
+          relayoutIds.add(c.id);
+        }
       }
       if (!manualIds.size) return;
       setNodes((nds) => {
+        let next = nds;
         let changed = false;
-        const next = nds.map((n) => {
+        next = next.map((n) => {
           if (!manualIds.has(n.id) || !n.data.snapFill) return n;
           changed = true;
           const { snapFill: _, ...rest } = n.data;
           return { ...n, data: rest };
         });
+        for (const id of relayoutIds) {
+          const host = next.find((n) => n.id === id);
+          if (host?.data.layoutSlots?.some(Boolean)) {
+            next = relayoutHostSlots(next, id);
+            changed = true;
+          }
+        }
         return changed ? next : nds;
       });
     },
@@ -526,20 +549,6 @@ function Inner({
 
   const align = useCallback((a: AlignKind) => setNodes((nds) => applyAlign(nds as PanelFlowNode[], a)), [setNodes]);
   const distribute = useCallback((d: 'h' | 'v') => setNodes((nds) => applyDistribute(nds as PanelFlowNode[], d)), [setNodes]);
-  const canvasSnap = useCallback(
-    (region: CanvasSnapRegion) => {
-      const vp = getViewport();
-      const size = viewportSize();
-      const visible = visibleFlowRect(vp, size.width, size.height);
-      setNodes((nds) => {
-        const next = applyCanvasSnap(nds as PanelFlowNode[], region, visible);
-        const snapped = next.find((n) => n.selected);
-        if (snapped?.height != null) setMeasuredHeight(snapped.id, snapped.height);
-        return next;
-      });
-    },
-    [getViewport, viewportSize, setNodes],
-  );
 
   useEffect(() => {
     setCanvasHud({
@@ -551,8 +560,8 @@ function Inner({
       setSnap,
       onPreset: applyPreset,
       onTidy: reset,
-      onCanvasSnap: canvasSnap,
-      canCanvasSnap: selCount === 1,
+      onCanvasSnap: () => {},
+      canCanvasSnap: false,
       tools: {
         selCount,
         onAlign: align,
@@ -573,7 +582,6 @@ function Inner({
     setSnap,
     applyPreset,
     reset,
-    canvasSnap,
     selCount,
     align,
     distribute,
@@ -588,6 +596,47 @@ function Inner({
       if (n) fitView({ padding: FIT_PADDING_FOCUS, duration: FIT_VIEW_DURATION_MS, nodes: [n] });
     },
     [fitView],
+  );
+
+  const onNodeDrag = useCallback<OnNodeDrag<PanelFlowNode>>(
+    (e) => {
+      if (lock || mode !== 'visualize') return;
+      const clientX = 'clientX' in e ? e.clientX : e.touches[0]?.clientX ?? 0;
+      const clientY = 'clientY' in e ? e.clientY : e.touches[0]?.clientY ?? 0;
+      setLayoutDropTarget(findLayoutSlotAtPoint(clientX, clientY));
+    },
+    [lock, mode],
+  );
+
+  const onNodeDragStop = useCallback<OnNodeDrag<PanelFlowNode>>(
+    (e, node) => {
+      setLayoutDropTarget(null);
+      if (lock || mode !== 'visualize') return;
+      if (
+        !canMoveCanvasNodes({
+          role: collab.role,
+          session: collab.session,
+          isCollaborating: collab.isCollaborating,
+        })
+      ) {
+        return;
+      }
+      const data = node.data as PanelNodeData | undefined;
+      if (data?.locked) return;
+      const clientX = 'clientX' in e ? e.clientX : e.changedTouches[0]?.clientX ?? 0;
+      const clientY = 'clientY' in e ? e.clientY : e.changedTouches[0]?.clientY ?? 0;
+      const hit = findLayoutSlotAtPoint(clientX, clientY);
+      if (!hit || hit.hostId === node.id) return;
+      setNodes((nds) => {
+        const next = assignNodeToSlot(nds as PanelFlowNode[], hit.hostId, hit.slotIndex, node.id);
+        requestAnimationFrame(() => {
+          updateNodeInternals(hit.hostId);
+          updateNodeInternals(node.id);
+        });
+        return next;
+      });
+    },
+    [lock, mode, collab.role, collab.session, collab.isCollaborating, setNodes, updateNodeInternals],
   );
 
   const ensureAndFocusPanel = useCallback(
@@ -784,6 +833,8 @@ function Inner({
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}
             onNodeClick={onNodeClick}
+            onNodeDrag={onNodeDrag}
+            onNodeDragStop={onNodeDragStop}
             onNodeDoubleClick={(_e, n) => focusNode(n.id)}
             onNodeContextMenu={onNodeContextMenu}
             onPaneContextMenu={onPaneContextMenu}
@@ -850,7 +901,6 @@ function Inner({
               style={{ width: 132, height: 92 }}
             />
             {!present && <CanvasFloatingHud />}
-            {!present && <CanvasDockPanel />}
             {!present && <CanvasToolbar lock={lock} onToggleLock={() => setLock((l) => !l)} onTidy={reset} />}
             {!present && <InterviewHud />}
             <CanvasCollabOverlays />

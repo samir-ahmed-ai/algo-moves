@@ -3,7 +3,17 @@ import { loadLayouts, saveLayouts, type LayoutEntry } from '@/store/canvas-layou
 import { migrateLayouts } from '../layout/layoutMigration';
 
 /** Persisted node positions/resizes per `${pluginId}:${mode}` key. */
-export type Saved = Record<string, { position: { x: number; y: number }; width?: number }>;
+export type Saved = Record<
+  string,
+  {
+    position: { x: number; y: number };
+    width?: number;
+    height?: number;
+    parentId?: string;
+    layoutSlots?: (string | null)[];
+    slotIndex?: number;
+  }
+>;
 
 /**
  * Per-(plugin, mode) canvas persistence, extracted from CanvasStage: dragged

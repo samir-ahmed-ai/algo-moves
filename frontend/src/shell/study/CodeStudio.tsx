@@ -2,21 +2,15 @@ import { Fragment, useCallback, useMemo, useState, type ReactNode } from 'react'
 import {
   Check,
   Copy,
-  Eye,
-  EyeOff,
   Keyboard,
   RotateCcw,
-  ScanEye,
   SkipForward,
-  Timer,
   WrapText,
 } from 'lucide-react';
 import { useCanvasStatic, nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu, useQuizHostRelay } from '@/shell/canvas';
 import { ReassemblePane } from '../../components/puzzle/ReassemblePane';
-import { SplitCodeEditor } from '../../components/code/SplitCodeEditor';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { patternsForTags } from '../../content';
-import { extractSkeleton } from '@/lib/code';
 import { resolveCodePieces } from '@/lib/code';
 import {
   nextPhase,
@@ -25,7 +19,7 @@ import {
   type CodeStudioPhase,
   type PhaseAvailability,
 } from '@/store/user-prefs';
-import { matchScore } from '@/lib/code';
+import { computeRecallProgress, matchScore } from '@/lib/code';
 import { useEditorPrefs } from '@/store/user-prefs';
 import { parseComplexity } from '@/lib/quiz';
 import { useProgress, statFor } from '@/store/persistence';
@@ -50,6 +44,9 @@ import {
 import { useCodeStudioTimer } from './hooks/useCodeStudioTimer';
 import { useCodeStudioRecallShortcuts } from './hooks/useCodeStudioRecallShortcuts';
 import { useCodeStudioMachine } from './hooks/useCodeStudioMachine';
+import { useRecallDraftChange } from './hooks/useRecallDraftChange';
+import { RecallEditorShell } from './components/RecallEditorShell';
+import { RecallToolbar } from './components/RecallToolbar';
 
 export {
   useCodeStudio,
@@ -154,7 +151,6 @@ export function CodeStudioProvider({
   const phaseSeq = useMemo(() => phaseSequence(av), [av]);
 
   const draftKey = STORAGE_KEYS.DRAFT(item.id, active);
-  const skeleton = useMemo(() => (reference ? extractSkeleton(reference) : ''), [reference]);
 
   const {
     phase,
@@ -174,8 +170,6 @@ export function CodeStudioProvider({
     itemId: item.id,
     active,
     av,
-    skeleton,
-    reference,
     draftKey,
     phaseLock,
     setTimerRunning,
@@ -191,11 +185,12 @@ export function CodeStudioProvider({
 
   useCodeStudioRecallShortcuts({
     phase,
-    skeleton,
     persistDraft,
-    vim: editorPrefs.vim,
-    setEditorPrefs,
     setBlind,
+    pointerMode: editorPrefs.pointerMode,
+    recallReveal: editorPrefs.recallReveal,
+    fontSize: editorPrefs.fontSize,
+    setEditorPrefs,
   });
 
   const copyRef = useCallback(async () => {
@@ -270,7 +265,6 @@ export function CodeStudioProvider({
     () => ({
       draft,
       persistDraft,
-      skeleton,
       blind,
       setBlind,
       peek,
@@ -280,16 +274,7 @@ export function CodeStudioProvider({
       timerLabel,
       score,
     }),
-    [
-      draft,
-      persistDraft,
-      skeleton,
-      blind,
-      peek,
-      timerRunning,
-      timerLabel,
-      score,
-    ],
+    [draft, persistDraft, blind, peek, timerRunning, timerLabel, score],
   );
 
   const editorValue = useMemo(
@@ -321,142 +306,26 @@ function ToolbarDivider() {
   return <span className="mx-0.5 h-4 w-px shrink-0 bg-edge" aria-hidden />;
 }
 
-function RecallToolbarInline({
-  blind,
-  setBlind,
-  peek,
-  setPeek,
-  overflowItems,
+function recallExtrasOverflow({
+  copied,
+  copyRef,
+  hasReassemble,
+  hasQuiz,
+  resetReassemble,
+  goToPhase,
 }: {
-  blind: boolean;
-  setBlind: (v: boolean | ((b: boolean) => boolean)) => void;
-  peek: boolean;
-  setPeek: (v: boolean) => void;
-  overflowItems: { label: string; icon?: ReactNode; onClick: () => void }[];
+  copied: boolean;
+  copyRef: () => void | Promise<void>;
+  hasReassemble: boolean;
+  hasQuiz: boolean;
+  resetReassemble: () => void;
+  goToPhase: (p: CodeStudioPhase) => void;
 }) {
-  return (
-    <>
-      <ToolbarDivider />
-      <PanelHeaderAction variant="toggle" active={blind} onClick={() => setBlind((b) => !b)} title="Blind recall (⌘\\)">
-        {blind ? <EyeOff className={nodeIconGlyph} /> : <Eye className={nodeIconGlyph} />}
-      </PanelHeaderAction>
-      {blind && (
-        <span
-          className="nodrag inline-flex"
-          onMouseDown={() => setPeek(true)}
-          onMouseUp={() => setPeek(false)}
-          onMouseLeave={() => setPeek(false)}
-        >
-          <PanelHeaderAction variant="toggle" active={peek} title="Hold to peek at reference">
-            <ScanEye className={nodeIconGlyph} />
-          </PanelHeaderAction>
-        </span>
-      )}
-      {overflowItems.length > 0 && <PanelHeaderMenu title="More actions" items={overflowItems} />}
-    </>
-  );
-}
-
-/** Inline header controls — icon-only with tooltips. */
-export function CodeStudioToolbar() {
-  const { variants, active, setActive } = useCodeStudioContent();
-  const { blind, setBlind, peek, setPeek, persistDraft, skeleton, timerRunning, setTimerRunning } =
-    useCodeStudioDraft();
-  const { copied, copyRef, editorPrefs, setEditorPrefs } = useCodeStudioEditor();
-  const {
-    phase,
-    phaseSeq,
-    goToPhase,
-    advance,
-    nextLabel,
-    hasQuiz,
-    hasReassemble,
-    resetReassemble,
-    phaseLocked,
-  } = useCodeStudioPhase();
-
-  if (phaseLocked) {
-    const recallOverflow = [
-      {
-        label: copied ? 'Copied reference' : 'Copy reference',
-        icon: copied ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />,
-        onClick: () => void copyRef(),
-      },
-      {
-        label: 'Reset to skeleton (⌘⇧R)',
-        icon: <RotateCcw className={nodeIconGlyph} />,
-        onClick: () => persistDraft(skeleton),
-      },
-      {
-        label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
-        icon: <Keyboard className={nodeIconGlyph} />,
-        onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
-      },
-      {
-        label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
-        icon: <WrapText className={nodeIconGlyph} />,
-        onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
-      },
-      ...(phase === 'recall'
-        ? [
-            {
-              label: timerRunning ? 'Stop recall timer' : 'Start recall timer',
-              icon: <Timer className={nodeIconGlyph} />,
-              onClick: () => setTimerRunning((r) => !r),
-            },
-          ]
-        : []),
-    ];
-    return (
-      <>
-        <HeaderLangTabs variants={variants} active={active} onPick={setActive} />
-        {phase === 'recall' ? (
-          <RecallToolbarInline
-            blind={blind}
-            setBlind={setBlind}
-            peek={peek}
-            setPeek={setPeek}
-            overflowItems={recallOverflow}
-          />
-        ) : (
-          hasReassemble && (
-            <>
-              <ToolbarDivider />
-              <PanelHeaderAction variant="ghost" title="Restart structure" onClick={resetReassemble}>
-                <RotateCcw className={nodeIconGlyph} />
-              </PanelHeaderAction>
-            </>
-          )
-        )}
-      </>
-    );
-  }
-
-  const recallOverflow = [
+  return [
     {
       label: copied ? 'Copied reference' : 'Copy reference',
       icon: copied ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />,
       onClick: () => void copyRef(),
-    },
-    {
-      label: 'Reset to skeleton (⌘⇧R)',
-      icon: <RotateCcw className={nodeIconGlyph} />,
-      onClick: () => persistDraft(skeleton),
-    },
-    {
-      label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
-      icon: <Keyboard className={nodeIconGlyph} />,
-      onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
-    },
-    {
-      label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
-      icon: <WrapText className={nodeIconGlyph} />,
-      onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
-    },
-    {
-      label: timerRunning ? 'Stop recall timer' : 'Start recall timer',
-      icon: <Timer className={nodeIconGlyph} />,
-      onClick: () => setTimerRunning((r) => !r),
     },
     ...(hasReassemble
       ? [
@@ -477,6 +346,71 @@ export function CodeStudioToolbar() {
         ]
       : []),
   ];
+}
+
+/** Inline header controls — icon-only with tooltips. */
+export function CodeStudioToolbar() {
+  const { variants, active, setActive, reference, stat } = useCodeStudioContent();
+  const { draft, blind, setBlind, peek, setPeek, persistDraft, timerRunning, setTimerRunning, timerLabel } =
+    useCodeStudioDraft();
+  const { copied, copyRef, editorPrefs, setEditorPrefs } = useCodeStudioEditor();
+  const {
+    phase,
+    phaseSeq,
+    goToPhase,
+    advance,
+    nextLabel,
+    hasQuiz,
+    hasReassemble,
+    resetReassemble,
+    phaseLocked,
+  } = useCodeStudioPhase();
+
+  const recallProgress = reference ? computeRecallProgress(reference, draft) : null;
+  const linesProgress = recallProgress
+    ? { completed: recallProgress.completedLines.length, total: recallProgress.total }
+    : undefined;
+
+  if (phaseLocked) {
+    const extras = recallExtrasOverflow({ copied, copyRef, hasReassemble, hasQuiz, resetReassemble, goToPhase });
+    return (
+      <>
+        <HeaderLangTabs variants={variants} active={active} onPick={setActive} />
+        {phase === 'recall' ? (
+          <>
+            <ToolbarDivider />
+            <RecallToolbar
+              blind={blind}
+              setBlind={setBlind}
+              peek={peek}
+              setPeek={setPeek}
+              persistDraft={persistDraft}
+              attemptCount={stat.attempts}
+              timerRunning={timerRunning}
+              setTimerRunning={setTimerRunning}
+              timerLabel={timerLabel}
+              editorPrefs={editorPrefs}
+              setEditorPrefs={setEditorPrefs}
+              compact={editorPrefs.recallCompact}
+              linesProgress={linesProgress}
+              trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
+            />
+          </>
+        ) : (
+          hasReassemble && (
+            <>
+              <ToolbarDivider />
+              <PanelHeaderAction variant="ghost" title="Restart structure" onClick={resetReassemble}>
+                <RotateCcw className={nodeIconGlyph} />
+              </PanelHeaderAction>
+            </>
+          )
+        )}
+      </>
+    );
+  }
+
+  const extras = recallExtrasOverflow({ copied, copyRef, hasReassemble, hasQuiz, resetReassemble, goToPhase });
 
   const structureOverflow = [
     {
@@ -508,13 +442,25 @@ export function CodeStudioToolbar() {
       {showStepper && <ToolbarDivider />}
       <HeaderLangTabs variants={variants} active={active} onPick={setActive} />
       {phase === 'recall' ? (
-        <RecallToolbarInline
-          blind={blind}
-          setBlind={setBlind}
-          peek={peek}
-          setPeek={setPeek}
-          overflowItems={recallOverflow}
-        />
+        <>
+          <ToolbarDivider />
+          <RecallToolbar
+            blind={blind}
+            setBlind={setBlind}
+            peek={peek}
+            setPeek={setPeek}
+            persistDraft={persistDraft}
+            attemptCount={stat.attempts}
+            timerRunning={timerRunning}
+            setTimerRunning={setTimerRunning}
+            timerLabel={timerLabel}
+            editorPrefs={editorPrefs}
+            setEditorPrefs={setEditorPrefs}
+            compact={editorPrefs.recallCompact}
+            linesProgress={linesProgress}
+            trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
+          />
+        </>
       ) : (
         <>
           <ToolbarDivider />
@@ -540,8 +486,9 @@ export function CodeStudioToolbar() {
 
 export function CodeStudioBody() {
   const { reference, code, theme, active } = useCodeStudioContent();
-  const { draft, blind, peek, persistDraft } = useCodeStudioDraft();
+  const { draft, blind, peek } = useCodeStudioDraft();
   const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
+  const { onDraftChange: recallDraftChange, mistakeTick } = useRecallDraftChange();
   const {
     phase,
     phaseTransition,
@@ -596,19 +543,19 @@ export function CodeStudioBody() {
           />
         )}
         {(!phaseLocked || phase === 'recall') && phase === 'recall' && (
-          <SplitCodeEditor
+          <RecallEditorShell
             reference={reference}
             draft={draft}
             lang={code?.lang}
             dark={theme === 'dark'}
             themeKey={themePreset}
-            vim={editorPrefs.vim}
-            wrap={editorPrefs.wrap}
-            hideLeft={blind}
-            peekLeft={peek}
-            splitPct={editorPrefs.splitPct}
-            onSplitPctChange={(splitPct) => setEditorPrefs({ splitPct })}
-            onDraftChange={persistDraft}
+            editorPrefs={editorPrefs}
+            setEditorPrefs={setEditorPrefs}
+            blind={blind}
+            peek={peek}
+            onDraftChange={recallDraftChange}
+            compact={editorPrefs.recallCompact}
+            mistakeTick={mistakeTick}
           />
         )}
       </div>

@@ -24,6 +24,8 @@ export interface SampleInput<I = unknown> {
 export interface PluginMeta {
   id: string;
   title: string;
+  /** Problem number from the manifest, e.g. "1.6". */
+  number?: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   tags: string[];
   source?: string;

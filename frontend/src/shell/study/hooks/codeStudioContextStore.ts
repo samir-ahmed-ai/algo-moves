@@ -54,7 +54,6 @@ export interface CodeStudioPhaseContextValue {
 export interface CodeStudioDraftContextValue {
   draft: string;
   persistDraft: (v: string) => void;
-  skeleton: string;
   blind: boolean;
   setBlind: (v: boolean | ((b: boolean) => boolean)) => void;
   peek: boolean;

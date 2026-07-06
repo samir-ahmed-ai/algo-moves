@@ -62,6 +62,7 @@ export function makePrepPlugin(p: PrepProblem): ProblemPlugin<any, any> {
   const meta = {
     id: p.id,
     title: p.title,
+    number: p.number,
     difficulty: p.difficulty,
     tags: p.tags,
     summary: p.pattern || p.visual || `${p.topicTitle} problem.`,

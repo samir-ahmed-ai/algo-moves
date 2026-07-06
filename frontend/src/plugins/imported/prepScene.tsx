@@ -107,7 +107,7 @@ function StageCard({
         <Icon className="h-3.5 w-3.5" />
         {stage.label}
       </div>
-      <p className={cn('leading-relaxed', stage.mono && 'font-mono', vizText.base)}>
+      <p className={cn('scene-body leading-relaxed', stage.mono && 'font-mono', vizText.base)}>
         <span className="text-ink">{shown.join(' ')}</span>
         {active && state.reveal < full.length && (
           <span className="ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[2px] animate-pulse bg-accent align-middle" />

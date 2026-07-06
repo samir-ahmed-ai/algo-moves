@@ -9,7 +9,6 @@ import {
   EyeOff,
   LayoutGrid,
   Lightbulb,
-  MoreHorizontal,
   Play,
   RotateCcw,
   Sparkles,
@@ -21,7 +20,7 @@ import { recordAttempt, logMistake } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { QuizChoiceLabel } from '../../../components/shared/QuizChoiceLabel';
 import { ReassemblePane } from '../../../components/puzzle/ReassemblePane';
-import { ASSEMBLE_GAMES } from '../../../components/puzzle/assemble';
+import { ASSEMBLE_GAMES, defaultGameFor } from '../../../components/puzzle/assemble';
 import { assembleGameStatsStore } from '../../assembleGameStats';
 import { quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '@/lib/quiz';
@@ -571,9 +570,8 @@ export function QuizCardView({
 /* -------------------------------------------------------------- reassemble */
 
 /** Classic tray rebuild plus the creative assemble trio; each problem opens on
- *  a stable per-problem default game so a topic run rotates through all three.
- *  By default, starts on the classic drag-and-drop; advanced modes are revealed
- *  via a ••• menu so the first experience is not overwhelming. */
+ *  a stable per-problem default game (via `defaultGameFor`) so a topic run
+ *  rotates through all three. All modes are one swipe away in the header roll. */
 export function ReassembleCardView({
   card,
   block,
@@ -589,115 +587,105 @@ export function ReassembleCardView({
 }) {
   const { item } = block;
   const lang = block.code?.lang ?? 'go';
-  // Default to classic; creative games are unlocked via the ••• menu.
-  const [gameId, setGameId] = useState<string>('classic');
-  const [modesOpen, setModesOpen] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  const game = ASSEMBLE_GAMES.find((g) => g.id === gameId);
   const gameScope = `${item.id}:${lang}`;
+  const [gameId, setGameId] = useState<string>(() => defaultGameFor(gameScope).id);
+  const [showHint, setShowHint] = useState(false);
+  const modeRollRef = useRef<HTMLDivElement>(null);
+  const game = ASSEMBLE_GAMES.find((g) => g.id === gameId);
   const gameStats = useMemo(() => assembleGameStatsStore(gameScope), [gameScope]);
   const hintPiece = card.pieces[0];
 
+  useEffect(() => {
+    const active = modeRollRef.current?.querySelector('[aria-selected="true"]');
+    active?.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+  }, [gameId]);
+
+  const modePillClass = (on: boolean) =>
+    cn(
+      'inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2 text-[10px] font-semibold transition-colors',
+      on ? 'bg-accentbg text-accent' : 'bg-panel2 text-ink3 hover:text-ink',
+    );
+
   return (
     <div className="mobile-card-shell mobile-reassemble-card flex min-h-0 flex-1 flex-col px-2 pt-3">
-      {/* Context header */}
-      <div className="flex items-start gap-2 px-1">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink3">Rebuild it</span>
-            {block.pattern && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-                <Sparkles className="h-2.5 w-2.5" />
-                {block.pattern}
-              </span>
-            )}
-          </div>
-          <div className="mt-0.5 truncate text-[15px] font-semibold text-ink">{item.title}</div>
-        </div>
-        <div className="flex shrink-0 items-center gap-1">
-          {/* Hint toggle */}
-          <button
-            type="button"
+      {/* Context header — label row carries the mode roll */}
+      <div className="px-1">
+        <div className="flex items-center gap-1.5">
+          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink3">Rebuild it</span>
+          {block.pattern && (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+              <Sparkles className="h-2.5 w-2.5" />
+              {block.pattern}
+            </span>
+          )}
+          <div
+            ref={modeRollRef}
+            className="ws-scroll flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto"
             data-noswipe
-            onClick={() => setShowHint((h) => !h)}
-            title={showHint ? 'Hide hint' : 'Show first line'}
-            className={cn(
-              'grid h-8 w-8 place-items-center rounded-full transition-colors',
-              showHint ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
-            )}
+            role="tablist"
+            aria-label="Assemble game"
           >
-            {showHint ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-          {/* Mode menu trigger */}
-          <button
-            type="button"
-            data-noswipe
-            onClick={() => setModesOpen((o) => !o)}
-            title="More game modes"
-            className={cn(
-              'grid h-8 w-8 place-items-center rounded-full transition-colors',
-              modesOpen ? 'bg-panel2 text-ink' : 'text-ink3 hover:bg-panel2 hover:text-ink',
-            )}
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onSkip}
-            className="rounded-full px-2.5 py-1.5 text-[12px] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
-          >
-            Skip
-          </button>
-        </div>
-      </div>
-
-      {/* Mode picker — shown on demand */}
-      {modesOpen && (
-        <div className="ws-scroll mt-2 flex shrink-0 items-center gap-1.5 overflow-x-auto px-1 pb-0.5" data-noswipe role="tablist" aria-label="Assemble game">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={gameId === 'classic'}
-            onClick={() => { setGameId('classic'); setModesOpen(false); }}
-            className={cn(
-              'inline-flex min-h-[34px] shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors',
-              gameId === 'classic' ? 'bg-accentbg text-accent' : 'bg-panel2 text-ink3 hover:text-ink',
-            )}
-          >
-            Classic
-          </button>
-          {ASSEMBLE_GAMES.map((g) => {
-            const Icon = g.icon;
-            const on = g.id === gameId;
-            return (
-              <button
-                key={g.id}
-                type="button"
-                role="tab"
-                aria-selected={on}
-                onClick={() => { setGameId(g.id); setModesOpen(false); }}
-                className={cn(
-                  'inline-flex min-h-[34px] shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors',
-                  on ? 'bg-accentbg text-accent' : 'bg-panel2 text-ink3 hover:text-ink',
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {g.name}
-              </button>
-            );
-          })}
-          {onOpenStudio && (
             <button
               type="button"
-              onClick={onOpenStudio}
-              className="ml-auto inline-flex min-h-[34px] shrink-0 items-center gap-1.5 rounded-full bg-panel2 px-3 text-[12px] font-medium text-ink3 hover:text-ink"
+              role="tab"
+              aria-selected={gameId === 'classic'}
+              onClick={() => setGameId('classic')}
+              className={modePillClass(gameId === 'classic')}
             >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              Studio
+              Classic
             </button>
-          )}
+            {ASSEMBLE_GAMES.map((g) => {
+              const Icon = g.icon;
+              const on = g.id === gameId;
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setGameId(g.id)}
+                  className={modePillClass(on)}
+                >
+                  <Icon className="h-3 w-3" />
+                  {g.name}
+                </button>
+              );
+            })}
+            {onOpenStudio && (
+              <button
+                type="button"
+                onClick={onOpenStudio}
+                className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-panel2 px-2 text-[10px] font-medium text-ink3 hover:text-ink"
+              >
+                <LayoutGrid className="h-3 w-3" />
+                Studio
+              </button>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-0.5">
+            <button
+              type="button"
+              data-noswipe
+              onClick={() => setShowHint((h) => !h)}
+              title={showHint ? 'Hide hint' : 'Show first line'}
+              className={cn(
+                'grid h-7 w-7 place-items-center rounded-full transition-colors',
+                showHint ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
+              )}
+            >
+              {showHint ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+            <button
+              type="button"
+              onClick={onSkip}
+              className="rounded-full px-2 py-1 text-[11px] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
+            >
+              Skip
+            </button>
+          </div>
         </div>
-      )}
+        <div className="mt-0.5 truncate text-[15px] font-semibold text-ink">{item.title}</div>
+      </div>
 
       {/* Hint strip — shows the first code piece as a visual cue */}
       {showHint && hintPiece && (

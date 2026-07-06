@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import '@/shell/panels/registerPanelNode';
+import { normalizeLegacyUrl } from '@/lib/navigation/appRoute';
 import App from './App';
 import '@xyflow/react/dist/style.css';
 import './index.css';
@@ -14,6 +15,8 @@ import './styles/assemble-games.css';
 import './styles/assemble/snap-call.css';
 import './styles/assemble/imposter.css';
 import './styles/assemble/one-stroke.css';
+
+normalizeLegacyUrl();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

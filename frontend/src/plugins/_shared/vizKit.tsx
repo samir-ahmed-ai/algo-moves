@@ -4,7 +4,7 @@
  * ESLint (optional): ban hardcoded `text-[Npx]` in `src/plugins/**` — use vizText / vizKit instead.
  * Enforced by: npm run check-plugin-typography
  */
-import type { CSSProperties, ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Frame, PluginViewProps } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
 import { vizPad, vizText } from './vizTokens';
@@ -79,8 +79,37 @@ export function VizStatRow({ k, v }: { k: ReactNode; v: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3 py-[3px]">
       <span className={cn(vizText.sm, 'text-ink3')}>{k}</span>
-      <span className={cn('text-right', vizText.base, vizText.mono, 'text-ink')}>{v}</span>
+      <span className={cn('text-right', vizText.base, vizText.mono, 'text-ink')}>
+        <VizValue value={v} />
+      </span>
     </div>
+  );
+}
+
+/**
+ * Wraps a value that mutates frame-to-frame and gives it a brief flash the
+ * instant it changes, so the eye is drawn straight to what just updated
+ * instead of having to re-scan the whole rail/inspector each step.
+ *
+ * Only primitive-ish values (string/number/null/undefined) can be tracked
+ * for change — richer ReactNode values render as-is with no flash.
+ */
+export function VizValue({ value, className }: { value: ReactNode; className?: string }) {
+  const trackable = typeof value === 'string' || typeof value === 'number' || value == null;
+  const key = trackable ? value : undefined;
+  const prevRef = useRef(key);
+  const [pulse, setPulse] = useState(0);
+  useEffect(() => {
+    if (trackable && key !== prevRef.current) {
+      prevRef.current = key;
+      setPulse((n) => n + 1);
+    }
+  }, [trackable, key]);
+  if (!trackable) return <>{value}</>;
+  return (
+    <span key={pulse} className={cn(pulse > 0 && 'viz-value-flash', className)}>
+      {value}
+    </span>
   );
 }
 
@@ -251,6 +280,73 @@ export function RailSection({
   );
 }
 
+/**
+ * Indented child group under a `RailSection` — for grouping related stats
+ * (e.g. a "window" section holding lo/hi/sum) so the hierarchy between a
+ * section and its sub-values is visible, not just implied by order.
+ */
+export function RailSubsection({
+  label,
+  children,
+  className,
+}: {
+  label?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn('viz-subsection', className)}>
+      {label != null && <div className={cn('viz-rail-hint', vizText['2xs'])}>{label}</div>}
+      {children}
+    </div>
+  );
+}
+
+export interface TreeNode {
+  /** Left-hand key/label for this row. */
+  k: ReactNode;
+  /** Right-hand value — flashes briefly when it changes between frames. */
+  v: ReactNode;
+  tone?: 'accent' | 'good' | 'bad' | 'warn';
+  /** Nested rows, indented one level further with a guide line. */
+  children?: readonly TreeNode[];
+}
+
+function TreeRows({ nodes, depth }: { nodes: readonly TreeNode[]; depth: number }) {
+  return (
+    <>
+      {nodes.map((node, i) => (
+        <Fragment key={i}>
+          <div
+            className={cn('viz-tree-row', depth === 0 && 'viz-tree-row--root')}
+            style={{ '--vt-depth': depth } as CSSProperties}
+          >
+            <span className={cn('viz-tree-k', vizText['2xs'])}>{node.k}</span>
+            <span className={cn('viz-tree-v', vizText.xs, node.tone && `viz-rail-stat-v--${node.tone}`)}>
+              <VizValue value={node.v} />
+            </span>
+          </div>
+          {node.children && node.children.length > 0 && <TreeRows nodes={node.children} depth={depth + 1} />}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+/**
+ * Indented, multi-row tree for structured state that a single flat line
+ * can't convey intuitively — maps (`seen`), path stacks, nested groups.
+ * Each level nests with a small guide line, like a file tree.
+ */
+export function VizTree({ nodes, className }: { nodes: readonly TreeNode[]; className?: string }) {
+  if (nodes.length === 0) return null;
+  return (
+    <div className={cn('viz-tree', className)}>
+      <TreeRows nodes={nodes} depth={0} />
+    </div>
+  );
+}
+
 export type RailStackItem = string | number | { label: ReactNode; tone?: 'accent' | 'good' | 'bad' | 'warn' };
 
 /**
@@ -387,6 +483,12 @@ interface StatKVProps {
    * the board's measured size.
    */
   reserve?: string;
+  /**
+   * Let the value wrap onto multiple lines with a hanging indent instead of
+   * ellipsizing — for structured values (maps, paths, running answers) that
+   * need more than one line to read intuitively.
+   */
+  wrap?: boolean;
 }
 
 /** Shared label / icon / mono-value anatomy for RailStat and VizStat. */
@@ -397,7 +499,9 @@ function StatKV({ k, v, icon, tone, reserve }: StatKVProps) {
         {icon != null && <span className={cn('viz-stat-icon', tone && `viz-rail-stat-v--${tone}`)}>{icon}</span>}
         {k}
       </span>
-      <span className={cn('viz-rail-stat-v font-mono', vizText.sm, tone && `viz-rail-stat-v--${tone}`)}>{v}</span>
+      <span className={cn('viz-rail-stat-v font-mono', vizText.sm, tone && `viz-rail-stat-v--${tone}`)}>
+        <VizValue value={v} />
+      </span>
       {reserve != null && (
         <span aria-hidden className={cn('viz-stat-reserve font-mono', vizText.sm)}>
           {reserve}
@@ -410,7 +514,7 @@ function StatKV({ k, v, icon, tone, reserve }: StatKVProps) {
 /** Compact key / value stat for the rail (label above, mono value below). */
 export function RailStat(props: StatKVProps) {
   return (
-    <div className="viz-rail-stat">
+    <div className={cn('viz-rail-stat', props.wrap && 'viz-rail-stat--wrap')}>
       <StatKV {...props} />
     </div>
   );
@@ -428,7 +532,7 @@ export function VizStatStrip({ children, className }: { children: ReactNode; cla
 /** One labelled cell in a VizStatStrip. */
 export function VizStat(props: StatKVProps) {
   return (
-    <div className="viz-statstrip-item">
+    <div className={cn('viz-statstrip-item', props.wrap && 'viz-rail-stat--wrap')}>
       <StatKV {...props} />
     </div>
   );

@@ -9,20 +9,21 @@ export interface BrowseNavigationState {
 }
 
 /**
- * Hydrate browse flags from `#mobile/...` only when that route is active.
+ * Hydrate browse flags from `/mobile#...` only when that route is active.
  * Shared `?item=` links must not leave stale browse state on the canvas workspace.
  */
 export function initialBrowseFromHash(
   hash: string,
   sharedItem?: string | null,
+  pathname?: string,
 ): BrowseNavigationState {
   if (sharedItem && catalog.getItem(sharedItem)) {
     return { trackId: null, categoryId: null, topicId: null };
   }
-  if (!isMobileHash(hash)) {
+  if (!isMobileHash(hash, pathname)) {
     return { trackId: null, categoryId: null, topicId: null };
   }
-  const parsed = parseMobileHash(hash);
+  const parsed = parseMobileHash(hash, pathname);
   return {
     trackId: parsed?.trackId ?? null,
     categoryId: parsed?.categoryId ?? null,

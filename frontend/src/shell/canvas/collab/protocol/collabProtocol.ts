@@ -109,6 +109,8 @@ export interface NodeMoveOp {
   x: number;
   y: number;
   width?: number;
+  height?: number;
+  parentId?: string;
 }
 export interface NodePatchOp {
   [CANVAS_TAG]: 'node-patch';

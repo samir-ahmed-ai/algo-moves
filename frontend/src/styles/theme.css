@@ -478,6 +478,99 @@ button {
   color: var(--warn, var(--accent));
 }
 
+/* Wrapped stat variant: for values too structured to ellipsize (maps, paths,
+   running answers). Continuation lines get a hanging indent so they read as
+   "part of" the first line rather than starting a new thought. */
+.viz-rail-stat--wrap .viz-rail-stat-v {
+  display: block;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  padding-left: 10px;
+  text-indent: -10px;
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ *
+ * Indented value tree — nested key/value rows for structured state
+ * (maps, seen-sets, path stacks) that need more than one flat line to
+ * read intuitively. Depth is expressed with left padding + a faint
+ * guide line, same visual language as `.viz-rail-step` connectors.
+ * ------------------------------------------------------------------ */
+.viz-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.viz-tree-row {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding-left: calc(var(--vt-depth, 0) * 12px + 2px);
+  min-width: 0;
+}
+.viz-tree-row::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--vt-depth, 0) * 12px - 7px);
+  top: 0;
+  bottom: 50%;
+  width: 7px;
+  border-left: 1px solid color-mix(in srgb, var(--edge) 55%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--edge) 55%, transparent);
+  border-bottom-left-radius: 3px;
+}
+.viz-tree-row--root::before {
+  display: none;
+}
+.viz-tree-k {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.viz-tree-v {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+/* Nested child group under a RailSection — indented + guided like the tree
+   rows above, for grouping related stats (e.g. "window" -> lo/hi/sum). */
+.viz-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px dashed color-mix(in srgb, var(--edge) 55%, transparent);
+}
+
+/* Per-frame value-change cue: a brief flash so the eye catches exactly which
+   value just updated, without relying on re-reading the whole rail. */
+@keyframes viz-value-flash {
+  0% {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+  100% {
+    background: transparent;
+  }
+}
+.viz-value-flash {
+  display: inline-block;
+  border-radius: 4px;
+  animation: viz-value-flash 0.6s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .viz-value-flash {
+    animation: none;
+  }
+}
+
 /* horizontal stat strip under the main animation */
 .viz-statstrip {
   display: flex;
@@ -1021,11 +1114,161 @@ circle {
   border-color: var(--bad);
   color: var(--bad);
 }
+/* Move note (short opcode/label) on its own line above the wrapped, indented
+   caption sentence, so multi-line narration reads as a heading + body. */
+.caption-note {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: var(--fs-xs, 12px);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.caption-body {
+  display: block;
+  padding-left: 9px;
+  border-left: 2px solid color-mix(in srgb, var(--edge) 55%, transparent);
+}
+
+/* Indented reveal body under a scene stage label (Scene / How it runs /
+   Memorize) — reads as "content belonging to" the label above it. */
+.scene-body {
+  margin-left: 2px;
+  padding-left: 10px;
+  border-left: 2px solid color-mix(in srgb, var(--edge) 45%, transparent);
+}
 
 .cm-host {
   border: 0.5px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
+}
+
+/* Recall split editor — CodeMirror @codemirror/merge MergeView chrome. */
+.cm-recall-merge-host {
+  overflow: hidden;
+}
+.cm-recall-merge-host .cm-mergeView {
+  height: 100%;
+  overflow: auto;
+}
+.cm-recall-merge-host .cm-mergeViewEditor {
+  min-width: 0;
+}
+.cm-recall-merge-host .cm-collapsedLines {
+  color: var(--text-3);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  border-top: 0.5px dashed var(--border);
+  border-bottom: 0.5px dashed var(--border);
+}
+/*
+ * Recall is a strict-prefix exercise, not a free-form diff: the draft is always a verified
+ * correct prefix of the reference, so the stock @codemirror/merge "changed line" flood (the
+ * whole reference lighting up green) is noise, not signal. The recall-progress highlighter
+ * (lib/editor/recallProgress.ts) drives the real per-line done/current/upcoming state instead,
+ * so neutralize the merge diff's own coloring down to a faint gutter tick.
+ */
+.cm-recall-merge-host .cm-changedLine,
+.cm-recall-merge-host .cm-deletedChunk {
+  background-color: transparent !important;
+}
+.cm-recall-merge-host .cm-changedText {
+  background: none !important;
+}
+.cm-recall-merge-host .cm-changedLineGutter,
+.cm-recall-merge-host .cm-deletedLineGutter {
+  background: color-mix(in srgb, var(--accent) 40%, transparent) !important;
+}
+/* Compact recall editor — denser chrome when compact toolbar is on. */
+.cm-recall-compact-chrome {
+  border-radius: calc(var(--radius) - 2px);
+}
+/* Recall pointer (.cm-recall-pointer-line / -gutter) styling lives in recallPointer.ts's baseTheme. */
+
+/*
+ * Recall progress highlighter (lib/editor/recallProgress.ts): reference-side line states plus
+ * the attempt-side "just completed" flash. Reveal levels (dim/blur/hidden) control how much of
+ * the not-yet-typed reference is visible ahead of the current line.
+ */
+.cm-recall-merge-host .cm-recall-done {
+  background-color: color-mix(in srgb, var(--good) 7%, transparent);
+  box-shadow: inset 2px 0 0 0 var(--good);
+}
+.cm-recall-merge-host .cm-recall-current {
+  background-color: color-mix(in srgb, var(--accent) 9%, transparent);
+  box-shadow: inset 2px 0 0 0 var(--accent);
+}
+.cm-recall-merge-host .cm-recall-match-cue {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+.cm-recall-merge-host .cm-recall-ghost-tail {
+  opacity: 0.45;
+}
+.cm-recall-merge-host .cm-recall-upcoming {
+  transition:
+    opacity 150ms ease,
+    filter 150ms ease;
+}
+.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-dim {
+  opacity: 0.32;
+}
+.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-blur {
+  filter: blur(4px);
+}
+.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-blur:hover {
+  filter: none;
+}
+/*
+ * Syntax-highlighted tokens set their own explicit color, which otherwise wins over the
+ * inherited value — force transparency on the line and every descendant span so hidden lines
+ * are actually hidden (not just recolored-then-overridden by token colors).
+ */
+.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden,
+.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden * {
+  color: transparent !important;
+  text-shadow: none;
+}
+.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden:hover,
+.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden:hover * {
+  color: inherit !important;
+}
+.cm-recall-merge-host .cm-recall-just-done {
+  animation: cm-recall-flash 650ms ease-out;
+}
+@keyframes cm-recall-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--good) 35%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+/* Brief shake on the whole recall shell when a mistake resets the draft to the skeleton. */
+.cm-recall-shake {
+  animation: cm-recall-shake 400ms ease-in-out;
+}
+@keyframes cm-recall-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(1px);
+  }
 }
 
 .cases-panel {
@@ -1758,16 +2001,6 @@ circle {
 }
 .sim-side .caption {
   margin-top: 0;
-}
-.sim-movenote {
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: var(--fs-xs, 12px);
-  margin-right: 8px;
-  padding: 1px 6px;
-  border-radius: 6px;
-  background: var(--surface-2);
-  color: var(--text);
 }
 .sim-q {
   font-size: var(--fs, 14px);

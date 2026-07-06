@@ -9,13 +9,31 @@ export function snapNodeWidth(n: PanelFlowNode): number | undefined {
 }
 
 /** Persist position + width; viz width is layout-owned in visualize mode. */
-export function snapNodeLayout(n: PanelFlowNode): { position: { x: number; y: number }; width?: number } {
+export function snapNodeLayout(n: PanelFlowNode): {
+  position: { x: number; y: number };
+  width?: number;
+  height?: number;
+  parentId?: string;
+  layoutSlots?: (string | null)[];
+  slotIndex?: number;
+} {
   const kind = (n.data as PanelNodeData | undefined)?.kind ?? n.id;
-  const entry: { position: { x: number; y: number }; width?: number } = { position: n.position };
+  const entry: {
+    position: { x: number; y: number };
+    width?: number;
+    height?: number;
+    parentId?: string;
+    layoutSlots?: (string | null)[];
+    slotIndex?: number;
+  } = { position: n.position };
   if (kind !== 'viz' && kind !== 'workbench') {
     const w = snapNodeWidth(n);
     if (w != null) entry.width = w;
   }
+  if (n.height != null) entry.height = n.height;
+  if (n.parentId) entry.parentId = n.parentId;
+  if (n.data.layoutSlots?.some(Boolean)) entry.layoutSlots = [...n.data.layoutSlots];
+  if (n.data.slotIndex != null) entry.slotIndex = n.data.slotIndex;
   return entry;
 }
 

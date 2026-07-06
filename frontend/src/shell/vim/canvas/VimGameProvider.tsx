@@ -37,7 +37,7 @@ function posKey([r, c]: Pos) {
 
 function levelFromHash(): string {
   if (typeof location === 'undefined') return VIM_LEVEL_IDS[0]!;
-  const parsed = parseVimHash(location.hash);
+  const parsed = parseVimHash(location.hash, location.pathname);
   if (parsed?.levelId && getVimLevel(parsed.levelId)) return parsed.levelId;
   return firstIncompleteLevelId(VIM_LEVEL_IDS, readVimProgress()) ?? VIM_LEVEL_IDS[0]!;
 }

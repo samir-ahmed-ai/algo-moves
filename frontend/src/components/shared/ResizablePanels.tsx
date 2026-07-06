@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { useResizeSplit, type ResizeDirection } from '@/hooks/useResizeSplit';
 
-function ResizeHandle({
+export function ResizeHandle({
   direction,
   handleProps,
 }: {
@@ -40,8 +40,11 @@ export interface ResizablePanelsProps {
   first: ReactNode;
   second: ReactNode;
   className?: string;
+  firstClassName?: string;
   /** When true, renders a static flex split without a drag handle. */
   disabled?: boolean;
+  /** Fixed pixel width for the first pane (overrides percentage split). */
+  firstWidthPx?: number;
 }
 
 export function ResizablePanels({
@@ -54,7 +57,9 @@ export function ResizablePanels({
   first,
   second,
   className,
+  firstClassName,
   disabled,
+  firstWidthPx,
 }: ResizablePanelsProps) {
   const { containerRef, splitPct, handleProps } = useResizeSplit({
     direction,
@@ -78,8 +83,16 @@ export function ResizablePanels({
       )}
     >
       <div
-        className="flex min-h-0 min-w-0 flex-col overflow-hidden"
-        style={horizontal ? { width: `${firstSize}%` } : { height: `${firstSize}%` }}
+        className={cn('flex min-h-0 min-w-0 flex-col overflow-hidden', firstClassName)}
+        style={
+          firstWidthPx != null
+            ? horizontal
+              ? { width: firstWidthPx }
+              : { height: firstWidthPx }
+            : horizontal
+              ? { width: `${firstSize}%` }
+              : { height: `${firstSize}%` }
+        }
       >
         {first}
       </div>

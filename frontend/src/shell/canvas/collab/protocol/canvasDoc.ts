@@ -13,7 +13,7 @@ import type { CanvasComment, CanvasDoc, EditOp } from './collabProtocol';
  * else on a node's data — notably `runState` and any panel-interior state — is
  * per-user and preserved locally when a remote update lands.
  */
-const COLLAB_DATA_FIELDS = ['title', 'collapsed', 'accent', 'locked', 'style'] as const;
+const COLLAB_DATA_FIELDS = ['title', 'collapsed', 'accent', 'locked', 'style', 'layoutSlots', 'slotIndex', 'layoutHost'] as const;
 
 type CollabData = Partial<Pick<PanelNodeData, (typeof COLLAB_DATA_FIELDS)[number]>>;
 
@@ -42,7 +42,7 @@ export function docSignature(
     .map((node) => {
       const pos = node.dragging ? 'drag' : `${round(node.position.x)},${round(node.position.y)}`;
       const d = node.data;
-      return `${node.id}:${pos}:${round(node.width ?? 0)}:${d.collapsed ? 1 : 0}:${d.accent ?? ''}:${d.locked ? 1 : 0}:${JSON.stringify(d.style ?? '')}:${d.title ?? ''}`;
+      return `${node.id}:${node.parentId ?? ''}:${pos}:${round(node.width ?? 0)}:${round(node.height ?? 0)}:${d.collapsed ? 1 : 0}:${d.accent ?? ''}:${d.locked ? 1 : 0}:${JSON.stringify(d.style ?? '')}:${d.title ?? ''}:${JSON.stringify(d.layoutSlots ?? '')}:${d.slotIndex ?? ''}:${d.layoutHost ? 1 : 0}`;
     })
     .join('|');
   const e = edges.map((edge) => `${edge.id}>${edge.source}-${edge.target}:${(edge.data as { label?: string })?.label ?? ''}`).join('|');
@@ -75,8 +75,18 @@ export function diffNodes(prev: PanelFlowNode[], next: PanelFlowNode[]): EditOp[
     const movedX = round(node.position.x) !== round(before.position.x);
     const movedY = round(node.position.y) !== round(before.position.y);
     const resized = round(node.width ?? 0) !== round(before.width ?? 0);
-    if (movedX || movedY || resized) {
-      ops.push({ __canvas: 'node-move', id: node.id, x: node.position.x, y: node.position.y, width: node.width });
+    const resizedH = round(node.height ?? 0) !== round(before.height ?? 0);
+    const reparented = (node.parentId ?? '') !== (before.parentId ?? '');
+    if (movedX || movedY || resized || resizedH || reparented) {
+      ops.push({
+        __canvas: 'node-move',
+        id: node.id,
+        x: node.position.x,
+        y: node.position.y,
+        width: node.width,
+        height: node.height,
+        parentId: node.parentId,
+      });
     }
     const beforeData = JSON.stringify(pickCollabData(before.data));
     const afterData = JSON.stringify(pickCollabData(node.data));
@@ -115,7 +125,20 @@ export function applyEditToNodes(op: EditOp, nodes: PanelFlowNode[]): PanelFlowN
       return nodes.filter((n) => n.id !== op.id);
     case 'node-move':
       return nodes.map((n) =>
-        n.id === op.id ? { ...n, position: { x: op.x, y: op.y }, ...(op.width != null ? { width: op.width } : {}) } : n,
+        n.id === op.id
+          ? {
+              ...n,
+              position: { x: op.x, y: op.y },
+              ...(op.width != null ? { width: op.width } : {}),
+              ...(op.height != null ? { height: op.height } : {}),
+              ...(op.parentId !== undefined
+                ? {
+                    parentId: op.parentId,
+                    extent: op.parentId ? ('parent' as const) : undefined,
+                  }
+                : {}),
+            }
+          : n,
       );
     case 'node-patch':
       return nodes.map((n) => (n.id === op.id ? { ...n, data: { ...n.data, ...op.data } } : n));

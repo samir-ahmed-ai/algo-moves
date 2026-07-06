@@ -383,8 +383,8 @@ export function makeSimulatePanel<I, S>(config: SimulateConfig<I, S>) {
 
           <div className="sim-side">
             <div className={`caption ${move.tone ?? 'default'}`}>
-              <span className="sim-movenote">{move.note}</span>
-              {move.caption}
+              <span className="caption-note">{move.note}</span>
+              <span className="caption-body">{move.caption}</span>
             </div>
 
             {feedback && !done && (

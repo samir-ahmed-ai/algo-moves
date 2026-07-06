@@ -1,4 +1,3 @@
-export * from './CanvasDockPanel';
 export * from './CanvasFloatingHud';
 export * from './CanvasToolbar';
 export * from './CanvasTools';
@@ -17,3 +16,5 @@ export * from './canvasChromeBodies';
 export * from './canvasTokens';
 export * from './inspectorUi';
 export * from './nodeui';
+export * from './PanelHeaderLayoutMenu';
+export * from './LayoutHostFrame';

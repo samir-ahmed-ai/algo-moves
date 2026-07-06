@@ -15,7 +15,17 @@ import {
 import { restoreNodeWidth } from '../nodes/nodeSnapshot';
 
 /** Persisted per-node position + width (see useCanvasLayoutPersistence `Saved`). */
-export type SavedNodeLayout = Record<string, { position: { x: number; y: number }; width?: number }>;
+export type SavedNodeLayout = Record<
+  string,
+  {
+    position: { x: number; y: number };
+    width?: number;
+    height?: number;
+    parentId?: string;
+    layoutSlots?: (string | null)[];
+    slotIndex?: number;
+  }
+>;
 
 export interface CanvasFrameInput {
   /** Node ids the user removed in this mode. */
@@ -69,15 +79,35 @@ export function buildCanvasFrame(
   if (saved) {
     nodes = nodes.map((n) => {
       if (!saved[n.id]) return n;
+      const s = saved[n.id];
       const kind = n.data.kind ?? n.id;
       const width =
         mode === 'visualize' && (kind === 'viz' || kind === 'workbench')
           ? n.width
-          : restoreNodeWidth(kind, saved[n.id].width, n.width);
-      if (mode === 'learn') {
-        return { ...n, position: n.position, width };
-      }
-      return { ...n, position: saved[n.id].position, width };
+          : restoreNodeWidth(kind, s.width, n.width);
+      const height = s.height ?? n.height;
+      const layoutSlots = s.layoutSlots?.length ? [...s.layoutSlots] : n.data.layoutSlots;
+      const slotIndex = s.slotIndex ?? n.data.slotIndex;
+      const parentId = s.parentId ?? n.parentId;
+      const base =
+        mode === 'learn'
+          ? { ...n, position: n.position, width, height, parentId, extent: parentId ? ('parent' as const) : undefined }
+          : {
+              ...n,
+              position: s.position,
+              width,
+              height,
+              parentId,
+              extent: parentId ? ('parent' as const) : undefined,
+            };
+      return {
+        ...base,
+        data: {
+          ...n.data,
+          ...(layoutSlots?.some(Boolean) ? { layoutSlots } : {}),
+          ...(slotIndex != null ? { slotIndex } : {}),
+        },
+      };
     });
   }
 

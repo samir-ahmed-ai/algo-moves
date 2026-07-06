@@ -34,6 +34,7 @@ const GROUPS: [PluginGroup, ProblemPlugin<any, any>[]][] = [
 interface MetaEntry {
   id: string;
   title: string;
+  number?: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   tags: string[];
   summary: string;
@@ -51,6 +52,7 @@ for (const [group, plugins] of GROUPS) {
     metas.push({
       id: m.id,
       title: m.title,
+      ...(m.number ? { number: m.number } : {}),
       difficulty: m.difficulty,
       tags: m.tags,
       summary: m.summary,
@@ -66,7 +68,7 @@ const metaFile =
   BANNER +
   `import type { PluginGroup } from '..';\n\n` +
   `export interface PluginMetaEntry {\n` +
-  `  id: string;\n  title: string;\n  difficulty: 'Easy' | 'Medium' | 'Hard';\n` +
+  `  id: string;\n  title: string;\n  number?: string;\n  difficulty: 'Easy' | 'Medium' | 'Hard';\n` +
   `  tags: string[];\n  summary: string;\n  source?: string;\n  group: PluginGroup;\n}\n\n` +
   `export const PLUGIN_META: PluginMetaEntry[] = ${JSON.stringify(metas, null, 2)};\n`;
 

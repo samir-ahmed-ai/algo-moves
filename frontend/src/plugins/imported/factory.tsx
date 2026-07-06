@@ -171,6 +171,7 @@ export function makeImportedPlugin(p: ImportedProblem): ProblemPlugin<any, any> 
   const meta = {
     id: p.id,
     title: p.title,
+    number: p.number,
     difficulty: p.difficulty,
     tags: p.tags,
     source: p.leetcode || undefined,

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useWorkspace } from '@/store/workspace';
+import { catalog, getSiblingItems } from '@/content';
 import { useNarration, useSoundCues } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { WorkspaceMenu } from './workspace/WorkspaceMenu';
@@ -23,12 +24,23 @@ export function Workspace() {
     mobileTransportOpen,
     setMobileTransportOpen,
     toggleFocusCanvas,
+    openProblem,
   } = useWorkspace();
   const narrate = tweaks.narrate;
   const [helpOpen, setHelpOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const { item, plugin, pluginLoading, inputId, customInput, setCustomInput, selectInput, frames, runtimeError, player, frame } =
     useWorkspaceRuntime(activeItemId);
+
+  const siblings = useMemo(() => getSiblingItems(activeItemId, catalog), [activeItemId]);
+  const siblingIdx = siblings.findIndex((i) => i.id === activeItemId);
+  const hasSiblingNav =
+    problemFocused && (mode === 'learn' || mode === 'play') && siblings.length >= 2 && siblingIdx >= 0;
+
+  const goSibling = (delta: number) => {
+    const n = (siblingIdx + delta + siblings.length) % siblings.length;
+    openProblem(siblings[n].id);
+  };
 
   useWorkspaceKeyboard({
     mode,
@@ -40,6 +52,9 @@ export function Workspace() {
     setHelpOpen,
     setPaletteOpen,
     toggleFocusCanvas,
+    hasSiblingNav,
+    onPrevProblem: hasSiblingNav ? () => goSibling(-1) : undefined,
+    onNextProblem: hasSiblingNav ? () => goSibling(1) : undefined,
   });
 
   // Text-to-speech narration + per-step sound cues.
@@ -54,32 +69,36 @@ export function Workspace() {
         !tweaks.animate && '[&_*]:!transition-none [&_*]:!animate-none',
       )}
     >
-      <div className="relative min-h-0 min-w-0 flex-1 h-full">
-        {!present && mode !== 'visualize' && (
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col h-full">
+        {!present && mode !== 'visualize' && mode !== 'learn' && mode !== 'play' && (
           <WorkspaceMenu
             onOpenPalette={() => setPaletteOpen(true)}
             onOpenHelp={() => setHelpOpen(true)}
           />
         )}
-        <ModeRouter
-          activeTrackId={activeTrackId}
-          activeCategoryId={activeCategoryId}
-          problemFocused={problemFocused}
-          mode={mode}
-          pluginLoading={pluginLoading}
-          plugin={plugin}
-          item={item}
-          inputId={inputId}
-          selectInput={selectInput}
-          customInput={customInput}
-          setCustomInput={setCustomInput}
-          frames={frames}
-          runtimeError={runtimeError}
-          player={player}
-          frame={frame}
-          backToBrowse={backToBrowse}
-          goHome={goHome}
-        />
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <ModeRouter
+            activeTrackId={activeTrackId}
+            activeCategoryId={activeCategoryId}
+            problemFocused={problemFocused}
+            mode={mode}
+            pluginLoading={pluginLoading}
+            plugin={plugin}
+            item={item}
+            inputId={inputId}
+            selectInput={selectInput}
+            customInput={customInput}
+            setCustomInput={setCustomInput}
+            frames={frames}
+            runtimeError={runtimeError}
+            player={player}
+            frame={frame}
+            backToBrowse={backToBrowse}
+            goHome={goHome}
+            onOpenPalette={() => setPaletteOpen(true)}
+            onOpenHelp={() => setHelpOpen(true)}
+          />
+        </div>
       </div>
 
       {present && <PresentationModeHint />}

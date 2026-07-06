@@ -36,6 +36,17 @@
   }
 }
 
+/* Problem statement column — smooth collapse/expand in Learn Studio split layout. */
+.studio-problem-pane {
+  flex-shrink: 0;
+  transition: width 0.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-problem-pane {
+    transition: none;
+  }
+}
+
 /* ============================================================ Assemble blocks
  * Code pieces rendered as physical, interlocking puzzle blocks. A two-layer clip
  * (stroke layer + tinted face) gives a coloured outline that follows the puzzle

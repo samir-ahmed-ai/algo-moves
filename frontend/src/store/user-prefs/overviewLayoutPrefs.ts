@@ -4,12 +4,6 @@ import {
   OVERVIEW_PROBLEM_DEFAULT,
   OVERVIEW_PROBLEM_MAX,
   OVERVIEW_PROBLEM_MIN,
-  OVERVIEW_TOP_DEFAULT,
-  OVERVIEW_TOP_MAX,
-  OVERVIEW_TOP_MIN,
-  OVERVIEW_VIZ_DEFAULT,
-  OVERVIEW_VIZ_MAX,
-  OVERVIEW_VIZ_MIN,
 } from '@/lib/editor/resizeSplit';
 import { readStorageJson } from '@/store/persistence/storage';
 import { STORAGE_KEYS } from '@/store/storageKeys';
@@ -17,15 +11,13 @@ import { createSyncStore } from '@/store/createSyncStore';
 
 export interface OverviewLayoutPrefs {
   problemPct: number;
-  recallTopPct: number;
-  vizPct: number;
+  problemCollapsed: boolean;
 }
 
 const KEY = STORAGE_KEYS.OVERVIEW_LAYOUT;
 const DEFAULTS: OverviewLayoutPrefs = {
   problemPct: OVERVIEW_PROBLEM_DEFAULT,
-  recallTopPct: OVERVIEW_TOP_DEFAULT,
-  vizPct: OVERVIEW_VIZ_DEFAULT,
+  problemCollapsed: false,
 };
 
 function clampPrefs(data: Partial<OverviewLayoutPrefs>): OverviewLayoutPrefs {
@@ -35,16 +27,7 @@ function clampPrefs(data: Partial<OverviewLayoutPrefs>): OverviewLayoutPrefs {
       OVERVIEW_PROBLEM_MIN,
       OVERVIEW_PROBLEM_MAX,
     ),
-    recallTopPct: clampSplitPct(
-      typeof data.recallTopPct === 'number' ? data.recallTopPct : DEFAULTS.recallTopPct,
-      OVERVIEW_TOP_MIN,
-      OVERVIEW_TOP_MAX,
-    ),
-    vizPct: clampSplitPct(
-      typeof data.vizPct === 'number' ? data.vizPct : DEFAULTS.vizPct,
-      OVERVIEW_VIZ_MIN,
-      OVERVIEW_VIZ_MAX,
-    ),
+    problemCollapsed: data.problemCollapsed === true,
   };
 }
 

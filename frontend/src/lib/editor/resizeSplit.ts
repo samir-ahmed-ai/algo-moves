@@ -18,13 +18,3 @@ export const OVERVIEW_PROBLEM_DEFAULT = 32;
 /** Concept courses (code trace, no graph board): wider problem column by default. */
 export const OVERVIEW_PROBLEM_CONCEPT_DEFAULT = 42;
 export const OVERVIEW_PROBLEM_CONCEPT_MAX = 55;
-
-/** Overview layout: top row height (problem + viz); bottom is recall editor. */
-export const OVERVIEW_TOP_MIN = 35;
-export const OVERVIEW_TOP_MAX = 80;
-export const OVERVIEW_TOP_DEFAULT = 62;
-
-/** Overview layout: viz column within the animation + transport row. */
-export const OVERVIEW_VIZ_MIN = 70;
-export const OVERVIEW_VIZ_MAX = 96;
-export const OVERVIEW_VIZ_DEFAULT = 88;

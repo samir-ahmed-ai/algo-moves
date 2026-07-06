@@ -3,19 +3,22 @@ import { isVimHash, parseVimHash } from './vimHash';
 
 describe('vimHash', () => {
   it('parses bare vim hash', () => {
+    expect(parseVimHash('', '/vim')).toEqual({});
     expect(parseVimHash('#vim')).toEqual({});
   });
 
   it('parses level deep link', () => {
+    expect(parseVimHash('#level/basic-01', '/vim')).toEqual({ levelId: 'basic-01' });
     expect(parseVimHash('#vim/level/basic-01')).toEqual({ levelId: 'basic-01' });
   });
 
   it('returns null for non-vim hash', () => {
-    expect(parseVimHash('#home')).toBeNull();
+    expect(parseVimHash('#home', '/home')).toBeNull();
   });
 
   it('detects vim hash prefix', () => {
+    expect(isVimHash('#level/find-01', '/vim')).toBe(true);
     expect(isVimHash('#vim/level/find-01')).toBe(true);
-    expect(isVimHash('#mobile')).toBe(false);
+    expect(isVimHash('#mobile', '/mobile')).toBe(false);
   });
 });

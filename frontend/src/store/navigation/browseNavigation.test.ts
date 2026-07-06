@@ -13,6 +13,13 @@ describe('initialBrowseFromHash', () => {
 
   it('hydrates track and category from mobile hash', () => {
     expect(
+      initialBrowseFromHash('#track/data-structures/category/prep-arrays-all', null, '/mobile'),
+    ).toEqual({
+      trackId: 'data-structures',
+      categoryId: 'prep-arrays-all',
+      topicId: null,
+    });
+    expect(
       initialBrowseFromHash('#mobile/track/data-structures/category/prep-arrays-all'),
     ).toEqual({
       trackId: 'data-structures',
@@ -22,7 +29,7 @@ describe('initialBrowseFromHash', () => {
   });
 
   it('hydrates legacy browse topic id from mobile hash', () => {
-    expect(initialBrowseFromHash('#mobile/topic/browse-prep-arrays-all')).toEqual({
+    expect(initialBrowseFromHash('#topic/browse-prep-arrays-all', null, '/mobile')).toEqual({
       trackId: null,
       categoryId: 'prep-arrays-all',
       topicId: 'browse-prep-arrays-all',

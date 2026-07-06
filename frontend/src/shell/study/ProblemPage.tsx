@@ -13,14 +13,15 @@ import {
   Btn,
   Chip,
   difficultyTone,
-  TransportBar,
   CanvasFrameProvider,
   CanvasStaticProvider,
   useCanvasStatic,
 } from '@/shell/canvas';
-import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { ProblemPanelBody } from '@/shell/panels/problem/ProblemPanelBody';
-import { VizPanelBody } from '@/shell/panels/visualize/VizPanelBody';
+import { OverviewContentColumn, OverviewProblemColumn } from '@/shell/panels/problem/overviewColumns';
+import { StudioSplitLayout } from '@/shell/panels/problem/studioSplitLayout';
+import { useOverviewView } from '@/shell/panels/problem/useOverviewView';
+import { CodeStudioProvider, useCodeStudioContent } from './CodeStudio';
 
 export interface ProblemPageProps {
   plugin: ProblemPlugin<any, any>;
@@ -32,6 +33,8 @@ export interface ProblemPageProps {
   frames: Frame<any>[];
   player: Player;
   frame: Frame<any>;
+  onOpenPalette?: () => void;
+  onOpenHelp?: () => void;
 }
 
 export function ProblemPage({
@@ -66,7 +69,9 @@ export function ProblemPage({
   return (
     <CanvasStaticProvider value={staticValue}>
       <CanvasFrameProvider value={frameValue}>
-        <ProblemPageShell />
+        <CodeStudioProvider>
+          <ProblemPageShell />
+        </CodeStudioProvider>
       </CanvasFrameProvider>
     </CanvasStaticProvider>
   );
@@ -75,42 +80,27 @@ export function ProblemPage({
 function ProblemPageShell() {
   const isMobile = useIsMobile();
   const { item } = useCanvasStatic();
-  const conceptCourse = isConceptCourse(item);
+  const { reference } = useCodeStudioContent();
+  const hasRecall = !!reference;
+  const [view, setView] = useOverviewView(item.id);
+  const showViz = view === 'animate' || !hasRecall;
 
   return (
     <div className="flex h-full w-full flex-col bg-bg">
       <ProblemPageHeader />
-      <div
-        className={cn(
-          'flex min-h-0 flex-1 overflow-hidden',
-          isMobile ? 'flex-col' : 'flex-row',
-        )}
-      >
-        <aside
-          className={cn(
-            'ws-scroll shrink-0 overflow-y-auto border-edge bg-panel/40',
-            isMobile
-              ? 'max-h-[40vh] border-b'
-              : conceptCourse
-                ? 'w-[min(440px,42vw)] border-r'
-                : 'w-[min(380px,38vw)] border-r',
-          )}
-        >
-          <div className="p-3 sm:p-4">
-            <div className="rounded-[var(--radius)] border border-edge bg-panel p-3 sm:p-4">
-              <ProblemPanelBody />
-            </div>
-          </div>
-        </aside>
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <VizPanelBody showTransport={false} />
-          </div>
-          <div className="flex shrink-0 justify-center border-t border-edge bg-panel/80 px-3 py-2 backdrop-blur">
-            <TransportBar />
-          </div>
-        </main>
-      </div>
+      <StudioSplitLayout
+        problem={
+          <OverviewProblemColumn
+            className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
+            view={view}
+            onView={setView}
+            hasRecall={hasRecall}
+          >
+            <ProblemPanelBody />
+          </OverviewProblemColumn>
+        }
+        second={<OverviewContentColumn showViz={showViz} />}
+      />
     </div>
   );
 }

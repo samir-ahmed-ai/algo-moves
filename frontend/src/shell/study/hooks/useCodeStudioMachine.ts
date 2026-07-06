@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
-import { assembleDraft, type CodePiece } from '@/lib/code';
+import { type CodePiece } from '@/lib/code';
 import {
   clearQuizProgress,
   clearReassembleProgress,
@@ -14,7 +14,7 @@ import {
   type QuizProgress,
 } from '@/store/user-prefs';
 import { usePhaseTransition } from './usePhaseTransition';
-import { readStorageText, writeStorageText } from '@/store/persistence';
+import { writeStorageText } from '@/store/persistence';
 import { recordAttempt } from '@/store/persistence';
 
 /**
@@ -27,8 +27,6 @@ export function useCodeStudioMachine({
   itemId,
   active,
   av,
-  skeleton,
-  reference,
   draftKey,
   phaseLock,
   setTimerRunning,
@@ -37,8 +35,6 @@ export function useCodeStudioMachine({
   itemId: string;
   active: number;
   av: PhaseAvailability;
-  skeleton: string;
-  reference: string;
   draftKey: string;
   phaseLock?: CodeStudioPhase;
   setTimerRunning: Dispatch<SetStateAction<boolean>>;
@@ -50,10 +46,7 @@ export function useCodeStudioMachine({
 
   const [phase, setPhase] = useState<CodeStudioPhase>(() => phaseLock ?? loadPhase(itemId, active, av));
 
-  const loadDraft = useCallback(() => {
-    if (!reference) return '';
-    return readStorageText(draftKey, skeleton) ?? '';
-  }, [draftKey, skeleton, reference]);
+  const loadDraft = useCallback(() => '', []);
 
   const [draft, setDraft] = useState(loadDraft);
 
@@ -74,9 +67,10 @@ export function useCodeStudioMachine({
   );
 
   const enterRecall = useCallback(
-    (draftValue: string, startTimer = true) => {
+    (startTimer = true) => {
       setPhaseTransition(true);
-      persistDraft(draftValue);
+      persistDraft('');
+      writeStorageText(draftKey, '');
       savePhase(itemId, active, 'recall');
       clearReassembleProgress(itemId, active);
       scheduleTransition(() => {
@@ -86,7 +80,7 @@ export function useCodeStudioMachine({
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [persistDraft, itemId, active, scheduleTransition],
+    [persistDraft, draftKey, itemId, active, scheduleTransition],
   );
 
   /** Animated, persisted jump to any phase (stepper navigation). Re-entering the
@@ -96,6 +90,10 @@ export function useCodeStudioMachine({
       if (phaseLock) return;
       if (target === phase) return;
       if (target === 'quiz') clearQuizProgress(itemId, active);
+      if (target === 'recall') {
+        persistDraft('');
+        writeStorageText(draftKey, '');
+      }
       setPhaseTransition(true);
       savePhase(itemId, active, target);
       if (target !== 'recall') {
@@ -108,7 +106,7 @@ export function useCodeStudioMachine({
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [phase, itemId, active, scheduleTransition],
+    [phase, itemId, active, draftKey, persistDraft, scheduleTransition],
   );
 
   /** Skip / continue to the next phase in the sequence. */
@@ -116,10 +114,10 @@ export function useCodeStudioMachine({
     if (phaseLock) return;
     const target = nextPhase(phase, av);
     if (target === phase) return;
-    if (target === 'recall') enterRecall(skeleton, false);
+    if (target === 'recall') enterRecall(false);
     else goToPhase(target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, av, enterRecall, skeleton, goToPhase]);
+  }, [phase, av, enterRecall, goToPhase]);
 
   const resetReassemble = useCallback(() => {
     clearReassembleProgress(itemId, active);
@@ -132,12 +130,12 @@ export function useCodeStudioMachine({
   }, [itemId, active]);
 
   const onReassembleComplete = useCallback(
-    (placed: CodePiece[], mistakes: number) => {
+    (_placed: CodePiece[], mistakes: number) => {
       if (mistakes <= 3) recordAttempt(itemId, true);
       if (phaseLock === 'reassemble') return;
-      enterRecall(assembleDraft(reference, placed), true);
+      enterRecall(true);
     },
-    [enterRecall, itemId, reference, phaseLock],
+    [enterRecall, itemId, phaseLock],
   );
 
   const onQuizProgress = useCallback(
@@ -147,9 +145,9 @@ export function useCodeStudioMachine({
 
   const onQuizContinue = useCallback(() => {
     const target = nextPhase('quiz', av);
-    if (target === 'recall') enterRecall(skeleton, false);
+    if (target === 'recall') enterRecall(false);
     else goToPhase(target);
-  }, [av, enterRecall, skeleton, goToPhase]);
+  }, [av, enterRecall, goToPhase]);
 
   const savedReassembleProgress = useMemo(
     () => (phase === 'reassemble' ? loadReassembleProgress(itemId, active) : null),

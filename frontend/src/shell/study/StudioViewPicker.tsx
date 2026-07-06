@@ -10,10 +10,12 @@ export interface StudioViewPickerProps {
   avail: StudioTab[];
   active: StudioTab;
   onGo: (id: string) => void;
+  /** Icon-only trigger for narrow viewports. */
+  compact?: boolean;
 }
 
 /** Grouped view picker — replaces the old sidebar nav with one dropdown. */
-export function StudioViewPicker({ stages, avail, active, onGo }: StudioViewPickerProps) {
+export function StudioViewPicker({ stages, avail, active, onGo, compact }: StudioViewPickerProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   usePopoverDismiss(rootRef, open, () => setOpen(false));
@@ -32,15 +34,21 @@ export function StudioViewPicker({ stages, avail, active, onGo }: StudioViewPick
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={compact ? `${active.label} view` : undefined}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          'flex max-w-[min(220px,42vw)] items-center gap-1.5 rounded-md border border-edge bg-panel2/60 px-2 py-1 transition-colors hover:bg-panel2',
+          'flex items-center gap-1.5 rounded-md border border-edge bg-panel2/60 transition-colors hover:bg-panel2',
+          compact ? 'h-7 w-7 shrink-0 justify-center px-0 py-0' : 'max-w-[min(220px,42vw)] px-2 py-1',
           open && 'border-edge-active bg-panel2',
         )}
       >
         <ActiveIcon className="h-4 w-4 shrink-0 text-accent" />
-        <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>{active.label}</span>
-        <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 text-ink3 transition-transform', open && 'rotate-180')} />
+        {!compact && (
+          <>
+            <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>{active.label}</span>
+            <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 text-ink3 transition-transform', open && 'rotate-180')} />
+          </>
+        )}
       </button>
       {open && (
         <div

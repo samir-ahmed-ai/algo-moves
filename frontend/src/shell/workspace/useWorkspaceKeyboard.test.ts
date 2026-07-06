@@ -43,4 +43,16 @@ describe('resolveWorkspaceKeyboardAction', () => {
     expect(action({ key: 'C' })).toBe('toggle-focus-canvas');
     expect(action({ key: 'c', editableTarget: true })).toBe('none');
   });
+
+  it('routes sibling problem navigation when available', () => {
+    expect(action({ key: '[', mode: 'learn', hasSiblingNav: true })).toBe('prev-problem');
+    expect(action({ key: ']', mode: 'play', hasSiblingNav: true })).toBe('next-problem');
+    expect(action({ key: '[', hasSiblingNav: false })).toBe('none');
+  });
+
+  it('blocks sibling navigation in editable targets and overlays', () => {
+    expect(action({ key: '[', hasSiblingNav: true, editableTarget: true })).toBe('none');
+    expect(action({ key: ']', hasSiblingNav: true, paletteOpen: true })).toBe('none');
+    expect(action({ key: '[', hasSiblingNav: true, helpOpen: true })).toBe('none');
+  });
 });

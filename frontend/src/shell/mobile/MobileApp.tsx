@@ -30,7 +30,7 @@ function resolveTopic(parsed: ReturnType<typeof parseMobileHash>): Topic | undef
 
 function targetFromHash(): DeckTarget | null {
   if (typeof location === 'undefined') return null;
-  const parsed = parseMobileHash(location.hash);
+  const parsed = parseMobileHash(location.hash, location.pathname);
   if (!parsed?.itemId && !parsed?.categoryId && !parsed?.topicId) return null;
   const topic = resolveTopic(parsed);
   if (!topic) return null;
@@ -40,7 +40,7 @@ function targetFromHash(): DeckTarget | null {
 
 function browseFromHash(): { trackId?: string; categoryId?: string } | null {
   if (typeof location === 'undefined') return null;
-  const parsed = parseMobileHash(location.hash);
+  const parsed = parseMobileHash(location.hash, location.pathname);
   if (!parsed || parsed.itemId) return null;
   if (parsed.trackId || parsed.categoryId) {
     return { trackId: parsed.trackId, categoryId: parsed.categoryId };
@@ -97,7 +97,7 @@ export function MobileApp() {
         if (browse.trackId) setActiveTrackId(browse.trackId as typeof activeTrackId);
         if (browse.categoryId !== undefined) setActiveCategoryId(browse.categoryId ?? null);
         setActiveTopicId(null);
-      } else if (isMobileHash(location.hash)) {
+      } else if (isMobileHash(location.hash, location.pathname)) {
         setActiveTopicId(null);
         setActiveTrackId(null);
         setActiveCategoryId(null);
