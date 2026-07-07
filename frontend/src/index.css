@@ -243,6 +243,87 @@ html {
   }
 }
 
+/* Landing roadmap — marching curved road, milestone glow, and stop polish. */
+.roadmap-road-path {
+  stroke-dasharray: 5 15;
+  animation: roadmapDash 1s linear infinite;
+}
+
+.roadmap-stop {
+  animation: roadmapStopIn 0.5s ease both;
+}
+
+.roadmap-stop:hover {
+  border-color: color-mix(in srgb, var(--stop-c1, var(--accent)) 55%, var(--edge));
+  box-shadow: 0 20px 44px -20px color-mix(in srgb, var(--stop-c1, var(--accent)) 65%, transparent);
+}
+
+.roadmap-dot {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--stop-c1, var(--accent)) 22%, transparent);
+}
+
+.roadmap-dot::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in srgb, var(--stop-c1, var(--accent)) 60%, transparent);
+  animation: roadmapPulse 2.4s ease-out infinite;
+}
+
+@keyframes roadmapDash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes roadmapPulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes roadmapStopIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .roadmap-dot::after {
+    inset: -4px;
+  }
+
+  .roadmap-stop:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-road-path {
+    animation: none;
+  }
+  .roadmap-stop {
+    animation: none;
+  }
+  .roadmap-dot::after {
+    animation: none;
+  }
+  .roadmap-traveller {
+    display: none;
+  }
+}
+
 .ws-scroll {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--text-3) 34%, transparent) transparent;

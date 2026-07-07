@@ -1,7 +1,7 @@
 import type { MazeGrid, Pos } from '../engine/vimMotions';
 
-import { MAZE_CELL_SIZE, MAZE_GRID_GAP, mazeBoardDimensions, mazeNodeSize } from '../canvas/layout/mazeMetrics';
-export { mazeBoardDimensions, mazeNodeSize, MAZE_CELL_SIZE, MAZE_GRID_GAP };
+import { MAZE_CELL_SIZE, MAZE_GRID_GAP, mazeBoardDimensions, mazeCellFontSize, mazeNodeSize } from '../canvas/layout/mazeMetrics';
+export { mazeBoardDimensions, mazeCellFontSize, mazeNodeSize, MAZE_CELL_SIZE, MAZE_GRID_GAP };
 
 export interface MazeBoardProps {
   grid: MazeGrid;
@@ -33,6 +33,7 @@ export function MazeBoard({
   const cols = grid.reduce((m, row) => Math.max(m, row.length), 0);
   const [cr, cc] = cursor;
   const [gr, gc] = goal;
+  const glyphSize = mazeCellFontSize(cellSize);
 
   return (
     <div className="relative inline-block max-w-full">
@@ -69,7 +70,7 @@ export function MazeBoard({
               <div
                 key={cellKey(r, c)}
                 className={`grid-cell vim-maze-cell ${tone} ${isCursor ? 'vim-maze-cursor active' : ''} ${shake && isCursor ? 'vim-maze-cursor--shake' : ''}`}
-                style={{ width: cellSize, height: cellSize }}
+                style={{ width: cellSize, height: cellSize, fontSize: glyphSize }}
               >
                 <span className={isCursor ? 'vim-maze-cursor-glyph' : undefined}>{display}</span>
               </div>
@@ -78,7 +79,7 @@ export function MazeBoard({
         )}
       </div>
       {showHint && hint ? (
-        <div className="mt-2 max-w-xs rounded border border-edge bg-panel2/90 px-2 py-1 text-[11px] text-ink2">
+        <div className="mt-2 max-w-xs rounded border border-edge bg-panel2/90 px-2.5 py-1.5 text-sm text-ink2">
           <span className="font-medium text-accent">Hint:</span> {hint}
         </div>
       ) : null}

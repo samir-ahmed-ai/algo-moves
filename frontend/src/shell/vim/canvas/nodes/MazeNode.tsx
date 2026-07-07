@@ -33,19 +33,21 @@ export function MazeNode({ id }: NodeProps) {
         style={{ left: '50%' }}
       />
       <div className="w-[3px] shrink-0 self-stretch rounded-full bg-accent/80" aria-hidden />
-      <div className="min-w-0 flex-1 pl-2">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col pl-2">
         <p className="vim-maze-node__title truncate">{level.title}</p>
-        <MazeBoard
-          grid={level.grid}
-          cursor={cursor}
-          goal={level.goal}
-          visited={visited}
-          shake={shake}
-          complete={complete}
-          showHint={showHint}
-          hint={level.hint}
-          cellSize={cellSize}
-        />
+        <div className="flex min-h-0 flex-1 items-center justify-center">
+          <MazeBoard
+            grid={level.grid}
+            cursor={cursor}
+            goal={level.goal}
+            visited={visited}
+            shake={shake}
+            complete={complete}
+            showHint={showHint}
+            hint={level.hint}
+            cellSize={cellSize}
+          />
+        </div>
       </div>
     </div>
   );

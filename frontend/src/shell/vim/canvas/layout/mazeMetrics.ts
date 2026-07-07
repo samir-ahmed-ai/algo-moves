@@ -42,6 +42,47 @@ export function mazeNodeSize(grid: MazeGrid, cellSize = MAZE_CELL_SIZE): { w: nu
   };
 }
 
+/** Largest cell size (flow-space px) used when the maze node fills the canvas. */
+export const MAX_FILL_CELL_SIZE = 160;
+
+/** Glyph size inside a maze cell, scaled to cell dimensions. */
+export function mazeCellFontSize(cellSize: number): number {
+  return Math.max(16, Math.round(cellSize * 0.58));
+}
+
+/**
+ * Compute the largest cell size (flow-space px) so the board fits within the maze
+ * node's inner content area when the node is in fill mode.
+ */
+export function computeMazeFillCellSize(
+  grid: MazeGrid,
+  innerW: number,
+  innerH: number,
+  maxCell = MAX_FILL_CELL_SIZE,
+  minCell = 16,
+): number {
+  const { cols, rows } = mazeBoardDimensions(grid, 1);
+  if (cols <= 0 || rows <= 0) return minCell;
+
+  let lo = minCell;
+  let hi = maxCell;
+  let best = minCell;
+
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const gapX = Math.max(0, cols - 1) * MAZE_GRID_GAP;
+    const gapY = Math.max(0, rows - 1) * MAZE_GRID_GAP;
+    if (cols * mid + gapX <= innerW && rows * mid + gapY <= innerH) {
+      best = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+
+  return best;
+}
+
 /** Pick a cell size so the board fits within a max inner width (e.g. narrow viewports). */
 export function fitMazeCellSize(grid: MazeGrid, maxInnerW: number, maxCellSize = MAZE_CELL_SIZE): number {
   const cols = grid.reduce((m, row) => Math.max(m, row.length), 0);

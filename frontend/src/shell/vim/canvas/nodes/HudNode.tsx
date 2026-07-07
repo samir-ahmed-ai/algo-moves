@@ -23,20 +23,20 @@ export function HudNode({ id }: NodeProps) {
       />
       <div className="grid min-w-0 flex-1 grid-cols-2">
         <div className="flex min-w-0 flex-col border-r border-edge/40">
-          <header className="flex shrink-0 items-center gap-1.5 border-b border-edge/40 px-2.5 py-1.5">
-            <Terminal className="h-3 w-3 shrink-0 text-accent" />
-            <span className={cn('text-[11px] font-semibold text-ink', nodeTextWrap)}>Status</span>
+          <header className="flex shrink-0 items-center gap-2 border-b border-edge/40 px-3 py-2">
+            <Terminal className="h-3.5 w-3.5 shrink-0 text-accent" />
+            <span className={cn('text-sm font-semibold text-ink', nodeTextWrap)}>Status</span>
           </header>
-          <div className="px-2.5 py-2">
+          <div className="px-3 py-2.5">
             <StatusPanelContent />
           </div>
         </div>
         <div className="flex min-w-0 flex-col">
-          <header className="flex shrink-0 items-center gap-1.5 border-b border-edge/40 px-2.5 py-1.5">
-            <Keyboard className="h-3 w-3 shrink-0 text-[var(--team2-stroke)]" />
-            <span className={cn('text-[11px] font-semibold text-ink', nodeTextWrap)}>Motions</span>
+          <header className="flex shrink-0 items-center gap-2 border-b border-edge/40 px-3 py-2">
+            <Keyboard className="h-3.5 w-3.5 shrink-0 text-[var(--team2-stroke)]" />
+            <span className={cn('text-sm font-semibold text-ink', nodeTextWrap)}>Motions</span>
           </header>
-          <div className="px-2.5 py-2">
+          <div className="px-3 py-2.5">
             <MotionsPanelContent />
           </div>
         </div>

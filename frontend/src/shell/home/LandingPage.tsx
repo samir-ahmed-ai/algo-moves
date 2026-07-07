@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   ArrowRight,
   BookOpen,
-  ChevronDown,
   Code2,
   Contrast,
   Eye,
@@ -24,23 +23,19 @@ import {
   getAllCategories,
   getTracks,
   browseBreadcrumbForItem,
-  type Item,
   type TrackId,
 } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { readLastItemId, useWorkspace } from '@/store/workspace';
 import { buildWorkspaceEntryUrl } from '@/store/navigation';
-import { useIsMobile } from '@/lib/utils/useMediaQuery';
+import { useIsMobile, useMediaQuery } from '@/lib/utils/useMediaQuery';
 import { compactLabel } from '../chromeUi';
 import { cn } from '@/lib/utils/cn';
-import { BrandLogo } from '@/shell/BrandLogo';
 import { EagleMark } from '@/shell/EagleMark';
 import { AuthButton } from '@/shell/auth';
 import { glyphFor } from '../../content/problemShape';
 import { Chip } from '@/design/components';
-import { TrackGrid } from '../browse/TrackGrid';
-
-const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`;
+import { RoadmapCanvas } from './RoadmapCanvas';
 
 /* ----------------------------------------------------------------- helpers */
 
@@ -60,8 +55,6 @@ function Glyph({ markup, className }: { markup: string; className?: string }) {
     />
   );
 }
-
-/* ------------------------------------------------------------------ pieces */
 
 function IconButton({
   title,
@@ -92,186 +85,45 @@ function IconButton({
   );
 }
 
-/** Header dropdown grouping the extra play modes — Vim Dojo, then Games. */
-function PlayMenu({ onVim, onGames }: { onVim: () => void; onGames: () => void }) {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
-
-  const pick = (fn: () => void) => {
-    setOpen(false);
-    fn();
-  };
-
+function RailStat({ icon, value, label }: { icon: ReactNode; value: ReactNode; label: string }) {
   return (
-    <div className="relative">
-      <button
-        type="button"
-        title="Play"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        className={cn(
-          'inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm transition-colors',
-          open
-            ? 'border-accent/60 bg-accentbg text-accent'
-            : 'border-edge text-ink2 hover:border-accent/50 hover:text-ink',
-        )}
-      >
-        <Gamepad2 className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Play</span>
-        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
-      </button>
-      {open ? (
-        <>
-          <div className="fixed inset-0 z-30" aria-hidden onClick={() => setOpen(false)} />
-          <div
-            role="menu"
-            className="absolute end-0 z-40 mt-1.5 w-48 overflow-hidden rounded-xl border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]"
-          >
-            <PlayMenuItem icon={<Keyboard className="h-4 w-4" />} title="Vim Dojo" hint="Keyboard maze trainer" onClick={() => pick(onVim)} />
-            <PlayMenuItem icon={<Gamepad2 className="h-4 w-4" />} title="Games" hint="Two-player games" onClick={() => pick(onGames)} />
-          </div>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-/** Primary CTA dropdown — Swipe mode first, then workspace in a new tab. */
-function OpenMenu({ onMobile, onWorkspace }: { onMobile: () => void; onWorkspace: () => void }) {
-  const isMobile = useIsMobile();
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
-
-  const pick = (fn: () => void) => {
-    setOpen(false);
-    fn();
-  };
-
-  return (
-    <div className="relative ml-1">
-      <button
-        type="button"
-        title="Open"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-      >
-        {compactLabel('Open', 'Open', isMobile)}
-        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
-      </button>
-      {open ? (
-        <>
-          <div className="fixed inset-0 z-30" aria-hidden onClick={() => setOpen(false)} />
-          <div
-            role="menu"
-            className="absolute end-0 z-40 mt-1.5 w-52 overflow-hidden rounded-xl border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]"
-          >
-            <PlayMenuItem
-              icon={<Smartphone className="h-4 w-4" />}
-              title="Swipe mode"
-              hint="Mobile practice deck"
-              onClick={() => pick(onMobile)}
-            />
-            <PlayMenuItem
-              icon={<LayoutGrid className="h-4 w-4" />}
-              title="Open workspace"
-              hint="Canvas in a new tab"
-              onClick={() => pick(onWorkspace)}
-            />
-          </div>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-function PlayMenuItem({
-  icon,
-  title,
-  hint,
-  onClick,
-}: {
-  icon: ReactNode;
-  title: string;
-  hint: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      onClick={onClick}
-      className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-panel2"
-    >
-      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-accentbg text-accent">{icon}</span>
-      <span className="min-w-0">
-        <span className="block text-sm font-medium text-ink">{title}</span>
-        <span className="block truncate text-xs text-ink3">{hint}</span>
-      </span>
-    </button>
-  );
-}
-
-function StatCard({ icon, value, label }: { icon: ReactNode; value: ReactNode; label: string }) {
-  return (
-    <div className="flex h-full items-center gap-3 rounded-[var(--radius)] border border-edge bg-panel/60 px-4 py-3.5">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-panel2 text-accent [&>svg]:h-[18px] [&>svg]:w-[18px]">
+    <div className="flex items-center gap-2.5 rounded-xl border border-edge bg-panel/60 px-3 py-2.5">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-panel2 text-accent [&>svg]:h-4 [&>svg]:w-4">
         {icon}
       </span>
-      <div className="min-w-0 flex-1">
-        <div className="font-mono text-xl font-semibold tabular-nums leading-none text-ink">{value}</div>
-        <div className="mt-1 truncate text-xs uppercase tracking-wide text-ink3">{label}</div>
+      <div className="min-w-0">
+        <div className="font-mono text-base font-semibold tabular-nums leading-none text-ink">{value}</div>
+        <div className="mt-1 truncate text-[10px] uppercase tracking-wide text-ink3">{label}</div>
       </div>
     </div>
   );
 }
 
-function FeatureCard({
+function RailTrack({
   icon,
   title,
-  body,
-  cta,
+  meta,
   onClick,
 }: {
   icon: ReactNode;
   title: string;
-  body: string;
-  cta: string;
+  meta: string;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group flex h-full flex-col items-start gap-2 rounded-[var(--radius)] border border-edge bg-panel/60 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)] sm:p-5"
+      className="group flex w-full items-center gap-3 rounded-xl border border-edge bg-panel/60 px-3 py-2.5 text-left transition-colors hover:border-accent/50 hover:bg-panel"
     >
-      <span className="grid h-10 w-10 place-items-center rounded-lg bg-accentbg text-accent [&>svg]:h-5 [&>svg]:w-5">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-accent [&>svg]:h-[18px] [&>svg]:w-[18px]">
         {icon}
       </span>
-      <span className="mt-1 font-semibold text-ink">{title}</span>
-      <span className="text-sm leading-snug text-ink2">{body}</span>
-      <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-medium text-accent">
-        {cta}
-        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-ink">{title}</span>
+        <span className="block truncate text-xs text-ink3">{meta}</span>
       </span>
+      <ArrowRight className="h-4 w-4 shrink-0 text-ink3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
     </button>
   );
 }
@@ -301,14 +153,14 @@ function ModeStrip({
   ] as const;
 
   return (
-    <div className="-mx-1 mt-4 overflow-x-auto pb-1">
+    <div className="-mx-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex min-w-min gap-2 px-1">
         {pills.map(({ icon: Icon, label, onClick }) => (
           <button
             key={label}
             type="button"
             onClick={onClick}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-1.5 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-2 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
           >
             <Icon className="h-3.5 w-3.5" />
             {label}
@@ -319,92 +171,26 @@ function ModeStrip({
   );
 }
 
-function SpotlightCourseCard({
-  icon,
+function RailDetails({
   title,
-  body,
-  cta,
-  onClick,
+  children,
+  forceOpen,
 }: {
-  icon: ReactNode;
   title: string;
-  body: string;
-  cta: string;
-  onClick: () => void;
+  children: ReactNode;
+  forceOpen?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex flex-col items-start gap-3 rounded-[var(--radius)] border border-edge bg-panel/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)]"
+    <details
+      className="group rounded-xl border border-edge bg-panel/40 open:bg-panel/60 lg:border-0 lg:bg-transparent lg:open:bg-transparent [&_summary::-webkit-details-marker]:hidden"
+      open={forceOpen || undefined}
     >
-      <span className="grid h-11 w-11 place-items-center rounded-lg border border-edge bg-panel2 text-accent [&>svg]:h-5 [&>svg]:w-5">
-        {icon}
-      </span>
-      <span className="font-semibold text-ink">{title}</span>
-      <span className="text-sm leading-snug text-ink2">{body}</span>
-      <span className="mt-auto inline-flex items-center gap-1 pt-1 text-sm font-medium text-accent">
-        {cta}
-        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-      </span>
-    </button>
-  );
-}
-
-/** A small framed preview of the workspace, built from real problem glyphs. */
-function WorkspacePreview({ featured }: { featured: Item[] }) {
-  const nodes = featured.slice(0, 3);
-  return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/70 shadow-[var(--shadow-xl)] backdrop-blur">
-      <div className="flex items-center gap-2 border-b border-edge px-3 py-2">
-        <span className="flex gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-bad/70" />
-          <span className="h-2.5 w-2.5 rounded-full opacity-70" style={{ background: 'var(--edge-active)' }} />
-          <span className="h-2.5 w-2.5 rounded-full bg-good/70" />
-        </span>
-        <span className="ml-1 flex min-w-0 items-center gap-1.5 truncate font-mono text-xs text-ink3">
-          <Eye className="h-3 w-3 shrink-0" /> {nodes[0]?.title ?? 'Algorithm'} · Visualize
-        </span>
-      </div>
-      <div
-        className="relative grid flex-1 grid-cols-1 gap-2 p-3 xl:grid-cols-3 xl:gap-3 xl:p-5"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 1px 1px, var(--edge) 1px, transparent 0)',
-          backgroundSize: '16px 16px',
-        }}
-      >
-        {nodes.map((item, i) => {
-          const markup = glyphFor(item);
-          return (
-            <div
-              key={item.id}
-              className={cn(
-                'relative flex flex-row items-center gap-2.5 rounded-md border border-edge bg-panel px-2.5 py-2',
-                'xl:flex-col xl:items-center xl:gap-2 xl:px-2 xl:py-3',
-                i === 1 && 'border-accent/60 shadow-[0_0_0_1px_var(--accent-bg)]',
-              )}
-            >
-              <span className="absolute -top-1.5 left-2 font-mono text-[9px] text-ink3">{i + 1}</span>
-              {markup ? (
-                <Glyph markup={markup} className="h-6 w-6 shrink-0 text-ink2 xl:h-8 xl:w-8" />
-              ) : (
-                <LayoutGrid className="h-6 w-6 shrink-0 text-ink3 xl:h-8 xl:w-8" />
-              )}
-              <span className="line-clamp-1 min-w-0 text-[11px] leading-tight text-ink3 xl:text-center">
-                {item.title}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex items-center gap-2 border-t border-edge px-3 py-2">
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-        <span className="truncate font-mono text-xs text-ink3">
-          step 3 / 12 · coloring node {nodes[1]?.title ? '→ team B' : ''}
-        </span>
-      </div>
-    </div>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink3 transition-colors hover:text-ink lg:hidden">
+        <span>{title}</span>
+        <ArrowRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+      </summary>
+      <div className="px-1 pb-3 pt-1 lg:contents">{children}</div>
+    </details>
   );
 }
 
@@ -414,201 +200,17 @@ interface Maker {
   name: string;
   role: string;
   photo?: string;
-  facts: [string, string, string, string, string];
-  links?: { label: string; href: string }[];
+  email?: string;
 }
 
-const MAKERS: Maker[] = [
-  {
-    name: 'Ahmed Abdelmaaboud',
-    role: 'Creator & Senior Go Engineer',
-    photo: `${import.meta.env.BASE_URL}assets/ahmed.png`,
-    facts: [
-      '10+ years shipping Go services that process millions of events daily.',
-      'Built an OpenRTB bidder, GPS scoring pipelines, and LLM MCP servers — all in production.',
-      'I built this because LeetCode alone never got me where I needed to be.',
-      'Polyglot fluent in Go, Java, Scala, and Python — and the whiteboard.',
-      'Senior engineer by day. Algorithm grinder by night.',
-    ],
-    links: [{ label: 'ahmed.amer.samir@gmail.com', href: 'mailto:ahmed.amer.samir@gmail.com' }],
-  },
-];
-
-function MakerCard({ name, role, photo, facts, links }: Maker) {
-  return (
-    <div className="flex w-full max-w-2xl flex-col gap-5 rounded-[var(--radius)] border border-edge bg-panel/60 p-6 sm:flex-row sm:gap-7">
-      {photo ? (
-        <div className="shrink-0 self-start">
-          <img
-            src={photo}
-            alt={name}
-            className="h-24 w-24 rounded-2xl border border-edge object-cover object-top shadow-[var(--shadow-md)] sm:h-28 sm:w-28"
-          />
-        </div>
-      ) : null}
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{role}</p>
-        <h3 className="mt-0.5 text-xl font-semibold tracking-tight text-ink">{name}</h3>
-        <ul className="mt-4 space-y-2">
-          {facts.map((fact) => (
-            <li key={fact} className="flex items-start gap-2.5 text-sm leading-snug text-ink2">
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-              {fact}
-            </li>
-          ))}
-        </ul>
-        {links && links.length > 0 ? (
-          <div className="mt-4 flex flex-wrap gap-3">
-            {links.map(({ label, href }) => (
-              <a
-                key={href}
-                href={href}
-                className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
-              >
-                {label}
-                <ArrowRight className="h-3 w-3" />
-              </a>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-/* ----------------------------------------------------------------- landing */
+const MAKER: Maker = {
+  name: 'Ahmed Abdelmaaboud',
+  role: 'Creator & Senior Go Engineer',
+  photo: `${import.meta.env.BASE_URL}assets/ahmed.png`,
+  email: 'ahmed.amer.samir@gmail.com',
+};
 
 const MBM_WORDS = ['move', 'by', 'move.'] as const;
-
-const LANDING_INNER = 'mx-auto max-w-6xl px-5 sm:px-8';
-const LANDING_SECTION_Y = 'py-12 sm:py-14 lg:py-16';
-
-function LandingSection({
-  id,
-  tone = 'default',
-  bordered = true,
-  className,
-  children,
-}: {
-  id?: string;
-  tone?: 'default' | 'muted';
-  bordered?: boolean;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      id={id}
-      className={cn(
-        tone === 'muted' && 'bg-panel/30',
-        bordered && 'border-b border-edge',
-        className,
-      )}
-    >
-      <div className={cn(LANDING_INNER, LANDING_SECTION_Y)}>{children}</div>
-    </section>
-  );
-}
-
-function LandingSplit({
-  reverse = false,
-  className,
-  children,
-}: {
-  reverse?: boolean;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className={cn(
-        'grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-10 lg:gap-12 xl:gap-16',
-        reverse && '[&>*:first-child]:md:order-2 [&>*:last-child]:md:order-1',
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
-function SplitCopy({
-  brand,
-  eyebrow,
-  title,
-  description,
-  children,
-  as = 'h2',
-}: {
-  brand?: ReactNode;
-  eyebrow?: ReactNode;
-  title: ReactNode;
-  description: string;
-  children?: ReactNode;
-  as?: 'h1' | 'h2';
-}) {
-  const Heading = as;
-  return (
-    <div className="@container flex min-w-0 flex-col justify-center">
-      {brand ? <div className="mb-5">{brand}</div> : null}
-      {eyebrow ? (
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">{eyebrow}</p>
-      ) : null}
-      <Heading
-        className={cn(
-          'font-semibold tracking-tight text-ink',
-          as === 'h1'
-            ? 'hero-headline whitespace-nowrap leading-[1.1]'
-            : 'text-2xl leading-tight sm:text-3xl',
-        )}
-      >
-        {title}
-      </Heading>
-      <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink2 sm:text-base">{description}</p>
-      {children ? <div className="mt-5">{children}</div> : null}
-    </div>
-  );
-}
-
-function SplitMedia({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn('flex min-w-0 items-center justify-center', className)}>{children}</div>
-  );
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-  align = 'center',
-}: {
-  eyebrow?: string;
-  title: string;
-  description?: string;
-  align?: 'center' | 'start';
-}) {
-  return (
-    <div className={cn('mb-8 lg:mb-10', align === 'center' ? 'text-center' : 'text-left')}>
-      {eyebrow ? (
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">{eyebrow}</p>
-      ) : null}
-      <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{title}</h2>
-      {description ? (
-        <p
-          className={cn(
-            'mt-3 text-sm leading-relaxed text-ink2 sm:text-base',
-            align === 'center' && 'mx-auto max-w-2xl',
-          )}
-        >
-          {description}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-const FRAMED_MEDIA =
-  'w-full rounded-[var(--radius)] border border-edge bg-panel/60 shadow-[var(--shadow-md)]';
 
 /** Hero tagline tail — flowing wave underline with staggered word bob. */
 function MoveByMoveAnimated({ className }: { className?: string }) {
@@ -635,6 +237,8 @@ function MoveByMoveAnimated({ className }: { className?: string }) {
   );
 }
 
+/* ----------------------------------------------------------------- landing */
+
 export function LandingPage() {
   const {
     theme,
@@ -649,19 +253,10 @@ export function LandingPage() {
     enterGames,
   } = useWorkspace();
   const isMobile = useIsMobile();
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const progress = useProgress();
 
   const problems = useMemo(() => catalog.items.filter((i) => i.pluginId), []);
-  const featured = useMemo(() => {
-    const picks: Item[] = [];
-    for (const item of catalog.items) {
-      if (item.pluginId && glyphFor(item)) {
-        picks.push(item);
-        if (picks.length >= 6) break;
-      }
-    }
-    return picks;
-  }, []);
 
   const totals = useMemo(() => {
     const mastered = problems.filter((i) => statFor(progress, i.id).mastered).length;
@@ -710,309 +305,287 @@ export function LandingPage() {
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
 
   return (
-    <div data-density={density} className="ws-scroll h-full w-full overflow-y-auto bg-bg text-ink">
-      {/* top bar */}
-      <header className="sticky top-0 z-20 border-b border-edge bg-bg/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl min-w-0 items-center gap-3 px-5 py-3 sm:px-8">
-          <div className="flex min-w-0 shrink items-center gap-2">
-            <BrandLogo />
-            <span className="truncate font-semibold tracking-tight">Algo Moves</span>
-          </div>
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            <IconButton
-              title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            >
-              {theme === 'dark' ? <Sun /> : <Moon />}
+    <div
+      data-density={density}
+      className="ws-scroll h-full w-full overflow-y-auto bg-bg text-ink"
+    >
+      {/* mobile sticky header */}
+      <header className="sticky top-0 z-30 border-b border-edge bg-bg/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur lg:hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5">
+          <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)]" />
+          <span className="min-w-0 truncate font-semibold tracking-tight">Algo Moves</span>
+          <div className="ml-auto flex shrink-0 items-center gap-1">
+            <IconButton title="Swipe mode" onClick={() => enterMobile()}>
+              <Smartphone />
             </IconButton>
-            <IconButton
-              title={palette === 'cb' ? 'Colour-blind palette: on' : 'Colour-blind palette: off'}
-              active={palette === 'cb'}
-              onClick={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
-            >
-              <Contrast />
+            <IconButton title="Games" onClick={() => enterGames()}>
+              <Gamepad2 />
             </IconButton>
-            <PlayMenu onVim={() => enterVim()} onGames={() => enterGames()} />
             <AuthButton />
-            <OpenMenu onMobile={() => enterMobile()} onWorkspace={() => openCanvas()} />
           </div>
         </div>
       </header>
 
-      {/* hero */}
-      <section className="relative overflow-hidden border-b border-edge">
-        <div aria-hidden className="landing-hero-glow pointer-events-none absolute inset-0 opacity-70" />
-        <div className={cn('relative', LANDING_INNER, LANDING_SECTION_Y)}>
-          <LandingSplit>
-            <SplitCopy
-              as="h1"
-              brand={
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div
-                      aria-hidden
-                      className="absolute -inset-3 rounded-3xl bg-accent/25 blur-2xl"
-                    />
-                    <EagleMark className="relative h-20 w-20 rounded-2xl shadow-[var(--shadow-xl)] sm:h-24 sm:w-24" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-                      Interview prep
-                    </p>
-                    <p className="mt-1 text-sm text-ink3">Master every algorithm move by move</p>
-                  </div>
-                </div>
-              }
-              title={
-                <>
-                  Algorithms{' '}
-                  <MoveByMoveAnimated className="text-[0.72em] font-semibold" />
-                </>
-              }
-              description={`${problems.length}+ interview problems as step-by-step replays — visualize, learn, and drill until they stick.`}
-            >
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
+      <div className="lg:grid lg:grid-cols-[minmax(440px,1fr)_minmax(280px,480px)]">
+        {/* ---------------------------------------------------------- left rail */}
+        <aside className="relative border-b border-edge lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:[scrollbar-gutter:stable]">
+          <div aria-hidden className="landing-hero-glow pointer-events-none absolute inset-0 opacity-60" />
+          <div className="relative flex min-h-full flex-col gap-4 px-4 py-5 sm:gap-5 sm:px-6 sm:py-6">
+            {/* brand + controls — desktop only */}
+            <div className="hidden items-center gap-2 lg:flex">
+              <EagleMark className="h-9 w-9 rounded-xl shadow-[var(--shadow-md)]" />
+              <span className="font-semibold tracking-tight">Algo Moves</span>
+              <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                <IconButton title="Swipe mode — mobile practice deck" onClick={() => enterMobile()}>
+                  <Smartphone />
+                </IconButton>
+                <IconButton title="Games — two-player rooms" onClick={() => enterGames()}>
+                  <Gamepad2 />
+                </IconButton>
+                <IconButton
+                  title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 >
-                  <Play className="h-4 w-4" />
-                  {lastItem
-                    ? compactLabel('Resume learning', 'Resume', isMobile)
-                    : compactLabel('Start learning', 'Start', isMobile)}
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  }
-                  className="inline-flex items-center gap-2 rounded-md border border-edge bg-panel/60 px-5 py-2.5 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
+                  {theme === 'dark' ? <Sun /> : <Moon />}
+                </IconButton>
+                <IconButton
+                  title={palette === 'cb' ? 'Colour-blind palette: on' : 'Colour-blind palette: off'}
+                  active={palette === 'cb'}
+                  onClick={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
                 >
-                  <BookOpen className="h-4 w-4" />
-                  {compactLabel('Browse tracks', 'Browse', isMobile)}
-                </button>
+                  <Contrast />
+                </IconButton>
+                <AuthButton />
               </div>
-              <ModeStrip
-                onPlay={() => startIn('play')}
-                onVisualize={() => startIn('visualize')}
-                onLearn={() => startIn('learn')}
-                onSwipe={() => enterMobile()}
-                onVim={() => enterVim()}
-                onGames={() => enterGames()}
-              />
-            </SplitCopy>
-            <SplitMedia>
-              <WorkspacePreview featured={featured} />
-            </SplitMedia>
-          </LandingSplit>
-        </div>
-      </section>
+            </div>
 
-      {/* spotlight courses */}
-      <LandingSection tone="muted">
-        <SectionHeading
-          eyebrow="Specialized tracks"
-          title="Go deep with expert-level courses"
-          description="Senior Go engineering, OpenRTB ad platforms, and a full interview prep library — each with quizzes, code drills, and design questions."
-        />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <SpotlightCourseCard
-            icon={<Code2 />}
-            title="Go — Senior Developer"
-            body={`${goConceptCount} concepts · concurrency, memory, generics, system design`}
-            cta="Open track"
-            onClick={() => browseTrack('go')}
-          />
-          <SpotlightCourseCard
-            icon={<Megaphone />}
-            title="OpenRTB & Ad Platform Engineering"
-            body={`${openrtbConceptCount} concepts · bidder, exchange, ad serving, privacy`}
-            cta="Open course"
-            onClick={() => browseTrack('openrtb')}
-          />
-          <SpotlightCourseCard
-            icon={<Target />}
-            title="Interview Preparation"
-            body={`${prepProblemCount} hand-authored problems across data structures & algorithms`}
-            cta="Browse"
-            onClick={() => browseTrack('interview-prep')}
-          />
-        </div>
-      </LandingSection>
+            {/* hero copy */}
+            <div className="@container">
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+                Interview prep
+              </p>
+              <h1 className="hero-headline font-semibold leading-[1.1] tracking-tight text-ink">
+                Algorithms <MoveByMoveAnimated className="text-[0.72em] font-semibold" />
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-ink2 sm:mt-3">
+                {problems.length}+ interview problems as step-by-step replays — visualize, learn, and
+                drill until they stick.
+              </p>
+            </div>
 
-      {/* stats */}
-      <LandingSection>
-        <SectionHeading
-          eyebrow="Progress"
-          title="Your library at a glance"
-          description="Tracks, categories, and problems — plus how far you've pushed your streak."
-        />
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 sm:items-stretch">
-          <StatCard icon={<BookOpen />} value={getTracks().length} label="Tracks" />
-          <StatCard icon={<LayoutGrid />} value={getAllCategories().length} label="Categories" />
-          <StatCard icon={<Code2 />} value={problems.length} label="Problems" />
-          <StatCard icon={<Target />} value={totals.attempted} label="Attempted" />
-          <StatCard icon={<Trophy />} value={totals.mastered} label="Mastered" />
-          <StatCard icon={<Flame />} value={totals.bestStreak} label="Best streak" />
-        </div>
-      </LandingSection>
+            {/* primary CTAs */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5">
+              <button
+                type="button"
+                onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 font-medium text-white transition-opacity hover:opacity-90 sm:w-auto sm:py-2.5"
+              >
+                <Play className="h-4 w-4" />
+                {lastItem
+                  ? compactLabel('Resume learning', 'Resume', isMobile)
+                  : compactLabel('Start learning', 'Start', isMobile)}
+              </button>
+              <button
+                type="button"
+                onClick={() => browseTrack('interview-prep')}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-edge bg-panel/60 px-4 py-3 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink sm:w-auto sm:py-2.5"
+              >
+                <BookOpen className="h-4 w-4" />
+                {compactLabel('Browse tracks', 'Browse', isMobile)}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  document.getElementById('roadmap')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-accent/40 bg-accentbg/40 px-4 py-2.5 text-sm font-medium text-accent transition-colors hover:border-accent/60 lg:hidden"
+              >
+                <Target className="h-4 w-4" />
+                Explore roadmap
+              </button>
+            </div>
 
-      <LandingSection id="courses" className="scroll-mt-16">
-        <SectionHeading
-          eyebrow="Catalog"
-          title="Browse all tracks"
-          description="Data Structures, Algorithms, Design, Go, and the full Interview Preparation library."
-        />
-        <TrackGrid onPick={browseTrack} />
-      </LandingSection>
+            {/* theme row — mobile only */}
+            <div className="flex items-center gap-1.5 lg:hidden">
+              <IconButton
+                title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              >
+                {theme === 'dark' ? <Sun /> : <Moon />}
+              </IconButton>
+              <IconButton
+                title={palette === 'cb' ? 'Colour-blind palette: on' : 'Colour-blind palette: off'}
+                active={palette === 'cb'}
+                onClick={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
+              >
+                <Contrast />
+              </IconButton>
+            </div>
 
-      <LandingSection tone="muted">
-        <SectionHeading
-          eyebrow="Modes"
-          title="Six ways to play & learn"
-          description="Step through problems, learn in the studio, drill in Swipe mode, train Vim motions, or challenge your partner in two-player games."
-        />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:items-stretch lg:grid-cols-6">
-          <FeatureCard
-            icon={<Play />}
-            title="Play"
-            body="Open a problem with inputs and step-by-step animation."
-            cta="Open a problem"
-            onClick={() => startIn('play')}
-          />
-          <FeatureCard
-            icon={<Eye />}
-            title="Visualize"
-            body="Replay each algorithm on a live canvas."
-            cta="Open canvas"
-            onClick={() => startIn('visualize')}
-          />
-          <FeatureCard
-            icon={<GraduationCap />}
-            title="Learn"
-            body="Study the pattern and reassemble the code."
-            cta="Open studio"
-            onClick={() => startIn('learn')}
-          />
-          <FeatureCard
-            icon={<Smartphone />}
-            title="Practice"
-            body="Swipe through animate, quiz, and rebuild cards."
-            cta="Open Swipe mode"
-            onClick={() => enterMobile()}
-          />
-          <FeatureCard
-            icon={<Keyboard />}
-            title="Vim Dojo"
-            body="Master Vim motions in a keyboard-only maze."
-            cta="Enter the Dojo"
-            onClick={() => enterVim()}
-          />
-          <FeatureCard
-            icon={<Gamepad2 />}
-            title="Games"
-            body="Play Number Duel & more with your partner in real time."
-            cta="Start a room"
-            onClick={() => enterGames()}
-          />
-        </div>
-      </LandingSection>
+            {/* mode pills */}
+            <ModeStrip
+              onPlay={() => startIn('play')}
+              onVisualize={() => startIn('visualize')}
+              onLearn={() => startIn('learn')}
+              onSwipe={() => enterMobile()}
+              onVim={() => enterVim()}
+              onGames={() => enterGames()}
+            />
 
-      {/* method + continue */}
-      <LandingSection bordered={false}>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start lg:gap-12">
-          {lastItem ? (
-            <div>
-              <SectionHeading align="start" title="Continue where you left off" />
+            {/* continue where you left off */}
+            {lastItem ? (
               <button
                 type="button"
                 onClick={() => openItem(lastItem.id)}
-                className="group flex w-full items-center gap-4 rounded-[var(--radius)] border border-edge bg-panel/60 p-4 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-lg)] sm:p-5"
+                className="group flex w-full items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)]"
               >
-                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
                   {glyphFor(lastItem) ? (
-                    <Glyph markup={glyphFor(lastItem)!} className="h-8 w-8 transition-colors group-hover:text-accent" />
+                    <Glyph
+                      markup={glyphFor(lastItem)!}
+                      className="h-6 w-6 transition-colors group-hover:text-accent"
+                    />
                   ) : (
-                    <LayoutGrid className="h-7 w-7" />
+                    <LayoutGrid className="h-5 w-5" />
                   )}
                 </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate font-semibold text-ink">{lastItem.title}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="truncate text-sm font-semibold text-ink">{lastItem.title}</span>
                     {lastItem.difficulty && (
-                      <Chip tone={lastItem.difficulty === 'Easy' ? 'good' : lastItem.difficulty === 'Hard' ? 'bad' : 'accent'}>
+                      <Chip
+                        tone={
+                          lastItem.difficulty === 'Easy'
+                            ? 'good'
+                            : lastItem.difficulty === 'Hard'
+                              ? 'bad'
+                              : 'accent'
+                        }
+                      >
                         {lastItem.difficulty}
                       </Chip>
                     )}
                     {statFor(progress, lastItem.id).mastered && (
-                      <Trophy className="h-4 w-4 text-good" aria-label="mastered" />
+                      <Trophy className="h-3.5 w-3.5 text-good" aria-label="mastered" />
                     )}
-                  </div>
-                  <p className="mt-0.5 truncate text-xs text-ink3">
-                    {lastBrowseCrumb?.track?.title}
+                  </span>
+                  <span className="mt-0.5 block truncate text-xs text-ink3">
+                    Continue · {lastBrowseCrumb?.track?.title}
                     {lastBrowseCrumb?.category ? ` › ${lastBrowseCrumb.category.title}` : ''}
-                  </p>
-                </div>
-                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white">
-                  Resume
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </span>
                 </span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
               </button>
-            </div>
-          ) : null}
-          <div className={cn(!lastItem && 'lg:col-span-2')}>
-            <LandingSplit reverse={!!lastItem}>
-              <SplitCopy
-                eyebrow="Method"
-                title="Learn like AI trains"
-                description="Try, get feedback, repeat. Wrong answers restart the run — shuffle and streak until you master the pattern."
-              />
-              <SplitMedia>
-                <img
-                  src={asset('learning-loop.svg')}
-                  alt="The learning loop: watch, quiz, restart on wrong, master"
-                  className={FRAMED_MEDIA}
-                  width={800}
-                  height={420}
-                  loading="lazy"
+            ) : null}
+
+            {/* stats */}
+            <RailDetails title="Your library" forceOpen={isDesktop}>
+              <p className="mb-2 hidden text-xs font-semibold uppercase tracking-[0.14em] text-ink3 lg:block">
+                Your library
+              </p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
+                <RailStat icon={<BookOpen />} value={getTracks().length} label="Tracks" />
+                <RailStat icon={<LayoutGrid />} value={getAllCategories().length} label="Categories" />
+                <RailStat icon={<Code2 />} value={problems.length} label="Problems" />
+                <RailStat icon={<Target />} value={totals.attempted} label="Attempted" />
+                <RailStat icon={<Trophy />} value={totals.mastered} label="Mastered" />
+                <RailStat icon={<Flame />} value={totals.bestStreak} label="Best streak" />
+              </div>
+            </RailDetails>
+
+            {/* spotlight tracks */}
+            <RailDetails title="Specialized tracks" forceOpen={isDesktop}>
+              <p className="mb-2 hidden text-xs font-semibold uppercase tracking-[0.14em] text-ink3 lg:block">
+                Specialized tracks
+              </p>
+              <div className="flex flex-col gap-2">
+                <RailTrack
+                  icon={<Code2 />}
+                  title="Go — Senior Developer"
+                  meta={`${goConceptCount} concepts · concurrency, memory, generics`}
+                  onClick={() => browseTrack('go')}
                 />
-              </SplitMedia>
-            </LandingSplit>
-          </div>
-        </div>
-      </LandingSection>
+                <RailTrack
+                  icon={<Megaphone />}
+                  title="OpenRTB & Ad Platforms"
+                  meta={`${openrtbConceptCount} concepts · bidder, exchange, privacy`}
+                  onClick={() => browseTrack('openrtb')}
+                />
+                <RailTrack
+                  icon={<Target />}
+                  title="Interview Preparation"
+                  meta={`${prepProblemCount} hand-authored problems`}
+                  onClick={() => browseTrack('interview-prep')}
+                />
+              </div>
+            </RailDetails>
 
-      {/* about the makers */}
-      <LandingSection tone="muted" bordered={false}>
-        <SectionHeading
-          eyebrow="The Makers"
-          title="Built by engineers, for engineers"
-          description="The people who built this tool to solve their own interview prep problems."
-        />
-        <div className="flex flex-wrap justify-center gap-6">
-          {MAKERS.map((m) => (
-            <MakerCard key={m.name} {...m} />
-          ))}
-        </div>
-      </LandingSection>
-
-      {/* footer */}
-      <footer className="border-t border-edge bg-panel/20">
-        <div className={cn(LANDING_INNER, 'py-10 text-center sm:py-14')}>
-          <div className="relative mb-4 inline-block">
-            <div
-              aria-hidden
-              className="absolute -inset-4 rounded-3xl bg-accent/20 blur-2xl"
-            />
-            <EagleMark className="relative h-16 w-16 rounded-2xl shadow-[var(--shadow-xl)]" />
+            {/* maker + footer — desktop only */}
+            <div className="mt-auto hidden space-y-4 pt-2 lg:block">
+              <div className="flex items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3">
+                {MAKER.photo ? (
+                  <img
+                    src={MAKER.photo}
+                    alt={MAKER.name}
+                    className="h-12 w-12 shrink-0 rounded-xl border border-edge object-cover object-top"
+                  />
+                ) : null}
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+                    {MAKER.role}
+                  </p>
+                  <p className="truncate text-sm font-semibold text-ink">{MAKER.name}</p>
+                  {MAKER.email ? (
+                    <a
+                      href={`mailto:${MAKER.email}`}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
+                    >
+                      {MAKER.email}
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+              <p className="text-xs text-ink3">
+                Algo Moves — step through interview algorithms until they stick.
+              </p>
+            </div>
           </div>
-          <p className="font-semibold tracking-tight text-ink text-lg">Algo Moves</p>
-          <p className="mx-auto mt-2 max-w-md text-sm text-ink3">
-            Step through interview algorithms until they stick.
-          </p>
-        </div>
-      </footer>
+        </aside>
+
+        {/* --------------------------------------------------------- right roadmap */}
+        <main id="roadmap" className="relative scroll-mt-14 bg-panel/20 lg:scroll-mt-0">
+          <div
+            aria-hidden
+            className="landing-hero-glow pointer-events-none absolute inset-x-0 top-0 h-72 opacity-50 sm:h-96"
+          />
+          <div className="relative border-b border-edge px-4 pt-5 text-center sm:px-6 sm:pt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+              The full system
+            </p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-ink sm:text-2xl">
+              Follow the roadmap, move by move
+            </h2>
+            <p className="mx-auto mt-1.5 max-w-sm pb-3 text-sm leading-relaxed text-ink2 sm:pb-4">
+              Every part of Algo Moves as one journey — from your first interview problem all the way
+              to two-player games.
+            </p>
+          </div>
+          <RoadmapCanvas
+            prepProblemCount={prepProblemCount}
+            problemsCount={problems.length}
+            goConceptCount={goConceptCount}
+            openrtbConceptCount={openrtbConceptCount}
+            onInterviewPrep={() => browseTrack('interview-prep')}
+            onProblems={() => startIn('play')}
+            onGo={() => browseTrack('go')}
+            onOpenrtb={() => browseTrack('openrtb')}
+            onLearn={() => startIn('learn')}
+            onVisualize={() => startIn('visualize')}
+            onVim={() => enterVim()}
+            onGames={() => enterGames()}
+          />
+        </main>
+      </div>
     </div>
   );
 }

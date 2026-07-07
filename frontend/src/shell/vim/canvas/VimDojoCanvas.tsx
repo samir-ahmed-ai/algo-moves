@@ -18,7 +18,7 @@ import { VimLayoutProvider } from './VimLayoutContext';
 import { HUD_NODE_ID, MAZE_NODE_ID } from './layout/orbitSlots';
 
 const edgeTypes = { orbit: OrbitEdge };
-const FIT_PADDING = 0.12;
+const FIT_PADDING = 0;
 const FIT_MAX_ZOOM = 2.5;
 const STUDIO_NODES = [{ id: HUD_NODE_ID }, { id: MAZE_NODE_ID }];
 

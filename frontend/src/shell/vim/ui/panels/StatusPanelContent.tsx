@@ -25,32 +25,32 @@ export function StatusPanelContent() {
 
   return (
     <div className="min-w-0">
-      <p className={cn('mb-1 text-[10px] font-medium text-ink3', nodeTextWrap)}>{moveLabel}</p>
+      <p className={cn('mb-1.5 text-xs font-medium text-ink3', nodeTextWrap)}>{moveLabel}</p>
       <div
         className={cn(
-          'font-mono text-[11px] transition-colors',
+          'font-mono text-sm transition-colors',
           lastMotionOk && 'text-accent',
           error && 'text-bad',
         )}
       >
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
           <VimBadge tone="accent">-- NORMAL --</VimBadge>
           {echo ? <VimKbd>{echo}</VimKbd> : null}
         </div>
         {isMobile ? (
-          <p className="mt-1.5 text-[10px] text-bad">Connect a keyboard to play</p>
+          <p className="mt-2 text-xs text-bad">Connect a keyboard to play</p>
         ) : message ? (
-          <p className={cn('mt-1.5', nodeTextWrap, error ? 'text-bad' : 'text-good')}>{message}</p>
+          <p className={cn('mt-2', nodeTextWrap, error ? 'text-bad' : 'text-good')}>{message}</p>
         ) : (
-          <p className="mt-1.5 text-[10px] text-ink3">Reach ★ with Vim motions</p>
+          <p className="mt-2 text-xs text-ink3">Reach ★ with Vim motions</p>
         )}
       </div>
       {complete ? (
-        <div className="mt-2 flex flex-wrap gap-1">
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
           {nextId ? (
             <VimBtn variant="accent" onClick={() => selectLevel(nextId)}>
               Next
-              <ArrowRight className="h-2.5 w-2.5" />
+              <ArrowRight className="h-3 w-3" />
             </VimBtn>
           ) : (
             <VimBadge tone="good">Dojo complete!</VimBadge>

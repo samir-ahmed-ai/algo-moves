@@ -8,12 +8,12 @@ export function MotionsPanelContent() {
 
   return (
     <div className="min-w-0">
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {level.allowed.map((motion) => (
           <VimKbd key={motion}>{motion}</VimKbd>
         ))}
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-ink3">
+      <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-ink3">
         <span>
           <VimKbd>Esc</VimKbd> reset · <VimKbd>r</VimKbd> retry
         </span>
@@ -21,13 +21,13 @@ export function MotionsPanelContent() {
           type="button"
           onClick={toggleHint}
           className={cn(
-            'nodrag grid h-5 w-5 place-items-center rounded-md border transition-colors',
+            'nodrag grid h-6 w-6 place-items-center rounded-md border transition-colors',
             showHint ? 'border-accent bg-accentbg text-accent' : 'border-edge text-ink3 hover:bg-panel2',
           )}
           title="Toggle hint"
           aria-label="Toggle hint"
         >
-          <HelpCircle className="h-3 w-3" />
+          <HelpCircle className="h-3.5 w-3.5" />
         </button>
       </div>
     </div>

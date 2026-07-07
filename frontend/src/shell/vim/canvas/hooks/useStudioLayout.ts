@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   useEdgesState,
   useNodesInitialized,
@@ -7,23 +7,31 @@ import {
   type Edge,
   type Node,
 } from '@xyflow/react';
-import { buildStudioLayout } from '../layout/studioLayout';
-import { HUD_NODE_ID, MAZE_NODE_ID, HUD_SLOT, ORBIT_TOP_EXTRA_GAP, ORBIT_V_GAP } from '../layout/orbitSlots';
+import { buildStudioLayout, STUDIO_HUD_WIDTH, STUDIO_MAZE_HEIGHT } from '../layout/studioLayout';
+import { HUD_NODE_ID, MAZE_NODE_ID, HUD_SLOT, ORBIT_V_GAP } from '../layout/orbitSlots';
 import {
-  computeStudioCellSize,
-  MAZE_CELL_SIZE,
-  mazeNodeSize,
+  computeMazeFillCellSize,
+  MAZE_NODE_CHROME,
 } from '../layout/mazeMetrics';
 import type { MazeGrid } from '../../engine';
 
-const FIT_PADDING = 0.12;
+const FIT_PADDING = 0;
 /** Allow fitView to scale the studio up on large full-page viewports. */
 const FIT_MAX_ZOOM = 2.5;
 const STUDIO_NODE_IDS = [{ id: HUD_NODE_ID }, { id: MAZE_NODE_ID }];
 
-function layoutForGrid(grid: MazeGrid, cellSize: number) {
-  const { w: mazeW, h: mazeH } = mazeNodeSize(grid, cellSize);
-  return buildStudioLayout({ mazeW, mazeH, hudW: HUD_SLOT.width, hudH: HUD_SLOT.height });
+/** Maze inner area in flow-space coordinates (fixed for all levels/viewports). */
+const MAZE_INNER_W = STUDIO_HUD_WIDTH - MAZE_NODE_CHROME.padX;
+const MAZE_INNER_H =
+  STUDIO_MAZE_HEIGHT - MAZE_NODE_CHROME.padTop - MAZE_NODE_CHROME.title - MAZE_NODE_CHROME.padBottom;
+
+function buildFillLayout() {
+  return buildStudioLayout({
+    mazeW: STUDIO_HUD_WIDTH,
+    mazeH: STUDIO_MAZE_HEIGHT,
+    hudW: HUD_SLOT.width,
+    hudH: HUD_SLOT.height,
+  });
 }
 
 function measureFlowNode(id: string): { w: number; h: number } | null {
@@ -37,29 +45,22 @@ function measureFlowNode(id: string): { w: number; h: number } | null {
 }
 
 export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HTMLElement | null>) {
-  const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
-  const initialCell = computeStudioCellSize(grid, 1280, 900);
-  const initial = layoutForGrid(grid, initialCell);
+  const initial = buildFillLayout();
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initial.edges);
   const { fitView } = useReactFlow();
   const nodesInitialized = useNodesInitialized();
   const didInitialFit = useRef(false);
 
-  const cellSize = useMemo(() => {
-    if (containerSize.w <= 0 || containerSize.h <= 0) return MAZE_CELL_SIZE;
-    return computeStudioCellSize(grid, containerSize.w, containerSize.h, {
-      hudW: HUD_SLOT.width,
-      hudH: HUD_SLOT.height,
-      gap: ORBIT_V_GAP,
-      pad: FIT_PADDING,
-    });
-  }, [grid, containerSize.w, containerSize.h]);
+  // Cell size is fixed per level — it fills the maze inner area in flow coordinates.
+  // fitView then scales the whole canvas to the actual container.
+  const cellSize = useMemo(
+    () => computeMazeFillCellSize(grid, MAZE_INNER_W, MAZE_INNER_H),
+    [grid],
+  );
 
-  const mazeLayoutKey = useMemo(() => {
-    const { w, h } = mazeNodeSize(grid, cellSize);
-    return `${cellSize}:${w}x${h}`;
-  }, [grid, cellSize]);
+  // mazeLayoutKey changes when the active level changes (different grid → different cellSize).
+  const mazeLayoutKey = String(cellSize);
 
   const fitCanvas = useCallback(
     (duration = 200) => {
@@ -73,10 +74,12 @@ export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HT
     [fitView],
   );
 
+  // Keep only HUD height measured — maze is explicitly fill-sized so it won't drift.
   const syncMeasuredNodes = useCallback(() => {
     setNodes((nds) => {
       let changed = false;
       const next = nds.map((n) => {
+        if (n.id === MAZE_NODE_ID) return n; // maze is fill-sized, skip measurement
         const measured = measureFlowNode(n.id);
         if (!measured) return n;
         const widthOk = n.width == null || Math.abs((n.width ?? 0) - measured.w) < 2;
@@ -89,7 +92,7 @@ export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HT
       const hud = next.find((n) => n.id === HUD_NODE_ID);
       const maze = next.find((n) => n.id === MAZE_NODE_ID);
       if (hud && maze) {
-        const mazeY = hud.position.y + (hud.height ?? HUD_SLOT.height) + ORBIT_V_GAP + ORBIT_TOP_EXTRA_GAP;
+        const mazeY = hud.position.y + (hud.height ?? HUD_SLOT.height) + ORBIT_V_GAP;
         if (Math.abs(maze.position.y - mazeY) > 1) {
           changed = true;
           return next.map((n) =>
@@ -103,29 +106,14 @@ export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HT
   }, [setNodes]);
 
   const relayout = useCallback(() => {
-    const layout = layoutForGrid(grid, cellSize);
+    const layout = buildFillLayout();
     setNodes(layout.nodes);
     setEdges(layout.edges);
-  }, [grid, cellSize, setNodes, setEdges]);
+  }, [setNodes, setEdges]);
 
   useEffect(() => {
     relayout();
   }, [relayout]);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const ro = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const { width, height } = entry.contentRect;
-      setContainerSize({ w: Math.round(width), h: Math.round(height) });
-    });
-    ro.observe(el);
-    setContainerSize({ w: el.clientWidth, h: el.clientHeight });
-    return () => ro.disconnect();
-  }, [containerRef]);
 
   useEffect(() => {
     if (!nodesInitialized || !nodes.length) return;

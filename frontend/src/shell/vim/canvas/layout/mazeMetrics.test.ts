@@ -3,12 +3,12 @@ import { getVimLevel } from '../../engine';
 import {
   MAZE_GRID_GAP,
   MAZE_NODE_CHROME,
-  computeStudioCellSize,
+  computeMazeFillCellSize,
   fitMazeCellSize,
   mazeBoardDimensions,
+  mazeCellFontSize,
   mazeNodeSize,
 } from './mazeMetrics';
-import { HUD_PANEL_WIDTH } from './orbitSlots';
 
 describe('mazeMetrics', () => {
   it('includes grid gaps in board dimensions', () => {
@@ -37,18 +37,45 @@ describe('mazeMetrics', () => {
     expect(fitMazeCellSize(grid, 200, 30)).toBeGreaterThanOrEqual(16);
   });
 
-  it('computeStudioCellSize scales down for short viewports', () => {
-    const grid = getVimLevel('basic-02')!.grid;
-    const full = computeStudioCellSize(grid, 1280, 900, { hudW: HUD_PANEL_WIDTH });
-    const short = computeStudioCellSize(grid, 1280, 360, { hudW: HUD_PANEL_WIDTH });
-    expect(short).toBeLessThanOrEqual(full);
-  });
+  describe('computeMazeFillCellSize', () => {
+    it('returns a cell size that fits the board in the given inner area', () => {
+      const grid = getVimLevel('basic-01')!.grid; // 5×5
+      const { cols, rows } = mazeBoardDimensions(grid, 1);
+      const innerW = 1197;
+      const innerH = 677;
+      const cell = computeMazeFillCellSize(grid, innerW, innerH);
+      const gapX = (cols - 1) * MAZE_GRID_GAP;
+      const gapY = (rows - 1) * MAZE_GRID_GAP;
+      expect(cols * cell + gapX).toBeLessThanOrEqual(innerW);
+      expect(rows * cell + gapY).toBeLessThanOrEqual(innerH);
+    });
 
-  it('computeStudioCellSize scales up on large full-page viewports', () => {
-    const grid = getVimLevel('basic-02')!.grid;
-    const compact = computeStudioCellSize(grid, 480, 640, { hudW: HUD_PANEL_WIDTH });
-    const spacious = computeStudioCellSize(grid, 1600, 1000, { hudW: HUD_PANEL_WIDTH });
-    expect(spacious).toBeGreaterThan(compact);
-    expect(spacious).toBeGreaterThan(30);
+    it('scales up on large inner areas compared to small ones', () => {
+      const grid = getVimLevel('basic-01')!.grid;
+      const small = computeMazeFillCellSize(grid, 200, 200);
+      const large = computeMazeFillCellSize(grid, 1197, 677);
+      expect(large).toBeGreaterThan(small);
+    });
+
+    it('uses the height constraint for tall grids', () => {
+      const grid = getVimLevel('basic-02')!.grid; // 7×7
+      const innerW = 1197;
+      const innerH = 677;
+      const cell = computeMazeFillCellSize(grid, innerW, innerH);
+      const { cols, rows } = mazeBoardDimensions(grid, 1);
+      expect(rows * cell + (rows - 1) * MAZE_GRID_GAP).toBeLessThanOrEqual(innerH);
+      expect(cols * cell + (cols - 1) * MAZE_GRID_GAP).toBeLessThanOrEqual(innerW);
+    });
+
+    it('never returns less than minCell', () => {
+      const grid = getVimLevel('basic-02')!.grid;
+      const cell = computeMazeFillCellSize(grid, 10, 10);
+      expect(cell).toBeGreaterThanOrEqual(16);
+    });
+
+    it('mazeCellFontSize scales with cell size', () => {
+      expect(mazeCellFontSize(30)).toBeGreaterThan(16);
+      expect(mazeCellFontSize(100)).toBeGreaterThan(mazeCellFontSize(30));
+    });
   });
 });
