@@ -58,7 +58,7 @@ export function QuizAssembleGames({ onWinContinue }: { onWinContinue?: () => voi
             pieces={pieces}
             lang={lang}
             variant="mobile"
-            onComplete={onWinContinue}
+            onComplete={(_placed, _mistakes) => onWinContinue?.()}
           />
         </div>
       )}

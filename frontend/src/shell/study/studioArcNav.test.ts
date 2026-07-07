@@ -6,7 +6,7 @@ const tabs = (ids: string[]): StudioTab[] =>
   ids.map((id) => ({
     id,
     label: id,
-    icon: (() => null) as StudioTab['icon'],
+    icon: (() => null) as unknown as StudioTab['icon'],
     group: 'start',
     render: 'panel',
   }));

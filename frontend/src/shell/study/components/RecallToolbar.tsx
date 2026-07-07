@@ -104,9 +104,11 @@ export function RecallToolbar({
 
       <div className="flex-1" />
       {attemptCount > 0 && (
-        <Chip tone="muted" mono title={`${attemptCount} failed attempt${attemptCount === 1 ? '' : 's'} saved`}>
-          Attempt {currentAttempt}
-        </Chip>
+        <span title={`${attemptCount} failed attempt${attemptCount === 1 ? '' : 's'} saved`}>
+          <Chip tone="muted" mono>
+            Attempt {currentAttempt}
+          </Chip>
+        </span>
       )}
       {linesProgress !== undefined && linesProgress.total > 0 && (
         <Chip tone={linesProgress.completed >= linesProgress.total ? 'good' : 'muted'} mono>

@@ -48,7 +48,7 @@ export function useCodeStudioMachine({
 
   const loadDraft = useCallback(() => '', []);
 
-  const [draft, setDraft] = useState(loadDraft);
+  const [draft, setDraft] = useState<string>(loadDraft);
 
   useEffect(() => {
     clearTransition();
