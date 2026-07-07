@@ -12,6 +12,7 @@ const reactionDuel: GameDef = {
   glyph:
     '<path d="M25 5 11 27h11l-2 16 15-24H23l2-14z" fill="currentColor" stroke="none"/><path d="M25 5 11 27h11l-2 16 15-24H23l2-14z"/>',
   category: 'party',
+  accent: '#10b981',
   Component: ReactionDuel,
 };
 

@@ -104,6 +104,8 @@ export function NumberDuel() {
     attempts: Attempt[];
   } | null>(null);
 
+  const sendRef = useRef<(msg: Msg) => void>(() => {});
+
   const send = useGameChannel<Msg>((msg) => {
     switch (msg.kind) {
       case 'ready':
@@ -121,8 +123,8 @@ export function NumberDuel() {
         const attempt: Attempt = { value: msg.value, result, heat, frac };
         const nextAttempts = [...attempts, attempt];
         setAttempts(nextAttempts);
-        send({ kind: 'feedback', value: msg.value, result, heat, frac, count });
-        send({ kind: 'snapshot', round, keeperName, guesserName, attempts: nextAttempts });
+        sendRef.current({ kind: 'feedback', value: msg.value, result, heat, frac, count });
+        sendRef.current({ kind: 'snapshot', round, keeperName, guesserName, attempts: nextAttempts });
         if (result === 'correct') {
           setCounts((c) => ({ ...c, [round]: count }));
           setPhase('roundResult');
@@ -157,6 +159,7 @@ export function NumberDuel() {
         break;
     }
   });
+  sendRef.current = send;
 
   useEffect(() => {
     if (phase !== 'roundResult') return;
@@ -221,7 +224,7 @@ export function NumberDuel() {
     if (phase !== 'over') reportedRef.current = false;
   }, [phase]);
 
-  if (!connected) {
+  if (!connected && !isSpectator) {
     return <WaitingForPeer message={arcade.waitingReconnect(peerName)} />;
   }
 

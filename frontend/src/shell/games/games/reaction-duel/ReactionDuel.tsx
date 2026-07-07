@@ -8,6 +8,7 @@ import { GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPe
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
+import { cn } from '@/lib/utils/cn';
 import { playCue } from '@/lib/utils/audio';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import {
@@ -55,6 +56,13 @@ const ARM_MAX_MS = 3500;
 const RESULT_MS = 2600;
 // Soft ceiling for the "tap now" window, used to drive the countdown ring.
 const GO_WINDOW_MS = 2000;
+
+const TAP_ZONE_STYLES = `
+  @keyframes reactionGoPop { 0% { transform: scale(0.97); } 60% { transform: scale(1.015); } 100% { transform: scale(1); } }
+  .reaction-go-pop { animation: reactionGoPop 220ms cubic-bezier(0.2,0.7,0.2,1); }
+  @keyframes reactionShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+  .reaction-shake { animation: reactionShake 320ms ease-in-out; }
+`;
 
 export function ReactionDuel() {
   const { locale } = useGamesLocale();
@@ -285,7 +293,7 @@ export function ReactionDuel() {
     send({ kind: 'rematch' });
   };
 
-  if (!connected) {
+  if (!connected && !isSpectator) {
     return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? t.partner)} />;
   }
 
@@ -463,14 +471,14 @@ function TapZone({
       onClick={onTap}
       disabled={!interactive}
       aria-label={heading}
-      className={
-        'relative flex h-[clamp(5.5rem,26dvh,9rem)] w-full select-none touch-manipulation flex-col items-center justify-center gap-1 ' +
-        'rounded-xl border-2 p-3 text-center transition-colors active:scale-[0.99] ' +
-        'disabled:active:scale-100 ' +
-        (go && !reduced ? 'reaction-go-pop ' : '') +
-        (falseStart && !reduced ? 'reaction-shake ' : '') +
-        tone
-      }
+      className={cn(
+        'relative flex h-[clamp(5.5rem,26dvh,9rem)] w-full select-none touch-manipulation flex-col items-center justify-center gap-1',
+        'rounded-xl border-2 p-3 text-center transition-colors active:scale-[0.99]',
+        'disabled:active:scale-100',
+        go && !reduced && 'reaction-go-pop',
+        falseStart && !reduced && 'reaction-shake',
+        tone,
+      )}
     >
       {go && !isSpectator ? (
         <span className="absolute right-3 top-3">
@@ -479,12 +487,7 @@ function TapZone({
       ) : null}
       <span className="text-xl font-black tracking-tight sm:text-2xl">{heading}</span>
       <span className="text-[10px] font-medium opacity-90">{sub}</span>
-      <style>{`
-        @keyframes reactionGoPop { 0% { transform: scale(0.97); } 60% { transform: scale(1.015); } 100% { transform: scale(1); } }
-        .reaction-go-pop { animation: reactionGoPop 220ms cubic-bezier(0.2,0.7,0.2,1); }
-        @keyframes reactionShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
-        .reaction-shake { animation: reactionShake 320ms ease-in-out; }
-      `}</style>
+      <style>{TAP_ZONE_STYLES}</style>
     </button>
   );
 }
@@ -527,13 +530,13 @@ function Ladder({
         return (
           <div
             key={p.id}
-            className={
-              'flex items-center gap-2.5 rounded-[var(--radius)] border px-3 py-2 ' +
-              (mine ? 'border-accent/50 bg-accentbg' : 'border-edge bg-panel')
-            }
+            className={cn(
+              'flex items-center gap-2.5 rounded-[var(--radius)] border px-3 py-2',
+              mine ? 'border-accent/50 bg-accentbg' : 'border-edge bg-panel',
+            )}
           >
             <Avatar seed={p.id} name={p.name} size={26} />
-            <span className={'min-w-0 flex-1 truncate text-sm font-semibold ' + (mine ? 'text-accent' : 'text-ink')}>
+            <span className={cn('min-w-0 flex-1 truncate text-sm font-semibold', mine ? 'text-accent' : 'text-ink')}>
               {mine ? strings.you : p.name}
             </span>
             <Pips score={s} />
@@ -550,7 +553,7 @@ function PlayerCell({ peer, name, score, mine }: { peer?: Peer; name?: string; s
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
       {peer ? <Avatar seed={peer.id} name={peer.name} size={26} /> : null}
       <div className="truncate text-xs font-semibold text-ink">{name ?? '—'}</div>
-      <div className={cn('font-mono text-xl font-bold tabular-nums ' + (mine ? 'text-accent' : 'text-ink2'))}>{score}</div>
+      <div className={cn('font-mono text-xl font-bold tabular-nums', mine ? 'text-accent' : 'text-ink2')}>{score}</div>
       <Pips score={score} />
     </div>
   );
@@ -561,7 +564,7 @@ function Pips({ score }: { score: number }) {
   return (
     <span className="flex items-center gap-1">
       {Array.from({ length: WIN_TARGET }, (_, i) => (
-        <span key={i} className={'h-2 w-2 rounded-full ' + (i < score ? 'bg-good' : 'bg-edge2')} />
+        <span key={i} className={cn('h-2 w-2 rounded-full', i < score ? 'bg-good' : 'bg-edge2')} />
       ))}
     </span>
   );
@@ -585,7 +588,7 @@ function RoundTimes({
   return (
     <span className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 font-mono text-sm">
       {rows.map((r) => (
-        <span key={r.id} className={r.id === result.winnerId ? 'font-bold' : 'opacity-80'}>
+        <span key={r.id} className={cn(r.id === result.winnerId ? 'font-bold' : 'opacity-80')}>
           {r.id === myId ? strings.you : r.name}: {fmt(r.ms, strings)}
         </span>
       ))}
@@ -621,11 +624,11 @@ function History({
                 {rows.map((r) => (
                   <span
                     key={r.id}
-                    className={
-                      r.id === res.winnerId ? 'font-bold text-good' : r.id === myId ? 'text-ink2' : 'text-ink3'
-                    }
+                    className={cn(
+                      r.id === res.winnerId ? 'font-bold text-good' : r.id === myId ? 'text-ink2' : 'text-ink3',
+                    )}
                   >
-                    {(r.id === myId ? strings.you : r.name)}: {fmt(r.ms, strings)}
+                    {r.id === myId ? strings.you : r.name}: {fmt(r.ms, strings)}
                   </span>
                 ))}
               </span>

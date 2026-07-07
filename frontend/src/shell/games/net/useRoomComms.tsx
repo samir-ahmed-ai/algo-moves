@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -229,10 +230,14 @@ function useRoomCommsState(): RoomComms {
     [self, send],
   );
 
-  const readyIds = new Set(
-    Object.entries(readyMap)
-      .filter(([, v]) => v)
-      .map(([k]) => k),
+  const readyIds = useMemo(
+    () =>
+      new Set(
+        Object.entries(readyMap)
+          .filter(([, v]) => v)
+          .map(([k]) => k),
+      ),
+    [readyMap],
   );
 
   return {

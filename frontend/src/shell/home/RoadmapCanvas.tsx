@@ -318,6 +318,8 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
   const finishRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const dotRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const stopsRef = useRef(stops);
+  stopsRef.current = stops;
 
   const [layout, setLayout] = useState<LayoutState>({
     w: 0,
@@ -346,7 +348,7 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
 
     const connectors: Connector[] = [];
 
-    stops.forEach((stop, i) => {
+    stopsRef.current.forEach((stop, i) => {
       const card = cardRefs.current[i];
       const dot = dotRefs.current[i];
       if (!card || !dot) return;
@@ -364,8 +366,23 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
       });
     });
 
-    setLayout({ w, h, cx, spinePath, connectors });
-  }, [stops]);
+    const next = { w, h, cx, spinePath, connectors };
+    setLayout((prev) => {
+      const sameConnectors =
+        prev.connectors.length === next.connectors.length
+        && prev.connectors.every((c, i) => c.d === next.connectors[i].d && c.c1 === next.connectors[i].c1);
+      if (
+        prev.w === next.w
+        && prev.h === next.h
+        && prev.cx === next.cx
+        && prev.spinePath === next.spinePath
+        && sameConnectors
+      ) {
+        return prev;
+      }
+      return next;
+    });
+  }, []);
 
   useLayoutEffect(() => {
     measure();

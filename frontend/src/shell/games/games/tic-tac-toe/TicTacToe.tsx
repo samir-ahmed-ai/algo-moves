@@ -5,7 +5,7 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
-import { mergeNestedRoomState } from '../../net/nestedRoomState';
+import { mergeNestedRoomState, useSharedStateRef } from '../../net/nestedRoomState';
 import { GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { Avatar } from '../../ui/Avatar';
@@ -40,6 +40,7 @@ export function TicTacToe() {
   const strings = useMemo(() => getTicTacToeStrings(locale), [locale]);
   const { self, peer, players, connected, isSpectator, sharedState, publishState, role } =
     useGameRoom();
+  const sharedStateRef = useSharedStateRef(sharedState);
   const { report } = useMatchReporter('tic-tac-toe');
   const reduced = usePrefersReducedMotion();
 
@@ -72,9 +73,9 @@ export function TicTacToe() {
   const publishBoard = useCallback(
     (nextBoard: Board, nextGen: number) => {
       if (role !== 'host') return;
-      publishState(mergeNestedRoomState(sharedState, 'ttt', { board: nextBoard, gen: nextGen }));
+      publishState(mergeNestedRoomState(sharedStateRef.current, 'ttt', { board: nextBoard, gen: nextGen }));
     },
-    [role, sharedState, publishState],
+    [role, publishState],
   );
 
   const send = useGameChannel<TttMsg>((msg) => {
@@ -176,7 +177,7 @@ export function TicTacToe() {
     }, 250);
     return () => window.clearInterval(id);
     // Re-arm whenever the turn flips or the board count changes.
-  }, [isSpectator, over, myTurn, board.length, turn]);
+  }, [isSpectator, over, myTurn, turn]);
 
   // --- End-of-match effects: sound, haptics, confetti (fired once per settled board). ---
   const iWon = win === myMark;

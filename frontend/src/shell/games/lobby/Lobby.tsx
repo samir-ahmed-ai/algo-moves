@@ -10,20 +10,12 @@ import { useAuth } from '../data/AuthProvider';
 import { getPersonalRoomCode } from '../data/arcadeClient';
 import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net/gameServer';
 import { Avatar } from '../ui/Avatar';
-import { Glyph, TouchButton } from '../ui/gamesUi';
+import { Glyph, TouchButton, CategoryBadge } from '../ui/gamesUi';
 import { GAMES } from '../registry';
+import { gameAccentColor } from '../gamePresentation';
 
 const NAME_KEY = STORAGE_KEYS.GAMES_NAME;
 const CAPACITIES = [2, 4, 6, 8];
-
-const GAME_ACCENT_COLORS: Record<string, string> = {
-  'would-you-rather': '#e879a0',
-  'number-duel': '#6366f1',
-  'tic-tac-toe': '#0ea5e9',
-  'rock-paper-scissors': '#f59e0b',
-  'mind-meld': '#8b5cf6',
-  'reaction-duel': '#10b981',
-};
 
 /** Pre-connection screen: pick a name + avatar, then create or join a room. */
 export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
@@ -273,15 +265,12 @@ function HeroBanner() {
       <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
       <div className="pointer-events-none absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-white/10" />
       <div className="relative flex flex-col items-center gap-2 text-center">
-        <div className="flex gap-2 text-3xl">
+        <div className="flex gap-3 text-6xl">
           <span className="animate-[bounce_1.2s_ease-in-out_infinite]">🎮</span>
           <span className="animate-[bounce_1.2s_ease-in-out_0.2s_infinite]">💕</span>
           <span className="animate-[bounce_1.2s_ease-in-out_0.4s_infinite]">🎲</span>
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">Games Arcade</h1>
-        <p className="text-sm text-white/80 max-w-[220px] leading-snug">
-          Play together, anywhere. Real-time games for two.
-        </p>
       </div>
     </div>
   );
@@ -293,8 +282,7 @@ function GamePreviewStrip() {
       <p className="text-xs font-bold uppercase tracking-widest text-ink3 px-0.5">Games available</p>
       <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch]">
         {GAMES.map((game) => {
-          const color = GAME_ACCENT_COLORS[game.id] ?? 'var(--accent)';
-          const isCouple = game.category === 'couple';
+          const color = gameAccentColor(game);
           return (
             <div
               key={game.id}
@@ -310,9 +298,7 @@ function GamePreviewStrip() {
               <span className="text-[10px] font-bold text-ink leading-tight text-center" style={{ maxWidth: 68 }}>
                 {game.title.length > 12 ? game.title.slice(0, 11) + '…' : game.title}
               </span>
-              {isCouple && (
-                <span className="rounded-full bg-pink-500/10 px-1.5 py-px text-[9px] font-bold text-pink-500">♥ 2P</span>
-              )}
+              {game.category ? <CategoryBadge category={game.category} /> : null}
             </div>
           );
         })}

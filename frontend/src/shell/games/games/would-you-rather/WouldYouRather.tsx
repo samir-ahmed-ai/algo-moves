@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { playCue } from '@/lib/utils/audio';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
+import { getArcadeStrings, useGamesLocale } from '../../locale';
 import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
-import { mergeNestedRoomState, readNestedRoomState } from '../../net/nestedRoomState';
+import { mergeNestedRoomState, useAdoptNestedState, useSharedStateRef } from '../../net/nestedRoomState';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
@@ -24,7 +25,7 @@ import {
   type WyrState,
 } from './logic';
 import { CATEGORY_LABELS, type WyrCategory } from './prompts';
-import { WYR_STRINGS } from './strings';
+import { getWouldYouRatherStrings } from './strings';
 
 type WyrMsg =
   | { kind: 'answer'; round: number; choice: WyrChoice }
@@ -34,30 +35,37 @@ type WyrMsg =
 const WYR_STATE_KEY = 'wyr';
 
 function isWyrState(v: unknown): v is WyrState {
-  return !!v && typeof v === 'object' && 'phase' in v;
+  if (!v || typeof v !== 'object') return false;
+  const o = v as Record<string, unknown>;
+  return (
+    typeof o.phase === 'string'
+    && (o.phase === 'category-pick' || o.phase === 'picking' || o.phase === 'reveal' || o.phase === 'over')
+    && typeof o.round === 'number'
+    && (o.deadline === null || typeof o.deadline === 'number')
+    && typeof o.answers === 'object'
+    && o.answers !== null
+    && typeof o.scores === 'object'
+    && o.scores !== null
+    && Array.isArray(o.prompts)
+  );
 }
 
 export function WouldYouRather() {
-  const s = WYR_STRINGS;
+  const { locale } = useGamesLocale();
+  const s = useMemo(() => getWouldYouRatherStrings(locale), [locale]);
+  const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
   const { self, peer, players, connected, role, isSpectator, publishState, sharedState } = useGameRoom();
   const { report } = useMatchReporter('would-you-rather');
   const isHost = role === 'host';
   const reduced = usePrefersReducedMotion();
 
   const [state, setState] = useState<WyrState>(freshState);
+  const sharedStateRef = useSharedStateRef(sharedState);
 
-  // Adopt inbound shared state (guests + spectators + host echo).
-  useEffect(() => {
-    const remote = readNestedRoomState(sharedState, WYR_STATE_KEY, isWyrState);
-    if (remote) setState(remote);
-  }, [sharedState]);
-
-  const commit = useCallback((next: WyrState) => {
-    setState(next);
-  }, []);
+  useAdoptNestedState(sharedState, WYR_STATE_KEY, isWyrState, setState, isHost);
 
   usePublishState(isHost, [state], () => {
-    publishState(mergeNestedRoomState(sharedState, WYR_STATE_KEY, state));
+    publishState(mergeNestedRoomState(sharedStateRef.current, WYR_STATE_KEY, state));
   });
 
   const recordAnswer = useCallback((round: number, peerId: string, choice: WyrChoice) => {
@@ -86,41 +94,48 @@ export function WouldYouRather() {
 
   // --- Host: open a deadline when we enter the picking phase ---
   useEffect(() => {
-    if (!isHost || state.phase !== 'picking' || state.deadline !== null) return;
-    commit({ ...state, deadline: Date.now() + ROUND_MS });
-  }, [isHost, state, commit]);
+    if (!isHost) return;
+    setState((prev) => {
+      if (prev.phase !== 'picking' || prev.deadline !== null) return prev;
+      return { ...prev, deadline: Date.now() + ROUND_MS };
+    });
+  }, [isHost, state.phase, state.round]);
 
   // --- Host: advance round when everyone answered or time runs out ---
   useEffect(() => {
-    if (!isHost || state.phase !== 'picking') return;
+    if (!isHost) return;
+    const playerIds = players.map((p) => p.id);
     const tryAdvance = () => {
-      const row = state.answers[state.round] ?? {};
-      const playerIds = players.map((p) => p.id);
-      const everyone = playerIds.length > 0 && playerIds.every((id) => id in row);
-      const expired = state.deadline !== null && Date.now() >= state.deadline;
-      if (everyone || expired) {
+      setState((prev) => {
+        if (prev.phase !== 'picking') return prev;
+        const row = prev.answers[prev.round] ?? {};
+        const everyone = playerIds.length > 0 && playerIds.every((id) => id in row);
+        const expired = prev.deadline !== null && Date.now() >= prev.deadline;
+        if (!everyone && !expired) return prev;
         const deltas = computeRoundDeltas(row, playerIds);
-        const newScores = applyDeltas(state.scores, deltas);
-        commit({ ...state, phase: 'reveal', deadline: null, scores: newScores });
-      }
+        const newScores = applyDeltas(prev.scores, deltas);
+        return { ...prev, phase: 'reveal', deadline: null, scores: newScores };
+      });
     };
     tryAdvance();
     const id = setInterval(tryAdvance, 200);
     return () => clearInterval(id);
-  }, [isHost, state, players, commit]);
+  }, [isHost, state.phase, players]);
 
   // --- Host: hold reveal then advance or end ---
   useEffect(() => {
     if (!isHost || state.phase !== 'reveal') return;
     const t = setTimeout(() => {
-      if (state.round + 1 >= state.prompts.length) {
-        commit({ ...state, phase: 'over' });
-      } else {
-        commit({ ...state, round: state.round + 1, phase: 'picking', deadline: null });
-      }
+      setState((prev) => {
+        if (prev.phase !== 'reveal') return prev;
+        if (prev.round + 1 >= prev.prompts.length) {
+          return { ...prev, phase: 'over' };
+        }
+        return { ...prev, round: prev.round + 1, phase: 'picking', deadline: null };
+      });
     }, REVEAL_MS);
     return () => clearTimeout(t);
-  }, [isHost, state, commit]);
+  }, [isHost, state.phase, state.round]);
 
   // --- Countdown ring (all clients derive from shared deadline) ---
   const [now, setNow] = useState(() => Date.now());
@@ -177,9 +192,9 @@ export function WouldYouRather() {
     const sorted = [...players].sort((a, b) => (state.scores[b.id] ?? 0) - (state.scores[a.id] ?? 0));
     const topScore = state.scores[sorted[0]?.id] ?? 0;
     void report(
-      sorted.map((p, i) => ({
+      sorted.map((p) => ({
         peerId: p.id,
-        placement: (state.scores[p.id] ?? 0) === topScore && i === 0 ? 1 : 2,
+        placement: (state.scores[p.id] ?? 0) === topScore ? 1 : 2,
         score: state.scores[p.id] ?? 0,
       })),
     );
@@ -194,13 +209,13 @@ export function WouldYouRather() {
     send({ kind: 'rematch' });
   };
 
-  if (!connected) {
-    return <WaitingForPeer message={`Waiting for ${peer?.name ?? s.partner}…`} />;
+  if (!connected && !isSpectator) {
+    return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? s.partner)} />;
   }
 
   // ---- Category picker (host only at game start) ----
   if (state.phase === 'category-pick') {
-    return <CategoryPicker isHost={isHost} onStart={(cats) => {
+    return <CategoryPicker strings={s} isHost={isHost} onStart={(cats) => {
       const seed = Date.now() & 0xffffffff;
       const partial = startGame(cats, seed);
       setState((prev) => ({ ...prev, ...partial }));
@@ -259,16 +274,17 @@ export function WouldYouRather() {
           <p className="text-sm font-bold leading-snug text-ink">{prompt.a}</p>
           <div className="my-1.5 flex items-center gap-2">
             <div className="flex-1 h-px bg-edge" />
-            <span className="text-[10px] font-semibold text-ink3 px-1">OR</span>
+            <span className="text-[10px] font-semibold text-ink3 px-1">{s.orLabel}</span>
             <div className="flex-1 h-px bg-edge" />
           </div>
           <p className="text-sm font-bold leading-snug text-ink">{prompt.b}</p>
         </div>
 
         {showReveal ? (
-          <RevealPanel players={players} row={row} prompt={prompt} reduced={reduced} />
+          <RevealPanel strings={s} players={players} row={row} prompt={prompt} reduced={reduced} />
         ) : (
           <PickingPanel
+            strings={s}
             isSpectator={isSpectator}
             myPick={myPick}
             timerProgress={timerProgress}
@@ -300,8 +316,15 @@ export function WouldYouRather() {
 
 // ---- Sub-components ----
 
-function CategoryPicker({ isHost, onStart }: { isHost: boolean; onStart: (cats: WyrCategory[]) => void }) {
-  const s = WYR_STRINGS;
+function CategoryPicker({
+  strings: s,
+  isHost,
+  onStart,
+}: {
+  strings: ReturnType<typeof getWouldYouRatherStrings>;
+  isHost: boolean;
+  onStart: (cats: WyrCategory[]) => void;
+}) {
   const [selected, setSelected] = useState<Set<WyrCategory>>(new Set());
 
   const toggle = (cat: WyrCategory) => {
@@ -366,6 +389,7 @@ function CategoryPicker({ isHost, onStart }: { isHost: boolean; onStart: (cats: 
 }
 
 function PickingPanel({
+  strings: s,
   isSpectator,
   myPick,
   timerProgress,
@@ -376,6 +400,7 @@ function PickingPanel({
   prompt,
   onPick,
 }: {
+  strings: ReturnType<typeof getWouldYouRatherStrings>;
   isSpectator: boolean;
   myPick: WyrChoice | null;
   timerProgress: number;
@@ -386,7 +411,6 @@ function PickingPanel({
   prompt: { a: string; b: string };
   onPick: (choice: WyrChoice) => void;
 }) {
-  const s = WYR_STRINGS;
   const picked = myPick !== null;
 
   return (
@@ -400,7 +424,7 @@ function PickingPanel({
         />
         <TurnBadge tone={isSpectator ? 'wait' : picked ? 'wait' : 'you'}>
           {isSpectator
-            ? `${answeredCount}/${total} answered`
+            ? s.answered(answeredCount, total)
             : picked
               ? s.waitingFor(peerName)
               : s.pickOne}
@@ -465,11 +489,13 @@ function OptionButton({
 }
 
 function RevealPanel({
+  strings: s,
   players,
   row,
   prompt,
   reduced,
 }: {
+  strings: ReturnType<typeof getWouldYouRatherStrings>;
   players: { id: string; name: string }[];
   row: Record<string, WyrChoice>;
   prompt: { a: string; b: string };
@@ -484,7 +510,7 @@ function RevealPanel({
         'text-center rounded-xl border-2 py-1.5 px-2.5 font-bold text-xs transition-all',
         matched ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
       )}>
-        {matched ? WYR_STRINGS.matched : WYR_STRINGS.noMatch}
+        {matched ? s.matched : s.noMatch}
       </div>
 
       <div className="grid grid-cols-2 gap-2">

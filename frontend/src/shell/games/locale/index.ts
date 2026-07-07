@@ -1,4 +1,4 @@
-export { GamesLocaleProvider, useGamesLocale } from './GamesLocaleProvider';
+export { GamesLocaleProvider, useArcadeStrings, useGamesLocale } from './GamesLocaleProvider';
 export { getArcadeStrings, type ArcadeStrings } from './messages';
 export {
   DEFAULT_GAME_LOCALE,

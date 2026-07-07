@@ -20,6 +20,8 @@ describe('arcade messages', () => {
     expect(t.header.games).toBe('Games');
     expect(t.lobby.title).toBe('Play with friends');
     expect(t.picker.title).toBe('Pick a game');
+    expect(t.picker.filterAll).toBe('All');
+    expect(t.picker.howToPlay).toBe('How to play:');
     expect(t.shareRoom.roomCode).toBe('Room code');
     expect(t.room.readyUp).toBe('Ready up');
     expect(t.leaderboard.title).toBe('Leaderboards');

@@ -59,6 +59,17 @@ export type ArcadeStrings = {
     you: string;
     partner: string;
     vs: string;
+    filterAll: string;
+    filterCouple: string;
+    filterParty: string;
+    categoryCouple: string;
+    categoryParty: string;
+    howToPlay: string;
+    showHowToPlay: string;
+    hideHowToPlay: string;
+    needsPlayers: (min: number, max: number) => string;
+    playerRange: (min: number, max: number) => string;
+    defaultHowToPlay: string;
   };
   shareRoom: {
     roomCode: string;

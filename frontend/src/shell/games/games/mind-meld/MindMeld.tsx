@@ -4,7 +4,7 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
-import { mergeNestedRoomState, readNestedRoomState } from '../../net/nestedRoomState';
+import { mergeNestedRoomState, useAdoptNestedState, useSharedStateRef } from '../../net/nestedRoomState';
 import type { Peer } from '../../net/protocol';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
@@ -45,7 +45,16 @@ interface MeldState {
 const MELD_STATE_KEY = 'meld';
 
 function isMeldState(v: unknown): v is MeldState {
-  return !!v && typeof v === 'object' && 'phase' in v;
+  if (!v || typeof v !== 'object') return false;
+  const o = v as Record<string, unknown>;
+  return (
+    typeof o.round === 'number'
+    && typeof o.phase === 'string'
+    && (o.phase === 'answer' || o.phase === 'reveal' || o.phase === 'over')
+    && (o.deadline === null || typeof o.deadline === 'number')
+    && typeof o.answers === 'object'
+    && o.answers !== null
+  );
 }
 
 const REVEAL_MS = 2200;
@@ -78,28 +87,17 @@ export function MindMeld() {
   // from sharedState. publishState also updates the host's own copy, so a single
   // `state` value is the source of truth on every client.
   const [state, setState] = useState<MeldState>(freshState);
+  const sharedStateRef = useSharedStateRef(sharedState);
 
-  // Adopt inbound meld snapshot (guests + spectators + host echo). Room metadata
-  // lives alongside `meld` at the top level — never replace the whole blob.
-  useEffect(() => {
-    const remote = readNestedRoomState(sharedState, MELD_STATE_KEY, isMeldState);
-    if (remote) setState(remote);
-  }, [sharedState]);
+  useAdoptNestedState(sharedState, MELD_STATE_KEY, isMeldState, setState, isHost);
 
-  // Only the host writes shared state — done in an effect below, never during
-  // render — so a single local setState keeps the two paths symmetric.
-  const commit = useCallback((next: MeldState) => {
-    setState(next);
-  }, []);
-
-  // Host mirrors authoritative state under `meld`, preserving room metadata.
   usePublishState(isHost, [state], () => {
-    publishState(mergeNestedRoomState(sharedState, MELD_STATE_KEY, state));
+    publishState(mergeNestedRoomState(sharedStateRef.current, MELD_STATE_KEY, state));
   });
 
   const resetMatch = useCallback(() => {
-    commit(freshState());
-  }, [commit]);
+    setState(freshState());
+  }, []);
 
   // Record a pick. Host applies it straight to authoritative state; guests relay
   // it up and optimistically show their own selection.
@@ -149,39 +147,44 @@ export function MindMeld() {
   // --- Host: open a fresh answer window whenever we enter the answer phase.
   useEffect(() => {
     if (!isHost) return;
-    if (state.phase !== 'answer' || state.deadline !== null) return;
-    commit({ ...state, deadline: Date.now() + ROUND_MS });
-  }, [isHost, state, commit]);
+    setState((prev) => {
+      if (prev.phase !== 'answer' || prev.deadline !== null) return prev;
+      return { ...prev, deadline: Date.now() + ROUND_MS };
+    });
+  }, [isHost, state.phase, state.round]);
 
-  // --- Host: flip to reveal once every player has answered, or when time runs
-  // out. Runs on a light interval so the deadline is enforced even if idle.
+  // --- Host: flip to reveal once every player has answered, or when time runs out.
   useEffect(() => {
-    if (!isHost || state.phase !== 'answer') return;
+    if (!isHost) return;
     const tryAdvance = () => {
-      const row = state.answers[state.round] ?? {};
-      const everyone = players.length > 0 && players.every((p) => p.id in row);
-      const expired = state.deadline !== null && Date.now() >= state.deadline;
-      if (everyone || expired) {
-        commit({ ...state, phase: 'reveal', deadline: null });
-      }
+      setState((prev) => {
+        if (prev.phase !== 'answer') return prev;
+        const row = prev.answers[prev.round] ?? {};
+        const everyone = players.length > 0 && players.every((p) => p.id in row);
+        const expired = prev.deadline !== null && Date.now() >= prev.deadline;
+        if (!everyone && !expired) return prev;
+        return { ...prev, phase: 'reveal', deadline: null };
+      });
     };
     tryAdvance();
     const id = setInterval(tryAdvance, 250);
     return () => clearInterval(id);
-  }, [isHost, state, players, commit]);
+  }, [isHost, state.phase, players]);
 
   // --- Host: hold the reveal for a beat, then advance or end the match.
   useEffect(() => {
     if (!isHost || state.phase !== 'reveal') return;
     const t = setTimeout(() => {
-      if (state.round + 1 >= total) {
-        commit({ ...state, phase: 'over', deadline: null });
-      } else {
-        commit({ ...state, round: state.round + 1, phase: 'answer', deadline: null });
-      }
+      setState((prev) => {
+        if (prev.phase !== 'reveal') return prev;
+        if (prev.round + 1 >= total) {
+          return { ...prev, phase: 'over', deadline: null };
+        }
+        return { ...prev, round: prev.round + 1, phase: 'answer', deadline: null };
+      });
     }, REVEAL_MS);
     return () => clearTimeout(t);
-  }, [isHost, state, total, commit]);
+  }, [isHost, state.phase, state.round, total]);
 
   // --- Countdown ring progress (all clients derive it from the shared deadline).
   const [now, setNow] = useState(() => Date.now());
@@ -289,7 +292,7 @@ export function MindMeld() {
 
   const reduced = usePrefersReducedMotion();
 
-  if (!connected) {
+  if (!connected && !isSpectator) {
     return <WaitingForPeer message={arcade.waitingReconnect(peer?.name ?? strings.partner)} />;
   }
 

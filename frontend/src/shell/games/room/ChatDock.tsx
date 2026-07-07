@@ -92,10 +92,16 @@ export function ChatDock() {
   const { messages, sendChat, sendReaction } = useRoomComms();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
+  const [readThrough, setReadThrough] = useState(0);
   const logRef = useRef<HTMLDivElement>(null);
 
   const lastMessage = messages[messages.length - 1];
-  const unread = !open && messages.length > 0;
+  const unreadCount = Math.max(0, messages.length - readThrough);
+  const unread = !open && unreadCount > 0;
+
+  useEffect(() => {
+    if (open) setReadThrough(messages.length);
+  }, [open, messages.length]);
 
   useEffect(() => {
     if (open && logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
@@ -131,7 +137,7 @@ export function ChatDock() {
         )}
         {unread ? (
           <span className="shrink-0 rounded-full bg-accent px-1.5 py-px text-[10px] font-bold leading-none text-white">
-            {messages.length}
+            {unreadCount}
           </span>
         ) : null}
       </button>

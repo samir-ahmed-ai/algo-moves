@@ -11,6 +11,7 @@ const ticTacToe: GameDef = {
   glyph:
     '<path d="M20 8v32M28 8v32M8 20h32M8 28h32"/><path d="M11 11l6 6M17 11l-6 6"/><circle cx="38" cy="38" r="4"/>',
   category: 'couple',
+  accent: '#0ea5e9',
   Component: TicTacToe,
 };
 

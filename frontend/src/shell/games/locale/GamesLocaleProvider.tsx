@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { useGameRoom } from '../net/useGameRoom';
+import { useSharedStateRef } from '../net/nestedRoomState';
+import { getArcadeStrings } from './messages';
 import {
   DEFAULT_GAME_LOCALE,
   GAME_LOCALE_KEY,
@@ -25,6 +27,7 @@ function readStoredLocale(): GameLocale {
 
 export function GamesLocaleProvider({ children }: { children: ReactNode }) {
   const { sharedState, role, publishState } = useGameRoom();
+  const sharedStateRef = useSharedStateRef(sharedState);
   const [localLocale, setLocalLocale] = useState<GameLocale>(readStoredLocale);
 
   const roomLocale = localeFromSharedState(sharedState);
@@ -47,10 +50,10 @@ export function GamesLocaleProvider({ children }: { children: ReactNode }) {
       setLocalLocale(next);
       writeStorageText(GAME_LOCALE_KEY, next);
       if (role === 'host') {
-        publishState({ ...(sharedState as object | null), locale: next });
+        publishState({ ...(sharedStateRef.current as object | null), locale: next });
       }
     },
-    [role, publishState, sharedState, roomLocale],
+    [role, publishState, roomLocale],
   );
 
   const value = useMemo(
@@ -67,4 +70,10 @@ export function useGamesLocale(): GamesLocaleContextValue {
     throw new Error('useGamesLocale must be used within GamesLocaleProvider');
   }
   return ctx;
+}
+
+/** Resolved arcade copy for the active games locale. */
+export function useArcadeStrings() {
+  const { locale } = useGamesLocale();
+  return useMemo(() => getArcadeStrings(locale), [locale]);
 }

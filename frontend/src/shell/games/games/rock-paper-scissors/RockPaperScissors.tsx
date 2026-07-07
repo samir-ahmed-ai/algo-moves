@@ -165,6 +165,11 @@ export function RockPaperScissors() {
     setScores((prev) => addRoundScores(prev, roundPts));
   }, [picksByRound, round, roster]);
 
+  const roundRef = useRef(round);
+  roundRef.current = round;
+  const scoresRef = useRef(scores);
+  scoresRef.current = scores;
+
   // Feedback + auto-advance once a reveal has been shown for a beat.
   useEffect(() => {
     if (phase !== 'reveal') return;
@@ -181,7 +186,12 @@ export function RockPaperScissors() {
     }
 
     const t = setTimeout(() => {
-      const done = isNPlayer ? npMatchOver(round + 1) : twoPlayerOver();
+      const done = isNPlayer
+        ? npMatchOver(roundRef.current + 1)
+        : matchOver(
+            scoresRef.current[self?.id ?? ''] ?? 0,
+            scoresRef.current[peer?.id ?? ''] ?? 0,
+          );
       if (done) {
         setPhase('over');
       } else {
@@ -191,14 +201,7 @@ export function RockPaperScissors() {
       }
     }, REVEAL_MS);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
-
-  // Two-player match end mirrors the original first-to-WIN_TARGET rule.
-  const twoPlayerOver = useCallback(() => {
-    if (!self || !peer) return false;
-    return matchOver(scores[self.id] ?? 0, scores[peer.id] ?? 0);
-  }, [self, peer, scores]);
+  }, [phase, self, peer, isNPlayer, roundPicks]);
 
   // Final placements + one-shot reporting + confetti on match over.
   const placements = useMemo(() => {

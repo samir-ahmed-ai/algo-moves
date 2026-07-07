@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useArcadeStrings } from '../locale';
 
 /** Inner-SVG mnemonic glyph, drawn the same way the topic board / landing draw it. */
 export function Glyph({ markup, className }: { markup: string; className?: string }) {
@@ -196,15 +197,16 @@ export function GameArena({
 
 /** Small pill badge for couple / party category. */
 export function CategoryBadge({ category }: { category: 'couple' | 'party' }) {
+  const t = useArcadeStrings();
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
+        'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
         category === 'couple' && 'bg-pink-500/10 text-pink-500',
         category === 'party' && 'bg-amber-500/10 text-amber-600',
       )}
     >
-      {category === 'couple' ? '♥ For Two' : '🎉 Party'}
+      {category === 'couple' ? t.picker.categoryCouple : t.picker.categoryParty}
     </span>
   );
 }
