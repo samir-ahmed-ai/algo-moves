@@ -227,6 +227,15 @@
   padding-inline: var(--studio-pad);
 }
 
+.studio-split-second__header {
+  min-width: 0;
+}
+
+.studio-split-second__header .studio-arc {
+  border-bottom: none;
+  background: transparent;
+}
+
 /* ============================================================ Assemble blocks
  * Code pieces rendered as physical, interlocking puzzle blocks. A two-layer clip
  * (stroke layer + tinted face) gives a coloured outline that follows the puzzle

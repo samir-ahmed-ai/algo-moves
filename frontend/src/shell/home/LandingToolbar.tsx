@@ -96,7 +96,7 @@ export function LandingToolbar({
               value={exploreId}
               onChange={onExplore}
               panelTitle="Explore modes"
-              panelHint="Swipe, games, Vim, interview canvas, plans"
+              panelHint="Swipe, games, and Vim dojo"
               triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
               triggerAriaLabel="Explore modes"
               compact

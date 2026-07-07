@@ -18,11 +18,14 @@ import {
   LogOut,
   Mail,
   Shield,
+  Trophy,
   User,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from '@/shell/BrandLogo';
+import { useWorkspaceNavigation } from '@/store/workspace';
+import { InterviewToolkitGrid } from '@/shell/interview/InterviewToolkitGrid';
 import { formatAuthError } from './formatAuthError';
 import { authStrings as s } from './strings';
 import { useAuth } from './AuthProvider';
@@ -609,6 +612,7 @@ export function AuthUserMenu({
   onOpenProfile?: () => void;
 }) {
   const { profile, signOut } = useAuth();
+  const { enterProfile, enterCollabCanvas, enterPlans, enterResumes } = useWorkspaceNavigation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -634,12 +638,19 @@ export function AuthUserMenu({
 
   if (!open || !profile) return null;
 
+  const openTool = (id: 'interview-canvas' | 'plans' | 'resumes') => {
+    if (id === 'interview-canvas') enterCollabCanvas();
+    else if (id === 'plans') enterPlans();
+    else enterResumes();
+    onClose();
+  };
+
   return (
     <div
       ref={menuRef}
       role="menu"
       aria-label="Account menu"
-      className="auth-user-menu absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-popover-in rounded-2xl border border-edge bg-[var(--surface-glass)] p-1.5 shadow-theme-xl backdrop-blur-xl"
+      className="auth-user-menu absolute end-0 top-full z-50 mt-1.5 w-[min(18.5rem,calc(100vw-2rem))] animate-auth-popover-in rounded-2xl border border-edge bg-[var(--surface-glass)] p-1.5 shadow-theme-xl backdrop-blur-xl"
     >
       <div className="auth-user-menu__head border-b border-edge px-2.5 py-2">
         <p className="auth-user-menu__name truncate text-sm font-semibold text-ink">
@@ -654,9 +665,23 @@ export function AuthUserMenu({
           </span>
         ) : null}
       </div>
+
+      <div className="border-b border-edge px-2 py-2.5">
+        <InterviewToolkitGrid onSelect={openTool} compact />
+      </div>
+
+      <MenuRow
+        icon={<User className="h-3.5 w-3.5" />}
+        onClick={() => {
+          enterProfile();
+          onClose();
+        }}
+      >
+        {s.profile}
+      </MenuRow>
       {onOpenProfile ? (
         <MenuRow
-          icon={<User className="h-3.5 w-3.5" />}
+          icon={<Trophy className="h-3.5 w-3.5" />}
           onClick={() => {
             onOpenProfile();
             onClose();

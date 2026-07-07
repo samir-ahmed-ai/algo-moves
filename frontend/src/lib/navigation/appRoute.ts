@@ -1,6 +1,6 @@
 /** Top-level app pages — pathname segment before the hash. */
 export type AppPage =
-  'home' | 'mobile' | 'vim' | 'dojo' | 'games' | 'workspace' | 'plans' | 'resumes';
+  'home' | 'mobile' | 'vim' | 'dojo' | 'games' | 'workspace' | 'plans' | 'resumes' | 'profile';
 
 const PAGE_SEGMENTS: Readonly<Record<AppPage, string>> = {
   home: 'home',
@@ -11,6 +11,7 @@ const PAGE_SEGMENTS: Readonly<Record<AppPage, string>> = {
   workspace: 'workspace',
   plans: 'plans',
   resumes: 'resumes',
+  profile: 'profile',
 };
 
 /** Vite base path without trailing slash, e.g. "" or "/algo-moves". */

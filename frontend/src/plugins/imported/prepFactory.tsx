@@ -46,27 +46,7 @@ export function makePrepPlugin(p: PrepProblem): ProblemPlugin<any, any> {
   const fallbackQuiz = defaultPrepQuiz(p);
 
   const sim = resolvePrepSimulator(p.id);
-
   const designSpec = p.topic === 'design' ? getDesignDiagram(p.id) : undefined;
-  if (designSpec) {
-    return definePlugin<any, any>({
-      meta: { ...meta, static: true },
-      inputs: [{ id: 'design', label: 'Design', value: null }],
-      record: () => [
-        {
-          move: { type: 'DESIGN', note: p.title, caption: designSpec.caption ?? '' },
-          state: {},
-        },
-      ],
-      View: () => <DesignFlow spec={designSpec} />,
-      Inspector: withNotes(SceneInspector, p),
-      verdict: () => ({ ok: true, label: p.difficulty.toLowerCase() }),
-      code,
-      extraCode,
-      quiz: sim?.practice?.quiz ?? fallbackQuiz,
-      codePieces: sim?.practice?.codePieces ?? codePieces,
-    });
-  }
 
   if (sim) {
     const verdict = sim.verdict ?? (() => ({ ok: true, label: p.difficulty.toLowerCase() }));
@@ -92,6 +72,26 @@ export function makePrepPlugin(p: PrepProblem): ProblemPlugin<any, any> {
       codePieces: sim.practice?.codePieces ?? codePieces,
       tabs: teaching?.tabs,
       wires: teaching?.wires,
+    });
+  }
+
+  if (designSpec) {
+    return definePlugin<any, any>({
+      meta: { ...meta, static: true },
+      inputs: [{ id: 'design', label: 'Design', value: null }],
+      record: () => [
+        {
+          move: { type: 'DESIGN', note: p.title, caption: designSpec.caption ?? '' },
+          state: {},
+        },
+      ],
+      View: () => <DesignFlow spec={designSpec} />,
+      Inspector: withNotes(SceneInspector, p),
+      verdict: () => ({ ok: true, label: p.difficulty.toLowerCase() }),
+      code,
+      extraCode,
+      quiz: fallbackQuiz,
+      codePieces,
     });
   }
 

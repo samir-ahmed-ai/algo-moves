@@ -124,6 +124,8 @@ export interface WorkspaceNavigationCtx {
   enterPlans: () => void;
   /** Enter the resume template creator hub. */
   enterResumes: () => void;
+  /** Enter the user profile / account hub. */
+  enterProfile: () => void;
 }
 
 export type WorkspaceCtx = WorkspaceAppearanceCtx & WorkspaceChromeCtx & WorkspaceNavigationCtx;

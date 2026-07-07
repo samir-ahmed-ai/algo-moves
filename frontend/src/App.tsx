@@ -11,6 +11,7 @@ import { ErrorBoundary } from './shell/ErrorBoundary';
 import { PlanProvider } from './shell/plans/PlanContext';
 import { PlansPage } from './shell/plans/PlansPage';
 import { ResumesPage } from './shell/resumes/ResumesPage';
+import { ProfilePage } from './shell/profile/ProfilePage';
 import { SettingsDialog } from '@/shell/canvas';
 
 const ROUTE_LABELS = {
@@ -21,6 +22,7 @@ const ROUTE_LABELS = {
   games: 'Algorithm games',
   plans: 'Study plans',
   resumes: 'Resume workspace',
+  profile: 'Your profile',
   canvas: 'Algorithm canvas workspace',
 } as const;
 
@@ -32,6 +34,7 @@ function Shell() {
   if (route === 'games') return <GamesPage />;
   if (route === 'plans') return <PlansPage />;
   if (route === 'resumes') return <ResumesPage />;
+  if (route === 'profile') return <ProfilePage />;
   return route === 'home' ? <LandingPage /> : <Workspace />;
 }
 

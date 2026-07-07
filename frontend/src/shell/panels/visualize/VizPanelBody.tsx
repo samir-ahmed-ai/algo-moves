@@ -3,7 +3,6 @@ import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { ErrorBoundary } from '../../ErrorBoundary';
 import { FlipFrame } from '@/components/shared/FlipFrame';
-import { MoveOrbit } from '@/components/shared/MoveOrbit';
 import { BigOPanelBody } from './BigOPanelBody';
 import { Transport } from '../shared/Transport';
 
@@ -33,7 +32,7 @@ export function VizPanelBody({
   showTransport?: boolean;
 }) {
   const { plugin, inputId, selectedNode, setSelectedNode, item } = useCanvasStatic();
-  const { frames, frame, player, changedKeys } = useCanvasFrame();
+  const { frame, player, changedKeys } = useCanvasFrame();
   const { mode } = useWorkspace();
   useCanvasFrameFollow(nodeId ?? 'viz', !!nodeId && mode === 'visualize');
   const View = plugin.View;
@@ -61,9 +60,6 @@ export function VizPanelBody({
     <div
       className={cn('flex flex-col', nodeText.base, inVisualize ? 'gap-0' : 'h-full min-h-0 gap-2')}
     >
-      {!inVisualize && !conceptCourse && !isStatic && (
-        <MoveOrbit frames={frames} index={player.index} onSeek={player.goTo} />
-      )}
       {inVisualize ? (
         <div ref={vizMeasureRef} className="viz-panel-stage flex min-w-0 justify-center">
           <VizFitBox

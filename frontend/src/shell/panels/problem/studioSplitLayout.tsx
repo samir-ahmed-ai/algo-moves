@@ -14,6 +14,7 @@ import {
 import { useOverviewLayoutPrefs } from '@/store/user-prefs/overviewLayoutPrefs';
 import { conceptOverviewProblemPct, isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { useCanvasStatic } from '@/shell/canvas';
+import { useStudioArcSlot } from '@/shell/study/StudioArc';
 import {
   ProblemCollapsedRail,
   ProblemColumnCollapseProvider,
@@ -32,6 +33,7 @@ export function StudioSplitLayout({
   footer?: ReactNode;
 }) {
   const isMobile = useIsMobile();
+  const arcHeader = useStudioArcSlot();
   const { item } = useCanvasStatic();
   const conceptCourse = isConceptCourse(item);
   const [layout, setLayout] = useOverviewLayoutPrefs();
@@ -56,7 +58,7 @@ export function StudioSplitLayout({
     return (
       <div className="studio-split-layout studio-split-layout--mobile flex min-h-0 flex-1 flex-col overflow-hidden">
         {problem}
-        {second}
+        <SecondColumn header={arcHeader}>{second}</SecondColumn>
         {footer ? <StudioSplitFooter>{footer}</StudioSplitFooter> : null}
       </div>
     );
@@ -83,11 +85,26 @@ export function StudioSplitLayout({
               problem
             )
           }
-          second={second}
+          second={<SecondColumn header={arcHeader}>{second}</SecondColumn>}
         />
         {footer ? <StudioSplitFooter>{footer}</StudioSplitFooter> : null}
       </div>
     </ProblemColumnCollapseProvider>
+  );
+}
+
+function SecondColumn({ header, children }: { header?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="studio-split-second flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      {header ? (
+        <div className="studio-split-second__header shrink-0 border-b border-edge bg-panel/60">
+          {header}
+        </div>
+      ) : null}
+      <div className="studio-split-second__body flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {children}
+      </div>
+    </div>
   );
 }
 

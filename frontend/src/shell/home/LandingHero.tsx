@@ -2,16 +2,13 @@ import { type CSSProperties } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowRight,
-  BookMarked,
   BookOpen,
   CheckCircle2,
   Code2,
-  FileText,
   Gamepad2,
   GraduationCap,
   Keyboard,
   LayoutGrid,
-  LayoutTemplate,
   Play,
   Smartphone,
   Swords,
@@ -226,9 +223,6 @@ export function LandingHero({
   onVim,
   onDojo,
   onGames,
-  onPlans,
-  onResumes,
-  onInterviewCanvas,
 }: {
   problems: Item[];
   lastItem: Item | undefined;
@@ -242,9 +236,6 @@ export function LandingHero({
   onVim: () => void;
   onDojo: () => void;
   onGames: () => void;
-  onPlans: () => void;
-  onResumes: () => void;
-  onInterviewCanvas: () => void;
 }) {
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
   const heroProof = [
@@ -282,38 +273,6 @@ export function LandingHero({
           c1: '#7c5cff',
           c2: '#b06bff',
           onClick: onSwipe,
-        },
-      ],
-    },
-    {
-      label: 'Interview',
-      modes: [
-        {
-          id: 'interview-canvas',
-          icon: LayoutTemplate,
-          title: 'Interview Canvas',
-          desc: 'Whiteboard + code studio',
-          c1: '#6366f1',
-          c2: '#4338ca',
-          onClick: onInterviewCanvas,
-        },
-        {
-          id: 'plans',
-          icon: BookMarked,
-          title: 'Plans',
-          desc: 'Interview prep',
-          c1: '#16c79a',
-          c2: '#0e9aa5',
-          onClick: onPlans,
-        },
-        {
-          id: 'resumes',
-          icon: FileText,
-          title: 'Resumes',
-          desc: 'Template creator',
-          c1: '#7c5cff',
-          c2: '#2f6bff',
-          onClick: onResumes,
         },
       ],
     },

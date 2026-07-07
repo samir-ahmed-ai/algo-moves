@@ -92,6 +92,7 @@ export function useAppNavigation(shared: ShareState | null): NavigationState {
       if (page === 'games') return 'games';
       if (page === 'plans') return 'plans';
       if (page === 'resumes') return 'resumes';
+      if (page === 'profile') return 'profile';
       if (page === 'home') return 'home';
       if (page === 'workspace') return 'workspace';
       if (
@@ -221,6 +222,11 @@ export function useAppNavigation(shared: ShareState | null): NavigationState {
     writeAppUrl('resumes');
   }, []);
 
+  const enterProfile = useCallback(() => {
+    setRoute('profile');
+    writeAppUrl('profile');
+  }, []);
+
   // Remember the last problem opened in the workspace for the home page's "Continue".
   useEffect(() => {
     if (route === 'workspace' && activeItemId) {
@@ -256,5 +262,6 @@ export function useAppNavigation(shared: ShareState | null): NavigationState {
     enterGames,
     enterPlans,
     enterResumes,
+    enterProfile,
   };
 }

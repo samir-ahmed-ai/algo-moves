@@ -18,7 +18,8 @@ export function recordWorkspaceFrames(
   plugin: ProblemPlugin<any, any> | null | undefined,
   input: unknown,
 ): WorkspaceFrameResult {
-  if (!plugin || input == null) return { frames: [], runtimeError: null };
+  if (!plugin) return { frames: [], runtimeError: null };
+  if (input == null && !plugin.meta.static) return { frames: [], runtimeError: null };
 
   try {
     const frames = plugin.record(input);

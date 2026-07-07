@@ -24,8 +24,6 @@ export function LandingPage() {
     enterVim,
     enterDojo,
     enterGames,
-    enterPlans,
-    enterResumes,
     enterCollabCanvas,
   } = useWorkspace();
   const isMobile = useIsMobile();
@@ -45,8 +43,6 @@ export function LandingPage() {
     else if (id === 'games') enterGames();
     else if (id === 'vim') enterVim();
     else if (id === 'dojo') enterDojo();
-    else if (id === 'plans') enterPlans();
-    else if (id === 'resumes') enterResumes();
     else if (id === 'interview-canvas') enterCollabCanvas();
   };
 
@@ -119,9 +115,6 @@ export function LandingPage() {
               onVim={enterVim}
               onDojo={enterDojo}
               onGames={enterGames}
-              onPlans={enterPlans}
-              onResumes={enterResumes}
-              onInterviewCanvas={enterCollabCanvas}
             />
             <LandingCatalogRail onVim={enterVim} />
           </div>

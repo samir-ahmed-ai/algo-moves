@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { VizPanelBody } from '../visualize/VizPanelBody';
 import { RecallPane } from '@/shell/study/components/RecallPane';
-import { TransportBar } from '@/shell/canvas';
+import { TransportBar, useCanvasStatic } from '@/shell/canvas';
 import { OverviewViewSwitch, type OverviewView } from './OverviewViewSwitch';
 import { useProblemColumnCollapse } from './problemColumnCollapse';
 import { StageCaption } from './StageCaption';
@@ -84,15 +84,19 @@ export function OverviewProblemColumn({
 }
 
 export function OverviewAnimateColumn() {
+  const { plugin } = useCanvasStatic();
+  const isStatic = !!plugin.meta.static;
   return (
     <StudioContentPanel>
       <StageCaption />
       <div className="overview-content-column overview-content-column--animate flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <VizPanelBody showTransport={false} />
       </div>
-      <aside className="overview-transport-strip flex shrink-0 justify-center border-t border-edge bg-panel/85 px-2 py-1.5 backdrop-blur">
-        <TransportBar />
-      </aside>
+      {!isStatic && (
+        <aside className="overview-transport-strip flex shrink-0 justify-center border-t border-edge bg-panel/85 px-2 py-1.5 backdrop-blur">
+          <TransportBar />
+        </aside>
+      )}
     </StudioContentPanel>
   );
 }

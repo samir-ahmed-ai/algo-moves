@@ -8,7 +8,16 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type FsOp =
   | { kind: 'ls'; path: string }
@@ -278,26 +287,37 @@ function TreeLines({
 
 function View({ frame }: PluginViewProps<FsState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== '' && (
+        <RailGroup label="result">
+          <RailStat k="val" v={`"${s.result}"`} tone="good" />
+        </RailGroup>
+      )}
+      {s.listing.length > 0 && <RailStack label="ls" items={s.listing} empty="∅" />}
+      <RailGroup label="path">
+        <RailStat
+          k="cwd"
+          v={s.activePath.length ? `/${s.activePath.join('/')}` : '/'}
+          tone={s.created ? 'good' : undefined}
+        />
+        {s.created && <RailStat k="note" v="+created" tone="good" />}
+      </RailGroup>
+      <RailGroup label="fs">
+        <RailStat k="nodes" v={countNodes(s.tree)} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result && <span className="ml-2 font-mono text-ink">&quot;{s.result}&quot;</span>}
-      </div>
-      {s.listing.length > 0 && (
-        <div className={cn('mt-1', vizText.sm, 'text-ink3')}>ls: [{s.listing.join(', ')}]</div>
-      )}
-      {s.activePath.length > 0 && (
-        <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
-          path: /{s.activePath.join('/')}
-          {s.created && <span className="ml-1 text-good">+created</span>}
-        </div>
-      )}
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>root /</div>
+    <VizStage rail={rail} railWidth={168}>
+      <div className={cn(vizText.sm, 'text-ink3')}>root /</div>
       <div className="mt-1 space-y-0.5 pl-2">
         <TreeLines node={s.tree} activePath={s.activePath} />
       </div>
-    </div>
+    </VizStage>
   );
 }
 

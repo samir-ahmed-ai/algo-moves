@@ -22,7 +22,7 @@ export function StageCaption() {
   const toneCls = TONE_CLASS[move?.tone ?? 'default'];
 
   return (
-    <div className="stage-caption flex shrink-0 items-center gap-2.5 border-b border-edge bg-panel/55 px-3 py-1.5">
+    <div className="stage-caption flex shrink-0 items-start gap-2.5 border-b border-edge bg-panel/55 px-3 py-1.5">
       {move?.type && (
         <span
           className={cn(
@@ -36,10 +36,9 @@ export function StageCaption() {
       )}
       <span
         className={cn(
-          'stage-caption__text min-w-0 flex-1 truncate font-mono text-ink2',
+          'stage-caption__text min-w-0 flex-1 whitespace-normal break-words font-mono text-ink2',
           chromeText.xs,
         )}
-        title={text}
       >
         {text}
       </span>

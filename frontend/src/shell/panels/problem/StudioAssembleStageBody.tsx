@@ -1,25 +1,19 @@
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
-import type { StudioTab } from '@/shell/study/studioTabs';
 import { AssembleModes } from '@/shell/study/components/AssembleModes';
 import { ProblemPanelBody } from './ProblemPanelBody';
 import { ProblemStatementColumn } from './overviewColumns';
-import { StudioArcRail } from './StudioArcRail';
 import { StudioNextFooter } from './StudioNextFooter';
 import { StudioContentPanel, StudioSplitLayout } from './studioSplitLayout';
 import { useStudioNextShortcut } from './useStudioNextShortcut';
 
 /** Assemble tab — problem statement beside the piece-assembly games/modes. */
 export function StudioAssembleStageBody({
-  availTabs,
-  activeTabId,
   nextLabel,
   onNext,
   nextAllLabel,
   onNextAll,
 }: {
-  availTabs: StudioTab[];
-  activeTabId: string;
   nextLabel?: string | undefined;
   onNext?: (() => void) | undefined;
   nextAllLabel?: string | undefined;
@@ -33,7 +27,6 @@ export function StudioAssembleStageBody({
     <StudioSplitLayout
       footer={
         <StudioNextFooter
-          arcRail={<StudioArcRail availTabs={availTabs} activeTabId={activeTabId} />}
           nextLabel={nextLabel}
           onNext={onNext}
           nextAllLabel={nextAllLabel}

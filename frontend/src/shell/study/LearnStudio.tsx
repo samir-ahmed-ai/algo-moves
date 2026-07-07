@@ -4,7 +4,6 @@ import { useWorkspace } from '@/store/workspace';
 import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
 import { computeInputFrameCounts, buildFrameContextValue } from '@/lib/canvas';
-import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import {
   EmptyState,
   CanvasActionsProvider,
@@ -18,7 +17,7 @@ import { ProblemOverviewBody } from '@/shell/panels/problem/ProblemOverviewBody'
 import { QuizStageBody } from '@/shell/panels/problem/QuizStageBody';
 import { StudioAssembleStageBody } from '@/shell/panels/problem/StudioAssembleStageBody';
 import { StudioPanelStageBody } from '@/shell/panels/problem/StudioPanelStageBody';
-import { StudioArc } from './StudioArc';
+import { StudioArc, StudioArcSlotProvider } from './StudioArc';
 import { ProblemSurfaceBar } from './ProblemSurfaceBar';
 import { readStudioTab, writeStudioTab } from '@/store/study/studioTab';
 import {
@@ -137,7 +136,6 @@ function StudioShell({
   } = useCodeStudioContent();
   const { item } = useCanvasStatic();
   const { present } = useWorkspace();
-  const isMobile = useIsMobile();
 
   const avail = useMemo(
     () =>
@@ -210,10 +208,9 @@ function StudioShell({
 
   return (
     <CanvasActionsProvider value={studioActions}>
-      <div className="learn-studio flex h-full w-full flex-col bg-bg">
-        {!present ? (
-          <>
-            <LearnTopBar onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
+      <StudioArcSlotProvider
+        value={
+          !present ? (
             <StudioArc
               arc={arc}
               more={more}
@@ -224,32 +221,39 @@ function StudioShell({
               variants={variants}
               activeVariant={activeVariant}
               onSetVariant={setVariant}
-              compact={isMobile}
-            />
-          </>
-        ) : (
-          // Present mode strips chrome; keep a faint, auto-revealing switcher so the
-          // presenter can still move through the arc without exiting the mode.
-          <div className="studio-present-switcher fixed bottom-3 right-3 z-40 rounded-full border border-edge bg-panel/90 opacity-30 shadow-[var(--shadow-lg)] backdrop-blur transition-opacity hover:opacity-100 focus-within:opacity-100">
-            <StudioArc
-              arc={arc}
-              more={more}
-              order={order}
-              stages={stages}
-              active={active}
-              onGo={go}
-              variants={variants}
-              activeVariant={activeVariant}
-              onSetVariant={setVariant}
-              compact
+              dense
               bare
             />
+          ) : null
+        }
+      >
+        <div className="learn-studio flex h-full w-full flex-col bg-bg">
+          {!present ? (
+            <LearnTopBar onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
+          ) : (
+            // Present mode strips chrome; keep a faint, auto-revealing switcher so the
+            // presenter can still move through the arc without exiting the mode.
+            <div className="studio-present-switcher fixed bottom-3 right-3 z-40 rounded-full border border-edge bg-panel/90 opacity-30 shadow-[var(--shadow-lg)] backdrop-blur transition-opacity hover:opacity-100 focus-within:opacity-100">
+              <StudioArc
+                arc={arc}
+                more={more}
+                order={order}
+                stages={stages}
+                active={active}
+                onGo={go}
+                variants={variants}
+                activeVariant={activeVariant}
+                onSetVariant={setVariant}
+                compact
+                bare
+              />
+            </div>
+          )}
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+            <StageBody avail={avail} active={active} cont={cont} lastTab={lastTab} onGo={go} />
           </div>
-        )}
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-          <StageBody avail={avail} active={active} cont={cont} lastTab={lastTab} onGo={go} />
         </div>
-      </div>
+      </StudioArcSlotProvider>
     </CanvasActionsProvider>
   );
 }
@@ -311,8 +315,6 @@ function StageBody({
           />
         ) : active.render === 'assemble' ? (
           <StudioAssembleStageBody
-            availTabs={avail}
-            activeTabId={active.id}
             nextLabel={cont?.label}
             onNext={onNext}
             nextAllLabel={nextAllLabel}
@@ -321,8 +323,6 @@ function StageBody({
         ) : (
           <StudioPanelStageBody
             kind={active.kind!}
-            availTabs={avail}
-            activeTabId={active.id}
             nextLabel={cont?.label}
             onNext={onNext}
             nextAllLabel={nextAllLabel}

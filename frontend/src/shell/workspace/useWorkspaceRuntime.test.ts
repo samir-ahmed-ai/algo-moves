@@ -41,6 +41,22 @@ describe('recordWorkspaceFrames', () => {
     expect(recordWorkspaceFrames(plugin, null)).toEqual({ frames: [], runtimeError: null });
   });
 
+  it('records static plugins even when the selected input value is null', () => {
+    const staticPlugin = {
+      ...plugin,
+      meta: { ...plugin.meta, static: true },
+      inputs: [{ id: 'design', label: 'Design', value: null }],
+      record: () => [
+        { move: { type: 'DESIGN', note: 'Demo', caption: 'Static frame' }, state: {} },
+      ],
+    };
+
+    expect(recordWorkspaceFrames(staticPlugin, null)).toEqual({
+      frames: [{ move: { type: 'DESIGN', note: 'Demo', caption: 'Static frame' }, state: {} }],
+      runtimeError: null,
+    });
+  });
+
   it('captures recorder failures without throwing', () => {
     const result = recordWorkspaceFrames(
       {

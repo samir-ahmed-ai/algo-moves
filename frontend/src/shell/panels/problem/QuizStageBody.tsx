@@ -7,7 +7,6 @@ import { studioTabAfter } from '@/shell/study/studioArcNav';
 import { ProblemPanelBody } from '@/shell/panels/problem/ProblemPanelBody';
 import { ProblemStatementColumn } from '@/shell/panels/problem/overviewColumns';
 import { QuizAssembleGames } from '@/shell/panels/problem/QuizAssembleGames';
-import { StudioArcRail } from '@/shell/panels/problem/StudioArcRail';
 import { StudioNextFooter } from '@/shell/panels/problem/StudioNextFooter';
 import { StudioContentPanel, StudioSplitLayout } from '@/shell/panels/problem/studioSplitLayout';
 import { useStudioNextShortcut } from '@/shell/panels/problem/useStudioNextShortcut';
@@ -62,13 +61,10 @@ export function QuizStageBody({
 
   useStudioNextShortcut(stage === 'reassemble' ? finishReassemble : undefined, handleNextAll);
 
-  const arcTabId = stage === 'reassemble' ? ASSEMBLE_TAB_ID : activeTabId;
-
   return (
     <StudioSplitLayout
       footer={
         <StudioNextFooter
-          arcRail={<StudioArcRail availTabs={availTabs} activeTabId={arcTabId} />}
           nextLabel={stage === 'reassemble' ? nextAfterAssemble?.label : undefined}
           onNext={stage === 'reassemble' ? finishReassemble : undefined}
           nextAllLabel={nextAllLabel}

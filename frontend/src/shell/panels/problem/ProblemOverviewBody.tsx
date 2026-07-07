@@ -36,15 +36,19 @@ export function ProblemOverviewBody({
     setInspectorOpen(true);
   };
   const { player } = useCanvasFrame();
-  const { item } = useCanvasStatic();
+  const { item, plugin } = useCanvasStatic();
   const { reference } = useCodeStudioContent();
+  const isStatic = !!plugin.meta.static;
   const hasAnimation = player.total > 1;
+  // Static plugins (e.g. design flow diagrams) have a single frame but still
+  // have a board worth showing — treat them as viewable, just not steppable.
+  const hasBoard = hasAnimation || isStatic;
   const hasSource = !!reference;
   const [rawView, setView] = useOverviewView(item.id);
   // Clamp the persisted animate/recall pref to what this problem actually offers,
   // so animation-less problems land on Recall instead of a dead, single-frame player.
-  const view = hasAnimation ? (hasSource ? rawView : 'animate') : hasSource ? 'recall' : 'animate';
-  const canToggle = hasAnimation && hasSource;
+  const view = hasBoard ? (hasSource ? rawView : 'animate') : hasSource ? 'recall' : 'animate';
+  const canToggle = hasBoard && hasSource;
   const showViz = view === 'animate';
 
   const onRecallFirst = canToggle && view === 'animate';

@@ -13,6 +13,7 @@ export const authStrings = {
   noAccount: "Don't have an account?",
   hasAccount: 'Already have an account?',
   profileStats: 'Profile & stats',
+  profile: 'Profile',
   signOut: 'Sign out',
   admin: 'Admin',
   stats: 'Stats',

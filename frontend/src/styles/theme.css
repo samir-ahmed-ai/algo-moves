@@ -189,7 +189,7 @@ button {
  * live below the animation and change its measured height every step.
  * ------------------------------------------------------------------ */
 .viz-stage {
-  --viz-rail-w: 128px;
+  --viz-rail-w: 160px;
   --viz-stage-minh: 132px;
   flex-direction: row;
   align-items: stretch;
@@ -240,26 +240,16 @@ button {
   gap: 11px;
   min-width: 0;
   overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  /* soft fade at the clipped ends so overflow feels intentional, not cut */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 8px,
-    #000 calc(100% - 8px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 8px,
-    #000 calc(100% - 8px),
-    transparent 100%
-  );
+  overflow-x: visible;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--edge) 70%, transparent) transparent;
 }
 .viz-rail-scroll::-webkit-scrollbar {
-  display: none;
+  width: 4px;
+}
+.viz-rail-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--edge) 70%, transparent);
 }
 .viz-rail-section {
   display: flex;
@@ -287,6 +277,42 @@ button {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-3);
+}
+.viz-rail-label-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+.viz-rail-label-leading {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+/* Root section icons only — child tree rows never get these. */
+.viz-rail-root-icon {
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+  color: var(--accent);
+}
+.viz-rail-root-icon--accent {
+  color: var(--accent);
+}
+.viz-rail-root-icon--good {
+  color: var(--good);
+}
+.viz-rail-root-icon--warn {
+  color: var(--warn, var(--accent));
+}
+.viz-rail-root-icon--bad {
+  color: var(--bad);
+}
+.viz-rail-root-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .viz-rail-hint {
   font-weight: 500;
@@ -398,7 +424,7 @@ button {
   flex: 1 1 auto;
   min-width: 0;
   line-height: 1.35;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .viz-rail-step-icon {
   flex: 0 0 auto;
@@ -546,7 +572,8 @@ button {
 /* Wrapped stat variant: for values too structured to ellipsize (maps, paths,
    running answers). Continuation lines get a hanging indent so they read as
    "part of" the first line rather than starting a new thought. */
-.viz-rail-stat--wrap .viz-rail-stat-v {
+.viz-rail-stat--wrap .viz-rail-stat-v,
+.viz-rail-stat--wrap .viz-tree-v {
   display: block;
   white-space: normal;
   overflow: visible;
@@ -555,6 +582,7 @@ button {
   padding-left: 10px;
   text-indent: -10px;
   line-height: 1.45;
+  text-align: left;
 }
 
 /* ------------------------------------------------------------------ *
@@ -590,17 +618,55 @@ button {
 .viz-tree-row--root::before {
   display: none;
 }
+.viz-tree-row--root {
+  gap: 4px;
+}
+.viz-tree-hint {
+  position: relative;
+  padding-left: calc(var(--vt-depth, 1) * 12px + 2px);
+  min-width: 0;
+}
+.viz-tree-hint::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--vt-depth, 1) * 12px - 7px);
+  top: 0;
+  bottom: 50%;
+  width: 7px;
+  border-left: 1px dashed color-mix(in srgb, var(--edge) 45%, transparent);
+  border-bottom: 1px dashed color-mix(in srgb, var(--edge) 45%, transparent);
+  border-bottom-left-radius: 3px;
+}
 .viz-tree-k {
   flex: 0 0 auto;
   font-family: var(--mono);
   color: var(--text-3);
   white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.viz-rail-section .viz-tree-row:has(.viz-tree-k) {
+  justify-content: space-between;
+  gap: 6px;
+}
+.viz-rail-section .viz-tree-row:has(.viz-tree-k) .viz-tree-v {
+  flex: 1 1 auto;
+  text-align: right;
 }
 .viz-tree-v {
   min-width: 0;
   overflow-wrap: anywhere;
   font-family: var(--mono);
   color: var(--text);
+  line-height: 1.35;
+}
+/* Value-only tree rows (queue/stack items) still get a full-width value column. */
+.viz-tree-row:has(.viz-tree-v:only-child) .viz-tree-v {
+  flex: 1 1 auto;
+}
+.viz-rail-section .viz-tree > .viz-tree-row {
+  animation: viz-rail-pop 0.24s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 /* Nested child group under a RailSection — indented + guided like the tree
@@ -759,6 +825,27 @@ button {
   background: var(--good-bg);
   color: var(--good);
 }
+.viz-rail-result-row {
+  padding: 4px 6px;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--good);
+  background: var(--good-bg);
+}
+.viz-rail-result-row--accent {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.viz-rail-result-row--good {
+  border-color: var(--good);
+  background: var(--good-bg);
+}
+.viz-rail-result-row--bad {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+}
+.viz-rail-result-row--warn {
+  border-color: color-mix(in srgb, var(--warn, var(--accent)) 60%, var(--edge));
+}
 .viz-rail-result--accent {
   border-color: var(--accent);
   background: var(--accent-bg);
@@ -778,16 +865,19 @@ button {
   .viz-rail-chip {
     animation: none;
   }
+  .viz-rail-section .viz-tree > .viz-tree-row {
+    animation: none;
+  }
 }
 
 /* Narrow surfaces: shrink the fixed rail so the main animation keeps room. */
 @media (max-width: 520px) {
   .viz-stage {
-    --viz-rail-w: 96px;
+    --viz-rail-w: 120px;
     gap: 8px;
   }
   .viz-stage:has(.viz-statstrip) {
-    --viz-rail-w: 104px;
+    --viz-rail-w: 128px;
     gap: 8px;
   }
 }

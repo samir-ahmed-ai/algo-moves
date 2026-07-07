@@ -8,8 +8,10 @@ import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNo
 import type { Frame, PluginViewProps } from '../../core/types';
 import { cn } from '@/lib/utils/cn';
 import { vizPad, vizText } from './vizTokens';
+import { resolveRailRootIcon, resolveRailRootTone, type RailRootTone } from './vizIcons';
 
 export { vizText, vizPad } from './vizTokens';
+export { resolveRailRootIcon, resolveRailRootTone, type RailRootTone } from './vizIcons';
 
 /** Standard plugin View props — use for consistent View signatures. */
 export type VizBoardProps<S> = PluginViewProps<S>;
@@ -233,7 +235,7 @@ export function VizStage({
 }: {
   children: ReactNode;
   rail?: ReactNode;
-  /** Override the rail width (default `--viz-rail-w`, 128px). */
+  /** Override the rail width (default `--viz-rail-w`, 160px). */
   railWidth?: number | string;
   /**
    * Override the stage's minimum height (default `--viz-stage-minh`, 132px).
@@ -263,15 +265,38 @@ export function VizStage({
   );
 }
 
-/** A labelled group in the rail — small uppercase label over its body. */
+/** Colored root icon for a rail section label — roots only, never child rows. */
+function RailRootIcon({
+  label,
+  icon,
+  tone,
+}: {
+  label: ReactNode;
+  icon?: ReactNode;
+  tone?: RailRootTone;
+}) {
+  const glyph = icon ?? resolveRailRootIcon(label);
+  const resolvedTone = tone ?? resolveRailRootTone(label);
+  return (
+    <span className={cn('viz-rail-root-icon', `viz-rail-root-icon--${resolvedTone}`)}>{glyph}</span>
+  );
+}
+
+/** A labelled group in the rail — root label gets a small tree icon; children indent under a guide. */
 export function RailSection({
   label,
   hint,
+  icon,
+  iconTone,
   children,
   className,
 }: {
   label?: ReactNode;
   hint?: ReactNode;
+  /** Override the auto-picked root icon (see resolveRailRootIcon). */
+  icon?: ReactNode;
+  /** Override the auto-picked root icon color. */
+  iconTone?: RailRootTone;
   children: ReactNode;
   className?: string;
 }) {
@@ -279,7 +304,14 @@ export function RailSection({
     <div className={cn('viz-rail-section', className)}>
       {label != null && (
         <div className={cn('viz-rail-label', vizText['2xs'])}>
-          <span className="truncate">{label}</span>
+          <span className="viz-rail-label-leading">
+            <RailRootIcon
+              label={label}
+              {...(icon !== undefined ? { icon } : {})}
+              {...(iconTone !== undefined ? { tone: iconTone } : {})}
+            />
+            <span className="viz-rail-label-text">{label}</span>
+          </span>
           {hint != null && <span className="viz-rail-hint">{hint}</span>}
         </div>
       )}
@@ -329,6 +361,7 @@ function TreeRows({ nodes, depth }: { nodes: readonly TreeNode[]; depth: number 
             className={cn('viz-tree-row', depth === 0 && 'viz-tree-row--root')}
             style={{ '--vt-depth': depth } as CSSProperties}
           >
+            {depth === 0 && <RailRootIcon label={node.k} />}
             <span className={cn('viz-tree-k', vizText['2xs'])}>{node.k}</span>
             <span
               className={cn('viz-tree-v', vizText.xs, node.tone && `viz-rail-stat-v--${node.tone}`)}
@@ -363,10 +396,9 @@ export type RailStackItem =
   string | number | { label: ReactNode; tone?: 'accent' | 'good' | 'bad' | 'warn' };
 
 /**
- * Animated vertical stack / queue column — the "column that keeps changing".
- * Top of the collection is drawn at the top and grows downward; new entries
- * pop in subtly. Overflow clips at the bottom with a fade so the active end
- * stays visible and the rail never changes the board's height.
+ * Vertical stack / queue column rendered as indented tree rows under a
+ * labelled root section. Top-of-collection is drawn first; overflow scrolls
+ * inside the rail without clipping or rescaling the main animation.
  */
 export function RailStack({
   label,
@@ -391,12 +423,19 @@ export function RailStack({
   const ordered = items.slice().reverse();
   return (
     <RailSection label={label} {...(className !== undefined ? { className } : {})}>
-      {topLabel != null && items.length > 0 && (
-        <div className={cn('viz-rail-edge', vizText['2xs'])}>{topLabel}</div>
-      )}
-      <div className="viz-rail-stack">
+      <div className="viz-tree">
+        {topLabel != null && items.length > 0 && (
+          <div
+            className={cn('viz-tree-hint viz-rail-edge', vizText['2xs'])}
+            style={{ '--vt-depth': 1 } as CSSProperties}
+          >
+            {topLabel}
+          </div>
+        )}
         {ordered.length === 0 ? (
-          <div className={cn('viz-rail-empty font-mono', vizText.xs)}>{empty}</div>
+          <div className="viz-tree-row" style={{ '--vt-depth': 1 } as CSSProperties}>
+            <span className={cn('viz-tree-v font-mono', vizText.xs, 'text-ink3')}>{empty}</span>
+          </div>
         ) : (
           ordered.map((raw, idx) => {
             const isTop = idx === 0;
@@ -405,28 +444,32 @@ export function RailStack({
               (highlightEnd === 'top' && isTop) || (highlightEnd === 'bottom' && isBottom);
             const item = typeof raw === 'object' ? raw : { label: raw, tone: undefined };
             const tone = item.tone ?? (live ? 'accent' : undefined);
-            // Stable key from the base so pushing a new top only mounts the new chip.
+            // Stable key from the base so pushing a new top only mounts the new row.
             const key = ordered.length - 1 - idx;
             return (
-              <div
-                key={key}
-                className={cn(
-                  'viz-rail-chip font-mono',
-                  vizText.xs,
-                  tone && `viz-rail-chip--${tone}`,
-                )}
-              >
-                {item.label}
+              <div key={key} className="viz-tree-row" style={{ '--vt-depth': 1 } as CSSProperties}>
+                <span
+                  className={cn(
+                    'viz-tree-v font-mono',
+                    vizText.xs,
+                    tone && `viz-rail-stat-v--${tone}`,
+                  )}
+                >
+                  <VizValue value={item.label} />
+                </span>
               </div>
             );
           })
         )}
+        {bottomLabel != null && items.length > 0 && (
+          <div
+            className={cn('viz-tree-hint viz-rail-edge viz-rail-edge--bottom', vizText['2xs'])}
+            style={{ '--vt-depth': 1 } as CSSProperties}
+          >
+            {bottomLabel}
+          </div>
+        )}
       </div>
-      {bottomLabel != null && items.length > 0 && (
-        <div className={cn('viz-rail-edge viz-rail-edge--bottom', vizText['2xs'])}>
-          {bottomLabel}
-        </div>
-      )}
     </RailSection>
   );
 }
@@ -565,12 +608,36 @@ function StatKV({ k, v, icon, tone, reserve }: StatKVProps) {
   );
 }
 
-/** Compact key / value stat for the rail (label above, mono value below). */
+/** Compact key / value stat for the rail — one indented tree row. */
 export function RailStat(props: StatKVInput) {
   const clean = toStatKVProps(props);
   return (
-    <div className={cn('viz-rail-stat', clean.wrap && 'viz-rail-stat--wrap')}>
-      <StatKV {...clean} />
+    <div
+      className={cn('viz-tree-row', clean.wrap && 'viz-rail-stat--wrap')}
+      style={{ '--vt-depth': 1 } as CSSProperties}
+    >
+      <span className={cn('viz-tree-k', vizText['2xs'])}>
+        {clean.icon != null && (
+          <span className={cn('viz-stat-icon', clean.tone && `viz-rail-stat-v--${clean.tone}`)}>
+            {clean.icon}
+          </span>
+        )}
+        {clean.k}
+      </span>
+      <span
+        className={cn(
+          'viz-tree-v font-mono',
+          vizText.sm,
+          clean.tone && `viz-rail-stat-v--${clean.tone}`,
+        )}
+      >
+        <VizValue value={clean.v} />
+      </span>
+      {clean.reserve != null && (
+        <span aria-hidden className={cn('viz-stat-reserve font-mono', vizText.sm)}>
+          {clean.reserve}
+        </span>
+      )}
     </div>
   );
 }
@@ -599,16 +666,16 @@ export function VizStat(props: StatKVInput) {
   );
 }
 
-/** Groups RailStats with subtle dividers. */
+/** Groups RailStats as indented tree rows under one section label. */
 export function RailGroup({ label, children }: { label?: ReactNode; children: ReactNode }) {
   return (
     <RailSection label={label}>
-      <div className="viz-rail-group">{children}</div>
+      <div className="viz-tree">{children}</div>
     </RailSection>
   );
 }
 
-/** A single emphasized result chip for the rail (the running / final answer). */
+/** A single emphasized result row for the rail (the running / final answer). */
 export function RailResult({
   label = 'result',
   value,
@@ -619,10 +686,18 @@ export function RailResult({
   tone?: 'accent' | 'good' | 'bad' | 'warn';
 }) {
   return (
-    <div className={cn('viz-rail-result', `viz-rail-result--${tone}`)}>
-      <span className={cn('viz-rail-stat-k', vizText['2xs'])}>{label}</span>
-      <span className={cn('font-mono', vizText.base)}>{value}</span>
-    </div>
+    <RailSection label={label} iconTone={tone}>
+      <div className="viz-tree">
+        <div
+          className={cn('viz-tree-row viz-rail-result-row', `viz-rail-result-row--${tone}`)}
+          style={{ '--vt-depth': 1 } as CSSProperties}
+        >
+          <span className={cn('viz-tree-v font-mono', vizText.base, `viz-rail-stat-v--${tone}`)}>
+            {value}
+          </span>
+        </div>
+      </div>
+    </RailSection>
   );
 }
 
