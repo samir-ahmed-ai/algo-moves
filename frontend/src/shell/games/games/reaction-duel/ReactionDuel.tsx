@@ -4,7 +4,7 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import type { Peer } from '../../net/protocol';
-import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import { GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
@@ -320,7 +320,7 @@ export function ReactionDuel() {
         <ResultBanner tone={tone} title={title} detail={<ScoreLine ordered={ordered} scores={scores} />} />
         {results.length > 0 ? <History results={results} players={players} myId={myId} strings={t} /> : null}
         {!isSpectator ? (
-          <TouchButton variant="primary" size="lg" onClick={rematch}>
+          <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>
             {t.playAgain}
           </TouchButton>
         ) : (
@@ -347,7 +347,7 @@ export function ReactionDuel() {
           : `${t.firstTo(WIN_TARGET)} · ${nPlayer ? t.fastestWins : t.tapWhenGreen}`}
       </p>
 
-      <div className="relative">
+      <GameArena accent="#10b981">
         <TapZone
           phase={phase}
           myMs={myMs}
@@ -357,7 +357,7 @@ export function ReactionDuel() {
           onTap={tap}
           strings={t}
         />
-      </div>
+      </GameArena>
 
       {showResult ? (
         <ResultBanner
@@ -464,8 +464,8 @@ function TapZone({
       disabled={!interactive}
       aria-label={heading}
       className={
-        'relative flex h-[clamp(9rem,45dvh,16rem)] w-full select-none touch-manipulation flex-col items-center justify-center gap-2 ' +
-        'rounded-[var(--radius)] border-2 p-6 text-center transition-colors active:scale-[0.99] ' +
+        'relative flex h-[clamp(5.5rem,26dvh,9rem)] w-full select-none touch-manipulation flex-col items-center justify-center gap-1 ' +
+        'rounded-xl border-2 p-3 text-center transition-colors active:scale-[0.99] ' +
         'disabled:active:scale-100 ' +
         (go && !reduced ? 'reaction-go-pop ' : '') +
         (falseStart && !reduced ? 'reaction-shake ' : '') +
@@ -474,11 +474,11 @@ function TapZone({
     >
       {go && !isSpectator ? (
         <span className="absolute right-3 top-3">
-          <CountdownRing progress={goProgress} tone="good" size={34} />
+          <CountdownRing progress={goProgress} tone="good" size={30} />
         </span>
       ) : null}
-      <span className="text-3xl font-black tracking-tight sm:text-4xl">{heading}</span>
-      <span className="text-sm font-medium opacity-90">{sub}</span>
+      <span className="text-xl font-black tracking-tight sm:text-2xl">{heading}</span>
+      <span className="text-[10px] font-medium opacity-90">{sub}</span>
       <style>{`
         @keyframes reactionGoPop { 0% { transform: scale(0.97); } 60% { transform: scale(1.015); } 100% { transform: scale(1); } }
         .reaction-go-pop { animation: reactionGoPop 220ms cubic-bezier(0.2,0.7,0.2,1); }
@@ -512,9 +512,9 @@ function Ladder({
     const me = ordered.find((p) => p.id === myId) ?? ordered[0];
     const other = ordered.find((p) => p.id !== myId) ?? ordered[1];
     return (
-      <div className="flex items-center justify-center gap-4 text-center">
+      <div className="flex items-center justify-center gap-3 text-center">
         <PlayerCell peer={me} name={strings.you} score={scores[me?.id ?? ''] ?? 0} mine />
-        <span className="text-sm font-semibold text-ink3">vs</span>
+        <span className="text-xs font-semibold text-ink3">vs</span>
         <PlayerCell peer={other} name={other?.name} score={scores[other?.id ?? ''] ?? 0} />
       </div>
     );
@@ -548,9 +548,9 @@ function Ladder({
 function PlayerCell({ peer, name, score, mine }: { peer?: Peer; name?: string; score: number; mine?: boolean }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
-      {peer ? <Avatar seed={peer.id} name={peer.name} size={30} /> : null}
-      <div className="truncate text-sm font-semibold text-ink">{name ?? '—'}</div>
-      <div className={'font-mono text-3xl font-bold tabular-nums ' + (mine ? 'text-accent' : 'text-ink2')}>{score}</div>
+      {peer ? <Avatar seed={peer.id} name={peer.name} size={26} /> : null}
+      <div className="truncate text-xs font-semibold text-ink">{name ?? '—'}</div>
+      <div className={cn('font-mono text-xl font-bold tabular-nums ' + (mine ? 'text-accent' : 'text-ink2'))}>{score}</div>
       <Pips score={score} />
     </div>
   );
@@ -607,8 +607,8 @@ function History({
 }) {
   const ordered = [...results].sort((a, b) => a.round - b.round);
   return (
-    <div className="rounded-[var(--radius)] border border-edge bg-panel2 p-3">
-      <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-ink3">{strings.history}</p>
+    <div className="rounded-xl border border-edge bg-panel2 p-2.5">
+      <p className="mb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-ink3">{strings.history}</p>
       <div className="flex flex-col gap-1.5">
         {ordered.map((res) => {
           const rows = Object.entries(res.taps)

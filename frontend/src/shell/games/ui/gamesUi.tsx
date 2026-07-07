@@ -31,8 +31,8 @@ const TOUCH_VARIANTS: Record<TouchVariant, string> = {
 };
 
 const TOUCH_SIZES: Record<TouchSize, string> = {
-  md: 'min-h-11 px-4 py-2.5 text-sm gap-2 rounded-2xl sm:min-h-11',
-  lg: 'min-h-14 px-6 py-3.5 text-base gap-2.5 rounded-2xl sm:min-h-14',
+  md: 'min-h-10 px-4 py-2 text-sm gap-2 rounded-xl sm:min-h-10',
+  lg: 'min-h-12 px-5 py-3 text-base gap-2 rounded-xl sm:min-h-12',
 };
 
 /** A large, finger-friendly button. Defaults are sized for phones and iPads. */
@@ -94,11 +94,11 @@ export function ChoiceCard({
       onClick={onClick}
       style={accent ? ({ '--accent': accent } as CSSProperties) : undefined}
       className={cn(
-        'flex select-none flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 text-center min-h-[110px]',
+        'flex select-none flex-col items-center justify-center gap-1 rounded-xl border-2 p-2.5 text-center min-h-[4.25rem]',
         'transition-all touch-manipulation active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40',
         selected
-          ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_3px_var(--accent-bg)]'
-          : 'border-edge bg-panel text-ink hover:border-edge2 hover:bg-panel2',
+          ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_2px_var(--accent-bg),0_4px_14px_-4px_var(--accent)]'
+          : 'border-edge bg-panel text-ink hover:border-accent/30 hover:bg-panel2',
         className,
       )}
     >
@@ -112,10 +112,10 @@ export function TurnBadge({ tone = 'wait', children }: { tone?: 'you' | 'peer' |
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide',
-        tone === 'you' && 'bg-accentbg text-accent',
-        tone === 'peer' && 'bg-panel2 text-ink2',
-        tone === 'wait' && 'bg-panel2 text-ink3',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ring-inset',
+        tone === 'you' && 'bg-accentbg text-accent ring-accent/25',
+        tone === 'peer' && 'bg-panel2 text-ink2 ring-edge',
+        tone === 'wait' && 'bg-panel2 text-ink3 ring-edge/60',
       )}
     >
       {children}
@@ -136,15 +136,15 @@ export function ResultBanner({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border p-5 text-center',
-        tone === 'win' && 'border-good/50 bg-goodbg text-good',
+        'relative overflow-hidden rounded-xl border p-3 text-center',
+        tone === 'win' && 'border-good/50 bg-goodbg text-good shadow-[0_4px_20px_-6px_var(--good)]',
         tone === 'lose' && 'border-bad/50 bg-bad/10 text-bad',
         tone === 'draw' && 'border-edge bg-panel2 text-ink2',
       )}
     >
       {tone === 'win' && <ConfettiSparkle />}
-      <div className="relative text-xl font-extrabold tracking-tight">{title}</div>
-      {detail ? <div className="relative mt-1.5 text-sm opacity-90">{detail}</div> : null}
+      <div className="relative text-base font-extrabold tracking-tight">{title}</div>
+      {detail ? <div className="relative mt-1 text-xs opacity-90">{detail}</div> : null}
     </div>
   );
 }
@@ -152,16 +152,46 @@ export function ResultBanner({
 /** Shown inside a game while the peer is momentarily gone. */
 export function WaitingForPeer({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 py-10 text-center text-ink3">
-      <Loader2 className="h-6 w-6 animate-spin text-accent" />
-      <p className="text-sm">{message}</p>
+    <div className="flex flex-col items-center gap-2 py-6 text-center text-ink3">
+      <Loader2 className="h-5 w-5 animate-spin text-accent" />
+      <p className="max-w-xs text-xs">{message}</p>
     </div>
   );
 }
 
 /** A vertical stack of game content, centered and width-capped for readability. */
 export function GameBody({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mx-auto flex w-full max-w-md flex-col gap-5', className)}>{children}</div>;
+  return <div className={cn('mx-auto flex w-full max-w-md flex-col gap-3', className)}>{children}</div>;
+}
+
+/** Vibrant bordered play surface — shared arena chrome for in-game phases. */
+export function GameArena({
+  children,
+  className,
+  accent,
+}: {
+  children: ReactNode;
+  className?: string;
+  accent?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'flex flex-col gap-2.5 rounded-xl border-2 bg-gradient-to-b from-panel/90 to-panel/50 p-3',
+        className,
+      )}
+      style={
+        accent
+          ? ({
+              borderColor: `${accent}44`,
+              boxShadow: `0 4px 24px -8px ${accent}33`,
+            } as CSSProperties)
+          : undefined
+      }
+    >
+      {children}
+    </div>
+  );
 }
 
 /** Small pill badge for couple / party category. */
@@ -176,6 +206,39 @@ export function CategoryBadge({ category }: { category: 'couple' | 'party' }) {
     >
       {category === 'couple' ? '♥ For Two' : '🎉 Party'}
     </span>
+  );
+}
+
+/** Round counter + dot progress — shared across simultaneous-pick games. */
+export function RoundProgress({
+  current,
+  total,
+  badge,
+}: {
+  current: number;
+  total: number;
+  badge?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-xs font-semibold tabular-nums text-ink2">
+          {current} / {total}
+        </span>
+        {badge}
+      </div>
+      <div className="flex flex-wrap justify-center gap-1">
+        {Array.from({ length: total }, (_, i) => (
+          <span
+            key={i}
+            className={cn(
+              'h-1.5 w-1.5 rounded-full',
+              i < current - 1 ? 'bg-accent' : i === current - 1 ? 'bg-accent/60' : 'bg-edge2',
+            )}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 

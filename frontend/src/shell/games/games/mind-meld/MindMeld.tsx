@@ -4,11 +4,12 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
+import { mergeNestedRoomState, readNestedRoomState } from '../../net/nestedRoomState';
 import type { Peer } from '../../net/protocol';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
-import { ChoiceCard, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import { ChoiceCard, GameArena, GameBody, ResultBanner, RoundProgress, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import { playCue } from '@/lib/utils/audio';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import { cn } from '@/lib/utils/cn';
@@ -38,6 +39,13 @@ interface MeldState {
   /** Epoch ms when the answer window closes; null outside the answer phase. */
   deadline: number | null;
   answers: Record<number, Record<string, MeldChoice>>;
+}
+
+/** Nested under room shared state so we keep game/started/locale metadata. */
+const MELD_STATE_KEY = 'meld';
+
+function isMeldState(v: unknown): v is MeldState {
+  return !!v && typeof v === 'object' && 'phase' in v;
 }
 
 const REVEAL_MS = 2200;
@@ -71,11 +79,11 @@ export function MindMeld() {
   // `state` value is the source of truth on every client.
   const [state, setState] = useState<MeldState>(freshState);
 
-  // Adopt any inbound shared state (guests + spectators, and the host's own echo).
+  // Adopt inbound meld snapshot (guests + spectators + host echo). Room metadata
+  // lives alongside `meld` at the top level — never replace the whole blob.
   useEffect(() => {
-    if (sharedState && typeof sharedState === 'object' && 'phase' in (sharedState as object)) {
-      setState(sharedState as MeldState);
-    }
+    const remote = readNestedRoomState(sharedState, MELD_STATE_KEY, isMeldState);
+    if (remote) setState(remote);
   }, [sharedState]);
 
   // Only the host writes shared state — done in an effect below, never during
@@ -84,8 +92,10 @@ export function MindMeld() {
     setState(next);
   }, []);
 
-  // Host mirrors authoritative state to the room whenever it changes.
-  usePublishState(isHost, [state], () => publishState(state));
+  // Host mirrors authoritative state under `meld`, preserving room metadata.
+  usePublishState(isHost, [state], () => {
+    publishState(mergeNestedRoomState(sharedState, MELD_STATE_KEY, state));
+  });
 
   const resetMatch = useCallback(() => {
     commit(freshState());
@@ -309,7 +319,7 @@ export function MindMeld() {
         />
         <HistoryList history={history} strings={strings} />
         {isHost ? (
-          <TouchButton variant="primary" size="lg" onClick={rematch}>
+          <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>
             {strings.playAgain}
           </TouchButton>
         ) : (
@@ -342,74 +352,73 @@ export function MindMeld() {
         strings={strings}
       />
 
-      <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink3">{prompt.q}</p>
-        <p className="mt-1 text-lg font-bold tracking-tight text-ink">{strings.thisOrThat}</p>
-      </div>
-
-      {showReveal ? (
-        <RevealGrid
-          players={players}
-          picks={picks}
-          prompt={prompt}
-          isGroup={isGroup}
-          reduced={reduced}
-          strings={strings}
-        />
-      ) : (
-        <div className="flex flex-col items-center gap-4">
-          {/* Per-round countdown timer. */}
-          <CountdownRing
-            progress={timerProgress}
-            size={52}
-            tone={secondsLeft <= 3 ? 'bad' : 'accent'}
-            label={String(secondsLeft)}
-          />
-
-          {isSpectator ? (
-            <TurnBadge tone="wait">
-              {isGroup ? strings.answered(answeredCount, players.length) : strings.spectating}
-            </TurnBadge>
-          ) : (
-            <TurnBadge tone={myPick !== null ? 'wait' : 'you'}>
-              {myPick !== null
-                ? isGroup
-                  ? strings.answered(answeredCount, players.length)
-                  : strings.waitingFor(peerName)
-                : strings.pickTogether}
-            </TurnBadge>
-          )}
-
-          {isSpectator ? (
-            // Read-only tiles: watchers see the prompt and live answer tally,
-            // but cannot pick.
-            <div className="grid w-full grid-cols-2 gap-3 opacity-90">
-              {options.map((o) => (
-                <div
-                  key={o.choice}
-                  className="flex min-h-24 select-none items-center justify-center rounded-[var(--radius)] border-2 border-edge bg-panel p-4 text-center"
-                >
-                  <span className="text-base font-bold leading-tight text-ink">{o.label}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid w-full grid-cols-2 gap-3">
-              {options.map((o) => (
-                <ChoiceCard
-                  key={o.choice}
-                  selected={myPick === o.choice}
-                  disabled={myPick !== null}
-                  onClick={() => answer(o.choice)}
-                  className="min-h-24"
-                >
-                  <span className="text-base font-bold leading-tight">{o.label}</span>
-                </ChoiceCard>
-              ))}
-            </div>
-          )}
+      <GameArena accent="#8b5cf6">
+        <div className="text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink3">{prompt.q}</p>
+          <p className="mt-0.5 text-sm font-bold tracking-tight text-ink">{strings.thisOrThat}</p>
         </div>
-      )}
+
+        {showReveal ? (
+          <RevealGrid
+            players={players}
+            picks={picks}
+            prompt={prompt}
+            isGroup={isGroup}
+            reduced={reduced}
+            strings={strings}
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center justify-between w-full px-0.5">
+              <CountdownRing
+                progress={timerProgress}
+                size={36}
+                tone={secondsLeft <= 3 ? 'bad' : 'accent'}
+                label={String(secondsLeft)}
+              />
+              {isSpectator ? (
+                <TurnBadge tone="wait">
+                  {isGroup ? strings.answered(answeredCount, players.length) : strings.spectating}
+                </TurnBadge>
+              ) : (
+                <TurnBadge tone={myPick !== null ? 'wait' : 'you'}>
+                  {myPick !== null
+                    ? isGroup
+                      ? strings.answered(answeredCount, players.length)
+                      : strings.waitingFor(peerName)
+                    : strings.pickTogether}
+                </TurnBadge>
+              )}
+            </div>
+
+            {isSpectator ? (
+              <div className="grid w-full grid-cols-2 gap-2 opacity-90">
+                {options.map((o) => (
+                  <div
+                    key={o.choice}
+                    className="flex min-h-16 select-none items-center justify-center rounded-xl border-2 border-edge bg-panel p-2 text-center"
+                  >
+                    <span className="text-xs font-bold leading-tight text-ink">{o.label}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid w-full grid-cols-2 gap-2">
+                {options.map((o) => (
+                  <ChoiceCard
+                    key={o.choice}
+                    selected={myPick === o.choice}
+                    disabled={myPick !== null}
+                    onClick={() => answer(o.choice)}
+                  >
+                    <span className="text-xs font-bold leading-tight">{o.label}</span>
+                  </ChoiceCard>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </GameArena>
     </GameBody>
   );
 }
@@ -450,27 +459,15 @@ function Progress({
 }) {
   const current = Math.min(state.round + 1, total);
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex items-center gap-3">
-        <span className="font-mono text-sm font-semibold tabular-nums text-ink2">
-          {current} / {total}
-        </span>
-        <span className="rounded-full bg-goodbg px-2.5 py-0.5 font-mono text-xs font-bold text-good">
+    <RoundProgress
+      current={current}
+      total={total}
+      badge={
+        <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[10px] font-bold text-good">
           {isGroup ? strings.syncPercentBadge(syncPercent) : strings.inSyncCount(matchedCount)}
         </span>
-      </div>
-      <div className="flex flex-wrap justify-center gap-1.5">
-        {Array.from({ length: total }, (_, i) => (
-          <span
-            key={i}
-            className={
-              'h-2 w-2 rounded-full ' +
-              (i < state.round ? 'bg-accent' : i === state.round ? 'bg-accent/60' : 'bg-edge2')
-            }
-          />
-        ))}
-      </div>
-    </div>
+      }
+    />
   );
 }
 
@@ -509,8 +506,8 @@ function RevealGrid({
   const synced = isGroup ? agreement >= 0.75 : twoPlayerMatch;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className={cn('grid gap-3', players.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
+    <div className="flex flex-col gap-2">
+      <div className={cn('grid gap-2', players.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
         {players.map((p, i) => {
           const pick = picks[i] ?? null;
           const onPlurality = isGroup ? pick !== null && pick === pluralityChoice : twoPlayerMatch;
@@ -527,7 +524,7 @@ function RevealGrid({
           );
         })}
       </div>
-      <p className={cn('text-center text-lg font-bold', synced ? 'text-good' : 'text-ink2')}>
+      <p className={cn('text-center text-sm font-bold', synced ? 'text-good' : 'text-ink2')}>
         {isGroup ? strings.groupInSync(Math.round(agreement * 100)) : synced ? strings.inSync : strings.offThisTime}
       </p>
     </div>
@@ -554,15 +551,15 @@ function RevealCard({
     <div
       style={reduced ? undefined : { animation: `meldReveal 360ms both`, animationDelay: `${delayMs}ms` }}
       className={cn(
-        'flex flex-col items-center gap-1.5 rounded-[var(--radius)] border p-4 text-center transition-colors',
+        'flex flex-col items-center gap-1 rounded-xl border p-2 text-center transition-colors',
         highlight ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
       )}
     >
-      <Avatar seed={player.id} name={player.name} size={28} />
+      <Avatar seed={player.id} name={player.name} size={24} />
       <span className="w-full truncate text-xs font-semibold uppercase tracking-wide opacity-80">
         {player.name}
       </span>
-      <span className="text-base font-bold leading-tight">{text}</span>
+      <span className="text-sm font-bold leading-tight">{text}</span>
       {/* Keyframes are inline so this game stays self-contained. */}
       <style>{`@keyframes meldReveal{from{opacity:0;transform:translateY(8px) scale(0.96)}to{opacity:1;transform:none}}`}</style>
     </div>
@@ -578,14 +575,14 @@ function HistoryList({
   strings: ReturnType<typeof getMindMeldStrings>;
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-edge bg-panel2 p-3">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">{strings.historyTitle}</p>
+    <div className="rounded-xl border border-edge bg-panel2 p-2.5">
+      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-ink3">{strings.historyTitle}</p>
       {history.length === 0 ? (
-        <p className="text-sm text-ink3">{strings.historyEmpty}</p>
+        <p className="text-xs text-ink3">{strings.historyEmpty}</p>
       ) : (
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-0.5">
           {history.map((h) => (
-            <li key={h.round} className="flex items-center gap-2 text-sm text-ink2">
+            <li key={h.round} className="flex items-center gap-2 text-xs text-ink2">
               <span className="text-good">✓</span>
               <span className="truncate">{h.label}</span>
             </li>

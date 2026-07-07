@@ -29,7 +29,7 @@ export type MindMeldStrings = {
 
 const STRINGS: Record<GameLocale, MindMeldStrings> = {
   ar: {
-    title: 'تطابق العقول',
+    title: 'نسرين',
     tagline: 'أجيبوا على أسئلة «هذا أم ذاك» واكتشفوا مدى تزامنكم.',
     thisOrThat: 'هذا أم ذاك؟',
     inSyncTitle: (score, total) => `متزامنان ${score} / ${total}`,
@@ -59,7 +59,7 @@ const STRINGS: Record<GameLocale, MindMeldStrings> = {
     answered: (done, of) => `أجاب ${done} / ${of}`,
   },
   en: {
-    title: 'Mind Meld',
+    title: 'نسرين',
     tagline: 'Answer this-or-thats and see how in sync you all really are.',
     thisOrThat: 'This or that?',
     inSyncTitle: (score, total) => `In sync ${score} / ${total}`,

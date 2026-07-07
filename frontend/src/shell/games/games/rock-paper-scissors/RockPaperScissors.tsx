@@ -6,7 +6,7 @@ import { useMatchReporter } from '../../net/useMatchReporter';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
-import { ChoiceCard, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import { ChoiceCard, GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import { playCue } from '@/lib/utils/audio';
 import { cn } from '@/lib/utils/cn';
@@ -279,7 +279,7 @@ export function RockPaperScissors() {
         <Scoreboard roster={roster} scores={scores} selfId={self?.id} taunts={{}} />
         <ResultBanner tone={isSpectator ? 'draw' : iWon ? 'win' : 'lose'} title={title} detail={detail} />
         {!isSpectator ? (
-          <TouchButton variant="primary" size="lg" onClick={rematch}>
+          <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>
             {strings.rematch}
           </TouchButton>
         ) : (
@@ -296,18 +296,18 @@ export function RockPaperScissors() {
       : null;
 
   return (
-    <GameBody className="relative">
+    <GameBody className="relative gap-2.5">
       <Confetti fire={fireConfetti} />
       <Scoreboard roster={roster} scores={scores} selfId={self?.id} taunts={taunts} />
-      <p className="text-center text-xs text-ink3">
+      <p className="text-center text-[10px] text-ink3">
         {isNPlayer ? strings.fieldOf(roster.length, NP_ROUNDS) : strings.bestOf(WIN_TARGET)}
         {' · '}
         {strings.roundLabel(round + 1, totalRounds)}
       </p>
 
-      {/* Hands: 2-player keeps the classic duel; N-player shows the field. */}
+      <GameArena accent="#f59e0b">
       {isNPlayer ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {roster.map((p) => {
             const theirPick = roundPicks[p.id];
             const showFace = p.id === self?.id || revealing;
@@ -325,7 +325,7 @@ export function RockPaperScissors() {
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <Hand
             label={self?.name ?? strings.you}
             emoji={myPick ? emojiFor(myPick) : '⏳'}
@@ -352,14 +352,14 @@ export function RockPaperScissors() {
       )}
 
       {phase === 'countdown' ? (
-        <div className="flex flex-col items-center gap-2">
-          <CountdownRing progress={count / COUNTDOWN_SECS} size={64} tone="accent" label={String(count)} />
+        <div className="flex flex-col items-center gap-1.5">
+          <CountdownRing progress={count / COUNTDOWN_SECS} size={44} tone="accent" label={String(count)} />
           <TurnBadge tone="wait">{strings.getReady}</TurnBadge>
         </div>
       ) : revealing ? (
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-2">
           {twoPlayerOutcome ? (
-            <p className="text-center text-lg font-bold">
+            <p className="text-center text-sm font-bold">
               {twoPlayerOutcome === 'win'
                 ? strings.youTakeIt
                 : twoPlayerOutcome === 'lose'
@@ -379,20 +379,21 @@ export function RockPaperScissors() {
           <p className="text-xs text-ink3">{strings.waitingField(Math.max(0, roster.length - lockedCount))}</p>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-2">
           <TurnBadge tone={myPick ? 'wait' : 'you'}>
             {myPick ? (isNPlayer ? strings.waitingField(roster.length - lockedCount) : strings.lockedIn) : strings.makeMove}
           </TurnBadge>
-          <div className="grid w-full grid-cols-3 gap-3">
+          <div className="grid w-full grid-cols-3 gap-1.5">
             {CHOICES.map((c) => (
               <ChoiceCard key={c.id} selected={myPick === c.id} disabled={!!myPick} onClick={() => pick(c.id)}>
-                <span className="text-4xl leading-none">{c.emoji}</span>
-                <span className="text-xs font-semibold">{strings.choiceLabel[c.id]}</span>
+                <span className="text-2xl leading-none">{c.emoji}</span>
+                <span className="text-[10px] font-semibold">{strings.choiceLabel[c.id]}</span>
               </ChoiceCard>
             ))}
           </div>
         </div>
       )}
+      </GameArena>
     </GameBody>
   );
 }
@@ -412,9 +413,9 @@ function Scoreboard({
   if (roster.length <= 2) {
     const [a, b] = roster;
     return (
-      <div className="flex items-center justify-center gap-4 text-center">
+      <div className="flex items-center justify-center gap-3 text-center">
         <PlayerScore player={a} score={scores[a?.id] ?? 0} isSelf={a?.id === selfId} />
-        <span className="text-sm font-semibold text-ink3">vs</span>
+        <span className="text-xs font-semibold text-ink3">vs</span>
         <PlayerScore player={b} score={scores[b?.id] ?? 0} isSelf={b?.id === selfId} align="right" muted />
       </div>
     );
@@ -458,7 +459,7 @@ function PlayerScore({
         {player ? <Avatar seed={player.id} name={player.name} size={22} ring={isSelf ? 'var(--accent)' : undefined} /> : null}
         <span className="truncate text-sm font-semibold text-ink">{player?.name ?? '—'}</span>
       </div>
-      <div className={cn('font-mono text-3xl font-bold tabular-nums', muted ? 'text-ink2' : 'text-accent')}>{score}</div>
+      <div className={cn('font-mono text-xl font-bold tabular-nums', muted ? 'text-ink2' : 'text-accent')}>{score}</div>
     </div>
   );
 }
@@ -496,7 +497,7 @@ function Hand({
   return (
     <div
       className={cn(
-        'relative flex flex-col items-center gap-2 rounded-[var(--radius)] border p-4 transition-colors',
+        'relative flex flex-col items-center gap-1 rounded-xl border p-2 transition-colors',
         revealed ? 'border-accent/40 bg-accentbg' : locked ? 'border-edge2 bg-panel2' : 'border-edge bg-panel',
       )}
     >
@@ -508,7 +509,7 @@ function Hand({
           {taunt}
         </span>
       ) : null}
-      <span ref={emojiRef} className="text-5xl leading-none">
+      <span ref={emojiRef} className="text-3xl leading-none">
         {emoji}
       </span>
       <span className="truncate text-xs font-semibold text-ink2">{label}</span>

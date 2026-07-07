@@ -6,10 +6,11 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
+import { mergeNestedRoomState, readNestedRoomState } from '../../net/nestedRoomState';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
-import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import { GameArena, GameBody, ResultBanner, RoundProgress, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import {
   ROUND_MS,
   REVEAL_MS,
@@ -30,6 +31,12 @@ type WyrMsg =
   | { kind: 'rematch' }
   | { kind: 'start'; seed: number; categories: WyrCategory[] };
 
+const WYR_STATE_KEY = 'wyr';
+
+function isWyrState(v: unknown): v is WyrState {
+  return !!v && typeof v === 'object' && 'phase' in v;
+}
+
 export function WouldYouRather() {
   const s = WYR_STRINGS;
   const { self, peer, players, connected, role, isSpectator, publishState, sharedState } = useGameRoom();
@@ -41,16 +48,17 @@ export function WouldYouRather() {
 
   // Adopt inbound shared state (guests + spectators + host echo).
   useEffect(() => {
-    if (sharedState && typeof sharedState === 'object' && 'phase' in (sharedState as object)) {
-      setState(sharedState as WyrState);
-    }
+    const remote = readNestedRoomState(sharedState, WYR_STATE_KEY, isWyrState);
+    if (remote) setState(remote);
   }, [sharedState]);
 
   const commit = useCallback((next: WyrState) => {
     setState(next);
   }, []);
 
-  usePublishState(isHost, [state], () => publishState(state));
+  usePublishState(isHost, [state], () => {
+    publishState(mergeNestedRoomState(sharedState, WYR_STATE_KEY, state));
+  });
 
   const recordAnswer = useCallback((round: number, peerId: string, choice: WyrChoice) => {
     setState((prev) => {
@@ -220,7 +228,7 @@ export function WouldYouRather() {
         />
         <ScoreBoard players={players} scores={state.scores} />
         {isHost ? (
-          <TouchButton variant="primary" size="lg" onClick={rematch}>{s.playAgain}</TouchButton>
+          <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>{s.playAgain}</TouchButton>
         ) : (
           <p className="text-center text-sm text-ink3">{s.spectatorWaiting}</p>
         )}
@@ -235,49 +243,57 @@ export function WouldYouRather() {
 
   return (
     <GameBody>
-      {/* Round progress */}
-      <RoundProgress round={state.round} total={state.prompts.length} matchCount={matchCount} />
+      <RoundProgress
+        current={state.round + 1}
+        total={state.prompts.length}
+        badge={
+          <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[10px] font-bold text-good">
+            {matchCount} matched
+          </span>
+        }
+      />
 
-      {/* Prompt */}
-      <div className="rounded-2xl bg-gradient-to-br from-accent/10 via-panel to-panel2 border border-accent/20 p-5 text-center shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-widest text-accent mb-2">{s.wouldYouRather}</p>
-        <p className="text-lg font-bold leading-snug text-ink">{prompt.a}</p>
-        <div className="my-3 flex items-center gap-2">
-          <div className="flex-1 h-px bg-edge" />
-          <span className="text-xs font-semibold text-ink3 px-2">OR</span>
-          <div className="flex-1 h-px bg-edge" />
+      <GameArena accent="#e879a0">
+        <div className="rounded-lg bg-gradient-to-br from-pink-500/15 via-accent/10 to-purple-500/10 border border-pink-500/25 p-2.5 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-pink-500 mb-1">{s.wouldYouRather}</p>
+          <p className="text-sm font-bold leading-snug text-ink">{prompt.a}</p>
+          <div className="my-1.5 flex items-center gap-2">
+            <div className="flex-1 h-px bg-edge" />
+            <span className="text-[10px] font-semibold text-ink3 px-1">OR</span>
+            <div className="flex-1 h-px bg-edge" />
+          </div>
+          <p className="text-sm font-bold leading-snug text-ink">{prompt.b}</p>
         </div>
-        <p className="text-lg font-bold leading-snug text-ink">{prompt.b}</p>
-      </div>
 
-      {showReveal ? (
-        <RevealPanel players={players} row={row} prompt={prompt} reduced={reduced} />
-      ) : (
-        <PickingPanel
-          isSpectator={isSpectator}
-          myPick={myPick}
-          timerProgress={timerProgress}
-          secondsLeft={secondsLeft}
-          peerName={peer?.name ?? s.partner}
-          answeredCount={Object.keys(row).filter((id) => playerIds.includes(id)).length}
-          total={players.length}
-          prompt={prompt}
-          onPick={(choice) => {
-            if (isSpectator || myPick !== null || state.phase !== 'picking') return;
-            playCue('click');
-            if (isHost) {
-              recordAnswer(state.round, myId, choice);
-            } else {
-              setState((prev) => {
-                if (prev.phase !== 'picking') return prev;
-                const r = prev.answers[prev.round] ?? {};
-                return { ...prev, answers: { ...prev.answers, [prev.round]: { ...r, [myId]: choice } } };
-              });
-              send({ kind: 'answer', round: state.round, choice });
-            }
-          }}
-        />
-      )}
+        {showReveal ? (
+          <RevealPanel players={players} row={row} prompt={prompt} reduced={reduced} />
+        ) : (
+          <PickingPanel
+            isSpectator={isSpectator}
+            myPick={myPick}
+            timerProgress={timerProgress}
+            secondsLeft={secondsLeft}
+            peerName={peer?.name ?? s.partner}
+            answeredCount={Object.keys(row).filter((id) => playerIds.includes(id)).length}
+            total={players.length}
+            prompt={prompt}
+            onPick={(choice) => {
+              if (isSpectator || myPick !== null || state.phase !== 'picking') return;
+              playCue('click');
+              if (isHost) {
+                recordAnswer(state.round, myId, choice);
+              } else {
+                setState((prev) => {
+                  if (prev.phase !== 'picking') return prev;
+                  const r = prev.answers[prev.round] ?? {};
+                  return { ...prev, answers: { ...prev.answers, [prev.round]: { ...r, [myId]: choice } } };
+                });
+                send({ kind: 'answer', round: state.round, choice });
+              }
+            }}
+          />
+        )}
+      </GameArena>
     </GameBody>
   );
 }
@@ -299,20 +315,20 @@ function CategoryPicker({ isHost, onStart }: { isHost: boolean; onStart: (cats: 
 
   if (!isHost) {
     return (
-      <div className="flex flex-col items-center gap-4 py-8 text-center">
-        <span className="text-4xl animate-bounce">🎲</span>
-        <p className="text-sm font-medium text-ink2">Host is choosing the vibe…</p>
+      <div className="flex flex-col items-center gap-2 py-6 text-center">
+        <span className="text-3xl animate-bounce">🎲</span>
+        <p className="text-xs font-medium text-ink2">Host is choosing the vibe…</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-2.5">
       <div className="text-center">
-        <h3 className="text-lg font-bold text-ink">{s.chooseCategoriesTitle}</h3>
-        <p className="text-sm text-ink3 mt-1">{s.chooseCategoriesHint}</p>
+        <h3 className="text-base font-bold text-ink">{s.chooseCategoriesTitle}</h3>
+        <p className="text-xs text-ink3 mt-0.5">{s.chooseCategoriesHint}</p>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {(Object.keys(CATEGORY_LABELS) as WyrCategory[]).map((cat) => {
           const { label, emoji } = CATEGORY_LABELS[cat];
           const on = selected.has(cat);
@@ -322,21 +338,22 @@ function CategoryPicker({ isHost, onStart }: { isHost: boolean; onStart: (cats: 
               type="button"
               onClick={() => toggle(cat)}
               className={cn(
-                'flex flex-col items-center gap-2 rounded-2xl border-2 p-4 text-center transition-all touch-manipulation active:scale-[0.97]',
+                'flex flex-col items-center gap-1 rounded-xl border-2 p-2.5 text-center transition-all touch-manipulation active:scale-[0.97]',
                 on
-                  ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_3px_var(--accent-bg)]'
-                  : 'border-edge bg-panel text-ink hover:border-edge2 hover:bg-panel2',
+                  ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_2px_var(--accent-bg),0_4px_14px_-4px_var(--accent)]'
+                  : 'border-edge bg-panel text-ink hover:border-pink-500/30 hover:bg-panel2',
               )}
             >
-              <span className="text-3xl">{emoji}</span>
-              <span className="font-bold text-sm">{label}</span>
+              <span className="text-xl">{emoji}</span>
+              <span className="font-bold text-xs">{label}</span>
             </button>
           );
         })}
       </div>
       <TouchButton
         variant="primary"
-        size="lg"
+        size="md"
+        className="w-full"
         onClick={() => {
           playCue('select');
           onStart(selected.size === 0 ? [] : [...selected]);
@@ -373,11 +390,11 @@ function PickingPanel({
   const picked = myPick !== null;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between px-1">
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between px-0.5">
         <CountdownRing
           progress={timerProgress}
-          size={44}
+          size={32}
           tone={secondsLeft <= 3 ? 'bad' : 'accent'}
           label={String(secondsLeft)}
         />
@@ -391,7 +408,7 @@ function PickingPanel({
       </div>
 
       {/* Two large tap targets stacked vertically — each echoes its option text */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {(['a', 'b'] as WyrChoice[]).map((choice) => (
           <OptionButton
             key={choice}
@@ -426,10 +443,10 @@ function OptionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex items-start gap-3 min-h-[72px] w-full rounded-2xl border-2 px-5 py-4 text-start transition-all touch-manipulation active:scale-[0.98] disabled:pointer-events-none',
+        'flex items-start gap-2 min-h-[3rem] w-full rounded-xl border-2 px-2.5 py-2 text-start transition-all touch-manipulation active:scale-[0.98] disabled:pointer-events-none',
         selected
-          ? 'border-accent bg-accentbg shadow-[0_0_0_3px_var(--accent-bg)]'
-          : 'border-edge bg-panel hover:border-accent/50 hover:bg-panel2',
+          ? 'border-accent bg-accentbg shadow-[0_0_0_2px_var(--accent-bg),0_4px_14px_-4px_var(--accent)]'
+          : 'border-edge bg-panel hover:border-pink-500/40 hover:bg-panel2',
         disabled && !selected && 'opacity-50',
       )}
     >
@@ -462,15 +479,15 @@ function RevealPanel({
   const matched = isMatch(row, playerIds);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <div className={cn(
-        'text-center rounded-2xl border-2 py-3 px-4 font-bold text-base transition-all',
+        'text-center rounded-xl border-2 py-1.5 px-2.5 font-bold text-xs transition-all',
         matched ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
       )}>
         {matched ? WYR_STRINGS.matched : WYR_STRINGS.noMatch}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {players.map((p, i) => {
           const pick = row[p.id] ?? null;
           const text = pick === null ? '—' : pick === 'a' ? prompt.a : prompt.b;
@@ -480,11 +497,11 @@ function RevealPanel({
               key={p.id}
               style={reduced ? undefined : { animation: `wyrReveal 380ms both`, animationDelay: `${i * 100}ms` }}
               className={cn(
-                'flex flex-col items-center gap-2 rounded-2xl border-2 p-4 text-center',
+                'flex flex-col items-center gap-1 rounded-xl border-2 p-2 text-center',
                 matched ? 'border-good/50 bg-goodbg text-good' : onWinSide ? 'border-edge bg-panel2 text-ink2' : 'border-edge bg-panel text-ink3',
               )}
             >
-              <Avatar seed={p.id} name={p.name} size={32} />
+              <Avatar seed={p.id} name={p.name} size={26} />
               <span className="text-xs font-bold uppercase tracking-wide opacity-70">{p.name}</span>
               <span className="text-sm font-bold leading-snug">
                 {pick !== null ? `Option ${pick.toUpperCase()}` : '—'}
@@ -505,43 +522,17 @@ function RevealPanel({
   );
 }
 
-function RoundProgress({ round, total, matchCount }: { round: number; total: number; matchCount: number }) {
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex items-center gap-3">
-        <span className="font-mono text-sm font-semibold tabular-nums text-ink2">
-          {round + 1} / {total}
-        </span>
-        <span className="rounded-full bg-goodbg px-2.5 py-0.5 font-mono text-xs font-bold text-good">
-          {matchCount} matched
-        </span>
-      </div>
-      <div className="flex gap-1.5">
-        {Array.from({ length: total }, (_, i) => (
-          <span
-            key={i}
-            className={cn(
-              'h-2 w-2 rounded-full transition-colors',
-              i < round ? 'bg-accent' : i === round ? 'bg-accent/60' : 'bg-edge2',
-            )}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function HeartMeter({ matched, total }: { matched: number; total: number }) {
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex gap-1">
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="flex gap-0.5">
         {Array.from({ length: total }, (_, i) => (
-          <span key={i} className={cn('text-xl transition-all', i < matched ? 'opacity-100' : 'opacity-20')}>
+          <span key={i} className={cn('text-base transition-all', i < matched ? 'opacity-100' : 'opacity-20')}>
             💕
           </span>
         ))}
       </div>
-      <p className="text-xs text-ink3 font-medium">{matched} / {total} matches</p>
+      <p className="text-[10px] text-ink3 font-medium">{matched} / {total} matches</p>
     </div>
   );
 }
@@ -549,15 +540,15 @@ function HeartMeter({ matched, total }: { matched: number; total: number }) {
 function ScoreBoard({ players, scores }: { players: { id: string; name: string }[]; scores: Record<string, number> }) {
   const ranked = [...players].sort((a, b) => (scores[b.id] ?? 0) - (scores[a.id] ?? 0));
   return (
-    <div className="rounded-2xl border border-edge bg-panel2 p-4">
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-ink3">Score</p>
-      <div className="flex flex-col gap-2">
+    <div className="rounded-xl border border-edge bg-panel2 p-2.5">
+      <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-ink3">Score</p>
+      <div className="flex flex-col gap-1.5">
         {ranked.map((p, i) => (
-          <div key={p.id} className="flex items-center gap-3">
-            <span className="text-sm text-ink3 w-4 text-center">{i + 1}</span>
-            <Avatar seed={p.id} name={p.name} size={28} />
-            <span className="flex-1 text-sm font-semibold text-ink truncate">{p.name}</span>
-            <span className="font-bold tabular-nums text-accent">{scores[p.id] ?? 0}</span>
+          <div key={p.id} className="flex items-center gap-2">
+            <span className="text-xs text-ink3 w-4 text-center">{i + 1}</span>
+            <Avatar seed={p.id} name={p.name} size={24} />
+            <span className="flex-1 text-xs font-semibold text-ink truncate">{p.name}</span>
+            <span className="font-bold tabular-nums text-accent text-sm">{scores[p.id] ?? 0}</span>
           </div>
         ))}
       </div>

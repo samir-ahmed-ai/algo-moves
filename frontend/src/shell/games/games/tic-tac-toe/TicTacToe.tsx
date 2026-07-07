@@ -5,7 +5,8 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
-import { GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import { mergeNestedRoomState } from '../../net/nestedRoomState';
+import { GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { Avatar } from '../../ui/Avatar';
 import { usePrefersReducedMotion } from '../../ui/hooks';
@@ -71,8 +72,7 @@ export function TicTacToe() {
   const publishBoard = useCallback(
     (nextBoard: Board, nextGen: number) => {
       if (role !== 'host') return;
-      const base = (sharedState as (TttShared & object) | null) ?? {};
-      publishState({ ...base, ttt: { board: nextBoard, gen: nextGen } });
+      publishState(mergeNestedRoomState(sharedState, 'ttt', { board: nextBoard, gen: nextGen }));
     },
     [role, sharedState, publishState],
   );
@@ -264,11 +264,11 @@ export function TicTacToe() {
           detail={win ? strings.completesLine(win) : strings.boardFull}
         />
       ) : (
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-2">
           <CountdownRing
             progress={timerProgress}
             tone={myTurn ? timerTone : 'accent'}
-            size={40}
+            size={36}
             label={String(remaining)}
           />
           <TurnBadge tone={myTurn ? 'you' : 'peer'}>
@@ -285,8 +285,9 @@ export function TicTacToe() {
       )}
 
       <div className="relative">
+        <GameArena accent="#0ea5e9" className="p-2">
         <div
-          className="grid grid-cols-3 gap-2.5"
+          className="grid grid-cols-3 gap-1.5"
           role="grid"
           aria-label="tic-tac-toe board"
         >
@@ -302,13 +303,13 @@ export function TicTacToe() {
             />
           ))}
         </div>
-        {/* Animated strike-through over the winning triple. */}
         {line && <WinningStroke line={line} reduced={reduced} />}
+        </GameArena>
         <Confetti fire={confetti} />
       </div>
 
       {over && !isSpectator && (
-        <TouchButton variant="primary" size="lg" onClick={rematch}>
+        <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>
           {strings.playAgain}
         </TouchButton>
       )}
@@ -438,11 +439,11 @@ function Scoreboard({
 }) {
   const peerMark: Mark = myMark === 'X' ? 'O' : 'X';
   return (
-    <div className="flex items-stretch justify-center gap-3 text-center">
+    <div className="flex items-stretch justify-center gap-2 text-center">
       <Tally name={me} mark={myMark} score={myScore} accent={!isSpectator} />
-      <div className="flex flex-col items-center justify-center">
-        <div className="font-mono text-xs uppercase tracking-wide text-ink3">{drawsLabel}</div>
-        <div className="font-mono text-2xl font-bold tabular-nums text-ink2">{draws}</div>
+      <div className="flex flex-col items-center justify-center px-1">
+        <div className="font-mono text-[10px] uppercase tracking-wide text-ink3">{drawsLabel}</div>
+        <div className="font-mono text-lg font-bold tabular-nums text-ink2">{draws}</div>
       </div>
       <Tally name={peer} mark={peerMark} score={peerScore} />
     </div>
@@ -464,13 +465,13 @@ function Tally({
     <div className="min-w-0 flex-1">
       <div className="flex items-center justify-center gap-1.5">
         <Avatar seed={name} name={name} size={20} />
-        <div className="truncate text-sm font-semibold text-ink">
+        <div className="truncate text-xs font-semibold text-ink">
           {name} <span className="text-ink3">({mark})</span>
         </div>
       </div>
       <div
         className={cn(
-          'font-mono text-3xl font-bold tabular-nums',
+          'font-mono text-xl font-bold tabular-nums',
           accent ? 'text-accent' : 'text-ink2',
         )}
       >

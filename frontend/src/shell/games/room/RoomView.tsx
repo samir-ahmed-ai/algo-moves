@@ -73,9 +73,9 @@ function Staging({ game, children }: { game?: GameDef; children: React.ReactNode
   const serverHint = hasConfiguredServer() ? t.waitingRoom.serverHintDeployed : t.waitingRoom.serverHintLan;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-2.5">
       <Roster />
-      <div className="rounded-2xl border border-edge bg-panel/60 p-4">{children}</div>
+      <div className="rounded-xl border border-edge bg-panel/60 p-3">{children}</div>
       {!game ? <ShareRoom room={room ?? ''} hint={serverHint} locale={locale} /> : null}
       <ChatDock />
     </div>
@@ -268,7 +268,7 @@ function ReadyRoom({ game }: { game: GameDef }) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-5 text-center">
+    <div className="flex flex-col items-center gap-4 text-center">
       <span
         className="grid h-16 w-16 place-items-center rounded-3xl shadow-lg"
         style={{ background: `${color}20`, color }}
@@ -285,7 +285,7 @@ function ReadyRoom({ game }: { game: GameDef }) {
       ) : (
         <TouchButton
           variant={ready ? 'good' : 'accentSoft'}
-          size="lg"
+          size="md"
           onClick={() => {
             playCue('click');
             setReady(!ready);
@@ -306,7 +306,7 @@ function ReadyRoom({ game }: { game: GameDef }) {
 
       {isHost ? (
         <div className="flex w-full max-w-xs flex-col gap-2">
-          <TouchButton variant="primary" size="lg" disabled={!canStart} onClick={start} icon={<Play className="h-4 w-4" />} className="w-full">
+          <TouchButton variant="primary" size="md" disabled={!canStart} onClick={start} icon={<Play className="h-4 w-4" />} className="w-full">
             {t.room.start}
           </TouchButton>
           <button type="button" onClick={changeGame} className="inline-flex min-h-10 items-center justify-center gap-1.5 text-xs text-ink3 hover:text-ink">
@@ -392,25 +392,32 @@ function PlayArea({ game }: { game: GameDef }) {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-2.5">
       <div className="flex items-center justify-between gap-2">
         <Roster compact />
         {isHost ? (
           <button
             type="button"
             onClick={changeGame}
-            className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-xl border border-edge px-3 py-1 text-xs text-ink3 hover:text-ink touch-manipulation"
+            className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg border border-edge px-2.5 py-1 text-xs text-ink3 hover:text-ink touch-manipulation"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> {t.room.changeGame}
           </button>
         ) : null}
       </div>
 
-      <div className="relative rounded-2xl border border-edge bg-panel/40 p-4 min-h-[58dvh] sm:min-h-0 overflow-y-auto">
+      <div
+        className="relative rounded-xl border-2 bg-gradient-to-b from-panel/90 to-panel/40 p-3"
+        style={{
+          borderColor: `${GAME_ACCENT_COLORS[game.id] ?? 'var(--accent)'}44`,
+          boxShadow: `0 4px 28px -10px ${GAME_ACCENT_COLORS[game.id] ?? 'var(--accent)'}33`,
+        }}
+      >
         {counting ? (
           <StartCountdown
             title={meta.title}
             emoji={GAME_EMOJI[game.id] ?? '🎮'}
+            accent={GAME_ACCENT_COLORS[game.id]}
             onDone={() => setCounting(false)}
           />
         ) : (
@@ -424,7 +431,17 @@ function PlayArea({ game }: { game: GameDef }) {
 }
 
 /** A brief synchronized 3-2-1 before the game surface mounts. */
-function StartCountdown({ title, emoji, onDone }: { title: string; emoji: string; onDone: () => void }) {
+function StartCountdown({
+  title,
+  emoji,
+  accent,
+  onDone,
+}: {
+  title: string;
+  emoji: string;
+  accent?: string;
+  onDone: () => void;
+}) {
   const [n, setN] = useState(3);
   useEffect(() => {
     if (n <= 0) {
@@ -438,16 +455,18 @@ function StartCountdown({ title, emoji, onDone }: { title: string; emoji: string
   }, [n, onDone]);
 
   return (
-    <div className="flex flex-col items-center gap-4 py-12">
+    <div className="flex flex-col items-center gap-3 py-6">
       <span
         key={n}
-        className="text-5xl"
+        className="text-4xl"
         style={{ animation: 'countdownPop 0.6s ease-out both' }}
       >
         {n > 0 ? emoji : '🚀'}
       </span>
-      <CountdownRing progress={n / 3} size={80} tone="accent" label={n > 0 ? String(n) : '·'} />
-      <p className="text-sm font-semibold text-ink2">{title}</p>
+      <CountdownRing progress={n / 3} size={64} tone="accent" label={n > 0 ? String(n) : '·'} />
+      <p className="text-sm font-semibold" style={{ color: accent ?? 'var(--ink-2)' }}>
+        {title}
+      </p>
       <style>{`
         @keyframes countdownPop {
           from { opacity: 0; transform: scale(1.6); }

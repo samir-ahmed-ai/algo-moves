@@ -4,7 +4,7 @@ import { getMindMeldStrings } from './strings';
 
 const mindMeld: GameDef = {
   id: 'mind-meld',
-  title: 'Mind Meld',
+  title: 'نسرين',
   tagline: 'Answer this-or-thats and see how in sync you two really are.',
   minutes: '~3 min',
   pace: 'simultaneous',

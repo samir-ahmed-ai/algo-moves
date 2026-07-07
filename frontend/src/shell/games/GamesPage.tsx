@@ -107,7 +107,7 @@ function Arcade() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-2xl flex-1 px-3 py-5 sm:px-4 sm:py-6">
+      <main className="mx-auto w-full max-w-2xl flex-1 min-h-0 px-3 py-3 sm:px-4 sm:py-4">
         {reconnecting ? (
           <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl border border-edge bg-panel2 px-3 py-2.5 text-sm text-ink3">
             <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
