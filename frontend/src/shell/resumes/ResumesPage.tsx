@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   FileText,
+  KeyRound,
   Loader2,
   LogIn,
   Pencil,
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/shell/auth/AuthProvider';
 import { AuthPopover } from '@/shell/auth/AuthPopover';
 import { chromeText } from '@/shell/chromeUi';
+import { getProfileIntegrations } from '@/platform/api/profileIntegrationsApi';
 import { useWorkspace } from '@/store/workspace';
 import { CustomizerStudio } from './CustomizerStudio';
 import { DirectoryHeader, DirectoryPage } from './DirectoryPage';
@@ -26,6 +28,7 @@ import {
   type Resume,
   type ResumeSummary,
 } from './data/resumesApi';
+import { formatResumeAiError, isOpenAIKeyError } from './formatResumeAiError';
 
 type View = 'hub' | 'editor' | 'customizer' | 'directory';
 
@@ -56,7 +59,13 @@ function SignInGate() {
   );
 }
 
-function UploadZone({ onUploaded }: { onUploaded: (resume: Resume) => void }) {
+function UploadZone({
+  onUploaded,
+  onOpenSettings,
+}: {
+  onUploaded: (resume: Resume) => void;
+  onOpenSettings: () => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -68,7 +77,7 @@ function UploadZone({ onUploaded }: { onUploaded: (resume: Resume) => void }) {
     const res = await uploadResume(file);
     setBusy(false);
     if (!res.ok) {
-      setError(res.error);
+      setError(formatResumeAiError(res.error));
       return;
     }
     onUploaded(res.resume);
@@ -126,7 +135,21 @@ function UploadZone({ onUploaded }: { onUploaded: (resume: Resume) => void }) {
           <p className={cn('text-ink3', chromeText.sm)}>PDF, DOCX, or TXT — max 5MB</p>
         </>
       )}
-      {error && <p className="mt-3 text-sm text-bad">{error}</p>}
+      {error && (
+        <div className="mt-3 space-y-2">
+          <p className="text-sm text-bad">{error}</p>
+          {isOpenAIKeyError(error) && (
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+            >
+              <KeyRound className="h-3.5 w-3.5" />
+              Open Settings → Profile
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -184,14 +207,20 @@ function ResumeCard({
 
 export function ResumesPage() {
   const { configured, isAnonymous, loading } = useAuth();
-  const { goHome } = useWorkspace();
+  const { goHome, openSettings } = useWorkspace();
 
   const [view, setView] = useState<View>('hub');
   const [resumes, setResumes] = useState<ResumeSummary[]>([]);
   const [activeResume, setActiveResume] = useState<Resume | null>(null);
   const [fetching, setFetching] = useState(false);
+  const [openaiConfigured, setOpenaiConfigured] = useState<boolean | null>(null);
 
   const needsAuth = !configured || isAnonymous;
+
+  const fetchIntegrations = useCallback(async () => {
+    const data = await getProfileIntegrations();
+    setOpenaiConfigured(data?.openai.configured ?? false);
+  }, []);
 
   const fetchResumes = useCallback(async () => {
     setFetching(true);
@@ -201,8 +230,11 @@ export function ResumesPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && !needsAuth) fetchResumes();
-  }, [loading, needsAuth, fetchResumes]);
+    if (!loading && !needsAuth) {
+      fetchResumes();
+      fetchIntegrations();
+    }
+  }, [loading, needsAuth, fetchResumes, fetchIntegrations]);
 
   const handleUploaded = (resume: Resume) => {
     setResumes((prev) => [
@@ -226,7 +258,8 @@ export function ResumesPage() {
     setView(target);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, title: string) => {
+    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
     await deleteResume(id);
     setResumes((prev) => prev.filter((r) => r.id !== id));
   };
@@ -315,7 +348,25 @@ export function ResumesPage() {
         <CustomizerStudio resume={activeResume} />
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-6 max-w-3xl mx-auto w-full">
-          <UploadZone onUploaded={handleUploaded} />
+          {openaiConfigured === false && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
+              <div className="flex items-start gap-2">
+                <KeyRound className="h-4 w-4 shrink-0 text-accent mt-0.5" />
+                <p className={cn('text-ink2', chromeText.sm)}>
+                  Add your OpenAI API key to parse resumes and use AI customization.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => openSettings('profile')}
+                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition"
+              >
+                Add API key
+              </button>
+            </div>
+          )}
+
+          <UploadZone onUploaded={handleUploaded} onOpenSettings={() => openSettings('profile')} />
 
           <section>
             <h2 className="text-sm font-semibold text-ink mb-3">My resumes</h2>
@@ -333,7 +384,7 @@ export function ResumesPage() {
                     summary={r}
                     onEdit={() => openResume(r, 'editor')}
                     onCustomize={() => openResume(r, 'customizer')}
-                    onDelete={() => handleDelete(r.id)}
+                    onDelete={() => handleDelete(r.id, r.title)}
                   />
                 ))}
               </div>

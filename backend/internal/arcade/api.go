@@ -9,20 +9,21 @@ import (
 	"algomoves/gameserver/internal/content"
 	"algomoves/gameserver/internal/games"
 	"algomoves/gameserver/internal/interview"
-	"algomoves/gameserver/internal/arcade/ai"
 	"algomoves/gameserver/internal/platform"
 	"algomoves/gameserver/internal/prep"
+	"algomoves/gameserver/internal/resume"
+	resumeai "algomoves/gameserver/internal/resume/ai"
 )
 
 // Service is the public facade over platform persistence and domain handlers.
 type Service struct {
 	*platform.Service
-	ai *ai.Client
 	games     *games.Handler
 	interview *interview.Handler
 	content   *content.Handler
 	canvas    *canvas.Handler
 	prep      *prep.Handler
+	resume    *resume.Handler
 }
 
 // Open connects optional Postgres persistence and domain handlers.
@@ -38,6 +39,7 @@ func Open(ctx context.Context) (*Service, error) {
 		content:   content.NewHandler(svc.Store()),
 		canvas:    canvas.NewHandler(svc.Store(), svc),
 		prep:      prep.NewHandler(svc.Store(), svc),
+		resume:    resume.NewHandler(svc.Store(), svc, resumeai.NewClient()),
 	}, nil
 }
 
@@ -88,7 +90,7 @@ func (s *Service) routes() []route {
 		{"/api/content/problems/", s.content.HandleContentProblem},
 		{"/api/prep-plans", s.prep.HandlePrepPlans},
 		{"/api/prep-plans/", s.prep.HandlePrepPlan},
-		{"/api/resumes", s.HandleResumes},
-		{"/api/resumes/", s.HandleResume},
+		{"/api/resumes", s.resume.HandleResumes},
+		{"/api/resumes/", s.resume.HandleResume},
 	}
 }

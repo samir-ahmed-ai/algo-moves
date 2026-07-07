@@ -5,6 +5,7 @@ import {
   saveDefaults,
   type WorkspaceDefaults,
   type Density,
+  type SettingsTab,
 } from '@/store/workspace';
 import { THEME_META, type ThemePreset } from '../../../styles/themes/registry';
 import {
@@ -17,6 +18,7 @@ import { Toggle } from '../../ui';
 import { Field, RADIUS_CTRL } from './nodeui';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../../chromeUi';
+import { ProfileIntegrationsSection } from '@/shell/settings/ProfileIntegrationsSection';
 
 function Segmented<T extends string>({
   value,
@@ -48,11 +50,18 @@ function Segmented<T extends string>({
   );
 }
 
+const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
+  { id: 'appearance', label: 'Appearance' },
+  { id: 'profile', label: 'Profile' },
+];
+
 export function SettingsDialog() {
   const ws = useWorkspace();
   const {
     settingsOpen,
     setSettingsOpen,
+    settingsTab,
+    setSettingsTab,
     density,
     setDensity,
     themePreset,
@@ -111,119 +120,150 @@ export function SettingsDialog() {
           </button>
         </header>
 
-        <div className="ws-scroll max-h-[70vh] space-y-3 overflow-y-auto p-3">
-          <Field label="Density">
-            <Segmented<Density>
-              value={density}
-              onChange={setDensity}
-              options={[
-                { v: 'ultra', label: 'Ultra' },
-                { v: 'compact', label: 'Compact' },
-                { v: 'spacious', label: 'Spacious' },
-              ]}
-            />
-          </Field>
-
-          <Field label="Theme preset">
-            <div className="grid max-h-[160px] grid-cols-2 gap-1 overflow-y-auto">
-              {THEME_META.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setThemePreset(t.id as ThemePreset)}
-                  className={cn(
-                    `flex items-center gap-1.5 border px-2 py-1 text-left${RADIUS_CTRL}`,
-                    themePreset === t.id
-                      ? 'border-accent bg-accentbg'
-                      : 'border-edge hover:border-accent/40',
-                  )}
-                >
-                  <span
-                    className="h-4 w-4 shrink-0 rounded-full border border-edge"
-                    style={{ background: t.swatch }}
-                  />
-                  <span className="truncate">{t.label}</span>
-                </button>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="Default layout preset">
-            <Segmented<LayoutPreset>
-              value={layoutPreset}
-              onChange={setLayoutPreset}
-              options={LAYOUT_PRESETS.map((p) => ({ v: p, label: p }))}
-            />
-          </Field>
-
-          {canvasHud && (
-            <>
-              <Field label="Edge style">
-                <Segmented<EdgePathType>
-                  value={canvasHud.edgeOpts.pathType}
-                  onChange={(v) => canvasHud.setEdgeOpts((o) => ({ ...o, pathType: v }))}
-                  options={[
-                    { v: 'bezier', label: 'Bezier' },
-                    { v: 'smoothstep', label: 'Smooth' },
-                    { v: 'step', label: 'Step' },
-                    { v: 'straight', label: 'Straight' },
-                  ]}
-                />
-              </Field>
-              <Field label="Canvas background">
-                <Segmented<BgVariant>
-                  value={canvasHud.bg}
-                  onChange={canvasHud.setBg}
-                  options={[
-                    { v: 'dots', label: 'Dots' },
-                    { v: 'lines', label: 'Lines' },
-                    { v: 'cross', label: 'Cross' },
-                    { v: 'none', label: 'None' },
-                  ]}
-                />
-              </Field>
-              <Toggle label="Snap to grid" checked={canvasHud.snap} onChange={canvasHud.setSnap} />
-            </>
-          )}
-
-          <div className="-mx-1 border-t border-edge pt-3">
-            <Toggle
-              label="Sound cues"
-              checked={tweaks.sound}
-              onChange={() => toggleTweak('sound')}
-            />
-            <Toggle
-              label="Narration"
-              checked={tweaks.narrate}
-              onChange={() => toggleTweak('narrate')}
-            />
-            <Toggle
-              label="Animations"
-              checked={tweaks.animate}
-              onChange={() => toggleTweak('animate')}
-            />
-          </div>
+        <div className="flex gap-1 border-b border-edge px-3 py-2">
+          {SETTINGS_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSettingsTab(tab.id)}
+              className={cn(
+                `${RADIUS_CTRL} px-2.5 py-1 font-medium transition`,
+                settingsTab === tab.id
+                  ? 'bg-accentbg text-accent'
+                  : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                chromeText.sm,
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        <footer className="flex justify-end gap-2 border-t border-edge px-3 py-2">
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(false)}
-            className={cn(`px-2.5 py-1 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`, chromeText.sm)}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={persist}
-            className={cn(
-              `bg-accent px-2.5 py-1 font-medium text-white hover:opacity-90 ${RADIUS_CTRL}`,
-              chromeText.sm,
-            )}
-          >
-            Save defaults
-          </button>
-        </footer>
+        <div className="ws-scroll max-h-[70vh] space-y-3 overflow-y-auto p-3">
+          {settingsTab === 'profile' ? (
+            <ProfileIntegrationsSection />
+          ) : (
+            <>
+              <Field label="Density">
+                <Segmented<Density>
+                  value={density}
+                  onChange={setDensity}
+                  options={[
+                    { v: 'ultra', label: 'Ultra' },
+                    { v: 'compact', label: 'Compact' },
+                    { v: 'spacious', label: 'Spacious' },
+                  ]}
+                />
+              </Field>
+
+              <Field label="Theme preset">
+                <div className="grid max-h-[160px] grid-cols-2 gap-1 overflow-y-auto">
+                  {THEME_META.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setThemePreset(t.id as ThemePreset)}
+                      className={cn(
+                        `flex items-center gap-1.5 border px-2 py-1 text-left${RADIUS_CTRL}`,
+                        themePreset === t.id
+                          ? 'border-accent bg-accentbg'
+                          : 'border-edge hover:border-accent/40',
+                      )}
+                    >
+                      <span
+                        className="h-4 w-4 shrink-0 rounded-full border border-edge"
+                        style={{ background: t.swatch }}
+                      />
+                      <span className="truncate">{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <Field label="Default layout preset">
+                <Segmented<LayoutPreset>
+                  value={layoutPreset}
+                  onChange={setLayoutPreset}
+                  options={LAYOUT_PRESETS.map((p) => ({ v: p, label: p }))}
+                />
+              </Field>
+
+              {canvasHud && (
+                <>
+                  <Field label="Edge style">
+                    <Segmented<EdgePathType>
+                      value={canvasHud.edgeOpts.pathType}
+                      onChange={(v) => canvasHud.setEdgeOpts((o) => ({ ...o, pathType: v }))}
+                      options={[
+                        { v: 'bezier', label: 'Bezier' },
+                        { v: 'smoothstep', label: 'Smooth' },
+                        { v: 'step', label: 'Step' },
+                        { v: 'straight', label: 'Straight' },
+                      ]}
+                    />
+                  </Field>
+                  <Field label="Canvas background">
+                    <Segmented<BgVariant>
+                      value={canvasHud.bg}
+                      onChange={canvasHud.setBg}
+                      options={[
+                        { v: 'dots', label: 'Dots' },
+                        { v: 'lines', label: 'Lines' },
+                        { v: 'cross', label: 'Cross' },
+                        { v: 'none', label: 'None' },
+                      ]}
+                    />
+                  </Field>
+                  <Toggle
+                    label="Snap to grid"
+                    checked={canvasHud.snap}
+                    onChange={canvasHud.setSnap}
+                  />
+                </>
+              )}
+
+              <div className="-mx-1 border-t border-edge pt-3">
+                <Toggle
+                  label="Sound cues"
+                  checked={tweaks.sound}
+                  onChange={() => toggleTweak('sound')}
+                />
+                <Toggle
+                  label="Narration"
+                  checked={tweaks.narrate}
+                  onChange={() => toggleTweak('narrate')}
+                />
+                <Toggle
+                  label="Animations"
+                  checked={tweaks.animate}
+                  onChange={() => toggleTweak('animate')}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {settingsTab === 'appearance' && (
+          <footer className="flex justify-end gap-2 border-t border-edge px-3 py-2">
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(false)}
+              className={cn(`px-2.5 py-1 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`, chromeText.sm)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={persist}
+              className={cn(
+                `bg-accent px-2.5 py-1 font-medium text-white hover:opacity-90 ${RADIUS_CTRL}`,
+                chromeText.sm,
+              )}
+            >
+              Save defaults
+            </button>
+          </footer>
+        )}
       </div>
     </div>
   );

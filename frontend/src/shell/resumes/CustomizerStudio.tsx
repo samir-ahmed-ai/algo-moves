@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BookmarkPlus, Clock, Download, Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { BookmarkPlus, Clock, Download, Loader2, Sparkles, Trash2, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 import type { Resume, ResumeMapping, ResumeVariant } from './data/resumesApi';
-import { customizeResume, listResumeVariants } from './data/resumesApi';
+import { customizeResume, deleteResumeVariant, listResumeVariants } from './data/resumesApi';
+import { formatResumeAiError, isOpenAIKeyError } from './formatResumeAiError';
 import { FOCUS_PRESETS, reorderMappingForFocus } from './customize/reorder';
 import { ResumeTemplate } from './ResumeTemplate';
+import { useWorkspace } from '@/store/workspace';
+import { KeyRound } from 'lucide-react';
 
 interface CustomizerStudioProps {
   resume: Resume;
@@ -18,6 +21,7 @@ export function CustomizerStudio({
   canSave = true,
   onMappingChange,
 }: CustomizerStudioProps) {
+  const { openSettings } = useWorkspace();
   const previewRef = useRef<HTMLDivElement>(null);
   const [focus, setFocus] = useState('java');
   const [targetRole, setTargetRole] = useState('Senior Java Engineer');
@@ -57,7 +61,7 @@ export function CustomizerStudio({
     const res = await customizeResume(resume.id, { focus, targetRole, mode: 'ai' });
     setBusy(false);
     if (!res.ok) {
-      setError(res.error);
+      setError(formatResumeAiError(res.error));
       return;
     }
     setPreview(res.result.mapping);
@@ -74,7 +78,7 @@ export function CustomizerStudio({
     const res = await customizeResume(resume.id, { focus, targetRole, mode, save: true });
     setSaving(false);
     if (!res.ok) {
-      setError(res.error);
+      setError(formatResumeAiError(res.error));
       return;
     }
     setPreview(res.result.mapping);
@@ -96,6 +100,15 @@ export function CustomizerStudio({
     setMode(v.mode);
     setPreview(v.mapping);
     onMappingChange?.(v.mapping);
+  };
+
+  const removeVariant = async (variantId: string) => {
+    const ok = await deleteResumeVariant(resume.id, variantId);
+    if (!ok) {
+      setError('Failed to delete variant');
+      return;
+    }
+    setVariants((prev) => prev.filter((v) => v.id !== variantId));
   };
 
   const exportPdf = useCallback(async () => {
@@ -241,7 +254,21 @@ export function CustomizerStudio({
           </button>
         </div>
 
-        {error && <p className="text-xs text-bad">{error}</p>}
+        {error && (
+          <div className="space-y-1">
+            <p className="text-xs text-bad">{error}</p>
+            {isOpenAIKeyError(error) && (
+              <button
+                type="button"
+                onClick={() => openSettings('profile')}
+                className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
+              >
+                <KeyRound className="h-3 w-3" />
+                Open Settings → Profile
+              </button>
+            )}
+          </div>
+        )}
 
         {canSave && variants.length > 0 && (
           <div>
@@ -251,23 +278,35 @@ export function CustomizerStudio({
             </h3>
             <div className="flex flex-col gap-1.5">
               {variants.map((v) => (
-                <button
+                <div
                   key={v.id}
-                  type="button"
-                  onClick={() => loadVariant(v)}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-edge bg-panel2 px-3 py-2 text-left text-xs transition hover:border-accent/40"
+                  className="flex items-center gap-1 rounded-lg border border-edge bg-panel2 pr-1"
                 >
-                  <span className="truncate text-ink2">{v.label}</span>
-                  <span
-                    className={cn(
-                      'shrink-0 rounded px-1.5 py-0.5 font-semibold uppercase',
-                      chromeText.xs,
-                      v.mode === 'ai' ? 'bg-accent/15 text-accent' : 'bg-panel text-ink3',
-                    )}
+                  <button
+                    type="button"
+                    onClick={() => loadVariant(v)}
+                    className="flex flex-1 items-center justify-between gap-2 px-3 py-2 text-left text-xs transition hover:bg-panel"
                   >
-                    {v.mode}
-                  </span>
-                </button>
+                    <span className="truncate text-ink2">{v.label}</span>
+                    <span
+                      className={cn(
+                        'shrink-0 rounded px-1.5 py-0.5 font-semibold uppercase',
+                        chromeText.xs,
+                        v.mode === 'ai' ? 'bg-accent/15 text-accent' : 'bg-panel text-ink3',
+                      )}
+                    >
+                      {v.mode}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(v.id)}
+                    className="rounded-lg p-1.5 text-ink3 transition hover:text-bad hover:bg-bad/10"
+                    aria-label={`Delete ${v.label}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>

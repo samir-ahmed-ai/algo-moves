@@ -6,24 +6,7 @@ import { apiServerHttpBase } from './config';
  * DATABASE_URL is set). Degrades gracefully when the backend has no database.
  */
 
-const SESSION_KEY = 'algo-moves-games-session';
-
 let arcadeAvailable: boolean | null = null;
-
-export function getSessionToken(): string | null {
-  if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem(SESSION_KEY);
-}
-
-export function setSessionToken(token: string): void {
-  if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(SESSION_KEY, token);
-}
-
-export function clearSessionToken(): void {
-  if (typeof localStorage === 'undefined') return;
-  localStorage.removeItem(SESSION_KEY);
-}
 
 /** Stable browser guest id used to derive a personal room code offline. */
 export function getOrCreateLocalGuestId(): string {
@@ -86,10 +69,6 @@ export async function arcadeFetch<T>(
   const headers = new Headers(init.headers);
   if (!headers.has('Content-Type') && init.body) {
     headers.set('Content-Type', 'application/json');
-  }
-  if (init.auth !== false) {
-    const token = getSessionToken();
-    if (token) headers.set('Authorization', `Bearer ${token}`);
   }
   try {
     const res = await fetch(`${apiServerHttpBase()}${path}`, {

@@ -32,7 +32,7 @@ export const ar: ArcadeStrings = {
     roomCodePlaceholder: 'رمز الغرفة',
     createRoomError: 'تعذّر إنشاء الغرفة.',
     lanHint:
-      'وضع الشبكة المحلية: شغّل make backend-dev وافتح الموقع على عنوان IP جهازك. للعب عبر الإنترنت، عيّن VITE_GAMES_SERVER_URL عند البناء.',
+      'وضع الشبكة المحلية: شغّل make backend-dev وافتح الموقع على عنوان IP جهازك. للعب عبر الإنترنت، عيّن VITE_API_SERVER_URL عند البناء.',
     yourRoom: 'غرفتك',
     yourRoomHint: 'يمكن لأصدقائك الانضمام إليك دائماً بهذا الرمز.',
     hostMyRoom: 'استضافة غرفتي',

@@ -36,17 +36,15 @@ func newSessionManager(databaseURL string) (*scs.SessionManager, *sql.DB, error)
 	return sm, db, nil
 }
 
-// SessionMiddleware loads SCS sessions from Bearer tokens or the session cookie.
+// SessionMiddleware loads SCS sessions from the session cookie.
 func (s *Service) SessionMiddleware(next http.Handler) http.Handler {
 	if s == nil || s.sessions == nil {
 		return next
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := BearerToken(r)
-		if token == "" {
-			if c, err := r.Cookie(s.sessions.Cookie.Name); err == nil {
-				token = c.Value
-			}
+		token := ""
+		if c, err := r.Cookie(s.sessions.Cookie.Name); err == nil {
+			token = c.Value
 		}
 
 		ctx, err := s.sessions.Load(r.Context(), token)

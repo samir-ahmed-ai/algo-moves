@@ -204,7 +204,7 @@ Thin re-exports over progress, Code Studio phase persistence, and resume helpers
 
 Stdlib-only Go service: pairs players into a room, relays JSON, stores host shared state. See [`backend/README.md`](../backend/README.md).
 
-Deploy both apps on Railway with GitHub connected per service (`backend/` and `frontend/` root directories, branch `main`). The frontend build injects `VITE_GAMES_SERVER_URL` from Railway service variables so browsers reach the game server.
+Deploy both apps on Railway with GitHub connected per service (`backend/` and `frontend/` root directories, branch `main`). The frontend build injects `VITE_API_SERVER_URL` from Railway service variables so browsers reach the backend API and game server.
 
 ## Canvas (`frontend/src/shell/canvas/`)
 

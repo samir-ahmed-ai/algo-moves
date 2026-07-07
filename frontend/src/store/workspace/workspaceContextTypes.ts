@@ -32,6 +32,8 @@ export interface WorkspaceAppearanceCtx {
   toggleTweak: (k: keyof Tweaks) => void;
 }
 
+export type SettingsTab = 'appearance' | 'profile';
+
 export interface WorkspaceChromeCtx {
   menuOpen: boolean;
   setMenuOpen: (b: boolean) => void;
@@ -57,6 +59,9 @@ export interface WorkspaceChromeCtx {
   setCanvasHud: (v: CanvasHudProps | null) => void;
   settingsOpen: boolean;
   setSettingsOpen: (b: boolean) => void;
+  settingsTab: SettingsTab;
+  setSettingsTab: (tab: SettingsTab) => void;
+  openSettings: (tab?: SettingsTab) => void;
   tracePreviewOpen: boolean;
   setTracePreviewOpen: (b: boolean) => void;
   mobileTransportOpen: boolean;

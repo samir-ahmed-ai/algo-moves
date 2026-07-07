@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultPrepQuiz } from './prepQuiz';
 import { quizCorrectnessIssues } from '@/lib/quiz';
-import type { PrepProblem } from './prepFactory';
+import type { PrepProblem } from './prepTypes';
 
 const emptyPattern: PrepProblem = {
   id: 'prep-test-empty-pattern',

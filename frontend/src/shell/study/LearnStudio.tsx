@@ -20,13 +20,12 @@ import { StudioAssembleStageBody } from '@/shell/panels/problem/StudioAssembleSt
 import { StudioPanelStageBody } from '@/shell/panels/problem/StudioPanelStageBody';
 import { StudioViewPicker } from './StudioViewPicker';
 import { ProblemSurfaceBar } from './ProblemSurfaceBar';
-import { readStorageText, writeStorageText } from '@/store/persistence';
+import { readStudioTab, writeStudioTab } from '@/store/study/studioTab';
 import {
   flatOrder,
   isTabAvailable,
   STUDIO_GROUPS,
   STUDIO_TABS,
-  STUDIO_TAB_PERSIST,
   type StudioGroupId,
   type StudioTab,
 } from './studioTabs';
@@ -111,7 +110,7 @@ export function LearnStudio({
 }
 
 function initialTab(itemId: string, avail: StudioTab[]): string {
-  const saved = readStorageText(`${STUDIO_TAB_PERSIST}:${itemId}`, null);
+  const saved = readStudioTab(itemId);
   if (saved && avail.some((t) => t.id === saved)) return saved;
   const prefer =
     avail.find((t) => t.id === 'overview') ??
@@ -150,7 +149,7 @@ function StudioShell({
   const [activeId, setActiveId] = useState(() => initialTab(item.id, avail));
 
   useEffect(() => {
-    writeStorageText(`${STUDIO_TAB_PERSIST}:${item.id}`, activeId);
+    writeStudioTab(item.id, activeId);
   }, [item.id, activeId]);
 
   const active = avail.find((t) => t.id === activeId) ?? avail[0];

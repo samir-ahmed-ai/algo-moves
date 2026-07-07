@@ -113,11 +113,3 @@ export const tweakMeta: { key: keyof Tweaks; label: string; hint: string }[] = [
   { key: 'narrate', label: 'Narration', hint: 'Speak captions aloud (text-to-speech)' },
   { key: 'sound', label: 'Sound cues', hint: 'A short tone on each step' },
 ];
-
-export { WorkspaceProvider } from './workspaceContext';
-export {
-  useWorkspace,
-  useWorkspaceAppearance,
-  useWorkspaceChrome,
-  useWorkspaceNavigation,
-} from './useWorkspace';

@@ -86,9 +86,9 @@ func (s *Service) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	s.maybePromotePlatformAdmin(r.Context(), email)
 	s.refreshSessionProfile(r.Context(), sess)
-	if token, err := s.issueSession(r.Context(), sess.ProfileID); err == nil && token != "" {
-		sess.SessionToken = token
-		_, _, _ = s.store.RotateSessionToken(r.Context(), sess.ProfileID)
+	if _, err := s.issueSession(r.Context(), sess.ProfileID); err != nil {
+		WriteErr(w, http.StatusInternalServerError, "could not create session")
+		return
 	}
 	WriteJSON(w, http.StatusOK, sess)
 }
@@ -129,23 +129,14 @@ func (s *Service) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.maybePromotePlatformAdmin(r.Context(), email)
-	token, updated, err := s.store.RotateSessionToken(r.Context(), p.ID)
-	if err != nil {
-		WriteErr(w, http.StatusInternalServerError, "could not create session")
-		return
-	}
-	if updated == nil {
-		WriteErr(w, http.StatusUnauthorized, "invalid credentials")
-		return
-	}
 	sess := GuestSession{
-		ProfileID:    updated.ID,
-		SessionToken: token,
-		Profile:      *updated,
+		ProfileID: p.ID,
+		Profile:   *p,
 	}
 	s.refreshSessionProfile(r.Context(), &sess)
-	if scsToken, err := s.issueSession(r.Context(), updated.ID); err == nil && scsToken != "" {
-		sess.SessionToken = scsToken
+	if _, err := s.issueSession(r.Context(), p.ID); err != nil {
+		WriteErr(w, http.StatusInternalServerError, "could not create session")
+		return
 	}
 	WriteJSON(w, http.StatusOK, sess)
 }
@@ -160,8 +151,9 @@ func (s *Service) HandleGuest(w http.ResponseWriter, r *http.Request) {
 		WriteErr(w, http.StatusInternalServerError, "could not create guest profile")
 		return
 	}
-	if token, err := s.issueSession(r.Context(), sess.ProfileID); err == nil && token != "" {
-		sess.SessionToken = token
+	if _, err := s.issueSession(r.Context(), sess.ProfileID); err != nil {
+		WriteErr(w, http.StatusInternalServerError, "could not create session")
+		return
 	}
 	WriteJSON(w, http.StatusOK, sess)
 }
@@ -193,6 +185,10 @@ func (s *Service) HandleMe(w http.ResponseWriter, r *http.Request) {
 func (s *Service) HandleProfiles(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	path := strings.TrimPrefix(r.URL.Path, "/api/profiles/")
+	if path == "me/integrations" {
+		s.HandleProfileIntegrations(w, r)
+		return
+	}
 	if path == "me" && r.Method == http.MethodPatch {
 		p, code, msg := s.ProfileFromRequest(ctx, r)
 		if code != 0 {

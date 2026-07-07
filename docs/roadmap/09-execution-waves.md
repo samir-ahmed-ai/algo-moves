@@ -43,7 +43,7 @@
 | W1-12 | Repoint `AuthButton` to shared Avatar | ✅ |
 | W1-13 | Add `platform/api/*.test.ts` | ✅ |
 | W1-14 | Update test mocks to `@/platform` | ✅ |
-| W1-15 | Delete deprecated `shell/games/data` re-exports | 🟡 `@deprecated` re-exports remain for games compat |
+| W1-15 | Delete deprecated `shell/games/data` re-exports | ✅ Wave 8: orphan `arcadeClient` + games `AuthProvider` shim removed |
 
 ---
 
@@ -57,8 +57,8 @@
 | W2-04 | Document nested room state contract | ✅ |
 | W2-05 | Move `soundConfig` persistence wiring | ✅ |
 | W2-06 | ESLint: forbid games imports from study/canvas/interview | ✅ |
-| W2-07 | Split `GamesPage.tsx` (<300 LOC submodules) | 🟡 Partial decomposition |
-| W2-08 | Extract shared chat UI | 🟡 Games keeps `ChatDock`; collab separate |
+| W2-07 | Split `GamesPage.tsx` (<300 LOC submodules) | ✅ Root ~25 LOC; submodules extracted |
+| W2-08 | Extract shared chat UI | ✅ `@/components/chat/*`; thin `ChatDock` + collab `ChatBody` |
 | W2-09 | Align game IDs with `010_games_catalog.sql` | ✅ |
 | W2-10 | Characterization tests per game plugin | ✅ |
 | W2-11 | `shell/games/README.md` domain contract | ✅ |
@@ -98,9 +98,9 @@
 | W4-05 | Delete hash URL shims (`mobileHash`, `gamesHash`, `vimHash`) | ✅ |
 | W4-06 | Remove `normalizeLegacyUrl()` from routing | ✅ |
 | W4-07 | Remove bare `CanvasDoc` envelope in `roomState.ts` | ✅ |
-| W4-08 | Remove `profiles.session_token` bearer fallback in HTTP | 🟡 SCS sessions primary; column retained for schema compat |
+| W4-08 | Remove `profiles.session_token` bearer fallback in HTTP | ✅ Cookie-only SCS auth (Wave 8); DB column retained for schema compat |
 | W4-09 | Delete `useYjsCanvasShadow.ts` shim | ✅ |
-| W4-10 | Remove deprecated `nodeui.tsx` barrel | 🟡 Re-export barrel remains during migration |
+| W4-10 | Remove deprecated `nodeui.tsx` barrel | ✅ Deleted; importers use `@/design/components` |
 | W4-11 | Remove `practice` tab alias in `normalizeCanvasMode()` | ✅ |
 | W4-12 | Remove legacy share-link mode without item | ✅ |
 | W4-13 | Remove SRS SM-2-lite migration | ✅ |
@@ -124,7 +124,7 @@
 | W5-09 | Update `backend/README.md` package map | ✅ |
 | W5-10 | `doc.go` package docs forbidding cross-domain imports | ✅ |
 | W5-11 | `go test ./...` + interview API tests green | ✅ |
-| W5-12 | Rename `VITE_GAMES_SERVER_URL` → `VITE_API_SERVER_URL` | 🟡 Alias documented; both env names accepted |
+| W5-12 | Rename `VITE_GAMES_SERVER_URL` → `VITE_API_SERVER_URL` | ✅ Primary name in deploy/docs; games alias fallback kept |
 
 ---
 
@@ -138,11 +138,11 @@
 | W6-04 | Confirm `layout.ts` barrel split; delete dead code | ✅ |
 | W6-05 | `CanvasStage.lifecycle.test.tsx` characterization tests | ✅ |
 | W6-06 | Extract `useCanvasLifecycle` from `CanvasStage.tsx` | ✅ |
-| W6-07 | Slice `CodeStudioProvider` into Phase/Draft/UI contexts | 🟡 Partial slice contexts |
-| W6-08 | Decompose `LandingPage.tsx` | 🟡 |
-| W6-09 | Decompose `AssembleModes.tsx` logic vs render | 🟡 |
-| W6-10 | Move localStorage IO from shell into Zustand slices | 🟡 |
-| W6-11 | Render layer graph in `docs/architecture.md` from FORBIDDEN map | 🟡 |
+| W6-07 | Slice `CodeStudioProvider` into Phase/Draft/UI contexts | ✅ Context slices + `CodeStudioHeader.tsx` extraction (<400 LOC root) |
+| W6-08 | Decompose `LandingPage.tsx` | ✅ `LandingHero`, `LandingToolbar`, `LandingCatalog`; root ~165 LOC |
+| W6-09 | Decompose `AssembleModes.tsx` logic vs render | ✅ Mode router + `assemble/*` mode files |
+| W6-10 | Move localStorage IO from shell into Zustand slices | ✅ `store/study/studioTab`, `store/games/lobbyPrefs`, `store/interview/hostRoom` |
+| W6-11 | Render layer graph in `docs/architecture.md` from FORBIDDEN map | ✅ Layer graph present in `docs/architecture.md` |
 | W6-12 | Add `madge --circular src/` CI gate | ✅ `check:circular` in parallel `check:all` |
 
 ---
@@ -193,18 +193,24 @@ cd frontend && npm run check:all           # parallel guardrails
 
 ---
 
+## Wave 8 — World-class completion pass (2026-07-07)
+
+Cookie-only SCS auth cutover, env rename, god-component splits, store persistence hygiene, shared chat primitives, circular-dep ratchet (27 → 17). Gate: `make check`.
+
+---
+
 ## Summary
 
 | Wave | Done | Partial | Pending |
 |------|-----:|--------:|--------:|
 | W0 DB | 12 | 0 | 0 |
-| W1 Platform | 14 | 1 | 0 |
-| W2 Games | 9 | 3 | 0 |
+| W1 Platform | 15 | 0 | 0 |
+| W2 Games | 12 | 0 | 0 |
 | W3 Interview/Collab | 14 | 0 | 0 |
-| W4 Legacy | 12 | 3 | 0 |
-| W5 Backend | 10 | 2 | 0 |
-| W6 Architecture | 7 | 5 | 0 |
+| W4 Legacy | 15 | 0 | 0 |
+| W5 Backend | 12 | 0 | 0 |
+| W6 Architecture | 12 | 0 | 0 |
 | W7 OSS | 10 | 0 | 0 |
-| **Total** | **88** | **14** | **0** |
+| **Total** | **100** | **0** | **0** |
 
-Last updated: 2026-07-07 (Wave 7 complete; `make check` green).
+Last updated: 2026-07-07 (Wave 8 complete; cookie-only auth; `make check` green).

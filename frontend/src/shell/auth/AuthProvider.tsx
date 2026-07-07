@@ -10,11 +10,8 @@ import {
 import {
   arcadeAuthRequest,
   arcadeFetch,
-  clearSessionToken,
-  getSessionToken,
   isArcadeConfigured,
   setPersonalRoomCode,
-  setSessionToken,
   getProfile,
   updateProfile,
   type Profile,
@@ -42,9 +39,8 @@ const noop = async () => {};
 
 const AuthContext = createContext<AuthApi | null>(null);
 
-type GuestSession = {
+type AuthSession = {
   profile_id: string;
-  session_token: string;
   profile: Profile;
 };
 
@@ -60,8 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const signingIn = useRef<Promise<string | null> | null>(null);
 
-  const applySession = useCallback((sess: GuestSession) => {
-    setSessionToken(sess.session_token);
+  const applySession = useCallback((sess: AuthSession) => {
     setUserId(sess.profile_id);
     setIsAnonymous(sess.profile.is_anonymous);
     setProfile(sess.profile);
@@ -94,8 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAnonymous(me.is_anonymous);
         setProfile(me);
         syncPersonalRoom(me);
-      } else if (getSessionToken()) {
-        clearSessionToken();
       }
       setLoading(false);
     })();
@@ -107,22 +100,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const ensureSignedIn = useCallback(async (): Promise<string | null> => {
     if (!configured) return null;
     if (userId) return userId;
-    const token = getSessionToken();
-    if (token) {
-      const me = await arcadeFetch<Profile>('/api/auth/me');
-      if (me) {
-        setUserId(me.id);
-        setIsAnonymous(me.is_anonymous);
-        setProfile(me);
-        syncPersonalRoom(me);
-        return me.id;
-      }
-      clearSessionToken();
+    const me = await arcadeFetch<Profile>('/api/auth/me');
+    if (me) {
+      setUserId(me.id);
+      setIsAnonymous(me.is_anonymous);
+      setProfile(me);
+      syncPersonalRoom(me);
+      return me.id;
     }
     if (signingIn.current) return signingIn.current;
 
     signingIn.current = (async () => {
-      const sess = await arcadeFetch<GuestSession>('/api/auth/guest', {
+      const sess = await arcadeFetch<AuthSession>('/api/auth/guest', {
         method: 'POST',
         auth: false,
       });
@@ -137,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUpEmail = useCallback<AuthApi['signUpEmail']>(
     async (email, password, displayName) => {
       if (!configured) return { error: 'not-configured' };
-      const res = await arcadeAuthRequest<GuestSession>('/api/auth/signup', {
+      const res = await arcadeAuthRequest<AuthSession>('/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({ email, password, display_name: displayName }),
       });
@@ -151,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInEmail = useCallback<AuthApi['signInEmail']>(
     async (email, password) => {
       if (!configured) return { error: 'not-configured' };
-      const res = await arcadeAuthRequest<GuestSession>('/api/auth/login', {
+      const res = await arcadeAuthRequest<AuthSession>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
@@ -174,7 +163,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     await arcadeFetch('/api/auth/logout', { method: 'POST' });
-    clearSessionToken();
     setUserId(null);
     setProfile(null);
     setIsAnonymous(true);

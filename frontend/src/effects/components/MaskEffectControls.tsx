@@ -1,6 +1,6 @@
 import { Field } from '@/components/shared/formControls';
 import { nodeText } from '@/design/typography';
-import type { EffectControlsProps } from './EffectControls';
+import type { EffectControlsProps } from './effectControlsTypes';
 
 const PRESETS = [
   { label: 'Always', value: 1 },

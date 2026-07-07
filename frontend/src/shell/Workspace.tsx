@@ -13,7 +13,7 @@ import {
   useWorkspaceKeyboard,
   useWorkspaceRuntime,
 } from '@/shell/workspace/index';
-import { SettingsDialog, MobileTransportSheet } from '@/shell/canvas';
+import { MobileTransportSheet } from '@/shell/canvas';
 import { PlanTray } from './plans/PlanTray';
 import { PlanRunner } from './plans/PlanRunner';
 import { usePlan } from './plans/PlanContext';
@@ -157,7 +157,6 @@ export function Workspace() {
         onClose={() => setMobileTransportOpen(false)}
       />
       <MobileSwipeReturn />
-      <SettingsDialog />
     </div>
   );
 }

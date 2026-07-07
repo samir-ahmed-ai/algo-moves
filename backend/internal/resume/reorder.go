@@ -1,4 +1,4 @@
-package arcade
+package resume
 
 import (
 	"encoding/json"
@@ -6,18 +6,18 @@ import (
 	"strings"
 )
 
-// ResumeMapping is the structured resume document used for customization.
-type ResumeMapping struct {
-	Contact        ResumeContact        `json:"contact"`
-	Summary        string               `json:"summary"`
-	Skills         []ResumeSkill        `json:"skills"`
-	Experience     []ResumeExperience   `json:"experience"`
-	Projects       []ResumeProject      `json:"projects"`
-	Education      []ResumeEducation    `json:"education"`
-	Certifications []string             `json:"certifications"`
+// Mapping is the structured resume document used for customization.
+type Mapping struct {
+	Contact        Contact      `json:"contact"`
+	Summary        string       `json:"summary"`
+	Skills         []Skill      `json:"skills"`
+	Experience     []Experience `json:"experience"`
+	Projects       []Project    `json:"projects"`
+	Education      []Education  `json:"education"`
+	Certifications []string     `json:"certifications"`
 }
 
-type ResumeContact struct {
+type Contact struct {
 	Name     string   `json:"name"`
 	Email    string   `json:"email"`
 	Phone    string   `json:"phone"`
@@ -25,33 +25,33 @@ type ResumeContact struct {
 	Links    []string `json:"links"`
 }
 
-type ResumeSkill struct {
+type Skill struct {
 	Name     string   `json:"name"`
 	Category string   `json:"category"`
 	Tags     []string `json:"tags"`
 	Weight   float64  `json:"weight"`
 }
 
-type ResumeBullet struct {
+type Bullet struct {
 	Text string   `json:"text"`
 	Tags []string `json:"tags"`
 }
 
-type ResumeExperience struct {
-	Company string         `json:"company"`
-	Role    string         `json:"role"`
-	Start   string         `json:"start"`
-	End     string         `json:"end"`
-	Bullets []ResumeBullet `json:"bullets"`
+type Experience struct {
+	Company string   `json:"company"`
+	Role    string   `json:"role"`
+	Start   string   `json:"start"`
+	End     string   `json:"end"`
+	Bullets []Bullet `json:"bullets"`
 }
 
-type ResumeProject struct {
-	Name    string         `json:"name"`
-	Tags    []string       `json:"tags"`
-	Bullets []ResumeBullet `json:"bullets"`
+type Project struct {
+	Name    string   `json:"name"`
+	Tags    []string `json:"tags"`
+	Bullets []Bullet `json:"bullets"`
 }
 
-type ResumeEducation struct {
+type Education struct {
 	School  string `json:"school"`
 	Degree  string `json:"degree"`
 	Start   string `json:"start"`
@@ -61,7 +61,7 @@ type ResumeEducation struct {
 
 // ReorderMappingForFocus applies rule-based emphasis for a focus keyword.
 func ReorderMappingForFocus(mapping json.RawMessage, focus string) (json.RawMessage, error) {
-	var m ResumeMapping
+	var m Mapping
 	if err := json.Unmarshal(mapping, &m); err != nil {
 		return nil, err
 	}
@@ -70,7 +70,6 @@ func ReorderMappingForFocus(mapping json.RawMessage, focus string) (json.RawMess
 		return mapping, nil
 	}
 
-	// Boost matching skills
 	for i := range m.Skills {
 		score := tagScore(m.Skills[i].Tags, m.Skills[i].Name, focus)
 		m.Skills[i].Weight = m.Skills[i].Weight + score*2
@@ -79,7 +78,6 @@ func ReorderMappingForFocus(mapping json.RawMessage, focus string) (json.RawMess
 		return m.Skills[i].Weight > m.Skills[j].Weight
 	})
 
-	// Reorder experience bullets
 	for i := range m.Experience {
 		sort.SliceStable(m.Experience[i].Bullets, func(a, b int) bool {
 			return bulletScore(m.Experience[i].Bullets[a], focus) > bulletScore(m.Experience[i].Bullets[b], focus)
@@ -89,7 +87,6 @@ func ReorderMappingForFocus(mapping json.RawMessage, focus string) (json.RawMess
 		return expScore(m.Experience[i], focus) > expScore(m.Experience[j], focus)
 	})
 
-	// Reorder projects
 	for i := range m.Projects {
 		sort.SliceStable(m.Projects[i].Bullets, func(a, b int) bool {
 			return bulletScore(m.Projects[i].Bullets[a], focus) > bulletScore(m.Projects[i].Bullets[b], focus)
@@ -117,7 +114,7 @@ func tagScore(tags []string, name, focus string) float64 {
 	return score
 }
 
-func bulletScore(b ResumeBullet, focus string) float64 {
+func bulletScore(b Bullet, focus string) float64 {
 	score := 0.0
 	lt := strings.ToLower(b.Text)
 	if strings.Contains(lt, focus) {
@@ -132,7 +129,7 @@ func bulletScore(b ResumeBullet, focus string) float64 {
 	return score
 }
 
-func expScore(e ResumeExperience, focus string) float64 {
+func expScore(e Experience, focus string) float64 {
 	score := 0.0
 	if strings.Contains(strings.ToLower(e.Role), focus) {
 		score += 2
@@ -143,7 +140,7 @@ func expScore(e ResumeExperience, focus string) float64 {
 	return score
 }
 
-func projectScore(p ResumeProject, focus string) float64 {
+func projectScore(p Project, focus string) float64 {
 	score := 0.0
 	if strings.Contains(strings.ToLower(p.Name), focus) {
 		score += 2

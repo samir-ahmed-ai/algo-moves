@@ -31,6 +31,7 @@ type Querier interface {
 	DeletePrepPlan(ctx context.Context, arg DeletePrepPlanParams) (int64, error)
 	DeletePrepPlanItems(ctx context.Context, planID pgtype.UUID) error
 	DeleteResume(ctx context.Context, arg DeleteResumeParams) (int64, error)
+	DeleteResumeVariant(ctx context.Context, arg DeleteResumeVariantParams) (int64, error)
 	EndInterviewSession(ctx context.Context, arg EndInterviewSessionParams) (EndInterviewSessionRow, error)
 	GameStatsByProfile(ctx context.Context, profileID pgtype.UUID) ([]GameStat, error)
 	GetCanvas(ctx context.Context, id pgtype.UUID) (GetCanvasRow, error)
@@ -42,6 +43,7 @@ type Querier interface {
 	GetProfileByEmail(ctx context.Context, email string) (GetProfileByEmailRow, error)
 	GetProfileByID(ctx context.Context, id pgtype.UUID) (GetProfileByIDRow, error)
 	GetProfileByToken(ctx context.Context, sessionToken pgtype.Text) (GetProfileByTokenRow, error)
+	GetProfileOpenAIKeyEnc(ctx context.Context, id pgtype.UUID) ([]byte, error)
 	GetResumeByID(ctx context.Context, id pgtype.UUID) (GetResumeByIDRow, error)
 	GetResumeByIDForOwner(ctx context.Context, arg GetResumeByIDForOwnerParams) (GetResumeByIDForOwnerRow, error)
 	GetRoom(ctx context.Context, code string) (Room, error)
@@ -66,6 +68,7 @@ type Querier interface {
 	RotateInterviewToken(ctx context.Context, arg RotateInterviewTokenParams) (RotateInterviewTokenRow, error)
 	RotateSessionToken(ctx context.Context, arg RotateSessionTokenParams) (RotateSessionTokenRow, error)
 	SetAdminByEmail(ctx context.Context, email string) (int64, error)
+	SetProfileOpenAIKey(ctx context.Context, arg SetProfileOpenAIKeyParams) error
 	SubmitDailyScore(ctx context.Context, arg SubmitDailyScoreParams) error
 	SubmitMatchResult(ctx context.Context, arg SubmitMatchResultParams) ([]byte, error)
 	TouchRoom(ctx context.Context, code string) error

@@ -10,6 +10,7 @@ import { ErrorBoundary } from './shell/ErrorBoundary';
 import { PlanProvider } from './shell/plans/PlanContext';
 import { PlansPage } from './shell/plans/PlansPage';
 import { ResumesPage } from './shell/resumes/ResumesPage';
+import { SettingsDialog } from '@/shell/canvas';
 
 function Shell() {
   const { route } = useWorkspace();
@@ -30,6 +31,7 @@ export default function App() {
             <div className="h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
               <ErrorBoundary label="app">
                 <Shell />
+                <SettingsDialog />
               </ErrorBoundary>
             </div>
           </ReplayStoreProvider>

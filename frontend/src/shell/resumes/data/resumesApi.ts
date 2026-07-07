@@ -1,4 +1,3 @@
-import { getSessionToken } from '@/platform/api/arcadeClient';
 import { apiServerHttpBase } from '@/platform/api/config';
 
 export interface ResumeContact {
@@ -109,8 +108,6 @@ async function resumesFetch<T>(
   init: RequestInit = {},
 ): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
   const headers = new Headers(init.headers);
-  const token = getSessionToken();
-  if (token) headers.set('Authorization', `Bearer ${token}`);
   try {
     const res = await fetch(`${apiServerHttpBase()}${path}`, {
       ...init,
@@ -152,14 +149,9 @@ export async function uploadResume(
   if (opts?.title) form.append('title', opts.title);
   if (opts?.isPublic === false) form.append('isPublic', 'false');
 
-  const token = getSessionToken();
-  const headers = new Headers();
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-
   try {
     const res = await fetch(`${apiServerHttpBase()}/api/resumes`, {
       method: 'POST',
-      headers,
       body: form,
       credentials: 'include',
     });
@@ -212,4 +204,14 @@ export async function customizeResume(
 export async function listResumeVariants(id: string): Promise<ResumeVariant[]> {
   const res = await resumesFetch<ResumeVariant[]>(`/api/resumes/${id}/variants`);
   return res.ok ? res.data : [];
+}
+
+export async function deleteResumeVariant(resumeId: string, variantId: string): Promise<boolean> {
+  const res = await resumesFetch<{ ok: boolean }>(
+    `/api/resumes/${resumeId}/variants/${variantId}`,
+    {
+      method: 'DELETE',
+    },
+  );
+  return res.ok && res.data?.ok === true;
 }

@@ -34,6 +34,23 @@ func NewClient() *Client {
 	}
 }
 
+// NewClientWithKey returns a client using the given API key (per-user BYOK).
+func NewClientWithKey(apiKey string) *Client {
+	c := NewClient()
+	c.apiKey = strings.TrimSpace(apiKey)
+	return c
+}
+
+// WithAPIKey returns a copy of the client using the given API key.
+func (c *Client) WithAPIKey(apiKey string) *Client {
+	if c == nil {
+		return NewClientWithKey(apiKey)
+	}
+	clone := *c
+	clone.apiKey = strings.TrimSpace(apiKey)
+	return &clone
+}
+
 func (c *Client) Enabled() bool {
 	return c != nil && c.apiKey != ""
 }

@@ -157,3 +157,7 @@ from public.resume_variants
 where resume_id = sqlc.arg(resume_id)::uuid and owner_profile_id = sqlc.arg(owner_profile_id)::uuid
 order by created_at desc
 limit 100;
+
+-- name: DeleteResumeVariant :execrows
+delete from public.resume_variants
+where id = sqlc.arg(id)::uuid and owner_profile_id = sqlc.arg(owner_profile_id)::uuid;

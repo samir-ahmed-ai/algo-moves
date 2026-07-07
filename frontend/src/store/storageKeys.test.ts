@@ -22,6 +22,7 @@ describe('STORAGE_KEYS', () => {
     expect(STORAGE_KEYS.GAMES_LOCALE).toBe('algo-moves:games:locale');
     expect(STORAGE_KEYS.GAMES_NAME).toBe('algo-moves:games:name');
     expect(STORAGE_KEYS.GAMES_MUTED).toBe('algo-moves:games:muted');
+    expect(STORAGE_KEYS.INTERVIEW_HOST_ROOM).toBe('algo-moves:interview-host-room');
     expect(STORAGE_KEYS.DEMO_WORKFLOW).toBe('algo-moves:demo-workflow');
   });
 

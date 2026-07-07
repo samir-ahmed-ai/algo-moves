@@ -171,7 +171,7 @@ Deploy the **frontend** and **game server** on [Railway](https://railway.com). P
    | **backend** | `RUN_CONTENT_SEED` | `true` |
    | **hocuspocus** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
    | **hocuspocus** | `HOCUSPOCUS_ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
-   | **frontend** | `VITE_GAMES_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
+   | **frontend** | `VITE_API_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
    | **frontend** | `VITE_HOCUSPOCUS_URL` | `wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}` |
 
    Service names in `${{…}}` must match your Railway service names exactly (`frontend`, `backend`, `hocuspocus`, `Postgres`).

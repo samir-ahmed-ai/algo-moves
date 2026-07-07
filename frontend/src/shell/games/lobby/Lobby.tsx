@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Copy, Eye, Loader2, Plus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { buildGamesUrl, writeGamesHash } from '@/lib/navigation';
-import { readStorageText, writeStorageText } from '@/store/persistence';
-import { STORAGE_KEYS } from '@/store/storageKeys';
+import { readLobbyPlayerName, writeLobbyPlayerName } from '@/store/games/lobbyPrefs';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
 import { useAuth } from '@/shell/auth/AuthProvider';
@@ -14,7 +13,6 @@ import { Glyph, TouchButton, CategoryBadge } from '../ui/gamesUi';
 import { GAMES } from '../registry';
 import { gameAccentColor } from '../gamePresentation';
 
-const NAME_KEY = STORAGE_KEYS.GAMES_NAME;
 const CAPACITIES = [2, 4, 6, 8];
 
 /** Pre-connection screen: pick a name + avatar, then create or join a room. */
@@ -23,7 +21,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
   const t = useMemo(() => getArcadeStrings(locale), [locale]);
   const { connect, disconnect, status, error } = useGameRoom();
   const { ensureSignedIn, updateMyProfile, configured } = useAuth();
-  const [name, setName] = useState(() => readStorageText(NAME_KEY, '') ?? '');
+  const [name, setName] = useState(() => readLobbyPlayerName());
   const [joinCode, setJoinCode] = useState(prefillRoom ?? '');
   const [tab, setTab] = useState<'create' | 'join'>(prefillRoom ? 'join' : 'create');
   const [capacity, setCapacity] = useState(2);
@@ -41,7 +39,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
   }, [prefillRoom]);
 
   const prepare = async () => {
-    writeStorageText(NAME_KEY, name.trim());
+    writeLobbyPlayerName(name.trim());
     if (configured) {
       await ensureSignedIn();
       await updateMyProfile({ display_name: name.trim() });

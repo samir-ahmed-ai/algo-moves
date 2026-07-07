@@ -2,7 +2,8 @@
  * HTTP(S) base for backend REST and WebSocket upgrade URLs.
  *
  * Priority:
- *  1. `VITE_GAMES_SERVER_URL` / `VITE_API_SERVER_URL` build-time env
+ *  1. `VITE_API_SERVER_URL` build-time env (primary)
+ *  2. `VITE_GAMES_SERVER_URL` build-time env (legacy alias, one release)
  *  2. Same host as the frontend on port 8080 (LAN default)
  */
 export function apiServerHttpBase(): string {

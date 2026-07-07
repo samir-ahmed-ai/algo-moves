@@ -8,8 +8,8 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-/** Baseline at Wave 6 landing — ratchet down as cycles are broken. */
-const MAX_CYCLES = 27;
+/** Baseline at Wave 8 — ratchet down as cycles are broken. */
+const MAX_CYCLES = 17;
 
 let out = '';
 try {

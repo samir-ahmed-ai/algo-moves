@@ -26,7 +26,7 @@ go run ./cmd/gameserver -addr :8080
 make backend-dev
 ```
 
-Point the frontend at it with `VITE_GAMES_SERVER_URL` (see `frontend/.env.example`).
+Point the frontend at it with `VITE_API_SERVER_URL` (see `frontend/.env.example`; `VITE_GAMES_SERVER_URL` is still accepted as a legacy alias).
 On a LAN the default already works: the frontend connects to `ws://<your-host>:8080`,
 so open the site on your laptop's IP from both phones.
 
@@ -135,7 +135,7 @@ See [`../db/README.md`](../db/README.md) for Railway Postgres setup.
 
 When `DATABASE_URL` is set, the server exposes REST endpoints for guest auth,
 profiles, stats, leaderboards, rooms, and daily challenges. The frontend calls
-these on the same origin as `VITE_GAMES_SERVER_URL`. Set `RUN_MIGRATIONS=true`
+these on the same origin as `VITE_API_SERVER_URL`. Set `RUN_MIGRATIONS=true`
 on deploy to apply embedded SQL migrations automatically.
 
 ```bash
@@ -172,7 +172,7 @@ The repo includes [`railway.toml`](railway.toml) and [`Dockerfile`](Dockerfile).
 | `RUN_CONTENT_SEED` | `true` to reload the learning catalog (`/api/content/*`) on startup |
 | `PORT` | Set automatically by Railway |
 
-The **frontend** service uses root directory `frontend`, the same GitHub repo/branch, and `VITE_GAMES_SERVER_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}`.
+The **frontend** service uses root directory `frontend`, the same GitHub repo/branch, and `VITE_API_SERVER_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}`.
 
 Pushes to `main` deploy both services automatically via Railway's GitHub integration. For a manual fallback:
 

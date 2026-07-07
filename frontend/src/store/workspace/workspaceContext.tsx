@@ -10,6 +10,7 @@ import type {
   LayoutDir,
   WorkspaceDefaults,
 } from './workspace';
+import type { SettingsTab } from './workspaceContextTypes';
 import { DEFAULTS_KEY } from './workspaceConstants';
 import {
   WorkspaceAppearanceContext,
@@ -50,6 +51,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [canvasProject, setCanvasProject] = useState<CanvasProjectApi | null>(null);
   const [canvasHud, setCanvasHud] = useState<CanvasHudProps | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('appearance');
+  const openSettings = useCallback((tab: SettingsTab = 'appearance') => {
+    setSettingsTab(tab);
+    setSettingsOpen(true);
+  }, []);
   const [tracePreviewOpen, setTracePreviewOpen] = useState(false);
   const [mobileTransportOpen, setMobileTransportOpen] = useState(false);
 
@@ -66,6 +72,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setCanvasHud,
       settingsOpen,
       setSettingsOpen,
+      settingsTab,
+      setSettingsTab,
+      openSettings,
       tracePreviewOpen,
       setTracePreviewOpen,
       mobileTransportOpen,
@@ -80,6 +89,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       canvasProject,
       canvasHud,
       settingsOpen,
+      settingsTab,
+      openSettings,
       tracePreviewOpen,
       mobileTransportOpen,
       fitCanvasSignal,

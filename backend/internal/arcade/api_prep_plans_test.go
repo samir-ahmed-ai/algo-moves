@@ -33,10 +33,10 @@ func TestArcadePrepPlanFlow(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	token := newGuestToken(t, ts.URL)
+	client := newGuestClient(t, ts.URL)
 
 	// Create with an initial title only.
-	create := doJSON(t, ts.URL, http.MethodPost, "/api/prep-plans", token, `{"title":"Comcast interview"}`)
+	create := doJSON(t, ts.URL, http.MethodPost, "/api/prep-plans", client, `{"title":"Comcast interview"}`)
 	if create.status != http.StatusOK {
 		t.Fatalf("create status: %d", create.status)
 	}
@@ -52,7 +52,7 @@ func TestArcadePrepPlanFlow(t *testing.T) {
 	}
 
 	// Full-state save: ordered items with one completed.
-	upd := doJSON(t, ts.URL, http.MethodPut, "/api/prep-plans/"+id, token,
+	upd := doJSON(t, ts.URL, http.MethodPut, "/api/prep-plans/"+id, client,
 		`{"title":"Comcast prep","notes":"focus arrays","itemIds":["two-sum","lru-cache","merge-intervals"],"completedItems":["lru-cache"]}`)
 	if upd.status != http.StatusOK {
 		t.Fatalf("update status: %d", upd.status)
@@ -62,7 +62,7 @@ func TestArcadePrepPlanFlow(t *testing.T) {
 	}
 
 	// Get — verify order preserved and completed flag applied.
-	get := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans/"+id, token, "")
+	get := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans/"+id, client, "")
 	if get.status != http.StatusOK {
 		t.Fatalf("get status: %d", get.status)
 	}
@@ -83,7 +83,7 @@ func TestArcadePrepPlanFlow(t *testing.T) {
 	}
 
 	// List — summary carries counts, not the items array.
-	list := doJSONList(t, ts.URL, http.MethodGet, "/api/prep-plans", token, "")
+	list := doJSONList(t, ts.URL, http.MethodGet, "/api/prep-plans", client, "")
 	if list.status != http.StatusOK {
 		t.Fatalf("list status: %d", list.status)
 	}
@@ -107,7 +107,7 @@ func TestArcadePrepPlanFlow(t *testing.T) {
 	}
 
 	// Owner guard — a different guest cannot read, update, or delete.
-	other := newGuestToken(t, ts.URL)
+	other := newGuestClient(t, ts.URL)
 	if r := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans/"+id, other, ""); r.status != http.StatusNotFound {
 		t.Fatalf("get by other: %d (want 404)", r.status)
 	}
@@ -119,21 +119,21 @@ func TestArcadePrepPlanFlow(t *testing.T) {
 	}
 
 	// Unauthenticated — 401.
-	if r := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans", "", ""); r.status != http.StatusUnauthorized {
-		t.Fatalf("list without token: %d (want 401)", r.status)
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans", nil, ""); r.status != http.StatusUnauthorized {
+		t.Fatalf("list without session: %d (want 401)", r.status)
 	}
 
 	// Missing plan — 404.
-	if r := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans/00000000-0000-0000-0000-000000000000", token, ""); r.status != http.StatusNotFound {
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans/00000000-0000-0000-0000-000000000000", client, ""); r.status != http.StatusNotFound {
 		t.Fatalf("get missing: %d (want 404)", r.status)
 	}
 
 	// Delete, then confirm it is gone.
-	del := doJSON(t, ts.URL, http.MethodDelete, "/api/prep-plans/"+id, token, "")
+	del := doJSON(t, ts.URL, http.MethodDelete, "/api/prep-plans/"+id, client, "")
 	if del.status != http.StatusOK || del.body["ok"] != true {
 		t.Fatalf("delete: status %d body %v", del.status, del.body)
 	}
-	if r := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans/"+id, token, ""); r.status != http.StatusNotFound {
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/prep-plans/"+id, client, ""); r.status != http.StatusNotFound {
 		t.Fatalf("get after delete: %d (want 404)", r.status)
 	}
 }

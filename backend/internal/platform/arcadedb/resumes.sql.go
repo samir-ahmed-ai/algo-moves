@@ -192,6 +192,24 @@ func (q *Queries) DeleteResume(ctx context.Context, arg DeleteResumeParams) (int
 	return result.RowsAffected(), nil
 }
 
+const deleteResumeVariant = `-- name: DeleteResumeVariant :execrows
+delete from public.resume_variants
+where id = $1::uuid and owner_profile_id = $2::uuid
+`
+
+type DeleteResumeVariantParams struct {
+	ID             pgtype.UUID `json:"id"`
+	OwnerProfileID pgtype.UUID `json:"owner_profile_id"`
+}
+
+func (q *Queries) DeleteResumeVariant(ctx context.Context, arg DeleteResumeVariantParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteResumeVariant, arg.ID, arg.OwnerProfileID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getResumeByID = `-- name: GetResumeByID :one
 select
   id::text,

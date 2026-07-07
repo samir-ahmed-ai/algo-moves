@@ -1,26 +1,41 @@
-package arcade
+package resume
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"strings"
 
-	"algomoves/gameserver/internal/arcade/ai"
 	"algomoves/gameserver/internal/platform"
+	resumeai "algomoves/gameserver/internal/resume/ai"
 )
 
 const maxResumeTitle = 200
+const errOpenAINotConfigured = "Add your OpenAI API key in Settings → Profile"
 
-func (s *Service) aiClient() *ai.Client {
-	if s == nil {
-		return nil
+// Handler serves resume upload, CRUD, customization, and variant routes.
+type Handler struct {
+	store *platform.Store
+	auth  platform.Authenticator
+	ai    *resumeai.Client
+}
+
+func NewHandler(store *platform.Store, auth platform.Authenticator, ai *resumeai.Client) *Handler {
+	return &Handler{store: store, auth: auth, ai: ai}
+}
+
+func (h *Handler) resolveAIClient(ctx context.Context, profileID string) (*resumeai.Client, error) {
+	if key, ok, err := h.store.GetOpenAIKeyForProfile(ctx, profileID); err != nil {
+		return nil, err
+	} else if ok && key != "" {
+		return resumeai.NewClientWithKey(key), nil
 	}
-	if s.ai == nil {
-		s.ai = ai.NewClient()
+	if h.ai != nil && h.ai.Enabled() {
+		return h.ai, nil
 	}
-	return s.ai
+	return nil, nil
 }
 
 func requireSignedIn(p *platform.Profile) (int, string) {
@@ -42,9 +57,9 @@ func sanitizeResumeTitle(title string) string {
 }
 
 // HandleResumes lists the caller's resumes (GET) or uploads and parses one (POST).
-func (s *Service) HandleResumes(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleResumes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	p, code, msg := s.ProfileFromRequest(ctx, r)
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
 		platform.WriteErr(w, code, msg)
 		return
@@ -52,7 +67,7 @@ func (s *Service) HandleResumes(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		list, err := s.Store().ListResumes(ctx, p.ID)
+		list, err := h.store.ListResumes(ctx, p.ID)
 		if err != nil {
 			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
@@ -104,12 +119,16 @@ func (s *Service) HandleResumes(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		client := s.aiClient()
-		if client == nil || !client.Enabled() {
-			platform.WriteErr(w, http.StatusServiceUnavailable, "OPENAI_API_KEY not configured")
+		aiClient, err := h.resolveAIClient(ctx, p.ID)
+		if err != nil {
+			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		mapping, err := client.ParseResume(ctx, rawText)
+		if aiClient == nil || !aiClient.Enabled() {
+			platform.WriteErr(w, http.StatusServiceUnavailable, errOpenAINotConfigured)
+			return
+		}
+		mapping, err := aiClient.ParseResume(ctx, rawText)
 		if err != nil {
 			platform.WriteErr(w, http.StatusBadGateway, "resume parse failed")
 			return
@@ -120,7 +139,7 @@ func (s *Service) HandleResumes(w http.ResponseWriter, r *http.Request) {
 			isPublic = false
 		}
 
-		resume, err := s.Store().CreateResume(ctx, p.ID, title, filename, contentType, data, rawText, mapping, isPublic)
+		resume, err := h.store.CreateResume(ctx, p.ID, title, filename, contentType, data, rawText, mapping, isPublic)
 		if err != nil {
 			platform.WriteErr(w, http.StatusInternalServerError, "create failed")
 			return
@@ -133,7 +152,7 @@ func (s *Service) HandleResumes(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleResume routes /api/resumes/{id} and its sub-paths (directory, customize, variants).
-func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleResume(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	rest := strings.TrimPrefix(r.URL.Path, "/api/resumes/")
 	if rest == "" {
@@ -141,13 +160,12 @@ func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Directory listing: /api/resumes/directory
 	if rest == "directory" {
 		if r.Method != http.MethodGet {
 			platform.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 			return
 		}
-		p, code, msg := s.ProfileFromRequest(ctx, r)
+		p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 		if code != 0 {
 			platform.WriteErr(w, code, msg)
 			return
@@ -156,7 +174,7 @@ func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
 			platform.WriteErr(w, code, msg)
 			return
 		}
-		list, err := s.Store().ListResumeDirectory(ctx)
+		list, err := h.store.ListResumeDirectory(ctx)
 		if err != nil {
 			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
@@ -175,19 +193,23 @@ func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
 	if len(parts) == 2 {
 		switch parts[1] {
 		case "customize":
-			s.handleResumeCustomize(w, r, id)
+			h.handleCustomize(w, r, id)
 			return
 		case "variants":
-			s.handleResumeVariants(w, r, id)
+			h.handleVariants(w, r, id)
 			return
 		}
+	}
+	if len(parts) == 3 && parts[1] == "variants" {
+		h.handleVariantDelete(w, r, id, parts[2])
+		return
 	}
 	if len(parts) > 1 {
 		platform.WriteErr(w, http.StatusNotFound, "not found")
 		return
 	}
 
-	p, code, msg := s.ProfileFromRequest(ctx, r)
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
 		platform.WriteErr(w, code, msg)
 		return
@@ -195,7 +217,7 @@ func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		resume, err := s.Store().GetResume(ctx, id)
+		resume, err := h.store.GetResume(ctx, id)
 		if err != nil {
 			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
@@ -231,7 +253,7 @@ func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
 			t := sanitizeResumeTitle(*body.Title)
 			body.Title = &t
 		}
-		resume, ok, err := s.Store().UpdateResume(ctx, id, p.ID, body.Title, body.Mapping, body.IsPublic)
+		resume, ok, err := h.store.UpdateResume(ctx, id, p.ID, body.Title, body.Mapping, body.IsPublic)
 		if err != nil {
 			platform.WriteErr(w, http.StatusInternalServerError, "save failed")
 			return
@@ -247,7 +269,7 @@ func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
 			platform.WriteErr(w, code, msg)
 			return
 		}
-		ok, err := s.Store().DeleteResume(ctx, id, p.ID)
+		ok, err := h.store.DeleteResume(ctx, id, p.ID)
 		if err != nil {
 			platform.WriteErr(w, http.StatusInternalServerError, "delete failed")
 			return
@@ -263,13 +285,13 @@ func (s *Service) HandleResume(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Service) handleResumeVariants(w http.ResponseWriter, r *http.Request, resumeID string) {
+func (h *Handler) handleVariants(w http.ResponseWriter, r *http.Request, resumeID string) {
 	if r.Method != http.MethodGet {
 		platform.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 	ctx := r.Context()
-	p, code, msg := s.ProfileFromRequest(ctx, r)
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
 		platform.WriteErr(w, code, msg)
 		return
@@ -278,7 +300,7 @@ func (s *Service) handleResumeVariants(w http.ResponseWriter, r *http.Request, r
 		platform.WriteErr(w, code, msg)
 		return
 	}
-	list, err := s.Store().ListResumeVariants(ctx, resumeID, p.ID)
+	list, err := h.store.ListResumeVariants(ctx, resumeID, p.ID)
 	if err != nil {
 		platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 		return
@@ -286,13 +308,41 @@ func (s *Service) handleResumeVariants(w http.ResponseWriter, r *http.Request, r
 	platform.WriteJSON(w, http.StatusOK, list)
 }
 
-func (s *Service) handleResumeCustomize(w http.ResponseWriter, r *http.Request, resumeID string) {
+func (h *Handler) handleVariantDelete(w http.ResponseWriter, r *http.Request, resumeID, variantID string) {
+	if r.Method != http.MethodDelete {
+		platform.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	ctx := r.Context()
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
+	if code != 0 {
+		platform.WriteErr(w, code, msg)
+		return
+	}
+	if code, msg := requireSignedIn(p); code != 0 {
+		platform.WriteErr(w, code, msg)
+		return
+	}
+	_ = resumeID // variant ownership is enforced by owner_profile_id on delete
+	ok, err := h.store.DeleteResumeVariant(ctx, variantID, p.ID)
+	if err != nil {
+		platform.WriteErr(w, http.StatusInternalServerError, "delete failed")
+		return
+	}
+	if !ok {
+		platform.WriteErr(w, http.StatusNotFound, "not found")
+		return
+	}
+	platform.WriteJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
+func (h *Handler) handleCustomize(w http.ResponseWriter, r *http.Request, resumeID string) {
 	if r.Method != http.MethodPost {
 		platform.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 	ctx := r.Context()
-	p, code, msg := s.ProfileFromRequest(ctx, r)
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
 		platform.WriteErr(w, code, msg)
 		return
@@ -324,7 +374,7 @@ func (s *Service) handleResumeCustomize(w http.ResponseWriter, r *http.Request, 
 		mode = "rules"
 	}
 
-	resume, err := s.Store().GetResume(ctx, resumeID)
+	resume, err := h.store.GetResume(ctx, resumeID)
 	if err != nil {
 		platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 		return
@@ -341,12 +391,16 @@ func (s *Service) handleResumeCustomize(w http.ResponseWriter, r *http.Request, 
 	var customized json.RawMessage
 	switch mode {
 	case "ai":
-		client := s.aiClient()
-		if client == nil || !client.Enabled() {
-			platform.WriteErr(w, http.StatusServiceUnavailable, "OPENAI_API_KEY not configured")
+		aiClient, err := h.resolveAIClient(ctx, p.ID)
+		if err != nil {
+			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		customized, err = client.RewriteForFocus(ctx, resume.Mapping, focus, targetRole)
+		if aiClient == nil || !aiClient.Enabled() {
+			platform.WriteErr(w, http.StatusServiceUnavailable, errOpenAINotConfigured)
+			return
+		}
+		customized, err = aiClient.RewriteForFocus(ctx, resume.Mapping, focus, targetRole)
 		if err != nil {
 			platform.WriteErr(w, http.StatusBadGateway, "ai rewrite failed")
 			return
@@ -375,7 +429,7 @@ func (s *Service) handleResumeCustomize(w http.ResponseWriter, r *http.Request, 
 				label = focus + " — " + targetRole
 			}
 		}
-		variant, err := s.Store().CreateResumeVariant(ctx, resume.ID, p.ID, label, focus, targetRole, mode, customized)
+		variant, err := h.store.CreateResumeVariant(ctx, resume.ID, p.ID, label, focus, targetRole, mode, customized)
 		if err != nil {
 			platform.WriteErr(w, http.StatusInternalServerError, "save variant failed")
 			return

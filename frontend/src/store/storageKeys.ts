@@ -57,6 +57,9 @@ export const STORAGE_KEYS = {
   // shell / vim
   VIM_PROGRESS: k('vim-dojo'),
 
+  // shell / interview
+  INTERVIEW_HOST_ROOM: k('interview-host-room'),
+
   // shell / games
   GAMES_LOCALE: k('games', 'locale'),
   GAMES_NAME: k('games', 'name'),

@@ -149,3 +149,13 @@ returning
   level,
   created_at,
   updated_at;
+
+-- name: GetProfileOpenAIKeyEnc :one
+select openai_api_key_enc
+from public.profiles
+where id = sqlc.arg(id)::uuid;
+
+-- name: SetProfileOpenAIKey :exec
+update public.profiles
+set openai_api_key_enc = sqlc.narg(openai_api_key_enc)
+where id = sqlc.arg(id)::uuid;

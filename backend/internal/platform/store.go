@@ -57,7 +57,7 @@ type Canvas struct {
 
 type GuestSession struct {
 	ProfileID    string  `json:"profile_id"`
-	SessionToken string  `json:"session_token"`
+	SessionToken string  `json:"-"`
 	Profile      Profile `json:"profile"`
 }
 

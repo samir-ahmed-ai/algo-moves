@@ -14,7 +14,14 @@ describe('gameServer', () => {
     vi.restoreAllMocks();
   });
 
-  it('uses VITE_GAMES_SERVER_URL when set', () => {
+  it('prefers VITE_API_SERVER_URL over VITE_GAMES_SERVER_URL', () => {
+    vi.stubEnv('VITE_API_SERVER_URL', 'https://api.example.com/');
+    vi.stubEnv('VITE_GAMES_SERVER_URL', 'https://games.example.com/');
+    expect(gameServerHttpBase()).toBe('https://api.example.com');
+    expect(hasConfiguredServer()).toBe(true);
+  });
+
+  it('uses VITE_GAMES_SERVER_URL when API URL is unset', () => {
     vi.stubEnv('VITE_GAMES_SERVER_URL', 'https://games.example.com/');
     expect(gameServerHttpBase()).toBe('https://games.example.com');
     expect(hasConfiguredServer()).toBe(true);

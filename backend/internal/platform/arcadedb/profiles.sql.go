@@ -292,6 +292,19 @@ func (q *Queries) GetProfileByToken(ctx context.Context, sessionToken pgtype.Tex
 	return i, err
 }
 
+const getProfileOpenAIKeyEnc = `-- name: GetProfileOpenAIKeyEnc :one
+select openai_api_key_enc
+from public.profiles
+where id = $1::uuid
+`
+
+func (q *Queries) GetProfileOpenAIKeyEnc(ctx context.Context, id pgtype.UUID) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getProfileOpenAIKeyEnc, id)
+	var openai_api_key_enc []byte
+	err := row.Scan(&openai_api_key_enc)
+	return openai_api_key_enc, err
+}
+
 const listProfilesByIDs = `-- name: ListProfilesByIDs :many
 select
   id::text,
@@ -423,6 +436,22 @@ func (q *Queries) SetAdminByEmail(ctx context.Context, email string) (int64, err
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+const setProfileOpenAIKey = `-- name: SetProfileOpenAIKey :exec
+update public.profiles
+set openai_api_key_enc = $1
+where id = $2::uuid
+`
+
+type SetProfileOpenAIKeyParams struct {
+	OpenaiApiKeyEnc []byte      `json:"openai_api_key_enc"`
+	ID              pgtype.UUID `json:"id"`
+}
+
+func (q *Queries) SetProfileOpenAIKey(ctx context.Context, arg SetProfileOpenAIKeyParams) error {
+	_, err := q.db.Exec(ctx, setProfileOpenAIKey, arg.OpenaiApiKeyEnc, arg.ID)
+	return err
 }
 
 const updatePasswordHashByEmail = `-- name: UpdatePasswordHashByEmail :execrows

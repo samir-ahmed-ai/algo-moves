@@ -1,4 +1,4 @@
-package arcade
+package resume
 
 import (
 	"archive/zip"
@@ -99,6 +99,5 @@ func stripXMLText(s string) string {
 			b.WriteRune(r)
 		}
 	}
-	// Collapse whitespace
 	return strings.Join(strings.Fields(b.String()), " ")
 }

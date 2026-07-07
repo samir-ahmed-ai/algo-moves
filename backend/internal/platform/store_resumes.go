@@ -359,6 +359,25 @@ func (s *Store) ListResumeVariants(ctx context.Context, resumeID, ownerID string
 	return out, nil
 }
 
+func (s *Store) DeleteResumeVariant(ctx context.Context, variantID, ownerID string) (bool, error) {
+	vid, err := parseCanvasUUID(variantID)
+	if err != nil {
+		return false, err
+	}
+	uid, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return false, err
+	}
+	n, err := s.q.DeleteResumeVariant(ctx, arcadedb.DeleteResumeVariantParams{
+		ID:             vid,
+		OwnerProfileID: uid,
+	})
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
+}
+
 func optionalBool(v *bool) pgtype.Bool {
 	if v == nil {
 		return pgtype.Bool{Valid: false}

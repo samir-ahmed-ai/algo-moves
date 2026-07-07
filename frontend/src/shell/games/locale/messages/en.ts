@@ -32,7 +32,7 @@ export const en: ArcadeStrings = {
     roomCodePlaceholder: 'ROOM CODE',
     createRoomError: 'Could not create a room.',
     lanHint:
-      "LAN mode: run make backend-dev and open this site on your machine's IP. For internet play, set VITE_GAMES_SERVER_URL at build time.",
+      "LAN mode: run make backend-dev and open this site on your machine's IP. For internet play, set VITE_API_SERVER_URL at build time.",
     yourRoom: 'Your room',
     yourRoomHint: 'Friends can always join you with this code.',
     hostMyRoom: 'Host my room',

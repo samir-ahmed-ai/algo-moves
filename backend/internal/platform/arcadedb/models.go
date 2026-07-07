@@ -202,6 +202,8 @@ type Profile struct {
 	PasswordHash pgtype.Text `json:"password_hash"`
 	// Platform admin; set via PLATFORM_ADMIN_EMAIL on server start.
 	IsAdmin bool `json:"is_admin"`
+	// AES-GCM encrypted OpenAI API key; never exposed in public profile reads.
+	OpenaiApiKeyEnc []byte `json:"openai_api_key_enc"`
 }
 
 type ProfileAchievement struct {

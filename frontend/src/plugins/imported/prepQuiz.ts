@@ -1,6 +1,6 @@
 import type { QuizQuestion } from '../../core/types';
 import { COMPLEXITY_POOL } from '@/lib/quiz';
-import type { PrepProblem } from './prepFactory';
+import type { PrepProblem } from './prepTypes';
 import { PREP_DATA } from './prepManifest';
 
 function hashSeed(s: string): number {

@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -35,30 +37,11 @@ func TestArcadeGuestFlow(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	// Create guest
-	res, err := http.Post(ts.URL+"/api/auth/guest", "application/json", nil)
-	if err != nil {
-		t.Fatalf("guest post: %v", err)
-	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		t.Fatalf("guest status: %d", res.StatusCode)
-	}
-	var sess struct {
-		ProfileID    string `json:"profile_id"`
-		SessionToken string `json:"session_token"`
-	}
-	if err := json.NewDecoder(res.Body).Decode(&sess); err != nil {
-		t.Fatalf("decode guest: %v", err)
-	}
-	if sess.ProfileID == "" || sess.SessionToken == "" {
-		t.Fatal("missing guest session fields")
-	}
+	// Create guest session (SCS cookie issued on response).
+	client := newGuestClient(t, ts.URL)
 
-	// Fetch profile with token
-	req, _ := http.NewRequest(http.MethodGet, ts.URL+"/api/auth/me", nil)
-	req.Header.Set("Authorization", "Bearer "+sess.SessionToken)
-	res2, err := http.DefaultClient.Do(req)
+	// Fetch profile with session cookie.
+	res2, err := client.Get(ts.URL + "/api/auth/me")
 	if err != nil {
 		t.Fatalf("me: %v", err)
 	}
@@ -102,10 +85,10 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	token := newGuestToken(t, ts.URL)
+	client := newGuestClient(t, ts.URL)
 
 	// Create
-	create := doJSON(t, ts.URL, http.MethodPost, "/api/canvases", token,
+	create := doJSON(t, ts.URL, http.MethodPost, "/api/canvases", client,
 		`{"title":"Sketch","doc":{"nodes":[1,2,3]},"roomCode":"ABCD"}`)
 	if create.status != http.StatusOK {
 		t.Fatalf("create status: %d", create.status)
@@ -119,7 +102,7 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	}
 
 	// Get
-	get := doJSON(t, ts.URL, http.MethodGet, "/api/canvases/"+id, token, "")
+	get := doJSON(t, ts.URL, http.MethodGet, "/api/canvases/"+id, client, "")
 	if get.status != http.StatusOK {
 		t.Fatalf("get status: %d", get.status)
 	}
@@ -134,7 +117,7 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	}
 
 	// List
-	list := doJSONList(t, ts.URL, http.MethodGet, "/api/canvases", token, "")
+	list := doJSONList(t, ts.URL, http.MethodGet, "/api/canvases", client, "")
 	if list.status != http.StatusOK {
 		t.Fatalf("list status: %d", list.status)
 	}
@@ -152,7 +135,7 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	}
 
 	// Update
-	upd := doJSON(t, ts.URL, http.MethodPut, "/api/canvases/"+id, token,
+	upd := doJSON(t, ts.URL, http.MethodPut, "/api/canvases/"+id, client,
 		`{"title":"Renamed","doc":{"nodes":[]}}`)
 	if upd.status != http.StatusOK {
 		t.Fatalf("update status: %d", upd.status)
@@ -162,7 +145,7 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	}
 
 	// Owner guard — a different guest cannot update or delete.
-	other := newGuestToken(t, ts.URL)
+	other := newGuestClient(t, ts.URL)
 	updOther := doJSON(t, ts.URL, http.MethodPut, "/api/canvases/"+id, other,
 		`{"doc":{}}`)
 	if updOther.status != http.StatusNotFound {
@@ -174,13 +157,13 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	}
 
 	// Missing canvas — 404.
-	missing := doJSON(t, ts.URL, http.MethodGet, "/api/canvases/00000000-0000-0000-0000-000000000000", token, "")
+	missing := doJSON(t, ts.URL, http.MethodGet, "/api/canvases/00000000-0000-0000-0000-000000000000", client, "")
 	if missing.status != http.StatusNotFound {
 		t.Fatalf("get missing status: %d (want 404)", missing.status)
 	}
 
 	// Delete
-	del := doJSON(t, ts.URL, http.MethodDelete, "/api/canvases/"+id, token, "")
+	del := doJSON(t, ts.URL, http.MethodDelete, "/api/canvases/"+id, client, "")
 	if del.status != http.StatusOK {
 		t.Fatalf("delete status: %d", del.status)
 	}
@@ -189,7 +172,7 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	}
 
 	// Gone after delete.
-	gone := doJSON(t, ts.URL, http.MethodGet, "/api/canvases/"+id, token, "")
+	gone := doJSON(t, ts.URL, http.MethodGet, "/api/canvases/"+id, client, "")
 	if gone.status != http.StatusNotFound {
 		t.Fatalf("get after delete status: %d (want 404)", gone.status)
 	}
@@ -219,10 +202,10 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	token := newGuestToken(t, ts.URL)
+	client := newGuestClient(t, ts.URL)
 
 	// Create
-	create := doJSON(t, ts.URL, http.MethodPost, "/api/interviews", token, `{"title":"Onsite"}`)
+	create := doJSON(t, ts.URL, http.MethodPost, "/api/interviews", client, `{"title":"Onsite"}`)
 	if create.status != http.StatusOK {
 		t.Fatalf("create status: %d", create.status)
 	}
@@ -242,7 +225,7 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	}
 
 	// Get (owner) — full fields present.
-	get := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/"+id, token, "")
+	get := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/"+id, client, "")
 	if get.status != http.StatusOK {
 		t.Fatalf("get status: %d", get.status)
 	}
@@ -254,7 +237,7 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	}
 
 	// List — summary omits heavy fields.
-	list := doJSONList(t, ts.URL, http.MethodGet, "/api/interviews", token, "")
+	list := doJSONList(t, ts.URL, http.MethodGet, "/api/interviews", client, "")
 	if list.status != http.StatusOK {
 		t.Fatalf("list status: %d", list.status)
 	}
@@ -275,7 +258,7 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	}
 
 	// Patch — partial update.
-	upd := doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, token,
+	upd := doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, client,
 		`{"title":"Renamed","canvas":{"els":[]},"notes":"hi","canvasLocked":true,"roomCode":"WXYZ"}`)
 	if upd.status != http.StatusOK {
 		t.Fatalf("patch status: %d", upd.status)
@@ -285,7 +268,7 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	}
 
 	// Public token GET — sanitized, no private fields.
-	pub := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", "")
+	pub := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, nil, "")
 	if pub.status != http.StatusOK {
 		t.Fatalf("public status: %d", pub.status)
 	}
@@ -302,45 +285,45 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	}
 
 	// Disable guest link — public GET 404s.
-	if r := doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, token, `{"guestLinkEnabled":false}`); r.status != http.StatusOK {
+	if r := doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, client, `{"guestLinkEnabled":false}`); r.status != http.StatusOK {
 		t.Fatalf("disable link status: %d", r.status)
 	}
-	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", ""); r.status != http.StatusNotFound {
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, nil, ""); r.status != http.StatusNotFound {
 		t.Fatalf("public after disable: %d (want 404)", r.status)
 	}
 	// Re-enable for the end/reopen checks.
-	doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, token, `{"guestLinkEnabled":true}`)
+	doJSON(t, ts.URL, http.MethodPatch, "/api/interviews/"+id, client, `{"guestLinkEnabled":true}`)
 
 	// End — status ended, public GET 404 (not served when ended).
-	end := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/end", token, "")
+	end := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/end", client, "")
 	if end.status != http.StatusOK || end.body["status"] != "ended" {
 		t.Fatalf("end: status %d body %v", end.status, end.body)
 	}
 	if end.body["endedAt"] == nil {
 		t.Fatal("end: endedAt should be set")
 	}
-	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", ""); r.status != http.StatusNotFound {
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, nil, ""); r.status != http.StatusNotFound {
 		t.Fatalf("public after end: %d (want 404)", r.status)
 	}
 
 	// Reopen.
-	reopen := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/reopen", token, "")
+	reopen := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/reopen", client, "")
 	if reopen.status != http.StatusOK || reopen.body["status"] != "active" {
 		t.Fatalf("reopen: status %d body %v", reopen.status, reopen.body)
 	}
 
 	// Rotate token — old token no longer resolves.
-	rot := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/rotate-token", token, "")
+	rot := doJSON(t, ts.URL, http.MethodPost, "/api/interviews/"+id+"/rotate-token", client, "")
 	newToken, _ := rot.body["guestToken"].(string)
 	if rot.status != http.StatusOK || newToken == "" || newToken == guestToken {
 		t.Fatalf("rotate: status %d token %q", rot.status, newToken)
 	}
-	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, "", ""); r.status != http.StatusNotFound {
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/token/"+guestToken, nil, ""); r.status != http.StatusNotFound {
 		t.Fatalf("public with old token: %d (want 404)", r.status)
 	}
 
 	// Owner guard — another guest cannot see or mutate.
-	other := newGuestToken(t, ts.URL)
+	other := newGuestClient(t, ts.URL)
 	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/"+id, other, ""); r.status != http.StatusNotFound {
 		t.Fatalf("get by other: %d (want 404)", r.status)
 	}
@@ -352,14 +335,23 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	}
 
 	// Missing id — 404.
-	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/00000000-0000-0000-0000-000000000000", token, ""); r.status != http.StatusNotFound {
+	if r := doJSON(t, ts.URL, http.MethodGet, "/api/interviews/00000000-0000-0000-0000-000000000000", client, ""); r.status != http.StatusNotFound {
 		t.Fatalf("get missing: %d (want 404)", r.status)
 	}
 }
 
-func newGuestToken(t *testing.T, base string) string {
+func newGuestClient(t *testing.T, base string) *http.Client {
 	t.Helper()
-	res, err := http.Post(base+"/api/auth/guest", "application/json", nil)
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		t.Fatalf("cookie jar: %v", err)
+	}
+	u, err := url.Parse(base)
+	if err != nil {
+		t.Fatalf("parse base: %v", err)
+	}
+	client := &http.Client{Jar: jar}
+	res, err := client.Post(base+"/api/auth/guest", "application/json", nil)
 	if err != nil {
 		t.Fatalf("guest post: %v", err)
 	}
@@ -368,15 +360,18 @@ func newGuestToken(t *testing.T, base string) string {
 		t.Fatalf("guest status: %d", res.StatusCode)
 	}
 	var sess struct {
-		SessionToken string `json:"session_token"`
+		ProfileID string `json:"profile_id"`
 	}
 	if err := json.NewDecoder(res.Body).Decode(&sess); err != nil {
 		t.Fatalf("decode guest: %v", err)
 	}
-	if sess.SessionToken == "" {
-		t.Fatal("missing session token")
+	if sess.ProfileID == "" {
+		t.Fatal("missing profile_id")
 	}
-	return sess.SessionToken
+	if len(jar.Cookies(u)) == 0 {
+		t.Fatal("missing session cookie")
+	}
+	return client
 }
 
 type jsonResult struct {
@@ -389,7 +384,7 @@ type jsonListResult struct {
 	body   []map[string]any
 }
 
-func doJSON(t *testing.T, base, method, path, token, payload string) jsonResult {
+func doJSON(t *testing.T, base, method, path string, client *http.Client, payload string) jsonResult {
 	t.Helper()
 	var reader io.Reader
 	if payload != "" {
@@ -402,10 +397,11 @@ func doJSON(t *testing.T, base, method, path, token, payload string) jsonResult 
 	if payload != "" {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
+	httpClient := client
+	if httpClient == nil {
+		httpClient = http.DefaultClient
 	}
-	res, err := http.DefaultClient.Do(req)
+	res, err := httpClient.Do(req)
 	if err != nil {
 		t.Fatalf("%s %s: %v", method, path, err)
 	}
@@ -415,16 +411,17 @@ func doJSON(t *testing.T, base, method, path, token, payload string) jsonResult 
 	return out
 }
 
-func doJSONList(t *testing.T, base, method, path, token, payload string) jsonListResult {
+func doJSONList(t *testing.T, base, method, path string, client *http.Client, payload string) jsonListResult {
 	t.Helper()
 	req, err := http.NewRequest(method, base+path, nil)
 	if err != nil {
 		t.Fatalf("%s %s: %v", method, path, err)
 	}
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
+	httpClient := client
+	if httpClient == nil {
+		httpClient = http.DefaultClient
 	}
-	res, err := http.DefaultClient.Do(req)
+	res, err := httpClient.Do(req)
 	if err != nil {
 		t.Fatalf("%s %s: %v", method, path, err)
 	}

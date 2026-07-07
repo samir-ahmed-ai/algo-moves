@@ -2,11 +2,9 @@ import type { ComponentType } from 'react';
 import { RangeEffectControls } from './RangeEffectControls';
 import { MaskEffectControls } from './MaskEffectControls';
 import { GenericEffectControls } from './GenericEffectControls';
+import type { EffectControlsProps } from './effectControlsTypes';
 
-export interface EffectControlsProps {
-  data: Record<string, unknown>;
-  onChange: (patch: Record<string, unknown>) => void;
-}
+export type { EffectControlsProps } from './effectControlsTypes';
 
 /**
  * Registry mapping an effect id to its control panel. Effects not listed here fall

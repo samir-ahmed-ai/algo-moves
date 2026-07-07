@@ -9,7 +9,6 @@ import {
   Copy,
   Check,
   Eye,
-  Send,
   Trash2,
   LogOut,
   ClipboardList,
@@ -21,6 +20,7 @@ import {
 import { useReactFlow } from '@xyflow/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils/cn';
+import { ChatComposer, ChatMessageLog, ReactionBar } from '@/components/chat';
 import { catalog } from '@/content';
 import { useWorkspace } from '@/store/workspace';
 import { buildInviteUrl, buildInterviewInviteUrl } from '@/store/navigation/shareState';
@@ -31,8 +31,6 @@ import { useCanvasCollab } from './CanvasCollabProvider';
 import { buildInterviewBoardNodes, mergeInterviewNodes } from '@/shell/interview/interviewLayout';
 import type { PanelFlowNode } from '@/shell/panels/panelTypes';
 import type { CanvasWidget } from '@/shell/canvas/widgets/types';
-
-const QUICK_REACTIONS = ['👍', '🔥', '😂', '🎉', '👏', '🧠'];
 
 /* ---------------------------------------------------------------- session */
 
@@ -474,69 +472,25 @@ function ChatBody() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-0.5">
-        {QUICK_REACTIONS.map((emoji) => (
-          <button
-            key={emoji}
-            type="button"
-            onClick={() => sendReaction(emoji)}
-            className="grid h-6 w-6 place-items-center rounded-full text-sm transition-transform hover:scale-125 active:scale-95"
-            aria-label={`React ${emoji}`}
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
+      <ReactionBar onPick={sendReaction} />
 
-      <div ref={logRef} className="max-h-48 min-h-[3rem] overflow-y-auto" aria-live="polite">
-        {messages.length === 0 ? (
-          <p className={cn('py-2 text-center text-ink3', chromeText.xs)}>No messages yet.</p>
-        ) : (
-          <ul className="flex flex-col gap-1">
-            {messages.map((m) => (
-              <li key={m.id} className={cn('leading-snug', chromeText.sm)}>
-                <span
-                  className={cn(
-                    'font-semibold',
-                    m.fromId === self?.id ? 'text-accent' : 'text-ink2',
-                  )}
-                >
-                  {m.name}:
-                </span>{' '}
-                <span className="break-words text-ink">{m.text}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <ChatMessageLog
+        messages={messages}
+        selfId={self?.id}
+        logRef={logRef}
+        className="max-h-48 min-h-[3rem] overflow-y-auto"
+        textClassName={chromeText.sm}
+        nameClassName={chromeText.sm}
+      />
 
-      <div className="flex items-center gap-1.5">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value.slice(0, 240))}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') submit();
-          }}
-          placeholder="Message…"
-          className={cn(
-            'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent',
-            RADIUS_CTRL,
-            chromeText.sm,
-          )}
-        />
-        <button
-          type="button"
-          onClick={submit}
-          disabled={!draft.trim()}
-          className={cn(
-            'grid h-8 w-8 shrink-0 place-items-center bg-accent text-white disabled:opacity-40',
-            RADIUS_CTRL,
-          )}
-          aria-label="Send"
-        >
-          <Send className="h-3 w-3" />
-        </button>
-      </div>
+      <ChatComposer
+        value={draft}
+        onChange={setDraft}
+        onSubmit={submit}
+        placeholder="Message…"
+        inputClassName={cn(RADIUS_CTRL, chromeText.sm)}
+        buttonClassName={RADIUS_CTRL}
+      />
     </div>
   );
 }

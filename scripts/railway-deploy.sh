@@ -38,7 +38,7 @@ if [[ "$DEPLOY_ONLY" != true ]]; then
 
   echo "==> Setting frontend variables..."
   railway variables set \
-    'VITE_GAMES_SERVER_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}' \
+    'VITE_API_SERVER_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}' \
     'VITE_HOCUSPOCUS_URL=wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}' \
     --service frontend
 
