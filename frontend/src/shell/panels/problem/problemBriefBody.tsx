@@ -1,5 +1,7 @@
 import { cn } from '@/lib/utils/cn';
 import type { ProblemBriefCase } from '@/content';
+import { looksLikeJson } from '@/lib/utils/formatJsonDisplay';
+import { JsonBlock } from '@/components/code/JsonBlock';
 import { nodeText } from '@/shell/canvas';
 
 function InfoParagraphs({ lines }: { lines: string[] }) {
@@ -27,12 +29,18 @@ export function InfoCases({ cases }: { cases: ProblemBriefCase[] }) {
             <p className={cn('font-medium text-ink', nodeText.xs)}>{c.label}</p>
           </div>
           <div className="px-2 py-1.5">
-            <p className={cn('font-mono text-ink2', nodeText.xs)}>{c.input}</p>
-            {c.output && (
-              <p className={cn('mt-0.5 text-ink3', nodeText.xs)}>
-                → <span className="font-mono text-ink">{c.output}</span>
-              </p>
-            )}
+            <JsonBlock value={c.input} size="xs" variant="nested" maxHeight="200px" />
+            {c.output &&
+              (looksLikeJson(c.output) ? (
+                <div className="mt-1.5">
+                  <p className={cn('mb-0.5 text-ink3', nodeText.xs)}>Output</p>
+                  <JsonBlock value={c.output} size="xs" variant="nested" maxHeight="120px" />
+                </div>
+              ) : (
+                <p className={cn('mt-0.5 text-ink3', nodeText.xs)}>
+                  → <span className="font-mono text-ink">{c.output}</span>
+                </p>
+              ))}
             {c.note && <p className={cn('mt-1 leading-relaxed text-ink3', nodeText.xs)}>{c.note}</p>}
           </div>
         </div>

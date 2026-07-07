@@ -49,6 +49,13 @@
   --ink3: var(--text-3);
   --surface2: var(--surface-2);
   --panel: var(--surface);
+  --panel2: var(--surface-2);
+
+  --json-key: #881798;
+  --json-str: #a31515;
+  --json-num: #098658;
+  --json-lit: #0000ff;
+  --json-punct: var(--text-3);
 }
 
 :root.dark {
@@ -85,6 +92,12 @@
     --node-shadow: 0 1px 2px hsl(0 0% 0% / 0.12), 0 8px 24px hsl(0 0% 0% / 0.22);
     --node-shadow-hover: 0 2px 4px hsl(0 0% 0% / 0.16), 0 12px 32px hsl(0 0% 0% / 0.28);
     --node-shadow-selected: 0 4px 8px hsl(0 0% 0% / 0.2), 0 16px 40px hsl(0 0% 0% / 0.34);
+
+    --json-key: #9cdcfe;
+    --json-str: #ce9178;
+    --json-num: #b5cea8;
+    --json-lit: #569cd6;
+    --json-punct: var(--text-3);
 }
 
 * {
@@ -2859,4 +2872,21 @@ circle {
     radial-gradient(ellipse 80% 100% at 50% -20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent),
     radial-gradient(ellipse 60% 80% at 50% 0%, color-mix(in srgb, var(--accent-bg) 55%, transparent), transparent);
   mask-image: linear-gradient(to bottom, black 40%, transparent);
+}
+
+/* Pretty-printed JSON blocks (problem panel, practice, diff, inspectors) */
+.json-block code .hl-json-key {
+  color: var(--json-key);
+}
+.json-block code .hl-json-str {
+  color: var(--json-str);
+}
+.json-block code .hl-json-num {
+  color: var(--json-num);
+}
+.json-block code .hl-json-lit {
+  color: var(--json-lit);
+}
+.json-block code .hl-json-punct {
+  color: var(--json-punct);
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { funcLineTone, highlightSnippet, pieceHasEntrySignature } from './highlightSnippet';
+import { funcLineTone, highlightSnippet, highlightSnippetShiki, pieceHasEntrySignature } from './highlightSnippet';
 
 describe('funcLineTone', () => {
   it('marks top-level Go func as entry', () => {
@@ -23,16 +23,7 @@ describe('pieceHasEntrySignature', () => {
   });
 });
 
-describe('highlightSnippet', () => {
-  it('highlights Go keywords and comments', () => {
-    const html = renderToStaticMarkup(<>{highlightSnippet('return true // note', 'go')}</>);
-    expect(html).toContain('hl-keyword');
-    expect(html).toContain('return');
-    expect(html).toContain('hl-comment');
-    expect(html).toContain('note');
-    expect(html).toContain('piece-code-line');
-  });
-
+describe('highlightSnippet (plain fallback)', () => {
   it('styles main func signature with named highlight', () => {
     const html = renderToStaticMarkup(<>{highlightSnippet('func solveNQueens(n int) {', 'go')}</>);
     expect(html).toContain('hl-line-entry');
@@ -44,7 +35,6 @@ describe('highlightSnippet', () => {
   it('styles nested func signature differently', () => {
     const html = renderToStaticMarkup(<>{highlightSnippet('safe := func(row, col int) bool {', 'go')}</>);
     expect(html).toContain('hl-line-func');
-    expect(html).toContain('hl-sig-kw');
     expect(html).not.toContain('hl-sig-name');
     expect(html).not.toContain('hl-line-entry');
   });
@@ -60,5 +50,24 @@ describe('highlightSnippet', () => {
     const html = renderToStaticMarkup(<>{highlightSnippet('let x = 1', 'rust')}</>);
     expect(html.replace(/<[^>]+>/g, '')).toContain('let x = 1');
     expect(html).not.toContain('hl-keyword');
+  });
+});
+
+describe('highlightSnippetShiki', () => {
+  it('highlights Go keywords and comments', async () => {
+    const html = renderToStaticMarkup(<>{await highlightSnippetShiki('return true // note', 'go')}</>);
+    expect(html).toContain('hl-keyword');
+    expect(html).toContain('return');
+    expect(html).toContain('hl-comment');
+    expect(html).toContain('note');
+    expect(html).toContain('piece-code-line');
+  });
+
+  it('styles main func signature with named highlight', async () => {
+    const html = renderToStaticMarkup(<>{await highlightSnippetShiki('func solveNQueens(n int) {', 'go')}</>);
+    expect(html).toContain('hl-line-entry');
+    expect(html).toContain('hl-sig-name');
+    expect(html).toContain('hl-sig-kw');
+    expect(html).toContain('solveNQueens');
   });
 });

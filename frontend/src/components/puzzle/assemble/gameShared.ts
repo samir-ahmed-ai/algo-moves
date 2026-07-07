@@ -1,3 +1,4 @@
+import { diffArrays } from 'diff';
 import type { AssembleGameStatsStore } from './types';
 
 /* ------------------------------- seeded PRNG ------------------------------ */
@@ -179,7 +180,7 @@ export interface DiffToken {
   changed: boolean;
 }
 
-/** Whitespace-token LCS diff; whitespace runs are emitted unchanged. */
+/** Whitespace-token diff via jsdiff; whitespace runs are emitted unchanged. */
 export function diffTokens(a: string, b: string): { a: DiffToken[]; b: DiffToken[] } {
   const split = (s: string) => s.split(/(\s+)/).filter((t) => t.length > 0);
   const at = split(a);
@@ -187,30 +188,36 @@ export function diffTokens(a: string, b: string): { a: DiffToken[]; b: DiffToken
   const isWs = (t: string) => /^\s+$/.test(t);
   const an = at.filter((t) => !isWs(t));
   const bn = bt.filter((t) => !isWs(t));
-  const dp: number[][] = Array.from({ length: an.length + 1 }, () => new Array(bn.length + 1).fill(0));
-  for (let i = an.length - 1; i >= 0; i--) {
-    for (let j = bn.length - 1; j >= 0; j--) {
-      dp[i][j] = an[i] === bn[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const changes = diffArrays(an, bn);
+
+  const changedA = new Set<number>();
+  const changedB = new Set<number>();
+  let ai = 0;
+  let bi = 0;
+  for (const change of changes) {
+    const count = change.value.length;
+    if (change.removed && !change.added) {
+      for (let i = 0; i < count; i++) changedA.add(ai++);
+    } else if (change.added && !change.removed) {
+      for (let i = 0; i < count; i++) changedB.add(bi++);
+    } else if (change.removed && change.added) {
+      for (let i = 0; i < count; i++) {
+        changedA.add(ai++);
+        changedB.add(bi++);
+      }
+    } else {
+      ai += count;
+      bi += count;
     }
   }
-  const keepA = new Set<number>();
-  const keepB = new Set<number>();
-  let i = 0;
-  let j = 0;
-  while (i < an.length && j < bn.length) {
-    if (an[i] === bn[j]) {
-      keepA.add(i);
-      keepB.add(j);
-      i++;
-      j++;
-    } else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
-    else j++;
-  }
-  const mark = (tokens: string[], keep: Set<number>): DiffToken[] => {
+
+  const mark = (tokens: string[], changed: Set<number>): DiffToken[] => {
     let k = 0;
-    return tokens.map((t) => (isWs(t) ? { text: t, changed: false } : { text: t, changed: !keep.has(k++) }));
+    return tokens.map((t) =>
+      isWs(t) ? { text: t, changed: false } : { text: t, changed: changed.has(k++) },
+    );
   };
-  return { a: mark(at, keepA), b: mark(bt, keepB) };
+  return { a: mark(at, changedA), b: mark(bt, changedB) };
 }
 
 /* ----------------------------- velocity tracker --------------------------- */

@@ -5,70 +5,65 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
-// ipRateLimiter tracks request timestamps per client IP within a sliding window.
+type ipLimiterEntry struct {
+	lim      *rate.Limiter
+	lastSeen time.Time
+}
+
+// ipRateLimiter tracks per-IP token buckets (golang.org/x/time/rate).
 type ipRateLimiter struct {
 	mu        sync.Mutex
-	hits      map[string][]time.Time
-	max       int
+	entries   map[string]*ipLimiterEntry
+	limit     rate.Limit
+	burst     int
 	window    time.Duration
 	lastSweep time.Time
 }
 
 func newIPRateLimiter(max int, window time.Duration) *ipRateLimiter {
+	if max < 1 {
+		max = 1
+	}
 	return &ipRateLimiter{
-		hits:   make(map[string][]time.Time),
-		max:    max,
-		window: window,
+		entries: make(map[string]*ipLimiterEntry),
+		limit:   rate.Every(window / time.Duration(max)),
+		burst:   max,
+		window:  window,
 	}
 }
 
 func (l *ipRateLimiter) allow(ip string) bool {
 	now := time.Now()
-	cutoff := now.Add(-l.window)
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	// Opportunistically sweep out IPs with no requests inside the current
-	// window, at most once per window. Without this, hits grows by one entry
-	// per distinct source IP ever seen and is never pruned, even long after
-	// that IP stops sending requests entirely.
 	if now.Sub(l.lastSweep) >= l.window {
-		l.sweepLocked(cutoff)
+		l.sweepLocked(now)
 		l.lastSweep = now
 	}
 
-	prev := l.hits[ip]
-	kept := prev[:0]
-	for _, t := range prev {
-		if t.After(cutoff) {
-			kept = append(kept, t)
+	entry, ok := l.entries[ip]
+	if !ok {
+		entry = &ipLimiterEntry{
+			lim:      rate.NewLimiter(l.limit, l.burst),
+			lastSeen: now,
 		}
+		l.entries[ip] = entry
 	}
-	if len(kept) >= l.max {
-		l.hits[ip] = kept
-		return false
-	}
-	l.hits[ip] = append(kept, now)
-	return true
+	entry.lastSeen = now
+	return entry.lim.Allow()
 }
 
-// sweepLocked removes every IP whose recorded hits are all older than cutoff.
-// Callers must hold l.mu.
-func (l *ipRateLimiter) sweepLocked(cutoff time.Time) {
-	for ip, times := range l.hits {
-		fresh := times[:0]
-		for _, t := range times {
-			if t.After(cutoff) {
-				fresh = append(fresh, t)
-			}
-		}
-		if len(fresh) == 0 {
-			delete(l.hits, ip)
-		} else {
-			l.hits[ip] = fresh
+// sweepLocked removes IPs idle longer than the limiter window.
+func (l *ipRateLimiter) sweepLocked(now time.Time) {
+	for ip, entry := range l.entries {
+		if now.Sub(entry.lastSeen) >= l.window {
+			delete(l.entries, ip)
 		}
 	}
 }

@@ -3,6 +3,7 @@ import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
+import { JsonBlock } from '@/components/code/JsonBlock';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 // Input: an N-ary tree as a flat node list. node 0 is the root; each node lists
@@ -175,7 +176,10 @@ function Inspector({ frame }: InspectorProps<LevelState>) {
       <InspectorRow k="next frontier" v={`[${s.next.map((i) => s.nodes[i].val).join(', ')}]`} />
       <InspectorRow k="current node" v={s.cur !== null ? s.nodes[s.cur].val : '—'} />
       <InspectorRow k="rows done" v={s.res.length} />
-      <InspectorRow k="result" v={s.res.length === 0 ? '[]' : JSON.stringify(s.res)} />
+      <div className="flex flex-col gap-1 py-[3px]">
+        <span className={cn(vizText.sm, 'text-ink3')}>result</span>
+        <JsonBlock value={s.res} size="xs" variant="nested" maxHeight="120px" />
+      </div>
     </VarGrid>
   );
 }

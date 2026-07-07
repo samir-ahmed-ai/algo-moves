@@ -1,3 +1,4 @@
+import { createEmptyCard, fsrs, Rating, type Card } from 'ts-fsrs';
 import { createSyncStore } from '@/store/createSyncStore';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { readStorageJson } from './storage';
@@ -9,6 +10,8 @@ export interface SrsCard {
   /** Current interval in days. */
   intervalDays: number;
   reps: number;
+  /** FSRS v6 card state for scheduling continuity. */
+  fsrs?: Card;
 }
 
 export interface SrsData {
@@ -17,15 +20,39 @@ export interface SrsData {
 
 const KEY = STORAGE_KEYS.SRS_DECK;
 const DAY_MS = 86_400_000;
-const INTERVALS = [1, 3, 7, 14, 30];
+const scheduler = fsrs();
 
 function isSrsData(value: unknown): value is SrsData {
   const c = value as Partial<SrsData>;
   return !!c && typeof c === 'object' && !!c.cards && typeof c.cards === 'object';
 }
 
+/** Rehydrate Date fields after JSON parse and migrate legacy SM-2-lite cards. */
+function hydrateCard(card: SrsCard): SrsCard {
+  if (card.fsrs) {
+    return {
+      ...card,
+      fsrs: {
+        ...card.fsrs,
+        due: new Date(card.fsrs.due),
+        last_review: card.fsrs.last_review ? new Date(card.fsrs.last_review) : undefined,
+      },
+    };
+  }
+  const fsrsCard = createEmptyCard(new Date(card.due - card.intervalDays * DAY_MS));
+  fsrsCard.reps = card.reps;
+  fsrsCard.scheduled_days = card.intervalDays;
+  fsrsCard.due = new Date(card.due);
+  return { ...card, fsrs: fsrsCard };
+}
+
 function load(): SrsData {
-  return readStorageJson(KEY, { cards: {} }, isSrsData);
+  const raw = readStorageJson(KEY, { cards: {} }, isSrsData);
+  const cards: Record<string, SrsCard> = {};
+  for (const [id, card] of Object.entries(raw.cards)) {
+    cards[id] = hydrateCard(card);
+  }
+  return { cards };
 }
 
 const store = createSyncStore<SrsData>(KEY, load);
@@ -34,19 +61,26 @@ export function useSrsData(): SrsData {
   return store.use();
 }
 
-/** SM-2-lite: correct advances interval ladder; wrong resets to due now. */
+function toSrsCard(problemId: string, card: Card): SrsCard {
+  return {
+    problemId,
+    due: card.due.getTime(),
+    intervalDays: card.scheduled_days,
+    reps: card.reps,
+    fsrs: card,
+  };
+}
+
+/** FSRS: correct → Good; wrong → Again (resets short-term learning). */
 export function scheduleReview(problemId: string, correct: boolean): SrsCard {
   let next!: SrsCard;
   store.update((data) => {
     const prev = data.cards[problemId];
-    const now = Date.now();
-    if (!correct) {
-      next = { problemId, due: now, intervalDays: 1, reps: 0 };
-    } else {
-      const reps = (prev?.reps ?? 0) + 1;
-      const intervalDays = INTERVALS[Math.min(reps - 1, INTERVALS.length - 1)] ?? 30;
-      next = { problemId, due: now + intervalDays * DAY_MS, intervalDays, reps };
-    }
+    const fsrsCard = prev?.fsrs ?? createEmptyCard();
+    const grade = correct ? Rating.Good : Rating.Again;
+    const preview = scheduler.repeat(fsrsCard, new Date());
+    const item = preview[grade];
+    next = toSrsCard(problemId, item.card);
     return { cards: { ...data.cards, [problemId]: next } };
   });
   return next;

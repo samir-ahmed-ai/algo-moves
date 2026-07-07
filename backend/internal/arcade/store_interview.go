@@ -3,16 +3,15 @@ package arcade
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"algomoves/gameserver/internal/arcade/arcadedb"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// InterviewSession is a durable interview whiteboard session. canvas/questions/
-// rubric are opaque JSON the backend never inspects.
+// InterviewSession is a durable interview whiteboard session.
 type InterviewSession struct {
 	ID               string          `json:"id"`
 	OwnerProfileID   *string         `json:"ownerProfileId"`
@@ -32,7 +31,7 @@ type InterviewSession struct {
 	EndedAt          *time.Time      `json:"endedAt"`
 }
 
-// InterviewSummary is a lightweight row for list views (no heavy JSON fields).
+// InterviewSummary is a lightweight row for list views.
 type InterviewSummary struct {
 	ID               string    `json:"id"`
 	Title            string    `json:"title"`
@@ -62,22 +61,43 @@ func (p InterviewPatch) IsEmpty() bool {
 		p.GuestLinkEnabled == nil && p.RoomCode == nil
 }
 
-const interviewCols = `id, owner_profile_id, room_code, title, status, guest_token,
-	guest_link_enabled, canvas_locked, canvas, questions, notes, rubric,
-	recommendation, created_at, updated_at, ended_at`
-
-func scanInterview(row pgx.Row) (*InterviewSession, error) {
-	var v InterviewSession
-	err := row.Scan(&v.ID, &v.OwnerProfileID, &v.RoomCode, &v.Title, &v.Status, &v.GuestToken,
-		&v.GuestLinkEnabled, &v.CanvasLocked, &v.Canvas, &v.Questions, &v.Notes, &v.Rubric,
-		&v.Recommendation, &v.CreatedAt, &v.UpdatedAt, &v.EndedAt)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
+func interviewFromSessionRow(
+	id string,
+	owner pgtype.UUID,
+	room pgtype.Text,
+	title, status, guestToken string,
+	guestLinkEnabled, canvasLocked bool,
+	canvas, questions, rubric []byte,
+	notes, recommendation string,
+	createdAt, updatedAt, endedAt pgtype.Timestamptz,
+) *InterviewSession {
+	v := InterviewSession{
+		ID:               id,
+		Title:            title,
+		Status:           status,
+		GuestToken:       guestToken,
+		GuestLinkEnabled: guestLinkEnabled,
+		CanvasLocked:     canvasLocked,
+		Canvas:           json.RawMessage(canvas),
+		Questions:        json.RawMessage(questions),
+		Notes:            notes,
+		Rubric:           json.RawMessage(rubric),
+		Recommendation:   recommendation,
+		CreatedAt:        pgTimestamptzTime(createdAt),
+		UpdatedAt:        pgTimestamptzTime(updatedAt),
 	}
-	if err != nil {
-		return nil, err
+	if owner.Valid {
+		s := owner.String()
+		v.OwnerProfileID = &s
 	}
-	// Normalize empty jsonb so clients always get [] / {} not null.
+	if room.Valid {
+		s := room.String
+		v.RoomCode = &s
+	}
+	if endedAt.Valid {
+		t := endedAt.Time
+		v.EndedAt = &t
+	}
 	if len(v.Canvas) == 0 {
 		v.Canvas = json.RawMessage(`{}`)
 	}
@@ -87,53 +107,136 @@ func scanInterview(row pgx.Row) (*InterviewSession, error) {
 	if len(v.Rubric) == 0 {
 		v.Rubric = json.RawMessage(`[]`)
 	}
-	return &v, nil
+	return &v
 }
+
+func interviewFromCreate(row arcadedb.CreateInterviewSessionRow) *InterviewSession {
+	return interviewFromSessionRow(
+		row.ID, row.OwnerProfileID, row.RoomCode, row.Title, row.Status, row.GuestToken,
+		row.GuestLinkEnabled, row.CanvasLocked, row.Canvas, row.Questions, row.Rubric,
+		row.Notes, row.Recommendation, row.CreatedAt, row.UpdatedAt, row.EndedAt,
+	)
+}
+
+func interviewFromGet(row arcadedb.GetInterviewSessionRow) *InterviewSession {
+	return interviewFromSessionRow(
+		row.ID, row.OwnerProfileID, row.RoomCode, row.Title, row.Status, row.GuestToken,
+		row.GuestLinkEnabled, row.CanvasLocked, row.Canvas, row.Questions, row.Rubric,
+		row.Notes, row.Recommendation, row.CreatedAt, row.UpdatedAt, row.EndedAt,
+	)
+}
+
+func interviewFromGetByToken(row arcadedb.GetInterviewSessionByTokenRow) *InterviewSession {
+	return interviewFromSessionRow(
+		row.ID, row.OwnerProfileID, row.RoomCode, row.Title, row.Status, row.GuestToken,
+		row.GuestLinkEnabled, row.CanvasLocked, row.Canvas, row.Questions, row.Rubric,
+		row.Notes, row.Recommendation, row.CreatedAt, row.UpdatedAt, row.EndedAt,
+	)
+}
+
+func interviewFromEnd(row arcadedb.EndInterviewSessionRow) *InterviewSession {
+	return interviewFromSessionRow(
+		row.ID, row.OwnerProfileID, row.RoomCode, row.Title, row.Status, row.GuestToken,
+		row.GuestLinkEnabled, row.CanvasLocked, row.Canvas, row.Questions, row.Rubric,
+		row.Notes, row.Recommendation, row.CreatedAt, row.UpdatedAt, row.EndedAt,
+	)
+}
+
+func interviewFromReopen(row arcadedb.ReopenInterviewSessionRow) *InterviewSession {
+	return interviewFromSessionRow(
+		row.ID, row.OwnerProfileID, row.RoomCode, row.Title, row.Status, row.GuestToken,
+		row.GuestLinkEnabled, row.CanvasLocked, row.Canvas, row.Questions, row.Rubric,
+		row.Notes, row.Recommendation, row.CreatedAt, row.UpdatedAt, row.EndedAt,
+	)
+}
+
+func interviewFromRotate(row arcadedb.RotateInterviewTokenRow) *InterviewSession {
+	return interviewFromSessionRow(
+		row.ID, row.OwnerProfileID, row.RoomCode, row.Title, row.Status, row.GuestToken,
+		row.GuestLinkEnabled, row.CanvasLocked, row.Canvas, row.Questions, row.Rubric,
+		row.Notes, row.Recommendation, row.CreatedAt, row.UpdatedAt, row.EndedAt,
+	)
+}
+
+const interviewCols = `id::text, owner_profile_id, room_code, title, status, guest_token,
+	guest_link_enabled, canvas_locked, canvas, questions, notes, rubric,
+	recommendation, created_at, updated_at, ended_at`
 
 func (s *Store) CreateInterviewSession(ctx context.Context, ownerID, title string) (*InterviewSession, error) {
 	token, err := newSessionToken()
 	if err != nil {
 		return nil, err
 	}
-	return scanInterview(s.pool.QueryRow(ctx, `
-		insert into public.interview_sessions (owner_profile_id, title, guest_token)
-		values ($1, $2, $3)
-		returning `+interviewCols, ownerID, title, token))
-}
-
-func (s *Store) ListInterviewSessions(ctx context.Context, ownerID string) ([]InterviewSummary, error) {
-	rows, err := s.pool.Query(ctx, `
-		select id, title, status, room_code, guest_link_enabled, canvas_locked, updated_at
-		from public.interview_sessions
-		where owner_profile_id = $1
-		order by created_at desc limit 200`, ownerID)
+	uid, err := parseProfileUUID(ownerID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	out := []InterviewSummary{}
-	for rows.Next() {
-		var v InterviewSummary
-		if err := rows.Scan(&v.ID, &v.Title, &v.Status, &v.RoomCode, &v.GuestLinkEnabled, &v.CanvasLocked, &v.UpdatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, v)
+	row, err := s.q.CreateInterviewSession(ctx, arcadedb.CreateInterviewSessionParams{
+		OwnerProfileID: uid,
+		Title:          title,
+		GuestToken:     token,
+	})
+	if err != nil {
+		return nil, err
 	}
-	return out, rows.Err()
+	return interviewFromCreate(row), nil
+}
+
+func (s *Store) ListInterviewSessions(ctx context.Context, ownerID string) ([]InterviewSummary, error) {
+	uid, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.q.ListInterviewSummaries(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]InterviewSummary, len(rows))
+	for i, row := range rows {
+		v := InterviewSummary{
+			ID:               row.ID,
+			Title:            row.Title,
+			Status:           row.Status,
+			GuestLinkEnabled: row.GuestLinkEnabled,
+			CanvasLocked:     row.CanvasLocked,
+			UpdatedAt:        pgTimestamptzTime(row.UpdatedAt),
+		}
+		if row.RoomCode.Valid {
+			s := row.RoomCode.String
+			v.RoomCode = &s
+		}
+		out[i] = v
+	}
+	return out, nil
 }
 
 func (s *Store) GetInterviewSession(ctx context.Context, id string) (*InterviewSession, error) {
-	return scanInterview(s.pool.QueryRow(ctx,
-		`select `+interviewCols+` from public.interview_sessions where id = $1`, id))
+	uid, err := parseCanvasUUID(id)
+	if err != nil {
+		return nil, err
+	}
+	row, err := s.q.GetInterviewSession(ctx, uid)
+	if isNoRows(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return interviewFromGet(row), nil
 }
 
 func (s *Store) GetInterviewSessionByToken(ctx context.Context, token string) (*InterviewSession, error) {
-	return scanInterview(s.pool.QueryRow(ctx,
-		`select `+interviewCols+` from public.interview_sessions where guest_token = $1`, token))
+	row, err := s.q.GetInterviewSessionByToken(ctx, token)
+	if isNoRows(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return interviewFromGetByToken(row), nil
 }
 
-// UpdateInterviewSession applies a partial patch to an owner-held session. The
-// bool is false when the id is missing or not owned by ownerID.
+// UpdateInterviewSession applies a partial patch via dynamic SQL (fields vary per call).
 func (s *Store) UpdateInterviewSession(ctx context.Context, id, ownerID string, p InterviewPatch) (*InterviewSession, bool, error) {
 	sets := []string{}
 	args := []any{}
@@ -176,31 +279,79 @@ func (s *Store) UpdateInterviewSession(ctx context.Context, id, ownerID string, 
 	q := `update public.interview_sessions set ` + strings.Join(sets, ", ") +
 		` where id = $` + strconv.Itoa(len(args)-1) + ` and owner_profile_id = $` + strconv.Itoa(len(args)) +
 		` returning ` + interviewCols
-	v, err := scanInterview(s.pool.QueryRow(ctx, q, args...))
+
+	row := s.pool.QueryRow(ctx, q, args...)
+	var (
+		sid, title, status, guestToken, notes, recommendation string
+		owner                                               pgtype.UUID
+		room                                                pgtype.Text
+		guestLinkEnabled, canvasLocked                      bool
+		canvas, questions, rubric                           []byte
+		createdAt, updatedAt, endedAt                       pgtype.Timestamptz
+	)
+	err := row.Scan(
+		&sid, &owner, &room, &title, &status, &guestToken,
+		&guestLinkEnabled, &canvasLocked, &canvas, &questions, &notes, &rubric,
+		&recommendation, &createdAt, &updatedAt, &endedAt,
+	)
+	if isNoRows(err) {
+		return nil, false, nil
+	}
 	if err != nil {
 		return nil, false, err
 	}
-	return v, v != nil, nil
+	v := interviewFromSessionRow(
+		sid, owner, room, title, status, guestToken,
+		guestLinkEnabled, canvasLocked, canvas, questions, rubric,
+		notes, recommendation, createdAt, updatedAt, endedAt,
+	)
+	return v, true, nil
 }
 
 func (s *Store) EndInterviewSession(ctx context.Context, id, ownerID string) (*InterviewSession, bool, error) {
-	v, err := scanInterview(s.pool.QueryRow(ctx, `
-		update public.interview_sessions set status = 'ended', ended_at = now(), updated_at = now()
-		where id = $1 and owner_profile_id = $2 returning `+interviewCols, id, ownerID))
+	planID, err := parseCanvasUUID(id)
 	if err != nil {
 		return nil, false, err
 	}
-	return v, v != nil, nil
+	ownerUUID, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return nil, false, err
+	}
+	row, err := s.q.EndInterviewSession(ctx, arcadedb.EndInterviewSessionParams{
+		ID:             planID,
+		OwnerProfileID: ownerUUID,
+	})
+	if isNoRows(err) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	v := interviewFromEnd(row)
+	return v, true, nil
 }
 
 func (s *Store) ReopenInterviewSession(ctx context.Context, id, ownerID string) (*InterviewSession, bool, error) {
-	v, err := scanInterview(s.pool.QueryRow(ctx, `
-		update public.interview_sessions set status = 'active', ended_at = null, updated_at = now()
-		where id = $1 and owner_profile_id = $2 returning `+interviewCols, id, ownerID))
+	planID, err := parseCanvasUUID(id)
 	if err != nil {
 		return nil, false, err
 	}
-	return v, v != nil, nil
+	ownerUUID, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return nil, false, err
+	}
+	row, err := s.q.ReopenInterviewSession(ctx, arcadedb.ReopenInterviewSessionParams{
+		ID:             planID,
+		OwnerProfileID: ownerUUID,
+	})
+	if isNoRows(err) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	v := interviewFromReopen(row)
+	return v, true, nil
 }
 
 func (s *Store) RotateInterviewToken(ctx context.Context, id, ownerID string) (*InterviewSession, bool, error) {
@@ -208,11 +359,25 @@ func (s *Store) RotateInterviewToken(ctx context.Context, id, ownerID string) (*
 	if err != nil {
 		return nil, false, err
 	}
-	v, err := scanInterview(s.pool.QueryRow(ctx, `
-		update public.interview_sessions set guest_token = $3, updated_at = now()
-		where id = $1 and owner_profile_id = $2 returning `+interviewCols, id, ownerID, token))
+	planID, err := parseCanvasUUID(id)
 	if err != nil {
 		return nil, false, err
 	}
-	return v, v != nil, nil
+	ownerUUID, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return nil, false, err
+	}
+	row, err := s.q.RotateInterviewToken(ctx, arcadedb.RotateInterviewTokenParams{
+		ID:             planID,
+		OwnerProfileID: ownerUUID,
+		GuestToken:     token,
+	})
+	if isNoRows(err) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	v := interviewFromRotate(row)
+	return v, true, nil
 }

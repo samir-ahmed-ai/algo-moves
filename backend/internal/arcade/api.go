@@ -2,17 +2,21 @@ package arcade
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Service bundles the arcade store and HTTP handlers.
 type Service struct {
-	store *Store
+	store    *Store
+	sessions *scs.SessionManager
+	sqlDB    *sql.DB
 }
 
 func (s *Service) Store() *Store {
@@ -54,14 +58,26 @@ func Open(ctx context.Context) (*Service, error) {
 		log.Printf("arcade: learning content seed applied")
 	}
 	log.Printf("arcade: connected to postgres")
-	return &Service{store: NewStore(pool)}, nil
+	svc := &Service{store: NewStore(pool)}
+	if sm, db, err := newSessionManager(url); err != nil {
+		log.Printf("arcade: session manager disabled: %v", err)
+	} else {
+		svc.sessions = sm
+		svc.sqlDB = db
+	}
+	return svc, nil
 }
 
 func (s *Service) Enabled() bool { return s != nil && s.store != nil }
 
 func (s *Service) Close() {
-	if s != nil && s.store != nil && s.store.pool != nil {
-		s.store.pool.Close()
+	if s != nil {
+		if s.sqlDB != nil {
+			s.sqlDB.Close()
+		}
+		if s.store != nil && s.store.pool != nil {
+			s.store.pool.Close()
+		}
 	}
 }
 

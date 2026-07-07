@@ -2,17 +2,13 @@ package arcade
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// Learning content is public, read-only data (courses, topics, problems, per-
-// language solutions, quizzes) mirrored from the frontend catalog by
-// scripts/export-content-sql.mts. These GET endpoints require no auth, mirroring
-// the public leaderboard/canvas reads.
+// Learning content is public, read-only data mirrored from the frontend catalog.
 
 type ContentItem struct {
 	ID         string  `json:"id"`
@@ -38,84 +34,6 @@ type ContentCourse struct {
 	Family       string         `json:"family"`
 	ProblemCount int            `json:"problemCount"`
 	Topics       []ContentTopic `json:"topics"`
-}
-
-// ContentCatalog returns the whole course/topic/item spine (metadata only, no
-// solution code) in sidebar order.
-func (s *Store) ContentCatalog(ctx context.Context) ([]ContentCourse, error) {
-	courseRows, err := s.pool.Query(ctx, `
-		select id, title, coalesce(summary,''), coalesce(icon,''), "group", family,
-		       (select count(*) from public.items i where i.course_id = c.id and i.kind = 'problem')
-		from public.courses c order by sort_order, id`)
-	if err != nil {
-		return nil, err
-	}
-	defer courseRows.Close()
-
-	var courses []ContentCourse
-	index := map[string]int{}
-	for courseRows.Next() {
-		var c ContentCourse
-		if err := courseRows.Scan(&c.ID, &c.Title, &c.Summary, &c.Icon, &c.Group, &c.Family, &c.ProblemCount); err != nil {
-			return nil, err
-		}
-		c.Topics = []ContentTopic{}
-		index[c.ID] = len(courses)
-		courses = append(courses, c)
-	}
-	if err := courseRows.Err(); err != nil {
-		return nil, err
-	}
-
-	topicRows, err := s.pool.Query(ctx, `
-		select id, course_id, title, coalesce(summary,'')
-		from public.topics order by course_id, sort_order, id`)
-	if err != nil {
-		return nil, err
-	}
-	defer topicRows.Close()
-
-	topicIndex := map[string]struct{ course, topic int }{}
-	for topicRows.Next() {
-		var id, courseID, title, summary string
-		if err := topicRows.Scan(&id, &courseID, &title, &summary); err != nil {
-			return nil, err
-		}
-		ci, ok := index[courseID]
-		if !ok {
-			continue
-		}
-		courses[ci].Topics = append(courses[ci].Topics, ContentTopic{ID: id, Title: title, Summary: summary, Items: []ContentItem{}})
-		topicIndex[id] = struct{ course, topic int }{ci, len(courses[ci].Topics) - 1}
-	}
-	if err := topicRows.Err(); err != nil {
-		return nil, err
-	}
-
-	itemRows, err := s.pool.Query(ctx, `
-		select id, topic_id, kind, problem_id, coalesce(title,''), difficulty
-		from public.items order by topic_id, sort_order, id`)
-	if err != nil {
-		return nil, err
-	}
-	defer itemRows.Close()
-
-	for itemRows.Next() {
-		var it ContentItem
-		var topicID *string
-		if err := itemRows.Scan(&it.ID, &topicID, &it.Kind, &it.ProblemID, &it.Title, &it.Difficulty); err != nil {
-			return nil, err
-		}
-		if topicID == nil {
-			continue
-		}
-		loc, ok := topicIndex[*topicID]
-		if !ok {
-			continue
-		}
-		courses[loc.course].Topics[loc.topic].Items = append(courses[loc.course].Topics[loc.topic].Items, it)
-	}
-	return courses, itemRows.Err()
 }
 
 type ContentSolution struct {
@@ -152,106 +70,155 @@ type ContentProblem struct {
 	Quiz        []ContentQuestion `json:"quiz"`
 }
 
+// ContentCatalog returns the whole course/topic/item spine (metadata only, no
+// solution code) in sidebar order.
+func (s *Store) ContentCatalog(ctx context.Context) ([]ContentCourse, error) {
+	courseRows, err := s.q.ContentCourses(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var courses []ContentCourse
+	index := map[string]int{}
+	for _, row := range courseRows {
+		c := ContentCourse{
+			ID:           row.ID,
+			Title:        row.Title,
+			Summary:      row.Summary,
+			Icon:         row.Icon,
+			Group:        row.Group,
+			Family:       row.Family,
+			ProblemCount: int(row.ProblemCount),
+			Topics:       []ContentTopic{},
+		}
+		index[c.ID] = len(courses)
+		courses = append(courses, c)
+	}
+
+	topicRows, err := s.q.ContentTopics(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	topicIndex := map[string]struct{ course, topic int }{}
+	for _, row := range topicRows {
+		ci, ok := index[row.CourseID]
+		if !ok {
+			continue
+		}
+		courses[ci].Topics = append(courses[ci].Topics, ContentTopic{
+			ID:      row.ID,
+			Title:   row.Title,
+			Summary: row.Summary,
+			Items:   []ContentItem{},
+		})
+		topicIndex[row.ID] = struct{ course, topic int }{ci, len(courses[ci].Topics) - 1}
+	}
+
+	itemRows, err := s.q.ContentItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, row := range itemRows {
+		if !row.TopicID.Valid {
+			continue
+		}
+		topicID := row.TopicID.String
+		loc, ok := topicIndex[topicID]
+		if !ok {
+			continue
+		}
+		it := ContentItem{
+			ID:    row.ID,
+			Kind:  row.Kind,
+			Title: row.Title,
+		}
+		if row.ProblemID.Valid {
+			s := row.ProblemID.String
+			it.ProblemID = &s
+		}
+		if row.Difficulty.Valid {
+			s := row.Difficulty.String
+			it.Difficulty = &s
+		}
+		courses[loc.course].Topics[loc.topic].Items = append(courses[loc.course].Topics[loc.topic].Items, it)
+	}
+	return courses, nil
+}
+
 // ContentProblemByID returns a full problem with its tags, per-language solutions
 // and quiz. Returns (nil, nil) when the id does not exist.
 func (s *Store) ContentProblemByID(ctx context.Context, id string) (*ContentProblem, error) {
-	var p ContentProblem
-	err := s.pool.QueryRow(ctx, `
-		select p.id, p.title, p.difficulty, coalesce(p.summary,''), coalesce(p.pattern,''),
-		       coalesce(p.source_url,''), coalesce(p.narrative,''), coalesce(p.region_id,''),
-		       coalesce(r.title,'')
-		from public.problems p
-		left join public.story_regions r on r.id = p.region_id
-		where p.id = $1`, id).
-		Scan(&p.ID, &p.Title, &p.Difficulty, &p.Summary, &p.Pattern, &p.SourceURL,
-			&p.Narrative, &p.RegionID, &p.RegionTitle)
-	if errors.Is(err, pgx.ErrNoRows) {
+	row, err := s.q.ContentProblemByID(ctx, id)
+	if isNoRows(err) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	p.Tags = []string{}
-	p.Solutions = []ContentSolution{}
-	p.Quiz = []ContentQuestion{}
 
-	tagRows, err := s.pool.Query(ctx, `select tag_id from public.problem_tags where problem_id = $1 order by tag_id`, id)
+	p := ContentProblem{
+		ID:          row.ID,
+		Title:       row.Title,
+		Difficulty:  row.Difficulty,
+		Summary:     row.Summary,
+		Pattern:     row.Pattern,
+		SourceURL:   row.SourceUrl,
+		Narrative:   row.Narrative,
+		RegionID:    row.RegionID,
+		RegionTitle: row.RegionTitle,
+		Tags:        []string{},
+		Solutions:   []ContentSolution{},
+		Quiz:        []ContentQuestion{},
+	}
+
+	tags, err := s.q.ContentProblemTags(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	defer tagRows.Close()
-	for tagRows.Next() {
-		var t string
-		if err := tagRows.Scan(&t); err != nil {
-			return nil, err
-		}
-		p.Tags = append(p.Tags, t)
-	}
-	if err := tagRows.Err(); err != nil {
-		return nil, err
-	}
+	p.Tags = tags
 
-	solRows, err := s.pool.Query(ctx, `
-		select language, file, code, is_primary from public.solutions
-		where problem_id = $1 order by is_primary desc, language, sort_order`, id)
+	sols, err := s.q.ContentProblemSolutions(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	defer solRows.Close()
-	for solRows.Next() {
-		var sol ContentSolution
-		if err := solRows.Scan(&sol.Language, &sol.File, &sol.Code, &sol.IsPrimary); err != nil {
-			return nil, err
-		}
-		p.Solutions = append(p.Solutions, sol)
-	}
-	if err := solRows.Err(); err != nil {
-		return nil, err
+	for _, sol := range sols {
+		p.Solutions = append(p.Solutions, ContentSolution{
+			Language:  sol.Language,
+			File:      sol.File,
+			Code:      sol.Code,
+			IsPrimary: sol.IsPrimary,
+		})
 	}
 
-	qRows, err := s.pool.Query(ctx, `
-		select id, prompt, coalesce(explain,'') from public.quiz_questions
-		where problem_id = $1 order by sort_order, id`, id)
+	questions, err := s.q.ContentProblemQuizQuestions(ctx, pgtype.Text{String: id, Valid: true})
 	if err != nil {
 		return nil, err
 	}
-	defer qRows.Close()
 	qIndex := map[string]int{}
-	for qRows.Next() {
-		var qq ContentQuestion
-		if err := qRows.Scan(&qq.ID, &qq.Prompt, &qq.Explain); err != nil {
-			return nil, err
-		}
-		qq.Choices = []ContentChoice{}
+	for _, qq := range questions {
 		qIndex[qq.ID] = len(p.Quiz)
-		p.Quiz = append(p.Quiz, qq)
-	}
-	if err := qRows.Err(); err != nil {
-		return nil, err
+		p.Quiz = append(p.Quiz, ContentQuestion{
+			ID:      qq.ID,
+			Prompt:  qq.Prompt,
+			Explain: qq.Explain,
+			Choices: []ContentChoice{},
+		})
 	}
 
 	if len(p.Quiz) > 0 {
-		chRows, err := s.pool.Query(ctx, `
-			select ch.question_id, ch.label, ch.is_correct
-			from public.quiz_choices ch
-			join public.quiz_questions q on q.id = ch.question_id
-			where q.problem_id = $1 order by ch.question_id, ch.sort_order`, id)
+		choices, err := s.q.ContentProblemQuizChoices(ctx, pgtype.Text{String: id, Valid: true})
 		if err != nil {
 			return nil, err
 		}
-		defer chRows.Close()
-		for chRows.Next() {
-			var qid string
-			var ch ContentChoice
-			if err := chRows.Scan(&qid, &ch.Label, &ch.IsCorrect); err != nil {
-				return nil, err
+		for _, ch := range choices {
+			if i, ok := qIndex[ch.QuestionID]; ok {
+				p.Quiz[i].Choices = append(p.Quiz[i].Choices, ContentChoice{
+					Label:     ch.Label,
+					IsCorrect: ch.IsCorrect,
+				})
 			}
-			if i, ok := qIndex[qid]; ok {
-				p.Quiz[i].Choices = append(p.Quiz[i].Choices, ch)
-			}
-		}
-		if err := chRows.Err(); err != nil {
-			return nil, err
 		}
 	}
 

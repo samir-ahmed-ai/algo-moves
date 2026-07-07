@@ -5,13 +5,13 @@ import { inputFrameCount, type InputFrameCounts } from '@/lib/canvas';
 import type { SampleInput } from '../../../core/types';
 import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { HighlightedCode } from '@/components/code/HighlightedCode';
+import { JsonBlock } from '@/components/code/JsonBlock';
 import { TONE_BAR } from '@/design/tone';
 import { briefFor } from '@/content';
 import {
   useCanvasStatic,
   stepExampleInput,
   Chip,
-  Code,
   ControlsAccordion,
   difficultyTone,
   NodeTagChip,
@@ -22,18 +22,6 @@ import {
   useFlash,
 } from '@/shell/canvas';
 import { ProblemBriefBody } from './problemBriefBody';
-
-/** Compact preview of a sample input value. */
-function formatInputPreview(value: unknown): string {
-  if (value == null) return '';
-  if (typeof value === 'string') return value;
-  try {
-    const s = JSON.stringify(value);
-    return s.length > 140 ? `${s.slice(0, 137)}…` : s;
-  } catch {
-    return String(value);
-  }
-}
 
 function StepBadge({ count }: { count: number }) {
   return (
@@ -153,7 +141,8 @@ function ExampleInputPicker() {
   const { plugin, inputId, setInputId, inputFrameCounts } = useCanvasStatic();
   const inputs = plugin.inputs;
   const active = inputs.find((i) => i.id === inputId) ?? inputs[0];
-  const preview = active ? formatInputPreview(active.value) : '';
+  const previewValue = active?.value;
+  const hasPreview = previewValue != null && previewValue !== '';
   const flash = useFlash(inputId);
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -176,10 +165,10 @@ function ExampleInputPicker() {
   }, [inputs, inputId, setInputId]);
 
   if (inputs.length <= 1) {
-    if (!preview) return null;
+    if (!hasPreview) return null;
     return (
-      <ControlsAccordion title="Input preview" defaultOpen bodyClassName="pt-1 [&_pre]:rounded-md [&_pre]:border [&_pre]:border-edge/60 [&_pre]:bg-panel2/50 [&_pre]:p-2">
-        <Code text={preview} />
+      <ControlsAccordion title="Input preview" defaultOpen bodyClassName="pt-1">
+        <JsonBlock value={previewValue} />
       </ControlsAccordion>
     );
   }
@@ -216,14 +205,14 @@ function ExampleInputPicker() {
             flash={flash}
           />
         )}
-        {preview && (
+        {hasPreview && (
           <ControlsAccordion
             title="Input preview"
             defaultOpen
             className="mt-1.5 border-t-0"
-            bodyClassName="pt-1 [&_pre]:rounded-md [&_pre]:border [&_pre]:border-edge/60 [&_pre]:bg-panel2/50 [&_pre]:p-2"
+            bodyClassName="pt-1"
           >
-            <Code text={preview} />
+            <JsonBlock value={previewValue} />
           </ControlsAccordion>
         )}
       </Section>

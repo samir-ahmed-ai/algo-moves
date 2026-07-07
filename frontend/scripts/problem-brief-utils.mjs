@@ -109,10 +109,19 @@ export function secondFromSummary(summary, first) {
 
 export function formatBriefInput(value) {
   if (value == null) return '';
-  if (typeof value === 'string') return value;
+  if (typeof value === 'string') {
+    const t = value.trim();
+    if (t.startsWith('{') || t.startsWith('[')) {
+      try {
+        return JSON.stringify(JSON.parse(t), null, 2);
+      } catch {
+        /* fall through */
+      }
+    }
+    return value;
+  }
   try {
-    const s = JSON.stringify(value);
-    return s.length > 160 ? `${s.slice(0, 157)}…` : s;
+    return JSON.stringify(value, null, 2);
   } catch {
     return String(value);
   }

@@ -16,6 +16,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type ComponentType } from 'react';
 import { Check, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { JsonBlock } from '@/components/code/JsonBlock';
 import { QuizChoiceLabel } from '../../components/shared/QuizChoiceLabel';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '@/lib/quiz';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
@@ -480,7 +481,7 @@ function CaseCard<I, S>({
 }) {
   const frames = useMemo(() => record(c.input), [c]);
   const tone = c.tone ?? 'ok';
-  const label = c.inputLabel ?? JSON.stringify(c.input);
+  const inputDisplay = c.inputLabel ?? c.input;
   const last = frames.length - 1;
   const animated = frames.length > 1;
   // Short runs advance one frame per tick; very long runs stride so a full loop
@@ -628,7 +629,7 @@ function CaseCard<I, S>({
         </>
       )}
 
-      <code className={cn('block overflow-x-auto whitespace-nowrap font-mono text-ink2', vizText.tight)}>{label}</code>
+      <JsonBlock value={inputDisplay} size="xs" variant="nested" maxHeight="160px" />
       <p className={cn('leading-relaxed text-ink2', vizText.sm)}>
         <span className="mr-1.5 inline-block w-3 font-medium text-ink3">Q</span>
         {c.question}

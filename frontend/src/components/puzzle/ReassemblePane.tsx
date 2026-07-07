@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Keyboard, Lightbulb, RotateCcw, ScanEye } from 'lucide-react';
 import type { CodePiece } from '@/lib/code';
 import { cn } from '@/lib/utils/cn';
 import { pieceHasEntrySignature } from '@/lib/editor';
 import { CodeBlueprintOverlay } from './CodeBlueprintOverlay';
 import { PuzzlePieceShell } from './PuzzlePieceShell';
+import { DraggableTrayPiece } from './DraggableTrayPiece';
+import { AssembledDropZone } from './AssembledDropZone';
 import { useReassembleLogic } from './hooks/useReassembleLogic';
 import { useTrayPointerDrag } from './hooks/useTrayPointerDrag';
 
@@ -94,8 +97,9 @@ export function ReassemblePane({
     mobileTrayColumns,
     reset,
     tryPlace,
-    onDragStart,
-    onDropAssembled,
+    onDndDragStart,
+    onDndDragOver,
+    onDndDragEnd,
   } = useReassembleLogic({
     pieces,
     variant,
@@ -128,49 +132,48 @@ export function ReassemblePane({
     return () => document.removeEventListener('mousedown', onDoc);
   }, [showCheatSheet]);
 
-  const renderTrayPiece = (p: CodePiece, i: number) => (
-    <div
-      key={p.id}
-      role="option"
-      aria-selected={selectedIdx === i}
-      tabIndex={0}
-      draggable={variant !== 'mobile'}
-      onDragStart={variant !== 'mobile' ? (e) => onDragStart(e, p) : undefined}
-      onPointerDown={variant === 'mobile' ? (e) => onTrayPointerDown(e, p, i) : undefined}
-      onPointerMove={variant === 'mobile' ? onTrayPointerMove : undefined}
-      onPointerUp={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
-      onPointerCancel={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
-      className={cn(
-        'piece tray-piece nodrag',
-        wrongId === p.id && 'shake-wrong',
-        selectedIdx === i && 'tray-piece-selected',
-        isDraggingPiece(p.id) && 'tray-piece-dragging',
-        pieceHasEntrySignature(p.code, lang) && 'tray-piece-signature-entry',
-        !mobileWrap && tray.length % 2 === 1 && i === tray.length - 1 && 'tray-piece-span',
-      )}
-      onClick={variant === 'mobile' ? undefined : () => tryPlace(p)}
-      onFocus={() => setSelectedIdx(i)}
-    >
-      {variant !== 'mobile' && (
-        <span className="tray-piece-key" aria-hidden>
-          {i < 9 ? i + 1 : '·'}
-        </span>
-      )}
-      <PuzzlePieceShell piece={p} lang={lang} wrap={!mobileWrap} mode="tray" />
-    </div>
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
-  return (
-    <div
-      ref={rootRef}
-      tabIndex={0}
-      className={cn(
-        'code-studio-reassemble flex min-h-0 flex-1 flex-col outline-none',
-        mobileWrap && 'code-studio-reassemble--mobile',
-        className,
-      )}
-      aria-label="Reassemble code blocks in source order"
-    >
+  const renderTrayPiece = (p: CodePiece, i: number) => {
+    const shell = (
+      <div
+        role="option"
+        aria-selected={selectedIdx === i}
+        tabIndex={0}
+        onPointerDown={variant === 'mobile' ? (e) => onTrayPointerDown(e, p, i) : undefined}
+        onPointerMove={variant === 'mobile' ? onTrayPointerMove : undefined}
+        onPointerUp={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
+        onPointerCancel={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
+        className={cn(
+          'piece tray-piece nodrag',
+          wrongId === p.id && 'shake-wrong',
+          selectedIdx === i && 'tray-piece-selected',
+          isDraggingPiece(p.id) && 'tray-piece-dragging',
+          pieceHasEntrySignature(p.code, lang) && 'tray-piece-signature-entry',
+          !mobileWrap && tray.length % 2 === 1 && i === tray.length - 1 && 'tray-piece-span',
+        )}
+        onClick={variant === 'mobile' ? undefined : () => tryPlace(p)}
+        onFocus={() => setSelectedIdx(i)}
+      >
+        {variant !== 'mobile' && (
+          <span className="tray-piece-key" aria-hidden>
+            {i < 9 ? i + 1 : '·'}
+          </span>
+        )}
+        <PuzzlePieceShell piece={p} lang={lang} wrap={!mobileWrap} mode="tray" />
+      </div>
+    );
+
+    if (variant === 'mobile') return <div key={p.id}>{shell}</div>;
+    return (
+      <DraggableTrayPiece key={p.id} id={p.id}>
+        {shell}
+      </DraggableTrayPiece>
+    );
+  };
+
+  const content = (
+    <>
       <div className="reassemble-sr-only" aria-live="assertive" aria-atomic="true">
         {liveMessage}
       </div>
@@ -245,23 +248,15 @@ export function ReassemblePane({
       </div>
 
       <div className={cn('reassemble-body flex min-h-0 flex-1 flex-col', mobileWrap && 'reassemble-body--scroll')}>
-        <div
-          ref={assembledRef}
+        <AssembledDropZone
+          innerRef={assembledRef}
+          active={dragOver}
           className={cn(
             'assembled nodrag',
             placed.length > 0 && 'blk-board',
             placed.length === 0 && !done && 'assembled-has-empty',
-            dragOver && 'assembled-drag-over',
             completing && 'assembled-complete-flash',
           )}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragOver(true);
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={onDropAssembled}
-          role="region"
-          aria-label="Assembled code"
         >
           {placed.length === 0 && !done && (
             <div className="assembled-empty">
@@ -286,7 +281,7 @@ export function ReassemblePane({
               Rebuilt the full solution with {mistakes} mistake{mistakes === 1 ? '' : 's'}.
             </div>
           )}
-        </div>
+        </AssembledDropZone>
 
         {!done && (
           <div className="reassemble-tray-wrap">
@@ -327,6 +322,32 @@ export function ReassemblePane({
 
       {showOverview && (
         <CodeBlueprintOverlay pieces={pieces} lang={lang} wrap={false} onClose={() => setShowOverview(false)} />
+      )}
+    </>
+  );
+
+  return (
+    <div
+      ref={rootRef}
+      tabIndex={0}
+      className={cn(
+        'code-studio-reassemble flex min-h-0 flex-1 flex-col outline-none',
+        mobileWrap && 'code-studio-reassemble--mobile',
+        className,
+      )}
+      aria-label="Reassemble code blocks in source order"
+    >
+      {variant === 'mobile' ? (
+        content
+      ) : (
+        <DndContext
+          sensors={sensors}
+          onDragStart={onDndDragStart}
+          onDragOver={onDndDragOver}
+          onDragEnd={onDndDragEnd}
+        >
+          {content}
+        </DndContext>
       )}
     </div>
   );

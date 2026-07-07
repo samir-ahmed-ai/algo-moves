@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -28,6 +37,7 @@ import {
 } from '@/components/puzzle/assemble/types';
 import { formatSecs } from '@/components/puzzle/assemble/gameShared';
 import { GameHud, HudChip } from '@/components/puzzle/assemble/gameUi';
+import { SortableRow, reorderIds } from '@/lib/dnd';
 
 /* ----------------------------- shared helpers ----------------------------- */
 
@@ -127,7 +137,7 @@ function OrderBoard({
     }
   }, [resetSig, correctIds]);
 
-  const dragId = useRef<string | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const move = (id: string, delta: number) =>
     setOrder((o) => {
       const i = o.indexOf(id);
@@ -137,14 +147,7 @@ function OrderBoard({
       [n[i], n[j]] = [n[j], n[i]];
       return n;
     });
-  const dropOn = (targetId: string) =>
-    setOrder((o) => {
-      const from = dragId.current;
-      if (!from || from === targetId) return o;
-      const n = o.filter((x) => x !== from);
-      n.splice(n.indexOf(targetId), 0, from);
-      return n;
-    });
+  const onDragEnd = (event: DragEndEvent) => setOrder((o) => reorderIds(o, event));
 
   const correctCount = order.filter((id, i) => correctIds[i] === id).length;
   const solved = correctCount === correctIds.length && correctIds.length > 0;
@@ -159,36 +162,35 @@ function OrderBoard({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-1">
-        {order.map((id, pos) => {
-          const correct = correctIds[pos] === id;
-          return (
-            <div
-              key={id}
-              draggable
-              onDragStart={() => {
-                dragId.current = id;
-              }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => dropOn(id)}
-              className={cn(
-                'flex items-stretch gap-1.5 rounded-md border transition-colors',
-                correct ? 'border-good/60 bg-goodbg/40' : 'border-edge bg-panel2/50 hover:border-accent/50',
-              )}
-            >
-              <div className="flex shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-l-md border-r border-edge px-1 py-1">
-                <StepBtn dir="up" disabled={pos === 0} onClick={() => move(id, -1)} />
-                <span className={cn('font-mono tabular-nums text-ink3', nodeText['2xs'])}>{pos + 1}</span>
-                <StepBtn dir="down" disabled={pos === order.length - 1} onClick={() => move(id, 1)} />
-              </div>
-              <div className="min-w-0 flex-1 py-1.5 pr-2">{renderRow(id, { pos, correct })}</div>
-              <span className="grid w-5 shrink-0 place-items-center text-ink3">
-                {correct ? <Check className="h-3.5 w-3.5 text-good" /> : <GripVertical className="h-3.5 w-3.5 opacity-40" />}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-1">
+            {order.map((id, pos) => {
+              const correct = correctIds[pos] === id;
+              return (
+                <SortableRow
+                  key={id}
+                  id={id}
+                  className={cn(
+                    'flex items-stretch gap-1.5 rounded-md border transition-colors',
+                    correct ? 'border-good/60 bg-goodbg/40' : 'border-edge bg-panel2/50 hover:border-accent/50',
+                  )}
+                >
+                  <div className="flex shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-l-md border-r border-edge px-1 py-1">
+                    <StepBtn dir="up" disabled={pos === 0} onClick={() => move(id, -1)} />
+                    <span className={cn('font-mono tabular-nums text-ink3', nodeText['2xs'])}>{pos + 1}</span>
+                    <StepBtn dir="down" disabled={pos === order.length - 1} onClick={() => move(id, 1)} />
+                  </div>
+                  <div className="min-w-0 flex-1 py-1.5 pr-2">{renderRow(id, { pos, correct })}</div>
+                  <span className="grid w-5 shrink-0 place-items-center text-ink3">
+                    {correct ? <Check className="h-3.5 w-3.5 text-good" /> : <GripVertical className="h-3.5 w-3.5 opacity-40" />}
+                  </span>
+                </SortableRow>
+              );
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
       {footer?.({ solved, correctCount, total: correctIds.length, reshuffle: () => setOrder(scramble(correctIds)) })}
     </div>
   );
@@ -265,8 +267,7 @@ function BlocksMode() {
     }
   }, [resetSig, correctIds]);
 
-  const dragId = useRef<string | null>(null);
-  const [overId, setOverId] = useState<string | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const move = (id: string, delta: number) =>
     setOrder((o) => {
       const i = o.indexOf(id);
@@ -276,55 +277,33 @@ function BlocksMode() {
       [n[i], n[j]] = [n[j], n[i]];
       return n;
     });
-  const dropOn = (targetId: string) =>
-    setOrder((o) => {
-      const from = dragId.current;
-      if (!from || from === targetId) return o;
-      const n = o.filter((x) => x !== from);
-      n.splice(n.indexOf(targetId), 0, from);
-      return n;
-    });
+  const onDragEnd = (event: DragEndEvent) => setOrder((o) => reorderIds(o, event));
 
   const correctCount = order.filter((id, i) => correctIds[i] === id).length;
   const solved = correctCount === correctIds.length && correctIds.length > 0;
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="blk-board pt-1.5">
-        {order.map((id, pos) => {
-          const correct = correctIds[pos] === id;
-          return (
-            <div
-              key={id}
-              draggable
-              onDragStart={() => {
-                dragId.current = id;
-              }}
-              onDragEnd={() => {
-                dragId.current = null;
-                setOverId(null);
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (overId !== id) setOverId(id);
-              }}
-              onDrop={() => {
-                dropOn(id);
-                setOverId(null);
-              }}
-              className={cn('blk-row', correct && 'blk-row--correct', overId === id && !correct && 'blk-row--over')}
-            >
-              <PuzzleBlock
-                piece={byId.get(id)!}
-                pos={pos}
-                correct={correct}
-                onUp={pos > 0 ? () => move(id, -1) : undefined}
-                onDown={pos < order.length - 1 ? () => move(id, 1) : undefined}
-              />
-            </div>
-          );
-        })}
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          <div className="blk-board pt-1.5">
+            {order.map((id, pos) => {
+              const correct = correctIds[pos] === id;
+              return (
+                <SortableRow key={id} id={id} className={cn('blk-row', correct && 'blk-row--correct')}>
+                  <PuzzleBlock
+                    piece={byId.get(id)!}
+                    pos={pos}
+                    correct={correct}
+                    onUp={pos > 0 ? () => move(id, -1) : undefined}
+                    onDown={pos < order.length - 1 ? () => move(id, 1) : undefined}
+                  />
+                </SortableRow>
+              );
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
       <Meter value={correctCount} max={correctIds.length} tone={solved ? 'good' : 'accent'} />
       {solved ? (
         <SolvedBanner label="Every block locked in source order — nicely done." />

@@ -1,15 +1,14 @@
+import { diffArrays } from 'diff';
+
 /** Normalize a line for comparison (trim whitespace). */
 export function normLine(line: string): string {
   return line.trim();
 }
 
-/** @deprecated use normLine */
-const norm = normLine;
-
 export function linesWithoutTrailingBlanks(source: string): string[] {
   const lines = source.split('\n');
   let end = lines.length;
-  while (end > 0 && norm(lines[end - 1]) === '') end--;
+  while (end > 0 && normLine(lines[end - 1]) === '') end--;
   return lines.slice(0, end);
 }
 
@@ -20,82 +19,63 @@ export interface DiffLines {
   draft: Set<number>;
 }
 
-interface AlignOp {
-  type: 'match' | 'ref' | 'draft';
-  refIdx?: number;
-  draftIdx?: number;
-}
+function collectLineDiff(
+  refLines: string[],
+  draftLines: string[],
+): { reference: Set<number>; draft: Set<number> } {
+  const refNorm = refLines.map(normLine);
+  const draftNorm = draftLines.map(normLine);
+  const changes = diffArrays(refNorm, draftNorm);
 
-/** Build LCS alignment ops between normalized line arrays. */
-function alignLines(refLines: string[], draftLines: string[]): AlignOp[] {
-  const a = refLines.map(norm);
-  const b = draftLines.map(norm);
-  const n = a.length;
-  const m = b.length;
+  const reference = new Set<number>();
+  const draft = new Set<number>();
+  let refIdx = 0;
+  let draftIdx = 0;
 
-  const dp: number[][] = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
-  for (let i = n - 1; i >= 0; i--) {
-    for (let j = m - 1; j >= 0; j--) {
-      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
-    }
-  }
-
-  const ops: AlignOp[] = [];
-  let i = 0;
-  let j = 0;
-  while (i < n && j < m) {
-    if (a[i] === b[j]) {
-      ops.push({ type: 'match', refIdx: i, draftIdx: j });
-      i++;
-      j++;
-    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
-      ops.push({ type: 'ref', refIdx: i });
-      i++;
+  for (const change of changes) {
+    const count = change.value.length;
+    if (change.removed && !change.added) {
+      for (let i = 0; i < count; i++) reference.add(refIdx + i + 1);
+      refIdx += count;
+    } else if (change.added && !change.removed) {
+      for (let i = 0; i < count; i++) draft.add(draftIdx + i + 1);
+      draftIdx += count;
+    } else if (change.removed && change.added) {
+      for (let i = 0; i < count; i++) {
+        reference.add(refIdx + i + 1);
+        draft.add(draftIdx + i + 1);
+      }
+      refIdx += count;
+      draftIdx += count;
     } else {
-      ops.push({ type: 'draft', draftIdx: j });
-      j++;
+      refIdx += count;
+      draftIdx += count;
     }
   }
-  while (i < n) {
-    ops.push({ type: 'ref', refIdx: i });
-    i++;
-  }
-  while (j < m) {
-    ops.push({ type: 'draft', draftIdx: j });
-    j++;
-  }
-  return ops;
+
+  return { reference, draft };
 }
 
-/** LCS-based diff: returns 1-based line numbers that differ in each file. */
+/** Line diff via jsdiff: returns 1-based line numbers that differ in each file. */
 export function diffChangedLines(reference: string, draft: string): DiffLines {
   const refLines = linesWithoutTrailingBlanks(reference);
   const draftLines = linesWithoutTrailingBlanks(draft);
-  const ops = alignLines(refLines, draftLines);
-
-  const referenceChanged = new Set<number>();
-  const draftChanged = new Set<number>();
-
-  for (const op of ops) {
-    if (op.type === 'match') continue;
-    if (op.type === 'ref' && op.refIdx !== undefined) referenceChanged.add(op.refIdx + 1);
-    if (op.type === 'draft' && op.draftIdx !== undefined) draftChanged.add(op.draftIdx + 1);
-  }
-
-  return { reference: referenceChanged, draft: draftChanged };
+  return collectLineDiff(refLines, draftLines);
 }
 
-/** Similarity score 0–100 based on LCS-aligned matching lines. */
+/** Similarity score 0–100 based on aligned matching lines. */
 export function matchScore(reference: string, draft: string): number {
   const refLines = linesWithoutTrailingBlanks(reference);
   const draftLines = linesWithoutTrailingBlanks(draft);
-  const ops = alignLines(refLines, draftLines);
+  const refNorm = refLines.map(normLine);
+  const draftNorm = draftLines.map(normLine);
+  const changes = diffArrays(refNorm, draftNorm);
   const max = Math.max(refLines.length, draftLines.length);
   if (max === 0) return 100;
 
   let match = 0;
-  for (const op of ops) {
-    if (op.type === 'match') match++;
+  for (const change of changes) {
+    if (!change.added && !change.removed) match += change.value.length;
   }
   return Math.round((match / max) * 100);
 }

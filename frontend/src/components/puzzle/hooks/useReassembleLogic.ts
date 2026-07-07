@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { CodePiece } from '@/lib/code';
 import { shuffle } from '@/lib/utils/shuffle';
 import { balanceTrayColumns } from '@/lib/code';
@@ -198,17 +199,20 @@ export function useReassembleLogic({
     return () => el.removeEventListener('keydown', onKey);
   }, [done, completing, selectedIdx, tray, tryPlace, reset, variant, showOverview, rootRef]);
 
-  const onDragStart = useCallback((e: React.DragEvent, piece: CodePiece) => {
-    e.dataTransfer.setData('text/plain', piece.id);
-    e.dataTransfer.effectAllowed = 'move';
+  const onDndDragStart = useCallback((event: DragStartEvent) => {
+    setDragOver(false);
+    void event;
   }, []);
 
-  const onDropAssembled = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
+  const onDndDragOver = useCallback(() => {
+    setDragOver(true);
+  }, []);
+
+  const onDndDragEnd = useCallback(
+    (event: DragEndEvent) => {
       setDragOver(false);
-      const id = e.dataTransfer.getData('text/plain');
-      const piece = tray.find((p) => p.id === id);
+      if (event.over?.id !== 'assembled-drop') return;
+      const piece = tray.find((p) => p.id === String(event.active.id));
       if (piece) tryPlace(piece);
     },
     [tray, tryPlace],
@@ -237,7 +241,9 @@ export function useReassembleLogic({
     mobileTrayColumns,
     reset,
     tryPlace,
-    onDragStart,
-    onDropAssembled,
+    onDndDragStart,
+    onDndDragOver,
+    onDndDragEnd,
+    trayIds: tray.map((p) => p.id),
   };
 }

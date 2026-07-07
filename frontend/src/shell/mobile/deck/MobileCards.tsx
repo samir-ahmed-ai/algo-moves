@@ -203,12 +203,12 @@ export function GistCardView({
       </div>
 
       <div className="mobile-gist-visual mt-2 flex min-h-0 flex-1 flex-col">
-        <GistArcCaption primary={card.gist} secondary={item.title} />
         <div
           className="mobile-gist-stage relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-3xl border border-edge/60 bg-panel2/40 text-ink2"
           data-noswipe
         >
           <GistScene key={item.id} item={item} className="h-full w-full" />
+          <GistArcCaption primary={card.gist} secondary={item.title} />
         </div>
       </div>
 
@@ -611,7 +611,6 @@ export function ReassembleCardView({
       {/* Context header — label row carries the mode roll */}
       <div className="px-1">
         <div className="flex items-center gap-1.5">
-          <span className="shrink-0 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.16em] text-ink3">Rebuild it</span>
           {block.pattern && (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">
               <Sparkles className="h-2.5 w-2.5" />

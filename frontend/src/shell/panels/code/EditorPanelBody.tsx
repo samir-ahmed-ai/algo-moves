@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { formatJsonDisplay } from '@/lib/utils/formatJsonDisplay';
 import type { InputBuilderKind } from '../../../core/effectTypes';
 import { CategorySelectItems } from '../../../components/shared/CategorySelectItems';
 import { INPUT_BUILDERS } from '../../../effects/inputBuilders';
@@ -162,8 +163,8 @@ export function EditorPanelBody() {
             value={json}
             onChange={(e) => setJson(e.target.value)}
             placeholder={'{ "values": [3,1,2] }'}
-            rows={3}
-            className={cn('font-mono', nodeText.base)}
+            rows={8}
+            className={cn('ws-scroll max-h-[320px] overflow-auto font-mono', nodeText.base)}
           />
           {jsonErr && (
             <Hint>
@@ -174,7 +175,7 @@ export function EditorPanelBody() {
             <Btn variant="primary" size="xs" onClick={importJson} disabled={!json.trim()}>
               Load JSON
             </Btn>
-            <Btn variant="quiet" size="xs" onClick={() => setJson(JSON.stringify(value))}>
+            <Btn variant="quiet" size="xs" onClick={() => setJson(formatJsonDisplay(value))}>
               Fill current
             </Btn>
           </div>

@@ -74,7 +74,18 @@ requireMatch(
   /role="status"/,
 );
 
-// --- Budget thresholds (documented constants for manual Lighthouse runs) ---
+// --- Shiki is lazy-loaded (puzzle tray only) — must not ship in main entry chunk ---
+requireMatch(
+  'src/lib/editor/shikiSnippet.tsx',
+  'Shiki must use dynamic import for bundle budget',
+  /import\(\s*['"]shiki\/bundle\/web['"]\s*\)/,
+);
+requireMatch(
+  'src/lib/editor/shikiSnippet.tsx',
+  'Shiki languages must load on demand',
+  /@shikijs\/langs\//,
+);
+
 const LIGHTHOUSE_BUDGET = {
   performance: 0.75,
   accessibility: 0.9,

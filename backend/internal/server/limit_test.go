@@ -48,7 +48,7 @@ func TestIPRateLimiterSweepPrunesStaleIPs(t *testing.T) {
 	}
 
 	l.mu.Lock()
-	before := len(l.hits)
+	before := len(l.entries)
 	l.mu.Unlock()
 	if before != 50 {
 		t.Fatalf("hits after 50 distinct IPs = %d, want 50", before)
@@ -62,7 +62,7 @@ func TestIPRateLimiterSweepPrunesStaleIPs(t *testing.T) {
 	l.allow("fresh")
 
 	l.mu.Lock()
-	after := len(l.hits)
+	after := len(l.entries)
 	l.mu.Unlock()
 	if after != 1 {
 		t.Fatalf("hits after sweep = %d, want 1 (only the fresh IP)", after)

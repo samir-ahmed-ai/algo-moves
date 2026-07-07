@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"algomoves/gameserver/internal/ws"
+	"golang.org/x/time/rate"
 )
 
 const (
@@ -36,7 +37,7 @@ type Client struct {
 	flush   chan chan struct{}
 	closed  chan struct{}
 	once    sync.Once
-	limiter *msgLimiter
+	limiter *rate.Limiter
 
 	// role is only ever read or written while the owning room holds its lock
 	// (room.join / room.setSeat set it, room.setState reads it), so — like
@@ -55,7 +56,7 @@ func newClient(conn *ws.Conn, name string) *Client {
 		out:     make(chan []byte, sendBuffer),
 		flush:   make(chan chan struct{}),
 		closed:  make(chan struct{}),
-		limiter: newMsgLimiter(msgRateLimit, msgBurst),
+		limiter: rate.NewLimiter(rate.Limit(msgRateLimit), int(msgBurst)),
 	}
 }
 
@@ -142,7 +143,7 @@ func (c *Client) readPump(h *Hub, code string) {
 		if err != nil {
 			return
 		}
-		if !c.limiter.allow() {
+		if !c.limiter.Allow() {
 			continue // throttle a fast-sending peer rather than processing every frame
 		}
 		var in Inbound
@@ -207,40 +208,4 @@ func (c *Client) writePump() {
 			close(ack)
 		}
 	}
-}
-
-// msgLimiter is a small token-bucket limiter guarding how fast one
-// connection's inbound application frames (relay/state/ping) are processed
-// after the WebSocket handshake — independent of, and finer-grained than, the
-// per-IP /ws upgrade rate limiter in the server package.
-type msgLimiter struct {
-	mu     sync.Mutex
-	tokens float64
-	max    float64
-	rate   float64 // tokens replenished per second
-	last   time.Time
-}
-
-func newMsgLimiter(ratePerSec, burst float64) *msgLimiter {
-	return &msgLimiter{tokens: burst, max: burst, rate: ratePerSec, last: time.Now()}
-}
-
-// allow reports whether one more message may be processed now, consuming a
-// token if so.
-func (l *msgLimiter) allow() bool {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	now := time.Now()
-	l.tokens += now.Sub(l.last).Seconds() * l.rate
-	if l.tokens > l.max {
-		l.tokens = l.max
-	}
-	l.last = now
-
-	if l.tokens < 1 {
-		return false
-	}
-	l.tokens--
-	return true
 }

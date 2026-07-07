@@ -2,6 +2,7 @@ import type { Item } from './types';
 import type { SampleInput } from '../core/types';
 import { PROBLEM_GISTS, gistFor } from './gists';
 import { GENERATED_PROBLEM_BRIEFS } from './_generated/problemBriefs';
+import { formatJsonDisplay } from '@/lib/utils/formatJsonDisplay';
 
 export interface ProblemBriefCase {
   label: string;
@@ -123,22 +124,11 @@ export function statementsFor(item: Item): [string, string] {
   return runtimeStatementsFor(item);
 }
 
-function formatBriefInput(value: unknown): string {
-  if (value == null) return '';
-  if (typeof value === 'string') return value;
-  try {
-    const s = JSON.stringify(value);
-    return s.length > 160 ? `${s.slice(0, 157)}…` : s;
-  } catch {
-    return String(value);
-  }
-}
-
 function casesFromInputs(inputs: SampleInput[]): ProblemBriefCase[] {
   return inputs.slice(0, 2).map((inp, i) => ({
     label: `Example ${i + 1}`,
     input:
-      inp.label.startsWith('[') || inp.label.includes('=') ? inp.label : formatBriefInput(inp.value),
+      inp.label.startsWith('[') || inp.label.includes('=') ? inp.label : formatJsonDisplay(inp.value),
     note: inp.hint,
   }));
 }

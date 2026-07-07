@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"algomoves/gameserver/internal/ws"
+	"golang.org/x/time/rate"
 )
 
 // upgradeTestConn performs a real RFC 6455 handshake against a throwaway
@@ -142,27 +143,27 @@ func TestDrainOutboundBlocksUntilWritePumpFlushes(t *testing.T) {
 }
 
 func TestMsgLimiterThrottlesBurst(t *testing.T) {
-	l := newMsgLimiter(1, 5)
+	l := rate.NewLimiter(rate.Limit(1), 5)
 	for i := 0; i < 5; i++ {
-		if !l.allow() {
+		if !l.Allow() {
 			t.Fatalf("call %d: expected allow within a burst of 5", i)
 		}
 	}
-	if l.allow() {
+	if l.Allow() {
 		t.Fatal("expected the 6th call to be throttled once the burst is exhausted")
 	}
 }
 
 func TestMsgLimiterRefillsOverTime(t *testing.T) {
-	l := newMsgLimiter(1000, 1) // fast refill so the test doesn't need a long sleep
-	if !l.allow() {
+	l := rate.NewLimiter(rate.Limit(1000), 1)
+	if !l.Allow() {
 		t.Fatal("first call should be allowed")
 	}
-	if l.allow() {
+	if l.Allow() {
 		t.Fatal("second call should be throttled immediately (burst of 1 exhausted)")
 	}
-	time.Sleep(10 * time.Millisecond) // >> 1 token at 1000/s
-	if !l.allow() {
+	time.Sleep(10 * time.Millisecond)
+	if !l.Allow() {
 		t.Fatal("expected a token to have refilled after waiting")
 	}
 }

@@ -36,7 +36,7 @@ func Handler(h *hub.Hub, arc *arcade.Service) http.Handler {
 	if arc != nil && arc.Enabled() {
 		apiMux := http.NewServeMux()
 		arc.Register(apiMux)
-		mux.Handle("/api/", corsAPI(allowed, apiMux))
+		mux.Handle("/api/", corsAPI(allowed, arc.SessionMiddleware(apiMux)))
 	}
 	mux.HandleFunc("/", bannerHandler)
 	return mux

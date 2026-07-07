@@ -16,6 +16,18 @@ func bearerToken(r *http.Request) string {
 }
 
 func (s *Service) profileFromRequest(ctx context.Context, r *http.Request) (*Profile, int, string) {
+	if pid := s.profileIDFromContext(ctx); pid != "" {
+		p, err := s.store.ProfileByID(ctx, pid)
+		if err != nil {
+			return nil, http.StatusInternalServerError, "database error"
+		}
+		if p == nil {
+			return nil, http.StatusUnauthorized, "invalid session token"
+		}
+		return p, 0, ""
+	}
+
+	// Legacy fallback: profiles.session_token column (pre-SCS tokens).
 	token := bearerToken(r)
 	if token == "" {
 		return nil, http.StatusUnauthorized, "missing session token"

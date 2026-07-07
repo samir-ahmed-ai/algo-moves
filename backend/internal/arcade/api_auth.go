@@ -86,6 +86,10 @@ func (s *Service) handleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	s.maybePromotePlatformAdmin(r.Context(), email)
 	s.refreshSessionProfile(r.Context(), sess)
+	if token, err := s.issueSession(r.Context(), sess.ProfileID); err == nil && token != "" {
+		sess.SessionToken = token
+		_, _, _ = s.store.RotateSessionToken(r.Context(), sess.ProfileID)
+	}
 	writeJSON(w, http.StatusOK, sess)
 }
 
@@ -140,6 +144,9 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		Profile:      *updated,
 	}
 	s.refreshSessionProfile(r.Context(), &sess)
+	if scsToken, err := s.issueSession(r.Context(), updated.ID); err == nil && scsToken != "" {
+		sess.SessionToken = scsToken
+	}
 	writeJSON(w, http.StatusOK, sess)
 }
 
@@ -152,6 +159,9 @@ func (s *Service) handleGuest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "could not create guest profile")
 		return
+	}
+	if token, err := s.issueSession(r.Context(), sess.ProfileID); err == nil && token != "" {
+		sess.SessionToken = token
 	}
 	writeJSON(w, http.StatusOK, sess)
 }

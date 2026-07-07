@@ -2,10 +2,9 @@ package arcade
 
 import (
 	"context"
-	"errors"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"algomoves/gameserver/internal/arcade/arcadedb"
 )
 
 // PrepPlan is a named, owner-held ordered collection of problem item ids.
@@ -35,90 +34,119 @@ type PrepPlanItem struct {
 	Completed bool   `json:"completed"`
 }
 
+func prepPlanFromHeader(row arcadedb.GetPrepPlanHeaderRow) PrepPlan {
+	return PrepPlan{
+		ID:             row.ID,
+		OwnerProfileID: row.OwnerProfileID,
+		Title:          row.Title,
+		Notes:          row.Notes,
+		CreatedAt:      pgTimestamptzTime(row.CreatedAt),
+		UpdatedAt:      pgTimestamptzTime(row.UpdatedAt),
+		Items:          []PrepPlanItem{},
+	}
+}
+
+func prepPlanFromCreate(row arcadedb.CreatePrepPlanRow) PrepPlan {
+	return PrepPlan{
+		ID:             row.ID,
+		OwnerProfileID: row.OwnerProfileID,
+		Title:          row.Title,
+		Notes:          row.Notes,
+		CreatedAt:      pgTimestamptzTime(row.CreatedAt),
+		UpdatedAt:      pgTimestamptzTime(row.UpdatedAt),
+		Items:          []PrepPlanItem{},
+	}
+}
+
+func prepPlanFromUpdate(row arcadedb.UpdatePrepPlanMetaRow) PrepPlan {
+	return PrepPlan{
+		ID:             row.ID,
+		OwnerProfileID: row.OwnerProfileID,
+		Title:          row.Title,
+		Notes:          row.Notes,
+		CreatedAt:      pgTimestamptzTime(row.CreatedAt),
+		UpdatedAt:      pgTimestamptzTime(row.UpdatedAt),
+	}
+}
+
+func prepItemsFromRows(rows []arcadedb.ListPrepPlanItemsRow) []PrepPlanItem {
+	out := make([]PrepPlanItem, len(rows))
+	for i, row := range rows {
+		out[i] = PrepPlanItem{
+			ItemID:    row.ItemID,
+			Position:  int(row.Position),
+			Completed: row.Completed,
+		}
+	}
+	return out
+}
+
 func (s *Store) ListPrepPlans(ctx context.Context, ownerID string) ([]PrepPlanSummary, error) {
-	rows, err := s.pool.Query(ctx, `
-		select p.id, p.title, p.updated_at,
-		       count(i.item_id)                                  as item_count,
-		       count(i.item_id) filter (where i.completed = true) as completed_count
-		from public.prep_plans p
-		left join public.prep_plan_items i on i.plan_id = p.id
-		where p.owner_profile_id = $1
-		group by p.id, p.title, p.updated_at
-		order by p.created_at desc
-		limit 200`, ownerID)
+	uid, err := parseProfileUUID(ownerID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	out := []PrepPlanSummary{}
-	for rows.Next() {
-		var v PrepPlanSummary
-		if err := rows.Scan(&v.ID, &v.Title, &v.UpdatedAt, &v.ItemCount, &v.CompletedCount); err != nil {
-			return nil, err
-		}
-		out = append(out, v)
+	rows, err := s.q.ListPrepPlanSummaries(ctx, uid)
+	if err != nil {
+		return nil, err
 	}
-	return out, rows.Err()
+	out := make([]PrepPlanSummary, len(rows))
+	for i, row := range rows {
+		out[i] = PrepPlanSummary{
+			ID:             row.ID,
+			Title:          row.Title,
+			ItemCount:      int(row.ItemCount),
+			CompletedCount: int(row.CompletedCount),
+			UpdatedAt:      pgTimestamptzTime(row.UpdatedAt),
+		}
+	}
+	return out, nil
 }
 
 func (s *Store) CreatePrepPlan(ctx context.Context, ownerID, title string) (*PrepPlan, error) {
-	var plan PrepPlan
-	err := s.pool.QueryRow(ctx, `
-		insert into public.prep_plans (owner_profile_id, title)
-		values ($1, $2)
-		returning id, owner_profile_id, title, notes, created_at, updated_at`,
-		ownerID, title).Scan(
-		&plan.ID, &plan.OwnerProfileID, &plan.Title, &plan.Notes, &plan.CreatedAt, &plan.UpdatedAt)
+	uid, err := parseProfileUUID(ownerID)
 	if err != nil {
 		return nil, err
 	}
-	plan.Items = []PrepPlanItem{}
+	row, err := s.q.CreatePrepPlan(ctx, arcadedb.CreatePrepPlanParams{
+		OwnerProfileID: uid,
+		Title:          title,
+	})
+	if err != nil {
+		return nil, err
+	}
+	plan := prepPlanFromCreate(row)
 	return &plan, nil
 }
 
 func (s *Store) GetPrepPlan(ctx context.Context, id, ownerID string) (*PrepPlan, error) {
-	var plan PrepPlan
-	err := s.pool.QueryRow(ctx, `
-		select id, owner_profile_id, title, notes, created_at, updated_at
-		from public.prep_plans
-		where id = $1 and owner_profile_id = $2`, id, ownerID).Scan(
-		&plan.ID, &plan.OwnerProfileID, &plan.Title, &plan.Notes, &plan.CreatedAt, &plan.UpdatedAt)
-	if errors.Is(err, pgx.ErrNoRows) {
+	planID, err := parseCanvasUUID(id)
+	if err != nil {
+		return nil, err
+	}
+	ownerUUID, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return nil, err
+	}
+	header, err := s.q.GetPrepPlanHeader(ctx, arcadedb.GetPrepPlanHeaderParams{
+		ID:             planID,
+		OwnerProfileID: ownerUUID,
+	})
+	if isNoRows(err) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-
-	rows, err := s.pool.Query(ctx, `
-		select item_id, position, completed
-		from public.prep_plan_items
-		where plan_id = $1
-		order by position asc`, id)
+	plan := prepPlanFromHeader(header)
+	items, err := s.q.ListPrepPlanItems(ctx, planID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	plan.Items = []PrepPlanItem{}
-	for rows.Next() {
-		var it PrepPlanItem
-		if err := rows.Scan(&it.ItemID, &it.Position, &it.Completed); err != nil {
-			return nil, err
-		}
-		plan.Items = append(plan.Items, it)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
+	plan.Items = prepItemsFromRows(items)
 	return &plan, nil
 }
 
-// UpdatePrepPlan performs a full-state save: updates plan metadata and replaces
-// the item list atomically inside a transaction.
-//
-// title and notes may be nil to leave them unchanged. itemIDs and completedSet
-// together define the new ordered item list; omitting itemIDs (nil) leaves items
-// unchanged. The bool return is false when id is not found or not owned by ownerID.
 func (s *Store) UpdatePrepPlan(
 	ctx context.Context,
 	id, ownerID string,
@@ -126,65 +154,59 @@ func (s *Store) UpdatePrepPlan(
 	itemIDs []string,
 	completedSet map[string]bool,
 ) (*PrepPlan, bool, error) {
+	planID, err := parseCanvasUUID(id)
+	if err != nil {
+		return nil, false, err
+	}
+	ownerUUID, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return nil, false, err
+	}
+
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return nil, false, err
 	}
 	defer tx.Rollback(ctx) //nolint:errcheck
 
-	var plan PrepPlan
-	err = tx.QueryRow(ctx, `
-		update public.prep_plans
-		set title      = coalesce($3, title),
-		    notes      = coalesce($4, notes),
-		    updated_at = now()
-		where id = $1 and owner_profile_id = $2
-		returning id, owner_profile_id, title, notes, created_at, updated_at`,
-		id, ownerID, title, notes).Scan(
-		&plan.ID, &plan.OwnerProfileID, &plan.Title, &plan.Notes, &plan.CreatedAt, &plan.UpdatedAt)
-	if errors.Is(err, pgx.ErrNoRows) {
+	qtx := s.q.WithTx(tx)
+	header, err := qtx.UpdatePrepPlanMeta(ctx, arcadedb.UpdatePrepPlanMetaParams{
+		ID:             planID,
+		OwnerProfileID: ownerUUID,
+		Title:          optionalText(title),
+		Notes:          optionalText(notes),
+	})
+	if isNoRows(err) {
 		return nil, false, nil
 	}
 	if err != nil {
 		return nil, false, err
 	}
+	plan := prepPlanFromUpdate(header)
 
 	if itemIDs != nil {
-		if _, err := tx.Exec(ctx, `delete from public.prep_plan_items where plan_id = $1`, id); err != nil {
+		if err := qtx.DeletePrepPlanItems(ctx, planID); err != nil {
 			return nil, false, err
 		}
 		plan.Items = make([]PrepPlanItem, 0, len(itemIDs))
 		for pos, itemID := range itemIDs {
 			completed := completedSet[itemID]
-			if _, err := tx.Exec(ctx, `
-				insert into public.prep_plan_items (plan_id, item_id, position, completed)
-				values ($1, $2, $3, $4)`, id, itemID, pos, completed); err != nil {
+			if err := qtx.InsertPrepPlanItem(ctx, arcadedb.InsertPrepPlanItemParams{
+				PlanID:    planID,
+				ItemID:    itemID,
+				Position:  int32(pos),
+				Completed: completed,
+			}); err != nil {
 				return nil, false, err
 			}
 			plan.Items = append(plan.Items, PrepPlanItem{ItemID: itemID, Position: pos, Completed: completed})
 		}
 	} else {
-		rows, err := tx.Query(ctx, `
-			select item_id, position, completed
-			from public.prep_plan_items
-			where plan_id = $1
-			order by position asc`, id)
+		items, err := qtx.ListPrepPlanItems(ctx, planID)
 		if err != nil {
 			return nil, false, err
 		}
-		plan.Items = []PrepPlanItem{}
-		for rows.Next() {
-			var it PrepPlanItem
-			if err := rows.Scan(&it.ItemID, &it.Position, &it.Completed); err != nil {
-				rows.Close()
-				return nil, false, err
-			}
-			plan.Items = append(plan.Items, it)
-		}
-		rows.Close()
-		if err := rows.Err(); err != nil {
-			return nil, false, err
-		}
+		plan.Items = prepItemsFromRows(items)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -193,13 +215,21 @@ func (s *Store) UpdatePrepPlan(
 	return &plan, true, nil
 }
 
-// DeletePrepPlan removes an owner-held plan (cascade deletes its items).
-// The bool is false when id is not found or not owned by ownerID.
 func (s *Store) DeletePrepPlan(ctx context.Context, id, ownerID string) (bool, error) {
-	tag, err := s.pool.Exec(ctx, `
-		delete from public.prep_plans where id = $1 and owner_profile_id = $2`, id, ownerID)
+	planID, err := parseCanvasUUID(id)
 	if err != nil {
 		return false, err
 	}
-	return tag.RowsAffected() > 0, nil
+	ownerUUID, err := parseProfileUUID(ownerID)
+	if err != nil {
+		return false, err
+	}
+	n, err := s.q.DeletePrepPlan(ctx, arcadedb.DeletePrepPlanParams{
+		ID:             planID,
+		OwnerProfileID: ownerUUID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
 }
