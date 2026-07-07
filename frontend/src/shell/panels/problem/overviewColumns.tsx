@@ -23,8 +23,8 @@ export function ProblemStatementColumn({
 
   return (
     <aside className={cn('ws-scroll h-full overflow-y-auto bg-panel/40', className)}>
-      <div className="flex h-full min-h-0 flex-col p-3 sm:p-4">
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-edge bg-panel p-3 before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:rounded-t-[var(--radius)] before:bg-accent/60 before:content-[''] sm:p-4">
+      <div className="flex h-full min-h-0 flex-col p-2">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-edge bg-panel p-2.5 shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:rounded-t-[var(--radius)] before:bg-accent/60 before:content-[''] sm:p-3">
           {collapse && (
             <button
               type="button"
@@ -36,7 +36,7 @@ export function ProblemStatementColumn({
               <PanelLeftClose className="h-3.5 w-3.5" />
             </button>
           )}
-          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto pt-1">{children}</div>
           {toolbar}
           {footer}
         </div>
@@ -62,7 +62,7 @@ export function OverviewProblemColumn({
     <ProblemStatementColumn
       className={className}
       toolbar={
-        <OverviewViewSwitch view={view} onView={onView} hasRecall={hasRecall} className="mt-3 shrink-0" />
+        <OverviewViewSwitch view={view} onView={onView} hasRecall={hasRecall} className="mt-2 shrink-0" />
       }
     >
       {children}
@@ -76,7 +76,7 @@ export function OverviewAnimateColumn() {
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <VizPanelBody showTransport={false} />
       </div>
-      <aside className="flex shrink-0 justify-center border-t border-edge bg-panel/80 px-3 py-2 backdrop-blur">
+      <aside className="flex shrink-0 justify-center border-t border-edge bg-panel/80 px-2 py-1.5 backdrop-blur">
         <TransportBar />
       </aside>
     </StudioContentPanel>

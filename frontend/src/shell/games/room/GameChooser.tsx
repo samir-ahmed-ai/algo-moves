@@ -65,7 +65,7 @@ export function GameChooser() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
         {filteredGames.map((game) => (
           <GameChooserCard
             key={game.id}
@@ -105,68 +105,65 @@ function GameChooserCard({
   const paceLabel = game.pace === 'turns' ? `🔄 ${t.picker.paceTurns}` : `⚡ ${t.picker.paceTogether}`;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex min-w-0 flex-col">
       <div
         className={cn(
-          'group relative flex items-stretch rounded-2xl border-2 bg-panel/70 p-3.5 transition-all',
+          'group relative flex h-full flex-col rounded-2xl border-2 bg-panel/70 transition-all',
           fits ? 'hover:-translate-y-0.5 hover:bg-panel hover:shadow-[var(--shadow-md)]' : 'opacity-50',
         )}
         style={fits ? { borderColor: `${color}40` } : { borderColor: 'var(--edge)' }}
       >
         <button
           type="button"
+          onClick={onToggleInfo}
+          aria-expanded={expanded}
+          aria-label={expanded ? t.picker.hideHowToPlay : t.picker.showHowToPlay}
+          className="absolute end-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink transition-colors touch-manipulation"
+        >
+          <Info className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
           disabled={!fits}
           onClick={onChoose}
           className={cn(
-            'flex min-w-0 flex-1 items-stretch gap-3 text-start touch-manipulation',
-            fits ? 'active:scale-[0.99]' : 'cursor-not-allowed',
+            'flex min-h-[10.5rem] w-full flex-col items-center gap-2.5 px-2.5 pb-3 pt-4 text-center touch-manipulation sm:min-h-[11rem]',
+            fits ? 'active:scale-[0.98]' : 'cursor-not-allowed',
           )}
         >
           <span
-            className="w-1 shrink-0 rounded-full"
-            style={{ background: fits ? color : 'var(--edge2)' }}
-          />
-          <span
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl"
-            style={{ background: `${color}20`, color }}
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl sm:h-[4.5rem] sm:w-[4.5rem]"
+            style={{ background: `${color}22`, color }}
           >
-            <Glyph markup={game.glyph} className="h-7 w-7" />
+            <Glyph markup={game.glyph} className="h-9 w-9 sm:h-10 sm:w-10" />
           </span>
-          <span className="min-w-0 flex-1 pe-10">
-            <span className="flex items-center gap-2">
-              <span className="font-bold text-ink truncate">{meta.title}</span>
+
+          <span className="flex w-full min-w-0 flex-1 flex-col items-center gap-1">
+            <span className="line-clamp-2 text-sm font-bold leading-tight text-ink">{meta.title}</span>
+            <span className="flex flex-wrap items-center justify-center gap-1">
               {game.category ? <CategoryBadge category={game.category} /> : null}
               {!fits ? (
-                <span className="shrink-0 rounded-full bg-panel2 px-2 py-0.5 text-[10px] font-semibold text-ink3 border border-edge">
+                <span className="shrink-0 rounded-full border border-edge bg-panel2 px-1.5 py-0.5 text-[9px] font-semibold text-ink3">
                   {t.picker.playerRange(cap.min, cap.max)}
                 </span>
               ) : null}
             </span>
-            <span className="mt-0.5 block text-xs text-ink3 leading-snug">
+            <span className="line-clamp-2 text-[10px] leading-snug text-ink3">
               {fits ? meta.tagline : t.picker.needsPlayers(cap.min, cap.max)}
             </span>
-            <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-ink3">
+            <span className="mt-auto inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide text-ink3">
               <span>{game.minutes}</span>
               <span className="text-edge2">·</span>
               <span>{paceLabel}</span>
             </span>
           </span>
         </button>
-
-        <button
-          type="button"
-          onClick={onToggleInfo}
-          aria-expanded={expanded}
-          aria-label={expanded ? t.picker.hideHowToPlay : t.picker.showHowToPlay}
-          className="absolute end-3 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink transition-colors touch-manipulation"
-        >
-          <Info className="h-4 w-4" />
-        </button>
       </div>
 
       {expanded ? (
         <div
-          className="mx-2 -mt-1 rounded-b-2xl border border-t-0 bg-panel2 px-4 py-3 text-xs text-ink2 leading-relaxed"
+          className="-mt-1 rounded-b-2xl border border-t-0 bg-panel2 px-3 py-2.5 text-[11px] text-ink2 leading-relaxed"
           style={{ borderColor: `${color}30` }}
         >
           <span className="font-bold text-ink">

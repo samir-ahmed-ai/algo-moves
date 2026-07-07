@@ -36,7 +36,7 @@ export function ProblemCollapsedRail({ onExpand }: { onExpand: () => void }) {
         onClick={onExpand}
         title="Show problem statement (\)"
         aria-label="Show problem statement"
-        className="grid h-7 w-7 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+        className="grid h-7 w-7 place-items-center rounded-md border border-transparent text-ink3 transition-colors hover:border-edge hover:bg-panel2 hover:text-accent"
       >
         <PanelLeft className="h-3.5 w-3.5" />
       </button>

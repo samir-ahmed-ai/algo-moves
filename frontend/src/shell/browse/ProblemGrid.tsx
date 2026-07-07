@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Trophy } from 'lucide-react';
+import { BookmarkPlus, CheckCircle2, Trophy } from 'lucide-react';
 import type { Difficulty, Item } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
@@ -8,6 +8,7 @@ import { chromeText } from '../chromeUi';
 import { glyphFor } from '../../content/problemShape';
 import { useProblemDragSource } from '@/hooks/useProblemDragSource';
 import { difficultyTint } from '../../content/difficultyTint';
+import { usePlan } from '@/shell/plans/PlanContext';
 
 const DIFFS: Difficulty[] = ['Easy', 'Medium', 'Hard'];
 
@@ -36,6 +37,15 @@ function ProblemCard({
   const pct = st.attempts > 0 ? Math.round((st.correct / st.attempts) * 100) : 0;
   const drag = useProblemDragSource(item.id);
 
+  const { isBuilding, hasItem, addItem, removeItem } = usePlan();
+  const inPlan = isBuilding && hasItem(item.id);
+
+  const handlePlanToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (inPlan) removeItem(item.id);
+    else addItem(item.id);
+  };
+
   return (
     <button
       type="button"
@@ -46,6 +56,7 @@ function ProblemCard({
       className={cn(
         'bp-note group relative flex min-h-[188px] flex-col items-center overflow-hidden rounded-lg border border-edge bg-panel pt-[3px] text-center transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
         isMastered && 'border-good/40',
+        isBuilding && inPlan && 'border-accent/60 ring-1 ring-accent/20',
       )}
     >
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px]" style={{ background: railColor }} />
@@ -58,6 +69,28 @@ function ProblemCard({
           <Trophy className="absolute right-2 top-2.5 h-3.5 w-3.5 text-good" aria-hidden />
         </>
       )}
+
+      {/* Add-to-plan toggle — only visible when a plan is being built */}
+      {isBuilding && (
+        <button
+          type="button"
+          onClick={handlePlanToggle}
+          aria-label={inPlan ? `Remove ${item.title} from plan` : `Add ${item.title} to plan`}
+          className={cn(
+            'absolute left-1.5 top-1.5 z-10 grid h-6 w-6 place-items-center rounded-md border transition-all',
+            inPlan
+              ? 'border-accent/60 bg-accent text-white shadow-sm'
+              : 'border-edge bg-panel/80 text-ink3 opacity-0 backdrop-blur-sm group-hover:opacity-100 hover:border-accent/50 hover:bg-panel hover:text-accent',
+          )}
+        >
+          {inPlan ? (
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          ) : (
+            <BookmarkPlus className="h-3.5 w-3.5" />
+          )}
+        </button>
+      )}
+
       <span aria-hidden className="pointer-events-none absolute left-1.5 top-2 h-2 w-2 border-l border-t border-edge2 opacity-60" />
       <span aria-hidden className="pointer-events-none absolute bottom-1.5 right-1.5 h-2 w-2 border-b border-r border-edge2 opacity-60" />
 

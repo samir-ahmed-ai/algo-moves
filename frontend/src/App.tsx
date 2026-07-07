@@ -7,12 +7,15 @@ import { MobileApp } from './shell/mobile/MobileApp';
 import { VimDojoPage } from './shell/vim/VimDojoPage';
 import { GamesPage } from './shell/games/GamesPage';
 import { ErrorBoundary } from './shell/ErrorBoundary';
+import { PlanProvider } from './shell/plans/PlanContext';
+import { PlansPage } from './shell/plans/PlansPage';
 
 function Shell() {
   const { route } = useWorkspace();
   if (route === 'mobile') return <MobileApp />;
   if (route === 'vim') return <VimDojoPage />;
   if (route === 'games') return <GamesPage />;
+  if (route === 'plans') return <PlansPage />;
   return route === 'home' ? <LandingPage /> : <Workspace />;
 }
 
@@ -20,13 +23,15 @@ export default function App() {
   return (
     <AuthProvider>
       <WorkspaceProvider>
-        <ReplayStoreProvider>
-          <div className="h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
-            <ErrorBoundary label="app">
-              <Shell />
-            </ErrorBoundary>
-          </div>
-        </ReplayStoreProvider>
+        <PlanProvider>
+          <ReplayStoreProvider>
+            <div className="h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
+              <ErrorBoundary label="app">
+                <Shell />
+              </ErrorBoundary>
+            </div>
+          </ReplayStoreProvider>
+        </PlanProvider>
       </WorkspaceProvider>
     </AuthProvider>
   );

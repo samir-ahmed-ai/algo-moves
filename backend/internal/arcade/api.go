@@ -88,4 +88,6 @@ func (s *Service) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/api/interviews/", s.handleInterview)
 	mux.HandleFunc("/api/content/catalog", s.handleContentCatalog)
 	mux.HandleFunc("/api/content/problems/", s.handleContentProblem)
+	mux.HandleFunc("/api/prep-plans", s.handlePrepPlans)
+	mux.HandleFunc("/api/prep-plans/", s.handlePrepPlan)
 }

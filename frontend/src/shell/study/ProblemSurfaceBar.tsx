@@ -8,6 +8,7 @@ import { chromeText } from '../chromeUi';
 import { useCanvasStatic, Chip, difficultyTone } from '@/shell/canvas';
 import { WorkspaceMenuDropdown } from '@/shell/workspace/WorkspaceMenu';
 import { AuthButton } from '@/shell/auth';
+import { FeatureSelectorPopover, ToolbarSegment } from '@/components/shared';
 
 export function IconBtn({
   title,
@@ -74,7 +75,7 @@ export function ProblemSurfaceBar({
   };
 
   return (
-    <header className="nodrag sticky top-0 z-20 flex h-11 shrink-0 items-center gap-1.5 border-b border-edge bg-panel px-2 py-1 sm:gap-2 sm:px-3">
+    <header className="nodrag sticky top-0 z-20 flex h-10 shrink-0 items-center gap-1.5 border-b border-edge bg-panel px-2 py-0.5 shadow-sm sm:gap-2">
       <AuthButton compact />
       {onOpenPalette && onOpenHelp ? (
         <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
@@ -126,21 +127,68 @@ export function ProblemSurfaceBar({
         </div>
       )}
 
-      <IconBtn
-        className="hidden md:grid"
-        title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      >
-        {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-      </IconBtn>
-      <IconBtn
-        className="hidden md:grid"
-        title="Presentation mode"
-        active={present}
-        onClick={() => setPresent(!present)}
-      >
-        <Maximize2 className="h-4 w-4" />
-      </IconBtn>
+      <ToolbarSegment className="hidden md:flex">
+        <FeatureSelectorPopover
+          groups={[
+            {
+              options: [
+                {
+                  id: 'light',
+                  icon: <Sun />,
+                  title: 'Light',
+                  subtitle: 'Light background',
+                  detailTitle: 'Light Theme',
+                  detailDescription: 'Light background with dark text.',
+                },
+                {
+                  id: 'dark',
+                  icon: <Moon />,
+                  title: 'Dark',
+                  subtitle: 'Dark background',
+                  detailTitle: 'Dark Theme',
+                  detailDescription: 'Dark background with light text — easier on the eyes at night.',
+                },
+              ],
+            },
+          ]}
+          value={theme}
+          onChange={(v) => setTheme(v as 'light' | 'dark')}
+          panelTitle="Theme"
+          triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+          compact
+          align="right"
+        />
+        <FeatureSelectorPopover
+          groups={[
+            {
+              options: [
+                {
+                  id: 'off',
+                  icon: <Maximize2 />,
+                  title: 'Normal',
+                  subtitle: 'Full chrome',
+                  detailTitle: 'Normal view',
+                  detailDescription: 'All UI chrome visible — toolbar, sidebar, and navigation.',
+                },
+                {
+                  id: 'on',
+                  icon: <Maximize2 />,
+                  title: 'Present',
+                  subtitle: 'Focus mode',
+                  detailTitle: 'Presentation mode',
+                  detailDescription: 'Hides chrome and maximises the problem surface for presenting or focusing.',
+                },
+              ],
+            },
+          ]}
+          value={present ? 'on' : 'off'}
+          onChange={(v) => setPresent(v === 'on')}
+          panelTitle="View"
+          triggerIcon={<Maximize2 className="h-3.5 w-3.5" />}
+          compact
+          align="right"
+        />
+      </ToolbarSegment>
     </header>
   );
 }

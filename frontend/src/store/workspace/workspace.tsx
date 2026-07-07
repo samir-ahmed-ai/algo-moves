@@ -26,8 +26,8 @@ export interface CanvasToolsProps {
 export type Theme = 'dark' | 'light';
 export type Density = 'compact' | 'ultra' | 'spacious';
 export type Palette = 'default' | 'cb';
-/** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, or the two-player games arcade. */
-export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim' | 'games';
+/** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, the two-player games arcade, or the interview prep plans hub. */
+export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim' | 'games' | 'plans';
 export type { ThemePreset, LayoutPreset, CanvasSnapRegion };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 

@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   // store / persistence
   PROJECTS: k('projects'),
   PROGRESS: k('progress'),
+  PREP_PLAN_ACTIVE: k('prep-plan-active'),
 
   // store / canvas-layout
   LAYOUTS: k('layouts'),
@@ -34,6 +35,8 @@ export const STORAGE_KEYS = {
   // shell / canvas
   STUDIO_TAB: k('studio-tab'),
   DRAFT: (itemId: string, variant: string | number) => k('draft', itemId, variant),
+  /** Session flag set in beforeunload — soft reload restores drafts; hard refresh does not. */
+  DRAFT_SOFT_RELOAD: k('draft-soft-reload'),
   NOTES: (itemId: string) => k('notes', itemId),
   EDGE_CASES: (itemId: string) => k('edgecases', itemId),
   RUSH_BEST: (itemId: string, variant: string | number) => k('rush-best', itemId, variant),
@@ -41,6 +44,7 @@ export const STORAGE_KEYS = {
 
   // shell / mobile
   MOBILE_SESSION: k('mobile-session'),
+  INSTALL_PROMPT_DISMISSED: k('install-prompt-dismissed'),
 
   // shell / home
   SWIPE_QR_DISMISSED: k('swipe-qr-dismissed'),

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Home, Moon, Sun } from 'lucide-react';
 import { BrandLogo } from '@/shell/BrandLogo';
 import { AuthButton } from '@/shell/auth';
+import { InstallAppBanner } from './install/InstallAppBanner';
+import { usePwaInstall } from './install/usePwaInstall';
 import { catalog, categoryIdFromBrowseTopic, topicForCategory, type Topic } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { MobileBrowse } from './MobileBrowse';
@@ -66,6 +68,9 @@ export function MobileApp() {
     activeCategoryId,
     setActiveCategoryId,
   } = useWorkspace();
+
+  const installState = usePwaInstall();
+  const [installDismissed, setInstallDismissed] = useState(false);
 
   const [target, setTarget] = useState<DeckTarget | null>(() => {
     const fromHash = targetFromHash();
@@ -194,6 +199,9 @@ export function MobileApp() {
               <AuthButton compact />
               {ThemeBtn}
             </header>
+            {!installDismissed && (
+              <InstallAppBanner state={installState} onDismiss={() => setInstallDismissed(true)} />
+            )}
             <MobileBrowse onPick={pick} />
           </>
         )}

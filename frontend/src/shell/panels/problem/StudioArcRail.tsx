@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 import type { StudioTab } from '@/shell/study/studioTabs';
@@ -63,19 +64,25 @@ export function StudioArcRail({
   if (steps.length === 0) return null;
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-1', className)}>
+    <div className={cn('flex flex-wrap items-center gap-0.5', className)}>
       {steps.map((step, idx) => (
-        <span key={step.key} className="flex items-center gap-1">
-          {idx > 0 && <span className={cn('text-ink3', chromeText.xs)} aria-hidden>›</span>}
+        <span key={step.key} className="flex items-center gap-0.5">
+          {idx > 0 && (
+            <span className={cn('mx-0.5 text-ink3/50', chromeText.tight)} aria-hidden>
+              ›
+            </span>
+          )}
           <span
             className={cn(
-              'rounded-full px-2 py-0.5 font-medium',
+              'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium transition-colors',
               chromeText.xs,
-              step.state === 'active' && 'bg-accentbg text-accent',
-              step.state === 'done' && 'bg-panel2 text-ink2',
-              step.state === 'todo' && 'text-ink3',
+              step.state === 'active' && 'bg-accentbg text-accent ring-1 ring-accent/20',
+              step.state === 'done' && 'text-ink3',
+              step.state === 'todo' && 'text-ink3/50',
             )}
           >
+            {step.state === 'done' && <Check className="h-2.5 w-2.5 shrink-0 text-good" strokeWidth={2.5} />}
+            {step.state === 'active' && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
             {step.label}
           </span>
         </span>

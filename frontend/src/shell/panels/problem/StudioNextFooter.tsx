@@ -29,15 +29,15 @@ export function StudioNextFooter({
       {(hasNext || hasNextAll) && (
         <div className="flex shrink-0 flex-wrap items-center gap-1">
           {hasNextAll && (
-            <Btn variant="ghost" size="sm" onClick={onNextAll} title="Skip to last view (Shift+Enter)">
+            <Btn variant="ghost" size="xs" onClick={onNextAll} title="Skip to last view (Shift+Enter)">
               Next all · {nextAllLabel}
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3 w-3" />
             </Btn>
           )}
           {hasNext && (
-            <Btn variant="ghost" size="sm" onClick={onNext} title="Next (Enter)">
+            <Btn variant="primary" size="xs" onClick={onNext} title="Next (Enter)">
               Next · {nextLabel}
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3 w-3" />
             </Btn>
           )}
         </div>

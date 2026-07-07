@@ -55,6 +55,7 @@ export function useAppNavigation(shared: ShareState | null) {
       if (page === 'mobile') return 'mobile';
       if (page === 'vim') return 'vim';
       if (page === 'games') return 'games';
+      if (page === 'plans') return 'plans';
       if (page === 'home') return 'home';
       if (page === 'workspace') return 'workspace';
       const { hash, pathname } = location;
@@ -132,6 +133,11 @@ export function useAppNavigation(shared: ShareState | null) {
     writeGamesHash(roomCode ? { room: roomCode } : null);
   }, []);
 
+  const enterPlans = useCallback(() => {
+    setRoute('plans');
+    writeAppUrl('plans');
+  }, []);
+
   // Remember the last problem opened in the workspace for the home page's "Continue".
   useEffect(() => {
     if (route === 'workspace' && activeItemId) {
@@ -163,5 +169,6 @@ export function useAppNavigation(shared: ShareState | null) {
     enterMobile,
     enterVim,
     enterGames,
+    enterPlans,
   };
 }

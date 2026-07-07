@@ -12,7 +12,7 @@ describe('editorPrefs', () => {
     expect(prefs.highlightChanges).toBe(true);
     expect(prefs.mergeGutter).toBe(true);
     expect(prefs.mergeCollapse).toBe(true);
-    expect(prefs.recallCompact).toBe(false);
+    expect(prefs.recallCompact).toBe(true);
     expect(prefs.recallReveal).toBe('full');
     expect(prefs.pointerMode).toBe('line');
   });

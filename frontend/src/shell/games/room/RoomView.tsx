@@ -38,7 +38,7 @@ function Staging({ game, children }: { game?: GameDef; children: ReactNode }) {
   const serverHint = hasConfiguredServer() ? t.waitingRoom.serverHintDeployed : t.waitingRoom.serverHintLan;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-2.5">
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-2.5">
       <Roster />
       <div className="rounded-xl border border-edge bg-panel/60 p-3">{children}</div>
       {!game ? <ShareRoom room={room ?? ''} hint={serverHint} locale={locale} /> : null}

@@ -14,7 +14,7 @@ import {
   type QuizProgress,
 } from '@/store/user-prefs';
 import { usePhaseTransition } from './usePhaseTransition';
-import { writeStorageText } from '@/store/persistence';
+import { loadPersistedDraft, savePersistedDraft } from '@/store/persistence/draftPersistence';
 import { recordAttempt } from '@/store/persistence';
 
 /**
@@ -46,14 +46,17 @@ export function useCodeStudioMachine({
 
   const [phase, setPhase] = useState<CodeStudioPhase>(() => phaseLock ?? loadPhase(itemId, active, av));
 
-  const loadDraft = useCallback(() => '', []);
+  const loadDraft = useCallback(
+    (opts?: { itemSwitch?: boolean }) => loadPersistedDraft(draftKey, opts),
+    [draftKey],
+  );
 
-  const [draft, setDraft] = useState<string>(loadDraft);
+  const [draft, setDraft] = useState<string>(() => loadDraft());
 
   useEffect(() => {
     clearTransition();
     setPhaseTransition(false);
-    setDraft(loadDraft());
+    setDraft(loadDraft({ itemSwitch: true }));
     setPhase(phaseLock ?? loadPhase(itemId, active, av));
     setReassembleKey((k) => k + 1);
   }, [loadDraft, itemId, active, av, clearTransition, phaseLock]);
@@ -61,7 +64,7 @@ export function useCodeStudioMachine({
   const persistDraft = useCallback(
     (v: string) => {
       setDraft(v);
-      writeStorageText(draftKey, v);
+      savePersistedDraft(draftKey, v);
     },
     [draftKey],
   );
@@ -70,7 +73,6 @@ export function useCodeStudioMachine({
     (startTimer = true) => {
       setPhaseTransition(true);
       persistDraft('');
-      writeStorageText(draftKey, '');
       savePhase(itemId, active, 'recall');
       clearReassembleProgress(itemId, active);
       scheduleTransition(() => {
@@ -92,7 +94,6 @@ export function useCodeStudioMachine({
       if (target === 'quiz') clearQuizProgress(itemId, active);
       if (target === 'recall') {
         persistDraft('');
-        writeStorageText(draftKey, '');
       }
       setPhaseTransition(true);
       savePhase(itemId, active, target);

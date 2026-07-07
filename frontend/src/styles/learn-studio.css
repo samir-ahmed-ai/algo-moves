@@ -47,6 +47,41 @@
   }
 }
 
+/* Pinned footer — frosted bar below the problem/content split. */
+.studio-split-footer {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Column resize handle — visible grip on hover. */
+.split-handle {
+  position: relative;
+}
+.split-handle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 3px;
+  height: 24px;
+  border-radius: 2px;
+  background: var(--border);
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.group:hover .split-handle::after,
+.split-handle:hover::after {
+  opacity: 1;
+}
+.split-handle:hover::after {
+  background: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .split-handle::after {
+    transition: none;
+  }
+}
+
 /* ============================================================ Assemble blocks
  * Code pieces rendered as physical, interlocking puzzle blocks. A two-layer clip
  * (stroke layer + tinted face) gives a coloured outline that follows the puzzle

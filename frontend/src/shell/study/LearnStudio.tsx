@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GraduationCap } from 'lucide-react';
 import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
-import { cn } from '@/lib/utils/cn';
 import { computeInputFrameCounts } from '@/lib/canvas';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import {
@@ -25,7 +24,6 @@ import { StudioPanelStageBody } from '@/shell/panels/problem/StudioPanelStageBod
 import { StudioViewPicker } from './StudioViewPicker';
 import { ProblemSurfaceBar } from './ProblemSurfaceBar';
 import { readStorageText, writeStorageText } from '@/store/persistence';
-import { chromeText } from '../chromeUi';
 import {
   flatOrder,
   isTabAvailable,
@@ -239,28 +237,18 @@ function LearnTopBar({
       onOpenHelp={onOpenHelp}
       badgeIcon={<GraduationCap className="h-4 w-4 text-accent" />}
       afterTitle={
-        <StudioViewPicker compact={isMobile} stages={stages} avail={avail} active={active} onGo={onGo} />
+        <StudioViewPicker
+          compact={isMobile}
+          stages={stages}
+          avail={avail}
+          active={active}
+          onGo={onGo}
+          variants={variants.length > 1 ? variants : undefined}
+          activeVariant={activeVariant}
+          onSetVariant={setActive}
+        />
       }
-      meta={
-        variants.length > 1 ? (
-          <div className="hidden shrink-0 items-center gap-0.5 sm:flex">
-            {variants.map((v, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setActive(i)}
-                className={cn(
-                  'rounded-md px-1.5 py-1 font-medium transition-colors',
-                  chromeText.sm,
-                  i === activeVariant ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
-                )}
-              >
-                {(v.lang ?? 'text').toUpperCase()}
-              </button>
-            ))}
-          </div>
-        ) : null
-      }
+      meta={null}
     />
   );
 }

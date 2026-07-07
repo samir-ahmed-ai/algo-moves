@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const devPort = Number((globalThis as { process?: { env?: { PORT?: string } } }).process?.env?.PORT) || 4321;
 const alphaBucket = (name: string) => {
@@ -11,7 +12,26 @@ const alphaBucket = (name: string) => {
 };
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      // Keep the hand-crafted manifest.webmanifest in public/ rather than
+      // having the plugin generate one — it already has all the right fields.
+      manifest: false,
+      includeAssets: ['favicon.svg', 'assets/*.png'],
+      workbox: {
+        // Cache everything shipped in dist, including large lazy JS chunks.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],
+        maximumFileSizeToCacheInBytes: 8_000_000,
+        // SPA fallback so /mobile deep-links work when served from cache.
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+      },
+      // No SW in dev — avoids stale-cache confusion during development.
+      devOptions: { enabled: false },
+    }),
+  ],
   resolve: {
     alias: {
       '@': new URL('./src', import.meta.url).pathname,

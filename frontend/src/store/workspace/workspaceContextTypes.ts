@@ -86,6 +86,8 @@ export interface WorkspaceCtx {
   enterVim: (levelId?: string) => void;
   /** Enter the two-player games arcade; pass a room code to join that room directly. */
   enterGames: (roomCode?: string) => void;
+  /** Enter the interview prep plans hub. */
+  enterPlans: () => void;
   canvasAdd: CanvasAddPanel | null;
   setCanvasAdd: (v: CanvasAddPanel | null) => void;
   canvasProject: CanvasProjectApi | null;

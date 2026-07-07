@@ -17,7 +17,7 @@ export function OverviewViewSwitch({
   if (!hasRecall) return null;
 
   return (
-    <div className={cn('flex items-center gap-0.5 border-t border-edge pt-3', className)}>
+    <div className={cn('flex items-center gap-0.5 rounded-md border border-edge bg-panel2/50 p-0.5', className)}>
       <TabBtn
         active={view === 'animate'}
         onClick={() => onView('animate')}
@@ -57,8 +57,10 @@ function TabBtn({
       onClick={onClick}
       title={title}
       className={cn(
-        'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-        active ? 'bg-accent text-white shadow-sm' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+        'flex flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--radius)-2px)] border px-2 py-1 text-xs font-medium transition-colors',
+        active
+          ? 'border-accent/25 bg-accent text-white shadow-sm'
+          : 'border-transparent bg-transparent text-ink2 hover:bg-panel hover:text-ink',
       )}
     >
       {icon}

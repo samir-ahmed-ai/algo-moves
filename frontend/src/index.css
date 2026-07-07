@@ -41,8 +41,8 @@ html {
 }
 
 [data-density='compact'] {
-  --pad: 0.4375rem;
-  --gap: 0.3125rem;
+  --pad: 0.375rem;
+  --gap: 0.25rem;
   --fs: 0.875rem;
   --fs-sm: 0.8125rem;
   --fs-xs: 0.75rem;
@@ -52,12 +52,12 @@ html {
   --lh: 1.4;
   --lh-tight: 1.25;
   --lh-snug: 1.35;
-  --row: 1.875rem;
-  --hpad: 0.5625rem;
-  --section: 0.375rem;
-  --node-px: 0.8125rem;
-  --node-py: 0.5625rem;
-  --node-gap: 0.5625rem;
+  --row: 1.75rem;
+  --hpad: 0.5rem;
+  --section: 0.3125rem;
+  --node-px: 0.75rem;
+  --node-py: 0.5rem;
+  --node-gap: 0.5rem;
   --node-icon: 1.125rem;
   --viz-display: 1.875rem;
   --viz-expr: 1.5rem;

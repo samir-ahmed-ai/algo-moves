@@ -1,5 +1,4 @@
 import { ScanEye } from 'lucide-react';
-import { computeRecallProgress } from '@/lib/code';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { useWorkspace } from '@/store/workspace';
@@ -9,13 +8,12 @@ import {
   useCodeStudioDraft,
   useCodeStudioEditor,
 } from '../CodeStudio';
-import { useRecallDraftChange } from '../hooks/useRecallDraftChange';
 import { RecallEditorShell } from './RecallEditorShell';
 import { RecallToolbar } from './RecallToolbar';
 
-/** Split reference/draft editor with recall toolbar — used by Learn Recall tab and Overview. */
+/** Split reference/draft diff editor — used by Learn Recall tab and Overview. */
 export function RecallPane({ className, showTitle }: { className?: string; showTitle?: boolean }) {
-  const { reference, code, stat } = useCodeStudioContent();
+  const { reference, code } = useCodeStudioContent();
   const {
     draft,
     score,
@@ -29,7 +27,6 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
     timerLabel,
   } = useCodeStudioDraft();
   const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
-  const { onDraftChange: recallDraftChange, mistakeTick } = useRecallDraftChange();
   const isMobile = useIsMobile();
   const { theme, themePreset } = useWorkspace();
 
@@ -41,8 +38,7 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
     );
   }
 
-  const compact = editorPrefs.recallCompact || isMobile;
-  const progress = computeRecallProgress(reference, draft);
+  const compact = editorPrefs.recallCompact !== false || isMobile;
 
   return (
     <div className={cn('flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
@@ -54,7 +50,6 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
         peek={peek}
         setPeek={setPeek}
         persistDraft={persistDraft}
-        attemptCount={stat.attempts}
         timerRunning={timerRunning}
         setTimerRunning={setTimerRunning}
         timerLabel={timerLabel}
@@ -62,7 +57,6 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
         setEditorPrefs={setEditorPrefs}
         compact={compact}
         scorePct={Math.round(score)}
-        linesProgress={{ completed: progress.completedLines.length, total: progress.total }}
       />
       <RecallEditorShell
         reference={reference}
@@ -74,9 +68,8 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
         setEditorPrefs={setEditorPrefs}
         blind={blind}
         peek={peek}
-        onDraftChange={recallDraftChange}
+        onDraftChange={persistDraft}
         compact={compact}
-        mistakeTick={mistakeTick}
       />
     </div>
   );

@@ -1146,129 +1146,58 @@ circle {
   overflow: hidden;
 }
 
-/* Recall split editor — CodeMirror @codemirror/merge MergeView chrome. */
-.cm-recall-merge-host {
+/* Merge diff editor — CodeMirror @codemirror/merge MergeView chrome. */
+.cm-merge-diff-host {
   overflow: hidden;
 }
-.cm-recall-merge-host .cm-mergeView {
+.cm-merge-diff-host .cm-mergeView {
   height: 100%;
   overflow: auto;
 }
-.cm-recall-merge-host .cm-mergeViewEditor {
+.cm-merge-diff-host .cm-mergeViewEditor {
   min-width: 0;
 }
-.cm-recall-merge-host .cm-collapsedLines {
+.cm-merge-diff-host .cm-mergeView .cm-content {
+  min-height: unset;
+}
+.cm-merge-diff-host .cm-collapsedLines {
   color: var(--text-3);
   background: color-mix(in srgb, var(--surface-2) 60%, transparent);
   border-top: 0.5px dashed var(--border);
   border-bottom: 0.5px dashed var(--border);
 }
-/*
- * Recall is a strict-prefix exercise, not a free-form diff: the draft is always a verified
- * correct prefix of the reference, so the stock @codemirror/merge "changed line" flood (the
- * whole reference lighting up green) is noise, not signal. The recall-progress highlighter
- * (lib/editor/recallProgress.ts) drives the real per-line done/current/upcoming state instead,
- * so neutralize the merge diff's own coloring down to a faint gutter tick.
- */
-.cm-recall-merge-host .cm-changedLine,
-.cm-recall-merge-host .cm-deletedChunk {
-  background-color: transparent !important;
-}
-.cm-recall-merge-host .cm-changedText {
-  background: none !important;
-}
-.cm-recall-merge-host .cm-changedLineGutter,
-.cm-recall-merge-host .cm-deletedLineGutter {
-  background: color-mix(in srgb, var(--accent) 40%, transparent) !important;
-}
-/* Compact recall editor — denser chrome when compact toolbar is on. */
-.cm-recall-compact-chrome {
+.cm-merge-compact-chrome {
   border-radius: calc(var(--radius) - 2px);
 }
-/* Recall pointer (.cm-recall-pointer-line / -gutter) styling lives in recallPointer.ts's baseTheme. */
+.cm-merge-compact .cm-mergeView .cm-content {
+  padding: 2px 0;
+}
+.cm-merge-compact .cm-mergeView .cm-gutters {
+  padding-left: 2px;
+}
+/* Reference pane is read-only — no text cursor or drag-select. */
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-content {
+  cursor: default;
+  user-select: none;
+}
 
-/*
- * Recall progress highlighter (lib/editor/recallProgress.ts): reference-side line states plus
- * the attempt-side "just completed" flash. Reveal levels (dim/blur/hidden) control how much of
- * the not-yet-typed reference is visible ahead of the current line.
- */
-.cm-recall-merge-host .cm-recall-done {
-  background-color: color-mix(in srgb, var(--good) 7%, transparent);
-  box-shadow: inset 2px 0 0 0 var(--good);
+/* Diff highlights — deletions on reference, insertions/changes on your attempt. */
+.cm-merge-diff-host .cm-deletedChunk,
+.cm-merge-diff-host .cm-deletedLineGutter {
+  background-color: color-mix(in srgb, var(--bad) 14%, transparent) !important;
 }
-.cm-recall-merge-host .cm-recall-current {
-  background-color: color-mix(in srgb, var(--accent) 9%, transparent);
-  box-shadow: inset 2px 0 0 0 var(--accent);
+.cm-merge-diff-host .cm-mergeViewEditor:last-child .cm-changedLine {
+  background-color: color-mix(in srgb, var(--accent) 14%, transparent);
 }
-.cm-recall-merge-host .cm-recall-match-cue {
-  text-decoration: underline;
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 2px;
+.cm-merge-diff-host .cm-mergeViewEditor:last-child .cm-changedText {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border-radius: 2px;
 }
-.cm-recall-merge-host .cm-recall-ghost-tail {
-  opacity: 0.45;
+.cm-merge-diff-host .cm-changedLineGutter {
+  background: color-mix(in srgb, var(--accent) 35%, transparent) !important;
 }
-.cm-recall-merge-host .cm-recall-upcoming {
-  transition:
-    opacity 150ms ease,
-    filter 150ms ease;
-}
-.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-dim {
-  opacity: 0.32;
-}
-.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-blur {
-  filter: blur(4px);
-}
-.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-blur:hover {
-  filter: none;
-}
-/*
- * Syntax-highlighted tokens set their own explicit color, which otherwise wins over the
- * inherited value — force transparency on the line and every descendant span so hidden lines
- * are actually hidden (not just recolored-then-overridden by token colors).
- */
-.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden,
-.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden * {
-  color: transparent !important;
-  text-shadow: none;
-}
-.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden:hover,
-.cm-recall-merge-host .cm-recall-upcoming.cm-reveal-hidden:hover * {
-  color: inherit !important;
-}
-.cm-recall-merge-host .cm-recall-just-done {
-  animation: cm-recall-flash 650ms ease-out;
-}
-@keyframes cm-recall-flash {
-  0% {
-    background-color: color-mix(in srgb, var(--good) 35%, transparent);
-  }
-  100% {
-    background-color: transparent;
-  }
-}
-/* Brief shake on the whole recall shell when a mistake resets the draft to the skeleton. */
-.cm-recall-shake {
-  animation: cm-recall-shake 400ms ease-in-out;
-}
-@keyframes cm-recall-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-4px);
-  }
-  40% {
-    transform: translateX(3px);
-  }
-  60% {
-    transform: translateX(-2px);
-  }
-  80% {
-    transform: translateX(1px);
-  }
+.cm-merge-diff-host .cm-insertedLine {
+  background-color: color-mix(in srgb, var(--good) 12%, transparent);
 }
 
 .cases-panel {

@@ -19,7 +19,7 @@ import {
   type CodeStudioPhase,
   type PhaseAvailability,
 } from '@/store/user-prefs';
-import { computeRecallProgress, matchScore } from '@/lib/code';
+import { matchScore } from '@/lib/code';
 import { useEditorPrefs } from '@/store/user-prefs';
 import { parseComplexity } from '@/lib/quiz';
 import { useProgress, statFor } from '@/store/persistence';
@@ -44,7 +44,6 @@ import {
 import { useCodeStudioTimer } from './hooks/useCodeStudioTimer';
 import { useCodeStudioRecallShortcuts } from './hooks/useCodeStudioRecallShortcuts';
 import { useCodeStudioMachine } from './hooks/useCodeStudioMachine';
-import { useRecallDraftChange } from './hooks/useRecallDraftChange';
 import { RecallEditorShell } from './components/RecallEditorShell';
 import { RecallToolbar } from './components/RecallToolbar';
 
@@ -187,8 +186,6 @@ export function CodeStudioProvider({
     phase,
     persistDraft,
     setBlind,
-    pointerMode: editorPrefs.pointerMode,
-    recallReveal: editorPrefs.recallReveal,
     fontSize: editorPrefs.fontSize,
     setEditorPrefs,
   });
@@ -350,8 +347,8 @@ function recallExtrasOverflow({
 
 /** Inline header controls — icon-only with tooltips. */
 export function CodeStudioToolbar() {
-  const { variants, active, setActive, reference, stat } = useCodeStudioContent();
-  const { draft, blind, setBlind, peek, setPeek, persistDraft, timerRunning, setTimerRunning, timerLabel } =
+  const { variants, active, setActive } = useCodeStudioContent();
+  const { blind, setBlind, peek, setPeek, persistDraft, timerRunning, setTimerRunning, timerLabel } =
     useCodeStudioDraft();
   const { copied, copyRef, editorPrefs, setEditorPrefs } = useCodeStudioEditor();
   const {
@@ -365,11 +362,6 @@ export function CodeStudioToolbar() {
     resetReassemble,
     phaseLocked,
   } = useCodeStudioPhase();
-
-  const recallProgress = reference ? computeRecallProgress(reference, draft) : null;
-  const linesProgress = recallProgress
-    ? { completed: recallProgress.completedLines.length, total: recallProgress.total }
-    : undefined;
 
   if (phaseLocked) {
     const extras = recallExtrasOverflow({ copied, copyRef, hasReassemble, hasQuiz, resetReassemble, goToPhase });
@@ -385,14 +377,12 @@ export function CodeStudioToolbar() {
               peek={peek}
               setPeek={setPeek}
               persistDraft={persistDraft}
-              attemptCount={stat.attempts}
               timerRunning={timerRunning}
               setTimerRunning={setTimerRunning}
               timerLabel={timerLabel}
               editorPrefs={editorPrefs}
               setEditorPrefs={setEditorPrefs}
               compact={editorPrefs.recallCompact}
-              linesProgress={linesProgress}
               trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
             />
           </>
@@ -450,14 +440,12 @@ export function CodeStudioToolbar() {
             peek={peek}
             setPeek={setPeek}
             persistDraft={persistDraft}
-            attemptCount={stat.attempts}
             timerRunning={timerRunning}
             setTimerRunning={setTimerRunning}
             timerLabel={timerLabel}
             editorPrefs={editorPrefs}
             setEditorPrefs={setEditorPrefs}
             compact={editorPrefs.recallCompact}
-            linesProgress={linesProgress}
             trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
           />
         </>
@@ -486,9 +474,8 @@ export function CodeStudioToolbar() {
 
 export function CodeStudioBody() {
   const { reference, code, theme, active } = useCodeStudioContent();
-  const { draft, blind, peek } = useCodeStudioDraft();
+  const { draft, blind, peek, persistDraft } = useCodeStudioDraft();
   const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
-  const { onDraftChange: recallDraftChange, mistakeTick } = useRecallDraftChange();
   const {
     phase,
     phaseTransition,
@@ -553,9 +540,8 @@ export function CodeStudioBody() {
             setEditorPrefs={setEditorPrefs}
             blind={blind}
             peek={peek}
-            onDraftChange={recallDraftChange}
+            onDraftChange={persistDraft}
             compact={editorPrefs.recallCompact}
-            mistakeTick={mistakeTick}
           />
         )}
       </div>

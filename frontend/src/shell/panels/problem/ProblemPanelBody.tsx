@@ -57,7 +57,7 @@ function ExamplePills({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="nodrag flex flex-wrap gap-1.5" role="radiogroup" aria-label="sample inputs">
+    <div className="nodrag flex flex-wrap gap-1" role="radiogroup" aria-label="sample inputs">
       {inputs.map((i) => {
         const on = i.id === inputId;
         const ops = inputFrameCount(inputFrameCounts, i.id);
@@ -69,7 +69,7 @@ function ExamplePills({
             aria-checked={on}
             onClick={() => onSelect(i.id)}
             className={cn(
-              'inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[length:var(--node-fs-xs,0.75rem)] transition-colors',
+              'inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[length:var(--node-fs-xs,0.75rem)] transition-colors',
               on
                 ? 'border-accent bg-accentbg text-accent'
                 : 'border-edge bg-panel2/60 text-ink2 hover:bg-panel2 hover:text-ink',
@@ -178,7 +178,7 @@ function ExampleInputPicker() {
   if (inputs.length <= 1) {
     if (!preview) return null;
     return (
-      <ControlsAccordion title="Input preview" defaultOpen bodyClassName="pt-1 [&_pre]:p-3">
+      <ControlsAccordion title="Input preview" defaultOpen bodyClassName="pt-1 [&_pre]:rounded-md [&_pre]:border [&_pre]:border-edge/60 [&_pre]:bg-panel2/50 [&_pre]:p-2">
         <Code text={preview} />
       </ControlsAccordion>
     );
@@ -221,7 +221,7 @@ function ExampleInputPicker() {
             title="Input preview"
             defaultOpen
             className="mt-1.5 border-t-0"
-            bodyClassName="pt-1 [&_pre]:p-3"
+            bodyClassName="pt-1 [&_pre]:rounded-md [&_pre]:border [&_pre]:border-edge/60 [&_pre]:bg-panel2/50 [&_pre]:p-2"
           >
             <Code text={preview} />
           </ControlsAccordion>
@@ -251,7 +251,7 @@ export function ProblemPanelBody() {
         <Section title={inVisualize ? 'Overview' : undefined} bordered={false}>
           {!inVisualize && (
             <div
-              className="mb-2 border-l-2 pl-2.5"
+              className="mb-1.5 border-l-2 pl-2"
               style={{ borderLeftColor: item.difficulty ? TONE_BAR[tone] : 'transparent' }}
             >
               <div className="flex flex-wrap items-center gap-[var(--node-gap,6px)]">
@@ -271,7 +271,7 @@ export function ProblemPanelBody() {
             <ProblemBriefBody statements={problemBrief.statements} cases={problemBrief.cases} />
           )}
           {item.tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-[var(--node-gap,6px)]">
+            <div className="mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
               {item.tags.map((t) => (
                 <NodeTagChip key={t} id={t} />
               ))}
@@ -291,7 +291,7 @@ export function ProblemPanelBody() {
           </div>
         </ControlsAccordion>
       )}
-      <div className={cn(showHeaderDivider && 'mt-3 border-t border-edge pt-3')}>
+      <div className={cn(showHeaderDivider && 'mt-2 border-t border-edge pt-2')}>
         <ExampleInputPicker />
       </div>
     </div>

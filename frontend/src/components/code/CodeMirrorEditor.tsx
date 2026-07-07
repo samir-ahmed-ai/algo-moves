@@ -52,6 +52,21 @@ export const baseTheme = EditorView.theme({
   },
 });
 
+/** MergeView-safe chrome — no fixed height/min-height; @codemirror/merge sizes editors and spacers from content. */
+export const mergeEditorChrome = EditorView.theme({
+  '&': { fontSize: 'var(--fs-xs, 12px)', borderRadius: 'var(--radius)' },
+  '.cm-scroller': { fontFamily: 'var(--mono)', lineHeight: '1.5' },
+  '.cm-gutters': { borderRight: '0.5px solid var(--border)' },
+  '&.cm-focused': { outline: 'none' },
+  '.cm-vimMode': {
+    fontFamily: 'var(--mono)',
+    fontSize: 'var(--fs-2xs, 9px)',
+    padding: '2px 6px',
+    color: 'var(--text-3)',
+    borderTop: '0.5px solid var(--border)',
+  },
+});
+
 /**
  * CodeMirror 6 for Code Studio. View created once per lang/minHeight; theme, vim, wrap,
  * readOnly, and decorations reconfigure live so toggles never discard edits.

@@ -1,12 +1,158 @@
-import type { Dispatch, ReactNode, SetStateAction } from 'react';
-import { Eye, EyeOff, Keyboard, RotateCcw, ScanEye, Timer } from 'lucide-react';
+import { useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import {
+  Eye,
+  EyeOff,
+  Keyboard,
+  RotateCcw,
+  ScanEye,
+  Settings2,
+  Timer,
+} from 'lucide-react';
 import { Chip } from '@/shell/canvas';
 import { cn } from '@/lib/utils/cn';
-import { chromeText } from '@/shell/chromeUi';
+import { chromeText, ChromeLabel } from '@/shell/chromeUi';
 import type { EditorPrefs } from '@/store/user-prefs';
-import { RecallEditorMenu } from './RecallEditorMenu';
 import { recallEditorMenuItems } from './recallEditorControls';
 import { ToolbarGroup, ToolbarGroupBtn } from './ToolbarGroup';
+import { usePopoverDismiss } from '@/shell/ui/usePopoverDismiss';
+
+/** Compact popover combining Session controls + Editor settings under one trigger. */
+function RecallSettingsPopover({
+  timerRunning,
+  setTimerRunning,
+  timerLabel,
+  persistDraft,
+  editorPrefs,
+  setEditorPrefs,
+  compact,
+}: {
+  timerRunning: boolean;
+  setTimerRunning: Dispatch<SetStateAction<boolean>>;
+  timerLabel: string;
+  persistDraft: (v: string) => void;
+  editorPrefs: EditorPrefs;
+  setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
+  compact?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  usePopoverDismiss(rootRef, open, () => setOpen(false));
+
+  const editorItems = recallEditorMenuItems(editorPrefs, setEditorPrefs);
+
+  const sessionCards = [
+    {
+      id: 'timer',
+      icon: <Timer className="h-4 w-4" />,
+      title: timerRunning ? 'Stop timer' : 'Start timer',
+      subtitle: timerRunning ? timerLabel : 'Timed recall',
+      active: timerRunning,
+      onClick: () => setTimerRunning((r) => !r),
+    },
+    {
+      id: 'clear',
+      icon: <RotateCcw className="h-4 w-4" />,
+      title: 'Clear draft',
+      subtitle: '⌘⇧R',
+      active: false,
+      onClick: () => { persistDraft(''); setOpen(false); },
+    },
+  ];
+
+  return (
+    <div ref={rootRef} className="relative shrink-0">
+      <button
+        type="button"
+        title="Recall settings"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          'grid place-items-center rounded-md border border-edge bg-panel2/60 transition-colors hover:bg-panel2',
+          open && 'border-accent/40 bg-panel2 text-accent',
+          compact ? 'h-[calc(var(--row)*0.875)] w-[calc(var(--row)*0.875)]' : 'h-[var(--row,28px)] w-[var(--row,28px)]',
+        )}
+      >
+        <Settings2 className="h-3.5 w-3.5 text-ink3" />
+      </button>
+
+      {open && (
+        <div
+          role="dialog"
+          aria-label="Recall settings"
+          className="absolute right-0 top-[calc(100%+4px)] z-50 w-[min(300px,calc(100vw-24px))] rounded-lg border border-edge bg-panel shadow-[var(--shadow-xl)]"
+          onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
+        >
+          {/* Session */}
+          <div className="p-2">
+            <ChromeLabel className="mb-1.5 px-1">Session</ChromeLabel>
+            <div className="flex gap-1.5">
+              {sessionCards.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={card.onClick}
+                  className={cn(
+                    'flex w-[min(8rem,42%)] flex-col items-center gap-1.5 rounded-lg border p-2 text-center transition-colors',
+                    card.active
+                      ? 'border-accent/60 bg-accentbg'
+                      : 'border-edge bg-panel2/60 hover:border-accent/40 hover:bg-panel2',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'grid h-8 w-8 place-items-center rounded-md border border-dashed',
+                      card.active ? 'border-accent/40 bg-panel text-accent' : 'border-edge bg-panel text-ink3',
+                    )}
+                  >
+                    {card.icon}
+                  </span>
+                  <span className="w-full">
+                    <span
+                      className={cn(
+                        'block truncate font-medium',
+                        chromeText.xs,
+                        card.active ? 'text-accent' : 'text-ink',
+                      )}
+                    >
+                      {card.title}
+                    </span>
+                    <span className={cn('block truncate text-ink3', chromeText.xs)}>{card.subtitle}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Editor settings */}
+          <div className="border-t border-edge px-2 pb-2 pt-2">
+            <ChromeLabel className="mb-1.5 px-1">Editor</ChromeLabel>
+            <div className="flex flex-col gap-0.5">
+              {editorItems.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  disabled={item.disabled}
+                  onClick={() => { if (!item.disabled) item.onClick(); }}
+                  className={cn(
+                    'flex w-full items-center gap-2 rounded-md px-2 py-1 text-left transition-colors disabled:opacity-40',
+                    chromeText.sm,
+                    item.active ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                  )}
+                >
+                  {item.icon && (
+                    <span className="grid h-4 w-4 shrink-0 place-items-center">{item.icon}</span>
+                  )}
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** Compact grouped recall controls — shared by RecallPane and Code Studio header. */
 export function RecallToolbar({
@@ -15,7 +161,6 @@ export function RecallToolbar({
   peek,
   setPeek,
   persistDraft,
-  attemptCount = 0,
   timerRunning,
   setTimerRunning,
   timerLabel,
@@ -24,7 +169,6 @@ export function RecallToolbar({
   compact,
   showTitle,
   scorePct,
-  linesProgress,
   className,
   trailing,
 }: {
@@ -33,8 +177,6 @@ export function RecallToolbar({
   peek: boolean;
   setPeek: (v: boolean) => void;
   persistDraft: (v: string) => void;
-  /** Saved recall attempts for this problem (incremented on each mistake). */
-  attemptCount?: number;
   timerRunning: boolean;
   setTimerRunning: Dispatch<SetStateAction<boolean>>;
   timerLabel: string;
@@ -43,18 +185,13 @@ export function RecallToolbar({
   compact?: boolean;
   showTitle?: boolean;
   scorePct?: number;
-  /** Lines fully recalled so far, out of the total non-blank reference lines. */
-  linesProgress?: { completed: number; total: number };
   className?: string;
   trailing?: ReactNode;
 }) {
-  const editorMenuItems = recallEditorMenuItems(editorPrefs, setEditorPrefs);
-  const currentAttempt = attemptCount + 1;
-
   return (
     <div
       className={cn(
-        'flex shrink-0 flex-nowrap items-center gap-1.5 overflow-x-auto',
+        'flex shrink-0 flex-nowrap items-center gap-1.5 overflow-x-auto bg-panel2/40',
         compact ? 'h-7' : 'h-8',
         className,
       )}
@@ -67,6 +204,7 @@ export function RecallToolbar({
         </>
       )}
 
+      {/* High-frequency view toggles — kept accessible at top level */}
       <ToolbarGroup title="View mode">
         <ToolbarGroupBtn
           active={blind}
@@ -86,36 +224,18 @@ export function RecallToolbar({
         </ToolbarGroupBtn>
       </ToolbarGroup>
 
-      <ToolbarGroup title="Session">
-        <ToolbarGroupBtn title="Clear attempt (⌘⇧R)" onClick={() => persistDraft('')}>
-          <RotateCcw className="h-3 w-3" />
-        </ToolbarGroupBtn>
-        <ToolbarGroupBtn
-          active={timerRunning}
-          title={timerRunning ? 'Stop recall timer' : 'Start recall timer'}
-          onClick={() => setTimerRunning((r) => !r)}
-        >
-          <Timer className="h-3 w-3" />
-          {!compact && <span className="max-w-[3.5rem] truncate">{timerLabel}</span>}
-        </ToolbarGroupBtn>
-      </ToolbarGroup>
-
-      <RecallEditorMenu items={editorMenuItems} compact title="Recall editor settings" />
+      {/* Session + editor settings combined into one popover */}
+      <RecallSettingsPopover
+        timerRunning={timerRunning}
+        setTimerRunning={setTimerRunning}
+        timerLabel={timerLabel}
+        persistDraft={persistDraft}
+        editorPrefs={editorPrefs}
+        setEditorPrefs={setEditorPrefs}
+        compact={compact}
+      />
 
       <div className="flex-1" />
-      {attemptCount > 0 && (
-        <span title={`${attemptCount} failed attempt${attemptCount === 1 ? '' : 's'} saved`}>
-          <Chip tone="muted" mono>
-            Attempt {currentAttempt}
-          </Chip>
-        </span>
-      )}
-      {linesProgress !== undefined && linesProgress.total > 0 && (
-        <Chip tone={linesProgress.completed >= linesProgress.total ? 'good' : 'muted'} mono>
-          {linesProgress.completed}/{linesProgress.total}
-          {!compact && ' lines'}
-        </Chip>
-      )}
       {scorePct !== undefined && (
         <Chip tone={scorePct >= 80 ? 'good' : scorePct >= 50 ? 'accent' : 'muted'} mono>
           {compact ? `${scorePct}%` : `${scorePct}% match`}

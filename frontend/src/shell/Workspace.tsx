@@ -6,8 +6,9 @@ import { cn } from '@/lib/utils/cn';
 import { WorkspaceMenu } from './workspace/WorkspaceMenu';
 import { MobileSwipeReturn } from './mobile/deck/MobileSwipeReturn';
 import { CommandPalette, ModeRouter, PresentationModeHint, ShortcutsOverlay, useWorkspaceKeyboard, useWorkspaceRuntime } from '@/shell/workspace/index';
-
 import { SettingsDialog, MobileTransportSheet } from '@/shell/canvas';
+import { PlanTray } from './plans/PlanTray';
+import { PlanRunner } from './plans/PlanRunner';
 export function Workspace() {
   const {
     density,
@@ -70,6 +71,9 @@ export function Workspace() {
       )}
     >
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col h-full">
+        {/* Plan run-mode bar appears above the workspace menu when a run is active */}
+        <PlanRunner />
+
         {!present && mode !== 'visualize' && mode !== 'learn' && mode !== 'play' && (
           <WorkspaceMenu
             onOpenPalette={() => setPaletteOpen(true)}
@@ -100,6 +104,9 @@ export function Workspace() {
           />
         </div>
       </div>
+
+      {/* Plan builder tray docked to the right */}
+      <PlanTray />
 
       {present && <PresentationModeHint />}
 

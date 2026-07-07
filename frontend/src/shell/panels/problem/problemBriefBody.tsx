@@ -17,17 +17,24 @@ function InfoParagraphs({ lines }: { lines: string[] }) {
 export function InfoCases({ cases }: { cases: ProblemBriefCase[] }) {
   if (cases.length === 0) return null;
   return (
-    <div className="mt-2 space-y-2">
-      {cases.map((c) => (
-        <div key={c.label} className="rounded-md border border-edge/60 bg-panel2/40 px-2.5 py-2">
-          <p className={cn('font-medium text-ink', nodeText.xs)}>{c.label}</p>
-          <p className={cn('mt-0.5 font-mono text-ink2', nodeText.xs)}>{c.input}</p>
-          {c.output && (
-            <p className={cn('mt-0.5 text-ink2', nodeText.xs)}>
-              Expected: <span className="font-mono text-ink">{c.output}</span>
-            </p>
-          )}
-          {c.note && <p className={cn('mt-1 leading-relaxed text-ink3', nodeText.xs)}>{c.note}</p>}
+    <div className="mt-1.5 space-y-1.5">
+      {cases.map((c, i) => (
+        <div key={c.label} className="overflow-hidden rounded-md border border-edge/60 bg-panel2/40">
+          <div className="flex items-center gap-2 border-b border-edge/40 bg-panel2/60 px-2 py-1">
+            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-accent/15 text-[10px] font-bold tabular-nums text-accent">
+              {i + 1}
+            </span>
+            <p className={cn('font-medium text-ink', nodeText.xs)}>{c.label}</p>
+          </div>
+          <div className="px-2 py-1.5">
+            <p className={cn('font-mono text-ink2', nodeText.xs)}>{c.input}</p>
+            {c.output && (
+              <p className={cn('mt-0.5 text-ink3', nodeText.xs)}>
+                → <span className="font-mono text-ink">{c.output}</span>
+              </p>
+            )}
+            {c.note && <p className={cn('mt-1 leading-relaxed text-ink3', nodeText.xs)}>{c.note}</p>}
+          </div>
         </div>
       ))}
     </div>

@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   ArrowRight,
+  BookMarked,
   BookOpen,
   Code2,
   Contrast,
@@ -12,12 +13,15 @@ import {
   LayoutGrid,
   Megaphone,
   Moon,
+  MoreHorizontal,
+  Palette,
   Play,
   Smartphone,
   Sun,
   Target,
   Trophy,
 } from 'lucide-react';
+import { FeatureSelectorPopover, ToolbarSegment } from '@/components/shared';
 import {
   catalog,
   getAllCategories,
@@ -56,35 +60,6 @@ function Glyph({ markup, className }: { markup: string; className?: string }) {
   );
 }
 
-function IconButton({
-  title,
-  active,
-  onClick,
-  children,
-}: {
-  title: string;
-  active?: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      title={title}
-      aria-label={title}
-      onClick={onClick}
-      className={cn(
-        'grid h-8 w-8 place-items-center rounded-xl border transition-colors [&>svg]:h-4 [&>svg]:w-4',
-        active
-          ? 'border-accent bg-accentbg text-accent'
-          : 'border-edge text-ink3 hover:bg-panel2 hover:text-ink',
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 function RailStat({ icon, value, label }: { icon: ReactNode; value: ReactNode; label: string }) {
   return (
     <div className="flex items-center gap-2.5 rounded-xl border border-edge bg-panel/60 px-3 py-2.5">
@@ -99,34 +74,36 @@ function RailStat({ icon, value, label }: { icon: ReactNode; value: ReactNode; l
   );
 }
 
-function RailTrack({
-  icon,
-  title,
-  meta,
-  onClick,
-}: {
-  icon: ReactNode;
-  title: string;
-  meta: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-xl border border-edge bg-panel/60 px-3 py-2.5 text-left transition-colors hover:border-accent/50 hover:bg-panel"
-    >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-accent [&>svg]:h-[18px] [&>svg]:w-[18px]">
-        {icon}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-ink">{title}</span>
-        <span className="block truncate text-xs text-ink3">{meta}</span>
-      </span>
-      <ArrowRight className="h-4 w-4 shrink-0 text-ink3 transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
-    </button>
-  );
-}
+const MORE_MODES_GROUPS = [
+  {
+    options: [
+      {
+        id: 'swipe',
+        icon: <Smartphone />,
+        title: 'Swipe',
+        subtitle: 'Mobile deck',
+        detailTitle: 'Swipe Mode',
+        detailDescription: 'A swipeable card deck optimised for phone practice — flip through problems one-handed.',
+      },
+      {
+        id: 'vim',
+        icon: <Keyboard />,
+        title: 'Vim Dojo',
+        subtitle: 'Keyboard drills',
+        detailTitle: 'Vim Dojo',
+        detailDescription: 'Timed keyboard-mastery drills to build muscle memory for Vim motions and shortcuts.',
+      },
+      {
+        id: 'games',
+        icon: <Gamepad2 />,
+        title: 'Games',
+        subtitle: 'Two-player rooms',
+        detailTitle: 'Games',
+        detailDescription: 'Create or join a room and race a friend through head-to-head algorithm rounds.',
+      },
+    ],
+  },
+];
 
 function ModeStrip({
   onPlay,
@@ -143,19 +120,25 @@ function ModeStrip({
   onVim: () => void;
   onGames: () => void;
 }) {
-  const pills = [
+  const [moreMode, setMoreMode] = useState('');
+
+  const primaryPills = [
     { icon: Play, label: 'Play', onClick: onPlay },
     { icon: Eye, label: 'Visualize', onClick: onVisualize },
     { icon: GraduationCap, label: 'Learn', onClick: onLearn },
-    { icon: Smartphone, label: 'Swipe', onClick: onSwipe },
-    { icon: Keyboard, label: 'Vim Dojo', onClick: onVim },
-    { icon: Gamepad2, label: 'Games', onClick: onGames },
   ] as const;
+
+  const handleMoreMode = (id: string) => {
+    setMoreMode(id);
+    if (id === 'swipe') onSwipe();
+    else if (id === 'vim') onVim();
+    else if (id === 'games') onGames();
+  };
 
   return (
     <div className="-mx-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex min-w-min gap-2 px-1">
-        {pills.map(({ icon: Icon, label, onClick }) => (
+        {primaryPills.map(({ icon: Icon, label, onClick }) => (
           <button
             key={label}
             type="button"
@@ -166,6 +149,15 @@ function ModeStrip({
             {label}
           </button>
         ))}
+        <FeatureSelectorPopover
+          groups={MORE_MODES_GROUPS}
+          value={moreMode}
+          onChange={handleMoreMode}
+          panelTitle="More modes"
+          panelHint="Alternative ways to practice on this platform."
+          triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
+          align="left"
+        />
       </div>
     </div>
   );
@@ -251,6 +243,7 @@ export function LandingPage() {
     enterMobile,
     enterVim,
     enterGames,
+    enterPlans,
   } = useWorkspace();
   const isMobile = useIsMobile();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
@@ -281,6 +274,94 @@ export function LandingPage() {
   const [lastId] = useState(() => readLastItemId());
   const lastItem = lastId ? catalog.getItem(lastId) : undefined;
   const firstProblem = problems[0];
+
+  const [exploreId, setExploreId] = useState('');
+  const [lastTrackId, setLastTrackId] = useState<TrackId>('go');
+
+  const handleExplore = (id: string) => {
+    setExploreId(id);
+    if (id === 'swipe') enterMobile();
+    else if (id === 'games') enterGames();
+    else if (id === 'plans') enterPlans();
+  };
+
+  const exploreGroups = [
+    {
+      options: [
+        {
+          id: 'swipe',
+          icon: <Smartphone />,
+          title: 'Swipe',
+          subtitle: 'Mobile deck',
+          detailTitle: 'Swipe Mode',
+          detailDescription: 'A swipeable card deck built for phone practice — flip through problems one-handed.',
+        },
+        {
+          id: 'games',
+          icon: <Gamepad2 />,
+          title: 'Games',
+          subtitle: 'Two-player rooms',
+          detailTitle: 'Games',
+          detailDescription: 'Race a friend through head-to-head algorithm rounds in a shared room.',
+        },
+        {
+          id: 'plans',
+          icon: <BookMarked />,
+          title: 'Plans',
+          subtitle: 'Interview prep',
+          detailTitle: 'Interview Plans',
+          detailDescription: 'Structured day-by-day prep plans tailored to your interview timeline.',
+        },
+      ],
+    },
+  ];
+
+  const themeGroups = [
+    {
+      options: [
+        {
+          id: 'light',
+          icon: <Sun />,
+          title: 'Light',
+          subtitle: 'Light background',
+          detailTitle: 'Light Theme',
+          detailDescription: 'Light background with dark text, ideal for bright environments.',
+        },
+        {
+          id: 'dark',
+          icon: <Moon />,
+          title: 'Dark',
+          subtitle: 'Dark background',
+          detailTitle: 'Dark Theme',
+          detailDescription: 'Dark background with light text, easy on the eyes in low light.',
+        },
+      ],
+    },
+  ];
+
+  const paletteGroups = [
+    {
+      options: [
+        {
+          id: 'default',
+          icon: <Palette />,
+          title: 'Default',
+          subtitle: 'Standard',
+          detailTitle: 'Default Palette',
+          detailDescription: 'Standard accent colours used throughout the interface.',
+        },
+        {
+          id: 'cb',
+          icon: <Contrast />,
+          title: 'CB-safe',
+          subtitle: 'Accessible',
+          detailTitle: 'Colour-blind Palette',
+          detailBadge: 'A11Y',
+          detailDescription: 'Optimised for deuteranopia and protanopia — distinguishable without relying on red or green.',
+        },
+      ],
+    },
+  ];
 
   const openInNewTab = (url: string) => window.open(url, '_blank', 'noopener,noreferrer');
   const wsUrl = useMemo(
@@ -314,13 +395,17 @@ export function LandingPage() {
         <div className="flex items-center gap-2 px-4 py-2.5">
           <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)]" />
           <span className="min-w-0 truncate font-semibold tracking-tight">Algo Moves</span>
-          <div className="ml-auto flex shrink-0 items-center gap-1">
-            <IconButton title="Swipe mode" onClick={() => enterMobile()}>
-              <Smartphone />
-            </IconButton>
-            <IconButton title="Games" onClick={() => enterGames()}>
-              <Gamepad2 />
-            </IconButton>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            <FeatureSelectorPopover
+              groups={exploreGroups}
+              value={exploreId}
+              onChange={handleExplore}
+              panelTitle="Explore modes"
+              panelHint="Alternative practice surfaces."
+              triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
+              compact
+              align="right"
+            />
             <AuthButton />
           </div>
         </div>
@@ -335,26 +420,37 @@ export function LandingPage() {
             <div className="hidden items-center gap-2 lg:flex">
               <EagleMark className="h-9 w-9 rounded-xl shadow-[var(--shadow-md)]" />
               <span className="font-semibold tracking-tight">Algo Moves</span>
-              <div className="ml-auto flex shrink-0 items-center gap-1.5">
-                <IconButton title="Swipe mode — mobile practice deck" onClick={() => enterMobile()}>
-                  <Smartphone />
-                </IconButton>
-                <IconButton title="Games — two-player rooms" onClick={() => enterGames()}>
-                  <Gamepad2 />
-                </IconButton>
-                <IconButton
-                  title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                >
-                  {theme === 'dark' ? <Sun /> : <Moon />}
-                </IconButton>
-                <IconButton
-                  title={palette === 'cb' ? 'Colour-blind palette: on' : 'Colour-blind palette: off'}
-                  active={palette === 'cb'}
-                  onClick={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
-                >
-                  <Contrast />
-                </IconButton>
+              <div className="ml-auto flex shrink-0 items-center gap-2">
+                <ToolbarSegment>
+                  <FeatureSelectorPopover
+                    groups={exploreGroups}
+                    value={exploreId}
+                    onChange={handleExplore}
+                    panelTitle="Explore modes"
+                    panelHint="Alternative practice surfaces."
+                    triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
+                    compact
+                    align="right"
+                  />
+                  <FeatureSelectorPopover
+                    groups={themeGroups}
+                    value={theme}
+                    onChange={(v) => setTheme(v as 'light' | 'dark')}
+                    panelTitle="Theme"
+                    triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+                    compact
+                    align="right"
+                  />
+                  <FeatureSelectorPopover
+                    groups={paletteGroups}
+                    value={palette}
+                    onChange={(v) => setPalette(v as 'default' | 'cb')}
+                    panelTitle="Colour palette"
+                    triggerIcon={<Contrast className="h-3.5 w-3.5" />}
+                    compact
+                    align="right"
+                  />
+                </ToolbarSegment>
                 <AuthButton />
               </div>
             </div>
@@ -405,21 +501,28 @@ export function LandingPage() {
               </button>
             </div>
 
-            {/* theme row — mobile only */}
+            {/* appearance controls — mobile only */}
             <div className="flex items-center gap-1.5 lg:hidden">
-              <IconButton
-                title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? <Sun /> : <Moon />}
-              </IconButton>
-              <IconButton
-                title={palette === 'cb' ? 'Colour-blind palette: on' : 'Colour-blind palette: off'}
-                active={palette === 'cb'}
-                onClick={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
-              >
-                <Contrast />
-              </IconButton>
+              <ToolbarSegment>
+                <FeatureSelectorPopover
+                  groups={themeGroups}
+                  value={theme}
+                  onChange={(v) => setTheme(v as 'light' | 'dark')}
+                  panelTitle="Theme"
+                  triggerLabel="Theme"
+                  triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+                  align="left"
+                />
+                <FeatureSelectorPopover
+                  groups={paletteGroups}
+                  value={palette}
+                  onChange={(v) => setPalette(v as 'default' | 'cb')}
+                  panelTitle="Colour palette"
+                  triggerLabel="Palette"
+                  triggerIcon={<Contrast className="h-3.5 w-3.5" />}
+                  align="left"
+                />
+              </ToolbarSegment>
             </div>
 
             {/* mode pills */}
@@ -498,26 +601,48 @@ export function LandingPage() {
               <p className="mb-2 hidden text-xs font-semibold uppercase tracking-[0.14em] text-ink3 lg:block">
                 Specialized tracks
               </p>
-              <div className="flex flex-col gap-2">
-                <RailTrack
-                  icon={<Code2 />}
-                  title="Go — Senior Developer"
-                  meta={`${goConceptCount} concepts · concurrency, memory, generics`}
-                  onClick={() => browseTrack('go')}
-                />
-                <RailTrack
-                  icon={<Megaphone />}
-                  title="OpenRTB & Ad Platforms"
-                  meta={`${openrtbConceptCount} concepts · bidder, exchange, privacy`}
-                  onClick={() => browseTrack('openrtb')}
-                />
-                <RailTrack
-                  icon={<Target />}
-                  title="Interview Preparation"
-                  meta={`${prepProblemCount} hand-authored problems`}
-                  onClick={() => browseTrack('interview-prep')}
-                />
-              </div>
+              <FeatureSelectorPopover
+                groups={[
+                  {
+                    options: [
+                      {
+                        id: 'go',
+                        icon: <Code2 />,
+                        title: 'Go',
+                        subtitle: 'Senior Developer',
+                        detailTitle: 'Go — Senior Developer',
+                        detailDescription: `${goConceptCount} concepts covering concurrency, memory management, and generics.`,
+                      },
+                      {
+                        id: 'openrtb',
+                        icon: <Megaphone />,
+                        title: 'OpenRTB',
+                        subtitle: 'Ad Platforms',
+                        detailTitle: 'OpenRTB & Ad Platforms',
+                        detailDescription: `${openrtbConceptCount} concepts spanning bidder architecture, exchange protocols, and privacy.`,
+                      },
+                      {
+                        id: 'interview-prep',
+                        icon: <Target />,
+                        title: 'Interview Prep',
+                        subtitle: 'Hand-authored',
+                        detailTitle: 'Interview Preparation',
+                        detailDescription: `${prepProblemCount} hand-authored problems designed to simulate real interview conditions.`,
+                      },
+                    ],
+                  },
+                ]}
+                value={lastTrackId}
+                onChange={(id) => {
+                  setLastTrackId(id as TrackId);
+                  browseTrack(id as TrackId);
+                }}
+                panelTitle="Browse a specialized track"
+                panelHint="Opens in a new tab."
+                triggerLabel="Track"
+                align="left"
+                className="w-full"
+              />
             </RailDetails>
 
             {/* maker + footer — desktop only */}

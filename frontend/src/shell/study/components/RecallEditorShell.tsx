@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
 import { SplitCodeEditor } from '@/components/code/SplitCodeEditor';
-import { cn } from '@/lib/utils/cn';
 import type { EditorPrefs } from '@/store/user-prefs';
 import { RecallEditorFooter } from './RecallEditorFooter';
 
-/** Split merge editor + footer controls — shared by RecallPane and Code Studio body. */
+/** Split merge diff editor + footer controls — shared by RecallPane and Code Studio body. */
 export function RecallEditorShell({
   reference,
   draft,
@@ -17,7 +15,6 @@ export function RecallEditorShell({
   peek,
   onDraftChange,
   compact,
-  mistakeTick,
 }: {
   reference: string;
   draft: string;
@@ -30,22 +27,9 @@ export function RecallEditorShell({
   peek: boolean;
   onDraftChange: (value: string) => void;
   compact?: boolean;
-  /** Bumped by useRecallDraftChange every time a mistake resets the draft — triggers a shake. */
-  mistakeTick?: number;
 }) {
-  const [shaking, setShaking] = useState(false);
-  const prevTickRef = useRef(mistakeTick);
-
-  useEffect(() => {
-    if (mistakeTick === undefined || mistakeTick === prevTickRef.current) return;
-    prevTickRef.current = mistakeTick;
-    setShaking(true);
-    const t = setTimeout(() => setShaking(false), 420);
-    return () => clearTimeout(t);
-  }, [mistakeTick]);
-
   return (
-    <div className={cn('flex min-h-0 flex-1 flex-col overflow-hidden', shaking && 'cm-recall-shake')}>
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <SplitCodeEditor
         reference={reference}
         draft={draft}
@@ -59,13 +43,10 @@ export function RecallEditorShell({
         splitPct={editorPrefs.splitPct}
         onSplitPctChange={(splitPct) => setEditorPrefs({ splitPct })}
         onDraftChange={onDraftChange}
-        pointerMode={editorPrefs.pointerMode}
-        reveal={editorPrefs.recallReveal}
         mergeGutter={editorPrefs.mergeGutter}
         mergeCollapse={editorPrefs.mergeCollapse}
         highlightChanges={editorPrefs.highlightChanges}
         showLineNumbers={editorPrefs.showLineNumbers}
-        showPointer={editorPrefs.showPointer}
         fontSize={editorPrefs.fontSize}
         lineHeight={editorPrefs.lineHeight}
         compact={compact}

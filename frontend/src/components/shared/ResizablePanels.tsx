@@ -14,7 +14,7 @@ export function ResizeHandle({
     <div
       {...handleProps}
       className={cn(
-        'nodrag shrink-0',
+        'nodrag shrink-0 group',
         horizontal
           ? 'flex w-2 cursor-col-resize items-stretch justify-center px-0.5'
           : 'flex h-2 cursor-row-resize items-center justify-center py-0.5',

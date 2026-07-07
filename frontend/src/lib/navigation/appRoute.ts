@@ -1,5 +1,5 @@
 /** Top-level app pages — pathname segment before the hash. */
-export type AppPage = 'home' | 'mobile' | 'vim' | 'games' | 'workspace';
+export type AppPage = 'home' | 'mobile' | 'vim' | 'games' | 'workspace' | 'plans';
 
 const PAGE_SEGMENTS: Record<AppPage, string> = {
   home: 'home',
@@ -7,6 +7,7 @@ const PAGE_SEGMENTS: Record<AppPage, string> = {
   vim: 'vim',
   games: 'games',
   workspace: 'workspace',
+  plans: 'plans',
 };
 
 /** Vite base path without trailing slash, e.g. "" or "/algo-moves". */

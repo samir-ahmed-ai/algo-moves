@@ -1,31 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { getChunks, MergeView } from '@codemirror/merge';
+import { MergeView } from '@codemirror/merge';
 import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { nodeText } from '@/design/typography';
 import { useResizeSplit } from '@/hooks/useResizeSplit';
-import { computeRecallProgress } from '@/lib/code';
 import {
-  applyRecallProgress,
   buildEditorTheme,
   buildRecallFontTheme,
   coreEditorExtensions,
-  flashRecallCompletedLine,
   languageExtension,
   lineNumberExtensions,
-  mapPointerLine,
-  pointerExtension,
-  recallFlashExtension,
-  recallProgressExtension,
-  showPointerLine,
   vimExtensions,
   wrapExtensions,
-  type PointerMode,
-  type RecallRevealMode,
 } from '@/lib/editor';
 import { CODE_SPLIT_MAX, CODE_SPLIT_MIN } from '@/lib/editor/resizeSplit';
 import { cn } from '@/lib/utils/cn';
-import { baseTheme } from './CodeMirrorEditor';
+import { mergeEditorChrome } from './CodeMirrorEditor';
 
 export interface SplitCodeEditorProps {
   reference: string;
@@ -35,17 +25,13 @@ export interface SplitCodeEditorProps {
   themeKey?: string;
   vim?: boolean;
   wrap?: boolean;
-  /** Hide the reference pane (blind recall mode). */
+  /** Hide the reference pane (blind mode). */
   hideLeft?: boolean;
   /** Temporarily show reference while in blind mode (peek). */
   peekLeft?: boolean;
   splitPct?: number;
   onSplitPctChange?: (pct: number) => void;
   onDraftChange: (value: string) => void;
-  /** How the recall pointer maps a cursor line between reference and draft (default 'line'). */
-  pointerMode?: PointerMode;
-  /** How much of the not-yet-typed reference to show ahead of the current line. */
-  reveal?: RecallRevealMode;
   /** Show change markers in the merge gutter. */
   mergeGutter?: boolean;
   /** Collapse long unchanged regions. */
@@ -55,17 +41,14 @@ export interface SplitCodeEditorProps {
   fontSize?: number;
   lineHeight?: import('@/lib/editor/recallEditorTheme').RecallLineHeight;
   showLineNumbers?: boolean;
-  showPointer?: boolean;
   highlightChanges?: boolean;
 }
-
-const sizeTheme = EditorView.theme({ '.cm-content': { minHeight: '100%' }, '.cm-editor': { height: '100%' } });
 
 function sideWrap(view: EditorView): HTMLElement | null {
   return view.dom.parentElement;
 }
 
-/** Positions the MergeView's two internal columns to match `pctA`, or collapses A when hidden (blind mode). */
+/** Positions the MergeView's two internal columns to match `pctA`, or collapses A when hidden. */
 function applySplitLayout(mergeView: MergeView, pctA: number, showLeft: boolean) {
   const wrapA = sideWrap(mergeView.a);
   const wrapB = sideWrap(mergeView.b);
@@ -83,12 +66,7 @@ function applySplitLayout(mergeView: MergeView, pctA: number, showLeft: boolean)
   }
 }
 
-/**
- * World-class split editor for Recall — a single CodeMirror `@codemirror/merge` MergeView
- * (real diff alignment, collapsible unchanged regions, change gutters) with a bidirectional
- * cursor "pointer": moving the cursor in either pane highlights + scrolls the corresponding
- * line in the other, mapped either 1:1 by line number or diff-aligned via merge chunks.
- */
+/** Side-by-side CodeMirror merge diff — reference (read-only) vs editable draft. */
 export function SplitCodeEditor({
   reference,
   draft,
@@ -102,15 +80,12 @@ export function SplitCodeEditor({
   splitPct: splitPctProp = 50,
   onSplitPctChange,
   onDraftChange,
-  pointerMode = 'line',
-  reveal = 'full',
   mergeGutter = true,
   mergeCollapse = true,
   compact = false,
   fontSize = 12,
   lineHeight = 'normal',
   showLineNumbers = true,
-  showPointer = true,
   highlightChanges = true,
 }: SplitCodeEditorProps) {
   const showLeft = !hideLeft || Boolean(peekLeft);
@@ -124,14 +99,9 @@ export function SplitCodeEditor({
   const fontCompB = useRef(new Compartment());
   const lineNumCompA = useRef(new Compartment());
   const lineNumCompB = useRef(new Compartment());
-  const pointerCompA = useRef(new Compartment());
-  const pointerCompB = useRef(new Compartment());
-  const syncingPointer = useRef(false);
 
   const onDraftChangeRef = useRef(onDraftChange);
   onDraftChangeRef.current = onDraftChange;
-  const pointerModeRef = useRef<PointerMode>(pointerMode);
-  pointerModeRef.current = pointerMode;
   const mergeGutterRef = useRef(mergeGutter);
   mergeGutterRef.current = mergeGutter;
   const mergeCollapseRef = useRef(mergeCollapse);
@@ -140,16 +110,10 @@ export function SplitCodeEditor({
   highlightChangesRef.current = highlightChanges;
   const showLineNumbersRef = useRef(showLineNumbers);
   showLineNumbersRef.current = showLineNumbers;
-  const showPointerRef = useRef(showPointer);
-  showPointerRef.current = showPointer;
   const fontSizeRef = useRef(fontSize);
   fontSizeRef.current = fontSize;
   const lineHeightRef = useRef(lineHeight);
   lineHeightRef.current = lineHeight;
-  const revealRef = useRef(reveal);
-  revealRef.current = reveal;
-  /** Count of completed lines as of the last dispatched progress snapshot — used to detect a just-finished line. */
-  const progressCompletedCountRef = useRef(0);
 
   const { containerRef, splitPct, handleProps } = useResizeSplit({
     direction: 'horizontal',
@@ -169,23 +133,6 @@ export function SplitCodeEditor({
     const isDark = dark ?? document.documentElement.classList.contains('dark');
     const langExt = languageExtension(lang);
 
-    const mirrorPointer = (source: EditorView, target: EditorView, direction: 'aToB' | 'bToA') => {
-      if (syncingPointer.current || !showPointerRef.current) return;
-      const line = source.state.doc.lineAt(source.state.selection.main.head).number;
-      const info = getChunks(source.state);
-      const targetLine = mapPointerLine(
-        line,
-        pointerModeRef.current,
-        info?.chunks ?? [],
-        source.state.doc,
-        target.state.doc,
-        direction,
-      );
-      syncingPointer.current = true;
-      showPointerLine(target, targetLine);
-      syncingPointer.current = false;
-    };
-
     const view = new MergeView({
       parent: hostRef.current,
       orientation: 'a-b',
@@ -199,18 +146,9 @@ export function SplitCodeEditor({
           EditorState.readOnly.of(true),
           ...coreEditorExtensions(langExt, { lineNumbers: false }),
           lineNumCompA.current.of(lineNumberExtensions(showLineNumbersRef.current)),
-          pointerCompA.current.of(showPointerRef.current ? pointerExtension() : []),
-          recallProgressExtension(),
           themeCompA.current.of(buildEditorTheme(isDark)),
           fontCompA.current.of(buildRecallFontTheme(fontSizeRef.current, lineHeightRef.current)),
-          sizeTheme,
-          baseTheme,
-          EditorView.updateListener.of((u) => {
-            if (u.selectionSet && !u.docChanged) {
-              const mv = mergeViewRef.current;
-              if (mv) mirrorPointer(mv.a, mv.b, 'aToB');
-            }
-          }),
+          mergeEditorChrome,
         ],
       },
       b: {
@@ -220,18 +158,11 @@ export function SplitCodeEditor({
           ...coreEditorExtensions(langExt, { lineNumbers: false }),
           lineNumCompB.current.of(lineNumberExtensions(showLineNumbersRef.current)),
           wrapComp.current.of(wrapExtensions(wrap ?? false)),
-          pointerCompB.current.of(showPointerRef.current ? pointerExtension() : []),
-          recallFlashExtension(),
           themeCompB.current.of(buildEditorTheme(isDark)),
           fontCompB.current.of(buildRecallFontTheme(fontSizeRef.current, lineHeightRef.current)),
-          sizeTheme,
-          baseTheme,
+          mergeEditorChrome,
           EditorView.updateListener.of((u) => {
             if (u.docChanged) onDraftChangeRef.current(u.state.doc.toString());
-            if (u.selectionSet) {
-              const mv = mergeViewRef.current;
-              if (mv) mirrorPointer(mv.b, mv.a, 'bToA');
-            }
           }),
         ],
       },
@@ -240,20 +171,10 @@ export function SplitCodeEditor({
     mergeViewRef.current = view;
     applySplitLayout(view, splitPctRef.current, showLeftRef.current);
 
-    const initialProgress = computeRecallProgress(reference, draft);
-    applyRecallProgress(view.a, {
-      completedLines: initialProgress.completedLines,
-      currentLine: initialProgress.currentLine,
-      matchedPrefixLen: initialProgress.matchedPrefixLen,
-      reveal: revealRef.current,
-    });
-    progressCompletedCountRef.current = initialProgress.completedLines.length;
-
     return () => {
       mergeViewRef.current = null;
       view.destroy();
     };
-    // Recreated only when the language changes; everything else reconfigures via compartments/effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
@@ -268,27 +189,10 @@ export function SplitCodeEditor({
   useEffect(() => {
     const view = mergeViewRef.current?.b;
     if (!view) return;
-    if (draft !== view.state.doc.toString()) {
-      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: draft } });
-    }
+    const editorDraft = view.state.doc.toString();
+    if (draft === editorDraft) return;
+    view.dispatch({ changes: { from: 0, to: editorDraft.length, insert: draft } });
   }, [draft]);
-
-  useEffect(() => {
-    const view = mergeViewRef.current;
-    if (!view) return;
-    const progress = computeRecallProgress(reference, draft);
-    applyRecallProgress(view.a, {
-      completedLines: progress.completedLines,
-      currentLine: progress.currentLine,
-      matchedPrefixLen: progress.matchedPrefixLen,
-      reveal,
-    });
-    if (progress.completedLines.length > progressCompletedCountRef.current) {
-      const justCompleted = progress.completedLines[progress.completedLines.length - 1];
-      flashRecallCompletedLine(view.b, justCompleted);
-    }
-    progressCompletedCountRef.current = progress.completedLines.length;
-  }, [reference, draft, reveal]);
 
   useEffect(() => {
     const view = mergeViewRef.current;
@@ -346,19 +250,11 @@ export function SplitCodeEditor({
     view.b.dispatch({ effects: lineNumCompB.current.reconfigure(lineExt) });
   }, [showLineNumbers]);
 
-  useEffect(() => {
-    const view = mergeViewRef.current;
-    if (!view) return;
-    const pointerExt = showPointer ? pointerExtension() : [];
-    view.a.dispatch({ effects: pointerCompA.current.reconfigure(pointerExt) });
-    view.b.dispatch({ effects: pointerCompB.current.reconfigure(pointerExt) });
-  }, [showPointer]);
-
   return (
     <div
       className={cn(
-        'flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-edge',
-        compact && 'cm-recall-compact-chrome',
+        'flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-edge',
+        compact && 'cm-merge-compact-chrome',
       )}
     >
       <div className={cn('flex shrink-0 border-b border-edge bg-panel2', compact ? 'h-6' : 'h-7')}>
@@ -386,14 +282,11 @@ export function SplitCodeEditor({
         </div>
       </div>
       <div ref={containerRef} className="relative min-h-0 flex-1 overflow-hidden">
-        <div
-          ref={hostRef}
-          className={cn('cm-recall-merge-host nodrag h-full min-h-0', compact && 'cm-recall-compact')}
-        />
+        <div ref={hostRef} className={cn('cm-merge-diff-host nodrag h-full min-h-0', compact && 'cm-merge-compact')} />
         {showLeft && (
           <div
             {...handleProps}
-            className="nodrag absolute top-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize items-stretch justify-center"
+            className="nodrag group absolute top-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize items-stretch justify-center"
             style={{ left: `${splitPct}%` }}
           >
             <div className="split-handle h-full w-px bg-edge transition-colors hover:bg-accent" />

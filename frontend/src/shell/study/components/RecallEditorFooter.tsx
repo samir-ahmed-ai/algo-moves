@@ -2,10 +2,6 @@ import {
   AlignVerticalSpaceAround,
   ChevronsDownUp,
   Columns2,
-  Crosshair,
-  Eye,
-  EyeOff,
-  GitCompareArrows,
   Hash,
   Highlighter,
   Minimize2,
@@ -13,7 +9,6 @@ import {
   Plus,
   RotateCcw,
   SplitSquareHorizontal,
-  Target,
   WrapText,
 } from 'lucide-react';
 import {
@@ -24,13 +19,12 @@ import {
   RECALL_FONT_MAX,
   RECALL_FONT_MIN,
 } from '@/lib/editor/recallEditorTheme';
-import { cycleRecallReveal, recallRevealLabel } from '@/lib/editor/recallProgress';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 import type { EditorPrefs } from '@/store/user-prefs';
 import { ToolbarGroup, ToolbarGroupBtn } from './ToolbarGroup';
 
-/** Font + editor feature controls below the recall merge editor. */
+/** Font + diff editor controls below the merge view. */
 export function RecallEditorFooter({
   editorPrefs,
   setEditorPrefs,
@@ -40,13 +34,8 @@ export function RecallEditorFooter({
   setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
   compact?: boolean;
 }) {
-  const pointerMode = editorPrefs.pointerMode;
-
   const toggle = (
-    key: keyof Pick<
-      EditorPrefs,
-      'wrap' | 'mergeGutter' | 'mergeCollapse' | 'showLineNumbers' | 'showPointer' | 'highlightChanges'
-    >,
+    key: keyof Pick<EditorPrefs, 'wrap' | 'mergeGutter' | 'mergeCollapse' | 'showLineNumbers' | 'highlightChanges'>,
     icon: React.ReactNode,
     title: string,
   ) => (
@@ -112,45 +101,19 @@ export function RecallEditorFooter({
         </ToolbarGroupBtn>
       </ToolbarGroup>
 
-      <ToolbarGroup title="Reveal ahead">
-        <ToolbarGroupBtn
-          active={editorPrefs.recallReveal !== 'full'}
-          title={`Reveal ahead: ${recallRevealLabel(editorPrefs.recallReveal)} — click to cycle (⌘⇧.)`}
-          onClick={() => setEditorPrefs({ recallReveal: cycleRecallReveal(editorPrefs.recallReveal) })}
-        >
-          {editorPrefs.recallReveal === 'full' ? (
-            <Eye className="h-3 w-3" />
-          ) : (
-            <EyeOff className="h-3 w-3" />
-          )}
-          {!compact && <span className="max-w-[3.5rem] truncate">{recallRevealLabel(editorPrefs.recallReveal)}</span>}
-        </ToolbarGroupBtn>
-      </ToolbarGroup>
-
-      <ToolbarGroup title="Editor features">
+      <ToolbarGroup title="Diff view">
         {toggle('wrap', <WrapText className="h-3 w-3" />, 'Soft-wrap lines')}
         {toggle('highlightChanges', <Highlighter className="h-3 w-3" />, 'Highlight changes')}
         {toggle('mergeGutter', <Columns2 className="h-3 w-3" />, 'Change gutter')}
         {toggle('mergeCollapse', <ChevronsDownUp className="h-3 w-3" />, 'Collapse unchanged')}
         {toggle('showLineNumbers', <Hash className="h-3 w-3" />, 'Line numbers')}
-        {toggle('showPointer', <Target className="h-3 w-3" />, 'Pointer highlight')}
-        <ToolbarGroupBtn
-          active={pointerMode === 'diff'}
-          title={pointerMode === 'diff' ? 'Diff-aligned pointer' : 'Line-mirror pointer'}
-          onClick={() => setEditorPrefs({ pointerMode: pointerMode === 'diff' ? 'line' : 'diff' })}
-        >
-          {pointerMode === 'diff' ? <GitCompareArrows className="h-3 w-3" /> : <Crosshair className="h-3 w-3" />}
-        </ToolbarGroupBtn>
-        <ToolbarGroupBtn
-          title="Reset split to 50/50"
-          onClick={() => setEditorPrefs({ splitPct: 50 })}
-        >
+        <ToolbarGroupBtn title="Reset split to 50/50" onClick={() => setEditorPrefs({ splitPct: 50 })}>
           <SplitSquareHorizontal className="h-3 w-3" />
         </ToolbarGroupBtn>
         <ToolbarGroupBtn
-          active={editorPrefs.recallCompact}
-          title="Compact recall toolbar"
-          onClick={() => setEditorPrefs({ recallCompact: !editorPrefs.recallCompact })}
+          active={editorPrefs.recallCompact !== false}
+          title="Compact editor chrome"
+          onClick={() => setEditorPrefs({ recallCompact: editorPrefs.recallCompact !== false ? false : true })}
         >
           <Minimize2 className="h-3 w-3" />
         </ToolbarGroupBtn>

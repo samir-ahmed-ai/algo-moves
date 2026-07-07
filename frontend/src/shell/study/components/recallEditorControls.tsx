@@ -3,41 +3,24 @@ import {
   AlignVerticalSpaceAround,
   ChevronsDownUp,
   Columns2,
-  Crosshair,
-  Eye,
-  GitCompareArrows,
   Hash,
   Highlighter,
   Minimize2,
   SplitSquareHorizontal,
-  Target,
   WrapText,
 } from 'lucide-react';
 import { recallLineHeightLabel } from '@/lib/editor/recallEditorTheme';
-import { cycleRecallReveal, recallRevealLabel } from '@/lib/editor/recallProgress';
 import type { PanelHeaderMenuItem } from '@/shell/canvas';
 import type { EditorPrefs } from '@/store/user-prefs';
 
 export type RecallEditorMenuItem = PanelHeaderMenuItem & { active?: boolean };
 
-/** Overflow menu entries for recall CodeMirror toggles (shared by RecallPane + CodeStudio header). */
+/** Overflow menu entries for merge diff editor toggles (shared by RecallPane + CodeStudio header). */
 export function recallEditorMenuItems(
   editorPrefs: EditorPrefs,
   setEditorPrefs: (patch: Partial<EditorPrefs>) => void,
 ): RecallEditorMenuItem[] {
-  const pointerMode = editorPrefs.pointerMode;
   return [
-    {
-      label: pointerMode === 'diff' ? 'Line pointer (⌘.)' : 'Diff pointer (⌘.)',
-      icon:
-        pointerMode === 'diff' ? (
-          <Crosshair className="h-3.5 w-3.5" />
-        ) : (
-          <GitCompareArrows className="h-3.5 w-3.5" />
-        ),
-      active: pointerMode === 'diff',
-      onClick: () => setEditorPrefs({ pointerMode: pointerMode === 'diff' ? 'line' : 'diff' }),
-    },
     {
       label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
       icon: <WrapText className="h-3.5 w-3.5" />,
@@ -49,12 +32,6 @@ export function recallEditorMenuItems(
       icon: <Highlighter className="h-3.5 w-3.5" />,
       active: editorPrefs.highlightChanges,
       onClick: () => setEditorPrefs({ highlightChanges: !editorPrefs.highlightChanges }),
-    },
-    {
-      label: `Reveal ahead: ${recallRevealLabel(editorPrefs.recallReveal)} (⌘⇧.)`,
-      icon: <Eye className="h-3.5 w-3.5" />,
-      active: editorPrefs.recallReveal !== 'full',
-      onClick: () => setEditorPrefs({ recallReveal: cycleRecallReveal(editorPrefs.recallReveal) }),
     },
     {
       label: editorPrefs.mergeGutter ? 'Hide change gutter' : 'Show change gutter',
@@ -75,12 +52,6 @@ export function recallEditorMenuItems(
       onClick: () => setEditorPrefs({ showLineNumbers: !editorPrefs.showLineNumbers }),
     },
     {
-      label: editorPrefs.showPointer ? 'Hide pointer highlight' : 'Show pointer highlight',
-      icon: <Target className="h-3.5 w-3.5" />,
-      active: editorPrefs.showPointer,
-      onClick: () => setEditorPrefs({ showPointer: !editorPrefs.showPointer }),
-    },
-    {
       label: `Line height: ${recallLineHeightLabel(editorPrefs.lineHeight)}`,
       icon: <AlignVerticalSpaceAround className="h-3.5 w-3.5" />,
       onClick: () =>
@@ -99,10 +70,10 @@ export function recallEditorMenuItems(
       onClick: () => setEditorPrefs({ splitPct: 50 }),
     },
     {
-      label: editorPrefs.recallCompact ? 'Spacious recall toolbar' : 'Compact recall toolbar',
+      label: editorPrefs.recallCompact !== false ? 'Spacious editor chrome' : 'Compact editor chrome',
       icon: <Minimize2 className="h-3.5 w-3.5" />,
-      active: editorPrefs.recallCompact,
-      onClick: () => setEditorPrefs({ recallCompact: !editorPrefs.recallCompact }),
+      active: editorPrefs.recallCompact !== false,
+      onClick: () => setEditorPrefs({ recallCompact: editorPrefs.recallCompact !== false ? false : true }),
     },
   ];
 }
@@ -119,7 +90,7 @@ export function recallEditorToggleLabel(
     case 'mergeCollapse':
       return editorPrefs.mergeCollapse ? 'Collapse' : 'Expand all';
     case 'recallCompact':
-      return editorPrefs.recallCompact ? 'Compact' : 'Spacious';
+      return editorPrefs.recallCompact !== false ? 'Compact' : 'Spacious';
   }
 }
 

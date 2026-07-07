@@ -44,7 +44,7 @@ const DEFAULTS: EditorPrefs = {
   wrap: false,
   splitPct: 50,
   pointerMode: 'line',
-  recallCompact: false,
+  recallCompact: true,
   recallReveal: 'full',
   mergeGutter: true,
   mergeCollapse: true,
