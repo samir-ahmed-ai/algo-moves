@@ -73,6 +73,16 @@ export const EXPLORE_GROUPS: FeatureGroup[] = [
         detailDescription: 'Race a friend through head-to-head algorithm rounds in a shared room.',
       },
       {
+        id: 'vim',
+        icon: <Keyboard />,
+        title: 'Vim Dojo',
+        subtitle: 'Keyboard drills',
+        tone: 'team2',
+        detailTitle: 'Vim Dojo',
+        detailDescription:
+          'Timed keyboard-mastery drills to build muscle memory for Vim motions and shortcuts.',
+      },
+      {
         id: 'plans',
         icon: <BookMarked />,
         title: 'Plans',
