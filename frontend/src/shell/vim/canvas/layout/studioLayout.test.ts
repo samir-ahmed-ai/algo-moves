@@ -1,12 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import {
   buildStudioLayout,
+  computeResponsiveStudioMetrics,
+  LAYOUT_CANVAS_H,
   LAYOUT_CANVAS_W,
   STUDIO_HUD_WIDTH,
   STUDIO_INSET_BOTTOM,
   STUDIO_INSET_TOP,
   STUDIO_MAZE_HEIGHT,
 } from './studioLayout';
+import { resolveStudioChrome } from './studioFit';
 import {
   HUD_NODE_ID,
   HUD_SLOT,
@@ -16,6 +19,36 @@ import {
   ORBIT_V_GAP,
   STUDIO_INSET_X,
 } from './orbitSlots';
+
+describe('computeResponsiveStudioMetrics', () => {
+  it('fills the usable container area between chrome gutters', () => {
+    const chrome = resolveStudioChrome(1280);
+    const metrics = computeResponsiveStudioMetrics(900, 800, 176, 1280);
+    expect(metrics.availW).toBe(900 - chrome.x * 2);
+    expect(metrics.availH).toBe(800 - chrome.top - chrome.bottom);
+    expect(metrics.hudW).toBe(metrics.availW - 2 * STUDIO_INSET_X);
+    expect(metrics.mazeW).toBe(metrics.hudW);
+    expect(metrics.mazeH).toBe(
+      metrics.availH - STUDIO_INSET_TOP - STUDIO_INSET_BOTTOM - 176 - ORBIT_V_GAP,
+    );
+  });
+
+  it('uses larger bottom chrome on phones for the keyboard HUD', () => {
+    const desktop = computeResponsiveStudioMetrics(900, 800, 176, 1280);
+    const phone = computeResponsiveStudioMetrics(390, 640, 280, 390);
+    const phoneChrome = resolveStudioChrome(390);
+    expect(phone.availH).toBe(640 - phoneChrome.top - phoneChrome.bottom);
+    expect(phone.mazeH).toBeLessThan(desktop.mazeH);
+  });
+
+  it('shrinks when the parent container shrinks', () => {
+    const large = computeResponsiveStudioMetrics(900, 800, 176, 1280);
+    const small = computeResponsiveStudioMetrics(640, 560, 176, 640);
+    expect(small.availW).toBeLessThan(large.availW);
+    expect(small.availH).toBeLessThan(large.availH);
+    expect(small.mazeH).toBeLessThan(large.mazeH);
+  });
+});
 
 describe('buildStudioLayout', () => {
   it('creates hud and maze nodes with one edge', () => {
@@ -78,7 +111,7 @@ describe('buildStudioLayout', () => {
     const hud = nodes.find((n) => n.id === HUD_NODE_ID)!;
     const maze = nodes.find((n) => n.id === MAZE_NODE_ID)!;
     const bottom = maze.position.y + (maze.height ?? STUDIO_MAZE_HEIGHT);
-    expect(bottom + STUDIO_INSET_BOTTOM).toBe(900); // LAYOUT_CANVAS_H
+    expect(bottom + STUDIO_INSET_BOTTOM).toBe(LAYOUT_CANVAS_H);
     expect(hud.position.y).toBe(STUDIO_INSET_TOP);
   });
 

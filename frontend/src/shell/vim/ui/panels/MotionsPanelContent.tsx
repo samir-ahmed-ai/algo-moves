@@ -13,7 +13,7 @@ export function MotionsPanelContent() {
           <VimKbd key={motion}>{motion}</VimKbd>
         ))}
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-[var(--gap)] text-[length:var(--fs-tight)] text-ink3">
+      <div className="mt-3 flex flex-wrap items-center gap-[var(--gap)] text-base text-ink3">
         <span>
           <VimKbd>Esc</VimKbd> reset · <VimKbd>r</VimKbd> retry
         </span>
@@ -21,13 +21,13 @@ export function MotionsPanelContent() {
           type="button"
           onClick={toggleHint}
           className={cn(
-            'nodrag grid h-6 w-6 place-items-center rounded-md border transition-colors',
+            'nodrag grid h-8 w-8 place-items-center rounded-md border transition-colors',
             showHint ? 'border-accent bg-accentbg text-accent' : 'border-edge text-ink3 hover:bg-panel2',
           )}
           title="Toggle hint"
           aria-label="Toggle hint"
         >
-          <HelpCircle className="h-3.5 w-3.5" />
+          <HelpCircle className="h-4 w-4" />
         </button>
       </div>
     </div>

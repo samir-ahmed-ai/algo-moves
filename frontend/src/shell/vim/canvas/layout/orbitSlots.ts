@@ -4,16 +4,15 @@ import { Position } from '@xyflow/react';
 export const ORBIT_PANEL_WIDTH = 210;
 export const ORBIT_PANEL_HEIGHT = 116;
 export const HUD_COLUMN_GAP = 2;
-export const HUD_PANEL_HEIGHT = 128;
-/** Full studio canvas width minus horizontal insets (1280 - 2×24 = 1232). */
-export const HUD_PANEL_WIDTH = 1232;
+/** Horizontal padding from the flow canvas edge to the HUD/maze nodes. */
+export const STUDIO_INSET_X = 10;
+export const HUD_PANEL_HEIGHT = 176;
+/** Full studio canvas width minus horizontal insets (860 - 2×10 = 840). */
+export const HUD_PANEL_WIDTH = (1280 - 2 * ORBIT_PANEL_WIDTH) - 2 * STUDIO_INSET_X;
 
 /** Gap between HUD and maze. */
 export const ORBIT_V_GAP = 12;
 export const ORBIT_TOP_EXTRA_GAP = 0;
-
-/** Horizontal padding from the flow canvas edge to the HUD/maze nodes. */
-export const STUDIO_INSET_X = 24;
 
 export const MAZE_NODE_ID = 'maze' as const;
 export const HUD_NODE_ID = 'hud' as const;

@@ -47,7 +47,7 @@ export const MAX_FILL_CELL_SIZE = 160;
 
 /** Glyph size inside a maze cell, scaled to cell dimensions. */
 export function mazeCellFontSize(cellSize: number): number {
-  return Math.max(16, Math.round(cellSize * 0.58));
+  return Math.max(18, Math.round(cellSize * 0.64));
 }
 
 /**
@@ -123,7 +123,7 @@ export function computeStudioCellSize(
 ): number {
   const {
     hudW = 422,
-    hudH = 128,
+    hudH = 176,
     gap = 24,
     maxCell = MAX_STUDIO_CELL_SIZE,
     minCell = 16,

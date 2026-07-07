@@ -25,10 +25,10 @@ export function StatusPanelContent() {
 
   return (
     <div className="min-w-0">
-      <p className={cn('mb-1.5 text-xs font-medium text-ink3', nodeTextWrap)}>{moveLabel}</p>
+      <p className={cn('mb-2.5 text-base font-medium text-ink3', nodeTextWrap)}>{moveLabel}</p>
       <div
         className={cn(
-          'font-mono text-sm transition-colors',
+          'font-mono text-lg transition-colors',
           lastMotionOk && 'text-accent',
           error && 'text-bad',
         )}
@@ -38,11 +38,11 @@ export function StatusPanelContent() {
           {echo ? <VimKbd>{echo}</VimKbd> : null}
         </div>
         {isMobile ? (
-          <p className="mt-2 text-xs text-bad">Connect a keyboard to play</p>
+          <p className="mt-3 text-base text-bad">Connect a keyboard to play</p>
         ) : message ? (
-          <p className={cn('mt-2', nodeTextWrap, error ? 'text-bad' : 'text-good')}>{message}</p>
+          <p className={cn('mt-3 text-base', nodeTextWrap, error ? 'text-bad' : 'text-good')}>{message}</p>
         ) : (
-          <p className="mt-2 text-xs text-ink3">Reach ★ with Vim motions</p>
+          <p className="mt-3 text-base text-ink3">Reach ★ with Vim motions</p>
         )}
       </div>
       {complete ? (

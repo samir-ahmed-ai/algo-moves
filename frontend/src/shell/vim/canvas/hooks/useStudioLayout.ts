@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useEdgesState,
   useNodesInitialized,
@@ -7,32 +7,20 @@ import {
   type Edge,
   type Node,
 } from '@xyflow/react';
-import { buildStudioLayout, STUDIO_HUD_WIDTH, STUDIO_MAZE_HEIGHT } from '../layout/studioLayout';
-import { HUD_NODE_ID, MAZE_NODE_ID, HUD_SLOT, ORBIT_V_GAP } from '../layout/orbitSlots';
+import {
+  buildStudioLayout,
+  computeResponsiveStudioMetrics,
+  defaultResponsiveStudioMetrics,
+} from '../layout/studioLayout';
+import { HUD_NODE_ID, HUD_SLOT } from '../layout/orbitSlots';
+import { STUDIO_REFERENCE_VIEWPORT_W, resolveStudioChrome } from '../layout/studioFit';
 import {
   computeMazeFillCellSize,
   MAZE_NODE_CHROME,
 } from '../layout/mazeMetrics';
 import type { MazeGrid } from '../../engine';
 
-const FIT_PADDING = 0;
-/** Allow fitView to scale the studio up on large full-page viewports. */
-const FIT_MAX_ZOOM = 2.5;
-const STUDIO_NODE_IDS = [{ id: HUD_NODE_ID }, { id: MAZE_NODE_ID }];
-
-/** Maze inner area in flow-space coordinates (fixed for all levels/viewports). */
-const MAZE_INNER_W = STUDIO_HUD_WIDTH - MAZE_NODE_CHROME.padX;
-const MAZE_INNER_H =
-  STUDIO_MAZE_HEIGHT - MAZE_NODE_CHROME.padTop - MAZE_NODE_CHROME.title - MAZE_NODE_CHROME.padBottom;
-
-function buildFillLayout() {
-  return buildStudioLayout({
-    mazeW: STUDIO_HUD_WIDTH,
-    mazeH: STUDIO_MAZE_HEIGHT,
-    hudW: HUD_SLOT.width,
-    hudH: HUD_SLOT.height,
-  });
-}
+const RESIZE_DEBOUNCE_MS = 100;
 
 function measureFlowNode(id: string): { w: number; h: number } | null {
   const root = document.querySelector(`.react-flow__node[data-id="${id}"]`);
@@ -44,109 +32,123 @@ function measureFlowNode(id: string): { w: number; h: number } | null {
   };
 }
 
+function readContainerSize(el: HTMLElement | null): { w: number; h: number } {
+  if (!el) return { w: 0, h: 0 };
+  return { w: el.clientWidth, h: el.clientHeight };
+}
+
+function readViewportWidth(): number {
+  return typeof window !== 'undefined' ? window.innerWidth : STUDIO_REFERENCE_VIEWPORT_W;
+}
+
 export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HTMLElement | null>) {
-  const initial = buildFillLayout();
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initial.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initial.edges);
-  const { fitView } = useReactFlow();
+  const [containerSize, setContainerSize] = useState(() => readContainerSize(containerRef.current));
+  const [viewportWidth, setViewportWidth] = useState(readViewportWidth);
+  const [hudHeight, setHudHeight] = useState(HUD_SLOT.height);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(() => {
+    const metrics = defaultResponsiveStudioMetrics();
+    return buildStudioLayout({
+      mazeW: metrics.mazeW,
+      mazeH: metrics.mazeH,
+      hudW: metrics.hudW,
+      hudH: HUD_SLOT.height,
+    }).nodes;
+  });
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(() => {
+    const metrics = defaultResponsiveStudioMetrics();
+    return buildStudioLayout({
+      mazeW: metrics.mazeW,
+      mazeH: metrics.mazeH,
+      hudW: metrics.hudW,
+      hudH: HUD_SLOT.height,
+    }).edges;
+  });
+  const { setViewport } = useReactFlow();
   const nodesInitialized = useNodesInitialized();
-  const didInitialFit = useRef(false);
 
-  // Cell size is fixed per level — it fills the maze inner area in flow coordinates.
-  // fitView then scales the whole canvas to the actual container.
-  const cellSize = useMemo(
-    () => computeMazeFillCellSize(grid, MAZE_INNER_W, MAZE_INNER_H),
-    [grid],
-  );
+  const chrome = useMemo(() => resolveStudioChrome(viewportWidth), [viewportWidth]);
 
-  // mazeLayoutKey changes when the active level changes (different grid → different cellSize).
-  const mazeLayoutKey = String(cellSize);
+  const layoutMetrics = useMemo(() => {
+    const { w, h } = containerSize;
+    if (w > 0 && h > 0) {
+      return computeResponsiveStudioMetrics(w, h, hudHeight, viewportWidth);
+    }
+    return defaultResponsiveStudioMetrics(hudHeight);
+  }, [containerSize, hudHeight, viewportWidth]);
 
-  const fitCanvas = useCallback(
-    (duration = 200) => {
-      fitView({
-        nodes: STUDIO_NODE_IDS,
-        padding: FIT_PADDING,
-        duration,
-        maxZoom: FIT_MAX_ZOOM,
-      });
-    },
-    [fitView],
-  );
+  const cellSize = useMemo(() => {
+    const mazeInnerW = layoutMetrics.mazeW - MAZE_NODE_CHROME.padX;
+    const mazeInnerH =
+      layoutMetrics.mazeH - MAZE_NODE_CHROME.padTop - MAZE_NODE_CHROME.title - MAZE_NODE_CHROME.padBottom;
+    return computeMazeFillCellSize(grid, mazeInnerW, mazeInnerH);
+  }, [grid, layoutMetrics]);
 
-  // Keep only HUD height measured — maze is explicitly fill-sized so it won't drift.
-  const syncMeasuredNodes = useCallback(() => {
-    setNodes((nds) => {
-      let changed = false;
-      const next = nds.map((n) => {
-        if (n.id === MAZE_NODE_ID) return n; // maze is fill-sized, skip measurement
-        const measured = measureFlowNode(n.id);
-        if (!measured) return n;
-        const widthOk = n.width == null || Math.abs((n.width ?? 0) - measured.w) < 2;
-        const heightOk = n.height == null || Math.abs((n.height ?? 0) - measured.h) < 2;
-        if (widthOk && heightOk) return n;
-        changed = true;
-        return { ...n, width: measured.w, height: measured.h };
-      });
+  const layoutKey = `${layoutMetrics.availW}x${layoutMetrics.availH}:${cellSize}:${hudHeight}:${viewportWidth}`;
 
-      const hud = next.find((n) => n.id === HUD_NODE_ID);
-      const maze = next.find((n) => n.id === MAZE_NODE_ID);
-      if (hud && maze) {
-        const mazeY = hud.position.y + (hud.height ?? HUD_SLOT.height) + ORBIT_V_GAP;
-        if (Math.abs(maze.position.y - mazeY) > 1) {
-          changed = true;
-          return next.map((n) =>
-            n.id === MAZE_NODE_ID ? { ...n, position: { ...n.position, y: mazeY } } : n,
-          );
-        }
-      }
+  const snapViewport = useCallback(async () => {
+    await setViewport({ x: chrome.x, y: chrome.top, zoom: 1 }, { duration: 0 });
+  }, [chrome.x, chrome.top, setViewport]);
 
-      return changed ? next : nds;
+  useEffect(() => {
+    const layout = buildStudioLayout({
+      mazeW: layoutMetrics.mazeW,
+      mazeH: layoutMetrics.mazeH,
+      hudW: layoutMetrics.hudW,
+      hudH: hudHeight,
     });
-  }, [setNodes]);
-
-  const relayout = useCallback(() => {
-    const layout = buildFillLayout();
     setNodes(layout.nodes);
     setEdges(layout.edges);
-  }, [setNodes, setEdges]);
+  }, [layoutKey, layoutMetrics, hudHeight, setEdges, setNodes]);
 
   useEffect(() => {
-    relayout();
-  }, [relayout]);
-
-  useEffect(() => {
-    if (!nodesInitialized || !nodes.length) return;
-    const id = requestAnimationFrame(() => syncMeasuredNodes());
-    return () => cancelAnimationFrame(id);
-  }, [nodesInitialized, mazeLayoutKey, nodes.length, syncMeasuredNodes]);
-
-  const nodesSig = nodes.map((n) => `${n.id}:${n.width ?? 0}x${n.height ?? 0}`).join('|');
-  useEffect(() => {
-    if (!nodesInitialized || !nodes.length) return;
-    const id = requestAnimationFrame(() => fitCanvas(didInitialFit.current ? 200 : 0));
-    didInitialFit.current = true;
-    return () => cancelAnimationFrame(id);
-  }, [nodesInitialized, mazeLayoutKey, nodesSig, fitCanvas, nodes.length]);
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     let timer: ReturnType<typeof setTimeout>;
-    const ro = new ResizeObserver(() => {
+    const updateSize = (width: number, height: number) => {
+      setContainerSize((prev) => {
+        if (prev.w === width && prev.h === height) return prev;
+        return { w: width, h: height };
+      });
+    };
+
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
       clearTimeout(timer);
       timer = setTimeout(() => {
-        syncMeasuredNodes();
-        fitCanvas();
-      }, 150);
+        updateSize(Math.round(entry.contentRect.width), Math.round(entry.contentRect.height));
+      }, RESIZE_DEBOUNCE_MS);
     });
+
     ro.observe(el);
+    updateSize(el.clientWidth, el.clientHeight);
+
     return () => {
       clearTimeout(timer);
       ro.disconnect();
     };
-  }, [containerRef, fitCanvas, syncMeasuredNodes]);
+  }, [containerRef]);
+
+  useEffect(() => {
+    if (!nodesInitialized || !nodes.length) return;
+
+    const id = requestAnimationFrame(() => {
+      const measured = measureFlowNode(HUD_NODE_ID);
+      if (measured && Math.abs(measured.h - hudHeight) >= 2) {
+        setHudHeight(measured.h);
+      }
+      void snapViewport();
+    });
+
+    return () => cancelAnimationFrame(id);
+  }, [nodesInitialized, layoutKey, nodes.length, hudHeight, snapViewport]);
 
   return { nodes, edges, onNodesChange, onEdgesChange, cellSize };
 }

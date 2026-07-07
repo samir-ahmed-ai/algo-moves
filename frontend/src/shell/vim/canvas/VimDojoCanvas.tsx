@@ -15,12 +15,8 @@ import { useVimGame } from './VimGameProvider';
 import { useVimKeyboard } from './hooks/useVimKeyboard';
 import { useStudioLayout } from './hooks/useStudioLayout';
 import { VimLayoutProvider } from './VimLayoutContext';
-import { HUD_NODE_ID, MAZE_NODE_ID } from './layout/orbitSlots';
 
 const edgeTypes = { orbit: OrbitEdge };
-const FIT_PADDING = 0;
-const FIT_MAX_ZOOM = 2.5;
-const STUDIO_NODES = [{ id: HUD_NODE_ID }, { id: MAZE_NODE_ID }];
 
 function VimDojoFlow() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,12 +38,12 @@ function VimDojoFlow() {
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
-          panOnDrag={[1, 2]}
-          zoomOnScroll
-          minZoom={0.2}
-          maxZoom={FIT_MAX_ZOOM}
-          fitView
-          fitViewOptions={{ padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM, nodes: STUDIO_NODES }}
+          panOnDrag={false}
+          zoomOnScroll={false}
+          zoomOnPinch={false}
+          preventScrolling
+          minZoom={1}
+          maxZoom={1}
           proOptions={{ hideAttribution: true }}
           onError={onVimFlowError}
           className="vim-dojo-canvas"
@@ -57,9 +53,9 @@ function VimDojoFlow() {
           <Panel position="bottom-right" className="!mb-4 !mr-4">
             <KeyboardHud />
           </Panel>
-          <Panel position="bottom-center" className="!mb-3">
+          <Panel position="bottom-center" className="!mb-3 max-[767px]:hidden">
             <p className="rounded-md border border-edge/60 bg-panel/70 px-2 py-1 text-[length:var(--fs-2xs)] text-ink3 backdrop-blur">
-              Pan: middle/right drag · Scroll: zoom · Keys: h j k l …
+              Keys: h j k l w b · Esc reset · r retry
             </p>
           </Panel>
         </ReactFlow>
