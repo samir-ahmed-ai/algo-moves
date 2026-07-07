@@ -41,6 +41,8 @@ import { AuthButton } from '@/shell/auth';
 import { glyphFor } from '../../content/problemShape';
 import { Chip } from '@/design/components';
 import { RoadmapCanvas } from './RoadmapCanvas';
+import { SwipeModeQrPromo } from './SwipeModeQrPromo';
+import { VimHeroPreview } from '@/shell/vim/ui/VimHeroPreview';
 
 /* ----------------------------------------------------------------- helpers */
 
@@ -78,11 +80,11 @@ function RailStat({ icon, value, label }: { icon: ReactNode; value: ReactNode; l
 const MODE_PILL =
   'inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-2 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink';
 
-const HEADER_BTN =
-  'inline-flex shrink-0 items-center gap-1 rounded-md border border-edge bg-panel/60 px-2 py-1.5 text-xs font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink sm:gap-1.5 sm:px-2.5 sm:text-sm';
-
 const HEADER_BTN_PRIMARY =
-  'inline-flex shrink-0 items-center gap-1 rounded-md bg-accent px-2 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 sm:gap-1.5 sm:px-2.5 sm:text-sm';
+  'inline-flex shrink-0 items-center gap-1 rounded-md bg-accent px-2.5 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 sm:gap-1.5 sm:px-3 sm:text-sm';
+
+const HEADER_MODE_BTN =
+  'inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-ink2 transition-colors hover:bg-panel2 hover:text-ink sm:gap-1.5 sm:px-2.5 sm:text-sm';
 
 function ModeStrip({
   onPlay,
@@ -255,13 +257,13 @@ export function LandingPage() {
   const firstProblem = problems[0];
 
   const [exploreId, setExploreId] = useState('');
-  const [headerMoreMode, setHeaderMoreMode] = useState('');
   const [lastTrackId, setLastTrackId] = useState<TrackId>('go');
 
   const handleExplore = (id: string) => {
     setExploreId(id);
     if (id === 'swipe') enterMobile();
     else if (id === 'games') enterGames();
+    else if (id === 'vim') enterVim();
     else if (id === 'plans') enterPlans();
   };
 
@@ -292,17 +294,7 @@ export function LandingPage() {
 
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
 
-  const scrollToRoadmap = () =>
-    document.getElementById('roadmap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  const handleHeaderMoreMode = (id: string) => {
-    setHeaderMoreMode(id);
-    if (id === 'swipe') enterMobile();
-    else if (id === 'vim') enterVim();
-    else if (id === 'games') enterGames();
-  };
-
-  const headerModePills = [
+  const headerModes = [
     { icon: Play, label: 'Play', title: 'Play mode', onClick: () => startIn('play') },
     { icon: Eye, label: 'Visualize', title: 'Visualize mode', onClick: () => startIn('visualize') },
     { icon: GraduationCap, label: 'Learn', title: 'Learn mode', onClick: () => startIn('learn') },
@@ -317,61 +309,31 @@ export function LandingPage() {
       <header className="sticky top-0 z-30 border-b border-edge bg-bg/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur">
         <div className="flex items-center gap-2 px-4 py-2.5 sm:px-6">
           <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)] lg:h-9 lg:w-9 lg:rounded-xl" />
-          <span className="shrink-0 font-semibold tracking-tight">Algo Moves</span>
-          <div className="-mx-1 flex min-w-0 flex-1 items-center overflow-x-auto pb-0.5 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-min items-center gap-1 px-1 sm:gap-1.5">
-              <button
-                type="button"
-                onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
-                className={HEADER_BTN_PRIMARY}
-                title={lastItem ? 'Resume learning' : 'Start learning'}
-              >
-                <Play className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{lastItem ? 'Resume' : 'Start'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => browseTrack('interview-prep')}
-                className={HEADER_BTN}
-                title="Browse tracks"
-              >
-                <BookOpen className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Browse</span>
-              </button>
-              {headerModePills.map(({ icon: Icon, label, title, onClick }) => (
+          <span className="min-w-0 truncate font-semibold tracking-tight">Algo Moves</span>
+          <div className="flex min-w-0 flex-1 items-center gap-2 lg:hidden">
+            <button
+              type="button"
+              onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
+              className={HEADER_BTN_PRIMARY}
+              title={lastItem ? 'Resume learning' : 'Start learning'}
+            >
+              <Play className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{lastItem ? 'Resume' : 'Start'}</span>
+            </button>
+            <ToolbarSegment className="min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {headerModes.map(({ icon: Icon, label, title, onClick }) => (
                 <button
                   key={label}
                   type="button"
                   onClick={onClick}
-                  className={HEADER_BTN}
+                  className={HEADER_MODE_BTN}
                   title={title}
                 >
                   <Icon className="h-3.5 w-3.5" />
                   <span className="hidden md:inline">{label}</span>
                 </button>
               ))}
-              <FeatureSelectorPopover
-                groups={MORE_MODES_GROUPS}
-                value={headerMoreMode}
-                onChange={handleHeaderMoreMode}
-                panelTitle="More modes"
-                panelHint="Swipe, Vim, games"
-                triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
-                triggerAriaLabel="More modes"
-                triggerClassName={HEADER_BTN}
-                menu
-                align="right"
-              />
-              <button
-                type="button"
-                onClick={scrollToRoadmap}
-                className={cn(HEADER_BTN, 'border-dashed border-accent/40 bg-accentbg/40 text-accent hover:border-accent/60')}
-                title="Explore roadmap"
-              >
-                <Target className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">Roadmap</span>
-              </button>
-            </div>
+            </ToolbarSegment>
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <ToolbarSegment>
@@ -380,7 +342,7 @@ export function LandingPage() {
                 value={exploreId}
                 onChange={handleExplore}
                 panelTitle="Explore modes"
-                panelHint="Swipe, games, plans"
+                panelHint="Swipe, Vim, games, plans"
                 triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
                 triggerAriaLabel="Explore modes"
                 compact
@@ -407,6 +369,9 @@ export function LandingPage() {
                 align="right"
               />
             </ToolbarSegment>
+            <div className="hidden lg:block">
+              <SwipeModeQrPromo onOpenDevice={enterMobile} />
+            </div>
             <AuthButton />
           </div>
         </div>
@@ -431,8 +396,8 @@ export function LandingPage() {
               </p>
             </div>
 
-            {/* primary CTAs */}
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5">
+            {/* primary CTAs — desktop left rail; sticky header covers sub-lg */}
+            <div className="hidden flex-col gap-2 lg:flex lg:flex-row lg:flex-wrap lg:items-center lg:gap-2.5">
               <button
                 type="button"
                 onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
@@ -451,14 +416,6 @@ export function LandingPage() {
                 <BookOpen className="h-4 w-4" />
                 {compactLabel('Browse tracks', 'Browse', isMobile)}
               </button>
-              <button
-                type="button"
-                onClick={scrollToRoadmap}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-accent/40 bg-accentbg/40 px-4 py-2.5 text-sm font-medium text-accent transition-colors hover:border-accent/60 lg:hidden"
-              >
-                <Target className="h-4 w-4" />
-                Explore roadmap
-              </button>
             </div>
 
             {/* mode pills — desktop left rail only; sticky header covers sub-lg */}
@@ -471,6 +428,25 @@ export function LandingPage() {
                 onVim={() => enterVim()}
                 onGames={() => enterGames()}
               />
+            </div>
+
+            {/* Vim Dojo promo — desktop left rail */}
+            <div className="hidden items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3 lg:flex">
+              <VimHeroPreview />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-ink">Vim Dojo</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-ink3">
+                  Timed keyboard drills for motions, editing, and muscle memory.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => enterVim()}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel2 px-3 py-2 text-xs font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-accent"
+              >
+                Open dojo
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
             </div>
 
             {/* continue where you left off */}

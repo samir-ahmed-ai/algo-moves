@@ -52,6 +52,7 @@ function resolveGlob(fromFile, pattern) {
 }
 
 const importRe = /\b(?:import|export)\b[^'"]*?from\s*['"]([^'"]+)['"]|\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
+const sideEffectImportRe = /\bimport\s*['"]([^'"]+)['"]/g;
 const globRe = /import\.meta\.glob\s*(?:<[^>]*>)?\s*\(\s*['"]([^'"]+)['"]/g;
 const graph = new Map(); // file -> Set(imported files)
 const sources = new Map();
@@ -63,6 +64,10 @@ for (const f of files) {
   while ((m = importRe.exec(src))) {
     const spec = m[1] ?? m[2];
     const resolved = resolveImport(f, spec);
+    if (resolved) deps.add(resolved);
+  }
+  while ((m = sideEffectImportRe.exec(src))) {
+    const resolved = resolveImport(f, m[1]);
     if (resolved) deps.add(resolved);
   }
   while ((m = globRe.exec(src))) {
