@@ -15,7 +15,7 @@ export function ProblemStatementColumn({
   footer,
   children,
 }: {
-  className?: string;
+  className?: string | undefined;
   toolbar?: ReactNode;
   footer?: ReactNode;
   children: ReactNode;

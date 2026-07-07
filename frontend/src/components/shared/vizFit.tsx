@@ -29,14 +29,14 @@ export function VizFitBox({
   layout: layoutMode = 'fill',
   measureRef,
 }: {
-  children: ReactNode;
-  className?: string;
+  readonly children: ReactNode;
+  readonly className?: string;
   /** Bumps remeasure when viz frame/step changes. */
-  remeasureKey?: string | number;
+  readonly remeasureKey?: string | number;
   /** `fill` expands to the flex slot; `hug` shrink-wraps to scaled board size. */
-  layout?: 'fill' | 'hug';
+  readonly layout?: 'fill' | 'hug';
   /** Flex-area element used for fit math when `layout="hug"`. */
-  measureRef?: RefObject<HTMLElement | null>;
+  readonly measureRef?: RefObject<HTMLElement | null>;
 }) {
   const selfRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -57,6 +57,7 @@ export function VizFitBox({
     const measureEl = hug && measureRef?.current ? measureRef.current : selfRef.current;
     const content = contentRef.current;
     if (!measureEl || !content) return;
+    if (typeof ResizeObserver === 'undefined') return;
 
     const measureTarget = () => {
       const board = content.querySelector<HTMLElement>('.board-area');
@@ -187,10 +188,10 @@ export function MiniTabs<T extends string>({
   onChange,
   label = 'Options',
 }: {
-  value: T;
-  options: { v: T; label: ReactNode }[];
-  onChange: (v: T) => void;
-  label?: string;
+  readonly value: T;
+  readonly options: readonly { readonly v: T; readonly label: ReactNode }[];
+  readonly onChange: (v: T) => void;
+  readonly label?: string;
 }) {
   return (
     <div

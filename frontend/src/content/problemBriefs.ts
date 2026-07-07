@@ -17,7 +17,7 @@ export interface ProblemBrief {
 }
 
 /** Hand-tuned overrides for weak generated asks or insights. Cases fall through to generated data. */
-export const PROBLEM_BRIEFS: Record<string, Partial<ProblemBrief>> = {
+export const PROBLEM_BRIEFS: Readonly<Record<string, Partial<ProblemBrief>>> = {
   'linked-list-cycle': {
     statements: [
       'Given the head of a linked list, decide whether it contains a cycle.',
@@ -59,7 +59,7 @@ function overrideForItem(item: Item): Partial<ProblemBrief> | undefined {
 }
 
 function generatedForItem(item: Item) {
-  const id = (item.pluginId ?? item.id).trim();
+  const id = (item.pluginId ?? item.id).trim().toLowerCase();
   return GENERATED_PROBLEM_BRIEFS[id];
 }
 
@@ -128,19 +128,20 @@ export function statementsFor(item: Item): [string, string] {
   return runtimeStatementsFor(item);
 }
 
-function casesFromInputs(inputs: SampleInput[]): ProblemBriefCase[] {
-  return inputs.slice(0, 2).map((inp, i) => ({
-    label: `Example ${i + 1}`,
-    input:
-      inp.label.trim().startsWith('[') || inp.label.includes('=')
-        ? inp.label
-        : formatJsonDisplay(inp.value),
-    note: inp.hint,
-  }));
+function casesFromInputs(inputs: readonly SampleInput[]): ProblemBriefCase[] {
+  return inputs.slice(0, 2).map((inp, i) => {
+    const label = inp.label.trim();
+    return {
+      label: `Example ${i + 1}`,
+      input:
+        label.startsWith('[') || label.includes('=') ? inp.label : formatJsonDisplay(inp.value),
+      ...(inp.hint ? { note: inp.hint } : {}),
+    };
+  });
 }
 
 /** Resolve example cases: override → generated → live plugin inputs. */
-export function casesFor(item: Item, inputs: SampleInput[] = []): ProblemBriefCase[] {
+export function casesFor(item: Item, inputs: readonly SampleInput[] = []): ProblemBriefCase[] {
   const override = overrideForItem(item);
   const generated = generatedForItem(item);
 
@@ -150,7 +151,7 @@ export function casesFor(item: Item, inputs: SampleInput[] = []): ProblemBriefCa
 }
 
 /** Resolve curated, generated, or fallback brief copy for the active problem. */
-export function briefFor(item: Item, inputs: SampleInput[] = []): ProblemBrief {
+export function briefFor(item: Item, inputs: readonly SampleInput[] = []): ProblemBrief {
   return {
     statements: [...statementsFor(item)],
     cases: casesFor(item, inputs),

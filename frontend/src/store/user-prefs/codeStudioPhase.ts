@@ -18,7 +18,7 @@ export function phaseSequence({ hasQuiz, hasPieces }: PhaseAvailability): CodeSt
 }
 
 export function firstPhase(av: PhaseAvailability): CodeStudioPhase {
-  return phaseSequence(av)[0];
+  return phaseSequence(av)[0] ?? 'recall';
 }
 
 /** The phase after `current`, clamped to the last (recall). */
@@ -26,7 +26,7 @@ export function nextPhase(current: CodeStudioPhase, av: PhaseAvailability): Code
   const seq = phaseSequence(av);
   const i = seq.indexOf(current);
   if (i === -1) return firstPhase(av);
-  return seq[Math.min(i + 1, seq.length - 1)];
+  return seq[Math.min(i + 1, seq.length - 1)] ?? 'recall';
 }
 
 export interface ReassembleProgress {
@@ -41,17 +41,19 @@ export interface QuizProgress {
   done: boolean;
   /** Picked choice index for the current question, so a resume restores the answered state. */
   answered?: number | null;
+  /** Choice-order seed for the current run; keeps resumed answered indexes stable. */
+  shuffleSeed?: number;
 }
 
-function phaseKey(itemId: string, langIdx: number) {
+function phaseKey(itemId: string, langIdx: number): string {
   return STORAGE_KEYS.CODE_PHASE(itemId, langIdx);
 }
 
-function progressKey(itemId: string, langIdx: number) {
+function progressKey(itemId: string, langIdx: number): string {
   return STORAGE_KEYS.REASSEMBLE_PROGRESS(itemId, langIdx);
 }
 
-function quizKey(itemId: string, langIdx: number) {
+function quizKey(itemId: string, langIdx: number): string {
   return STORAGE_KEYS.CODE_QUIZ(itemId, langIdx);
 }
 
@@ -112,6 +114,8 @@ function normalizeQuizProgress(progress: Partial<QuizProgress>): QuizProgress {
   };
   if (progress.answered === null) next.answered = null;
   if (typeof progress.answered === 'number') next.answered = nonNegativeInt(progress.answered);
+  if (typeof progress.shuffleSeed === 'number')
+    next.shuffleSeed = nonNegativeInt(progress.shuffleSeed);
   return next;
 }
 
@@ -120,10 +124,10 @@ export function loadPhase(itemId: string, langIdx: number, av: PhaseAvailability
   const seq = phaseSequence(av);
   const raw = readStorageJson(phaseKey(itemId, langIdx), null as CodeStudioPhase | null, isPhase);
   if (raw && isPhase(raw) && seq.includes(raw)) return raw;
-  return seq[0];
+  return seq[0] ?? 'recall';
 }
 
-export function savePhase(itemId: string, langIdx: number, phase: CodeStudioPhase) {
+export function savePhase(itemId: string, langIdx: number, phase: CodeStudioPhase): void {
   if (isPhase(phase)) writeStorageJson(phaseKey(itemId, langIdx), phase);
 }
 
@@ -136,11 +140,11 @@ export function saveReassembleProgress(
   itemId: string,
   langIdx: number,
   progress: ReassembleProgress,
-) {
+): void {
   writeStorageJson(progressKey(itemId, langIdx), normalizeReassembleProgress(progress));
 }
 
-export function clearReassembleProgress(itemId: string, langIdx: number) {
+export function clearReassembleProgress(itemId: string, langIdx: number): void {
   removeStorageValue(progressKey(itemId, langIdx));
 }
 
@@ -149,10 +153,10 @@ export function loadQuizProgress(itemId: string, langIdx: number): QuizProgress 
   return progress ? normalizeQuizProgress(progress) : null;
 }
 
-export function saveQuizProgress(itemId: string, langIdx: number, progress: QuizProgress) {
+export function saveQuizProgress(itemId: string, langIdx: number, progress: QuizProgress): void {
   writeStorageJson(quizKey(itemId, langIdx), normalizeQuizProgress(progress));
 }
 
-export function clearQuizProgress(itemId: string, langIdx: number) {
+export function clearQuizProgress(itemId: string, langIdx: number): void {
   removeStorageValue(quizKey(itemId, langIdx));
 }

@@ -69,7 +69,7 @@ function record({ adj, pos }: TSInput): Frame<TSState>[] {
       { active: v, highlight: null, order: [] },
     );
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (color[nb] === 0) {
         emit(
           'WALK',

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -30,7 +30,7 @@ function record({ text }: CountWordsInput): Frame<CountWordsState>[] {
   const words = countWords(text);
   let count = 0;
 
-  const { emit, frames } = createRecorder<CountWordsState>(() => ({
+  const { emit, frames } = createPrepRecorder<CountWordsState>(() => ({
     text,
     words,
     wordIdx: null,
@@ -60,8 +60,8 @@ function record({ text }: CountWordsInput): Frame<CountWordsState>[] {
     count++;
     emit(
       'SCAN',
-      `word ${count}: "${words[wordIdx]}"`,
-      `\`scanner.Scan()\` returned true — token "${words[wordIdx]}" is word #${count}. The scanner advances to the next whitespace-delimited token.`,
+      `word ${count}: "${words[wordIdx]!}"`,
+      `\`scanner.Scan()\` returned true — token "${words[wordIdx]!}" is word #${count}. The scanner advances to the next whitespace-delimited token.`,
       { wordIdx, count },
     );
   }
@@ -114,7 +114,7 @@ function Inspector({ frame }: InspectorProps<CountWordsState>) {
   return (
     <VarGrid>
       <InspectorRow k="word idx" v={s.wordIdx ?? '—'} />
-      <InspectorRow k="current word" v={s.wordIdx !== null ? s.words[s.wordIdx] : '—'} />
+      <InspectorRow k="current word" v={s.wordIdx !== null ? s.words[s.wordIdx]! : '—'} />
       <InspectorRow k="count" v={s.count} />
       <InspectorRow k="total words" v={s.words.length} />
     </VarGrid>

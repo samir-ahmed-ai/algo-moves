@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ function record({ s }: MinAddInput): Frame<MinAddState>[] {
   let open = 0;
   let close = 0;
 
-  const { emit, frames } = createRecorder<MinAddState>(() => ({
+  const { emit, frames } = createPrepRecorder<MinAddState>(() => ({
     chars,
     i: null,
     open,
@@ -46,7 +46,7 @@ function record({ s }: MinAddInput): Frame<MinAddState>[] {
   );
 
   for (let i = 0; i < chars.length; i++) {
-    const c = chars[i];
+    const c = chars[i]!;
     if (c === '(') {
       open++;
       emit(
@@ -123,7 +123,7 @@ function Inspector({ frame }: InspectorProps<MinAddState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="s[i]" v={s.i !== null ? s.chars[s.i] : '—'} />
+      <InspectorRow k="s[i]!" v={s.i !== null ? s.chars[s.i]! : '—'} />
       <InspectorRow k="open (unmatched '(')" v={s.open} />
       <InspectorRow k="close (orphan ')')" v={s.close} />
       <InspectorRow k="to add (open+close)" v={s.open + s.close} />

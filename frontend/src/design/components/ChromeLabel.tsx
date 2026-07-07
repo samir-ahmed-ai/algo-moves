@@ -1,24 +1,20 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { chromeText } from '@/design/chromeTypography';
+import { cn } from '@/design/cn';
 
-const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(' ');
-
-/** Small uppercase label for shell chrome (dock tabs, section headers). */
-export function ChromeLabel({
-  children,
-  className,
-  mono,
-  style,
-}: {
+interface ChromeLabelProps {
   children: ReactNode;
   className?: string;
   mono?: boolean;
   style?: CSSProperties;
-}) {
+}
+
+/** Small uppercase label for shell chrome (dock tabs, section headers). */
+export function ChromeLabel({ children, className, mono, style }: ChromeLabelProps) {
   return (
     <span
       style={style}
-      className={cx(
+      className={cn(
         chromeText.sm,
         'chrome-label font-medium uppercase tracking-wide leading-[var(--lh-tight,1.25)] text-ink3',
         mono && 'chrome-label--mono font-mono normal-case tracking-normal tabular-nums',

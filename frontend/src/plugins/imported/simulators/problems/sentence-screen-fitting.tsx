@@ -44,7 +44,7 @@ function measure(sentence: string[], cols: number, w: number): { count: number; 
   let idx = w;
   while (true) {
     const word = sentence[idx % sentence.length];
-    const need = count === 0 ? word.length : used + 1 + word.length;
+    const need = count === 0 ? word!.length : used + 1 + word!.length;
     if (need > cols) break;
     used = need;
     count += 1;
@@ -99,7 +99,7 @@ function record({ sentence, rows, cols }: SSFInput): Frame<SSFState>[] {
     walkRow = r;
     walkStart = start;
     const placed = fit[start];
-    totalWords += placed;
+    totalWords += placed!;
     const nx = next[start];
     emit(
       'WALK',
@@ -107,7 +107,7 @@ function record({ sentence, rows, cols }: SSFInput): Frame<SSFState>[] {
       `Row ${r} starts at word ${start}, placing ${placed} word(s) — running total ${totalWords} word(s). The next row starts at word ${nx}.`,
       { cur: start },
     );
-    start = nx;
+    start = nx!;
   }
 
   const answer = Math.floor(totalWords / w);
@@ -128,7 +128,7 @@ function View({ frame }: PluginViewProps<SSFState>) {
   const cells = s.fit.map((v) => (v < 0 ? '' : v));
   const pointers: ArrayPointer[] = [];
   if (s.cur !== null) pointers.push({ i: s.cur, label: 'start', tone: 'accent', place: 'above' });
-  const tone = (i: number) => (s.cur === i ? 'found' : s.fit[i] >= 0 ? 'match' : '');
+  const tone = (i: number) => (s.cur === i ? 'found' : s.fit[i]! >= 0 ? 'match' : '');
   const w = s.sentence.length;
   const allFit = s.fit.every((v) => v >= 0);
   const answerVal = s.done ? Math.floor(s.totalWords / w) : null;

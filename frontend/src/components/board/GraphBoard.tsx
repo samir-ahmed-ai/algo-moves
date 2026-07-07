@@ -47,7 +47,10 @@ export function GraphBoard({
   const labels: ReactElement[] = [];
 
   for (let v = 0; v < adj.length; v++) {
-    for (const u of adj[v]) {
+    for (const u of adj[v] ?? []) {
+      const posV = pos[v];
+      const posU = pos[u];
+      if (!posV || !posU) continue;
       const key = directed ? `${v}->${u}` : `${Math.min(u, v)}-${Math.max(u, v)}`;
       if (seen.has(key)) continue;
       seen.add(key);
@@ -62,8 +65,8 @@ export function GraphBoard({
           : 'var(--accent)'
         : 'var(--edge)';
       // For directed edges, stop the line at the target circle's edge so the arrowhead shows.
-      let [x1, y1] = pos[v];
-      let [x2, y2] = pos[u];
+      let [x1, y1] = posV;
+      let [x2, y2] = posU;
       if (directed) {
         const dx = x2 - x1;
         const dy = y2 - y1;
@@ -99,8 +102,8 @@ export function GraphBoard({
       if (edgeLabel) {
         const w = edgeLabel(v, u);
         if (w !== undefined && w !== '') {
-          const mx = (pos[v][0] + pos[u][0]) / 2;
-          const my = (pos[v][1] + pos[u][1]) / 2;
+          const mx = (posV[0] + posU[0]) / 2;
+          const my = (posV[1] + posU[1]) / 2;
           labels.push(
             <g key={`l-${key}`}>
               <rect

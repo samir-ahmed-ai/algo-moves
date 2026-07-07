@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -38,7 +38,7 @@ interface IsBinaryState {
 function record({ n }: IsBinaryInput): Frame<IsBinaryState>[] {
   const nBits = bitsOf(n < 0 ? 0 : n);
 
-  const { emit, frames } = createRecorder<IsBinaryState>(() => ({
+  const { emit, frames } = createPrepRecorder<IsBinaryState>(() => ({
     n,
     sign: -1,
     nBits,
@@ -88,18 +88,18 @@ function record({ n }: IsBinaryInput): Frame<IsBinaryState>[] {
   const andBits = new Array<number>(BITS).fill(-1);
   let anySet = 0;
   for (let b = 0; b < BITS; b++) {
-    andBits[b] = nBits[b] & mBits[b];
-    if (andBits[b] === 1) anySet = 1;
+    andBits[b]! = nBits[b]! & mBits[b]!;
+    if (andBits[b]! === 1) anySet = 1;
     emit(
       'AND',
-      `bit ${b}: ${nBits[b]}&${mBits[b]}=${andBits[b]}`,
-      `Bit ${b}: n has ${nBits[b]} and n-1 has ${mBits[b]}, so their AND is ${andBits[b]}.${
-        andBits[b] === 1
+      `bit ${b}: ${nBits[b]!}&${mBits[b]!}=${andBits[b]!}`,
+      `Bit ${b}: n has ${nBits[b]!} and n-1 has ${mBits[b]!}, so their AND is ${andBits[b]!}.${
+        andBits[b]! === 1
           ? ' A 1 here means the two numbers share a set bit — n had more than one bit set.'
           : ' Still zero, meaning no shared bit at this position yet.'
       }`,
       { sign: 1, mBits, andBits: andBits.slice(), i: b },
-      andBits[b] === 1 ? 'bad' : undefined,
+      andBits[b]! === 1 ? 'bad' : undefined,
     );
   }
 
@@ -136,7 +136,7 @@ function View({ frame }: PluginViewProps<IsBinaryState>) {
   if (iCol !== null) andPtr.push({ i: iCol, label: '&', tone: 'accent', place: 'below' });
 
   const andTone = (col: number) => {
-    const v = andCells[col];
+    const v = andCells[col]!;
     if (v === '·') return '';
     return v === 1 ? 'match' : s.done && s.result ? 'found' : '';
   };

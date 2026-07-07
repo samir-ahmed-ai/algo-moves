@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -28,7 +28,7 @@ function record({ encoding, calls }: RleInput): Frame<RleState>[] {
   const enc = [...encoding];
   let idx = 0;
 
-  const { emit, frames } = createRecorder<RleState>(() => ({
+  const { emit, frames } = createPrepRecorder<RleState>(() => ({
     enc: enc.slice(),
     idx,
     op: '',
@@ -48,20 +48,20 @@ function record({ encoding, calls }: RleInput): Frame<RleState>[] {
     let remaining = n;
     let result = -1;
     while (idx < enc.length) {
-      if (enc[idx] >= remaining) {
-        enc[idx] -= remaining;
-        result = enc[idx + 1];
+      if (enc[idx]! >= remaining) {
+        enc[idx]! -= remaining;
+        result! = enc[idx + 1]!;
         emit(
           'NEXT',
           `n=${n} → ${result}`,
-          `Next(${n}): consume ${remaining} from pair [${enc[idx] + remaining},${enc[idx + 1]}] → return ${result}.`,
+          `Next(${n}): consume ${remaining} from pair [${enc[idx]! + remaining},${enc[idx + 1]!}] → return ${result}.`,
           { op: `next(${n})`, n, result, enc: enc.slice(), idx },
           'good',
         );
         remaining = 0;
         break;
       }
-      remaining -= enc[idx];
+      remaining -= enc[idx]!;
       idx += 2;
     }
     if (remaining > 0) {
@@ -83,7 +83,7 @@ function View({ frame }: PluginViewProps<RleState>) {
   const s = frame.state;
   const pairs: { count: number; val: number; i: number }[] = [];
   for (let i = 0; i < s.enc.length; i += 2) {
-    pairs.push({ count: s.enc[i], val: s.enc[i + 1], i });
+    pairs.push({ count: s.enc[i]!, val: s.enc[i + 1]!, i });
   }
   return (
     <div className="board-area">

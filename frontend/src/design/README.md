@@ -25,6 +25,19 @@ flowchart TB
 4. **Plugins use vizKit** — `VizInspector`, `InspectorRow`, `PathDisplay`, etc. Never hardcode `text-[13px]` in `src/plugins/`.
 5. **Generated theme artifacts are downstream** — edit `scripts/generate-themes.mjs` or raw theme inputs, not `styles/themes/index.css` or `styles/themes/sources/index.ts`.
 6. **Shared UI belongs in design/components** — reusable chips, meters, pills, labels, avatars, and empty states must not be imported from canvas internals.
+7. **Arcade surfaces use glass depth intentionally** — route chrome, lobby, room, and game cards may use translucent panels, but controls still need clear borders, shadows, focus states, and dark/light contrast.
+8. **Motion earns its place** — countdowns, reveal beats, confetti, and swipe hints are meaningful; decorative motion must respect `prefers-reduced-motion`.
+
+## Quality bar
+
+| Surface | Standard |
+|---------|----------|
+| Shell chrome | Readable at compact density, keyboard reachable, no clipped controls |
+| Canvas nodes | Stable sizing, tokenized spacing, no viewport jump on restore |
+| Plugin viz | Uses vizKit typography and does not leak shell chrome styles |
+| Games arcade | Works as a complete room flow: lobby, chooser, roster, chat, game, profile |
+| Mobile | Safe-area aware, no horizontal scroll, primary action thumb reachable |
+| Themes | Light and dark must both preserve border contrast, focus rings, and disabled states |
 
 ## Usage
 

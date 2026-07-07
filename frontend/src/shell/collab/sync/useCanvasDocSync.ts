@@ -31,6 +31,8 @@ interface DocSyncArgs {
   edges: Edge[];
   setNodes: SetNodes;
   setEdges: SetEdges;
+  /** When false (a locked-out/restricted guest) local graph edits are not written to the shared doc. */
+  canModifyCanvas?: boolean;
 }
 
 /**
@@ -38,7 +40,13 @@ interface DocSyncArgs {
  * On the relay-only fallback (no Yjs) the host publishes the full room state
  * (session + canvas + subDocs) so guests still receive content changes.
  */
-export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncArgs): void {
+export function useCanvasDocSync({
+  nodes,
+  edges,
+  setNodes,
+  setEdges,
+  canModifyCanvas = true,
+}: DocSyncArgs): void {
   const {
     role,
     isCollaborating,
@@ -121,8 +129,8 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
         }
       : undefined;
     return buildRoomEnvelope(sessionRef.current, {
-      canvas,
-      subDocs: relaySubdocs ? subDocsRef.current : undefined,
+      ...(relayCanvas && canvas ? { canvas } : {}),
+      ...(relaySubdocs ? { subDocs: subDocsRef.current } : {}),
     });
   };
   const publishRef = useRef(() => {});
@@ -188,10 +196,13 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
 
   const yjsWriteSig = useMemo(() => {
     if (!yjsTransport || yjsMode !== 'transport') return '';
+    // A restricted guest must not push graph mutations into the shared doc
+    // (add/delete/move) — the board lock would otherwise be bypassed.
+    if (!canModifyCanvas) return '';
     const dragging = nodes.some((n) => n.dragging);
     if (dragging) return '';
     return docSignature(nodes, edges, comments);
-  }, [yjsTransport, yjsMode, nodes, edges, comments]);
+  }, [yjsTransport, yjsMode, canModifyCanvas, nodes, edges, comments]);
 
   useEffect(() => {
     if (!yjsWriteSig || !yjsDoc) return;

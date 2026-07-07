@@ -36,5 +36,7 @@ export const ASSEMBLE_GAMES: AssembleGameDef[] = [
 
 /** Stable per-problem default so a topic run rotates through all three games. */
 export function defaultGameFor(scope: string): AssembleGameDef {
-  return ASSEMBLE_GAMES[hashString(scope) % ASSEMBLE_GAMES.length];
+  const game = ASSEMBLE_GAMES[hashString(scope) % ASSEMBLE_GAMES.length];
+  if (!game) return ASSEMBLE_GAMES[0]!;
+  return game;
 }

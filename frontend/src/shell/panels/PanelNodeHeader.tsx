@@ -287,7 +287,10 @@ export function PanelNodeHeader({
           </HeaderActionSlots>
         )}
         {selected && mode === 'visualize' && !locked && (
-          <PanelHeaderLayoutMenu hostId={id} slots={data.layoutSlots} />
+          <PanelHeaderLayoutMenu
+            hostId={id}
+            {...(data.layoutSlots !== undefined ? { slots: data.layoutSlots } : {})}
+          />
         )}
         {(isViz || isWorkbench) && <HeaderStep />}
         <PanelHeaderMenu items={menuItems} />

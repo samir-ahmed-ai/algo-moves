@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -28,9 +28,9 @@ interface RemoveOnesState {
 
 function record({ grid }: RemoveOnesInput): Frame<RemoveOnesState>[] {
   const m = grid.length;
-  const n = grid[0].length;
+  const n = grid[0]!.length;
 
-  const { emit, frames } = createRecorder<RemoveOnesState>(() => ({
+  const { emit, frames } = createPrepRecorder<RemoveOnesState>(() => ({
     grid,
     row: null,
     col: null,
@@ -67,15 +67,15 @@ function record({ grid }: RemoveOnesInput): Frame<RemoveOnesState>[] {
     );
 
     for (let j = 0; j < n; j++) {
-      if (grid[i][j] !== grid[0][j]) same = false;
-      if (grid[i][j] === grid[0][j]) inv = false;
-      const a = grid[i][j];
-      const b = grid[0][j];
+      if (grid[i]![j] !== grid[0]![j]) same = false;
+      if (grid[i]![j] === grid[0]![j]) inv = false;
+      const a = grid[i]![j];
+      const b = grid[0]![j];
       const rel = a === b ? 'matches' : 'differs from';
       emit(
         'CMP',
         `c${j}: ${a} vs ${b}`,
-        `Column ${j}: grid[${i}][${j}] = ${a} ${rel} grid[0][${j}] = ${b}. ${
+        `Column ${j}: grid[${i}]![${j}] = ${a} ${rel} grid[0]![${j}] = ${b}. ${
           a === b
             ? `An agreement here means row ${i} can no longer be the inverse of row 0.`
             : `A disagreement here means row ${i} can no longer be identical to row 0.`
@@ -130,7 +130,7 @@ function View({ frame }: PluginViewProps<RemoveOnesState>) {
     if (s.result === false && s.row !== null && r === s.row) return 'water';
     if (r === 0) return 'fill';
     if (clearedSet.has(r)) return 'visited';
-    return s.grid[r][c] === 1 ? 'land' : '';
+    return s.grid[r]![c] === 1 ? 'land' : '';
   };
   const active: [number, number] | null = s.row !== null && s.col !== null ? [s.row, s.col] : null;
   return (
@@ -158,17 +158,17 @@ function Inspector({ frame }: InspectorProps<RemoveOnesState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const cur =
-    s.row !== null && s.col !== null && s.row < s.grid.length && s.col < s.grid[0].length
-      ? s.grid[s.row][s.col]
+    s.row !== null && s.col !== null && s.row < s.grid.length && s.col < s.grid[0]!.length
+      ? s.grid[s.row]![s.col]
       : '—';
-  const ref = s.col !== null && s.col < s.grid[0].length ? s.grid[0][s.col] : '—';
+  const ref = s.col !== null && s.col < s.grid[0]!.length ? s.grid[0]![s.col] : '—';
   return (
     <VarGrid>
-      <InspectorRow k="dims (m×n)" v={`${s.grid.length}×${s.grid[0].length}`} />
+      <InspectorRow k="dims (m×n)" v={`${s.grid.length}×${s.grid[0]!.length}`} />
       <InspectorRow k="row i" v={s.row ?? '—'} />
       <InspectorRow k="col j" v={s.col ?? '—'} />
-      <InspectorRow k="grid[i][j]" v={cur} />
-      <InspectorRow k="grid[0][j]" v={ref} />
+      <InspectorRow k="grid[i]![j]" v={cur} />
+      <InspectorRow k="grid[0]![j]" v={ref} />
       <InspectorRow k="same?" v={s.row !== null && s.row > 0 ? String(s.same) : '—'} />
       <InspectorRow k="inverse?" v={s.row !== null && s.row > 0 ? String(s.inv) : '—'} />
       <InspectorRow k="rows cleared" v={s.clearedRows.length} />
@@ -228,7 +228,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'On the "CMP" step (c:  vs ), what happens?',
     choices: [
       {
-        label: 'Column : grid[][] = grid[0][] = — this move caption',
+        label: 'Column : grid[][] = grid[0]![] = — this move caption',
         correct: true,
       },
       {
@@ -241,7 +241,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Remaining input skipped — early return path',
       },
     ],
-    explain: 'Column : grid[][] =   grid[0][] = . ${\n          a === b\n            ? ',
+    explain: 'Column : grid[][] =   grid[0]![] = . ${\n          a === b\n            ? ',
   },
   {
     id: 'state',

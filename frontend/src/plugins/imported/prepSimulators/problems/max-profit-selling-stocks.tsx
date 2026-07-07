@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { cn } from '@/lib/utils/cn';
@@ -34,7 +34,7 @@ function record({ prices }: StocksInput): Frame<StocksState>[] {
   let bestBuyIdx: number | null = null;
   let bestSellIdx: number | null = null;
 
-  const { emit, frames } = createRecorder<StocksState>(() => ({
+  const { emit, frames } = createPrepRecorder<StocksState>(() => ({
     prices,
     i: null,
     minIdx,
@@ -54,10 +54,10 @@ function record({ prices }: StocksInput): Frame<StocksState>[] {
   );
 
   for (let i = 0; i < prices.length; i++) {
-    const p = prices[i];
+    const p = prices[i]!;
 
-    if (p < minP) {
-      minP = p;
+    if (p! < minP) {
+      minP! = p;
       minIdx = i;
       emit(
         'NEW_MIN',
@@ -74,7 +74,7 @@ function record({ prices }: StocksInput): Frame<StocksState>[] {
       );
     }
 
-    const profit = p - minP;
+    const profit = p! - minP;
     if (profit > best) {
       best = profit;
       bestBuyIdx = minIdx;
@@ -157,7 +157,7 @@ function Inspector({ frame }: InspectorProps<StocksState>) {
   return (
     <VarGrid>
       <InspectorRow k="day i" v={s.i ?? '—'} />
-      <InspectorRow k="price[i]" v={s.i !== null ? s.prices[s.i] : '—'} />
+      <InspectorRow k="price[i]!" v={s.i !== null ? s.prices[s.i]! : '—'} />
       <InspectorRow k="minP" v={s.minP === null ? '∞' : s.minP} />
       <InspectorRow k="buy day" v={s.minIdx ?? '—'} />
       <InspectorRow k="profit here" v={s.profit ?? '—'} />

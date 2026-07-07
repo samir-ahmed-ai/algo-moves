@@ -27,7 +27,7 @@ function leadingIndentChanged(before: string, after: string): boolean {
   const a = leadingIndents(before);
   const b = leadingIndents(after);
   if (a.length !== b.length) return true;
-  return a.some((indent, i) => indent !== b[i]);
+  return a.some((indent, i) => indent !== (b[i] ?? ''));
 }
 
 export { applySpacingOnly, braceFormat, formatCompleteSource } from './styleFormat';
@@ -205,14 +205,14 @@ export function splitForAlign(
 ): [string, string, string] | null {
   if (delimiter === ':') {
     const m = line.match(/^(.*?)(:)(.*)$/);
-    return m ? [m[1], m[2], m[3]] : null;
+    return m ? [m[1] ?? '', m[2] ?? '', m[3] ?? ''] : null;
   }
   const colonAssign = line.match(/^(.*?)(:=)(.*)$/);
-  if (colonAssign) return [colonAssign[1], colonAssign[2], colonAssign[3]];
+  if (colonAssign) return [colonAssign[1] ?? '', colonAssign[2] ?? '', colonAssign[3] ?? ''];
   const spaced = line.match(/^(.*?)( = )(.*)$/);
-  if (spaced) return [spaced[1], spaced[2], spaced[3]];
+  if (spaced) return [spaced[1] ?? '', spaced[2] ?? '', spaced[3] ?? ''];
   const tight = line.match(/^(.*?)(?<![=!<>:])=(?!=)(.*)$/);
-  if (tight) return [tight[1], tight[2], tight[3]];
+  if (tight) return [tight[1] ?? '', tight[2] ?? '', tight[3] ?? ''];
   return null;
 }
 
@@ -252,8 +252,9 @@ export const alignSelection: Command = (view) => {
   const changes = [];
   for (let i = 0; i < lines.length; i++) {
     const line = state.doc.line(fromLine.number + i);
-    if (line.text !== aligned[i]) {
-      changes.push({ from: line.from, to: line.to, insert: aligned[i] });
+    const alignedLine = aligned[i] ?? line.text;
+    if (line.text !== alignedLine) {
+      changes.push({ from: line.from, to: line.to, insert: alignedLine });
     }
   }
   if (changes.length === 0) return true;

@@ -44,8 +44,8 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
 
   const find = (x: number): number => {
     while (parent[x] !== x) {
-      parent[x] = parent[parent[x]];
-      x = parent[x];
+      parent[x]! = parent[parent[x]!]!;
+      x = parent[x]!;
     }
     return x;
   };
@@ -70,13 +70,13 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
     { active: null, inspect: null, highlightEdge: null, groupVal: null },
   );
 
-  const ids = Array.from({ length: n }, (_, i) => i).sort((a, b) => vals[a] - vals[b]);
+  const ids = Array.from({ length: n }, (_, i) => i).sort((a, b) => vals[a]! - vals[b]!);
 
   let i = 0;
   while (i < n) {
     let j = i;
-    while (j < n && vals[ids[j]] === vals[ids[i]]) j += 1;
-    const val = vals[ids[i]];
+    while (j < n && vals[ids[j]!] === vals[ids[i]!]) j += 1;
+    const val = vals[ids[i]!]!;
     const groupNodes = ids.slice(i, j);
     emit(
       'GROUP',
@@ -86,13 +86,13 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
     );
 
     for (let k = i; k < j; k++) {
-      const u = ids[k];
-      for (const v of adj[u]) {
-        if (vals[v] <= vals[u]) {
+      const u = ids[k]!;
+      for (const v of adj[u]!) {
+        if (vals[v]! <= vals[u]!) {
           const ru = find(u);
           const rv = find(v);
           if (ru !== rv) {
-            if (vals[ru] < vals[rv]) parent[ru] = rv;
+            if (vals[ru]! < vals[rv]!) parent[ru] = rv;
             else parent[rv] = ru;
             emit(
               'UNION',
@@ -114,7 +114,7 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
 
     const cnt = new Map<number, number>();
     for (let k = i; k < j; k++) {
-      const r = find(ids[k]);
+      const r = find(ids[k]!);
       cnt.set(r, (cnt.get(r) ?? 0) + 1);
     }
     let added = 0;
@@ -143,7 +143,7 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
 
 function team(s: GPState, node: number): string {
   if (s.groupVal !== null && s.vals[node] === s.groupVal) return 'team-1';
-  if (s.groupVal !== null && s.vals[node] < s.groupVal) return 'team-2';
+  if (s.groupVal !== null && s.vals[node]! < s.groupVal) return 'team-2';
   return 'team-0';
 }
 

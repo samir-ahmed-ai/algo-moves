@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -17,11 +17,11 @@ interface PalinInput {
 
 interface PalinState {
   chars: string[]; // the input split into characters
-  dp: number[][]; // dp[l][r] = length of longest palindromic subsequence in s[l..r]
+  dp: number[][]; // dp[l]![r] = length of longest palindromic subsequence in s[l..r]!
   l: number | null; // current left index of the interval
   r: number | null; // current right index of the interval
-  matched: boolean | null; // did s[l] === s[r] on this step?
-  lps: number | null; // final longest palindromic subsequence length (dp[0][n-1])
+  matched: boolean | null; // did s[l]! === s[r]! on this step?
+  lps: number | null; // final longest palindromic subsequence length (dp[0]![n-1])
   answer: number | null; // insertions needed = n - lps
   done: boolean;
 }
@@ -37,7 +37,7 @@ function record({ s }: PalinInput): Frame<PalinState>[] {
 
   const cloneDp = (): number[][] => dp.map((row) => row.slice());
 
-  const { emit, frames } = createRecorder<PalinState>(() => ({
+  const { emit, frames } = createPrepRecorder<PalinState>(() => ({
     chars,
     dp: cloneDp(),
     l: null,
@@ -51,7 +51,7 @@ function record({ s }: PalinInput): Frame<PalinState>[] {
   emit(
     'INIT',
     `s="${s}"`,
-    `Minimum insertions to make "${s}" a palindrome. The trick: the fewest insertions equals n − LPS, where LPS is the Longest Palindromic Subsequence. We build LPS with an interval DP where dp[l][r] is the LPS length of the substring s[l..r].`,
+    `Minimum insertions to make "${s}" a palindrome. The trick: the fewest insertions equals n − LPS, where LPS is the Longest Palindromic Subsequence. We build LPS with an interval DP where dp[l]![r] is the LPS length of the substring s[l..r]!.`,
     {},
   );
 
@@ -67,46 +67,46 @@ function record({ s }: PalinInput): Frame<PalinState>[] {
   }
 
   // Base case: every single character is a palindrome of length 1.
-  for (let i = 0; i < n; i++) dp[i][i] = 1;
+  for (let i = 0; i < n; i++) dp[i]![i] = 1;
   emit(
     'BASE',
     'diagonal = 1',
-    `Base case: any single character is a palindrome of length 1, so dp[i][i] = 1 for every i. These sit on the diagonal of the table.`,
+    `Base case: any single character is a palindrome of length 1, so dp[i]![i] = 1 for every i. These sit on the diagonal of the table.`,
     { l: 0, r: 0 },
   );
 
   // Fill intervals from the shortest (length 2) outward, matching the Go loop
-  // which sweeps l downward and r upward so every dp[l+1][r-1], dp[l+1][r] and
-  // dp[l][r-1] is already computed.
+  // which sweeps l downward and r upward so every dp[l+1]![r-1], dp[l+1]![r] and
+  // dp[l]![r-1] is already computed.
   for (let l = n - 2; l >= 0; l--) {
     for (let r = l + 1; r < n; r++) {
-      if (chars[l] === chars[r]) {
-        dp[l][r] = dp[l + 1][r - 1] + 2;
+      if (chars[l]! === chars[r]!) {
+        dp[l]![r] = dp[l + 1]![r - 1]! + 2;
         emit(
           'MATCH',
-          `dp[${l}][${r}]=${dp[l][r]}`,
-          `s[${l}]='${chars[l]}' equals s[${r}]='${chars[r]}', so both ends join the palindrome. dp[${l}][${r}] = dp[${l + 1}][${r - 1}] (=${dp[l + 1][r - 1]}) + 2 = ${dp[l][r]}.`,
+          `dp[${l}]![${r}]=${dp[l]![r]}`,
+          `s[${l}]!='${chars[l]!}' equals s[${r}]!='${chars[r]!}', so both ends join the palindrome. dp[${l}]![${r}] = dp[${l + 1}]![${r - 1}] (=${dp[l + 1]![r - 1]}) + 2 = ${dp[l]![r]}.`,
           { l, r, matched: true },
           'good',
         );
       } else {
-        dp[l][r] = Math.max(dp[l + 1][r], dp[l][r - 1]);
+        dp[l]![r] = Math.max(dp[l + 1]![r]!, dp[l]![r - 1]!);
         emit(
           'SKIP',
-          `dp[${l}][${r}]=${dp[l][r]}`,
-          `s[${l}]='${chars[l]}' differs from s[${r}]='${chars[r]}', so drop one end and keep the better subsequence. dp[${l}][${r}] = max(dp[${l + 1}][${r}]=${dp[l + 1][r]}, dp[${l}][${r - 1}]=${dp[l][r - 1]}) = ${dp[l][r]}.`,
+          `dp[${l}]![${r}]=${dp[l]![r]}`,
+          `s[${l}]!='${chars[l]!}' differs from s[${r}]!='${chars[r]!}', so drop one end and keep the better subsequence. dp[${l}]![${r}] = max(dp[${l + 1}]![${r}]=${dp[l + 1]![r]}, dp[${l}]![${r - 1}]=${dp[l]![r - 1]}) = ${dp[l]![r]}.`,
           { l, r, matched: false },
         );
       }
     }
   }
 
-  const lps = dp[0][n - 1];
-  const answer = n - lps;
+  const lps = dp[0]![n - 1];
+  const answer = n - lps!;
   emit(
     'DONE',
     `${answer} insertions`,
-    `The whole-string cell dp[0][${n - 1}] = ${lps} is the longest palindromic subsequence length. Every character NOT in it needs a mirror inserted, so the answer is n − LPS = ${n} − ${lps} = ${answer}.`,
+    `The whole-string cell dp[0]![${n - 1}] = ${lps} is the longest palindromic subsequence length. Every character NOT in it needs a mirror inserted, so the answer is n − LPS = ${n} − ${lps} = ${answer}.`,
     { l: 0, r: n - 1, lps, answer, done: true },
     'good',
   );
@@ -128,8 +128,8 @@ function View({ frame }: PluginViewProps<PalinState>) {
   };
   const window: [number, number] | null = s.l !== null && s.r !== null ? [s.l, s.r] : null;
   const cur =
-    s.l !== null && s.r !== null && s.dp[s.l]?.[s.r] !== undefined && s.dp[s.l][s.r] !== NONE
-      ? s.dp[s.l][s.r]
+    s.l !== null && s.r !== null && s.dp[s.l]?.[s.r] !== undefined && s.dp[s.l]![s.r] !== NONE
+      ? s.dp[s.l]![s.r]
       : null;
   return (
     <div className="board-area">
@@ -160,8 +160,8 @@ function Inspector({ frame }: InspectorProps<PalinState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const cell =
-    s.l !== null && s.r !== null && s.dp[s.l]?.[s.r] !== undefined && s.dp[s.l][s.r] !== NONE
-      ? s.dp[s.l][s.r]
+    s.l !== null && s.r !== null && s.dp[s.l]?.[s.r] !== undefined && s.dp[s.l]![s.r] !== NONE
+      ? s.dp[s.l]![s.r]
       : '—';
   return (
     <VarGrid>
@@ -169,9 +169,9 @@ function Inspector({ frame }: InspectorProps<PalinState>) {
       <InspectorRow k="n" v={s.chars.length} />
       <InspectorRow k="l" v={s.l ?? '—'} />
       <InspectorRow k="r" v={s.r ?? '—'} />
-      <InspectorRow k="s[l]" v={s.l !== null ? `'${s.chars[s.l]}'` : '—'} />
-      <InspectorRow k="s[r]" v={s.r !== null ? `'${s.chars[s.r]}'` : '—'} />
-      <InspectorRow k="dp[l][r]" v={cell} />
+      <InspectorRow k="s[l]!" v={s.l !== null ? `'${s.chars[s.l]!}'` : '—'} />
+      <InspectorRow k="s[r]!" v={s.r !== null ? `'${s.chars[s.r]!}'` : '—'} />
+      <InspectorRow k="dp[l]![r]" v={cell} />
       <InspectorRow k="LPS" v={s.lps ?? '…'} />
       <InspectorRow k="insertions" v={s.answer ?? (s.done ? 0 : '…')} />
     </VarGrid>
@@ -221,7 +221,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Minimum insertions to make "" a palindrome. The trick: the fewest insertions equals n − LPS, where LPS is the Longest Palindromic Subsequence. We build LPS with an interval DP where dp[l][r] is the LPS length of the substring s[l..r].',
+      'Minimum insertions to make "" a palindrome. The trick: the fewest insertions equals n − LPS, where LPS is the Longest Palindromic Subsequence. We build LPS with an interval DP where dp[l]![r] is the LPS length of the substring s[l..r]!.',
   },
   {
     id: 'key-step',
@@ -283,14 +283,14 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n^2). O(n^2). LPS interval DP; match -> +2 inside, else max(drop end); n-dp[0][n-1]',
+      'O(n^2). O(n^2). LPS interval DP; match -> +2 inside, else max(drop end); n-dp[0]![n-1]',
   },
   {
     id: 'outcome',
     prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: 'The whole-string cell dp[0][] = — final DONE caption',
+        label: 'The whole-string cell dp[0]![] = — final DONE caption',
         correct: true,
       },
       {
@@ -304,7 +304,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The whole-string cell dp[0][] =  is the longest palindromic subsequence length. Every character NOT in it needs a mirror inserted, so the answer is n − LPS =  −  = .',
+      'The whole-string cell dp[0]![] =  is the longest palindromic subsequence length. Every character NOT in it needs a mirror inserted, so the answer is n − LPS =  −  = .',
   },
 ];
 export const simulator: ProblemSimulator = {

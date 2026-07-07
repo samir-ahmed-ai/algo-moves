@@ -101,12 +101,12 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
     let p: [number, number] | null = [er, ec];
     while (p) {
       path.push(p);
-      p = parent[p[0]][p[1]];
+      p = parent[p[0]]![p[1]] ?? null;
     }
     return path.reverse();
   };
 
-  if (grid[0][0] !== 0 || grid[n - 1][n - 1] !== 0) {
+  if (grid[0]![0] !== 0 || grid[n - 1]![n - 1] !== 0) {
     snap(
       'BLOCKED',
       'endpoint blocked',
@@ -121,8 +121,8 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
   }
 
   const queue: [number, number][] = [[0, 0]];
-  visited[0][0] = true;
-  dist[0][0] = 1;
+  visited[0]![0] = true;
+  dist[0]![0] = 1;
   snap(
     'START',
     'enqueue (0,0)',
@@ -135,7 +135,7 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
 
   while (queue.length) {
     const [r, c] = queue.shift() as [number, number];
-    const d = dist[r][c];
+    const d = dist[r]![c];
 
     if (r === n - 1 && c === n - 1) {
       const path = reconstruct(r, c);
@@ -144,18 +144,18 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
         `reached in ${d}`,
         `Dequeued the goal (${r}, ${c}) at path length ${d}. Because BFS reaches every cell by its shortest number of steps, this is the answer.`,
         [r, c],
-        d,
+        d!,
         path,
-        d,
+        d!,
       );
       snap(
         'DONE',
         `${d} cells`,
         `Shortest clear path uses ${d} cells. The answer is ${d}.`,
         null,
-        d,
+        d!,
         path,
-        d,
+        d!,
         'good',
       );
       return frames;
@@ -165,10 +165,10 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
     for (const [dr, dc] of DIRS) {
       const nr = r + dr;
       const nc = c + dc;
-      if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc] === 0 && !visited[nr][nc]) {
-        visited[nr][nc] = true;
-        dist[nr][nc] = d + 1;
-        parent[nr][nc] = [r, c];
+      if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr]![nc] === 0 && !visited[nr]![nc]) {
+        visited[nr]![nc] = true;
+        dist[nr]![nc] = d! + 1;
+        parent[nr]![nc] = [r, c];
         queue.push([nr, nc]);
         opened.push(`(${nr}, ${nc})`);
       }
@@ -176,14 +176,14 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
 
     const expanded =
       opened.length > 0
-        ? `Open unvisited neighbours ${opened.join(', ')} are reached at path length ${d + 1}; mark them visited and enqueue them.`
+        ? `Open unvisited neighbours ${opened.join(', ')} are reached at path length ${d! + 1}; mark them visited and enqueue them.`
         : `No new open neighbours to explore from here.`;
     snap(
       'EXPAND',
       `expand (${r},${c})`,
       `Dequeue (${r}, ${c}) at path length ${d}. ${expanded}`,
       [r, c],
-      d,
+      d!,
       [],
       null,
     );
@@ -206,10 +206,10 @@ function View({ frame }: PluginViewProps<SpbmState>) {
   const s = frame.state;
   const onPath = (r: number, c: number) => s.path.some((p) => p[0] === r && p[1] === c);
   const cellTone = (r: number, c: number) => {
-    if (s.grid[r][c] === 1) return 'water';
+    if (s.grid[r]![c] === 1) return 'water';
     if (s.path.length > 0 && onPath(r, c)) return 'path';
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
-    if (s.visited[r][c]) return 'visited';
+    if (s.visited[r]![c]) return 'visited';
     return 'land';
   };
   const answerValue = s.answer !== null ? s.answer : s.dist > 0 ? s.dist : '—';

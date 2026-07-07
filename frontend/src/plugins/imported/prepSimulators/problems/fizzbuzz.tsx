@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ interface FizzBuzzState {
 function record({ n }: FizzBuzzInput): Frame<FizzBuzzState>[] {
   const out = new Array<string>(n).fill('');
 
-  const { emit, frames } = createRecorder<FizzBuzzState>(() => ({
+  const { emit, frames } = createPrepRecorder<FizzBuzzState>(() => ({
     n,
     out: out.slice(),
     i: null,
@@ -70,7 +70,7 @@ function record({ n }: FizzBuzzInput): Frame<FizzBuzzState>[] {
       caption = `${i} is not divisible by 3, 5, or 15, so none of the conditions fire — print the number itself, "${i}".`;
     }
 
-    out[i - 1] = picked;
+    out[i - 1]! = picked;
     emit(
       picked === String(i) ? 'NUM' : picked.toUpperCase(),
       `${i} → ${picked}`,
@@ -97,7 +97,7 @@ function View({ frame }: PluginViewProps<FizzBuzzState>) {
   if (s.i !== null) pointers.push({ i: s.i - 1, label: 'i', tone: 'accent', place: 'above' });
   const tone = (idx: number) => {
     if (s.i !== null && idx === s.i - 1) return 'found';
-    return s.out[idx] !== '' ? 'match' : '';
+    return s.out[idx]! !== '' ? 'match' : '';
   };
   return (
     <div className="board-area">

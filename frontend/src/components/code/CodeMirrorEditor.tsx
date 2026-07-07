@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Compartment, EditorState, RangeSetBuilder } from '@codemirror/state';
-import { Decoration, EditorView } from '@codemirror/view';
+import { Decoration, EditorView, type DecorationSet } from '@codemirror/view';
 import { coreEditorExtensions, vimExtensions, wrapExtensions } from '@/lib/editor';
 import { buildEditorTheme } from '@/lib/editor';
 import { languageExtension } from '@/lib/editor';
@@ -26,10 +26,14 @@ export interface CodeMirrorEditorProps {
   className?: string;
 }
 
-function buildLineDecorations(state: EditorState, lines: Map<number, string>) {
+function buildLineDecorations(
+  state: EditorState,
+  lines: ReadonlyMap<number, string>,
+): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();
   for (const [lineNum, cls] of lines) {
-    if (lineNum < 1 || lineNum > state.doc.lines) continue;
+    if (!Number.isInteger(lineNum) || lineNum < 1 || lineNum > state.doc.lines) continue;
+    if (!cls.trim()) continue;
     const line = state.doc.line(lineNum);
     builder.add(line.from, line.from, Decoration.line({ class: cls }));
   }
@@ -158,6 +162,7 @@ export function CodeMirrorEditor({
     if (!host.current) return;
     const isDark = dark ?? document.documentElement.classList.contains('dark');
     const langExt = languageExtension(lang);
+    const safeMinHeight = minHeight.trim() || '320px';
 
     const view = new EditorView({
       parent: host.current,
@@ -179,7 +184,10 @@ export function CodeMirrorEditor({
           EditorView.updateListener.of((u) => {
             if (u.docChanged) onChangeRef.current?.(u.state.doc.toString());
           }),
-          EditorView.theme({ '.cm-content': { minHeight }, '.cm-editor': { height: '100%' } }),
+          EditorView.theme({
+            '.cm-content': { minHeight: safeMinHeight },
+            '.cm-editor': { height: '100%' },
+          }),
           baseTheme,
           themeComp.current.of(buildEditorTheme(isDark)),
         ],
@@ -193,7 +201,6 @@ export function CodeMirrorEditor({
       viewRef.current = null;
     };
     // Created once per lang/minHeight; other props applied live below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, minHeight]);
 
   useEffect(() => {

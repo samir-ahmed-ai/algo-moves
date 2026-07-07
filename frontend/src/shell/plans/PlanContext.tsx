@@ -246,6 +246,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
           return prev;
         const next = [...prev];
         const [moved] = next.splice(fromIndex, 1);
+        if (moved === undefined) return prev;
         next.splice(toIndex, 0, moved);
         scheduleSave(activePlan, next, completed);
         return next;

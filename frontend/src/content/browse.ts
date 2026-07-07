@@ -52,9 +52,8 @@ export function getItemsForCategory(categoryId: string, catalog: Catalog): Item[
     const course = catalog.courses.find((c) => c.id === src.courseId);
     if (!course) continue;
 
-    const topics = src.topicIds
-      ? course.topics.filter((t) => src.topicIds!.includes(t.id))
-      : course.topics;
+    const topicIds = src.topicIds;
+    const topics = topicIds ? course.topics.filter((t) => topicIds.includes(t.id)) : course.topics;
 
     for (const topic of topics) {
       for (const item of topic.items) {
@@ -77,9 +76,9 @@ export function topicForCategory(categoryId: string, catalog: Catalog): Topic | 
   return {
     id: browseTopicId(categoryId),
     title: cat.title,
-    summary: cat.summary,
     courseId: cat.sources[0]?.courseId ?? '',
     items,
+    ...(cat.summary ? { summary: cat.summary } : {}),
   };
 }
 
@@ -185,5 +184,9 @@ export function browseBreadcrumbForItem(
   const catId = categoryIdForItem(itemId, catalog);
   const category = catId ? getCategoryById(catId) : undefined;
   const track = catId ? trackForCategory(catId) : undefined;
-  return { track, category, item };
+  return {
+    ...(track ? { track } : {}),
+    ...(category ? { category } : {}),
+    ...(item ? { item } : {}),
+  };
 }

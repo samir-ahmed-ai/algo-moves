@@ -145,6 +145,7 @@ export function MobileDeck({
     }
     if (pIdx > 0) {
       const prev = blocks[pIdx - 1];
+      if (!prev) return;
       setPIdx(pIdx - 1);
       setCIdx(Math.max(0, prev.cards.length - 1));
     }

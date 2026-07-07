@@ -35,8 +35,8 @@ export function WidgetSection({ widget }: { widget: CanvasWidget }) {
       title={widget.title}
       open={open}
       onToggle={() => setOpen((o) => !o)}
-      maxHeightClass={widget.maxHeightClass}
-      badge={Badge ? <Badge /> : undefined}
+      {...(widget.maxHeightClass ? { maxHeightClass: widget.maxHeightClass } : {})}
+      {...(Badge ? { badge: <Badge /> } : {})}
     >
       <Body />
     </SidebarSection>

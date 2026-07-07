@@ -82,9 +82,9 @@ function record({ adj, pos, start }: BSRInput): Frame<BSRState>[] {
       { active: v },
     );
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (dist[nb] === -1) {
-        dist[nb] = dist[v] + EDGE_WEIGHT;
+        dist[nb] = dist[v]! + EDGE_WEIGHT;
         color[nb] = 2;
         queue.push(nb);
         emit(
@@ -115,7 +115,7 @@ function record({ adj, pos, start }: BSRInput): Frame<BSRState>[] {
 function distLabel(s: BSRState, node: number): string {
   if (node === s.start) return `${node + 1}·0`;
   const d = s.dist[node];
-  return `${node + 1}·${d < 0 ? '∞' : d}`;
+  return `${node + 1}·${d! < 0 ? '∞' : d}`;
 }
 
 function View({ frame }: PluginViewProps<BSRState>) {

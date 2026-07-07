@@ -46,6 +46,8 @@ export type UseCanvasStageWorkspaceOptions = {
   mode: CanvasMode;
   key: string;
   standalone: boolean;
+  /** False when the local client (a locked-out/restricted guest) may not mutate the graph. */
+  canModifyCanvas: boolean;
   nodes: PanelFlowNode[];
   edges: Edge[];
   setNodes: Dispatch<SetStateAction<PanelFlowNode[]>>;
@@ -60,7 +62,7 @@ export type UseCanvasStageWorkspaceOptions = {
   removedRef: MutableRefObject<Record<string, Set<string>>>;
   removedEdgesRef: MutableRefObject<Record<string, Set<string>>>;
   nodesRef: MutableRefObject<PanelFlowNode[]>;
-  historyRef: MutableRefObject<{ nodes: PanelFlowNode[]; edges: Edge[] }[]>;
+  historyRef: MutableRefObject<import('@/store/canvas').CanvasHistorySnapshot[]>;
   histIdxRef: MutableRefObject<number>;
   builtKeyRef: MutableRefObject<string>;
   undo: () => void;
@@ -104,6 +106,7 @@ export function useCanvasStageWorkspace({
   mode,
   key,
   standalone,
+  canModifyCanvas,
   nodes,
   edges,
   setNodes,
@@ -212,6 +215,7 @@ export function useCanvasStageWorkspace({
 
   const addKind = useCallback(
     (kind: string) => {
+      if (!canModifyCanvas) return;
       const r = wrapperRef.current?.getBoundingClientRect();
       const center = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: 240, y: 240 };
       const position = screenToFlowPosition(center);
@@ -242,6 +246,7 @@ export function useCanvasStageWorkspace({
       plugin,
       mode,
       key,
+      canModifyCanvas,
       edgeOpts,
       edges,
       screenToFlowPosition,
@@ -256,13 +261,14 @@ export function useCanvasStageWorkspace({
 
   const addEffect = useCallback(
     (effectId: string) => {
+      if (!canModifyCanvas) return;
       const r = wrapperRef.current?.getBoundingClientRect();
       const center = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: 240, y: 240 };
       const position = screenToFlowPosition(center);
       const node = createEffectByType(effectId, position);
       setNodes((nds) => [...nds, node as unknown as PanelFlowNode]);
     },
-    [screenToFlowPosition, setNodes, wrapperRef],
+    [canModifyCanvas, screenToFlowPosition, setNodes, wrapperRef],
   );
 
   useEffect(() => {
@@ -281,7 +287,11 @@ export function useCanvasStageWorkspace({
     (): ShareState => ({
       ...(standalone
         ? { focus: 'canvas' as const }
-        : { item: item.id, input: inputId || undefined, focus: 'problem' as const }),
+        : {
+            item: item.id,
+            ...(inputId ? { input: inputId } : {}),
+            focus: 'problem' as const,
+          }),
       mode,
       theme,
       palette,

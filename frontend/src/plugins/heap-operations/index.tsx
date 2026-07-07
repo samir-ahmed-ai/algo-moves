@@ -56,7 +56,7 @@ function record({ ops }: HeapInput): Frame<HeapState>[] {
     tone?: 'good',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         heap: heap.slice(),
         active: fields.active ?? null,
@@ -78,28 +78,31 @@ function record({ ops }: HeapInput): Frame<HeapState>[] {
     let i = start;
     while (i > 0) {
       const p = parent(i);
+      const cur = heap[i]!;
+      const par = heap[p]!;
       emit(
         'SIFTUP',
-        `${heap[i]} vs parent ${heap[p]}`,
-        `Sift-up: compare ${heap[i]} (index ${i}) with its parent ${heap[p]} (index ${p}).`,
+        `${cur} vs parent ${par}`,
+        `Sift-up: compare ${cur} (index ${i}) with its parent ${par} (index ${p}).`,
         { active: i, compareWith: p, op: opLabel },
       );
-      if (heap[i] >= heap[p]) {
+      if (cur >= par) {
         emit(
           'SIFTUP',
-          `${heap[i]} ≥ ${heap[p]}`,
-          `${heap[i]} ≥ parent ${heap[p]}, so the heap property holds — stop sifting up.`,
+          `${cur} ≥ ${par}`,
+          `${cur} ≥ parent ${par}, so the heap property holds — stop sifting up.`,
           { active: i, compareWith: p, op: opLabel },
         );
         return;
       }
       emit(
         'SWAP',
-        `swap ${heap[i]} ↔ ${heap[p]}`,
-        `${heap[i]} < parent ${heap[p]}, so swap them to bubble the smaller value up.`,
+        `swap ${cur} ↔ ${par}`,
+        `${cur} < parent ${par}, so swap them to bubble the smaller value up.`,
         { active: i, compareWith: p, swap: [i, p], op: opLabel },
       );
-      [heap[i], heap[p]] = [heap[p], heap[i]];
+      heap[i] = par;
+      heap[p] = cur;
       i = p;
     }
     emit(
@@ -116,30 +119,33 @@ function record({ ops }: HeapInput): Frame<HeapState>[] {
       const l = left(i);
       const r = right(i);
       let smallest = i;
-      if (l < heap.length && heap[l] < heap[smallest]) smallest = l;
-      if (r < heap.length && heap[r] < heap[smallest]) smallest = r;
+      if (l < heap.length && heap[l]! < heap[smallest]!) smallest = l;
+      if (r < heap.length && heap[r]! < heap[smallest]!) smallest = r;
       if (smallest === i) {
         emit(
           'SIFTDOWN',
-          `${heap[i]} settled`,
-          `Sift-down: ${heap[i]} (index ${i}) is ≤ both children, so the heap property holds — stop.`,
+          `${heap[i]!} settled`,
+          `Sift-down: ${heap[i]!} (index ${i}) is ≤ both children, so the heap property holds — stop.`,
           { active: i, op: opLabel },
         );
         return;
       }
+      const cur = heap[i]!;
+      const child = heap[smallest]!;
       emit(
         'SIFTDOWN',
-        `${heap[i]} vs child ${heap[smallest]}`,
-        `Sift-down: compare ${heap[i]} (index ${i}) with its smaller child ${heap[smallest]} (index ${smallest}).`,
+        `${cur} vs child ${child}`,
+        `Sift-down: compare ${cur} (index ${i}) with its smaller child ${child} (index ${smallest}).`,
         { active: i, compareWith: smallest, op: opLabel },
       );
       emit(
         'SWAP',
-        `swap ${heap[i]} ↔ ${heap[smallest]}`,
-        `${heap[i]} > child ${heap[smallest]}, so swap them to push the larger value down.`,
+        `swap ${cur} ↔ ${child}`,
+        `${cur} > child ${child}, so swap them to push the larger value down.`,
         { active: i, compareWith: smallest, swap: [i, smallest], op: opLabel },
       );
-      [heap[i], heap[smallest]] = [heap[smallest], heap[i]];
+      heap[i] = child;
+      heap[smallest] = cur;
       i = smallest;
     }
   };

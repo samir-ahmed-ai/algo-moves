@@ -55,7 +55,7 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
     tone?: 'good',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { nodes: snapshot(), active, highlight, phase, word, pathOk, result },
     });
 
@@ -74,7 +74,7 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
   for (const word of insert) {
     let cur = 0;
     for (const ch of word) {
-      const existing = childMap[cur][ch];
+      const existing = childMap[cur]![ch];
       if (existing !== undefined) {
         cur = existing;
         emit(
@@ -92,8 +92,8 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
         const next = nodes.length;
         nodes.push({ label: ch, children: [], isEnd: false });
         childMap.push({});
-        nodes[cur].children.push(next);
-        childMap[cur][ch] = next;
+        nodes[cur]!.children.push(next);
+        childMap[cur]![ch] = next;
         cur = next;
         emit(
           'ADD',
@@ -108,7 +108,7 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
         );
       }
     }
-    nodes[cur].isEnd = true;
+    nodes[cur]!.isEnd = true;
     emit(
       'MARK',
       word,
@@ -125,7 +125,7 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
   let cur = 0;
   let ok = true;
   for (const ch of search) {
-    const next = childMap[cur][ch];
+    const next = childMap[cur]![ch];
     if (next === undefined) {
       ok = false;
       emit(
@@ -155,7 +155,7 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
     );
   }
 
-  if (ok && nodes[cur].isEnd) {
+  if (ok && nodes[cur]!.isEnd) {
     emit(
       'FOUND',
       search,
@@ -205,7 +205,7 @@ function View({ frame }: PluginViewProps<TrieState>) {
     >
       <NaryTreeBoard
         nodes={s.nodes}
-        nodeClass={(i) => (i === s.active ? 'team-1' : s.nodes[i].isEnd ? 'team-2' : 'team-0')}
+        nodeClass={(i) => (i === s.active ? 'team-1' : s.nodes[i]!.isEnd ? 'team-2' : 'team-0')}
         activeNode={s.active}
         highlightNode={s.highlight}
       />

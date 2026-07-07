@@ -73,7 +73,7 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
       { active: u, inspect: null, highlightEdge: null },
     );
 
-    for (const v of adj[u]) {
+    for (const v of adj[u]!) {
       if (v === parent) continue;
       if (disc[v] === -1) {
         emit(
@@ -83,8 +83,8 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
           { active: u, inspect: v, highlightEdge: [u, v] },
         );
         dfs(v, u);
-        if (low[v] < low[u]) {
-          low[u] = low[v];
+        if (low[v]! < low[u]!) {
+          low[u]! = low[v]!;
           emit(
             'LOW',
             `low[${u}]=${low[u]}`,
@@ -92,7 +92,7 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
             { active: u, inspect: v, highlightEdge: [u, v] },
           );
         }
-        if (low[v] > disc[u]) {
+        if (low[v]! > disc[u]) {
           bridges.push([u, v]);
           emit(
             'BRIDGE',
@@ -108,8 +108,8 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
             { active: u, inspect: v, highlightEdge: [u, v] },
           );
         }
-      } else if (disc[v] < low[u]) {
-        low[u] = disc[v];
+      } else if (disc[v]! < low[u]!) {
+        low[u]! = disc[v]!;
         emit(
           'BACK',
           `low[${u}]=${low[u]}`,

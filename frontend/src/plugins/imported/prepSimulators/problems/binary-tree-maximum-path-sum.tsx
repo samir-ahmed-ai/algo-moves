@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -40,7 +40,7 @@ function record({ tree }: PathSumInput): Frame<PathSumState>[] {
   const visited: number[] = [];
   let best = NEG_INF;
 
-  const { emit, frames } = createRecorder<PathSumState>(() => ({
+  const { emit, frames } = createPrepRecorder<PathSumState>(() => ({
     tree,
     active: null,
     visited: visited.slice(),
@@ -53,7 +53,7 @@ function record({ tree }: PathSumInput): Frame<PathSumState>[] {
     done: false,
   }));
 
-  const present = (i: number) => i >= 0 && i < tree.length && tree[i] != null;
+  const present = (i: number) => i >= 0 && i < tree.length && tree[i]! != null;
 
   emit(
     'INIT',
@@ -66,7 +66,7 @@ function record({ tree }: PathSumInput): Frame<PathSumState>[] {
   // that continues up through its parent (a single downward branch).
   const dfs = (i: number): number => {
     if (!present(i)) return 0;
-    const val = tree[i] as number;
+    const val = tree[i]! as number;
 
     const l = dfs(leftChild(i));
     const r = dfs(rightChild(i));
@@ -136,7 +136,7 @@ function View({ frame }: PluginViewProps<PathSumState>) {
     if (visitedSet.has(i)) return 'team-2';
     return 'team-0';
   };
-  const activeVal = s.active !== null ? s.tree[s.active] : null;
+  const activeVal = s.active !== null ? s.tree[s.active]! : null;
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -169,7 +169,7 @@ function View({ frame }: PluginViewProps<PathSumState>) {
 function Inspector({ frame }: InspectorProps<PathSumState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const activeVal = s.active !== null ? s.tree[s.active] : null;
+  const activeVal = s.active !== null ? s.tree[s.active]! : null;
   return (
     <VarGrid>
       <InspectorRow k="node" v={activeVal ?? '—'} />

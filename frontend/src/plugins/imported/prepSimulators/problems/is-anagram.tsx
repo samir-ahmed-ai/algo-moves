@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ interface AnagramState {
 function record({ s, t }: AnagramInput): Frame<AnagramState>[] {
   const cnt = new Map<string, number>();
 
-  const { emit, frames } = createRecorder<AnagramState>(() => ({
+  const { emit, frames } = createPrepRecorder<AnagramState>(() => ({
     s,
     t,
     i: null,
@@ -67,16 +67,16 @@ function record({ s, t }: AnagramInput): Frame<AnagramState>[] {
     {},
   );
 
-  // Single pass: ++cnt[s[i]], --cnt[t[i]].
+  // Single pass: ++cnt[s[i]!], --cnt[t[i]!].
   for (let i = 0; i < s.length; i++) {
-    const cs = s[i];
-    const ct = t[i];
-    cnt.set(cs, (cnt.get(cs) ?? 0) + 1);
-    cnt.set(ct, (cnt.get(ct) ?? 0) - 1);
+    const cs = s[i]!;
+    const ct = t[i]!;
+    cnt.set(cs!, (cnt.get(cs!) ?? 0) + 1);
+    cnt.set(ct!, (cnt.get(ct!) ?? 0) - 1);
     emit(
       'TALLY',
       `+${cs} −${ct}`,
-      `Index ${i}: add s[${i}]='${cs}' (++) and subtract t[${i}]='${ct}' (−−). The tally now reads ${cnt.get(cs)! >= 0 ? '+' : ''}${cnt.get(cs)} for '${cs}' and ${cnt.get(ct)! >= 0 ? '+' : ''}${cnt.get(ct)} for '${ct}'.`,
+      `Index ${i}: add s[${i}]!='${cs}' (++) and subtract t[${i}]!='${ct}' (−−). The tally now reads ${cnt.get(cs!)! >= 0 ? '+' : ''}${cnt.get(cs!)} for '${cs}' and ${cnt.get(ct!)! >= 0 ? '+' : ''}${cnt.get(ct!)} for '${ct}'.`,
       { i },
     );
   }
@@ -178,8 +178,8 @@ function Inspector({ frame }: InspectorProps<AnagramState>) {
       <InspectorRow k="len(s)" v={s.s.length} />
       <InspectorRow k="len(t)" v={s.t.length} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="s[i]" v={s.i !== null ? s.s[s.i] : '—'} />
-      <InspectorRow k="t[i]" v={s.i !== null ? s.t[s.i] : '—'} />
+      <InspectorRow k="s[i]!" v={s.i !== null ? s.s[s.i]! : '—'} />
+      <InspectorRow k="t[i]!" v={s.i !== null ? s.t[s.i]! : '—'} />
       <InspectorRow k="nonzero counts" v={nonZero} />
       <InspectorRow k="result" v={s.result === null ? (s.done ? 'none' : '…') : String(s.result)} />
     </VarGrid>
@@ -290,7 +290,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n·L) time, O(n·L) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). len match; ++s[i] --t[i]; all counts zero',
+    explain: 'O(n). O(1). len match; ++s[i]! --t[i]!; all counts zero',
   },
   {
     id: 'outcome',

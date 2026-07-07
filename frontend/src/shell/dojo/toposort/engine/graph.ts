@@ -33,7 +33,7 @@ export function inDegrees(
 ): number[] {
   const degs = nodes.map(() => 0);
   for (const [from, to] of edges) {
-    if (!locked.has(from) && !locked.has(to)) degs[to] += 1;
+    if (!locked.has(from) && !locked.has(to)) degs[to] = (degs[to] ?? 0) + 1;
   }
   return degs;
 }
@@ -75,8 +75,8 @@ export function layerOf(nodes: TopoNode[], edges: TopoEdge[]): number[] {
   for (let pass = 0; pass < nodes.length; pass += 1) {
     let changed = false;
     for (const [from, to] of edges) {
-      const candidate = Math.min(layers[from] + 1, cap);
-      if (candidate > layers[to]) {
+      const candidate = Math.min((layers[from] ?? 0) + 1, cap);
+      if (candidate > (layers[to] ?? 0)) {
         layers[to] = candidate;
         changed = true;
       }
@@ -242,5 +242,5 @@ export function getLevel(id: string): TopoLevel | undefined {
 export function nextLevelId(currentId: string): string | null {
   const idx = LEVELS.findIndex((l) => l.id === currentId);
   if (idx < 0 || idx >= LEVELS.length - 1) return null;
-  return LEVELS[idx + 1].id;
+  return LEVELS[idx + 1]!.id;
 }

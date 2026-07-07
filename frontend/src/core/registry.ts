@@ -9,7 +9,7 @@ export type { PluginMetaEntry } from '../plugins/_generated/pluginMeta';
 // implementation is loaded on demand, one chunk per group, and memoized.
 
 function normalizePluginId(id: string): string {
-  return id.trim();
+  return id.trim().toLowerCase();
 }
 
 const metaById = new Map<string, PluginMetaEntry>();
@@ -38,14 +38,19 @@ const groupMaps = new Map<PluginGroup, Promise<Map<string, ProblemPlugin<any, an
 function loadGroup(group: PluginGroup): Promise<Map<string, ProblemPlugin<any, any>>> {
   let pending = groupMaps.get(group);
   if (!pending) {
-    pending = GROUP_LOADERS[group]().then((plugins) => {
-      const map = new Map<string, ProblemPlugin<any, any>>();
-      for (const p of plugins) {
-        const id = normalizePluginId(p.meta.id);
-        if (id && !map.has(id)) map.set(id, p);
-      }
-      return map;
-    });
+    pending = GROUP_LOADERS[group]()
+      .then((plugins) => {
+        const map = new Map<string, ProblemPlugin<any, any>>();
+        for (const p of plugins) {
+          const id = normalizePluginId(p.meta.id);
+          if (id && !map.has(id)) map.set(id, p);
+        }
+        return map;
+      })
+      .catch((error) => {
+        groupMaps.delete(group);
+        throw error;
+      });
     groupMaps.set(group, pending);
   }
   return pending;

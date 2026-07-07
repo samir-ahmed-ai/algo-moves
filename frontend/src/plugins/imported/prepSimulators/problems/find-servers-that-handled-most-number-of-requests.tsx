@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -38,8 +38,8 @@ function heapPush(h: BusyItem[], item: BusyItem): BusyItem[] {
   let i = a.length - 1;
   while (i > 0) {
     const p = Math.floor((i - 1) / 2);
-    if (a[p].freeTime <= a[i].freeTime) break;
-    [a[p], a[i]] = [a[i], a[p]];
+    if (a[p]!.freeTime <= a[i]!.freeTime) break;
+    [a[p]!, a[i]!] = [a[i]!, a[p]!];
     i = p;
   }
   return a;
@@ -47,23 +47,23 @@ function heapPush(h: BusyItem[], item: BusyItem): BusyItem[] {
 
 function heapPop(h: BusyItem[]): [BusyItem[], BusyItem] {
   if (h.length === 0) return [[], { freeTime: 0, id: -1 }];
-  const top = h[0];
-  if (h.length === 1) return [[], top];
+  const top = h[0]!;
+  if (h.length === 1) return [[], top!];
   const a = [...h];
   const last = a.pop()!;
-  a[0] = last;
+  a[0]! = last;
   let i = 0;
   for (;;) {
     const l = 2 * i + 1;
     const r = 2 * i + 2;
     let smallest = i;
-    if (l < a.length && a[l].freeTime < a[smallest].freeTime) smallest = l;
-    if (r < a.length && a[r].freeTime < a[smallest].freeTime) smallest = r;
+    if (l < a.length && a[l]!.freeTime < a[smallest]!.freeTime) smallest = l;
+    if (r < a.length && a[r]!.freeTime < a[smallest]!.freeTime) smallest = r;
     if (smallest === i) break;
-    [a[i], a[smallest]] = [a[smallest], a[i]];
+    [a[i]!, a[smallest]!] = [a[smallest]!, a[i]!];
     i = smallest;
   }
-  return [a, top];
+  return [a, top!];
 }
 
 function insertSorted(avail: number[], id: number): number[] {
@@ -72,7 +72,7 @@ function insertSorted(avail: number[], id: number): number[] {
   let hi = a.length;
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    if (a[mid] < id) lo = mid + 1;
+    if (a[mid]! < id) lo = mid + 1;
     else hi = mid;
   }
   a.splice(lo, 0, id);
@@ -84,7 +84,7 @@ function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {
   let avail = Array.from({ length: k }, (_, i) => i);
   const cnt = new Array(k).fill(0);
 
-  const { emit, frames } = createRecorder<SrvState>(() => ({
+  const { emit, frames } = createPrepRecorder<SrvState>(() => ({
     k,
     avail: avail.slice(),
     busy: busy.map((b) => ({ ...b })),
@@ -104,8 +104,8 @@ function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {
   );
 
   for (let i = 0; i < arrival.length; i++) {
-    const arr = arrival[i];
-    while (busy.length > 0 && busy[0].freeTime <= arr) {
+    const arr = arrival[i]!;
+    while (busy.length > 0 && busy[0]!.freeTime <= arr!) {
       let freed: BusyItem;
       [busy, freed] = heapPop(busy);
       avail = insertSorted(avail, freed.id);
@@ -120,14 +120,14 @@ function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {
     const target = i % k;
     let idx = avail.findIndex((x) => x >= target);
     if (idx < 0) idx = 0;
-    const srv = avail[idx];
+    const srv = avail[idx]!;
     avail = [...avail.slice(0, idx), ...avail.slice(idx + 1)];
-    cnt[srv]++;
-    busy = heapPush(busy, { freeTime: arr + load[i], id: srv });
+    cnt[srv!]!++;
+    busy = heapPush(busy, { freeTime: arr! + load[i]!, id: srv });
     emit(
       'ASSIGN',
       `srv ${srv}`,
-      `Request ${i} at t=${arr}: target=${target} → server ${srv}, busy until ${arr + load[i]}. cnt[${srv}]=${cnt[srv]}.`,
+      `Request ${i} at t=${arr}: target=${target} → server ${srv}, busy until ${arr! + load[i]!}. cnt[${srv}]!=${cnt[srv!]!}.`,
       {
         req: i,
         assigned: srv,

@@ -48,7 +48,7 @@ function panelModeRole(p: PanelConfigEntry, mode: CanvasMode): 'builtin' | 'opti
 }
 
 /** Ordered category buckets for sidebar / add menu. */
-export const CATEGORY_ORDER: PanelCategory[] = [
+export const CATEGORY_ORDER: readonly PanelCategory[] = [
   'Visualize',
   'Practice',
   'Progress',
@@ -61,7 +61,7 @@ export const CATEGORY_ORDER: PanelCategory[] = [
 ];
 
 /** Unified panel registry — single source for titles, categories, and mode visibility. */
-export const panelsConfig: PanelConfigEntry[] = [
+export const panelsConfig: readonly PanelConfigEntry[] = [
   {
     id: 'workbench',
     title: 'Workbench',

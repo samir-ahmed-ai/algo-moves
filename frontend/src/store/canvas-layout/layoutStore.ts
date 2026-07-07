@@ -160,7 +160,7 @@ export function loadLayouts(): Record<string, LayoutEntry> {
   return store.get();
 }
 
-export function saveLayouts(data: Record<string, LayoutEntry>) {
+export function saveLayouts(data: Record<string, LayoutEntry>): void {
   store.set(normalizeLayouts(data));
 }
 

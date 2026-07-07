@@ -61,10 +61,10 @@ function record({ recipes, ingredients, supplies }: RInput): Frame<RState>[] {
   const indeg = new Array<number>(n).fill(0);
   recipes.forEach((r, i) => {
     const rv = idx.get(r) as number;
-    indeg[rv] = ingredients[i].length;
-    for (const ing of ingredients[i]) {
+    indeg[rv] = ingredients[i]!.length;
+    for (const ing of ingredients[i]!) {
       const iv = idx.get(ing) as number;
-      adj[iv].push(rv); // ingredient → recipe
+      adj[iv]!.push(rv); // ingredient → recipe
     }
   });
 
@@ -115,8 +115,8 @@ function record({ recipes, ingredients, supplies }: RInput): Frame<RState>[] {
       { active: v },
     );
 
-    for (const nb of adj[v]) {
-      indeg[nb]--;
+    for (const nb of adj[v]!) {
+      indeg[nb]!--;
       if (indeg[nb] === 0) {
         color[nb] = 2;
         queue.push(nb);
@@ -156,11 +156,11 @@ function View({ frame }: PluginViewProps<RState>) {
     <>
       <RailStack
         label="queue"
-        items={s.queue.map((n) => s.labels[n])}
+        items={s.queue.map((n) => s.labels[n] ?? '')}
         topLabel="front"
         highlightEnd="bottom"
       />
-      <RailStack label="made" items={s.made.map((m) => s.labels[m])} />
+      <RailStack label="made" items={s.made.map((m) => s.labels[m] ?? '')} />
       <RailGroup label="scan">
         <RailStat k="current" v={s.active !== null ? s.labels[s.active] : '—'} tone="accent" />
         <RailStat k="done" v={`${s.made.length}/${recipeCount}`} />
@@ -180,7 +180,7 @@ function View({ frame }: PluginViewProps<RState>) {
         adj={s.adj}
         pos={s.pos}
         nodeClass={(node) => `team-${s.color[node]}`}
-        label={(n) => s.labels[n]}
+        label={(n) => s.labels[n]!}
         activeNode={s.active}
         directed
         height={260}

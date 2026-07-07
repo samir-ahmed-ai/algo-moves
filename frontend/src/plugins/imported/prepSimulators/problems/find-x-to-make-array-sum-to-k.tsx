@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -37,7 +37,7 @@ function cappedSum(a: number[], x: number): number {
 function record({ a, target }: FindXInput): Frame<FindXState>[] {
   const sorted = [...a].sort((p, q) => p - q);
 
-  const { emit, frames } = createRecorder<FindXState>(() => ({
+  const { emit, frames } = createPrepRecorder<FindXState>(() => ({
     a: sorted,
     target,
     lo: null,
@@ -55,8 +55,8 @@ function record({ a, target }: FindXInput): Frame<FindXState>[] {
     {},
   );
 
-  let lo = sorted[0];
-  let hi = sorted[sorted.length - 1];
+  let lo = sorted[0]!;
+  let hi = sorted[sorted.length - 1]!;
 
   emit(
     'BOUNDS',
@@ -66,9 +66,9 @@ function record({ a, target }: FindXInput): Frame<FindXState>[] {
   );
 
   // Grow hi until cappedSum(a, hi) >= target (matches the Go hi *= 2 loop).
-  while (cappedSum(sorted, hi) < target) {
-    const cap = cappedSum(sorted, hi);
-    const next = hi * 2;
+  while (cappedSum(sorted, hi!) < target) {
+    const cap = cappedSum(sorted, hi!);
+    const next = hi! * 2;
     emit(
       'GROW',
       `cap(${hi})=${cap}<${target}`,
@@ -78,8 +78,8 @@ function record({ a, target }: FindXInput): Frame<FindXState>[] {
     hi = next;
   }
 
-  while (lo < hi) {
-    const mid = lo + Math.floor((hi - lo) / 2);
+  while (lo! < hi!) {
+    const mid = lo! + Math.floor((hi! - lo!) / 2);
     const cap = cappedSum(sorted, mid);
     if (cap >= target) {
       emit(
@@ -106,12 +106,12 @@ function record({ a, target }: FindXInput): Frame<FindXState>[] {
   emit(
     'DONE',
     `x=${answer}`,
-    `lo and hi have met at x = ${answer}. cappedSum(a, ${answer}) = ${cappedSum(sorted, answer)} ≥ ${target}, and no smaller cap reaches ${target}. The answer is ${answer}.`,
+    `lo and hi have met at x = ${answer}. cappedSum(a, ${answer}) = ${cappedSum(sorted, answer!)} ≥ ${target}, and no smaller cap reaches ${target}. The answer is ${answer}.`,
     {
       lo: answer,
       hi: answer,
       mid: answer,
-      capped: cappedSum(sorted, answer),
+      capped: cappedSum(sorted, answer!),
       result: answer,
       done: true,
     },
@@ -131,7 +131,7 @@ function View({ frame }: PluginViewProps<FindXState>) {
     if (x === null) return -1;
     let best = 0;
     for (let i = 1; i < s.a.length; i++) {
-      if (Math.abs(s.a[i] - x) < Math.abs(s.a[best] - x)) best = i;
+      if (Math.abs(s.a[i]! - x) < Math.abs(s.a[best]! - x)) best = i;
     }
     return best;
   };
@@ -145,8 +145,8 @@ function View({ frame }: PluginViewProps<FindXState>) {
 
   // A value is "capped" by the current x when it exceeds x.
   const tone = (i: number) => {
-    if (s.result !== null) return s.a[i] > s.result ? 'found' : '';
-    if (s.mid !== null && s.a[i] > s.mid) return 'match';
+    if (s.result !== null) return s.a[i]! > s.result ? 'found' : '';
+    if (s.mid !== null && s.a[i]! > s.mid) return 'match';
     return '';
   };
 

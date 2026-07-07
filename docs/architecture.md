@@ -1,6 +1,7 @@
 # Architecture
 
-Three layers in the frontend SPA, plus an optional Go backend for realtime games.
+Three layers in the frontend SPA, plus Go services for realtime rooms, optional
+Postgres persistence, and collaborative documents.
 
 ```mermaid
 flowchart TB
@@ -194,7 +195,21 @@ Routes in `App.tsx`: home, workspace, mobile deck (`#mobile`), Vim Dojo (`#vim`)
 
 ### Games arcade (`frontend/src/shell/games/`)
 
-Multiplayer games over WebSocket. Transport lives in `shell/realtime/`; game plugins stay under `games/<id>/`.
+Multiplayer arcade over the shared realtime room transport.
+
+| Area | Owner | Contract |
+|------|-------|----------|
+| Route chrome | `shell/games/arcade/` | Header, route shell, profile overlay entry |
+| Lobby | `shell/games/lobby/` | Name, personal room, create/join/share flow |
+| Room shell | `shell/games/room/` | Roster, chooser, ready flow, chat, active game mount |
+| Game plugins | `shell/games/games/<id>/` | Isolated game UI plus pure `logic.ts` |
+| Shared game UI | `shell/games/ui/` | Arcade-only primitives: buttons, arenas, effects, avatars |
+| Transport | `shell/realtime/` | Room socket, relay protocol, shared state, room comms |
+| API data | `shell/games/data/` + `platform/api/` | Profile, stats, history, leaderboard, local fallback |
+
+Host-authoritative games publish small snapshots under nested room-state keys.
+Channel-relay games send typed peer frames through `useGameChannel`. The game UI
+must not know the WebSocket protocol directly.
 
 ### Study store facade (`store/study/`)
 

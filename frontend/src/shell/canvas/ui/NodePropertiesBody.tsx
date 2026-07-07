@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { ACCENTS } from '../layout/layout';
 import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
-import { patchPanelStyle, type PanelCornerStyle, type PanelNodeStyle } from '../nodes/panelStyle';
+import { patchPanelStyle, type PanelCornerStyle, type PanelStylePatch } from '../nodes/panelStyle';
 import { Btn, RADIUS_CTRL } from './nodeui';
 import { chromeText } from '../../chromeUi';
 import { InsField, InsGrid, InsSection, InsSelect } from './inspectorUi';
@@ -68,7 +68,7 @@ export function NodePropertiesBody() {
   const h = Math.round(node.measured?.height ?? node.height ?? 0);
   const opacity = style.opacity ?? 100;
 
-  const patch = (p: Partial<PanelNodeStyle>) => {
+  const patch = (p: PanelStylePatch) => {
     if (readOnly) return;
     setNodes((nds) =>
       nds.map((n) => {
@@ -128,7 +128,7 @@ export function NodePropertiesBody() {
             unit="px"
             readOnly={!resizable}
             title={resizable ? 'Width' : 'Auto-sized to content'}
-            onChange={resizable ? (v) => setSize('width', v) : undefined}
+            {...(resizable ? { onChange: (v: string) => setSize('width', v) } : {})}
           />
           <InsField
             icon="H"
@@ -137,7 +137,7 @@ export function NodePropertiesBody() {
             unit="px"
             readOnly={!resizable}
             title={resizable ? 'Height' : 'Auto-sized to content'}
-            onChange={resizable ? (v) => setSize('height', v) : undefined}
+            {...(resizable ? { onChange: (v: string) => setSize('height', v) } : {})}
           />
         </InsGrid>
       </InsSection>
@@ -160,7 +160,7 @@ export function NodePropertiesBody() {
             value={(style.corners ?? 'theme') as PanelCornerStyle}
             options={CORNER_OPTIONS}
             disabled={readOnly}
-            onChange={(c) => patch({ corners: c === 'theme' ? undefined : c })}
+            onChange={(c) => patch(c === 'theme' ? { corners: undefined } : { corners: c })}
           />
         </InsGrid>
         <input
@@ -187,7 +187,7 @@ export function NodePropertiesBody() {
                 disabled={readOnly}
                 title="Stroke colour"
                 aria-label="stroke colour"
-                onClick={() => patch({ stroke: active ? undefined : c })}
+                onClick={() => patch(active ? { stroke: undefined } : { stroke: c })}
                 className={cn(
                   'node-properties__swatch nodrag h-4 w-4 rounded-full ring-1 transition-transform hover:scale-110 disabled:opacity-40',
                   active ? 'ring-2 ring-accent' : 'ring-edge',
@@ -208,7 +208,7 @@ export function NodePropertiesBody() {
                 key={f.label}
                 type="button"
                 disabled={readOnly}
-                onClick={() => patch({ fill: f.v })}
+                onClick={() => patch(f.v ? { fill: f.v } : { fill: undefined })}
                 className={cn(
                   `border px-1.5 py-0.5 font-medium transition-colors ${RADIUS_CTRL}`,
                   chromeText.xs,

@@ -31,7 +31,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
   );
 
   for (let i = 1; i < n; i++) {
-    const key = values[i];
+    const key = values[i]!;
     let j = i - 1;
     emit(
       'KEY',
@@ -44,21 +44,22 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
 
     while (j >= 0) {
       incCompare();
+      const atJ = values[j]!;
       emit(
         'CMP',
-        `${values[j]} ? ${key}`,
-        `Compare the key ${key} against values[${j}] = ${values[j]} just to its left.`,
+        `${atJ} ? ${key}`,
+        `Compare the key ${key} against values[${j}] = ${atJ} just to its left.`,
         key,
         j + 1,
         j,
       );
-      if (values[j] <= key) break;
-      values[j + 1] = values[j];
+      if (atJ <= key) break;
+      values[j + 1] = atJ;
       incShift();
       emit(
         'SHIFT',
-        `shift ${values[j]} →`,
-        `${values[j]} is bigger than the key, so shift it one slot right to open a gap.`,
+        `shift ${atJ} →`,
+        `${atJ} is bigger than the key, so shift it one slot right to open a gap.`,
         key,
         j,
         j,

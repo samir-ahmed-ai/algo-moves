@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -34,7 +34,7 @@ function record({ s, goal }: RotateInput): Frame<RotateState>[] {
   const goalArr = goal.split('');
   const n = goal.length;
 
-  const { emit, frames } = createRecorder<RotateState>(() => ({
+  const { emit, frames } = createPrepRecorder<RotateState>(() => ({
     double,
     goal: goalArr,
     n,
@@ -76,23 +76,23 @@ function record({ s, goal }: RotateInput): Frame<RotateState>[] {
     emit(
       'WINDOW',
       `start=${start}`,
-      `Try the window starting at index ${start}: double[${start}..${start + n - 1}] = "${doubleStr.slice(start, start + n)}". Compare it to goal character by character.`,
+      `Try the window starting at index ${start}: double[${start}..${start + n - 1}]! = "${doubleStr.slice(start, start + n)}". Compare it to goal character by character.`,
       { start },
     );
 
     let matched = true;
     for (let k = 0; k < n; k++) {
       const di = start + k;
-      const dc = double[di];
-      const gc = goalArr[k];
+      const dc = double[di]!;
+      const gc = goalArr[k]!;
       const ok = dc === gc;
       if (!ok) matched = false;
       emit(
         ok ? 'MATCH' : 'MISMATCH',
         ok ? `${dc}=${gc}` : `${dc}≠${gc}`,
         ok
-          ? `double[${di}] = '${dc}' equals goal[${k}] = '${gc}'. So far the window still matches.`
-          : `double[${di}] = '${dc}' does not equal goal[${k}] = '${gc}'. This window fails — slide one step to the right.`,
+          ? `double[${di}]! = '${dc}' equals goal[${k}]! = '${gc}'. So far the window still matches.`
+          : `double[${di}]! = '${dc}' does not equal goal[${k}]! = '${gc}'. This window fails — slide one step to the right.`,
         { start, cmp: di, cmpOk: ok },
         ok ? undefined : 'bad',
       );
@@ -103,7 +103,7 @@ function record({ s, goal }: RotateInput): Frame<RotateState>[] {
       emit(
         'FOUND',
         `at ${start}`,
-        `The whole window double[${start}..${start + n - 1}] equals "${goal}". goal is a rotation of s — return true.`,
+        `The whole window double[${start}..${start + n - 1}]! equals "${goal}". goal is a rotation of s — return true.`,
         { start, found: true, done: true },
         'good',
       );
@@ -269,7 +269,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Try the window starting at index : double[..] = "". Compare it to goal character by character.',
+      'Try the window starting at index : double[..]! = "". Compare it to goal character by character.',
   },
   {
     id: 'state',
@@ -317,7 +317,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: 'The whole window double[..] equals "". — final DONE caption',
+        label: 'The whole window double[..]! equals "". — final DONE caption',
         correct: true,
       },
       {
@@ -330,7 +330,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Aborted run on failure — infinite loop detected',
       },
     ],
-    explain: 'The whole window double[..] equals "". goal is a rotation of s — return true.',
+    explain: 'The whole window double[..]! equals "". goal is a rotation of s — return true.',
   },
 ];
 export const simulator: ProblemSimulator = {

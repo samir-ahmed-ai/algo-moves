@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ function record({ values }: PrintFromEndInput): Frame<PrintFromEndState>[] {
   const stack: number[] = [];
   const out: number[] = [];
 
-  const { emit, frames } = createRecorder<PrintFromEndState>(() => ({
+  const { emit, frames } = createPrepRecorder<PrintFromEndState>(() => ({
     values,
     cur: null,
     stack: stack.slice(),
@@ -64,19 +64,19 @@ function record({ values }: PrintFromEndInput): Frame<PrintFromEndState>[] {
     emit(
       'DESCEND',
       `rec(node ${i})`,
-      `Call printFromEnd on node ${i} (value ${values[i]}). Before doing anything, it recurses into the next node — so node ${i} waits on the stack until the deeper call returns.`,
+      `Call printFromEnd on node ${i} (value ${values[i]!}). Before doing anything, it recurses into the next node — so node ${i} waits on the stack until the deeper call returns.`,
       { cur: i, phase: 'descend' },
     );
 
     printFromEnd(i + 1);
 
     // Unwind: out = append(out, head.Val)
-    out.push(values[i]);
+    out.push(values[i]!);
     stack.pop();
     emit(
       'UNWIND',
-      `append ${values[i]}`,
-      `The deeper call returned, so node ${i}'s call resumes and appends its value ${values[i]} to the output. Because the tail finished first, values come out in reverse order.`,
+      `append ${values[i]!}`,
+      `The deeper call returned, so node ${i}'s call resumes and appends its value ${values[i]!} to the output. Because the tail finished first, values come out in reverse order.`,
       { cur: i, phase: 'unwind' },
     );
   }
@@ -150,7 +150,7 @@ function Inspector({ frame }: InspectorProps<PrintFromEndState>) {
       <InspectorRow k="n (nodes)" v={s.values.length} />
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="cur node" v={s.cur ?? '—'} />
-      <InspectorRow k="cur val" v={s.cur !== null ? s.values[s.cur] : '—'} />
+      <InspectorRow k="cur val" v={s.cur !== null ? s.values[s.cur]! : '—'} />
       <InspectorRow k="stack depth" v={s.stack.length} />
       <InspectorRow k="out" v={`[${s.out.join(', ')}]`} />
     </VarGrid>

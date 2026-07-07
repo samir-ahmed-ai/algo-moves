@@ -7,17 +7,23 @@ export const PLATFORM_STORAGE_KEYS = {
   PERSONAL_ROOM: k('games', 'personal-room'),
 } as const;
 
-export function readText(key: string): string | null {
+export type PlatformStorageKey = (typeof PLATFORM_STORAGE_KEYS)[keyof typeof PLATFORM_STORAGE_KEYS];
+
+function localStore(): Storage | null {
+  return typeof localStorage === 'undefined' ? null : localStorage;
+}
+
+export function readText(key: PlatformStorageKey): string | null {
   try {
-    return localStorage.getItem(key);
+    return localStore()?.getItem(key) ?? null;
   } catch {
     return null;
   }
 }
 
-export function writeText(key: string, value: string): void {
+export function writeText(key: PlatformStorageKey, value: string): void {
   try {
-    localStorage.setItem(key, value);
+    localStore()?.setItem(key, value);
   } catch {
     // ignore
   }

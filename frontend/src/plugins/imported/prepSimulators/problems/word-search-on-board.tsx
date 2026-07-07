@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -19,7 +19,7 @@ interface WordSearchInput {
 interface WordSearchState {
   board: string[][];
   word: string;
-  idx: number; // how many characters matched so far (word[idx] is the next target)
+  idx: number; // how many characters matched so far (word[idx]! is the next target)
   active: [number, number] | null; // cell DFS is currently examining
   path: [number, number][]; // cells currently marked visited on the active DFS chain
   fail: [number, number] | null; // cell that just failed the match test
@@ -43,13 +43,13 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
     const out: [number, number][] = [];
     for (let r = 0; r < m; r++) {
       for (let c = 0; c < n; c++) {
-        if (visited[r][c]) out.push([r, c]);
+        if (visited[r]![c]) out.push([r, c]);
       }
     }
     return out;
   };
 
-  const { emit, frames } = createRecorder<WordSearchState>(() => ({
+  const { emit, frames } = createPrepRecorder<WordSearchState>(() => ({
     board,
     word,
     idx: 0,
@@ -80,17 +80,17 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
       return true;
     }
 
-    const target = word[idx];
+    const target = word[idx]!;
     const outOfBounds = i < 0 || j < 0 || i >= m || j >= n;
     if (outOfBounds) {
       return false;
     }
 
-    const cellChar = board[i][j];
-    if (visited[i][j] || cellChar !== target) {
-      const reason = visited[i][j]
+    const cellChar = board[i]![j];
+    if (visited[i]![j] || cellChar !== target) {
+      const reason = visited[i]![j]
         ? `cell (${i},${j}) is already on the current path`
-        : `board[${i}][${j}]='${cellChar}' ≠ word[${idx}]='${target}'`;
+        : `board[${i}]![${j}]='${cellChar}' ≠ word[${idx}]!='${target}'`;
       emit(
         'REJECT',
         `(${i},${j})`,
@@ -102,11 +102,11 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
     }
 
     // Match: mark and descend.
-    visited[i][j] = true;
+    visited[i]![j] = true;
     emit(
       'MARK',
       `'${cellChar}' @(${i},${j})`,
-      `board[${i}][${j}]='${cellChar}' matches word[${idx}]='${target}'. Mark it visited and look for word[${idx + 1}]='${word[idx + 1] ?? '∅'}' among its neighbours.`,
+      `board[${i}]![${j}]='${cellChar}' matches word[${idx}]!='${target}'. Mark it visited and look for word[${idx + 1}]!='${word[idx + 1]! ?? '∅'}' among its neighbours.`,
       { idx: idx + 1, active: [i, j] },
     );
 
@@ -116,7 +116,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
       }
     }
 
-    visited[i][j] = false;
+    visited[i]![j] = false;
     emit(
       'UNMARK',
       `(${i},${j})`,
@@ -131,7 +131,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
       emit(
         'START',
         `from (${i},${j})`,
-        `Launch a fresh DFS from cell (${i},${j})='${board[i][j]}', attempting to match word[0]='${word[0] ?? '∅'}' here.`,
+        `Launch a fresh DFS from cell (${i},${j})='${board[i]![j]}', attempting to match word[0]!='${word[0]! ?? '∅'}' here.`,
         { idx: 0, active: [i, j] },
       );
       if (dfs(i, j, 0)) {
@@ -160,7 +160,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
 function View({ frame }: PluginViewProps<WordSearchState>) {
   const s = frame.state;
   const onPath = (r: number, c: number) => s.path.some(([pr, pc]) => pr === r && pc === c);
-  const isFail = (r: number, c: number) => s.fail !== null && s.fail[0] === r && s.fail[1] === c;
+  const isFail = (r: number, c: number) => s.fail !== null && s.fail[0]! === r && s.fail[1]! === c;
 
   const cellTone = (r: number, c: number): string => {
     if (s.found && onPath(r, c)) return 'path';
@@ -196,9 +196,9 @@ function Inspector({ frame }: InspectorProps<WordSearchState>) {
   return (
     <VarGrid>
       <InspectorRow k="word" v={s.word} />
-      <InspectorRow k="next char (word[idx])" v={s.idx < s.word.length ? s.word[s.idx] : '∅'} />
+      <InspectorRow k="next char (word[idx]!)" v={s.idx < s.word.length ? s.word[s.idx]! : '∅'} />
       <InspectorRow k="idx (matched)" v={`${s.idx}/${s.word.length}`} />
-      <InspectorRow k="active cell" v={s.active ? `(${s.active[0]},${s.active[1]})` : '—'} />
+      <InspectorRow k="active cell" v={s.active ? `(${s.active[0]!},${s.active[1]!})` : '—'} />
       <InspectorRow k="path length" v={s.path.length} />
       <InspectorRow k="result" v={s.done ? (s.found ? 'found' : 'not found') : '…'} />
     </VarGrid>
@@ -211,14 +211,14 @@ function solve({ board, word }: WordSearchInput): boolean {
   const visited: boolean[][] = board.map((row) => row.map(() => false));
   const dfs = (i: number, j: number, idx: number): boolean => {
     if (idx === word.length) return true;
-    if (i < 0 || j < 0 || i >= m || j >= n || visited[i][j] || board[i][j] !== word[idx]) {
+    if (i < 0 || j < 0 || i >= m || j >= n || visited[i]![j] || board[i]![j] !== word[idx]!) {
       return false;
     }
-    visited[i][j] = true;
+    visited[i]![j] = true;
     for (const [di, dj] of DIRS) {
       if (dfs(i + di, j + dj, idx + 1)) return true;
     }
-    visited[i][j] = false;
+    visited[i]![j] = false;
     return false;
   };
   for (let i = 0; i < m; i++) {
@@ -314,7 +314,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The recorder keeps `idx` in sync: how many characters matched so far (word[idx] is the next target)',
+      'The recorder keeps `idx` in sync: how many characters matched so far (word[idx]! is the next target)',
   },
   {
     id: 'complexity',
@@ -354,7 +354,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Aborted run on failure — infinite loop detected',
       },
     ],
-    explain: "Launch a fresh DFS from cell (,)='', attempting to match word[0]='' here.",
+    explain: "Launch a fresh DFS from cell (,)='', attempting to match word[0]!='' here.",
   },
 ];
 export const simulator: ProblemSimulator = {

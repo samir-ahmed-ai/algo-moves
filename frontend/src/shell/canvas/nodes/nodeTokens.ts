@@ -42,7 +42,7 @@ function normalizeSize(size: PanelSize): PanelSize {
   const w = normalizeWidth(size.w);
   const estH = Math.max(1, Math.round(finiteNumber(size.estH, DEFAULT_SIZE.estH)));
   const cap = size.cap == null ? undefined : clampNodeWidth(size.cap);
-  return { w, estH, cap };
+  return cap !== undefined ? { w, estH, cap } : { w, estH };
 }
 
 function scaleEstH(base: number): number {
@@ -174,14 +174,15 @@ export function layoutSize(kind: string, viewport?: { width: number; height: num
     const availH = Math.max(MIN_VIEWPORT_HEIGHT, viewportH - 24);
     const availW = Math.max(STRUDEL_NODE_W, viewportW * 0.55);
     if (panelKind === 'viz') {
-      return { w: availW, estH: availH, cap };
+      return cap !== undefined ? { w: availW, estH: availH, cap } : { w: availW, estH: availH };
     }
     if (panelKind === 'workbench') {
-      return { w: Math.max(1400, viewportW - 48), estH: availH, cap };
+      const w = Math.max(1400, viewportW - 48);
+      return cap !== undefined ? { w, estH: availH, cap } : { w, estH: availH };
     }
   }
 
-  return { w, estH: base.estH, cap };
+  return cap !== undefined ? { w, estH: base.estH, cap } : { w, estH: base.estH };
 }
 
 /** Measured height when available, else estimate — for align / dagre helpers. */

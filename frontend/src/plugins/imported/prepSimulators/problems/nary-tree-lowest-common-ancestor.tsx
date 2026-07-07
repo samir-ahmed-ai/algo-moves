@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -36,7 +36,7 @@ interface LcaState {
 function childrenOf(tree: (number | null)[], i: number): number[] {
   const out: number[] = [];
   for (const c of [2 * i + 1, 2 * i + 2]) {
-    if (c < tree.length && tree[c] != null) out.push(c);
+    if (c < tree.length && tree[c]! != null) out.push(c);
   }
   return out;
 }
@@ -45,7 +45,7 @@ function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
   const visited: number[] = [];
   const stack: number[] = [];
 
-  const { emit, frames } = createRecorder<LcaState>(() => ({
+  const { emit, frames } = createPrepRecorder<LcaState>(() => ({
     tree,
     a,
     b,
@@ -67,7 +67,7 @@ function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
   // Post-order DFS. Returns the index of the discovered LCA / hit node, or -1.
   const dfs = (i: number): number => {
     stack.push(i);
-    const val = tree[i];
+    const val = tree[i]!;
     emit(
       'VISIT',
       `node ${val}`,
@@ -98,7 +98,7 @@ function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
         emit(
           'HIT-COUNT',
           `hits at ${val}: ${count}`,
-          `Child subtree under node ${val} reported a hit (${tree[lca]}). That is hit #${count} for node ${val}. Two hits from different children would make ${val} the LCA.`,
+          `Child subtree under node ${val} reported a hit (${tree[lca]!}). That is hit #${count} for node ${val}. Two hits from different children would make ${val} the LCA.`,
           { active: i, count },
         );
       } else {
@@ -129,7 +129,7 @@ function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
       'PROPAGATE',
       `bubble up from ${val}`,
       count === 1
-        ? `Only one child of node ${val} had a hit, so ${val} is not the split point yet. Propagate the found node (${found !== -1 ? tree[found] : '—'}) upward.`
+        ? `Only one child of node ${val} had a hit, so ${val} is not the split point yet. Propagate the found node (${found !== -1 ? tree[found]! : '—'}) upward.`
         : `No child of node ${val} had a hit, so this subtree is empty. Return "nothing" to the parent.`,
       { active: i, count },
     );
@@ -143,8 +143,8 @@ function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
     // or the LCA bubbled all the way to the root without a >=2 split there).
     emit(
       'RESULT',
-      `LCA = ${tree[answer]}`,
-      `The recursion settled on node ${tree[answer]} as the lowest common ancestor of ${a} and ${b}.`,
+      `LCA = ${tree[answer]!}`,
+      `The recursion settled on node ${tree[answer]!} as the lowest common ancestor of ${a} and ${b}.`,
       { active: answer, result: answer, done: true },
       'good',
     );
@@ -180,7 +180,7 @@ function View({ frame }: PluginViewProps<LcaState>) {
         <span className="font-mono text-ink">{s.b}</span>
         {s.count !== null && s.active !== null && !s.done && (
           <>
-            {' · '}hits at <span className="font-mono text-ink">{s.tree[s.active]}</span> ={' '}
+            {' · '}hits at <span className="font-mono text-ink">{s.tree[s.active]!}</span> ={' '}
             <span className="font-mono text-ink">{s.count}</span>
           </>
         )}
@@ -193,7 +193,7 @@ function View({ frame }: PluginViewProps<LcaState>) {
       </div>
       {s.result !== null && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → LCA = {s.tree[s.result]}
+          → LCA = {s.tree[s.result]!}
         </div>
       )}
     </div>
@@ -206,13 +206,13 @@ function Inspector({ frame }: InspectorProps<LcaState>) {
   return (
     <VarGrid>
       <InspectorRow k="targets" v={`${s.a}, ${s.b}`} />
-      <InspectorRow k="active node" v={s.active !== null ? (s.tree[s.active] ?? '—') : '—'} />
+      <InspectorRow k="active node" v={s.active !== null ? (s.tree[s.active]! ?? '—') : '—'} />
       <InspectorRow k="child hits" v={s.count ?? '—'} />
       <InspectorRow k="stack depth" v={s.onPath.length} />
       <InspectorRow k="visited" v={s.visited.length} />
       <InspectorRow
         k="LCA"
-        v={s.result !== null ? (s.tree[s.result] ?? '—') : s.done ? 'none' : '…'}
+        v={s.result !== null ? (s.tree[s.result]! ?? '—') : s.done ? 'none' : '…'}
       />
     </VarGrid>
   );
@@ -233,9 +233,9 @@ const SAMPLE_TREE: (number | null)[] = [3, 5, 1, 6, 2, 0, 8, null, null, 7, 4];
 
 function computeLca(tree: (number | null)[], a: number, b: number): number | null {
   const children = (i: number) =>
-    [2 * i + 1, 2 * i + 2].filter((c) => c < tree.length && tree[c] != null);
+    [2 * i + 1, 2 * i + 2].filter((c) => c < tree.length && tree[c]! != null);
   const dfs = (i: number): number => {
-    if (tree[i] === a || tree[i] === b) return i;
+    if (tree[i]! === a || tree[i]! === b) return i;
     let found = -1;
     let count = 0;
     for (const c of children(i)) {
@@ -249,7 +249,7 @@ function computeLca(tree: (number | null)[], a: number, b: number): number | nul
     return found;
   };
   const idx = dfs(0);
-  return idx === -1 ? null : (tree[idx] as number);
+  return idx === -1 ? null : (tree[idx]! as number);
 }
 
 const practiceQuiz: QuizQuestion[] = [

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -36,7 +36,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
   // Work on a mutable char array, mirroring Go's []byte(s).
   let b = s.split('');
 
-  const { emit, frames } = createRecorder<ReverseWordsState>(() => ({
+  const { emit, frames } = createPrepRecorder<ReverseWordsState>(() => ({
     chars: b.map(show),
     phase: 'init',
     l: null,
@@ -57,8 +57,8 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
   // --- trim: drop leading and trailing spaces by shrinking the slice ---
   let start = 0;
   let end = b.length - 1;
-  while (start <= end && b[start] === ' ') start++;
-  while (end >= start && b[end] === ' ') end--;
+  while (start <= end && b[start]! === ' ') start++;
+  while (end >= start && b[end]! === ' ') end--;
   const trimmed = start > 0 || end < b.length - 1;
   b = b.slice(start, end + 1);
   emit(
@@ -70,7 +70,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
     { phase: 'trim' },
   );
 
-  // In-place reverse of b[l..r].
+  // In-place reverse of b[l..r]!.
   const rev = (
     lo: number,
     hi: number,
@@ -82,7 +82,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
     let l = lo;
     let r = hi;
     while (l < r) {
-      [b[l], b[r]] = [b[r], b[l]];
+      [b[l]!, b[r]!] = [b[r]!, b[l]!];
       emit('SWAP', `swap ${l}↔${r}`, label(l, r), { phase, l, r, wordStart, wordEnd });
       l++;
       r--;
@@ -112,7 +112,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
   let i = 0;
   while (i < b.length) {
     let j = i;
-    while (j < b.length && b[j] !== ' ') j++;
+    while (j < b.length && b[j]! !== ' ') j++;
     // word occupies [i, j-1]
     if (j - 1 > i) {
       rev(

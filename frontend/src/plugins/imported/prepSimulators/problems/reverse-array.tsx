@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -25,7 +25,7 @@ interface ReverseArrayState {
 
 function record({ nums }: ReverseArrayInput): Frame<ReverseArrayState>[] {
   const arr = nums.slice();
-  const { emit, frames } = createRecorder<ReverseArrayState>(() => ({
+  const { emit, frames } = createPrepRecorder<ReverseArrayState>(() => ({
     nums: arr.slice(),
     i: null,
     j: null,
@@ -47,18 +47,18 @@ function record({ nums }: ReverseArrayInput): Frame<ReverseArrayState>[] {
     emit(
       'COMPARE',
       `i=${i} j=${j}`,
-      `i (${i}) is still left of j (${j}), so there is a pair to mirror. Swap nums[${i}] = ${arr[i]} with nums[${j}] = ${arr[j]}.`,
+      `i (${i}) is still left of j (${j}), so there is a pair to mirror. Swap nums[${i}]! = ${arr[i]!} with nums[${j}]! = ${arr[j]!}.`,
       { i, j },
     );
 
-    const tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
+    const tmp = arr[i]!;
+    arr[i]! = arr[j]!;
+    arr[j]! = tmp;
 
     emit(
       'SWAP',
       `swap ${i}↔${j}`,
-      `Swapped: nums[${i}] is now ${arr[i]} and nums[${j}] is now ${arr[j]}. Step i inward (i++) and step j inward (j--).`,
+      `Swapped: nums[${i}]! is now ${arr[i]!} and nums[${j}]! is now ${arr[j]!}. Step i inward (i++) and step j inward (j--).`,
       { i, j, swapped: true },
     );
 
@@ -126,14 +126,14 @@ function View({ frame }: PluginViewProps<ReverseArrayState>) {
 function Inspector({ frame }: InspectorProps<ReverseArrayState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const at = (k: number | null) => (k !== null && k >= 0 && k < s.nums.length ? s.nums[k] : '—');
+  const at = (k: number | null) => (k !== null && k >= 0 && k < s.nums.length ? s.nums[k]! : '—');
   return (
     <VarGrid>
       <InspectorRow k="length" v={s.nums.length} />
       <InspectorRow k="i (left)" v={s.i ?? '—'} />
       <InspectorRow k="j (right)" v={s.j ?? '—'} />
-      <InspectorRow k="nums[i]" v={at(s.i)} />
-      <InspectorRow k="nums[j]" v={at(s.j)} />
+      <InspectorRow k="nums[i]!" v={at(s.i)} />
+      <InspectorRow k="nums[j]!" v={at(s.j)} />
       <InspectorRow k="array" v={`[${s.nums.join(', ')}]`} />
     </VarGrid>
   );

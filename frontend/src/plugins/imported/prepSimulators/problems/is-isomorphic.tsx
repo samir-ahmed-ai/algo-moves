@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -28,8 +28,8 @@ interface IsIsomorphicState {
   s: string[]; // characters of s
   t: string[]; // characters of t
   i: number | null; // current index being compared
-  a: string | null; // s[i]
-  b: string | null; // t[i]
+  a: string | null; // s[i]!
+  b: string | null; // t[i]!
   m1: [string, string][]; // s -> t mapping entries so far
   m2: [string, string][]; // t -> s mapping entries so far
   conflict: boolean; // the current step contradicted an existing mapping
@@ -43,7 +43,7 @@ function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {
   const m1 = new Map<string, string>();
   const m2 = new Map<string, string>();
 
-  const { emit, frames } = createRecorder<IsIsomorphicState>(() => ({
+  const { emit, frames } = createPrepRecorder<IsIsomorphicState>(() => ({
     s: sc,
     t: tc,
     i: null,
@@ -59,7 +59,7 @@ function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {
   emit(
     'INIT',
     `"${s}" vs "${t}"`,
-    `Is Isomorphic: two strings are isomorphic when characters in s can be replaced to get t with a consistent one-to-one mapping. Walk both strings in lockstep, enforcing s[i]→t[i] and t[i]→s[i] at every position.`,
+    `Is Isomorphic: two strings are isomorphic when characters in s can be replaced to get t with a consistent one-to-one mapping. Walk both strings in lockstep, enforcing s[i]!→t[i]! and t[i]!→s[i]! at every position.`,
     {},
   );
 
@@ -75,16 +75,16 @@ function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {
   }
 
   for (let i = 0; i < sc.length; i++) {
-    const a = sc[i];
-    const b = tc[i];
+    const a = sc[i]!;
+    const b = tc[i]!;
     emit(
       'SCAN',
       `${a} ? ${b}`,
-      `At index ${i} we pair s[${i}]='${a}' with t[${i}]='${b}'. Check both mapping tables: does '${a}' already map to something other than '${b}', or '${b}' to something other than '${a}'?`,
+      `At index ${i} we pair s[${i}]!='${a}' with t[${i}]!='${b}'. Check both mapping tables: does '${a}' already map to something other than '${b}', or '${b}' to something other than '${a}'?`,
       { i, a, b },
     );
 
-    const v1 = m1.get(a);
+    const v1 = m1.get(a!);
     if (v1 !== undefined && v1 !== b) {
       emit(
         'CONFLICT',
@@ -96,7 +96,7 @@ function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {
       return frames;
     }
 
-    const v2 = m2.get(b);
+    const v2 = m2.get(b!);
     if (v2 !== undefined && v2 !== a) {
       emit(
         'CONFLICT',
@@ -108,8 +108,8 @@ function record({ s, t }: IsIsomorphicInput): Frame<IsIsomorphicState>[] {
       return frames;
     }
 
-    m1.set(a, b);
-    m2.set(b, a);
+    m1.set(a!, b!);
+    m2.set(b!, a!);
     emit(
       'MAP',
       `${a}↔${b}`,
@@ -150,8 +150,8 @@ function View({ frame }: PluginViewProps<IsIsomorphicState>) {
     <>
       <RailGroup label="scan">
         <RailStat k="i" v={st.i ?? '—'} tone="accent" />
-        <RailStat k="s[i]" v={st.a ?? '—'} />
-        <RailStat k="t[i]" v={st.b ?? '—'} />
+        <RailStat k="s[i]!" v={st.a ?? '—'} />
+        <RailStat k="t[i]!" v={st.b ?? '—'} />
       </RailGroup>
       <RailStack label="s→t" items={st.m1.map(([k, v]) => `${k}:${v}`)} />
       <RailStack label="t→s" items={st.m2.map(([k, v]) => `${k}:${v}`)} />
@@ -179,8 +179,8 @@ function Inspector({ frame }: InspectorProps<IsIsomorphicState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={st.i ?? '—'} />
-      <InspectorRow k="s[i]" v={st.a ?? '—'} />
-      <InspectorRow k="t[i]" v={st.b ?? '—'} />
+      <InspectorRow k="s[i]!" v={st.a ?? '—'} />
+      <InspectorRow k="t[i]!" v={st.b ?? '—'} />
       <InspectorRow k="s→t size" v={st.m1.length} />
       <InspectorRow k="t→s size" v={st.m2.length} />
       <InspectorRow
@@ -242,7 +242,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Is Isomorphic: two strings are isomorphic when characters in s can be replaced to get t with a consistent one-to-one mapping. Walk both strings in lockstep, enforcing s[i]→t[i] and t[i]→s[i] at every position.',
+      'Is Isomorphic: two strings are isomorphic when characters in s can be replaced to get t with a consistent one-to-one mapping. Walk both strings in lockstep, enforcing s[i]!→t[i]! and t[i]!→s[i]! at every position.',
   },
   {
     id: 'key-step',
@@ -303,7 +303,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). m1[a]==b and m2[b]==a else conflict',
+    explain: 'O(n). O(1). m1[a]!==b and m2[b]!==a else conflict',
   },
   {
     id: 'outcome',

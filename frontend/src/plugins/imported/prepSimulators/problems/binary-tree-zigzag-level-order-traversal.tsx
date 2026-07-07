@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -39,12 +39,12 @@ interface ZigzagState {
 // Follow the queue in insertion order, but keep the level-order *tree index*
 // alongside each node so the TreeBoard can highlight the right circle.
 function record({ tree }: ZigzagInput): Frame<ZigzagState>[] {
-  const val = (i: number): number => tree[i] as number;
+  const val = (i: number): number => tree[i]! as number;
 
   const visited: number[] = [];
   const result: number[][] = [];
 
-  const { emit, frames } = createRecorder<ZigzagState>(() => ({
+  const { emit, frames } = createPrepRecorder<ZigzagState>(() => ({
     tree,
     visited: visited.slice(),
     queue: [],
@@ -56,7 +56,7 @@ function record({ tree }: ZigzagInput): Frame<ZigzagState>[] {
     done: false,
   }));
 
-  if (tree.length === 0 || tree[0] == null) {
+  if (tree.length === 0 || tree[0]! == null) {
     emit(
       'DONE',
       'empty',
@@ -94,18 +94,18 @@ function record({ tree }: ZigzagInput): Frame<ZigzagState>[] {
 
     const next: number[] = [];
     for (let i = 0; i < sz; i++) {
-      const node = queue[i];
+      const node = queue[i]!;
       const idx = ltr ? i : sz - 1 - i;
-      levelBuf[idx] = val(node);
-      visited.push(node);
+      levelBuf[idx]! = val(node!);
+      visited.push(node!);
 
       // Remaining queue after conceptually dequeuing this node.
       const remaining = queue.slice(i + 1);
 
       emit(
         'PLACE',
-        `${val(node)} → slot ${idx}`,
-        `Dequeue node ${val(node)} (position ${i} in this level) and place its value at slot ${idx} because the level fills ${ltr ? 'left-to-right' : 'right-to-left'}.`,
+        `${val(node!)} → slot ${idx}`,
+        `Dequeue node ${val(node!)} (position ${i} in this level) and place its value at slot ${idx} because the level fills ${ltr ? 'left-to-right' : 'right-to-left'}.`,
         {
           queue: [...remaining, ...next],
           active: node,
@@ -115,10 +115,10 @@ function record({ tree }: ZigzagInput): Frame<ZigzagState>[] {
         },
       );
 
-      const left = 2 * node + 1;
-      const right = 2 * node + 2;
-      if (left < tree.length && tree[left] != null) next.push(left);
-      if (right < tree.length && tree[right] != null) next.push(right);
+      const left = 2 * node! + 1;
+      const right = 2 * node! + 2;
+      if (left < tree.length && tree[left]! != null) next.push(left);
+      if (right < tree.length && tree[right]! != null) next.push(right);
     }
 
     result.push(levelBuf.map((v) => v as number));
@@ -165,7 +165,7 @@ function View({ frame }: PluginViewProps<ZigzagState>) {
   };
 
   const displayTree = s.tree.map((v) => (v == null ? null : v));
-  const queueVals = s.queue.map((i) => String(s.tree[i] as number));
+  const queueVals = s.queue.map((i) => String(s.tree[i]! as number));
   const levelBufVals = s.levelBuf.map((v) => (v == null ? '·' : String(v)));
   const resultLabel = s.result.length ? s.result.map((r) => `[${r.join(',')}]`).join(' ') : '…';
 
@@ -174,7 +174,7 @@ function View({ frame }: PluginViewProps<ZigzagState>) {
       <RailGroup label="scan">
         <RailStat k="level" v={s.levelNo} />
         <RailStat k="dir" v={s.ltr ? 'L→R' : 'R→L'} tone="accent" />
-        <RailStat k="active" v={s.active !== null ? (s.tree[s.active] as number) : '—'} />
+        <RailStat k="active" v={s.active !== null ? (s.tree[s.active]! as number) : '—'} />
       </RailGroup>
       <RailStack label="queue" items={queueVals} topLabel="front" highlightEnd="bottom" />
       {!s.done && levelBufVals.length > 0 && <RailStack label="level buf" items={levelBufVals} />}
@@ -194,12 +194,12 @@ function View({ frame }: PluginViewProps<ZigzagState>) {
 function Inspector({ frame }: InspectorProps<ZigzagState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const queueVals = s.queue.map((i) => s.tree[i] as number);
+  const queueVals = s.queue.map((i) => s.tree[i]! as number);
   return (
     <VarGrid>
       <InspectorRow k="level" v={s.levelNo} />
       <InspectorRow k="direction" v={s.ltr ? 'L→R' : 'R→L'} />
-      <InspectorRow k="active" v={s.active !== null ? (s.tree[s.active] as number) : '—'} />
+      <InspectorRow k="active" v={s.active !== null ? (s.tree[s.active]! as number) : '—'} />
       <InspectorRow k="queue" v={queueVals.length ? `[${queueVals.join(', ')}]` : '[]'} />
       <InspectorRow k="levels done" v={s.result.length} />
       <InspectorRow

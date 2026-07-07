@@ -9,10 +9,12 @@ export function EmptyState({
   title,
   hint,
 }: {
-  icon?: ReactNode;
-  title: string;
-  hint?: string;
+  readonly icon?: ReactNode;
+  readonly title: string;
+  readonly hint?: string;
 }) {
+  const safeTitle = title.trim() || 'Nothing here yet';
+  const safeHint = hint?.trim() ?? '';
   return (
     <div className="design-empty-state flex flex-col items-center gap-1.5 px-3 py-5 text-center">
       {icon && (
@@ -20,15 +22,17 @@ export function EmptyState({
           {icon}
         </span>
       )}
-      <p className={cx(nodeText.sm, 'design-empty-state__title font-medium text-ink2')}>{title}</p>
-      {hint && (
+      <p className={cx(nodeText.sm, 'design-empty-state__title font-medium text-ink2')}>
+        {safeTitle}
+      </p>
+      {safeHint && (
         <p
           className={cx(
             'design-empty-state__hint max-w-[34ch] leading-snug text-ink3',
             nodeText.sm,
           )}
         >
-          {hint}
+          {safeHint}
         </p>
       )}
     </div>

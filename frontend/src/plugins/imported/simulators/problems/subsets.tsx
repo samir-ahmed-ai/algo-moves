@@ -61,7 +61,7 @@ function record({ nums }: SubsetsInput): Frame<SubsetsState>[] {
       'good',
     );
     for (let i = idx; i < nums.length; i++) {
-      cur.push(nums[i]);
+      cur.push(nums[i]!);
       emit(
         'CHOOSE',
         `pick ${nums[i]}`,
@@ -97,7 +97,7 @@ function View({ frame }: PluginViewProps<SubsetsState>) {
   if (s.pick !== null) pointers.push({ i: s.pick, label: 'pick', tone: 'warn', place: 'above' });
   const tone = (i: number) => {
     if (s.pick === i) return 'mid';
-    if (inCur.has(s.nums[i])) return 'match';
+    if (inCur.has(s.nums[i]!)) return 'match';
     return '';
   };
   const rail = (

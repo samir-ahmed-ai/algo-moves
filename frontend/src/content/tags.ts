@@ -10,7 +10,7 @@ export interface Tag {
  * Known tags. Items reference tags by id; unknown ids degrade gracefully via
  * getTag(). Add new tags here — the catalog indexes whatever items use.
  */
-const TAGS: Record<string, Tag> = {
+const TAGS: Readonly<Record<string, Readonly<Tag>>> = {
   graph: { id: 'graph', label: 'Graph', kind: 'structure' },
   queue: { id: 'queue', label: 'Queue', kind: 'structure' },
   stack: { id: 'stack', label: 'Stack', kind: 'structure' },
@@ -42,7 +42,11 @@ const TAGS: Record<string, Tag> = {
   'cycle-detection': { id: 'cycle-detection', label: 'Cycle detection', kind: 'skill' },
 };
 
-export const ALL_TAGS = Object.values(TAGS);
+export const ALL_TAGS: readonly Readonly<Tag>[] = Object.freeze(Object.values(TAGS));
+
+function normalizeTagId(id: string): string {
+  return id.trim().toLowerCase();
+}
 
 function formatUnknownTagLabel(id: string): string {
   const words = id
@@ -60,6 +64,6 @@ function formatUnknownTagLabel(id: string): string {
 }
 
 export function getTag(id: string): Tag {
-  const key = id.trim();
+  const key = normalizeTagId(id);
   return TAGS[key] ?? { id: key || 'unknown', label: formatUnknownTagLabel(key), kind: 'meta' };
 }

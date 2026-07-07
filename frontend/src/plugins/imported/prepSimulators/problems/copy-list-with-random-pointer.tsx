@@ -5,14 +5,14 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 // The input describes a list by its node values plus, for each node, the index
-// of the node its Random pointer targets (or null). e.g. random[0] = 2 means
+// of the node its Random pointer targets (or null). e.g. random[0]! = 2 means
 // node 0's random points at node 2; null means it points at nothing.
 interface CopyListInput {
   vals: number[];
@@ -20,7 +20,7 @@ interface CopyListInput {
 }
 
 // We model the interweaved chain as a flat array of "slots". Each slot is either
-// an original node or its freshly inserted clone. orig[k] = true when slot k is
+// an original node or its freshly inserted clone. orig[k]! = true when slot k is
 // an original. The Random pointers are stored as slot-index targets so the View
 // can draw an arrow line.
 interface Slot {
@@ -46,13 +46,13 @@ function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {
   // array; passes mutate `slots[].random` and we snapshot per frame.
   const slots: Slot[] = [];
   for (let i = 0; i < n; i++) {
-    slots.push({ val: vals[i], orig: true, random: null }); // original
-    slots.push({ val: vals[i], orig: false, random: null }); // clone (inserted)
+    slots.push({ val: vals[i]!, orig: true, random: null }); // original
+    slots.push({ val: vals[i]!, orig: false, random: null }); // clone (inserted)
   }
   // Original slot for original index i sits at 2*i; its clone at 2*i + 1.
   const cloneVals: number[] = [];
 
-  const { emit, frames } = createRecorder<CopyListState>(() => ({
+  const { emit, frames } = createPrepRecorder<CopyListState>(() => ({
     slots: slots.map((sl) => ({ ...sl })),
     pass: 1,
     cur: null,
@@ -76,8 +76,8 @@ function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {
     const cloneSlot = 2 * i + 1;
     emit(
       'WEAVE',
-      `clone(${vals[i]})`,
-      `Pass 1 — insert a clone of node ${vals[i]} immediately after it: cur.Next = clone, clone.Next = old next. Now slot ${cloneSlot} holds the copy of slot ${origSlot}.`,
+      `clone(${vals[i]!})`,
+      `Pass 1 — insert a clone of node ${vals[i]!} immediately after it: cur.Next = clone, clone.Next = old next. Now slot ${cloneSlot} holds the copy of slot ${origSlot}.`,
       { pass: 1, cur: cloneSlot },
     );
   }
@@ -94,22 +94,22 @@ function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {
   for (let i = 0; i < n; i++) {
     const origSlot = 2 * i;
     const cloneSlot = 2 * i + 1;
-    const r = random[i];
+    const r = random[i]!;
     if (r === null || r === undefined) {
       emit(
         'RANDOM',
-        `node ${vals[i]} rand=∅`,
-        `Original ${vals[i]} has no Random pointer, so its clone keeps Random = null. Move two slots forward (skip the clone).`,
+        `node ${vals[i]!} rand=∅`,
+        `Original ${vals[i]!} has no Random pointer, so its clone keeps Random = null. Move two slots forward (skip the clone).`,
         { pass: 2, cur: origSlot },
       );
       continue;
     }
     const targetCloneSlot = 2 * r + 1;
-    slots[cloneSlot].random = targetCloneSlot;
+    slots[cloneSlot]!.random = targetCloneSlot;
     emit(
       'RANDOM',
-      `clone→${vals[r]}`,
-      `Original ${vals[i]}.Random points at original ${vals[r]} (slot ${2 * r}). Its clone must point at the COPY of ${vals[r]}, which is the next slot (${targetCloneSlot}). Set clone.Random = original.Random.Next.`,
+      `clone→${vals[r]!}`,
+      `Original ${vals[i]!}.Random points at original ${vals[r]!} (slot ${2 * r}). Its clone must point at the COPY of ${vals[r]!}, which is the next slot (${targetCloneSlot}). Set clone.Random = original.Random.Next.`,
       { pass: 2, cur: origSlot, ranSrc: cloneSlot, ranDst: targetCloneSlot },
     );
   }
@@ -123,11 +123,11 @@ function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {
   );
   for (let i = 0; i < n; i++) {
     const cloneSlot = 2 * i + 1;
-    cloneVals.push(slots[cloneSlot].val);
+    cloneVals.push(slots[cloneSlot]!.val);
     emit(
       'SPLIT',
-      `take ${vals[i]}'`,
-      `Detach the clone of ${vals[i]} (slot ${cloneSlot}) into the copy list, and relink original ${vals[i]}.Next to the following original. Copy list so far: [${cloneVals.join(', ')}].`,
+      `take ${vals[i]!}'`,
+      `Detach the clone of ${vals[i]!} (slot ${cloneSlot}) into the copy list, and relink original ${vals[i]!}.Next to the following original. Copy list so far: [${cloneVals.join(', ')}].`,
       { pass: 3, cur: cloneSlot, cloneVals: cloneVals.slice() },
     );
   }
@@ -152,12 +152,12 @@ function View({ frame }: PluginViewProps<CopyListState>) {
   if (s.ranDst !== null) pointers.push({ i: s.ranDst, label: '→', tone: 'good', place: 'below' });
 
   const tone = (i: number) => {
-    const sl = s.slots[i];
-    if (s.done) return sl.orig ? 'dead' : 'found';
+    const sl = s.slots[i]!;
+    if (s.done) return sl!.orig ? 'dead' : 'found';
     if (i === s.cur) return 'match';
     if (i === s.ranDst) return 'found';
     if (i === s.ranSrc) return 'in-window';
-    return sl.orig ? '' : 'lo';
+    return sl!.orig ? '' : 'lo';
   };
 
   return (
@@ -169,7 +169,7 @@ function View({ frame }: PluginViewProps<CopyListState>) {
       <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} />
       {s.ranSrc !== null && s.ranDst !== null && (
         <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          clone[{s.ranSrc}].Random → slot {s.ranDst} ({values[s.ranDst]})
+          clone[{s.ranSrc}]!.Random → slot {s.ranDst} ({values[s.ranDst]!})
         </div>
       )}
       <div className={cn('mt-1 font-mono', s.done ? 'text-good' : 'text-ink3', vizText.base)}>
@@ -182,7 +182,7 @@ function View({ frame }: PluginViewProps<CopyListState>) {
 function Inspector({ frame }: InspectorProps<CopyListState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curSl = s.cur !== null ? s.slots[s.cur] : null;
+  const curSl = s.cur !== null ? s.slots[s.cur]! : null;
   return (
     <VarGrid>
       <InspectorRow k="pass" v={s.pass} />

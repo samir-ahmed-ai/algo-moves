@@ -64,47 +64,49 @@ export function CategoryBoard({
 
       <div className="category-board__content relative">
         <BrowseBreadcrumb
-          trackId={trackId}
+          {...(trackId != null ? { trackId } : {})}
           categoryId={categoryId}
-          description={category?.description}
+          {...(category?.description ? { description: category.description } : {})}
           onBack={() => setActiveCategoryId(null)}
-          trailing={
-            total > 0 ? (
-              <div className="category-board__progress relative ml-auto flex shrink-0 items-center gap-2">
-                <div className="category-board__progress-copy flex flex-col items-end gap-1">
-                  <div className="category-board__meters flex w-24 flex-col gap-0.5">
-                    <Meter value={mastered} max={total} tone="good" height={4} />
-                    <Meter value={attempted} max={total} tone="accent" height={4} />
-                  </div>
-                  <span
-                    className={cn(
-                      'category-board__progress-text font-mono tabular-nums text-ink3',
-                      chromeText.sm,
-                    )}
-                  >
-                    {mastered}/{total} mastered · {attempted} tried
-                    {onStreak > 0 ? ` · ${onStreak} on streak` : ''}
-                  </span>
-                </div>
-                <div className="category-board__difficulty hidden items-center gap-1 sm:flex">
-                  {(['Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => {
-                    const n = d === 'Easy' ? easy : d === 'Medium' ? med : hard;
-                    if (n === 0) return null;
-                    return (
-                      <Chip
-                        key={d}
-                        tone={difficultyTone(d)}
-                        mono
-                        className={cn('!px-1.5 !py-px', chromeText.xs)}
+          {...(total > 0
+            ? {
+                trailing: (
+                  <div className="category-board__progress relative ml-auto flex shrink-0 items-center gap-2">
+                    <div className="category-board__progress-copy flex flex-col items-end gap-1">
+                      <div className="category-board__meters flex w-24 flex-col gap-0.5">
+                        <Meter value={mastered} max={total} tone="good" height={4} />
+                        <Meter value={attempted} max={total} tone="accent" height={4} />
+                      </div>
+                      <span
+                        className={cn(
+                          'category-board__progress-text font-mono tabular-nums text-ink3',
+                          chromeText.sm,
+                        )}
                       >
-                        {d[0]}·{n}
-                      </Chip>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : undefined
-          }
+                        {mastered}/{total} mastered · {attempted} tried
+                        {onStreak > 0 ? ` · ${onStreak} on streak` : ''}
+                      </span>
+                    </div>
+                    <div className="category-board__difficulty hidden items-center gap-1 sm:flex">
+                      {(['Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => {
+                        const n = d === 'Easy' ? easy : d === 'Medium' ? med : hard;
+                        if (n === 0) return null;
+                        return (
+                          <Chip
+                            key={d}
+                            tone={difficultyTone(d)}
+                            mono
+                            className={cn('!px-1.5 !py-px', chromeText.xs)}
+                          >
+                            {d[0]}·{n}
+                          </Chip>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ),
+              }
+            : {})}
         />
 
         {total === 0 ? (

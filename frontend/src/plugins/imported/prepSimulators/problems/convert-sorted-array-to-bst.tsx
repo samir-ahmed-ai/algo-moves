@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,10 +33,10 @@ function record({ nums }: BstInput): Frame<BstState>[] {
 
   const setAt = (pos: number, val: number) => {
     while (tree.length <= pos) tree.push(null);
-    tree[pos] = val;
+    tree[pos]! = val;
   };
 
-  const { emit, frames } = createRecorder<BstState>(() => ({
+  const { emit, frames } = createPrepRecorder<BstState>(() => ({
     nums,
     tree: tree.slice(),
     l: null,
@@ -70,15 +70,15 @@ function record({ nums }: BstInput): Frame<BstState>[] {
     emit(
       'MID',
       `m=${m}`,
-      `In range [${l}, ${r}] the middle index is m = ⌊(${l} + ${r}) / 2⌋ = ${m}, so nums[${m}] = ${nums[m]} becomes the root of this subtree. Values left of ${m} are smaller, values right are larger.`,
+      `In range [${l}, ${r}] the middle index is m = ⌊(${l} + ${r}) / 2⌋ = ${m}, so nums[${m}]! = ${nums[m]!} becomes the root of this subtree. Values left of ${m} are smaller, values right are larger.`,
       { l, r, m, pos },
     );
-    setAt(pos, nums[m]);
+    setAt(pos, nums[m]!);
     done.push(pos);
     emit(
       'PLACE',
-      `node ${nums[m]}`,
-      `Place ${nums[m]} as this subtree's root. Now recurse left on [${l}, ${m - 1}] then right on [${m + 1}, ${r}].`,
+      `node ${nums[m]!}`,
+      `Place ${nums[m]!} as this subtree's root. Now recurse left on [${l}, ${m - 1}] then right on [${m + 1}, ${r}].`,
       { l, r, m, pos },
       'good',
     );
@@ -116,7 +116,7 @@ function View({ frame }: PluginViewProps<BstState>) {
           <>
             {' · '}mid ={' '}
             <span className="font-mono text-ink">
-              nums[{s.m}] = {s.nums[s.m]}
+              nums[{s.m}]! = {s.nums[s.m]!}
             </span>
           </>
         )}
@@ -140,7 +140,7 @@ function Inspector({ frame }: InspectorProps<BstState>) {
       <InspectorRow k="l" v={s.l ?? '—'} />
       <InspectorRow k="r" v={s.r ?? '—'} />
       <InspectorRow k="m = (l+r)/2" v={s.m ?? '—'} />
-      <InspectorRow k="nums[m] (root)" v={s.m !== null ? s.nums[s.m] : '—'} />
+      <InspectorRow k="nums[m]! (root)" v={s.m !== null ? s.nums[s.m]! : '—'} />
       <InspectorRow k="nodes placed" v={nodeCount} />
       <InspectorRow k="status" v={s.finished ? 'balanced BST' : '…building'} />
     </VarGrid>

@@ -80,12 +80,13 @@ export function mergeBraceOnlyPieces(pieces: CodePiece[]): CodePiece[] {
   }
 
   if (pending && out.length > 0) {
+    const last = out[out.length - 1]!;
     out[out.length - 1] = {
-      ...out[out.length - 1],
-      code: `${out[out.length - 1].code}\n${pending}`,
+      ...last,
+      code: `${last.code}\n${pending}`,
     };
   } else if (pending) {
-    out.push({ ...pieces[0], code: pending });
+    out.push({ ...pieces[0]!, code: pending });
   }
 
   return out;
@@ -103,16 +104,17 @@ export function isPreambleOnlyPiece(code: string): boolean {
 /** Drop leading package/import/comment-only blocks from the puzzle tray. */
 export function stripPreamblePieces(pieces: CodePiece[]): CodePiece[] {
   let i = 0;
-  while (i < pieces.length && isPreambleOnlyPiece(pieces[i].code)) i++;
+  while (i < pieces.length && isPreambleOnlyPiece(pieces[i]!.code)) i++;
   let rest = pieces.slice(i);
   if (rest.length === 0) return rest;
-  const lines = rest[0].code.split('\n');
+  const first = rest[0]!;
+  const lines = first.code.split('\n');
   let drop = 0;
-  while (drop < lines.length && isHeaderLine(lines[drop].trim())) drop++;
+  while (drop < lines.length && isHeaderLine((lines[drop] ?? '').trim())) drop++;
   if (drop === 0) return rest;
   const code = lines.slice(drop).join('\n');
   if (!code.trim()) return rest.slice(1);
-  rest = [{ ...rest[0], code }, ...rest.slice(1)];
+  rest = [{ ...first, code }, ...rest.slice(1)];
   return rest;
 }
 
@@ -134,7 +136,7 @@ export function splitCodeIntoPieces(source: string): CodePiece[] | null {
   let inHeader = true;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const line = lines[i] ?? '';
     const trimmed = line.trim();
 
     if (inHeader && isHeaderLine(trimmed)) {
@@ -210,10 +212,11 @@ function coarsenPieces(pieces: CodePiece[]): CodePiece[] {
 
   const flush = () => {
     if (buf.length === 0) return;
+    const first = buf[0]!;
     merged.push({
-      id: buf[0].id,
+      id: first.id,
       code: buf.map((p) => p.code).join('\n'),
-      role: buf[0].role,
+      role: first.role,
     });
     buf = [];
   };
@@ -265,8 +268,9 @@ export function joinPieces(pieces: CodePiece[]): string {
 
 /** Preamble in reference before the first piece (package, imports, comments). */
 export function preambleForPieces(reference: string, pieces: CodePiece[]): string {
-  if (pieces.length === 0) return '';
-  const anchor = pieces[0].code.split('\n')[0]?.trim();
+  const first = pieces[0];
+  if (!first) return '';
+  const anchor = first.code.split('\n')[0]?.trim();
   if (!anchor) return '';
   const idx = reference.indexOf(anchor);
   if (idx <= 0) return '';
@@ -282,7 +286,8 @@ export function assembleDraft(reference: string, pieces: CodePiece[]): string {
     const idx = reference.indexOf(piece.code, pos);
     if (idx < 0) {
       const body = joinPieces(pieces);
-      const anchor = pieces[0].code.split('\n')[0]?.trim() ?? '';
+      const first = pieces[0];
+      const anchor = first?.code.split('\n')[0]?.trim() ?? '';
       const start = anchor ? reference.indexOf(anchor) : -1;
       return start > 0 ? reference.slice(0, start) + body : body;
     }

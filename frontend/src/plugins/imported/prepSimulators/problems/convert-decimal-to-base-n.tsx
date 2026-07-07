@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -35,7 +35,7 @@ interface ConvertState {
 function record({ n, base }: ConvertInput): Frame<ConvertState>[] {
   const collected: string[] = [];
 
-  const { emit, frames } = createRecorder<ConvertState>(() => ({
+  const { emit, frames } = createPrepRecorder<ConvertState>(() => ({
     n,
     base,
     neg: n < 0,
@@ -82,9 +82,9 @@ function record({ n, base }: ConvertInput): Frame<ConvertState>[] {
   // Repeated divmod: collect remainders least-significant first.
   while (cur > 0) {
     const rem = cur % base;
-    const digit = DIGITS[rem];
+    const digit = DIGITS[rem]!;
     const next = Math.floor(cur / base);
-    collected.push(digit);
+    collected.push(digit!);
     emit(
       'DIVMOD',
       `${cur} % ${base} = ${rem}`,
@@ -106,9 +106,9 @@ function record({ n, base }: ConvertInput): Frame<ConvertState>[] {
   let l = 0;
   let r = out.length - 1;
   while (l < r) {
-    const tmp = out[l];
-    out[l] = out[r];
-    out[r] = tmp;
+    const tmp = out[l]!;
+    out[l]! = out[r]!;
+    out[r]! = tmp;
     emit(
       'SWAP',
       `swap ${l} ↔ ${r}`,
@@ -136,14 +136,14 @@ function View({ frame }: PluginViewProps<ConvertState>) {
   const cells = s.collected.length > 0 ? s.collected : ['·'];
   const pointers: ArrayPointer[] = [];
   if (s.swap) {
-    pointers.push({ i: s.swap[0], label: 'l', tone: 'accent', place: 'above' });
-    pointers.push({ i: s.swap[1], label: 'r', tone: 'warn', place: 'below' });
+    pointers.push({ i: s.swap[0]!, label: 'l', tone: 'accent', place: 'above' });
+    pointers.push({ i: s.swap[1]!, label: 'r', tone: 'warn', place: 'below' });
   } else if (!s.reversing && s.collected.length > 0) {
     pointers.push({ i: s.collected.length - 1, label: 'last', tone: 'accent', place: 'above' });
   }
   const tone = (i: number) => {
     if (s.done) return 'found';
-    if (s.swap && (i === s.swap[0] || i === s.swap[1])) return 'match';
+    if (s.swap && (i === s.swap[0]! || i === s.swap[1]!)) return 'match';
     if (!s.reversing && i === s.collected.length - 1) return 'match';
     return '';
   };
@@ -202,7 +202,7 @@ function compute(n: number, base: number): string {
   let cur = neg ? -n : n;
   let out = '';
   while (cur > 0) {
-    out = DIGITS[cur % base] + out;
+    out = DIGITS[cur % base]! + out;
     cur = Math.floor(cur / base);
   }
   return (neg ? '-' : '') + out;
@@ -312,7 +312,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(log x) time, O(1) space — wrong order of growth',
       },
     ],
-    explain: 'O(log n). O(log n). out+=digits[n%base]; n/=base; reverse',
+    explain: 'O(log n). O(log n). out+=digits[n%base]!; n/=base; reverse',
   },
   {
     id: 'outcome',

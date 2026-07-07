@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -36,13 +36,13 @@ function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {
   const sorted = intervals.slice().sort((a, b) => a.start - b.start);
   const merged: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<CountRangeState>(() => ({
+  const { emit, frames } = createPrepRecorder<CountRangeState>(() => ({
     sorted,
     i: null,
     j: null,
     groupStart: null,
     groupEnd: null,
-    merged: merged.map((m) => [m[0], m[1]] as [number, number]),
+    merged: merged.map((m) => [m[0]!, m[1]!] as [number, number]),
     rangeSum: 0,
     lastSpan: null,
     done: false,
@@ -78,24 +78,24 @@ function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {
   let rangeSum = 0;
   let i = 0;
   while (i < sorted.length) {
-    const start = sorted[i].start;
-    let end = sorted[i].end;
+    const start = sorted[i]!.start;
+    let end = sorted[i]!.end;
 
     emit(
       'OPEN',
-      `group ${fmt(sorted[i])}`,
-      `Open a new merged group at index ${i}: ${fmt(sorted[i])}. Track its start=${start} and a running end=${end} that we will extend over any touching neighbours.`,
+      `group ${fmt(sorted[i]!)}`,
+      `Open a new merged group at index ${i}: ${fmt(sorted[i]!)}. Track its start=${start} and a running end=${end} that we will extend over any touching neighbours.`,
       { i, j: null, groupStart: start, groupEnd: end },
     );
 
     let j = i + 1;
-    while (j < sorted.length && sorted[j].start <= end + 1) {
+    while (j < sorted.length && sorted[j]!.start <= end + 1) {
       const before = end;
-      if (sorted[j].end > end) end = sorted[j].end;
+      if (sorted[j]!.end > end) end = sorted[j]!.end;
       emit(
         'MERGE',
         `extend end→${end}`,
-        `${fmt(sorted[j])} starts at ${sorted[j].start} ≤ end+1 (${before}+1), so it touches or overlaps the group. Merge it: end becomes max(${before}, ${sorted[j].end}) = ${end}.`,
+        `${fmt(sorted[j]!)} starts at ${sorted[j]!.start} ≤ end+1 (${before}+1), so it touches or overlaps the group. Merge it: end becomes max(${before}, ${sorted[j]!.end}) = ${end}.`,
         { i, j, groupStart: start, groupEnd: end },
       );
       j++;
@@ -104,8 +104,8 @@ function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {
     if (j < sorted.length) {
       emit(
         'STOP',
-        `gap before ${fmt(sorted[j])}`,
-        `${fmt(sorted[j])} starts at ${sorted[j].start} > end+1 (${end}+1), leaving a gap. The current group [${start},${end}] is complete.`,
+        `gap before ${fmt(sorted[j]!)}`,
+        `${fmt(sorted[j]!)} starts at ${sorted[j]!.start} > end+1 (${end}+1), leaving a gap. The current group [${start},${end}] is complete.`,
         { i, j, groupStart: start, groupEnd: end },
       );
     }
@@ -127,7 +127,7 @@ function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {
   emit(
     'DONE',
     `${rangeSum} covered`,
-    `Swept all intervals. The merged groups ${merged.map((m) => `[${m[0]},${m[1]}]`).join(', ')} cover ${rangeSum} distinct integers in total.`,
+    `Swept all intervals. The merged groups ${merged.map((m) => `[${m[0]!},${m[1]!}]`).join(', ')} cover ${rangeSum} distinct integers in total.`,
     { i: null, j: null, groupStart: null, groupEnd: null, rangeSum, done: true },
     'good',
   );
@@ -145,8 +145,8 @@ function View({ frame }: PluginViewProps<CountRangeState>) {
 
   const inGroup = (idx: number) => {
     if (s.groupStart === null || s.groupEnd === null) return false;
-    const iv = s.sorted[idx];
-    return iv.start <= s.groupEnd && iv.end >= s.groupStart;
+    const iv = s.sorted[idx]!;
+    return iv!.start <= s.groupEnd && iv!.end >= s.groupStart;
   };
   const tone = (idx: number) =>
     s.done ? 'found' : s.i === idx ? 'match' : inGroup(idx) ? 'in-window' : '';
@@ -166,7 +166,7 @@ function View({ frame }: PluginViewProps<CountRangeState>) {
       </div>
       <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        merged {s.merged.length ? s.merged.map((m) => `[${m[0]},${m[1]}]`).join(' ') : '·'}
+        merged {s.merged.length ? s.merged.map((m) => `[${m[0]!},${m[1]!}]`).join(' ') : '·'}
       </div>
       {s.lastSpan !== null && !s.done && (
         <div className={cn('mt-1 font-mono text-good', vizText.sm)}>+{s.lastSpan} integers</div>
@@ -185,7 +185,7 @@ function Inspector({ frame }: InspectorProps<CountRangeState>) {
     s.groupStart !== null && s.groupEnd !== null ? `[${s.groupStart}, ${s.groupEnd}]` : '—';
   const probe =
     s.j !== null && s.j >= 0 && s.j < s.sorted.length
-      ? `[${s.sorted[s.j].start},${s.sorted[s.j].end}]`
+      ? `[${s.sorted[s.j]!.start},${s.sorted[s.j]!.end}]`
       : '—';
   return (
     <VarGrid>

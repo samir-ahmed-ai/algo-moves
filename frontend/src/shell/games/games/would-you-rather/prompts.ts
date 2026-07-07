@@ -259,7 +259,12 @@ export function pickPrompts(categories: WyrCategory[], count: number, seed: numb
   for (let i = arr.length - 1; i > 0; i--) {
     s = (s * 1664525 + 1013904223) & 0xffffffff;
     const j = Math.abs(s) % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    const left = arr[i];
+    const right = arr[j];
+    if (left !== undefined && right !== undefined) {
+      arr[i] = right;
+      arr[j] = left;
+    }
   }
   return arr.slice(0, Math.min(count, arr.length));
 }

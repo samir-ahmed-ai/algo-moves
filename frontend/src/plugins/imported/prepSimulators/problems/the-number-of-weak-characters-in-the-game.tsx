@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,18 +33,18 @@ interface WeakState {
 }
 
 function attackOf(p: Pair): number {
-  return p[0];
+  return p[0]!;
 }
 function defenseOf(p: Pair): number {
-  return p[1];
+  return p[1]!;
 }
 
 function record({ properties }: WeakInput): Frame<WeakState>[] {
-  const props: Pair[] = properties.map((p) => [p[0], p[1]] as Pair);
+  const props: Pair[] = properties.map((p) => [p[0]!, p[1]!] as Pair);
   const n = props.length;
   const weakIdx = new Array<boolean>(n).fill(false);
-  const { emit, frames } = createRecorder<WeakState>(() => ({
-    props: props.map((p) => [p[0], p[1]] as Pair),
+  const { emit, frames } = createPrepRecorder<WeakState>(() => ({
+    props: props.map((p) => [p[0]!, p[1]!] as Pair),
     phase: 'sort',
     cmpA: null,
     cmpB: null,
@@ -82,10 +82,10 @@ function record({ properties }: WeakInput): Frame<WeakState>[] {
       emit(
         'COMPARE',
         `${j} vs best`,
-        `Compare candidate ${j} (atk ${attackOf(props[j])}, def ${defenseOf(props[j])}) against the current best ${best} (atk ${attackOf(props[best])}, def ${defenseOf(props[best])}). "Comes first" = higher attack, or equal attack with lower defense.`,
+        `Compare candidate ${j} (atk ${attackOf(props[j]!)}, def ${defenseOf(props[j]!)}) against the current best ${best} (atk ${attackOf(props[best]!)}, def ${defenseOf(props[best]!)}). "Comes first" = higher attack, or equal attack with lower defense.`,
         { phase: 'sort', cmpA: best, cmpB: j, sortedFrom: i },
       );
-      if (less(props[j], props[best])) {
+      if (less(props[j]!, props[best]!)) {
         best = j;
         emit(
           'NEWBEST',
@@ -96,9 +96,9 @@ function record({ properties }: WeakInput): Frame<WeakState>[] {
       }
     }
     if (best !== i) {
-      const tmp = props[i];
-      props[i] = props[best];
-      props[best] = tmp;
+      const tmp = props[i]!;
+      props[i]! = props[best]!;
+      props[best]! = tmp;
       emit(
         'SWAP',
         `${i}<->${best}`,
@@ -125,9 +125,9 @@ function record({ properties }: WeakInput): Frame<WeakState>[] {
   let maxDef = 0;
   let cnt = 0;
   for (let i = 0; i < n; i++) {
-    const def = defenseOf(props[i]);
+    const def = defenseOf(props[i]!);
     if (def < maxDef) {
-      weakIdx[i] = true;
+      weakIdx[i]! = true;
       cnt++;
       emit(
         'WEAK',
@@ -163,7 +163,7 @@ function View({ frame }: PluginViewProps<WeakState>) {
   const s = frame.state;
   const tone = (i: number): BarTone => {
     if (s.phase === 'sweep') {
-      if (s.weakIdx[i]) return 'swap'; // weak — flagged
+      if (s.weakIdx[i]!) return 'swap'; // weak — flagged
       if (s.cur === i) return 'pivot'; // cursor
       if (s.cur !== null && i < s.cur) return 'min'; // already kept (set maxDef)
       return 'idle';
@@ -186,7 +186,7 @@ function View({ frame }: PluginViewProps<WeakState>) {
           </>
         )}
       </div>
-      <ArrayBars values={s.props.map(attackOf)} tone={tone} label={(i) => defenseOf(s.props[i])} />
+      <ArrayBars values={s.props.map(attackOf)} tone={tone} label={(i) => defenseOf(s.props[i]!)} />
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.phase === 'sort'
           ? 'sorting by attack ↓ (ties: defense ↑)'
@@ -201,13 +201,13 @@ function Inspector({ frame }: InspectorProps<WeakState>) {
   const s = frame.state;
   const at = (i: number | null) =>
     i !== null && i >= 0 && i < s.props.length
-      ? `(${attackOf(s.props[i])}, ${defenseOf(s.props[i])})`
+      ? `(${attackOf(s.props[i]!)}, ${defenseOf(s.props[i]!)})`
       : '—';
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="cursor i" v={s.phase === 'sweep' ? (s.cur ?? '—') : (s.cmpA ?? '—')} />
-      <InspectorRow k="char[i] (atk,def)" v={s.phase === 'sweep' ? at(s.cur) : at(s.cmpA)} />
+      <InspectorRow k="char[i]! (atk,def)" v={s.phase === 'sweep' ? at(s.cur) : at(s.cmpA)} />
       <InspectorRow k="maxDef" v={s.phase === 'sweep' ? s.maxDef : '—'} />
       <InspectorRow k="weak count" v={s.cnt} />
     </VarGrid>

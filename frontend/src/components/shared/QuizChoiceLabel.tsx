@@ -2,16 +2,15 @@ import { cn } from '@/lib/utils/cn';
 import { isCodeHeadline, isComplexityHeadline, parseQuizChoiceLabel } from '@/lib/quiz';
 
 type ChoiceState = 'idle' | 'correct' | 'wrong' | 'dim';
+type ChoiceSize = 'mobile' | 'studio';
 
-export function QuizChoiceLabel({
-  label,
-  size = 'studio',
-  state = 'idle',
-}: {
-  label: string;
-  size?: 'mobile' | 'studio';
-  state?: ChoiceState;
-}) {
+interface QuizChoiceLabelProps {
+  readonly label: string;
+  readonly size?: ChoiceSize;
+  readonly state?: ChoiceState;
+}
+
+export function QuizChoiceLabel({ label, size = 'studio', state = 'idle' }: QuizChoiceLabelProps) {
   const { headline, detail } = parseQuizChoiceLabel(label);
   const complexity = isComplexityHeadline(headline);
   const code = !complexity && isCodeHeadline(headline);
@@ -36,6 +35,7 @@ export function QuizChoiceLabel({
   if (!detail) {
     return (
       <span
+        title={headline}
         className={cn(
           'quiz-choice-label quiz-choice-label--solo quiz-choice-headline',
           headlineCls,
@@ -47,12 +47,20 @@ export function QuizChoiceLabel({
   }
 
   return (
-    <span className="quiz-choice-label inline-flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+    <span
+      className={cn(
+        'quiz-choice-label inline-flex min-w-0 max-w-full flex-wrap items-baseline gap-x-1.5 gap-y-0.5',
+        size === 'mobile' && 'leading-tight',
+      )}
+      title={label}
+    >
       <span className={cn('quiz-choice-headline', headlineCls)}>{headline}</span>
       <span className="shrink-0 text-ink3/40" aria-hidden>
         —
       </span>
-      <span className={cn('quiz-choice-detail', detailCls)}>{detail}</span>
+      <span className={cn('quiz-choice-detail', detailCls, size === 'mobile' && 'basis-full')}>
+        {detail}
+      </span>
     </span>
   );
 }

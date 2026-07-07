@@ -32,7 +32,6 @@ export function MobileVizShell({
   useEffect(() => {
     if (!hasFrames) return;
     if (baseFrames.length > 1 && !player.isPlaying) player.togglePlay();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-play once per problem
   }, [plugin.meta.id]);
 
   // Fire onWatched once the last frame is reached and playback stops.

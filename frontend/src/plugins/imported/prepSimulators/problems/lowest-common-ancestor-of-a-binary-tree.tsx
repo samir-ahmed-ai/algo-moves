@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -45,7 +45,7 @@ function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
   const path: number[] = [];
   let lca: number | null = null;
 
-  const { emit, frames } = createRecorder<LcaState>(() => ({
+  const { emit, frames } = createPrepRecorder<LcaState>(() => ({
     tree,
     p,
     q,
@@ -57,7 +57,7 @@ function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
     done: false,
   }));
 
-  const valOf = (i: number) => (i >= 0 && i < tree.length ? tree[i] : null);
+  const valOf = (i: number) => (i >= 0 && i < tree.length ? tree[i]! : null);
 
   const pVal = valOf(p);
   const qVal = valOf(q);
@@ -72,7 +72,7 @@ function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
   // Faithful re-implementation of the Go lowestCommonAncestor(root, p, q).
   // Returns an index (or NIL) instead of a *TreeNode.
   const dfs = (i: number): number => {
-    if (i >= tree.length || tree[i] == null) {
+    if (i >= tree.length || tree[i]! == null) {
       emit(
         'NIL',
         'root == nil',
@@ -82,7 +82,7 @@ function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
       return NIL;
     }
 
-    const val = tree[i] as number;
+    const val = tree[i]! as number;
     path.push(i);
 
     if (i === p || i === q) {
@@ -171,11 +171,11 @@ function View({ frame }: PluginViewProps<LcaState>) {
     if (s.visited.includes(i)) return 'team-2';
     return 'team-0';
   };
-  const pVal = s.p >= 0 && s.p < s.tree.length ? s.tree[s.p] : null;
-  const qVal = s.q >= 0 && s.q < s.tree.length ? s.tree[s.q] : null;
-  const lcaVal = s.lca !== null ? s.tree[s.lca] : null;
-  const retVal = s.returned == null ? null : s.returned === NIL ? 'nil' : s.tree[s.returned];
-  const pathLabels = s.path.map((i) => String(s.tree[i] ?? i));
+  const pVal = s.p >= 0 && s.p < s.tree.length ? s.tree[s.p]! : null;
+  const qVal = s.q >= 0 && s.q < s.tree.length ? s.tree[s.q]! : null;
+  const lcaVal = s.lca !== null ? s.tree[s.lca]! : null;
+  const retVal = s.returned == null ? null : s.returned === NIL ? 'nil' : s.tree[s.returned]!;
+  const pathLabels = s.path.map((i) => String(s.tree[i]! ?? i));
   return (
     <VizStage
       rail={
@@ -188,7 +188,7 @@ function View({ frame }: PluginViewProps<LcaState>) {
           <RailGroup label="frame">
             <RailStat
               k="cur"
-              v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'}
+              v={s.current !== null ? (s.tree[s.current]! ?? '—') : '—'}
               tone="accent"
             />
             <RailStat k="ret" v={retVal ?? '—'} />
@@ -209,11 +209,11 @@ function View({ frame }: PluginViewProps<LcaState>) {
 function Inspector({ frame }: InspectorProps<LcaState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current !== null ? s.tree[s.current] : null;
-  const retVal = s.returned == null ? null : s.returned === NIL ? 'nil' : s.tree[s.returned];
-  const lcaVal = s.lca !== null ? s.tree[s.lca] : null;
-  const pVal = s.p >= 0 && s.p < s.tree.length ? s.tree[s.p] : null;
-  const qVal = s.q >= 0 && s.q < s.tree.length ? s.tree[s.q] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
+  const retVal = s.returned == null ? null : s.returned === NIL ? 'nil' : s.tree[s.returned]!;
+  const lcaVal = s.lca !== null ? s.tree[s.lca]! : null;
+  const pVal = s.p >= 0 && s.p < s.tree.length ? s.tree[s.p]! : null;
+  const qVal = s.q >= 0 && s.q < s.tree.length ? s.tree[s.q]! : null;
   return (
     <VarGrid>
       <InspectorRow k="p / q" v={`${pVal ?? '—'} / ${qVal ?? '—'}`} />
@@ -358,7 +358,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as LcaState | undefined;
     if (!s || s.lca === null) return { ok: false, label: 'no LCA' };
-    const v = s.tree[s.lca];
+    const v = s.tree[s.lca]!;
     return { ok: true, label: `LCA = ${v}` };
   },
 };

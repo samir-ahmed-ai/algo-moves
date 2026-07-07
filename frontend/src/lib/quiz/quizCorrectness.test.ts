@@ -3,7 +3,7 @@ import { quizCorrectnessIssues } from './quizCorrectness';
 import type { QuizQuestion } from '@/core/types';
 
 function q(overrides: Partial<QuizQuestion> & Pick<QuizQuestion, 'choices'>): QuizQuestion {
-  return { id: 't', prompt: 'p?', explain: '', ...overrides };
+  return { id: 't', prompt: 'p?', explain: 'Because the hash map fits.', ...overrides };
 }
 
 describe('quizCorrectnessIssues', () => {

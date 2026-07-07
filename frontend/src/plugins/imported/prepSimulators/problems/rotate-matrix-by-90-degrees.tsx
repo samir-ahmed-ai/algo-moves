@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -33,7 +33,7 @@ interface RotateState {
 function record({ mat }: RotateInput): Frame<RotateState>[] {
   const n = mat.length;
   const grid = mat.map((row) => row.slice());
-  const { emit, frames } = createRecorder<RotateState>(() => ({
+  const { emit, frames } = createPrepRecorder<RotateState>(() => ({
     mat: grid.map((row) => row.slice()),
     n,
     ring: null,
@@ -66,47 +66,47 @@ function record({ mat }: RotateInput): Frame<RotateState>[] {
       const right: Cell = [j, n - i - 1];
       const corners: Cell[] = [top, left, bottom, right];
 
-      const tmp = grid[i][j];
+      const tmp = grid[i]![j]!;
       emit(
         'SAVE',
         `tmp=${tmp}`,
-        `Pick a 4-cycle on ring ${i} (offset j=${j}). Save the top value tmp = mat[${i}][${j}] = ${tmp} so it is not lost when we overwrite it.`,
+        `Pick a 4-cycle on ring ${i} (offset j=${j}). Save the top value tmp = mat[${i}]![${j}] = ${tmp} so it is not lost when we overwrite it.`,
         { ring: i, j, corners, active: top, source: top },
       );
 
       // top <- left
-      grid[i][j] = grid[n - j - 1][i];
+      grid[i]![j]! = grid[n - j - 1]![i]!;
       emit(
         'MOVE',
         `top←left`,
-        `Top gets the left value: mat[${i}][${j}] ← mat[${n - j - 1}][${i}] = ${grid[i][j]}.`,
+        `Top gets the left value: mat[${i}]![${j}] ← mat[${n - j - 1}]![${i}] = ${grid[i]![j]}.`,
         { ring: i, j, corners, active: top, source: left },
       );
 
       // left <- bottom
-      grid[n - j - 1][i] = grid[n - i - 1][n - j - 1];
+      grid[n - j - 1]![i]! = grid[n - i - 1]![n - j - 1]!;
       emit(
         'MOVE',
         `left←bottom`,
-        `Left gets the bottom value: mat[${n - j - 1}][${i}] ← mat[${n - i - 1}][${n - j - 1}] = ${grid[n - j - 1][i]}.`,
+        `Left gets the bottom value: mat[${n - j - 1}]![${i}] ← mat[${n - i - 1}]![${n - j - 1}] = ${grid[n - j - 1]![i]}.`,
         { ring: i, j, corners, active: left, source: bottom },
       );
 
       // bottom <- right
-      grid[n - i - 1][n - j - 1] = grid[j][n - i - 1];
+      grid[n - i - 1]![n - j - 1]! = grid[j]![n - i - 1]!;
       emit(
         'MOVE',
         `bottom←right`,
-        `Bottom gets the right value: mat[${n - i - 1}][${n - j - 1}] ← mat[${j}][${n - i - 1}] = ${grid[n - i - 1][n - j - 1]}.`,
+        `Bottom gets the right value: mat[${n - i - 1}]![${n - j - 1}] ← mat[${j}]![${n - i - 1}] = ${grid[n - i - 1]![n - j - 1]}.`,
         { ring: i, j, corners, active: bottom, source: right },
       );
 
       // right <- tmp
-      grid[j][n - i - 1] = tmp;
+      grid[j]![n - i - 1]! = tmp;
       emit(
         'MOVE',
         `right←tmp`,
-        `Right gets the saved top value: mat[${j}][${n - i - 1}] ← tmp = ${tmp}. The 4-cycle is complete.`,
+        `Right gets the saved top value: mat[${j}]![${n - i - 1}] ← tmp = ${tmp}. The 4-cycle is complete.`,
         { ring: i, j, corners, active: right, source: top },
         'good',
       );
@@ -124,7 +124,7 @@ function record({ mat }: RotateInput): Frame<RotateState>[] {
 }
 
 function sameCell(a: Cell | null, b: Cell): boolean {
-  return a !== null && a[0] === b[0] && a[1] === b[1];
+  return a !== null && a[0]! === b[0]! && a[1]! === b[1]!;
 }
 
 function inCorners(corners: Cell[], r: number, c: number): boolean {
@@ -172,7 +172,7 @@ function View({ frame }: PluginViewProps<RotateState>) {
 function Inspector({ frame }: InspectorProps<RotateState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const fmt = (cell: Cell | null) => (cell ? `[${cell[0]},${cell[1]}]` : '—');
+  const fmt = (cell: Cell | null) => (cell ? `[${cell[0]!},${cell[1]!}]` : '—');
   return (
     <VarGrid>
       <InspectorRow k="n" v={s.n} />

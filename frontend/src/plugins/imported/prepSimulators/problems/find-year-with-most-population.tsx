@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -34,9 +34,9 @@ function record({ years }: PopulationInput): Frame<PopulationState>[] {
   // We keep yearKeys / prefix stable across frames so the axis does not jump.
   // They are computed once the delta map is fully built; before that the
   // sweep-only fields stay null/empty.
-  const deltaEntries = (): [number, number][] => [...delta.entries()].sort((a, b) => a[0] - b[0]);
+  const deltaEntries = (): [number, number][] => [...delta.entries()].sort((a, b) => a[0]! - b[0]!);
 
-  const { emit, frames } = createRecorder<PopulationState>(() => ({
+  const { emit, frames } = createPrepRecorder<PopulationState>(() => ({
     intervals: years,
     delta: deltaEntries(),
     yearKeys: [],
@@ -58,19 +58,19 @@ function record({ years }: PopulationInput): Frame<PopulationState>[] {
 
   // Build the delta map.
   for (let p = 0; p < years.length; p++) {
-    const [birth, death] = years[p];
+    const [birth, death] = years[p]!;
     delta.set(birth, (delta.get(birth) ?? 0) + 1);
     emit(
       'BIRTH',
       `+1 @${birth}`,
-      `Person ${p} lives [${birth}, ${death}]. Mark a birth: delta[${birth}] += 1 — one more person is alive from year ${birth} onward.`,
+      `Person ${p} lives [${birth}, ${death}]. Mark a birth: delta[${birth}]! += 1 — one more person is alive from year ${birth} onward.`,
       { buildPair: p, phase: 'build' },
     );
     delta.set(death + 1, (delta.get(death + 1) ?? 0) - 1);
     emit(
       'DEATH',
       `-1 @${death + 1}`,
-      `They are alive through year ${death}, so the population drops the year after: delta[${death + 1}] −= 1. Using death+1 keeps the person counted in their final year.`,
+      `They are alive through year ${death}, so the population drops the year after: delta[${death + 1}]! −= 1. Using death+1 keeps the person counted in their final year.`,
       { buildPair: p, phase: 'build' },
     );
   }
@@ -92,18 +92,18 @@ function record({ years }: PopulationInput): Frame<PopulationState>[] {
   let bestPop = 0;
   let bestYear = 0;
   for (let i = 0; i < yearKeys.length; i++) {
-    const yr = yearKeys[i];
-    const d = finalDelta[i][1];
+    const yr = yearKeys[i]!;
+    const d = finalDelta[i]![1];
     pop += d;
-    prefix[i] = pop;
+    prefix[i]! = pop;
     if (pop > bestPop) {
       const prevBest = bestPop;
       bestPop = pop;
-      bestYear = yr;
+      bestYear! = yr;
       emit(
         'PEAK',
         `${yr}: pop ${pop}`,
-        `Add delta[${yr}] (=${d >= 0 ? '+' : ''}${d}) to the running population → ${pop}. That beats the previous best (${prevBest}), so the new peak year is ${yr} with ${pop} people alive.`,
+        `Add delta[${yr}]! (=${d >= 0 ? '+' : ''}${d}) to the running population → ${pop}. That beats the previous best (${prevBest}), so the new peak year is ${yr} with ${pop} people alive.`,
         { i, yearKeys, prefix: prefix.slice(), pop, bestPop, bestYear, phase: 'sweep' },
         'good',
       );
@@ -111,7 +111,7 @@ function record({ years }: PopulationInput): Frame<PopulationState>[] {
       emit(
         'STEP',
         `${yr}: pop ${pop}`,
-        `Add delta[${yr}] (=${d >= 0 ? '+' : ''}${d}) → running population ${pop}. This does not exceed the current best of ${bestPop} (year ${bestYear}), so the peak year is unchanged.`,
+        `Add delta[${yr}]! (=${d >= 0 ? '+' : ''}${d}) → running population ${pop}. This does not exceed the current best of ${bestPop} (year ${bestYear}), so the peak year is unchanged.`,
         { i, yearKeys, prefix: prefix.slice(), pop, bestPop, bestYear, phase: 'sweep' },
       );
     }
@@ -138,7 +138,7 @@ function record({ years }: PopulationInput): Frame<PopulationState>[] {
 
 function deltaAt(s: PopulationState, yr: number): number {
   const hit = s.delta.find(([k]) => k === yr);
-  return hit ? hit[1] : 0;
+  return hit ? hit[1]! : 0;
 }
 
 function View({ frame }: PluginViewProps<PopulationState>) {
@@ -214,7 +214,7 @@ function View({ frame }: PluginViewProps<PopulationState>) {
 function Inspector({ frame }: InspectorProps<PopulationState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curYear = s.i !== null && s.i < s.yearKeys.length ? s.yearKeys[s.i] : null;
+  const curYear = s.i !== null && s.i < s.yearKeys.length ? s.yearKeys[s.i]! : null;
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
@@ -222,8 +222,10 @@ function Inspector({ frame }: InspectorProps<PopulationState>) {
       <InspectorRow k="delta keys" v={s.delta.length} />
       <InspectorRow k="sweep year" v={curYear ?? '—'} />
       <InspectorRow
-        k="delta[year]"
-        v={curYear !== null ? `${deltaAt(s, curYear) >= 0 ? '+' : ''}${deltaAt(s, curYear)}` : '—'}
+        k="delta[year]!"
+        v={
+          curYear !== null ? `${deltaAt(s, curYear!) >= 0 ? '+' : ''}${deltaAt(s, curYear!)}` : '—'
+        }
       />
       <InspectorRow k="pop (running)" v={s.pop} />
       <InspectorRow k="best pop" v={s.bestPop} />
@@ -336,7 +338,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n²) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(p log p). O(y). delta[birth]++, delta[death+1]--; prefix-sum, track peak year',
+    explain: 'O(p log p). O(y). delta[birth]!++, delta[death+1]!--; prefix-sum, track peak year',
   },
   {
     id: 'outcome',

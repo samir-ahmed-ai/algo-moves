@@ -33,7 +33,7 @@ export function createSortRecorder(initial: number[]) {
     tone?: 'good' | 'bad',
   ) => {
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { values: values.slice(), compare, swap, sortedFrom, comparisons, swaps },
     });
   };
@@ -85,7 +85,7 @@ export function createSelectionSortRecorder(initial: number[]) {
     tone?: 'good' | 'bad',
   ) => {
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { values: values.slice(), compare, minIdx, sortedUpto, comparisons, swaps },
     });
   };
@@ -136,7 +136,7 @@ export function createInsertionSortRecorder(initial: number[]) {
     tone?: 'good' | 'bad',
   ) => {
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { values: values.slice(), key, keyIdx, compare, sortedUpto, comparisons, shifts },
     });
   };

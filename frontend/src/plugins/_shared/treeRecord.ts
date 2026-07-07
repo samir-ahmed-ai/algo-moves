@@ -38,7 +38,7 @@ export function parent(i: number): number {
 }
 
 export function nodeValue(tree: LevelOrderTree, i: number): number | null {
-  return i >= 0 && i < tree.length ? tree[i] : null;
+  return i >= 0 && i < tree.length ? (tree[i] ?? null) : null;
 }
 
 export type TreeEmit = (

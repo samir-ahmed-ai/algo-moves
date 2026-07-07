@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { nodeText, RADIUS_CTRL } from '@/design/typography';
-import { TONE_CHIP, type UiTone } from '@/design/tone';
+import { normalizeUiTone, TONE_CHIP, type UiTone } from '@/design/tone';
 
 const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(' ');
 
@@ -12,18 +12,19 @@ export function Pill({
   onClick,
   title,
 }: {
-  children: ReactNode;
-  tone?: UiTone;
-  active?: boolean;
-  onClick?: () => void;
-  title?: string;
+  readonly children: ReactNode;
+  readonly tone?: UiTone;
+  readonly active?: boolean;
+  readonly onClick?: () => void;
+  readonly title?: string;
 }) {
-  const cls = active ? 'bg-accentbg text-accent' : TONE_CHIP[tone];
+  const safeTone = normalizeUiTone(tone, 'muted');
+  const cls = active ? 'bg-accentbg text-accent' : TONE_CHIP[safeTone];
   const base = cx(
     'design-pill inline-flex min-w-[1.4rem] items-center justify-center px-1.5 py-0.5 font-mono tabular-nums leading-none',
     nodeText.xs,
     RADIUS_CTRL,
-    `design-pill--${tone}`,
+    `design-pill--${safeTone}`,
     active && 'design-pill--active',
   );
   return onClick ? (

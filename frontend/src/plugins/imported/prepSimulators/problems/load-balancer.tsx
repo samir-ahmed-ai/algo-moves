@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -30,7 +30,7 @@ function record({ servers: init, ops }: LbInput): Frame<LbState>[] {
   let servers = [...init];
   let index = 0;
 
-  const { emit, frames } = createRecorder<LbState>(() => ({
+  const { emit, frames } = createPrepRecorder<LbState>(() => ({
     servers: servers.slice(),
     index,
     op: '',
@@ -57,10 +57,10 @@ function record({ servers: init, ops }: LbInput): Frame<LbState>[] {
           'bad',
         );
       } else {
-        const server = servers[index];
+        const server = servers[index]!;
         emit(
           'NEXT',
-          server,
+          server!,
           `nextServer(): return "${server}" (index ${index}), then index → ${(index + 1) % servers.length}.`,
           { op: 'next', result: server, ok: true, index },
           'good',
@@ -203,7 +203,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(1). O(servers). server=servers[idx]; idx=(idx+1)%len',
+    explain: 'O(1). O(servers). server=servers[idx]!; idx=(idx+1)%len',
   },
 ];
 export const simulator: ProblemSimulator = {

@@ -61,8 +61,8 @@ function record({ values }: SqInput): Frame<SqState>[] {
   );
 
   for (let k = n - 1; k >= 0; k--) {
-    const lSq = values[left] * values[left];
-    const rSq = values[right] * values[right];
+    const lSq = values[left]! * values[left]!;
+    const rSq = values[right]! * values[right]!;
     if (lSq > rSq) {
       result[k] = lSq;
       dead[left] = true;
@@ -99,8 +99,8 @@ function record({ values }: SqInput): Frame<SqState>[] {
 function View({ frame }: PluginViewProps<SqState>) {
   const s = frame.state;
   const live = s.left <= s.right;
-  const lSq = live ? s.values[s.left] * s.values[s.left] : null;
-  const rSq = live ? s.values[s.right] * s.values[s.right] : null;
+  const lSq = live ? s.values[s.left]! * s.values[s.left]! : null;
+  const rSq = live ? s.values[s.right]! * s.values[s.right]! : null;
   const filled = s.result.filter((v) => v !== null).length;
   const pointers: ArrayPointer[] = [];
   if (live) {
@@ -114,7 +114,7 @@ function View({ frame }: PluginViewProps<SqState>) {
   };
   const resultItems = s.result.map((v, i) =>
     v === null
-      ? { label: '·', tone: undefined }
+      ? { label: '·' }
       : { label: String(v), tone: (s.writeAt === i ? 'accent' : 'good') as 'accent' | 'good' },
   );
   const rail = (
@@ -141,8 +141,8 @@ function View({ frame }: PluginViewProps<SqState>) {
 function Inspector({ frame }: InspectorProps<SqState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const lSq = s.left <= s.right ? s.values[s.left] * s.values[s.left] : null;
-  const rSq = s.left <= s.right ? s.values[s.right] * s.values[s.right] : null;
+  const lSq = s.left <= s.right ? s.values[s.left]! * s.values[s.left]! : null;
+  const rSq = s.left <= s.right ? s.values[s.right]! * s.values[s.right]! : null;
   const filled = s.result.filter((v) => v !== null).length;
   return (
     <VarGrid>

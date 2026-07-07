@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -26,7 +26,7 @@ interface CalState {
 function record({ books }: CalInput): Frame<CalState>[] {
   const events: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<CalState>(() => ({
+  const { emit, frames } = createPrepRecorder<CalState>(() => ({
     events: events.map((e) => [...e] as [number, number]),
     op: '',
     start: null,
@@ -45,12 +45,12 @@ function record({ books }: CalInput): Frame<CalState>[] {
   for (const [start, end] of books) {
     let clash = false;
     for (const e of events) {
-      if (start < e[1] && end > e[0]) {
+      if (start < e[1]! && end > e[0]!) {
         clash = true;
         emit(
           'REJECT',
-          `clash [${e[0]},${e[1]})`,
-          `Book(${start},${end}): overlaps existing [${e[0]},${e[1]}) → return false.`,
+          `clash [${e[0]!},${e[1]!})`,
+          `Book(${start},${end}): overlaps existing [${e[0]!},${e[1]!}) → return false.`,
           {
             op: `book [${start},${end})`,
             start,

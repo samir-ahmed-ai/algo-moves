@@ -47,8 +47,8 @@ function BarDivider() {
 }
 
 export interface ProblemSurfaceBarProps {
-  onOpenPalette?: () => void;
-  onOpenHelp?: () => void;
+  onOpenPalette?: (() => void) | undefined;
+  onOpenHelp?: (() => void) | undefined;
   badgeIcon?: ReactNode;
   afterTitle?: ReactNode;
   meta?: ReactNode;
@@ -83,7 +83,8 @@ export function ProblemSurfaceBar({
       return;
     }
     const n = (siblingIdx + delta + siblings.length) % siblings.length;
-    openProblem(siblings[n].id);
+    const next = siblings[n];
+    if (next) openProblem(next.id);
   };
 
   return (

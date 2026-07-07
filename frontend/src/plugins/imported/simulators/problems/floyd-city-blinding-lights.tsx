@@ -44,7 +44,7 @@ function record(input: FloydInput): Frame<FloydState>[] {
   const dist: number[][] = Array.from({ length: n }, (_, i) =>
     Array.from({ length: n }, (_, j) => (i === j ? 0 : INF)),
   );
-  for (const [u, v, w] of input.edges) dist[u][v] = w;
+  for (const [u, v, w] of input.edges) dist[u]![v] = w;
   const { emit, frames } = createRecorder<FloydState>(() => ({
     dist: dist.map((r) => r.slice()),
     src: input.src,
@@ -70,14 +70,14 @@ function record(input: FloydInput): Frame<FloydState>[] {
     );
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
-        const through = dist[i][k] + dist[k][j];
-        if (through < dist[i][j]) {
-          const prev = dist[i][j];
-          dist[i][j] = through;
+        const through = dist[i]![k]! + dist[k]![j]!;
+        if (through < dist[i]![j]!) {
+          const prev = dist[i]![j];
+          dist[i]![j] = through;
           emit(
             'RELAX',
             `(${i},${j})=${through}`,
-            `dist[${i}][${j}]: ${i}→${k}→${j} costs ${fmt(dist[i][k])}+${fmt(dist[k][j])}=${through}, beating the old ${fmt(prev)}. Update dist[${i}][${j}] to ${through}.`,
+            `dist[${i}][${j}]: ${i}→${k}→${j} costs ${fmt(dist[i]![k]!)}+${fmt(dist[k]![j]!)}=${through}, beating the old ${fmt(prev!)}. Update dist[${i}][${j}] to ${through}.`,
             { k: k, cell: [i, j] },
           );
         }
@@ -87,8 +87,8 @@ function record(input: FloydInput): Frame<FloydState>[] {
 
   emit(
     'DONE',
-    `dist[${input.src}][${input.dst}]=${fmt(dist[input.src][input.dst])}`,
-    `Matrix complete. The queried shortest distance from ${input.src} to ${input.dst} is ${fmt(dist[input.src][input.dst])}.`,
+    `dist[${input.src}][${input.dst}]=${fmt(dist[input.src]![input.dst]!)}`,
+    `Matrix complete. The queried shortest distance from ${input.src} to ${input.dst} is ${fmt(dist[input.src]![input.dst]!)}.`,
     { k: null, cell: [input.src, input.dst], done: true },
     'good',
   );
@@ -98,7 +98,7 @@ function record(input: FloydInput): Frame<FloydState>[] {
 function View({ frame }: PluginViewProps<FloydState>) {
   const s = frame.state;
   const grid = s.dist.map((row) => row.map((d) => fmt(d)));
-  const ans = fmt(s.dist[s.src][s.dst]);
+  const ans = fmt(s.dist[s.src]![s.dst]!);
   const rail = (
     <>
       <RailGroup label="scan">
@@ -136,7 +136,7 @@ function Inspector({ frame }: InspectorProps<FloydState>) {
       <InspectorRow k="intermediate k" v={s.k ?? '—'} />
       <InspectorRow k="cell (i,j)" v={s.cell ? `(${s.cell[0]}, ${s.cell[1]})` : '—'} />
       <InspectorRow k="query" v={`dist[${s.src}][${s.dst}]`} />
-      <InspectorRow k="answer" v={fmt(s.dist[s.src][s.dst])} />
+      <InspectorRow k="answer" v={fmt(s.dist[s.src]![s.dst]!)} />
     </VarGrid>
   );
 }
@@ -168,6 +168,6 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as FloydState | undefined;
-    return { ok: true, label: s ? `dist ${fmt(s.dist[s.src][s.dst])}` : 'dist ∞' };
+    return { ok: true, label: s ? `dist ${fmt(s.dist[s.src]![s.dst]!)}` : 'dist ∞' };
   },
 };

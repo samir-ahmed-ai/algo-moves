@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -25,7 +25,7 @@ interface FindNodeState {
 }
 
 function record({ list, val }: FindNodeInput): Frame<FindNodeState>[] {
-  const { emit, frames } = createRecorder<FindNodeState>(() => ({
+  const { emit, frames } = createPrepRecorder<FindNodeState>(() => ({
     list,
     val,
     head: null,
@@ -41,10 +41,10 @@ function record({ list, val }: FindNodeInput): Frame<FindNodeState>[] {
   );
 
   for (let head = 0; head < list.length; head++) {
-    const v = list[head];
+    const v = list[head]!;
     emit(
       'VISIT',
-      `node[${head}]=${v}`,
+      `node[${head}]!=${v}`,
       `head points at the node holding ${v}. Compare its value to the target: is ${v} == ${val}?`,
       { head },
     );
@@ -102,7 +102,7 @@ function View({ frame }: PluginViewProps<FindNodeState>) {
             s.found !== null ? 'text-good' : 'text-bad',
           )}
         >
-          → {s.found !== null ? `node[${s.found}] = ${s.list[s.found]}` : 'nil'}
+          → {s.found !== null ? `node[${s.found}]! = ${s.list[s.found]!}` : 'nil'}
         </div>
       )}
     </div>
@@ -116,8 +116,8 @@ function Inspector({ frame }: InspectorProps<FindNodeState>) {
     <VarGrid>
       <InspectorRow k="val (target)" v={s.val} />
       <InspectorRow k="head (index)" v={s.head ?? 'nil'} />
-      <InspectorRow k="head.Val" v={s.head !== null ? s.list[s.head] : '—'} />
-      <InspectorRow k="result" v={s.found !== null ? `node[${s.found}]` : s.done ? 'nil' : '…'} />
+      <InspectorRow k="head.Val" v={s.head !== null ? s.list[s.head]! : '—'} />
+      <InspectorRow k="result" v={s.found !== null ? `node[${s.found}]!` : s.done ? 'nil' : '…'} />
     </VarGrid>
   );
 }
@@ -262,7 +262,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as FindNodeState | undefined;
     return s && s.found !== null
-      ? { ok: true, label: `node[${s.found}] = ${s.list[s.found]}` }
+      ? { ok: true, label: `node[${s.found}]! = ${s.list[s.found]!}` }
       : { ok: false, label: 'nil' };
   },
 };

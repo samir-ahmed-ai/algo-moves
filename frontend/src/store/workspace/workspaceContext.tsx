@@ -23,7 +23,11 @@ import { useChromeState } from './useChromeState';
 import { useAppNavigation } from './useAppNavigation';
 
 function loadDefaults(): Partial<WorkspaceDefaults> {
-  return readStorageJson(DEFAULTS_KEY, {});
+  return readStorageJson(
+    DEFAULTS_KEY,
+    {},
+    (value): value is Partial<WorkspaceDefaults> => value !== null && typeof value === 'object',
+  );
 }
 
 /**

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -18,7 +18,7 @@ interface ChunksInput {
 interface ChunksState {
   arr: number[];
   i: number | null; // current index being processed
-  val: number | null; // arr[i]
+  val: number | null; // arr[i]!
   mx: number | null; // running max for the chunk being built
   stack: number[]; // monotonic stack of chunk maxima
   poppedTop: number | null; // value just popped from the stack (merge step)
@@ -29,7 +29,7 @@ interface ChunksState {
 function record({ arr }: ChunksInput): Frame<ChunksState>[] {
   const stack: number[] = [];
 
-  const { emit, frames } = createRecorder<ChunksState>(() => ({
+  const { emit, frames } = createPrepRecorder<ChunksState>(() => ({
     arr,
     i: null,
     val: null,
@@ -48,19 +48,19 @@ function record({ arr }: ChunksInput): Frame<ChunksState>[] {
   );
 
   for (let i = 0; i < arr.length; i++) {
-    const val = arr[i];
+    const val = arr[i]!;
     let mx = val;
     emit(
       'SCAN',
-      `arr[${i}]=${val}`,
-      `Look at arr[${i}] = ${val}. A new chunk can start here only if every existing chunk-max to the left is <= ${val}; otherwise this value belongs inside an earlier chunk, so we must merge. Start the running max at ${val}.`,
+      `arr[${i}]!=${val}`,
+      `Look at arr[${i}]! = ${val}. A new chunk can start here only if every existing chunk-max to the left is <= ${val}; otherwise this value belongs inside an earlier chunk, so we must merge. Start the running max at ${val}.`,
       { i, val, mx },
     );
 
-    while (stack.length > 0 && stack[stack.length - 1] > val) {
-      const top = stack[stack.length - 1];
+    while (stack.length > 0 && stack[stack.length - 1]! > val!) {
+      const top = stack[stack.length - 1]!;
       stack.pop();
-      if (top > mx) mx = top;
+      if (top! > mx!) mx = top;
       emit(
         'MERGE',
         `pop ${top}`,
@@ -69,7 +69,7 @@ function record({ arr }: ChunksInput): Frame<ChunksState>[] {
       );
     }
 
-    stack.push(mx);
+    stack.push(mx!);
     emit(
       'PUSH',
       `push ${mx}`,
@@ -133,9 +133,9 @@ function Inspector({ frame }: InspectorProps<ChunksState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="arr[i]" v={s.val ?? '—'} />
+      <InspectorRow k="arr[i]!" v={s.val ?? '—'} />
       <InspectorRow k="running max" v={s.mx ?? '—'} />
-      <InspectorRow k="stack top" v={s.stack.length ? s.stack[s.stack.length - 1] : '—'} />
+      <InspectorRow k="stack top" v={s.stack.length ? s.stack[s.stack.length - 1]! : '—'} />
       <InspectorRow k="stack (chunks)" v={`[${s.stack.join(', ')}]`} />
       <InspectorRow k="chunk count" v={s.stack.length} />
     </VarGrid>

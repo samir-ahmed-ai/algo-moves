@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { Btn, Field } from '@/components/shared/formControls';
 import { nodeText } from '@/design/typography';
@@ -11,7 +11,7 @@ import {
   type PadGridState,
 } from './padGrid';
 
-const MODIFIERS: { id: ColumnModifier; label: string }[] = [
+const MODIFIERS: readonly { readonly id: ColumnModifier; readonly label: string }[] = [
   { id: 'none', label: '—' },
   { id: 'repeat', label: '!2' },
   { id: 'slow', label: '/2' },
@@ -23,9 +23,9 @@ export function PadGridBuilder({
   onApply,
   playheadCol,
 }: {
-  onApply: (values: number[]) => void;
-  playheadCol?: number;
-}) {
+  readonly onApply: (values: number[]) => void;
+  readonly playheadCol?: number;
+}): ReactNode {
   const [grid, setGrid] = useState<PadGridState>(() => createPadGrid(4, 8));
 
   const onCell = (row: number, col: number, shift: boolean) => {
@@ -33,6 +33,7 @@ export function PadGridBuilder({
   };
 
   const setColMod = (col: number, mod: ColumnModifier) => {
+    if (col < 0) return;
     setGrid((g) => ({ ...g, columnModifiers: { ...g.columnModifiers, [col]: mod } }));
   };
 
@@ -56,6 +57,8 @@ export function PadGridBuilder({
                       key={ci}
                       type="button"
                       onClick={(e) => onCell(ri, ci, e.shiftKey)}
+                      aria-label={`${on ? 'Disable' : 'Enable'} row ${ri + 1}, column ${ci + 1}`}
+                      aria-pressed={on}
                       className={cn(
                         'h-6 w-6 rounded-sm border transition-colors',
                         'input-builder-pad-cell',

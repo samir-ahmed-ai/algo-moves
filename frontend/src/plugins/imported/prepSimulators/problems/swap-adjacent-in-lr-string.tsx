@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ interface SwapLRState {
 function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {
   const n = start.length;
 
-  const { emit, frames } = createRecorder<SwapLRState>(() => ({
+  const { emit, frames } = createPrepRecorder<SwapLRState>(() => ({
     start,
     target,
     i: null,
@@ -62,21 +62,21 @@ function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {
 
   while (i < n || j < n) {
     // Skip 'X' in start.
-    while (i < n && start[i] === 'X') {
+    while (i < n && start[i]! === 'X') {
       emit(
         'SKIP_START',
-        `start[${i}]=X`,
-        `start[${i}] is 'X' (a blank), which letters slide across freely. Advance i past it.`,
+        `start[${i}]!=X`,
+        `start[${i}]! is 'X' (a blank), which letters slide across freely. Advance i past it.`,
         { i, j, reason: `skip X in start` },
       );
       i++;
     }
     // Skip 'X' in target.
-    while (j < n && target[j] === 'X') {
+    while (j < n && target[j]! === 'X') {
       emit(
         'SKIP_TARGET',
-        `target[${j}]=X`,
-        `target[${j}] is 'X' (a blank). Advance j past it so we only line up real letters.`,
+        `target[${j}]!=X`,
+        `target[${j}]! is 'X' (a blank). Advance j past it so we only line up real letters.`,
         { i, j, reason: `skip X in target` },
       );
       j++;
@@ -110,13 +110,13 @@ function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {
       break;
     }
 
-    // Now start[i] and target[j] are the next real letters.
-    const a = start[i];
-    const b = target[j];
+    // Now start[i]! and target[j]! are the next real letters.
+    const a = start[i]!;
+    const b = target[j]!;
     emit(
       'COMPARE',
       `${a} vs ${b}`,
-      `Compare the next real letters: start[${i}] = '${a}' and target[${j}] = '${b}'. They must be the same letter.`,
+      `Compare the next real letters: start[${i}]! = '${a}' and target[${j}]! = '${b}'. They must be the same letter.`,
       { i, j, reason: `compare ${a} vs ${b}` },
     );
 
@@ -124,7 +124,7 @@ function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {
       emit(
         'FAIL',
         `${a} ≠ ${b}`,
-        `start[${i}] = '${a}' but target[${j}] = '${b}'. Different letters can never be produced by swapping, so it is impossible.`,
+        `start[${i}]! = '${a}' but target[${j}]! = '${b}'. Different letters can never be produced by swapping, so it is impossible.`,
         { i, j, result: false, reason: `letter mismatch ${a}≠${b}`, done: true },
         'bad',
       );
@@ -156,7 +156,7 @@ function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {
     emit(
       'OK',
       `${a} placement valid`,
-      `'${a}' at start[${i}] can reach target[${j}]: ${a === 'L' ? `an 'L' moving left needs i ≥ j (${i} ≥ ${j})` : `an 'R' moving right needs i ≤ j (${i} ≤ ${j})`}. Valid — advance both pointers.`,
+      `'${a}' at start[${i}]! can reach target[${j}]!: ${a === 'L' ? `an 'L' moving left needs i ≥ j (${i} ≥ ${j})` : `an 'R' moving right needs i ≤ j (${i} ≤ ${j})`}. Valid — advance both pointers.`,
       { i, j, reason: `${a} ok` },
       'good',
     );
@@ -191,14 +191,14 @@ function View({ frame }: PluginViewProps<SwapLRState>) {
 
   const startTone = (idx: number): string => {
     if (s.result === false && s.i === idx) return 'dead';
-    if (s.result === true) return startChars[idx] === 'X' ? '' : 'found';
-    if (s.i === idx && startChars[idx] !== 'X') return 'match';
+    if (s.result === true) return startChars[idx]! === 'X' ? '' : 'found';
+    if (s.i === idx && startChars[idx]! !== 'X') return 'match';
     return '';
   };
   const targetTone = (idx: number): string => {
     if (s.result === false && s.j === idx) return 'dead';
-    if (s.result === true) return targetChars[idx] === 'X' ? '' : 'found';
-    if (s.j === idx && targetChars[idx] !== 'X') return 'match';
+    if (s.result === true) return targetChars[idx]! === 'X' ? '' : 'found';
+    if (s.j === idx && targetChars[idx]! !== 'X') return 'match';
     return '';
   };
 
@@ -239,15 +239,15 @@ function Inspector({ frame }: InspectorProps<SwapLRState>) {
   const startChars = s.start.split('');
   const targetChars = s.target.split('');
   const at = (chars: string[], idx: number | null) =>
-    idx !== null && idx >= 0 && idx < chars.length ? chars[idx] : '—';
+    idx !== null && idx >= 0 && idx < chars.length ? chars[idx]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="start" v={s.start} />
       <InspectorRow k="target" v={s.target} />
       <InspectorRow k="i" v={s.i ?? '—'} />
       <InspectorRow k="j" v={s.j ?? '—'} />
-      <InspectorRow k="start[i]" v={at(startChars, s.i)} />
-      <InspectorRow k="target[j]" v={at(targetChars, s.j)} />
+      <InspectorRow k="start[i]!" v={at(startChars, s.i)} />
+      <InspectorRow k="target[j]!" v={at(targetChars, s.j)} />
       <InspectorRow k="step" v={s.reason || '…'} />
       <InspectorRow
         k="result"

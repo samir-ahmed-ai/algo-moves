@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import { cn } from '@/lib/utils/cn';
@@ -17,7 +17,7 @@ interface LipInput {
 
 interface LipState {
   mat: number[][];
-  memo: number[][]; // memo[i][j] = best path length from cell (i,j); 0 = unfilled
+  memo: number[][]; // memo[i]![j] = best path length from cell (i,j); 0 = unfilled
   cur: [number, number] | null; // cell DFS is currently resolving
   neighbor: [number, number] | null; // neighbor being inspected
   bestCell: [number, number] | null; // cell where the current overall best starts
@@ -34,14 +34,14 @@ const DIRS: [number, number][] = [
 
 function record({ mat }: LipInput): Frame<LipState>[] {
   const m = mat.length;
-  const n = mat[0].length;
+  const n = mat[0]!.length;
   const memo: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
   let bestCell: [number, number] | null = null;
   let bestLen = 0;
 
   const snapshot = (): number[][] => memo.map((row) => row.slice());
 
-  const { emit, frames } = createRecorder<LipState>(() => ({
+  const { emit, frames } = createPrepRecorder<LipState>(() => ({
     mat,
     memo: snapshot(),
     cur: null,
@@ -59,20 +59,20 @@ function record({ mat }: LipInput): Frame<LipState>[] {
   );
 
   const dfs = (i: number, j: number): number => {
-    if (memo[i][j] !== 0) {
+    if (memo[i]![j] !== 0) {
       emit(
         'CACHE',
-        `memo[${i}][${j}]=${memo[i][j]}`,
-        `Cell (${i},${j})=${mat[i][j]} was already solved: memo[${i}][${j}] = ${memo[i][j]}. Reuse the cached value instead of re-exploring — this is what makes the algorithm O(m·n).`,
+        `memo[${i}]![${j}]=${memo[i]![j]}`,
+        `Cell (${i},${j})=${mat[i]![j]} was already solved: memo[${i}]![${j}] = ${memo[i]![j]}. Reuse the cached value instead of re-exploring — this is what makes the algorithm O(m·n).`,
         { cur: [i, j] },
       );
-      return memo[i][j];
+      return memo[i]![j]!;
     }
 
     emit(
       'VISIT',
       `dfs(${i},${j})`,
-      `Start DFS at cell (${i},${j}) with value ${mat[i][j]}. The path is at least length 1 (the cell itself); now look for strictly larger neighbors to extend it.`,
+      `Start DFS at cell (${i},${j}) with value ${mat[i]![j]}. The path is at least length 1 (the cell itself); now look for strictly larger neighbors to extend it.`,
       { cur: [i, j] },
     );
 
@@ -81,11 +81,11 @@ function record({ mat }: LipInput): Frame<LipState>[] {
       const ni = i + di;
       const nj = j + dj;
       const inBounds = ni >= 0 && nj >= 0 && ni < m && nj < n;
-      if (inBounds && mat[ni][nj] > mat[i][j]) {
+      if (inBounds && mat[ni]![nj]! > mat[i]![j]!) {
         emit(
           'STEP',
-          `${mat[i][j]}→${mat[ni][nj]}`,
-          `Neighbor (${ni},${nj})=${mat[ni][nj]} is strictly greater than ${mat[i][j]}, so we can step there. Recurse to find the longest increasing path that continues from it.`,
+          `${mat[i]![j]}→${mat[ni]![nj]}`,
+          `Neighbor (${ni},${nj})=${mat[ni]![nj]} is strictly greater than ${mat[i]![j]}, so we can step there. Recurse to find the longest increasing path that continues from it.`,
           { cur: [i, j], neighbor: [ni, nj] },
         );
         const v = dfs(ni, nj) + 1;
@@ -101,18 +101,18 @@ function record({ mat }: LipInput): Frame<LipState>[] {
       } else if (inBounds) {
         emit(
           'BLOCK',
-          `${mat[ni][nj]}≤${mat[i][j]}`,
-          `Neighbor (${ni},${nj})=${mat[ni][nj]} is not strictly greater than ${mat[i][j]}, so the path can't increase through it. Skip this direction.`,
+          `${mat[ni]![nj]}≤${mat[i]![j]}`,
+          `Neighbor (${ni},${nj})=${mat[ni]![nj]} is not strictly greater than ${mat[i]![j]}, so the path can't increase through it. Skip this direction.`,
           { cur: [i, j], neighbor: [ni, nj] },
         );
       }
     }
 
-    memo[i][j] = best;
+    memo[i]![j] = best;
     emit(
       'MEMO',
-      `memo[${i}][${j}]=${best}`,
-      `Done with (${i},${j}): the longest increasing path starting here has length ${best}. Cache it as memo[${i}][${j}] = ${best} and backtrack.`,
+      `memo[${i}]![${j}]=${best}`,
+      `Done with (${i},${j}): the longest increasing path starting here has length ${best}. Cache it as memo[${i}]![${j}] = ${best} and backtrack.`,
       { cur: [i, j] },
     );
     return best;
@@ -148,17 +148,17 @@ function record({ mat }: LipInput): Frame<LipState>[] {
 
 function View({ frame }: PluginViewProps<LipState>) {
   const s = frame.state;
-  const isCur = (r: number, c: number) => s.cur !== null && s.cur[0] === r && s.cur[1] === c;
+  const isCur = (r: number, c: number) => s.cur !== null && s.cur[0]! === r && s.cur[1]! === c;
   const isNeighbor = (r: number, c: number) =>
-    s.neighbor !== null && s.neighbor[0] === r && s.neighbor[1] === c;
+    s.neighbor !== null && s.neighbor[0]! === r && s.neighbor[1]! === c;
   const isBest = (r: number, c: number) =>
-    s.bestCell !== null && s.bestCell[0] === r && s.bestCell[1] === c;
+    s.bestCell !== null && s.bestCell[0]! === r && s.bestCell[1]! === c;
 
   const cellTone = (r: number, c: number): string => {
     if (isCur(r, c)) return 'active';
     if (isNeighbor(r, c)) return 'fill';
     if (isBest(r, c)) return 'path';
-    if (s.memo[r][c] !== 0) return 'visited';
+    if (s.memo[r]![c] !== 0) return 'visited';
     return '';
   };
 
@@ -181,15 +181,18 @@ function Inspector({ frame }: InspectorProps<LipState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const cur = s.cur;
-  const curVal = cur ? s.mat[cur[0]][cur[1]] : null;
-  const curMemo = cur ? s.memo[cur[0]][cur[1]] : 0;
+  const curVal = cur ? s.mat[cur[0]!]![cur[1]!] : null;
+  const curMemo = cur ? s.memo[cur[0]!]![cur[1]!] : 0;
   return (
     <VarGrid>
-      <InspectorRow k="current cell" v={cur ? `(${cur[0]}, ${cur[1]})` : '—'} />
-      <InspectorRow k="mat[cell]" v={curVal ?? '—'} />
-      <InspectorRow k="neighbor" v={s.neighbor ? `(${s.neighbor[0]}, ${s.neighbor[1]})` : '—'} />
-      <InspectorRow k="memo[cell]" v={curMemo === 0 ? '·' : curMemo} />
-      <InspectorRow k="best start" v={s.bestCell ? `(${s.bestCell[0]}, ${s.bestCell[1]})` : '—'} />
+      <InspectorRow k="current cell" v={cur ? `(${cur[0]!}, ${cur[1]!})` : '—'} />
+      <InspectorRow k="mat[cell]!" v={curVal ?? '—'} />
+      <InspectorRow k="neighbor" v={s.neighbor ? `(${s.neighbor[0]!}, ${s.neighbor[1]!})` : '—'} />
+      <InspectorRow k="memo[cell]!" v={curMemo === 0 ? '·' : curMemo} />
+      <InspectorRow
+        k="best start"
+        v={s.bestCell ? `(${s.bestCell[0]!}, ${s.bestCell[1]!})` : '—'}
+      />
       <InspectorRow k="answer" v={s.bestLen === 0 ? '…' : s.bestLen} />
     </VarGrid>
   );
@@ -266,7 +269,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'What does the `memo` field track in the visualization state?',
     choices: [
       {
-        label: 'memo[i][j] = best path length — updated each frame',
+        label: 'memo[i]![j] = best path length — updated each frame',
         correct: true,
       },
       {
@@ -280,7 +283,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The recorder keeps `memo` in sync: memo[i][j] = best path length from cell (i,j); 0 = unfilled',
+      'The recorder keeps `memo` in sync: memo[i]![j] = best path length from cell (i,j); 0 = unfilled',
   },
   {
     id: 'complexity',
@@ -300,7 +303,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(log n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(m·n). O(m·n). memo[i][j]=1+max(dfs over greater neighbors)',
+    explain: 'O(m·n). O(m·n). memo[i]![j]=1+max(dfs over greater neighbors)',
   },
   {
     id: 'outcome',

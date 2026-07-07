@@ -1,52 +1,57 @@
-# Algo Moves — Game Server
+# Algo Moves Game Server
 
-A tiny, dependency-free realtime backend that pairs two players into a **room**
-and relays messages between them. It powers the couch/long-distance two-player
-games in the frontend (Number Duel, Rock-Paper-Scissors, Tic-Tac-Toe, Mind Meld,
-Reaction Duel, Would You Rather).
+The backend is a lean Go service for realtime arcade rooms and optional durable
+arcade data. It pairs players into rooms, relays game-owned JSON, and exposes
+REST APIs for profiles, leaderboards, match history, content, canvases, interview
+sessions, and prep plans when Postgres is configured.
 
-- **Stdlib WebSocket.** The WebSocket layer (RFC 6455) is implemented on the Go
-  standard library; only Postgres persistence adds `pgx`.
-- **In-memory rooms.** Realtime rooms live in memory for the life of a match and
-  are reclaimed when everyone leaves. Optional **Postgres** (`DATABASE_URL`) adds
-  durable profiles, leaderboards, and match history via `/api/*`.
-- **Game-agnostic.** The server never decodes a game move. Each game speaks its
-  own JSON over the `relay` channel; the server only forwards it to the peer and
-  remembers the host's shared `state` so a late joiner catches up.
-- **Not the Yjs server.** Canvas CRDT collaboration runs through the separate
-  Hocuspocus service. This backend owns game rooms, arcade REST, interview REST,
-  content reads, saved canvases, and prep plans.
+## Operating model
 
-## Run it
+- **Realtime first.** Rooms live in memory for the life of a match and are
+  reclaimed after the last connection leaves.
+- **Durable when configured.** `DATABASE_URL` enables `/api/*` persistence through
+  embedded migrations, generated queries, and Postgres-backed stores.
+- **Game-agnostic relay.** The server never interprets a game move. Clients send
+  JSON over `relay`; only the host can publish shared `state` for reconnects,
+  spectators, and late joiners.
+- **Stdlib WebSocket.** RFC 6455 upgrade and framing are implemented on the Go
+  standard library. Postgres persistence is the only major runtime dependency.
+- **Separate from canvas CRDT.** Realtime canvas collaboration belongs to the
+  Hocuspocus service. This server owns arcade rooms and backend REST domains.
+
+## Local development
 
 ```bash
-# from backend/
-go run ./cmd/gameserver          # listens on :8080
-PORT=9000 go run ./cmd/gameserver
-go run ./cmd/gameserver -addr :8080
+# from backend
+go run ./cmd/gameserver             # listens on :8080
+PORT=9000 go run ./cmd/gameserver   # listens on :9000
+go run ./cmd/gameserver -addr :8080 # explicit address
 
 # or via the top-level Makefile (repo root)
 make backend-dev
 ```
 
-Point the frontend at it with `VITE_API_SERVER_URL` (see `frontend/.env.example`; `VITE_GAMES_SERVER_URL` is still accepted as a legacy alias).
-On a LAN the default already works: the frontend connects to `ws://<your-host>:8080`,
-so open the site on your laptop's IP from both phones.
+Point the frontend at this service with `VITE_API_SERVER_URL`; see
+`frontend/.env.example`. `VITE_GAMES_SERVER_URL` is still accepted as a legacy
+alias.
 
-## Endpoints
+For LAN play, the default works without extra config: the frontend connects to
+`ws://<your-host>:8080`, so open the frontend on the laptop IP from both phones.
 
-| Method | Path                               | Purpose                                    |
-| ------ | ----------------------------------- | ------------------------------------------ |
-| GET    | `/ws?room=CODE&name=NAME&pid=PID`  | Upgrade to a game-room WebSocket           |
-| GET    | `/new`                              | Mint a fresh room code → `{"code":"ABCD"}` |
-| GET    | `/healthz`                          | Liveness → `{"status":"ok","rooms":N,"arcade":?}` |
-| GET    | `/`                                 | Plain-text banner                          |
-| *      | `/api/*`                            | Arcade persistence (when `DATABASE_URL` set) |
+## HTTP surface
+
+| Method | Path                              | Purpose |
+| ------ | --------------------------------- | ------- |
+| GET    | `/ws?room=CODE&name=NAME&pid=PID` | Upgrade to a game-room WebSocket |
+| GET    | `/new`                            | Mint a fresh room code: `{"code":"ABCD"}` |
+| GET    | `/healthz`                        | Liveness: `{"status":"ok","rooms":N,"arcade":?}` |
+| GET    | `/`                               | Plain-text service banner |
+| *      | `/api/*`                          | Durable arcade and app APIs when `DATABASE_URL` is set |
 
 `pid` is optional but recommended: a stable, client-minted id (e.g. persisted in
 `localStorage`) that identifies the *player*, not the connection. Reconnecting
-with the same `pid` reclaims that player's original slot/role in the room —
-important for a host, whose role controls who may publish shared `state` — even
+with the same `pid` reclaims that player's original slot/role in the room -
+important for a host, whose role controls who may publish shared `state` - even
 across a dropped socket. If the previous connection for that `pid` is still
 technically open but has gone stale (e.g. a phone that lost network without a
 clean close), the reconnect actively replaces it rather than waiting on the
@@ -54,7 +59,7 @@ clean close), the reconnect actively replaces it rather than waiting on the
 without a `pid` (or with one that matches nothing) falls back to plain
 lowest-free-slot assignment, same as before.
 
-## Protocol
+## Realtime protocol
 
 Client → server (text frames, JSON):
 
@@ -78,19 +83,19 @@ Server → client:
 `"guest"` (slot 1). A third connection to a full room gets `{"t":"error","msg":"room-full"}`
 and is closed.
 
-## Room invariants
+## Room contract
 
 These rules are enforced in `internal/hub/room.go` and matter to every arcade game:
 
 - **Seat 0 is always the host.** The first player to claim slot 0 gets `role: "host"`.
   Seat 1 keeps the historical `"guest"` name; seats 2–7 are `"player"`.
 - **Only the host may publish shared `state`.** Guests and spectators relay moves over
-  `relay`, but `setState` from a non-host is ignored — games mirror authoritative
+  `relay`, but `setState` from a non-host is ignored. Games mirror authoritative
   snapshots from the host into room state for spectators and late joiners.
 - **Capacity is 2–8 player seats.** Rooms default to 2 seats; the creating client may
   request up to 8. Extra joiners become spectators (up to 64), not rejected outright.
 - **Roles are seat-fixed, not promoted.** When the host disconnects, their seat frees
-  but stays slot 0 — a reconnect with the same `pid` reclaims host. No automatic
+  but stays slot 0. A reconnect with the same `pid` reclaims host. No automatic
   promotion of a guest to host.
 - **Pid reclaim beats lowest-free-seat.** Reconnecting with a stable `pid` always
   returns to the same seat/role, evicting a stale connection still parked there.
@@ -98,7 +103,7 @@ These rules are enforced in `internal/hub/room.go` and matter to every arcade ga
   `dead` and removed from the hub map so the code can be reused. A join that races
   with that teardown retries against a fresh room (see `JoinWith`).
 
-## Layout
+## Architecture
 
 ```
 cmd/gameserver      entrypoint (flags, http.Server)
@@ -117,7 +122,7 @@ internal/canvas     saved canvas CRUD
 internal/prep       prep plan CRUD
 ```
 
-### Package map (Wave 5)
+### Domain package map
 
 | Package | Responsibility | Key routes |
 | ------- | -------------- | ---------- |
@@ -131,7 +136,11 @@ internal/prep       prep plan CRUD
 
 Domain packages depend on `platform` only — not on each other. `arcade` is the single composition root consumed by `cmd/gameserver` and `internal/server`.
 
-## Generated seeds
+## Persistence and generated seeds
+
+Without `DATABASE_URL`, the server runs in realtime-only mode and `/api/*`
+durable features are unavailable. With `DATABASE_URL`, the server opens Postgres,
+registers REST routes, and can apply embedded migrations on startup.
 
 `internal/arcade/seeds/content_seed.sql` mirrors `../db/content_seed.sql` and is generated from the frontend catalog by:
 
@@ -144,12 +153,7 @@ Do not hand-edit either seed file. Update catalog/plugin data or the exporter, r
 
 See [`../db/README.md`](../db/README.md) for Railway Postgres setup.
 
-## Arcade API (optional)
-
-When `DATABASE_URL` is set, the server exposes REST endpoints for guest auth,
-profiles, stats, leaderboards, rooms, and daily challenges. The frontend calls
-these on the same origin as `VITE_API_SERVER_URL`. Set `RUN_MIGRATIONS=true`
-on deploy to apply embedded SQL migrations automatically.
+## Optional arcade API
 
 ```bash
 export DATABASE_URL="postgres://..."
@@ -158,13 +162,15 @@ go run ./cmd/gameserver
 curl -s localhost:8080/healthz   # includes "arcade": true
 ```
 
-## Test
+The frontend calls these APIs on the same origin as `VITE_API_SERVER_URL`.
+
+## Test command
 
 ```bash
 go test ./...   # unit tests for framing + hub, plus a real two-client socket relay
 ```
 
-## Deploy (production)
+## Production deploy
 
 Build and run the Docker image anywhere that exposes HTTP/WebSocket on `$PORT`:
 
@@ -172,6 +178,14 @@ Build and run the Docker image anywhere that exposes HTTP/WebSocket on `$PORT`:
 docker build -t algomoves-gameserver backend/
 docker run --rm -p 8080:8080 -e ALLOWED_ORIGINS=https://your-pages-origin algomoves-gameserver
 ```
+
+Production checklist:
+
+- Set `ALLOWED_ORIGINS` to the exact frontend origin.
+- Set `DATABASE_URL` when durable arcade/profile/content features are required.
+- Enable `RUN_MIGRATIONS=true` for managed deploys unless migrations are handled separately.
+- Enable `RUN_CONTENT_SEED=true` when refreshing the learning catalog.
+- Keep frontend `VITE_API_SERVER_URL` pointed at the public backend URL.
 
 ### Railway
 

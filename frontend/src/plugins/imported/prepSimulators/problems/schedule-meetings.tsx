@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -26,8 +26,8 @@ interface MeetingsState {
   sorted: boolean; // have we committed to the sorted order yet
   i: number | null; // current meeting under inspection
   prev: number | null; // previous meeting (i-1)
-  prevEnd: number | null; // sorted[i-1].End we are comparing against
-  curStart: number | null; // sorted[i].Start we are comparing
+  prevEnd: number | null; // sorted[i-1]!.End we are comparing against
+  curStart: number | null; // sorted[i]!.Start we are comparing
   conflict: boolean; // did this step find an overlap
   result: boolean | null; // final answer once known
   done: boolean;
@@ -38,7 +38,7 @@ const fmt = (iv: Interval) => `[${iv.start},${iv.end}]`;
 function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
   const original = intervals.map((c) => ({ ...c }));
 
-  const { emit, frames } = createRecorder<MeetingsState>(() => ({
+  const { emit, frames } = createPrepRecorder<MeetingsState>(() => ({
     cells: original.map((c) => ({ ...c })),
     sorted: false,
     i: null,
@@ -79,12 +79,12 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
 
   let result = true;
   for (let i = 1; i < sorted.length; i++) {
-    const prevEnd = sorted[i - 1].end;
-    const curStart = sorted[i].start;
+    const prevEnd = sorted[i - 1]!.end;
+    const curStart = sorted[i]!.start;
     emit(
       'COMPARE',
       `${curStart} vs ${prevEnd}`,
-      `Compare meeting ${fmt(sorted[i])} with the previous meeting ${fmt(sorted[i - 1])}: does it start (${curStart}) before the previous one ends (${prevEnd})?`,
+      `Compare meeting ${fmt(sorted[i]!)} with the previous meeting ${fmt(sorted[i - 1]!)}: does it start (${curStart}) before the previous one ends (${prevEnd})?`,
       { cells: sorted.map((c) => ({ ...c })), sorted: true, i, prev: i - 1, prevEnd, curStart },
     );
 
@@ -93,7 +93,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
       emit(
         'CONFLICT',
         `${curStart} < ${prevEnd}`,
-        `Overlap found: ${fmt(sorted[i])} starts at ${curStart}, which is before ${fmt(sorted[i - 1])} ends at ${prevEnd}. The two meetings collide, so not all meetings can be attended — return false.`,
+        `Overlap found: ${fmt(sorted[i]!)} starts at ${curStart}, which is before ${fmt(sorted[i - 1]!)} ends at ${prevEnd}. The two meetings collide, so not all meetings can be attended — return false.`,
         {
           cells: sorted.map((c) => ({ ...c })),
           sorted: true,
@@ -113,7 +113,7 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
     emit(
       'OK',
       `${curStart} ≥ ${prevEnd}`,
-      `No overlap: ${fmt(sorted[i])} starts at ${curStart}, at or after ${fmt(sorted[i - 1])} ends at ${prevEnd}. These two are compatible — keep sweeping.`,
+      `No overlap: ${fmt(sorted[i]!)} starts at ${curStart}, at or after ${fmt(sorted[i - 1]!)} ends at ${prevEnd}. These two are compatible — keep sweeping.`,
       { cells: sorted.map((c) => ({ ...c })), sorted: true, i, prev: i - 1, prevEnd, curStart },
       'good',
     );
@@ -177,16 +177,16 @@ function View({ frame }: PluginViewProps<MeetingsState>) {
 function Inspector({ frame }: InspectorProps<MeetingsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null ? fmt(s.cells[s.i]) : '—';
-  const prev = s.prev !== null ? fmt(s.cells[s.prev]) : '—';
+  const cur = s.i !== null ? fmt(s.cells[s.i]!) : '—';
+  const prev = s.prev !== null ? fmt(s.cells[s.prev]!) : '—';
   return (
     <VarGrid>
       <InspectorRow k="count" v={s.cells.length} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="meeting[i]" v={cur} />
-      <InspectorRow k="meeting[i−1]" v={prev} />
-      <InspectorRow k="start[i]" v={s.curStart ?? '—'} />
-      <InspectorRow k="end[i−1]" v={s.prevEnd ?? '—'} />
+      <InspectorRow k="meeting[i]!" v={cur} />
+      <InspectorRow k="meeting[i−1]!" v={prev} />
+      <InspectorRow k="start[i]!" v={s.curStart ?? '—'} />
+      <InspectorRow k="end[i−1]!" v={s.prevEnd ?? '—'} />
       <InspectorRow k="result" v={s.result === null ? '…' : s.result ? 'true' : 'false'} />
     </VarGrid>
   );
@@ -296,7 +296,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(s * c) time, O(1) space — wrong order of growth',
       },
     ],
-    explain: 'O(n log n). O(n). sort by start; sorted[i].Start < sorted[i-1].End -> false',
+    explain: 'O(n log n). O(n). sort by start; sorted[i]!.Start < sorted[i-1]!.End -> false',
   },
   {
     id: 'outcome',

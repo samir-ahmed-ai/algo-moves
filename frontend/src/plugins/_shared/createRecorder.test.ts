@@ -20,10 +20,10 @@ describe('createRecorder', () => {
     emit('DONE', 'end', 'finished', { done: true }, 'good');
 
     expect(frames).toHaveLength(3);
-    expect(frames[0].state).toEqual({ n: 0, sum: 0, done: false });
-    expect(frames[1].state).toEqual({ n: 1, sum: 1, done: false });
-    expect(frames[2].move.tone).toBe('good');
-    expect(frames[2].state.done).toBe(true);
+    expect(frames[0]!.state).toEqual({ n: 0, sum: 0, done: false });
+    expect(frames[1]!.state).toEqual({ n: 1, sum: 1, done: false });
+    expect(frames[2]!.move.tone).toBe('good');
+    expect(frames[2]!.state.done).toBe(true);
   });
 
   it('supports custom merge for derived fields', () => {
@@ -39,6 +39,6 @@ describe('createRecorder', () => {
 
     setState({ items: [1, 2], total: 3 });
     emit('PUSH', '+3', 'push 3', { items: [1, 2, 3] });
-    expect(frames[0].state.total).toBe(6);
+    expect(frames[0]!.state.total).toBe(6);
   });
 });

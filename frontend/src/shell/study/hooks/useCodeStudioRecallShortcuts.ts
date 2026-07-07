@@ -38,19 +38,23 @@ export function useCodeStudioRecallShortcuts({
       if (e.key === '\\') {
         e.preventDefault();
         setBlind((b) => !b);
+        return;
       }
       // e.code (not e.key) so macOS ⌥ doesn't remap the character.
       if (e.altKey && e.code === 'KeyV') {
         e.preventDefault();
         setEditorPrefs({ vim: !vim });
+        return;
       }
       if (e.key === 'r' && e.shiftKey) {
         e.preventDefault();
         persistDraft('');
+        return;
       }
       if ((e.key === '=' || e.key === '+') && e.shiftKey) {
         e.preventDefault();
         setEditorPrefs({ fontSize: fontSize + 1 });
+        return;
       }
       if (e.key === '-' && e.shiftKey) {
         e.preventDefault();

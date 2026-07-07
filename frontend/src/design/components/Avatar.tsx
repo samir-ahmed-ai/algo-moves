@@ -22,15 +22,16 @@ export function Avatar({
   className,
   ring,
 }: {
-  seed: string;
-  name?: string;
-  size?: number;
-  className?: string;
-  ring?: string;
+  readonly seed: string;
+  readonly name?: string;
+  readonly size?: number;
+  readonly className?: string;
+  readonly ring?: string;
 }) {
   const gradientId = `avatar-gradient-${useId().replace(/:/g, '')}`;
+  const label = name?.trim() ?? '';
   const { cells, hue } = useMemo(() => {
-    const h = hashSeed(seed || name || 'seed');
+    const h = hashSeed(seed.trim() || label || 'seed');
     const hue = h % 360;
     const grid: boolean[] = [];
     for (let y = 0; y < 5; y++) {
@@ -47,9 +48,9 @@ export function Avatar({
       }
     }
     return { cells, hue };
-  }, [seed, name]);
+  }, [seed, label]);
 
-  const safeSize = Number.isFinite(size) ? Math.max(16, Math.round(size)) : 40;
+  const safeSize = Number.isFinite(size) ? Math.min(160, Math.max(16, Math.round(size))) : 40;
   const bg = `hsl(${hue} 78% 94%)`;
   const bg2 = `hsl(${(hue + 42) % 360} 74% 88%)`;
   const fg = `hsl(${hue} 68% 36%)`;
@@ -68,9 +69,9 @@ export function Avatar({
           ? `0 0 0 2px ${ring}, 0 10px 24px ${glow}`
           : `0 10px 24px ${glow}, inset 0 0 0 1px hsl(0 0% 100% / 0.72)`,
       }}
-      role={name ? 'img' : undefined}
-      aria-label={name ? `${name} avatar` : undefined}
-      aria-hidden={name ? undefined : true}
+      role={label ? 'img' : undefined}
+      aria-label={label ? `${label} avatar` : undefined}
+      aria-hidden={label ? undefined : true}
     >
       <svg
         className="design-avatar__svg"

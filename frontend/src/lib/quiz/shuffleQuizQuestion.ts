@@ -2,8 +2,10 @@ import type { QuizQuestion } from '@/core/types';
 import { QUIZ_SHUFFLE_BY_DEFAULT } from './quizConstants';
 import { shuffleSeeded } from './shuffleSeeded';
 
+const MAX_SEED = 0x7fffffff;
+
 export function randomShuffleSeed(): number {
-  return (Math.random() * 0x7fffffff) | 0;
+  return Math.floor(Math.random() * MAX_SEED);
 }
 
 /** Fresh seed for a quiz run — random per session, stable within a run until retry. */
@@ -13,7 +15,12 @@ export function newQuizRunSeed(): number {
 
 /** Deterministic per-question seed from a run seed, question index, and retry attempt. */
 export function quizQuestionSeed(runSeed: number, questionIndex: number, attempt = 0): number {
-  return (runSeed + attempt * 997 + questionIndex * 131) | 0;
+  const safeRunSeed = Number.isFinite(runSeed) ? Math.trunc(runSeed) : 0;
+  const safeQuestionIndex = Number.isFinite(questionIndex)
+    ? Math.max(0, Math.trunc(questionIndex))
+    : 0;
+  const safeAttempt = Number.isFinite(attempt) ? Math.max(0, Math.trunc(attempt)) : 0;
+  return (safeRunSeed + safeAttempt * 997 + safeQuestionIndex * 131) | 0;
 }
 
 /** Return a copy of the question with choices in a new order. */

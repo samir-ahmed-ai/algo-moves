@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -39,7 +39,7 @@ interface BuildNode {
 
 function isPalindrome(str: string): boolean {
   for (let i = 0, j = str.length - 1; i < j; i++, j--) {
-    if (str[i] !== str[j]) return false;
+    if (str[i]! !== str[j]!) return false;
   }
   return true;
 }
@@ -50,12 +50,16 @@ function buildSuffixTrie(s: string): { nodes: NaryNode[]; paths: string[] } {
   for (let i = 0; i < s.length; i++) {
     let node = 0;
     for (let j = i; j < s.length; j++) {
-      const ch = s[j];
-      const existing = build[node].children.get(ch);
+      const ch = s[j]!;
+      const existing = build[node]!.children.get(ch!);
       if (existing === undefined) {
         const idx = build.length;
-        build.push({ label: ch, path: build[node].path + ch, children: new Map<string, number>() });
-        build[node].children.set(ch, idx);
+        build.push({
+          label: ch,
+          path: build[node]!.path + ch,
+          children: new Map<string, number>(),
+        });
+        build[node]!.children.set(ch!, idx);
         node = idx;
       } else {
         node = existing;
@@ -77,7 +81,7 @@ function record({ s }: PaliInput): Frame<PaliState>[] {
   const seen: string[] = [];
   let count = 0;
 
-  const { emit, frames } = createRecorder<PaliState>(() => ({
+  const { emit, frames } = createPrepRecorder<PaliState>(() => ({
     s,
     nodes,
     path: paths,
@@ -110,10 +114,10 @@ function record({ s }: PaliInput): Frame<PaliState>[] {
   const stack: number[] = [0];
   while (stack.length > 0) {
     const node = stack.pop()!;
-    const candidate = paths[node];
+    const candidate = paths[node]!;
 
-    const pali = candidate !== '' && isPalindrome(candidate);
-    const fresh = pali && !seen.includes(candidate);
+    const pali = candidate !== '' && isPalindrome(candidate!);
+    const fresh = pali && !seen.includes(candidate!);
 
     if (node === 0) {
       emit(
@@ -130,7 +134,7 @@ function record({ s }: PaliInput): Frame<PaliState>[] {
         { current: node, candidate, isPali: false, isNew: false },
       );
     } else if (fresh) {
-      seen.push(candidate);
+      seen.push(candidate!);
       counted.push(node);
       count++;
       emit(
@@ -149,10 +153,10 @@ function record({ s }: PaliInput): Frame<PaliState>[] {
       );
     }
 
-    visited[node] = true;
+    visited[node]! = true;
     // Push children in reverse so they pop left-to-right (stable, readable order).
-    const kids = nodes[node].children;
-    for (let k = kids.length - 1; k >= 0; k--) stack.push(kids[k]);
+    const kids = nodes[node]!.children;
+    for (let k = kids.length - 1; k >= 0; k--) stack.push(kids[k]!);
   }
 
   emit(
@@ -171,7 +175,7 @@ function View({ frame }: PluginViewProps<PaliState>) {
   const nodeClass = (i: number) => {
     if (s.current === i) return 'team-1';
     if (s.counted.includes(i)) return 'team-2';
-    if (s.visited[i]) return 'team-2';
+    if (s.visited[i]!) return 'team-2';
     return 'team-0';
   };
   return (
@@ -330,7 +334,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(s) insert, O(s) search/prefix time — wrong order of growth',
       },
     ],
-    explain: 'O(s^2). O(s^2). at each node test s[i:] is palindrome; dedupe via seen set',
+    explain: 'O(s^2). O(s^2). at each node test s[i:]! is palindrome; dedupe via seen set',
   },
   {
     id: 'outcome',

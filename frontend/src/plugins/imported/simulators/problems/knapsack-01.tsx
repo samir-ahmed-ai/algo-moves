@@ -54,7 +54,7 @@ function record({ weights, values, capacity }: KnapInput): Frame<KnapState>[] {
   );
 
   // Base row: zero items → value 0 for every capacity.
-  for (let w = 0; w <= capacity; w++) dp[0][w] = 0;
+  for (let w = 0; w <= capacity; w++) dp[0]![w] = 0;
   emit(
     'BASE',
     'row 0 = 0',
@@ -66,22 +66,22 @@ function record({ weights, values, capacity }: KnapInput): Frame<KnapState>[] {
     const wt = weights[i - 1];
     const val = values[i - 1];
     for (let w = 0; w <= capacity; w++) {
-      const skip = dp[i - 1][w];
-      if (wt <= w) {
-        const take = dp[i - 1][w - wt] + val;
-        dp[i][w] = Math.max(skip, take);
-        const tookIt = take >= skip;
+      const skip = dp[i - 1]![w];
+      if (wt! <= w) {
+        const take = dp[i - 1]![w - wt!]! + val!;
+        dp[i]![w] = Math.max(skip!, take);
+        const tookIt = take >= skip!;
         emit(
           'FILL',
-          `dp[${i}][${w}]=${dp[i][w]}`,
-          `Item ${i} (weight ${wt}, value ${val}) fits in capacity ${w}: skip it for dp[${i - 1}][${w}] = ${skip}, or take it for dp[${i - 1}][${w - wt}] + ${val} = ${take}. dp[${i}][${w}] = max(${skip}, ${take}) = ${dp[i][w]}${tookIt ? ' (take it)' : ' (skip it)'}.`,
+          `dp[${i}][${w}]=${dp[i]![w]}`,
+          `Item ${i} (weight ${wt}, value ${val}) fits in capacity ${w}: skip it for dp[${i - 1}][${w}] = ${skip}, or take it for dp[${i - 1}][${w - wt!}] + ${val} = ${take}. dp[${i}][${w}] = max(${skip}, ${take}) = ${dp[i]![w]}${tookIt ? ' (take it)' : ' (skip it)'}.`,
           { cur: [i, w] },
         );
       } else {
-        dp[i][w] = skip;
+        dp[i]![w] = skip!;
         emit(
           'FILL',
-          `dp[${i}][${w}]=${dp[i][w]}`,
+          `dp[${i}][${w}]=${dp[i]![w]}`,
           `Item ${i} (weight ${wt}) is too heavy for capacity ${w}, so we must skip it: dp[${i}][${w}] = dp[${i - 1}][${w}] = ${skip}.`,
           { cur: [i, w] },
         );
@@ -89,7 +89,7 @@ function record({ weights, values, capacity }: KnapInput): Frame<KnapState>[] {
     }
   }
 
-  const ans = dp[n][capacity];
+  const ans = dp[n]![capacity];
   emit(
     'DONE',
     `value ${ans}`,
@@ -111,7 +111,7 @@ function View({ frame }: PluginViewProps<KnapState>) {
   for (let i = 0; i <= n; i++) {
     const rowLabel = i === 0 ? '∅' : `w${s.weights[i - 1]} v${s.values[i - 1]}`;
     const row: (number | string)[] = [rowLabel];
-    for (let w = 0; w <= s.capacity; w++) row.push(s.dp[i][w] < 0 ? '' : s.dp[i][w]);
+    for (let w = 0; w <= s.capacity; w++) row.push(s.dp[i]![w]! < 0 ? '' : s.dp[i]![w]!);
     display.push(row);
   }
 
@@ -121,20 +121,22 @@ function View({ frame }: PluginViewProps<KnapState>) {
     const w = c - 1;
     if (s.cur && s.cur[0] === i && s.cur[1] === w) return 'active';
     if (i === n && w === s.capacity) return 'path';
-    return s.dp[i][w] >= 0 ? 'visited' : '';
+    return s.dp[i]![w]! >= 0 ? 'visited' : '';
   };
 
   const activeCell: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
-  const done = s.dp[n][s.capacity] >= 0;
-  const ans = done ? s.dp[n][s.capacity] : null;
+  const done = s.dp[n]![s.capacity]! >= 0;
+  const ans = done ? s.dp[n]![s.capacity] : null;
   const i = s.cur ? s.cur[0] : -1;
   const w = s.cur ? s.cur[1] : -1;
-  const wt = i >= 1 ? s.weights[i - 1] : null;
-  const val = i >= 1 ? s.values[i - 1] : null;
-  const skip = i >= 1 && w >= 0 && s.dp[i - 1]?.[w] >= 0 ? s.dp[i - 1][w] : null;
+  const wt = i >= 1 ? (s.weights[i - 1] ?? null) : null;
+  const val = i >= 1 ? (s.values[i - 1] ?? null) : null;
+  const skipVal = s.dp[i - 1]?.[w];
+  const skip = i >= 1 && w >= 0 && skipVal !== undefined && skipVal >= 0 ? skipVal : null;
+  const takePrev = wt !== null && wt <= w ? s.dp[i - 1]?.[w - wt] : undefined;
   const take =
-    i >= 1 && wt !== null && wt <= w && s.dp[i - 1]?.[w - wt] >= 0
-      ? s.dp[i - 1][w - wt] + s.values[i - 1]
+    i >= 1 && wt !== null && wt <= w && takePrev !== undefined && takePrev >= 0
+      ? takePrev + s.values[i - 1]!
       : null;
   const rail = (
     <>
@@ -162,11 +164,14 @@ function Inspector({ frame }: InspectorProps<KnapState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const n = s.weights.length;
-  const cell = (i: number, w: number) => (i >= 0 && w >= 0 && s.dp[i]?.[w] >= 0 ? s.dp[i][w] : '—');
-  const done = s.dp[n][s.capacity] >= 0;
+  const cell = (i: number, w: number) => {
+    const v = s.dp[i]?.[w];
+    return i >= 0 && w >= 0 && v !== undefined && v >= 0 ? v : '—';
+  };
+  const done = s.dp[n]![s.capacity]! >= 0;
   const i = s.cur ? s.cur[0] : -1;
   const w = s.cur ? s.cur[1] : -1;
-  const wt = i >= 1 ? s.weights[i - 1] : null;
+  const wt = i >= 1 ? (s.weights[i - 1] ?? null) : null;
   return (
     <VarGrid>
       <InspectorRow k="cell" v={s.cur ? `dp[${i}][${w}]` : '—'} />
@@ -175,13 +180,13 @@ function Inspector({ frame }: InspectorProps<KnapState>) {
       <InspectorRow k="skip = dp[i−1][w]" v={i >= 1 ? cell(i - 1, w) : '—'} />
       <InspectorRow
         k="take = dp[i−1][w−wt]+v"
-        v={
-          i >= 1 && wt !== null && wt <= w && s.dp[i - 1]?.[w - wt] >= 0
-            ? s.dp[i - 1][w - wt] + s.values[i - 1]
-            : '—'
-        }
+        v={(() => {
+          if (i < 1 || wt === null || wt > w) return '—';
+          const prev = s.dp[i - 1]?.[w - wt];
+          return prev !== undefined && prev >= 0 ? prev + s.values[i - 1]! : '—';
+        })()}
       />
-      <InspectorRow k="answer" v={done ? `value ${s.dp[n][s.capacity]}` : '…filling'} />
+      <InspectorRow k="answer" v={done ? `value ${s.dp[n]![s.capacity]}` : '…filling'} />
     </VarGrid>
   );
 }
@@ -207,7 +212,7 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as KnapState | undefined;
-    const v = s ? s.dp[s.weights.length][s.capacity] : 0;
+    const v = s ? s.dp[s.weights.length]![s.capacity] : 0;
     return { ok: true, label: `value ${v}` };
   },
 };

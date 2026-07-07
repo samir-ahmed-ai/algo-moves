@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,7 +33,7 @@ function fields(s: string): string[] {
 function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
   const words = fields(s);
 
-  const { emit, frames } = createRecorder<ReverseWordsState>(() => ({
+  const { emit, frames } = createPrepRecorder<ReverseWordsState>(() => ({
     s,
     words: words.slice(),
     l: null,
@@ -72,18 +72,18 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
     emit(
       'COMPARE',
       `swap ${l} & ${r}`,
-      `l = ${l} points at "${words[l]}" and r = ${r} points at "${words[r]}". Since l < r, exchange these two words so the ends move toward the middle.`,
+      `l = ${l} points at "${words[l]!}" and r = ${r} points at "${words[r]!}". Since l < r, exchange these two words so the ends move toward the middle.`,
       { words: words.slice(), l, r },
     );
 
-    const tmp = words[l];
-    words[l] = words[r];
-    words[r] = tmp;
+    const tmp = words[l]!;
+    words[l]! = words[r]!;
+    words[r]! = tmp;
 
     emit(
       'SWAP',
       `[${l}]↔[${r}]`,
-      `Swapped: "${words[r]}" ↔ "${words[l]}". The word list is now [${words.map((w) => `"${w}"`).join(', ')}]. Advance l→${l + 1} and pull r→${r - 1}.`,
+      `Swapped: "${words[r]!}" ↔ "${words[l]!}". The word list is now [${words.map((w) => `"${w}"`).join(', ')}]. Advance l→${l + 1} and pull r→${r - 1}.`,
       { words: words.slice(), l, r, swapped: [l, r] },
     );
 
@@ -112,7 +112,7 @@ function View({ frame }: PluginViewProps<ReverseWordsState>) {
     if (s.r !== null && s.r >= 0)
       pointers.push({ i: s.r, label: 'r', tone: 'warn', place: 'above' });
   }
-  const inPair = (i: number) => s.swapped !== null && (i === s.swapped[0] || i === s.swapped[1]);
+  const inPair = (i: number) => s.swapped !== null && (i === s.swapped[0]! || i === s.swapped[1]!);
   const tone = (i: number) => {
     if (s.done) return 'found';
     if (inPair(i)) return 'match';
@@ -141,14 +141,14 @@ function Inspector({ frame }: InspectorProps<ReverseWordsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const word = (i: number | null) =>
-    i !== null && i >= 0 && i < s.words.length ? `"${s.words[i]}"` : '—';
+    i !== null && i >= 0 && i < s.words.length ? `"${s.words[i]!}"` : '—';
   return (
     <VarGrid>
       <InspectorRow k="words" v={s.words.length} />
       <InspectorRow k="l" v={s.l ?? '—'} />
       <InspectorRow k="r" v={s.r ?? '—'} />
-      <InspectorRow k="words[l]" v={word(s.l)} />
-      <InspectorRow k="words[r]" v={word(s.r)} />
+      <InspectorRow k="words[l]!" v={word(s.l)} />
+      <InspectorRow k="words[r]!" v={word(s.r)} />
       <InspectorRow k="result" v={s.result !== null ? `"${s.result}"` : s.done ? '""' : '…'} />
     </VarGrid>
   );

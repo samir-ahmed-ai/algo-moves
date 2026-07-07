@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -36,12 +36,12 @@ function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {
 
   const read4 = (): number => {
     if (chunkIdx >= chunks.length) return 0;
-    buf4 = chunks[chunkIdx].slice(0, 4);
+    buf4 = chunks[chunkIdx]!.slice(0, 4);
     chunkIdx++;
     return buf4.length;
   };
 
-  const { emit, frames } = createRecorder<Read4State>(() => ({
+  const { emit, frames } = createPrepRecorder<Read4State>(() => ({
     chunks: [...chunks],
     chunkIdx,
     buf4,
@@ -75,7 +75,7 @@ function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {
         );
         if (n4 === 0) break;
       }
-      outChars.push(buf4[i4]);
+      outChars.push(buf4[i4]!);
       i4++;
       total++;
     }

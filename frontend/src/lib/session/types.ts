@@ -59,7 +59,7 @@ export interface SessionMeta {
   interviewRuntime?: InterviewRuntime;
 }
 
-export const DEFAULT_INTERVIEW_SETTINGS: InterviewSettings = {
+export const DEFAULT_INTERVIEW_SETTINGS: Readonly<InterviewSettings> = {
   hideHints: true,
   hideSolutions: true,
 };
@@ -69,8 +69,8 @@ function normalizedId(value: string | undefined): string | undefined {
   return id || undefined;
 }
 
-function nonNegativeMs(value: number | undefined): number {
-  return Number.isFinite(value) ? Math.max(0, Math.round(value!)) : 0;
+function nonNegativeMs(value: number | undefined | null): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
 }
 
 export const emptyTimerState = (): TimerState => ({
@@ -130,8 +130,9 @@ export function isSessionKind(value: unknown): value is SessionKind {
 }
 
 export function isSessionMeta(value: unknown): value is SessionMeta {
-  const s = value as Partial<SessionMeta> | null;
-  return !!s && isSessionKind(s.kind);
+  if (value === null || typeof value !== 'object') return false;
+  const s = value as Partial<SessionMeta>;
+  return isSessionKind(s.kind);
 }
 
 /** Map games relay role to session role (1:1 today). */

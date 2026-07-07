@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -35,7 +35,7 @@ interface DeleteKthState {
 function record({ values, k }: DeleteKthInput): Frame<DeleteKthState>[] {
   const deleted = new Set<number>();
 
-  const { emit, frames } = createRecorder<DeleteKthState>(() => ({
+  const { emit, frames } = createPrepRecorder<DeleteKthState>(() => ({
     k,
     values,
     deleted: [...deleted],
@@ -80,14 +80,14 @@ function record({ values, k }: DeleteKthInput): Frame<DeleteKthState>[] {
       emit(
         'HIT',
         `step==${k}`,
-        `Node ${i} (value ${values[i]}) is the ${k}th since the last reset, so it is the one to delete. step reached k = ${k}.`,
+        `Node ${i} (value ${values[i]!}) is the ${k}th since the last reset, so it is the one to delete. step reached k = ${k}.`,
         { cur: i, step, total },
       );
       deleted.add(i);
       step = 0;
       emit(
         'DELETE',
-        `unlink ${values[i]}`,
+        `unlink ${values[i]!}`,
         `Unlink node ${i}: set prev.next = next and next.prev = prev so it is bypassed on both sides of the DLL. Reset step to 0 and continue from the next node.`,
         { cur: i, step, total },
         'good',
@@ -96,7 +96,7 @@ function record({ values, k }: DeleteKthInput): Frame<DeleteKthState>[] {
       emit(
         'WALK',
         `step ${step}`,
-        `Node ${i} (value ${values[i]}) is kept — it is only #${step} since the last reset (need ${k}). Advance the cursor.`,
+        `Node ${i} (value ${values[i]!}) is kept — it is only #${step} since the last reset (need ${k}). Advance the cursor.`,
         { cur: i, step, total },
       );
     }
@@ -165,7 +165,7 @@ function Inspector({ frame }: InspectorProps<DeleteKthState>) {
       <InspectorRow k="k (stride)" v={s.k} />
       <InspectorRow k="n (nodes)" v={s.total ?? '—'} />
       <InspectorRow k="cur index" v={s.cur ?? '—'} />
-      <InspectorRow k="cur value" v={s.cur !== null ? s.values[s.cur] : '—'} />
+      <InspectorRow k="cur value" v={s.cur !== null ? s.values[s.cur]! : '—'} />
       <InspectorRow k="step" v={s.step !== null ? `${s.step} / ${s.k}` : '—'} />
       <InspectorRow k="deleted" v={s.deleted.length} />
       <InspectorRow k="survivors" v={`[${survivors.join(', ')}]`} />

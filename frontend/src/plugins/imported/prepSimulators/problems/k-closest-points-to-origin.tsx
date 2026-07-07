@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, railItem } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -46,7 +46,7 @@ function record({ points, k }: KClosestInput): Frame<KClosestState>[] {
   const pts: Pt[] = points.map(([x, y]) => ({ x, y, d2: x * x + y * y }));
   const n = pts.length;
 
-  const { emit, frames } = createRecorder<KClosestState>(() => ({
+  const { emit, frames } = createPrepRecorder<KClosestState>(() => ({
     points: pts.map((p) => ({ ...p })),
     k,
     i: null,
@@ -66,11 +66,11 @@ function record({ points, k }: KClosestInput): Frame<KClosestState>[] {
   );
 
   for (let idx = 0; idx < n; idx++) {
-    const p = pts[idx];
+    const p = pts[idx]!;
     emit(
       'DIST',
-      `d²=${p.d2}`,
-      `Point (${p.x}, ${p.y}): its squared distance is ${p.x}² + ${p.y}² = ${p.d2}. We compare these squared values directly — the square root would not change the ordering.`,
+      `d²=${p!.d2}`,
+      `Point (${p!.x}, ${p!.y}): its squared distance is ${p!.x}² + ${p!.y}² = ${p!.d2}. We compare these squared values directly — the square root would not change the ordering.`,
       { j: idx },
     );
   }
@@ -82,33 +82,33 @@ function record({ points, k }: KClosestInput): Frame<KClosestState>[] {
     emit(
       'SELECT',
       `min@${i}`,
-      `Find the smallest remaining squared distance from position ${i} onward. Start by assuming position ${i} (d²=${pts[i].d2}) is the minimum.`,
+      `Find the smallest remaining squared distance from position ${i} onward. Start by assuming position ${i} (d²=${pts[i]!.d2}) is the minimum.`,
       { i, minIdx, sortedUpto: i },
     );
     for (let j = i + 1; j < n; j++) {
       emit(
         'COMPARE',
-        `${pts[j].d2} vs ${pts[minIdx].d2}`,
-        `Compare position ${j} (d²=${pts[j].d2}) against the current minimum at ${minIdx} (d²=${pts[minIdx].d2}). ${pts[j].d2 < pts[minIdx].d2 ? `Smaller — ${j} becomes the new minimum.` : `Not smaller — keep ${minIdx}.`}`,
+        `${pts[j]!.d2} vs ${pts[minIdx]!.d2}`,
+        `Compare position ${j} (d²=${pts[j]!.d2}) against the current minimum at ${minIdx} (d²=${pts[minIdx]!.d2}). ${pts[j]!.d2 < pts[minIdx]!.d2 ? `Smaller — ${j} becomes the new minimum.` : `Not smaller — keep ${minIdx}.`}`,
         { i, j, minIdx, compareIdx: j, sortedUpto: i },
       );
-      if (pts[j].d2 < pts[minIdx].d2) minIdx = j;
+      if (pts[j]!.d2 < pts[minIdx]!.d2) minIdx = j;
     }
     if (minIdx !== i) {
-      const tmp = pts[i];
-      pts[i] = pts[minIdx];
-      pts[minIdx] = tmp;
+      const tmp = pts[i]!;
+      pts[i]! = pts[minIdx]!;
+      pts[minIdx]! = tmp;
       emit(
         'SWAP',
         `swap ${i}↔${minIdx}`,
-        `The nearest remaining point (d²=${pts[i].d2}) was at ${minIdx}; swap it into position ${i}. Positions 0..${i} are now sorted by distance.`,
+        `The nearest remaining point (d²=${pts[i]!.d2}) was at ${minIdx}; swap it into position ${i}. Positions 0..${i} are now sorted by distance.`,
         { i, minIdx, sortedUpto: i + 1 },
       );
     } else {
       emit(
         'LOCK',
         `lock ${i}`,
-        `Position ${i} already holds the nearest remaining point (d²=${pts[i].d2}). Lock it in place; positions 0..${i} are sorted.`,
+        `Position ${i} already holds the nearest remaining point (d²=${pts[i]!.d2}). Lock it in place; positions 0..${i} are sorted.`,
         { i, minIdx: i, sortedUpto: i + 1 },
       );
     }
@@ -147,10 +147,7 @@ function View({ frame }: PluginViewProps<KClosestState>) {
   const pointLabels = s.points.map((p, i) => {
     const active = !s.done && i === s.compareIdx;
     const locked = s.done ? i < s.answerCount : i < s.sortedUpto;
-    return {
-      label: `(${p.x},${p.y})`,
-      tone: (active ? 'accent' : locked ? 'good' : undefined) as 'accent' | 'good' | undefined,
-    };
+    return railItem(`(${p.x},${p.y})`, active ? 'accent' : locked ? 'good' : undefined);
   });
 
   const answerPoints = s.done ? s.points.slice(0, s.answerCount).map((p) => `(${p.x},${p.y})`) : [];
@@ -180,7 +177,7 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
   const s = frame.state;
   const cur = (idx: number | null) =>
     idx !== null && idx >= 0 && idx < s.points.length
-      ? `(${s.points[idx].x},${s.points[idx].y}) d²=${s.points[idx].d2}`
+      ? `(${s.points[idx]!.x},${s.points[idx]!.y}) d²=${s.points[idx]!.d2}`
       : '—';
   return (
     <VarGrid>
@@ -258,7 +255,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Compare position  (d²=) against the current minimum at  (d²=). ${pts[j].d2 < pts[minIdx].d2 ? ',
+      'Compare position  (d²=) against the current minimum at  (d²=). ${pts[j]!.d2 < pts[minIdx]!.d2 ? ',
   },
   {
     id: 'state',

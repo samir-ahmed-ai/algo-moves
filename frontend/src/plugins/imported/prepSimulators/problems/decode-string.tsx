@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import {
@@ -27,7 +27,7 @@ interface DecodeInput {
 interface DecodeState {
   s: string;
   i: number | null; // index of the char being processed (null before/after the scan)
-  c: string | null; // the current char s[i]
+  c: string | null; // the current char s[i]!
   num: number; // digits accumulated so far (count for the next '[')
   cur: string; // string built at the current bracket depth
   cntStack: number[]; // saved counts, bottom -> top
@@ -41,7 +41,7 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
   let cur = '';
   let num = 0;
 
-  const { emit, frames } = createRecorder<DecodeState>(() => ({
+  const { emit, frames } = createPrepRecorder<DecodeState>(() => ({
     s: s,
     num: num,
     cur: cur,
@@ -55,18 +55,18 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
   emit(
     'INIT',
     `decode "${s}"`,
-    `Decode String: expand a pattern like k[...] into k copies of the inner string. We use two stacks — one for the repeat counts, one for the strings built so far — plus a running number "num" and the current string "cur".`,
+    `Decode String: expand a pattern like k[...]! into k copies of the inner string. We use two stacks — one for the repeat counts, one for the strings built so far — plus a running number "num" and the current string "cur".`,
     { i: null, c: null },
   );
 
   for (let i = 0; i < s.length; i++) {
-    const c = s[i];
-    if (c >= '0' && c <= '9') {
-      num = num * 10 + (c.charCodeAt(0) - 48);
+    const c = s[i]!;
+    if (c! >= '0' && c! <= '9') {
+      num = num * 10 + (c!.charCodeAt(0) - 48);
       emit(
         'DIGIT',
         `num=${num}`,
-        `'${c}' is a digit, so fold it into the running count: num = num*10 + ${c} = ${num}. This is how multi-digit repeat counts like "12[a]" are built.`,
+        `'${c}' is a digit, so fold it into the running count: num = num*10 + ${c} = ${num}. This is how multi-digit repeat counts like "12[a]!" are built.`,
         { i: i, c: c },
       );
     } else if (c === '[') {
@@ -83,12 +83,12 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
         { i: i, c: c },
       );
     } else if (c === ']') {
-      const k = cntStack[cntStack.length - 1];
+      const k = cntStack[cntStack.length - 1]!;
       cntStack.pop();
-      const prev = strStack[strStack.length - 1];
+      const prev = strStack[strStack.length - 1]!;
       strStack.pop();
       const inner = cur;
-      cur = prev + inner.repeat(k);
+      cur = prev + inner.repeat(k!);
       emit(
         ']',
         `repeat ${k}×`,
@@ -213,7 +213,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Decode String: expand a pattern like k[...] into k copies of the inner string. We use two stacks — one for the repeat counts, one for the strings built so far — plus a running number "num" and the current string "cur".',
+      'Decode String: expand a pattern like k[...]! into k copies of the inner string. We use two stacks — one for the repeat counts, one for the strings built so far — plus a running number "num" and the current string "cur".',
   },
   {
     id: 'key-step',
@@ -301,8 +301,8 @@ const practiceQuiz: QuizQuestion[] = [
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'ds1', label: '"3[a2[c]]"', value: { s: '3[a2[c]]' } },
-    { id: 'ds2', label: '"2[abc]3[cd]"', value: { s: '2[abc]3[cd]' } },
+    { id: 'ds1', label: '"3[a2[c]!]"', value: { s: '3[a2[c]!]' } },
+    { id: 'ds2', label: '"2[abc]!3[cd]!"', value: { s: '2[abc]!3[cd]!' } },
   ] satisfies SampleInput<DecodeInput>[],
   record,
   View,

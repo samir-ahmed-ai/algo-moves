@@ -10,39 +10,47 @@ const GAME_EMOJI: Record<string, string> = {
   'reaction-duel': '⚡',
 };
 
+const GAME_ACCENT: Record<string, string> = {
+  'would-you-rather': '#db2777',
+  'number-duel': '#4f46e5',
+  'tic-tac-toe': '#0ea5e9',
+  'rock-paper-scissors': '#f59e0b',
+  'mind-meld': '#8b5cf6',
+  'reaction-duel': '#10b981',
+};
+
 const HOW_TO_PLAY: Record<GameLocale, Record<string, string>> = {
   en: {
     'would-you-rather':
-      'Both choose between two options simultaneously. Match = +2 pts each. Differ = +1 each. 8 rounds.',
+      'Pick between two options at the same time. Matching answers score highest, split answers still move the round forward.',
     'number-duel':
-      "Each player hides a secret number 1–100. Race to guess your opponent's in fewest tries. Roles swap each round.",
+      'Hide a secret number from 1 to 100, then race to crack the other player’s number in the fewest guesses.',
     'tic-tac-toe':
-      'Classic 3×3 grid. Get three in a row to win. 15 s turn timer — miss it and a move is auto-played.',
+      'Classic 3×3 tactics with a live turn clock. Build three in a row before the board fills.',
     'rock-paper-scissors':
-      'Lock in your throw, then reveal together. Best of 5 wins. Throw in taunts during the countdown!',
+      'Lock your throw, reveal together, and win the best-of-five race. Send quick taunts during reveal beats.',
     'mind-meld':
-      'Both pick from this-or-that prompts simultaneously. Score goes up for every matching answer. 12 s per round.',
+      'Answer this-or-that prompts together and chase a higher sync score across the full set.',
     'reaction-duel':
-      'Wait for the screen to go green, then tap as fast as you can. False start = penalty. First to target wins.',
+      'Hold steady until green, then tap first. Jumping early becomes a false start penalty.',
   },
   ar: {
     'would-you-rather':
-      'يختار كل لاعب بين خيارين في نفس الوقت. التطابق = +2 نقطة لكلٍ. الاختلاف = +1 لكلٍ. 8 جولات.',
+      'اختر بين خيارين في نفس اللحظة. الإجابات المتطابقة تسجل أعلى نتيجة، والاختلاف لا يوقف الجولة.',
     'number-duel':
-      'يخفي كل لاعب رقماً سرياً من 1 إلى 100. سباق لتخمين رقم الخصم بأقل محاولات. الأدوار تتبدل كل جولة.',
+      'اخف رقماً من 1 إلى 100، ثم سابق لاكتشاف رقم اللاعب الآخر بأقل عدد من التخمينات.',
     'tic-tac-toe':
-      'شبكة 3×3 كلاسيكية. اجمع ثلاثة في صف للفوز. مؤقت 15 ثانية لكل دور — إن انتهى يُلعب تلقائياً.',
+      'تكتيك 3×3 كلاسيكي مع مؤقت حي لكل دور. اصنع ثلاثة على خط واحد قبل امتلاء اللوحة.',
     'rock-paper-scissors':
-      'ثبّت رميتك ثم اكشفوا معاً. أفضل من 5 جولات يفوز. أرسل استفزازات أثناء العد التنازلي!',
-    'mind-meld':
-      'يختار كل لاعب من مطالبات هذا أو ذاك في نفس الوقت. ترتفع النقاط مع كل إجابة متطابقة. 12 ثانية لكل جولة.',
-    'reaction-duel':
-      'انتظر حتى يتحول اللون إلى الأخضر ثم اضغط بأسرع ما يمكن. البدء المبكر = عقوبة. أول من يصل للهدف يفوز.',
+      'ثبّت رميتك ثم اكشفوا معاً في سباق أفضل من خمس. أرسل استفزازات سريعة أثناء لحظات الكشف.',
+    'mind-meld': 'أجيبوا على أسئلة هذا أو ذاك معاً، وحاولوا رفع نسبة الانسجام عبر المجموعة كاملة.',
+    'reaction-duel': 'انتظر حتى يظهر الأخضر، ثم اضغط أولاً. الضغط المبكر يتحول إلى عقوبة بدء خاطئ.',
   },
 };
 
 export function gameAccentColor(game: GameDef | string): string {
   if (typeof game === 'object' && game.accent) return game.accent;
+  if (typeof game === 'string') return GAME_ACCENT[game] ?? 'var(--accent)';
   return 'var(--accent)';
 }
 

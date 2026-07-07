@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -37,7 +37,7 @@ function record({ nodes }: HeightInput): Frame<HeightState>[] {
   const best = new Array<number | null>(n).fill(null);
   const height = new Array<number | null>(n).fill(null);
 
-  const { emit, frames } = createRecorder<HeightState>(() => ({
+  const { emit, frames } = createPrepRecorder<HeightState>(() => ({
     nodes,
     active: null,
     childIdx: null,
@@ -49,31 +49,31 @@ function record({ nodes }: HeightInput): Frame<HeightState>[] {
 
   // Post-order DFS, faithful to the Go getHeight: nil -> 0; else 1 + max(child heights).
   const getHeight = (i: number): number => {
-    best[i] = 0;
+    best[i]! = 0;
     emit(
       'ENTER',
-      `visit ${nodes[i].val}`,
-      `Enter node ${nodes[i].val}. Height of a node = 1 + the tallest of its child subtrees, so start a running best-child-height of 0 and recurse into each child (post-order).`,
+      `visit ${nodes[i]!.val}`,
+      `Enter node ${nodes[i]!.val}. Height of a node = 1 + the tallest of its child subtrees, so start a running best-child-height of 0 and recurse into each child (post-order).`,
       { active: i, best: best.slice() },
     );
 
-    for (const c of nodes[i].children) {
+    for (const c of nodes[i]!.children) {
       emit(
         'DESCEND',
-        `→ ${nodes[c].val}`,
-        `Walk down from node ${nodes[i].val} into child ${nodes[c].val}. We must know the child's subtree height before we can finish this node.`,
+        `→ ${nodes[c]!.val}`,
+        `Walk down from node ${nodes[i]!.val} into child ${nodes[c]!.val}. We must know the child's subtree height before we can finish this node.`,
         { active: i, childIdx: c, best: best.slice() },
       );
 
-      const h = getHeight(c); // recurse — resolves height[c]
+      const h = getHeight(c); // recurse — resolves height[c]!
 
-      const prevBest = best[i] ?? 0;
+      const prevBest = best[i]! ?? 0;
       if (h > prevBest) {
-        best[i] = h;
+        best[i]! = h;
         emit(
           'UPDATE',
           `best=${h}`,
-          `Child ${nodes[c].val} returned height ${h}, which beats the previous best (${prevBest}) for node ${nodes[i].val}. Update this node's tallest-child height to ${h}.`,
+          `Child ${nodes[c]!.val} returned height ${h}, which beats the previous best (${prevBest}) for node ${nodes[i]!.val}. Update this node's tallest-child height to ${h}.`,
           { active: i, childIdx: c, best: best.slice() },
           'good',
         );
@@ -81,18 +81,18 @@ function record({ nodes }: HeightInput): Frame<HeightState>[] {
         emit(
           'KEEP',
           `keep ${prevBest}`,
-          `Child ${nodes[c].val} returned height ${h}, which does not beat the current best (${prevBest}) for node ${nodes[i].val}. Keep the best as ${prevBest}.`,
+          `Child ${nodes[c]!.val} returned height ${h}, which does not beat the current best (${prevBest}) for node ${nodes[i]!.val}. Keep the best as ${prevBest}.`,
           { active: i, childIdx: c, best: best.slice() },
         );
       }
     }
 
-    const result = (best[i] ?? 0) + 1;
-    height[i] = result;
+    const result = (best[i]! ?? 0) + 1;
+    height[i]! = result;
     emit(
       'RETURN',
-      `h(${nodes[i].val})=${result}`,
-      `All children of node ${nodes[i].val} are resolved. Return 1 + tallest child height = 1 + ${best[i] ?? 0} = ${result}. (A leaf has no children, so it returns 1.)`,
+      `h(${nodes[i]!.val})=${result}`,
+      `All children of node ${nodes[i]!.val} are resolved. Return 1 + tallest child height = 1 + ${best[i]! ?? 0} = ${result}. (A leaf has no children, so it returns 1.)`,
       { active: i, best: best.slice(), height: height.slice() },
       'good',
     );
@@ -136,7 +136,7 @@ function View({ frame }: PluginViewProps<HeightState>) {
     children: nd.children,
   }));
   const nodeClass = (i: number) => {
-    if (s.height[i] !== null) return 'team-2'; // resolved / done
+    if (s.height[i]! !== null) return 'team-2'; // resolved / done
     if (s.active === i) return 'team-1'; // currently processing
     return 'team-0'; // idle
   };
@@ -154,11 +154,11 @@ function View({ frame }: PluginViewProps<HeightState>) {
       />
       {s.active !== null && !s.done && (
         <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          node {s.nodes[s.active].val}: best child ={' '}
-          <span className="text-ink">{s.best[s.active] ?? 0}</span>
-          {s.height[s.active] !== null && (
+          node {s.nodes[s.active]!.val}: best child ={' '}
+          <span className="text-ink">{s.best[s.active]! ?? 0}</span>
+          {s.height[s.active]! !== null && (
             <>
-              {' · '}h = <span className="text-good">{s.height[s.active]}</span>
+              {' · '}h = <span className="text-good">{s.height[s.active]!}</span>
             </>
           )}
         </div>
@@ -174,10 +174,13 @@ function Inspector({ frame }: InspectorProps<HeightState>) {
   return (
     <VarGrid>
       <InspectorRow k="nodes" v={s.nodes.length} />
-      <InspectorRow k="active node" v={cur !== null ? s.nodes[cur].val : '—'} />
-      <InspectorRow k="children" v={cur !== null ? s.nodes[cur].children.length || 'leaf' : '—'} />
-      <InspectorRow k="best child h" v={cur !== null ? (s.best[cur] ?? 0) : '—'} />
-      <InspectorRow k="h(node)" v={cur !== null && s.height[cur] !== null ? s.height[cur] : '…'} />
+      <InspectorRow k="active node" v={cur !== null ? s.nodes[cur]!.val : '—'} />
+      <InspectorRow k="children" v={cur !== null ? s.nodes[cur]!.children.length || 'leaf' : '—'} />
+      <InspectorRow k="best child h" v={cur !== null ? (s.best[cur]! ?? 0) : '—'} />
+      <InspectorRow
+        k="h(node)"
+        v={cur !== null && s.height[cur]! !== null ? s.height[cur]! : '…'}
+      />
       <InspectorRow k="tree height" v={s.answer !== null ? s.answer : '…'} />
     </VarGrid>
   );

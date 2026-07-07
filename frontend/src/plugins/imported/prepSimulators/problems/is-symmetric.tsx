@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,13 +30,13 @@ const childR = (i: number) => 2 * i + 2;
 
 function valAt(tree: (number | null)[], i: number): number | null {
   if (i < 0 || i >= tree.length) return null;
-  return tree[i];
+  return tree[i]!;
 }
 
 function record({ tree }: SymmetricInput): Frame<SymmetricState>[] {
   const visited: number[] = [];
 
-  const { emit, frames } = createRecorder<SymmetricState>(() => ({
+  const { emit, frames } = createPrepRecorder<SymmetricState>(() => ({
     tree,
     a: null,
     b: null,
@@ -145,8 +145,8 @@ function View({ frame }: PluginViewProps<SymmetricState>) {
 function Inspector({ frame }: InspectorProps<SymmetricState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const av = s.a !== null ? s.tree[s.a] : null;
-  const bv = s.b !== null ? s.tree[s.b] : null;
+  const av = s.a !== null ? s.tree[s.a]! : null;
+  const bv = s.b !== null ? s.tree[s.b]! : null;
   return (
     <VarGrid>
       <InspectorRow k="a (left-walk)" v={s.a ?? '—'} />

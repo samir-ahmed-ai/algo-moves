@@ -35,7 +35,7 @@ function record({ values }: ListInput): Frame<ListState>[] {
 
   const emit = (type: string, note: string, caption: string, tone?: 'good' | 'bad') =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { values, next: next.slice(), prev, curr, nextPtr, head, done: tone != null },
     });
 
@@ -46,7 +46,7 @@ function record({ values }: ListInput): Frame<ListState>[] {
   );
 
   while (curr !== null) {
-    nextPtr = next[curr];
+    nextPtr = next[curr] ?? null;
     emit(
       'SAVE',
       `next=${nextPtr === null ? 'null' : values[nextPtr]}`,
@@ -196,8 +196,8 @@ function order(s: ListState): string {
   const seen = new Set<number>();
   while (node !== null && !seen.has(node)) {
     seen.add(node);
-    seq.push(s.values[node]);
-    node = s.next[node];
+    seq.push(s.values[node]!);
+    node = s.next[node] ?? null;
   }
   return seq.length ? seq.join(' → ') : 'empty';
 }

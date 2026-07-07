@@ -23,7 +23,11 @@ import { cn } from '@/lib/utils/cn';
 import { ChatComposer, ChatMessageLog, ReactionBar } from '@/components/chat';
 import { catalog } from '@/content';
 import { useWorkspace } from '@/store/workspace';
-import { buildInviteUrl, buildInterviewInviteUrl } from '@/store/navigation/shareState';
+import {
+  buildInviteUrl,
+  buildInterviewInviteUrl,
+  type ShareState,
+} from '@/store/navigation/shareState';
 import { chromeText } from '@/shell/chromeUi';
 import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '@/shell/canvas/ui/nodeui';
 import { useRoomComms } from '@/shell/realtime';
@@ -64,8 +68,8 @@ export function SessionBody() {
   const canInterview = !!activeItem?.pluginId;
 
   const isInterview = session.kind === 'interview';
-  const shareBase = {
-    item: isInterview ? activeItemId : undefined,
+  const shareBase: ShareState = {
+    ...(isInterview && activeItemId ? { item: activeItemId } : {}),
     focus: (isInterview && activeItemId ? 'problem' : 'canvas') as 'problem' | 'canvas',
     mode,
     theme,
@@ -110,7 +114,7 @@ export function SessionBody() {
       const newNodes = buildInterviewBoardNodes({
         includeNotes: canInterview,
         includeProblem: canInterview,
-        problemId: canInterview ? activeItemId : undefined,
+        ...(canInterview && activeItemId ? { problemId: activeItemId } : {}),
       });
       setNodes((prev) => mergeInterviewNodes(prev as PanelFlowNode[], newNodes));
     } finally {

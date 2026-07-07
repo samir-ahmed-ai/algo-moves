@@ -1,12 +1,14 @@
 export function isEditableTarget(target: EventTarget | null): target is HTMLElement {
+  if (typeof HTMLElement === 'undefined') return false;
   if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName.toUpperCase();
+  const tag = target.tagName.toLowerCase();
+  const role = target.getAttribute('role')?.toLowerCase();
   return (
-    tag === 'INPUT' ||
-    tag === 'TEXTAREA' ||
-    tag === 'SELECT' ||
-    target.getAttribute('role') === 'textbox' ||
+    tag === 'input' ||
+    tag === 'textarea' ||
+    tag === 'select' ||
+    role === 'textbox' ||
     target.isContentEditable ||
-    target.closest('.cm-editor') != null
+    target.closest('[contenteditable="true"], .cm-editor') != null
   );
 }

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -17,7 +17,7 @@ interface ReverseInput {
 
 interface ReverseState {
   values: number[]; // node values, fixed positions left→right (original order)
-  // next[i] = index of the node that node i currently points to, or null for nil.
+  // next[i]! = index of the node that node i currently points to, or null for nil.
   next: (number | null)[];
   prev: number | null; // index of the node `prev` points at (null = nil)
   head: number | null; // index of the node `head`/cur points at (null = nil)
@@ -34,7 +34,7 @@ function record({ values }: ReverseInput): Frame<ReverseState>[] {
   let prev: number | null = null;
   let head: number | null = n > 0 ? 0 : null;
 
-  const { emit, frames } = createRecorder<ReverseState>(() => ({
+  const { emit, frames } = createPrepRecorder<ReverseState>(() => ({
     values,
     next: next.slice(),
     prev,
@@ -44,7 +44,7 @@ function record({ values }: ReverseInput): Frame<ReverseState>[] {
     done: false,
   }));
 
-  const name = (i: number | null) => (i === null ? 'nil' : `${values[i]}`);
+  const name = (i: number | null) => (i === null ? 'nil' : `${values[i]!}`);
 
   emit(
     'INIT',
@@ -54,11 +54,11 @@ function record({ values }: ReverseInput): Frame<ReverseState>[] {
   );
 
   while (head !== null) {
-    const saved = next[head];
+    const saved = next[head]!;
     emit(
       'SAVE',
-      `next=${name(saved)}`,
-      `Before we cut head's link, remember where it points: next = head.Next = ${name(saved)}. Losing this would orphan the rest of the list.`,
+      `next=${name(saved!)}`,
+      `Before we cut head's link, remember where it points: next = head.Next = ${name(saved!)}. Losing this would orphan the rest of the list.`,
       { nextSaved: saved },
     );
 
@@ -78,7 +78,7 @@ function record({ values }: ReverseInput): Frame<ReverseState>[] {
       { nextSaved: saved },
     );
 
-    head = saved;
+    head! = saved;
     emit(
       'ADVANCE-HEAD',
       `head=${name(head)}`,
@@ -105,8 +105,8 @@ function chainFrom(head: number | null, values: number[], next: (number | null)[
   let cur = head;
   while (cur !== null && !seen.has(cur)) {
     seen.add(cur);
-    out.push(values[cur]);
-    cur = next[cur];
+    out.push(values[cur]!);
+    cur! = next[cur]!;
   }
   return out;
 }
@@ -135,12 +135,12 @@ function View({ frame }: PluginViewProps<ReverseState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         prev ={' '}
-        <span className="font-mono text-ink">{s.prev === null ? 'nil' : s.values[s.prev]}</span>
+        <span className="font-mono text-ink">{s.prev === null ? 'nil' : s.values[s.prev]!}</span>
         {' · '}head ={' '}
-        <span className="font-mono text-ink">{s.head === null ? 'nil' : s.values[s.head]}</span>
+        <span className="font-mono text-ink">{s.head === null ? 'nil' : s.values[s.head]!}</span>
         {s.nextSaved !== null && (
           <>
-            {' · '}next = <span className="font-mono text-ink">{s.values[s.nextSaved]}</span>
+            {' · '}next = <span className="font-mono text-ink">{s.values[s.nextSaved]!}</span>
           </>
         )}
       </div>
@@ -153,7 +153,7 @@ function View({ frame }: PluginViewProps<ReverseState>) {
       </div>
       {s.done && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → new head = {s.resultHead === null ? 'nil' : s.values[s.resultHead]}
+          → new head = {s.resultHead === null ? 'nil' : s.values[s.resultHead]!}
         </div>
       )}
     </div>
@@ -163,7 +163,7 @@ function View({ frame }: PluginViewProps<ReverseState>) {
 function Inspector({ frame }: InspectorProps<ReverseState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const valOf = (i: number | null) => (i === null ? 'nil' : `${s.values[i]}`);
+  const valOf = (i: number | null) => (i === null ? 'nil' : `${s.values[i]!}`);
   return (
     <VarGrid>
       <InspectorRow k="n (length)" v={s.values.length} />
@@ -318,7 +318,7 @@ export const simulator: ProblemSimulator = {
     if (!s) return { ok: false, label: 'no frames' };
     const reversed = chainFrom(s.resultHead, s.values, s.next);
     const expected = [...s.values].reverse();
-    const ok = reversed.length === expected.length && reversed.every((v, i) => v === expected[i]);
+    const ok = reversed.length === expected.length && reversed.every((v, i) => v === expected[i]!);
     return { ok, label: reversed.length ? reversed.join(' → ') : 'nil' };
   },
 };

@@ -54,15 +54,16 @@ function buildTable(n: number): number[][] {
     const prev = table[i - 1];
     const nd = [0, 0, 0, 0, 0, 0];
     // Append 'P': resets trailing Ls to 0, absences unchanged.
-    nd[idx(0, 0)] = (prev[idx(0, 0)] + prev[idx(0, 1)] + prev[idx(0, 2)]) % MOD;
-    nd[idx(1, 0)] = (prev[idx(1, 0)] + prev[idx(1, 1)] + prev[idx(1, 2)]) % MOD;
+    nd[idx(0, 0)] = (prev![idx(0, 0)]! + prev![idx(0, 1)]! + prev![idx(0, 2)]!) % MOD;
+    nd[idx(1, 0)] = (prev![idx(1, 0)]! + prev![idx(1, 1)]! + prev![idx(1, 2)]!) % MOD;
     // Append 'L': bumps trailing Ls by one, absences unchanged.
-    nd[idx(0, 1)] = prev[idx(0, 0)];
-    nd[idx(0, 2)] = prev[idx(0, 1)];
-    nd[idx(1, 1)] = prev[idx(1, 0)];
-    nd[idx(1, 2)] = prev[idx(1, 1)];
+    nd[idx(0, 1)]! = prev![idx(0, 0)]!;
+    nd[idx(0, 2)]! = prev![idx(0, 1)]!;
+    nd[idx(1, 1)]! = prev![idx(1, 0)]!;
+    nd[idx(1, 2)]! = prev![idx(1, 1)]!;
     // Append 'A': only legal from a 0-absence state; lands in A1L0.
-    nd[idx(1, 0)] = (nd[idx(1, 0)] + prev[idx(0, 0)] + prev[idx(0, 1)] + prev[idx(0, 2)]) % MOD;
+    nd[idx(1, 0)] =
+      (nd[idx(1, 0)]! + prev![idx(0, 0)]! + prev![idx(0, 1)]! + prev![idx(0, 2)]!) % MOD;
     table.push(nd);
   }
   return table;
@@ -102,16 +103,16 @@ function record({ n }: AttInput): Frame<AttState>[] {
     emit(
       'FILL',
       `day ${i}`,
-      `Day ${i}: extend every day-${i - 1} record by one of P/L/A. P resets trailing L's, L bumps them up (3 L's is illegal so A?L2 has no L-child), A is only allowed from a 0-absence state and lands in A1L0. The 6 counts become [${row.join(', ')}].`,
+      `Day ${i}: extend every day-${i - 1} record by one of P/L/A. P resets trailing L's, L bumps them up (3 L's is illegal so A?L2 has no L-child), A is only allowed from a 0-absence state and lands in A1L0. The 6 counts become [${row!.join(', ')}].`,
       { day: i, table: full.slice(0, i + 1).map((r) => r.slice()), answer: null },
     );
   }
 
-  const answer = n === 0 ? 1 : sumRow(full[n]);
+  const answer = n === 0 ? 1 : sumRow(full[n]!);
   emit(
     'DONE',
     `${answer} records`,
-    `Sum the 6 counts on day ${n}: ${full[n].join(' + ')} = ${answer}. So there are ${answer} valid attendance records of length ${n}.`,
+    `Sum the 6 counts on day ${n}: ${full[n]!.join(' + ')} = ${answer}. So there are ${answer} valid attendance records of length ${n}.`,
     { day: n, table: full.slice(0, n + 1).map((r) => r.slice()), answer: answer, done: true },
     'good',
   );

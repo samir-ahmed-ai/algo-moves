@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,7 +32,7 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {
   const visited: number[] = [];
   const view: number[] = [];
 
-  const { emit, frames } = createRecorder<SideViewState>(() => ({
+  const { emit, frames } = createPrepRecorder<SideViewState>(() => ({
     tree,
     queue: [],
     current: null,
@@ -45,7 +45,7 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {
   }));
 
   // Empty tree (root is null / absent).
-  if (tree.length === 0 || tree[0] == null) {
+  if (tree.length === 0 || tree[0]! == null) {
     emit(
       'DONE',
       'empty',
@@ -59,7 +59,7 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {
   let queue: number[] = [0];
   emit(
     'INIT',
-    `root=${tree[0]}`,
+    `root=${tree[0]!}`,
     `Right-side view: standing to the RIGHT of the tree, we see only the last node on each level. We BFS level by level; on every level the final node dequeued (i === sz − 1) is the one we can see.`,
     { queue: queue.slice() },
   );
@@ -75,14 +75,14 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {
     );
 
     for (let i = 0; i < sz; i++) {
-      const nodeIdx = queue[0];
+      const nodeIdx = queue[0]!;
       queue = queue.slice(1);
-      const val = tree[nodeIdx] as number;
+      const val = tree[nodeIdx!]! as number;
       const isLast = i === sz - 1;
 
       if (isLast) {
         view.push(val);
-        visited.push(nodeIdx);
+        visited.push(nodeIdx!);
         emit(
           'SEE',
           `see ${val}`,
@@ -99,7 +99,7 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {
           'good',
         );
       } else {
-        visited.push(nodeIdx);
+        visited.push(nodeIdx!);
         emit(
           'SKIP',
           `skip ${val}`,
@@ -117,14 +117,14 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {
       }
 
       // Enqueue children (left then right) — mirrors the Go solution.
-      const left = 2 * nodeIdx + 1;
-      const right = 2 * nodeIdx + 2;
+      const left = 2 * nodeIdx! + 1;
+      const right = 2 * nodeIdx! + 2;
       const added: number[] = [];
-      if (left < tree.length && tree[left] != null) added.push(left);
-      if (right < tree.length && tree[right] != null) added.push(right);
+      if (left < tree.length && tree[left]! != null) added.push(left);
+      if (right < tree.length && tree[right]! != null) added.push(right);
       if (added.length > 0) {
         queue = queue.concat(added);
-        const childVals = added.map((c) => tree[c]).join(', ');
+        const childVals = added.map((c) => tree[c]!).join(', ');
         emit(
           'ENQ',
           `enqueue ${childVals}`,
@@ -179,7 +179,7 @@ function View({ frame }: PluginViewProps<SideViewState>) {
       </div>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
       <div className={cn('mt-1 font-mono text-ink3', vizText.sm)}>
-        queue [{s.queue.map((i) => s.tree[i]).join(', ')}]
+        queue [{s.queue.map((i) => s.tree[i]!).join(', ')}]
       </div>
       <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
         side view → [{s.view.join(', ')}]
@@ -191,7 +191,7 @@ function View({ frame }: PluginViewProps<SideViewState>) {
 function Inspector({ frame }: InspectorProps<SideViewState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
   return (
     <VarGrid>
       <InspectorRow k="level" v={s.level} />

@@ -25,31 +25,42 @@ export interface ProgressData {
 }
 
 const KEY = STORAGE_KEYS.PROGRESS;
-const EMPTY: ProblemStat = { attempts: 0, correct: 0, streak: 0, bestStreak: 0, mastered: false };
+const EMPTY: Readonly<ProblemStat> = Object.freeze({
+  attempts: 0,
+  correct: 0,
+  streak: 0,
+  bestStreak: 0,
+  mastered: false,
+});
+
+function emptyStat(): ProblemStat {
+  return { ...EMPTY };
+}
 
 function normalizeProblemId(problemId: string): string | null {
   const id = problemId.trim();
   return id || null;
 }
 
-function nonNegativeInt(value: number): number {
-  return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+function nonNegativeInt(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
 }
 
 function normalizeStat(stat: ProblemStat): ProblemStat {
   const attempts = nonNegativeInt(stat.attempts);
   const correct = Math.min(nonNegativeInt(stat.correct), attempts);
-  const streak = nonNegativeInt(stat.streak);
+  const streak = Math.min(nonNegativeInt(stat.streak), attempts);
   return {
     attempts,
     correct,
     streak,
-    bestStreak: Math.max(nonNegativeInt(stat.bestStreak), streak),
+    bestStreak: Math.min(attempts, Math.max(nonNegativeInt(stat.bestStreak), streak)),
     mastered: Boolean(stat.mastered),
   };
 }
 
 function isProblemStat(value: unknown): value is ProblemStat {
+  if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<ProblemStat>;
   return (
     typeof candidate.attempts === 'number' &&
@@ -86,7 +97,8 @@ function readMistakeSeq(mistakes: Mistake[]): number {
   let max = -1;
   for (const m of mistakes) {
     const match = /^m(\d+)$/.exec(m.id);
-    if (match) max = Math.max(max, Number(match[1]));
+    const seq = match?.[1] ? Number(match[1]) : NaN;
+    if (Number.isFinite(seq)) max = Math.max(max, seq);
   }
   return max + 1;
 }
@@ -99,7 +111,11 @@ function load(): ProgressData {
         .map(([id, stat]) => [normalizeProblemId(id), normalizeStat(stat)] as const)
         .filter((entry): entry is readonly [string, ProblemStat] => entry[0] != null),
     ),
-    mistakes: data.mistakes.filter((m) => normalizeProblemId(m.problemId)),
+    mistakes: data.mistakes.flatMap((m) => {
+      const id = normalizeProblemId(m.id);
+      const problemId = normalizeProblemId(m.problemId);
+      return id && problemId ? [{ ...m, id, problemId }] : [];
+    }),
   };
 }
 
@@ -107,11 +123,11 @@ const store = createSyncStore<ProgressData>(KEY, load);
 
 let mistakeSeq = readMistakeSeq(store.get().mistakes);
 
-export function recordAttempt(problemId: string, correct: boolean) {
+export function recordAttempt(problemId: string, correct: boolean): void {
   const id = normalizeProblemId(problemId);
   if (!id) return;
   store.update((data) => {
-    const prev = data.stats[id] ?? EMPTY;
+    const prev = data.stats[id] ?? emptyStat();
     const streak = correct ? prev.streak + 1 : 0;
     const stat: ProblemStat = {
       attempts: prev.attempts + 1,
@@ -124,16 +140,16 @@ export function recordAttempt(problemId: string, correct: boolean) {
   });
 }
 
-export function setMastered(problemId: string, mastered: boolean) {
+export function setMastered(problemId: string, mastered: boolean): void {
   const id = normalizeProblemId(problemId);
   if (!id) return;
   store.update((data) => {
-    const prev = data.stats[id] ?? EMPTY;
+    const prev = data.stats[id] ?? emptyStat();
     return { ...data, stats: { ...data.stats, [id]: { ...prev, mastered } } };
   });
 }
 
-export function logMistake(m: Omit<Mistake, 'id'>) {
+export function logMistake(m: Omit<Mistake, 'id'>): void {
   const problemId = normalizeProblemId(m.problemId);
   if (!problemId) return;
   const entry: Mistake = { ...m, problemId, id: `m${mistakeSeq++}` };
@@ -141,11 +157,11 @@ export function logMistake(m: Omit<Mistake, 'id'>) {
   store.update((data) => ({ ...data, mistakes: [entry, ...data.mistakes].slice(0, 50) }));
 }
 
-export function clearMistakes() {
+export function clearMistakes(): void {
   store.update((data) => ({ ...data, mistakes: [] }));
 }
 
-export function resetProgress() {
+export function resetProgress(): void {
   store.set({ stats: {}, mistakes: [] });
 }
 
@@ -155,5 +171,5 @@ export function useProgress(): ProgressData {
 
 export function statFor(d: ProgressData, problemId: string): ProblemStat {
   const id = normalizeProblemId(problemId);
-  return id ? (d.stats[id] ?? EMPTY) : EMPTY;
+  return id && d.stats[id] ? d.stats[id] : emptyStat();
 }

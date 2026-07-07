@@ -4,21 +4,21 @@ import { chromeBar, chromeText } from '@/design/chromeTypography';
 export { chromeBar, chromeText };
 export { ChromeLabel } from '@/design/components/ChromeLabel';
 
-/** Pick a shorter button label on phone-sized viewports. */
-export function compactLabel(full: string, compact: string, isMobile: boolean) {
-  return isMobile ? compact : full;
-}
-
-/** Muted helper / hint copy for shell chrome. */
-export function ChromeHint({
-  children,
-  className,
-  mono,
-}: {
+interface ChromeTextProps {
   children: ReactNode;
   className?: string;
   mono?: boolean;
-}) {
+}
+
+/** Pick a shorter button label on phone-sized viewports. */
+export function compactLabel(full: string, compact: string, isMobile: boolean): string {
+  const fallback = full.trim();
+  const short = compact.trim();
+  return isMobile && short ? short : fallback;
+}
+
+/** Muted helper / hint copy for shell chrome. */
+export function ChromeHint({ children, className, mono }: ChromeTextProps) {
   return (
     <span
       className={cn(
@@ -34,15 +34,7 @@ export function ChromeHint({
 }
 
 /** Keyboard shortcut or hint badge for command palette / menus. */
-export function ChromeKbd({
-  children,
-  className,
-  mono = true,
-}: {
-  children: ReactNode;
-  className?: string;
-  mono?: boolean;
-}) {
+export function ChromeKbd({ children, className, mono = true }: ChromeTextProps) {
   return (
     <kbd
       className={cn(
@@ -57,8 +49,8 @@ export function ChromeKbd({
   );
 }
 
-/** Uppercase token badge (action, panel, problem, …). */
-export function ChromeToken({ children, className }: { children: ReactNode; className?: string }) {
+/** Uppercase token badge (action, panel, problem, ...). */
+export function ChromeToken({ children, className }: Omit<ChromeTextProps, 'mono'>) {
   return (
     <span
       className={cn(

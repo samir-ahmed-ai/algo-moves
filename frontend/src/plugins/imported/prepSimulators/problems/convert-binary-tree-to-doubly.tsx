@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -43,7 +43,7 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
   let prevIdx: number | null = null;
   let headVal: number | null = null;
 
-  const { emit, frames } = createRecorder<DoublyState>(() => ({
+  const { emit, frames } = createPrepRecorder<DoublyState>(() => ({
     tree: tree,
     status: status.slice(),
     prev: prevIdx,
@@ -61,12 +61,12 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
   );
 
   const dfs = (i: number) => {
-    if (i >= tree.length || tree[i] == null) return;
+    if (i >= tree.length || tree[i]! == null) return;
     const left = 2 * i + 1;
     const right = 2 * i + 2;
-    const val = tree[i] as number;
+    const val = tree[i]! as number;
 
-    if (left < tree.length && tree[left] != null) {
+    if (left < tree.length && tree[left]! != null) {
       emit(
         'GO_LEFT',
         `↙ ${val}`,
@@ -77,7 +77,7 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
     dfs(left);
 
     // Visit this node.
-    status[i] = 'active';
+    status[i]! = 'active';
     if (headVal === null) {
       headVal = val;
       emit(
@@ -87,7 +87,7 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
         { active: i, done: false },
       );
     } else {
-      const prevVal = tree[prevIdx as number] as number;
+      const prevVal = tree[prevIdx as number]! as number;
       emit(
         'LINK',
         `${prevVal}↔${val}`,
@@ -97,7 +97,7 @@ function record({ tree }: DoublyInput): Frame<DoublyState>[] {
     }
     list.push(val);
     prevIdx = i;
-    status[i] = 'done';
+    status[i]! = 'done';
     emit(
       'ADVANCE',
       `prev=${val}`,
@@ -126,10 +126,10 @@ function View({ frame }: PluginViewProps<DoublyState>) {
   const s = frame.state;
   const nodeClass = (i: number) => {
     if (s.active === i) return 'team-1';
-    if (s.status[i] === 'done') return 'team-2';
+    if (s.status[i]! === 'done') return 'team-2';
     return 'team-0';
   };
-  const prevVal = s.prev !== null ? (s.tree[s.prev] as number) : '—';
+  const prevVal = s.prev !== null ? (s.tree[s.prev]! as number) : '—';
   const rail = (
     <>
       <RailGroup label="pointers">
@@ -152,8 +152,8 @@ function View({ frame }: PluginViewProps<DoublyState>) {
 function Inspector({ frame }: InspectorProps<DoublyState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.active !== null ? (s.tree[s.active] as number) : '—';
-  const prevVal = s.prev !== null ? (s.tree[s.prev] as number) : '—';
+  const cur = s.active !== null ? (s.tree[s.active]! as number) : '—';
+  const prevVal = s.prev !== null ? (s.tree[s.prev]! as number) : '—';
   return (
     <VarGrid>
       <InspectorRow k="cur (visiting)" v={cur} />

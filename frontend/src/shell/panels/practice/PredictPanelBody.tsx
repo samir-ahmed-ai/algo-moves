@@ -93,6 +93,17 @@ export function PredictPanelBody() {
     );
   }
 
+  if (!cur) {
+    return (
+      <EmptyState
+        icon={<Lightbulb className="h-5 w-5" />}
+        title="Too short to predict"
+        hint="Pick a longer problem."
+      />
+    );
+  }
+
+  const nextFrame = frames[pos + 1];
   const answered = picked !== null;
   const next = () => {
     setPicked(null);
@@ -176,7 +187,7 @@ export function PredictPanelBody() {
         <div className="predict-feedback predict-feedback--wrong">
           <Hint>
             {picked === '(timed out)' ? '⏱ Timed out — ' : '✕ Actually — '}
-            {frames[pos + 1].move.caption}
+            {nextFrame ? nextFrame.move.caption : ''}
           </Hint>
           <Btn variant="primary" size="sm" onClick={next} className="self-start">
             next ›
@@ -185,7 +196,7 @@ export function PredictPanelBody() {
       )}
       {answered && picked === answer && (
         <div className="predict-feedback predict-feedback--right">
-          <Hint>✓ Right — {frames[pos + 1].move.caption}</Hint>
+          <Hint>✓ Right — {nextFrame ? nextFrame.move.caption : ''}</Hint>
         </div>
       )}
     </section>

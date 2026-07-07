@@ -29,12 +29,16 @@ function pickDistractors(correct: string, pool: string[], count: number, seed: n
 
 function fmtPattern(label: string, correct: boolean): { label: string; correct?: boolean } {
   const detail = correct ? 'fits this problem' : 'different approach';
-  return { label: `${label} — ${detail}`, correct: correct || undefined };
+  return correct
+    ? { label: `${label} — ${detail}`, correct: true }
+    : { label: `${label} — ${detail}` };
 }
 
 function fmtTime(label: string, correct: boolean): { label: string; correct?: boolean } {
   const detail = correct ? 'standard solution runtime' : 'wrong order of growth';
-  return { label: `${label} — ${detail}`, correct: correct || undefined };
+  return correct
+    ? { label: `${label} — ${detail}`, correct: true }
+    : { label: `${label} — ${detail}` };
 }
 
 function buildChoices(

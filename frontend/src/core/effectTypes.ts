@@ -12,10 +12,11 @@ export interface EffectPlugin<D = unknown> {
 export type InputBuilderKind = 'pad' | 'beat' | 'arpeggiator' | 'polyrhythm' | 'custom';
 
 function normalizeEffectMeta(meta: EffectPlugin['meta']): EffectPlugin['meta'] {
+  const id = meta.id.trim() || 'effect';
   return {
     ...meta,
-    id: meta.id.trim(),
-    title: meta.title.trim() || meta.id.trim(),
+    id,
+    title: meta.title.trim() || id,
   };
 }
 

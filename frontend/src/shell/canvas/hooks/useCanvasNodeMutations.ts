@@ -32,7 +32,8 @@ export function useCanvasNodeMutations({
         nds.map((n) => {
           if (n.id !== id) return n;
           const cur = ACCENTS.indexOf((n.data.accent as string) ?? '');
-          return { ...n, data: { ...n.data, accent: ACCENTS[(cur + 1) % ACCENTS.length] } };
+          const accent = ACCENTS[(cur + 1) % ACCENTS.length]!;
+          return { ...n, data: { ...n.data, accent } };
         }),
       ),
     [setNodes],

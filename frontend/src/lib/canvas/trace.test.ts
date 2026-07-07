@@ -8,8 +8,8 @@ describe('stackFrames', () => {
     const b: Frame[] = [{ move: { type: 'B', note: '', caption: 'b1' }, state: 2 }];
     const out = stackFrames([a, b]);
     expect(out).toHaveLength(2);
-    expect(out[0].move.type).toBe('A');
-    expect(out[1].move.type).toBe('B');
+    expect(out[0]!.move.type).toBe('A');
+    expect(out[1]!.move.type).toBe('B');
   });
 });
 

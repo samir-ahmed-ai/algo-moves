@@ -57,15 +57,15 @@ function record({ nums }: PartInput): Frame<PartState>[] {
   for (let k = 0; k < nums.length; k++) {
     const x = nums[k];
     // 0/1 knapsack reachable update, iterate high→low so each number is used once.
-    for (let s = total; s >= x; s--) {
-      if (reach[s - x]) reach[s] = true;
+    for (let s = total; s >= x!; s--) {
+      if (reach[s - x!]) reach[s] = true;
     }
     const hits = reach.map((b, i) => (b ? i : -1)).filter((i) => i >= 0);
     emit(
       'FILL',
       `+${x}`,
       `Fold in ${x}: every previously reachable sum s also makes s + ${x} reachable. Reachable subset sums are now {${hits.join(', ')}}.`,
-      { processed: k + 1, justAdded: x, bestSum: null, answer: null },
+      { processed: k + 1, justAdded: x!, bestSum: null, answer: null },
     );
   }
 

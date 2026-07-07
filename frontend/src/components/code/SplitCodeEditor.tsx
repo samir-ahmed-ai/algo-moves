@@ -2,8 +2,9 @@ import { useEffect, useRef, type MutableRefObject } from 'react';
 import { MergeView } from '@codemirror/merge';
 import { Compartment } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import type { RecallLineHeight } from '@/lib/editor/recallEditorTheme';
 import { nodeText } from '@/design/typography';
-import { useResizeSplit } from '@/hooks/useResizeSplit';
+import { useResizeSplit, type UseResizeSplitOptions } from '@/hooks/useResizeSplit';
 import {
   buildEditorTheme,
   buildRecallFontTheme,
@@ -44,7 +45,7 @@ export interface SplitCodeEditorProps {
   /** Denser pane chrome (labels + editor padding). */
   compact?: boolean;
   fontSize?: number;
-  lineHeight?: import('@/lib/editor/recallEditorTheme').RecallLineHeight;
+  lineHeight?: RecallLineHeight;
   showLineNumbers?: boolean;
   highlightChanges?: boolean;
   /** Receives the editable draft editor view for toolbar format/align actions. */
@@ -137,14 +138,15 @@ export function SplitCodeEditor({
   const langRef = useRef(lang);
   langRef.current = lang;
 
-  const { containerRef, splitPct, handleProps } = useResizeSplit({
+  const resizeSplitOptions: UseResizeSplitOptions = {
     direction: 'horizontal',
     splitPct: splitPctProp,
-    onSplitPctChange,
     minPct: CODE_SPLIT_MIN,
     maxPct: CODE_SPLIT_MAX,
     defaultPct: 50,
-  });
+    ...(onSplitPctChange !== undefined ? { onSplitPctChange } : {}),
+  };
+  const { containerRef, splitPct, handleProps } = useResizeSplit(resizeSplitOptions);
   const splitPctRef = useRef(splitPct);
   splitPctRef.current = splitPct;
   const showLeftRef = useRef(showLeft);
@@ -154,18 +156,19 @@ export function SplitCodeEditor({
     if (!hostRef.current) return;
     const isDark = dark ?? document.documentElement.classList.contains('dark');
     const langExt = languageExtension(lang);
+    const coreOptions = lang ? { lineNumbers: false, lang } : { lineNumbers: false };
 
     const view = new MergeView({
       parent: hostRef.current,
       orientation: 'a-b',
       highlightChanges: highlightChangesRef.current,
       gutter: mergeGutterRef.current,
-      collapseUnchanged: mergeCollapseRef.current ? { margin: 3, minSize: 4 } : undefined,
+      ...(mergeCollapseRef.current ? { collapseUnchanged: { margin: 3, minSize: 4 } } : {}),
       a: {
         doc: reference,
         extensions: [
           readOnlyCompA.current.of(mergeReferenceReadOnly),
-          ...coreEditorExtensions(langExt, { lineNumbers: false, lang }),
+          ...coreEditorExtensions(langExt, coreOptions),
           lineNumCompA.current.of(lineNumberExtensions(showLineNumbersRef.current)),
           themeCompA.current.of(buildEditorTheme(isDark)),
           fontCompA.current.of(buildRecallFontTheme(fontSizeRef.current, lineHeightRef.current)),
@@ -176,7 +179,7 @@ export function SplitCodeEditor({
         doc: draft,
         extensions: [
           vimComp.current.of(vimExtensions(vim ?? false)),
-          ...coreEditorExtensions(langExt, { lineNumbers: false, lang }),
+          ...coreEditorExtensions(langExt, coreOptions),
           lineNumCompB.current.of(lineNumberExtensions(showLineNumbersRef.current)),
           wrapComp.current.of(wrapExtensions(wrap ?? false)),
           themeCompB.current.of(buildEditorTheme(isDark)),
@@ -200,9 +203,9 @@ export function SplitCodeEditor({
     formatBothFnRef.current = () => {
       skipDraftSyncRef.current = true;
       formatMergeViews(view, {
-        lang: langRef.current,
         readOnlyCompA: readOnlyCompA.current,
         onDraftChange: onDraftChangeRef.current,
+        ...(langRef.current ? { lang: langRef.current } : {}),
       });
       queueMicrotask(() => {
         skipDraftSyncRef.current = false;
@@ -225,7 +228,6 @@ export function SplitCodeEditor({
       if (foldBothRef) foldBothRef.current = null;
       view.destroy();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
   useEffect(() => {
@@ -251,7 +253,6 @@ export function SplitCodeEditor({
     const theme = buildEditorTheme(isDark);
     view.a.dispatch({ effects: themeCompA.current.reconfigure(theme) });
     view.b.dispatch({ effects: themeCompB.current.reconfigure(theme) });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dark, themeKey]);
 
   useEffect(() => {
@@ -270,8 +271,8 @@ export function SplitCodeEditor({
     const view = mergeViewRef.current;
     if (!view) return;
     applySplitLayout(view, splitPct, showLeft);
-    const t = setTimeout(() => view.reconfigure({}), 0);
-    return () => clearTimeout(t);
+    const t = window.setTimeout(() => view.reconfigure({}), 0);
+    return () => window.clearTimeout(t);
   }, [splitPct, showLeft]);
 
   useEffect(() => {
@@ -280,7 +281,7 @@ export function SplitCodeEditor({
     view.reconfigure({
       highlightChanges,
       gutter: mergeGutter,
-      collapseUnchanged: mergeCollapse ? { margin: 3, minSize: 4 } : undefined,
+      ...(mergeCollapse ? { collapseUnchanged: { margin: 3, minSize: 4 } } : {}),
     });
   }, [mergeGutter, mergeCollapse, highlightChanges]);
 

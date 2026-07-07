@@ -58,8 +58,11 @@ export function applyDistribute(nodes: PanelFlowNode[], dir: 'h' | 'v'): PanelFl
   const centerOf = (n: PanelFlowNode) =>
     dir === 'h' ? n.position.x + W(n) / 2 : n.position.y + H(n) / 2;
   const ordered = [...sel].sort((a, b) => centerOf(a) - centerOf(b));
-  const first = centerOf(ordered[0]);
-  const last = centerOf(ordered[ordered.length - 1]);
+  const start = ordered[0];
+  const end = ordered[ordered.length - 1];
+  if (!start || !end) return nodes;
+  const first = centerOf(start);
+  const last = centerOf(end);
   const step = (last - first) / (ordered.length - 1);
   const target = new Map<string, number>();
   ordered.forEach((n, i) => target.set(n.id, first + step * i));

@@ -329,12 +329,12 @@ export function ReactionDuel() {
     let title = t.matchTie;
     if (!tie) {
       const w = winners[0];
-      if (w.id === myId && !isSpectator) {
+      if (w && w.id === myId && !isSpectator) {
         tone = 'win';
         title = t.youWin;
       } else {
         tone = isSpectator ? 'draw' : 'lose';
-        title = t.peerWins(w.name);
+        title = t.peerWins(w?.name ?? '');
       }
     }
 
@@ -357,7 +357,9 @@ export function ReactionDuel() {
             {t.playAgain}
           </TouchButton>
         ) : (
-          <p className="text-center text-xs text-ink3">{t.spectating}</p>
+          <p className="rounded-2xl border border-white/60 bg-white/64 px-3 py-3 text-center text-xs font-semibold text-slate-500 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+            {t.spectating}
+          </p>
         )}
       </GameBody>
     );
@@ -374,7 +376,7 @@ export function ReactionDuel() {
   return (
     <GameBody>
       <Ladder ordered={ordered} scores={scores} myId={myId} nPlayer={nPlayer} strings={t} />
-      <p className="text-center text-xs text-ink3">
+      <p className="text-center text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {isSpectator
           ? t.liveRound(round + 1)
           : `${t.firstTo(WIN_TARGET)} · ${nPlayer ? t.fastestWins : t.tapWhenGreen}`}
@@ -470,13 +472,18 @@ function TapZone({
   const tapped = phase === 'tapped' || phase === 'result';
   const falseStart = myMs !== null && isFalseStart(myMs);
 
-  let tone = 'border-edge bg-panel text-ink2';
-  if (armed) tone = 'border-amber-400/50 bg-amber-500/10 text-amber-500';
-  else if (go) tone = 'border-good/60 bg-good/15 text-good';
+  let tone =
+    'border-white/60 bg-white/72 text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-200';
+  if (armed)
+    tone =
+      'border-amber-300/50 bg-amber-50/90 text-amber-800 shadow-[0_18px_44px_rgba(245,158,11,0.14)] dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100';
+  else if (go)
+    tone =
+      'border-emerald-300/60 bg-emerald-100/85 text-emerald-800 shadow-[0_22px_58px_rgba(5,150,105,0.18)] dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100';
   else if (tapped)
     tone = falseStart
-      ? 'border-bad/50 bg-badbg text-bad'
-      : 'border-accent/40 bg-accentbg text-accent';
+      ? 'border-red-300/45 bg-red-50/85 text-red-700 shadow-[0_18px_44px_rgba(220,38,38,0.14)] dark:border-red-400/25 dark:bg-red-500/10 dark:text-red-200'
+      : 'border-cyan-300/45 bg-cyan-50/85 text-cyan-800 shadow-[0_18px_44px_rgba(8,145,178,0.14)] dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100';
 
   let heading = strings.getReady;
   let sub = strings.tapWhenGreen;
@@ -506,7 +513,7 @@ function TapZone({
       aria-label={heading}
       className={cn(
         'relative flex h-[clamp(5.5rem,26dvh,9rem)] w-full select-none touch-manipulation flex-col items-center justify-center gap-1',
-        'rounded-xl border-2 p-3 text-center transition-colors active:scale-[0.99]',
+        'rounded-[1.75rem] border p-4 text-center transition active:scale-[0.99]',
         'disabled:active:scale-100',
         go && !reduced && 'reaction-go-pop',
         falseStart && !reduced && 'reaction-shake',
@@ -518,8 +525,10 @@ function TapZone({
           <CountdownRing progress={goProgress} tone="good" size={30} />
         </span>
       ) : null}
-      <span className="text-xl font-black tracking-tight sm:text-2xl">{heading}</span>
-      <span className="text-[length:var(--fs-2xs)] font-medium opacity-90">{sub}</span>
+      <span className="text-2xl font-black tracking-tight sm:text-3xl">{heading}</span>
+      <span className="text-[length:var(--fs-2xs)] font-bold uppercase tracking-[0.14em] opacity-90">
+        {sub}
+      </span>
       <style>{TAP_ZONE_STYLES}</style>
     </button>
   );
@@ -548,10 +557,21 @@ function Ladder({
     const me = ordered.find((p) => p.id === myId) ?? ordered[0];
     const other = ordered.find((p) => p.id !== myId) ?? ordered[1];
     return (
-      <div className="flex items-center justify-center gap-3 text-center">
-        <PlayerCell peer={me} name={strings.you} score={scores[me?.id ?? ''] ?? 0} mine />
-        <span className="text-xs font-semibold text-ink3">vs</span>
-        <PlayerCell peer={other} name={other?.name} score={scores[other?.id ?? ''] ?? 0} />
+      <div className="flex items-center justify-center gap-3 rounded-[1.5rem] border border-white/60 bg-white/72 p-3 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+        <PlayerCell
+          {...(me !== undefined ? { peer: me } : {})}
+          name={strings.you}
+          score={scores[me?.id ?? ''] ?? 0}
+          mine
+        />
+        <span className="rounded-full bg-slate-950 px-2 py-0.5 text-xs font-black text-white dark:bg-white dark:text-slate-950">
+          vs
+        </span>
+        <PlayerCell
+          {...(other !== undefined ? { peer: other } : {})}
+          {...(other?.name !== undefined ? { name: other.name } : {})}
+          score={scores[other?.id ?? ''] ?? 0}
+        />
       </div>
     );
   }
@@ -564,21 +584,23 @@ function Ladder({
           <div
             key={p.id}
             className={cn(
-              'flex items-center gap-2.5 rounded-[var(--radius)] border px-3 py-2',
-              mine ? 'border-accent/50 bg-accentbg' : 'border-edge bg-panel',
+              'flex items-center gap-2.5 rounded-[1.35rem] border px-3 py-2 shadow-sm backdrop-blur',
+              mine
+                ? 'border-cyan-300/45 bg-cyan-50/85 dark:border-cyan-300/20 dark:bg-cyan-300/10'
+                : 'border-white/60 bg-white/70 dark:border-white/10 dark:bg-white/5',
             )}
           >
             <Avatar seed={p.id} name={p.name} size={26} />
             <span
               className={cn(
-                'min-w-0 flex-1 truncate text-sm font-semibold',
-                mine ? 'text-accent' : 'text-ink',
+                'min-w-0 flex-1 truncate text-sm font-bold',
+                mine ? 'text-cyan-800 dark:text-cyan-100' : 'text-slate-800 dark:text-slate-100',
               )}
             >
               {mine ? strings.you : p.name}
             </span>
             <Pips score={s} />
-            <span className="w-5 text-right font-mono text-sm font-bold tabular-nums text-ink2">
+            <span className="w-5 text-right font-mono text-sm font-black tabular-nums text-slate-700 dark:text-slate-200">
               {s}
             </span>
           </div>
@@ -602,11 +624,13 @@ function PlayerCell({
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
       {peer ? <Avatar seed={peer.id} name={peer.name} size={26} /> : null}
-      <div className="truncate text-xs font-semibold text-ink">{name ?? '—'}</div>
+      <div className="truncate text-xs font-bold text-slate-800 dark:text-slate-100">
+        {name ?? '—'}
+      </div>
       <div
         className={cn(
-          'font-mono text-xl font-bold tabular-nums',
-          mine ? 'text-accent' : 'text-ink2',
+          'font-mono text-xl font-black tabular-nums',
+          mine ? 'text-cyan-700 dark:text-cyan-200' : 'text-slate-700 dark:text-slate-200',
         )}
       >
         {score}
@@ -621,7 +645,13 @@ function Pips({ score }: { score: number }) {
   return (
     <span className="flex items-center gap-1">
       {Array.from({ length: WIN_TARGET }, (_, i) => (
-        <span key={i} className={cn('h-2 w-2 rounded-full', i < score ? 'bg-good' : 'bg-edge2')} />
+        <span
+          key={i}
+          className={cn(
+            'h-2 w-2 rounded-full',
+            i < score ? 'bg-emerald-500 dark:bg-emerald-300' : 'bg-slate-300 dark:bg-white/15',
+          )}
+        />
       ))}
     </span>
   );
@@ -645,7 +675,14 @@ function RoundTimes({
   return (
     <span className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 font-mono text-sm">
       {rows.map((r) => (
-        <span key={r.id} className={cn(r.id === result.winnerId ? 'font-bold' : 'opacity-80')}>
+        <span
+          key={r.id}
+          className={cn(
+            r.id === result.winnerId
+              ? 'font-black text-emerald-600 dark:text-emerald-200'
+              : 'font-semibold text-slate-500 dark:text-slate-400',
+          )}
+        >
           {r.id === myId ? strings.you : r.name}: {fmt(r.ms, strings)}
         </span>
       ))}
@@ -667,8 +704,8 @@ function History({
 }) {
   const ordered = [...results].sort((a, b) => a.round - b.round);
   return (
-    <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+    <div className="rounded-[1.35rem] border border-white/60 bg-white/72 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+      <p className="mb-2 text-center text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {strings.history}
       </p>
       <div className="flex flex-col gap-1.5">
@@ -677,18 +714,23 @@ function History({
             .map(([id, ms]) => ({ id, ms, name: players.find((p) => p.id === id)?.name ?? '?' }))
             .sort((a, b) => a.ms - b.ms);
           return (
-            <div key={res.round} className="flex items-center gap-2 text-xs">
-              <span className="w-6 shrink-0 font-mono text-ink3">{res.round + 1}</span>
+            <div
+              key={res.round}
+              className="flex items-center gap-2 rounded-2xl border border-white/60 bg-white/64 px-3 py-2 text-xs shadow-sm dark:border-white/10 dark:bg-white/5"
+            >
+              <span className="w-6 shrink-0 font-mono font-black text-slate-400">
+                {res.round + 1}
+              </span>
               <span className="flex flex-wrap gap-x-2.5 gap-y-0.5 font-mono">
                 {rows.map((r) => (
                   <span
                     key={r.id}
                     className={cn(
                       r.id === res.winnerId
-                        ? 'font-bold text-good'
+                        ? 'font-black text-emerald-600 dark:text-emerald-200'
                         : r.id === myId
-                          ? 'text-ink2'
-                          : 'text-ink3',
+                          ? 'font-bold text-slate-700 dark:text-slate-200'
+                          : 'font-semibold text-slate-500 dark:text-slate-400',
                     )}
                   >
                     {r.id === myId ? strings.you : r.name}: {fmt(r.ms, strings)}

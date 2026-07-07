@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { QueueTape } from '../../../../components/board/QueueTape';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -26,7 +26,7 @@ interface MinStackInput {
 interface MinStackState {
   /** Values bottom -> top (top is last). */
   vals: number[];
-  /** Parallel running-min stack, mins[i] = min of vals[0..i]. */
+  /** Parallel running-min stack, mins[i]! = min of vals[0..i]!. */
   mins: number[];
   /** Index of the cell touched this frame (top), or null. */
   active: number | null;
@@ -41,7 +41,7 @@ function record({ ops }: MinStackInput): Frame<MinStackState>[] {
   const vals: number[] = [];
   const mins: number[] = [];
 
-  const { emit, frames } = createRecorder<MinStackState>(() => ({
+  const { emit, frames } = createPrepRecorder<MinStackState>(() => ({
     vals: vals.slice(),
     mins: mins.slice(),
     active: null,
@@ -61,14 +61,14 @@ function record({ ops }: MinStackInput): Frame<MinStackState>[] {
     if (o.kind === 'push') {
       const val = o.val ?? 0;
       // m := val; if top exists and top.min < m, m = top.min
-      const topMin = mins.length > 0 ? mins[mins.length - 1] : null;
-      const m = topMin !== null && topMin < val ? topMin : val;
+      const topMin = mins.length > 0 ? mins[mins.length - 1]! : null;
+      const m = topMin !== null && topMin! < val ? topMin : val;
       vals.push(val);
-      mins.push(m);
+      mins.push(m!);
       const reason =
         topMin === null
           ? `the stack was empty, so its running-min is just ${val}`
-          : topMin < val
+          : topMin! < val
             ? `min(${val}, previous-min ${topMin}) = ${topMin}`
             : `min(${val}, previous-min ${topMin}) = ${val}`;
       emit(
@@ -88,7 +88,7 @@ function record({ ops }: MinStackInput): Frame<MinStackState>[] {
         );
         continue;
       }
-      const v = vals[vals.length - 1];
+      const v = vals[vals.length - 1]!;
       // show the cell about to leave, highlighted
       emit(
         'POP',
@@ -117,7 +117,7 @@ function record({ ops }: MinStackInput): Frame<MinStackState>[] {
         );
         continue;
       }
-      const m = mins[mins.length - 1];
+      const m = mins[mins.length - 1]!;
       emit(
         'MIN',
         `min ${m}`,
@@ -128,7 +128,7 @@ function record({ ops }: MinStackInput): Frame<MinStackState>[] {
     }
   }
 
-  const finalMin = mins.length > 0 ? mins[mins.length - 1] : null;
+  const finalMin = mins.length > 0 ? mins[mins.length - 1]! : null;
   emit(
     'DONE',
     finalMin !== null ? `min ${finalMin}` : 'empty',
@@ -177,7 +177,7 @@ function View({ frame }: PluginViewProps<MinStackState>) {
         top cell:{' '}
         <span className="font-mono text-ink">
           {s.vals.length > 0
-            ? `val=${s.vals[s.vals.length - 1]}, min=${s.mins[s.mins.length - 1]}`
+            ? `val=${s.vals[s.vals.length - 1]!}, min=${s.mins[s.mins.length - 1]!}`
             : '—'}
         </span>
       </div>
@@ -188,8 +188,8 @@ function View({ frame }: PluginViewProps<MinStackState>) {
 function Inspector({ frame }: InspectorProps<MinStackState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const topVal = s.vals.length > 0 ? s.vals[s.vals.length - 1] : '—';
-  const topMin = s.mins.length > 0 ? s.mins[s.mins.length - 1] : '—';
+  const topVal = s.vals.length > 0 ? s.vals[s.vals.length - 1]! : '—';
+  const topMin = s.mins.length > 0 ? s.mins[s.mins.length - 1]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="op" v={s.op || '—'} />
@@ -349,7 +349,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as MinStackState | undefined;
     if (!s) return { ok: false, label: 'no frames' };
-    const finalMin = s.mins.length > 0 ? s.mins[s.mins.length - 1] : null;
+    const finalMin = s.mins.length > 0 ? s.mins[s.mins.length - 1]! : null;
     return finalMin !== null
       ? { ok: true, label: `min = ${finalMin}` }
       : { ok: true, label: 'empty' };

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -48,13 +48,13 @@ const DIR_NAME = (dr: number, dc: number): string =>
 
 function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
   const m = mat.length;
-  const n = mat[0].length;
+  const n = mat[0]!.length;
   const visited: boolean[][] = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
   const path: [number, number][] = [];
   const cloneVisited = (): boolean[][] => visited.map((row) => row.slice());
-  const clonePath = (): [number, number][] => path.map((p) => [p[0], p[1]] as [number, number]);
+  const clonePath = (): [number, number][] => path.map((p) => [p[0]!, p[1]!] as [number, number]);
 
-  const { emit, frames } = createRecorder<PathState>(() => ({
+  const { emit, frames } = createPrepRecorder<PathState>(() => ({
     mat,
     src: [sx, sy],
     dest: [dx, dy],
@@ -85,7 +85,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
       );
       return false;
     }
-    if (mat[i][j] === 1) {
+    if (mat[i]![j] === 1) {
       emit(
         'BLOCKED',
         `(${i},${j}) wall`,
@@ -95,7 +95,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
       );
       return false;
     }
-    if (visited[i][j]) {
+    if (visited[i]![j]) {
       emit(
         'BLOCKED',
         `(${i},${j}) seen`,
@@ -126,7 +126,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
       return true;
     }
 
-    visited[i][j] = true;
+    visited[i]![j] = true;
     emit(
       'VISIT',
       `visit (${i},${j})`,
@@ -172,7 +172,7 @@ function record({ mat, sx, sy, dx, dy }: PathInput): Frame<PathState>[] {
 }
 
 function onPath(path: [number, number][], r: number, c: number): boolean {
-  return path.some((p) => p[0] === r && p[1] === c);
+  return path.some((p) => p[0]! === r && p[1]! === c);
 }
 
 function View({ frame }: PluginViewProps<PathState>) {
@@ -180,29 +180,29 @@ function View({ frame }: PluginViewProps<PathState>) {
   const result = s.result;
   const tone = (r: number, c: number): string => {
     if (result && onPath(result, r, c)) return 'path';
-    if (r === s.src[0] && c === s.src[1]) return 'active';
-    if (r === s.dest[0] && c === s.dest[1]) return 'fill';
-    if (s.mat[r][c] === 1) return 'water';
+    if (r === s.src[0]! && c === s.src[1]!) return 'active';
+    if (r === s.dest[0]! && c === s.dest[1]!) return 'fill';
+    if (s.mat[r]![c] === 1) return 'water';
     if (onPath(s.path, r, c)) return 'path';
-    if (s.visited[r][c]) return 'visited';
+    if (s.visited[r]![c]) return 'visited';
     return 'land';
   };
   const label = (r: number, c: number): string => {
-    if (r === s.src[0] && c === s.src[1]) return 'S';
-    if (r === s.dest[0] && c === s.dest[1]) return 'D';
-    return s.mat[r][c] === 1 ? '▩' : '·';
+    if (r === s.src[0]! && c === s.src[1]!) return 'S';
+    if (r === s.dest[0]! && c === s.dest[1]!) return 'D';
+    return s.mat[r]![c] === 1 ? '▩' : '·';
   };
-  const pathStr = (result ?? s.path).map((p) => `(${p[0]},${p[1]})`).join(' → ');
+  const pathStr = (result ?? s.path).map((p) => `(${p[0]!},${p[1]!})`).join(' → ');
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         start{' '}
         <span className="font-mono text-ink">
-          ({s.src[0]},{s.src[1]})
+          ({s.src[0]!},{s.src[1]!})
         </span>{' '}
         · dest{' '}
         <span className="font-mono text-ink">
-          ({s.dest[0]},{s.dest[1]})
+          ({s.dest[0]!},{s.dest[1]!})
         </span>{' '}
         · 1 = wall
       </div>
@@ -219,9 +219,9 @@ function Inspector({ frame }: InspectorProps<PathState>) {
   const s = frame.state;
   return (
     <VarGrid>
-      <InspectorRow k="start" v={`(${s.src[0]},${s.src[1]})`} />
-      <InspectorRow k="dest" v={`(${s.dest[0]},${s.dest[1]})`} />
-      <InspectorRow k="current" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
+      <InspectorRow k="start" v={`(${s.src[0]!},${s.src[1]!})`} />
+      <InspectorRow k="dest" v={`(${s.dest[0]!},${s.dest[1]!})`} />
+      <InspectorRow k="current" v={s.cur ? `(${s.cur[0]!},${s.cur[1]!})` : '—'} />
       <InspectorRow k="path length" v={(s.result ?? s.path).length} />
       <InspectorRow k="result" v={s.result ? `${s.result.length} cells` : s.done ? 'none' : '…'} />
     </VarGrid>

@@ -5,8 +5,8 @@ import { LAST_ITEM_KEY } from '@/store/workspace/workspaceConstants';
 const TAB_KEY = `${STORAGE_KEYS.PROGRESS}:last-tab`;
 
 export interface StudySessionResume {
-  lastItemId: string | null;
-  lastTab: string | null;
+  readonly lastItemId: string | null;
+  readonly lastTab: string | null;
 }
 
 function normalizeId(value: string | null | undefined): string | null {

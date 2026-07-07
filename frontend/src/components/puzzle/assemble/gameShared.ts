@@ -27,7 +27,11 @@ export function seededShuffle<T>(arr: T[], rand: () => number): T[] {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    const left = a[i];
+    const right = a[j];
+    if (left === undefined || right === undefined) continue;
+    a[i] = right;
+    a[j] = left;
   }
   return a;
 }
@@ -122,7 +126,8 @@ function pickMatch(code: string, re: RegExp, rand: () => number): RegExpExecArra
     if (m.index === re.lastIndex) re.lastIndex++;
   }
   if (hits.length === 0) return null;
-  return hits[Math.floor(rand() * hits.length)];
+  const pick = hits[Math.floor(rand() * hits.length)];
+  return pick ?? null;
 }
 
 function splice(code: string, start: number, len: number, insert: string): string {
@@ -145,7 +150,11 @@ const mutators: Mutator[] = [
   // and generics (List<String>) never produce syntactically-invalid mutants
   (code, rand) => {
     const m = pickMatch(code, /<=|>=|==|!=|(?<=\s)<(?![<=-])|(?<=\s)(?<!-)>(?![>=])/g, rand);
-    return m ? splice(code, m.index, m[0].length, COMPARISON_FLIP[m[0]]) : null;
+    if (!m) return null;
+    const matched = m[0];
+    if (!matched) return null;
+    const flipped = COMPARISON_FLIP[matched];
+    return flipped ? splice(code, m.index, matched.length, flipped) : null;
   },
   // increment/decrement + arithmetic swap
   (code, rand) => {
@@ -155,8 +164,11 @@ const mutators: Mutator[] = [
       rand,
     );
     if (!m) return null;
+    const matched = m[0];
+    if (!matched) return null;
     const swap: Record<string, string> = { '++': '--', '--': '++', '+': '-', '-': '+' };
-    return splice(code, m.index, m[0].length, swap[m[0]]);
+    const replacement = swap[matched];
+    return replacement ? splice(code, m.index, matched.length, replacement) : null;
   },
   // integer literal ±1
   (code, rand) => {
@@ -182,6 +194,7 @@ const mutators: Mutator[] = [
     const idents = [...counts.entries()].sort((a, b) => b[1].n - a[1].n).map(([w]) => w);
     if (idents.length === 0) return null;
     const target = idents[Math.floor(rand() * Math.min(idents.length, 3))];
+    if (!target) return null;
     const pool = idents.filter((w) => w !== target && w.length <= target.length + 4);
     const harvested = siblings
       .flatMap((s) => s.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g) ?? [])
@@ -194,7 +207,9 @@ const mutators: Mutator[] = [
           : pool[0];
     if (!replacement) return null;
     const occ = pickMatch(code, new RegExp(`\\b${target}\\b`, 'g'), rand);
-    return occ ? splice(code, occ.index, occ[0].length, replacement) : null;
+    if (!occ) return null;
+    const occMatch = occ[0];
+    return occMatch ? splice(code, occ.index, occMatch.length, replacement) : null;
   },
   // boolean / negation toggle
   (code, rand) => {
@@ -206,7 +221,10 @@ const mutators: Mutator[] = [
       True: 'False',
       False: 'True',
     };
-    return splice(code, m.index, m[0].length, swap[m[0]]);
+    const matched = m[0];
+    if (!matched) return null;
+    const swapped = swap[matched];
+    return swapped ? splice(code, m.index, matched.length, swapped) : null;
   },
   // adjacent interior-line swap (multi-line pieces only)
   (code, rand) => {
@@ -214,10 +232,13 @@ const mutators: Mutator[] = [
     if (lines.length < 3) return null;
     const i = 1 + Math.floor(rand() * (lines.length - 2));
     const j = i === lines.length - 2 ? i - 1 : i + 1;
-    if (i === j || lines[i].trim() === lines[j].trim()) return null;
-    const n = lines.slice();
-    [n[i], n[j]] = [n[j], n[i]];
-    return n.join('\n');
+    const lineI = lines[i];
+    const lineJ = lines[j];
+    if (i === j || !lineI || !lineJ || lineI.trim() === lineJ.trim()) return null;
+    const next = lines.slice();
+    next[i] = lineJ;
+    next[j] = lineI;
+    return next.join('\n');
   },
 ];
 
@@ -308,7 +329,9 @@ export function createVelocityTracker(windowMs = 80): VelocityTracker {
     velocity() {
       if (samples.length < 2) return 0;
       const last = samples[samples.length - 1];
+      if (!last) return 0;
       let first = samples[0];
+      if (!first) return 0;
       for (const s of samples) {
         if (last.t - s.t <= windowMs) {
           first = s;

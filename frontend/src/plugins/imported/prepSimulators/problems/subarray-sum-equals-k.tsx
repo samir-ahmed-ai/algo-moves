@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -41,7 +41,7 @@ function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {
   let sum = 0;
   let cnt = 0;
 
-  const { emit, frames } = createRecorder<SubarraySumState>(() => ({
+  const { emit, frames } = createPrepRecorder<SubarraySumState>(() => ({
     nums,
     k,
     i: null,
@@ -56,17 +56,17 @@ function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {
   emit(
     'INIT',
     `k=${k}`,
-    `Subarray Sum Equals K: count subarrays summing to ${k}. Key idea — if prefix[j] − prefix[i] = ${k}, then the slice (i+1 .. j) sums to ${k}. We scan once, keeping a map of how many times each running prefix sum has occurred. Seed it with {0: 1} so a whole-prefix match counts.`,
+    `Subarray Sum Equals K: count subarrays summing to ${k}. Key idea — if prefix[j]! − prefix[i]! = ${k}, then the slice (i+1 .. j) sums to ${k}. We scan once, keeping a map of how many times each running prefix sum has occurred. Seed it with {0: 1} so a whole-prefix match counts.`,
     { sum: 0 },
   );
 
   for (let i = 0; i < nums.length; i++) {
-    sum += nums[i];
+    sum += nums[i]!;
     const need = sum - k;
     emit(
       'SCAN',
       `sum=${sum}`,
-      `At index ${i} (value ${nums[i]}) the running prefix sum becomes ${sum}. A subarray ending here sums to ${k} exactly when an earlier prefix equalled sum − k = ${sum} − ${k} = ${need}. Look up ${need} in the map.`,
+      `At index ${i} (value ${nums[i]!}) the running prefix sum becomes ${sum}. A subarray ending here sums to ${k} exactly when an earlier prefix equalled sum − k = ${sum} − ${k} = ${need}. Look up ${need} in the map.`,
       { i, sum, need },
     );
 
@@ -92,8 +92,8 @@ function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {
     prefixMap.set(sum, (prefixMap.get(sum) ?? 0) + 1);
     emit(
       'STORE',
-      `prefix[${sum}]=${prefixMap.get(sum)}`,
-      `Record the current prefix sum so future indices can match against it: prefix[${sum}] is now ${prefixMap.get(sum)}.`,
+      `prefix[${sum}]!=${prefixMap.get(sum)}`,
+      `Record the current prefix sum so future indices can match against it: prefix[${sum}]! is now ${prefixMap.get(sum)}.`,
       { i, sum },
     );
   }
@@ -128,7 +128,11 @@ function View({ frame }: PluginViewProps<SubarraySumState>) {
           <RailResult
             label="count"
             value={s.cnt}
-            tone={s.done ? 'good' : s.added !== null && s.added > 0 ? 'accent' : undefined}
+            {...(s.done
+              ? { tone: 'good' as const }
+              : s.added !== null && s.added > 0
+                ? { tone: 'accent' as const }
+                : {})}
           />
         </>
       }
@@ -145,10 +149,10 @@ function Inspector({ frame }: InspectorProps<SubarraySumState>) {
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
       <InspectorRow k="prefix sum" v={s.sum} />
       <InspectorRow k="need (sum−k)" v={s.need ?? '—'} />
-      <InspectorRow k="map[need]" v={s.added ?? '—'} />
+      <InspectorRow k="map[need]!" v={s.added ?? '—'} />
       <InspectorRow k="map size" v={s.prefix.length} />
       <InspectorRow k="count" v={s.cnt} />
     </VarGrid>
@@ -174,14 +178,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Prefix Sum Mod Map — different approach',
       },
     ],
-    explain: 'If `prefix[j] - prefix[i] == k`, then subarray `[i+1..j]` sums to `k`',
+    explain: 'If `prefix[j]! - prefix[i]! == k`, then subarray `[i+1..j]` sums to `k`',
   },
   {
     id: 'init',
     prompt: 'At the start of a run (Subarray Sum Equals K), what strategy is established?',
     choices: [
       {
-        label: 'If `prefix[j] - prefix[i] == k` — described in INIT caption',
+        label: 'If `prefix[j]! - prefix[i]! == k` — described in INIT caption',
         correct: true,
       },
       {
@@ -195,7 +199,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Subarray Sum Equals K: count subarrays summing to . Key idea — if prefix[j] − prefix[i] = , then the slice (i+1 .. j) sums to . We scan once, keeping a map of how many times each running prefix sum has occurred. Seed it with {0: 1} so a whole-prefix match counts.',
+      'Subarray Sum Equals K: count subarrays summing to . Key idea — if prefix[j]! − prefix[i]! = , then the slice (i+1 .. j) sums to . We scan once, keeping a map of how many times each running prefix sum has occurred. Seed it with {0: 1} so a whole-prefix match counts.',
   },
   {
     id: 'key-step',
@@ -256,7 +260,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n). O(n). If `prefix[j] - prefix[i] == k`, then subarray `[i+1..j]` sums to `k`; Use a hashmap counting how many times each prefix sum has occurred',
+      'O(n). O(n). If `prefix[j]! - prefix[i]! == k`, then subarray `[i+1..j]` sums to `k`; Use a hashmap counting how many times each prefix sum has occurred',
   },
   {
     id: 'outcome',

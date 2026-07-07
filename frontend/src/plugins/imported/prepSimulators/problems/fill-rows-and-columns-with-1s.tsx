@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -45,22 +45,22 @@ function clone(mat: number[][]): number[][] {
 function record({ mat: input }: FillInput): Frame<FillState>[] {
   const mat = clone(input);
   const m = mat.length;
-  const n = m > 0 ? mat[0].length : 0;
+  const n = m > 0 ? mat[0]!.length : 0;
   let row0 = false;
   let col0 = false;
   const marked: [number, number][] = [];
   const filled: [number, number][] = [];
   const border: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<FillState>(() => ({
+  const { emit, frames } = createPrepRecorder<FillState>(() => ({
     mat: clone(mat),
     m: m,
     n: n,
     row0: row0,
     col0: col0,
-    marked: marked.map((p) => [p[0], p[1]] as [number, number]),
-    filled: filled.map((p) => [p[0], p[1]] as [number, number]),
-    border: border.map((p) => [p[0], p[1]] as [number, number]),
+    marked: marked.map((p) => [p[0]!, p[1]!] as [number, number]),
+    filled: filled.map((p) => [p[0]!, p[1]!] as [number, number]),
+    border: border.map((p) => [p[0]!, p[1]!] as [number, number]),
     phase: 'init',
     active: null,
     done: false,
@@ -86,22 +86,22 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
 
   // Pass 1a: flag whether the original first row has a 1.
   for (let j = 0; j < n; j++) {
-    if (mat[0][j] === 1) row0 = true;
+    if (mat[0]![j] === 1) row0 = true;
     emit(
       'SCAN_ROW0',
       `row0=${row0}`,
-      `Scanning the first row to record its own state before we overwrite it. mat[0][${j}] = ${mat[0][j]}. row0 is now ${row0}${row0 ? ' — the top row already had a 1, so we must rebuild it fully at the end.' : '.'}`,
+      `Scanning the first row to record its own state before we overwrite it. mat[0]![${j}] = ${mat[0]![j]}. row0 is now ${row0}${row0 ? ' — the top row already had a 1, so we must rebuild it fully at the end.' : '.'}`,
       { phase: 'scan-row0', active: [0, j] },
     );
   }
 
   // Pass 1b: flag whether the original first column has a 1.
   for (let i = 0; i < m; i++) {
-    if (mat[i][0] === 1) col0 = true;
+    if (mat[i]![0] === 1) col0 = true;
     emit(
       'SCAN_COL0',
       `col0=${col0}`,
-      `Scanning the first column to record its own state before we overwrite it. mat[${i}][0] = ${mat[i][0]}. col0 is now ${col0}${col0 ? ' — the left column already had a 1, so we must rebuild it fully at the end.' : '.'}`,
+      `Scanning the first column to record its own state before we overwrite it. mat[${i}]![0] = ${mat[i]![0]}. col0 is now ${col0}${col0 ? ' — the left column already had a 1, so we must rebuild it fully at the end.' : '.'}`,
       { phase: 'scan-col0', active: [i, 0] },
     );
   }
@@ -109,22 +109,22 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
   // Pass 2: mark from the interior. A 1 at (i,j) records itself in row0 and col0.
   for (let i = 1; i < m; i++) {
     for (let j = 1; j < n; j++) {
-      if (mat[i][j] === 1) {
-        mat[i][0] = 1;
-        mat[0][j] = 1;
+      if (mat[i]![j] === 1) {
+        mat[i]![0] = 1;
+        mat[0]![j] = 1;
         marked.push([i, 0]);
         marked.push([0, j]);
         emit(
           'MARK',
           `mark ${i},${j}`,
-          `Interior cell mat[${i}][${j}] = 1, so this row and column must become all 1s. We record that by setting the markers mat[${i}][0] = 1 and mat[0][${j}] = 1 in the marker lanes.`,
+          `Interior cell mat[${i}]![${j}] = 1, so this row and column must become all 1s. We record that by setting the markers mat[${i}]![0] = 1 and mat[0]![${j}] = 1 in the marker lanes.`,
           { phase: 'mark', active: [i, j] },
         );
       } else {
         emit(
           'MARK',
           `skip ${i},${j}`,
-          `Interior cell mat[${i}][${j}] = 0 — nothing to mark for this cell.`,
+          `Interior cell mat[${i}]![${j}] = 0 — nothing to mark for this cell.`,
           { phase: 'mark', active: [i, j] },
         );
       }
@@ -134,21 +134,21 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
   // Pass 3: apply markers to the interior.
   for (let i = 1; i < m; i++) {
     for (let j = 1; j < n; j++) {
-      if (mat[i][0] === 1 || mat[0][j] === 1) {
-        const already = mat[i][j] === 1;
-        mat[i][j] = 1;
+      if (mat[i]![0] === 1 || mat[0]![j] === 1) {
+        const already = mat[i]![j] === 1;
+        mat[i]![j] = 1;
         if (!already) filled.push([i, j]);
         emit(
           'APPLY',
           `fill ${i},${j}`,
-          `mat[${i}][0] = ${mat[i][0]} or mat[0][${j}] = ${mat[0][j]} flags this cell, so set mat[${i}][${j}] = 1${already ? ' (it was already 1).' : '.'}`,
+          `mat[${i}]![0] = ${mat[i]![0]} or mat[0]![${j}] = ${mat[0]![j]} flags this cell, so set mat[${i}]![${j}] = 1${already ? ' (it was already 1).' : '.'}`,
           { phase: 'apply', active: [i, j] },
         );
       } else {
         emit(
           'APPLY',
           `keep ${i},${j}`,
-          `Neither marker fires for mat[${i}][${j}] (row marker ${mat[i][0]}, column marker ${mat[0][j]}), so it stays 0.`,
+          `Neither marker fires for mat[${i}]![${j}] (row marker ${mat[i]![0]}, column marker ${mat[0]![j]}), so it stays 0.`,
           { phase: 'apply', active: [i, j] },
         );
       }
@@ -158,26 +158,26 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
   // Pass 4: restore the borders using the flags we saved up front.
   if (row0) {
     for (let j = 0; j < n; j++) {
-      const already = mat[0][j] === 1;
-      mat[0][j] = 1;
+      const already = mat[0]![j] === 1;
+      mat[0]![j] = 1;
       if (!already) border.push([0, j]);
       emit(
         'BORDER',
         `row0 ${j}`,
-        `Because the original top row contained a 1 (row0 = true), the entire first row becomes 1: set mat[0][${j}] = 1.`,
+        `Because the original top row contained a 1 (row0 = true), the entire first row becomes 1: set mat[0]![${j}] = 1.`,
         { phase: 'borders', active: [0, j] },
       );
     }
   }
   if (col0) {
     for (let i = 0; i < m; i++) {
-      const already = mat[i][0] === 1;
-      mat[i][0] = 1;
+      const already = mat[i]![0] === 1;
+      mat[i]![0] = 1;
       if (!already) border.push([i, 0]);
       emit(
         'BORDER',
         `col0 ${i}`,
-        `Because the original left column contained a 1 (col0 = true), the entire first column becomes 1: set mat[${i}][0] = 1.`,
+        `Because the original left column contained a 1 (col0 = true), the entire first column becomes 1: set mat[${i}]![0] = 1.`,
         { phase: 'borders', active: [i, 0] },
       );
     }
@@ -195,18 +195,18 @@ function record({ mat: input }: FillInput): Frame<FillState>[] {
 }
 
 function inList(list: [number, number][], r: number, c: number): boolean {
-  return list.some((p) => p[0] === r && p[1] === c);
+  return list.some((p) => p[0]! === r && p[1]! === c);
 }
 
 function View({ frame }: PluginViewProps<FillState>) {
   const s = frame.state;
   const isMarker = (r: number, c: number) => r === 0 || c === 0;
   const cellTone = (r: number, c: number): string => {
-    if (s.active && s.active[0] === r && s.active[1] === c) return 'active';
+    if (s.active && s.active[0]! === r && s.active[1]! === c) return 'active';
     if (s.phase === 'borders' && inList(s.border, r, c)) return 'path';
     if (s.phase === 'apply' && inList(s.filled, r, c)) return 'fill';
     if ((s.phase === 'mark' || s.phase === 'apply') && inList(s.marked, r, c)) return 'visited';
-    if (s.mat[r][c] === 1) return 'land';
+    if (s.mat[r]![c] === 1) return 'land';
     if (isMarker(r, c)) return 'water';
     return '';
   };
@@ -299,7 +299,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'On the "APPLY" step (fill ,), what happens?',
     choices: [
       {
-        label: 'mat[][0] = or mat[0][] = flags — this move caption',
+        label: 'mat[][0] = or mat[0]![] = flags — this move caption',
         correct: true,
       },
       {
@@ -312,7 +312,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Remaining input skipped — early return path',
       },
     ],
-    explain: 'mat[][0] =  or mat[0][] =  flags this cell, so set mat[][] = 1',
+    explain: 'mat[][0] =  or mat[0]![] =  flags this cell, so set mat[][] = 1',
   },
   {
     id: 'state',

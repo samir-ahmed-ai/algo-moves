@@ -10,7 +10,8 @@ export function computeInputFrameCounts<I, S>(plugin: ProblemPlugin<I, S>): Inpu
     const id = inp.id.trim();
     if (!id) continue;
     try {
-      counts.set(id, plugin.record(inp.value).length);
+      const frames = plugin.record(inp.value);
+      counts.set(id, Array.isArray(frames) ? frames.length : 0);
     } catch {
       counts.set(id, 0);
     }
@@ -24,7 +25,7 @@ export function inputFrameCount(counts: InputFrameCounts, inputId: string): numb
 }
 
 /** Stable dependency key for memoizing frame counts when plugin identity changes. */
-export function inputFrameCountsKey(inputs: SampleInput<unknown>[]): string {
+export function inputFrameCountsKey(inputs: readonly SampleInput<unknown>[]): string {
   return inputs
     .map((i) => i.id.trim())
     .filter(Boolean)

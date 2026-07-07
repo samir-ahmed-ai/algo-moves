@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -48,7 +48,7 @@ function record({ n }: PowerTwoInput): Frame<PowerTwoState>[] {
   const width = WIDTH;
   const rows: Row[] = [];
 
-  const { emit, frames } = createRecorder<PowerTwoState>(() => ({
+  const { emit, frames } = createPrepRecorder<PowerTwoState>(() => ({
     n,
     width,
     rows: rows.map((r) => ({ label: r.label, bits: r.bits.slice() })),
@@ -139,10 +139,10 @@ function View({ frame }: PluginViewProps<PowerTwoState>) {
             const isAnd = ri === 2;
             const tone = (col: number) =>
               isAnd
-                ? r.bits[col] === '1'
+                ? r.bits[col]! === '1'
                   ? 'match'
                   : ''
-                : s.lowestSet === col && r.bits[col] === '1'
+                : s.lowestSet === col && r.bits[col]! === '1'
                   ? 'match'
                   : '';
             const pointers: ArrayPointer[] =

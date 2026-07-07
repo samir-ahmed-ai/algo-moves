@@ -28,7 +28,7 @@ export async function captureElementPng(
   const { toPng } = await import('html-to-image');
   const dataUrl = await toPng(element, {
     pixelRatio: opts.pixelRatio ?? 2,
-    backgroundColor: opts.backgroundColor,
+    ...(opts.backgroundColor !== undefined ? { backgroundColor: opts.backgroundColor } : {}),
     cacheBust: true,
   });
   const res = await fetch(dataUrl);

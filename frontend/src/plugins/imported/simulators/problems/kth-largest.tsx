@@ -97,19 +97,20 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
     for (let x = 0; x < n; x++) dead[x] = x < lo || x > hi;
 
     if (lo === hi) {
-      answer = a[lo];
+      const ans = a[lo]!;
+      answer! = ans;
       found = lo;
       emitDone(
         'BASE',
-        `a[${lo}]=${a[lo]}`,
-        `Window collapsed to a single cell at index ${lo}. Its value ${a[lo]} is the element at the target position — that is the ${k}${k === 2 ? 'nd' : 'th'} largest. Answer = ${a[lo]}.`,
-        { lo, hi, found: lo, answer: a[lo] },
+        `a[${lo}]=${ans}`,
+        `Window collapsed to a single cell at index ${lo}. Its value ${ans} is the element at the target position — that is the ${k}${k === 2 ? 'nd' : 'th'} largest. Answer = ${ans}.`,
+        { lo, hi, found: lo, answer: ans },
         'good',
       );
       return frames;
     }
 
-    const pivot = a[lo];
+    const pivot = a[lo]!;
     let pos = lo;
     emit(
       'PIVOT',
@@ -119,11 +120,11 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
     );
 
     for (let i = lo + 1; i <= hi; i++) {
-      if (a[i] < pivot) {
+      if (a[i]! < pivot) {
         pos++;
-        const tmp = a[pos];
-        a[pos] = a[i];
-        a[i] = tmp;
+        const tmp = a[pos]!;
+        a[pos]! = a[i]!;
+        a[i]! = tmp;
         emit(
           'SCAN',
           `a[${i}]=${a[pos]}<${pivot}`,
@@ -141,9 +142,9 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
     }
 
     // place pivot at its final spot
-    const tmp = a[lo];
-    a[lo] = a[pos];
-    a[pos] = tmp;
+    const tmpLo = a[lo]!;
+    a[lo]! = a[pos]!;
+    a[pos]! = tmpLo;
     emit(
       'PLACE',
       `pivot→${pos}`,
@@ -152,13 +153,14 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
     );
 
     if (pos === target) {
-      answer = a[pos];
+      const ans = a[pos]!;
+      answer! = ans;
       found = pos;
       emitDone(
         'HIT',
         `idx ${pos}==${target}`,
-        `Pivot landed exactly on the target index ${target}. Its value ${a[pos]} is the ${k}${k === 2 ? 'nd' : 'th'} largest element. Answer = ${a[pos]}.`,
-        { lo, hi, pivotIdx: pos, found: pos, answer: a[pos] },
+        `Pivot landed exactly on the target index ${target}. Its value ${ans} is the ${k}${k === 2 ? 'nd' : 'th'} largest element. Answer = ${ans}.`,
+        { lo, hi, pivotIdx: pos, found: pos, answer: ans },
         'good',
       );
       return frames;

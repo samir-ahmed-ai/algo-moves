@@ -3,14 +3,14 @@ import type { Move } from '../../core';
 import { cn } from '@/lib/utils/cn';
 
 export interface MoveLogProps {
-  moves: Move[];
-  index: number;
-  onSelect: (i: number) => void;
+  readonly moves: readonly Move[];
+  readonly index: number;
+  readonly onSelect: (i: number) => void;
   /** Flow the transcript into N balanced columns to reduce height. */
-  columns?: number;
+  readonly columns?: number;
   /** Frame indices marked as breakpoints (auto-pause). */
-  breakpoints?: Set<number>;
-  onToggleBreakpoint?: (i: number) => void;
+  readonly breakpoints?: ReadonlySet<number>;
+  readonly onToggleBreakpoint?: (i: number) => void;
 }
 
 export function MoveLog({
@@ -21,7 +21,9 @@ export function MoveLog({
   breakpoints,
   onToggleBreakpoint,
 }: MoveLogProps) {
-  const cols = columns > 1;
+  const columnCount =
+    typeof columns === 'number' && Number.isFinite(columns) ? Math.max(1, Math.round(columns)) : 1;
+  const cols = columnCount > 1;
   const curRef = useRef<HTMLButtonElement>(null);
 
   // Keep the active move visible while it auto-advances inside a scroll container.
@@ -30,7 +32,7 @@ export function MoveLog({
   }, [index]);
 
   const wrapStyle: CSSProperties | undefined = cols
-    ? { display: 'block', columnCount: columns, columnGap: '14px' }
+    ? { display: 'block', columnCount, columnGap: '14px' }
     : undefined;
   const lineStyle: CSSProperties | undefined = cols ? { breakInside: 'avoid' } : undefined;
 
@@ -49,8 +51,8 @@ export function MoveLog({
             {onToggleBreakpoint && (
               <button
                 type="button"
-                aria-label={isBp ? 'clear breakpoint' : 'set breakpoint'}
-                title={isBp ? 'clear breakpoint' : 'set breakpoint'}
+                aria-label={isBp ? 'Clear breakpoint' : 'Set breakpoint'}
+                title={isBp ? 'Clear breakpoint' : 'Set breakpoint'}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleBreakpoint(i);
@@ -72,11 +74,14 @@ export function MoveLog({
                 isBp && 'has-breakpoint',
               )}
               aria-current={cur ? 'step' : undefined}
+              aria-label={`Move ${i + 1}: ${m.note}`}
               onClick={() => onSelect(i)}
             >
               <span className="ln">{i + 1}</span>
               <span className="nt">{m.note}</span>
-              {m.team ? <span className={`chip team-chip-${m.team}`}>{m.team}</span> : null}
+              {m.team !== undefined ? (
+                <span className={`chip team-chip-${m.team}`}>{m.team}</span>
+              ) : null}
             </button>
           </div>
         );

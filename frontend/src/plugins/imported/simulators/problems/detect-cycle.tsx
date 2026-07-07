@@ -70,7 +70,7 @@ function record({ adj, pos }: DCInput): Frame<DCState>[] {
       { active: v, backEdge: null },
     );
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (color[nb] === 1) {
         cycle = true;
         emit(

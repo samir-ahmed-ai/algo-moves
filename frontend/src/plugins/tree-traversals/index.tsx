@@ -44,7 +44,7 @@ function record({ tree, order }: TreeInput): Frame<TreeState>[] {
     tone?: 'good',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         tree,
         order,
@@ -55,7 +55,6 @@ function record({ tree, order }: TreeInput): Frame<TreeState>[] {
       },
     });
 
-  const val = (i: number) => tree[i];
   const intro: Record<Order, string> = {
     preorder: 'Pre-order DFS: visit the node first, then its left subtree, then its right.',
     inorder:
@@ -69,14 +68,15 @@ function record({ tree, order }: TreeInput): Frame<TreeState>[] {
   if (order === 'levelorder') {
     let q = [0];
     while (q.length) {
-      const i = q[0];
+      const i = q[0]!;
       q = q.slice(1);
+      const nodeVal = tree[i]!;
       visited.push(i);
-      output.push(val(i) as number);
+      output.push(nodeVal);
       emit(
         'VISIT',
-        `visit ${val(i)}`,
-        `Dequeue and visit ${val(i)} (index ${i}). Append it to the output, then enqueue its children.`,
+        `visit ${nodeVal}`,
+        `Dequeue and visit ${nodeVal} (index ${i}). Append it to the output, then enqueue its children.`,
         i,
         q,
       );
@@ -84,13 +84,14 @@ function record({ tree, order }: TreeInput): Frame<TreeState>[] {
     }
   } else {
     const visit = (i: number, stack: number[]) => {
+      const nodeVal = tree[i]!;
       if (order === 'preorder') {
         visited.push(i);
-        output.push(val(i) as number);
+        output.push(nodeVal);
         emit(
           'VISIT',
-          `visit ${val(i)}`,
-          `Visit ${val(i)} before descending — append it to the output, then recurse left.`,
+          `visit ${nodeVal}`,
+          `Visit ${nodeVal} before descending — append it to the output, then recurse left.`,
           i,
           stack,
         );
@@ -98,11 +99,11 @@ function record({ tree, order }: TreeInput): Frame<TreeState>[] {
       if (present(tree, 2 * i + 1)) visit(2 * i + 1, [...stack, i]);
       if (order === 'inorder') {
         visited.push(i);
-        output.push(val(i) as number);
+        output.push(nodeVal);
         emit(
           'VISIT',
-          `visit ${val(i)}`,
-          `Left subtree done, so visit ${val(i)} now — append it, then recurse right.`,
+          `visit ${nodeVal}`,
+          `Left subtree done, so visit ${nodeVal} now — append it, then recurse right.`,
           i,
           stack,
         );
@@ -110,11 +111,11 @@ function record({ tree, order }: TreeInput): Frame<TreeState>[] {
       if (present(tree, 2 * i + 2)) visit(2 * i + 2, [...stack, i]);
       if (order === 'postorder') {
         visited.push(i);
-        output.push(val(i) as number);
+        output.push(nodeVal);
         emit(
           'VISIT',
-          `visit ${val(i)}`,
-          `Both subtrees of ${val(i)} are done, so visit it last and append it.`,
+          `visit ${nodeVal}`,
+          `Both subtrees of ${nodeVal} are done, so visit it last and append it.`,
           i,
           stack,
         );
@@ -144,8 +145,9 @@ function View({ frame, onSelectNode, selectedNode }: PluginViewProps<TreeState>)
       <RailStack
         label={s.order === 'levelorder' ? 'queue' : 'call stack'}
         items={s.frontier.map(String)}
-        highlightEnd={s.order === 'levelorder' ? 'bottom' : undefined}
-        topLabel={s.order === 'levelorder' ? 'front' : undefined}
+        {...(s.order === 'levelorder'
+          ? { highlightEnd: 'bottom' as const, topLabel: 'front' }
+          : {})}
       />
       <RailStack label="output" items={s.output.map(String)} />
       <RailGroup label="progress">
@@ -163,7 +165,7 @@ function View({ frame, onSelectNode, selectedNode }: PluginViewProps<TreeState>)
         activeNode={s.active}
         highlightChild={s.active}
         pickedNode={selectedNode ?? null}
-        onNodeClick={onSelectNode}
+        {...(onSelectNode ? { onNodeClick: onSelectNode } : {})}
       />
     </VizStage>
   );

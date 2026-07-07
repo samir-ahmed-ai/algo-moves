@@ -74,27 +74,27 @@ describe('behavioural snapshots', () => {
   it('binary search finds a present target and reports the index', () => {
     const hit = binarySearchPlugin.inputs.find((i) => i.id === 'hit')!;
     const frames = binarySearchPlugin.record(hit.value);
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.move.tone).not.toBe('bad');
     expect(last.state.found).not.toBeNull();
-    expect(last.state.values[last.state.found!]).toBe(hit.value.target);
+    expect(last.state.values[last.state.found!]!).toBe(hit.value.target);
   });
 
   it('binary search reports absence for a missing target', () => {
     const miss = binarySearchPlugin.inputs.find((i) => i.id === 'miss')!;
     const frames = binarySearchPlugin.record(miss.value);
-    expect(frames[frames.length - 1].move.tone).toBe('bad');
+    expect(frames[frames.length - 1]!.move.tone).toBe('bad');
   });
 
   it('bubble sort ends with a sorted array', () => {
     const frames = bubbleSortPlugin.record({ values: [5, 2, 8, 1, 9, 3] });
-    const out = frames[frames.length - 1].state.values;
+    const out = frames[frames.length - 1]!.state.values;
     expect(out).toEqual([...out].sort((a, b) => a - b));
   });
 
   it('n-queens finds a valid placement on 4×4', () => {
     const frames = nQueensPlugin.record({ n: 4 });
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.move.tone).toBe('good');
     expect(last.state.solved).toBe(true);
     expect(last.state.queens.filter((c) => c >= 0).length).toBe(4);
@@ -103,7 +103,7 @@ describe('behavioural snapshots', () => {
   it('union-find builds an MST on a connected graph', () => {
     const input = unionFindPlugin.inputs[0]!;
     const frames = unionFindPlugin.record(input.value);
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.state.mst.length).toBeGreaterThan(0);
     expect(last.state.mstWeight).toBeGreaterThan(0);
   });
@@ -111,7 +111,7 @@ describe('behavioural snapshots', () => {
   it('tree traversals in-order on BST yields sorted output', () => {
     const inorder = treeTraversalsPlugin.inputs.find((i) => i.id === 'in')!;
     const frames = treeTraversalsPlugin.record(inorder.value);
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.state.order).toBe('inorder');
     expect(last.state.output).toEqual([1, 2, 3, 4, 5, 6, 7]);
   });
@@ -119,23 +119,23 @@ describe('behavioural snapshots', () => {
   it('trie search finds an inserted word', () => {
     const input = triePlugin.inputs[0]!;
     const frames = triePlugin.record(input.value);
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.state.result).toBe('found');
   });
 
   it('two-sum sorted finds a valid pair', () => {
     const input = twoSumSortedPlugin.inputs[0]!;
     const frames = twoSumSortedPlugin.record(input.value);
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.state.found).not.toBeNull();
     const [a, b] = last.state.found!;
-    expect(last.state.values[a] + last.state.values[b]).toBe(input.value.target);
+    expect(last.state.values[a]! + last.state.values[b]!).toBe(input.value.target);
   });
 
   it('max subarray sum k tracks the best k-window', () => {
     const input = maxSubarraySumKPlugin.inputs[0]!;
     const frames = maxSubarraySumKPlugin.record(input.value);
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.state.done).toBe(true);
     expect(last.state.best).toBeGreaterThan(0);
   });
@@ -143,24 +143,24 @@ describe('behavioural snapshots', () => {
   it('longest substring without repeat reaches a positive best length', () => {
     const input = longestSubstringPlugin.inputs[0]!;
     const frames = longestSubstringPlugin.record(input.value);
-    const last = frames[frames.length - 1];
+    const last = frames[frames.length - 1]!;
     expect(last.state.best).toBeGreaterThan(0);
   });
 
   it('selection sort ends with sorted array', () => {
     const frames = selectionSortPlugin.record({ values: [5, 2, 8, 1, 9, 3] });
     expect(frames[0]?.move.type).toBe('INIT');
-    const last = frames[frames.length - 1];
-    expect(last?.move.type).toBe('DONE');
-    const out = last!.state.values;
+    const last = frames[frames.length - 1]!;
+    expect(last.move.type).toBe('DONE');
+    const out = last.state.values;
     expect(out).toEqual([...out].sort((a, b) => a - b));
   });
 
   it('insertion sort ends with sorted array', () => {
     const frames = insertionSortPlugin.record({ values: [5, 2, 8, 1] });
-    const last = frames[frames.length - 1];
-    expect(last?.move.type).toBe('DONE');
-    expect(last!.state.values).toEqual([1, 2, 5, 8]);
+    const last = frames[frames.length - 1]!;
+    expect(last.move.type).toBe('DONE');
+    expect(last.state.values).toEqual([1, 2, 5, 8]);
   });
 
   it('merge sort ends with sorted array', () => {

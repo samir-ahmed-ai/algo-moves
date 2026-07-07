@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -43,7 +43,7 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
   let bestL = 0;
   let bestLen = Number.MAX_SAFE_INTEGER;
 
-  const { emit, frames } = createRecorder<MinWindowState>(() => ({
+  const { emit, frames } = createPrepRecorder<MinWindowState>(() => ({
     s,
     t,
     l: null,
@@ -75,10 +75,10 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
   }
 
   for (let r = 0; r < s.length; r++) {
-    const c = s[r];
-    have.set(c, (have.get(c) ?? 0) + 1);
-    const cnt = need.get(c);
-    const nowFormed = cnt !== undefined && have.get(c) === cnt;
+    const c = s[r]!;
+    have.set(c!, (have.get(c!) ?? 0) + 1);
+    const cnt = need.get(c!);
+    const nowFormed = cnt !== undefined && have.get(c!) === cnt;
     if (nowFormed) formed++;
 
     emit(
@@ -86,9 +86,9 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
       `r=${r} '${c}'`,
       cnt !== undefined
         ? nowFormed
-          ? `Grow right: add s[${r}]='${c}'. It is in t and we now have enough '${c}' — one more required char is satisfied, so formed = ${formed}/${required}.`
-          : `Grow right: add s[${r}]='${c}'. It is in t but we still don't have the full count needed, so formed stays ${formed}/${required}.`
-        : `Grow right: add s[${r}]='${c}'. It is not in t, so it can't help coverage — formed stays ${formed}/${required}.`,
+          ? `Grow right: add s[${r}]!='${c}'. It is in t and we now have enough '${c}' — one more required char is satisfied, so formed = ${formed}/${required}.`
+          : `Grow right: add s[${r}]!='${c}'. It is in t but we still don't have the full count needed, so formed stays ${formed}/${required}.`
+        : `Grow right: add s[${r}]!='${c}'. It is not in t, so it can't help coverage — formed stays ${formed}/${required}.`,
       { l, r, window: [l, r] },
     );
 
@@ -99,24 +99,24 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
         emit(
           'RECORD',
           `best="${s.slice(bestL, bestL + bestLen)}"`,
-          `The window s[${l}..${r}] = "${s.slice(l, r + 1)}" covers all of t and is shorter than any before (length ${bestLen}). Record it as the new best.`,
+          `The window s[${l}..${r}]! = "${s.slice(l, r + 1)}" covers all of t and is shorter than any before (length ${bestLen}). Record it as the new best.`,
           { l, r, window: [l, r], best: [bestL, bestL + bestLen - 1] },
           'good',
         );
       }
 
-      const left = s[l];
-      have.set(left, (have.get(left) ?? 0) - 1);
-      const leftCnt = need.get(left);
-      const brokeCoverage = leftCnt !== undefined && (have.get(left) ?? 0) < leftCnt;
+      const left = s[l]!;
+      have.set(left!, (have.get(left!) ?? 0) - 1);
+      const leftCnt = need.get(left!);
+      const brokeCoverage = leftCnt !== undefined && (have.get(left!) ?? 0) < leftCnt;
       if (brokeCoverage) formed--;
 
       emit(
         'SHRINK',
         `l=${l}→${l + 1}`,
         brokeCoverage
-          ? `Shrink left: drop s[${l}]='${left}'. That was the last copy needed to cover '${left}', so coverage breaks — formed = ${formed}/${required}. Stop shrinking and grow right again.`
-          : `Shrink left: drop s[${l}]='${left}'. We still cover t without it, so keep shrinking to look for an even smaller window.`,
+          ? `Shrink left: drop s[${l}]!='${left}'. That was the last copy needed to cover '${left}', so coverage breaks — formed = ${formed}/${required}. Stop shrinking and grow right again.`
+          : `Shrink left: drop s[${l}]!='${left}'. We still cover t without it, so keep shrinking to look for an even smaller window.`,
         { l: l + 1, r, window: l + 1 <= r ? [l + 1, r] : null },
       );
       l++;
@@ -129,7 +129,7 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
     result === '' ? 'no window' : `"${result}"`,
     result === ''
       ? `Reached the end of s without ever covering all of t — there is no valid window, so return "".`
-      : `Scan complete. The smallest covering window is "${result}" (s[${bestL}..${bestL + bestLen - 1}]). That is the answer.`,
+      : `Scan complete. The smallest covering window is "${result}" (s[${bestL}..${bestL + bestLen - 1}]!). That is the answer.`,
     { result, done: true, best: result === '' ? null : [bestL, bestL + bestLen - 1] },
     result === '' ? 'bad' : 'good',
   );
@@ -145,8 +145,8 @@ function View({ frame }: PluginViewProps<MinWindowState>) {
   if (s.r !== null) pointers.push({ i: s.r, label: 'r', tone: 'accent', place: 'above' });
 
   const tone = (i: number) => {
-    if (s.result && s.best && i >= s.best[0] && i <= s.best[1]) return 'found';
-    if (s.window && i >= s.window[0] && i <= s.window[1]) return 'match';
+    if (s.result && s.best && i >= s.best[0]! && i <= s.best[1]!) return 'found';
+    if (s.window && i >= s.window[0]! && i <= s.window[1]!) return 'match';
     return '';
   };
 
@@ -161,7 +161,7 @@ function View({ frame }: PluginViewProps<MinWindowState>) {
       </div>
       <ArrayRow values={chars} cellTone={tone} pointers={pointers} windowRange={s.window} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        best {s.best ? `= "${s.s.slice(s.best[0], s.best[1] + 1)}"` : '= (none yet)'}
+        best {s.best ? `= "${s.s.slice(s.best[0]!, s.best[1]! + 1)}"` : '= (none yet)'}
       </div>
       {s.done && (
         <div className={cn('mt-1 font-mono', s.result ? 'text-good' : 'text-bad', vizText.base)}>
@@ -175,8 +175,8 @@ function View({ frame }: PluginViewProps<MinWindowState>) {
 function Inspector({ frame }: InspectorProps<MinWindowState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const winStr = s.window ? `"${s.s.slice(s.window[0], s.window[1] + 1)}"` : '—';
-  const bestStr = s.best ? `"${s.s.slice(s.best[0], s.best[1] + 1)}"` : '—';
+  const winStr = s.window ? `"${s.s.slice(s.window[0]!, s.window[1]! + 1)}"` : '—';
+  const bestStr = s.best ? `"${s.s.slice(s.best[0]!, s.best[1]! + 1)}"` : '—';
   return (
     <VarGrid>
       <InspectorRow k="t" v={`"${s.t}"`} />
@@ -243,7 +243,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'On the "RECORD" step (best=""), what happens?',
     choices: [
       {
-        label: 'The window s[..] = "" covers — this move caption',
+        label: 'The window s[..]! = "" covers — this move caption',
         correct: true,
       },
       {
@@ -257,7 +257,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The window s[..] = "" covers all of t and is shorter than any before (length ). Record it as the new best.',
+      'The window s[..]! = "" covers all of t and is shorter than any before (length ). Record it as the new best.',
   },
   {
     id: 'state',
@@ -304,7 +304,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: 'The window s[..] = "" covers — final DONE caption',
+        label: 'The window s[..]! = "" covers — final DONE caption',
         correct: true,
       },
       {
@@ -318,7 +318,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The window s[..] = "" covers all of t and is shorter than any before (length ). Record it as the new best.',
+      'The window s[..]! = "" covers all of t and is shorter than any before (length ). Record it as the new best.',
   },
 ];
 export const simulator: ProblemSimulator = {

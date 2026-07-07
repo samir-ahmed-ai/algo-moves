@@ -44,12 +44,12 @@ function View({ frame }: PluginViewProps<MedianState>) {
             <RailStat k="high sz" v={s.high.length} />
             <RailStat
               k="low top"
-              v={s.low[0] ?? '—'}
+              v={s.low[0]! ?? '—'}
               tone={s.highlightLow ? 'accent' : undefined}
             />
             <RailStat
               k="high top"
-              v={s.high[0] ?? '—'}
+              v={s.high[0]! ?? '—'}
               tone={s.highlightHigh ? 'accent' : undefined}
             />
           </RailGroup>
@@ -83,8 +83,8 @@ function Inspector({ frame }: InspectorProps<MedianState>) {
     <VarGrid>
       <InspectorRow k="low size" v={s.low.length} />
       <InspectorRow k="high size" v={s.high.length} />
-      <InspectorRow k="low top" v={s.low[0] ?? '—'} />
-      <InspectorRow k="high top" v={s.high[0] ?? '—'} />
+      <InspectorRow k="low top" v={s.low[0]! ?? '—'} />
+      <InspectorRow k="high top" v={s.high[0]! ?? '—'} />
       <InspectorRow k="median" v={s.median ?? '—'} />
     </VarGrid>
   );

@@ -54,8 +54,8 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
 
   const find = (x: number): number => {
     while (parent[x] !== x) {
-      parent[x] = parent[parent[x]];
-      x = parent[x];
+      parent[x]! = parent[parent[x]!]!;
+      x = parent[x]!;
     }
     return x;
   };
@@ -84,8 +84,8 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
       const a = op[1] - 1;
       const b = op[2] - 1;
       // Draw the merge edge regardless (it reflects the relationship asserted).
-      adj[a].push(b);
-      adj[b].push(a);
+      adj[a]!.push(b);
+      adj[b]!.push(a);
       const ra = find(a);
       const rb = find(b);
       if (ra === rb) {
@@ -99,12 +99,12 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
         // Union by size: attach the smaller tree under the larger root.
         let big = ra;
         let small = rb;
-        if (size[big] < size[small]) {
+        if (size[big]! < size[small]!) {
           big = rb;
           small = ra;
         }
         parent[small] = big;
-        size[big] += size[small];
+        size[big]! += size[small]!;
         components -= 1;
         emit(
           'MERGE',
@@ -116,7 +116,7 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
     } else {
       const a = op[1] - 1;
       const r = find(a);
-      answer = size[r];
+      answer! = size[r]!;
       emit(
         'QUERY',
         `Q ${op[1]} → ${answer}`,
@@ -138,7 +138,7 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
 
 function colorOf(parent: number[], node: number): number {
   let r = node;
-  while (parent[r] !== r) r = parent[r];
+  while (parent[r] !== r) r = parent[r]!;
   return r % 3;
 }
 

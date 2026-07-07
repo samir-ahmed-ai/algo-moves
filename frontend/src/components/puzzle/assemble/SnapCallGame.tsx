@@ -71,7 +71,10 @@ function tokensToLines(tokens: DiffToken[]): DiffToken[][] {
     const parts = t.text.split('\n');
     parts.forEach((part, i) => {
       if (i > 0) lines.push([]);
-      if (part) lines[lines.length - 1].push({ text: part, changed: t.changed });
+      if (part) {
+        const line = lines[lines.length - 1];
+        if (line) line.push({ text: part, changed: t.changed });
+      }
     });
   }
   return lines;
@@ -209,6 +212,17 @@ export function SnapCallGame({
       (hashString(storageKeyRef.current) ^ Math.imul(n + 1, 0x9e3779b1) ^ runSaltRef.current) >>> 0,
     );
     const truth = all[placed];
+    if (!truth) {
+      return {
+        n,
+        piece: { id: `snap-${n}-empty`, role: 'empty', code: '' },
+        shownCode: '',
+        truthCode: '',
+        isReal: true,
+        decoyKind: null,
+        durMs: n < 2 ? FIRST_DEAL_MS : DEAL_MS,
+      };
+    }
     const ahead = all.length - placed - 1;
     const durMs = n < 2 ? FIRST_DEAL_MS : DEAL_MS;
 
@@ -237,9 +251,10 @@ export function SnapCallGame({
       const tryLater = (): boolean => {
         for (let a = 0; a < 4 && ahead >= 1; a++) {
           const j = placed + 1 + Math.floor(rand() * ahead);
-          if (all[j].code !== lastDecoyRef.current) {
-            shown = all[j].code;
-            src = all[j];
+          const candidate = all[j];
+          if (candidate && candidate.code !== lastDecoyRef.current) {
+            shown = candidate.code;
+            src = candidate;
             kind = 'later';
             return true;
           }
@@ -760,18 +775,21 @@ export function SnapCallGame({
                 piece={p}
                 muted={mutedRef.current.has(i)}
                 flash={i === placedIdx - 1 ? slotFlash : null}
-                className={i === placedIdx - 1 && slotFlash === 'good' ? 'asm-spring' : undefined}
+                {...(i === placedIdx - 1 && slotFlash === 'good'
+                  ? { className: 'asm-spring' }
+                  : {})}
               />
             </div>
           ))}
-          {placedIdx < pieces.length && (
-            <div ref={slotRef} className={cn(placedIdx > 0 && 'mt-1')}>
-              <GhostSlot
-                piece={pieces[placedIdx]}
-                lines={pieces[placedIdx].code.split('\n').length}
-              />
-            </div>
-          )}
+          {(() => {
+            const slotPiece = pieces[placedIdx];
+            if (!slotPiece) return null;
+            return (
+              <div ref={slotRef} className={cn(placedIdx > 0 && 'mt-1')}>
+                <GhostSlot piece={slotPiece} lines={slotPiece.code.split('\n').length} />
+              </div>
+            );
+          })()}
         </div>
         {placedIdx === 0 && winStage === 'none' && (
           <p className="mt-2 px-2 text-center text-[11px] text-ink3">
@@ -934,8 +952,7 @@ export function SnapCallGame({
               bestMs !== null ? `Play again — beat ${formatSecs(bestMs)}` : 'Play again'
             }
             onPrimary={startRun}
-            secondaryLabel={onContinue ? 'Continue' : undefined}
-            onSecondary={onContinue}
+            {...(onContinue ? { secondaryLabel: 'Continue', onSecondary: onContinue } : {})}
           />
         </div>
       )}

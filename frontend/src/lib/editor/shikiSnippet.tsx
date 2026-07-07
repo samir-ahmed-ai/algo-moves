@@ -118,9 +118,9 @@ function renderSignatureLine(line: string, tone: FuncLineTone, bodySpans: ReactN
   if (tone === 'hl-line-entry') {
     const m = trimmed.match(ENTRY_SIG);
     if (m) {
-      const funcName = m[1] ?? m[2] ?? m[3];
-      const kw = m[1] ? 'func' : m[2] ? 'function' : 'def';
-      const rest = m[4] ?? '';
+      const funcName = m[1] ?? m[2] ?? m[3] ?? m[4] ?? '';
+      const kw = m[1] ? 'func' : m[2] ? 'function' : m[3] ? 'def' : 'fn';
+      const rest = m[5] ?? '';
       return (
         <>
           {lead}

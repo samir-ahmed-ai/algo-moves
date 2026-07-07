@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -57,9 +57,9 @@ function record({ postfix }: ExprInput): Frame<ExprState>[] {
   const nodeStack: ExprNode[] = [];
   const labelStack: string[] = [];
 
-  const { emit, frames } = createRecorder<ExprState>(() => ({
+  const { emit, frames } = createPrepRecorder<ExprState>(() => ({
     stack: labelStack.slice(),
-    tree: nodeStack[nodeStack.length - 1] ?? null,
+    tree: nodeStack[nodeStack.length - 1]! ?? null,
     op: '',
     result: null,
     done: false,
@@ -83,7 +83,7 @@ function record({ postfix }: ExprInput): Frame<ExprState>[] {
       emit('OP', tok, `Operator "${tok}": pop ${rl} and ${ll}, push subtree (${ll}${tok}${rl}).`, {
         op: tok,
         stack: labelStack.slice(),
-        tree: nodeStack[nodeStack.length - 1],
+        tree: nodeStack[nodeStack.length - 1]!,
       });
     } else {
       nodeStack.push({ val: tok, left: null, right: null });
@@ -95,7 +95,7 @@ function record({ postfix }: ExprInput): Frame<ExprState>[] {
     }
   }
 
-  const tree = nodeStack[0] ?? null;
+  const tree = nodeStack[0]! ?? null;
   const result = evaluate(tree);
   emit(
     'EVAL',

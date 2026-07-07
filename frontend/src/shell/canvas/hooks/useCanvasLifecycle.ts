@@ -200,7 +200,6 @@ export function useCanvasLifecycle({
     // `key` matters for the standalone canvas: switching the plain canvas into
     // the interview variant changes only the key (plugin/mode stay fixed) and
     // must rebuild so the interview board seeds.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pluginId, mode, key]);
 
   useEffect(() => {

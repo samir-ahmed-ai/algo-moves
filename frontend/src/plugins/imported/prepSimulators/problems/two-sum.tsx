@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   ArrayPatternInspector,
   ArrayPatternView,
@@ -30,7 +30,7 @@ interface TwoSumState {
   nums: number[];
   target: number;
   i: number | null; // current index
-  need: number | null; // target - nums[i], the complement we look up
+  need: number | null; // target - nums[i]!, the complement we look up
   seen: [number, number][]; // value -> index entries stored so far
   hit: number | null; // index the complement was found at
   result: [number, number] | null;
@@ -39,7 +39,7 @@ interface TwoSumState {
 
 function record({ nums, target }: TwoSumInput): Frame<TwoSumState>[] {
   const seen = new Map<number, number>();
-  const { emit, frames } = createRecorder<TwoSumState>(() => ({
+  const { emit, frames } = createPrepRecorder<TwoSumState>(() => ({
     nums,
     target,
     i: null,
@@ -58,8 +58,8 @@ function record({ nums, target }: TwoSumInput): Frame<TwoSumState>[] {
   );
 
   for (let i = 0; i < nums.length; i++) {
-    const v = nums[i];
-    const need = target - v;
+    const v = nums[i]!;
+    const need = target - v!;
     emit(
       'SCAN',
       `need ${need}`,
@@ -71,17 +71,17 @@ function record({ nums, target }: TwoSumInput): Frame<TwoSumState>[] {
       emit(
         'FOUND',
         `${j},${i}`,
-        `Yes — ${need} was stored at index ${j}. nums[${j}] + nums[${i}] = ${nums[j]} + ${v} = ${target}. Return [${j}, ${i}].`,
+        `Yes — ${need} was stored at index ${j}. nums[${j}]! + nums[${i}]! = ${nums[j]!} + ${v} = ${target}. Return [${j}, ${i}].`,
         { i, need, hit: j, result: [j, i], done: true },
         'good',
       );
       return frames;
     }
-    seen.set(v, i);
+    seen.set(v!, i);
     emit(
       'STORE',
-      `seen[${v}]=${i}`,
-      `${need} is not in the map yet, so remember the current value: seen[${v}] = ${i}. Move on.`,
+      `seen[${v}]!=${i}`,
+      `${need} is not in the map yet, so remember the current value: seen[${v}]! = ${i}. Move on.`,
       { i, need },
     );
   }
@@ -102,7 +102,7 @@ function View({ frame }: PluginViewProps<TwoSumState>) {
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   if (s.hit !== null) pointers.push({ i: s.hit, label: 'j', tone: 'good', place: 'below' });
   const tone = (i: number) =>
-    s.result && (i === s.result[0] || i === s.result[1]) ? 'found' : s.i === i ? 'match' : '';
+    s.result && (i === s.result[0]! || i === s.result[1]!) ? 'found' : s.i === i ? 'match' : '';
   const seenItems = s.seen.map(([v, idx]) => `${v}:${idx}`);
   return (
     <ArrayPatternView
@@ -120,7 +120,7 @@ function View({ frame }: PluginViewProps<TwoSumState>) {
           {s.done && (
             <RailResult
               label="answer"
-              value={s.result ? `[${s.result[0]}, ${s.result[1]}]` : 'none'}
+              value={s.result ? `[${s.result[0]!}, ${s.result[1]!}]` : 'none'}
               tone={s.result ? 'good' : 'bad'}
             />
           )}
@@ -141,7 +141,7 @@ function Inspector({ frame }: InspectorProps<TwoSumState>) {
       rows={[
         ['target', s.target],
         ['i', s.i ?? '—'],
-        ['nums[i]', s.i !== null ? s.nums[s.i] : '—'],
+        ['nums[i]!', s.i !== null ? s.nums[s.i]! : '—'],
         ['need (target−v)', s.need ?? '—'],
         ['seen', seenRows.length > 0 ? seenRows : 'empty'],
         ['result', s.result ? `[${s.result.join(', ')}]` : s.done ? 'none' : '…'],
@@ -253,7 +253,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(n). want target-v in seen? return; else seen[v]=i',
+    explain: 'O(n). O(n). want target-v in seen? return; else seen[v]!=i',
   },
   {
     id: 'outcome',

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -41,7 +41,7 @@ function formatSize(bytes: number): string {
 function record({ entries }: FindLargeInput): Frame<FindLargeState>[] {
   const matches: string[] = [];
 
-  const { emit, frames } = createRecorder<FindLargeState>(() => ({
+  const { emit, frames } = createPrepRecorder<FindLargeState>(() => ({
     entries,
     idx: null,
     limit: LIMIT,
@@ -58,31 +58,31 @@ function record({ entries }: FindLargeInput): Frame<FindLargeState>[] {
   );
 
   for (let idx = 0; idx < entries.length; idx++) {
-    const e = entries[idx];
-    if (e.isDir) {
+    const e = entries[idx]!;
+    if (e!.isDir) {
       emit(
         'SKIP_DIR',
-        e.path,
-        `Visit "${e.path}" — it's a directory, return nil (don't add to matches).`,
-        { idx, activePath: e.path },
+        e!.path,
+        `Visit "${e!.path}" — it's a directory, return nil (don't add to matches).`,
+        { idx, activePath: e!.path },
       );
       continue;
     }
-    if (e.size > LIMIT) {
-      matches.push(e.path);
+    if (e!.size > LIMIT) {
+      matches.push(e!.path);
       emit(
         'MATCH',
-        `${formatSize(e.size)}`,
-        `File "${e.path}" size ${formatSize(e.size)} > 5M — append to matches.`,
-        { idx, activePath: e.path, matches: matches.slice() },
+        `${formatSize(e!.size)}`,
+        `File "${e!.path}" size ${formatSize(e!.size)} > 5M — append to matches.`,
+        { idx, activePath: e!.path, matches: matches.slice() },
         'good',
       );
     } else {
       emit(
         'SKIP',
-        `${formatSize(e.size)}`,
-        `File "${e.path}" size ${formatSize(e.size)} ≤ 5M — skip.`,
-        { idx, activePath: e.path },
+        `${formatSize(e!.size)}`,
+        `File "${e!.path}" size ${formatSize(e!.size)} ≤ 5M — skip.`,
+        { idx, activePath: e!.path },
       );
     }
   }
@@ -138,7 +138,7 @@ function View({ frame }: PluginViewProps<FindLargeState>) {
 function Inspector({ frame }: InspectorProps<FindLargeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const e = s.idx !== null ? s.entries[s.idx] : null;
+  const e = s.idx !== null ? s.entries[s.idx]! : null;
   return (
     <VarGrid>
       <InspectorRow k="idx" v={s.idx ?? '—'} />

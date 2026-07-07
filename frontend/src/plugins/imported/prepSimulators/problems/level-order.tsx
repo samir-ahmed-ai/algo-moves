@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -41,7 +41,7 @@ function record({ tree }: LevelOrderInput): Frame<LevelOrderState>[] {
   const visited: number[] = [];
   const out: number[][] = [];
 
-  const { emit, frames } = createRecorder<LevelOrderState>(() => ({
+  const { emit, frames } = createPrepRecorder<LevelOrderState>(() => ({
     tree,
     queue: queue.slice(),
     visited: visited.slice(),
@@ -52,9 +52,9 @@ function record({ tree }: LevelOrderInput): Frame<LevelOrderState>[] {
     done: false,
   }));
 
-  const valAt = (i: number) => tree[i] as number;
+  const valAt = (i: number) => tree[i]! as number;
 
-  if (tree.length === 0 || tree[0] == null) {
+  if (tree.length === 0 || tree[0]! == null) {
     emit(
       'DONE',
       'empty',
@@ -85,34 +85,34 @@ function record({ tree }: LevelOrderInput): Frame<LevelOrderState>[] {
     );
 
     for (let i = 0; i < sz; i++) {
-      const node = queue[0];
+      const node = queue[0]!;
       queue = queue.slice(1);
-      levelSoFar.push(valAt(node));
-      visited.push(node);
+      levelSoFar.push(valAt(node!));
+      visited.push(node!);
       emit(
         'POP',
-        `pop ${valAt(node)}`,
-        `Pop node ${valAt(node)} and record its value into level ${level} (now [${levelSoFar.join(', ')}]).`,
+        `pop ${valAt(node!)}`,
+        `Pop node ${valAt(node!)} and record its value into level ${level} (now [${levelSoFar.join(', ')}]).`,
         { active: node, level, levelSoFar: levelSoFar.slice() },
       );
 
-      const left = 2 * node + 1;
-      const right = 2 * node + 2;
-      if (left < tree.length && tree[left] != null) {
+      const left = 2 * node! + 1;
+      const right = 2 * node! + 2;
+      if (left < tree.length && tree[left]! != null) {
         queue.push(left);
         emit(
           'PUSH',
           `push ${valAt(left)}`,
-          `Node ${valAt(node)} has a left child ${valAt(left)}. Enqueue it — it belongs to the next level.`,
+          `Node ${valAt(node!)} has a left child ${valAt(left)}. Enqueue it — it belongs to the next level.`,
           { active: node, level, levelSoFar: levelSoFar.slice() },
         );
       }
-      if (right < tree.length && tree[right] != null) {
+      if (right < tree.length && tree[right]! != null) {
         queue.push(right);
         emit(
           'PUSH',
           `push ${valAt(right)}`,
-          `Node ${valAt(node)} has a right child ${valAt(right)}. Enqueue it — it belongs to the next level.`,
+          `Node ${valAt(node!)} has a right child ${valAt(right)}. Enqueue it — it belongs to the next level.`,
           { active: node, level, levelSoFar: levelSoFar.slice() },
         );
       }
@@ -148,9 +148,9 @@ function View({ frame }: PluginViewProps<LevelOrderState>) {
     if (s.visited.includes(i)) return 'team-2';
     return 'team-0';
   };
-  const queueVals = s.queue.map((i) => String(s.tree[i] as number));
+  const queueVals = s.queue.map((i) => String(s.tree[i]! as number));
   const outItems = s.out.map((l) => `[${l.join(',')}]`);
-  const activeVal = s.active !== null ? String(s.tree[s.active] as number) : '—';
+  const activeVal = s.active !== null ? String(s.tree[s.active]! as number) : '—';
   const levelSoFarStr = s.levelSoFar.length > 0 ? `[${s.levelSoFar.join(', ')}]` : '—';
   return (
     <VizStage
@@ -185,7 +185,7 @@ function Inspector({ frame }: InspectorProps<LevelOrderState>) {
     <VarGrid>
       <InspectorRow k="level" v={s.level} />
       <InspectorRow k="queue size" v={s.queue.length} />
-      <InspectorRow k="active" v={s.active !== null ? (s.tree[s.active] as number) : '—'} />
+      <InspectorRow k="active" v={s.active !== null ? (s.tree[s.active]! as number) : '—'} />
       <InspectorRow
         k="level so far"
         v={s.levelSoFar.length ? `[${s.levelSoFar.join(', ')}]` : '[]'}

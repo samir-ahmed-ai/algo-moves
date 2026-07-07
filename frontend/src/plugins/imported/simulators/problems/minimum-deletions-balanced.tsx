@@ -91,15 +91,15 @@ function record({ s }: MDInput): Frame<MDState>[] {
 
 function View({ frame }: PluginViewProps<MDState>) {
   const s = frame.state;
-  const cells = s.dp.map((v, i) => (v < 0 ? s.s[i] : v));
+  const cells = s.dp.map((v, i) => (v < 0 ? s.s[i]! : v));
   const pointers: ArrayPointer[] = [];
   if (s.i !== null)
     pointers.push({ i: s.i, label: `'${s.s[s.i]}'`, tone: 'accent', place: 'above' });
-  const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] >= 0 ? 'match' : '');
+  const tone = (i: number) => (s.i === i ? 'found' : s.dp[i]! >= 0 ? 'match' : '');
   let ans: string | number = '…';
   for (let i = s.dp.length - 1; i >= 0; i--) {
-    if (s.dp[i] >= 0) {
-      ans = s.dp[i];
+    if (s.dp[i]! >= 0) {
+      ans = s.dp[i]!;
       break;
     }
   }
@@ -119,7 +119,7 @@ function View({ frame }: PluginViewProps<MDState>) {
         cellTone={tone}
         pointers={pointers}
         windowRange={null}
-        label={(i) => s.s[i]}
+        label={(i) => s.s[i]!}
       />
     </VizStage>
   );
@@ -128,11 +128,11 @@ function View({ frame }: PluginViewProps<MDState>) {
 function Inspector({ frame }: InspectorProps<MDState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = (i: number) => (i >= 0 && i < s.dp.length && s.dp[i] >= 0 ? s.dp[i] : '—');
+  const cell = (i: number) => (i >= 0 && i < s.dp.length && s.dp[i]! >= 0 ? s.dp[i] : '—');
   let answer: string | number = '…filling';
   if (s.done) {
     for (let i = s.dp.length - 1; i >= 0; i--) {
-      if (s.dp[i] >= 0) {
+      if (s.dp[i]! >= 0) {
         answer = `${s.dp[i]} deletions`;
         break;
       }
@@ -166,8 +166,8 @@ export const simulator: ProblemSimulator = {
     let v = 0;
     if (s) {
       for (let i = s.dp.length - 1; i >= 0; i--) {
-        if (s.dp[i] >= 0) {
-          v = s.dp[i];
+        if (s.dp[i]! >= 0) {
+          v = s.dp[i]!;
           break;
         }
       }

@@ -28,9 +28,9 @@ describe('trayLayout', () => {
       piece('d', 'z'),
     ];
     const cols = balanceTrayColumns(tray, 2);
-    expect(cols[0].length + cols[1].length).toBe(4);
-    const leftRows = cols[0].reduce((n, { piece: p }) => n + estimatePieceRows(p.code), 0);
-    const rightRows = cols[1].reduce((n, { piece: p }) => n + estimatePieceRows(p.code), 0);
+    expect(cols[0]!.length + cols[1]!.length).toBe(4);
+    const leftRows = cols[0]!.reduce((n, { piece: p }) => n + estimatePieceRows(p.code), 0);
+    const rightRows = cols[1]!.reduce((n, { piece: p }) => n + estimatePieceRows(p.code), 0);
     expect(Math.abs(leftRows - rightRows)).toBeLessThanOrEqual(3);
   });
 
@@ -40,12 +40,12 @@ describe('trayLayout', () => {
     const wide = balanceTrayColumns([long, short], 2, 32);
     const narrow = balanceTrayColumns([long, short], 2, 16);
     const wideSpread = Math.abs(
-      wide[0].reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 32), 0) -
-        wide[1].reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 32), 0),
+      wide[0]!.reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 32), 0) -
+        wide[1]!.reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 32), 0),
     );
     const narrowSpread = Math.abs(
-      narrow[0].reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 16), 0) -
-        narrow[1].reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 16), 0),
+      narrow[0]!.reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 16), 0) -
+        narrow[1]!.reduce((n, { piece: p }) => n + estimatePieceRows(p.code, 16), 0),
     );
     expect(narrowSpread).toBeGreaterThanOrEqual(wideSpread);
   });

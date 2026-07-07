@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -31,7 +31,7 @@ function record({ str }: ParensInput): Frame<ParensState>[] {
   const chars = [...str];
   const stack: string[] = [];
 
-  const { emit, frames } = createRecorder<ParensState>(() => ({
+  const { emit, frames } = createPrepRecorder<ParensState>(() => ({
     chars,
     i: null,
     stack: stack.slice(),
@@ -51,10 +51,10 @@ function record({ str }: ParensInput): Frame<ParensState>[] {
   const openIdx: number[] = [];
 
   for (let i = 0; i < chars.length; i++) {
-    const c = chars[i];
+    const c = chars[i]!;
 
-    if (OPENS.has(c)) {
-      stack.push(c);
+    if (OPENS.has(c!)) {
+      stack.push(c!);
       openIdx.push(i);
       emit(
         'PUSH',
@@ -65,7 +65,7 @@ function record({ str }: ParensInput): Frame<ParensState>[] {
       continue;
     }
 
-    const open = PAIRS[c];
+    const open = PAIRS[c!]!;
     if (open === undefined) {
       // Non-bracket char: solution ignores it.
       emit(
@@ -89,19 +89,19 @@ function record({ str }: ParensInput): Frame<ParensState>[] {
       return frames;
     }
 
-    const top = stack[stack.length - 1];
+    const top = stack[stack.length - 1]!;
     if (top !== open) {
       emit(
         'FAIL',
         `${top} ≠ ${open}`,
         `'${c}' should close a '${open}', but the top of the stack is '${top}'. The brackets are interleaved wrong, so the string is invalid.`,
-        { i, matchAt: openIdx[openIdx.length - 1], result: false, done: true },
+        { i, matchAt: openIdx[openIdx.length - 1]!, result: false, done: true },
         'bad',
       );
       return frames;
     }
 
-    const matchAt = openIdx[openIdx.length - 1];
+    const matchAt = openIdx[openIdx.length - 1]!;
     stack.pop();
     openIdx.pop();
     emit(
@@ -169,8 +169,8 @@ function View({ frame }: PluginViewProps<ParensState>) {
 function Inspector({ frame }: InspectorProps<ParensState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null ? s.chars[s.i] : '—';
-  const top = s.stack.length > 0 ? s.stack[s.stack.length - 1] : '—';
+  const cur = s.i !== null ? s.chars[s.i]! : '—';
+  const top = s.stack.length > 0 ? s.stack[s.stack.length - 1]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />

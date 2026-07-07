@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -44,7 +44,7 @@ function record({ cap, ops }: LruInput): Frame<LruState>[] {
     list.unshift(n);
   };
 
-  const { emit, frames } = createRecorder<LruState>(() => ({
+  const { emit, frames } = createPrepRecorder<LruState>(() => ({
     cap,
     list: list.map((x) => ({ ...x })),
     op: '',
@@ -97,7 +97,7 @@ function record({ cap, ops }: LruInput): Frame<LruState>[] {
       }
       let evicted: LruNode | null = null;
       if (cache.size >= cap && cap > 0) {
-        const lru = list[list.length - 1];
+        const lru = list[list.length - 1]!;
         if (lru) {
           evicted = { ...lru };
           remove(lru);
@@ -188,12 +188,12 @@ function Inspector({ frame }: InspectorProps<LruState>) {
       <InspectorRow k="size" v={s.list.length} />
       <InspectorRow k="op" v={s.op || '—'} />
       <InspectorRow k="returned" v={s.out ?? '—'} />
-      <InspectorRow k="MRU" v={s.list[0] ? `${s.list[0].key}:${s.list[0].val}` : '—'} />
+      <InspectorRow k="MRU" v={s.list[0]! ? `${s.list[0]!.key}:${s.list[0]!.val}` : '—'} />
       <InspectorRow
         k="LRU"
         v={
-          s.list[s.list.length - 1]
-            ? `${s.list[s.list.length - 1].key}:${s.list[s.list.length - 1].val}`
+          s.list[s.list.length - 1]!
+            ? `${s.list[s.list.length - 1]!.key}:${s.list[s.list.length - 1]!.val}`
             : '—'
         }
       />

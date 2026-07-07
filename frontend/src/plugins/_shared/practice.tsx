@@ -275,20 +275,22 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
 
 /** Pick the correct next-move note plus two plausible distractors from the run. */
 function buildOptions<S>(frames: Frame<S>[], k: number) {
-  const correct = frames[k + 1].move.note;
+  const next = frames[k + 1];
+  if (!next) return { correct: '', options: [] as string[] };
+  const correct = next.move.note;
   const pool = Array.from(new Set(frames.map((f) => f.move.note))).filter((n) => n !== correct);
   const distractors: string[] = [];
   let j = 1;
   while (distractors.length < 2 && pool.length > 0 && j < pool.length + 8) {
     const cand = pool[(k * 5 + j * 3) % pool.length];
-    if (cand && !distractors.includes(cand)) distractors.push(cand);
+    if (cand !== undefined && !distractors.includes(cand)) distractors.push(cand);
     j++;
   }
   const fillers = ['done', 'return', `step ${frames.length + k}`];
   let fi = 0;
   while (distractors.length < 2 && fi < fillers.length) {
     const f = fillers[fi++];
-    if (f !== correct && !distractors.includes(f)) distractors.push(f);
+    if (f !== undefined && f !== correct && !distractors.includes(f)) distractors.push(f);
   }
   const opts = [correct, ...distractors];
   const r = k % opts.length;
@@ -318,8 +320,9 @@ export function makeSimulatePanel<I, S>(config: SimulateConfig<I, S>) {
 
   return function SimulatePanel() {
     const { focusPanel, advancePractice } = useCanvasActions();
-    const [inputId, setInputId] = useState(inputs[0].id);
-    const input = inputs.find((g) => g.id === inputId) ?? inputs[0];
+    const defaultInput = inputs[0]!;
+    const [inputId, setInputId] = useState(defaultInput.id);
+    const input = inputs.find((g) => g.id === inputId) ?? defaultInput;
     const frames = useMemo(() => record(input.value), [input]);
     const [k, setK] = useState(0);
     const [mistakes, setMistakes] = useState(0);
@@ -331,7 +334,7 @@ export function makeSimulatePanel<I, S>(config: SimulateConfig<I, S>) {
     const done = k >= frames.length - 1;
     const opt = useMemo(() => (done ? null : buildOptions(frames, k)), [frames, k, done]);
     const frame = frames[k];
-    const move = frame.move;
+    const move = frame?.move;
 
     const clearFeedback = () => {
       if (feedbackTimer.current !== null) {
@@ -380,6 +383,8 @@ export function makeSimulatePanel<I, S>(config: SimulateConfig<I, S>) {
       const t = window.setTimeout(() => advancePractice(panelId), FINISH_FOCUS_MS);
       return () => window.clearTimeout(t);
     }, [done, advancePractice]);
+
+    if (!frame || !move) return null;
 
     return (
       <div className="simulate">
@@ -549,7 +554,12 @@ function CaseCard<I, S>({
       setInView(true);
       return;
     }
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.2 });
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry) setInView(entry.isIntersecting);
+      },
+      { threshold: 0.2 },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -567,6 +577,7 @@ function CaseCard<I, S>({
   }, [animated, playing, inView, k, last, stride, stepDelay]);
 
   const frame = frames[Math.min(k, last)];
+  if (!frame) return null;
   const move = frame.move;
   const step = (d: number) => {
     setPlaying(false);

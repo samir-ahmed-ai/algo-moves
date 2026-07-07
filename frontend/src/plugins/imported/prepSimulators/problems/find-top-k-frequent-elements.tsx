@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -41,7 +41,7 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
       .map((vals, cnt) => [cnt, vals.slice()] as [number, number[]])
       .filter(([, vals]) => vals.length > 0);
 
-  const { emit, frames } = createRecorder<TopKState>(() => ({
+  const { emit, frames } = createPrepRecorder<TopKState>(() => ({
     a,
     k,
     phase: 'count',
@@ -63,23 +63,23 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
 
   // Phase 1 — frequency map.
   for (let i = 0; i < a.length; i++) {
-    const x = a[i];
-    const next = (freq.get(x) ?? 0) + 1;
-    freq.set(x, next);
+    const x = a[i]!;
+    const next = (freq.get(x!) ?? 0) + 1;
+    freq.set(x!, next);
     emit(
       'COUNT',
-      `freq[${x}]=${next}`,
-      `Read a[${i}] = ${x} and tally it: freq[${x}] is now ${next}. One linear pass fills the whole frequency map.`,
+      `freq[${x}]!=${next}`,
+      `Read a[${i}]! = ${x} and tally it: freq[${x}]! is now ${next}. One linear pass fills the whole frequency map.`,
       { phase: 'count', scan: i },
     );
   }
 
   // Phase 2 — bucket by count.
   for (const [num, cnt] of freq.entries()) {
-    buckets[cnt].push(num);
+    buckets[cnt]!.push(num);
     emit(
       'BUCKET',
-      `bucket[${cnt}] += ${num}`,
+      `bucket[${cnt}]! += ${num}`,
       `Value ${num} occurs ${cnt} time(s), so place it in bucket ${cnt}. Index = frequency, so values that share a count land in the same bucket.`,
       { phase: 'bucket', bucketAt: cnt },
     );
@@ -87,14 +87,14 @@ function record({ a, k }: TopKInput): Frame<TopKState>[] {
 
   // Phase 3 — collect from the highest count down until we have k values.
   for (let cnt = buckets.length - 1; cnt >= 0 && result.length < k; cnt--) {
-    if (buckets[cnt].length === 0) continue;
+    if (buckets[cnt]!.length === 0) continue;
     emit(
       'SWEEP',
-      `bucket[${cnt}]`,
+      `bucket[${cnt}]!`,
       `Sweeping from the top: bucket ${cnt} holds the values seen ${cnt} time(s). Anything here is at least as frequent as anything in lower buckets, so pull from it first.`,
       { phase: 'collect', bucketAt: cnt },
     );
-    for (const num of buckets[cnt]) {
+    for (const num of buckets[cnt]!) {
       result.push(num);
       emit(
         'PICK',
@@ -152,7 +152,7 @@ function View({ frame }: PluginViewProps<TopKState>) {
                 s.bucketAt === cnt ? 'text-accent' : 'text-ink3',
               )}
             >
-              bucket[{cnt}] = [{vals.join(', ')}]
+              bucket[{cnt}]! = [{vals.join(', ')}]
             </div>
           ))
         )}
@@ -174,7 +174,7 @@ function Inspector({ frame }: InspectorProps<TopKState>) {
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="phase" v={s.phase} />
-      <InspectorRow k="scan a[i]" v={s.scan !== null ? `[${s.scan}] = ${s.a[s.scan]}` : '—'} />
+      <InspectorRow k="scan a[i]!" v={s.scan !== null ? `[${s.scan}] = ${s.a[s.scan]!}` : '—'} />
       <InspectorRow k="distinct values" v={s.freq.length} />
       <InspectorRow k="bucket in focus" v={s.bucketAt !== null ? `count ${s.bucketAt}` : '—'} />
       <InspectorRow k="picked" v={s.pickValue ?? '—'} />
@@ -287,7 +287,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n) average time, O(1) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(n). freq map; buckets[cnt]; collect from top until k',
+    explain: 'O(n). O(n). freq map; buckets[cnt]!; collect from top until k',
   },
   {
     id: 'outcome',

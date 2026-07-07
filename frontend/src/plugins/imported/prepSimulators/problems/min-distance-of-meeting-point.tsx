@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -26,8 +26,8 @@ interface MeetState {
   sorted: number[]; // the sorted coords for the current axis
   lo: number | null; // two-pointer low index into `sorted`
   hi: number | null; // two-pointer high index into `sorted`
-  loCoord: number | null; // sorted[lo] (the coordinate value at lo)
-  hiCoord: number | null; // sorted[hi] (the coordinate value at hi)
+  loCoord: number | null; // sorted[lo]! (the coordinate value at lo)
+  hiCoord: number | null; // sorted[hi]! (the coordinate value at hi)
   pairCost: number | null; // min*(hi-lo) added this step
   rowDist: number; // running distance accumulated on the row axis
   colDist: number; // running distance accumulated on the col axis
@@ -47,7 +47,7 @@ function record({ grid }: MeetInput): Frame<MeetState>[] {
   const colCoords: number[] = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (grid[r][c] === 1) {
+      if (grid[r]![c] === 1) {
         people.push([r, c]);
         rowCoords.push(r);
         colCoords.push(c);
@@ -58,7 +58,7 @@ function record({ grid }: MeetInput): Frame<MeetState>[] {
   let rowDist = 0;
   let colDist = 0;
 
-  const { emit, frames } = createRecorder<MeetState>(() => ({
+  const { emit, frames } = createPrepRecorder<MeetState>(() => ({
     grid,
     rows,
     cols,
@@ -87,7 +87,7 @@ function record({ grid }: MeetInput): Frame<MeetState>[] {
   const sweep = (axis: Axis, coords: number[]) => {
     const a = coords.slice().sort((x, y) => x - y);
     const axisName = axis === 'rows' ? 'row' : 'column';
-    const median = a.length ? a[Math.floor((a.length - 1) / 2)] : null;
+    const median = a.length ? a[Math.floor((a.length - 1) / 2)]! : null;
 
     emit(
       'SORT',
@@ -100,10 +100,10 @@ function record({ grid }: MeetInput): Frame<MeetState>[] {
     let hi = a.length - 1;
     let dist = 0;
     while (lo < hi) {
-      // mn = min(a[lo], a[hi]); both are >=0 distances from a shared origin,
+      // mn = min(a[lo]!, a[hi]!); both are >=0 distances from a shared origin,
       // and pairing the outermost two contributes mn*(hi-lo) toward the median.
-      const mn = a[lo] < a[hi] ? a[lo] : a[hi];
-      const pairCost = mn * (hi - lo);
+      const mn = a[lo]! < a[hi]! ? a[lo]! : a[hi]!;
+      const pairCost = mn! * (hi - lo);
       dist += pairCost;
       if (axis === 'rows') rowDist = dist;
       else colDist = dist;
@@ -111,13 +111,13 @@ function record({ grid }: MeetInput): Frame<MeetState>[] {
       emit(
         'PINCH',
         `+${pairCost}`,
-        `Pair the outermost ${axisName}s a[lo]=${a[lo]} and a[hi]=${a[hi]}. Sliding everyone in this span of ${hi - lo} gaps toward the center closes min(${a[lo]}, ${a[hi]})=${mn} on each gap, adding ${mn}×${hi - lo}=${pairCost}. Running ${axisName} distance = ${dist}.`,
-        { axis, sorted: a, lo, hi, loCoord: a[lo], hiCoord: a[hi], pairCost, median },
+        `Pair the outermost ${axisName}s a[lo]!=${a[lo]!} and a[hi]!=${a[hi]!}. Sliding everyone in this span of ${hi - lo} gaps toward the center closes min(${a[lo]!}, ${a[hi]!})=${mn} on each gap, adding ${mn}×${hi - lo}=${pairCost}. Running ${axisName} distance = ${dist}.`,
+        { axis, sorted: a, lo, hi, loCoord: a[lo]!, hiCoord: a[hi]!, pairCost, median },
       );
 
       // Advance whichever pointer(s) matched the min — identical to the Go code.
-      if (a[lo] === mn) lo++;
-      if (a[hi] === mn) hi--;
+      if (a[lo]! === mn) lo++;
+      if (a[hi]! === mn) hi--;
     }
 
     emit(
@@ -162,7 +162,7 @@ function View({ frame }: PluginViewProps<MeetState>) {
           ? c === s.median
           : false;
 
-  const isPerson = (r: number, c: number) => s.grid[r][c] === 1;
+  const isPerson = (r: number, c: number) => s.grid[r]![c] === 1;
 
   const tone = (r: number, c: number): string => {
     if (onLo(r, c) || onHi(r, c)) return isPerson(r, c) ? 'path' : 'active';
@@ -171,7 +171,7 @@ function View({ frame }: PluginViewProps<MeetState>) {
     return 'water';
   };
 
-  const label = (r: number, c: number) => (s.grid[r][c] === 1 ? '1' : '0');
+  const label = (r: number, c: number) => (s.grid[r]![c] === 1 ? '1' : '0');
 
   const total = s.rowDist + s.colDist;
   const axisLabel = s.axis === 'rows' ? 'row' : s.axis === 'cols' ? 'column' : null;
@@ -228,7 +228,7 @@ function Inspector({ frame }: InspectorProps<MeetState>) {
       <InspectorRow k="axis" v={s.axis ?? '—'} />
       <InspectorRow k="lo / hi" v={s.lo !== null && s.hi !== null ? `${s.lo} / ${s.hi}` : '—'} />
       <InspectorRow
-        k="a[lo] / a[hi]"
+        k="a[lo]! / a[hi]!"
         v={s.loCoord !== null && s.hiCoord !== null ? `${s.loCoord} / ${s.hiCoord}` : '—'}
       />
       <InspectorRow k="pair cost" v={s.pairCost ?? '—'} />
@@ -246,7 +246,7 @@ function solve(grid: number[][]): number {
   const colCoords: number[] = [];
   for (let r = 0; r < grid.length; r++) {
     for (let c = 0; c < (grid[r]?.length ?? 0); c++) {
-      if (grid[r][c] === 1) {
+      if (grid[r]![c] === 1) {
         rowCoords.push(r);
         colCoords.push(c);
       }
@@ -258,10 +258,10 @@ function solve(grid: number[][]): number {
     let hi = a.length - 1;
     let dist = 0;
     while (lo < hi) {
-      const mn = a[lo] < a[hi] ? a[lo] : a[hi];
-      dist += mn * (hi - lo);
-      if (a[lo] === mn) lo++;
-      if (a[hi] === mn) hi--;
+      const mn = a[lo]! < a[hi]! ? a[lo]! : a[hi]!;
+      dist += mn! * (hi - lo);
+      if (a[lo]! === mn) lo++;
+      if (a[hi]! === mn) hi--;
     }
     return dist;
   };
@@ -318,7 +318,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'On the "PINCH" step (+), what happens?',
     choices: [
       {
-        label: 'Pair the outermost s a[lo]= — this move caption',
+        label: 'Pair the outermost s a[lo]!= — this move caption',
         correct: true,
       },
       {
@@ -332,7 +332,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Pair the outermost s a[lo]= and a[hi]=. Sliding everyone in this span of  gaps toward the center closes min(, )= on each gap, adding ×=. Running  distance = .',
+      'Pair the outermost s a[lo]!= and a[hi]!=. Sliding everyone in this span of  gaps toward the center closes min(, )= on each gap, adding ×=. Running  distance = .',
   },
   {
     id: 'state',

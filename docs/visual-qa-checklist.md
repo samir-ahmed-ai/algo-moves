@@ -1,6 +1,7 @@
 # Visual QA Checklist
 
-Final pass before shipping UI density and presentation changes. Run on **1280×800** (desktop), **390×844** (mobile), in **dark** and **light** themes.
+Final pass before shipping UI density, arcade, and presentation changes. Run on
+**1280×800** desktop, **390×844** mobile, in **dark** and **light** themes.
 
 ## Setup
 
@@ -48,9 +49,19 @@ Toggle density via the canvas HUD (cycle) or Settings. Presentation mode: **F** 
 - [ ] Landing hero and CTA row fit without overflow
 - [ ] Mobile deck: one card per swipe, transport reachable with thumb
 - [ ] Install banner is single-line compact variant
-- [ ] Games lobby roster readable without horizontal scroll
 - [ ] Mobile session resume lands on a valid topic, problem, and card index
 - [ ] Bottom transport and swipe affordances do not collide with browser safe areas
+
+## Games Arcade
+
+- [ ] `#games` route opens with polished header, stage frame, and no horizontal scroll
+- [ ] Lobby name input, personal room card, QR share card, create/join tabs, and game strip align on desktop and mobile
+- [ ] Game chooser cards show localized title/tagline, category, pacing, disabled states, and expanded how-to-play details
+- [ ] In-room roster, reconnect banner, ready state, standings, chat dock, and progress overlay match the arcade chrome
+- [ ] Each game surface fits the stage: Would You Rather, Number Duel, Tic Tac Toe, RPS, Mind Meld, Reaction Duel
+- [ ] Spectator mode remains readable and does not expose player-only controls
+- [ ] Sound toggle, theme toggle, locale selector, leave room, and profile overlay remain keyboard reachable
+- [ ] Realtime reconnect keeps the active room visible and shows a clear status message
 
 ## 390×844 — Themes
 

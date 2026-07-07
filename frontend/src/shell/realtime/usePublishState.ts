@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 
+export type PublishStateDeps = readonly unknown[];
+export type PublishStateFn = () => void;
+
 /**
  * Host-authoritative shared-state publishing, done safely.
  *
@@ -15,14 +18,13 @@ import { useEffect, useRef } from 'react';
  */
 export function usePublishState(
   enabled: boolean,
-  deps: readonly unknown[],
-  publish: () => void,
+  deps: PublishStateDeps,
+  publish: PublishStateFn,
 ): void {
   const publishRef = useRef(publish);
   publishRef.current = publish;
   useEffect(() => {
     if (enabled) publishRef.current();
     // publishRef is intentionally stable; only `enabled` + caller `deps` re-run.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, ...deps]);
 }

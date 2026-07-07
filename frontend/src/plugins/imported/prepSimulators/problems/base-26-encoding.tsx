@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ function record({ n }: Base26Input): Frame<Base26State>[] {
   const digits: string[] = [];
   let cur = n;
 
-  const { emit, frames } = createRecorder<Base26State>(() => ({
+  const { emit, frames } = createPrepRecorder<Base26State>(() => ({
     n0: n,
     n: cur,
     digits: digits.slice(),

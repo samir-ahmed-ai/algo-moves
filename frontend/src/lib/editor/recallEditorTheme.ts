@@ -7,7 +7,7 @@ export const RECALL_FONT_MIN = 10;
 export const RECALL_FONT_MAX = 18;
 export const RECALL_FONT_DEFAULT = 13;
 
-export const RECALL_LINE_HEIGHTS: Record<RecallLineHeight, string> = {
+export const RECALL_LINE_HEIGHTS: Readonly<Record<RecallLineHeight, string>> = {
   compact: '1.35',
   normal: '1.5',
   relaxed: '1.65',
@@ -23,15 +23,25 @@ export function isRecallLineHeight(value: unknown): value is RecallLineHeight {
 }
 
 export function cycleRecallLineHeight(current: RecallLineHeight): RecallLineHeight {
-  if (current === 'compact') return 'normal';
-  if (current === 'normal') return 'relaxed';
-  return 'compact';
+  switch (current) {
+    case 'compact':
+      return 'normal';
+    case 'normal':
+      return 'relaxed';
+    case 'relaxed':
+      return 'compact';
+  }
 }
 
 export function recallLineHeightLabel(value: RecallLineHeight): string {
-  if (value === 'compact') return 'Tight';
-  if (value === 'relaxed') return 'Loose';
-  return 'Normal';
+  switch (value) {
+    case 'compact':
+      return 'Tight';
+    case 'relaxed':
+      return 'Loose';
+    case 'normal':
+      return 'Normal';
+  }
 }
 
 /** Live font size + line height for recall merge editors. */

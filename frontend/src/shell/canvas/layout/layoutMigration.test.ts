@@ -16,7 +16,7 @@ describe('migrateCodeLayoutEntry', () => {
     };
     const out = migrateCodeLayoutEntry(entry);
     expect(out.nodes.scratch).toBeUndefined();
-    expect(out.nodes.code.width).toBe(500); // widened to the larger of the two
+    expect(out.nodes.code!.width).toBe(500); // widened to the larger of the two
     expect(out.removed).toContain('scratch');
   });
 
@@ -91,8 +91,9 @@ describe('migrateLayouts', () => {
     expect(out['two-sum:learn']).toBeDefined();
     expect(out['two-sum:practice']).toBeUndefined();
     expect(out['two-sum:code']).toBeUndefined();
-    expect(out['two-sum:learn'].nodes.problem).toBeDefined();
-    expect(out['two-sum:learn'].nodes.code).toBeDefined();
+    const learn = out['two-sum:learn']!;
+    expect(learn.nodes.problem).toBeDefined();
+    expect(learn.nodes.code).toBeDefined();
   });
 
   it('strips persisted heights while preserving positions and widths', () => {
@@ -103,7 +104,7 @@ describe('migrateLayouts', () => {
       },
     };
     const out = migrateLayouts(stored);
-    const wb = out['two-sum:visualize'].nodes.workbench;
+    const wb = out['two-sum:visualize']!.nodes.workbench!;
     expect(wb.height).toBeUndefined();
     expect(wb.width).toBe(700);
     expect(wb.position).toEqual({ x: 5, y: 6 });

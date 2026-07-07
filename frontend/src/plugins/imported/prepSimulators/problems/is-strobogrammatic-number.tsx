@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { cn } from '@/lib/utils/cn';
@@ -19,8 +19,8 @@ interface StroboState {
   digits: string[];
   lo: number | null; // outer-left pointer
   hi: number | null; // outer-right pointer
-  a: string | null; // rotation of digits[lo]
-  b: string | null; // digits[hi]
+  a: string | null; // rotation of digits[lo]!
+  b: string | null; // digits[hi]!
   bad: number[]; // indices that failed the check
   done: boolean;
   answer: boolean | null;
@@ -31,7 +31,7 @@ const PAIRS: Record<string, string> = { '0': '0', '1': '1', '6': '9', '8': '8', 
 
 function record({ s }: StroboInput): Frame<StroboState>[] {
   const digits = s.split('');
-  const { emit, frames } = createRecorder<StroboState>(() => ({
+  const { emit, frames } = createPrepRecorder<StroboState>(() => ({
     digits,
     lo: null,
     hi: null,
@@ -45,32 +45,32 @@ function record({ s }: StroboInput): Frame<StroboState>[] {
   emit(
     'INIT',
     `"${s}"`,
-    `Is Strobogrammatic: the number must read the same after rotating the whole string 180°. Walk two pointers inward — each outer digit d[lo] must rotate to exactly d[hi] using the map 0→0, 1→1, 8→8, 6→9, 9→6.`,
+    `Is Strobogrammatic: the number must read the same after rotating the whole string 180°. Walk two pointers inward — each outer digit d[lo]! must rotate to exactly d[hi]! using the map 0→0, 1→1, 8→8, 6→9, 9→6.`,
     {},
   );
 
   let lo = 0;
   let hi = digits.length - 1;
   while (lo <= hi) {
-    const a = PAIRS[digits[lo]];
+    const a = PAIRS[digits[lo]!];
     const okA = a !== undefined;
-    const b = digits[hi];
-    const okB = PAIRS[b] !== undefined;
+    const b = digits[hi]!;
+    const okB = PAIRS[b!]! !== undefined;
     emit(
       'CHECK',
-      `${digits[lo]}?${digits[hi]}`,
-      `Compare the outer pair. Rotating d[${lo}]="${digits[lo]}" should give d[${hi}]="${digits[hi]}". ${
-        okA ? `"${digits[lo]}" rotates to "${a}".` : `"${digits[lo]}" is not a rotatable digit.`
+      `${digits[lo]!}?${digits[hi]!}`,
+      `Compare the outer pair. Rotating d[${lo}]!="${digits[lo]!}" should give d[${hi}]!="${digits[hi]!}". ${
+        okA ? `"${digits[lo]!}" rotates to "${a}".` : `"${digits[lo]!}" is not a rotatable digit.`
       }`,
       { lo, hi, a: okA ? a : null, b },
     );
 
     if (!okA || !okB || a !== b) {
       const reason = !okA
-        ? `d[${lo}]="${digits[lo]}" cannot be rotated at all`
+        ? `d[${lo}]!="${digits[lo]!}" cannot be rotated at all`
         : !okB
-          ? `d[${hi}]="${digits[hi]}" cannot be rotated at all`
-          : `rotation "${a}" ≠ d[${hi}]="${b}"`;
+          ? `d[${hi}]!="${digits[hi]!}" cannot be rotated at all`
+          : `rotation "${a}" ≠ d[${hi}]!="${b}"`;
       emit(
         'FAIL',
         'not strobo',
@@ -92,7 +92,7 @@ function record({ s }: StroboInput): Frame<StroboState>[] {
     emit(
       'MATCH',
       `${a}=${b} ✓`,
-      `Match: rotating "${digits[lo]}" gives "${a}", which equals d[${hi}]="${b}". This pair is symmetric. Step both pointers inward.`,
+      `Match: rotating "${digits[lo]!}" gives "${a}", which equals d[${hi}]!="${b}". This pair is symmetric. Step both pointers inward.`,
       { lo, hi, a, b },
       'good',
     );
@@ -135,7 +135,7 @@ function View({ frame }: PluginViewProps<StroboState>) {
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
         {s.a !== null && s.b !== null ? (
           <>
-            rotate("{s.digits[s.lo ?? 0]}") = <span className="text-ink">{s.a}</span> vs d[hi] ={' '}
+            rotate("{s.digits[s.lo ?? 0]!}") = <span className="text-ink">{s.a}</span> vs d[hi]! ={' '}
             <span className="text-ink">{s.b}</span>
           </>
         ) : (
@@ -159,9 +159,12 @@ function Inspector({ frame }: InspectorProps<StroboState>) {
       <InspectorRow k="length" v={s.digits.length} />
       <InspectorRow k="lo" v={s.lo ?? '—'} />
       <InspectorRow k="hi" v={s.hi ?? '—'} />
-      <InspectorRow k="d[lo]" v={s.lo !== null && s.lo < s.digits.length ? s.digits[s.lo] : '—'} />
-      <InspectorRow k="d[hi]" v={s.hi !== null && s.hi >= 0 ? s.digits[s.hi] : '—'} />
-      <InspectorRow k="rotate(d[lo])" v={s.a ?? '—'} />
+      <InspectorRow
+        k="d[lo]!"
+        v={s.lo !== null && s.lo < s.digits.length ? s.digits[s.lo]! : '—'}
+      />
+      <InspectorRow k="d[hi]!" v={s.hi !== null && s.hi >= 0 ? s.digits[s.hi]! : '—'} />
+      <InspectorRow k="rotate(d[lo]!)" v={s.a ?? '—'} />
       <InspectorRow k="result" v={s.answer === null ? '…' : s.answer ? 'true' : 'false'} />
     </VarGrid>
   );
@@ -210,7 +213,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Is Strobogrammatic: the number must read the same after rotating the whole string 180°. Walk two pointers inward — each outer digit d[lo] must rotate to exactly d[hi] using the map 0→0, 1→1, 8→8, 6→9, 9→6.',
+      'Is Strobogrammatic: the number must read the same after rotating the whole string 180°. Walk two pointers inward — each outer digit d[lo]! must rotate to exactly d[hi]! using the map 0→0, 1→1, 8→8, 6→9, 9→6.',
   },
   {
     id: 'key-step',

@@ -8,12 +8,15 @@ import { configureSoundPersistence } from '@/lib/utils/audio';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 
+const MUTED = '1';
+const UNMUTED = '0';
+
 let configured = false;
 
 export function ensureSoundConfig(): void {
   if (configured) return;
-  configured = true;
-  configureSoundPersistence(readStorageText(STORAGE_KEYS.GAMES_MUTED) === '1', (muted) =>
-    writeStorageText(STORAGE_KEYS.GAMES_MUTED, muted ? '1' : '0'),
+  configureSoundPersistence(readStorageText(STORAGE_KEYS.GAMES_MUTED) === MUTED, (muted) =>
+    writeStorageText(STORAGE_KEYS.GAMES_MUTED, muted ? MUTED : UNMUTED),
   );
+  configured = true;
 }

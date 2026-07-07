@@ -9,16 +9,21 @@
  */
 let ctx: AudioContext | null = null;
 
+type WebAudioWindow = Window &
+  typeof globalThis & {
+    webkitAudioContext?: typeof AudioContext;
+  };
+
 export function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   try {
-    const Ctor =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const audioWindow = window as WebAudioWindow;
+    const Ctor = audioWindow.AudioContext ?? audioWindow.webkitAudioContext;
     if (!Ctor) return null;
-    if (!ctx) ctx = new Ctor();
+    if (!ctx || ctx.state === 'closed') ctx = new Ctor();
     return ctx;
   } catch {
+    ctx = null;
     return null;
   }
 }

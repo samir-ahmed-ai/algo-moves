@@ -58,8 +58,8 @@ export function WorkbenchPanelBody({
           <WorkbenchSectionHeader label="Visualizer" icon={<Network className={nodeIconGlyph} />} />
           <div className="workbench-section-body workbench-section-body--visualizer nowheel flex min-h-0 flex-1 flex-col overflow-hidden">
             <VizPanelBody
-              showBigO={showBigO}
-              onBigOOpenChange={onBigOOpenChange}
+              {...(showBigO !== undefined ? { showBigO } : {})}
+              {...(onBigOOpenChange !== undefined ? { onBigOOpenChange } : {})}
               showTransport={false}
             />
           </div>

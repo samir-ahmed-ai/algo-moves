@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -41,7 +41,7 @@ function record({ tree }: PathsInput): Frame<PathsState>[] {
   const path: number[] = [];
   const out: number[][] = [];
 
-  const { emit, frames } = createRecorder<PathsState>(() => ({
+  const { emit, frames } = createPrepRecorder<PathsState>(() => ({
     tree,
     current: null,
     visited: visited.slice(),
@@ -50,8 +50,8 @@ function record({ tree }: PathsInput): Frame<PathsState>[] {
     done: false,
   }));
 
-  const exists = (i: number) => i >= 0 && i < tree.length && tree[i] !== null;
-  const val = (i: number) => tree[i] as number;
+  const exists = (i: number) => i >= 0 && i < tree.length && tree[i]! !== null;
+  const val = (i: number) => tree[i]! as number;
   const pathVals = () => path.map((i) => val(i));
 
   emit(
@@ -109,7 +109,7 @@ function record({ tree }: PathsInput): Frame<PathsState>[] {
       'POP',
       `pop ${val(i)}`,
       `Done with node ${val(i)}'s subtree: pop it so the path becomes [${pathVals().join(', ')}] before we return to its parent.`,
-      { current: path.length > 0 ? path[path.length - 1] : i },
+      { current: path.length > 0 ? path[path.length - 1]! : i },
     );
   };
 
@@ -137,7 +137,7 @@ function View({ frame }: PluginViewProps<PathsState>) {
     if (visitedSet.has(i)) return 'team-2';
     return 'team-0';
   };
-  const pathVals = s.path.map((i) => s.tree[i] as number);
+  const pathVals = s.path.map((i) => s.tree[i]! as number);
   const outLabels = s.out.map((p) => p.join('→'));
   return (
     <VizStage
@@ -160,8 +160,8 @@ function View({ frame }: PluginViewProps<PathsState>) {
 function Inspector({ frame }: InspectorProps<PathsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.current !== null ? (s.tree[s.current] as number) : '—';
-  const pathVals = s.path.map((i) => s.tree[i] as number);
+  const cur = s.current !== null ? (s.tree[s.current]! as number) : '—';
+  const pathVals = s.path.map((i) => s.tree[i]! as number);
   return (
     <VarGrid>
       <InspectorRow k="current node" v={cur} />

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { STRUDEL_NODE_W, vizMinWidth, vizWireGap, LAYOUT_PRESET_META } from '@/shell/canvas';
 import { VizEmpty, VizHint, vizText } from '../plugins/_shared/vizKit';
-import { EmptyState } from '@/design/components';
+import { difficultyTone, EmptyState, normalizeUiTone, UI_TONES } from '@/design/components';
 import { chromeText } from '@/design/chromeTypography';
 
 describe('layout integration', () => {
@@ -43,5 +43,12 @@ describe('design density integration', () => {
     for (const key of ['base', 'sm', 'xs', 'tight', '2xs', 'title'] as const) {
       expect(chromeText[key]).toMatch(/--fs/);
     }
+  });
+
+  it('shares a stable semantic tone vocabulary', () => {
+    expect(UI_TONES).toEqual(['default', 'accent', 'good', 'bad', 'muted']);
+    expect(normalizeUiTone('good')).toBe('good');
+    expect(normalizeUiTone('unknown', 'muted')).toBe('muted');
+    expect(difficultyTone(' Hard ')).toBe('bad');
   });
 });

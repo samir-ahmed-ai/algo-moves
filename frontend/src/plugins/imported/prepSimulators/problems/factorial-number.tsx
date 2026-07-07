@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ function record({ n }: FactorialInput): Frame<FactorialState>[] {
   const factors: number[] = [];
   for (let i = 2; i <= n; i++) factors.push(i);
 
-  const { emit, frames } = createRecorder<FactorialState>(() => ({
+  const { emit, frames } = createPrepRecorder<FactorialState>(() => ({
     n,
     factors,
     i: null,
@@ -66,9 +66,9 @@ function record({ n }: FactorialInput): Frame<FactorialState>[] {
   );
 
   for (let k = 0; k < factors.length; k++) {
-    const i = factors[k];
+    const i = factors[k]!;
     const before = result;
-    result *= i;
+    result *= i!;
     emit(
       'MUL',
       `×${i} → ${result}`,

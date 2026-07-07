@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Btn, Field, TextArea } from '@/components/shared/formControls';
 
 const EXAMPLES = [
   { label: 'Sorted array', json: '{"values":[1,3,5,7,9,11]}' },
   { label: 'Graph edges', json: '{"n":4,"edges":[[0,1],[1,2],[2,3]]}' },
   { label: 'DP grid', json: '{"grid":[[1,2],[3,4]]}' },
-];
+] as const;
 
-export function CustomInputBuilder({ onApply }: { onApply: (value: unknown) => void }) {
-  const [text, setText] = useState(EXAMPLES[0].json);
+export function CustomInputBuilder({
+  onApply,
+}: {
+  readonly onApply: (value: unknown) => void;
+}): ReactNode {
+  const [text, setText] = useState<string>(EXAMPLES[0].json);
   const [err, setErr] = useState('');
 
   const apply = () => {
@@ -28,7 +32,10 @@ export function CustomInputBuilder({ onApply }: { onApply: (value: unknown) => v
             <button
               key={ex.label}
               type="button"
-              onClick={() => setText(ex.json)}
+              onClick={() => {
+                setText(ex.json);
+                setErr('');
+              }}
               className="input-builder-preset rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2"
             >
               {ex.label}
@@ -40,6 +47,7 @@ export function CustomInputBuilder({ onApply }: { onApply: (value: unknown) => v
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={5}
+        aria-label="Custom input JSON"
         className="input-builder-json font-mono"
       />
       {err && <span className="input-builder-error text-bad text-xs">{err}</span>}

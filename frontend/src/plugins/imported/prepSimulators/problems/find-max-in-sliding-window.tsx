@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,7 +33,7 @@ function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
   const dq: number[] = [];
   const res: number[] = [];
 
-  const { emit, frames } = createRecorder<MaxWindowState>(() => ({
+  const { emit, frames } = createPrepRecorder<MaxWindowState>(() => ({
     nums,
     k,
     i: null,
@@ -65,7 +65,7 @@ function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
   }
 
   for (let i = 0; i < nums.length; i++) {
-    const x = nums[i];
+    const x = nums[i]!;
     emit(
       'SCAN',
       `i=${i} x=${x}`,
@@ -73,13 +73,13 @@ function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
       { i },
     );
 
-    while (dq.length > 0 && nums[dq[dq.length - 1]] <= x) {
-      const p = dq[dq.length - 1];
+    while (dq.length > 0 && nums[dq[dq.length - 1]!]! <= x!) {
+      const p = dq[dq.length - 1]!;
       dq.pop();
       emit(
         'POP_TAIL',
         `pop ${p}`,
-        `nums[${p}] = ${nums[p]} ≤ ${x}, so pop index ${p} off the tail; a later, larger (or equal, newer) value dominates it.`,
+        `nums[${p}]! = ${nums[p!]!} ≤ ${x}, so pop index ${p} off the tail; a later, larger (or equal, newer) value dominates it.`,
         { i, popped: p },
       );
     }
@@ -92,8 +92,8 @@ function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
       { i },
     );
 
-    if (dq[0] <= i - k) {
-      const old = dq[0];
+    if (dq[0]! <= i - k) {
+      const old = dq[0]!;
       dq.shift();
       emit(
         'DROP_FRONT',
@@ -104,12 +104,12 @@ function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
     }
 
     if (i >= k - 1) {
-      const front = dq[0];
-      res.push(nums[front]);
+      const front = dq[0]!;
+      res.push(nums[front!]!);
       emit(
         'RECORD',
-        `max=${nums[front]}`,
-        `Window [${i - k + 1}, ${i}] is complete. The front of the deque is index ${front}, so its value ${nums[front]} is this window's maximum — record it.`,
+        `max=${nums[front!]!}`,
+        `Window [${i - k + 1}, ${i}] is complete. The front of the deque is index ${front}, so its value ${nums[front!]!} is this window's maximum — record it.`,
         { i, windowLo: i - k + 1, recorded: front },
         'good',
       );
@@ -130,7 +130,7 @@ function View({ frame }: PluginViewProps<MaxWindowState>) {
   const s = frame.state;
   const lo = s.windowLo;
   const hi = lo !== null ? lo + s.k - 1 : null;
-  const front = s.dq.length > 0 ? s.dq[0] : null;
+  const front = s.dq.length > 0 ? s.dq[0]! : null;
 
   const pointers: ArrayPointer[] = [];
   if (s.i !== null && !s.done)
@@ -176,7 +176,7 @@ function View({ frame }: PluginViewProps<MaxWindowState>) {
                 pos === 0 ? 'text-good' : 'text-ink',
               )}
             >
-              {idx}:{s.nums[idx]}
+              {idx}:{s.nums[idx]!}
             </span>
           ))
         )}
@@ -190,14 +190,14 @@ function View({ frame }: PluginViewProps<MaxWindowState>) {
 function Inspector({ frame }: InspectorProps<MaxWindowState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const front = s.dq.length > 0 ? s.dq[0] : null;
+  const front = s.dq.length > 0 ? s.dq[0]! : null;
   return (
     <VarGrid>
       <InspectorRow k="k (window)" v={s.k} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
       <InspectorRow k="deque (idx)" v={s.dq.length ? `[${s.dq.join(', ')}]` : 'empty'} />
-      <InspectorRow k="front max" v={front !== null ? s.nums[front] : '—'} />
+      <InspectorRow k="front max" v={front !== null ? s.nums[front!]! : '—'} />
       <InspectorRow k="result" v={`[${s.res.join(', ')}]`} />
     </VarGrid>
   );

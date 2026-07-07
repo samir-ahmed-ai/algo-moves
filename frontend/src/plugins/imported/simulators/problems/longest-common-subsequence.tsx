@@ -59,7 +59,7 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
   );
 
   for (let j = 0; j <= n; j++) {
-    dp[0][j] = 0;
+    dp[0]![j] = 0;
     snap(
       'BASE',
       `dp[0][${j}]=0`,
@@ -68,7 +68,7 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
     );
   }
   for (let i = 1; i <= m; i++) {
-    dp[i][0] = 0;
+    dp[i]![0] = 0;
     snap(
       'BASE',
       `dp[${i}][0]=0`,
@@ -82,21 +82,21 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
       const ca = a[i - 1];
       const cb = b[j - 1];
       if (ca === cb) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
+        dp[i]![j] = dp[i - 1]![j - 1]! + 1;
         snap(
           'FILL',
-          `dp[${i}][${j}]=${dp[i][j]}`,
-          `'${ca}' == '${cb}': the match extends the diagonal. dp[${i}][${j}] = dp[${i - 1}][${j - 1}] + 1 = ${dp[i - 1][j - 1]} + 1 = ${dp[i][j]}.`,
+          `dp[${i}][${j}]=${dp[i]![j]}`,
+          `'${ca}' == '${cb}': the match extends the diagonal. dp[${i}][${j}] = dp[${i - 1}][${j - 1}] + 1 = ${dp[i - 1]![j - 1]} + 1 = ${dp[i]![j]}.`,
           [i, j],
         );
       } else {
-        const up = dp[i - 1][j];
-        const left = dp[i][j - 1];
-        dp[i][j] = Math.max(up, left);
+        const up = dp[i - 1]![j];
+        const left = dp[i]![j - 1];
+        dp[i]![j] = Math.max(up!, left!);
         snap(
           'FILL',
-          `dp[${i}][${j}]=${dp[i][j]}`,
-          `'${ca}' != '${cb}': carry the better neighbour. dp[${i}][${j}] = max(up dp[${i - 1}][${j}]=${up}, left dp[${i}][${j - 1}]=${left}) = ${dp[i][j]}.`,
+          `dp[${i}][${j}]=${dp[i]![j]}`,
+          `'${ca}' != '${cb}': carry the better neighbour. dp[${i}][${j}] = max(up dp[${i - 1}][${j}]=${up}, left dp[${i}][${j - 1}]=${left}) = ${dp[i]![j]}.`,
           [i, j],
         );
       }
@@ -105,8 +105,8 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
 
   snap(
     'DONE',
-    `LCS = ${dp[m][n]}`,
-    `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so the longest common subsequence of "${a}" and "${b}" has length ${dp[m][n]}.`,
+    `LCS = ${dp[m]![n]}`,
+    `The table is full. dp[${m}][${n}] = ${dp[m]![n]}, so the longest common subsequence of "${a}" and "${b}" has length ${dp[m]![n]}.`,
     [m, n],
     'good',
   );
@@ -119,13 +119,13 @@ function buildDisplay(s: LCSState): (number | string)[][] {
   const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
     new Array<number | string>(n + 2).fill(''),
   );
-  display[0][1] = 'ε';
-  for (let j = 0; j < n; j++) display[0][j + 2] = s.b[j];
-  display[1][0] = 'ε';
-  for (let i = 0; i < m; i++) display[i + 2][0] = s.a[i];
+  display[0]![1] = 'ε';
+  for (let j = 0; j < n; j++) display[0]![j + 2]! = s.b[j]!;
+  display[1]![0] = 'ε';
+  for (let i = 0; i < m; i++) display[i + 2]![0]! = s.a[i]!;
   for (let i = 0; i <= m; i++) {
     for (let j = 0; j <= n; j++) {
-      display[i + 1][j + 1] = s.dp[i][j] < 0 ? '' : s.dp[i][j];
+      display[i + 1]![j + 1]! = s.dp[i]![j]! < 0 ? '' : s.dp[i]![j]!;
     }
   }
   return display;
@@ -136,14 +136,17 @@ function View({ frame }: PluginViewProps<LCSState>) {
   const display = buildDisplay(s);
   const m = s.a.length;
   const n = s.b.length;
-  const ans = s.dp[m][n] >= 0 ? s.dp[m][n] : null;
+  const ans = s.dp[m]![n]! >= 0 ? s.dp[m]![n] : null;
   const displayActive: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
     if (s.cur && s.cur[0] + 1 === r && s.cur[1] + 1 === c) return 'active';
-    return s.dp[r - 1][c - 1] >= 0 ? 'visited' : '';
+    return s.dp[r - 1]![c - 1]! >= 0 ? 'visited' : '';
   };
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
+  const cell = (r: number, c: number) => {
+    const v = s.dp[r]?.[c];
+    return r >= 0 && c >= 0 && v !== undefined && v >= 0 ? v : '—';
+  };
   const rail = (
     <>
       <RailGroup label="strings">
@@ -173,8 +176,11 @@ function Inspector({ frame }: InspectorProps<LCSState>) {
   const s = frame.state;
   const m = s.a.length;
   const n = s.b.length;
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
-  const answer = s.dp[m][n] >= 0 ? s.dp[m][n] : '…filling';
+  const cell = (r: number, c: number) => {
+    const v = s.dp[r]?.[c];
+    return r >= 0 && c >= 0 && v !== undefined && v >= 0 ? v : '—';
+  };
+  const answer = s.dp[m]![n]! >= 0 ? s.dp[m]![n] : '…filling';
   return (
     <VarGrid>
       <InspectorRow k="text1" v={`"${s.a}"`} />
@@ -201,7 +207,7 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as LCSState | undefined;
-    const v = s ? s.dp[s.a.length][s.b.length] : 0;
+    const v = s ? s.dp[s.a.length]![s.b.length] : 0;
     return { ok: true, label: `LCS = ${v}` };
   },
 };

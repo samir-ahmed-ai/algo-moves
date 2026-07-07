@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -37,7 +37,7 @@ function renderJustified(parts: string[], maxWidth: number): string {
   const extra = totalSpaces % (numWords - 1);
   let out = '';
   for (let k = 0; k < numWords; k++) {
-    out += parts[k];
+    out += parts[k]!;
     if (k < numWords - 1) {
       const gaps = perGap + (k < extra ? 1 : 0);
       out += ' '.repeat(gaps);
@@ -57,7 +57,7 @@ function renderLeft(parts: string[], maxWidth: number): string {
 function record({ words, maxWidth }: JustifyInput): Frame<JustifyState>[] {
   const result: string[] = [];
 
-  const { emit, frames } = createRecorder<JustifyState>(() => ({
+  const { emit, frames } = createPrepRecorder<JustifyState>(() => ({
     words,
     maxWidth,
     i: null,
@@ -77,23 +77,23 @@ function record({ words, maxWidth }: JustifyInput): Frame<JustifyState>[] {
 
   let i = 0;
   while (i < words.length) {
-    // Greedily grow the line: start with words[i], add words while they fit.
-    let lineLen = words[i].length;
+    // Greedily grow the line: start with words[i]!, add words while they fit.
+    let lineLen = words[i]!.length;
     let j = i + 1;
     emit(
       'START',
       `line @ ${i}`,
-      `Start a new line with "${words[i]}" (length ${words[i].length}). We will keep adding words while the running length + 1 space + next word still fits in ${maxWidth}.`,
-      { i, j: i + 1, lineChars: [...words[i]] },
+      `Start a new line with "${words[i]!}" (length ${words[i]!.length}). We will keep adding words while the running length + 1 space + next word still fits in ${maxWidth}.`,
+      { i, j: i + 1, lineChars: [...words[i]!] },
     );
 
-    while (j < words.length && lineLen + 1 + words[j].length <= maxWidth) {
-      lineLen += 1 + words[j].length;
+    while (j < words.length && lineLen + 1 + words[j]!.length <= maxWidth) {
+      lineLen += 1 + words[j]!.length;
       j++;
       emit(
         'PACK',
-        `+${words[j - 1]}`,
-        `"${words[j - 1]}" fits: adding it makes the minimum length ${lineLen} (≤ ${maxWidth}). Extend the line and check the next word.`,
+        `+${words[j - 1]!}`,
+        `"${words[j - 1]!}" fits: adding it makes the minimum length ${lineLen} (≤ ${maxWidth}). Extend the line and check the next word.`,
         { i, j, lineChars: [...words.slice(i, j).join(' ')] },
       );
     }
@@ -153,7 +153,7 @@ function View({ frame }: PluginViewProps<JustifyState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null && s.i < cells.length)
     pointers.push({ i: s.i, label: 'line', tone: 'accent', place: 'above' });
-  const tone = (idx: number) => (s.lineChars[idx] === ' ' ? '' : 'match');
+  const tone = (idx: number) => (s.lineChars[idx]! === ' ' ? '' : 'match');
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -31,22 +31,22 @@ interface KClosestState {
 }
 
 function distSq(p: Point): number {
-  return p[0] * p[0] + p[1] * p[1];
+  return p[0]! * p[0]! + p[1]! * p[1]!;
 }
 
 function fmtPt(p: Point): string {
-  return `(${p[0]},${p[1]})`;
+  return `(${p[0]!},${p[1]!})`;
 }
 
 function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {
-  const order: Point[] = pairs.map((p) => [p[0], p[1]] as Point);
+  const order: Point[] = pairs.map((p) => [p[0]!, p[1]!] as Point);
   const dist = order.map(distSq);
   const n = order.length;
   const kClamped = Math.min(k, n);
 
-  const { emit, frames } = createRecorder<KClosestState>(() => ({
+  const { emit, frames } = createPrepRecorder<KClosestState>(() => ({
     k: kClamped,
-    order: order.map((p) => [p[0], p[1]] as Point),
+    order: order.map((p) => [p[0]!, p[1]!] as Point),
     dist: dist.slice(),
     sortedUpto: 0,
     i: null,
@@ -71,48 +71,48 @@ function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {
     emit(
       'PASS',
       `pass ${i}`,
-      `Looking for the closest remaining point to place at position ${i}. Start by assuming ${fmtPt(order[i])} (dist² = ${dist[i]}) is the closest.`,
+      `Looking for the closest remaining point to place at position ${i}. Start by assuming ${fmtPt(order[i]!)} (dist² = ${dist[i]!}) is the closest.`,
       { sortedUpto: i, i, j: i, best },
     );
     for (let j = i + 1; j < n; j++) {
       emit(
         'COMPARE',
-        `${dist[j]} vs ${dist[best]}`,
-        `Compare ${fmtPt(order[j])} (dist² = ${dist[j]}) against the current closest ${fmtPt(order[best])} (dist² = ${dist[best]}). ${
-          dist[j] < dist[best]
-            ? `${dist[j]} < ${dist[best]}, so this one is nearer.`
-            : `${dist[j]} ≥ ${dist[best]}, so keep the current closest.`
+        `${dist[j]!} vs ${dist[best]!}`,
+        `Compare ${fmtPt(order[j]!)} (dist² = ${dist[j]!}) against the current closest ${fmtPt(order[best]!)} (dist² = ${dist[best]!}). ${
+          dist[j]! < dist[best]!
+            ? `${dist[j]!} < ${dist[best]!}, so this one is nearer.`
+            : `${dist[j]!} ≥ ${dist[best]!}, so keep the current closest.`
         }`,
         { sortedUpto: i, i, j, best },
       );
-      if (dist[j] < dist[best]) {
+      if (dist[j]! < dist[best]!) {
         best = j;
         emit(
           'NEWMIN',
           `best=${best}`,
-          `${fmtPt(order[best])} is the new closest remaining point (dist² = ${dist[best]}).`,
+          `${fmtPt(order[best]!)} is the new closest remaining point (dist² = ${dist[best]!}).`,
           { sortedUpto: i, i, j, best },
         );
       }
     }
     if (best !== i) {
-      const tmpP = order[i];
-      order[i] = order[best];
-      order[best] = tmpP;
-      const tmpD = dist[i];
-      dist[i] = dist[best];
-      dist[best] = tmpD;
+      const tmpP = order[i]!;
+      order[i]! = order[best]!;
+      order[best]! = tmpP;
+      const tmpD = dist[i]!;
+      dist[i]! = dist[best]!;
+      dist[best]! = tmpD;
       emit(
         'SWAP',
-        `place ${fmtPt(order[i])}`,
-        `Move the closest remaining point ${fmtPt(order[i])} (dist² = ${dist[i]}) into position ${i}. Positions 0…${i} are now in sorted order.`,
+        `place ${fmtPt(order[i]!)}`,
+        `Move the closest remaining point ${fmtPt(order[i]!)} (dist² = ${dist[i]!}) into position ${i}. Positions 0…${i} are now in sorted order.`,
         { sortedUpto: i + 1, i, j: null, best: null },
       );
     } else {
       emit(
         'LOCK',
-        `lock ${fmtPt(order[i])}`,
-        `${fmtPt(order[i])} (dist² = ${dist[i]}) was already the closest remaining point, so it stays at position ${i}. Positions 0…${i} are sorted.`,
+        `lock ${fmtPt(order[i]!)}`,
+        `${fmtPt(order[i]!)} (dist² = ${dist[i]!}) was already the closest remaining point, so it stays at position ${i}. Positions 0…${i} are sorted.`,
         { sortedUpto: i + 1, i, j: null, best: null },
       );
     }
@@ -131,7 +131,7 @@ function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {
 
 function View({ frame }: PluginViewProps<KClosestState>) {
   const s = frame.state;
-  const labels = s.order.map((p) => `(${p[0]},${p[1]})`);
+  const labels = s.order.map((p) => `(${p[0]!},${p[1]!})`);
   const pointers: ArrayPointer[] = [];
   if (s.i !== null && s.i < s.order.length)
     pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
@@ -171,16 +171,16 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
   const s = frame.state;
   const at = (idx: number | null) =>
     idx !== null && idx >= 0 && idx < s.order.length
-      ? `(${s.order[idx][0]},${s.order[idx][1]})`
+      ? `(${s.order[idx]![0]},${s.order[idx]![1]})`
       : '—';
   const distAt = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.dist.length ? s.dist[idx] : '—';
+    idx !== null && idx >= 0 && idx < s.dist.length ? s.dist[idx]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="i (slot)" v={s.i ?? '—'} />
       <InspectorRow k="j (scan)" v={s.j ?? '—'} />
-      <InspectorRow k="point[j]" v={at(s.j)} />
+      <InspectorRow k="point[j]!" v={at(s.j)} />
       <InspectorRow k="dist²[j]" v={distAt(s.j)} />
       <InspectorRow k="closest so far" v={at(s.best)} />
       <InspectorRow k="dist² best" v={distAt(s.best)} />
@@ -191,7 +191,7 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
           s.done
             ? `[${s.order
                 .slice(0, s.resultUpto)
-                .map((p) => `(${p[0]},${p[1]})`)
+                .map((p) => `(${p[0]!},${p[1]!})`)
                 .join(', ')}]`
             : '…'
         }
@@ -364,7 +364,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as KClosestState | undefined;
     if (!s) return { ok: false, label: 'no result' };
-    const result = s.order.slice(0, s.resultUpto).map((p) => `(${p[0]},${p[1]})`);
+    const result = s.order.slice(0, s.resultUpto).map((p) => `(${p[0]!},${p[1]!})`);
     return { ok: true, label: result.join(', ') || '∅' };
   },
 };

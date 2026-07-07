@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,7 +19,7 @@ interface JumpGameState {
   nums: number[];
   i: number | null; // current index being evaluated
   reach: number; // farthest index reachable so far
-  candidate: number | null; // i + nums[i], the reach if we jump from i
+  candidate: number | null; // i + nums[i]!, the reach if we jump from i
   extended: boolean; // did this step push reach farther?
   result: boolean | null; // final verdict once computed
   done: boolean;
@@ -29,7 +29,7 @@ function record({ nums }: JumpGameInput): Frame<JumpGameState>[] {
   const last = nums.length - 1;
   let reach = 0;
 
-  const { emit, frames } = createRecorder<JumpGameState>(() => ({
+  const { emit, frames } = createPrepRecorder<JumpGameState>(() => ({
     nums,
     i: null,
     reach,
@@ -42,17 +42,17 @@ function record({ nums }: JumpGameInput): Frame<JumpGameState>[] {
   emit(
     'INIT',
     `reach=0`,
-    `Jump Game: each value nums[i] is the max jump length from index i. Greedily track reach — the farthest index we can get to. Start at index 0 with reach = 0, and only ever step onto indices we can already reach.`,
+    `Jump Game: each value nums[i]! is the max jump length from index i. Greedily track reach — the farthest index we can get to. Start at index 0 with reach = 0, and only ever step onto indices we can already reach.`,
     {},
   );
 
   let i = 0;
   for (; i <= reach && i < nums.length; i++) {
-    const candidate = i + nums[i];
+    const candidate = i + nums[i]!;
     emit(
       'SCAN',
-      `i=${i}, ${i}+${nums[i]}=${candidate}`,
-      `Index ${i} is reachable (i = ${i} ≤ reach = ${reach}). From here we can jump up to nums[${i}] = ${nums[i]} steps, landing as far as ${i} + ${nums[i]} = ${candidate}.`,
+      `i=${i}, ${i}+${nums[i]!}=${candidate}`,
+      `Index ${i} is reachable (i = ${i} ≤ reach = ${reach}). From here we can jump up to nums[${i}]! = ${nums[i]!} steps, landing as far as ${i} + ${nums[i]!} = ${candidate}.`,
       { i, candidate },
     );
     if (candidate > reach) {
@@ -114,7 +114,7 @@ function View({ frame }: PluginViewProps<JumpGameState>) {
         {' · '}last index = <span className="font-mono text-ink">{last}</span>
         {s.candidate !== null && !s.done && (
           <>
-            {' · '}i+nums[i] = <span className="font-mono text-ink">{s.candidate}</span>
+            {' · '}i+nums[i]! = <span className="font-mono text-ink">{s.candidate}</span>
           </>
         )}
       </div>
@@ -141,8 +141,8 @@ function Inspector({ frame }: InspectorProps<JumpGameState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
-      <InspectorRow k="i + nums[i]" v={s.candidate ?? '—'} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
+      <InspectorRow k="i + nums[i]!" v={s.candidate ?? '—'} />
       <InspectorRow k="reach" v={s.reach} />
       <InspectorRow k="last index" v={last} />
       <InspectorRow
@@ -196,7 +196,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Jump Game: each value nums[i] is the max jump length from index i. Greedily track reach — the farthest index we can get to. Start at index 0 with reach = 0, and only ever step onto indices we can already reach.',
+      'Jump Game: each value nums[i]! is the max jump length from index i. Greedily track reach — the farthest index we can get to. Start at index 0 with reach = 0, and only ever step onto indices we can already reach.',
   },
   {
     id: 'key-step',
@@ -257,7 +257,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). loop while i<=reach; reach=max(reach,i+nums[i])',
+    explain: 'O(n). O(1). loop while i<=reach; reach=max(reach,i+nums[i]!)',
   },
   {
     id: 'outcome',

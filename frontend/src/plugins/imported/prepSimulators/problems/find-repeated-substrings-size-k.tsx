@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -21,7 +21,7 @@ interface RepeatedSubsState {
   k: number;
   i: number | null; // window start index (window is [i, i+k-1])
   sub: string | null; // the current length-k substring
-  count: number | null; // seen[sub] after incrementing on this step
+  count: number | null; // seen[sub]! after incrementing on this step
   seen: [string, number][]; // substring -> occurrence count so far
   out: string[]; // repeated substrings collected (emitted when count first hits 2)
   justEmitted: boolean; // this step pushed sub into out
@@ -33,7 +33,7 @@ function record({ s, k }: RepeatedSubsInput): Frame<RepeatedSubsState>[] {
   const seen = new Map<string, number>();
   const out: string[] = [];
 
-  const { emit, frames } = createRecorder<RepeatedSubsState>(() => ({
+  const { emit, frames } = createPrepRecorder<RepeatedSubsState>(() => ({
     chars,
     k,
     i: null,
@@ -70,7 +70,7 @@ function record({ s, k }: RepeatedSubsInput): Frame<RepeatedSubsState>[] {
     emit(
       'WINDOW',
       `"${sub}"`,
-      `Slide the window to start at index ${i}: the substring is s[${i}..${i + k - 1}] = "${sub}". Look it up in the map.`,
+      `Slide the window to start at index ${i}: the substring is s[${i}..${i + k - 1}]! = "${sub}". Look it up in the map.`,
       { i, sub },
     );
     const next = (seen.get(sub) ?? 0) + 1;
@@ -80,7 +80,7 @@ function record({ s, k }: RepeatedSubsInput): Frame<RepeatedSubsState>[] {
       emit(
         'REPEAT',
         `"${sub}" x2`,
-        `seen["${sub}"] just went from 1 to 2 — this is the first time "${sub}" repeats, so add it to the result once.`,
+        `seen["${sub}"]! just went from 1 to 2 — this is the first time "${sub}" repeats, so add it to the result once.`,
         { i, sub, count: next, justEmitted: true },
         'good',
       );
@@ -89,7 +89,7 @@ function record({ s, k }: RepeatedSubsInput): Frame<RepeatedSubsState>[] {
         'TALLY',
         `count ${next}`,
         next === 1
-          ? `First time we have seen "${sub}"; store seen["${sub}"] = 1 and keep sliding.`
+          ? `First time we have seen "${sub}"; store seen["${sub}"]! = 1 and keep sliding.`
           : `"${sub}" already counted (now ${next}); we only emit on the first repeat, so skip it and keep sliding.`,
         { i, sub, count: next },
       );
@@ -159,7 +159,7 @@ function Inspector({ frame }: InspectorProps<RepeatedSubsState>) {
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="i (window start)" v={s.i ?? '—'} />
       <InspectorRow k="substring" v={s.sub !== null ? `"${s.sub}"` : '—'} />
-      <InspectorRow k="seen[sub]" v={s.count ?? '—'} />
+      <InspectorRow k="seen[sub]!" v={s.count ?? '—'} />
       <InspectorRow k="distinct seen" v={s.seen.length} />
       <InspectorRow k="repeated found" v={s.out.length} />
     </VarGrid>
@@ -217,7 +217,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'On the "REPEAT" step ("" x2), what happens?',
     choices: [
       {
-        label: 'seen[""] just went from 1 — this move caption',
+        label: 'seen[""]! just went from 1 — this move caption',
         correct: true,
       },
       {
@@ -231,7 +231,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'seen[""] just went from 1 to 2 — this is the first time "" repeats, so add it to the result once.',
+      'seen[""]! just went from 1 to 2 — this is the first time "" repeats, so add it to the result once.',
   },
   {
     id: 'state',
@@ -272,14 +272,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n*m) time, O(1) space — wrong order of growth',
       },
     ],
-    explain: 'O(n*k). O(n*k). seen[sub]++; emit when it first hits 2',
+    explain: 'O(n*k). O(n*k). seen[sub]!++; emit when it first hits 2',
   },
   {
     id: 'outcome',
     prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: 'seen[""] just went from 1 — final DONE caption',
+        label: 'seen[""]! just went from 1 — final DONE caption',
         correct: true,
       },
       {
@@ -293,7 +293,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'seen[""] just went from 1 to 2 — this is the first time "" repeats, so add it to the result once.',
+      'seen[""]! just went from 1 to 2 — this is the first time "" repeats, so add it to the result once.',
   },
 ];
 export const simulator: ProblemSimulator = {

@@ -20,11 +20,34 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function normalizeKeyPart(value: string | number): string | null {
+  const key = String(value).trim();
+  return key ? key : null;
+}
+
+function assembleBestKey(gameId: string, scope: string): string | null {
+  const normalizedGameId = normalizeKeyPart(gameId);
+  const normalizedScope = normalizeKeyPart(scope);
+  return normalizedGameId && normalizedScope
+    ? STORAGE_KEYS.ASSEMBLE_GAME_BEST(normalizedGameId, normalizedScope)
+    : null;
+}
+
+function rushScope(itemId: string, variant: string | number): string | null {
+  const normalizedItemId = normalizeKeyPart(itemId);
+  const normalizedVariant = normalizeKeyPart(variant);
+  return normalizedItemId && normalizedVariant ? `${normalizedItemId}:${normalizedVariant}` : null;
+}
+
 /** Persisted assemble-game bests — one JSON blob per game per scope. */
 export function assembleGameStatsStore(scope: string): AssembleGameStatsStore {
+  const normalizedScope = normalizeKeyPart(scope);
   return {
     read<T extends object>(gameId: string, fallback: T): T {
-      const raw = readStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST(gameId, scope), null);
+      if (!normalizedScope) return fallback;
+      const key = assembleBestKey(gameId, normalizedScope);
+      if (!key) return fallback;
+      const raw = readStorageText(key, null);
       if (!raw) return fallback;
       try {
         const parsed = JSON.parse(raw);
@@ -33,23 +56,30 @@ export function assembleGameStatsStore(scope: string): AssembleGameStatsStore {
         return fallback;
       }
     },
-    write(gameId: string, value: object) {
+    write(gameId: string, value: object): void {
       if (!isPlainRecord(value)) return;
-      writeStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST(gameId, scope), JSON.stringify(value));
+      if (!normalizedScope) return;
+      const key = assembleBestKey(gameId, normalizedScope);
+      if (key) writeStorageText(key, JSON.stringify(value));
     },
   };
 }
 
 export function readRushBestSeconds(itemId: string, variant: string | number): number | null {
-  const scope = `${itemId}:${variant}`;
+  const scope = rushScope(itemId, variant);
+  if (!scope) return null;
   const primary = readStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', scope), null);
   return parseAssembleBestSeconds(primary);
 }
 
-export function writeRushBestSeconds(itemId: string, variant: string | number, seconds: number) {
+export function writeRushBestSeconds(
+  itemId: string,
+  variant: string | number,
+  seconds: number,
+): void {
   if (!Number.isFinite(seconds) || seconds <= 0) return;
-  const scope = `${itemId}:${variant}`;
-  writeStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', scope), String(seconds));
+  const scope = rushScope(itemId, variant);
+  if (scope) writeStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', scope), String(seconds));
 }
 
 export function maybeWriteRushBest(

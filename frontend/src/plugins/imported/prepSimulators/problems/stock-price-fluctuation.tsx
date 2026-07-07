@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { DualHeapBoard } from '../../../_shared/dualHeapBoard';
@@ -44,7 +44,7 @@ function record({ ops }: StockInput): Frame<StockState>[] {
   let maxH: HeapEntry[] = [];
   let minH: HeapEntry[] = [];
 
-  const { emit, frames } = createRecorder<StockState>(() => ({
+  const { emit, frames } = createPrepRecorder<StockState>(() => ({
     records: { ...records },
     latestTime,
     maxH: maxH.map((x) => ({ ...x })),
@@ -65,7 +65,7 @@ function record({ ops }: StockInput): Frame<StockState>[] {
 
   for (const o of ops) {
     if (o.kind === 'update') {
-      records[o.timestamp] = o.price;
+      records[o.timestamp]! = o.price;
       if (o.timestamp > latestTime) latestTime = o.timestamp;
       maxH.push({ price: o.price, timestamp: o.timestamp });
       minH.push({ price: o.price, timestamp: o.timestamp });
@@ -76,7 +76,7 @@ function record({ ops }: StockInput): Frame<StockState>[] {
         { op: `update ${o.timestamp}=${o.price}`, records: { ...records }, latestTime },
       );
     } else if (o.kind === 'current') {
-      const cur = records[latestTime];
+      const cur = records[latestTime]!;
       emit(
         'CURRENT',
         String(cur),
@@ -86,23 +86,23 @@ function record({ ops }: StockInput): Frame<StockState>[] {
       );
     } else if (o.kind === 'maximum') {
       maxH.sort((a, b) => b.price - a.price);
-      while (maxH.length > 0 && records[maxH[0].timestamp] !== maxH[0].price) maxH.shift();
+      while (maxH.length > 0 && records[maxH[0]!.timestamp] !== maxH[0]!.price) maxH.shift();
       const mx = maxH[0]?.price ?? 0;
       emit(
         'MAX',
         String(mx),
-        `Maximum(): pop stale max-heap tops until records[timestamp]==price → ${mx}.`,
+        `Maximum(): pop stale max-heap tops until records[timestamp]!==price → ${mx}.`,
         { op: 'maximum', result: mx, highlightMax: true, maxH: maxH.map((x) => ({ ...x })) },
         'good',
       );
     } else {
       minH.sort((a, b) => a.price - b.price);
-      while (minH.length > 0 && records[minH[0].timestamp] !== minH[0].price) minH.shift();
+      while (minH.length > 0 && records[minH[0]!.timestamp] !== minH[0]!.price) minH.shift();
       const mn = minH[0]?.price ?? 0;
       emit(
         'MIN',
         String(mn),
-        `Minimum(): pop stale min-heap tops until records[timestamp]==price → ${mn}.`,
+        `Minimum(): pop stale min-heap tops until records[timestamp]!==price → ${mn}.`,
         { op: 'minimum', result: mn, highlightMin: true, minH: minH.map((x) => ({ ...x })) },
         'good',
       );
@@ -133,7 +133,7 @@ function View({ frame }: PluginViewProps<StockState>) {
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>records</div>
       <div className="mt-1 flex flex-wrap gap-1">
         {Object.entries(s.records)
-          .sort((a, b) => +a[0] - +b[0])
+          .sort((a, b) => +a[0]! - +b[0]!)
           .map(([t, p]) => (
             <span
               key={t}

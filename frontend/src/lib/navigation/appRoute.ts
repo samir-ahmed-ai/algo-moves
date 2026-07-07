@@ -2,7 +2,7 @@
 export type AppPage =
   'home' | 'mobile' | 'vim' | 'dojo' | 'games' | 'workspace' | 'plans' | 'resumes';
 
-const PAGE_SEGMENTS: Record<AppPage, string> = {
+const PAGE_SEGMENTS: Readonly<Record<AppPage, string>> = {
   home: 'home',
   mobile: 'mobile',
   vim: 'vim',
@@ -39,7 +39,7 @@ export function parsePageFromPathname(pathname: string): AppPage | null {
   if (base && rest.startsWith(base)) rest = rest.slice(base.length);
   rest = rest.replace(/^\/+|\/+$/g, '');
   if (!rest) return null;
-  const segment = rest.split('/')[0];
+  const segment = rest.split('/')[0] ?? '';
   for (const [page, seg] of Object.entries(PAGE_SEGMENTS) as [AppPage, string][]) {
     if (seg === segment) return page;
   }
@@ -65,7 +65,7 @@ export function writeAppUrl(
   page: AppPage,
   hashBody = '',
   opts?: { replace?: boolean; search?: string },
-) {
+): void {
   if (typeof location === 'undefined') return;
   const search = opts?.search ?? location.search;
   const url = buildAppUrl(page, hashBody, search);

@@ -23,4 +23,9 @@ describe('pendingProblemDrop', () => {
     expect(consumePendingProblemDrop('b')).toBeNull();
     expect(consumePendingProblemDrop('a')).toEqual({ x: 1, y: 2 });
   });
+
+  it('normalizes padded ids and invalid coordinates', () => {
+    setPendingProblemDrop(' binary-search ', { x: Number.NaN, y: Number.POSITIVE_INFINITY });
+    expect(consumePendingProblemDrop('binary-search')).toEqual({ x: 0, y: 0 });
+  });
 });

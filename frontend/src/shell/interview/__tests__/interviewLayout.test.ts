@@ -58,7 +58,7 @@ describe('interviewLayout', () => {
       const incoming = buildInterviewBoardNodes(false);
       const merged = mergeInterviewNodes(existing, incoming);
 
-      expect(merged[0].id).toBe('custom-1');
+      expect(merged[0]!.id).toBe('custom-1');
       const newKinds = merged.slice(1).map((n) => n.data.kind);
       expect(newKinds).toContain('whiteboard');
       expect(newKinds).toContain('collab-code');

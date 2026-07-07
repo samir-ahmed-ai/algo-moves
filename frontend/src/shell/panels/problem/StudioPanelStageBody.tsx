@@ -22,10 +22,10 @@ export function StudioPanelStageBody({
   kind: string;
   availTabs: StudioTab[];
   activeTabId: string;
-  nextLabel?: string;
-  onNext?: () => void;
-  nextAllLabel?: string;
-  onNextAll?: () => void;
+  nextLabel?: string | undefined;
+  onNext?: (() => void) | undefined;
+  nextAllLabel?: string | undefined;
+  onNextAll?: (() => void) | undefined;
 }) {
   const isMobile = useIsMobile();
 

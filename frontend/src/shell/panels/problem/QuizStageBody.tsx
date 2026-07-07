@@ -26,8 +26,8 @@ export function QuizStageBody({
 }: {
   availTabs: StudioTab[];
   activeTabId: string;
-  nextAllLabel?: string;
-  onNextAll?: () => void;
+  nextAllLabel?: string | undefined;
+  onNextAll?: (() => void) | undefined;
 }) {
   const isMobile = useIsMobile();
   const { active } = useCodeStudioContent();

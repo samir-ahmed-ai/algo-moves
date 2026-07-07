@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -22,7 +22,7 @@ interface KthState {
   target: number; // index n-k that, once a value lands there, is the answer
   lo: number; // active search window low bound
   hi: number; // active search window high bound
-  pivot: number | null; // value of the current pivot (a[hi] at partition start)
+  pivot: number | null; // value of the current pivot (a[hi]! at partition start)
   pivotIdx: number | null; // index the pivot currently lives at
   i: number | null; // scanning pointer inside partition
   store: number | null; // boundary index where the next "<= pivot" value goes
@@ -36,7 +36,7 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
   const n = a.length;
   const target = n - k;
 
-  const { emit, frames } = createRecorder<KthState>(() => ({
+  const { emit, frames } = createPrepRecorder<KthState>(() => ({
     a: a.slice(),
     k,
     target,
@@ -64,30 +64,30 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
 
   while (lo < hi) {
     // --- partition(a, lo, hi) ---
-    const pivot = a[hi];
+    const pivot = a[hi]!;
     let store = lo;
     emit(
       'PIVOT',
       `pivot=${pivot}`,
-      `Partition the window [${lo}, ${hi}]. Take the last element a[${hi}] = ${pivot} as the pivot. Walk a "store" boundary (start ${store}) — everything left of it will be ≤ pivot.`,
+      `Partition the window [${lo}, ${hi}]. Take the last element a[${hi}]! = ${pivot} as the pivot. Walk a "store" boundary (start ${store}) — everything left of it will be ≤ pivot.`,
       { lo, hi, pivot, pivotIdx: hi, store, i: lo },
     );
 
     for (let i = lo; i < hi; i++) {
-      if (a[i] <= pivot) {
+      if (a[i]! <= pivot!) {
         if (i !== store) {
-          [a[i], a[store]] = [a[store], a[i]];
+          [a[i]!, a[store]!] = [a[store]!, a[i]!];
           emit(
             'SWAP',
             `swap ${i}↔${store}`,
-            `a[${i}] = ${a[store]} ≤ ${pivot}, so swap it to the boundary at index ${store} and advance the boundary. Small values pile up on the left.`,
+            `a[${i}]! = ${a[store]!} ≤ ${pivot}, so swap it to the boundary at index ${store} and advance the boundary. Small values pile up on the left.`,
             { lo, hi, pivot, pivotIdx: hi, i, store },
           );
         } else {
           emit(
             'KEEP',
             `keep ${i}`,
-            `a[${i}] = ${a[i]} ≤ ${pivot} and it is already at the boundary ${store}, so just advance the boundary.`,
+            `a[${i}]! = ${a[i]!} ≤ ${pivot} and it is already at the boundary ${store}, so just advance the boundary.`,
             { lo, hi, pivot, pivotIdx: hi, i, store },
           );
         }
@@ -96,27 +96,27 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
         emit(
           'PASS',
           `pass ${i}`,
-          `a[${i}] = ${a[i]} > ${pivot}, so it belongs on the right — leave it and keep the boundary at ${store}.`,
+          `a[${i}]! = ${a[i]!} > ${pivot}, so it belongs on the right — leave it and keep the boundary at ${store}.`,
           { lo, hi, pivot, pivotIdx: hi, i, store },
         );
       }
     }
 
-    [a[store], a[hi]] = [a[hi], a[store]];
+    [a[store]!, a[hi]!] = [a[hi]!, a[store]!];
     const p = store;
     emit(
       'PLACE',
       `pivot@${p}`,
-      `Swap the pivot into the boundary slot ${p}. Now a[${p}] = ${pivot} is in its final sorted position: everything left is ≤ it, everything right is > it.`,
+      `Swap the pivot into the boundary slot ${p}. Now a[${p}]! = ${pivot} is in its final sorted position: everything left is ≤ it, everything right is > it.`,
       { lo, hi, pivot, pivotIdx: p, p, store: null, i: null },
     );
 
     if (p === target) {
-      result = a[p];
+      result! = a[p]!;
       emit(
         'FOUND',
-        `${a[p]}`,
-        `The pivot landed exactly on the target index ${target}, so a[${p}] = ${a[p]} is the ${k}th largest value. Done.`,
+        `${a[p]!}`,
+        `The pivot landed exactly on the target index ${target}, so a[${p}]! = ${a[p]!} is the ${k}th largest value. Done.`,
         { lo, hi, p, pivotIdx: p, result, done: true },
         'good',
       );
@@ -142,11 +142,11 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
     }
   }
 
-  result = a[lo];
+  result! = a[lo]!;
   emit(
     'DONE',
-    `${a[lo]}`,
-    `The window collapsed to a single cell at index ${lo} = target ${target}, so a[${lo}] = ${a[lo]} is the ${k}th largest value.`,
+    `${a[lo]!}`,
+    `The window collapsed to a single cell at index ${lo} = target ${target}, so a[${lo}]! = ${a[lo]!} is the ${k}th largest value.`,
     { lo, hi: lo, p: lo, result, done: true },
     'good',
   );
@@ -226,21 +226,21 @@ function computeKth(nums: number[], k: number): number {
   let lo = 0;
   let hi = a.length - 1;
   while (lo < hi) {
-    const pivot = a[hi];
+    const pivot = a[hi]!;
     let store = lo;
     for (let i = lo; i < hi; i++) {
-      if (a[i] <= pivot) {
-        [a[i], a[store]] = [a[store], a[i]];
+      if (a[i]! <= pivot!) {
+        [a[i]!, a[store]!] = [a[store]!, a[i]!];
         store++;
       }
     }
-    [a[store], a[hi]] = [a[hi], a[store]];
+    [a[store]!, a[hi]!] = [a[hi]!, a[store]!];
     const p = store;
-    if (p === target) return a[p];
+    if (p === target) return a[p]!;
     if (p < target) lo = p + 1;
     else hi = p - 1;
   }
-  return a[lo];
+  return a[lo]!;
 }
 
 const practiceQuiz: QuizQuestion[] = [

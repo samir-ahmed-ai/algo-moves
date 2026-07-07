@@ -1,6 +1,12 @@
 import { readStorageJson, writeStorageJson } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 
+export interface LocalMatchOpponent {
+  name: string;
+  score: number;
+  placement: number;
+}
+
 export interface LocalMatchRecord {
   id: string;
   gameId: string;
@@ -9,7 +15,7 @@ export interface LocalMatchRecord {
   myScore: number;
   placement: number;
   totalPlayers: number;
-  opponents: { name: string; score: number; placement: number }[];
+  opponents: LocalMatchOpponent[];
 }
 
 export interface LocalLeaderboardRow {
@@ -22,6 +28,16 @@ export interface LocalLeaderboardRow {
 
 const MAX_HISTORY = 100;
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isLocalMatchOpponent(value: unknown): value is LocalMatchOpponent {
+  if (!value || typeof value !== 'object') return false;
+  const row = value as LocalMatchOpponent;
+  return typeof row.name === 'string' && isFiniteNumber(row.score) && isFiniteNumber(row.placement);
+}
+
 function isLocalMatchRecord(value: unknown): value is LocalMatchRecord {
   if (!value || typeof value !== 'object') return false;
   const row = value as LocalMatchRecord;
@@ -30,7 +46,11 @@ function isLocalMatchRecord(value: unknown): value is LocalMatchRecord {
     typeof row.gameId === 'string' &&
     typeof row.date === 'string' &&
     typeof row.myName === 'string' &&
-    typeof row.placement === 'number'
+    isFiniteNumber(row.myScore) &&
+    isFiniteNumber(row.placement) &&
+    isFiniteNumber(row.totalPlayers) &&
+    Array.isArray(row.opponents) &&
+    row.opponents.every(isLocalMatchOpponent)
   );
 }
 
@@ -54,17 +74,19 @@ export function saveLocalMatch(record: LocalMatchRecord): void {
 
 export function getLocalHistory(limit?: number): LocalMatchRecord[] {
   const rows = readAll();
-  return limit ? rows.slice(0, limit) : rows;
+  return limit && limit > 0 ? rows.slice(0, Math.floor(limit)) : rows;
 }
 
 export function clearLocalHistory(): void {
   writeStorageJson(STORAGE_KEYS.GAMES_LOCAL_HISTORY, []);
 }
 
-export function buildLocalLeaderboard(opts?: {
-  gameId?: string | null;
-  since?: Date;
-}): LocalLeaderboardRow[] {
+export function buildLocalLeaderboard(
+  opts?: Readonly<{
+    gameId?: string | null | undefined;
+    since?: Date | undefined;
+  }>,
+): LocalLeaderboardRow[] {
   let rows = readAll();
   if (opts?.gameId) rows = rows.filter((row) => row.gameId === opts.gameId);
   if (opts?.since) {

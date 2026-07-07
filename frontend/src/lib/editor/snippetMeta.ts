@@ -4,7 +4,7 @@ export type FuncLineTone = 'hl-line-entry' | 'hl-line-func';
 export function funcLineTone(trimmed: string, lang: string): FuncLineTone | null {
   const l = lang.trim().toLowerCase();
   if (l === 'go') {
-    if (/^func\s+\w+\s*\(/.test(trimmed)) return 'hl-line-entry';
+    if (/^func\s+(?:\([^)]*\)\s*)?\w+\s*\(/.test(trimmed)) return 'hl-line-entry';
     if (/\bfunc\s*\(/.test(trimmed)) return 'hl-line-func';
     return null;
   }
@@ -28,6 +28,11 @@ export function funcLineTone(trimmed: string, lang: string): FuncLineTone | null
       return 'hl-line-func';
     return null;
   }
+  if (l === 'rust' || l === 'rs') {
+    if (/^(?:pub\s+)?fn\s+\w+\s*\(/.test(trimmed)) return 'hl-line-entry';
+    if (/\bfn\s*\(/.test(trimmed)) return 'hl-line-func';
+    return null;
+  }
   return null;
 }
 
@@ -39,4 +44,5 @@ export function pieceHasEntrySignature(code: string, lang: string): boolean {
     .some((line) => funcLineTone(line.trim(), normalizedLang) === 'hl-line-entry');
 }
 
-export const ENTRY_SIG = /^(?:func\s+(\w+)|function\s+(\w+)|def\s+(\w+))([\s\S]*)$/;
+export const ENTRY_SIG =
+  /^(?:func\s+(?:\([^)]*\)\s*)?(\w+)|function\s+(\w+)|def\s+(\w+)|(?:pub\s+)?fn\s+(\w+))([\s\S]*)$/;

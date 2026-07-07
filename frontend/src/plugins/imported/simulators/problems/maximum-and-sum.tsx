@@ -61,8 +61,8 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
     for (let slot = 1; slot <= numSlots; slot++) {
       if (occ(mask, slot) < 2) {
         const next = mask + (1 << (2 * (slot - 1)));
-        const val = dpFull[mask] + (nums[idx] & slot);
-        if (val > dpFull[next]) dpFull[next] = val;
+        const val = dpFull[mask]! + (nums[idx]! & slot);
+        if (val > dpFull[next]!) dpFull[next] = val;
       }
     }
   }
@@ -94,8 +94,8 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
   // Reveal each reachable mask in order. mask 0 (nothing placed) is the base.
   for (let k = 0; k < masks.length; k++) {
     const mask = masks[k];
-    visible[k] = dpFull[mask];
-    const cnt = assignedCount(mask, numSlots);
+    visible[k]! = dpFull[mask!]!;
+    const cnt = assignedCount(mask!, numSlots);
     if (mask === 0) {
       emit(
         'BASE',
@@ -106,8 +106,8 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
     } else {
       emit(
         'FILL',
-        `dp[${mask}]=${dpFull[mask]}`,
-        `Mask ${mask} (occupancy ${occString(mask, numSlots)}) means ${cnt} number${cnt === 1 ? '' : 's'} placed. The best AND-sum to reach this arrangement is dp = ${dpFull[mask]}.`,
+        `dp[${mask}]=${dpFull[mask!]}`,
+        `Mask ${mask} (occupancy ${occString(mask!, numSlots)}) means ${cnt} number${cnt === 1 ? '' : 's'} placed. The best AND-sum to reach this arrangement is dp = ${dpFull[mask!]}.`,
         { cur: k, answer: null },
       );
     }
@@ -149,7 +149,7 @@ function View({ frame }: PluginViewProps<AndState>) {
         <>
           <RailGroup label="current">
             <RailStat k="mask" v={mask ?? '—'} tone={mask !== null ? 'accent' : undefined} />
-            <RailStat k="occ" v={mask !== null ? occString(mask, s.numSlots) : '—'} />
+            <RailStat k="occ" v={mask !== null ? occString(mask!, s.numSlots) : '—'} />
             <RailStat k="dp" v={dpVal ?? '—'} />
           </RailGroup>
           {s.answer !== null ? (
@@ -165,7 +165,7 @@ function View({ frame }: PluginViewProps<AndState>) {
         cellTone={tone}
         pointers={pointers}
         windowRange={null}
-        label={(i) => occString(s.masks[i], s.numSlots)}
+        label={(i) => occString(s.masks[i]!, s.numSlots)}
       />
     </VizStage>
   );
@@ -180,7 +180,7 @@ function Inspector({ frame }: InspectorProps<AndState>) {
       <InspectorRow k="nums" v={`[${s.nums.join(', ')}]`} />
       <InspectorRow k="slots" v={s.numSlots} />
       <InspectorRow k="current mask" v={mask ?? '—'} />
-      <InspectorRow k="occupancy" v={mask !== null ? occString(mask, s.numSlots) : '—'} />
+      <InspectorRow k="occupancy" v={mask !== null ? occString(mask!, s.numSlots) : '—'} />
       <InspectorRow k="dp[mask]" v={s.cur !== null && s.dp[s.cur] !== NEG ? s.dp[s.cur] : '—'} />
       <InspectorRow k="answer" v={s.answer !== null ? s.answer : '…filling'} />
     </VarGrid>

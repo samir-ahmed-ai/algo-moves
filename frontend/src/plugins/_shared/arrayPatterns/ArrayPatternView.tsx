@@ -20,7 +20,12 @@ export function ArrayPatternView({
 }: ArrayPatternViewProps) {
   return (
     <VizStage rail={rail}>
-      <ArrayRow values={values} pointers={pointers} windowRange={windowRange} cellTone={cellTone} />
+      <ArrayRow
+        values={values}
+        pointers={pointers}
+        windowRange={windowRange}
+        {...(cellTone !== undefined ? { cellTone } : {})}
+      />
     </VizStage>
   );
 }

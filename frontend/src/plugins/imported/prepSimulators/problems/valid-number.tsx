@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -42,7 +42,7 @@ function record({ s }: ValidNumberInput): Frame<ValidNumberState>[] {
   let seenDot = false;
   let seenExp = false;
 
-  const { emit, frames } = createRecorder<ValidNumberState>(() => ({
+  const { emit, frames } = createPrepRecorder<ValidNumberState>(() => ({
     chars,
     i: null,
     seenDigit,
@@ -60,9 +60,9 @@ function record({ s }: ValidNumberInput): Frame<ValidNumberState>[] {
   );
 
   for (let i = 0; i < chars.length; i++) {
-    const c = chars[i];
+    const c = chars[i]!;
 
-    if (isDigit(c)) {
+    if (isDigit(c!)) {
       seenDigit = true;
       emit(
         'DIGIT',
@@ -76,11 +76,11 @@ function record({ s }: ValidNumberInput): Frame<ValidNumberState>[] {
 
     if (c === '+' || c === '-') {
       // A sign is only valid at the start or immediately after an exponent.
-      if (i > 0 && chars[i - 1] !== 'e' && chars[i - 1] !== 'E') {
+      if (i > 0 && chars[i - 1]! !== 'e' && chars[i - 1]! !== 'E') {
         emit(
           'REJECT',
           `'${c}' sign`,
-          `'${c}' is a sign but it is at index ${i}, not the start and not right after 'e'/'E' (previous char is '${chars[i - 1]}'). A sign is only legal leading the number or the exponent. Reject.`,
+          `'${c}' is a sign but it is at index ${i}, not the start and not right after 'e'/'E' (previous char is '${chars[i - 1]!}'). A sign is only legal leading the number or the exponent. Reject.`,
           { i, result: false, done: true },
           'bad',
         );
@@ -184,7 +184,7 @@ function View({ frame }: PluginViewProps<ValidNumberState>) {
       </RailGroup>
       <RailGroup label="scan">
         <RailStat k="i" v={s.i ?? '—'} />
-        <RailStat k="char" v={s.i !== null ? `'${s.chars[s.i]}'` : '—'} tone="accent" />
+        <RailStat k="char" v={s.i !== null ? `'${s.chars[s.i]!}'` : '—'} tone="accent" />
       </RailGroup>
       {s.result !== null && (
         <RailResult
@@ -212,7 +212,7 @@ function Inspector({ frame }: InspectorProps<ValidNumberState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="char" v={s.i !== null ? `'${s.chars[s.i]}'` : '—'} />
+      <InspectorRow k="char" v={s.i !== null ? `'${s.chars[s.i]!}'` : '—'} />
       <InspectorRow k="seenDigit" v={String(s.seenDigit)} />
       <InspectorRow k="seenDot" v={String(s.seenDot)} />
       <InspectorRow k="seenExp" v={String(s.seenExp)} />

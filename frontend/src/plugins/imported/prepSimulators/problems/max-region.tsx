@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   VizStage,
@@ -50,13 +50,13 @@ const DIRS: [number, number][] = [
 
 function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
   const m = mat.length;
-  const n = m > 0 ? mat[0].length : 0;
+  const n = m > 0 ? mat[0]!.length : 0;
   // grid mirrors mat but uses the richer 0..3 encoding for the view.
   const grid: number[][] = mat.map((row) => row.map((v) => (v === 1 ? LAND : WATER)));
 
   let best = 0;
 
-  const { emit, frames } = createRecorder<MaxRegionState>(() => ({
+  const { emit, frames } = createPrepRecorder<MaxRegionState>(() => ({
     grid: grid.map((row) => row.slice()),
     best: best,
     active: null,
@@ -75,7 +75,7 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
   // faithfully reproducing the recursive Go `dfs` (area = 1 + sum over 8 dirs).
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
-      if (grid[i][j] !== LAND) continue;
+      if (grid[i]![j] !== LAND) continue;
 
       emit(
         'SEED',
@@ -86,7 +86,7 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
 
       let area = 0;
       const stack: [number, number][] = [[i, j]];
-      grid[i][j] = CURRENT; // claim immediately, mirroring Go's `mat[i][j] = 0` on entry
+      grid[i]![j] = CURRENT; // claim immediately, mirroring Go's `mat[i]![j] = 0` on entry
 
       while (stack.length > 0) {
         const [ci, cj] = stack.pop()!;
@@ -102,8 +102,8 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
           const ni = ci + di;
           const nj = cj + dj;
           if (ni < 0 || nj < 0 || ni >= m || nj >= n) continue;
-          if (grid[ni][nj] !== LAND) continue;
-          grid[ni][nj] = CURRENT; // claim before pushing to avoid double-counting
+          if (grid[ni]![nj] !== LAND) continue;
+          grid[ni]![nj] = CURRENT; // claim before pushing to avoid double-counting
           stack.push([ni, nj]);
         }
       }
@@ -111,7 +111,7 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
       // Region fully grown: settle it and update best.
       for (let r = 0; r < m; r++) {
         for (let c = 0; c < n; c++) {
-          if (grid[r][c] === CURRENT) grid[r][c] = SETTLED;
+          if (grid[r]![c] === CURRENT) grid[r]![c] = SETTLED;
         }
       }
       const improved = area > best;
@@ -141,7 +141,7 @@ function record({ mat }: MaxRegionInput): Frame<MaxRegionState>[] {
 function View({ frame }: PluginViewProps<MaxRegionState>) {
   const s = frame.state;
   const tone = (r: number, c: number): string => {
-    const v = s.grid[r][c];
+    const v = s.grid[r]![c];
     if (v === CURRENT) return 'active';
     if (v === SETTLED) return 'visited';
     if (v === LAND) return 'land';
@@ -151,7 +151,7 @@ function View({ frame }: PluginViewProps<MaxRegionState>) {
   const rail = (
     <>
       <RailGroup label="scan">
-        <RailStat k="cell" v={s.active ? `(${s.active[0]},${s.active[1]})` : '—'} tone="accent" />
+        <RailStat k="cell" v={s.active ? `(${s.active[0]!},${s.active[1]!})` : '—'} tone="accent" />
         <RailStat k="area" v={s.area} />
         <RailStat k="best" v={s.best} tone={s.best > 0 ? 'good' : undefined} />
         <RailStat k="status" v={status} />
@@ -171,7 +171,7 @@ function Inspector({ frame }: InspectorProps<MaxRegionState>) {
   const s = frame.state;
   return (
     <VarGrid>
-      <InspectorRow k="cell (i,j)" v={s.active ? `(${s.active[0]}, ${s.active[1]})` : '—'} />
+      <InspectorRow k="cell (i,j)" v={s.active ? `(${s.active[0]!}, ${s.active[1]!})` : '—'} />
       <InspectorRow k="current area" v={s.area} />
       <InspectorRow k="best" v={s.best} />
       <InspectorRow k="status" v={s.done ? 'done' : s.active ? 'flooding' : 'scanning'} />

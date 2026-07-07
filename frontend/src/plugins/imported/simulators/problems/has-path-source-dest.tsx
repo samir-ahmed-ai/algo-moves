@@ -89,7 +89,7 @@ function record({ adj, pos, src, dst }: HPInput): Frame<HPState>[] {
     });
 
     let hit = false;
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (nb === dst) {
         found = true;
         hit = true;

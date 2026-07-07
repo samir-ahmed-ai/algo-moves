@@ -48,7 +48,7 @@ function record({ values, k }: WindowInput): Frame<WindowState>[] {
 
   const emit = (type: string, note: string, caption: string, tone?: 'good' | 'bad') =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { values, k, left, right, sum, best, bestStart, done },
     });
 
@@ -58,7 +58,7 @@ function record({ values, k }: WindowInput): Frame<WindowState>[] {
     `Fixed window of width ${k}: sum the first ${k} elements, then slide one step at a time, adding the entering value and dropping the leaving one.`,
   );
 
-  for (let i = 0; i < k; i++) sum += values[i];
+  for (let i = 0; i < k; i++) sum += values[i]!;
   best = sum;
   bestStart = 0;
   emit(
@@ -69,8 +69,8 @@ function record({ values, k }: WindowInput): Frame<WindowState>[] {
 
   for (right = k; right < n; right++) {
     left = right - k + 1;
-    const entering = values[right];
-    const leaving = values[left - 1];
+    const entering = values[right]!;
+    const leaving = values[left - 1]!;
     sum += entering - leaving;
     if (sum > best) {
       best = sum;

@@ -11,7 +11,7 @@ import type { Item } from './types';
 import { shapeFor, type ShapeKey } from './problemShape';
 
 /** Curated one-line asks, keyed by item id or plugin id. */
-export const PROBLEM_GISTS: Record<string, string> = {
+export const PROBLEM_GISTS: Readonly<Record<string, string>> = {
   /* PRIORITY_GISTS_START — backtracking / graphs / binary search / DP */
   // Backtracking
   subsets: 'List every possible subset of the given numbers.',
@@ -163,7 +163,7 @@ export const PROBLEM_GISTS: Record<string, string> = {
 };
 
 /** Last-resort ask when a problem carries no usable summary. */
-const SHAPE_GIST: Record<ShapeKey, string> = {
+const SHAPE_GIST: Readonly<Record<ShapeKey, string>> = {
   backtracking: 'Explore every choice; undo the ones that fail and keep what works.',
   graph: 'Walk the network node by node to answer a reachability or distance question.',
   binarySearch: 'Halve a sorted range each step to zero in on the answer.',
@@ -179,7 +179,7 @@ const SHAPE_GIST: Record<ShapeKey, string> = {
 const MAX_GIST = 120;
 
 function normalizedId(id: string | undefined): string | undefined {
-  const trimmed = id?.trim();
+  const trimmed = id?.trim().toLowerCase();
   return trimmed || undefined;
 }
 
@@ -211,5 +211,5 @@ export function gistFor(item: Item): string {
   const sentence = firstSentence(item.summary ?? '');
   if (looksLikeAsk(sentence)) return sentence + '.';
 
-  return SHAPE_GIST[shapeFor(item)];
+  return SHAPE_GIST[shapeFor(item)] ?? SHAPE_GIST.generic;
 }

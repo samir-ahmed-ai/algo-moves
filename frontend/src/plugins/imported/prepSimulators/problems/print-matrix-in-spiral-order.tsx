@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   VizStage,
@@ -45,7 +45,7 @@ function cloneVisited(v: boolean[][]): boolean[][] {
 
 function record({ mat }: SpiralInput): Frame<SpiralState>[] {
   const rows = mat.length;
-  const cols = rows > 0 ? mat[0].length : 0;
+  const cols = rows > 0 ? mat[0]!.length : 0;
   const visited = emptyVisited(rows, cols);
   const res: number[] = [];
 
@@ -54,7 +54,7 @@ function record({ mat }: SpiralInput): Frame<SpiralState>[] {
   let endR = rows - 1;
   let endC = cols - 1;
 
-  const { emit, frames } = createRecorder<SpiralState>(() => ({
+  const { emit, frames } = createPrepRecorder<SpiralState>(() => ({
     mat: mat,
     startR: startR,
     startC: startC,
@@ -85,8 +85,8 @@ function record({ mat }: SpiralInput): Frame<SpiralState>[] {
   );
 
   const take = (r: number, c: number) => {
-    visited[r][c] = true;
-    res.push(mat[r][c]);
+    visited[r]![c] = true;
+    res.push(mat[r]![c]!);
   };
 
   while (startR <= endR && startC <= endC) {
@@ -95,8 +95,8 @@ function record({ mat }: SpiralInput): Frame<SpiralState>[] {
       take(startR, c);
       emit(
         'TOP',
-        `${mat[startR][c]}`,
-        `Top row: walk left → right across row ${startR}, appending ${mat[startR][c]} from (${startR}, ${c}).`,
+        `${mat[startR]![c]}`,
+        `Top row: walk left → right across row ${startR}, appending ${mat[startR]![c]} from (${startR}, ${c}).`,
         { active: [startR, c], done: false },
       );
     }
@@ -113,8 +113,8 @@ function record({ mat }: SpiralInput): Frame<SpiralState>[] {
       take(r, endC);
       emit(
         'RIGHT',
-        `${mat[r][endC]}`,
-        `Right column: walk top → bottom down column ${endC}, appending ${mat[r][endC]} from (${r}, ${endC}).`,
+        `${mat[r]![endC]}`,
+        `Right column: walk top → bottom down column ${endC}, appending ${mat[r]![endC]} from (${r}, ${endC}).`,
         { active: [r, endC], done: false },
       );
     }
@@ -132,8 +132,8 @@ function record({ mat }: SpiralInput): Frame<SpiralState>[] {
         take(endR, c);
         emit(
           'BOTTOM',
-          `${mat[endR][c]}`,
-          `Bottom row: walk right → left across row ${endR}, appending ${mat[endR][c]} from (${endR}, ${c}).`,
+          `${mat[endR]![c]}`,
+          `Bottom row: walk right → left across row ${endR}, appending ${mat[endR]![c]} from (${endR}, ${c}).`,
           { active: [endR, c], done: false },
         );
       }
@@ -152,8 +152,8 @@ function record({ mat }: SpiralInput): Frame<SpiralState>[] {
         take(r, startC);
         emit(
           'LEFT',
-          `${mat[r][startC]}`,
-          `Left column: walk bottom → top up column ${startC}, appending ${mat[r][startC]} from (${r}, ${startC}).`,
+          `${mat[r]![startC]}`,
+          `Left column: walk bottom → top up column ${startC}, appending ${mat[r]![startC]} from (${r}, ${startC}).`,
           { active: [r, startC], done: false },
         );
       }
@@ -180,7 +180,7 @@ function record({ mat }: SpiralInput): Frame<SpiralState>[] {
 function View({ frame }: PluginViewProps<SpiralState>) {
   const s = frame.state;
   const cellTone = (r: number, c: number) => {
-    if (s.active && s.active[0] === r && s.active[1] === c) return 'path';
+    if (s.active && s.active[0]! === r && s.active[1]! === c) return 'path';
     if (s.visited[r]?.[c]) return 'visited';
     return 'land';
   };
@@ -210,7 +210,7 @@ function Inspector({ frame }: InspectorProps<SpiralState>) {
       <InspectorRow k="endR" v={s.endR} />
       <InspectorRow k="startC" v={s.startC} />
       <InspectorRow k="endC" v={s.endC} />
-      <InspectorRow k="current" v={s.active ? `(${s.active[0]}, ${s.active[1]})` : '—'} />
+      <InspectorRow k="current" v={s.active ? `(${s.active[0]!}, ${s.active[1]!})` : '—'} />
       <InspectorRow k="appended" v={s.res.length} />
       <InspectorRow k="result" v={s.done ? `[${s.res.join(', ')}]` : '…'} />
     </VarGrid>

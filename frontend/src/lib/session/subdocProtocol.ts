@@ -85,8 +85,9 @@ export type SubDocOp =
   | SubDocCursorOp;
 
 export function isSubDocOp(value: unknown): value is SubDocOp {
-  const op = value as Partial<SubDocOp> | null;
-  if (!op || op[SUBDOC_TAG] == null) return false;
+  if (value === null || typeof value !== 'object') return false;
+  const op = value as Partial<SubDocOp>;
+  if (op[SUBDOC_TAG] == null) return false;
   const tag = op[SUBDOC_TAG];
   return (
     tag === 'snapshot' ||
@@ -121,7 +122,7 @@ export function emptyNotesPayload(): NotesPayload {
   return { text: '' };
 }
 
-export function subDocSignature(docs: Record<string, SubDocSnapshot>): string {
+export function subDocSignature(docs: Readonly<Record<string, SubDocSnapshot>>): string {
   return Object.entries(docs)
     .filter(([id]) => id.trim().length > 0)
     .sort(([a], [b]) => a.localeCompare(b))

@@ -39,7 +39,10 @@ export function PanelNodeBody({
     return (
       <>
         <PanelNodeHeader {...headerProps} />
-        <LayoutHostFrame hostId={headerProps.id} slots={data.layoutSlots} />
+        <LayoutHostFrame
+          hostId={headerProps.id}
+          {...(data.layoutSlots !== undefined ? { slots: data.layoutSlots } : {})}
+        />
       </>
     );
   }
@@ -70,7 +73,13 @@ export function PanelNodeBody({
 
   if (isCode) {
     return (
-      <CodeStudioProvider phaseLock={isReassemble ? 'reassemble' : isRecall ? 'recall' : undefined}>
+      <CodeStudioProvider
+        {...(isReassemble
+          ? { phaseLock: 'reassemble' as const }
+          : isRecall
+            ? { phaseLock: 'recall' as const }
+            : {})}
+      >
         <PanelNodeHeader
           {...headerProps}
           inlineToolbar={
@@ -122,7 +131,7 @@ export function PanelNodeBody({
           fill={isViz && !vizCanvas}
           flush={flushBody || boardCanvas}
           narrow={narrowBody}
-          style={!isViz && bodyCap ? { maxWidth: bodyCap } : undefined}
+          {...(!isViz && bodyCap ? { style: { maxWidth: bodyCap } } : {})}
         >
           {isViz ? (
             <VizPanelBody

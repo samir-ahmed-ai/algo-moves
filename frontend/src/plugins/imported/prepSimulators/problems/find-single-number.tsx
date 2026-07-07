@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,7 +19,7 @@ interface SingleNumberState {
   nums: number[];
   i: number | null; // index of the value being folded in this frame
   prevAcc: number | null; // accumulator before this XOR
-  v: number | null; // nums[i]
+  v: number | null; // nums[i]!
   acc: number; // running XOR accumulator
   bits: number; // how many bit columns to render
   done: boolean;
@@ -36,7 +36,7 @@ function toBits(n: number, width: number): string[] {
 }
 
 function record({ nums }: SingleNumberInput): Frame<SingleNumberState>[] {
-  const { emit, frames } = createRecorder<SingleNumberState>(() => ({
+  const { emit, frames } = createPrepRecorder<SingleNumberState>(() => ({
     nums,
     i: null,
     prevAcc: null,
@@ -57,14 +57,14 @@ function record({ nums }: SingleNumberInput): Frame<SingleNumberState>[] {
   );
 
   for (let i = 0; i < nums.length; i++) {
-    const v = nums[i];
+    const v = nums[i]!;
     const prev = acc;
-    acc ^= v;
+    acc ^= v!;
     const canceled = acc === 0;
     emit(
       'XOR',
       `acc^=${v}`,
-      `Fold in nums[${i}] = ${v}: acc = ${prev} ^ ${v} = ${acc}. XOR compares bit by bit — matching bits become 0, differing bits become 1.${
+      `Fold in nums[${i}]! = ${v}: acc = ${prev} ^ ${v} = ${acc}. XOR compares bit by bit — matching bits become 0, differing bits become 1.${
         canceled
           ? ` The accumulator dropped back to 0, so ${v} just canceled an earlier equal value.`
           : ''
@@ -115,7 +115,7 @@ function View({ frame }: PluginViewProps<SingleNumberState>) {
         acc = <span className="font-mono text-ink">{s.acc}</span>
         {s.v !== null && !s.done && (
           <>
-            {' · '}folding nums[{s.i}] = <span className="font-mono text-ink">{s.v}</span>
+            {' · '}folding nums[{s.i}]! = <span className="font-mono text-ink">{s.v}</span>
           </>
         )}
       </div>
@@ -135,7 +135,7 @@ function View({ frame }: PluginViewProps<SingleNumberState>) {
           </>
         )}
         <span className={cn(s.done ? 'text-good' : 'text-ink3')}>{s.done ? 'single' : 'acc'}</span>
-        <span>{accBits.map((b, k) => bitCell(b, prevBits !== null && prevBits[k] !== b, k))}</span>
+        <span>{accBits.map((b, k) => bitCell(b, prevBits !== null && prevBits[k]! !== b, k))}</span>
       </div>
 
       <div className={cn('mt-1', vizText.xs, 'text-ink3')}>
@@ -155,7 +155,7 @@ function Inspector({ frame }: InspectorProps<SingleNumberState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.v ?? '—'} />
+      <InspectorRow k="nums[i]!" v={s.v ?? '—'} />
       <InspectorRow k="prev acc" v={s.prevAcc ?? '—'} />
       <InspectorRow k="acc (XOR)" v={s.acc} />
       <InspectorRow k="acc bits" v={toBits(s.acc, s.bits).join('')} />

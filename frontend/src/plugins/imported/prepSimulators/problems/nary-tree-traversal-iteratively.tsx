@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   VizStage,
@@ -27,7 +27,7 @@ import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryT
  *   while stack not empty:
  *     curr = stack.pop()
  *     res.append(curr.Val)
- *     for i := len(children)-1 .. 0: stack.push(children[i])   // reversed
+ *     for i := len(children)-1 .. 0: stack.push(children[i]!)   // reversed
  *
  * Pushing children in reverse means the leftmost child ends up on top of the
  * stack and is visited first, giving classic pre-order (root, then children L→R).
@@ -40,7 +40,7 @@ interface NaryTreeInput {
 
 interface TraversalState {
   labels: string[]; // node value labels, index-aligned with input nodes
-  children: number[][]; // children[i] = child indices of node i
+  children: number[][]; // children[i]! = child indices of node i
   stack: number[]; // current explicit stack (bottom → top)
   res: number[]; // pre-order output collected so far (values)
   curr: number | null; // node index just popped / being processed
@@ -54,7 +54,7 @@ function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {
   const visited = new Array<boolean>(nodes.length).fill(false);
   const res: number[] = [];
 
-  const { emit, frames } = createRecorder<TraversalState>(() => ({
+  const { emit, frames } = createPrepRecorder<TraversalState>(() => ({
     labels: labels,
     children: children,
     res: res.slice(),
@@ -79,7 +79,7 @@ function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {
   emit(
     'INIT',
     'push root',
-    `Pre-order traversal with an explicit stack. Seed the stack with the root (node ${labels[0]}). We pop a node, emit its value, then push its children in reverse so the leftmost child is processed first.`,
+    `Pre-order traversal with an explicit stack. Seed the stack with the root (node ${labels[0]!}). We pop a node, emit its value, then push its children in reverse so the leftmost child is processed first.`,
     { stack: stack, curr: null },
   );
 
@@ -87,41 +87,41 @@ function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {
     const curr = stack.pop()!;
     emit(
       'POP',
-      `pop ${labels[curr]}`,
-      `Pop the top of the stack: node ${labels[curr]}. In pre-order we emit a node the moment we pop it.`,
+      `pop ${labels[curr]!}`,
+      `Pop the top of the stack: node ${labels[curr]!}. In pre-order we emit a node the moment we pop it.`,
       { stack: stack, curr: curr },
     );
 
-    res.push(nodes[curr].val);
-    visited[curr] = true;
+    res.push(nodes[curr]!.val);
+    visited[curr]! = true;
     emit(
       'EMIT',
-      `emit ${labels[curr]}`,
-      `Append ${labels[curr]} to the result. Output so far: [${res.join(', ')}].`,
+      `emit ${labels[curr]!}`,
+      `Append ${labels[curr]!} to the result. Output so far: [${res.join(', ')}].`,
       { stack: stack, curr: curr },
       'good',
     );
 
-    const kids = children[curr];
-    if (kids.length === 0) {
+    const kids = children[curr]!;
+    if (kids!.length === 0) {
       emit(
         'LEAF',
         'no children',
-        `Node ${labels[curr]} is a leaf, so there is nothing to push. Continue with whatever is on top of the stack.`,
+        `Node ${labels[curr]!} is a leaf, so there is nothing to push. Continue with whatever is on top of the stack.`,
         { stack: stack, curr: curr },
       );
     } else {
-      for (let i = kids.length - 1; i >= 0; i--) {
-        stack.push(kids[i]);
+      for (let i = kids!.length - 1; i >= 0; i--) {
+        stack.push(kids![i]!);
       }
-      const pushedLabels = kids.map((c) => labels[c]);
+      const pushedLabels = kids!.map((c) => labels[c]!);
       emit(
         'PUSH',
         `push children`,
-        `Push node ${labels[curr]}'s children in reverse order (${[...pushedLabels].reverse().join(', ')}) so the first child ${pushedLabels[0]} lands on top and gets visited next. Stack top → bottom: [${stack
+        `Push node ${labels[curr]!}'s children in reverse order (${[...pushedLabels].reverse().join(', ')}) so the first child ${pushedLabels[0]!} lands on top and gets visited next. Stack top → bottom: [${stack
           .slice()
           .reverse()
-          .map((i) => labels[i])
+          .map((i) => labels[i]!)
           .join(', ')}].`,
         { stack: stack, curr: curr },
       );
@@ -140,10 +140,10 @@ function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {
 
 function View({ frame }: PluginViewProps<TraversalState>) {
   const s = frame.state;
-  const boardNodes: NaryNode[] = s.labels.map((label, i) => ({ label, children: s.children[i] }));
-  const nodeClass = (i: number) => (s.curr === i ? 'team-1' : s.visited[i] ? 'team-2' : 'team-0');
+  const boardNodes: NaryNode[] = s.labels.map((label, i) => ({ label, children: s.children[i]! }));
+  const nodeClass = (i: number) => (s.curr === i ? 'team-1' : s.visited[i]! ? 'team-2' : 'team-0');
 
-  const stackTop = s.stack.length > 0 ? s.stack[s.stack.length - 1] : null;
+  const stackTop = s.stack.length > 0 ? s.stack[s.stack.length - 1]! : null;
 
   const rail = (
     <>
@@ -153,11 +153,11 @@ function View({ frame }: PluginViewProps<TraversalState>) {
         items={s.stack
           .slice()
           .reverse()
-          .map((i) => s.labels[i])}
+          .map((i) => s.labels[i]!)}
       />
       <RailGroup label="current">
-        <RailStat k="pop" v={s.curr !== null ? s.labels[s.curr] : '—'} tone="accent" />
-        <RailStat k="next" v={stackTop !== null ? s.labels[stackTop] : '—'} />
+        <RailStat k="pop" v={s.curr !== null ? s.labels[s.curr]! : '—'} tone="accent" />
+        <RailStat k="next" v={stackTop !== null ? s.labels[stackTop!]! : '—'} />
       </RailGroup>
       <RailResult
         label="result"
@@ -184,10 +184,10 @@ function View({ frame }: PluginViewProps<TraversalState>) {
 function Inspector({ frame }: InspectorProps<TraversalState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const top = s.stack.length > 0 ? s.labels[s.stack[s.stack.length - 1]] : '—';
+  const top = s.stack.length > 0 ? s.labels[s.stack[s.stack.length - 1]!] : '—';
   return (
     <VarGrid>
-      <InspectorRow k="curr (popped)" v={s.curr !== null ? s.labels[s.curr] : '—'} />
+      <InspectorRow k="curr (popped)" v={s.curr !== null ? s.labels[s.curr]! : '—'} />
       <InspectorRow k="stack top" v={top} />
       <InspectorRow k="stack size" v={s.stack.length} />
       <InspectorRow k="visited" v={s.visited.filter(Boolean).length} />

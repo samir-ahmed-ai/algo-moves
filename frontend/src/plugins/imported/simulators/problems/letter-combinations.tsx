@@ -68,8 +68,8 @@ function record({ digits }: LettersInput): Frame<LettersState>[] {
       return;
     }
     const letters = PHONE_PAD[Number(digits[idx])];
-    for (let i = 0; i < letters.length; i++) {
-      const ch = letters[i];
+    for (let i = 0; i < letters!.length; i++) {
+      const ch = letters![i];
       emit(
         'CHOOSE',
         `'${ch}'`,
@@ -119,7 +119,7 @@ function View({ frame }: PluginViewProps<LettersState>) {
 function Inspector({ frame }: InspectorProps<LettersState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const target = s.digits.split('').reduce((acc, d) => acc * PHONE_PAD[Number(d)].length, 1);
+  const target = s.digits.split('').reduce((acc, d) => acc * PHONE_PAD[Number(d)]!.length, 1);
   return (
     <VarGrid>
       <InspectorRow k="digits" v={`"${s.digits}"`} />

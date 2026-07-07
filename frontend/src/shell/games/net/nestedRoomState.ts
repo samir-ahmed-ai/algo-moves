@@ -38,13 +38,22 @@ import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 /** Keys used by host-authoritative games under room shared state. */
 export const NESTED_GAME_STATE_KEYS = ['ttt', 'meld', 'wyr', 'nduel'] as const;
 
+export type NestedGameStateKey = (typeof NESTED_GAME_STATE_KEYS)[number];
+type SharedStateRecord = Record<string, unknown>;
+
 /** Map nested snapshot keys to canonical {@link GameId} values. */
 export const NESTED_KEY_TO_GAME_ID = {
   ttt: 'tic-tac-toe',
   meld: 'mind-meld',
   wyr: 'would-you-rather',
   nduel: 'number-duel',
-} as const satisfies Record<(typeof NESTED_GAME_STATE_KEYS)[number], string>;
+} as const satisfies Record<NestedGameStateKey, string>;
+
+function cloneSharedState(sharedState: unknown): SharedStateRecord {
+  return sharedState && typeof sharedState === 'object' && !Array.isArray(sharedState)
+    ? { ...(sharedState as SharedStateRecord) }
+    : {};
+}
 
 /** Read game state nested under a key in room shared state. */
 export function readNestedRoomState<T extends object>(
@@ -53,28 +62,35 @@ export function readNestedRoomState<T extends object>(
   isState: (v: unknown) => v is T,
 ): T | null {
   if (!sharedState || typeof sharedState !== 'object') return null;
-  const nested = (sharedState as Record<string, unknown>)[key];
+  const nested = (sharedState as SharedStateRecord)[key];
   return isState(nested) ? nested : null;
 }
 
 /** Publish game state under a key without clobbering room metadata (game, started, locale). */
-export function mergeNestedRoomState<T>(sharedState: unknown, key: string, nested: T): object {
-  const base = sharedState && typeof sharedState === 'object' ? { ...(sharedState as object) } : {};
-  return { ...base, [key]: nested };
+export function mergeNestedRoomState<T>(
+  sharedState: unknown,
+  key: string,
+  nested: T,
+): SharedStateRecord {
+  return { ...cloneSharedState(sharedState), [key]: nested };
 }
 
 /** Drop stale nested game snapshots when switching games or restarting a match. */
-export function stripNestedGameState(sharedState: unknown): object {
-  const base = sharedState && typeof sharedState === 'object' ? { ...(sharedState as object) } : {};
+export function stripNestedGameState(sharedState: unknown): SharedStateRecord {
+  const base = cloneSharedState(sharedState);
   for (const key of NESTED_GAME_STATE_KEYS) {
-    delete (base as Record<string, unknown>)[key];
+    delete base[key];
   }
   return base;
 }
 
 /** Cheap equality for small nested snapshots (avoids pointless re-renders). */
 export function nestedSnapshotEqual<T>(a: T, b: T): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return Object.is(a, b);
+  }
 }
 
 /** Keep publish closures from closing over a stale sharedState snapshot. */

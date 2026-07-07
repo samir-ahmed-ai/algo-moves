@@ -69,7 +69,10 @@ export function buildMobileModeUrl(): string {
 }
 
 /** Write the mobile route without a full page reload. */
-export function writeMobileHash(target?: MobileHashTarget | null, opts?: { replace?: boolean }) {
+export function writeMobileHash(
+  target?: MobileHashTarget | null,
+  opts?: { replace?: boolean },
+): void {
   if (typeof location === 'undefined') return;
   let hashBody = '';
   const trackId = target?.trackId?.trim();
@@ -82,7 +85,9 @@ export function writeMobileHash(target?: MobileHashTarget | null, opts?: { repla
     hashBody += `track/${encodeURIComponent(trackId)}/category/${encodeURIComponent(categoryId)}`;
     if (itemId) hashBody += `/item/${encodeURIComponent(itemId)}`;
   } else if (categoryId) {
-    hashBody += `track/${encodeURIComponent(trackId ?? defaultTrack)}/category/${encodeURIComponent(categoryId)}`;
+    hashBody += `track/${encodeURIComponent(trackId ?? defaultTrack)}/category/${encodeURIComponent(
+      categoryId,
+    )}`;
     if (itemId) hashBody += `/item/${encodeURIComponent(itemId)}`;
   } else if (target?.trackId?.trim()) {
     hashBody += `track/${encodeURIComponent(target.trackId.trim())}`;

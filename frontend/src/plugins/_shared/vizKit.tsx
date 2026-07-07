@@ -390,7 +390,7 @@ export function RailStack({
   // Render top-of-collection first (visually on top), base last.
   const ordered = items.slice().reverse();
   return (
-    <RailSection label={label} className={className}>
+    <RailSection label={label} {...(className !== undefined ? { className } : {})}>
       {topLabel != null && items.length > 0 && (
         <div className={cn('viz-rail-edge', vizText['2xs'])}>{topLabel}</div>
       )}
@@ -470,7 +470,7 @@ export function RailSteps({
 }) {
   const activeIdx = steps.findIndex((s) => s.id === activeId);
   return (
-    <RailSection label={label} className={className}>
+    <RailSection label={label} {...(className !== undefined ? { className } : {})}>
       <div className="viz-rail-steps">
         {steps.map((step, idx) => {
           const state: RailStepState =
@@ -521,6 +521,26 @@ interface StatKVProps {
   wrap?: boolean;
 }
 
+/** Accepts explicit `undefined` for optional fields (exactOptionalPropertyTypes). */
+export type StatKVInput = {
+  k: ReactNode;
+  v: ReactNode;
+  icon?: ReactNode | undefined;
+  tone?: StatKVProps['tone'] | undefined;
+  reserve?: string | undefined;
+  wrap?: boolean | undefined;
+};
+
+function toStatKVProps(props: StatKVInput): StatKVProps {
+  const { k, v, icon, tone, reserve, wrap } = props;
+  const out: StatKVProps = { k, v };
+  if (icon !== undefined) out.icon = icon;
+  if (tone !== undefined) out.tone = tone;
+  if (reserve !== undefined) out.reserve = reserve;
+  if (wrap !== undefined) out.wrap = wrap;
+  return out;
+}
+
 /** Shared label / icon / mono-value anatomy for RailStat and VizStat. */
 function StatKV({ k, v, icon, tone, reserve }: StatKVProps) {
   return (
@@ -546,10 +566,11 @@ function StatKV({ k, v, icon, tone, reserve }: StatKVProps) {
 }
 
 /** Compact key / value stat for the rail (label above, mono value below). */
-export function RailStat(props: StatKVProps) {
+export function RailStat(props: StatKVInput) {
+  const clean = toStatKVProps(props);
   return (
-    <div className={cn('viz-rail-stat', props.wrap && 'viz-rail-stat--wrap')}>
-      <StatKV {...props} />
+    <div className={cn('viz-rail-stat', clean.wrap && 'viz-rail-stat--wrap')}>
+      <StatKV {...clean} />
     </div>
   );
 }
@@ -569,10 +590,11 @@ export function VizStatGroup({ children }: { children: ReactNode }) {
 }
 
 /** One labelled cell in a VizStatStrip. */
-export function VizStat(props: StatKVProps) {
+export function VizStat(props: StatKVInput) {
+  const clean = toStatKVProps(props);
   return (
-    <div className={cn('viz-statstrip-item', props.wrap && 'viz-rail-stat--wrap')}>
-      <StatKV {...props} />
+    <div className={cn('viz-statstrip-item', clean.wrap && 'viz-rail-stat--wrap')}>
+      <StatKV {...clean} />
     </div>
   );
 }

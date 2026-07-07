@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -37,14 +37,14 @@ function record({ s }: MinDelInput): Frame<MinDelState>[] {
   const freq = new Array<number>(26).fill(0);
   for (let i = 0; i < s.length; i++) {
     const c = s.charCodeAt(i) - 97;
-    if (c >= 0 && c < 26) freq[c]++;
+    if (c >= 0 && c < 26) freq[c]!++;
   }
 
   // Build buckets for letters that actually appear, then sort ascending by
   // frequency (mirrors Go's sort.Ints on the freq slice, ignoring the zeros).
   const buckets: Bucket[] = [];
   for (let c = 0; c < 26; c++) {
-    if (freq[c] > 0) buckets.push({ letter: String.fromCharCode(97 + c), freq: freq[c] });
+    if (freq[c]! > 0) buckets.push({ letter: String.fromCharCode(97 + c), freq: freq[c]! });
   }
   buckets.sort((a, b) => a.freq - b.freq);
 
@@ -54,7 +54,7 @@ function record({ s }: MinDelInput): Frame<MinDelState>[] {
   const used = new Set<number>();
   let dels = 0;
 
-  const { emit, frames } = createRecorder<MinDelState>(() => ({
+  const { emit, frames } = createPrepRecorder<MinDelState>(() => ({
     s: s,
     bars: bars.slice(),
     letters: letters,
@@ -76,33 +76,33 @@ function record({ s }: MinDelInput): Frame<MinDelState>[] {
   //    each, while its count is positive and already claimed, delete one
   //    occurrence (decrement) and bump the deletion counter; then claim it.
   for (let i = bars.length - 1; i >= 0; i--) {
-    const letter = letters[i];
+    const letter = letters[i]!;
     emit(
       'VISIT',
-      `${letter} = ${bars[i]}`,
-      `Process letter '${letter}' with frequency ${bars[i]}. It is the largest count not yet handled, so it gets first pick — any earlier bar must dodge whatever count this one keeps.`,
+      `${letter} = ${bars[i]!}`,
+      `Process letter '${letter}' with frequency ${bars[i]!}. It is the largest count not yet handled, so it gets first pick — any earlier bar must dodge whatever count this one keeps.`,
       { active: i },
     );
 
-    while (bars[i] > 0 && used.has(bars[i])) {
-      const before = bars[i];
-      bars[i]--;
+    while (bars[i]! > 0 && used.has(bars[i]!)) {
+      const before = bars[i]!;
+      bars[i]!--;
       dels++;
       emit(
         'DELETE',
-        `${letter} ${before}→${bars[i]}`,
-        `Count ${before} is already taken by another letter, so delete one '${letter}': ${before} → ${bars[i]}. That is +1 deletion (total ${dels}). Keep shrinking until '${letter}' lands on a free count (or 0).`,
+        `${letter} ${before}→${bars[i]!}`,
+        `Count ${before} is already taken by another letter, so delete one '${letter}': ${before} → ${bars[i]!}. That is +1 deletion (total ${dels}). Keep shrinking until '${letter}' lands on a free count (or 0).`,
         { active: i },
         'bad',
       );
     }
 
-    if (bars[i] > 0) {
-      used.add(bars[i]);
+    if (bars[i]! > 0) {
+      used.add(bars[i]!);
       emit(
         'CLAIM',
-        `claim ${bars[i]}`,
-        `Frequency ${bars[i]} for '${letter}' is free, so claim it — no other letter may use ${bars[i]} now.`,
+        `claim ${bars[i]!}`,
+        `Frequency ${bars[i]!} for '${letter}' is free, so claim it — no other letter may use ${bars[i]!} now.`,
         { active: i },
         'good',
       );
@@ -131,13 +131,13 @@ function View({ frame }: PluginViewProps<MinDelState>) {
   const s = frame.state;
   const tone = (i: number): BarTone => {
     if (s.active === i) {
-      if (s.bars[i] === 0) return 'min';
-      return s.used.includes(s.bars[i]) ? 'swap' : 'compare';
+      if (s.bars[i]! === 0) return 'min';
+      return s.used.includes(s.bars[i]!) ? 'swap' : 'compare';
     }
-    if (s.bars[i] > 0 && s.used.includes(s.bars[i])) return 'sorted';
+    if (s.bars[i]! > 0 && s.used.includes(s.bars[i]!)) return 'sorted';
     return 'idle';
   };
-  const label = (i: number) => s.letters[i] ?? String(i);
+  const label = (i: number) => s.letters[i]! ?? String(i);
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -162,12 +162,12 @@ function View({ frame }: PluginViewProps<MinDelState>) {
 function Inspector({ frame }: InspectorProps<MinDelState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const activeLetter = s.active !== null ? s.letters[s.active] : null;
+  const activeLetter = s.active !== null ? s.letters[s.active]! : null;
   return (
     <VarGrid>
       <InspectorRow k="bars (sorted)" v={s.bars.length ? s.bars.join(', ') : '—'} />
       <InspectorRow k="active" v={activeLetter ?? '—'} />
-      <InspectorRow k="active count" v={s.active !== null ? s.bars[s.active] : '—'} />
+      <InspectorRow k="active count" v={s.active !== null ? s.bars[s.active]! : '—'} />
       <InspectorRow k="claimed" v={s.used.length ? `{${s.used.join(', ')}}` : '∅'} />
       <InspectorRow k="deletions" v={s.dels} />
     </VarGrid>

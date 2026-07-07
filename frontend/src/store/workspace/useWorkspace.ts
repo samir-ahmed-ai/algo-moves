@@ -1,5 +1,10 @@
 import { useContext } from 'react';
-import type { WorkspaceCtx } from './workspaceContextTypes';
+import type {
+  WorkspaceAppearanceCtx,
+  WorkspaceChromeCtx,
+  WorkspaceCtx,
+  WorkspaceNavigationCtx,
+} from './workspaceContextTypes';
 import {
   WorkspaceAppearanceContext,
   WorkspaceChromeContext,
@@ -8,19 +13,19 @@ import {
 
 const MISSING = 'useWorkspace hooks must be used inside <WorkspaceProvider>';
 
-export function useWorkspaceAppearance() {
+export function useWorkspaceAppearance(): WorkspaceAppearanceCtx {
   const ctx = useContext(WorkspaceAppearanceContext);
   if (!ctx) throw new Error(MISSING);
   return ctx;
 }
 
-export function useWorkspaceChrome() {
+export function useWorkspaceChrome(): WorkspaceChromeCtx {
   const ctx = useContext(WorkspaceChromeContext);
   if (!ctx) throw new Error(MISSING);
   return ctx;
 }
 
-export function useWorkspaceNavigation() {
+export function useWorkspaceNavigation(): WorkspaceNavigationCtx {
   const ctx = useContext(WorkspaceNavigationContext);
   if (!ctx) throw new Error(MISSING);
   return ctx;

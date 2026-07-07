@@ -54,7 +54,9 @@ export function scoreRound(picks: Record<string, Choice>): Record<string, number
     let won = 0;
     for (const other of ids) {
       if (other === id) continue;
-      if (outcome(picks[id], picks[other]) === 'win') won += 1;
+      const pick = picks[id];
+      if (!pick) continue;
+      if (outcome(pick, picks[other]!) === 'win') won += 1;
     }
     points[id] = won;
   }

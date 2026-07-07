@@ -25,7 +25,7 @@ function parseCount(countStr: string): number {
 }
 
 function motionFromKind(kind: VimMotionKind, count: number, char?: string): MotionSpec {
-  return { kind, count, char };
+  return { kind, count, ...(char !== undefined ? { char } : {}) };
 }
 
 function digitKey(key: string): string | null {

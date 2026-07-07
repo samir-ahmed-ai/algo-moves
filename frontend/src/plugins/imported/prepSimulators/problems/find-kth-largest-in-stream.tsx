@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayRow } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -41,7 +41,7 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
   const answers: number[] = [];
   const heapDisplay = () => [...heap].sort((a, b) => a - b);
 
-  const { emit, frames } = createRecorder<KthStreamState>(() => ({
+  const { emit, frames } = createPrepRecorder<KthStreamState>(() => ({
     k,
     heap: heapDisplay(),
     added: null,
@@ -92,12 +92,12 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
         { added: v, popped, heap: heapDisplay() },
       );
     }
-    const kth = heap[0];
-    answers.push(kth);
+    const kth = heap[0]!;
+    answers.push(kth!);
     emit(
       'KTH',
       `kth=${kth}`,
-      `Return heap[0] = ${kth} — the kth largest after adding ${v}.`,
+      `Return heap[0]! = ${kth} — the kth largest after adding ${v}.`,
       { added: v, popped, kth, answers: answers.slice(), heap: heapDisplay() },
       'good',
     );
@@ -105,9 +105,9 @@ function record({ k, init, stream }: KthStreamInput): Frame<KthStreamState>[] {
 
   emit(
     'DONE',
-    answers.length ? `last=${answers[answers.length - 1]}` : 'empty',
+    answers.length ? `last=${answers[answers.length - 1]!}` : 'empty',
     `Stream complete. Kth-largest answers: [${answers.join(', ')}].`,
-    { kth: answers[answers.length - 1] ?? null, answers: answers.slice(), done: true },
+    { kth: answers[answers.length - 1]! ?? null, answers: answers.slice(), done: true },
     'good',
   );
   return frames;
@@ -147,7 +147,7 @@ function Inspector({ frame }: InspectorProps<KthStreamState>) {
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="heap size" v={s.heap.length} />
-      <InspectorRow k="heap root" v={s.heap[0] ?? '—'} />
+      <InspectorRow k="heap root" v={s.heap[0]! ?? '—'} />
       <InspectorRow k="added" v={s.added ?? '—'} />
       <InspectorRow k="kth" v={s.kth ?? '—'} />
     </VarGrid>
@@ -257,14 +257,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n log k). O(k). push val; if size>k popMin; answer is heap[0]',
+    explain: 'O(n log k). O(k). push val; if size>k popMin; answer is heap[0]!',
   },
   {
     id: 'outcome',
     prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: 'Return heap[0] = — the kth — final DONE caption',
+        label: 'Return heap[0]! = — the kth — final DONE caption',
         correct: true,
       },
       {
@@ -277,7 +277,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Aborted run on failure — infinite loop detected',
       },
     ],
-    explain: 'Return heap[0] =  — the kth largest after adding .',
+    explain: 'Return heap[0]! =  — the kth largest after adding .',
   },
 ];
 export const simulator: ProblemSimulator = {
@@ -302,7 +302,7 @@ export const simulator: ProblemSimulator = {
     if (!s?.done) return { ok: false, label: 'incomplete' };
     return {
       ok: true,
-      label: s.answers.length ? `last kth = ${s.answers[s.answers.length - 1]}` : 'done',
+      label: s.answers.length ? `last kth = ${s.answers[s.answers.length - 1]!}` : 'done',
     };
   },
 };

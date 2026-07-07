@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -33,7 +33,7 @@ function isOp(c: string): boolean {
 function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {
   const stack: string[] = [];
 
-  const { emit, frames } = createRecorder<PreToPostState>(() => ({
+  const { emit, frames } = createPrepRecorder<PreToPostState>(() => ({
     exp,
     i: null,
     stack: stack.slice(),
@@ -53,17 +53,17 @@ function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {
   );
 
   for (let i = exp.length - 1; i >= 0; i--) {
-    const c = exp[i];
+    const c = exp[i]!;
     if (c === ' ') {
       emit('SKIP', `i=${i} space`, `Position ${i} is a space — skip it.`, { i });
       continue;
     }
-    if (isOp(c)) {
-      const a = stack[stack.length - 1];
-      const b = stack[stack.length - 2];
+    if (isOp(c!)) {
+      const a = stack[stack.length - 1]!;
+      const b = stack[stack.length - 2]!;
       stack.pop();
       stack.pop();
-      const pushed = a + b + c;
+      const pushed = a! + b! + c;
       stack.push(pushed);
       emit(
         'OP',
@@ -72,7 +72,7 @@ function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {
         { i, a, b, op: c, pushed, stack: stack.slice() },
       );
     } else {
-      stack.push(c);
+      stack.push(c!);
       emit('OPERAND', `push '${c}'`, `'${c}' is an operand. Push it onto the stack unchanged.`, {
         i,
         pushed: c,
@@ -81,7 +81,7 @@ function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {
     }
   }
 
-  const result = stack[stack.length - 1];
+  const result = stack[stack.length - 1]!;
   emit(
     'DONE',
     `result="${result}"`,
@@ -151,7 +151,7 @@ function View({ frame }: PluginViewProps<PreToPostState>) {
 function Inspector({ frame }: InspectorProps<PreToPostState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null ? s.exp[s.i] : '—';
+  const cur = s.i !== null ? s.exp[s.i]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="i (scan)" v={s.i ?? '—'} />
@@ -169,19 +169,19 @@ function Inspector({ frame }: InspectorProps<PreToPostState>) {
 function prefixToPostfix(exp: string): string {
   const stack: string[] = [];
   for (let i = exp.length - 1; i >= 0; i--) {
-    const c = exp[i];
+    const c = exp[i]!;
     if (c === ' ') continue;
-    if (isOp(c)) {
-      const a = stack[stack.length - 1];
-      const b = stack[stack.length - 2];
+    if (isOp(c!)) {
+      const a = stack[stack.length - 1]!;
+      const b = stack[stack.length - 2]!;
       stack.pop();
       stack.pop();
-      stack.push(a + b + c);
+      stack.push(a! + b! + c);
     } else {
-      stack.push(c);
+      stack.push(c!);
     }
   }
-  return stack[stack.length - 1];
+  return stack[stack.length - 1]!;
 }
 
 export const manifestId = 'prep-stacks-queues-prefix-to-postfix';

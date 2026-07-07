@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -47,7 +47,7 @@ const fmtPt = (p: GeoPoint) => `(${p.x},${p.y})`;
 function record({ stores, customers }: NearestInput): Frame<NearestState>[] {
   const res = new Array<number>(customers.length).fill(UNFILLED);
 
-  const { emit, frames } = createRecorder<NearestState>(() => ({
+  const { emit, frames } = createPrepRecorder<NearestState>(() => ({
     stores,
     customers,
     ci: null,
@@ -67,20 +67,20 @@ function record({ stores, customers }: NearestInput): Frame<NearestState>[] {
   );
 
   for (let i = 0; i < customers.length; i++) {
-    const cust = customers[i];
+    const cust = customers[i]!;
     let best = UNFILLED;
     let bestStore: number | null = null;
 
     emit(
       'CUSTOMER',
-      `customer ${i} ${fmtPt(cust)}`,
-      `Start customer ${i} at ${fmtPt(cust)}. best is reset to ∞ — we have not measured any store for this customer yet.`,
+      `customer ${i} ${fmtPt(cust!)}`,
+      `Start customer ${i} at ${fmtPt(cust!)}. best is reset to ∞ — we have not measured any store for this customer yet.`,
       { ci: i, best, bestStore },
     );
 
     for (let j = 0; j < stores.length; j++) {
-      const store = stores[j];
-      const d = distED(cust, store);
+      const store = stores[j]!;
+      const d = distED(cust!, store!);
 
       if (best < 0 || d < best) {
         const improved = best < 0;
@@ -90,8 +90,8 @@ function record({ stores, customers }: NearestInput): Frame<NearestState>[] {
           'IMPROVE',
           `best=${d}`,
           improved
-            ? `Store ${j} ${fmtPt(store)} is the first store measured: distance² = (${cust.x}−${store.x})² + (${cust.y}−${store.y})² = ${d}. Set best = ${d}.`
-            : `Store ${j} ${fmtPt(store)} gives distance² = ${d}, which is smaller than the previous best — update best = ${d} (store ${j} is now nearest so far).`,
+            ? `Store ${j} ${fmtPt(store!)} is the first store measured: distance² = (${cust!.x}−${store!.x})² + (${cust!.y}−${store!.y})² = ${d}. Set best = ${d}.`
+            : `Store ${j} ${fmtPt(store!)} gives distance² = ${d}, which is smaller than the previous best — update best = ${d} (store ${j} is now nearest so far).`,
           { ci: i, si: j, d, best, bestStore },
           'good',
         );
@@ -99,17 +99,17 @@ function record({ stores, customers }: NearestInput): Frame<NearestState>[] {
         emit(
           'KEEP',
           `d=${d} ≥ ${best}`,
-          `Store ${j} ${fmtPt(store)} gives distance² = ${d}, which is not closer than the current best (${best}). Keep best unchanged.`,
+          `Store ${j} ${fmtPt(store!)} gives distance² = ${d}, which is not closer than the current best (${best}). Keep best unchanged.`,
           { ci: i, si: j, d, best, bestStore },
         );
       }
     }
 
-    res[i] = best;
+    res[i]! = best;
     emit(
       'RECORD',
-      `res[${i}]=${best}`,
-      `All stores checked for customer ${i}. The nearest store is store ${bestStore} with squared distance ${best}, so res[${i}] = ${best}.`,
+      `res[${i}]!=${best}`,
+      `All stores checked for customer ${i}. The nearest store is store ${bestStore} with squared distance ${best}, so res[${i}]! = ${best}.`,
       { ci: i, best, bestStore, res: res.slice() },
       'good',
     );
@@ -137,14 +137,14 @@ function View({ frame }: PluginViewProps<NearestState>) {
 
   const tone = (i: number) => (s.bestStore === i ? 'found' : s.si === i ? 'match' : '');
 
-  const cust = s.ci !== null ? s.customers[s.ci] : null;
+  const cust = s.ci !== null ? s.customers[s.ci]! : null;
 
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         customer{' '}
         <span className="font-mono text-ink">
-          {s.ci !== null ? `${s.ci} ${fmtPt(s.customers[s.ci])}` : '—'}
+          {s.ci !== null ? `${s.ci} ${fmtPt(s.customers[s.ci]!)}` : '—'}
         </span>
         {cust && (
           <>
@@ -174,8 +174,8 @@ function View({ frame }: PluginViewProps<NearestState>) {
 function Inspector({ frame }: InspectorProps<NearestState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cust = s.ci !== null ? s.customers[s.ci] : null;
-  const store = s.si !== null ? s.stores[s.si] : null;
+  const cust = s.ci !== null ? s.customers[s.ci]! : null;
+  const store = s.si !== null ? s.stores[s.si]! : null;
   return (
     <VarGrid>
       <InspectorRow k="customer i" v={s.ci ?? '—'} />

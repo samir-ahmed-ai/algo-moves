@@ -42,7 +42,7 @@ export function parseVimHash(hash: string, pathname?: string): VimHashTarget | n
 }
 
 /** Write the Vim route without a full page reload. */
-export function writeVimHash(target?: VimHashTarget | null, opts?: { replace?: boolean }) {
+export function writeVimHash(target?: VimHashTarget | null, opts?: { replace?: boolean }): void {
   if (typeof location === 'undefined') return;
   let hashBody = '';
   const levelId = target?.levelId?.trim();

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -42,9 +42,9 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
   let queue: QItem[] = [];
 
   const colsSorted = (): [number, number[]][] =>
-    [...cols.entries()].sort((a, b) => a[0] - b[0]).map(([c, v]) => [c, v.slice()]);
+    [...cols.entries()].sort((a, b) => a[0]! - b[0]!).map(([c, v]) => [c, v.slice()]);
 
-  const { emit, frames } = createRecorder<VerticalState>(() => ({
+  const { emit, frames } = createPrepRecorder<VerticalState>(() => ({
     tree,
     queue: queue.map((q) => ({ ...q })),
     visited: visited.slice(),
@@ -57,7 +57,7 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
     done: false,
   }));
 
-  if (tree.length === 0 || tree[0] == null) {
+  if (tree.length === 0 || tree[0]! == null) {
     emit(
       'DONE',
       'empty',
@@ -77,51 +77,51 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
   );
 
   while (queue.length > 0) {
-    const p = queue[0];
+    const p = queue[0]!;
     queue = queue.slice(1);
-    const val = tree[p.i] as number;
+    const val = tree[p!.i]! as number;
 
     emit(
       'DEQUEUE',
-      `node ${val} @ col ${p.col}`,
-      `Dequeue node ${val}. It sits in column ${p.col}, so we add ${val} to that column's bucket.`,
-      { current: p.i, currentCol: p.col },
+      `node ${val} @ col ${p!.col}`,
+      `Dequeue node ${val}. It sits in column ${p!.col}, so we add ${val} to that column's bucket.`,
+      { current: p!.i, currentCol: p!.col },
     );
 
-    const bucket = cols.get(p.col) ?? [];
+    const bucket = cols.get(p!.col) ?? [];
     bucket.push(val);
-    cols.set(p.col, bucket);
-    visited.push(p.i);
+    cols.set(p!.col, bucket);
+    visited.push(p!.i);
 
-    if (p.col < minC) minC = p.col;
-    if (p.col > maxC) maxC = p.col;
+    if (p!.col < minC) minC = p!.col;
+    if (p!.col > maxC) maxC = p!.col;
 
     emit(
       'PLACE',
-      `col ${p.col} += ${val}`,
-      `Column ${p.col} now holds [${cols.get(p.col)!.join(', ')}]. Columns seen so far span ${minC}..${maxC}.`,
-      { current: p.i, currentCol: p.col },
+      `col ${p!.col} += ${val}`,
+      `Column ${p!.col} now holds [${cols.get(p!.col)!.join(', ')}]. Columns seen so far span ${minC}..${maxC}.`,
+      { current: p!.i, currentCol: p!.col },
     );
 
-    const left = 2 * p.i + 1;
-    if (left < tree.length && tree[left] != null) {
-      queue.push({ i: left, col: p.col - 1 });
+    const left = 2 * p!.i + 1;
+    if (left < tree.length && tree[left]! != null) {
+      queue.push({ i: left, col: p!.col - 1 });
       emit(
         'PUSH_LEFT',
-        `enqueue ${tree[left]} @ col ${p.col - 1}`,
-        `Node ${val} has a left child ${tree[left]}; going left means column ${p.col} − 1 = ${p.col - 1}. Enqueue it.`,
-        { current: p.i, currentCol: p.col },
+        `enqueue ${tree[left]!} @ col ${p!.col - 1}`,
+        `Node ${val} has a left child ${tree[left]!}; going left means column ${p!.col} − 1 = ${p!.col - 1}. Enqueue it.`,
+        { current: p!.i, currentCol: p!.col },
       );
     }
 
-    const right = 2 * p.i + 2;
-    if (right < tree.length && tree[right] != null) {
-      queue.push({ i: right, col: p.col + 1 });
+    const right = 2 * p!.i + 2;
+    if (right < tree.length && tree[right]! != null) {
+      queue.push({ i: right, col: p!.col + 1 });
       emit(
         'PUSH_RIGHT',
-        `enqueue ${tree[right]} @ col ${p.col + 1}`,
-        `Node ${val} has a right child ${tree[right]}; going right means column ${p.col} + 1 = ${p.col + 1}. Enqueue it.`,
-        { current: p.i, currentCol: p.col },
+        `enqueue ${tree[right]!} @ col ${p!.col + 1}`,
+        `Node ${val} has a right child ${tree[right]!}; going right means column ${p!.col} + 1 = ${p!.col + 1}. Enqueue it.`,
+        { current: p!.i, currentCol: p!.col },
       );
     }
   }
@@ -182,7 +182,7 @@ function View({ frame }: PluginViewProps<VerticalState>) {
 function Inspector({ frame }: InspectorProps<VerticalState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.current !== null ? s.tree[s.current] : null;
+  const cur = s.current !== null ? s.tree[s.current]! : null;
   return (
     <VarGrid>
       <InspectorRow k="current node" v={cur ?? '—'} />

@@ -41,7 +41,7 @@ function record({ intervals }: SchedInput): Frame<SchedState>[] {
 
   const emit = (type: string, note: string, caption: string, tone?: 'good' | 'bad') =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         sorted: sorted.map((iv) => [iv[0], iv[1]] as [number, number]),
         status: status.slice(),
@@ -60,7 +60,8 @@ function record({ intervals }: SchedInput): Frame<SchedState>[] {
   );
 
   for (let i = 0; i < sorted.length; i++) {
-    const [start, end] = sorted[i];
+    const iv = sorted[i]!;
+    const [start, end] = iv;
     cur = i;
     status[i] = 'current';
     emit(
@@ -116,7 +117,10 @@ function View({ frame }: PluginViewProps<SchedState>) {
     pending: { bg: 'var(--surface-2)', fg: 'var(--text-3)' },
   };
 
-  const curIv = s.cur !== null ? `[${s.sorted[s.cur][0]},${s.sorted[s.cur][1]}]` : '—';
+  const curIv =
+    s.cur !== null && s.sorted[s.cur] !== undefined
+      ? `[${s.sorted[s.cur]![0]},${s.sorted[s.cur]![1]}]`
+      : '—';
   const done = frame.move.type === 'DONE';
 
   const rail = (
@@ -163,7 +167,8 @@ function View({ frame }: PluginViewProps<SchedState>) {
         />
         {s.sorted.map((iv, i) => {
           const [start, end] = iv;
-          const c = palette[s.status[i]];
+          const st = s.status[i] ?? 'pending';
+          const c = palette[st];
           return (
             <div
               key={i}
@@ -202,7 +207,10 @@ function Inspector({ frame, selectedNode }: InspectorProps<SchedState>) {
       frame={frame}
       selectedNode={selectedNode}
       rows={(s) => {
-        const curIv = s.cur !== null ? `[${s.sorted[s.cur][0]},${s.sorted[s.cur][1]}]` : '—';
+        const curIv =
+          s.cur !== null && s.sorted[s.cur] !== undefined
+            ? `[${s.sorted[s.cur]![0]},${s.sorted[s.cur]![1]}]`
+            : '—';
         return (
           <>
             <InspectorRow k="lastEnd" v={s.lastEnd} />

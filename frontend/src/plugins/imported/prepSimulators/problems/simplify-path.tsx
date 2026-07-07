@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -35,7 +35,7 @@ function record({ path }: SimplifyPathInput): Frame<SimplifyPathState>[] {
   const parts = path.split('/');
   const stack: string[] = [];
 
-  const { emit, frames } = createRecorder<SimplifyPathState>(() => ({
+  const { emit, frames } = createPrepRecorder<SimplifyPathState>(() => ({
     path,
     parts,
     pi: null,
@@ -55,7 +55,7 @@ function record({ path }: SimplifyPathInput): Frame<SimplifyPathState>[] {
   );
 
   for (let pi = 0; pi < parts.length; pi++) {
-    const part = parts[pi];
+    const part = parts[pi]!;
     if (part === '' || part === '.') {
       emit(
         'SKIP',
@@ -84,7 +84,7 @@ function record({ path }: SimplifyPathInput): Frame<SimplifyPathState>[] {
       }
       continue;
     }
-    stack.push(part);
+    stack.push(part!);
     emit(
       'PUSH',
       `push "${part}"`,

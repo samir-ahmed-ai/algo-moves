@@ -40,26 +40,31 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
     );
     for (let j = i + 1; j < n; j++) {
       incCompare();
+      const atJ = values[j]!;
+      const atMin = values[minIdx]!;
       emit(
         'SCAN',
-        `${values[j]} ? ${values[minIdx]}`,
-        `Compare ${values[j]} at index ${j} against the current minimum ${values[minIdx]}.`,
+        `${atJ} ? ${atMin}`,
+        `Compare ${atJ} at index ${j} against the current minimum ${atMin}.`,
         j,
         minIdx,
       );
-      if (values[j] < values[minIdx]) {
+      if (atJ < atMin) {
         minIdx = j;
         emit(
           'MIN',
           `min=${minIdx}`,
-          `${values[j]} is smaller, so the new minimum is at index ${minIdx}.`,
+          `${atJ} is smaller, so the new minimum is at index ${minIdx}.`,
           null,
           minIdx,
         );
       }
     }
     if (minIdx !== i) {
-      [values[i], values[minIdx]] = [values[minIdx], values[i]];
+      const atI = values[i]!;
+      const atMin = values[minIdx]!;
+      values[i] = atMin;
+      values[minIdx] = atI;
       incSwap();
       emit(
         'SWAP',

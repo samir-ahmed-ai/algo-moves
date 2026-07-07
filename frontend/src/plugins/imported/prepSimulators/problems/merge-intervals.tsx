@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -28,19 +28,19 @@ interface MergeState {
 }
 
 function fmt(iv: Interval): string {
-  return `[${iv[0]},${iv[1]}]`;
+  return `[${iv[0]!},${iv[1]!}]`;
 }
 
 function record({ intervals }: MergeInput): Frame<MergeState>[] {
   // Sort by start time (faithful to sort.Slice in the Go solution).
-  const sorted: Interval[] = intervals.map((iv) => [iv[0], iv[1]] as Interval);
-  sorted.sort((a, b) => a[0] - b[0]);
+  const sorted: Interval[] = intervals.map((iv) => [iv[0]!, iv[1]!] as Interval);
+  sorted.sort((a, b) => a[0]! - b[0]!);
 
   const res: Interval[] = [];
 
-  const { emit, frames } = createRecorder<MergeState>(() => ({
-    sorted: sorted.map((iv) => [iv[0], iv[1]] as Interval),
-    res: res.map((iv) => [iv[0], iv[1]] as Interval),
+  const { emit, frames } = createPrepRecorder<MergeState>(() => ({
+    sorted: sorted.map((iv) => [iv[0]!, iv[1]!] as Interval),
+    res: res.map((iv) => [iv[0]!, iv[1]!] as Interval),
     i: null,
     lastIdx: null,
     overlap: null,
@@ -60,46 +60,46 @@ function record({ intervals }: MergeInput): Frame<MergeState>[] {
   );
 
   // Seed the result with the first interval.
-  res.push([sorted[0][0], sorted[0][1]]);
+  res.push([sorted[0]![0], sorted[0]![1]]);
   emit(
     'SEED',
-    `open ${fmt(res[0])}`,
-    `Start the result with the first interval ${fmt(sorted[0])}. This is the currently "open" interval whose right edge we may stretch as later intervals arrive.`,
+    `open ${fmt(res[0]!)}`,
+    `Start the result with the first interval ${fmt(sorted[0]!)}. This is the currently "open" interval whose right edge we may stretch as later intervals arrive.`,
     { i: 0, lastIdx: 0 },
   );
 
   for (let i = 1; i < sorted.length; i++) {
     const lastIdx = res.length - 1;
-    const last = res[lastIdx];
-    const cur = sorted[i];
-    const overlaps = cur[0] <= last[1];
+    const last = res[lastIdx]!;
+    const cur = sorted[i]!;
+    const overlaps = cur![0] <= last![1];
 
     if (overlaps) {
-      const willExtend = cur[1] > last[1];
+      const willExtend = cur![1] > last![1];
       if (willExtend) {
-        const before = last[1];
-        last[1] = cur[1];
+        const before = last![1];
+        last![1] = cur![1];
         emit(
           'EXTEND',
-          `${fmt(res[lastIdx])}`,
-          `${fmt(cur)} overlaps the open interval because its start ${cur[0]} ≤ open end ${before}. Its end ${cur[1]} reaches further, so extend the open interval's right edge to ${cur[1]} → ${fmt(res[lastIdx])}.`,
+          `${fmt(res[lastIdx]!)}`,
+          `${fmt(cur!)} overlaps the open interval because its start ${cur![0]} ≤ open end ${before}. Its end ${cur![1]} reaches further, so extend the open interval's right edge to ${cur![1]} → ${fmt(res[lastIdx]!)}.`,
           { i, lastIdx, overlap: true, extended: true },
           'good',
         );
       } else {
         emit(
           'ABSORB',
-          `inside ${fmt(last)}`,
-          `${fmt(cur)} overlaps (start ${cur[0]} ≤ open end ${last[1]}) but its end ${cur[1]} ≤ ${last[1]}, so it sits entirely inside the open interval ${fmt(last)}. Nothing changes — just absorb it.`,
+          `inside ${fmt(last!)}`,
+          `${fmt(cur!)} overlaps (start ${cur![0]} ≤ open end ${last![1]}) but its end ${cur![1]} ≤ ${last![1]}, so it sits entirely inside the open interval ${fmt(last!)}. Nothing changes — just absorb it.`,
           { i, lastIdx, overlap: true, extended: false },
         );
       }
     } else {
-      res.push([cur[0], cur[1]]);
+      res.push([cur![0], cur![1]]);
       emit(
         'NEW',
-        `open ${fmt(cur)}`,
-        `${fmt(cur)} starts at ${cur[0]}, which is past the open end ${last[1]}, so there is no overlap. Close ${fmt(last)} and open a fresh interval ${fmt(cur)}.`,
+        `open ${fmt(cur!)}`,
+        `${fmt(cur!)} starts at ${cur![0]}, which is past the open end ${last![1]}, so there is no overlap. Close ${fmt(last!)} and open a fresh interval ${fmt(cur!)}.`,
         { i, lastIdx: res.length - 1, overlap: false, extended: false },
       );
     }
@@ -125,7 +125,7 @@ function View({ frame }: PluginViewProps<MergeState>) {
   if (s.i !== null && !s.done) {
     pointers.push({ i: s.i, label: 'cur', tone: 'accent', place: 'above' });
   }
-  const curStart = s.i !== null && s.i < s.sorted.length ? s.sorted[s.i][0] : null;
+  const curStart = s.i !== null && s.i < s.sorted.length ? s.sorted[s.i]![0] : null;
   const tone = (idx: number) => {
     if (s.i === idx && !s.done) return 'match';
     if (s.i !== null && idx < s.i) return 'dead'; // already consumed
@@ -172,16 +172,16 @@ function View({ frame }: PluginViewProps<MergeState>) {
 function Inspector({ frame }: InspectorProps<MergeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null && s.i < s.sorted.length ? s.sorted[s.i] : null;
+  const cur = s.i !== null && s.i < s.sorted.length ? s.sorted[s.i]! : null;
   const last =
-    s.lastIdx !== null && s.lastIdx >= 0 && s.lastIdx < s.res.length ? s.res[s.lastIdx] : null;
+    s.lastIdx !== null && s.lastIdx >= 0 && s.lastIdx < s.res.length ? s.res[s.lastIdx]! : null;
   return (
     <VarGrid>
-      <InspectorRow k="cur (sorted[i])" v={cur ? fmt(cur) : '—'} />
+      <InspectorRow k="cur (sorted[i]!)" v={cur ? fmt(cur) : '—'} />
       <InspectorRow k="open interval" v={last ? fmt(last) : '—'} />
       <InspectorRow
         k="overlap?"
-        v={s.overlap === null ? '—' : s.overlap ? 'yes (cur[0] ≤ end)' : 'no'}
+        v={s.overlap === null ? '—' : s.overlap ? 'yes (cur[0]! ≤ end)' : 'no'}
       />
       <InspectorRow k="extended end?" v={s.extended ? 'yes' : s.overlap === false ? 'n/a' : 'no'} />
       <InspectorRow k="merged count" v={s.res.length} />
@@ -212,7 +212,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Sort by start time, then greedily merge: if `curr[0] <= last[1]`, extend `last[1] = max(last[1], curr[1])`',
+      'Sort by start time, then greedily merge: if `curr[0]! <= last[1]!`, extend `last[1]! = max(last[1]!, curr[1]!)`',
   },
   {
     id: 'key-step',
@@ -274,7 +274,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n log n). O(n). Sort by start time, then greedily merge: if `curr[0] <= last[1]`, extend `last[1] = max(last[1], curr[1])`; Otherwise, start a new interval',
+      'O(n log n). O(n). Sort by start time, then greedily merge: if `curr[0]! <= last[1]!`, extend `last[1]! = max(last[1]!, curr[1]!)`; Otherwise, start a new interval',
   },
   {
     id: 'outcome',
@@ -329,7 +329,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as MergeState | undefined;
     if (!s) return { ok: false, label: 'no result' };
-    const label = s.res.map((iv) => `[${iv[0]},${iv[1]}]`).join(' ');
+    const label = s.res.map((iv) => `[${iv[0]!},${iv[1]!}]`).join(' ');
     return { ok: true, label };
   },
 };

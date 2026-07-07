@@ -9,43 +9,43 @@ import { useAnchoredPopover } from '@/hooks/useAnchoredPopover';
 export type FeatureTone = 'accent' | 'good' | 'team1' | 'team2';
 
 export type FeatureOption = {
-  id: string;
-  icon: ReactNode;
-  title: string;
-  subtitle?: string;
-  detailTitle: string;
-  detailBadge?: string;
-  detailDescription: ReactNode;
-  tone?: FeatureTone;
+  readonly id: string;
+  readonly icon: ReactNode;
+  readonly title: string;
+  readonly subtitle?: string;
+  readonly detailTitle: string;
+  readonly detailBadge?: string;
+  readonly detailDescription: ReactNode;
+  readonly tone?: FeatureTone;
 };
 
 export type FeatureGroup = {
-  label?: string;
-  options: FeatureOption[];
+  readonly label?: string;
+  readonly options: readonly FeatureOption[];
 };
 
 export interface FeatureSelectorPopoverProps {
-  groups: FeatureGroup[];
-  value: string;
-  onChange: (id: string) => void;
-  triggerLabel?: string;
-  panelTitle: string;
-  panelHint?: string;
-  align?: 'left' | 'right';
-  compact?: boolean;
+  readonly groups: readonly FeatureGroup[];
+  readonly value: string;
+  readonly onChange: (id: string) => void;
+  readonly triggerLabel?: string;
+  readonly panelTitle: string;
+  readonly panelHint?: string;
+  readonly align?: 'left' | 'right';
+  readonly compact?: boolean;
   /** Action menu — no selected value or chevron on the trigger. */
-  menu?: boolean;
-  triggerIcon?: ReactNode;
-  triggerAriaLabel?: string;
-  triggerClassName?: string;
-  className?: string;
+  readonly menu?: boolean;
+  readonly triggerIcon?: ReactNode;
+  readonly triggerAriaLabel?: string;
+  readonly triggerClassName?: string;
+  readonly className?: string;
 }
 
 const CARD_WIDTH_PX = 104; // matches w-[min(6.5rem,32vw)]
 const CARD_GAP_PX = 4; // gap-1
 const PANEL_PADDING_X_PX = 12; // p-1.5 horizontal padding
 
-function panelWidthForGroups(groups: FeatureGroup[]): number {
+function panelWidthForGroups(groups: readonly FeatureGroup[]): number {
   const maxCards = Math.max(1, ...groups.map((g) => g.options.length));
   return maxCards * CARD_WIDTH_PX + (maxCards - 1) * CARD_GAP_PX + PANEL_PADDING_X_PX;
 }
@@ -158,7 +158,7 @@ export function FeatureSelectorPopover({
     panelWidth,
   );
 
-  const allOptions = groups.flatMap((g) => g.options);
+  const allOptions = useMemo(() => groups.flatMap((g) => g.options), [groups]);
   const selected = allOptions.find((o) => o.id === value);
   const defaultPreview = menu && !selected ? allOptions[0] : undefined;
   const highlighted =
@@ -172,11 +172,16 @@ export function FeatureSelectorPopover({
     if (!open) setHovered(null);
   }, [open]);
 
-  const pick = (id: string) => {
-    onChange(id);
-    setOpen(false);
-    setHovered(null);
-  };
+  const pick = useCallback(
+    (id: string) => {
+      const nextId = id.trim();
+      if (!nextId) return;
+      onChange(nextId);
+      setOpen(false);
+      setHovered(null);
+    },
+    [onChange],
+  );
 
   const ariaLabel =
     triggerAriaLabel ?? (menu && triggerLabel ? triggerLabel : compact ? panelTitle : undefined);
@@ -272,9 +277,11 @@ export function FeatureSelectorPopover({
                           onClick={() => pick(opt.id)}
                           onMouseEnter={() => setHovered(opt.id)}
                           onMouseLeave={() => setHovered(null)}
+                          onFocus={() => setHovered(opt.id)}
+                          onBlur={() => setHovered(null)}
                           className={cn(
                             'relative flex w-[min(6.5rem,32vw)] shrink-0 flex-col items-center gap-1 rounded-md border p-2 text-center transition-[colors,transform,box-shadow] duration-150',
-                            'focus-visible:-translate-y-0.5',
+                            'outline-none focus-visible:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-accent/40',
                             'feature-selector-card',
                             isSelected
                               ? cn('feature-selector-card--selected', tone.cardActive)
@@ -371,8 +378,8 @@ export function ToolbarSegment({
   children,
   className,
 }: {
-  children: ReactNode;
-  className?: string;
+  readonly children: ReactNode;
+  readonly className?: string;
 }) {
   return (
     <div

@@ -72,7 +72,7 @@ function record({ letters, target }: LetterInput): Frame<LetterState>[] {
     emit('MID', `mid=${mid}`, `Middle of the live window: mid=${mid}, letter '${letters[mid]}'.`, {
       mid: mid,
     });
-    if (letters[mid] > target) {
+    if (letters[mid]! > target) {
       res = mid;
       for (let i = mid; i <= hi; i++) dead[i] = true;
       hi = mid - 1;
@@ -95,7 +95,7 @@ function record({ letters, target }: LetterInput): Frame<LetterState>[] {
   }
 
   if (res === null) {
-    result = letters[0];
+    result! = letters[0]!;
     emitDone(
       'WRAP',
       `wrap → '${result}'`,
@@ -104,7 +104,7 @@ function record({ letters, target }: LetterInput): Frame<LetterState>[] {
       'good',
     );
   } else {
-    result = letters[res];
+    result! = letters[res]!;
     emitDone(
       'DONE',
       `'${result}'`,

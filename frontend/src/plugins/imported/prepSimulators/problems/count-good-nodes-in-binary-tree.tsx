@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   RailGroup,
@@ -38,7 +38,7 @@ function record({ tree }: GoodNodesInput): Frame<GoodNodesState>[] {
   const visited: number[] = [];
   let count = 0;
 
-  const { emit, frames } = createRecorder<GoodNodesState>(() => ({
+  const { emit, frames } = createPrepRecorder<GoodNodesState>(() => ({
     tree,
     current: null,
     maxVal: null,
@@ -48,7 +48,7 @@ function record({ tree }: GoodNodesInput): Frame<GoodNodesState>[] {
     done: false,
   }));
 
-  const rootVal = tree[0];
+  const rootVal = tree[0]!;
 
   emit(
     'INIT',
@@ -59,8 +59,8 @@ function record({ tree }: GoodNodesInput): Frame<GoodNodesState>[] {
 
   // Faithful re-implementation of the Go dfs(node, maxVal) -> int.
   const dfs = (i: number, maxVal: number): number => {
-    if (i >= tree.length || tree[i] == null) return 0;
-    const val = tree[i] as number;
+    if (i >= tree.length || tree[i]! == null) return 0;
+    const val = tree[i]! as number;
 
     let cnt = 0;
     let nextMax = maxVal;
@@ -139,7 +139,7 @@ function View({ frame }: PluginViewProps<GoodNodesState>) {
 function Inspector({ frame }: InspectorProps<GoodNodesState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
   return (
     <VarGrid>
       <InspectorRow k="node.val" v={curVal ?? '—'} />

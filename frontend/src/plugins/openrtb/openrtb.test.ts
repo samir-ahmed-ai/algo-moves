@@ -61,7 +61,7 @@ describe('openrtb-course content integrity', () => {
   it('builds one plugin per concept and one catalog course', () => {
     expect(openrtbPlugins.length).toBe(concepts.length);
     expect(openrtbCourses.length).toBe(1);
-    expect(openrtbCourses[0].topics.length).toBe(OPENRTB_TOPICS.length);
+    expect(openrtbCourses[0]!.topics.length).toBe(OPENRTB_TOPICS.length);
   });
 
   it('every topic has at least one concept', () => {

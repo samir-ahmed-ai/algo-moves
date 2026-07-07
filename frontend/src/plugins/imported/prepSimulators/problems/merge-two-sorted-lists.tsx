@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, railItem } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -42,7 +42,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
   const headI = () => (i < l1.length ? i : null);
   const headJ = () => (j < l2.length ? j : null);
 
-  const { emit, frames } = createRecorder<MergeState>(() => ({
+  const { emit, frames } = createPrepRecorder<MergeState>(() => ({
     l1,
     l2,
     i: headI(),
@@ -62,26 +62,26 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
   while (i < l1.length && j < l2.length) {
     emit(
       'COMPARE',
-      `${l1[i]} vs ${l2[j]}`,
-      `Both lists still have nodes. Compare the two heads: l1 = ${l1[i]} and l2 = ${l2[j]}. The Go code attaches l1 only when l1.Val < l2.Val, so ties go to l2.`,
+      `${l1[i]!} vs ${l2[j]!}`,
+      `Both lists still have nodes. Compare the two heads: l1 = ${l1[i]!} and l2 = ${l2[j]!}. The Go code attaches l1 only when l1.Val < l2.Val, so ties go to l2.`,
       { i: headI(), j: headJ() },
     );
-    if (l1[i] < l2[j]) {
-      merged.push(l1[i]);
+    if (l1[i]! < l2[j]!) {
+      merged.push(l1[i]!);
       i += 1;
       emit(
         'ATTACH_L1',
-        `take ${merged[merged.length - 1]}`,
-        `${merged[merged.length - 1]} (from l1) is smaller, so attach it to the result and advance l1's head. cur now sits on the node we just appended.`,
+        `take ${merged[merged.length - 1]!}`,
+        `${merged[merged.length - 1]!} (from l1) is smaller, so attach it to the result and advance l1's head. cur now sits on the node we just appended.`,
         { i: headI(), j: headJ(), from: 'l1' },
       );
     } else {
-      merged.push(l2[j]);
+      merged.push(l2[j]!);
       j += 1;
       emit(
         'ATTACH_L2',
-        `take ${merged[merged.length - 1]}`,
-        `l2's head (${merged[merged.length - 1]}) is smaller or equal, so attach it and advance l2's head. cur moves to the appended node.`,
+        `take ${merged[merged.length - 1]!}`,
+        `l2's head (${merged[merged.length - 1]!}) is smaller or equal, so attach it and advance l2's head. cur moves to the appended node.`,
         { i: headI(), j: headJ(), from: 'l2' },
       );
     }
@@ -89,7 +89,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
 
   if (i < l1.length) {
     const rest = l1.slice(i);
-    for (; i < l1.length; i += 1) merged.push(l1[i]);
+    for (; i < l1.length; i += 1) merged.push(l1[i]!);
     emit(
       'APPEND_REST',
       `+[${rest.join(',')}] from l1`,
@@ -98,7 +98,7 @@ function record({ l1, l2 }: MergeInput): Frame<MergeState>[] {
     );
   } else if (j < l2.length) {
     const rest = l2.slice(j);
-    for (; j < l2.length; j += 1) merged.push(l2[j]);
+    for (; j < l2.length; j += 1) merged.push(l2[j]!);
     emit(
       'APPEND_REST',
       `+[${rest.join(',')}] from l2`,
@@ -144,16 +144,15 @@ function View({ frame }: PluginViewProps<MergeState>) {
           : '';
 
   const headVal = (vals: number[], idx: number | null) =>
-    idx !== null && idx >= 0 && idx < vals.length ? String(vals[idx]) : 'nil';
+    idx !== null && idx >= 0 && idx < vals.length ? String(vals[idx]!) : 'nil';
 
   const rail = (
     <>
       <RailStack
         label="merged"
-        items={s.merged.map((v, idx) => ({
-          label: String(v),
-          tone: s.done ? 'good' : idx === s.merged.length - 1 ? 'accent' : undefined,
-        }))}
+        items={s.merged.map((v, idx) =>
+          railItem(String(v), s.done ? 'good' : idx === s.merged.length - 1 ? 'accent' : undefined),
+        )}
         highlightEnd="bottom"
         topLabel="tail"
       />
@@ -178,7 +177,7 @@ function Inspector({ frame }: InspectorProps<MergeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const headVal = (vals: number[], idx: number | null) =>
-    idx !== null && idx >= 0 && idx < vals.length ? vals[idx] : 'nil';
+    idx !== null && idx >= 0 && idx < vals.length ? vals[idx]! : 'nil';
   return (
     <VarGrid>
       <InspectorRow k="l1 head" v={headVal(s.l1, s.i)} />
@@ -192,7 +191,7 @@ function Inspector({ frame }: InspectorProps<MergeState>) {
 }
 
 function isSorted(a: number[]): boolean {
-  for (let k = 1; k < a.length; k += 1) if (a[k] < a[k - 1]) return false;
+  for (let k = 1; k < a.length; k += 1) if (a[k]! < a[k - 1]!) return false;
   return true;
 }
 

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, mergeState } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -54,10 +54,10 @@ function build(nodes: NodeSpec[]): MNode | null {
     child: null,
   }));
   nodes.forEach((n, id) => {
-    ms[id].next = n.next >= 0 ? ms[n.next] : null;
-    ms[id].child = n.child >= 0 ? ms[n.child] : null;
+    ms[id]!.next = n.next >= 0 ? ms[n.next]! : null;
+    ms[id]!.child = n.child >= 0 ? ms[n.child]! : null;
   });
-  return ms[0];
+  return ms[0]!;
 }
 
 function record({ nodes }: FlattenInput): Frame<FlattenState>[] {
@@ -81,7 +81,7 @@ function record({ nodes }: FlattenInput): Frame<FlattenState>[] {
   const allVals = order.map((nd) => nd.val);
   const total = order.length;
 
-  const { emit, frames } = createRecorder<FlattenState>(
+  const { emit, frames } = createPrepRecorder<FlattenState>(
     () => ({
       chain: allVals.map(() => '·'),
       prevPos: null,
@@ -92,9 +92,10 @@ function record({ nodes }: FlattenInput): Frame<FlattenState>[] {
     }),
     {
       merge: (base, partial) => {
-        const linkedCount = partial.linkedCount ?? base.linkedCount;
+        const merged = mergeState(base, partial);
+        const linkedCount = merged.linkedCount;
         const chain = allVals.map((v, i) => (i < linkedCount ? v : '·'));
-        return { ...base, ...partial, chain, linkedCount };
+        return { ...merged, chain, linkedCount };
       },
     },
   );
@@ -229,7 +230,7 @@ function Inspector({ frame }: InspectorProps<FlattenState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const val = (pos: number | null) =>
-    pos !== null && pos >= 0 && pos < s.chain.length ? s.chain[pos] : '—';
+    pos !== null && pos >= 0 && pos < s.chain.length ? s.chain[pos]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="total nodes" v={s.chain.length} />

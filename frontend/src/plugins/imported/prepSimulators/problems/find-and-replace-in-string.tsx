@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -37,14 +37,14 @@ interface FindReplaceState {
 function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindReplaceState>[] {
   const m = new Map<number, Op>();
   for (let k = 0; k < indices.length; k++) {
-    m.set(indices[k], { src: sources[k], tgt: targets[k] });
+    m.set(indices[k]!, { src: sources[k]!, tgt: targets[k]! });
   }
   const mapEntries = (): [number, string, string][] =>
-    [...m.entries()].sort((a, b) => a[0] - b[0]).map(([idx, o]) => [idx, o.src, o.tgt]);
+    [...m.entries()].sort((a, b) => a[0]! - b[0]!).map(([idx, o]) => [idx, o.src, o.tgt]);
 
   let result = '';
 
-  const { emit, frames } = createRecorder<FindReplaceState>(() => ({
+  const { emit, frames } = createPrepRecorder<FindReplaceState>(() => ({
     s,
     map: mapEntries(),
     i: null,
@@ -65,9 +65,9 @@ function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindR
   for (let k = 0; k < indices.length; k++) {
     emit(
       'MAP',
-      `map[${indices[k]}]="${sources[k]}"→"${targets[k]}"`,
-      `Store operation: at index ${indices[k]}, if the substring equals "${sources[k]}" replace it with "${targets[k]}". Indexing lets each scan position check for an op instantly.`,
-      { i: indices[k], op: { src: sources[k], tgt: targets[k] }, span: sources[k].length },
+      `map[${indices[k]!}]="${sources[k]!}"→"${targets[k]!}"`,
+      `Store operation: at index ${indices[k]!}, if the substring equals "${sources[k]!}" replace it with "${targets[k]!}". Indexing lets each scan position check for an op instantly.`,
+      { i: indices[k]!, op: { src: sources[k]!, tgt: targets[k]! }, span: sources[k]!.length },
     );
   }
 
@@ -80,7 +80,7 @@ function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindR
       const isMatch = fits && slice === o.src;
       emit(
         'CHECK',
-        `s[${i}..]="${slice}" vs "${o.src}"`,
+        `s[${i}..]!="${slice}" vs "${o.src}"`,
         `Index ${i} has an operation. Check the original substring "${slice}" against source "${o.src}". ${isMatch ? 'They match' : 'They do NOT match'}, so we ${isMatch ? 'perform the replacement' : 'skip the operation and copy the character'}.`,
         { i, op: o, span: o.src.length, matched: isMatch },
         isMatch ? 'good' : undefined,
@@ -98,11 +98,11 @@ function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindR
         continue;
       }
     }
-    result += s[i];
+    result += s[i]!;
     emit(
       'COPY',
-      `write '${s[i]}'`,
-      `No replacement applies at index ${i}, so copy the original character '${s[i]}' to the result and advance by 1.`,
+      `write '${s[i]!}'`,
+      `No replacement applies at index ${i}, so copy the original character '${s[i]!}' to the result and advance by 1.`,
       { i, span: 1, matched: o ? false : null, op: o ?? null, result },
     );
     i += 1;
@@ -171,7 +171,7 @@ function Inspector({ frame }: InspectorProps<FindReplaceState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="char at i" v={s.i !== null && s.i < s.s.length ? `'${s.s[s.i]}'` : '—'} />
+      <InspectorRow k="char at i" v={s.i !== null && s.i < s.s.length ? `'${s.s[s.i]!}'` : '—'} />
       <InspectorRow k="op source" v={s.op ? `"${s.op.src}"` : '—'} />
       <InspectorRow k="op target" v={s.op ? `"${s.op.tgt}"` : '—'} />
       <InspectorRow k="match?" v={s.matched === null ? '—' : s.matched ? 'yes' : 'no'} />
@@ -187,7 +187,7 @@ export const title = 'Find and Replace in String';
 function compute(input: FindReplaceInput): string {
   const m = new Map<number, Op>();
   for (let k = 0; k < input.indices.length; k++) {
-    m.set(input.indices[k], { src: input.sources[k], tgt: input.targets[k] });
+    m.set(input.indices[k]!, { src: input.sources[k]!, tgt: input.targets[k]! });
   }
   let out = '';
   let i = 0;
@@ -197,7 +197,7 @@ function compute(input: FindReplaceInput): string {
       out += o.tgt;
       i += o.src.length;
     } else {
-      out += input.s[i];
+      out += input.s[i]!;
       i += 1;
     }
   }

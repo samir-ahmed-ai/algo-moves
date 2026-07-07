@@ -37,7 +37,7 @@ export function createDsu(n: number): DsuState {
 /** Follow parent pointers up until a node points to itself — the root. */
 export function find(parent: number[], x: number): number {
   let r = x;
-  while (parent[r] !== r) r = parent[r];
+  while (parent[r] !== r) r = parent[r]!;
   return r;
 }
 
@@ -50,7 +50,7 @@ export function isConnected(state: DsuState, a: number, b: number): boolean {
 }
 
 export function componentSize(state: DsuState, x: number): number {
-  return state.size[rootOf(state, x)];
+  return state.size[rootOf(state, x)]!;
 }
 
 /**
@@ -62,7 +62,7 @@ export function unionBySizeParent(state: DsuState, a: number, b: number): number
   const ra = rootOf(state, a);
   const rb = rootOf(state, b);
   if (ra === rb) return null;
-  return state.size[rb] > state.size[ra] ? rb : ra;
+  return state.size[rb]! > state.size[ra]! ? rb : ra;
 }
 
 /** Hang `loser`'s tree under `winner` (both must be roots). Immutable. */
@@ -70,7 +70,7 @@ export function applyUnionWithParent(state: DsuState, winner: number, loser: num
   const parent = [...state.parent];
   const size = [...state.size];
   parent[loser] = winner;
-  size[winner] += size[loser];
+  size[winner] = size[winner]! + size[loser]!;
   return { parent, size };
 }
 
@@ -112,13 +112,13 @@ export function judgeUnionPress(
   if (rp !== ra && rp !== rb) return { ok: false, reason: 'outside' };
   if (pressed !== rp) return { ok: false, reason: 'not-root', root: rp };
   const other = rp === ra ? rb : ra;
-  if (state.size[rp] < state.size[other]) {
+  if (state.size[rp]! < state.size[other]!) {
     return {
       ok: false,
       reason: 'smaller',
-      pressedSize: state.size[rp],
+      pressedSize: state.size[rp]!,
       otherRoot: other,
-      otherSize: state.size[other],
+      otherSize: state.size[other]!,
     };
   }
   return { ok: true, winner: rp, loser: other };
@@ -255,5 +255,5 @@ export function getLevel(id: string): UfLevel | undefined {
 export function nextLevelId(currentId: string): string | null {
   const idx = LEVELS.findIndex((l) => l.id === currentId);
   if (idx < 0 || idx >= LEVELS.length - 1) return null;
-  return LEVELS[idx + 1].id;
+  return LEVELS[idx + 1]!.id;
 }

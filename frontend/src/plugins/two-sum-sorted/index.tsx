@@ -48,7 +48,7 @@ function record({ values, target }: TwoSumInput): Frame<TwoSumState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { values, target, left, right, sum, found, done: tone != null },
     });
 
@@ -60,13 +60,15 @@ function record({ values, target }: TwoSumInput): Frame<TwoSumState>[] {
   );
 
   while (left < right) {
-    const sum = values[left] + values[right];
+    const leftVal = values[left]!;
+    const rightVal = values[right]!;
+    const sum = leftVal + rightVal;
     if (sum === target) {
       found = [left, right];
       emit(
         'FOUND',
         `${left}+${right}`,
-        `${values[left]} + ${values[right]} = ${target}. Pair found at indices ${left} and ${right}.`,
+        `${leftVal} + ${rightVal} = ${target}. Pair found at indices ${left} and ${right}.`,
         sum,
         'good',
       );
@@ -76,7 +78,7 @@ function record({ values, target }: TwoSumInput): Frame<TwoSumState>[] {
       emit(
         'LOW',
         `sum ${sum} < ${target}`,
-        `${values[left]} + ${values[right]} = ${sum}, below ${target}. The smallest value can't help — move left rightward to a bigger number.`,
+        `${leftVal} + ${rightVal} = ${sum}, below ${target}. The smallest value can't help — move left rightward to a bigger number.`,
         sum,
       );
       left++;
@@ -84,7 +86,7 @@ function record({ values, target }: TwoSumInput): Frame<TwoSumState>[] {
       emit(
         'HIGH',
         `sum ${sum} > ${target}`,
-        `${values[left]} + ${values[right]} = ${sum}, above ${target}. The largest value is too big — move right leftward to a smaller number.`,
+        `${leftVal} + ${rightVal} = ${sum}, above ${target}. The largest value is too big — move right leftward to a smaller number.`,
         sum,
       );
       right--;

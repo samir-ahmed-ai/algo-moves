@@ -6,7 +6,10 @@ import { codeVariants, LangTabs } from '../shared/codeVariants';
 import { useCanvasStatic, Btn, Code, Hint, nodeIconGlyph } from '@/shell/canvas';
 export function CopyPanelBody() {
   const { plugin } = useCanvasStatic();
-  const variants = codeVariants(plugin);
+  const variants = codeVariants({
+    ...(plugin.code !== undefined ? { code: plugin.code } : {}),
+    ...(plugin.extraCode !== undefined ? { extraCode: plugin.extraCode } : {}),
+  });
   const [active, setActive] = useState(0);
   const variant = variants[Math.min(active, Math.max(variants.length - 1, 0))];
   const code = variant?.text ?? '// no source available';

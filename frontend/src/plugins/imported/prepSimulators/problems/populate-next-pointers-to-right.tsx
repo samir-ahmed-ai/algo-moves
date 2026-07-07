@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -29,7 +29,7 @@ interface PopulateInput {
 
 interface PopulateState {
   tree: (number | null)[];
-  // next[i] = index of the node to i's right on its level, or null.
+  // next[i]! = index of the node to i's right on its level, or null.
   next: (number | null)[];
   leftmost: number | null; // start of the level currently being wired
   cur: number | null; // node on the parent level we are threading through
@@ -44,9 +44,9 @@ const R = (i: number) => 2 * i + 2;
 function record({ tree }: PopulateInput): Frame<PopulateState>[] {
   const n = tree.length;
   const next = new Array<number | null>(n).fill(null);
-  const present = (i: number) => i >= 0 && i < n && tree[i] != null;
+  const present = (i: number) => i >= 0 && i < n && tree[i]! != null;
 
-  const { emit, frames } = createRecorder<PopulateState>(() => ({
+  const { emit, frames } = createPrepRecorder<PopulateState>(() => ({
     tree,
     next: next.slice(),
     leftmost: null,
@@ -80,8 +80,8 @@ function record({ tree }: PopulateInput): Frame<PopulateState>[] {
   while (leftmost !== null && present(L(leftmost))) {
     emit(
       'DROP',
-      `leftmost=${tree[leftmost]}`,
-      `Stand at the leftmost node of this level (value ${tree[leftmost]}). Thread rightward across this level using the next-links we built earlier, wiring the children below as we go.`,
+      `leftmost=${tree[leftmost]!}`,
+      `Stand at the leftmost node of this level (value ${tree[leftmost]!}). Thread rightward across this level using the next-links we built earlier, wiring the children below as we go.`,
       { leftmost, cur: leftmost },
     );
 
@@ -96,32 +96,32 @@ function record({ tree }: PopulateInput): Frame<PopulateState>[] {
         next[lc] = present(rc) ? rc : null;
         emit(
           'WIRE_LR',
-          `${tree[lc]}→${present(rc) ? tree[rc] : '∅'}`,
-          `Both children of node ${tree[cur]} share a parent, so link them: left child ${tree[lc]}.next = right child ${present(rc) ? tree[rc] : '(none)'}.`,
-          { leftmost, cur, wiredChild: lc, wiredTo: next[lc] },
+          `${tree[lc]!}→${present(rc) ? tree[rc]! : '∅'}`,
+          `Both children of node ${tree[cur]!} share a parent, so link them: left child ${tree[lc]!}.next = right child ${present(rc) ? tree[rc]! : '(none)'}.`,
+          { leftmost, cur, wiredChild: lc, wiredTo: next[lc]! },
         );
 
         // right.Next = cur.Next.Left  (only when cur has a next sibling)
-        const sib = next[cur];
+        const sib = next[cur]!;
         if (sib !== null && present(rc)) {
-          next[rc] = present(L(sib)) ? L(sib) : null;
+          next[rc] = present(L(sib!)) ? L(sib!) : null;
           emit(
             'WIRE_GAP',
-            `${tree[rc]}→${next[rc] !== null ? tree[next[rc]] : '∅'}`,
-            `Node ${tree[cur]} has a right neighbour (${tree[sib]}) on this level, so bridge the gap: right child ${tree[rc]}.next = that neighbour's left child ${next[rc] !== null ? tree[next[rc]] : '(none)'}.`,
-            { leftmost, cur, wiredChild: rc, wiredTo: next[rc] },
+            `${tree[rc]!}→${next[rc]! !== null ? tree[next[rc]!] : '∅'}`,
+            `Node ${tree[cur]!} has a right neighbour (${tree[sib!]!}) on this level, so bridge the gap: right child ${tree[rc]!}.next = that neighbour's left child ${next[rc]! !== null ? tree[next[rc]!] : '(none)'}.`,
+            { leftmost, cur, wiredChild: rc, wiredTo: next[rc]! },
           );
         }
 
         if (nextLeft === null) nextLeft = lc;
       }
       // Advance across the parent level via its own next-link.
-      const step: number | null = next[cur];
+      const step: number | null = next[cur]!;
       if (step !== null) {
         emit(
           'STEP',
-          `→${tree[step]}`,
-          `Follow node ${tree[cur]}'s next-link to its right neighbour ${tree[step]} and keep wiring the level below.`,
+          `→${tree[step]!}`,
+          `Follow node ${tree[cur]!}'s next-link to its right neighbour ${tree[step]!} and keep wiring the level below.`,
           { leftmost, cur: step },
         );
       }
@@ -145,21 +145,21 @@ function View({ frame }: PluginViewProps<PopulateState>) {
   const s = frame.state;
   const cells = s.tree.map((v) => (v == null ? null : v));
   const nodeClass = (i: number) => {
-    if (s.tree[i] == null) return 'team-0';
+    if (s.tree[i]! == null) return 'team-0';
     if (i === s.cur) return 'team-1';
-    if (s.next[i] !== null || i === s.wiredChild || i === s.wiredTo) return 'team-2';
+    if (s.next[i]! !== null || i === s.wiredChild || i === s.wiredTo) return 'team-2';
     return 'team-0';
   };
 
   const links: string[] = [];
   for (let i = 0; i < s.tree.length; i++) {
-    if (s.tree[i] != null && s.next[i] !== null) {
-      const t = s.next[i];
-      links.push(`${s.tree[i]}→${t !== null ? s.tree[t] : '∅'}`);
+    if (s.tree[i]! != null && s.next[i]! !== null) {
+      const t = s.next[i]!;
+      links.push(`${s.tree[i]!}→${t !== null ? s.tree[t!]! : '∅'}`);
     }
   }
 
-  const label = (i: number | null) => (i !== null && s.tree[i] != null ? String(s.tree[i]) : '—');
+  const label = (i: number | null) => (i !== null && s.tree[i]! != null ? String(s.tree[i]!) : '—');
   const wired = s.next.filter((v) => v !== null).length;
 
   const rail = (
@@ -192,7 +192,7 @@ function Inspector({ frame }: InspectorProps<PopulateState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const wired = s.next.filter((v) => v !== null).length;
-  const label = (i: number | null) => (i !== null && s.tree[i] != null ? String(s.tree[i]) : '—');
+  const label = (i: number | null) => (i !== null && s.tree[i]! != null ? String(s.tree[i]!) : '—');
   return (
     <VarGrid>
       <InspectorRow k="leftmost" v={label(s.leftmost)} />

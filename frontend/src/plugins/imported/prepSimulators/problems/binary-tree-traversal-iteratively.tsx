@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -37,15 +37,15 @@ function record({ tree }: TraversalInput): Frame<TraversalState>[] {
   const n = tree.length;
   const left = (i: number) => 2 * i + 1;
   const right = (i: number) => 2 * i + 2;
-  const exists = (i: number) => i >= 0 && i < n && tree[i] !== null;
-  const val = (i: number) => tree[i] as number;
+  const exists = (i: number) => i >= 0 && i < n && tree[i]! !== null;
+  const val = (i: number) => tree[i]! as number;
 
   const stack: number[] = [];
   const visited: number[] = [];
   const out: number[] = [];
   let cur: number | null = exists(0) ? 0 : null;
 
-  const { emit, frames } = createRecorder<TraversalState>(() => ({
+  const { emit, frames } = createPrepRecorder<TraversalState>(() => ({
     tree: tree,
     cur: cur,
     stack: stack.slice(),
@@ -121,9 +121,9 @@ function View({ frame }: PluginViewProps<TraversalState>) {
     if (onStack.has(i)) return 'team-1';
     return 'team-0';
   };
-  const stackVals = s.stack.map((i) => String(s.tree[i]));
+  const stackVals = s.stack.map((i) => String(s.tree[i]!));
   const outVals = s.out.map(String);
-  const curVal = s.cur !== null ? String(s.tree[s.cur]) : '—';
+  const curVal = s.cur !== null ? String(s.tree[s.cur]!) : '—';
   return (
     <VizStage
       rail={
@@ -148,8 +148,8 @@ function View({ frame }: PluginViewProps<TraversalState>) {
 function Inspector({ frame }: InspectorProps<TraversalState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.cur !== null ? s.tree[s.cur] : 'null';
-  const stackVals = s.stack.map((i) => s.tree[i]);
+  const curVal = s.cur !== null ? s.tree[s.cur]! : 'null';
+  const stackVals = s.stack.map((i) => s.tree[i]!);
   return (
     <VarGrid>
       <InspectorRow k="cur" v={curVal ?? 'null'} />

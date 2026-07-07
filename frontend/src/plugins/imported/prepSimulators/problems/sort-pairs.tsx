@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -23,7 +23,7 @@ interface SortPairsState {
   start: string | null; // the discovered head (key never used as a value)
   scanKey: string | null; // key being checked while hunting for the head
   cur: string | null; // current key while walking the chain
-  next: string | null; // inputMap[cur], the link we just followed
+  next: string | null; // inputMap[cur]!, the link we just followed
   route: string[]; // accumulated 'a-b' segments
   done: boolean;
 }
@@ -36,7 +36,7 @@ function record({ pairs }: SortPairsInput): Frame<SortPairsState>[] {
   let start: string | null = null;
   let route: string[] = [];
 
-  const { emit, frames } = createRecorder<SortPairsState>(() => ({
+  const { emit, frames } = createPrepRecorder<SortPairsState>(() => ({
     pairs,
     keys,
     dest: [...dest],
@@ -142,10 +142,10 @@ function View({ frame }: PluginViewProps<SortPairsState>) {
   }
   const destSet = new Set(s.dest);
   const tone = (i: number) => {
-    const k = s.keys[i];
+    const k = s.keys[i]!;
     if (s.start !== null && k === s.start) return 'found';
     if (s.cur !== null && k === s.cur) return 'match';
-    if (destSet.has(k)) return 'dead';
+    if (destSet.has(k!)) return 'dead';
     return '';
   };
   return (

@@ -54,8 +54,8 @@ function record({ nums }: LISInput): Frame<LISState>[] {
     let cur = 1; // a single element is itself an LIS of length 1
     let from: number | null = null;
     for (let j = 0; j < i; j++) {
-      if (nums[j] < nums[i] && dp[j] + 1 > cur) {
-        cur = dp[j] + 1;
+      if (nums[j]! < nums[i]! && dp[j]! + 1 > cur) {
+        cur = dp[j]! + 1;
         from = j;
       }
     }

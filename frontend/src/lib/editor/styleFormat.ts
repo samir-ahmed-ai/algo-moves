@@ -5,8 +5,17 @@ export type StyleLang = 'go' | 'js' | 'python' | 'java' | 'default';
 export function styleLangFromId(lang?: string): StyleLang {
   const id = (lang ?? '').trim().toLowerCase();
   if (id === 'go') return 'go';
-  if (id === 'js' || id === 'javascript' || id === 'ts' || id === 'typescript') return 'js';
-  if (id === 'py' || id === 'python') return 'python';
+  if (
+    id === 'js' ||
+    id === 'javascript' ||
+    id === 'jsx' ||
+    id === 'node' ||
+    id === 'ts' ||
+    id === 'typescript' ||
+    id === 'tsx'
+  )
+    return 'js';
+  if (id === 'py' || id === 'python' || id === 'python3') return 'python';
   if (id === 'java') return 'java';
   return 'default';
 }
@@ -98,8 +107,8 @@ function formatBareSpacing(bare: string, style: StyleLang): string {
     '=>',
   ]) {
     const esc = op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const first = esc[0];
-    const last = esc[esc.length - 1];
+    const first = esc[0]!;
+    const last = esc[esc.length - 1]!;
     const lb =
       first === '=' || first === '!' || first === '<' || first === '>' ? `(?<![${first}=!<>])` : '';
     const la = last === '=' || last === '>' || last === '<' ? `(?![${last}=])` : '';
@@ -335,7 +344,7 @@ function expandInlineBraces(source: string, unit: string): string {
       const hadTrailingSemi = body.trimEnd().endsWith(';');
       for (let i = 0; i < stmts.length; i++) {
         const semi = i < stmts.length - 1 || hadTrailingSemi ? ';' : '';
-        out.push(`${indent}${inner}${stmts[i]}${semi}`);
+        out.push(`${indent}${inner}${stmts[i] ?? ''}${semi}`);
       }
       out.push(`${indent}}`);
     } else {
@@ -403,7 +412,7 @@ function trimTrailingLines(text: string): string {
     .split('\n')
     .map((l) => l.replace(/\s+$/, ''));
   let end = lines.length;
-  while (end > 0 && lines[end - 1] === '') end--;
+  while (end > 0 && (lines[end - 1] ?? '') === '') end--;
   return lines.slice(0, end).join('\n');
 }
 

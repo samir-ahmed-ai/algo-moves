@@ -78,7 +78,7 @@ function record({ values, target }: FllInput): Frame<FllState>[] {
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
     emit('MID', `mid=${mid}`, `Lower-bound search: mid=${mid}, value ${values[mid]}.`, { mid });
-    if (values[mid] < target) {
+    if (values[mid]! < target) {
       for (let i = lo; i <= mid; i++) dead[i] = true;
       lo = mid + 1;
       emit(
@@ -131,7 +131,7 @@ function record({ values, target }: FllInput): Frame<FllState>[] {
   while (lo < hi) {
     const mid = (lo + hi + 1) >> 1; // bias right to avoid an infinite loop on lo = mid
     emit('MID', `mid=${mid}`, `Upper-bound search: mid=${mid}, value ${values[mid]}.`, { mid });
-    if (values[mid] > target) {
+    if (values[mid]! > target) {
       for (let i = mid; i <= hi; i++) dead[i] = true;
       hi = mid - 1;
       emit(

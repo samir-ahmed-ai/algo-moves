@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -27,7 +27,7 @@ interface RleState {
 
 function record({ s }: RleInput): Frame<RleState>[] {
   const chars = s.split('');
-  const { emit, frames } = createRecorder<RleState>(() => ({
+  const { emit, frames } = createPrepRecorder<RleState>(() => ({
     chars,
     i: null,
     runStart: null,
@@ -50,7 +50,7 @@ function record({ s }: RleInput): Frame<RleState>[] {
 
   let out = '';
   let run = 1;
-  let c = chars[0];
+  let c = chars[0]!;
   let runStart = 0;
 
   emit(
@@ -61,12 +61,12 @@ function record({ s }: RleInput): Frame<RleState>[] {
   );
 
   for (let i = 1; i < chars.length; i++) {
-    if (chars[i] === c) {
+    if (chars[i]! === c) {
       run++;
       emit(
         'EXTEND',
         `run=${run}`,
-        `Index ${i} is '${chars[i]}', the same as the current run character '${c}', so extend the run: run = ${run}.`,
+        `Index ${i} is '${chars[i]!}', the same as the current run character '${c}', so extend the run: run = ${run}.`,
         { i, runStart, c, run, out },
       );
     } else {
@@ -74,10 +74,10 @@ function record({ s }: RleInput): Frame<RleState>[] {
       emit(
         'FLUSH',
         `+'${c}${run}'`,
-        `Index ${i} is '${chars[i]}', different from '${c}'. Flush the finished run as '${c}${run}' into the output, then start a new run at this character.`,
+        `Index ${i} is '${chars[i]!}', different from '${c}'. Flush the finished run as '${c}${run}' into the output, then start a new run at this character.`,
         { i, runStart, c, run, out },
       );
-      c = chars[i];
+      c = chars[i]!;
       run = 1;
       runStart = i;
       emit(
@@ -133,7 +133,7 @@ function Inspector({ frame }: InspectorProps<RleState>) {
   return (
     <VarGrid>
       <InspectorRow k="i (scan)" v={s.i ?? '—'} />
-      <InspectorRow k="chars[i]" v={s.i !== null ? `'${s.chars[s.i]}'` : '—'} />
+      <InspectorRow k="chars[i]!" v={s.i !== null ? `'${s.chars[s.i]!}'` : '—'} />
       <InspectorRow k="run char c" v={s.c !== null ? `'${s.c}'` : '—'} />
       <InspectorRow k="run length" v={s.run} />
       <InspectorRow k="output" v={s.out ? `"${s.out}"` : s.done ? '""' : '…'} />
@@ -146,13 +146,13 @@ function encode(s: string): string {
   if (chars.length === 0) return '';
   let out = '';
   let run = 1;
-  let c = chars[0];
+  let c = chars[0]!;
   for (let i = 1; i < chars.length; i++) {
-    if (chars[i] === c) {
+    if (chars[i]! === c) {
       run++;
     } else {
       out += `${c}${run}`;
-      c = chars[i];
+      c = chars[i]!;
       run = 1;
     }
   }

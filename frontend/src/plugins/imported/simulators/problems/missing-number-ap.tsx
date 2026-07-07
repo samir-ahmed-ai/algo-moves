@@ -36,7 +36,7 @@ interface ApState {
 function record({ values }: ApInput): Frame<ApState>[] {
   const n = values.length;
   const dead = new Array<boolean>(n).fill(false);
-  const diff = (values[n - 1] - values[0]) / n;
+  const diff = (values[n - 1]! - values[0]!) / n;
   let lo = 0;
   let hi = n - 1;
 
@@ -68,7 +68,7 @@ function record({ values }: ApInput): Frame<ApState>[] {
 
   while (lo <= hi) {
     const mid = lo + ((hi - lo) >> 1);
-    const expected = values[0] + mid * diff;
+    const expected = values[0]! + mid * diff;
     if (values[mid] === expected) {
       // progression still intact up to mid → the break is to the right
       for (let i = lo; i <= mid; i++) dead[i] = true;
@@ -92,7 +92,7 @@ function record({ values }: ApInput): Frame<ApState>[] {
     }
   }
 
-  const result = values[0] + lo * diff;
+  const result = values[0]! + lo * diff;
   emitDone(
     'DONE',
     `missing=${result}`,

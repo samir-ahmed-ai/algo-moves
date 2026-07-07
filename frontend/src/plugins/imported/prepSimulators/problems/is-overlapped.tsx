@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -73,14 +73,14 @@ function record({ p1, p2, q1, q2 }: OverlapInput): Frame<OverlapState>[] {
     done: false,
   };
 
-  const { emit, frames } = createRecorder<OverlapState>(() => ({
+  const { emit, frames } = createPrepRecorder<OverlapState>(() => ({
     ...base,
   }));
 
   emit(
     'INIT',
     'two rectangles',
-    `Is Overlapped: two axis-aligned rectangles overlap (with positive area) only if their X projections intersect AND their Y projections intersect. Rectangle A spans X[${p1.x},${p2.x}] Y[${p1.y},${p2.y}]; rectangle B spans X[${q1.x},${q2.x}] Y[${q1.y},${q2.y}]. We test each axis separately.`,
+    `Is Overlapped: two axis-aligned rectangles overlap (with positive area) only if their X projections intersect AND their Y projections intersect. Rectangle A spans X[${p1.x},${p2.x}]! Y[${p1.y},${p2.y}]!; rectangle B spans X[${q1.x},${q2.x}]! Y[${q1.y},${q2.y}]!. We test each axis separately.`,
     {},
   );
 
@@ -191,18 +191,18 @@ function View({ frame }: PluginViewProps<OverlapState>) {
   const track: number[] = [];
   for (let v = TRACK_LO; v <= TRACK_HI; v++) track.push(v);
 
-  const inSpan = (span: [number, number], v: number) => v >= span[0] && v <= span[1];
+  const inSpan = (span: [number, number], v: number) => v >= span[0]! && v <= span[1]!;
 
   const tone = (i: number) => {
-    const v = track[i];
-    const inA = inSpan(spanA, v);
-    const inB = inSpan(spanB, v);
+    const v = track[i]!;
+    const inA = inSpan(spanA, v!);
+    const inB = inSpan(spanB, v!);
     if (
       s.maxLeft !== null &&
       s.minRight !== null &&
       s.minRight > s.maxLeft &&
-      v > s.maxLeft &&
-      v < s.minRight
+      v! > s.maxLeft &&
+      v! < s.minRight
     )
       return 'found'; // the proven shared interval
     if (inA && inB) return 'match'; // both cover this point
@@ -391,7 +391,7 @@ export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'ov-yes',
-      label: 'A[1..6]×[1..6] vs B[4..9]×[3..7] → overlap',
+      label: 'A[1..6]!×[1..6] vs B[4..9]!×[3..7] → overlap',
       value: {
         p1: { x: 1, y: 1 },
         p2: { x: 6, y: 6 },
@@ -401,7 +401,7 @@ export const simulator: ProblemSimulator = {
     },
     {
       id: 'ov-no',
-      label: 'A[1..3]×[1..8] vs B[5..9]×[2..6] → no overlap',
+      label: 'A[1..3]!×[1..8] vs B[5..9]!×[2..6] → no overlap',
       value: {
         p1: { x: 1, y: 1 },
         p2: { x: 3, y: 8 },

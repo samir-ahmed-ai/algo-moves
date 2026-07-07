@@ -198,9 +198,9 @@ export const PEER_COLORS = [
 ] as const;
 
 export function peerColor(peerId: string, index: number): string {
-  if (index >= 0) return PEER_COLORS[index % PEER_COLORS.length];
+  if (index >= 0) return PEER_COLORS[index % PEER_COLORS.length] ?? PEER_COLORS[0]!;
   // Fallback: hash the id when roster order is unavailable.
   let h = 0;
   for (let i = 0; i < peerId.length; i++) h = (h * 31 + peerId.charCodeAt(i)) | 0;
-  return PEER_COLORS[Math.abs(h) % PEER_COLORS.length];
+  return PEER_COLORS[Math.abs(h) % PEER_COLORS.length] ?? PEER_COLORS[0]!;
 }

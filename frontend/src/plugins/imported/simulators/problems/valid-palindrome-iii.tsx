@@ -53,7 +53,7 @@ function record({ s, k }: VP3Input): Frame<VP3State>[] {
 
   // Base diagonal: single characters are palindromes of length 1.
   for (let i = 0; i < n; i++) {
-    dp[i][i] = 1;
+    dp[i]![i] = 1;
     emit(
       'BASE',
       `dp[${i}][${i}]=1`,
@@ -67,30 +67,30 @@ function record({ s, k }: VP3Input): Frame<VP3State>[] {
     for (let i = 0; i + len - 1 < n; i++) {
       const j = i + len - 1;
       if (s[i] === s[j]) {
-        const inner = len === 2 ? 0 : dp[i + 1][j - 1];
-        dp[i][j] = inner + 2;
+        const inner = len === 2 ? 0 : dp[i + 1]![j - 1];
+        dp[i]![j] = inner! + 2;
         emit(
           'MATCH',
-          `dp[${i}][${j}]=${dp[i][j]}`,
-          `s[${i}]="${s[i]}" matches s[${j}]="${s[j]}": wrap them around the inner result dp[${i + 1}][${j - 1}] = ${inner}, so dp[${i}][${j}] = ${inner} + 2 = ${dp[i][j]}.`,
+          `dp[${i}][${j}]=${dp[i]![j]}`,
+          `s[${i}]="${s[i]}" matches s[${j}]="${s[j]}": wrap them around the inner result dp[${i + 1}][${j - 1}] = ${inner}, so dp[${i}][${j}] = ${inner} + 2 = ${dp[i]![j]}.`,
           { cur: [i, j] },
         );
       } else {
-        const drop = dp[i + 1][j];
-        const keep = dp[i][j - 1];
-        dp[i][j] = Math.max(drop, keep);
+        const drop = dp[i + 1]![j];
+        const keep = dp[i]![j - 1];
+        dp[i]![j] = Math.max(drop!, keep!);
         emit(
           'SKIP',
-          `dp[${i}][${j}]=${dp[i][j]}`,
-          `s[${i}]="${s[i]}" ≠ s[${j}]="${s[j]}": take the better of dropping the left end dp[${i + 1}][${j}] = ${drop} or the right end dp[${i}][${j - 1}] = ${keep}, so dp[${i}][${j}] = ${dp[i][j]}.`,
+          `dp[${i}][${j}]=${dp[i]![j]}`,
+          `s[${i}]="${s[i]}" ≠ s[${j}]="${s[j]}": take the better of dropping the left end dp[${i + 1}][${j}] = ${drop} or the right end dp[${i}][${j - 1}] = ${keep}, so dp[${i}][${j}] = ${dp[i]![j]}.`,
           { cur: [i, j] },
         );
       }
     }
   }
 
-  const lps = n > 0 ? dp[0][n - 1] : 0;
-  const removals = n - lps;
+  const lps = n > 0 ? dp[0]![n - 1] : 0;
+  const removals = n - lps!;
   const ok = removals <= k;
   emit(
     'DONE',
@@ -108,12 +108,12 @@ function View({ frame }: PluginViewProps<VP3State>) {
   const cellTone = (r: number, c: number) => {
     if (c < r) return 'water';
     if (st.cur && st.cur[0] === r && st.cur[1] === c) return 'active';
-    if (r === 0 && c === n - 1 && st.dp[r][c] >= 0) return 'path';
-    return st.dp[r][c] >= 0 ? 'visited' : '';
+    if (r === 0 && c === n - 1 && st.dp[r]![c]! >= 0) return 'path';
+    return st.dp[r]![c]! >= 0 ? 'visited' : '';
   };
-  const lpsReady = n > 0 && st.dp[0][n - 1] >= 0;
-  const lps = lpsReady ? st.dp[0][n - 1] : null;
-  const removals = lps === null ? null : n - lps;
+  const lpsReady = n > 0 && st.dp[0]![n - 1]! >= 0;
+  const lps = lpsReady ? st.dp[0]![n - 1] : null;
+  const removals = lps === null ? null : n - lps!;
   const ok = removals !== null && removals <= st.k;
   const i = st.cur ? st.cur[0] : -1;
   const j = st.cur ? st.cur[1] : -1;
@@ -156,7 +156,7 @@ function View({ frame }: PluginViewProps<VP3State>) {
           <GridBoard
             grid={display}
             cellTone={cellTone}
-            label={(r, c) => (c < r ? '' : display[r][c])}
+            label={(r, c) => (c < r ? '' : display[r]![c])!}
             active={st.cur}
             cellSize={40}
           />
@@ -173,9 +173,9 @@ function Inspector({ frame }: InspectorProps<VP3State>) {
   if (!frame) return <VizEmpty />;
   const st = frame.state;
   const n = st.s.length;
-  const lpsReady = n > 0 && st.dp[0][n - 1] >= 0;
-  const lps = lpsReady ? st.dp[0][n - 1] : null;
-  const removals = lps === null ? null : n - lps;
+  const lpsReady = n > 0 && st.dp[0]![n - 1]! >= 0;
+  const lps = lpsReady ? st.dp[0]![n - 1] : null;
+  const removals = lps === null ? null : n - lps!;
   const i = st.cur ? st.cur[0] : -1;
   const j = st.cur ? st.cur[1] : -1;
   const sub = i >= 0 && j >= 0 ? st.s.slice(i, j + 1) : '—';
@@ -211,7 +211,7 @@ export const simulator: ProblemSimulator = {
     const st = frames[frames.length - 1]?.state as VP3State | undefined;
     if (!st || st.s.length === 0) return { ok: true, label: 'true' };
     const n = st.s.length;
-    const removals = n - st.dp[0][n - 1];
+    const removals = n - st.dp[0]![n - 1]!;
     const ok = removals <= st.k;
     return { ok, label: ok ? `true (${removals} ≤ ${st.k})` : `false (${removals} > ${st.k})` };
   },

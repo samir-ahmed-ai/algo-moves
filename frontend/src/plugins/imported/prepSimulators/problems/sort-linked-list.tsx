@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -37,7 +37,7 @@ function record({ list }: SortListInput): Frame<SortListState>[] {
   // though merge reorders the array. `chain` always shows the live left→right order.
   let chain = list.slice();
 
-  const { emit, frames } = createRecorder<SortListState>(() => ({
+  const { emit, frames } = createPrepRecorder<SortListState>(() => ({
     chain: chain.slice(),
     range: null,
     split: null,
@@ -62,8 +62,8 @@ function record({ list }: SortListInput): Frame<SortListState>[] {
       if (segment.length === 1) {
         emit(
           'BASE',
-          `[${segment[0]}]`,
-          `Base case: a single node ([${segment[0]}]) is already sorted, so return it unchanged.`,
+          `[${segment[0]!}]`,
+          `Base case: a single node ([${segment[0]!}]) is already sorted, so return it unchanged.`,
           { depth },
         );
       }
@@ -97,16 +97,16 @@ function record({ list }: SortListInput): Frame<SortListState>[] {
       { depth },
     );
     while (a < sortedLeft.length && b < sortedRight.length) {
-      const av = sortedLeft[a];
-      const bv = sortedRight[b];
-      if (av < bv) {
+      const av = sortedLeft[a]!;
+      const bv = sortedRight[b]!;
+      if (av! < bv!) {
         emit(
           'COMPARE',
           `${av} < ${bv}`,
           `${av} (left) < ${bv} (right), so append ${av} to the merged list and advance the left pointer.`,
           { depth },
         );
-        merged.push(av);
+        merged.push(av!);
         a++;
       } else {
         emit(
@@ -115,17 +115,17 @@ function record({ list }: SortListInput): Frame<SortListState>[] {
           `${bv} (right) ≤ ${av} (left), so append ${bv} to the merged list and advance the right pointer.`,
           { depth },
         );
-        merged.push(bv);
+        merged.push(bv!);
         b++;
       }
     }
     // Whichever half still has nodes is already sorted — attach it wholesale.
     while (a < sortedLeft.length) {
-      merged.push(sortedLeft[a]);
+      merged.push(sortedLeft[a]!);
       a++;
     }
     while (b < sortedRight.length) {
-      merged.push(sortedRight[b]);
+      merged.push(sortedRight[b]!);
       b++;
     }
 
@@ -163,7 +163,7 @@ function rebuildChain(chain: number[], oldSeg: number[], newSeg: number[]): numb
   for (let start = 0; start + oldSeg.length <= chain.length; start++) {
     let ok = true;
     for (let k = 0; k < oldSeg.length; k++) {
-      if (chain[start + k] !== oldSeg[k]) {
+      if (chain[start + k]! !== oldSeg[k]!) {
         ok = false;
         break;
       }
@@ -183,7 +183,7 @@ function View({ frame }: PluginViewProps<SortListState>) {
   const placed = new Set(s.placed);
   const tone = (i: number) => {
     if (s.result) return 'found';
-    if (s.compare && (i === s.compare[0] || i === s.compare[1])) return 'match';
+    if (s.compare && (i === s.compare[0]! || i === s.compare[1]!)) return 'match';
     if (placed.has(i)) return 'in-window';
     return '';
   };
@@ -222,7 +222,7 @@ function Inspector({ frame }: InspectorProps<SortListState>) {
       <InspectorRow k="depth" v={s.depth} />
       <InspectorRow
         k="comparing"
-        v={s.compare ? `${s.chain[s.compare[0]]} vs ${s.chain[s.compare[1]]}` : '—'}
+        v={s.compare ? `${s.chain[s.compare[0]!]} vs ${s.chain[s.compare[1]!]}` : '—'}
       />
       <InspectorRow k="placed" v={s.placed.length} />
       <InspectorRow k="chain" v={`[${s.chain.join(', ')}]`} />
@@ -371,7 +371,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as SortListState | undefined;
     if (!s?.result) return { ok: false, label: 'unsorted' };
-    const ok = s.result.every((v, i) => i === 0 || s.result![i - 1] <= v);
+    const ok = s.result.every((v, i) => i === 0 || s.result![i - 1]! <= v);
     return { ok, label: `[${s.result.join(', ')}]` };
   },
 };

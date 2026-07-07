@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ function record({ nums }: MissingInput): Frame<MissingState>[] {
   const n = nums.length;
   let xorAll = n;
 
-  const { emit, frames } = createRecorder<MissingState>(() => ({
+  const { emit, frames } = createPrepRecorder<MissingState>(() => ({
     nums,
     n,
     i: null,
@@ -49,10 +49,10 @@ function record({ nums }: MissingInput): Frame<MissingState>[] {
   );
 
   for (let i = 0; i < n; i++) {
-    const v = nums[i];
-    const contrib = i ^ v;
+    const v = nums[i]!;
+    const contrib = i ^ v!;
     const prev = xorAll;
-    xorAll ^= i ^ v;
+    xorAll ^= i ^ v!;
     emit(
       'FOLD',
       `^= ${i}^${v}`,
@@ -88,7 +88,7 @@ function View({ frame }: PluginViewProps<MissingState>) {
       </div>
       {s.i !== null && s.contrib !== null && (
         <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-          {s.prev} ^ ({s.i} ^ {s.nums[s.i]} = {s.contrib}) = {s.xorAll}
+          {s.prev} ^ ({s.i} ^ {s.nums[s.i]!} = {s.contrib}) = {s.xorAll}
         </div>
       )}
       {s.result !== null && (
@@ -105,7 +105,7 @@ function Inspector({ frame }: InspectorProps<MissingState>) {
     <VarGrid>
       <InspectorRow k="n (len)" v={s.n} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
       <InspectorRow k="i ^ v" v={s.contrib ?? '—'} />
       <InspectorRow k="xorAll" v={s.xorAll} />
       <InspectorRow k="missing" v={s.result ?? (s.done ? 'none' : '…')} />

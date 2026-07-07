@@ -39,7 +39,7 @@ function record({ arr }: MaxLenInput): Frame<MaxLenState>[] {
   // Eligibility: a string with internal duplicate chars can never be used.
   const valid = arr.map((s) => new Set(s).size === s.length);
 
-  const lenOf = () => selected.reduce((sum, i) => sum + arr[i].length, 0);
+  const lenOf = () => selected.reduce((sum, i) => sum + arr[i]!.length, 0);
 
   const { emit, frames } = createRecorder<MaxLenState>(() => ({
     arr: arr,
@@ -64,7 +64,7 @@ function record({ arr }: MaxLenInput): Frame<MaxLenState>[] {
 
   const usedChars = (): Set<string> => {
     const set = new Set<string>();
-    for (const i of selected) for (const ch of arr[i]) set.add(ch);
+    for (const i of selected) for (const ch of arr[i]!) set.add(ch);
     return set;
   };
 
@@ -92,7 +92,7 @@ function record({ arr }: MaxLenInput): Frame<MaxLenState>[] {
         continue;
       }
       const taken = usedChars();
-      const overlap = [...arr[i]].filter((ch) => taken.has(ch));
+      const overlap = [...arr[i]!].filter((ch) => taken.has(ch));
       if (overlap.length > 0) {
         emit(
           'CONFLICT',
@@ -149,7 +149,11 @@ function View({ frame }: PluginViewProps<MaxLenState>) {
   };
   const rail = (
     <>
-      <RailStack label="selection" items={s.selected.map((i) => s.arr[i])} highlightEnd="bottom" />
+      <RailStack
+        label="selection"
+        items={s.selected.map((i) => s.arr[i] ?? '')}
+        highlightEnd="bottom"
+      />
       <RailGroup label="lengths">
         <RailStat k="cur" v={s.curLen} tone="accent" />
         <RailStat k="best" v={s.best} />

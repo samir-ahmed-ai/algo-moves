@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -66,7 +66,7 @@ function record({ nums }: DupMissInput): Frame<DupMissState>[] {
   let x = 0;
   let y = 0;
 
-  const { emit, frames } = createRecorder<DupMissState>(() => ({
+  const { emit, frames } = createPrepRecorder<DupMissState>(() => ({
     nums,
     n,
     phase: 'init',
@@ -105,11 +105,11 @@ function record({ nums }: DupMissInput): Frame<DupMissState>[] {
 
   // Phase 1b — fold in the actual array values.
   for (let i = 0; i < n; i++) {
-    xorAll ^= nums[i];
+    xorAll ^= nums[i]!;
     emit(
       'XOR_NUMS',
-      `^nums[${i}]=${nums[i]}`,
-      `Fold in the actual value nums[${i}] = ${nums[i]}. Equal numbers from the range and the array cancel each other; xorAll = ${xorAll} (${bin(xorAll)}).`,
+      `^nums[${i}]!=${nums[i]!}`,
+      `Fold in the actual value nums[${i}]! = ${nums[i]!}. Equal numbers from the range and the array cancel each other; xorAll = ${xorAll} (${bin(xorAll)}).`,
       { phase: 'xorAll', scanI: i, xorAll },
     );
   }
@@ -138,27 +138,27 @@ function record({ nums }: DupMissInput): Frame<DupMissState>[] {
 
   // Phase 3b — bucket the actual array values.
   for (let i = 0; i < n; i++) {
-    const v = nums[i];
-    const hasBit = (v & rightBit) !== 0;
-    if (hasBit) x ^= v;
-    else y ^= v;
+    const v = nums[i]!;
+    const hasBit = (v! & rightBit) !== 0;
+    if (hasBit) x ^= v!;
+    else y ^= v!;
     emit(
       'BUCKET_NUMS',
       hasBit ? `x^=${v}` : `y^=${v}`,
-      `Array value nums[${i}] = ${v}: bit ${rightBit} is ${hasBit ? 'set' : 'clear'}, so XOR it into bucket ${hasBit ? 'X' : 'Y'}. X = ${x}, Y = ${y}.`,
+      `Array value nums[${i}]! = ${v}: bit ${rightBit} is ${hasBit ? 'set' : 'clear'}, so XOR it into bucket ${hasBit ? 'X' : 'Y'}. X = ${x}, Y = ${y}.`,
       { phase: 'bucket', scanI: i, bucketVal: v, bucketHasBit: hasBit, x, y },
     );
   }
 
   // Phase 4 — X and Y are dup and missing in some order. The one that
-  // actually appears in nums (nums[x-1] === x) is the duplicate.
-  const xPresent = x >= 1 && x <= n && nums[x - 1] === x;
+  // actually appears in nums (nums[x-1]! === x) is the duplicate.
+  const xPresent = x >= 1 && x <= n && nums[x - 1]! === x;
   const dup = xPresent ? x : y;
   const missing = xPresent ? y : x;
   emit(
     'DECIDE',
-    `nums[${x}-1]==${x}? ${xPresent}`,
-    `Bucket X = ${x} and bucket Y = ${y} are the duplicate and the missing value, but in unknown order. Check whether X actually occurs: nums[${x} − 1] = ${nums[x - 1] ?? '—'} ${xPresent ? '=' : '≠'} ${x}. ${xPresent ? 'X is present, so X is the duplicate.' : 'X is absent, so X is the missing one and Y is the duplicate.'}`,
+    `nums[${x}-1]!==${x}? ${xPresent}`,
+    `Bucket X = ${x} and bucket Y = ${y} are the duplicate and the missing value, but in unknown order. Check whether X actually occurs: nums[${x} − 1]! = ${nums[x - 1]! ?? '—'} ${xPresent ? '=' : '≠'} ${x}. ${xPresent ? 'X is present, so X is the duplicate.' : 'X is absent, so X is the missing one and Y is the duplicate.'}`,
     { phase: 'decide', x, y, dup, missing },
   );
 
@@ -200,7 +200,7 @@ function View({ frame }: PluginViewProps<DupMissState>) {
   const showXor = s.phase === 'xorAll' || s.phase === 'split';
   const bucketsLive = s.phase === 'bucket' || s.phase === 'decide' || s.phase === 'done';
   const folding =
-    s.phase === 'xorAll' ? (s.expectVal ?? (s.scanI !== null ? s.nums[s.scanI] : null)) : null;
+    s.phase === 'xorAll' ? (s.expectVal ?? (s.scanI !== null ? s.nums[s.scanI]! : null)) : null;
   const routing =
     s.phase === 'bucket' && s.bucketVal !== null
       ? `${s.bucketVal} → ${s.bucketHasBit ? 'X' : 'Y'}`
@@ -390,7 +390,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n). O(1). xor 1..n and arr; rightBit=x&-x; xor each bucket; nums[x-1]==x decides order',
+      'O(n). O(1). xor 1..n and arr; rightBit=x&-x; xor each bucket; nums[x-1]!==x decides order',
   },
   {
     id: 'outcome',

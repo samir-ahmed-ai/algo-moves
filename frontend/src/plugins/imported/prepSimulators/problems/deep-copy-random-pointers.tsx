@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -35,7 +35,7 @@ interface DeepCopyState {
   cur: number | null; // node currently being cloned
   from: number | null; // node whose pointer we are following into `cur`
   link: 'next' | 'random' | null; // which pointer we are following
-  cloned: boolean[]; // cloned[i] = original i already has a clone in `seen`
+  cloned: boolean[]; // cloned[i]! = original i already has a clone in `seen`
   seen: number[]; // indices currently stored in the clone cache (order of insertion)
   cacheHit: boolean; // this step returned an existing clone instead of building
   done: boolean;
@@ -49,9 +49,9 @@ function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
   const seenOrder: number[] = []; // insertion order of cache keys (original indices)
   const seen = new Map<number, number>(); // original index -> 1 (presence only)
 
-  const label = (i: number | null) => (i === null ? 'nil' : `node ${i} (val ${vals[i]})`);
+  const label = (i: number | null) => (i === null ? 'nil' : `node ${i} (val ${vals[i]!})`);
 
-  const { emit, frames } = createRecorder<DeepCopyState>(() => ({
+  const { emit, frames } = createPrepRecorder<DeepCopyState>(() => ({
     vals,
     next,
     random,
@@ -78,7 +78,7 @@ function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
   emit(
     'INIT',
     `${nodes.length} nodes`,
-    `Deep copy a linked list whose nodes carry an extra Random pointer. We walk the structure recursively and keep a cache seen[original] = clone, so every original node is built exactly once and both its Next and Random links can point at the right clones. Time O(n), space O(n).`,
+    `Deep copy a linked list whose nodes carry an extra Random pointer. We walk the structure recursively and keep a cache seen[original]! = clone, so every original node is built exactly once and both its Next and Random links can point at the right clones. Time O(n), space O(n).`,
     {},
   );
 
@@ -98,7 +98,7 @@ function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
     if (seen.has(n)) {
       emit(
         'CACHE_HIT',
-        `seen[${n}]`,
+        `seen[${n}]!`,
         `The ${link ?? 'head'} pointer from ${label(from)} reaches ${label(n)}, which is already in the cache. Return its existing clone instead of building a duplicate — this is what stops Random cycles from looping forever.`,
         { from, link, cur: n, cacheHit: true },
         'good',
@@ -107,35 +107,35 @@ function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
     }
 
     // Build the clone and cache it BEFORE recursing, exactly like the Go code.
-    cloned[n] = true;
+    cloned[n]! = true;
     seen.set(n, 1);
     seenOrder.push(n);
     emit(
       'CLONE',
       `clone ${n}`,
-      `First time we reach ${label(n)}. Allocate a fresh clone with the same value (${vals[n]}) and store seen[${n}] = clone right away, before recursing — caching up front is what makes the Random pointers safe.`,
+      `First time we reach ${label(n)}. Allocate a fresh clone with the same value (${vals[n]!}) and store seen[${n}]! = clone right away, before recursing — caching up front is what makes the Random pointers safe.`,
       { from, link, cur: n },
     );
 
     // c.Next = clone(n.Next)
-    const nx = next[n];
+    const nx = next[n]!;
     emit(
       'FOLLOW_NEXT',
       nx === null ? 'next nil' : `next → ${nx}`,
-      `Now wire the clone's Next pointer: follow ${label(n)}'s Next, which goes to ${label(nx)}.`,
+      `Now wire the clone's Next pointer: follow ${label(n)}'s Next, which goes to ${label(nx!)}.`,
       { from: n, link: 'next', cur: n },
     );
-    clone(n, 'next', nx);
+    clone(n, 'next', nx!);
 
     // c.Random = clone(n.Random)
-    const rd = random[n];
+    const rd = random[n]!;
     emit(
       'FOLLOW_RANDOM',
       rd === null ? 'random nil' : `random → ${rd}`,
-      `Next wire the clone's Random pointer: follow ${label(n)}'s Random, which goes to ${label(rd)}.`,
+      `Next wire the clone's Random pointer: follow ${label(n)}'s Random, which goes to ${label(rd!)}.`,
       { from: n, link: 'random', cur: n },
     );
-    clone(n, 'random', rd);
+    clone(n, 'random', rd!);
   };
 
   clone(null, null, 0);
@@ -165,11 +165,11 @@ function View({ frame }: PluginViewProps<DeepCopyState>) {
   if (s.from !== null && s.from !== s.cur) {
     pointers.push({ i: s.from, label: 'from', tone: 'warn', place: 'below' });
   }
-  const tone = (i: number) => (s.cur === i ? 'match' : s.cloned[i] ? 'found' : '');
+  const tone = (i: number) => (s.cur === i ? 'match' : s.cloned[i]! ? 'found' : '');
 
-  const chain = s.vals.map((v, i) => `${v}${s.next[i] === null ? '' : ' →'}`).join(' ');
+  const chain = s.vals.map((v, i) => `${v}${s.next[i]! === null ? '' : ' →'}`).join(' ');
   const randomLine = s.random
-    .map((r, i) => (r === null ? null : `${s.vals[i]}⤳${s.vals[r]}`))
+    .map((r, i) => (r === null ? null : `${s.vals[i]!}⤳${s.vals[r]!}`))
     .filter((x): x is string => x !== null)
     .join('  ');
 
@@ -205,7 +205,7 @@ function View({ frame }: PluginViewProps<DeepCopyState>) {
 function Inspector({ frame }: InspectorProps<DeepCopyState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const nodeLabel = (i: number | null) => (i === null ? 'nil' : `${i} (val ${s.vals[i]})`);
+  const nodeLabel = (i: number | null) => (i === null ? 'nil' : `${i} (val ${s.vals[i]!})`);
   return (
     <VarGrid>
       <InspectorRow k="nodes" v={s.vals.length} />
@@ -262,7 +262,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Deep copy a linked list whose nodes carry an extra Random pointer. We walk the structure recursively and keep a cache seen[original] = clone, so every original node is built exactly once and both its Next and Random links can point at the right clones. Time O(n), space O(n).',
+      'Deep copy a linked list whose nodes carry an extra Random pointer. We walk the structure recursively and keep a cache seen[original]! = clone, so every original node is built exactly once and both its Next and Random links can point at the right clones. Time O(n), space O(n).',
   },
   {
     id: 'key-step',
@@ -324,7 +324,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(n). seen[n] returns cached; clone Next and Random recursively',
+    explain: 'O(n). O(n). seen[n]! returns cached; clone Next and Random recursively',
   },
   {
     id: 'outcome',

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -27,7 +27,7 @@ interface DupState {
 }
 
 function record({ nums }: DupInput): Frame<DupState>[] {
-  const { emit, frames } = createRecorder<DupState>(() => ({
+  const { emit, frames } = createPrepRecorder<DupState>(() => ({
     nums,
     slow: 0,
     fast: 0,
@@ -36,23 +36,23 @@ function record({ nums }: DupInput): Frame<DupState>[] {
     result: null,
   }));
 
-  // Treat each value as a "next index" pointer: i -> nums[i]. Because values are
+  // Treat each value as a "next index" pointer: i -> nums[i]!. Because values are
   // in [1, n-1] and there are n entries, a duplicate forces a cycle, and the
   // cycle's entrance is the duplicated value.
-  let slow = nums[0];
-  let fast = nums[nums[0]];
+  let slow = nums[0]!;
+  let fast = nums[nums[0]!];
 
   emit(
     'INIT',
     `slow=${slow} fast=${fast}`,
-    `Find Duplicate (Floyd's tortoise & hare): read each value as a jump link i → nums[i]. A repeated value makes the chain loop, and the loop's entrance is the duplicate. Start slow one hop in (nums[0]=${slow}) and fast two hops in (nums[nums[0]]=${fast}).`,
+    `Find Duplicate (Floyd's tortoise & hare): read each value as a jump link i → nums[i]!. A repeated value makes the chain loop, and the loop's entrance is the duplicate. Start slow one hop in (nums[0]!=${slow}) and fast two hops in (nums[nums[0]!]=${fast}).`,
     { slow, fast, phase: 'p1' },
   );
 
   // Phase 1: advance slow by 1 and fast by 2 until they collide inside the cycle.
   while (slow !== fast) {
-    slow = nums[slow];
-    fast = nums[nums[fast]];
+    slow = nums[slow!]!;
+    fast = nums[nums[fast!]!];
     emit(
       'STEP1',
       `slow=${slow} fast=${fast}`,
@@ -80,8 +80,8 @@ function record({ nums }: DupInput): Frame<DupState>[] {
   );
 
   while (slow !== fast) {
-    slow = nums[slow];
-    fast = nums[fast];
+    slow = nums[slow!]!;
+    fast = nums[fast!]!;
     emit(
       'STEP2',
       `slow=${slow} fast=${fast}`,
@@ -129,7 +129,7 @@ function View({ frame }: PluginViewProps<DupState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        index → nums[index] jump links · <span className="font-mono text-ink">{phaseLabel}</span>
+        index → nums[index]! jump links · <span className="font-mono text-ink">{phaseLabel}</span>
       </div>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
@@ -157,8 +157,8 @@ function Inspector({ frame }: InspectorProps<DupState>) {
       <InspectorRow k="slow (index)" v={s.slow} />
       <InspectorRow k="fast (index)" v={s.fast} />
       <InspectorRow
-        k="nums[slow]"
-        v={s.slow >= 0 && s.slow < s.nums.length ? s.nums[s.slow] : '—'}
+        k="nums[slow]!"
+        v={s.slow >= 0 && s.slow < s.nums.length ? s.nums[s.slow]! : '—'}
       />
       <InspectorRow k="meet point" v={s.meetAt ?? '—'} />
       <InspectorRow k="duplicate" v={s.result ?? (s.phase === 'done' ? 'none' : '…')} />
@@ -209,7 +209,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      "Find Duplicate (Floyd's tortoise & hare): read each value as a jump link i → nums[i]. A repeated value makes the chain loop, and the loop's entrance is the duplicate. Start slow one hop in (nums[0]=) and fast two hops in (nums[nums[0]]=).",
+      "Find Duplicate (Floyd's tortoise & hare): read each value as a jump link i → nums[i]!. A repeated value makes the chain loop, and the loop's entrance is the duplicate. Start slow one hop in (nums[0]!=) and fast two hops in (nums[nums[0]!]=).",
   },
   {
     id: 'key-step',

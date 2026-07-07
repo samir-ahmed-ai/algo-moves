@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, railItem } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -29,7 +29,7 @@ interface LeavesState {
   active: number | null; // node index currently being processed
   visited: number[]; // indices already assigned a height (done)
   height: (number | null)[]; // height per node index (null = not yet computed)
-  layers: number[][]; // res: layers[h] = node VALUES grouped at height h
+  layers: number[][]; // res: layers[h]! = node VALUES grouped at height h
   removedLayer: number | null; // which layer index the active node just joined
   done: boolean;
 }
@@ -39,7 +39,7 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
   const visited: number[] = [];
   const layers: number[][] = [];
 
-  const { emit, frames } = createRecorder<LeavesState>(() => ({
+  const { emit, frames } = createPrepRecorder<LeavesState>(() => ({
     tree: tree,
     visited: visited.slice(),
     height: height.slice(),
@@ -53,18 +53,18 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
   emit(
     'INIT',
     `${visited.length} placed`,
-    `Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height].`,
+    `Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height]!.`,
     { active: null, removedLayer: null, done: false },
   );
 
   // dfs returns the height of node index i, or -1 for a missing node (mirrors Go's nil -> -1).
   const dfs = (i: number): number => {
-    if (i >= tree.length || tree[i] == null) return -1;
+    if (i >= tree.length || tree[i]! == null) return -1;
 
     emit(
       'ENTER',
-      `node ${tree[i]}`,
-      `Descend into node ${tree[i]}. Before we can place it we must know how tall its subtrees are, so recurse left then right first (post-order).`,
+      `node ${tree[i]!}`,
+      `Descend into node ${tree[i]!}. Before we can place it we must know how tall its subtrees are, so recurse left then right first (post-order).`,
       { active: i, removedLayer: null, done: false },
     );
 
@@ -73,14 +73,14 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
     const h = Math.max(left, right) + 1; // leaf: max(-1,-1)+1 = 0
 
     if (h === layers.length) layers.push([]);
-    layers[h].push(tree[i] as number);
-    height[i] = h;
+    layers[h]!.push(tree[i]! as number);
+    height[i]! = h;
     visited.push(i);
 
     emit(
       'PLACE',
       `h=${h}`,
-      `Node ${tree[i]}: left height ${left}, right height ${right}, so its height is max(${left}, ${right}) + 1 = ${h}. It joins layer ${h}${h === 0 ? ' (a leaf)' : ''}, which now reads [${layers[h].join(', ')}].`,
+      `Node ${tree[i]!}: left height ${left}, right height ${right}, so its height is max(${left}, ${right}) + 1 = ${h}. It joins layer ${h}${h === 0 ? ' (a leaf)' : ''}, which now reads [${layers[h]!.join(', ')}].`,
       { active: i, removedLayer: h, done: false },
     );
 
@@ -110,12 +110,11 @@ function View({ frame }: PluginViewProps<LeavesState>) {
     if (activeSet.has(i)) return 'team-2';
     return 'team-0';
   };
-  const activeVal = s.active !== null ? s.tree[s.active] : null;
-  const activeHeight = s.active !== null ? s.height[s.active] : null;
-  const layerItems = s.layers.map((l, idx) => ({
-    label: `L${idx}[${l.join(',')}]`,
-    tone: idx === s.removedLayer ? ('accent' as const) : undefined,
-  }));
+  const activeVal = s.active !== null ? s.tree[s.active]! : null;
+  const activeHeight = s.active !== null ? s.height[s.active]! : null;
+  const layerItems = s.layers.map((l, idx) =>
+    railItem(`L${idx}[${l.join(',')}]`, idx === s.removedLayer ? 'accent' : undefined),
+  );
   const resultLabel = s.done ? s.layers.map((l) => `[${l.join(',')}]`).join('') : undefined;
   const rail = (
     <>
@@ -140,8 +139,8 @@ function View({ frame }: PluginViewProps<LeavesState>) {
 function Inspector({ frame }: InspectorProps<LeavesState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const activeVal = s.active !== null ? s.tree[s.active] : null;
-  const activeHeight = s.active !== null ? s.height[s.active] : null;
+  const activeVal = s.active !== null ? s.tree[s.active]! : null;
+  const activeHeight = s.active !== null ? s.height[s.active]! : null;
   return (
     <VarGrid>
       <InspectorRow k="active node" v={activeVal ?? '—'} />
@@ -200,7 +199,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height].',
+      'Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height]!.',
   },
   {
     id: 'key-step',

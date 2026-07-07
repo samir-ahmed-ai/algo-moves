@@ -46,7 +46,10 @@ export function NaryTreeBoard({
       return;
     }
     for (const c of kids) place(c, d + 1);
-    x[i] = (x[kids[0]] + x[kids[kids.length - 1]]) / 2;
+    const firstKid = kids[0];
+    const lastKid = kids[kids.length - 1];
+    if (firstKid === undefined || lastKid === undefined) return;
+    x[i] = ((x[firstKid] ?? 0) + (x[lastKid] ?? 0)) / 2;
   };
   if (n > 0) place(0, 0);
 
@@ -54,12 +57,14 @@ export function NaryTreeBoard({
   const maxDepth = Math.max(0, ...depth);
   const width = Math.max(1, leafCursor) * gapX + pad * 2 - gapX + 2 * nodeRadius;
   const height = (maxDepth + 1) * gapY + pad;
-  const px = (i: number) => pad + x[i] * gapX;
-  const py = (i: number) => pad + depth[i] * gapY;
+  const px = (i: number) => pad + (x[i] ?? 0) * gapX;
+  const py = (i: number) => pad + (depth[i] ?? 0) * gapY;
 
   const edges: ReactElement[] = [];
   for (let i = 0; i < n; i++) {
-    for (const c of nodes[i].children) {
+    const node = nodes[i];
+    if (!node) continue;
+    for (const c of node.children) {
       const hot = highlightNode === c;
       edges.push(
         <line

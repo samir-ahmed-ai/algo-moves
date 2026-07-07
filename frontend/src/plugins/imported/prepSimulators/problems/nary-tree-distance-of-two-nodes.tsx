@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -72,7 +72,7 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {
     done: false,
   };
 
-  const { emit, frames } = createRecorder<DistanceState>(() => ({
+  const { emit, frames } = createPrepRecorder<DistanceState>(() => ({
     ...base,
   }));
 
@@ -106,7 +106,7 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {
 
     let found: number | null = null;
     let count = 0;
-    for (const child of nodes[root].children) {
+    for (const child of nodes[root]!.children) {
       const res = findLca(child);
       if (res !== null) {
         count++;
@@ -151,7 +151,7 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {
     }
 
     let level = 0;
-    let frontier: number[] = [...nodes[from].children];
+    let frontier: number[] = [...nodes[from]!.children];
     const seen: number[] = [from];
 
     emit(
@@ -192,7 +192,7 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {
           );
           return level;
         }
-        for (const c of nodes[node].children) next.push(c);
+        for (const c of nodes[node]!.children) next.push(c);
       }
       emit(
         'LEVEL_STEP',
@@ -232,7 +232,7 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {
 
 function View({ frame }: PluginViewProps<DistanceState>) {
   const s = frame.state;
-  const label = (i: number | null) => (i !== null && s.nodes[i] ? s.nodes[i].label : '—');
+  const label = (i: number | null) => (i !== null && s.nodes[i]! ? s.nodes[i]!.label : '—');
   const nodeClass = (i: number) => {
     if (i === s.active) return 'team-1';
     if (i === s.lca && s.lca !== null) return 'team-2';
@@ -278,7 +278,7 @@ function View({ frame }: PluginViewProps<DistanceState>) {
 function Inspector({ frame }: InspectorProps<DistanceState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const label = (i: number | null) => (i !== null && s.nodes[i] ? s.nodes[i].label : '—');
+  const label = (i: number | null) => (i !== null && s.nodes[i]! ? s.nodes[i]!.label : '—');
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />

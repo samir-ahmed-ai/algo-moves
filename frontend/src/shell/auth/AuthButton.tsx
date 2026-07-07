@@ -79,7 +79,7 @@ export function AuthButton({
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
           anchorRef={anchorRef}
-          onOpenProfile={onOpenProfile}
+          {...(onOpenProfile ? { onOpenProfile } : {})}
         />
       </div>
     );

@@ -21,6 +21,16 @@ import type {
  * when the backend has no Postgres configured, so callers never need to branch.
  */
 
+const DEFAULT_LIMIT = 50;
+
+function safeLimit(limit: number, fallback = DEFAULT_LIMIT): number {
+  return Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : fallback;
+}
+
+function encodePathPart(value: string): string {
+  return encodeURIComponent(value);
+}
+
 // ---- profiles -------------------------------------------------------------
 
 export async function getProfile(id: string): Promise<Profile | null> {
@@ -29,14 +39,14 @@ export async function getProfile(id: string): Promise<Profile | null> {
 
 export async function getProfilesByIds(ids: string[]): Promise<Profile[]> {
   if (ids.length === 0) return [];
-  return (await arcadeFetch<Profile[]>(`/api/profiles/${ids.join(',')}`, { auth: false })) ?? [];
+  const pathIds = ids.map(encodePathPart).join(',');
+  return (await arcadeFetch<Profile[]>(`/api/profiles/${pathIds}`, { auth: false })) ?? [];
 }
 
 export async function updateProfile(
   id: string,
   patch: Partial<Pick<Profile, 'display_name' | 'avatar_seed' | 'is_anonymous'>>,
 ): Promise<Profile | null> {
-  void id;
   return updateProfileApi(id, patch);
 }
 
@@ -49,8 +59,8 @@ export async function getGameStats(profileId: string): Promise<GameStats[]> {
 
 export async function getMatchHistory(profileId: string, limit = 25): Promise<MatchHistoryEntry[]> {
   void profileId;
-  void limit;
-  return (await arcadeFetch<MatchHistoryEntry[]>('/api/matches/me')) ?? [];
+  const params = new URLSearchParams({ limit: String(safeLimit(limit, 25)) });
+  return (await arcadeFetch<MatchHistoryEntry[]>(`/api/matches/me?${params}`)) ?? [];
 }
 
 export async function submitMatchResult(
@@ -77,16 +87,19 @@ export async function submitMatchResult(
 // ---- leaderboards ---------------------------------------------------------
 
 export async function leaderboardGame(gameId: string, limit = 50): Promise<LeaderboardEntry[]> {
+  const params = new URLSearchParams({ limit: String(safeLimit(limit)) });
   return (
-    (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/game/${gameId}?limit=${limit}`, {
-      auth: false,
-    })) ?? []
+    (await arcadeFetch<LeaderboardEntry[]>(
+      `/api/leaderboard/game/${encodePathPart(gameId)}?${params}`,
+      { auth: false },
+    )) ?? []
   );
 }
 
 export async function leaderboardGlobal(limit = 50): Promise<LeaderboardEntry[]> {
+  const params = new URLSearchParams({ limit: String(safeLimit(limit)) });
   return (
-    (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/global?limit=${limit}`, {
+    (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/global?${params}`, {
       auth: false,
     })) ?? []
   );
@@ -97,7 +110,7 @@ export async function leaderboardRecent(
   gameId: string | null = null,
   limit = 50,
 ): Promise<LeaderboardEntry[]> {
-  const params = new URLSearchParams({ since: sinceIso, limit: String(limit) });
+  const params = new URLSearchParams({ since: sinceIso, limit: String(safeLimit(limit)) });
   if (gameId) params.set('game', gameId);
   return (
     (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/recent?${params}`, { auth: false })) ??
@@ -117,7 +130,7 @@ export async function listUnlockedAchievementIds(profileId: string): Promise<str
 }
 
 export async function unlockAchievement(achievementId: string): Promise<void> {
-  await arcadeFetch(`/api/achievements/${achievementId}`, { method: 'POST' });
+  await arcadeFetch(`/api/achievements/${encodePathPart(achievementId)}`, { method: 'POST' });
 }
 
 // ---- rooms ----------------------------------------------------------------
@@ -125,22 +138,23 @@ export async function unlockAchievement(achievementId: string): Promise<void> {
 export async function upsertRoom(
   row: Partial<RoomRow> & { code: string },
 ): Promise<RoomRow | null> {
-  return arcadeFetch<RoomRow>(`/api/rooms/${row.code}`, {
+  return arcadeFetch<RoomRow>(`/api/rooms/${encodePathPart(row.code)}`, {
     method: 'PUT',
     body: JSON.stringify({ ...row, last_active_at: new Date().toISOString() }),
   });
 }
 
 export async function getRoom(code: string): Promise<RoomRow | null> {
-  return arcadeFetch<RoomRow>(`/api/rooms/${code}`, { auth: false });
+  return arcadeFetch<RoomRow>(`/api/rooms/${encodePathPart(code)}`, { auth: false });
 }
 
 export async function listPublicRooms(limit = 20): Promise<RoomRow[]> {
-  return (await arcadeFetch<RoomRow[]>(`/api/rooms/public?limit=${limit}`, { auth: false })) ?? [];
+  const params = new URLSearchParams({ limit: String(safeLimit(limit, 20)) });
+  return (await arcadeFetch<RoomRow[]>(`/api/rooms/public?${params}`, { auth: false })) ?? [];
 }
 
 export async function touchRoom(code: string): Promise<void> {
-  await arcadeFetch(`/api/rooms/${code}/touch`, { method: 'POST' });
+  await arcadeFetch(`/api/rooms/${encodePathPart(code)}/touch`, { method: 'POST' });
 }
 
 // ---- friends / recent players ---------------------------------------------

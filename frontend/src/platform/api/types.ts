@@ -1,12 +1,14 @@
 /** Shared API types mirroring the backend Postgres schema. */
 
+export type ProfileId = string;
+
 export interface Profile {
-  id: string;
+  id: ProfileId;
   display_name: string;
   avatar_seed: string;
-  personal_room_code?: string;
-  email?: string;
-  is_admin?: boolean;
+  personal_room_code?: string | undefined;
+  email?: string | undefined;
+  is_admin?: boolean | undefined;
   is_anonymous: boolean;
   xp: number;
   level: number;

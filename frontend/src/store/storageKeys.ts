@@ -10,7 +10,7 @@
 const NS = 'algo-moves';
 const keyPart = (part: string | number): string => {
   if (typeof part === 'number') return Number.isFinite(part) ? String(Math.round(part)) : '0';
-  return part.trim();
+  return part.trim().replace(/\s+/g, '-');
 };
 const k = (...parts: (string | number)[]): string => [NS, ...parts.map(keyPart)].join(':');
 
@@ -79,3 +79,10 @@ export const STORAGE_KEYS = {
   // data
   DEMO_WORKFLOW: k('demo-workflow'),
 } as const;
+
+export type StorageKeyRegistry = typeof STORAGE_KEYS;
+export type StaticStorageKey = Extract<StorageKeyRegistry[keyof StorageKeyRegistry], string>;
+export type DynamicStorageKeyFactory = Extract<
+  StorageKeyRegistry[keyof StorageKeyRegistry],
+  (...args: never[]) => string
+>;

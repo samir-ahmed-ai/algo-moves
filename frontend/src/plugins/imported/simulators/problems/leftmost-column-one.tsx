@@ -33,7 +33,7 @@ interface LcoState {
 
 function record({ grid }: LcoInput): Frame<LcoState>[] {
   const m = grid.length;
-  const n = grid[0].length;
+  const n = grid[0]!.length;
   const path = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
 
   let r = 0;
@@ -58,8 +58,8 @@ function record({ grid }: LcoInput): Frame<LcoState>[] {
   );
 
   while (r < m && c >= 0) {
-    path[r][c] = true;
-    if (grid[r][c] === 1) {
+    path[r]![c] = true;
+    if (grid[r]![c] === 1) {
       res = c;
       emit(
         'ONE',
@@ -97,8 +97,8 @@ function View({ frame }: PluginViewProps<LcoState>) {
   const cellTone = (r: number, c: number) => {
     if (cur && cur[0] === r && cur[1] === c) return 'active';
     if (s.res !== -1 && c === s.res) return 'path';
-    if (s.path[r][c]) return 'visited';
-    return s.grid[r][c] === 1 ? 'land' : 'water';
+    if (s.path[r]![c]) return 'visited';
+    return s.grid[r]![c] === 1 ? 'land' : 'water';
   };
   const rail = (
     <>

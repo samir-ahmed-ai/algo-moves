@@ -1,5 +1,7 @@
 /** Arcade-specific API types (games domain). */
 
+export type ArcadeJsonObject = Record<string, unknown>;
+
 export interface GameStats {
   profile_id: string;
   game_id: string;
@@ -23,7 +25,7 @@ export interface MatchRow {
   winner_profile_id: string | null;
   started_at: string | null;
   ended_at: string;
-  metadata: Record<string, unknown>;
+  metadata: ArcadeJsonObject;
   created_at: string;
 }
 
@@ -77,7 +79,7 @@ export interface DailyChallenge {
   challenge_date: string;
   game_id: string;
   seed: string;
-  config: Record<string, unknown>;
+  config: ArcadeJsonObject;
   created_at: string;
 }
 
@@ -87,26 +89,26 @@ export interface LeaderboardEntry {
   display_name: string;
   avatar_seed: string;
   level: number;
-  mmr?: number;
-  xp?: number;
-  wins?: number;
-  losses?: number;
-  matches_played?: number;
+  mmr?: number | undefined;
+  xp?: number | undefined;
+  wins?: number | undefined;
+  losses?: number | undefined;
+  matches_played?: number | undefined;
 }
 
 export interface MatchResultParticipant {
   profileId: string | null;
   displayName: string;
   placement: number;
-  score?: number;
+  score?: number | undefined;
 }
 
 export interface MatchResultInput {
   gameId: string;
-  roomCode?: string | null;
-  mode?: RoomMode;
+  roomCode?: string | null | undefined;
+  mode?: RoomMode | undefined;
   participants: MatchResultParticipant[];
-  metadata?: Record<string, unknown>;
+  metadata?: ArcadeJsonObject | undefined;
 }
 
 export interface MatchResultDelta {

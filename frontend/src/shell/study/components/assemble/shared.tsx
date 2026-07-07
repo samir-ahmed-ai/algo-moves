@@ -143,7 +143,10 @@ export function OrderBoard({
       const j = i + delta;
       if (i < 0 || j < 0 || j >= o.length) return o;
       const n = o.slice();
-      [n[i], n[j]] = [n[j], n[i]];
+      const left = n[i]!;
+      const right = n[j]!;
+      n[i] = right;
+      n[j] = left;
       return n;
     });
   const onDragEnd = (event: DragEndEvent) => setOrder((o) => reorderIds(o, event));
@@ -306,7 +309,10 @@ export function BlocksMode() {
       const j = i + delta;
       if (i < 0 || j < 0 || j >= o.length) return o;
       const n = o.slice();
-      [n[i], n[j]] = [n[j], n[i]];
+      const left = n[i]!;
+      const right = n[j]!;
+      n[i] = right;
+      n[j] = left;
       return n;
     });
   const onDragEnd = (event: DragEndEvent) => setOrder((o) => reorderIds(o, event));
@@ -331,8 +337,8 @@ export function BlocksMode() {
                     piece={byId.get(id)!}
                     pos={pos}
                     correct={correct}
-                    onUp={pos > 0 ? () => move(id, -1) : undefined}
-                    onDown={pos < order.length - 1 ? () => move(id, 1) : undefined}
+                    {...(pos > 0 ? { onUp: () => move(id, -1) } : {})}
+                    {...(pos < order.length - 1 ? { onDown: () => move(id, 1) } : {})}
                   />
                 </SortableRow>
               );
@@ -565,11 +571,16 @@ export function BlanksMode() {
     setSel(null);
   }, [reference, resolved]);
 
-  const tray = resolved.filter((_, i) => !filled.includes(resolved[i].id));
+  const tray = resolved.filter((_, i) => {
+    const piece = resolved[i];
+    return piece ? !filled.includes(piece.id) : false;
+  });
   const place = (pieceId: string) => {
     const slot = sel ?? filled.findIndex((f) => f === null);
     if (slot < 0) return;
-    if (resolved[slot].id === pieceId) {
+    const target = resolved[slot];
+    if (!target) return;
+    if (target.id === pieceId) {
       setFilled((f) => f.map((x, i) => (i === slot ? pieceId : x)));
       setSel(null);
     } else {
@@ -660,9 +671,11 @@ export function ParsonsMode() {
       i < base.length && distractors.length < 2;
       i += Math.ceil(base.length / 3) || 1
     ) {
-      const m = mutate(base[i].text);
-      if (m !== base[i].text)
-        distractors.push({ id: `d${i}`, text: m, indent: base[i].indent, real: false });
+      const baseItem = base[i];
+      if (!baseItem) continue;
+      const m = mutate(baseItem.text);
+      if (m !== baseItem.text)
+        distractors.push({ id: `d${i}`, text: m, indent: baseItem.indent, real: false });
     }
     return {
       items: shuffle([...correct, ...distractors]),
@@ -693,7 +706,10 @@ export function ParsonsMode() {
       const j = idx + d;
       if (j < 0 || j >= s.length) return s;
       const n = s.slice();
-      [n[idx], n[j]] = [n[j], n[idx]];
+      const left = n[idx]!;
+      const right = n[j]!;
+      n[idx] = right;
+      n[j] = left;
       return n;
     });
 
@@ -779,7 +795,7 @@ export function AssembleGameHost({ id }: { id: string }) {
       <game.Component
         key={`${item.id}:${active}:${id}`}
         pieces={pieces!}
-        lang={lang}
+        {...(lang !== undefined ? { lang } : {})}
         storageKey={scope}
         stats={stats}
       />

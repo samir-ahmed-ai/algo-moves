@@ -46,12 +46,12 @@ export const prepCourses: CourseDef[] = (() => {
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
         .map((p) => ({ id: p.id, kind: 'problem', pluginId: p.id, status: 'todo' }));
-      const onlyTopic: TopicDef = { id: `${courseId}-all`, title: problems[0].topicTitle, items };
+      const onlyTopic: TopicDef = { id: `${courseId}-all`, title: problems[0]!.topicTitle, items };
       return {
         id: courseId,
-        title: problems[0].course,
-        summary: `${problems.length} ${problems[0].topicTitle} problems from your prep study collection.`,
-        icon: problems[0].courseIcon,
+        title: problems[0]!.course,
+        summary: `${problems.length} ${problems[0]!.topicTitle} problems from your prep study collection.`,
+        icon: problems[0]!.courseIcon,
         topics: [onlyTopic],
       };
     });

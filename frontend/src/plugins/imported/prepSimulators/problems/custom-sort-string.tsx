@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, mergeState } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -62,11 +62,11 @@ function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {
     }
   }
 
-  const snapshotCounts = (): CountEntry[] => display.map((ch) => ({ ch, n: cnt[idx(ch)] }));
+  const snapshotCounts = (): CountEntry[] => display.map((ch) => ({ ch, n: cnt[idx(ch)]! }));
 
   let result = '';
 
-  const { emit, frames } = createRecorder<CustomSortState>(
+  const { emit, frames } = createPrepRecorder<CustomSortState>(
     () => ({
       order: order,
       s: s,
@@ -78,7 +78,7 @@ function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {
       done: false,
     }),
     {
-      merge: (base, partial) => ({ ...base, counts: snapshotCounts(), ...partial }),
+      merge: (base, partial) => mergeState({ ...base, counts: snapshotCounts() }, partial),
     },
   );
 
@@ -91,20 +91,20 @@ function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {
 
   // Phase 1: count characters of s.
   for (let i = 0; i < s.length; i++) {
-    const c = s[i];
-    cnt[idx(c)]++;
+    const c = s[i]!;
+    cnt[idx(c!)]!++;
     emit(
       'COUNT',
-      `cnt[${c}]=${cnt[idx(c)]}`,
-      `Tally character '${c}' from s. We now know there are ${cnt[idx(c)]} '${c}'(s) to place. Counting is O(1) space because there are at most 26 lowercase letters.`,
+      `cnt[${c}]!=${cnt[idx(c!)]!}`,
+      `Tally character '${c}' from s. We now know there are ${cnt[idx(c!)]!} '${c}'(s) to place. Counting is O(1) space because there are at most 26 lowercase letters.`,
       { phase: 'count' },
     );
   }
 
   // Phase 2: emit chars in `order` precedence, draining their counts.
   for (let oi = 0; oi < order.length; oi++) {
-    const c = order[oi];
-    if (cnt[idx(c)] === 0) {
+    const c = order[oi]!;
+    if (cnt[idx(c!)]! === 0) {
       emit(
         'SKIP',
         `'${c}' x0`,
@@ -113,13 +113,13 @@ function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {
       );
       continue;
     }
-    while (cnt[idx(c)] > 0) {
+    while (cnt[idx(c!)]! > 0) {
       result += c;
-      cnt[idx(c)]--;
+      cnt[idx(c!)]!--;
       emit(
         'TAKE',
         `+${c}`,
-        `'${c}' comes next in the order and still has ${cnt[idx(c)] + 1} left, so append one '${c}' to the result and decrement its count to ${cnt[idx(c)]}. Result is now "${result}".`,
+        `'${c}' comes next in the order and still has ${cnt[idx(c!)]! + 1} left, so append one '${c}' to the result and decrement its count to ${cnt[idx(c!)]!}. Result is now "${result}".`,
         { phase: 'order', orderIdx: oi, takeChar: c },
       );
     }
@@ -127,14 +127,14 @@ function record({ order, s }: CustomSortInput): Frame<CustomSortState>[] {
 
   // Phase 3: append remaining chars (not in order) in alphabetical order.
   for (let i = 0; i < 26; i++) {
-    while (cnt[i] > 0) {
+    while (cnt[i]! > 0) {
       const c = String.fromCharCode(97 + i);
       result += c;
-      cnt[i]--;
+      cnt[i]!--;
       emit(
         'TAIL',
         `+${c}`,
-        `'${c}' never appeared in the order, so it goes after the ordered characters. Append one '${c}' (count → ${cnt[i]}). Result is now "${result}".`,
+        `'${c}' never appeared in the order, so it goes after the ordered characters. Append one '${c}' (count → ${cnt[i]!}). Result is now "${result}".`,
         { phase: 'tail', takeChar: c },
       );
     }
@@ -177,7 +177,7 @@ function View({ frame }: PluginViewProps<CustomSortState>) {
       <RailStack label="counts" items={countItems.length ? countItems : []} />
       <RailGroup label="scan">
         <RailStat k="phase" v={s.phase} />
-        <RailStat k="cur" v={s.orderIdx !== null ? s.order[s.orderIdx] : '—'} tone="accent" />
+        <RailStat k="cur" v={s.orderIdx !== null ? s.order[s.orderIdx]! : '—'} tone="accent" />
         <RailStat k="+char" v={s.takeChar ?? '—'} tone={s.takeChar ? 'accent' : undefined} />
         <RailStat k="left" v={remaining} />
       </RailGroup>
@@ -218,7 +218,7 @@ function Inspector({ frame }: InspectorProps<CustomSortState>) {
     <VarGrid>
       <InspectorRow k="order" v={s.order} />
       <InspectorRow k="phase" v={s.phase} />
-      <InspectorRow k="order[idx]" v={s.orderIdx !== null ? s.order[s.orderIdx] : '—'} />
+      <InspectorRow k="order[idx]!" v={s.orderIdx !== null ? s.order[s.orderIdx]! : '—'} />
       <InspectorRow k="just placed" v={s.takeChar ?? '—'} />
       <InspectorRow k="remaining" v={remaining} />
       <InspectorRow k="result" v={s.result ? `"${s.result}"` : s.done ? '""' : '…'} />
@@ -228,18 +228,18 @@ function Inspector({ frame }: InspectorProps<CustomSortState>) {
 
 function computeAnswer({ order, s }: CustomSortInput): string {
   const cnt = new Array<number>(26).fill(0);
-  for (const c of s) cnt[idx(c)]++;
+  for (const c of s) cnt[idx(c)]!++;
   let res = '';
   for (const c of order) {
-    while (cnt[idx(c)] > 0) {
+    while (cnt[idx(c)]! > 0) {
       res += c;
-      cnt[idx(c)]--;
+      cnt[idx(c)]!--;
     }
   }
   for (let i = 0; i < 26; i++) {
-    while (cnt[i] > 0) {
+    while (cnt[i]! > 0) {
       res += String.fromCharCode(97 + i);
-      cnt[i]--;
+      cnt[i]!--;
     }
   }
   return res;

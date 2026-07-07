@@ -44,7 +44,7 @@ export function PatternPanelBody() {
             title={c.title}
             collapsible
             defaultOpen={idx === 0}
-            right={<Chip mono>{c.complexity.split('|')[0].trim()}</Chip>}
+            right={<Chip mono>{c.complexity.split('|')[0]?.trim() ?? ''}</Chip>}
           >
             <div className="pattern-card__content">
               <div className="pattern-field-grid">

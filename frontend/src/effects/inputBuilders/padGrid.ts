@@ -1,4 +1,5 @@
 export type ColumnModifier = 'none' | 'repeat' | 'slow' | 'fast' | 'euclid';
+const COLUMN_MODIFIERS: readonly ColumnModifier[] = ['none', 'repeat', 'slow', 'fast', 'euclid'];
 
 export interface PadGridState {
   rows: number;
@@ -8,11 +9,27 @@ export interface PadGridState {
   selected: Set<string>;
 }
 
+function positiveInt(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+    ? Math.max(1, Math.round(value))
+    : fallback;
+}
+
+function isColumnModifier(value: unknown): value is ColumnModifier {
+  return typeof value === 'string' && (COLUMN_MODIFIERS as readonly string[]).includes(value);
+}
+
+function normalizeColumnModifier(value: unknown): ColumnModifier {
+  return isColumnModifier(value) ? value : 'none';
+}
+
 export function createPadGrid(rows = 4, cols = 8): PadGridState {
+  const rowCount = positiveInt(rows, 4);
+  const colCount = positiveInt(cols, 8);
   return {
-    rows,
-    cols,
-    cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => false)),
+    rows: rowCount,
+    cols: colCount,
+    cells: Array.from({ length: rowCount }, () => Array.from({ length: colCount }, () => false)),
     columnModifiers: {},
     selected: new Set(),
   };
@@ -24,6 +41,7 @@ export function toggleCell(
   col: number,
   shiftKey = false,
 ): PadGridState {
+  if (row < 0 || col < 0 || row >= state.rows || col >= state.cols) return state;
   const key = `${row},${col}`;
   const cells = state.cells.map((r, ri) => r.map((c, ci) => (ri === row && ci === col ? !c : c)));
   const selected = new Set(state.selected);
@@ -32,7 +50,8 @@ export function toggleCell(
     else selected.add(key);
   } else {
     selected.clear();
-    if (cells[row][col]) selected.add(key);
+    const rowCells = cells[row];
+    if (rowCells?.[col]) selected.add(key);
   }
   return { ...state, cells, selected };
 }
@@ -43,9 +62,9 @@ export function padGridToArray(state: PadGridState): number[] {
   for (let c = 0; c < state.cols; c++) {
     let colValues: number[] = [];
     for (let r = 0; r < state.rows; r++) {
-      if (state.cells[r][c]) colValues.push(r + 1);
+      if (state.cells[r]?.[c]) colValues.push(r + 1);
     }
-    const mod = state.columnModifiers[c] ?? 'none';
+    const mod = normalizeColumnModifier(state.columnModifiers[c]);
     if (mod === 'repeat' && colValues.length) {
       colValues = [...colValues, ...colValues];
     } else if (mod === 'euclid' && colValues.length === 0) {
@@ -73,4 +92,4 @@ export const EUCLIDEAN_PRESETS = [
   { label: '3:2', pulses: 3, steps: 5 },
   { label: '4:3', pulses: 4, steps: 7 },
   { label: '5:3', pulses: 5, steps: 8 },
-];
+] as const;

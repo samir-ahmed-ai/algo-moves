@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -31,7 +31,7 @@ interface DirLengths {
 
 interface LineState {
   mat: number[][];
-  // best[r][c] = the longest of the 4 direction lengths ending at (r,c); 0 if not visited / cell is 0
+  // best[r]![c] = the longest of the 4 direction lengths ending at (r,c); 0 if not visited / cell is 0
   best: number[][];
   cur: [number, number] | null; // current cell being processed
   dirs: DirLengths | null; // the 4 direction lengths computed for cur
@@ -42,16 +42,16 @@ interface LineState {
 
 function record({ mat }: LineInput): Frame<LineState>[] {
   const m = mat.length;
-  const n = m > 0 ? mat[0].length : 0;
+  const n = m > 0 ? mat[0]!.length : 0;
 
-  // best[r][c] for the View — longest line ending at each visited cell.
+  // best[r]![c] for the View — longest line ending at each visited cell.
   const best: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
 
-  // dp[j] holds the 4 direction lengths for the PREVIOUS row at column j.
+  // dp[j]! holds the 4 direction lengths for the PREVIOUS row at column j.
   let dp: DirLengths[] = Array.from({ length: n }, () => ({ hor: 0, ver: 0, diag: 0, anti: 0 }));
   let res = 0;
 
-  const { emit, frames } = createRecorder<LineState>(() => ({
+  const { emit, frames } = createPrepRecorder<LineState>(() => ({
     mat: mat,
     best: best.map((row) => row.slice()),
     res: res,
@@ -76,26 +76,26 @@ function record({ mat }: LineInput): Frame<LineState>[] {
       anti: 0,
     }));
     for (let j = 0; j < n; j++) {
-      if (mat[i][j] === 1) {
+      if (mat[i]![j] === 1) {
         // horizontal: extend the cell to the left in this row
-        nd[j].hor = j > 0 ? nd[j - 1].hor + 1 : 1;
+        nd[j]!.hor = j > 0 ? nd[j - 1]!.hor + 1 : 1;
         // vertical: extend the cell above (previous row, same column)
-        nd[j].ver = dp[j].ver + 1;
+        nd[j]!.ver = dp[j]!.ver + 1;
         // diagonal ↘: extend the cell up-left (previous row, column j-1)
-        nd[j].diag = j > 0 ? dp[j - 1].diag + 1 : 1;
+        nd[j]!.diag = j > 0 ? dp[j - 1]!.diag + 1 : 1;
         // anti-diagonal ↙: extend the cell up-right (previous row, column j+1)
-        nd[j].anti = j < n - 1 ? dp[j + 1].anti + 1 : 1;
+        nd[j]!.anti = j < n - 1 ? dp[j + 1]!.anti + 1 : 1;
 
-        const local = Math.max(nd[j].hor, nd[j].ver, nd[j].diag, nd[j].anti);
+        const local = Math.max(nd[j]!.hor, nd[j]!.ver, nd[j]!.diag, nd[j]!.anti);
         const bestDir =
-          local === nd[j].hor
+          local === nd[j]!.hor
             ? 'horizontal →'
-            : local === nd[j].ver
+            : local === nd[j]!.ver
               ? 'vertical ↓'
-              : local === nd[j].diag
+              : local === nd[j]!.diag
                 ? 'diagonal ↘'
                 : 'anti-diagonal ↙';
-        best[i][j] = local;
+        best[i]![j] = local;
 
         const improved = local > res;
         if (improved) res = local;
@@ -103,8 +103,8 @@ function record({ mat }: LineInput): Frame<LineState>[] {
         emit(
           improved ? 'GROW' : 'CELL',
           `(${i},${j}) max=${local}`,
-          `Cell (${i},${j}) is a 1. Extend each direction from its neighbours: horizontal=${nd[j].hor}, vertical=${nd[j].ver}, diagonal=${nd[j].diag}, anti-diagonal=${nd[j].anti}. The longest line ending here is ${local} (${bestDir}).${improved ? ` That beats the old best, so res = ${res}.` : ` The best so far stays ${res}.`}`,
-          { cur: [i, j], dirs: { ...nd[j] }, bestDir: bestDir },
+          `Cell (${i},${j}) is a 1. Extend each direction from its neighbours: horizontal=${nd[j]!.hor}, vertical=${nd[j]!.ver}, diagonal=${nd[j]!.diag}, anti-diagonal=${nd[j]!.anti}. The longest line ending here is ${local} (${bestDir}).${improved ? ` That beats the old best, so res = ${res}.` : ` The best so far stays ${res}.`}`,
+          { cur: [i, j], dirs: { ...nd[j]! }, bestDir: bestDir },
         );
       } else {
         emit(
@@ -131,13 +131,13 @@ function record({ mat }: LineInput): Frame<LineState>[] {
 function View({ frame }: PluginViewProps<LineState>) {
   const s = frame.state;
   const cellTone = (r: number, c: number) => {
-    if (s.cur && s.cur[0] === r && s.cur[1] === c) return s.mat[r][c] === 1 ? 'active' : 'water';
-    if (s.mat[r][c] === 0) return 'water';
-    if (s.best[r][c] > 0) return s.best[r][c] === s.res ? 'path' : 'visited';
+    if (s.cur && s.cur[0]! === r && s.cur[1]! === c) return s.mat[r]![c] === 1 ? 'active' : 'water';
+    if (s.mat[r]![c] === 0) return 'water';
+    if (s.best[r]![c]! > 0) return s.best[r]![c] === s.res ? 'path' : 'visited';
     return 'land';
   };
-  const showDirs = s.cur && s.dirs && s.mat[s.cur[0]][s.cur[1]] === 1;
-  const at = s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—';
+  const showDirs = s.cur && s.dirs && s.mat[s.cur[0]!]![s.cur[1]!] === 1;
+  const at = s.cur ? `(${s.cur[0]!},${s.cur[1]!})` : '—';
   const rail = (
     <>
       {showDirs && (
@@ -163,11 +163,11 @@ function View({ frame }: PluginViewProps<LineState>) {
 function Inspector({ frame }: InspectorProps<LineState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const at = s.cur ? `(${s.cur[0]}, ${s.cur[1]})` : '—';
+  const at = s.cur ? `(${s.cur[0]!}, ${s.cur[1]!})` : '—';
   return (
     <VarGrid>
       <InspectorRow k="cell" v={at} />
-      <InspectorRow k="value" v={s.cur ? s.mat[s.cur[0]][s.cur[1]] : '—'} />
+      <InspectorRow k="value" v={s.cur ? s.mat[s.cur[0]!]![s.cur[1]!] : '—'} />
       <InspectorRow k="horizontal →" v={s.dirs ? s.dirs.hor : '—'} />
       <InspectorRow k="vertical ↓" v={s.dirs ? s.dirs.ver : '—'} />
       <InspectorRow k="diagonal ↘" v={s.dirs ? s.dirs.diag : '—'} />

@@ -49,7 +49,7 @@ interface QItem {
 
 function record({ grid, k }: SpgoInput): Frame<SpgoState>[] {
   const m = grid.length;
-  const n = grid[0].length;
+  const n = grid[0]!.length;
   // bestRem[r][c] = the largest remaining-k with which we have reached (r,c).
   const bestRem = Array.from({ length: m }, () => new Array<number>(n).fill(-1));
   const { emit, frames } = createRecorder<SpgoState>(() => ({
@@ -83,7 +83,7 @@ function record({ grid, k }: SpgoInput): Frame<SpgoState>[] {
   }
 
   let queue: QItem[] = [{ r: 0, c: 0, rem: k }];
-  bestRem[0][0] = k;
+  bestRem[0]![0] = k;
   let steps = 0;
 
   while (queue.length) {
@@ -95,9 +95,9 @@ function record({ grid, k }: SpgoInput): Frame<SpgoState>[] {
         const nr = r + dr;
         const nc = c + dc;
         if (nr < 0 || nr >= m || nc < 0 || nc >= n) continue;
-        const nextRem = rem - grid[nr][nc];
+        const nextRem = rem - grid[nr]![nc]!;
         // Skip if we'd run out of eliminations, or already reached this cell with >= remaining-k.
-        if (nextRem < 0 || nextRem <= bestRem[nr][nc]) continue;
+        if (nextRem < 0 || nextRem <= bestRem[nr]![nc]!) continue;
         if (nr === m - 1 && nc === n - 1) {
           emit(
             'GOAL',
@@ -114,7 +114,7 @@ function record({ grid, k }: SpgoInput): Frame<SpgoState>[] {
           );
           return frames;
         }
-        bestRem[nr][nc] = nextRem;
+        bestRem[nr]![nc] = nextRem;
         next.push({ r: nr, c: nc, rem: nextRem });
         opened.push(`(${nr}, ${nc}) [rem ${nextRem}]`);
       }
@@ -146,10 +146,10 @@ function View({ frame }: PluginViewProps<SpgoState>) {
   const s = frame.state;
   const cellTone = (r: number, c: number) => {
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
-    if (s.bestRem[r][c] >= 0) return 'visited';
-    return s.grid[r][c] === 1 ? 'water' : 'land';
+    if (s.bestRem[r]![c]! >= 0) return 'visited';
+    return s.grid[r]![c] === 1 ? 'water' : 'land';
   };
-  const label = (r: number, c: number) => (s.grid[r][c] === 1 ? '✕' : '·');
+  const label = (r: number, c: number) => (s.grid[r]![c] === 1 ? '✕' : '·');
   const answerTone = s.done ? (s.answer !== null && s.answer >= 0 ? 'good' : 'bad') : 'accent';
   const answerValue = s.answer !== null ? s.answer : s.steps;
   return (

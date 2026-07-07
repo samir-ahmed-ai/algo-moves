@@ -101,9 +101,9 @@ function record({ adj, pos, src, dst }: FSPInput): Frame<FSPState>[] {
       pathEdge: null,
     });
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (dist[nb] === -1) {
-        dist[nb] = dist[v] + 1;
+        dist[nb] = dist[v]! + 1;
         parent[nb] = v;
         color[nb] = 2;
         queue.push(nb);
@@ -130,9 +130,9 @@ function record({ adj, pos, src, dst }: FSPInput): Frame<FSPState>[] {
 
   // Reconstruct path from dst back to src, lighting each edge.
   const full: number[] = [];
-  for (let at = dst; at !== -1; at = parent[at]) full.unshift(at);
+  for (let at = dst; at !== -1; at = parent[at]!) full.unshift(at);
   // Dim all, then re-light path nodes as we walk it.
-  for (let i = 0; i < n; i++) color[i] = i === src || i === dst ? color[i] : 0;
+  for (let i = 0; i < n; i++) color[i]! = i === src || i === dst ? color[i]! : 0;
   path = [dst];
   color[dst] = 1;
   emit('REBUILD', `path tail ${dst}`, `Start the path at the destination ${dst}.`, {
@@ -140,10 +140,10 @@ function record({ adj, pos, src, dst }: FSPInput): Frame<FSPState>[] {
     path,
     pathEdge: null,
   });
-  for (let at = dst; parent[at] !== -1; at = parent[at]) {
-    const p = parent[at];
+  for (let at = dst; parent[at]! !== -1; at = parent[at]!) {
+    const p = parent[at]!;
     path.unshift(p);
-    color[p] = 1;
+    color[p]! = 1;
     emit(
       'REBUILD',
       `parent ${at} ← ${p}`,
@@ -164,7 +164,7 @@ function record({ adj, pos, src, dst }: FSPInput): Frame<FSPState>[] {
 
 function View({ frame }: PluginViewProps<FSPState>) {
   const s = frame.state;
-  const distVal = s.dist[s.dst] < 0 ? '—' : s.dist[s.dst];
+  const distVal = s.dist[s.dst]! < 0 ? '—' : s.dist[s.dst];
   return (
     <VizStage
       rail={
@@ -210,7 +210,7 @@ function Inspector({ frame }: InspectorProps<FSPState>) {
     <VarGrid>
       <InspectorRow k="src → dst" v={`${s.src} → ${s.dst}`} />
       <InspectorRow k="current" v={s.active ?? '—'} />
-      <InspectorRow k="dist[dst]" v={s.dist[s.dst] < 0 ? '−1' : s.dist[s.dst]} />
+      <InspectorRow k="dist[dst]" v={s.dist[s.dst]! < 0 ? '−1' : s.dist[s.dst]} />
       <InspectorRow k="path" v={s.path.length ? `[${s.path.join(' → ')}]` : '—'} />
       <div className="mt-1 border-t border-[var(--border)] pt-1">
         {s.parent.map((p, i) => (

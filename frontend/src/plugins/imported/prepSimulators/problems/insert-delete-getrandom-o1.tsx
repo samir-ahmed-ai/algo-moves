@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -34,7 +34,7 @@ function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
   const nums: number[] = [];
   const idx = new Map<number, number>();
 
-  const { emit, frames } = createRecorder<RsState>(() => ({
+  const { emit, frames } = createPrepRecorder<RsState>(() => ({
     nums: nums.slice(),
     op: '',
     out: null,
@@ -68,7 +68,7 @@ function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
       emit(
         'INSERT',
         `insert ${o.val}`,
-        `Insert(${o.val}): append at index ${nums.length - 1}, map[${o.val}]=${nums.length - 1} → return true.`,
+        `Insert(${o.val}): append at index ${nums.length - 1}, map[${o.val}]!=${nums.length - 1} → return true.`,
         { op: `insert ${o.val}`, out: true, active: nums.length - 1 },
         'good',
       );
@@ -84,7 +84,7 @@ function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
         );
         continue;
       }
-      const last = nums[nums.length - 1];
+      const last = nums[nums.length - 1]!;
       const lastIdx = nums.length - 1;
       emit(
         'REMOVE',
@@ -92,8 +92,8 @@ function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
         `Remove(${o.val}) at index ${i}: swap with last element ${last} at index ${lastIdx} so deletion is O(1).`,
         { op: `remove ${o.val}`, swapFrom: i, swapTo: lastIdx, active: i },
       );
-      nums[i] = last;
-      idx.set(last, i);
+      nums[i]! = last;
+      idx.set(last!, i);
       nums.pop();
       idx.delete(o.val);
       emit(
@@ -118,8 +118,8 @@ function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
       emit(
         'RANDOM',
         `pick idx ${pick}`,
-        `GetRandom: choose index ${pick} uniformly → return nums[${pick}] = ${nums[pick]}. (Demo uses fixed index ${pick}.)`,
-        { op: 'getRandom', out: nums[pick], active: pick },
+        `GetRandom: choose index ${pick} uniformly → return nums[${pick}]! = ${nums[pick]!}. (Demo uses fixed index ${pick}.)`,
+        { op: 'getRandom', out: nums[pick]!, active: pick },
         'good',
       );
     }

@@ -7,5 +7,8 @@ export interface ComplexityInfo {
 export function parseComplexity(text: string): ComplexityInfo {
   const time = text.match(/Time:\s*(O\([^)]+\)|[^|\n]+)/i)?.[1]?.trim();
   const space = text.match(/Space:\s*(O\([^)]+\)|[^\n]+)/i)?.[1]?.trim();
-  return { time, space };
+  return {
+    ...(time ? { time } : {}),
+    ...(space ? { space } : {}),
+  };
 }

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -24,8 +24,8 @@ interface MultiplyState {
   j: number | null; // index into num2 (multiplier digit)
   lo: number | null; // result slot i+j+1 (units place of this product)
   hi: number | null; // result slot i+j (carry lands here)
-  mul: number | null; // digit product num1[i] * num2[j]
-  sum: number | null; // mul + result[i+j+1]
+  mul: number | null; // digit product num1[i]! * num2[j]!
+  sum: number | null; // mul + result[i+j+1]!
   answer: string | null; // final stripped answer, once known
   done: boolean;
 }
@@ -39,7 +39,7 @@ function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
   const n = num2.length;
   const result = new Array<number>(m + n).fill(0);
 
-  const { emit, frames } = createRecorder<MultiplyState>(() => ({
+  const { emit, frames } = createPrepRecorder<MultiplyState>(() => ({
     num1,
     num2,
     result: result.slice(),
@@ -56,7 +56,7 @@ function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
   emit(
     'INIT',
     `${num1} × ${num2}`,
-    `Grade-school multiplication of "${num1}" × "${num2}". We keep a result array of ${m + n} digit slots. The product of num1[i] and num2[j] always lands at slot i+j+1, with any carry spilling into slot i+j.`,
+    `Grade-school multiplication of "${num1}" × "${num2}". We keep a result array of ${m + n} digit slots. The product of num1[i]! and num2[j]! always lands at slot i+j+1, with any carry spilling into slot i+j.`,
     {},
   );
 
@@ -77,26 +77,26 @@ function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
       const lo = i + j + 1;
       const hi = i + j;
       const mul = digitProduct(num1, i, num2, j);
-      const sum = mul + result[lo];
+      const sum = mul + result[lo]!;
       emit(
         'MUL',
-        `${num1[i]}·${num2[j]}=${mul}`,
-        `Multiply num1[${i}]=${num1[i]} by num2[${j}]=${num2[j]} to get ${mul}. Add the digit already sitting in slot i+j+1=${lo} (=${result[lo]}): sum = ${mul} + ${result[lo]} = ${sum}.`,
+        `${num1[i]!}·${num2[j]!}=${mul}`,
+        `Multiply num1[${i}]!=${num1[i]!} by num2[${j}]!=${num2[j]!} to get ${mul}. Add the digit already sitting in slot i+j+1=${lo} (=${result[lo]!}): sum = ${mul} + ${result[lo]!} = ${sum}.`,
         { i, j, lo, hi, mul, sum },
       );
-      result[lo] = sum % 10;
-      result[hi] += Math.floor(sum / 10);
+      result[lo]! = sum % 10;
+      result[hi]! += Math.floor(sum / 10);
       emit(
         'CARRY',
-        `[${lo}]=${result[lo]} +[${hi}]${Math.floor(sum / 10)}`,
-        `Write the units digit sum%10 = ${result[lo]} into slot ${lo}, and carry sum/10 = ${Math.floor(sum / 10)} up into slot i+j=${hi} (now ${result[hi]}).`,
+        `[${lo}]=${result[lo]!} +[${hi}]${Math.floor(sum / 10)}`,
+        `Write the units digit sum%10 = ${result[lo]!} into slot ${lo}, and carry sum/10 = ${Math.floor(sum / 10)} up into slot i+j=${hi} (now ${result[hi]!}).`,
         { i, j, lo, hi, mul, sum },
       );
     }
   }
 
   let start = 0;
-  while (start < result.length - 1 && result[start] === 0) {
+  while (start < result.length - 1 && result[start]! === 0) {
     emit(
       'STRIP',
       `skip [${start}]=0`,
@@ -179,13 +179,13 @@ function View({ frame }: PluginViewProps<MultiplyState>) {
 function Inspector({ frame }: InspectorProps<MultiplyState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const d1 = s.i !== null ? s.num1[s.i] : '—';
-  const d2 = s.j !== null ? s.num2[s.j] : '—';
+  const d1 = s.i !== null ? s.num1[s.i]! : '—';
+  const d2 = s.j !== null ? s.num2[s.j]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="num1 × num2" v={`${s.num1} × ${s.num2}`} />
-      <InspectorRow k="i / num1[i]" v={s.i !== null ? `${s.i} / ${d1}` : '—'} />
-      <InspectorRow k="j / num2[j]" v={s.j !== null ? `${s.j} / ${d2}` : '—'} />
+      <InspectorRow k="i / num1[i]!" v={s.i !== null ? `${s.i} / ${d1}` : '—'} />
+      <InspectorRow k="j / num2[j]!" v={s.j !== null ? `${s.j} / ${d2}` : '—'} />
       <InspectorRow k="mul (d1·d2)" v={s.mul ?? '—'} />
       <InspectorRow k="sum (mul+slot)" v={s.sum ?? '—'} />
       <InspectorRow k="slot i+j+1 / i+j" v={s.lo !== null ? `${s.lo} / ${s.hi ?? '—'}` : '—'} />
@@ -217,14 +217,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Primality trial division — different approach',
       },
     ],
-    explain: 'Each digit product a[i]*b[j] lands at result[i+j+1]',
+    explain: 'Each digit product a[i]!*b[j]! lands at result[i+j+1]!',
   },
   {
     id: 'init',
     prompt: 'At the start of a run (Multiply string numbers), what strategy is established?',
     choices: [
       {
-        label: 'Each digit product a[i]*b[j] lands — described in INIT caption',
+        label: 'Each digit product a[i]!*b[j]! lands — described in INIT caption',
         correct: true,
       },
       {
@@ -238,7 +238,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Grade-school multiplication of "" × "". We keep a result array of  digit slots. The product of num1[i] and num2[j] always lands at slot i+j+1, with any carry spilling into slot i+j.',
+      'Grade-school multiplication of "" × "". We keep a result array of  digit slots. The product of num1[i]! and num2[j]! always lands at slot i+j+1, with any carry spilling into slot i+j.',
   },
   {
     id: 'key-step',
@@ -300,7 +300,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(log x) time, O(1) space — wrong order of growth',
       },
     ],
-    explain: 'O(m*n). O(m+n). result[i+j+1]+=mul; carry to [i+j]; strip leading zeros',
+    explain: 'O(m*n). O(m+n). result[i+j+1]!+=mul; carry to [i+j]; strip leading zeros',
   },
   {
     id: 'outcome',

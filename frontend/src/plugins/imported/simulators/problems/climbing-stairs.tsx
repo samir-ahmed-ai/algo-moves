@@ -69,7 +69,7 @@ function record({ n }: StairsInput): Frame<StairsState>[] {
   }
 
   for (let i = 2; i <= n; i++) {
-    dp[i] = dp[i - 1] + dp[i - 2];
+    dp[i] = dp[i - 1]! + dp[i - 2]!;
     emit(
       'FILL',
       `dp[${i}]=${dp[i]}`,

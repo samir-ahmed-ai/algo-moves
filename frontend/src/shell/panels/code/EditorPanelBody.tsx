@@ -47,7 +47,6 @@ export function EditorPanelBody() {
         f.type === 'numberArray' ? (Array.isArray(v) ? v.join(', ') : '') : String(v ?? '');
     }
     return d;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputId, customInput, plugin]);
   const [draft, setDraft] = useState(seed);
   useEffect(() => setDraft(seed), [seed]);
@@ -156,7 +155,7 @@ export function EditorPanelBody() {
           <Field
             key={f.key}
             label={f.label}
-            hint={f.type === 'numberArray' ? 'comma / space separated' : undefined}
+            {...(f.type === 'numberArray' ? { hint: 'comma / space separated' } : {})}
           >
             <TextInput
               value={draft[f.key] ?? ''}

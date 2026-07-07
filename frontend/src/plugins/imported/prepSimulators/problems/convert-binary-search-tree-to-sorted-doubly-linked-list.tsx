@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -35,9 +35,9 @@ function record({ tree }: BstInput): Frame<BstState>[] {
   let first: number | null = null;
   let last: number | null = null;
 
-  const val = (i: number) => tree[i] as number;
+  const val = (i: number) => tree[i]! as number;
 
-  const { emit, frames } = createRecorder<BstState>(() => ({
+  const { emit, frames } = createPrepRecorder<BstState>(() => ({
     tree,
     status: status.slice(),
     active: null,
@@ -56,12 +56,12 @@ function record({ tree }: BstInput): Frame<BstState>[] {
   );
 
   const inorder = (i: number) => {
-    if (i >= tree.length || tree[i] == null) return;
+    if (i >= tree.length || tree[i]! == null) return;
     const l = 2 * i + 1;
     const r = 2 * i + 2;
 
     // Recurse left first — smaller values are linked before this node.
-    if (l < tree.length && tree[l] != null) {
+    if (l < tree.length && tree[l]! != null) {
       emit(
         'GO_LEFT',
         `left of ${val(i)}`,
@@ -72,7 +72,7 @@ function record({ tree }: BstInput): Frame<BstState>[] {
     inorder(l);
 
     // Visit node i: this is the "process" step of in-order.
-    status[i] = 'active';
+    status[i]! = 'active';
     if (last != null) {
       emit(
         'LINK',
@@ -91,7 +91,7 @@ function record({ tree }: BstInput): Frame<BstState>[] {
     }
     order.push(i);
     last = i;
-    status[i] = 'done';
+    status[i]! = 'done';
     emit(
       'ADVANCE',
       `last = ${val(i)}`,
@@ -100,7 +100,7 @@ function record({ tree }: BstInput): Frame<BstState>[] {
     );
 
     // Recurse right — larger values are linked after this node.
-    if (r < tree.length && tree[r] != null) {
+    if (r < tree.length && tree[r]! != null) {
       emit(
         'GO_RIGHT',
         `right of ${val(i)}`,
@@ -138,15 +138,15 @@ function record({ tree }: BstInput): Frame<BstState>[] {
 function View({ frame }: PluginViewProps<BstState>) {
   const s = frame.state;
   const nodeClass = (i: number) => {
-    const st = s.status[i] ?? 'idle';
+    const st = s.status[i]! ?? 'idle';
     if (st === 'active') return 'team-1';
     if (st === 'done') return 'team-2';
     return 'team-0';
   };
-  const chain = s.order.map((i) => s.tree[i]);
+  const chain = s.order.map((i) => s.tree[i]!);
   const chainStr = chain.length ? chain.join(' ⇄ ') : '·';
-  const headVal = s.first !== null ? s.tree[s.first] : null;
-  const tailVal = s.last !== null ? s.tree[s.last] : null;
+  const headVal = s.first !== null ? s.tree[s.first]! : null;
+  const tailVal = s.last !== null ? s.tree[s.last]! : null;
 
   return (
     <div className="board-area">
@@ -177,14 +177,14 @@ function View({ frame }: PluginViewProps<BstState>) {
 function Inspector({ frame }: InspectorProps<BstState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const nodeVal = (i: number | null) => (i !== null && s.tree[i] != null ? s.tree[i] : '—');
+  const nodeVal = (i: number | null) => (i !== null && s.tree[i]! != null ? s.tree[i]! : '—');
   return (
     <VarGrid>
       <InspectorRow k="active node" v={s.active !== null ? nodeVal(s.active) : '—'} />
       <InspectorRow k="first (head)" v={nodeVal(s.first)} />
       <InspectorRow k="last (tail)" v={nodeVal(s.last)} />
       <InspectorRow k="linked count" v={s.order.length} />
-      <InspectorRow k="list" v={s.order.length ? s.order.map((i) => s.tree[i]).join(',') : '…'} />
+      <InspectorRow k="list" v={s.order.length ? s.order.map((i) => s.tree[i]!).join(',') : '…'} />
       <InspectorRow k="circular" v={s.closed ? 'yes' : s.done ? 'empty' : '…'} />
     </VarGrid>
   );
@@ -316,7 +316,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as BstState | undefined;
     if (!s || s.order.length === 0) return { ok: false, label: 'empty' };
-    const seq = s.order.map((i) => s.tree[i]);
+    const seq = s.order.map((i) => s.tree[i]!);
     return { ok: s.closed, label: seq.join(' ⇄ ') };
   },
 };

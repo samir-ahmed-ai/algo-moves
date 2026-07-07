@@ -124,9 +124,9 @@ export function useWorkspaceKeyboard({
         present,
         helpOpen,
         paletteOpen,
-        hasSiblingNav,
-        hasPrevProblemNav,
-        hasNextProblemNav,
+        ...(hasSiblingNav !== undefined ? { hasSiblingNav } : {}),
+        ...(hasPrevProblemNav !== undefined ? { hasPrevProblemNav } : {}),
+        ...(hasNextProblemNav !== undefined ? { hasNextProblemNav } : {}),
       });
       if (action === 'none') return;
       e.preventDefault();

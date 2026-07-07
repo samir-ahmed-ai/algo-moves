@@ -81,9 +81,9 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
         { active: v, inspect: null, clashEdge: null },
       );
 
-      for (const nb of adj[v]) {
+      for (const nb of adj[v]!) {
         if (color[nb] === 0) {
-          color[nb] = 3 - color[v];
+          color[nb] = 3 - color[v]!;
           queue.push(nb);
           emit(
             'PAINT',

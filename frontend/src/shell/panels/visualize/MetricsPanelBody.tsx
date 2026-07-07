@@ -11,10 +11,12 @@ import {
 export function MetricsBody() {
   const { plugin } = useCanvasStatic();
   const { frames, frame, player } = useCanvasFrame();
-  const verdict = plugin.verdict?.(frames);
+  const verdict = plugin.verdict?.([...frames]);
   const counts = new Map<string, number>();
   for (let i = 0; i <= player.index && i < frames.length; i++) {
-    const t = frames[i].move.type.toLowerCase();
+    const frame = frames[i];
+    if (!frame) continue;
+    const t = frame.move.type.toLowerCase();
     counts.set(t, (counts.get(t) ?? 0) + 1);
   }
   const tally = [...counts.entries()].sort((a, b) => b[1] - a[1]);

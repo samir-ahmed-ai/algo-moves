@@ -56,8 +56,8 @@ function record({ n, logs, pos }: EMInput): Frame<EMState>[] {
 
   const find = (x: number): number => {
     while (parent[x] !== x) {
-      parent[x] = parent[parent[x]];
-      x = parent[x];
+      parent[x]! = parent[parent[x]!]!;
+      x = parent[x]!;
     }
     return x;
   };
@@ -82,8 +82,8 @@ function record({ n, logs, pos }: EMInput): Frame<EMState>[] {
   );
 
   for (const [ts, x, y] of sorted) {
-    adj[x].push(y);
-    adj[y].push(x);
+    adj[x]!.push(y);
+    adj[y]!.push(x);
     const rx = find(x);
     const ry = find(y);
     if (rx === ry) {
@@ -98,12 +98,12 @@ function record({ n, logs, pos }: EMInput): Frame<EMState>[] {
     // Union by size.
     let big = rx;
     let small = ry;
-    if (size[big] < size[small]) {
+    if (size[big]! < size[small]!) {
       big = ry;
       small = rx;
     }
     parent[small] = big;
-    size[big] += size[small];
+    size[big]! += size[small]!;
     components -= 1;
     if (components === 1 && earliest === null) {
       earliest = ts;
@@ -147,7 +147,7 @@ function record({ n, logs, pos }: EMInput): Frame<EMState>[] {
 
 function colorOf(parent: number[], node: number): number {
   let r = node;
-  while (parent[r] !== r) r = parent[r];
+  while (parent[r] !== r) r = parent[r]!;
   return r % 3;
 }
 

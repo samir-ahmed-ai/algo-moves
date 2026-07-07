@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -41,7 +41,7 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
     { ch: 'c', cnt: c },
   ];
 
-  const { emit, frames } = createRecorder<HappyState>(() => ({
+  const { emit, frames } = createPrepRecorder<HappyState>(() => ({
     res: res.slice(),
     counts: [],
     pickIdx: null,
@@ -58,15 +58,14 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
     { counts: sortedView().map((e) => ({ ...e })), pickIdx: null, skipIdx: null, done: false },
   );
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const sorted = sortedView();
     let pick = -1;
     let skip: number | null = null;
     for (let i = 0; i < sorted.length; i++) {
-      if (sorted[i].cnt === 0) continue;
+      if (sorted[i]!.cnt === 0) continue;
       const n = res.length;
-      if (n >= 2 && res[n - 1] === sorted[i].ch && res[n - 2] === sorted[i].ch) {
+      if (n >= 2 && res[n - 1]! === sorted[i]!.ch && res[n - 2]! === sorted[i]!.ch) {
         // Would create three-in-a-row; remember the first such skip for teaching.
         if (skip === null) skip = i;
         continue;
@@ -86,12 +85,12 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
       break;
     }
 
-    const chosen = sorted[pick].ch;
+    const chosen = sorted[pick]!.ch;
     if (skip !== null) {
       emit(
         'SKIP',
-        `skip ${sorted[skip].ch}`,
-        `The highest-remaining letter '${sorted[skip].ch}' already sits at the tail twice ("${res
+        `skip ${sorted[skip]!.ch}`,
+        `The highest-remaining letter '${sorted[skip]!.ch}' already sits at the tail twice ("${res
           .slice(-2)
           .join(
             '',
@@ -189,14 +188,14 @@ function solve(a: number, b: number, c: number): string {
     const sorted = counts.slice().sort((x, y) => y.cnt - x.cnt);
     let pick = -1;
     for (let i = 0; i < sorted.length; i++) {
-      if (sorted[i].cnt === 0) continue;
+      if (sorted[i]!.cnt === 0) continue;
       const n = res.length;
-      if (n >= 2 && res[n - 1] === sorted[i].ch && res[n - 2] === sorted[i].ch) continue;
+      if (n >= 2 && res[n - 1]! === sorted[i]!.ch && res[n - 2]! === sorted[i]!.ch) continue;
       pick = i;
       break;
     }
     if (pick === -1) break;
-    const chosen = sorted[pick].ch;
+    const chosen = sorted[pick]!.ch;
     res.push(chosen);
     counts.find((e) => e.ch === chosen)!.cnt--;
   }

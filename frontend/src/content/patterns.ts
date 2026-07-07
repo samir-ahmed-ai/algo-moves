@@ -21,7 +21,7 @@ export interface PatternCard {
   tradeoff?: string;
 }
 
-const PATTERNS: Record<string, PatternCard> = {
+const PATTERNS: Readonly<Record<string, Readonly<PatternCard>>> = {
   bfs: {
     id: 'bfs',
     title: 'Breadth-first search',
@@ -205,13 +205,19 @@ const PATTERNS: Record<string, PatternCard> = {
   },
 };
 
-export const ALL_PATTERN_CARDS = Object.values(PATTERNS);
+export const ALL_PATTERN_CARDS: readonly Readonly<PatternCard>[] = Object.freeze(
+  Object.values(PATTERNS),
+);
 
-export function patternsForTags(tags: string[]): PatternCard[] {
+function normalizePatternTag(tag: string): string {
+  return tag.trim().toLowerCase();
+}
+
+export function patternsForTags(tags: readonly string[]): PatternCard[] {
   const seen = new Set<string>();
   const out: PatternCard[] = [];
   for (const t of tags) {
-    const key = t.trim().toLowerCase();
+    const key = normalizePatternTag(t);
     const card = PATTERNS[key];
     if (card && !seen.has(card.id)) {
       seen.add(card.id);

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -21,12 +21,12 @@ interface WordWrapState {
   maxWidth: number;
   // Optimal cost to wrap words[i..n); INF = not yet computed.
   dp: number[];
-  // next[i] = index just past the last word placed on the line starting at i.
+  // next[i]! = index just past the last word placed on the line starting at i.
   next: number[];
   i: number | null; // line-start word being solved (outer loop)
   j: number | null; // last word tried on this candidate line (inner loop)
-  length: number | null; // width of words[i..j] with single spaces
-  cost: number | null; // rem^2 + dp[j+1] for the current candidate
+  length: number | null; // width of words[i..j]! with single spaces
+  cost: number | null; // rem^2 + dp[j+1]! for the current candidate
   lines: string[]; // reconstructed wrapped output (only on the final frame)
   done: boolean;
 }
@@ -41,9 +41,9 @@ function record({ words, maxWidth }: WordWrapInput): Frame<WordWrapState>[] {
   const n = words.length;
   const dp = new Array<number>(n + 1).fill(INF);
   const next = new Array<number>(Math.max(n, 0)).fill(0);
-  dp[n] = 0;
+  dp[n]! = 0;
 
-  const { emit, frames } = createRecorder<WordWrapState>(() => ({
+  const { emit, frames } = createPrepRecorder<WordWrapState>(() => ({
     words,
     maxWidth,
     dp: dp.slice(),
@@ -59,29 +59,29 @@ function record({ words, maxWidth }: WordWrapInput): Frame<WordWrapState>[] {
   emit(
     'INIT',
     `maxWidth=${maxWidth}`,
-    `Word Wrap: pack these ${n} words into lines no wider than ${maxWidth}. Each non-last line pays slack² (the leftover space squared). dp[i] = the minimum total cost to wrap words[i..end], solved right-to-left so dp[i+1..] are already known.`,
+    `Word Wrap: pack these ${n} words into lines no wider than ${maxWidth}. Each non-last line pays slack² (the leftover space squared). dp[i]! = the minimum total cost to wrap words[i..end]!, solved right-to-left so dp[i+1..]! are already known.`,
     {},
   );
 
   for (let i = n - 1; i >= 0; i--) {
-    dp[i] = INF;
+    dp[i]! = INF;
     let length = 0;
     emit(
       'LINE',
       `i=${i}`,
-      `Solve dp[${i}]: what is the cheapest way to lay out lines starting from word "${words[i]}"? Try every line that begins at word ${i}, adding one more word at a time until it overflows.`,
+      `Solve dp[${i}]!: what is the cheapest way to lay out lines starting from word "${words[i]!}"? Try every line that begins at word ${i}, adding one more word at a time until it overflows.`,
       { i, length: 0 },
     );
 
     for (let j = i; j < n; j++) {
-      if (j > i) length++; // the space before words[j]
-      length += words[j].length;
+      if (j > i) length++; // the space before words[j]!
+      length += words[j]!.length;
 
       if (length > maxWidth) {
         emit(
           'OVERFLOW',
           `${length}>${maxWidth}`,
-          `Adding "${words[j]}" makes the line width ${length}, which exceeds ${maxWidth}. No line can hold words ${i}..${j} or beyond, so stop extending this line.`,
+          `Adding "${words[j]!}" makes the line width ${length}, which exceeds ${maxWidth}. No line can hold words ${i}..${j} or beyond, so stop extending this line.`,
           { i, j, length },
           'bad',
         );
@@ -91,11 +91,11 @@ function record({ words, maxWidth }: WordWrapInput): Frame<WordWrapState>[] {
       let cost = 0;
       if (j < n - 1) {
         const rem = maxWidth - length;
-        cost = rem * rem + dp[j + 1];
+        cost = rem * rem + dp[j + 1]!;
         emit(
           'TRY',
           `cost=${cost}`,
-          `Line = words ${i}..${j} ("${joinWords(words.slice(i, j + 1))}"), width ${length}, slack ${rem}. Cost = slack² + dp[${j + 1}] = ${rem}² + ${dp[j + 1]} = ${cost}. Break after word ${j}?`,
+          `Line = words ${i}..${j} ("${joinWords(words.slice(i, j + 1))}"), width ${length}, slack ${rem}. Cost = slack² + dp[${j + 1}]! = ${rem}² + ${dp[j + 1]!} = ${cost}. Break after word ${j}?`,
           { i, j, length, cost },
         );
       } else {
@@ -107,13 +107,13 @@ function record({ words, maxWidth }: WordWrapInput): Frame<WordWrapState>[] {
         );
       }
 
-      if (cost < dp[i]) {
-        dp[i] = cost;
-        next[i] = j + 1;
+      if (cost < dp[i]!) {
+        dp[i]! = cost;
+        next[i]! = j + 1;
         emit(
           'PICK',
-          `dp[${i}]=${cost}`,
-          `${cost} beats the best cost seen for dp[${i}], so record it: dp[${i}] = ${cost} and cut the first line right after word ${j} (next[${i}] = ${j + 1}).`,
+          `dp[${i}]!=${cost}`,
+          `${cost} beats the best cost seen for dp[${i}]!, so record it: dp[${i}]! = ${cost} and cut the first line right after word ${j} (next[${i}]! = ${j + 1}).`,
           { i, j, length, cost, dp: dp.slice(), next: next.slice() },
           'good',
         );
@@ -125,15 +125,15 @@ function record({ words, maxWidth }: WordWrapInput): Frame<WordWrapState>[] {
   const lines: string[] = [];
   let cur = 0;
   while (cur < n) {
-    const end = next[cur] - 1;
+    const end = next[cur]! - 1;
     lines.push(joinWords(words.slice(cur, end + 1)));
-    cur = next[cur];
+    cur! = next[cur]!;
   }
 
   emit(
     'DONE',
-    `cost=${n > 0 ? dp[0] : 0}`,
-    `Table complete. dp[0] = ${n > 0 ? dp[0] : 0} is the minimum total slack² cost. Follow next[] from word 0 to read off the wrapped lines shown below.`,
+    `cost=${n > 0 ? dp[0]! : 0}`,
+    `Table complete. dp[0]! = ${n > 0 ? dp[0]! : 0} is the minimum total slack² cost. Follow next[] from word 0 to read off the wrapped lines shown below.`,
     { done: true, lines },
     'good',
   );
@@ -204,7 +204,7 @@ function Inspector({ frame }: InspectorProps<WordWrapState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const dpAt = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
+    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx]! >= INF ? '∞' : s.dp[idx]!) : '—';
   return (
     <VarGrid>
       <InspectorRow k="maxWidth" v={s.maxWidth} />
@@ -212,8 +212,8 @@ function Inspector({ frame }: InspectorProps<WordWrapState>) {
       <InspectorRow k="j (last word)" v={s.j ?? '—'} />
       <InspectorRow k="line width" v={s.length ?? '—'} />
       <InspectorRow k="candidate cost" v={s.cost ?? '—'} />
-      <InspectorRow k="dp[i]" v={dpAt(s.i)} />
-      <InspectorRow k="answer dp[0]" v={s.done ? dpAt(0) : '…'} />
+      <InspectorRow k="dp[i]!" v={dpAt(s.i)} />
+      <InspectorRow k="answer dp[0]!" v={s.done ? dpAt(0) : '…'} />
     </VarGrid>
   );
 }
@@ -261,7 +261,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Word Wrap: pack these  words into lines no wider than . Each non-last line pays slack² (the leftover space squared). dp[i] = the minimum total cost to wrap words[i..end], solved right-to-left so dp[i+1..] are already known.',
+      'Word Wrap: pack these  words into lines no wider than . Each non-last line pays slack² (the leftover space squared). dp[i]! = the minimum total cost to wrap words[i..end]!, solved right-to-left so dp[i+1..]! are already known.',
   },
   {
     id: 'key-step',
@@ -322,14 +322,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n^2). O(n). dp[i]=min over j of (rem^2 + dp[j+1]); next[i] records the cut',
+    explain: 'O(n^2). O(n). dp[i]!=min over j of (rem^2 + dp[j+1]!); next[i]! records the cut',
   },
   {
     id: 'outcome',
     prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: 'Table complete. dp[0] = — final DONE caption',
+        label: 'Table complete. dp[0]! = — final DONE caption',
         correct: true,
       },
       {
@@ -343,7 +343,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Table complete. dp[0] =  is the minimum total slack² cost. Follow next[] from word 0 to read off the wrapped lines shown below.',
+      'Table complete. dp[0]! =  is the minimum total slack² cost. Follow next[] from word 0 to read off the wrapped lines shown below.',
   },
 ];
 export const simulator: ProblemSimulator = {
@@ -366,7 +366,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as WordWrapState | undefined;
     if (!s || s.words.length === 0) return { ok: true, label: 'cost 0' };
-    const total = s.dp[0] >= INF ? INF : s.dp[0];
+    const total = s.dp[0]! >= INF ? INF : s.dp[0]!;
     return { ok: true, label: `cost ${total} · ${s.lines.length} lines` };
   },
 };

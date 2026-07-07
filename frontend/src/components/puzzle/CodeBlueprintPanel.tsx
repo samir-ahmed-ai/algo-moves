@@ -32,15 +32,16 @@ export function CodeBlueprintPanel({
       onClick={(e) => e.stopPropagation()}
       role="region"
       aria-label="Solution blueprint"
+      data-inline={inline ? 'true' : 'false'}
     >
       <header className="code-blueprint-header">
         <div className="code-blueprint-title-wrap">
           <ScanEye className="code-blueprint-title-icon" aria-hidden />
           <div className="min-w-0">
             <h2 className="code-blueprint-title">Solution blueprint</h2>
-            {!inline && (
-              <p className="code-blueprint-subtitle">{pieces.length} blocks · source order</p>
-            )}
+            <p className="code-blueprint-subtitle">
+              {pieces.length} block{pieces.length === 1 ? '' : 's'} · source order
+            </p>
           </div>
         </div>
         <button

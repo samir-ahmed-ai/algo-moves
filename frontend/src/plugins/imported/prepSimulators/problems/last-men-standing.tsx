@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -27,7 +27,7 @@ interface LastMenInput {
 interface LastMenState {
   n: number;
   k: number;
-  // ring of person labels still alive, in walking order. ringOrder[curIdx] is `cur`.
+  // ring of person labels still alive, in walking order. ringOrder[curIdx]! is `cur`.
   ring: number[];
   curIdx: number | null; // position of `cur` within ring
   doomedIdx: number | null; // position of cur.Next (the person about to be removed)
@@ -37,7 +37,7 @@ interface LastMenState {
 }
 
 function record({ n, k }: LastMenInput): Frame<LastMenState>[] {
-  const { emit, frames } = createRecorder<LastMenState>(() => ({
+  const { emit, frames } = createPrepRecorder<LastMenState>(() => ({
     n: n,
     k: k,
     ring: [],
@@ -88,25 +88,25 @@ function record({ n, k }: LastMenInput): Frame<LastMenState>[] {
       cur = (cur + 1) % ring.length;
       emit(
         'WALK',
-        `step ${i}/${k - 1} → ${ring[cur]}`,
-        `Counting: advance cur one position to person ${ring[cur]} (step ${i} of ${k - 1}). After all k−1 steps, cur.Next will be the person we eliminate.`,
+        `step ${i}/${k - 1} → ${ring[cur]!}`,
+        `Counting: advance cur one position to person ${ring[cur]!} (step ${i} of ${k - 1}). After all k−1 steps, cur.Next will be the person we eliminate.`,
         { ring: ring, curIdx: cur, doomedIdx: null, eliminated: eliminated, survivor: null },
       );
     }
 
     // cur.Next is the victim — the next person clockwise.
     const doomedIdx = (cur + 1) % ring.length;
-    const victim = ring[doomedIdx];
+    const victim = ring[doomedIdx]!;
     emit(
       'MARK',
       `drop ${victim}`,
-      `cur is on person ${ring[cur]}; the very next person, ${victim}, is the k-th in this count and gets eliminated. In the list this is cur.Next = cur.Next.Next.`,
+      `cur is on person ${ring[cur]!}; the very next person, ${victim}, is the k-th in this count and gets eliminated. In the list this is cur.Next = cur.Next.Next.`,
       { ring: ring, curIdx: cur, doomedIdx: doomedIdx, eliminated: eliminated, survivor: null },
       'bad',
     );
 
     // Splice the victim out (Go: cur.Next = cur.Next.Next).
-    eliminated.push(victim);
+    eliminated.push(victim!);
     ring.splice(doomedIdx, 1);
     // Removing an element before/at cur shifts cur's index; victim was after cur
     // unless it wrapped to index 0. Recompute cur's position by its label.
@@ -121,12 +121,12 @@ function record({ n, k }: LastMenInput): Frame<LastMenState>[] {
         curIdx: cur,
         doomedIdx: null,
         eliminated: eliminated,
-        survivor: ring.length === 1 ? ring[0] : null,
+        survivor: ring.length === 1 ? ring[0]! : null,
       },
     );
   }
 
-  const survivor = ring[0];
+  const survivor = ring[0]!;
   emit(
     'DONE',
     `survivor ${survivor}`,
@@ -150,7 +150,7 @@ function record({ n, k }: LastMenInput): Frame<LastMenState>[] {
 function curLabelAfterSplice(postRing: number[], curIdxPre: number, doomedIdxPre: number): number {
   const adjusted = doomedIdxPre <= curIdxPre ? curIdxPre - 1 : curIdxPre;
   const clamped = ((adjusted % postRing.length) + postRing.length) % postRing.length;
-  return postRing[clamped];
+  return postRing[clamped]!;
 }
 
 function View({ frame }: PluginViewProps<LastMenState>) {
@@ -162,14 +162,14 @@ function View({ frame }: PluginViewProps<LastMenState>) {
     pointers.push({ i: s.doomedIdx, label: 'drop', tone: 'bad', place: 'below' });
 
   const tone = (i: number) => {
-    if (s.survivor !== null && s.ring[i] === s.survivor) return 'found';
+    if (s.survivor !== null && s.ring[i]! === s.survivor) return 'found';
     if (s.doomedIdx === i) return 'dead';
     if (s.curIdx === i) return 'match';
     return '';
   };
 
-  const cur = s.curIdx !== null ? s.ring[s.curIdx] : null;
-  const doomed = s.doomedIdx !== null ? s.ring[s.doomedIdx] : null;
+  const cur = s.curIdx !== null ? s.ring[s.curIdx]! : null;
+  const doomed = s.doomedIdx !== null ? s.ring[s.doomedIdx]! : null;
 
   const rail = (
     <>
@@ -198,8 +198,8 @@ function View({ frame }: PluginViewProps<LastMenState>) {
 function Inspector({ frame }: InspectorProps<LastMenState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.curIdx !== null ? s.ring[s.curIdx] : null;
-  const doomed = s.doomedIdx !== null ? s.ring[s.doomedIdx] : null;
+  const cur = s.curIdx !== null ? s.ring[s.curIdx]! : null;
+  const doomed = s.doomedIdx !== null ? s.ring[s.doomedIdx]! : null;
   return (
     <VarGrid>
       <InspectorRow k="n (people)" v={s.n} />

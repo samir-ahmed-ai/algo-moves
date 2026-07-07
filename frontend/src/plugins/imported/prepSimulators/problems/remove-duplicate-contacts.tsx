@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -54,7 +54,7 @@ function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
   const emailOwner = new Map<string, number>();
   const byId = new Map<number, Contact>();
 
-  const { emit, frames } = createRecorder<ContactsState>(() => ({
+  const { emit, frames } = createPrepRecorder<ContactsState>(() => ({
     ids,
     parent: [...parent.entries()],
     emailOwner: [...emailOwner.entries()],
@@ -74,33 +74,33 @@ function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
 
   // Pass 1: build the union-find structure by scanning every email.
   for (let ci = 0; ci < contacts.length; ci++) {
-    const c = contacts[ci];
-    parent.set(c.id, c.id);
-    byId.set(c.id, c);
+    const c = contacts[ci]!;
+    parent.set(c!.id, c!.id);
+    byId.set(c!.id, c!);
     emit(
       'CLAIM_CONTACT',
-      `id ${c.id}`,
-      `Register contact #${c.id} as the root of its own group: parent[${c.id}] = ${c.id}. Now scan its ${c.emails.length} email(s).`,
+      `id ${c!.id}`,
+      `Register contact #${c!.id} as the root of its own group: parent[${c!.id}]! = ${c!.id}. Now scan its ${c!.emails.length} email(s).`,
       { i: ci },
     );
 
-    for (const e of c.emails) {
+    for (const e of c!.emails) {
       const existing = emailOwner.get(e);
       if (existing !== undefined) {
         emit(
           'UNION',
           `${e} → id ${existing}`,
-          `Email "${e}" is already owned by contact #${existing}, so #${c.id} and #${existing} are the same person. Union the two groups.`,
+          `Email "${e}" is already owned by contact #${existing}, so #${c!.id} and #${existing} are the same person. Union the two groups.`,
           { i: ci, owner: idxOf(existing), email: e },
           'good',
         );
-        union(c.id, existing);
+        union(c!.id, existing);
       } else {
-        emailOwner.set(e, c.id);
+        emailOwner.set(e, c!.id);
         emit(
           'OWN_EMAIL',
-          `${e} → id ${c.id}`,
-          `Email "${e}" is new, so contact #${c.id} claims it: emailOwner["${e}"] = ${c.id}.`,
+          `${e} → id ${c!.id}`,
+          `Email "${e}" is new, so contact #${c!.id} claims it: emailOwner["${e}"]! = ${c!.id}.`,
           { i: ci, email: e },
         );
       }
@@ -111,13 +111,13 @@ function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
   const seen = new Set<number>();
   const roots: number[] = [];
   for (let ci = 0; ci < contacts.length; ci++) {
-    const c = contacts[ci];
-    const root = find(c.id);
+    const c = contacts[ci]!;
+    const root = find(c!.id);
     if (seen.has(root)) {
       emit(
         'SKIP',
-        `id ${c.id} dup`,
-        `Contact #${c.id} resolves to root #${root}, which we already kept — skip it as a duplicate.`,
+        `id ${c!.id} dup`,
+        `Contact #${c!.id} resolves to root #${root}, which we already kept — skip it as a duplicate.`,
         { i: ci, owner: idxOf(root) },
         'bad',
       );
@@ -128,7 +128,7 @@ function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
     emit(
       'KEEP',
       `keep id ${root}`,
-      `Contact #${c.id} resolves to root #${root}, seen for the first time — keep one contact (#${root}) for this group.`,
+      `Contact #${c!.id} resolves to root #${root}, seen for the first time — keep one contact (#${root}) for this group.`,
       { i: ci, owner: idxOf(root), roots: [...roots] },
       'good',
     );
@@ -152,8 +152,8 @@ function View({ frame }: PluginViewProps<ContactsState>) {
     pointers.push({ i: s.owner, label: 'root', tone: 'good', place: 'below' });
   const rootSet = new Set(s.roots);
   const tone = (i: number) => {
-    const id = s.ids[i];
-    if (rootSet.has(id)) return 'found';
+    const id = s.ids[i]!;
+    if (rootSet.has(id!)) return 'found';
     if (s.i === i) return 'match';
     return '';
   };
@@ -193,7 +193,7 @@ function Inspector({ frame }: InspectorProps<ContactsState>) {
   return (
     <VarGrid>
       <InspectorRow k="total contacts" v={s.ids.length} />
-      <InspectorRow k="current id" v={s.i !== null ? s.ids[s.i] : '—'} />
+      <InspectorRow k="current id" v={s.i !== null ? s.ids[s.i]! : '—'} />
       <InspectorRow k="email" v={s.email ?? '—'} />
       <InspectorRow k="emails seen" v={s.emailOwner.length} />
       <InspectorRow k="groups so far" v={new Set(s.parent.map(([, p]) => p)).size || '—'} />
@@ -265,7 +265,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Remaining input skipped — early return path',
       },
     ],
-    explain: 'Email "" is new, so contact # claims it: emailOwner[""] = .',
+    explain: 'Email "" is new, so contact # claims it: emailOwner[""]! = .',
   },
   {
     id: 'state',

@@ -48,11 +48,12 @@ export function QuizAssembleGames({ onWinContinue }: { onWinContinue?: () => voi
           <game.Component
             key={`${item.id}:${active}:${mode}`}
             pieces={pieces}
-            lang={lang}
+            {...(lang !== undefined ? { lang } : {})}
             storageKey={scope}
             stats={stats}
-            onComplete={onWinContinue}
-            onContinue={onWinContinue}
+            {...(onWinContinue !== undefined
+              ? { onComplete: onWinContinue, onContinue: onWinContinue }
+              : {})}
           />
         </div>
       ) : (
@@ -60,9 +61,11 @@ export function QuizAssembleGames({ onWinContinue }: { onWinContinue?: () => voi
           <ReassemblePane
             key={reassembleKey}
             pieces={pieces}
-            lang={lang}
+            {...(lang !== undefined ? { lang } : {})}
             variant="mobile"
-            onComplete={(_placed, _mistakes) => onWinContinue?.()}
+            onComplete={(_placed, _mistakes) => {
+              onWinContinue?.();
+            }}
           />
         </div>
       )}

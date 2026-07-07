@@ -39,7 +39,7 @@ interface RsqState {
 
 function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[] {
   const m = matrix.length;
-  const n = matrix[0].length;
+  const n = matrix[0]!.length;
   const pre: (number | null)[][] = Array.from({ length: m + 1 }, () =>
     new Array<number | null>(n + 1).fill(null),
   );
@@ -62,8 +62,8 @@ function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[]
   );
 
   // Zero-padding row and column.
-  for (let j = 0; j <= n; j++) pre[0][j] = 0;
-  for (let i = 0; i <= m; i++) pre[i][0] = 0;
+  for (let j = 0; j <= n; j++) pre[0]![j] = 0;
+  for (let i = 0; i <= m; i++) pre[i]![0] = 0;
   emit(
     'BASE',
     `border = 0`,
@@ -73,15 +73,15 @@ function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[]
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      const cell = matrix[i - 1][j - 1];
-      const top = pre[i - 1][j] as number;
-      const left = pre[i][j - 1] as number;
-      const diag = pre[i - 1][j - 1] as number;
-      pre[i][j] = cell + top + left - diag;
+      const cell = matrix[i - 1]![j - 1];
+      const top = pre[i - 1]![j] as number;
+      const left = pre[i]![j - 1] as number;
+      const diag = pre[i - 1]![j - 1] as number;
+      pre[i]![j] = cell! + top + left - diag;
       emit(
         'FILL',
-        `pre[${i}][${j}]=${pre[i][j]}`,
-        `pre[${i}][${j}] = matrix[${i - 1}][${j - 1}](${cell}) + pre[${i - 1}][${j}](${top}) + pre[${i}][${j - 1}](${left}) − pre[${i - 1}][${j - 1}](${diag}) = ${pre[i][j]}.`,
+        `pre[${i}][${j}]=${pre[i]![j]}`,
+        `pre[${i}][${j}] = matrix[${i - 1}][${j - 1}](${cell}) + pre[${i - 1}][${j}](${top}) + pre[${i}][${j - 1}](${left}) − pre[${i - 1}][${j - 1}](${diag}) = ${pre[i]![j]}.`,
         { cur: [i, j], corners: [], answer: null },
       );
     }
@@ -99,10 +99,10 @@ function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[]
   const B: [number, number] = [row1, col2 + 1]; // -
   const C: [number, number] = [row2 + 1, col1]; // -
   const D: [number, number] = [row1, col1]; // +
-  const vA = pre[A[0]][A[1]] as number;
-  const vB = pre[B[0]][B[1]] as number;
-  const vC = pre[C[0]][C[1]] as number;
-  const vD = pre[D[0]][D[1]] as number;
+  const vA = pre[A[0]]![A[1]] as number;
+  const vB = pre[B[0]]![B[1]] as number;
+  const vC = pre[C[0]]![C[1]] as number;
+  const vD = pre[D[0]]![D[1]] as number;
   const all: { cell: [number, number]; sign: 1 | -1 }[] = [
     { cell: A, sign: 1 },
     { cell: B, sign: -1 },
@@ -114,19 +114,19 @@ function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[]
     'QUERY',
     `+pre[${A[0]}][${A[1]}]=${vA}`,
     `Start with the big rectangle pre[${A[0]}][${A[1]}] = ${vA}: the sum of everything from the origin to the bottom-right corner of the query.`,
-    { cur: A, corners: [all[0]], answer: null },
+    { cur: A, corners: [all[0]!], answer: null },
   );
   emit(
     'QUERY',
     `−pre[${B[0]}][${B[1]}]=${vB}`,
     `Subtract the band above the query: pre[${B[0]}][${B[1]}] = ${vB}.`,
-    { cur: B, corners: [all[0], all[1]], answer: null },
+    { cur: B, corners: [all[0]!, all[1]!], answer: null },
   );
   emit(
     'QUERY',
     `−pre[${C[0]}][${C[1]}]=${vC}`,
     `Subtract the band left of the query: pre[${C[0]}][${C[1]}] = ${vC}.`,
-    { cur: C, corners: [all[0], all[1], all[2]], answer: null },
+    { cur: C, corners: [all[0]!, all[1]!, all[2]!], answer: null },
   );
   const answer = vA - vB - vC + vD;
   emit(
@@ -148,18 +148,18 @@ function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[]
 
 function buildDisplay(state: RsqState): (number | string)[][] {
   const m = state.matrix.length;
-  const n = state.matrix[0].length;
+  const n = state.matrix[0]!.length;
   // +1 for the prefix index header row/col labels (0..n / 0..m).
   const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
     new Array<number | string>(n + 2).fill(''),
   );
-  display[0][0] = 'pre';
-  for (let j = 0; j <= n; j++) display[0][j + 1] = `j${j}`;
-  for (let i = 0; i <= m; i++) display[i + 1][0] = `i${i}`;
+  display[0]![0] = 'pre';
+  for (let j = 0; j <= n; j++) display[0]![j + 1] = `j${j}`;
+  for (let i = 0; i <= m; i++) display[i + 1]![0] = `i${i}`;
   for (let i = 0; i <= m; i++) {
     for (let j = 0; j <= n; j++) {
-      const v = state.pre[i][j];
-      display[i + 1][j + 1] = v === null ? '' : v;
+      const v = state.pre[i]![j];
+      display[i + 1]![j + 1]! = v === null ? '' : v!;
     }
   }
   return display;
@@ -176,10 +176,10 @@ function View({ frame }: PluginViewProps<RsqState>) {
     const sign = cornerMap.get(`${r - 1},${c - 1}`);
     if (sign !== undefined) return sign === 1 ? 'path' : 'active';
     if (s.cur && s.cur[0] + 1 === r && s.cur[1] + 1 === c) return 'active';
-    const v = s.pre[r - 1][c - 1];
+    const v = s.pre[r - 1]![c - 1];
     return v === null ? '' : 'visited';
   };
-  const cellVal = s.cur ? s.pre[s.cur[0]][s.cur[1]] : null;
+  const cellVal = s.cur ? s.pre[s.cur[0]]![s.cur[1]] : null;
   const corners = s.corners.map(({ cell, sign }) => ({
     label: `${sign > 0 ? '+' : '−'}[${cell[0]},${cell[1]}]`,
     tone: sign === 1 ? ('good' as const) : ('bad' as const),
@@ -214,12 +214,12 @@ function View({ frame }: PluginViewProps<RsqState>) {
 function Inspector({ frame }: InspectorProps<RsqState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cellVal = s.cur ? s.pre[s.cur[0]][s.cur[1]] : null;
+  const cellVal = s.cur ? s.pre[s.cur[0]]![s.cur[1]] : null;
   const cellStr = cellVal === null ? '—' : cellVal;
   const answer = s.answer === null ? '…building' : `${s.answer}`;
   return (
     <VarGrid>
-      <InspectorRow k="matrix" v={`${s.matrix.length}×${s.matrix[0].length}`} />
+      <InspectorRow k="matrix" v={`${s.matrix.length}×${s.matrix[0]!.length}`} />
       <InspectorRow
         k="query"
         v={`(${s.query.row1},${s.query.col1})→(${s.query.row2},${s.query.col2})`}

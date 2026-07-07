@@ -1,7 +1,7 @@
 import type { CourseDef, ItemDef, TopicDef } from './types';
 
 /** Imported category key → curated course id. */
-const MERGE_MAP: Record<string, string> = {
+const MERGE_MAP: Readonly<Record<string, string>> = {
   backtracking: 'backtracking',
   graph: 'graphs',
   'binary-search': 'binary-search',
@@ -23,10 +23,19 @@ export const COURSE_ORDER = [
 ] as const;
 
 function normalizeId(id: string): string {
-  return id.trim();
+  return id.trim().toLowerCase();
 }
 
-function uniqueItems(items: ItemDef[]): ItemDef[] {
+function cloneTopic(topic: TopicDef): TopicDef {
+  return {
+    id: topic.id,
+    title: topic.title,
+    items: topic.items.map((item) => ({ ...item })),
+    ...(topic.summary ? { summary: topic.summary } : {}),
+  };
+}
+
+function uniqueItems(items: readonly ItemDef[]): ItemDef[] {
   const seen = new Set<string>();
   const out: ItemDef[] = [];
   for (const item of items) {
@@ -39,9 +48,21 @@ function uniqueItems(items: ItemDef[]): ItemDef[] {
 }
 
 /** Merge imported library topics into matching curated courses and enforce sidebar order. */
-export function mergeCourses(curated: CourseDef[], imported: CourseDef[]): CourseDef[] {
+export function mergeCourses(
+  curated: readonly CourseDef[],
+  imported: readonly CourseDef[],
+): CourseDef[] {
   const byId = new Map<string, CourseDef>(
-    curated.map((c) => [c.id, { ...c, topics: [...c.topics] }]),
+    curated.map((c) => [
+      c.id,
+      {
+        id: c.id,
+        title: c.title,
+        topics: c.topics.map(cloneTopic),
+        ...(c.summary ? { summary: c.summary } : {}),
+        ...(c.icon ? { icon: c.icon } : {}),
+      },
+    ]),
   );
 
   for (const lib of imported) {

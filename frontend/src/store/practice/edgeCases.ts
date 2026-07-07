@@ -31,6 +31,11 @@ function normalizeEdgeCaseLabel(label: string): EdgeCaseLabel | null {
   return EDGE_CASE_SET.has(normalized) ? (normalized as EdgeCaseLabel) : null;
 }
 
+function normalizeItemId(itemId: string): string | null {
+  const id = itemId.trim();
+  return id ? id : null;
+}
+
 function normalizeEdgeCases(value: Record<string, boolean>): Record<string, boolean> {
   const next: Record<string, boolean> = {};
   for (const label of EDGE_CASE_LABELS) {
@@ -39,24 +44,26 @@ function normalizeEdgeCases(value: Record<string, boolean>): Record<string, bool
   return next;
 }
 
-function keyFor(itemId: string) {
-  return STORAGE_KEYS.EDGE_CASES(itemId);
+function keyFor(itemId: string): string | null {
+  const id = normalizeItemId(itemId);
+  return id ? STORAGE_KEYS.EDGE_CASES(id) : null;
 }
 
 function load(itemId: string): Record<string, boolean> {
-  return normalizeEdgeCases(readStorageJson(keyFor(itemId), {}, isEdgeCaseMap));
+  const key = keyFor(itemId);
+  return key ? normalizeEdgeCases(readStorageJson(key, {}, isEdgeCaseMap)) : {};
 }
 
 const listeners = new Set<() => void>();
 
-function subscribe(listener: () => void) {
+function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
   };
 }
 
-function notify() {
+function notify(): void {
   listeners.forEach((l) => l());
 }
 
@@ -64,8 +71,10 @@ export function getEdgeCases(itemId: string): Record<string, boolean> {
   return load(itemId);
 }
 
-export function setEdgeCases(itemId: string, next: Record<string, boolean>) {
-  writeStorageJson(keyFor(itemId), normalizeEdgeCases(next));
+export function setEdgeCases(itemId: string, next: Record<string, boolean>): void {
+  const key = keyFor(itemId);
+  if (!key) return;
+  writeStorageJson(key, normalizeEdgeCases(next));
   notify();
 }
 

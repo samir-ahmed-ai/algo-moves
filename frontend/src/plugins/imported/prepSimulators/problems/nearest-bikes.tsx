@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -44,7 +44,7 @@ function record({ grid: rows }: NearestBikesInput): Frame<NearestBikesState>[] {
   const bikes: Cell[] = [];
   const workers: Cell[] = [];
 
-  const { emit, frames } = createRecorder<NearestBikesState>(() => ({
+  const { emit, frames } = createPrepRecorder<NearestBikesState>(() => ({
     grid,
     bikes: bikes.map((b) => ({ ...b })),
     workers: workers.map((w) => ({ ...w })),
@@ -66,8 +66,8 @@ function record({ grid: rows }: NearestBikesInput): Frame<NearestBikesState>[] {
 
   // Pass 1 — collect bikes ('X') and workers ('Y').
   for (let r = 0; r < grid.length; r++) {
-    for (let c = 0; c < grid[r].length; c++) {
-      const ch = grid[r][c];
+    for (let c = 0; c < grid[r]!.length; c++) {
+      const ch = grid[r]![c];
       if (ch === 'X') {
         bikes.push({ r, c });
         emit(
@@ -140,7 +140,7 @@ function View({ frame }: PluginViewProps<NearestBikesState>) {
     cell !== null && cell.r === r && cell.c === c;
 
   const cellTone = (r: number, c: number): string => {
-    const ch = s.grid[r][c];
+    const ch = s.grid[r]![c];
     // Pair-comparison highlights take priority once scanning is done.
     if (sameCell(s.worker, r, c)) return 'active';
     if (sameCell(s.bike, r, c)) return 'path';

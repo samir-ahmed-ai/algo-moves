@@ -2,8 +2,8 @@ import { cn } from '@/lib/utils/cn';
 import { nodeText } from '@/design/typography';
 
 export interface SelectCategory<T extends string = string> {
-  label: string;
-  items: { id: T; label: string; hint?: string }[];
+  readonly label: string;
+  readonly items: readonly { readonly id: T; readonly label: string; readonly hint?: string }[];
 }
 
 /** Reusable grouped select (Strudel category-select-items pattern). */
@@ -13,17 +13,19 @@ export function CategorySelectItems<T extends string>({
   onChange,
   placeholder = 'Choose…',
 }: {
-  categories: SelectCategory<T>[];
-  value: T | '';
-  onChange: (id: T) => void;
-  placeholder?: string;
+  readonly categories: readonly SelectCategory<T>[];
+  readonly value: T | '';
+  readonly onChange: (id: T) => void;
+  readonly placeholder?: string;
 }) {
   return (
     <select
       value={value}
-      onChange={(e) => onChange(e.target.value as T)}
+      onChange={(e) => {
+        if (e.target.value) onChange(e.target.value as T);
+      }}
       className={cn(
-        'category-select nodrag w-full rounded border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none focus:border-accent',
+        'category-select nodrag w-full rounded border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20',
         nodeText.sm,
       )}
     >
@@ -47,8 +49,8 @@ export function CategorySelectList({
   categories,
   onPick,
 }: {
-  categories: SelectCategory[];
-  onPick: (id: string) => void;
+  readonly categories: readonly SelectCategory[];
+  readonly onPick: (id: string) => void;
 }) {
   return (
     <div className="category-select-list flex flex-col gap-2">
@@ -69,7 +71,7 @@ export function CategorySelectList({
                 type="button"
                 onClick={() => onPick(item.id)}
                 className={cn(
-                  'category-select-list__item rounded border border-transparent px-2 py-1 text-left text-ink2 hover:border-edge hover:bg-panel2',
+                  'category-select-list__item rounded border border-transparent px-2 py-1 text-left text-ink2 outline-none hover:border-edge hover:bg-panel2 focus-visible:border-accent focus-visible:bg-panel2',
                   nodeText.sm,
                 )}
               >

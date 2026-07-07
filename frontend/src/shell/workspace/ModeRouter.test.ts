@@ -49,7 +49,12 @@ describe('resolveWorkspaceSurface', () => {
     'routes unavailable problem-backed visualize mode to $expected',
     ({ pluginLoading, runtimeError, expected }) => {
       expect(
-        surface({ mode: 'visualize', ready: false, pluginLoading: !!pluginLoading, runtimeError }),
+        surface({
+          mode: 'visualize',
+          ready: false,
+          pluginLoading: !!pluginLoading,
+          ...(runtimeError ? { runtimeError: true } : {}),
+        }),
       ).toBe(expected);
     },
   );
@@ -95,7 +100,14 @@ describe('resolveRuntimeErrorRecovery', () => {
     { input: { customInput: null, inputId: 'sample', firstInputId: 'sample' }, expected: 'none' },
     { input: { customInput: null, inputId: 'sample', firstInputId: undefined }, expected: 'none' },
   ] as const)('returns $expected', ({ input, expected }) => {
-    expect(resolveRuntimeErrorRecovery(input)).toBe(expected);
+    const { customInput, inputId, firstInputId } = input;
+    expect(
+      resolveRuntimeErrorRecovery({
+        customInput,
+        inputId,
+        ...(firstInputId !== undefined ? { firstInputId } : {}),
+      }),
+    ).toBe(expected);
   });
 });
 

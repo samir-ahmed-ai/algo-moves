@@ -56,7 +56,7 @@ export function parseDojoHash(hash: string, pathname?: string): DojoHashTarget |
 export const DOJO_NAVIGATE_EVENT = 'dojo:navigate';
 
 /** Write the Dojo route without a full page reload. */
-export function writeDojoHash(target?: DojoHashTarget | null, opts?: { replace?: boolean }) {
+export function writeDojoHash(target?: DojoHashTarget | null, opts?: { replace?: boolean }): void {
   if (typeof location === 'undefined') return;
   let hashBody = '';
   const gameId = target?.gameId?.trim();

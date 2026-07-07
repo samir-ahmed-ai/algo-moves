@@ -20,6 +20,10 @@ describe('orbitPoint', () => {
     expect(apex.x).toBe(500);
     expect(apex.y).toBeLessThan(80);
   });
+
+  it('falls back to the apex for non-finite arc positions', () => {
+    expect(orbitPoint(Number.NaN)).toEqual(orbitPoint(0.5));
+  });
 });
 
 describe('orbitT', () => {
@@ -27,6 +31,11 @@ describe('orbitT', () => {
     expect(orbitT(0, 10)).toBeCloseTo(0.06);
     expect(orbitT(9, 10)).toBeCloseTo(0.94);
     expect(orbitT(0, 1)).toBe(0.5);
+  });
+
+  it('clamps out-of-range frame indices', () => {
+    expect(orbitT(-10, 10)).toBeCloseTo(0.06);
+    expect(orbitT(99, 10)).toBeCloseTo(0.94);
   });
 });
 
@@ -40,6 +49,10 @@ describe('orbitTickIndices', () => {
     expect(ticks.length).toBeLessThanOrEqual(73);
     expect(ticks[0]).toBe(0);
     expect(ticks[ticks.length - 1]).toBe(499);
+  });
+
+  it('handles empty runs without synthetic ticks', () => {
+    expect(orbitTickIndices(0)).toEqual([]);
   });
 });
 

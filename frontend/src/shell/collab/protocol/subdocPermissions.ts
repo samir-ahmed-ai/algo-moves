@@ -24,9 +24,10 @@ export function canEditSubDoc(ctx: SubDocPermissionContext, kind: SubDocKind): b
   // A locked board (host toggle, broadcast via the envelope) makes guests view-only.
   if (ctx.session.interviewRuntime?.locked) return false;
   const settings = guestInterviewSettings(ctx.session);
-  if (kind === 'whiteboard') return settings.guestCanEditBoard !== false;
   if (kind === 'collab-code') return settings.guestCanEditCode !== false;
-  return true;
+  // Whiteboard and shared notes are both facilitator-controlled shared surfaces;
+  // the guest board-edit toggle governs both.
+  return settings.guestCanEditBoard !== false;
 }
 
 export function canMoveCanvasNodes(ctx: SubDocPermissionContext): boolean {

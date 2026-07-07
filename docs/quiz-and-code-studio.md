@@ -1,6 +1,7 @@
-# Quiz & Code Studio
+# Quiz and Code Studio
 
-Teaching UX shared across **mobile deck**, **Learn-mode panels**, and **Code Studio** (quiz → reassemble → recall).
+Shared teaching standards for the **mobile deck**, **Learn-mode panels**, and
+**Code Studio** sequence: quiz → reassemble → recall.
 
 ---
 
@@ -19,11 +20,16 @@ Save curr.next — tail link is lost otherwise
 | **Separator** | Em dash `—` (not hyphen-minus) |
 | **Detail** | One short hint (≤ 60 chars, total label ≤ 72) |
 
-Author in `practice.ts` (native plugins) or `imported/practice/items/*.ts` (progress library). Prep simulators without hand-authored quiz get labels from [`defaultPrepQuiz()`](../src/plugins/imported/prepQuiz.ts).
+Author labels in `frontend/src/plugins/**/practice.ts` for native plugins or
+`frontend/src/plugins/imported/practice/items/*.ts` for the imported progress
+library. Prep simulators without hand-authored quiz content get labels from
+[`defaultPrepQuiz()`](../frontend/src/plugins/imported/prepQuiz.ts).
 
 ### Rendering
 
-[`QuizChoiceLabel`](../src/components/QuizChoiceLabel.tsx) parses labels via [`parseQuizChoiceLabel()`](../src/lib/quizChoiceFormat.ts) and styles:
+[`QuizChoiceLabel`](../frontend/src/components/shared/QuizChoiceLabel.tsx) parses
+labels via
+[`parseQuizChoiceLabel()`](../frontend/src/lib/quiz/quizChoiceFormat.ts) and styles:
 
 - **Big-O** headlines → mono + accent
 - **Code** headlines (indices, formulas) → mono pill
@@ -32,9 +38,14 @@ Author in `practice.ts` (native plugins) or `imported/practice/items/*.ts` (prog
 
 ### Shuffle & scoring
 
-Choice order is shuffled **by default** on every quiz surface (`QUIZ_SHUFFLE_BY_DEFAULT = true` in [`quizConstants.ts`](../src/lib/quizConstants.ts)).
+Choice order is shuffled **by default** on every quiz surface
+(`QUIZ_SHUFFLE_BY_DEFAULT = true` in
+[`quizConstants.ts`](../frontend/src/lib/quiz/quizConstants.ts)).
 
-[`shuffleQuizQuestion()`](../src/lib/shuffleQuizQuestion.ts) reorders choices with a seeded PRNG. [`quizQuestionSeed()`](../src/lib/shuffleQuizQuestion.ts) derives a stable per-question seed from:
+[`shuffleQuizQuestion()`](../frontend/src/lib/quiz/shuffleQuizQuestion.ts) reorders
+choices with a seeded PRNG.
+[`quizQuestionSeed()`](../frontend/src/lib/quiz/shuffleQuizQuestion.ts) derives a
+stable per-question seed from:
 
 - a random **run seed** (`newQuizRunSeed()`) — new each session / retry
 - the **question index** within the run
@@ -54,16 +65,19 @@ Surfaces:
 
 | Surface | File | Restart-on-wrong |
 |---------|------|------------------|
-| Mobile deck | `shell/mobile/MobileCards.tsx` + `MobileDeck.tsx` | Auto (`QUIZ_WRONG_MS`) |
-| Code Studio quiz phase | `shell/canvas/CodeStudioQuiz.tsx` | Auto |
-| Canvas quiz panel | `plugins/_shared/practice.tsx` → `makeQuizPanel` | Auto |
-| Complexity panel | `shell/canvas/panels/practice/ComplexityPanelBody.tsx` | Manual shuffle (single-round UX) |
+| Mobile deck | `frontend/src/shell/mobile/MobileCards.tsx` + `MobileDeck.tsx` | Auto (`QUIZ_WRONG_MS`) |
+| Code Studio quiz phase | `frontend/src/shell/study/CodeStudioQuiz.tsx` | Auto |
+| Canvas quiz panel | `frontend/src/plugins/_shared/practice.tsx` → `makeQuizPanel` | Auto |
+| Complexity panel | `frontend/src/shell/panels/practice/ComplexityPanelBody.tsx` | Manual shuffle (single-round UX) |
 
 Practice tab quiz and Code Studio quiz share one data source (`plugin.quiz` / `practice.quiz`) — edit once, both stay in sync.
 
 ### Quality guardrails
 
-[`quizLabelIssues()`](../src/lib/quizChoiceFormat.ts) (rules in [`quizLabelRules.ts`](../src/lib/quizLabelRules.ts)) enforces format in [`integrity.test.ts`](../src/plugins/integrity.test.ts) for all registered plugins and `defaultPrepQuiz()` output.
+[`quizLabelIssues()`](../frontend/src/lib/quiz/quizChoiceFormat.ts) (rules in
+[`quizLabelRules.ts`](../frontend/src/lib/quiz/quizLabelRules.ts)) enforces format in
+[`integrity.test.ts`](../frontend/src/plugins/integrity.test.ts) for all
+registered plugins and `defaultPrepQuiz()` output.
 
 Rejected patterns:
 
@@ -74,7 +88,9 @@ Rejected patterns:
 - Mid-word ellipsis cuts
 - Generic filler details (`plausible distractor`, `wrong approach here`, etc.)
 
-Shared Big-O hints live in [`complexityHints.ts`](../src/lib/complexityHints.ts) (used by complexity panel and prep fallback quizzes).
+Shared Big-O hints live in
+[`complexityHints.ts`](../frontend/src/lib/quiz/complexityHints.ts) and are used
+by the complexity panel and prep fallback quizzes.
 
 CI:
 
@@ -95,13 +111,18 @@ Draft starter quizzes from recorder captions (human review required):
 npm run draft-quiz-from-frames imp-44-word-search
 ```
 
-Generated prep quizzes come from `frontend/scripts/generate-prep-practice-quiz.mjs`. The generator should only produce paste-ready labels that pass the same headline/detail rules as hand-authored quizzes.
+Generated prep quizzes come from
+`frontend/scripts/generate-prep-practice-quiz.mjs`. The generator should only
+produce paste-ready labels that pass the same headline/detail rules as
+hand-authored quizzes.
 
 ---
 
 ## Code Studio — reassemble & highlighting
 
-Code Studio runs three gated phases: **quiz → reassemble → recall**. Reassemble shows shuffled [`CodePiece`](../src/lib/codePieces.ts) blocks the learner orders into a working solution.
+Code Studio runs three gated phases: **quiz → reassemble → recall**. Reassemble
+shows shuffled [`CodePiece`](../frontend/src/lib/code/codePieces.ts) blocks the
+learner orders into a working solution.
 
 ### Resume and persistence contract
 
@@ -118,34 +139,45 @@ If a problem loses quiz or reassemble content, resume should clamp to the first 
 
 ### Syntax highlighting (read-only pieces)
 
-[`HighlightedCode`](../src/components/HighlightedCode.tsx) wraps [`highlightSnippet()`](../src/lib/highlightSnippet.tsx):
+[`HighlightedCode`](../frontend/src/components/code/HighlightedCode.tsx) wraps
+[`highlightSnippet()`](../frontend/src/lib/editor/highlightSnippet.tsx):
 
 - Keywords, strings, numbers per language (Go, JS/TS, Python)
 - **Entry function** lines (`hl-line-entry`) vs nested helpers (`hl-line-func`)
 - Signature name emphasis (`hl-sig-name`, `hl-sig-kw`)
 
-Styles live in `src/styles/theme.css` under `.code-studio-reassemble`.
+Styles live in `frontend/src/styles/theme.css` under `.code-studio-reassemble`.
 
 ### Tray layout
 
-[`balanceTrayColumns()`](../src/lib/trayLayout.ts) packs code pieces into balanced masonry columns by estimated row height (long lines wrap at ~32 cols). Used by [`ReassemblePane`](../src/components/ReassemblePane.tsx).
+[`balanceTrayColumns()`](../frontend/src/lib/code/trayLayout.ts) packs code pieces
+into balanced masonry columns by estimated row height (long lines wrap at ~32
+cols). Used by [`ReassemblePane`](../frontend/src/components/puzzle/ReassemblePane.tsx).
 
 ### CodeMirror editor
 
-[`languageExtension()`](../src/lib/languageExtension.ts) picks the CodeMirror language mode; [`editorTheme.ts`](../src/lib/editorTheme.ts) aligns editor chrome with design tokens. Recall phase uses the full editor; reassemble uses highlighted read-only snippets.
+[`languageExtension()`](../frontend/src/lib/editor/languageExtension.ts) picks the
+CodeMirror language mode;
+[`editorTheme.ts`](../frontend/src/lib/editor/editorTheme.ts) aligns editor chrome with
+design tokens. Recall phase uses the full editor; reassemble uses highlighted
+read-only snippets.
 
 ### Haptic feedback
 
-[`haptic.ts`](../src/lib/haptic.ts) fires light taps on correct/wrong piece placement in reassemble (where supported).
+[`haptic.ts`](../frontend/src/lib/haptic.ts) fires light taps on correct/wrong
+piece placement in reassemble where supported.
 
 ### Solution blueprint overlay
 
 During reassemble, the **ScanEye** toolbar button (or **`B`**) opens the solution blueprint:
 
-- **Desktop** — full-page overlay via [`CodeBlueprintOverlay`](../src/components/CodeBlueprintOverlay.tsx)
-- **Mobile deck** — compact in-card panel via [`ReassemblePane`](../src/components/ReassemblePane.tsx) (shares space with the block tray; code wraps to fit the screen)
+- **Desktop** — full-page overlay via [`CodeBlueprintOverlay`](../frontend/src/components/puzzle/CodeBlueprintOverlay.tsx)
+- **Mobile deck** — compact in-card panel via [`ReassemblePane`](../frontend/src/components/puzzle/ReassemblePane.tsx) (shares space with the block tray; code wraps to fit the screen)
 
-Both use [`CodePieceOverview`](../src/components/CodePieceOverview.tsx) with role tints from [`codePieceRoles.ts`](../src/lib/codePieceRoles.ts). Close with **X**, **`Esc`**, or **`B`**.
+Both use [`CodePieceOverview`](../frontend/src/components/puzzle/CodePieceOverview.tsx)
+with role tints from
+[`codePieceRoles.ts`](../frontend/src/lib/code/codePieceRoles.ts). Close with **X**,
+**`Esc`**, or **`B`**.
 
 ---
 
@@ -166,7 +198,8 @@ export const quiz: QuizQuestion[] = [
 ];
 ```
 
-Wire via `wireTeachingStack({ practice: { quiz, … } })` — see [`src/plugins/README.md`](../src/plugins/README.md).
+Wire via `wireTeachingStack({ practice: { quiz, … } })` — see
+[`frontend/src/plugins/README.md`](../frontend/src/plugins/README.md).
 
 ## Authoring standards
 

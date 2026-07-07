@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -25,7 +25,7 @@ interface SubsetWordsState {
   i: number | null; // current char index within word
   ch: string | null; // current char
   used: number; // running count of ch within the word so far
-  avail: number; // cnt[ch] in the text pile
+  avail: number; // cnt[ch]! in the text pile
   fits: boolean | null; // did this char still fit?
   result: string[]; // words accepted so far
   done: boolean;
@@ -35,11 +35,11 @@ function record({ text, words }: SubsetWordsInput): Frame<SubsetWordsState>[] {
   const cnt = new Map<string, number>();
   for (const c of text) cnt.set(c, (cnt.get(c) ?? 0) + 1);
   const pile = (): [string, number][] =>
-    [...cnt.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    [...cnt.entries()].sort((a, b) => a[0]!.localeCompare(b[0]!));
 
   const result: string[] = [];
 
-  const { emit, frames } = createRecorder<SubsetWordsState>(() => ({
+  const { emit, frames } = createPrepRecorder<SubsetWordsState>(() => ({
     text,
     cnt: pile(),
     words,
@@ -62,7 +62,7 @@ function record({ text, words }: SubsetWordsInput): Frame<SubsetWordsState>[] {
   );
 
   for (let w = 0; w < words.length; w++) {
-    const word = words[w];
+    const word = words[w]!;
     const tmp = new Map<string, number>();
     let ok = true;
 
@@ -73,11 +73,11 @@ function record({ text, words }: SubsetWordsInput): Frame<SubsetWordsState>[] {
       { wIdx: w, word, i: null },
     );
 
-    for (let i = 0; i < word.length; i++) {
-      const ch = word[i];
-      const used = (tmp.get(ch) ?? 0) + 1;
-      tmp.set(ch, used);
-      const avail = cnt.get(ch) ?? 0;
+    for (let i = 0; i < word!.length; i++) {
+      const ch = word![i];
+      const used = (tmp.get(ch!) ?? 0) + 1;
+      tmp.set(ch!, used);
+      const avail = cnt.get(ch!) ?? 0;
       const fits = used <= avail;
 
       if (!fits) {
@@ -101,12 +101,12 @@ function record({ text, words }: SubsetWordsInput): Frame<SubsetWordsState>[] {
     }
 
     if (ok) {
-      result.push(word);
+      result.push(word!);
       emit(
         'ACCEPT',
         `"${word}" ✓`,
         `Every letter of "${word}" fit inside the text pile, so "${word}" is a subset word. Add it to the result.`,
-        { wIdx: w, word, i: word.length - 1, result: [...result] },
+        { wIdx: w, word, i: word!.length - 1, result: [...result] },
         'good',
       );
     }

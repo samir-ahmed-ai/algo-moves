@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, railItem } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -42,12 +42,12 @@ function serializeTokens(tree: (number | null)[]): { tokens: string[]; order: (n
   const tokens: string[] = [];
   const order: (number | null)[] = []; // index visited per token (null for a nil slot)
   const dfs = (i: number) => {
-    if (i >= tree.length || tree[i] == null) {
+    if (i >= tree.length || tree[i]! == null) {
       tokens.push('null');
       order.push(null);
       return;
     }
-    tokens.push(String(tree[i]));
+    tokens.push(String(tree[i]!));
     order.push(i);
     dfs(2 * i + 1);
     dfs(2 * i + 2);
@@ -57,7 +57,7 @@ function serializeTokens(tree: (number | null)[]): { tokens: string[]; order: (n
 }
 
 function record({ tree }: SerializeInput): Frame<SerializeState>[] {
-  const { emit, frames } = createRecorder<SerializeState>(() => ({
+  const { emit, frames } = createPrepRecorder<SerializeState>(() => ({
     tree,
     phase: 'serialize',
     current: null,
@@ -79,7 +79,7 @@ function record({ tree }: SerializeInput): Frame<SerializeState>[] {
   const soFar: string[] = [];
   const seen: number[] = [];
   for (let k = 0; k < order.length; k++) {
-    const i = order[k];
+    const i = order[k]!;
     if (i == null) {
       soFar.push('null');
       emit(
@@ -89,12 +89,12 @@ function record({ tree }: SerializeInput): Frame<SerializeState>[] {
         { phase: 'serialize', current: null, visited: seen.slice(), tokens: soFar.slice() },
       );
     } else {
-      soFar.push(String(tree[i]));
+      soFar.push(String(tree[i]!));
       seen.push(i);
       emit(
         'VISIT',
-        `write ${tree[i]}`,
-        `Visit node ${tree[i]} (preorder: node first, then left subtree, then right). Write "${tree[i]}," and recurse. Tokens: ${soFar.join(',')}`,
+        `write ${tree[i]!}`,
+        `Visit node ${tree[i]!} (preorder: node first, then left subtree, then right). Write "${tree[i]!}," and recurse. Tokens: ${soFar.join(',')}`,
         { phase: 'serialize', current: i, visited: seen.slice(), tokens: soFar.slice() },
       );
     }
@@ -114,7 +114,7 @@ function record({ tree }: SerializeInput): Frame<SerializeState>[] {
   const built: number[] = [];
   let cursor = 0;
   const rebuild = (i: number): void => {
-    const tok = tokens[cursor];
+    const tok = tokens[cursor]!;
     if (tok === undefined || tok === 'null') {
       emit(
         'READ_NIL',
@@ -177,14 +177,9 @@ function View({ frame }: PluginViewProps<SerializeState>) {
   const active = s.phase === 'serialize' ? s.visited : s.built;
   const nodeClass = (i: number) =>
     s.current === i ? 'team-1' : active.includes(i) ? 'team-2' : 'team-0';
-  const tokenItems = s.tokens.map((t, idx) => ({
-    label: t,
-    tone: (s.cursor !== null && idx === s.cursor
-      ? 'accent'
-      : t !== 'null'
-        ? undefined
-        : undefined) as 'accent' | undefined,
-  }));
+  const tokenItems = s.tokens.map((t, idx) =>
+    railItem(t, s.cursor !== null && idx === s.cursor ? 'accent' : undefined),
+  );
   return (
     <VizStage
       railWidth={150}
@@ -216,7 +211,7 @@ function Inspector({ frame }: InspectorProps<SerializeState>) {
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
-      <InspectorRow k="current node" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} />
+      <InspectorRow k="current node" v={s.current !== null ? (s.tree[s.current]! ?? '—') : '—'} />
       <InspectorRow k="nodes done" v={active.length} />
       <InspectorRow k="tokens" v={s.tokens.length} />
       <InspectorRow k="cursor" v={s.cursor ?? '—'} />

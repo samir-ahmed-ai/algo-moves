@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -41,7 +41,7 @@ function record({ tweets, now, window, k }: TopKInput): Frame<TopKState>[] {
   const counts = new Map<string, number>();
   const lo = now - window;
 
-  const { emit, frames } = createRecorder<TopKState>(() => ({
+  const { emit, frames } = createPrepRecorder<TopKState>(() => ({
     tweets,
     now,
     window,
@@ -63,34 +63,34 @@ function record({ tweets, now, window, k }: TopKInput): Frame<TopKState>[] {
   );
 
   for (let i = 0; i < tweets.length; i++) {
-    const tw = tweets[i];
-    const tooNew = tw.time > now;
-    const tooOld = now - tw.time > window;
+    const tw = tweets[i]!;
+    const tooNew = tw!.time > now;
+    const tooOld = now - tw!.time > window;
     if (tooNew || tooOld) {
       const why = tooNew
-        ? `t=${tw.time} is after now=${now}`
-        : `now − t = ${now} − ${tw.time} = ${now - tw.time} > window ${window}`;
+        ? `t=${tw!.time} is after now=${now}`
+        : `now − t = ${now} − ${tw!.time} = ${now - tw!.time} > window ${window}`;
       emit(
         'SKIP',
-        `skip "${tw.word}"`,
-        `Tweet ${i} ("${tw.word}", t=${tw.time}) is outside the window because ${why}. Ignore it.`,
+        `skip "${tw!.word}"`,
+        `Tweet ${i} ("${tw!.word}", t=${tw!.time}) is outside the window because ${why}. Ignore it.`,
         { i, phase: 'scan' },
         'bad',
       );
       continue;
     }
-    const next = (counts.get(tw.word) ?? 0) + 1;
-    counts.set(tw.word, next);
+    const next = (counts.get(tw!.word) ?? 0) + 1;
+    counts.set(tw!.word, next);
     emit(
       'COUNT',
-      `${tw.word} → ${next}`,
-      `Tweet ${i} ("${tw.word}", t=${tw.time}) sits inside ${lo} … ${now}, so it counts. counts["${tw.word}"] = ${next}.`,
+      `${tw!.word} → ${next}`,
+      `Tweet ${i} ("${tw!.word}", t=${tw!.time}) sits inside ${lo} … ${now}, so it counts. counts["${tw!.word}"]! = ${next}.`,
       { i, phase: 'count', counts: [...counts.entries()] },
       'good',
     );
   }
 
-  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const ranked = [...counts.entries()].sort((a, b) => b[1]! - a[1]!);
   emit(
     'SORT',
     'rank by count',
@@ -117,16 +117,16 @@ function View({ frame }: PluginViewProps<TopKState>) {
   const s = frame.state;
   const cells = s.tweets.map((t) => t.word);
   const inWindow = (i: number) => {
-    const t = s.tweets[i].time;
+    const t = s.tweets[i]!.time;
     return t <= s.now && s.now - t <= s.window;
   };
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) {
     pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-    pointers.push({ i: s.i, label: `t=${s.tweets[s.i].time}`, tone: 'warn', place: 'below' });
+    pointers.push({ i: s.i, label: `t=${s.tweets[s.i]!.time}`, tone: 'warn', place: 'below' });
   }
   const tone = (i: number) => {
-    if (s.phase === 'done' && s.result && s.result.includes(s.tweets[i].word)) return 'found';
+    if (s.phase === 'done' && s.result && s.result.includes(s.tweets[i]!.word)) return 'found';
     if (s.i === i) return 'match';
     if (inWindow(i)) return 'in-window';
     return 'dead';
@@ -166,7 +166,7 @@ function Inspector({ frame }: InspectorProps<TopKState>) {
       <InspectorRow k="window [lo…hi]" v={`[${s.lo}…${s.now}]`} />
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="i (tweet)" v={s.i ?? '—'} />
-      <InspectorRow k="word @ i" v={s.i !== null ? s.tweets[s.i].word : '—'} />
+      <InspectorRow k="word @ i" v={s.i !== null ? s.tweets[s.i]!.word : '—'} />
       <InspectorRow k="distinct words" v={s.counts.length} />
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="result" v={s.result ? `[${s.result.join(', ')}]` : '…'} />
@@ -183,7 +183,7 @@ function computeResult(input: TopKInput): string[] {
     if (tw.time > input.now || input.now - tw.time > input.window) continue;
     counts.set(tw.word, (counts.get(tw.word) ?? 0) + 1);
   }
-  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const ranked = [...counts.entries()].sort((a, b) => b[1]! - a[1]!);
   return ranked.slice(0, Math.min(input.k, ranked.length)).map(([w]) => w);
 }
 
@@ -247,7 +247,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Remaining input skipped — early return path',
       },
     ],
-    explain: 'Tweet  ("", t=) sits inside  … , so it counts. counts[""] = .',
+    explain: 'Tweet  ("", t=) sits inside  … , so it counts. counts[""]! = .',
   },
   {
     id: 'state',
@@ -308,7 +308,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Aborted run on failure — infinite loop detected',
       },
     ],
-    explain: 'Tweet  ("", t=) sits inside  … , so it counts. counts[""] = .',
+    explain: 'Tweet  ("", t=) sits inside  … , so it counts. counts[""]! = .',
   },
 ];
 export const simulator: ProblemSimulator = {

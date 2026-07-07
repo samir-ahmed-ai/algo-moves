@@ -62,6 +62,6 @@ type Node struct {
     const state = EditorState.create({ doc: src });
     const ranges = allSectionFoldRanges(state, 'go');
     expect(ranges.length).toBe(1);
-    expect(state.sliceDoc(ranges[0].from, ranges[0].to)).toContain('Val int');
+    expect(state.sliceDoc(ranges[0]!.from, ranges[0]!.to)).toContain('Val int');
   });
 });

@@ -19,6 +19,10 @@ export function togglePanelCollapse(n: PanelFlowNode, minHeight = 36): PanelFlow
   return {
     ...n,
     height: collapsedHeight,
-    data: { ...d, collapsed: true, fullHeight: Number.isFinite(n.height) ? n.height : undefined },
+    data: {
+      ...d,
+      collapsed: true,
+      ...(Number.isFinite(n.height) ? { fullHeight: n.height } : {}),
+    },
   };
 }

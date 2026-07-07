@@ -74,10 +74,10 @@ export function wireTeachingStack<I, S>(config: TeachingStackConfig<I, S>): Teac
         record,
         View,
         good: practice.cases.good,
-        bad: practice.cases.bad,
-        goodLabel: practice.cases.goodLabel,
-        badLabel: practice.cases.badLabel,
-        intro: practice.cases.intro,
+        ...(practice.cases.bad !== undefined ? { bad: practice.cases.bad } : {}),
+        ...(practice.cases.goodLabel !== undefined ? { goodLabel: practice.cases.goodLabel } : {}),
+        ...(practice.cases.badLabel !== undefined ? { badLabel: practice.cases.badLabel } : {}),
+        ...(practice.cases.intro !== undefined ? { intro: practice.cases.intro } : {}),
       }),
     });
   }
@@ -91,13 +91,13 @@ export function wireTeachingStack<I, S>(config: TeachingStackConfig<I, S>): Teac
       id: 'simulate',
       label: 'Simulate',
       mode: 'practice',
-      side: simulateSide,
+      ...(simulateSide !== undefined ? { side: simulateSide } : {}),
       Panel: makeSimulatePanel({
         inputs,
         record,
         View,
-        question: practice.simulateQuestion,
-        verdict,
+        ...(practice.simulateQuestion !== undefined ? { question: practice.simulateQuestion } : {}),
+        ...(verdict !== undefined ? { verdict } : {}),
       }),
     });
   }
@@ -113,7 +113,12 @@ export function wireTeachingStack<I, S>(config: TeachingStackConfig<I, S>): Teac
     ];
   }
 
-  return { tabs, wires, quiz, codePieces };
+  return {
+    tabs,
+    wires,
+    ...(quiz !== undefined ? { quiz } : {}),
+    ...(codePieces !== undefined ? { codePieces } : {}),
+  };
 }
 
 /** Standard View + Inspector pair for native/imported simulators. */

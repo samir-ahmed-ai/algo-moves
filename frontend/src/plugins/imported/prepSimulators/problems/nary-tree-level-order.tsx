@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,7 +32,7 @@ interface LevelState {
 function record({ nodes }: NaryInput): Frame<LevelState>[] {
   const tree = nodes ?? [];
 
-  const { emit, frames } = createRecorder<LevelState>(() => ({
+  const { emit, frames } = createPrepRecorder<LevelState>(() => ({
     nodes: tree,
     level: [],
     next: [],
@@ -60,8 +60,8 @@ function record({ nodes }: NaryInput): Frame<LevelState>[] {
 
   emit(
     'INIT',
-    `root=${tree[0].val}`,
-    `Level order BFS: process the whole current frontier one level at a time. Start the frontier with just the root (${tree[0].val}).`,
+    `root=${tree[0]!.val}`,
+    `Level order BFS: process the whole current frontier one level at a time. Start the frontier with just the root (${tree[0]!.val}).`,
     { level: level.slice(), res: [], visited: [], depth: 0 },
   );
 
@@ -74,22 +74,22 @@ function record({ nodes }: NaryInput): Frame<LevelState>[] {
       'ROW_START',
       `level ${depth}`,
       `Begin level ${depth}. Read every node in the frontier ([${level
-        .map((i) => tree[i].val)
+        .map((i) => tree[i]!.val)
         .join(', ')}]) into this row, and collect all of their children into the next frontier.`,
       { level: level.slice(), next: [], visited: visited.slice(), res: res.slice(), depth },
     );
 
     for (const idx of level) {
-      row.push(tree[idx].val);
+      row.push(tree[idx]!.val);
       visited.push(idx);
-      for (const c of tree[idx].children) next.push(c);
+      for (const c of tree[idx]!.children) next.push(c);
 
       emit(
         'READ',
-        `+${tree[idx].val}`,
-        `Read node ${tree[idx].val}: append its value to the level-${depth} row and push its ${tree[idx].children.length} child${
-          tree[idx].children.length === 1 ? '' : 'ren'
-        } (${tree[idx].children.map((c) => tree[c].val).join(', ') || '—'}) onto the next frontier.`,
+        `+${tree[idx]!.val}`,
+        `Read node ${tree[idx]!.val}: append its value to the level-${depth} row and push its ${tree[idx]!.children.length} child${
+          tree[idx]!.children.length === 1 ? '' : 'ren'
+        } (${tree[idx]!.children.map((c) => tree[c]!.val).join(', ') || '—'}) onto the next frontier.`,
         {
           level: level.slice(),
           next: next.slice(),
@@ -108,7 +108,7 @@ function record({ nodes }: NaryInput): Frame<LevelState>[] {
       `Level ${depth} is complete: [${row.join(
         ', ',
       )}]. The next frontier holds ${next.length} node${next.length === 1 ? '' : 's'} (${
-        next.map((c) => tree[c].val).join(', ') || 'none'
+        next.map((c) => tree[c]!.val).join(', ') || 'none'
       }). Advance to it.`,
       {
         level: next.slice(),
@@ -163,13 +163,13 @@ function View({ frame }: PluginViewProps<LevelState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         frontier ={' '}
         <span className="font-mono text-ink">
-          [{s.level.map((i) => s.nodes[i].val).join(', ')}]
+          [{s.level.map((i) => s.nodes[i]!.val).join(', ')}]
         </span>
         {s.next.length > 0 && (
           <>
             {' · '}next ={' '}
             <span className="font-mono text-ink">
-              [{s.next.map((i) => s.nodes[i].val).join(', ')}]
+              [{s.next.map((i) => s.nodes[i]!.val).join(', ')}]
             </span>
           </>
         )}
@@ -197,9 +197,9 @@ function Inspector({ frame }: InspectorProps<LevelState>) {
   return (
     <VarGrid>
       <InspectorRow k="depth (level)" v={s.depth} />
-      <InspectorRow k="frontier" v={`[${s.level.map((i) => s.nodes[i].val).join(', ')}]`} />
-      <InspectorRow k="next frontier" v={`[${s.next.map((i) => s.nodes[i].val).join(', ')}]`} />
-      <InspectorRow k="current node" v={s.cur !== null ? s.nodes[s.cur].val : '—'} />
+      <InspectorRow k="frontier" v={`[${s.level.map((i) => s.nodes[i]!.val).join(', ')}]`} />
+      <InspectorRow k="next frontier" v={`[${s.next.map((i) => s.nodes[i]!.val).join(', ')}]`} />
+      <InspectorRow k="current node" v={s.cur !== null ? s.nodes[s.cur]!.val : '—'} />
       <InspectorRow k="rows done" v={s.res.length} />
       <div className="flex flex-col gap-1 py-[3px]">
         <span className={cn(vizText.sm, 'text-ink3')}>result</span>

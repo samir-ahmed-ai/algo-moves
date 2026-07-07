@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -38,7 +38,7 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
   const chars = s.split('');
   const cnt = new Map<string, number>();
 
-  const { emit, frames } = createRecorder<FirstUniqueState>(() => ({
+  const { emit, frames } = createPrepRecorder<FirstUniqueState>(() => ({
     chars,
     phase: 'count',
     i: null,
@@ -58,12 +58,12 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
 
   // Pass 1: build the frequency map.
   for (let i = 0; i < chars.length; i++) {
-    const c = chars[i];
-    cnt.set(c, (cnt.get(c) ?? 0) + 1);
+    const c = chars[i]!;
+    cnt.set(c!, (cnt.get(c!) ?? 0) + 1);
     emit(
       'COUNT',
-      `cnt['${c}']=${cnt.get(c)}`,
-      `Pass 1, index ${i}: character '${c}'. Increment its tally — cnt['${c}'] is now ${cnt.get(c)}.`,
+      `cnt['${c}']!=${cnt.get(c!)}`,
+      `Pass 1, index ${i}: character '${c}'. Increment its tally — cnt['${c}']! is now ${cnt.get(c!)}.`,
       { phase: 'count', i, curChar: c },
     );
   }
@@ -77,8 +77,8 @@ function record({ s }: FirstUniqueInput): Frame<FirstUniqueState>[] {
 
   // Pass 2: find the first index whose count is 1.
   for (let i = 0; i < chars.length; i++) {
-    const c = chars[i];
-    const count = cnt.get(c) ?? 0;
+    const c = chars[i]!;
+    const count = cnt.get(c!) ?? 0;
     if (count === 1) {
       emit(
         'FOUND',

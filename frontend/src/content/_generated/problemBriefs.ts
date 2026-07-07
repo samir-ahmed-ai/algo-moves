@@ -3346,7 +3346,7 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
       {
         "label": "Example 1",
         "input": "[3,1,4,1,5] find 4",
-        "output": "node[2] = 4",
+        "output": "node[2]! = 4",
         "note": "Walk the list until a node's value matches."
       },
       {
@@ -4972,14 +4972,14 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "{\n  \"s\": \"3[a2[c]]\"\n}",
-        "output": "\"accaccacc\"",
+        "input": "{\n  \"s\": \"3[a2[c]!]\"\n}",
+        "output": "\"acc!acc!acc!\"",
         "note": "Two stacks: one for counts, one for strings built so far."
       },
       {
         "label": "Example 2",
-        "input": "{\n  \"s\": \"2[abc]3[cd]\"\n}",
-        "output": "\"abcabccdcdcd\"",
+        "input": "{\n  \"s\": \"2[abc]!3[cd]!\"\n}",
+        "output": "\"abcabc!cdcdcd!\"",
         "note": "Two stacks: one for counts, one for strings built so far."
       }
     ]
@@ -5229,7 +5229,7 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "{\n  \"root\": {\n    \"name\": \"root\",\n    \"files\": [],\n    \"children\": [\n      {\"name\": \"a\", \"files\": [], \"children\": [{\"name\": \"b\", \"files\": [], \"children\": []}]},\n      {\"name\": \"keep\", \"files\": [\"data.txt\"], \"children\": []}\n    ]\n  }\n}",
+        "input": "{\n  \"root\": {\n    \"name\": \"root\",\n    \"files\": [],\n    \"children\": [\n      {\"name\": \"a\", \"files\": [], \"children\": [{\"name\": \"b\", \"files\": [...], \"children\": [...]}]},\n      {\"name\": \"keep\", \"files\": [\"data.txt\"], \"children\": []}\n    ]\n  }\n}",
         "output": "1 removed",
         "note": "Recurse depth-first; delete each directory once it's empty."
       },

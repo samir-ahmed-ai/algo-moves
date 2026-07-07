@@ -1,9 +1,9 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { useCanvasStatic, useQuizHostRelay } from '@/shell/canvas';
-import { ReassemblePane } from '../../components/puzzle/ReassemblePane';
+import { ReassemblePane } from '@/components/puzzle/ReassemblePane';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
-import { patternsForTags } from '../../content';
+import { patternsForTags } from '@/content';
 import { resolveCodePieces } from '@/lib/code';
 import {
   nextPhase,
@@ -66,7 +66,10 @@ export function CodeStudioProvider({
   const { theme } = useWorkspace();
   const progress = useProgress();
   const stat = statFor(progress, item.id);
-  const variants = codeVariants(plugin);
+  const variants = codeVariants({
+    ...(plugin.code !== undefined ? { code: plugin.code } : {}),
+    ...(plugin.extraCode !== undefined ? { extraCode: plugin.extraCode } : {}),
+  });
   const [active, setActive] = useState(0);
   const [blind, setBlind] = useState(false);
   const [peek, setPeek] = useState(false);
@@ -75,6 +78,7 @@ export function CodeStudioProvider({
   const draftViewRef = useRef<EditorView | null>(null);
   const formatBothRef = useRef<(() => void) | null>(null);
   const foldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
+  const copyTimerRef = useRef<number | null>(null);
   const { timerRunning, setTimerRunning, setTimerSec, timerLabel } = useCodeStudioTimer(item.id);
 
   const code = variants[Math.min(active, Math.max(variants.length - 1, 0))];
@@ -113,9 +117,9 @@ export function CodeStudioProvider({
     active,
     av,
     draftKey,
-    phaseLock,
     setTimerRunning,
     setTimerSec,
+    ...(phaseLock ? { phaseLock } : {}),
   });
 
   const score = reference ? matchScore(reference, draft) : 0;
@@ -138,11 +142,22 @@ export function CodeStudioProvider({
     try {
       await navigator.clipboard.writeText(reference);
       setCopied(true);
-      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
+      if (copyTimerRef.current !== null) window.clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = window.setTimeout(() => {
+        setCopied(false);
+        copyTimerRef.current = null;
+      }, COPY_FEEDBACK_MS);
     } catch {
       /* clipboard unavailable */
     }
   }, [reference]);
+
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current !== null) window.clearTimeout(copyTimerRef.current);
+    },
+    [],
+  );
 
   const contentValue = useMemo(
     () => ({
@@ -301,20 +316,24 @@ export function CodeStudioBody() {
             key={reassembleKey}
             pieces={pieces}
             lang={code?.lang ?? 'go'}
-            initialPlacedIds={savedReassembleProgress?.placedIds}
-            initialTrayIds={savedReassembleProgress?.trayIds}
-            initialMistakes={savedReassembleProgress?.mistakes}
             onComplete={onReassembleComplete}
             onProgress={(placedIds, trayIds, mistakes) =>
               saveReassembleProgress(item.id, active, { placedIds, trayIds, mistakes })
             }
+            {...(savedReassembleProgress
+              ? {
+                  initialPlacedIds: savedReassembleProgress.placedIds,
+                  initialTrayIds: savedReassembleProgress.trayIds,
+                  initialMistakes: savedReassembleProgress.mistakes,
+                }
+              : {})}
           />
         )}
         {(!phaseLocked || phase === 'recall') && phase === 'recall' && (
           <RecallEditorShell
             reference={reference}
             draft={draft}
-            lang={code?.lang}
+            lang={code?.lang ?? 'go'}
             dark={theme === 'dark'}
             themeKey={themePreset}
             editorPrefs={editorPrefs}

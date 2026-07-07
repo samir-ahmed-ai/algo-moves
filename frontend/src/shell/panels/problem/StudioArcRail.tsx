@@ -54,13 +54,13 @@ export function StudioArcRail({
   nextLabel,
   className,
 }: {
-  availTabs?: StudioTab[];
-  activeTabId?: string;
-  view?: OverviewView;
-  canAnimate?: boolean;
-  canRecall?: boolean;
-  nextLabel?: string;
-  className?: string;
+  availTabs?: StudioTab[] | undefined;
+  activeTabId?: string | undefined;
+  view?: OverviewView | undefined;
+  canAnimate?: boolean | undefined;
+  canRecall?: boolean | undefined;
+  nextLabel?: string | undefined;
+  className?: string | undefined;
 }) {
   const steps =
     view !== undefined

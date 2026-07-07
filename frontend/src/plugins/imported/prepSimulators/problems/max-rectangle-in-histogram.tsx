@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,7 +33,7 @@ function record({ heights }: HistogramInput): Frame<HistogramState>[] {
   let best = 0;
   let bestIdx: number | null = null;
 
-  const { emit, frames } = createRecorder<HistogramState>(() => ({
+  const { emit, frames } = createPrepRecorder<HistogramState>(() => ({
     heights,
     i: null,
     h: null,
@@ -54,7 +54,7 @@ function record({ heights }: HistogramInput): Frame<HistogramState>[] {
   );
 
   for (let i = 0; i <= heights.length; i++) {
-    const h = i < heights.length ? heights[i] : 0;
+    const h = i < heights.length ? heights[i]! : 0;
     if (i < heights.length) {
       emit(
         'VISIT',
@@ -71,28 +71,28 @@ function record({ heights }: HistogramInput): Frame<HistogramState>[] {
       );
     }
 
-    while (stack.length > 0 && h < heights[stack[stack.length - 1]]) {
-      const top = stack[stack.length - 1];
+    while (stack.length > 0 && h! < heights[stack[stack.length - 1]!]!) {
+      const top = stack[stack.length - 1]!;
       stack.pop();
       let width = i;
       if (stack.length > 0) {
-        width = i - stack[stack.length - 1] - 1;
+        width = i - stack[stack.length - 1]! - 1;
       }
-      const area = heights[top] * width;
-      const leftBound = stack.length > 0 ? stack[stack.length - 1] : -1;
+      const area = heights[top!]! * width;
+      const leftBound = stack.length > 0 ? stack[stack.length - 1]! : -1;
       emit(
         'POP',
-        `area=${heights[top]}×${width}=${area}`,
-        `Pop bar ${top} (height ${heights[top]}). It spans from just right of index ${leftBound} up to ${i - 1}, a width of ${width}. Its rectangle area is ${heights[top]} × ${width} = ${area}.`,
+        `area=${heights[top!]!}×${width}=${area}`,
+        `Pop bar ${top} (height ${heights[top!]!}). It spans from just right of index ${leftBound} up to ${i - 1}, a width of ${width}. Its rectangle area is ${heights[top!]!} × ${width} = ${area}.`,
         { i, h, top, width, area },
       );
       if (area > best) {
         best = area;
-        bestIdx = top;
+        bestIdx! = top;
         emit(
           'BEST',
           `best=${best}`,
-          `That ${area} beats the previous best, so best = ${area} (from bar ${top}, height ${heights[top]}).`,
+          `That ${area} beats the previous best, so best = ${area} (from bar ${top}, height ${heights[top!]!}).`,
           { i, h, top, width, area },
           'good',
         );
@@ -129,8 +129,8 @@ function View({ frame }: PluginViewProps<HistogramState>) {
   if (s.top !== null) {
     pointers.push({ i: s.top, label: 'pop', tone: 'bad', place: 'below' });
   }
-  const stackTop = s.stack.length > 0 ? s.stack[s.stack.length - 1] : null;
-  if (stackTop !== null && stackTop < s.heights.length && stackTop !== s.top) {
+  const stackTop = s.stack.length > 0 ? s.stack[s.stack.length - 1]! : null;
+  if (stackTop !== null && stackTop! < s.heights.length && stackTop !== s.top) {
     pointers.push({ i: stackTop, label: 'top', tone: 'warn', place: 'below' });
   }
 

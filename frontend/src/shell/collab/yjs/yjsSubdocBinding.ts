@@ -122,8 +122,10 @@ function readSubdocPanelMap(nodeId: string, panel: Y.Map<unknown>): SubDocSnapsh
   const elements = elementsMap ? [...elementsMap.values()] : [];
   const payload: WhiteboardPayload = {
     elements,
-    appState: panel.get('appState') as Record<string, unknown> | undefined,
-    files: panel.get('files') as Record<string, unknown> | undefined,
+    ...(panel.get('appState')
+      ? { appState: panel.get('appState') as Record<string, unknown> }
+      : {}),
+    ...(panel.get('files') ? { files: panel.get('files') as Record<string, unknown> } : {}),
   };
   return snapshotFromPayload(nodeId, kind, rev, payload);
 }

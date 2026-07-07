@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   RailGroup,
@@ -31,7 +31,7 @@ interface ThreeSumState {
   i: number | null; // fixed anchor index
   l: number | null; // left pointer
   r: number | null; // right pointer
-  sum: number | null; // nums[i] + nums[l] + nums[r] when comparing
+  sum: number | null; // nums[i]! + nums[l]! + nums[r]! when comparing
   // sort-phase highlight indices (selection-sort compare/min/swap markers)
   compare: [number, number] | null;
   minIdx: number | null;
@@ -46,7 +46,7 @@ function record({ nums }: ThreeSumInput): Frame<ThreeSumState>[] {
   const n = a.length;
   const results: Triplet[] = [];
 
-  const { emit, frames } = createRecorder<ThreeSumState>(() => ({
+  const { emit, frames } = createPrepRecorder<ThreeSumState>(() => ({
     nums: a.slice(),
     phase: 'scan',
     i: null,
@@ -64,7 +64,7 @@ function record({ nums }: ThreeSumInput): Frame<ThreeSumState>[] {
   emit(
     'INIT',
     `n=${n}`,
-    `3Sum: find every unique triplet that sums to 0. Strategy: sort the array, then for each fixed anchor nums[i] walk two pointers (l from the left, r from the right) inward to find the remaining pair.`,
+    `3Sum: find every unique triplet that sums to 0. Strategy: sort the array, then for each fixed anchor nums[i]! walk two pointers (l from the left, r from the right) inward to find the remaining pair.`,
     { phase: 'sort', sortedUpTo: 0 },
   );
 
@@ -73,42 +73,42 @@ function record({ nums }: ThreeSumInput): Frame<ThreeSumState>[] {
     let m = p;
     emit(
       'SORT_SELECT',
-      `min=${a[p]}`,
-      `Sort phase: position ${p} is the next slot to fill. Tentatively the minimum of the unsorted region is nums[${p}] = ${a[p]}.`,
+      `min=${a[p]!}`,
+      `Sort phase: position ${p} is the next slot to fill. Tentatively the minimum of the unsorted region is nums[${p}]! = ${a[p]!}.`,
       { phase: 'sort', minIdx: m, sortedUpTo: p },
     );
     for (let q = p + 1; q < n; q++) {
       emit(
         'SORT_COMPARE',
-        `${a[q]} ? ${a[m]}`,
-        `Compare nums[${q}] = ${a[q]} against the current minimum nums[${m}] = ${a[m]}.`,
+        `${a[q]!} ? ${a[m]!}`,
+        `Compare nums[${q}]! = ${a[q]!} against the current minimum nums[${m}]! = ${a[m]!}.`,
         { phase: 'sort', compare: [q, m], minIdx: m, sortedUpTo: p },
       );
-      if (a[q] < a[m]) {
+      if (a[q]! < a[m]!) {
         m = q;
         emit(
           'SORT_NEWMIN',
-          `min=${a[m]}`,
-          `nums[${q}] = ${a[q]} is smaller, so it becomes the new minimum of the unsorted region.`,
+          `min=${a[m]!}`,
+          `nums[${q}]! = ${a[q]!} is smaller, so it becomes the new minimum of the unsorted region.`,
           { phase: 'sort', minIdx: m, sortedUpTo: p },
         );
       }
     }
     if (m !== p) {
-      const tmp = a[p];
-      a[p] = a[m];
-      a[m] = tmp;
+      const tmp = a[p]!;
+      a[p]! = a[m]!;
+      a[m]! = tmp;
       emit(
         'SORT_SWAP',
         `swap ${p}↔${m}`,
-        `Swap the minimum into place: nums[${p}] ↔ nums[${m}]. Position ${p} is now sorted.`,
+        `Swap the minimum into place: nums[${p}]! ↔ nums[${m}]!. Position ${p} is now sorted.`,
         { phase: 'sort', swap: [p, m], sortedUpTo: p + 1 },
       );
     } else {
       emit(
         'SORT_FIX',
         `fix ${p}`,
-        `nums[${p}] = ${a[p]} is already the minimum of the unsorted region, so it stays put and position ${p} is sorted.`,
+        `nums[${p}]! = ${a[p]!} is already the minimum of the unsorted region, so it stays put and position ${p} is sorted.`,
         { phase: 'sort', sortedUpTo: p + 1 },
       );
     }
@@ -120,13 +120,13 @@ function record({ nums }: ThreeSumInput): Frame<ThreeSumState>[] {
     { phase: 'scan', sortedUpTo: n },
   );
 
-  // --- Scan phase: fix nums[i], two pointers l=i+1, r=n-1 ---
+  // --- Scan phase: fix nums[i]!, two pointers l=i+1, r=n-1 ---
   for (let i = 0; i < n - 2; i++) {
-    if (i > 0 && a[i] === a[i - 1]) {
+    if (i > 0 && a[i]! === a[i - 1]!) {
       emit(
         'SKIP_I',
-        `dup ${a[i]}`,
-        `nums[${i}] = ${a[i]} equals the previous anchor nums[${i - 1}], so fixing it again would only repeat triplets we already have. Skip this anchor.`,
+        `dup ${a[i]!}`,
+        `nums[${i}]! = ${a[i]!} equals the previous anchor nums[${i - 1}]!, so fixing it again would only repeat triplets we already have. Skip this anchor.`,
         { phase: 'scan', i, sortedUpTo: n },
       );
       continue;
@@ -135,44 +135,44 @@ function record({ nums }: ThreeSumInput): Frame<ThreeSumState>[] {
     let r = n - 1;
     emit(
       'FIX_I',
-      `anchor ${a[i]}`,
-      `Fix the anchor nums[${i}] = ${a[i]}. Set l = ${l} (just right of the anchor) and r = ${r} (the last element); we need nums[l] + nums[r] = ${-a[i]}.`,
+      `anchor ${a[i]!}`,
+      `Fix the anchor nums[${i}]! = ${a[i]!}. Set l = ${l} (just right of the anchor) and r = ${r} (the last element); we need nums[l]! + nums[r]! = ${-a[i]!}.`,
       { phase: 'scan', i, l, r, sortedUpTo: n },
     );
 
     while (l < r) {
-      const sum = a[i] + a[l] + a[r];
+      const sum = a[i]! + a[l]! + a[r]!;
       emit(
         'SUM',
         `sum=${sum}`,
-        `Check the triple: nums[${i}] + nums[${l}] + nums[${r}] = ${a[i]} + ${a[l]} + ${a[r]} = ${sum}.`,
+        `Check the triple: nums[${i}]! + nums[${l}]! + nums[${r}]! = ${a[i]!} + ${a[l]!} + ${a[r]!} = ${sum}.`,
         { phase: 'scan', i, l, r, sum, sortedUpTo: n },
       );
       if (sum === 0) {
-        results.push([a[i], a[l], a[r]]);
+        results.push([a[i]!, a[l]!, a[r]!]);
         emit(
           'FOUND',
-          `[${a[i]},${a[l]},${a[r]}]`,
-          `Sum is 0 — record the triplet [${a[i]}, ${a[l]}, ${a[r]}]. Then move both pointers inward (l++, r−−) to look for another pair with this anchor.`,
+          `[${a[i]!},${a[l]!},${a[r]!}]`,
+          `Sum is 0 — record the triplet [${a[i]!}, ${a[l]!}, ${a[r]!}]. Then move both pointers inward (l++, r−−) to look for another pair with this anchor.`,
           { phase: 'scan', i, l, r, sum, sortedUpTo: n },
           'good',
         );
         l++;
         r--;
-        while (l < r && a[l] === a[l - 1]) {
+        while (l < r && a[l]! === a[l - 1]!) {
           emit(
             'SKIP_L',
-            `dup l ${a[l]}`,
-            `nums[${l}] = ${a[l]} repeats the value we just used on the left, which would give a duplicate triplet. Advance l past it.`,
+            `dup l ${a[l]!}`,
+            `nums[${l}]! = ${a[l]!} repeats the value we just used on the left, which would give a duplicate triplet. Advance l past it.`,
             { phase: 'scan', i, l, r, sortedUpTo: n },
           );
           l++;
         }
-        while (l < r && a[r] === a[r + 1]) {
+        while (l < r && a[r]! === a[r + 1]!) {
           emit(
             'SKIP_R',
-            `dup r ${a[r]}`,
-            `nums[${r}] = ${a[r]} repeats the value we just used on the right, which would give a duplicate triplet. Retreat r past it.`,
+            `dup r ${a[r]!}`,
+            `nums[${r}]! = ${a[r]!} repeats the value we just used on the right, which would give a duplicate triplet. Retreat r past it.`,
             { phase: 'scan', i, l, r, sortedUpTo: n },
           );
           r--;
@@ -215,9 +215,9 @@ function View({ frame }: PluginViewProps<ThreeSumState>) {
 
   const tone = (idx: number): BarTone => {
     if (s.phase === 'sort') {
-      if (s.swap && (idx === s.swap[0] || idx === s.swap[1])) return 'swap';
+      if (s.swap && (idx === s.swap[0]! || idx === s.swap[1]!)) return 'swap';
       if (s.minIdx === idx) return 'min';
-      if (s.compare && idx === s.compare[0]) return 'compare';
+      if (s.compare && idx === s.compare[0]!) return 'compare';
       if (idx < s.sortedUpTo) return 'sorted';
       return 'idle';
     }
@@ -270,12 +270,12 @@ function Inspector({ frame }: InspectorProps<ThreeSumState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const at = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.nums.length ? s.nums[idx] : '—';
+    idx !== null && idx >= 0 && idx < s.nums.length ? s.nums[idx]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="i (anchor)" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={at(s.i)} />
+      <InspectorRow k="nums[i]!" v={at(s.i)} />
       <InspectorRow k="l" v={s.l ?? '—'} />
       <InspectorRow k="r" v={s.r ?? '—'} />
       <InspectorRow k="sum" v={s.sum ?? '—'} />
@@ -306,14 +306,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Memoized Collatz + Sort — different approach',
       },
     ],
-    explain: 'Sort, then fix `nums[i]`, use two pointers `l=i+1, r=n-1` for the remaining pair',
+    explain: 'Sort, then fix `nums[i]!`, use two pointers `l=i+1, r=n-1` for the remaining pair',
   },
   {
     id: 'init',
     prompt: 'At the start of a run (3Sum), what strategy is established?',
     choices: [
       {
-        label: 'Sort, then fix `nums[i]`, use two — described in INIT caption',
+        label: 'Sort, then fix `nums[i]!`, use two — described in INIT caption',
         correct: true,
       },
       {
@@ -327,7 +327,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      '3Sum: find every unique triplet that sums to 0. Strategy: sort the array, then for each fixed anchor nums[i] walk two pointers (l from the left, r from the right) inward to find the remaining pair.',
+      '3Sum: find every unique triplet that sums to 0. Strategy: sort the array, then for each fixed anchor nums[i]! walk two pointers (l from the left, r from the right) inward to find the remaining pair.',
   },
   {
     id: 'key-step',
@@ -348,7 +348,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Fix the anchor nums[] = . Set l =  (just right of the anchor) and r =  (the last element); we need nums[l] + nums[r] = .',
+      'Fix the anchor nums[] = . Set l =  (just right of the anchor) and r =  (the last element); we need nums[l]! + nums[r]! = .',
   },
   {
     id: 'state',
@@ -389,7 +389,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n²). O(1). Sort, then fix `nums[i]`, use two pointers `l=i+1, r=n-1` for the remaining pair; Skip duplicates: if `nums[i] == nums[i-1]`, skip `i`; after finding a triplet,',
+      'O(n²). O(1). Sort, then fix `nums[i]!`, use two pointers `l=i+1, r=n-1` for the remaining pair; Skip duplicates: if `nums[i]! == nums[i-1]!`, skip `i`; after finding a triplet,',
   },
   {
     id: 'outcome',

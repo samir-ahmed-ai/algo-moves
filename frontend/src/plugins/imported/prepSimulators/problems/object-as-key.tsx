@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -53,7 +53,7 @@ function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>
   const gmap = gradesToMap(grades);
   const result: ResultEntry[] = [];
 
-  const { emit, frames } = createRecorder<ObjectAsKeyState>(() => ({
+  const { emit, frames } = createPrepRecorder<ObjectAsKeyState>(() => ({
     students,
     grades,
     i: null,
@@ -71,12 +71,12 @@ function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>
   );
 
   for (let i = 0; i < students.length; i++) {
-    const s = students[i];
-    const k = keyOf(s);
+    const s = students[i]!;
+    const k = keyOf(s!);
     emit(
       'PROBE',
-      `grades[{${s.ID},${s.Name}}]`,
-      `Look up student {ID:${s.ID}, Name:"${s.Name}"} in the map. Go hashes every field of the struct, so the key is the pair (${s.ID}, "${s.Name}").`,
+      `grades[{${s!.ID},${s!.Name}}]!`,
+      `Look up student {ID:${s!.ID}, Name:"${s!.Name}"} in the map. Go hashes every field of the struct, so the key is the pair (${s!.ID}, "${s!.Name}").`,
       { i, probeKey: k },
     );
 
@@ -85,8 +85,8 @@ function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>
       result.push({ student: s, grade: g });
       emit(
         'COPY',
-        `result[${s.Name}]=${g}`,
-        `Hit — the struct key {${s.ID},"${s.Name}"} is present with grade ${g}. Copy it into the result: result[{${s.ID},"${s.Name}"}] = ${g}.`,
+        `result[${s!.Name}]!=${g}`,
+        `Hit — the struct key {${s!.ID},"${s!.Name}"} is present with grade ${g}. Copy it into the result: result[{${s!.ID},"${s!.Name}"}]! = ${g}.`,
         {
           i,
           probeKey: k,
@@ -99,7 +99,7 @@ function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>
       emit(
         'MISS',
         `no entry`,
-        `Miss — no map entry has both ID ${s.ID} and Name "${s.Name}", so this student is skipped. (A student with the same Name but a different ID would NOT match.)`,
+        `Miss — no map entry has both ID ${s!.ID} and Name "${s!.Name}", so this student is skipped. (A student with the same Name but a different ID would NOT match.)`,
         { i, probeKey: k },
         'bad',
       );
@@ -125,7 +125,7 @@ function View({ frame }: PluginViewProps<ObjectAsKeyState>) {
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
 
   const tone = (i: number) => {
-    const st = s.students[i];
+    const st = s.students[i]!;
     if (!st) return '';
     if (inResult.has(keyOf(st))) return 'found';
     if (s.i === i) return 'match';
@@ -163,7 +163,7 @@ function View({ frame }: PluginViewProps<ObjectAsKeyState>) {
 function Inspector({ frame }: InspectorProps<ObjectAsKeyState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null ? s.students[s.i] : null;
+  const cur = s.i !== null ? s.students[s.i]! : null;
   return (
     <VarGrid>
       <InspectorRow k="students" v={s.students.length} />
@@ -268,7 +268,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Hit — the struct key {,""} is present with grade . Copy it into the result: result[{,""}] = .',
+      'Hit — the struct key {,""} is present with grade . Copy it into the result: result[{,""}]! = .',
   },
   {
     id: 'state',
@@ -308,7 +308,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(1) per op. O(n). map[Student]; copy grades[s] when present',
+    explain: 'O(1) per op. O(n). map[Student]!; copy grades[s]! when present',
   },
   {
     id: 'outcome',

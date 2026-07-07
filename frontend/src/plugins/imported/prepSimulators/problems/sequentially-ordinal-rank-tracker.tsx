@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -35,8 +35,8 @@ function insertSorted(locs: Loc[], name: string, score: number): Loc[] {
   let hi = locs.length;
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    const cur = locs[mid];
-    const before = cur.score < score || (cur.score === score && cur.name > name);
+    const cur = locs[mid]!;
+    const before = cur!.score < score || (cur!.score === score && cur!.name > name);
     if (before) lo = mid + 1;
     else hi = mid;
   }
@@ -49,7 +49,7 @@ function record({ ops }: SorInput): Frame<SorState>[] {
   let locs: Loc[] = [];
   let idx = 0;
 
-  const { emit, frames } = createRecorder<SorState>(() => ({
+  const { emit, frames } = createPrepRecorder<SorState>(() => ({
     locs: locs.map((x) => ({ ...x })),
     idx,
     op: '',
@@ -60,7 +60,7 @@ function record({ ops }: SorInput): Frame<SorState>[] {
   emit(
     'INIT',
     'empty',
-    `Sequentially Ordinal Rank Tracker: sorted by (score asc, name desc). Add inserts; Get returns locs[idx++] in that order.`,
+    `Sequentially Ordinal Rank Tracker: sorted by (score asc, name desc). Add inserts; Get returns locs[idx++]! in that order.`,
     {},
   );
 

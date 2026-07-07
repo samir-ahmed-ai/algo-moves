@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -18,10 +18,10 @@ interface MaxSwapInput {
 interface MaxSwapState {
   digits: string[]; // current digit chars (mutated after the swap)
   num: number; // original number
-  last: number[]; // last[d] = last index where digit d appears (-1 = absent)
+  last: number[]; // last[d]! = last index where digit d appears (-1 = absent)
   i: number | null; // current scan position
   d: number | null; // candidate larger digit we are testing (9..cur+1)
-  swapWith: number | null; // index we swapped i with (the winning last[d])
+  swapWith: number | null; // index we swapped i with (the winning last[d]!)
   result: number | null; // final value once resolved
   done: boolean;
 }
@@ -29,9 +29,9 @@ interface MaxSwapState {
 function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {
   const s = String(num).split('');
   const last: number[] = new Array<number>(10).fill(-1);
-  for (let i = 0; i < s.length; i++) last[s[i].charCodeAt(0) - 48] = i;
+  for (let i = 0; i < s.length; i++) last[s[i]!.charCodeAt(0) - 48] = i;
 
-  const { emit, frames } = createRecorder<MaxSwapState>(() => ({
+  const { emit, frames } = createPrepRecorder<MaxSwapState>(() => ({
     digits: s.slice(),
     num,
     last: last.slice(),
@@ -52,12 +52,12 @@ function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {
   emit(
     'LAST',
     'last[] built',
-    `First record last[d] = the rightmost index where digit d appears. Swapping with the LAST occurrence of a bigger digit maximizes the gain (it moves the most significant possible position).`,
+    `First record last[d]! = the rightmost index where digit d appears. Swapping with the LAST occurrence of a bigger digit maximizes the gain (it moves the most significant possible position).`,
     {},
   );
 
   for (let i = 0; i < s.length; i++) {
-    const cur = s[i].charCodeAt(0) - 48;
+    const cur = s[i]!.charCodeAt(0) - 48;
     emit(
       'SCAN',
       `pos ${i} = ${cur}`,
@@ -65,11 +65,11 @@ function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {
       { i },
     );
     for (let d = 9; d > cur; d--) {
-      const hasLater = last[d] > i;
+      const hasLater = last[d]! > i;
       emit(
         'TRY',
         `try ${d}`,
-        `Is digit ${d} available at an index past ${i}? last[${d}] = ${last[d] === -1 ? 'none' : last[d]}${
+        `Is digit ${d} available at an index past ${i}? last[${d}]! = ${last[d]! === -1 ? 'none' : last[d]!}${
           hasLater
             ? ` > ${i}, yes — this is the biggest digit we can pull left here.`
             : `, not to the right, skip.`
@@ -78,10 +78,10 @@ function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {
         hasLater ? 'good' : undefined,
       );
       if (hasLater) {
-        const j = last[d];
-        const tmp = s[i];
-        s[i] = s[j];
-        s[j] = tmp;
+        const j = last[d]!;
+        const tmp = s[i]!;
+        s[i]! = s[j!]!;
+        s[j!]! = tmp;
         const result = Number(s.join(''));
         emit(
           'SWAP',
@@ -128,7 +128,7 @@ function View({ frame }: PluginViewProps<MaxSwapState>) {
       </div>
       <ArrayRow values={s.digits} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.xs, 'text-ink3')}>
-        last[d]:{' '}
+        last[d]!:{' '}
         {s.last
           .map((v, d) => (v === -1 ? null : `${d}→${v}`))
           .filter(Boolean)
@@ -148,11 +148,11 @@ function Inspector({ frame }: InspectorProps<MaxSwapState>) {
     <VarGrid>
       <InspectorRow k="num" v={s.num} />
       <InspectorRow k="i (pos)" v={s.i ?? '—'} />
-      <InspectorRow k="digit at i" v={s.i !== null ? s.digits[s.i] : '—'} />
+      <InspectorRow k="digit at i" v={s.i !== null ? s.digits[s.i]! : '—'} />
       <InspectorRow k="d (target)" v={s.d ?? '—'} />
       <InspectorRow
-        k="last[d]"
-        v={s.d !== null ? (s.last[s.d] === -1 ? 'none' : s.last[s.d]) : '—'}
+        k="last[d]!"
+        v={s.d !== null ? (s.last[s.d]! === -1 ? 'none' : s.last[s.d]!) : '—'}
       />
       <InspectorRow k="result" v={s.result ?? (s.done ? 'none' : '…')} />
     </VarGrid>

@@ -29,10 +29,14 @@ export function panelFill(style?: PanelNodeStyle): string | undefined {
   return fill && fill !== 'transparent' ? fill : fill === 'transparent' ? 'transparent' : undefined;
 }
 
+export type PanelStylePatch = Partial<{
+  [K in keyof PanelNodeStyle]: PanelNodeStyle[K] | undefined;
+}>;
+
 /** Merge style updates; undefined values remove keys. */
 export function patchPanelStyle(
   prev: PanelNodeStyle | undefined,
-  patch: Partial<PanelNodeStyle> | null,
+  patch: PanelStylePatch | null,
 ): PanelNodeStyle | undefined {
   if (patch === null) return undefined;
   const next = { ...prev };

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -59,13 +59,13 @@ const THOUSANDS = ['', 'Thousand', 'Million', 'Billion'];
 // helper(n): english words for a 3-digit group (0..999), no trailing scale.
 function helper(n: number): string {
   if (n === 0) return '';
-  if (n < 20) return BELOW20[n];
+  if (n < 20) return BELOW20[n]!;
   if (n < 100) {
-    let r = TENS[Math.floor(n / 10)];
-    if (n % 10 > 0) r += ' ' + BELOW20[n % 10];
+    let r = TENS[Math.floor(n / 10)]!;
+    if (n % 10 > 0) r += ' ' + BELOW20[n % 10]!;
     return r;
   }
-  let r = BELOW20[Math.floor(n / 100)] + ' Hundred';
+  let r = BELOW20[Math.floor(n / 100)]! + ' Hundred';
   if (n % 100 > 0) r += ' ' + helper(n % 100);
   return r;
 }
@@ -78,7 +78,7 @@ function numberToWords(num: number): string {
   while (n > 0) {
     if (n % 1000 !== 0) {
       let s = helper(n % 1000);
-      if (THOUSANDS[idx] !== '') s += ' ' + THOUSANDS[idx];
+      if (THOUSANDS[idx]! !== '') s += ' ' + THOUSANDS[idx]!;
       parts.unshift(s);
     }
     n = Math.floor(n / 1000);
@@ -95,14 +95,14 @@ function record({ num }: WordsInput): Frame<WordsState>[] {
     let idx = 0;
     while (n > 0) {
       const value = n % 1000;
-      chunks.push({ value, scale: THOUSANDS[idx], words: helper(value) });
+      chunks.push({ value, scale: THOUSANDS[idx]!, words: helper(value) });
       n = Math.floor(n / 1000);
       idx++;
     }
     if (chunks.length === 0) chunks.push({ value: 0, scale: '', words: '' });
   }
 
-  const { emit, frames } = createRecorder<WordsState>(() => ({
+  const { emit, frames } = createPrepRecorder<WordsState>(() => ({
     num,
     chunks,
     active: null,
@@ -132,16 +132,16 @@ function record({ num }: WordsInput): Frame<WordsState>[] {
 
   const parts: string[] = [];
   for (let idx = 0; idx < chunks.length; idx++) {
-    const c = chunks[idx];
+    const c = chunks[idx]!;
     const remaining = Math.floor(num / Math.pow(1000, idx));
     emit(
       'CHUNK',
-      `group ${idx}=${c.value}`,
-      `Take group ${idx} (the ${idx === 0 ? 'ones' : THOUSANDS[idx].toLowerCase()} group): num % 1000 gives the low three digits = ${c.value}.`,
+      `group ${idx}=${c!.value}`,
+      `Take group ${idx} (the ${idx === 0 ? 'ones' : THOUSANDS[idx]!.toLowerCase()} group): num % 1000 gives the low three digits = ${c!.value}.`,
       { active: idx, remaining, parts: parts.slice() },
     );
 
-    if (c.value === 0) {
+    if (c!.value === 0) {
       emit(
         'SKIP',
         `group ${idx} empty`,
@@ -151,20 +151,20 @@ function record({ num }: WordsInput): Frame<WordsState>[] {
       continue;
     }
 
-    let s = c.words;
+    let s = c!.words;
     emit(
       'NAME',
       `"${s}"`,
-      `Name the 3-digit group ${c.value} with the lookup helper: ${c.value} → "${s}". Hundreds use below-20 + "Hundred"; the last two digits use the tens/below-20 tables.`,
+      `Name the 3-digit group ${c!.value} with the lookup helper: ${c!.value} → "${s}". Hundreds use below-20 + "Hundred"; the last two digits use the tens/below-20 tables.`,
       { active: idx, remaining, parts: parts.slice() },
     );
 
-    if (c.scale !== '') {
-      s += ' ' + c.scale;
+    if (c!.scale !== '') {
+      s += ' ' + c!.scale;
       emit(
         'SCALE',
-        `+ ${c.scale}`,
-        `This group sits in the ${c.scale} place, so append the scale word: "${s}".`,
+        `+ ${c!.scale}`,
+        `This group sits in the ${c!.scale} place, so append the scale word: "${s}".`,
         { active: idx, remaining, parts: parts.slice() },
       );
     }
@@ -202,12 +202,12 @@ function View({ frame }: PluginViewProps<WordsState>) {
     pointers.push({ i: activeDisplay, label: 'group', tone: 'accent', place: 'above' });
   }
   const tone = (i: number) => {
-    const c = display[i];
+    const c = display[i]!;
     if (activeDisplay === i) return 'match';
-    if (c.value === 0) return 'dead';
+    if (c!.value === 0) return 'dead';
     return 'in-window';
   };
-  const scaleLabel = (i: number) => (display[i].scale === '' ? 'ones' : display[i].scale);
+  const scaleLabel = (i: number) => (display[i]!.scale === '' ? 'ones' : display[i]!.scale);
 
   return (
     <div className="board-area">
@@ -222,11 +222,11 @@ function View({ frame }: PluginViewProps<WordsState>) {
         label={scaleLabel}
       />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {s.active !== null && s.chunks[s.active] ? (
+        {s.active !== null && s.chunks[s.active]! ? (
           <>
-            group {s.active} ({String(s.chunks[s.active].value).padStart(3, '0')}) →{' '}
-            <span className="text-ink">{s.chunks[s.active].words || '—'}</span>
-            {s.chunks[s.active].scale ? ` ${s.chunks[s.active].scale}` : ''}
+            group {s.active} ({String(s.chunks[s.active]!.value).padStart(3, '0')}) →{' '}
+            <span className="text-ink">{s.chunks[s.active]!.words || '—'}</span>
+            {s.chunks[s.active]!.scale ? ` ${s.chunks[s.active]!.scale}` : ''}
           </>
         ) : (
           'index = 3-digit group, label = scale'
@@ -248,7 +248,7 @@ function View({ frame }: PluginViewProps<WordsState>) {
 function Inspector({ frame }: InspectorProps<WordsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const c = s.active !== null ? s.chunks[s.active] : null;
+  const c = s.active !== null ? s.chunks[s.active]! : null;
   return (
     <VarGrid>
       <InspectorRow k="num" v={s.num.toLocaleString()} />

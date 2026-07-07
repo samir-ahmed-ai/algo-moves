@@ -63,15 +63,21 @@ export interface Verdict {
 }
 
 /** Top-level canvas modes shown in the HUD. */
-export type CanvasMode = 'play' | 'learn' | 'visualize';
+export const CANVAS_MODES = ['play', 'learn', 'visualize'] as const;
+export type CanvasMode = (typeof CANVAS_MODES)[number];
 
 export type PluginTabMode = CanvasMode | 'practice';
+export type CanvasModeParam = CanvasMode | 'code' | string | undefined;
 
 /** Normalize share URL mode strings to a canvas mode. */
-export function normalizeCanvasMode(m?: string): CanvasMode {
-  if (m === 'learn' || m === 'code') return 'learn';
-  if (m === 'visualize') return 'visualize';
-  return 'play';
+export function normalizeCanvasMode(m?: CanvasModeParam): CanvasMode {
+  const mode = m?.trim().toLowerCase();
+  if (mode === 'learn' || mode === 'code') return 'learn';
+  return isCanvasMode(mode) ? mode : 'play';
+}
+
+export function isCanvasMode(value: unknown): value is CanvasMode {
+  return typeof value === 'string' && (CANVAS_MODES as readonly string[]).includes(value);
 }
 
 export interface PluginTab {
@@ -107,8 +113,10 @@ export interface QuizQuestion {
   explain: string;
 }
 
-/** Edge wiring between panels per mode: [sourceId, targetId, label?]. `practice` aliases `learn`. */
-export type PluginWires = Partial<Record<CanvasMode | 'practice', [string, string, string?][]>>;
+export type PluginWire = [sourceId: string, targetId: string, label?: string];
+
+/** Edge wiring between panels per mode. `practice` aliases `learn`. */
+export type PluginWires = Partial<Record<CanvasMode | 'practice', PluginWire[]>>;
 
 /**
  * A top-level field of the input value the student may edit to run the algorithm
@@ -129,31 +137,31 @@ export interface ProblemPlugin<I = unknown, S = unknown> {
   inputs: SampleInput<I>[];
   record: (input: I) => Frame<S>[];
   View: ComponentType<PluginViewProps<S>>;
-  verdict?: (frames: Frame<S>[]) => Verdict;
-  tabs?: PluginTab[];
-  Inspector?: ComponentType<InspectorProps<S>>;
+  verdict?: ((frames: Frame<S>[]) => Verdict) | undefined;
+  tabs?: PluginTab[] | undefined;
+  Inspector?: ComponentType<InspectorProps<S>> | undefined;
   /** Raw solution source — the Code mode mounts an editable editor + a copy node from this. */
-  code?: PluginCode;
+  code?: PluginCode | undefined;
   /** Additional language ports of the solution; the Code/Copy panels show one tab per language (#71). */
-  extraCode?: PluginCode[];
+  extraCode?: PluginCode[] | undefined;
   /** Curated ordered blocks for Code Studio reassemble phase; auto-split from `code` when omitted. */
-  codePieces?: CodePiece[];
+  codePieces?: CodePiece[] | undefined;
   /**
    * Conceptual multiple-choice questions. The Code Studio runs these as its first
    * phase (Quiz → Structure → Recall) and the Learn-mode Quiz tab reuses the same
    * data. Omit to skip the quiz phase for this problem.
    */
-  quiz?: QuizQuestion[];
+  quiz?: QuizQuestion[] | undefined;
   /**
    * Extra edges between this plugin's tab nodes (and shell built-ins) per mode.
    * The shell already wires the built-in panels; declare tab connections here so
    * a plugin's nodes aren't left unwired. Only edges whose endpoints both exist render.
    */
-  wires?: PluginWires;
+  wires?: PluginWires | undefined;
   /** Fields the student can edit to run the algorithm on custom input (Input editor panel). */
-  editable?: EditableField[];
+  editable?: EditableField[] | undefined;
   /** Optional visual input builders (pad grid, beat machine, etc.). */
-  inputBuilders?: ('pad' | 'beat' | 'arpeggiator' | 'polyrhythm' | 'custom')[];
+  inputBuilders?: ('pad' | 'beat' | 'arpeggiator' | 'polyrhythm' | 'custom')[] | undefined;
 }
 
 export function definePlugin<I, S>(plugin: ProblemPlugin<I, S>): ProblemPlugin<I, S> {

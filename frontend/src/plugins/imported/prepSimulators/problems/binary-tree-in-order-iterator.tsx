@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   InspectorRow,
@@ -42,10 +42,10 @@ function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {
   const done: number[] = [];
   const output: number[] = [];
 
-  const val = (i: number): number => tree[i] as number;
-  const exists = (i: number): boolean => i >= 0 && i < tree.length && tree[i] != null;
+  const val = (i: number): number => tree[i]! as number;
+  const exists = (i: number): boolean => i >= 0 && i < tree.length && tree[i]! != null;
 
-  const { emit, frames } = createRecorder<BtInOrderState>(() => ({
+  const { emit, frames } = createPrepRecorder<BtInOrderState>(() => ({
     tree: tree,
     stack: stack.slice(),
     done: done.slice(),
@@ -76,8 +76,8 @@ function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {
     emit(
       'SPINE_DONE',
       'left spine done',
-      `Left spine fully stacked. Top of stack (${stack.length ? val(stack[stack.length - 1]) : '—'}) is the next in-order value.`,
-      { active: stack[stack.length - 1] ?? null },
+      `Left spine fully stacked. Top of stack (${stack.length ? val(stack[stack.length - 1]!) : '—'}) is the next in-order value.`,
+      { active: stack[stack.length - 1]! ?? null },
     );
   };
 
@@ -91,24 +91,24 @@ function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {
   pushLeft(0);
 
   while (stack.length > 0) {
-    const top = stack[stack.length - 1];
+    const top = stack[stack.length - 1]!;
     emit(
       'HASNEXT',
       'hasNext = true',
-      `\`hasNext()\`: stack non-empty — next value is ${val(top)} at stack top.`,
+      `\`hasNext()\`: stack non-empty — next value is ${val(top!)} at stack top.`,
       { active: top },
     );
     stack.pop();
-    done.push(top);
-    output.push(val(top));
+    done.push(top!);
+    output.push(val(top!));
     emit(
       'NEXT',
-      `yield ${val(top)}`,
-      `\`next()\`: pop ${val(top)}, emit it. In-order so far: [${output.join(', ')}]. Now pushLeft(node.right).`,
+      `yield ${val(top!)}`,
+      `\`next()\`: pop ${val(top!)}, emit it. In-order so far: [${output.join(', ')}]. Now pushLeft(node.right).`,
       { active: top },
       'good',
     );
-    pushLeft(R(top));
+    pushLeft(R(top!));
   }
 
   emit(
@@ -131,8 +131,8 @@ function View({ frame }: PluginViewProps<BtInOrderState>) {
     if (stackSet.has(i)) return 'team-1';
     return 'team-0';
   };
-  const stackLabels = s.stack.map((i) => String(s.tree[i] as number));
-  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]] as number) : '—';
+  const stackLabels = s.stack.map((i) => String(s.tree[i]! as number));
+  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]!] as number) : '—';
   const rail = (
     <>
       <RailStack label="stack" items={stackLabels} topLabel="top" />
@@ -158,7 +158,7 @@ function View({ frame }: PluginViewProps<BtInOrderState>) {
 function Inspector({ frame }: InspectorProps<BtInOrderState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]] as number) : '—';
+  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]!] as number) : '—';
   return (
     <VarGrid>
       <InspectorRow k="stack depth" v={s.stack.length} />

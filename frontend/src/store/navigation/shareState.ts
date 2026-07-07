@@ -32,7 +32,7 @@ export interface ShareState {
 }
 
 /** Legacy catalog item ids → current item ids after imported-canonical migration. */
-export const LEGACY_ITEM_REDIRECTS: Record<string, string> = {
+export const LEGACY_ITEM_REDIRECTS: Readonly<Record<string, string>> = {
   'is-bipartite': 'is-bipartite',
   'number-of-islands': 'number-of-islands',
   'course-schedule': 'course-schedule',
@@ -52,38 +52,41 @@ function cleanUpper(value: string | undefined): string | undefined {
   return cleanText(value)?.toUpperCase();
 }
 
+function isShareObject(value: unknown): value is ShareState {
+  return value !== null && typeof value === 'object';
+}
+
 /** Resolve share state item id through legacy redirects (item ids unchanged; pluginIds migrated). */
 export function normalizeShareState(s: ShareState): ShareState {
+  const item = cleanText(s.item);
+  const id = cleanText(s.id);
+  const input = cleanText(s.input);
+  const mode = cleanText(s.mode);
+  const theme = cleanText(s.theme);
+  const palette = cleanText(s.palette);
+  const themePreset = cleanText(s.themePreset);
+  const dir = cleanText(s.dir);
+  const room = cleanUpper(s.room);
+  const guestToken = cleanText(s.guestToken);
+  const trackId = cleanText(s.trackId);
   let out: ShareState = {
-    ...s,
-    item: cleanText(s.item),
-    id: cleanText(s.id),
-    input: cleanText(s.input),
-    mode: cleanText(s.mode),
-    theme: cleanText(s.theme),
-    palette: cleanText(s.palette),
-    themePreset: cleanText(s.themePreset),
-    dir: cleanText(s.dir),
-    room: cleanUpper(s.room),
-    guestToken: cleanText(s.guestToken),
-    trackId: cleanText(s.trackId),
+    ...(item ? { item } : {}),
+    ...(id ? { id } : {}),
+    ...(input ? { input } : {}),
+    ...(mode ? { mode } : {}),
+    ...(s.focus === 'problem' || s.focus === 'canvas' ? { focus: s.focus } : {}),
+    ...(theme ? { theme } : {}),
+    ...(palette ? { palette } : {}),
+    ...(themePreset ? { themePreset } : {}),
+    ...(dir ? { dir } : {}),
+    ...(room ? { room } : {}),
+    ...(s.sessionKind === 'interview' || s.sessionKind === 'collab'
+      ? { sessionKind: s.sessionKind }
+      : {}),
+    ...(s.variant === 'interview' ? { variant: s.variant } : {}),
+    ...(guestToken ? { guestToken } : {}),
+    ...(trackId ? { trackId } : {}),
   };
-  if (out.variant !== undefined && out.variant !== 'interview') {
-    const { variant: _ignored, ...rest } = out;
-    out = rest;
-  }
-  if (
-    out.sessionKind !== undefined &&
-    out.sessionKind !== 'interview' &&
-    out.sessionKind !== 'collab'
-  ) {
-    const { sessionKind: _ignored, ...rest } = out;
-    out = rest;
-  }
-  if (!out.guestToken) {
-    const { guestToken: _ignored, ...rest } = out;
-    out = rest;
-  }
   if (!out.item) return out;
   const next = LEGACY_ITEM_REDIRECTS[out.item] ?? out.item;
   return next === out.item ? out : { ...out, item: next };
@@ -132,10 +135,12 @@ export function decodeShare(raw: string): ShareState | null {
   try {
     const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
     const pad = b64.length % 4 === 0 ? '' : '='.repeat(4 - (b64.length % 4));
-    return normalizeShareState(JSON.parse(decodeURIComponent(atob(b64 + pad))) as ShareState);
+    const parsed = JSON.parse(decodeURIComponent(atob(b64 + pad)));
+    return isShareObject(parsed) ? normalizeShareState(parsed) : null;
   } catch {
     try {
-      return normalizeShareState(JSON.parse(decodeURIComponent(atob(encoded))) as ShareState);
+      const parsed = JSON.parse(decodeURIComponent(atob(encoded)));
+      return isShareObject(parsed) ? normalizeShareState(parsed) : null;
     } catch {
       return null;
     }
@@ -171,7 +176,16 @@ export function buildWorkspaceEntryUrl(input: {
   trackId?: string;
 }): string {
   const { theme, palette, themePreset, dir, itemId, mode, trackId } = input;
-  const base = { theme, palette, themePreset, dir };
+  const cleanTheme = cleanText(theme);
+  const cleanPalette = cleanText(palette);
+  const cleanThemePreset = cleanText(themePreset);
+  const cleanDir = cleanText(dir);
+  const base: ShareState = {
+    ...(cleanTheme ? { theme: cleanTheme } : {}),
+    ...(cleanPalette ? { palette: cleanPalette } : {}),
+    ...(cleanThemePreset ? { themePreset: cleanThemePreset } : {}),
+    ...(cleanDir ? { dir: cleanDir } : {}),
+  };
   const cleanItemId = cleanText(itemId);
   const cleanTrackId = cleanText(trackId);
   if (cleanItemId) {
@@ -179,7 +193,7 @@ export function buildWorkspaceEntryUrl(input: {
     return buildShareUrl({
       ...base,
       item: cleanItemId,
-      id,
+      ...(id ? { id } : {}),
       mode: cleanText(mode) ?? 'learn',
       focus: 'problem',
     });
@@ -192,9 +206,10 @@ export function buildWorkspaceEntryUrl(input: {
 
 /** Invite link for a live collab/interview room (includes workspace context + room code). */
 export function buildInviteUrl(s: ShareState, room: string): string {
+  const roomCode = cleanUpper(room);
   const base = buildShareUrl({
     ...s,
-    room: cleanUpper(room),
+    ...(roomCode ? { room: roomCode } : {}),
     focus: s.focus ?? 'canvas',
     mode: s.mode ?? 'visualize',
   });
@@ -203,8 +218,14 @@ export function buildInviteUrl(s: ShareState, room: string): string {
 
 /** Guest-invite link for a durable interview: carries the room + public token + interview variant. */
 export function buildInterviewInviteUrl(s: ShareState, room: string, guestToken?: string): string {
+  const token = cleanText(guestToken);
   return buildInviteUrl(
-    { ...s, sessionKind: 'interview', variant: 'interview', guestToken: cleanText(guestToken) },
+    {
+      ...s,
+      sessionKind: 'interview',
+      variant: 'interview',
+      ...(token ? { guestToken: token } : {}),
+    },
     room,
   );
 }
@@ -227,15 +248,16 @@ function mergeShareHashBody(currentBody: string, encoded: string): string {
   const sharePart = `s=${encoded}`;
   if (!currentBody) return sharePart;
   const parts = currentBody.split('&').filter((p) => !p.startsWith('s='));
-  if (parts.length === 0 || (parts.length === 1 && parts[0].startsWith('s='))) return sharePart;
+  if (parts.length === 0 || (parts.length === 1 && parts[0] != null && parts[0].startsWith('s=')))
+    return sharePart;
   return `${parts.join('&')}&${sharePart}`;
 }
 
 /** Keep the URL in sync with workspace state (refresh restores the same view). */
-export function writeShareToUrl(s: ShareState) {
+export function writeShareToUrl(s: ShareState): void {
   if (typeof location === 'undefined') return;
   const hashBody = mergeShareHashBody(getHashBody(location.hash), encodeShare(s));
   const next = buildAppUrl('workspace', hashBody, location.search);
   const cur = `${location.pathname}${location.search}${location.hash}`;
-  if (cur !== next) history.replaceState(null, '', next);
+  if (cur !== next && typeof history !== 'undefined') history.replaceState(null, '', next);
 }

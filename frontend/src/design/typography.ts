@@ -30,3 +30,6 @@ export const nodeIconGlyph = 'node-icon-glyph size-[var(--node-icon-glyph)]';
 /** Theme-aware border radii for controls and containers. */
 export const RADIUS_CTRL = 'radius-ctrl rounded-[calc(var(--radius)-2px)]';
 export const RADIUS_SHELL = 'radius-shell rounded-[var(--radius)]';
+export const RADIUS_PILL = 'radius-pill rounded-full';
+
+export type NodeTextScale = keyof typeof nodeText;

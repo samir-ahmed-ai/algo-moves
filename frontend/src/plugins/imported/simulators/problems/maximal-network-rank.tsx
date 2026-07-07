@@ -69,7 +69,7 @@ function record({ adj, pos }: RankInput): Frame<RankState>[] {
   );
 
   for (let v = 0; v < n; v++) {
-    degrees[v] = adj[v].length;
+    degrees[v] = adj[v]!.length;
     emit(
       'DEGREE',
       `deg(${v})=${degrees[v]}`,
@@ -80,8 +80,8 @@ function record({ adj, pos }: RankInput): Frame<RankState>[] {
 
   for (let a = 0; a < n; a++) {
     for (let b = a + 1; b < n; b++) {
-      const connected = adj[a].includes(b);
-      const rank = degrees[a] + degrees[b] - (connected ? 1 : 0);
+      const connected = adj[a]!.includes(b);
+      const rank = degrees[a]! + degrees[b]! - (connected ? 1 : 0);
       const note = connected
         ? `directly connected, so subtract 1: ${degrees[a]} + ${degrees[b]} − 1 = ${rank}.`
         : `not directly connected, so no subtraction: ${degrees[a]} + ${degrees[b]} = ${rank}.`;

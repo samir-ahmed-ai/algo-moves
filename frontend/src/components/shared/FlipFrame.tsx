@@ -7,6 +7,14 @@ const FLIP_EASE = 'transform 0.24s cubic-bezier(0.2, 0.7, 0.3, 1)';
 
 type Pt = { left: number; top: number };
 
+function scheduleMicrotask(fn: () => void): void {
+  if (typeof queueMicrotask === 'function') {
+    queueMicrotask(fn);
+    return;
+  }
+  void Promise.resolve().then(fn);
+}
+
 /**
  * FLIP layer for the frame player: when `frameKey` advances, descendants
  * carrying `data-flip` (a stable value identity, see board/flipKeys) slide
@@ -26,11 +34,11 @@ export function FlipFrame({
   children,
 }: {
   /** Bump per frame (player.index). */
-  frameKey: string | number;
+  readonly frameKey: string | number;
   /** Bump when the board identity changes (plugin/input) to forget positions. */
-  resetKey?: string | number;
-  className?: string;
-  children: ReactNode;
+  readonly resetKey?: string | number;
+  readonly className?: string;
+  readonly children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const rects = useRef(new Map<string, Pt>());
@@ -106,7 +114,7 @@ export function FlipFrame({
     // Apply the inverted start transforms in a microtask: after every layout
     // effect in this commit (VizFitBox measures a transform-free board — a
     // translated mover would inflate its scrollWidth), yet still before paint.
-    queueMicrotask(() => {
+    scheduleMicrotask(() => {
       if (cancelled) return;
       for (const m of moves) {
         m.el.style.transition = 'none';

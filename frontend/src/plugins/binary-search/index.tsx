@@ -51,7 +51,7 @@ function record({ values, target }: BinInput): Frame<BinState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: { values, target, lo, hi, mid, found, dead: dead.slice(), done: tone != null },
     });
 
@@ -67,10 +67,11 @@ function record({ values, target }: BinInput): Frame<BinState>[] {
     emit(
       'MID',
       `mid=${mid}`,
-      `Look at the middle of the live window: mid=${mid}, value ${values[mid]}.`,
+      `Look at the middle of the live window: mid=${mid}, value ${values[mid]!}.`,
       mid,
     );
-    if (values[mid] === target) {
+    const midVal = values[mid]!;
+    if (midVal === target) {
       found = mid;
       emit(
         'FOUND',
@@ -81,13 +82,13 @@ function record({ values, target }: BinInput): Frame<BinState>[] {
       );
       return frames;
     }
-    if (values[mid] < target) {
+    if (midVal < target) {
       for (let i = lo; i <= mid; i++) dead[i] = true;
       lo = mid + 1;
       emit(
         'RIGHT',
         `lo=${lo}`,
-        `${values[mid]} < ${target}, so the target must be to the right. Discard everything up to mid and set lo = ${lo}.`,
+        `${midVal} < ${target}, so the target must be to the right. Discard everything up to mid and set lo = ${lo}.`,
         mid,
       );
     } else {
@@ -96,7 +97,7 @@ function record({ values, target }: BinInput): Frame<BinState>[] {
       emit(
         'LEFT',
         `hi=${hi}`,
-        `${values[mid]} > ${target}, so the target must be to the left. Discard everything from mid up and set hi = ${hi}.`,
+        `${midVal} > ${target}, so the target must be to the left. Discard everything from mid up and set hi = ${hi}.`,
         mid,
       );
     }

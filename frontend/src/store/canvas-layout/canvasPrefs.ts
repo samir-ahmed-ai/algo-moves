@@ -1,16 +1,22 @@
-import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '@/lib/canvas/layoutPrefs';
+import {
+  defaultEdgeOpts,
+  normalizeBgVariant,
+  normalizeEdgeOpts as normalizeCanvasEdgeOpts,
+  type BgVariant,
+  type EdgeOpts,
+} from '@/lib/canvas/layoutPrefs';
 import { readStorageJson } from '@/store/persistence/storage';
 import { createSyncStore } from '@/store/createSyncStore';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 
 export interface CanvasPrefs {
-  edgeOpts: EdgeOpts;
-  bg: BgVariant;
+  readonly edgeOpts: EdgeOpts;
+  readonly bg: BgVariant;
 }
 
 const KEY = STORAGE_KEYS.CANVAS_PREFS;
 
-const DEFAULTS: CanvasPrefs = {
+const DEFAULTS: Readonly<CanvasPrefs> = {
   edgeOpts: defaultEdgeOpts,
   bg: 'dots',
 };
@@ -20,32 +26,18 @@ interface StoredCanvasPrefs {
   bg?: BgVariant;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-function normalizeEdgeOpts(value: unknown): EdgeOpts {
-  if (!isRecord(value)) return DEFAULTS.edgeOpts;
-  const next = { ...DEFAULTS.edgeOpts };
-  for (const key of Object.keys(DEFAULTS.edgeOpts) as (keyof EdgeOpts)[]) {
-    const fallback = DEFAULTS.edgeOpts[key];
-    const candidate = value[String(key)];
-    if (typeof candidate === typeof fallback) {
-      (next as Record<string, unknown>)[String(key)] = candidate;
-    }
-  }
-  return next;
-}
-
-function normalizeBg(value: unknown): BgVariant {
-  return typeof value === 'string' && value.trim() ? (value.trim() as BgVariant) : DEFAULTS.bg;
+function defaultPrefs(): CanvasPrefs {
+  return {
+    edgeOpts: { ...DEFAULTS.edgeOpts },
+    bg: DEFAULTS.bg,
+  };
 }
 
 function normalizePrefs(value: StoredCanvasPrefs | CanvasPrefs | null): CanvasPrefs {
-  if (!value) return DEFAULTS;
+  if (!value) return defaultPrefs();
   return {
-    edgeOpts: normalizeEdgeOpts(value.edgeOpts),
-    bg: normalizeBg(value.bg),
+    edgeOpts: normalizeCanvasEdgeOpts(value.edgeOpts),
+    bg: normalizeBgVariant(value.bg, DEFAULTS.bg),
   };
 }
 
@@ -70,7 +62,7 @@ export function loadCanvasPrefs(): CanvasPrefs {
   return store.get();
 }
 
-export function saveCanvasPrefs(p: CanvasPrefs) {
+export function saveCanvasPrefs(p: CanvasPrefs): void {
   store.set(normalizePrefs(p));
 }
 

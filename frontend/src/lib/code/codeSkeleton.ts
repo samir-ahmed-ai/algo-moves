@@ -6,7 +6,7 @@ export function extractSkeleton(ref: string): string {
 
   // Preserve leading package/import/comment header until first top-level func/type.
   while (i < lines.length) {
-    const line = lines[i];
+    const line = lines[i] ?? '';
     const trimmed = line.trim();
     if (/^func\s/.test(trimmed) || /^type\s+\w+/.test(trimmed)) break;
     out.push(line);
@@ -14,7 +14,7 @@ export function extractSkeleton(ref: string): string {
   }
 
   while (i < lines.length) {
-    const line = lines[i];
+    const line = lines[i] ?? '';
     const trimmed = line.trim();
 
     if (/^func\s/.test(trimmed)) {
@@ -26,7 +26,7 @@ export function extractSkeleton(ref: string): string {
       // Skip original body until matching closing brace at column 0 or func indent.
       let depth = 1;
       while (i < lines.length && depth > 0) {
-        const t = lines[i].trim();
+        const t = (lines[i] ?? '').trim();
         if (t.includes('{')) depth += t.match(/\{/g)?.length ?? 0;
         if (t.includes('}')) depth -= t.match(/\}/g)?.length ?? 0;
         i++;
@@ -38,8 +38,9 @@ export function extractSkeleton(ref: string): string {
       out.push(line);
       i++;
       while (i < lines.length) {
-        out.push(lines[i]);
-        if (lines[i].trim() === '}') {
+        const typeLine = lines[i] ?? '';
+        out.push(typeLine);
+        if (typeLine.trim() === '}') {
           i++;
           break;
         }

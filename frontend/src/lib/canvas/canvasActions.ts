@@ -3,15 +3,15 @@ import type { LayoutVisualizeOptions } from './layoutPrefs';
 
 /** Zoom/focus helpers for canvas panels (practice flow, etc.). */
 export interface CanvasActions {
-  focusPanel: (id: string) => void;
+  readonly focusPanel: (id: string) => void;
   /** Focus the next panel in the mode wire chain; adds the panel if it was removed. */
-  advancePractice: (fromId: string) => void;
+  readonly advancePractice: (fromId: string) => void;
   /** Jump to the last view in the Learn Studio arc (optional — Learn mode only). */
-  advancePracticeAll?: () => void;
+  readonly advancePracticeAll?: () => void;
   /** Spawn a panel wired to `fromId`, or focus it if already present. */
-  spawnConnectedPanel: (panelId: string, fromId: string) => void;
+  readonly spawnConnectedPanel: (panelId: string, fromId: string) => void;
   /** Current visualize layout options (viewport + preset) for incremental re-layout. */
-  layoutVisualizeOptions: () => LayoutVisualizeOptions;
+  readonly layoutVisualizeOptions: () => LayoutVisualizeOptions;
 }
 
 const ActionsCtx = createContext<CanvasActions | null>(null);

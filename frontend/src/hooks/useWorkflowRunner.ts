@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { Edge, Node } from '@xyflow/react';
 import type { Frame } from '../core/types';
-import { generateTrace, transformFramesForGraph } from '@/lib/canvas';
+import { generateTrace, transformFramesForGraph, type WorkflowNode } from '@/lib/canvas';
 import { useReplayStoreOptional } from '@/store/replay';
 
 const DEBOUNCE_MS = 50;
@@ -41,14 +41,16 @@ export function useWorkflowRunner({
     [runStates],
   );
 
+  const workflowNodes = nodes as WorkflowNode[];
+
   const transformed = useMemo(
-    () => transformFramesForGraph(baseFrames, nodes, edges, runStates),
-    [baseFrames, nodes, edges, runStates],
+    () => transformFramesForGraph(baseFrames, workflowNodes, edges, runStates),
+    [baseFrames, workflowNodes, edges, runStates],
   );
 
   const trace = useMemo(
-    () => generateTrace(transformed, nodes, edges, { chainPaused }),
-    [transformed, nodes, edges, chainPaused],
+    () => generateTrace(transformed, workflowNodes, edges, { chainPaused }),
+    [transformed, workflowNodes, edges, chainPaused],
   );
 
   useEffect(() => {

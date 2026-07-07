@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -81,11 +81,11 @@ function buildMonarchy(lines: string[]): { members: Map<string, Member>; king: s
   for (const line of lines) {
     const parts = splitFields(line);
     if (parts.length < 2) continue;
-    const parent = ensure(parts[0]);
-    if (parts[0] === 'monarch' || king === null) king = parent.name;
+    const parent = ensure(parts[0]!);
+    if (parts[0]! === 'monarch' || king === null) king = parent.name;
     for (let i = 1; i < parts.length; i++) {
-      ensure(parts[i]);
-      parent.successors.push(parts[i]);
+      ensure(parts[i]!);
+      parent.successors.push(parts[i]!);
     }
   }
   return { members, king };
@@ -107,10 +107,10 @@ function layout(
   const tree: (string | null)[] = [];
   const place = (name: string, idx: number) => {
     while (tree.length <= idx) tree.push(null);
-    tree[idx] = name;
+    tree[idx]! = name;
     indexOf.set(name, idx);
     const succ = members.get(name)?.successors ?? [];
-    for (let k = 0; k < succ.length; k++) place(succ[k], 2 * idx + 1 + k);
+    for (let k = 0; k < succ.length; k++) place(succ[k]!, 2 * idx + 1 + k);
   };
   place(king, 0);
   return { tree, indexOf };
@@ -122,7 +122,7 @@ function record({ lines }: MonarchyInput): Frame<MonarchyState>[] {
   const order: string[] = [];
   let tree: (string | null)[] = [];
 
-  const { emit, frames } = createRecorder<MonarchyState>(() => ({
+  const { emit, frames } = createPrepRecorder<MonarchyState>(() => ({
     tree,
     active: null,
     visited: visited.slice(),
@@ -168,19 +168,19 @@ function record({ lines }: MonarchyInput): Frame<MonarchyState>[] {
       `Pop "${curr}" off the stack and add it to the succession order (position ${order.length}). ${
         succ.length === 0
           ? `"${curr}" has no successors, so nothing new is pushed.`
-          : `Its successors are [${succ.join(', ')}] — push them in reverse so "${succ[0]}" ends up on top and is crowned next.`
+          : `Its successors are [${succ.join(', ')}] — push them in reverse so "${succ[0]!}" ends up on top and is crowned next.`
       }`,
       { active: idx, stack: stack },
       'good',
     );
 
-    for (let i = succ.length - 1; i >= 0; i--) stack.push(succ[i]);
+    for (let i = succ.length - 1; i >= 0; i--) stack.push(succ[i]!);
 
     if (succ.length > 0) {
       emit(
         'PUSH',
         `+${succ.length}`,
-        `After pushing the successors of "${curr}" reversed, the stack (top→bottom) is [${[...stack].reverse().join(', ')}]. The next pop takes the top, "${stack[stack.length - 1]}".`,
+        `After pushing the successors of "${curr}" reversed, the stack (top→bottom) is [${[...stack].reverse().join(', ')}]. The next pop takes the top, "${stack[stack.length - 1]!}".`,
         { active: idx, stack: stack },
       );
     }
@@ -206,7 +206,7 @@ function View({ frame }: PluginViewProps<MonarchyState>) {
     return 'team-0';
   };
   const total = s.tree.filter((v) => v != null).length;
-  const activeName = s.active !== null ? s.tree[s.active] : null;
+  const activeName = s.active !== null ? s.tree[s.active]! : null;
   const rail = (
     <>
       <RailStack label="stack" items={[...s.stack].reverse()} topLabel="top" />
@@ -231,12 +231,12 @@ function View({ frame }: PluginViewProps<MonarchyState>) {
 function Inspector({ frame }: InspectorProps<MonarchyState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const activeName = s.active !== null ? s.tree[s.active] : null;
+  const activeName = s.active !== null ? s.tree[s.active]! : null;
   return (
     <VarGrid>
       <InspectorRow k="current" v={activeName ?? '—'} />
       <InspectorRow k="stack size" v={s.stack.length} />
-      <InspectorRow k="next up" v={s.stack.length > 0 ? s.stack[s.stack.length - 1] : '—'} />
+      <InspectorRow k="next up" v={s.stack.length > 0 ? s.stack[s.stack.length - 1]! : '—'} />
       <InspectorRow k="listed" v={s.order.length} />
       <InspectorRow k="order" v={s.order.length > 0 ? s.order.join(', ') : '…'} />
     </VarGrid>

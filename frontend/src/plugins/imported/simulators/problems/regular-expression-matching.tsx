@@ -51,7 +51,7 @@ function record({ s, p }: ReInput): Frame<ReState>[] {
     { cur: null },
   );
 
-  dp[0][0] = true;
+  dp[0]![0] = true;
   emit(
     'BASE',
     `dp[0][0]=✓`,
@@ -62,15 +62,15 @@ function record({ s, p }: ReInput): Frame<ReState>[] {
   // First row: empty string vs non-empty pattern. Only "x*" groups can match "".
   for (let j = 1; j <= n; j++) {
     if (p[j - 1] === '*') {
-      dp[0][j] = dp[0][j - 2] ?? false;
+      dp[0]![j] = dp[0]![j - 2] ?? false;
       emit(
         'BASE',
-        `dp[0][${j}]=${dp[0][j] ? '✓' : '✗'}`,
-        `Empty string row: '${p[j - 1]}' lets the group "${p[j - 2]}*" match zero times, so dp[0][${j}] copies dp[0][${j - 2}] = ${dp[0][j - 2] ? 'true' : 'false'} → ${dp[0][j] ? 'true' : 'false'}.`,
+        `dp[0][${j}]=${dp[0]![j] ? '✓' : '✗'}`,
+        `Empty string row: '${p[j - 1]}' lets the group "${p[j - 2]}*" match zero times, so dp[0][${j}] copies dp[0][${j - 2}] = ${dp[0]![j - 2] ? 'true' : 'false'} → ${dp[0]![j] ? 'true' : 'false'}.`,
         { cur: [0, j] },
       );
     } else {
-      dp[0][j] = false;
+      dp[0]![j] = false;
       emit(
         'BASE',
         `dp[0][${j}]=✗`,
@@ -86,30 +86,30 @@ function record({ s, p }: ReInput): Frame<ReState>[] {
       const pc = p[j - 1];
       if (pc === '*') {
         const prev = p[j - 2];
-        const zero = dp[i][j - 2] ?? false;
+        const zero = dp[i]![j - 2] ?? false;
         const charMatches = prev === '.' || prev === sc;
-        const more = charMatches ? (dp[i - 1][j] ?? false) : false;
-        dp[i][j] = zero || more;
+        const more = charMatches ? (dp[i - 1]![j] ?? false) : false;
+        dp[i]![j] = zero || more;
         emit(
           'FILL',
-          `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`,
-          `'*' on group "${prev}*": use it zero times → dp[${i}][${j - 2}] = ${zero}, OR (since '${prev}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}) consume '${sc}' and reuse the star → ${charMatches ? `dp[${i - 1}][${j}] = ${more}` : 'unavailable'}. dp[${i}][${j}] = ${dp[i][j]}.`,
+          `dp[${i}][${j}]=${dp[i]![j] ? '✓' : '✗'}`,
+          `'*' on group "${prev}*": use it zero times → dp[${i}][${j - 2}] = ${zero}, OR (since '${prev}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}) consume '${sc}' and reuse the star → ${charMatches ? `dp[${i - 1}][${j}] = ${more}` : 'unavailable'}. dp[${i}][${j}] = ${dp[i]![j]}.`,
           { cur: [i, j] },
         );
       } else {
         const charMatches = pc === '.' || pc === sc;
-        dp[i][j] = charMatches ? (dp[i - 1][j - 1] ?? false) : false;
+        dp[i]![j] = charMatches ? (dp[i - 1]![j - 1] ?? false) : false;
         emit(
           'FILL',
-          `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`,
-          `'${pc}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}: ${charMatches ? `carry the diagonal dp[${i - 1}][${j - 1}] = ${dp[i - 1][j - 1]}` : 'no match here'}. dp[${i}][${j}] = ${dp[i][j]}.`,
+          `dp[${i}][${j}]=${dp[i]![j] ? '✓' : '✗'}`,
+          `'${pc}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}: ${charMatches ? `carry the diagonal dp[${i - 1}][${j - 1}] = ${dp[i - 1]![j - 1]}` : 'no match here'}. dp[${i}][${j}] = ${dp[i]![j]}.`,
           { cur: [i, j] },
         );
       }
     }
   }
 
-  const ans = dp[m][n] ?? false;
+  const ans = dp[m]![n] ?? false;
   emit(
     'DONE',
     ans ? 'match ✓' : 'no match ✗',
@@ -127,14 +127,14 @@ function buildDisplay(state: ReState): (number | string)[][] {
   const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
     new Array<number | string>(n + 2).fill(''),
   );
-  display[0][1] = 'ε';
-  for (let j = 0; j < n; j++) display[0][j + 2] = state.p[j];
-  display[1][0] = 'ε';
-  for (let i = 0; i < m; i++) display[i + 2][0] = state.s[i];
+  display[0]![1] = 'ε';
+  for (let j = 0; j < n; j++) display[0]![j + 2]! = state.p[j]!;
+  display[1]![0] = 'ε';
+  for (let i = 0; i < m; i++) display[i + 2]![0]! = state.s[i]!;
   for (let i = 0; i <= m; i++) {
     for (let j = 0; j <= n; j++) {
-      const v = state.dp[i][j];
-      display[i + 1][j + 1] = v === null ? '' : v ? '✓' : '✗';
+      const v = state.dp[i]![j];
+      display[i + 1]![j + 1] = v === null ? '' : v ? '✓' : '✗';
     }
   }
   return display;
@@ -145,15 +145,15 @@ function View({ frame }: PluginViewProps<ReState>) {
   const m = s.s.length;
   const n = s.p.length;
   const display = buildDisplay(s);
-  const final = s.dp[m][n];
+  const final = s.dp[m]![n];
   const displayActive: [number, number] | null = s.cur ? [s.cur[0] + 1, s.cur[1] + 1] : null;
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
     if (s.cur && s.cur[0] + 1 === r && s.cur[1] + 1 === c) return 'active';
-    const v = s.dp[r - 1][c - 1];
+    const v = s.dp[r - 1]![c - 1];
     return v === null ? '' : 'visited';
   };
-  const cellVal = s.cur ? s.dp[s.cur[0]][s.cur[1]] : null;
+  const cellVal = s.cur ? s.dp[s.cur[0]]![s.cur[1]] : null;
   const cellStr = cellVal === null ? '—' : cellVal ? '✓' : '✗';
   const ansDone = final !== null;
   const ansLabel = final === null ? '…' : final ? 'match' : 'no match';
@@ -187,9 +187,9 @@ function Inspector({ frame }: InspectorProps<ReState>) {
   const s = frame.state;
   const m = s.s.length;
   const n = s.p.length;
-  const cellVal = s.cur ? s.dp[s.cur[0]][s.cur[1]] : null;
+  const cellVal = s.cur ? s.dp[s.cur[0]]![s.cur[1]] : null;
   const cellStr = cellVal === null ? '—' : cellVal ? '✓ true' : '✗ false';
-  const final = s.dp[m][n];
+  const final = s.dp[m]![n];
   const answer = final === null ? '…filling' : final ? 'match ✓' : 'no match ✗';
   return (
     <VarGrid>
@@ -216,7 +216,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const last = frames[frames.length - 1]?.state as ReState | undefined;
     if (!last) return { ok: false, label: 'no match' };
-    const v = last.dp[last.s.length][last.p.length] ?? false;
+    const v = last.dp[last.s.length]![last.p.length] ?? false;
     return { ok: v, label: v ? 'match' : 'no match' };
   },
 };

@@ -114,7 +114,7 @@ export function PanelHeaderMenu({
         title={title}
         ariaHaspopup="menu"
         ariaExpanded={open}
-        ariaControls={open ? menuId : undefined}
+        {...(open ? { ariaControls: menuId } : {})}
         onClick={() => setOpen((o) => !o)}
       >
         <MoreVertical className={nodeIconGlyph} />

@@ -41,11 +41,11 @@ const DIRS = [
 
 function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
   const m = grid.length;
-  const n = grid[0].length;
+  const n = grid[0]!.length;
   const total = Array.from({ length: m }, () => new Array<number>(n).fill(0));
   const reach = Array.from({ length: m }, () => new Array<number>(n).fill(0));
   let buildingsTotal = 0;
-  for (let r = 0; r < m; r++) for (let c = 0; c < n; c++) if (grid[r][c] === 1) buildingsTotal++;
+  for (let r = 0; r < m; r++) for (let c = 0; c < n; c++) if (grid[r]![c] === 1) buildingsTotal++;
 
   let buildingsSeen = 0;
 
@@ -69,7 +69,7 @@ function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
 
   for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
-      if (grid[r][c] !== 1) continue;
+      if (grid[r]![c] !== 1) continue;
       buildingsSeen++;
       emit(
         'BUILDING',
@@ -79,7 +79,7 @@ function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
       );
 
       const vis = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
-      vis[r][c] = true;
+      vis[r]![c] = true;
       let q: [number, number][] = [[r, c]];
       let dist = 0;
       while (q.length) {
@@ -87,17 +87,17 @@ function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
         const next: [number, number][] = [];
         for (const [cr, cc] of q) {
           for (const [dr, dc] of DIRS) {
-            const nr = cr + dr;
-            const nc = cc + dc;
-            if (nr >= 0 && nr < m && nc >= 0 && nc < n && !vis[nr][nc] && grid[nr][nc] === 0) {
-              vis[nr][nc] = true;
-              total[nr][nc] += dist;
-              reach[nr][nc]++;
+            const nr = cr + dr!;
+            const nc = cc + dc!;
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && !vis[nr]![nc] && grid[nr]![nc] === 0) {
+              vis[nr]![nc] = true;
+              total[nr]![nc]! += dist;
+              reach[nr]![nc]!++;
               next.push([nr, nc]);
               emit(
                 'REACH',
-                `(${nr},${nc}) +${dist} → total ${total[nr][nc]}`,
-                `Cell (${nr}, ${nc}) is ${dist} step${dist === 1 ? '' : 's'} from building #${buildingsSeen}; total[${nr}][${nc}] becomes ${total[nr][nc]}, reached by ${reach[nr][nc]} building${reach[nr][nc] === 1 ? '' : 's'} so far.`,
+                `(${nr},${nc}) +${dist} → total ${total[nr]![nc]}`,
+                `Cell (${nr}, ${nc}) is ${dist} step${dist === 1 ? '' : 's'} from building #${buildingsSeen}; total[${nr}][${nc}] becomes ${total[nr]![nc]}, reached by ${reach[nr]![nc]} building${reach[nr]![nc] === 1 ? '' : 's'} so far.`,
                 { cur: [nr, nc], answer: null },
               );
             }
@@ -111,8 +111,8 @@ function record({ grid }: BuildingsInput): Frame<BuildingsState>[] {
   let res = Infinity;
   for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
-      if (grid[r][c] === 0 && reach[r][c] === buildingsTotal && total[r][c] < res)
-        res = total[r][c];
+      if (grid[r]![c] === 0 && reach[r]![c] === buildingsTotal && total[r]![c]! < res)
+        res = total[r]![c]!;
     }
   }
   const answer = res === Infinity ? -1 : res;
@@ -143,22 +143,22 @@ function View({ frame }: PluginViewProps<BuildingsState>) {
     row.map((v, c) => {
       if (v === 1) return 'B';
       if (v === 2) return '#';
-      return s.reach[r][c] > 0 ? s.total[r][c] : '·';
+      return s.reach[r]![c]! > 0 ? s.total[r]![c]! : '·';
     }),
   );
   const cellTone = (r: number, c: number) => {
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
-    if (s.grid[r][c] === 1) return 'land';
-    if (s.grid[r][c] === 2) return 'water';
-    return s.reach[r][c] > 0 ? 'visited' : '';
+    if (s.grid[r]![c] === 1) return 'land';
+    if (s.grid[r]![c] === 2) return 'water';
+    return s.reach[r]![c]! > 0 ? 'visited' : '';
   };
   const rail = (
     <>
       <RailGroup label="progress">
         <RailStat k="buildings" v={`${s.buildingsSeen}/${s.buildingsTotal}`} />
         <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
-        {s.cur && <RailStat k="total" v={s.total[s.cur[0]][s.cur[1]]} tone="accent" />}
-        {s.cur && <RailStat k="reach" v={s.reach[s.cur[0]][s.cur[1]]} />}
+        {s.cur && <RailStat k="total" v={s.total[s.cur[0]]![s.cur[1]]} tone="accent" />}
+        {s.cur && <RailStat k="reach" v={s.reach[s.cur[0]]![s.cur[1]]} />}
       </RailGroup>
       {s.answer !== null && (
         <RailResult label="answer" value={s.answer} tone={s.answer === -1 ? 'bad' : 'good'} />
@@ -178,8 +178,8 @@ function Inspector({ frame }: InspectorProps<BuildingsState>) {
   return (
     <VarGrid>
       <InspectorRow k="cell" v={s.cur ? `(${s.cur[0]}, ${s.cur[1]})` : '—'} />
-      <InspectorRow k="cell total" v={s.cur ? s.total[s.cur[0]][s.cur[1]] : '—'} />
-      <InspectorRow k="cell reach" v={s.cur ? s.reach[s.cur[0]][s.cur[1]] : '—'} />
+      <InspectorRow k="cell total" v={s.cur ? s.total[s.cur[0]]![s.cur[1]] : '—'} />
+      <InspectorRow k="cell reach" v={s.cur ? s.reach[s.cur[0]]![s.cur[1]] : '—'} />
       <InspectorRow k="buildings" v={`${s.buildingsSeen}/${s.buildingsTotal}`} />
       <InspectorRow k="answer" v={s.answer === null ? '—' : s.answer} />
     </VarGrid>

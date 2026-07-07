@@ -6,14 +6,16 @@ import { useEffect, useRef } from 'react';
  */
 export function useReportOnce(active: boolean, onReport: () => void, resetToken?: unknown): void {
   const doneRef = useRef(false);
+  const onReportRef = useRef(onReport);
+  onReportRef.current = onReport;
 
   useEffect(() => {
     doneRef.current = false;
-  }, [resetToken]);
+  }, [active, resetToken]);
 
   useEffect(() => {
     if (!active || doneRef.current) return;
     doneRef.current = true;
-    onReport();
-  }, [active, onReport]);
+    onReportRef.current();
+  }, [active]);
 }

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -29,7 +29,7 @@ interface VcState {
 function record({ ops }: VcInput): Frame<VcState>[] {
   const history: Record<string, number>[] = [{}];
 
-  const { emit, frames } = createRecorder<VcState>(() => ({
+  const { emit, frames } = createPrepRecorder<VcState>(() => ({
     history: history.map((h) => ({ ...h })),
     version: history.length - 1,
     op: '',
@@ -41,13 +41,13 @@ function record({ ops }: VcInput): Frame<VcState>[] {
   emit(
     'INIT',
     'v0',
-    `Version Control Snapshot: each set() copies previous map and appends new version. get(key, version) reads history[version].`,
+    `Version Control Snapshot: each set() copies previous map and appends new version. get(key, version) reads history[version]!.`,
     {},
   );
 
   for (const o of ops) {
     if (o.kind === 'set') {
-      const cur = history[history.length - 1];
+      const cur = history[history.length - 1]!;
       const next: Record<string, number> = { ...cur, [o.key]: o.value };
       history.push(next);
       emit(
@@ -62,7 +62,7 @@ function record({ ops }: VcInput): Frame<VcState>[] {
       );
     } else {
       const ok = o.version >= 0 && o.version < history.length;
-      const val = ok ? history[o.version][o.key] : undefined;
+      const val = ok ? history[o.version]![o.key] : undefined;
       const found = val !== undefined;
       emit(
         found ? 'GET' : 'MISS',
@@ -93,7 +93,7 @@ function record({ ops }: VcInput): Frame<VcState>[] {
 function View({ frame }: PluginViewProps<VcState>) {
   const s = frame.state;
   const ver = s.version;
-  const cur = s.history[ver] ?? {};
+  const cur = s.history[ver]! ?? {};
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -234,7 +234,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(versions) get. O(changes). copy latest, set key, append; get reads history[version]',
+      'O(versions) get. O(changes). copy latest, set key, append; get reads history[version]!',
   },
   {
     id: 'outcome',

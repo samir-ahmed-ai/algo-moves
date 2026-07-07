@@ -72,6 +72,7 @@ export function usePlayer(total: number): Player {
 
   // New problem: rewind and drop frame-specific loop + breakpoints (speed is a user preference, kept).
   useEffect(() => {
+    clear();
     setIndex(0);
     setPlaying(false);
     setLoopStart(null);
@@ -79,7 +80,7 @@ export function usePlayer(total: number): Player {
     setBreakpoints(new Set());
     setBookmarks(new Map());
     setReversed(false);
-  }, [frameTotal]);
+  }, [frameTotal, clear]);
 
   // Auto-stop at the boundary: frame 0 when reversed, the last frame otherwise (unless an A–B loop wraps).
   useEffect(() => {
@@ -119,8 +120,8 @@ export function usePlayer(total: number): Player {
 
   const prev = useCallback(() => {
     setPlaying(false);
-    setIndex((i) => Math.max(i - 1, 0));
-  }, []);
+    setIndex((i) => clampFrameIndex(i - 1, frameTotal));
+  }, [frameTotal]);
 
   const reset = useCallback(() => {
     setPlaying(false);
@@ -136,6 +137,10 @@ export function usePlayer(total: number): Player {
   );
 
   const togglePlay = useCallback(() => {
+    if (frameTotal <= 1) {
+      setPlaying(false);
+      return;
+    }
     // Resuming (not pausing): rewind into the loop segment, or from the end.
     if (!latest.current.isPlaying) {
       setIndex((i) => {
@@ -177,7 +182,14 @@ export function usePlayer(total: number): Player {
 
   const setBookmark = useCallback(
     (i: number, note: string) => {
-      setBookmarks((prev) => new Map(prev).set(clampFrameIndex(i, frameTotal), note.trim()));
+      setBookmarks((prev) => {
+        const frame = clampFrameIndex(i, frameTotal);
+        const cleanNote = note.trim();
+        const next = new Map(prev);
+        if (cleanNote) next.set(frame, cleanNote);
+        else next.delete(frame);
+        return next;
+      });
     },
     [frameTotal],
   );

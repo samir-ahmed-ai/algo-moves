@@ -58,9 +58,9 @@ export function styleEdges(edges: Edge[], o: EdgeOpts, nodes?: Node[]): Edge[] {
       ...e,
       type: 'removable',
       animated: o.animated,
-      markerEnd: o.arrow
-        ? { type: MarkerType.ArrowClosed, color: stroke, width: 16, height: 16 }
-        : undefined,
+      ...(o.arrow
+        ? { markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 16, height: 16 } }
+        : {}),
       style: { ...e.style, stroke, strokeWidth: o.strokeWidth },
       data: { ...(e.data ?? {}), pathType, ...(label ? { label } : {}) },
     };

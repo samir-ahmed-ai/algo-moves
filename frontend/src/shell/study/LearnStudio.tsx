@@ -43,8 +43,8 @@ export interface LearnStudioProps {
   frames: Frame<any>[];
   player: Player;
   frame: Frame<any>;
-  onOpenPalette?: () => void;
-  onOpenHelp?: () => void;
+  onOpenPalette?: (() => void) | undefined;
+  onOpenHelp?: (() => void) | undefined;
 }
 
 /**
@@ -126,8 +126,8 @@ function StudioShell({
   onOpenPalette,
   onOpenHelp,
 }: {
-  onOpenPalette?: () => void;
-  onOpenHelp?: () => void;
+  onOpenPalette?: (() => void) | undefined;
+  onOpenHelp?: (() => void) | undefined;
 }) {
   const { hasQuiz, hasReassemble } = useCodeStudioPhase();
   const {
@@ -188,7 +188,9 @@ function StudioShell({
         const next = i >= 0 ? order[i + 1] : cont;
         if (next) go(next.id);
       },
-      advancePracticeAll: lastTab ? () => go(lastTab.id) : undefined,
+      advancePracticeAll: () => {
+        if (lastTab) go(lastTab.id);
+      },
       spawnConnectedPanel: () => {},
       layoutVisualizeOptions: () => ({}),
     }),
@@ -260,8 +262,8 @@ function LearnTopBar({
   onOpenPalette,
   onOpenHelp,
 }: {
-  onOpenPalette?: () => void;
-  onOpenHelp?: () => void;
+  onOpenPalette?: (() => void) | undefined;
+  onOpenHelp?: (() => void) | undefined;
 }) {
   return (
     <ProblemSurfaceBar

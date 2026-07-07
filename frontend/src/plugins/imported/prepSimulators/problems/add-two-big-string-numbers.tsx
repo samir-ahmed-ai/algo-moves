@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -36,7 +36,7 @@ function record({ a, b }: AddInput): Frame<AddState>[] {
   let carry = 0;
   let out = '';
 
-  const { emit, frames } = createRecorder<AddState>(() => ({
+  const { emit, frames } = createPrepRecorder<AddState>(() => ({
     a,
     b,
     i: null,
@@ -64,8 +64,8 @@ function record({ a, b }: AddInput): Frame<AddState>[] {
     sum += aDigit;
     sum += bDigit;
 
-    const aLabel = i >= 0 ? `a[${i}]=${aDigit}` : `a exhausted →0`;
-    const bLabel = j >= 0 ? `b[${j}]=${bDigit}` : `b exhausted →0`;
+    const aLabel = i >= 0 ? `a[${i}]!=${aDigit}` : `a exhausted →0`;
+    const bLabel = j >= 0 ? `b[${j}]!=${bDigit}` : `b exhausted →0`;
     emit(
       'ADD',
       `${aDigit}+${bDigit}+${carry}=${sum}`,

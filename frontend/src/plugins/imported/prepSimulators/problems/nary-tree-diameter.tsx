@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -44,13 +44,13 @@ interface DiaState {
 // ---- Faithful re-implementation of the Go solution, instrumented to emit frames.
 function record({ tree }: TreeInput): Frame<DiaState>[] {
   const n = tree.length;
-  const kids = (i: number) => [2 * i + 1, 2 * i + 2].filter((c) => c < n && tree[c] != null);
+  const kids = (i: number) => [2 * i + 1, 2 * i + 2].filter((c) => c < n && tree[c]! != null);
 
   const heights = new Map<number, number>(); // index -> getHeight(index)
   const done: number[] = [];
   let best = 0;
 
-  const { emit, frames } = createRecorder<DiaState>(() => ({
+  const { emit, frames } = createPrepRecorder<DiaState>(() => ({
     tree,
     active: null,
     done: [...done],
@@ -65,7 +65,7 @@ function record({ tree }: TreeInput): Frame<DiaState>[] {
   // getHeight(i): -1 for a null slot, else 1 + max child height. Memoized so the
   // View can show every resolved height; results match the Go getHeight exactly.
   const getHeight = (i: number): number => {
-    if (i >= n || tree[i] == null) return -1;
+    if (i >= n || tree[i]! == null) return -1;
     if (heights.has(i)) return heights.get(i)!;
     let maxChild = -1;
     for (const c of kids(i)) {
@@ -79,12 +79,12 @@ function record({ tree }: TreeInput): Frame<DiaState>[] {
 
   // getDiameter mirrors the Go post-order walk, emitting a frame per node.
   const getDiameter = (i: number): number => {
-    if (i >= n || tree[i] == null) return 0;
+    if (i >= n || tree[i]! == null) return 0;
 
     emit(
       'VISIT',
-      `node ${tree[i]}`,
-      `Recurse into node ${tree[i]}. We will (1) find its two tallest child subtrees and (2) compare the path through it against each child's own diameter.`,
+      `node ${tree[i]!}`,
+      `Recurse into node ${tree[i]!}. We will (1) find its two tallest child subtrees and (2) compare the path through it against each child's own diameter.`,
       { active: i },
     );
 
@@ -100,8 +100,8 @@ function record({ tree }: TreeInput): Frame<DiaState>[] {
       }
       emit(
         'HEIGHT',
-        `h(${tree[c]})=${h}`,
-        `Child ${tree[c]} has height ${h}. Track the two tallest child heights so far: top1=${max1}${max2 >= 0 ? `, top2=${max2}` : ''}.`,
+        `h(${tree[c]!})=${h}`,
+        `Child ${tree[c]!} has height ${h}. Track the two tallest child heights so far: top1=${max1}${max2 >= 0 ? `, top2=${max2}` : ''}.`,
         { active: i, top1: max1 >= 0 ? max1 : null, top2: max2 >= 0 ? max2 : null },
       );
     }
@@ -121,7 +121,7 @@ function record({ tree }: TreeInput): Frame<DiaState>[] {
     emit(
       'THROUGH',
       throughNote,
-      `Path THROUGH node ${tree[i]} = ${throughNote}. This joins its two deepest branches. Global best is now ${best}.`,
+      `Path THROUGH node ${tree[i]!} = ${throughNote}. This joins its two deepest branches. Global best is now ${best}.`,
       { active: i, top1: max1 >= 0 ? max1 : null, top2: max2 >= 0 ? max2 : null, through },
     );
 
@@ -134,8 +134,8 @@ function record({ tree }: TreeInput): Frame<DiaState>[] {
     done.push(i);
     emit(
       'RESOLVE',
-      `dia(${tree[i]})=${diameter}`,
-      `Node ${tree[i]} is resolved: its diameter is max(through=${through}, best child diameter) = ${diameter}. Bubble it up to the parent.`,
+      `dia(${tree[i]!})=${diameter}`,
+      `Node ${tree[i]!} is resolved: its diameter is max(through=${through}, best child diameter) = ${diameter}. Bubble it up to the parent.`,
       { active: i, through, best },
     );
     return diameter;
@@ -169,7 +169,7 @@ function View({ frame }: PluginViewProps<DiaState>) {
     return 'team-0';
   };
   const heightMap = new Map(s.heights);
-  const activeVal = s.active !== null ? s.tree[s.active] : null;
+  const activeVal = s.active !== null ? s.tree[s.active]! : null;
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -189,7 +189,7 @@ function View({ frame }: PluginViewProps<DiaState>) {
         {heightMap.size > 0 && (
           <span>
             heights {'{'}
-            {[...heightMap.entries()].map(([i, h]) => `${s.tree[i]}:${h}`).join(', ')}
+            {[...heightMap.entries()].map(([i, h]) => `${s.tree[i]!}:${h}`).join(', ')}
             {'}'}
           </span>
         )}
@@ -204,7 +204,7 @@ function View({ frame }: PluginViewProps<DiaState>) {
 function Inspector({ frame }: InspectorProps<DiaState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const activeVal = s.active !== null ? s.tree[s.active] : null;
+  const activeVal = s.active !== null ? s.tree[s.active]! : null;
   return (
     <VarGrid>
       <InspectorRow k="active node" v={activeVal ?? '—'} />

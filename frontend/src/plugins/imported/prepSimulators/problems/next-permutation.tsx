@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,8 +19,8 @@ interface NextPermState {
   nums: number[];
   /** 'find-dip' | 'find-swap' | 'reverse' | 'done' */
   phase: 'find-dip' | 'find-swap' | 'reverse' | 'done';
-  i: number | null; // pivot index (first nums[i] < nums[i+1] from the right)
-  j: number | null; // rightmost index with nums[j] > nums[i]
+  i: number | null; // pivot index (first nums[i]! < nums[i+1]! from the right)
+  j: number | null; // rightmost index with nums[j]! > nums[i]!
   cmp: number | null; // the index currently being compared while scanning
   lo: number | null; // left bound of suffix-reverse
   hi: number | null; // right bound of suffix-reverse
@@ -32,7 +32,7 @@ interface NextPermState {
 function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
   const nums = input.slice();
   const n = nums.length;
-  const { emit, frames } = createRecorder<NextPermState>(() => ({
+  const { emit, frames } = createPrepRecorder<NextPermState>(() => ({
     nums: nums.slice(),
     phase: 'find-dip',
     i: null,
@@ -51,20 +51,20 @@ function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
     { phase: 'find-dip' },
   );
 
-  // Step 1: find the pivot i — first index from the right with nums[i] < nums[i+1].
+  // Step 1: find the pivot i — first index from the right with nums[i]! < nums[i+1]!.
   let i = n - 2;
   while (i >= 0) {
     emit(
       'SCAN_DIP',
       `i=${i}`,
-      `Looking for the dip: is nums[${i}] (=${nums[i]}) < nums[${i + 1}] (=${nums[i + 1]})? If not, this suffix is still descending, so step left.`,
+      `Looking for the dip: is nums[${i}]! (=${nums[i]!}) < nums[${i + 1}]! (=${nums[i + 1]!})? If not, this suffix is still descending, so step left.`,
       { phase: 'find-dip', i: i + 1, cmp: i },
     );
-    if (nums[i] < nums[i + 1]) {
+    if (nums[i]! < nums[i + 1]!) {
       emit(
         'DIP_FOUND',
         `pivot i=${i}`,
-        `Found the dip at i=${i}: nums[${i}] (=${nums[i]}) < nums[${i + 1}] (=${nums[i + 1]}). Everything to the right is descending, so the pivot ${nums[i]} is the value we must bump up.`,
+        `Found the dip at i=${i}: nums[${i}]! (=${nums[i]!}) < nums[${i + 1}]! (=${nums[i + 1]!}). Everything to the right is descending, so the pivot ${nums[i]!} is the value we must bump up.`,
         { phase: 'find-dip', i, cmp: i },
         'good',
       );
@@ -83,19 +83,19 @@ function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
       'bad',
     );
   } else {
-    // Step 2: find j — rightmost index with nums[j] > nums[i].
+    // Step 2: find j — rightmost index with nums[j]! > nums[i]!.
     emit(
       'SWAP_PHASE',
-      `find j > ${nums[i]}`,
-      `Now find the rightmost element bigger than the pivot ${nums[i]}. Because the suffix is descending, the first one we meet scanning from the right is the smallest value still greater than the pivot.`,
+      `find j > ${nums[i]!}`,
+      `Now find the rightmost element bigger than the pivot ${nums[i]!}. Because the suffix is descending, the first one we meet scanning from the right is the smallest value still greater than the pivot.`,
       { phase: 'find-swap', i },
     );
     let j = n - 1;
-    while (nums[j] <= nums[i]) {
+    while (nums[j]! <= nums[i]!) {
       emit(
         'SCAN_SWAP',
         `j=${j}`,
-        `nums[${j}] (=${nums[j]}) ≤ pivot ${nums[i]}, so it can't be the swap target. Step left.`,
+        `nums[${j}]! (=${nums[j]!}) ≤ pivot ${nums[i]!}, so it can't be the swap target. Step left.`,
         { phase: 'find-swap', i, j: null, cmp: j },
       );
       j--;
@@ -103,17 +103,17 @@ function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
     emit(
       'SWAP_TARGET',
       `j=${j}`,
-      `nums[${j}] (=${nums[j]}) > pivot ${nums[i]} (=${nums[i]}). This is the next-bigger value; swap it into the pivot position.`,
+      `nums[${j}]! (=${nums[j]!}) > pivot ${nums[i]!} (=${nums[i]!}). This is the next-bigger value; swap it into the pivot position.`,
       { phase: 'find-swap', i, j, cmp: j },
       'good',
     );
-    const tmp = nums[i];
-    nums[i] = nums[j];
-    nums[j] = tmp;
+    const tmp = nums[i]!;
+    nums[i]! = nums[j]!;
+    nums[j]! = tmp;
     emit(
       'SWAP',
       `swap ${i}↔${j}`,
-      `Swapped nums[${i}] and nums[${j}]. The prefix is now one notch larger; only the suffix to the right of i still needs to be made as small as possible.`,
+      `Swapped nums[${i}]! and nums[${j}]!. The prefix is now one notch larger; only the suffix to the right of i still needs to be made as small as possible.`,
       { phase: 'find-swap', i, j },
       'good',
     );
@@ -131,9 +131,9 @@ function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
     { phase: 'reverse', i: i < 0 ? null : i, lo: l, hi: r, reversed: settled.slice() },
   );
   while (l < r) {
-    const tmp = nums[l];
-    nums[l] = nums[r];
-    nums[r] = tmp;
+    const tmp = nums[l]!;
+    nums[l]! = nums[r]!;
+    nums[r]! = tmp;
     settled.push(l, r);
     emit(
       'REVERSE_SWAP',
@@ -207,14 +207,14 @@ function Inspector({ frame }: InspectorProps<NextPermState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const at = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.nums.length ? s.nums[idx] : '—';
+    idx !== null && idx >= 0 && idx < s.nums.length ? s.nums[idx]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="i (pivot)" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={at(s.i)} />
+      <InspectorRow k="nums[i]!" v={at(s.i)} />
       <InspectorRow k="j (swap)" v={s.j ?? '—'} />
-      <InspectorRow k="nums[j]" v={at(s.j)} />
+      <InspectorRow k="nums[j]!" v={at(s.j)} />
       <InspectorRow
         k="reverse [l,r]"
         v={s.lo !== null && s.hi !== null ? `[${s.lo}, ${s.hi}]` : '—'}
@@ -295,7 +295,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: 'pivot index (first nums[i] < — updated each frame',
+        label: 'pivot index (first nums[i]! < — updated each frame',
         correct: true,
       },
       {
@@ -309,7 +309,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The recorder keeps `i` in sync: pivot index (first nums[i] < nums[i+1] from the right)',
+      'The recorder keeps `i` in sync: pivot index (first nums[i]! < nums[i+1]! from the right)',
   },
   {
     id: 'complexity',
@@ -329,7 +329,8 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n+m) time, O(1) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). i: first nums[i]<nums[i+1]; j: rightmost >nums[i]; swap; reverse suffix',
+    explain:
+      'O(n). O(1). i: first nums[i]!<nums[i+1]!; j: rightmost >nums[i]!; swap; reverse suffix',
   },
   {
     id: 'outcome',

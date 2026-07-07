@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -46,7 +46,7 @@ function lowestSetIndex(value: number, width: number): number | null {
 }
 
 function record({ n, width }: CountBitsInput): Frame<CountBitsState>[] {
-  const { emit, frames } = createRecorder<CountBitsState>(() => ({
+  const { emit, frames } = createPrepRecorder<CountBitsState>(() => ({
     width: width,
     original: n,
     bits: toBitStrings(n, width),
@@ -117,7 +117,7 @@ function View({ frame }: PluginViewProps<CountBitsState>) {
   }
   const tone = (i: number) => {
     if (s.lowIndex === i) return 'match';
-    return s.bits[i] === '1' ? 'in-window' : '';
+    return s.bits[i]! === '1' ? 'in-window' : '';
   };
   // Show the power-of-two exponent under each column instead of the raw index.
   const powerLabel = (i: number) => 2 ** (s.width - 1 - i);

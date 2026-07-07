@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ interface SelfExcludeState {
 function record({ nums }: SelfExcludeInput): Frame<SelfExcludeState>[] {
   const n = nums.length;
   const out = new Array<number | null>(n).fill(null);
-  const { emit, frames } = createRecorder<SelfExcludeState>(() => ({
+  const { emit, frames } = createPrepRecorder<SelfExcludeState>(() => ({
     nums,
     out: out.slice(),
     phase: 'init',
@@ -43,30 +43,30 @@ function record({ nums }: SelfExcludeInput): Frame<SelfExcludeState>[] {
   emit(
     'INIT',
     `n=${n}`,
-    `Self exclude product: out[i] should be the product of every element except nums[i]. We do it in two passes with no division — a left-to-right prefix pass, then a right-to-left suffix pass. Time O(n), space O(1) extra.`,
+    `Self exclude product: out[i]! should be the product of every element except nums[i]!. We do it in two passes with no division — a left-to-right prefix pass, then a right-to-left suffix pass. Time O(n), space O(1) extra.`,
     { phase: 'init' },
   );
 
-  // Prefix pass: out[i] = product of all elements left of i.
-  out[0] = 1;
+  // Prefix pass: out[i]! = product of all elements left of i.
+  out[0]! = 1;
   emit(
     'PREFIX',
-    'out[0]=1',
-    `Prefix pass begins. There is nothing to the left of index 0, so its prefix product is the identity 1. out[0] = 1.`,
+    'out[0]!=1',
+    `Prefix pass begins. There is nothing to the left of index 0, so its prefix product is the identity 1. out[0]! = 1.`,
     { phase: 'prefix', i: 0 },
   );
 
   for (let i = 1; i < n; i++) {
-    out[i] = out[i - 1]! * nums[i - 1];
+    out[i]! = out[i - 1]! * nums[i - 1]!;
     emit(
       'PREFIX',
-      `out[${i}]=${out[i]}`,
-      `Carry the prefix forward: out[${i}] = out[${i - 1}] (=${out[i - 1]}) × nums[${i - 1}] (=${nums[i - 1]}) = ${out[i]}. Now out[${i}] holds the product of everything to the LEFT of index ${i}.`,
+      `out[${i}]!=${out[i]!}`,
+      `Carry the prefix forward: out[${i}]! = out[${i - 1}]! (=${out[i - 1]!}) × nums[${i - 1}]! (=${nums[i - 1]!}) = ${out[i]!}. Now out[${i}]! holds the product of everything to the LEFT of index ${i}.`,
       { phase: 'prefix', i, ref: i - 1 },
     );
   }
 
-  // Suffix pass: multiply out[i] by the running product of elements right of i.
+  // Suffix pass: multiply out[i]! by the running product of elements right of i.
   let suffix = 1;
   emit(
     'SUFFIX',
@@ -77,18 +77,18 @@ function record({ nums }: SelfExcludeInput): Frame<SelfExcludeState>[] {
 
   for (let i = n - 1; i >= 0; i--) {
     const before = out[i]!;
-    out[i] = before * suffix;
+    out[i]! = before * suffix;
     emit(
       'SUFFIX',
-      `out[${i}]=${out[i]}`,
-      `out[${i}] = prefix(${before}) × suffix(${suffix}) = ${out[i]}. Multiplying the left product by the right product gives the product of all elements except nums[${i}].`,
+      `out[${i}]!=${out[i]!}`,
+      `out[${i}]! = prefix(${before}) × suffix(${suffix}) = ${out[i]!}. Multiplying the left product by the right product gives the product of all elements except nums[${i}]!.`,
       { phase: 'suffix', i, suffix },
     );
-    suffix *= nums[i];
+    suffix *= nums[i]!;
     emit(
       'SUFFIX',
       `suffix=${suffix}`,
-      `Fold nums[${i}] (=${nums[i]}) into the running suffix so the next (more-left) index sees everything to its right: suffix = ${suffix}.`,
+      `Fold nums[${i}]! (=${nums[i]!}) into the running suffix so the next (more-left) index sees everything to its right: suffix = ${suffix}.`,
       { phase: 'suffix', i, suffix },
     );
   }
@@ -116,11 +116,11 @@ function View({ frame }: PluginViewProps<SelfExcludeState>) {
 
   const outPointers: ArrayPointer[] = [];
   if (s.i !== null && (s.phase === 'prefix' || s.phase === 'suffix'))
-    outPointers.push({ i: s.i, label: 'out[i]', tone: 'good', place: 'below' });
+    outPointers.push({ i: s.i, label: 'out[i]!', tone: 'good', place: 'below' });
 
   const numTone = (i: number) => (s.i === i ? 'match' : '');
   const outTone = (i: number) =>
-    s.done ? 'found' : s.i === i ? 'match' : s.out[i] !== null ? 'in-window' : '';
+    s.done ? 'found' : s.i === i ? 'match' : s.out[i]! !== null ? 'in-window' : '';
 
   const outCells = s.out.map((v) => (v === null ? '·' : v));
 
@@ -154,13 +154,13 @@ function Inspector({ frame }: InspectorProps<SelfExcludeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const outAt = (i: number | null) =>
-    i !== null && i >= 0 && i < s.out.length ? (s.out[i] === null ? '·' : s.out[i]) : '—';
+    i !== null && i >= 0 && i < s.out.length ? (s.out[i]! === null ? '·' : s.out[i]!) : '—';
   return (
     <VarGrid>
       <InspectorRow k="pass" v={s.phase} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
-      <InspectorRow k="out[i]" v={outAt(s.i)} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
+      <InspectorRow k="out[i]!" v={outAt(s.i)} />
       <InspectorRow k="suffix" v={s.suffix ?? '—'} />
       <InspectorRow k="filled" v={s.out.filter((v) => v !== null).length} />
     </VarGrid>
@@ -189,14 +189,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Greedy reach — different approach',
       },
     ],
-    explain: 'Left-product pass fills out[i], right-product pass multiplies it',
+    explain: 'Left-product pass fills out[i]!, right-product pass multiplies it',
   },
   {
     id: 'init',
     prompt: 'At the start of a run (Self exclude product), what strategy is established?',
     choices: [
       {
-        label: 'Left-product pass fills out[i] — described in INIT caption',
+        label: 'Left-product pass fills out[i]! — described in INIT caption',
         correct: true,
       },
       {
@@ -210,7 +210,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Self exclude product: out[i] should be the product of every element except nums[i]. We do it in two passes with no division — a left-to-right prefix pass, then a right-to-left suffix pass. Time O(n), space O(1) extra.',
+      'Self exclude product: out[i]! should be the product of every element except nums[i]!. We do it in two passes with no division — a left-to-right prefix pass, then a right-to-left suffix pass. Time O(n), space O(1) extra.',
   },
   {
     id: 'key-step',
@@ -272,7 +272,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n²) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). out[i]=prefix products; then *= suffix going right-to-left',
+    explain: 'O(n). O(1). out[i]!=prefix products; then *= suffix going right-to-left',
   },
   {
     id: 'outcome',

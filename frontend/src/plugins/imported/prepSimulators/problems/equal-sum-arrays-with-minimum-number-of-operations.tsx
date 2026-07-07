@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import {
@@ -24,7 +24,7 @@ interface EqualSumInput {
 }
 
 interface EqualSumState {
-  // contrib[c] = how many dice can change the smaller-sum side toward the
+  // contrib[c]! = how many dice can change the smaller-sum side toward the
   // larger side by exactly `c` (for c in 1..5). Index 0 is unused.
   contrib: number[];
   c: number | null; // contribution bucket currently being processed (5..1)
@@ -46,15 +46,15 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
   const buildContrib = (smaller: number[], larger: number[]): number[] => {
     const c = new Array<number>(FULL).fill(0);
     // Each die in the SMALLER-sum array can grow by up to (6 - x).
-    for (const x of smaller) c[FULL - x]++;
+    for (const x of smaller) c[FULL - x]!++;
     // Each die in the LARGER-sum array can shrink by up to (x - 1).
-    for (const x of larger) c[x - 1]++;
+    for (const x of larger) c[x - 1]!++;
     return c;
   };
 
   const sumOf = (a: number[]) => a.reduce((t, x) => t + x, 0);
 
-  const { emit, frames } = createRecorder<EqualSumState>(() => ({
+  const { emit, frames } = createPrepRecorder<EqualSumState>(() => ({
     contrib: new Array<number>(FULL).fill(0),
     c: null,
     diff: 0,
@@ -157,7 +157,7 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
   let ops = 0;
   let rem = diff;
   for (let c = 5; c >= 1 && rem > 0; c--) {
-    const available = contrib[c];
+    const available = contrib[c]!;
     if (available === 0) {
       emit(
         'SKIP',
@@ -169,7 +169,7 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
     }
     // We only need ceil(rem / c) moves of size c; never take more than that.
     const need = Math.ceil(rem / c);
-    const take = Math.min(available, need);
+    const take = Math.min(available!, need);
     ops += take;
     rem -= take * c;
     if (rem < 0) rem = 0;
@@ -207,10 +207,10 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
 
 function View({ frame }: PluginViewProps<EqualSumState>) {
   const s = frame.state;
-  const values = [s.contrib[1], s.contrib[2], s.contrib[3], s.contrib[4], s.contrib[5]];
+  const values = [s.contrib[1]!, s.contrib[2]!, s.contrib[3]!, s.contrib[4]!, s.contrib[5]!];
   const tone = (i: number): BarTone => {
     const bucket = i + 1;
-    if (s.done && !s.failed) return values[i] > 0 ? 'done' : 'idle';
+    if (s.done && !s.failed) return values[i]! > 0 ? 'done' : 'idle';
     if (s.c === bucket) return s.taken > 0 ? 'swap' : 'compare';
     return 'idle';
   };
@@ -238,7 +238,12 @@ function View({ frame }: PluginViewProps<EqualSumState>) {
   );
   return (
     <VizStage rail={rail} railWidth={140}>
-      <ArrayBars values={values} tone={tone} label={label} max={Math.max(1, ...values)} />
+      <ArrayBars
+        values={values}
+        tone={tone}
+        label={label}
+        max={Math.max(1, ...values.map((v) => v!))}
+      />
     </VizStage>
   );
 }

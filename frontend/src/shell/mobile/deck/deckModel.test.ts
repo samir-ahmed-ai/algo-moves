@@ -14,7 +14,7 @@ describe('deckModel', () => {
       expect(block.cards[0]?.kind).toBe('gist');
       expect(block.cards[1]?.kind).toBe('animate');
       const gist = block.cards[0];
-      expect(gist.kind === 'gist' && gist.gist.length).toBeGreaterThan(0);
+      expect(gist?.kind === 'gist' && gist.gist.length).toBeGreaterThan(0);
       const kinds = block.cards.map((c) => c.kind);
       const quizIdx = kinds.indexOf('quiz');
       const asmIdx = kinds.indexOf('reassemble');

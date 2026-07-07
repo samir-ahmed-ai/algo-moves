@@ -26,8 +26,9 @@ describe('buildCanvasFrame', () => {
       seedProblemCanvas: true,
     });
     expect(nodes.map((n) => n.id)).toEqual(['workbench']);
-    expect(nodes[0].width).toBeGreaterThan(1000);
-    expect(nodes[0].height).toBeGreaterThan(700);
+    const workbench = nodes[0]!;
+    expect(workbench.width).toBeGreaterThan(1000);
+    expect(workbench.height).toBeGreaterThan(700);
     expect(edges).toHaveLength(0);
   });
 
@@ -104,21 +105,21 @@ describe('buildCanvasFrame', () => {
   it('omits removed nodes and their incident edges', () => {
     const full = buildCanvasFrame(stubPlugin, 'learn', baseInput);
     if (full.nodes.length === 0) return;
-    const removed = new Set([full.nodes[0].id]);
+    const firstNode = full.nodes[0]!;
+    const removed = new Set([firstNode.id]);
     const { nodes, edges } = buildCanvasFrame(stubPlugin, 'learn', { ...baseInput, removed });
-    expect(nodes.some((n) => n.id === full.nodes[0].id)).toBe(false);
+    expect(nodes.some((n) => n.id === firstNode.id)).toBe(false);
     expect(nodes.length).toBe(full.nodes.length - 1);
-    expect(edges.every((e) => e.source !== full.nodes[0].id && e.target !== full.nodes[0].id)).toBe(
-      true,
-    );
+    expect(edges.every((e) => e.source !== firstNode.id && e.target !== firstNode.id)).toBe(true);
   });
 
   it('drops removed edges', () => {
     const full = buildCanvasFrame(stubPlugin, 'learn', baseInput);
     if (full.edges.length === 0) return;
-    const removedEdges = new Set([full.edges[0].id]);
+    const firstEdge = full.edges[0]!;
+    const removedEdges = new Set([firstEdge.id]);
     const { edges } = buildCanvasFrame(stubPlugin, 'learn', { ...baseInput, removedEdges });
-    expect(edges.some((e) => e.id === full.edges[0].id)).toBe(false);
+    expect(edges.some((e) => e.id === firstEdge.id)).toBe(false);
   });
 
   it('restores saved positions in visualize mode (freeform)', () => {

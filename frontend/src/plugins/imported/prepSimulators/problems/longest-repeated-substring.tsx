@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -40,7 +40,7 @@ function pathTo(nodes: TrieNode[], i: number): number[] {
   let cur = i;
   while (cur !== -1) {
     out.push(cur);
-    cur = nodes[cur].parent;
+    cur = nodes[cur]!.parent;
   }
   return out.reverse();
 }
@@ -48,7 +48,7 @@ function pathTo(nodes: TrieNode[], i: number): number[] {
 function labelOf(nodes: TrieNode[], i: number): string {
   // Substring spelled from root down to node i.
   return pathTo(nodes, i)
-    .map((n) => nodes[n].char)
+    .map((n) => nodes[n]!.char)
     .join('');
 }
 
@@ -67,7 +67,7 @@ function record({ str }: LrsInput): Frame<LrsState>[] {
 
   const snapshot = (): TrieNode[] => nodes.map((n) => ({ ...n, children: { ...n.children } }));
 
-  const { emit, frames } = createRecorder<LrsState>(() => ({
+  const { emit, frames } = createPrepRecorder<LrsState>(() => ({
     str,
     nodes: snapshot(),
     active: null,
@@ -84,24 +84,24 @@ function record({ str }: LrsInput): Frame<LrsState>[] {
     { active: 0, matchedPath: [0] },
   );
 
-  // Insert every suffix text[i:] into the trie (text = str + sentinel).
+  // Insert every suffix text[i:]! into the trie (text = str + sentinel).
   for (let i = 0; i < text.length; i++) {
     const suffix = text.slice(i);
     emit(
       'SUFFIX',
       `insert "${suffix}"`,
-      `Insert suffix #${i}: "${suffix}" (str[${i}:]). We walk down the trie from the root, following or creating one edge per letter.`,
+      `Insert suffix #${i}: "${suffix}" (str[${i}:]!). We walk down the trie from the root, following or creating one edge per letter.`,
       { active: 0, matchedPath: [0] },
     );
 
     let cur = 0;
-    nodes[0].visits += 1;
+    nodes[0]!.visits += 1;
     for (let k = 0; k < suffix.length; k++) {
-      const ch = suffix[k];
-      const existing = nodes[cur].children[ch];
+      const ch = suffix[k]!;
+      const existing = nodes[cur]!.children[ch!]!;
       if (existing !== undefined) {
         cur = existing;
-        nodes[cur].visits += 1;
+        nodes[cur]!.visits += 1;
         emit(
           'WALK',
           `follow '${ch}'`,
@@ -112,12 +112,12 @@ function record({ str }: LrsInput): Frame<LrsState>[] {
         const idx = nodes.length;
         nodes.push({
           char: ch,
-          depth: nodes[cur].depth + 1,
+          depth: nodes[cur]!.depth + 1,
           parent: cur,
           children: {},
           visits: 1,
         });
-        nodes[cur].children[ch] = idx;
+        nodes[cur]!.children[ch!]! = idx;
         cur = idx;
         emit(
           'ADD',
@@ -138,7 +138,7 @@ function record({ str }: LrsInput): Frame<LrsState>[] {
   );
 
   for (let i = 0; i < nodes.length; i++) {
-    const kids = Object.keys(nodes[i].children).length;
+    const kids = Object.keys(nodes[i]!.children).length;
     if (kids >= 2) {
       const label = labelOf(nodes, i);
       const isBetter = label.length > answer.length;
@@ -146,7 +146,7 @@ function record({ str }: LrsInput): Frame<LrsState>[] {
         isBetter ? 'FORK' : 'FORK_SKIP',
         `"${label}" ×${kids}`,
         isBetter
-          ? `Node "${label}" has ${kids} children (depth ${nodes[i].depth}) — it is a fork and longer than the current best "${answer || '∅'}". New longest repeat: "${label}".`
+          ? `Node "${label}" has ${kids} children (depth ${nodes[i]!.depth}) — it is a fork and longer than the current best "${answer || '∅'}". New longest repeat: "${label}".`
           : `Node "${label}" is also a fork (${kids} children) but is not longer than the current best "${answer}", so we keep the current answer.`,
         {
           active: i,
@@ -185,7 +185,7 @@ function View({ frame }: PluginViewProps<LrsState>) {
     label: n.char === '' ? '·' : n.char,
     children: Object.keys(n.children)
       .sort()
-      .map((ch) => n.children[ch]),
+      .map((ch) => n.children[ch]!),
   }));
   const onPath = new Set(s.matchedPath);
   const nodeClass = (i: number) => {
@@ -227,7 +227,7 @@ function Inspector({ frame }: InspectorProps<LrsState>) {
       : '—';
   const activeKids =
     s.active !== null && s.active >= 0 && s.active < s.nodes.length
-      ? Object.keys(s.nodes[s.active].children).length
+      ? Object.keys(s.nodes[s.active]!.children).length
       : 0;
   return (
     <VarGrid>

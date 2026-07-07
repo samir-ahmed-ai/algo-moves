@@ -2,12 +2,17 @@ import { useCallback, useEffect, useRef } from 'react';
 
 const TRANSITION_MS = 340;
 
+interface PhaseTransitionApi {
+  scheduleTransition(fn: () => void): void;
+  clearTransition(): void;
+}
+
 /**
  * Owns the cross-fade timeout used to swap Code Studio phases after the fade.
  * Extracted from CodeStudioProvider so the timer plumbing lives in one place and
  * is always cleaned up on unmount.
  */
-export function usePhaseTransition() {
+export function usePhaseTransition(): PhaseTransitionApi {
   const transitionTimer = useRef<number | null>(null);
 
   const clearTransition = useCallback(() => {
@@ -19,7 +24,7 @@ export function usePhaseTransition() {
 
   /** Run a phase swap after the cross-fade, cancelling any pending one first. */
   const scheduleTransition = useCallback(
-    (fn: () => void) => {
+    (fn: () => void): void => {
       clearTransition();
       transitionTimer.current = window.setTimeout(() => {
         transitionTimer.current = null;

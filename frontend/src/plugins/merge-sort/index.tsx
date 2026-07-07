@@ -46,7 +46,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         values: values.slice(),
         leftRun,
@@ -100,20 +100,20 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
         comparisons++;
         emit(
           'CMP',
-          `${buffer[li]} ? ${buffer[ri]}`,
-          `Compare the run fronts: left ${buffer[li]} at ${aIdx} vs right ${buffer[ri]} at ${bIdx}. The smaller one is written next.`,
+          `${buffer[li]!} ? ${buffer[ri]!}`,
+          `Compare the run fronts: left ${buffer[li]!} at ${aIdx} vs right ${buffer[ri]!} at ${bIdx}. The smaller one is written next.`,
           leftRun,
           rightRun,
           null,
           aIdx,
           bIdx,
         );
-        if (buffer[li] <= buffer[ri]) {
-          values[write] = buffer[li];
+        if (buffer[li]! <= buffer[ri]!) {
+          values[write] = buffer[li]!;
           writes++;
           li++;
         } else {
-          values[write] = buffer[ri];
+          values[write] = buffer[ri]!;
           writes++;
           ri++;
         }
@@ -131,7 +131,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
       }
 
       while (li < leftLen) {
-        values[write] = buffer[li];
+        values[write] = buffer[li]!;
         writes++;
         emit(
           'WRITE',
@@ -148,7 +148,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
       }
 
       while (ri < buffer.length) {
-        values[write] = buffer[ri];
+        values[write] = buffer[ri]!;
         writes++;
         emit(
           'WRITE',

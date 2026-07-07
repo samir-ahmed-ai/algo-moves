@@ -4,24 +4,36 @@ import { IMPORTED_PRACTICE } from './bundles';
 import { MIGRATED_BUNDLES } from './migrated';
 import { EXTRA_CASE_BUNDLES } from './extraCases';
 
+function mergeCases(
+  a?: PracticeBundle['cases'],
+  b?: PracticeBundle['cases'],
+): PracticeBundle['cases'] | undefined {
+  if (!a && !b) return undefined;
+  const good = b?.good ?? a?.good ?? [];
+  const out: NonNullable<PracticeBundle['cases']> = { good };
+  const bad = b?.bad ?? a?.bad;
+  if (bad !== undefined) out.bad = bad;
+  const goodLabel = b?.goodLabel ?? a?.goodLabel;
+  if (goodLabel !== undefined) out.goodLabel = goodLabel;
+  const badLabel = b?.badLabel ?? a?.badLabel;
+  if (badLabel !== undefined) out.badLabel = badLabel;
+  const intro = b?.intro ?? a?.intro;
+  if (intro !== undefined) out.intro = intro;
+  return out;
+}
+
 function mergeBundles(a?: PracticeBundle, b?: PracticeBundle): PracticeBundle | undefined {
   if (!a && !b) return undefined;
-  const mergedCases =
-    a?.cases || b?.cases
-      ? {
-          good: b?.cases?.good ?? a?.cases?.good ?? [],
-          bad: b?.cases?.bad ?? a?.cases?.bad,
-          goodLabel: b?.cases?.goodLabel ?? a?.cases?.goodLabel,
-          badLabel: b?.cases?.badLabel ?? a?.cases?.badLabel,
-          intro: b?.cases?.intro ?? a?.cases?.intro,
-        }
-      : undefined;
-  return {
-    quiz: b?.quiz ?? a?.quiz,
-    codePieces: b?.codePieces ?? a?.codePieces,
-    cases: mergedCases,
-    simulateQuestion: b?.simulateQuestion ?? a?.simulateQuestion,
-  };
+  const mergedCases = mergeCases(a?.cases, b?.cases);
+  const out: PracticeBundle = {};
+  const quiz = b?.quiz ?? a?.quiz;
+  const codePieces = b?.codePieces ?? a?.codePieces;
+  const simulateQuestion = b?.simulateQuestion ?? a?.simulateQuestion;
+  if (quiz !== undefined) out.quiz = quiz;
+  if (codePieces !== undefined) out.codePieces = codePieces;
+  if (mergedCases !== undefined) out.cases = mergedCases;
+  if (simulateQuestion !== undefined) out.simulateQuestion = simulateQuestion;
+  return out;
 }
 
 /** Resolve teaching bundle: migrated native content > split item bundles > extra cases. */

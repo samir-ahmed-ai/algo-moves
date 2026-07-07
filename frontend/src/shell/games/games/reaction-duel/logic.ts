@@ -58,10 +58,10 @@ export function resolveRound(taps: Record<string, number>): RoundResolution {
   const valid = ranking.filter((r) => !isFalseStart(r.ms));
   if (valid.length === 0) return { winnerId: null, ranking };
 
-  const best = valid[0].ms;
+  const best = valid[0]!.ms;
   // A unique fastest valid time wins; a tie for fastest is a wash.
   const tiedForBest = valid.filter((r) => r.ms === best);
-  return { winnerId: tiedForBest.length === 1 ? valid[0].id : null, ranking };
+  return { winnerId: tiedForBest.length === 1 ? valid[0]!.id : null, ranking };
 }
 
 /**

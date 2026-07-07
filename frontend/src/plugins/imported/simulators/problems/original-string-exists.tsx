@@ -62,7 +62,7 @@ function record({ s1, s2 }: OSEInput): Frame<OSEState>[] {
   const bt = (i: number, j: number, diff: number): boolean => {
     if (i === m && j === n) {
       const ok = diff === 0;
-      if (grid[i][j] !== 1) grid[i][j] = ok ? 1 : 0;
+      if (grid[i]![j] !== 1) grid[i]![j] = ok ? 1 : 0;
       emit(
         ok ? 'GOAL' : 'STATE',
         `(${i},${j},${diff})`,
@@ -86,18 +86,18 @@ function record({ s1, s2 }: OSEInput): Frame<OSEState>[] {
     }
 
     let res = false;
-    if (i < m && isDigit(s1[i])) {
+    if (i < m && isDigit(s1[i]!)) {
       let num = 0;
-      for (let p = i; p < m && isDigit(s1[p]); p++) {
+      for (let p = i; p < m && isDigit(s1[p]!); p++) {
         num = num * 10 + (s1.charCodeAt(p) - 48);
         if (bt(p + 1, j, diff + num)) {
           res = true;
           break;
         }
       }
-    } else if (j < n && isDigit(s2[j])) {
+    } else if (j < n && isDigit(s2[j]!)) {
       let num = 0;
-      for (let p = j; p < n && isDigit(s2[p]); p++) {
+      for (let p = j; p < n && isDigit(s2[p]!); p++) {
         num = num * 10 + (s2.charCodeAt(p) - 48);
         if (bt(i, p + 1, diff - num)) {
           res = true;
@@ -105,21 +105,21 @@ function record({ s1, s2 }: OSEInput): Frame<OSEState>[] {
         }
       }
     } else if (diff > 0 && j < n) {
-      if (isLower(s2[j])) res = bt(i, j + 1, diff - 1);
+      if (isLower(s2[j]!)) res = bt(i, j + 1, diff - 1);
     } else if (diff < 0 && i < m) {
-      if (isLower(s1[i])) res = bt(i + 1, j, diff + 1);
+      if (isLower(s1[i]!)) res = bt(i + 1, j, diff + 1);
     } else if (diff === 0 && i < m && j < n) {
-      if (isLower(s1[i]) && isLower(s2[j])) res = s1[i] === s2[j] && bt(i + 1, j + 1, 0);
+      if (isLower(s1[i]!) && isLower(s2[j]!)) res = s1[i] === s2[j] && bt(i + 1, j + 1, 0);
     }
 
     memo.set(key, res);
-    if (res) grid[i][j] = 1;
-    else if (grid[i][j] !== 1) grid[i][j] = 0;
+    if (res) grid[i]![j] = 1;
+    else if (grid[i]![j] !== 1) grid[i]![j] = 0;
 
     const reason =
-      i < m && isDigit(s1[i])
+      i < m && isDigit(s1[i]!)
         ? `"${s1}" has a digit run at index ${i}; try expanding it into letter counts.`
-        : j < n && isDigit(s2[j])
+        : j < n && isDigit(s2[j]!)
           ? `"${s2}" has a digit run at index ${j}; try expanding it into letter counts.`
           : diff > 0
             ? `diff = ${diff} > 0: "${s1}" is ahead, so consume a letter of "${s2}" at index ${j} to shrink diff.`
@@ -153,14 +153,14 @@ function buildDisplay(s: OSEState): (number | string)[][] {
   const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
     new Array<number | string>(n + 2).fill(''),
   );
-  display[0][1] = 'ε';
-  for (let j = 0; j < n; j++) display[0][j + 2] = s.s2[j];
-  display[1][0] = 'ε';
-  for (let i = 0; i < m; i++) display[i + 2][0] = s.s1[i];
+  display[0]![1] = 'ε';
+  for (let j = 0; j < n; j++) display[0]![j + 2]! = s.s2[j]!;
+  display[1]![0] = 'ε';
+  for (let i = 0; i < m; i++) display[i + 2]![0]! = s.s1[i]!;
   for (let i = 0; i <= m; i++) {
     for (let j = 0; j <= n; j++) {
-      const v = s.grid[i][j];
-      display[i + 1][j + 1] = v === 1 ? '✓' : v === 0 ? '✗' : '';
+      const v = s.grid[i]![j];
+      display[i + 1]![j + 1] = v === 1 ? '✓' : v === 0 ? '✗' : '';
     }
   }
   return display;
@@ -173,7 +173,7 @@ function View({ frame }: PluginViewProps<OSEState>) {
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
     if (s.cur && s.cur[0] + 1 === r && s.cur[1] + 1 === c) return 'active';
-    const v = s.grid[r - 1][c - 1];
+    const v = s.grid[r - 1]![c - 1];
     if (v === 1) return 'path';
     if (v === 0) return 'visited';
     return '';

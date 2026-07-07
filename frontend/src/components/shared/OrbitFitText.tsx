@@ -11,7 +11,9 @@ import {
 
 function prefersReducedMotion(): boolean {
   return (
-    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
 }
 
@@ -25,13 +27,13 @@ export function OrbitFitText({
   font,
   onClick,
 }: {
-  text: string;
-  pathId: string;
-  slot: 'center' | 'side';
-  className?: string;
-  dy?: number;
-  font?: OrbitFontConfig;
-  onClick?: () => void;
+  readonly text: string;
+  readonly pathId: string;
+  readonly slot: 'center' | 'side';
+  readonly className?: string;
+  readonly dy?: number;
+  readonly font?: OrbitFontConfig;
+  readonly onClick?: () => void;
 }) {
   const measureRef = useRef<SVGTextElement>(null);
   const { max, min, maxLines } = font ?? ORBIT_FONT[slot];

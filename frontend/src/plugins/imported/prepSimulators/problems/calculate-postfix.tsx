@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -48,7 +48,7 @@ function applyOp(a: number, b: number, op: string): number {
 function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
   const stack: number[] = [];
 
-  const { emit, frames } = createRecorder<PostfixState>(() => ({
+  const { emit, frames } = createPrepRecorder<PostfixState>(() => ({
     tokens,
     ti: null,
     stack: stack.slice(),
@@ -69,11 +69,11 @@ function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
   );
 
   for (let ti = 0; ti < tokens.length; ti++) {
-    const tok = tokens[ti];
+    const tok = tokens[ti]!;
 
-    if (OPS.has(tok)) {
-      const b = stack[stack.length - 1];
-      const a = stack[stack.length - 2];
+    if (OPS.has(tok!)) {
+      const b = stack[stack.length - 1]!;
+      const a = stack[stack.length - 2]!;
       emit(
         'POP',
         `pop ${a} ${tok} ${b}`,
@@ -89,7 +89,7 @@ function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
 
       stack.pop();
       stack.pop();
-      const r = applyOp(a, b, tok);
+      const r = applyOp(a!, b!, tok!);
       stack.push(r);
 
       emit(
@@ -106,7 +106,7 @@ function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
         },
       );
     } else {
-      const v = Number.parseInt(tok, 10);
+      const v = Number.parseInt(tok!, 10);
       stack.push(v);
       emit(
         'PUSH',
@@ -121,7 +121,7 @@ function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
     }
   }
 
-  const result = stack.length > 0 ? stack[0] : 0;
+  const result = stack.length > 0 ? stack[0]! : 0;
   emit(
     'DONE',
     `= ${result}`,
@@ -192,8 +192,8 @@ function View({ frame }: PluginViewProps<PostfixState>) {
 function Inspector({ frame }: InspectorProps<PostfixState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const tok = s.ti !== null ? s.tokens[s.ti] : '—';
-  const top = s.stack.length > 0 ? s.stack[s.stack.length - 1] : '—';
+  const tok = s.ti !== null ? s.tokens[s.ti]! : '—';
+  const top = s.stack.length > 0 ? s.stack[s.stack.length - 1]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="token" v={tok} />
@@ -311,7 +311,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(n). switch token; pop b then a; applyOp; stack[0] is answer',
+    explain: 'O(n). O(n). switch token; pop b then a; applyOp; stack[0]! is answer',
   },
   {
     id: 'outcome',

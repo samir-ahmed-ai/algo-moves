@@ -163,14 +163,16 @@ export function RockPaperScissors() {
     }, 700);
     return () => clearInterval(tick);
     // scoreThisRound closes over current round/picks; re-run only on phase change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   const scoreThisRound = useCallback(() => {
     const picks = picksByRound[round] ?? {};
     // Only score seats still present so a dropout can't skew the field.
     const active: Record<string, Choice> = {};
-    for (const p of roster) if (picks[p.id]) active[p.id] = picks[p.id];
+    for (const p of roster) {
+      const pick = picks[p.id];
+      if (pick) active[p.id] = pick;
+    }
     const roundPts = scoreRound(active);
     setScores((prev) => addRoundScores(prev, roundPts));
   }, [picksByRound, round, roster]);
@@ -284,7 +286,12 @@ export function RockPaperScissors() {
     return (
       <GameBody className="relative">
         <Confetti fire={fireConfetti} />
-        <Scoreboard roster={roster} scores={scores} selfId={self?.id} taunts={{}} />
+        <Scoreboard
+          roster={roster}
+          scores={scores}
+          {...(self?.id !== undefined ? { selfId: self.id } : {})}
+          taunts={{}}
+        />
         <ResultBanner
           tone={isSpectator ? 'draw' : iWon ? 'win' : 'lose'}
           title={title}
@@ -295,23 +302,30 @@ export function RockPaperScissors() {
             {strings.rematch}
           </TouchButton>
         ) : (
-          <p className="text-center text-xs text-ink3">{strings.spectating}</p>
+          <p className="rounded-2xl border border-white/60 bg-white/64 px-3 py-3 text-center text-xs font-semibold text-slate-500 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+            {strings.spectating}
+          </p>
         )}
       </GameBody>
     );
   }
 
   // ---- Live round ----------------------------------------------------------
+  const myRoundPick = self ? roundPicks[self.id] : undefined;
+  const peerRoundPick = peer ? roundPicks[peer.id] : undefined;
   const twoPlayerOutcome =
-    !isNPlayer && self && peer && revealing && roundPicks[self.id] && roundPicks[peer.id]
-      ? outcome(roundPicks[self.id], roundPicks[peer.id])
-      : null;
+    !isNPlayer && myRoundPick && peerRoundPick ? outcome(myRoundPick, peerRoundPick) : null;
 
   return (
     <GameBody className="relative gap-2.5">
       <Confetti fire={fireConfetti} />
-      <Scoreboard roster={roster} scores={scores} selfId={self?.id} taunts={taunts} />
-      <p className="text-center text-[length:var(--fs-2xs)] text-ink3">
+      <Scoreboard
+        roster={roster}
+        scores={scores}
+        {...(self?.id !== undefined ? { selfId: self.id } : {})}
+        taunts={taunts}
+      />
+      <p className="text-center text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {isNPlayer ? strings.fieldOf(roster.length, NP_ROUNDS) : strings.bestOf(WIN_TARGET)}
         {' · '}
         {strings.roundLabel(round + 1, totalRounds)}
@@ -338,7 +352,7 @@ export function RockPaperScissors() {
                   }
                   locked={!!theirPick}
                   revealed={revealing}
-                  taunt={taunts[p.id]}
+                  {...(taunts[p.id] !== undefined ? { taunt: taunts[p.id] } : {})}
                   reduced={reduced}
                 />
               );
@@ -351,21 +365,15 @@ export function RockPaperScissors() {
               emoji={myPick ? emojiFor(myPick) : '⏳'}
               locked={!!myPick}
               revealed
-              taunt={self ? taunts[self.id] : undefined}
+              {...(self && taunts[self.id] !== undefined ? { taunt: taunts[self.id] } : {})}
               reduced={reduced}
             />
             <Hand
               label={peer?.name ?? strings.partner}
-              emoji={
-                peer && roundPicks[peer.id]
-                  ? revealing
-                    ? emojiFor(roundPicks[peer.id])
-                    : '🔒'
-                  : '❔'
-              }
-              locked={!!(peer && roundPicks[peer.id])}
+              emoji={peerRoundPick ? (revealing ? emojiFor(peerRoundPick) : '🔒') : '❔'}
+              locked={!!peerRoundPick}
               revealed={revealing}
-              taunt={peer ? taunts[peer.id] : undefined}
+              {...(peer && taunts[peer.id] !== undefined ? { taunt: taunts[peer.id] } : {})}
               reduced={reduced}
             />
           </div>
@@ -384,7 +392,7 @@ export function RockPaperScissors() {
         ) : revealing ? (
           <div className="flex flex-col items-center gap-2">
             {twoPlayerOutcome ? (
-              <p className="text-center text-sm font-bold">
+              <p className="rounded-2xl border border-white/60 bg-white/70 px-3 py-2 text-center text-sm font-black text-slate-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
                 {twoPlayerOutcome === 'win'
                   ? strings.youTakeIt
                   : twoPlayerOutcome === 'lose'
@@ -392,7 +400,7 @@ export function RockPaperScissors() {
                     : strings.tie}
               </p>
             ) : (
-              <p className="text-center text-sm font-semibold text-ink2">
+              <p className="text-center text-sm font-bold text-slate-600 dark:text-slate-300">
                 {strings.roundLabel(round + 1, totalRounds)}
               </p>
             )}
@@ -403,7 +411,7 @@ export function RockPaperScissors() {
         ) : isSpectator ? (
           <div className="flex flex-col items-center gap-2">
             <TurnBadge tone="wait">{strings.spectating}</TurnBadge>
-            <p className="text-xs text-ink3">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               {strings.waitingField(Math.max(0, roster.length - lockedCount))}
             </p>
           </div>
@@ -425,7 +433,7 @@ export function RockPaperScissors() {
                   onClick={() => pick(c.id)}
                 >
                   <span className="text-2xl leading-none">{c.emoji}</span>
-                  <span className="text-[length:var(--fs-2xs)] font-semibold">
+                  <span className="text-[length:var(--fs-2xs)] font-black">
                     {strings.choiceLabel[c.id]}
                   </span>
                 </ChoiceCard>
@@ -452,14 +460,22 @@ function Scoreboard({
 }) {
   if (roster.length <= 2) {
     const [a, b] = roster;
+    const aId = a?.id;
+    const bId = b?.id;
     return (
-      <div className="flex items-center justify-center gap-3 text-center">
-        <PlayerScore player={a} score={scores[a?.id] ?? 0} isSelf={a?.id === selfId} />
-        <span className="text-xs font-semibold text-ink3">vs</span>
+      <div className="flex items-center justify-center gap-3 rounded-[1.5rem] border border-white/60 bg-white/72 p-3 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
         <PlayerScore
-          player={b}
-          score={scores[b?.id] ?? 0}
-          isSelf={b?.id === selfId}
+          {...(a !== undefined ? { player: a } : {})}
+          score={aId ? (scores[aId] ?? 0) : 0}
+          isSelf={aId === selfId}
+        />
+        <span className="rounded-full bg-slate-950 px-2 py-0.5 text-xs font-black text-white dark:bg-white dark:text-slate-950">
+          vs
+        </span>
+        <PlayerScore
+          {...(b !== undefined ? { player: b } : {})}
+          score={bId ? (scores[bId] ?? 0) : 0}
+          isSelf={bId === selfId}
           align="right"
           muted
         />
@@ -472,13 +488,17 @@ function Scoreboard({
         <div
           key={p.id}
           className={cn(
-            'flex items-center gap-1.5 rounded-full border px-2.5 py-1',
-            p.id === selfId ? 'border-accent/40 bg-accentbg' : 'border-edge bg-panel2',
+            'flex items-center gap-1.5 rounded-full border px-2.5 py-1 shadow-sm backdrop-blur',
+            p.id === selfId
+              ? 'border-cyan-300/45 bg-cyan-50/85 dark:border-cyan-300/20 dark:bg-cyan-300/10'
+              : 'border-white/60 bg-white/70 dark:border-white/10 dark:bg-white/5',
           )}
         >
           <Avatar seed={p.id} name={p.name} size={20} />
-          <span className="max-w-20 truncate text-xs font-semibold text-ink2">{p.name}</span>
-          <span className="font-mono text-sm font-bold tabular-nums text-accent">
+          <span className="max-w-20 truncate text-xs font-bold text-slate-700 dark:text-slate-200">
+            {p.name}
+          </span>
+          <span className="font-mono text-sm font-black tabular-nums text-cyan-700 dark:text-cyan-200">
             {scores[p.id] ?? 0}
           </span>
           {taunts[p.id] ? <span className="text-sm leading-none">{taunts[p.id]}</span> : null}
@@ -512,15 +532,17 @@ function PlayerScore({
             seed={player.id}
             name={player.name}
             size={22}
-            ring={isSelf ? 'var(--accent)' : undefined}
+            {...(isSelf ? { ring: '#0891b2' } : {})}
           />
         ) : null}
-        <span className="truncate text-sm font-semibold text-ink">{player?.name ?? '—'}</span>
+        <span className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+          {player?.name ?? '—'}
+        </span>
       </div>
       <div
         className={cn(
-          'font-mono text-xl font-bold tabular-nums',
-          muted ? 'text-ink2' : 'text-accent',
+          'font-mono text-xl font-black tabular-nums',
+          muted ? 'text-slate-600 dark:text-slate-300' : 'text-cyan-700 dark:text-cyan-200',
         )}
       >
         {score}
@@ -562,12 +584,12 @@ function Hand({
   return (
     <div
       className={cn(
-        'relative flex flex-col items-center gap-1 rounded-xl border p-2 transition-colors',
+        'relative flex flex-col items-center gap-2 rounded-[1.35rem] border p-3 shadow-sm backdrop-blur transition',
         revealed
-          ? 'border-accent/40 bg-accentbg'
+          ? 'border-amber-300/45 bg-amber-50/85 shadow-[0_14px_34px_rgba(245,158,11,0.14)] dark:border-amber-300/20 dark:bg-amber-300/10'
           : locked
-            ? 'border-edge2 bg-panel2'
-            : 'border-edge bg-panel',
+            ? 'border-white/60 bg-white/70 dark:border-white/10 dark:bg-white/5'
+            : 'border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/[0.03]',
       )}
     >
       {taunt ? (
@@ -581,10 +603,12 @@ function Hand({
           {taunt}
         </span>
       ) : null}
-      <span ref={emojiRef} className="text-3xl leading-none">
+      <span ref={emojiRef} className="text-4xl leading-none drop-shadow-sm">
         {emoji}
       </span>
-      <span className="truncate text-xs font-semibold text-ink2">{label}</span>
+      <span className="truncate text-xs font-black text-slate-700 dark:text-slate-200">
+        {label}
+      </span>
     </div>
   );
 }
@@ -601,7 +625,7 @@ function TauntBar({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+      <span className="text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {label}
       </span>
       <div className="flex gap-1.5">
@@ -610,7 +634,7 @@ function TauntBar({
             key={e}
             type="button"
             onClick={() => onFling(e)}
-            className="grid h-9 w-9 place-items-center rounded-full border border-edge bg-panel text-lg transition-transform touch-manipulation hover:bg-panel2 active:scale-90"
+            className="grid h-9 w-9 touch-manipulation place-items-center rounded-full border border-white/60 bg-white/72 text-lg shadow-sm transition hover:-translate-y-0.5 hover:bg-white active:scale-90 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
           >
             {e}
           </button>

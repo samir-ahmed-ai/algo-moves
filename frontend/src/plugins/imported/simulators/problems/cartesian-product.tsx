@@ -68,13 +68,13 @@ function record({ lists }: CartesianInput): Frame<CartesianState>[] {
       );
       return;
     }
-    for (let j = 0; j < lists[i].length; j++) {
-      const v = lists[i][j];
-      path.push(v);
+    for (let j = 0; j < lists[i]!.length; j++) {
+      const v = lists[i]![j];
+      path.push(v!);
       emit(
         'CHOOSE',
         `list ${i} → ${v}`,
-        `From list ${i} = [${lists[i].join(', ')}] choose "${v}" and recurse into list ${i + 1}. Tuple so far is ${fmt(path)}.`,
+        `From list ${i} = [${lists[i]!.join(', ')}] choose "${v}" and recurse into list ${i + 1}. Tuple so far is ${fmt(path)}.`,
         { depth: i, pick: j },
       );
       backtrack(i + 1);
@@ -120,7 +120,7 @@ function View({ frame }: PluginViewProps<CartesianState>) {
       <div className="flex flex-col gap-2">
         {s.lists.map((list, i) => {
           const isActive = s.depth === i;
-          const chosenIdx = i < s.path.length ? list.indexOf(s.path[i]) : -1;
+          const chosenIdx = i < s.path.length ? list.indexOf(s.path[i]!) : -1;
           const pointers: ArrayPointer[] = [];
           if (isActive && s.pick !== null) {
             pointers.push({ i: s.pick, label: 'pick', tone: 'warn', place: 'above' });

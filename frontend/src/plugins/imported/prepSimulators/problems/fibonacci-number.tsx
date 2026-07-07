@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { cn } from '@/lib/utils/cn';
@@ -17,7 +17,7 @@ interface FibInput {
 
 interface FibState {
   n: number;
-  seq: number[]; // Fibonacci values computed so far, seq[k] = F(k)
+  seq: number[]; // Fibonacci values computed so far, seq[k]! = F(k)
   i: number | null; // index just produced (the new cur), i.e. F(i)
   prevIdx: number | null; // index of prev (a) in seq
   curIdx: number | null; // index of cur (b) in seq
@@ -32,7 +32,7 @@ function record({ n }: FibInput): Frame<FibState>[] {
   // itself carries just prev/cur exactly like the Go solution.
   const seq: number[] = [0, 1];
 
-  const { emit, frames } = createRecorder<FibState>(() => ({
+  const { emit, frames } = createPrepRecorder<FibState>(() => ({
     n,
     seq: seq.slice(),
     i: null,
@@ -80,7 +80,7 @@ function record({ n }: FibInput): Frame<FibState>[] {
 
   for (let i = 2; i <= n; i++) {
     const next = prev + cur;
-    seq.push(next); // seq[i] = F(i)
+    seq.push(next); // seq[i]! = F(i)
     emit(
       'STEP',
       `F(${i})=${next}`,
@@ -271,7 +271,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Failure error code — set once at end',
       },
     ],
-    explain: 'The recorder keeps `seq` in sync: Fibonacci values computed so far, seq[k] = F(k)',
+    explain: 'The recorder keeps `seq` in sync: Fibonacci values computed so far, seq[k]! = F(k)',
   },
   {
     id: 'complexity',

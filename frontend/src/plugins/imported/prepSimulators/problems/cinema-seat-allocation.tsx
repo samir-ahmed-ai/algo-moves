@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -46,12 +46,12 @@ function record({ n, reservedSeats }: CinemaInput): Frame<CinemaState>[] {
   for (const [r, seat] of reservedSeats) {
     rows.set(r, (rows.get(r) ?? 0) | (1 << seat));
   }
-  const rowList = [...rows.entries()].sort((a, b) => a[0] - b[0]);
+  const rowList = [...rows.entries()].sort((a, b) => a[0]! - b[0]!);
 
   let res = 2 * n;
   const processed: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<CinemaState>(() => ({
+  const { emit, frames } = createPrepRecorder<CinemaState>(() => ({
     n,
     row: null,
     mask: 0,
@@ -61,7 +61,7 @@ function record({ n, reservedSeats }: CinemaInput): Frame<CinemaState>[] {
     right: false,
     granted: [],
     res,
-    processed: processed.map((p) => [p[0], p[1]] as [number, number]),
+    processed: processed.map((p) => [p[0]!, p[1]!] as [number, number]),
     done: false,
   }));
 
@@ -168,7 +168,7 @@ function View({ frame }: PluginViewProps<CinemaState>) {
 
   const pointers: ArrayPointer[] = [];
   if (s.row !== null && s.reservedInRow.length > 0) {
-    pointers.push({ i: s.reservedInRow[0] - 1, label: 'X', tone: 'bad', place: 'above' });
+    pointers.push({ i: s.reservedInRow[0]! - 1, label: 'X', tone: 'bad', place: 'above' });
   }
 
   return (

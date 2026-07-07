@@ -1,5 +1,5 @@
 import { catalog } from '@/content';
-import type { TrackId } from '@/content';
+import { getTrackById, type TrackId } from '@/content';
 import { parseMobileHash, isMobileHash } from '@/lib/navigation';
 
 export interface BrowseNavigationState {
@@ -25,8 +25,9 @@ export function initialBrowseFromHash(
     return { trackId: null, categoryId: null, topicId: null };
   }
   const parsed = parseMobileHash(hash, pathname);
+  const trackId = parsed?.trackId && getTrackById(parsed.trackId) ? parsed.trackId : null;
   return {
-    trackId: parsed?.trackId ?? null,
+    trackId,
     categoryId: parsed?.categoryId ?? null,
     topicId: parsed?.topicId ?? null,
   };

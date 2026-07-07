@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -21,7 +21,7 @@ interface MatrixState {
   key: number;
   i: number | null; // current row
   j: number | null; // current column
-  cur: number | null; // mat[i][j] under inspection
+  cur: number | null; // mat[i]![j] under inspection
   visited: [number, number][]; // cells the walk has already touched
   result: [number, number] | null; // answer cell, or null when not found
   done: boolean;
@@ -30,13 +30,13 @@ interface MatrixState {
 function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {
   const visited: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<MatrixState>(() => ({
+  const { emit, frames } = createPrepRecorder<MatrixState>(() => ({
     mat,
     key,
     i: null,
     j: null,
     cur: null,
-    visited: visited.map((p): [number, number] => [p[0], p[1]]),
+    visited: visited.map((p): [number, number] => [p[0]!, p[1]!]),
     result: null,
     done: false,
   }));
@@ -53,21 +53,21 @@ function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {
   }
 
   let i = 0;
-  let j = mat[0].length - 1;
+  let j = mat[0]!.length - 1;
 
   emit(
     'INIT',
     `key=${key}`,
     `Staircase search: each row is sorted left→right and each column top→bottom. Start at the top-right corner (i=0, j=${j}) — the only cell that is both the largest in its row and the smallest in its column, which makes every comparison decisive.`,
-    { i, j, cur: mat[i][j] },
+    { i, j, cur: mat[i]![j] },
   );
 
   while (i < mat.length && j >= 0) {
-    const cur = mat[i][j];
+    const cur = mat[i]![j];
     emit(
       'LOOK',
-      `mat[${i}][${j}]=${cur}`,
-      `Inspect the corner cell mat[${i}][${j}] = ${cur} and compare it with the key ${key}.`,
+      `mat[${i}]![${j}]=${cur}`,
+      `Inspect the corner cell mat[${i}]![${j}] = ${cur} and compare it with the key ${key}.`,
       { i, j, cur },
     );
 
@@ -75,7 +75,7 @@ function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {
       emit(
         'FOUND',
         `${i},${j}`,
-        `mat[${i}][${j}] = ${cur} equals the key. The key is found at row ${i}, column ${j}. Return [${i}, ${j}].`,
+        `mat[${i}]![${j}] = ${cur} equals the key. The key is found at row ${i}, column ${j}. Return [${i}, ${j}].`,
         { i, j, cur, result: [i, j], done: true },
         'good',
       );
@@ -84,7 +84,7 @@ function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {
 
     visited.push([i, j]);
 
-    if (cur > key) {
+    if (cur! > key) {
       emit(
         'LEFT',
         `j-- → ${j - 1}`,
@@ -115,9 +115,9 @@ function record({ mat, key }: MatrixInput): Frame<MatrixState>[] {
 
 function View({ frame }: PluginViewProps<MatrixState>) {
   const s = frame.state;
-  const isVisited = (r: number, c: number) => s.visited.some((p) => p[0] === r && p[1] === c);
+  const isVisited = (r: number, c: number) => s.visited.some((p) => p[0]! === r && p[1]! === c);
   const cellTone = (r: number, c: number): string => {
-    if (s.result && s.result[0] === r && s.result[1] === c) return 'path';
+    if (s.result && s.result[0]! === r && s.result[1]! === c) return 'path';
     if (s.i === r && s.j === c && !s.done) return 'active';
     if (isVisited(r, c)) return 'visited';
     return '';
@@ -141,7 +141,7 @@ function View({ frame }: PluginViewProps<MatrixState>) {
       )}
       {s.result ? (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → [{s.result[0]}, {s.result[1]}]
+          → [{s.result[0]!}, {s.result[1]!}]
         </div>
       ) : s.done ? (
         <div className={cn('mt-1 font-mono text-bad', vizText.base)}>→ [-1, -1]</div>
@@ -160,7 +160,7 @@ function Inspector({ frame }: InspectorProps<MatrixState>) {
       <InspectorRow k="key" v={s.key} />
       <InspectorRow k="i (row)" v={s.i ?? '—'} />
       <InspectorRow k="j (col)" v={s.j ?? '—'} />
-      <InspectorRow k="mat[i][j]" v={s.cur ?? '—'} />
+      <InspectorRow k="mat[i]![j]" v={s.cur ?? '—'} />
       <InspectorRow k="vs key" v={cmp} />
       <InspectorRow
         k="result"

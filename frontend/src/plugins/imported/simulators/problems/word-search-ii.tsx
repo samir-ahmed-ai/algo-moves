@@ -49,7 +49,7 @@ function key(r: number, c: number): string {
 
 function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[] {
   const m = board.length;
-  const n = board[0].length;
+  const n = board[0]!.length;
   const onPath = new Set<string>();
   const path: [number, number][] = [];
   const found: string[] = [];
@@ -75,11 +75,11 @@ function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[]
   const dfs = (r: number, c: number, idx: number): boolean => {
     if (r < 0 || r >= m || c < 0 || c >= n) return false;
     if (onPath.has(key(r, c))) return false;
-    if (board[r][c] !== word[idx]) {
+    if (board[r]![c] !== word[idx]) {
       emit(
         'MISMATCH',
-        `'${r >= 0 && r < m && c >= 0 && c < n ? board[r][c] : '·'}' ≠ '${word[idx]}'`,
-        `At (${r}, ${c}) the letter '${board[r][c]}' doesn't match '${word[idx]}' (position ${idx} of "${word}"). Prune.`,
+        `'${r >= 0 && r < m && c >= 0 && c < n ? board[r]![c] : '·'}' ≠ '${word[idx]}'`,
+        `At (${r}, ${c}) the letter '${board[r]![c]}' doesn't match '${word[idx]}' (position ${idx} of "${word}"). Prune.`,
         { cur: [r, c] },
       );
       return false;
@@ -89,8 +89,8 @@ function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[]
     path.push([r, c]);
     emit(
       'MATCH',
-      `'${board[r][c]}' == '${word[idx]}'`,
-      `At (${r}, ${c}) '${board[r][c]}' matches '${word[idx]}' (position ${idx} of "${word}"). Mark it — ${idx + 1}/${word.length} letters matched.`,
+      `'${board[r]![c]}' == '${word[idx]}'`,
+      `At (${r}, ${c}) '${board[r]![c]}' matches '${word[idx]}' (position ${idx} of "${word}"). Mark it — ${idx + 1}/${word.length} letters matched.`,
       { cur: [r, c] },
     );
 
@@ -129,11 +129,11 @@ function record({ board, words }: WordSearchIIInput): Frame<WordSearchIIState>[]
     let hit = false;
     outer: for (let r = 0; r < m; r++) {
       for (let c = 0; c < n; c++) {
-        if (board[r][c] === w[0]) {
+        if (board[r]![c] === w[0]) {
           emit(
             'TRY',
             `start (${r},${c})`,
-            `Try starting "${w}" at (${r}, ${c}) — '${board[r][c]}' matches first letter '${w[0]}'.`,
+            `Try starting "${w}" at (${r}, ${c}) — '${board[r]![c]}' matches first letter '${w[0]}'.`,
             { cur: [r, c] },
           );
           if (dfs(r, c, 0)) {

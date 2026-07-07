@@ -65,7 +65,10 @@ export function buildCanvasRoomState(
   canvas: CanvasDoc,
   subDocs?: Record<string, SubDocSnapshot>,
 ): RoomSharedEnvelope {
-  return buildRoomEnvelope(session, { canvas, subDocs });
+  return buildRoomEnvelope(session, {
+    canvas,
+    ...(subDocs !== undefined ? { subDocs } : {}),
+  });
 }
 
 /** Session + interview metadata only — canvas/subDocs live in Yjs when transport is on. */

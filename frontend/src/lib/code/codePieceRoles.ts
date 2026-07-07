@@ -75,10 +75,12 @@ export const BLOCK_META: Record<BlockKind, BlockMeta> = {
 export function blockKind(piece: CodePiece): BlockKind {
   const role = piece.role.toLowerCase();
   const f = (piece.code.split('\n').find((l) => l.trim()) ?? '').trim().toLowerCase();
-  if (/\bsignature\b/.test(role) || /^func\b/.test(f)) return 'def';
-  if (/\bloop\b/.test(role) || /^for\b/.test(f) || /^while\b/.test(f)) return 'loop';
-  if (/\breturn\b/.test(role) || /^return\b/.test(f)) return 'return';
-  if (/\b(condition|branch)\b/.test(role) || /^if\b/.test(f) || /^else\b/.test(f)) return 'branch';
+  if (/\b(signature|function|method)\b/.test(role) || /^(func|function|def|pub\s+fn|fn)\b/.test(f))
+    return 'def';
+  if (/\bloop\b/.test(role) || /^(for|while)\b/.test(f)) return 'loop';
+  if (/\breturn\b/.test(role) || /^(return|yield)\b/.test(f)) return 'return';
+  if (/\b(condition|branch|else-if)\b/.test(role) || /^(if|else|elif|switch|case|match)\b/.test(f))
+    return 'branch';
   if (
     /\bclose\b/.test(role) ||
     /^[})]/.test(f) ||
@@ -98,10 +100,10 @@ export function pieceRoleMeta(piece: CodePiece): BlockMeta & { kind: BlockKind }
 export function pieceGlyph(piece: CodePiece, kind: BlockKind): string {
   const line = (piece.code.split('\n').find((l) => l.trim()) ?? '').trim();
   const ch = line[0];
-  if ('{}[])"\''.includes(ch)) return ch;
-  if (/^return\b/.test(line)) return '↩';
-  if (/^func\b/.test(line)) return 'ƒ';
+  if (ch && '{}[])"\''.includes(ch)) return ch;
+  if (/^(return|yield)\b/.test(line)) return '↩';
+  if (/^(func|function|def|pub\s+fn|fn)\b/.test(line)) return 'ƒ';
   if (/^(for|while)\b/.test(line)) return '↻';
-  if (/^(if|else)\b/.test(line)) return '?';
+  if (/^(if|else|elif|switch|case|match)\b/.test(line)) return '?';
   return BLOCK_META[kind].glyph;
 }

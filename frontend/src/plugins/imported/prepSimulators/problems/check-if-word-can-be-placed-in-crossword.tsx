@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -45,7 +45,7 @@ function record({ board: rows, word }: CrosswordInput): Frame<CrosswordState>[] 
   const m = board.length;
   const n = board[0]?.length ?? 0;
   const wLen = word.length;
-  const { emit, frames } = createRecorder<CrosswordState>(() => ({
+  const { emit, frames } = createPrepRecorder<CrosswordState>(() => ({
     board,
     word,
     seg: [],
@@ -74,9 +74,9 @@ function record({ board: rows, word }: CrosswordInput): Frame<CrosswordState>[] 
     let fwd = true;
     let bwd = true;
     for (let i = 0; i < wLen; i++) {
-      const ch = board[seg[i].r][seg[i].c];
-      if (ch !== ' ' && ch !== word[i]) fwd = false;
-      if (ch !== ' ' && ch !== word[wLen - 1 - i]) bwd = false;
+      const ch = board[seg[i]!.r]![seg[i]!.c];
+      if (ch !== ' ' && ch !== word[i]!) fwd = false;
+      if (ch !== ' ' && ch !== word[wLen - 1 - i]!) bwd = false;
     }
     emit(
       'TEST',
@@ -101,12 +101,12 @@ function record({ board: rows, word }: CrosswordInput): Frame<CrosswordState>[] 
   for (let i = 0; i < m; i++) {
     let seg: Cell[] = [];
     for (let j = 0; j <= n; j++) {
-      if (j < n && board[i][j] !== '#') {
+      if (j < n && board[i]![j] !== '#') {
         seg.push({ r: i, c: j });
         emit(
           'EXTEND',
           `row ${i} +(${i},${j})`,
-          `Scanning row ${i}: cell (${i},${j}) holds '${board[i][j] === ' ' ? '·' : board[i][j]}' (not a wall), so it joins the current open segment, now length ${seg.length}.`,
+          `Scanning row ${i}: cell (${i},${j}) holds '${board[i]![j] === ' ' ? '·' : board[i]![j]}' (not a wall), so it joins the current open segment, now length ${seg.length}.`,
           { seg: seg.slice(), axis: 'row', active: [i, j] },
         );
       } else {
@@ -131,12 +131,12 @@ function record({ board: rows, word }: CrosswordInput): Frame<CrosswordState>[] 
   for (let j = 0; j < n; j++) {
     let seg: Cell[] = [];
     for (let i = 0; i <= m; i++) {
-      if (i < m && board[i][j] !== '#') {
+      if (i < m && board[i]![j] !== '#') {
         seg.push({ r: i, c: j });
         emit(
           'EXTEND',
           `col ${j} +(${i},${j})`,
-          `Scanning column ${j}: cell (${i},${j}) holds '${board[i][j] === ' ' ? '·' : board[i][j]}' (not a wall), so it joins the current vertical segment, now length ${seg.length}.`,
+          `Scanning column ${j}: cell (${i},${j}) holds '${board[i]![j] === ' ' ? '·' : board[i]![j]}' (not a wall), so it joins the current vertical segment, now length ${seg.length}.`,
           { seg: seg.slice(), axis: 'col', active: [i, j] },
         );
       } else {
@@ -176,7 +176,7 @@ function View({ frame }: PluginViewProps<CrosswordState>) {
   const display: string[][] = s.board.map((row) => row.map((ch) => (ch === ' ' ? '·' : ch)));
   const tone = (r: number, c: number) => {
     if (inSeg(s.placed, r, c)) return 'path';
-    if (s.board[r][c] === '#') return 'water';
+    if (s.board[r]![c] === '#') return 'water';
     if (inSeg(s.seg, r, c)) return 'fill';
     return 'land';
   };
@@ -215,7 +215,7 @@ function Inspector({ frame }: InspectorProps<CrosswordState>) {
       <InspectorRow k="word" v={s.word} />
       <InspectorRow k="|word|" v={s.word.length} />
       <InspectorRow k="axis" v={s.axis ?? '—'} />
-      <InspectorRow k="head" v={s.active ? `(${s.active[0]},${s.active[1]})` : '—'} />
+      <InspectorRow k="head" v={s.active ? `(${s.active[0]!},${s.active[1]!})` : '—'} />
       <InspectorRow k="segment len" v={s.seg.length} />
       <InspectorRow
         k="fwd / bwd"

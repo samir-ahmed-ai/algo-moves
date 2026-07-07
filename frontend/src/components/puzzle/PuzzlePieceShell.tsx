@@ -28,6 +28,7 @@ export function PuzzlePieceShell({
     <div
       className={cn('blk', meta.shape, `puzzle-piece--${mode}`, className)}
       style={{ '--blk-stroke': meta.stroke } as CSSProperties}
+      data-piece-kind={meta.kind}
     >
       <div className="blk-face">
         <HighlightedCode code={display} lang={lang} wrap={wrap} gutter={false} />

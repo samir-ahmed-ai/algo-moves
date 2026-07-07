@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -40,7 +40,7 @@ function emptyNode(): FsNode {
 
 function cloneNode(n: FsNode): FsNode {
   const children: Record<string, FsNode> = {};
-  for (const [k, v] of Object.entries(n.children)) children[k] = cloneNode(v);
+  for (const [k, v] of Object.entries(n.children)) children[k]! = cloneNode(v);
   return { children, content: n.content, isFile: n.isFile };
 }
 
@@ -48,8 +48,8 @@ function traverse(root: FsNode, path: string): FsNode {
   let cur = root;
   if (path === '/') return cur;
   for (const part of path.slice(1).split('/')) {
-    if (!cur.children[part]) cur.children[part] = emptyNode();
-    cur = cur.children[part];
+    if (!cur.children[part]!) cur.children[part]! = emptyNode();
+    cur = cur.children[part]!;
   }
   return cur;
 }
@@ -58,7 +58,7 @@ function ls(root: FsNode, path: string): string[] {
   const node = traverse(root, path);
   if (node.isFile) {
     const parts = path.split('/');
-    return [parts[parts.length - 1]];
+    return [parts[parts.length - 1]!];
   }
   return Object.keys(node.children).sort();
 }
@@ -66,7 +66,7 @@ function ls(root: FsNode, path: string): string[] {
 function record({ ops }: FsInput): Frame<FsState>[] {
   const root = emptyNode();
 
-  const { emit, frames } = createRecorder<FsState>(() => ({
+  const { emit, frames } = createPrepRecorder<FsState>(() => ({
     tree: cloneNode(root),
     op: '',
     result: '',
@@ -136,13 +136,13 @@ function View({ frame }: PluginViewProps<FsState>) {
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>root /</div>
       <div className="mt-1 space-y-0.5 pl-2">
         {dirs.map((name) => {
-          const child = s.tree.children[name];
+          const child = s.tree.children[name]!;
           return (
             <div
               key={name}
-              className={cn('font-mono', vizText.sm, child.isFile ? 'text-accent' : 'text-ink')}
+              className={cn('font-mono', vizText.sm, child!.isFile ? 'text-accent' : 'text-ink')}
             >
-              {child.isFile ? `📄 ${name}: "${child.content}"` : `📁 ${name}/`}
+              {child!.isFile ? `📄 ${name}: "${child!.content}"` : `📁 ${name}/`}
             </div>
           );
         })}

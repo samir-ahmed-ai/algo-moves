@@ -41,13 +41,13 @@ export const TOPO_GAME_ID = 'toposort';
 const store = getDojoProgressStore(TOPO_GAME_ID);
 
 function initialLevelId(): string {
-  if (typeof location === 'undefined') return LEVEL_IDS[0];
+  if (typeof location === 'undefined') return LEVEL_IDS[0]!;
   const parsed = parseDojoHash(location.hash, location.pathname);
   const id = parsed?.levelId;
   if (id && getLevel(id) && isDojoLevelUnlocked(LEVEL_IDS, LEVEL_IDS.indexOf(id), store.read())) {
     return id;
   }
-  return firstIncompleteDojoLevelId(LEVEL_IDS, store.read()) ?? LEVEL_IDS[0];
+  return firstIncompleteDojoLevelId(LEVEL_IDS, store.read()) ?? LEVEL_IDS[0]!;
 }
 
 export interface TopoGameContextValue {
@@ -85,7 +85,7 @@ const TopoGameContext = createContext<TopoGameContextValue | null>(null);
 export function TopoGameProvider({ children }: { children: ReactNode }) {
   const [levelId, setLevelId] = useState(initialLevelId);
   const progress = store.use();
-  const level = useMemo(() => getLevel(levelId) ?? LEVELS[0], [levelId]);
+  const level = useMemo(() => getLevel(levelId) ?? LEVELS[0]!, [levelId]);
 
   const [locked, setLocked] = useState<number[]>([]);
   const [mistakes, setMistakes] = useState(0);
@@ -145,7 +145,6 @@ export function TopoGameProvider({ children }: { children: ReactNode }) {
     if (parsed && parsed.levelId !== levelId) {
       writeDojoHash({ gameId: TOPO_GAME_ID, levelId }, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const failAction = useCallback((msg: string, idx: number | null) => {
@@ -186,7 +185,7 @@ export function TopoGameProvider({ children }: { children: ReactNode }) {
       const target = LEVEL_IDS.indexOf(levelId) + dir;
       if (target < 0 || target >= LEVEL_IDS.length) return;
       if (!isDojoLevelUnlocked(LEVEL_IDS, target, store.read())) return;
-      selectLevel(LEVEL_IDS[target]);
+      selectLevel(LEVEL_IDS[target]!);
     },
     [levelId, selectLevel],
   );
@@ -244,10 +243,10 @@ export function TopoGameProvider({ children }: { children: ReactNode }) {
             lock(idx);
           } else {
             const prereq = unmetPrereq({ level, locked }, idx);
-            const label = level.nodes[idx].label;
+            const label = level.nodes[idx]!.label;
             failAction(
               prereq != null
-                ? `«${label}» still needs «${level.nodes[prereq].label}»`
+                ? `«${label}» still needs «${level.nodes[prereq]!.label}»`
                 : `«${label}» is not ready yet`,
               idx,
             );

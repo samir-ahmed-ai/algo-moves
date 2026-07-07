@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -27,9 +27,9 @@ interface AnagramState {
   chars: string[]; // s split into characters
   p: string;
   pLen: number;
-  diff: number[]; // 26-letter diff count (need[c] - have[c]); all-zero => anagram
+  diff: number[]; // 26-letter diff count (need[c]! - have[c]!); all-zero => anagram
   r: number | null; // right edge just added
-  dropped: number | null; // index dropped out of the window (s[r-pLen])
+  dropped: number | null; // index dropped out of the window (s[r-pLen]!)
   winLo: number | null; // window start
   winHi: number | null; // window end (inclusive)
   nonZero: number; // how many letters still off-balance
@@ -47,7 +47,7 @@ function record({ s, p }: AnagramInput): Frame<AnagramState>[] {
 
   const countNonZero = () => diff.reduce((acc, d) => acc + (d === 0 ? 0 : 1), 0);
 
-  const { emit, frames } = createRecorder<AnagramState>(() => ({
+  const { emit, frames } = createPrepRecorder<AnagramState>(() => ({
     chars,
     p,
     pLen,
@@ -73,7 +73,7 @@ function record({ s, p }: AnagramInput): Frame<AnagramState>[] {
   }
 
   // Seed diff with the pattern's letter counts (positive = still needed).
-  for (let i = 0; i < pLen; i++) diff[p.charCodeAt(i) - A]++;
+  for (let i = 0; i < pLen; i++) diff[p.charCodeAt(i) - A]!++;
   emit(
     'SEED',
     `count "${p}"`,
@@ -82,8 +82,8 @@ function record({ s, p }: AnagramInput): Frame<AnagramState>[] {
   );
 
   for (let i = 0; i < chars.length; i++) {
-    const inCh = chars[i];
-    diff[inCh.charCodeAt(0) - A]--;
+    const inCh = chars[i]!;
+    diff[inCh!.charCodeAt(0) - A]!--;
     emit(
       'ADD',
       `+ '${inCh}'`,
@@ -93,8 +93,8 @@ function record({ s, p }: AnagramInput): Frame<AnagramState>[] {
 
     if (i >= pLen) {
       const outIdx = i - pLen;
-      const outCh = chars[outIdx];
-      diff[outCh.charCodeAt(0) - A]++;
+      const outCh = chars[outIdx]!;
+      diff[outCh!.charCodeAt(0) - A]!++;
       emit(
         'DROP',
         `- '${outCh}'`,
@@ -111,7 +111,7 @@ function record({ s, p }: AnagramInput): Frame<AnagramState>[] {
         emit(
           'MATCH',
           `start ${lo}`,
-          `Every letter count is 0 — the window s[${lo}..${i}] = "${s.slice(lo, i + 1)}" is an anagram of "${p}". Record start index ${lo}.`,
+          `Every letter count is 0 — the window s[${lo}..${i}]! = "${s.slice(lo, i + 1)}" is an anagram of "${p}". Record start index ${lo}.`,
           { r: i, winLo: lo, winHi: i },
           'good',
         );
@@ -119,7 +119,7 @@ function record({ s, p }: AnagramInput): Frame<AnagramState>[] {
         emit(
           'CHECK',
           `${nz} off`,
-          `Check window s[${lo}..${i}] = "${s.slice(lo, i + 1)}": ${nz} letter${nz === 1 ? '' : 's'} still off-balance, so it is not an anagram. Slide on.`,
+          `Check window s[${lo}..${i}]! = "${s.slice(lo, i + 1)}": ${nz} letter${nz === 1 ? '' : 's'} still off-balance, so it is not an anagram. Slide on.`,
           { r: i, winLo: lo, winHi: i },
         );
       }
@@ -210,11 +210,11 @@ export const title = 'Find anagram substring indices';
 function compute(s: string, p: string): number[] {
   if (p.length > s.length) return [];
   const diff = new Array<number>(26).fill(0);
-  for (let i = 0; i < p.length; i++) diff[p.charCodeAt(i) - A]++;
+  for (let i = 0; i < p.length; i++) diff[p.charCodeAt(i) - A]!++;
   const out: number[] = [];
   for (let i = 0; i < s.length; i++) {
-    diff[s.charCodeAt(i) - A]--;
-    if (i >= p.length) diff[s.charCodeAt(i - p.length) - A]++;
+    diff[s.charCodeAt(i) - A]!--;
+    if (i >= p.length) diff[s.charCodeAt(i - p.length) - A]!++;
     if (i >= p.length - 1 && diff.every((d) => d === 0)) out.push(i - p.length + 1);
   }
   return out;
@@ -300,14 +300,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O( time, O(words) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). add s[r], drop s[r-len(p)]; all-zero -> record start',
+    explain: 'O(n). O(1). add s[r]!, drop s[r-len(p)]!; all-zero -> record start',
   },
   {
     id: 'outcome',
     prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: 'Check window s[..] = "": letter — final DONE caption',
+        label: 'Check window s[..]! = "": letter — final DONE caption',
         correct: true,
       },
       {
@@ -321,7 +321,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Check window s[..] = "":  letter still off-balance, so it is not an anagram. Slide on.',
+      'Check window s[..]! = "":  letter still off-balance, so it is not an anagram. Slide on.',
   },
 ];
 export const simulator: ProblemSimulator = {

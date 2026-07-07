@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/cn';
 import { RADIUS_CTRL } from '@/design/typography';
 
 export const buttonVariants = cva(
-  'ui-button nodrag inline-flex items-center justify-center gap-1.5 font-medium transition-[background-color,border-color,color,box-shadow,opacity,transform] disabled:cursor-not-allowed disabled:opacity-40',
+  'ui-button nodrag inline-flex items-center justify-center gap-1.5 font-medium outline-none transition-[background-color,border-color,color,box-shadow,opacity,transform] active:translate-y-px disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
   {
     variants: {
       variant: {

@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -45,7 +45,7 @@ function cloneVisited(v: boolean[][]): boolean[][] {
 
 function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
   const rows = matrix.length;
-  const cols = rows > 0 ? matrix[0].length : 0;
+  const cols = rows > 0 ? matrix[0]!.length : 0;
   const visited = emptyVisited(rows, cols);
   const res: number[] = [];
 
@@ -54,7 +54,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
   let left = 0;
   let right = cols - 1;
 
-  const { emit, frames } = createRecorder<SpiralState>(() => ({
+  const { emit, frames } = createPrepRecorder<SpiralState>(() => ({
     matrix,
     top,
     bot,
@@ -96,8 +96,8 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
   );
 
   const take = (r: number, c: number) => {
-    visited[r][c] = true;
-    res.push(matrix[r][c]);
+    visited[r]![c] = true;
+    res.push(matrix[r]![c]!);
   };
 
   while (top <= bot && left <= right) {
@@ -106,8 +106,8 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
       take(top, c);
       snap(
         'TOP',
-        `${matrix[top][c]}`,
-        `Top edge: walk left → right along row ${top}, appending ${matrix[top][c]} from (${top}, ${c}).`,
+        `${matrix[top]![c]}`,
+        `Top edge: walk left → right along row ${top}, appending ${matrix[top]![c]} from (${top}, ${c}).`,
         [top, c],
         false,
       );
@@ -126,8 +126,8 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
       take(r, right);
       snap(
         'RIGHT',
-        `${matrix[r][right]}`,
-        `Right edge: walk top → bottom down column ${right}, appending ${matrix[r][right]} from (${r}, ${right}).`,
+        `${matrix[r]![right]}`,
+        `Right edge: walk top → bottom down column ${right}, appending ${matrix[r]![right]} from (${r}, ${right}).`,
         [r, right],
         false,
       );
@@ -147,8 +147,8 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
         take(bot, c);
         snap(
           'BOTTOM',
-          `${matrix[bot][c]}`,
-          `Bottom edge: walk right → left along row ${bot}, appending ${matrix[bot][c]} from (${bot}, ${c}).`,
+          `${matrix[bot]![c]}`,
+          `Bottom edge: walk right → left along row ${bot}, appending ${matrix[bot]![c]} from (${bot}, ${c}).`,
           [bot, c],
           false,
         );
@@ -177,8 +177,8 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
         take(r, left);
         snap(
           'LEFT',
-          `${matrix[r][left]}`,
-          `Left edge: walk bottom → top up column ${left}, appending ${matrix[r][left]} from (${r}, ${left}).`,
+          `${matrix[r]![left]}`,
+          `Left edge: walk bottom → top up column ${left}, appending ${matrix[r]![left]} from (${r}, ${left}).`,
           [r, left],
           false,
         );
@@ -216,7 +216,7 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
 function View({ frame }: PluginViewProps<SpiralState>) {
   const s = frame.state;
   const cellTone = (r: number, c: number) => {
-    if (s.active && s.active[0] === r && s.active[1] === c) return 'path';
+    if (s.active && s.active[0]! === r && s.active[1]! === c) return 'path';
     if (s.visited[r]?.[c]) return 'visited';
     return 'land';
   };
@@ -252,7 +252,7 @@ function Inspector({ frame }: InspectorProps<SpiralState>) {
       <InspectorRow k="bot" v={s.bot} />
       <InspectorRow k="left" v={s.left} />
       <InspectorRow k="right" v={s.right} />
-      <InspectorRow k="current" v={s.active ? `(${s.active[0]}, ${s.active[1]})` : '—'} />
+      <InspectorRow k="current" v={s.active ? `(${s.active[0]!}, ${s.active[1]!})` : '—'} />
       <InspectorRow k="appended" v={s.res.length} />
       <InspectorRow k="result" v={s.done ? `[${s.res.join(', ')}]` : '…'} />
     </VarGrid>

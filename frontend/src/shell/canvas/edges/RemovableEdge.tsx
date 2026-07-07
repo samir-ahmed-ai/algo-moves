@@ -52,7 +52,13 @@ export function RemovableEdge({
 
   return (
     <>
-      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={style} interactionWidth={0} />
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        interactionWidth={0}
+        {...(markerEnd ? { markerEnd } : {})}
+        {...(style ? { style } : {})}
+      />
       <path
         d={edgePath}
         fill="none"

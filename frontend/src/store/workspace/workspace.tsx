@@ -67,7 +67,7 @@ export function normalizeWorkspaceDefaults(
   };
 }
 
-export function saveDefaults(d: WorkspaceDefaults) {
+export function saveDefaults(d: WorkspaceDefaults): void {
   writeStorageJson(DEFAULTS_KEY, normalizeWorkspaceDefaults(d));
 }
 
@@ -141,7 +141,7 @@ export interface Tweaks {
   sound: boolean;
 }
 
-export const tweakMeta: { key: keyof Tweaks; label: string; hint: string }[] = [
+export const tweakMeta: readonly { key: keyof Tweaks; label: string; hint: string }[] = [
   { key: 'moveLog', label: 'Move log', hint: 'The chess-style transcript' },
   { key: 'caption', label: 'Captions', hint: 'Plain-English narration' },
   { key: 'controls', label: 'Global transport', hint: 'Show bottom-centre play / step bar' },

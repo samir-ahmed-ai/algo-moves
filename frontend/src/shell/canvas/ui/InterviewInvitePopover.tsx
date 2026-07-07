@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Copy, QrCode, UserCheck } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils/cn';
@@ -19,13 +19,15 @@ export function InterviewInvitePopover({
   autoOpen?: boolean;
   onAutoOpenHandled?: () => void;
 }) {
-  const { room, session, isCollaborating } = useCanvasCollab();
+  const { room, session, isCollaborating, isHost } = useCanvasCollab();
   const [open, setOpen] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const { copied, copy } = useCopyFeedback();
   const inviteUrl = useInterviewInviteUrl();
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  const isInterview = isCollaborating && session.kind === 'interview' && !!room;
+  // Only the host may share the candidate invite link (it carries the join token).
+  const isInterview = isCollaborating && session.kind === 'interview' && !!room && isHost;
 
   useEffect(() => {
     if (!autoOpen || !isInterview) return;
@@ -33,10 +35,26 @@ export function InterviewInvitePopover({
     onAutoOpenHandled?.();
   }, [autoOpen, isInterview, onAutoOpenHandled]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as globalThis.Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   if (!isInterview) return null;
 
   return (
-    <div className="interview-invite relative">
+    <div ref={rootRef} className="interview-invite relative">
       <button
         type="button"
         title="Interview invite"

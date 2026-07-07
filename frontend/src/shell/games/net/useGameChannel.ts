@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useGameRoom } from './useGameRoom';
 
-export type GameChannelOptions<M> = {
+export type GameChannelHandler<M> = (msg: M, fromId: string) => void;
+export type GameChannelSend<M> = (msg: M) => void;
+
+export type GameChannelOptions<M> = Readonly<{
   /** Drop invalid relay frames at the channel boundary (dev logs in non-production). */
-  validate?: (value: unknown) => value is M;
-};
+  validate?: ((value: unknown) => value is M) | undefined;
+}>;
 
 /**
  * Typed relay channel for a single game. Subscribes to incoming peer messages
@@ -15,9 +18,9 @@ export type GameChannelOptions<M> = {
  *   send({ kind: 'guess', value: 42 });
  */
 export function useGameChannel<M = unknown>(
-  onMessage: (msg: M, fromId: string) => void,
-  options?: GameChannelOptions<M>,
-): (msg: M) => void {
+  onMessage: GameChannelHandler<M>,
+  options?: GameChannelOptions<M> | undefined,
+): GameChannelSend<M> {
   const { send, subscribe } = useGameRoom();
   const handlerRef = useRef(onMessage);
   handlerRef.current = onMessage;

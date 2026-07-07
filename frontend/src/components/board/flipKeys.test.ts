@@ -19,8 +19,12 @@ describe('flipKeys', () => {
   it('retires duplicate identities when one is removed, so no survivor inherits an evicted position', () => {
     const before = new Set(flipKeys([7, 2, 7]));
     const after = flipKeys([2, 7]);
-    expect(before.has(after[1])).toBe(false);
-    expect(before.has(after[0])).toBe(true);
+    const afterFirst = after[0];
+    const afterSecond = after[1];
+    expect(afterFirst).toBeDefined();
+    expect(afterSecond).toBeDefined();
+    expect(before.has(afterSecond!)).toBe(false);
+    expect(before.has(afterFirst!)).toBe(true);
   });
 
   it('prefixes keys for per-board uniqueness', () => {

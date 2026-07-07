@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -30,7 +30,7 @@ interface HeightState {
   current: number | null; // node index we are looking at right now
   visiting: number[]; // indices we have descended into (call stack)
   done: number[]; // indices whose height is fully computed
-  heights: (number | null)[]; // heights[i] = computed height, aligned to tree
+  heights: (number | null)[]; // heights[i]! = computed height, aligned to tree
   answer: number | null; // final height once known
   finished: boolean;
 }
@@ -40,7 +40,7 @@ function record({ tree }: HeightInput): Frame<HeightState>[] {
   const visiting: number[] = [];
   const done: number[] = [];
 
-  const { emit, frames } = createRecorder<HeightState>(() => ({
+  const { emit, frames } = createPrepRecorder<HeightState>(() => ({
     tree: tree,
     visiting: visiting.slice(),
     done: done.slice(),
@@ -50,11 +50,11 @@ function record({ tree }: HeightInput): Frame<HeightState>[] {
     finished: false,
   }));
 
-  const label = (i: number) => (tree[i] == null ? '·' : String(tree[i]));
+  const label = (i: number) => (tree[i]! == null ? '·' : String(tree[i]!));
 
   // Post-order height: nil -> 0; otherwise 1 + max(height(left), height(right)).
   const getHeight = (i: number): number => {
-    if (i >= tree.length || tree[i] == null) {
+    if (i >= tree.length || tree[i]! == null) {
       emit(
         'NIL',
         'nil → 0',
@@ -89,7 +89,7 @@ function record({ tree }: HeightInput): Frame<HeightState>[] {
     );
 
     const h = (l > r ? l : r) + 1;
-    heights[i] = h;
+    heights[i]! = h;
     visiting.pop();
     done.push(i);
     emit(
@@ -136,11 +136,11 @@ function View({ frame }: PluginViewProps<HeightState>) {
     return 'team-0';
   };
   const curLabel =
-    s.current !== null && s.tree[s.current] != null ? String(s.tree[s.current]) : '—';
+    s.current !== null && s.tree[s.current]! != null ? String(s.tree[s.current]!) : '—';
   const curHeight =
-    s.current !== null && s.heights[s.current] != null ? String(s.heights[s.current]) : '…';
+    s.current !== null && s.heights[s.current]! != null ? String(s.heights[s.current]!) : '…';
   const answerVal = s.answer !== null ? s.answer : s.finished ? 0 : '…';
-  const callStack = s.visiting.map((i) => (s.tree[i] != null ? String(s.tree[i]) : '·'));
+  const callStack = s.visiting.map((i) => (s.tree[i]! != null ? String(s.tree[i]!) : '·'));
   const rail = (
     <>
       <RailStack label="call stack" items={callStack} />
@@ -163,9 +163,9 @@ function Inspector({ frame }: InspectorProps<HeightState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const curLabel =
-    s.current !== null && s.tree[s.current] != null ? String(s.tree[s.current]) : '—';
+    s.current !== null && s.tree[s.current]! != null ? String(s.tree[s.current]!) : '—';
   const curHeight =
-    s.current !== null && s.heights[s.current] != null ? String(s.heights[s.current]) : '…';
+    s.current !== null && s.heights[s.current]! != null ? String(s.heights[s.current]!) : '…';
   return (
     <VarGrid>
       <InspectorRow k="current node" v={curLabel} />

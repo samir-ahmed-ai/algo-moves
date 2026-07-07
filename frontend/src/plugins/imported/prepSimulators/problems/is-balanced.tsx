@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,14 +30,14 @@ interface BalancedState {
   answer: boolean | null; // final verdict
 }
 
-const has = (tree: Cell[], i: number) => i >= 0 && i < tree.length && tree[i] != null;
+const has = (tree: Cell[], i: number) => i >= 0 && i < tree.length && tree[i]! != null;
 
 function record({ tree }: BalancedInput): Frame<BalancedState>[] {
   const done: number[] = [];
   const heights: Record<number, number> = {};
   let bad: number | null = null;
 
-  const { emit, frames } = createRecorder<BalancedState>(() => ({
+  const { emit, frames } = createPrepRecorder<BalancedState>(() => ({
     tree,
     visiting: null,
     current: null,
@@ -65,7 +65,7 @@ function record({ tree }: BalancedInput): Frame<BalancedState>[] {
       return 0;
     }
 
-    const val = tree[i];
+    const val = tree[i]!;
     emit(
       'ENTER',
       `node ${val}`,
@@ -104,7 +104,7 @@ function record({ tree }: BalancedInput): Frame<BalancedState>[] {
     }
 
     const h = (l > r ? l : r) + 1;
-    heights[i] = h;
+    heights[i]! = h;
     done.push(i);
     emit(
       'HEIGHT',
@@ -173,14 +173,14 @@ function View({ frame }: PluginViewProps<BalancedState>) {
 function Inspector({ frame }: InspectorProps<BalancedState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const nodeVal = s.current !== null ? s.tree[s.current] : null;
+  const nodeVal = s.current !== null ? s.tree[s.current]! : null;
   return (
     <VarGrid>
       <InspectorRow k="node" v={nodeVal ?? '—'} />
       <InspectorRow k="left height (L)" v={s.l ?? '—'} />
       <InspectorRow k="right height (R)" v={s.r ?? '—'} />
       <InspectorRow k="heights done" v={s.done.length} />
-      <InspectorRow k="imbalance at" v={s.bad !== null ? (s.tree[s.bad] ?? s.bad) : '—'} />
+      <InspectorRow k="imbalance at" v={s.bad !== null ? (s.tree[s.bad]! ?? s.bad) : '—'} />
       <InspectorRow
         k="answer"
         v={s.answer === null ? '…' : s.answer ? 'balanced' : 'not balanced'}

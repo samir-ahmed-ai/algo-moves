@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -31,7 +31,7 @@ interface SubtreeState {
 
 // --- faithful re-implementation of the Go solution over level-order arrays ---
 // A "node" is an index into the level-order array that holds a non-null value.
-const val = (t: TreeArr, i: number): number | null => (i >= 0 && i < t.length ? t[i] : null);
+const val = (t: TreeArr, i: number): number | null => (i >= 0 && i < t.length ? t[i]! : null);
 const has = (t: TreeArr, i: number): boolean => val(t, i) !== null;
 const L = (i: number) => 2 * i + 1;
 const R = (i: number) => 2 * i + 2;
@@ -39,7 +39,7 @@ const R = (i: number) => 2 * i + 2;
 function record({ root, sub }: SubtreeInput): Frame<SubtreeState>[] {
   const visited: number[] = [];
 
-  const { emit, frames } = createRecorder<SubtreeState>(() => ({
+  const { emit, frames } = createPrepRecorder<SubtreeState>(() => ({
     root,
     sub,
     anchor: null,
@@ -179,7 +179,7 @@ function View({ frame }: PluginViewProps<SubtreeState>) {
         pattern is subtree? <span className="font-mono text-ink">{answer}</span>
         {s.anchor !== null && !s.done && (
           <>
-            {' · '}anchor = <span className="font-mono text-ink">{s.root[s.anchor] ?? '—'}</span>
+            {' · '}anchor = <span className="font-mono text-ink">{s.root[s.anchor]! ?? '—'}</span>
           </>
         )}
       </div>
@@ -202,12 +202,12 @@ function Inspector({ frame }: InspectorProps<SubtreeState>) {
   const s = frame.state;
   return (
     <VarGrid>
-      <InspectorRow k="anchor node" v={s.anchor !== null ? (s.root[s.anchor] ?? '—') : '—'} />
-      <InspectorRow k="pattern root" v={s.sub.length ? (s.sub[0] ?? '—') : '—'} />
+      <InspectorRow k="anchor node" v={s.anchor !== null ? (s.root[s.anchor]! ?? '—') : '—'} />
+      <InspectorRow k="pattern root" v={s.sub.length ? (s.sub[0]! ?? '—') : '—'} />
       <InspectorRow k="ruled out" v={s.visited.length} />
       <InspectorRow
         k="found at"
-        v={s.found !== null ? (s.root[s.found] ?? '—') : s.done ? 'none' : '…'}
+        v={s.found !== null ? (s.root[s.found]! ?? '—') : s.done ? 'none' : '…'}
       />
       <InspectorRow k="answer" v={s.done ? (s.found !== null ? 'true' : 'false') : '…'} />
     </VarGrid>

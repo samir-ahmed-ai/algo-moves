@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ interface MaxSumKState {
 }
 
 function record({ nums, k }: MaxSumKInput): Frame<MaxSumKState>[] {
-  const { emit, frames } = createRecorder<MaxSumKState>(() => ({
+  const { emit, frames } = createPrepRecorder<MaxSumKState>(() => ({
     nums,
     k,
     lo: null,
@@ -64,11 +64,11 @@ function record({ nums, k }: MaxSumKInput): Frame<MaxSumKState>[] {
   // Seed the first window (indices 0..k-1).
   let sum = 0;
   for (let i = 0; i < k; i++) {
-    sum += nums[i];
+    sum += nums[i]!;
     emit(
       'SEED',
       `sum=${sum}`,
-      `Building the first window: add nums[${i}] = ${nums[i]} to the running sum, giving ${sum}. This window covers indices 0..${k - 1}.`,
+      `Building the first window: add nums[${i}]! = ${nums[i]!} to the running sum, giving ${sum}. This window covers indices 0..${k - 1}.`,
       { lo: 0, hi: i, enter: i, sum },
     );
   }
@@ -85,15 +85,15 @@ function record({ nums, k }: MaxSumKInput): Frame<MaxSumKState>[] {
 
   // Slide the window one position at a time.
   for (let i = k; i < nums.length; i++) {
-    const incoming = nums[i];
-    const outgoing = nums[i - k];
-    sum += incoming - outgoing;
+    const incoming = nums[i]!;
+    const outgoing = nums[i - k]!;
+    sum += incoming! - outgoing!;
     const lo = i - k + 1;
     const hi = i;
     emit(
       'SLIDE',
       `sum=${sum}`,
-      `Slide right: nums[${i}] = ${incoming} enters and nums[${i - k}] = ${outgoing} leaves, so sum += ${incoming} − ${outgoing} = ${sum}. Window is now [${lo}..${hi}].`,
+      `Slide right: nums[${i}]! = ${incoming} enters and nums[${i - k}]! = ${outgoing} leaves, so sum += ${incoming} − ${outgoing} = ${sum}. Window is now [${lo}..${hi}].`,
       { lo, hi, enter: i, leave: i - k, sum, best, bestRange },
     );
 
@@ -121,7 +121,7 @@ function record({ nums, k }: MaxSumKInput): Frame<MaxSumKState>[] {
     'DONE',
     `${best}`,
     `Every window of size ${k} has been checked. The maximum sum is ${best}, from the highlighted window.`,
-    { done: true, sum, best, bestRange, lo: bestRange[0], hi: bestRange[1] },
+    { done: true, sum, best, bestRange, lo: bestRange[0]!, hi: bestRange[1]! },
     'good',
   );
 
@@ -137,7 +137,7 @@ function View({ frame }: PluginViewProps<MaxSumKState>) {
   if (s.leave !== null) pointers.push({ i: s.leave, label: 'out', tone: 'bad', place: 'above' });
 
   const tone = (i: number) => {
-    if (s.bestRange && i >= s.bestRange[0] && i <= s.bestRange[1] && s.done) return 'found';
+    if (s.bestRange && i >= s.bestRange[0]! && i <= s.bestRange[1]! && s.done) return 'found';
     if (s.lo !== null && s.hi !== null && i >= s.lo && i <= s.hi) return 'match';
     return '';
   };
@@ -172,17 +172,17 @@ function Inspector({ frame }: InspectorProps<MaxSumKState>) {
       <InspectorRow k="hi" v={s.hi ?? '—'} />
       <InspectorRow
         k="entering"
-        v={s.enter !== null ? `nums[${s.enter}]=${s.nums[s.enter]}` : '—'}
+        v={s.enter !== null ? `nums[${s.enter}]!=${s.nums[s.enter]!}` : '—'}
       />
       <InspectorRow
         k="leaving"
-        v={s.leave !== null ? `nums[${s.leave}]=${s.nums[s.leave]}` : '—'}
+        v={s.leave !== null ? `nums[${s.leave}]!=${s.nums[s.leave]!}` : '—'}
       />
       <InspectorRow k="window sum" v={s.sum} />
       <InspectorRow k="best" v={s.best} />
       <InspectorRow
         k="best window"
-        v={s.bestRange ? `[${s.bestRange[0]}..${s.bestRange[1]}]` : '—'}
+        v={s.bestRange ? `[${s.bestRange[0]!}..${s.bestRange[1]!}]` : '—'}
       />
     </VarGrid>
   );

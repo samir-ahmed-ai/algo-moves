@@ -37,7 +37,7 @@ export interface BrowseTrack {
 export const BROWSE_TOPIC_PREFIX = 'browse-';
 
 function normalizeId(id: string): string {
-  return id.trim();
+  return id.trim().toLowerCase();
 }
 
 export function browseTopicId(categoryId: string): string {
@@ -255,7 +255,7 @@ export function getCategoryById(id: string): BrowseCategory | undefined {
 }
 
 export function getAllCategories(): BrowseCategory[] {
-  return CATEGORIES;
+  return CATEGORIES.slice();
 }
 
 /* ------------------------------------------------------------------ tracks */
@@ -340,7 +340,7 @@ const TRACKS: BrowseTrack[] = [
 const trackById = new Map(TRACKS.map((t) => [t.id, t]));
 
 export function getTracks(): BrowseTrack[] {
-  return TRACKS;
+  return TRACKS.slice();
 }
 
 export function getTrackById(id: TrackId): BrowseTrack | undefined {
@@ -390,7 +390,7 @@ export interface UnlockGraphNode {
 
 /** Build an item-id → prerequisite-item-ids adjacency list from catalog items. */
 export function buildProblemUnlockGraph(
-  items: ReadonlyArray<{ id: string; prereqs: string[] }>,
+  items: ReadonlyArray<{ id: string; prereqs: readonly string[] }>,
 ): Map<string, string[]> {
   const graph = new Map<string, string[]>();
   for (const item of items) {
@@ -406,7 +406,8 @@ export function getCategoryPrerequisites(categoryId: string): string[] {
   const stack = [...(categoryPrereqsById.get(normalizeId(categoryId)) ?? [])];
   const out: string[] = [];
   while (stack.length) {
-    const id = stack.pop()!;
+    const id = stack.pop();
+    if (!id) break;
     if (seen.has(id)) continue;
     seen.add(id);
     out.push(id);

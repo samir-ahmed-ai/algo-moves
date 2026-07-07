@@ -1,18 +1,83 @@
+import { useEffect } from 'react';
 import { Boxes } from 'lucide-react';
-import { DojoGameChrome } from '../ui/DojoGameChrome';
+import { cn } from '@/lib/utils/cn';
+import { isEditableTarget } from '@/lib/utils/keyboard';
+import { DojoGameChrome } from '@/shell/dojo/ui/DojoGameChrome';
+import { DojoBadge } from '@/shell/dojo/ui/shared';
 import { LEVEL_IDS } from './engine/heap';
+import { HeapGameProvider, useHeapGame } from './HeapGameProvider';
+import { HeapBoard } from './ui/HeapBoard';
+import { LevelStrip } from './ui/LevelStrip';
+import { IntroCard } from './ui/IntroCard';
+import { CompleteCard } from './ui/CompleteCard';
+import { TouchPad } from './ui/TouchPad';
 
-/** Placeholder — the Top of the Heap game is built in. */
-export function HeapDojoPage() {
+function useGameKeyboard() {
+  const { handleKey } = useHeapGame();
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isEditableTarget(e.target)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (handleKey(e.key)) e.preventDefault();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleKey]);
+}
+
+function StatusBar() {
+  const { level, actions, message, error } = useHeapGame();
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="flex flex-wrap items-center justify-center gap-1.5 tabular-nums">
+        <DojoBadge tone="accent">{actions} actions</DojoBadge>
+        <DojoBadge tone="muted">par {level.par}</DojoBadge>
+      </div>
+      <p
+        className={cn(
+          'min-h-[2.5rem] max-w-xl px-2 text-center text-sm',
+          error ? 'text-bad' : 'text-ink2',
+        )}
+        role="status"
+      >
+        {message ?? ''}
+      </p>
+    </div>
+  );
+}
+
+function HeapDojoPageBody() {
+  const { completedCount } = useHeapGame();
+  useGameKeyboard();
+
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       <DojoGameChrome
         icon={Boxes}
         title="Top of the Heap"
-        completedCount={0}
+        completedCount={completedCount}
         levelCount={LEVEL_IDS.length}
       />
-      <div className="grid flex-1 place-items-center text-sm text-ink3">Coming soon</div>
+      <div className="flex justify-center px-3 pb-1 pt-16 min-[720px]:pt-3">
+        <LevelStrip />
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 overflow-y-auto px-3 pb-3">
+        <HeapBoard />
+        <StatusBar />
+      </div>
+      <IntroCard />
+      <CompleteCard />
+      <TouchPad />
     </div>
+  );
+}
+
+export function HeapDojoPage() {
+  return (
+    <HeapGameProvider>
+      <HeapDojoPageBody />
+    </HeapGameProvider>
   );
 }

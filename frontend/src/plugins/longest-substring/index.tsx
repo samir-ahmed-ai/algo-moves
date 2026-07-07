@@ -51,7 +51,7 @@ function record({ s }: LSInput): Frame<LSState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         chars,
         left,
@@ -72,14 +72,15 @@ function record({ s }: LSInput): Frame<LSState>[] {
   );
 
   for (let right = 0; right < chars.length; right++) {
-    const c = chars[right];
+    const c = chars[right]!;
     while (seen.has(c)) {
-      seen.delete(chars[left]);
+      const dropped = chars[left]!;
+      seen.delete(dropped);
       left++;
       emit(
         'SHRINK',
-        `drop '${chars[left - 1]}'`,
-        `'${c}' is already inside the window, so shrink from the left — drop '${chars[left - 1]}' and advance left to ${left}.`,
+        `drop '${dropped}'`,
+        `'${c}' is already inside the window, so shrink from the left — drop '${dropped}' and advance left to ${left}.`,
         right - 1,
       );
     }

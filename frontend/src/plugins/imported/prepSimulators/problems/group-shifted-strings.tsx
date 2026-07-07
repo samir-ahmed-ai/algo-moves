@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -41,7 +41,7 @@ function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
 
   const snapshotGroups = (): GroupEntry[] => [...groups.entries()].map(([k, v]) => [k, [...v]]);
 
-  const { emit, frames } = createRecorder<GroupShiftedState>(() => ({
+  const { emit, frames } = createPrepRecorder<GroupShiftedState>(() => ({
     words,
     wi: null,
     chars: [],
@@ -62,8 +62,8 @@ function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
   );
 
   for (let wi = 0; wi < words.length; wi++) {
-    const word = words[wi];
-    const chars = word.split('');
+    const word = words[wi]!;
+    const chars = word!.split('');
     const diffs: number[] = [];
 
     emit(
@@ -74,12 +74,12 @@ function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
     );
 
     for (let ci = 1; ci < chars.length; ci++) {
-      const d = shift(chars[ci - 1], chars[ci]);
+      const d = shift(chars[ci - 1]!, chars[ci]!);
       diffs.push(d);
       emit(
         'DIFF',
-        `${chars[ci - 1]}→${chars[ci]} = ${d}`,
-        `Gap from '${chars[ci - 1]}' to '${chars[ci]}' is (${chars[ci].charCodeAt(0) - 97} − ${chars[ci - 1].charCodeAt(0) - 97} + 26) mod 26 = ${d}. Append it to the key.`,
+        `${chars[ci - 1]!}→${chars[ci]!} = ${d}`,
+        `Gap from '${chars[ci - 1]!}' to '${chars[ci]!}' is (${chars[ci]!.charCodeAt(0) - 97} − ${chars[ci - 1]!.charCodeAt(0) - 97} + 26) mod 26 = ${d}. Append it to the key.`,
         { wi, chars, ci, diffs: [...diffs] },
       );
     }
@@ -87,7 +87,7 @@ function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
     const key = diffs.join(',');
 
     if (groups.has(key)) {
-      groups.get(key)!.push(word);
+      groups.get(key)!.push(word!);
       emit(
         'MATCH',
         `key "${key}"`,
@@ -96,7 +96,7 @@ function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
         'good',
       );
     } else {
-      groups.set(key, [word]);
+      groups.set(key, [word!]);
       emit(
         'NEW',
         `key "${key}"`,
@@ -137,7 +137,7 @@ function View({ frame }: PluginViewProps<GroupShiftedState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.wi !== null ? (
           <>
-            word #{s.wi} = <span className="font-mono text-ink">"{s.words[s.wi]}"</span>
+            word #{s.wi} = <span className="font-mono text-ink">"{s.words[s.wi]!}"</span>
           </>
         ) : (
           <>{s.words.length} words to group</>
@@ -183,7 +183,7 @@ function Inspector({ frame }: InspectorProps<GroupShiftedState>) {
   return (
     <VarGrid>
       <InspectorRow k="word idx" v={s.wi ?? '—'} />
-      <InspectorRow k="word" v={s.wi !== null ? `"${s.words[s.wi]}"` : '—'} />
+      <InspectorRow k="word" v={s.wi !== null ? `"${s.words[s.wi]!}"` : '—'} />
       <InspectorRow k="char idx" v={s.ci ?? '—'} />
       <InspectorRow k="diffs so far" v={s.diffs.length ? s.diffs.join(',') : '—'} />
       <InspectorRow k="key" v={s.key ?? '…'} />

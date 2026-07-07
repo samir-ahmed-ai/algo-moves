@@ -49,8 +49,8 @@ function build(input: DijkstraInput): { adj: number[][]; w: number[][] } {
   const adj: number[][] = Array.from({ length: input.n }, () => []);
   const w: number[][] = Array.from({ length: input.n }, () => new Array<number>(input.n).fill(-1));
   for (const [a, b, wt] of input.edges) {
-    adj[a].push(b);
-    w[a][b] = wt;
+    adj[a]!.push(b);
+    w[a]![b] = wt;
   }
   return { adj, w };
 }
@@ -86,8 +86,8 @@ function record(input: DijkstraInput): Frame<DijkstraState>[] {
     let u = -1;
     let best = INF;
     for (let v = 0; v < n; v++) {
-      if (!settled[v] && dist[v] < best) {
-        best = dist[v];
+      if (!settled[v] && dist[v]! < best) {
+        best = dist[v]!;
         u = v;
       }
     }
@@ -96,27 +96,27 @@ function record(input: DijkstraInput): Frame<DijkstraState>[] {
     settled[u] = true;
     emit(
       'SETTLE',
-      `settle ${u} (${fmt(dist[u])})`,
-      `Among unsettled nodes, ${u} has the smallest tentative distance ${fmt(dist[u])} — settle it. Its shortest distance from ${input.src} is now final at ${fmt(dist[u])}.`,
+      `settle ${u} (${fmt(dist[u]!)})`,
+      `Among unsettled nodes, ${u} has the smallest tentative distance ${fmt(dist[u]!)} — settle it. Its shortest distance from ${input.src} is now final at ${fmt(dist[u]!)}.`,
       { active: u, edge: null },
     );
 
-    for (const v of adj[u]) {
-      const cand = dist[u] + w[u][v];
-      if (cand < dist[v]) {
+    for (const v of adj[u]!) {
+      const cand = dist[u]! + w[u]![v]!;
+      if (cand < dist[v]!) {
         const prev = dist[v];
         dist[v] = cand;
         emit(
           'RELAX',
           `${u}→${v}: ${cand}`,
-          `Relax edge ${u}→${v} of weight ${w[u][v]}: ${fmt(dist[u])}+${w[u][v]}=${cand}, which beats ${v}'s old ${fmt(prev)}. Lower dist[${v}] to ${cand}.`,
+          `Relax edge ${u}→${v} of weight ${w[u]![v]}: ${fmt(dist[u]!)}+${w[u]![v]}=${cand}, which beats ${v}'s old ${fmt(prev!)}. Lower dist[${v}] to ${cand}.`,
           { active: u, edge: [u, v] },
         );
       } else {
         emit(
           'RELAX',
-          `${u}→${v}: keep ${fmt(dist[v])}`,
-          `Edge ${u}→${v} of weight ${w[u][v]} offers ${fmt(dist[u])}+${w[u][v]}=${cand}, no better than ${v}'s current ${fmt(dist[v])}, so leave dist[${v}] unchanged.`,
+          `${u}→${v}: keep ${fmt(dist[v]!)}`,
+          `Edge ${u}→${v} of weight ${w[u]![v]} offers ${fmt(dist[u]!)}+${w[u]![v]}=${cand}, no better than ${v}'s current ${fmt(dist[v]!)}, so leave dist[${v}] unchanged.`,
           { active: u, edge: [u, v] },
         );
       }
@@ -125,8 +125,8 @@ function record(input: DijkstraInput): Frame<DijkstraState>[] {
 
   emit(
     'DONE',
-    `dist=${fmt(dist[input.target])}`,
-    `Every reachable node settled. The shortest path from ${input.src} to ${input.target} costs ${fmt(dist[input.target])} — the cheapest route is the multi-hop detour, not the single direct edge.`,
+    `dist=${fmt(dist[input.target]!)}`,
+    `Every reachable node settled. The shortest path from ${input.src} to ${input.target} costs ${fmt(dist[input.target]!)} — the cheapest route is the multi-hop detour, not the single direct edge.`,
     { active: null, edge: null, done: true },
     'good',
   );
@@ -146,12 +146,16 @@ function View({ frame }: PluginViewProps<DijkstraState>) {
         label="dist[ ]"
         items={s.dist.map((d, i) => ({
           label: `${i}: ${fmt(d)}`,
-          tone: s.settled[i] ? 'good' : i === s.active ? 'accent' : undefined,
+          ...(s.settled[i]
+            ? { tone: 'good' as const }
+            : i === s.active
+              ? { tone: 'accent' as const }
+              : {}),
         }))}
       />
       <RailResult
         label={`${s.src}→${s.target}`}
-        value={fmt(s.dist[s.target])}
+        value={fmt(s.dist[s.target]!)}
         tone={s.done ? 'good' : 'accent'}
       />
     </>
@@ -165,7 +169,7 @@ function View({ frame }: PluginViewProps<DijkstraState>) {
         nodeClass={(node) => (s.settled[node] ? 'team-1' : 'team-0')}
         activeNode={s.active}
         highlightEdge={s.edge}
-        edgeLabel={(v, u) => (s.w[v][u] >= 0 && s.w[v][u] < INF ? s.w[v][u] : undefined)}
+        edgeLabel={(v, u) => (s.w[v]![u]! >= 0 && s.w[v]![u]! < INF ? s.w[v]![u] : undefined)}
         height={286}
       />
     </VizStage>
@@ -216,6 +220,6 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as DijkstraState | undefined;
-    return { ok: true, label: s ? `dist ${fmt(s.dist[s.target])}` : 'dist ∞' };
+    return { ok: true, label: s ? `dist ${fmt(s.dist[s.target]!)}` : 'dist ∞' };
   },
 };

@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -25,7 +25,7 @@ interface LipInput {
 
 interface LipState {
   matrix: number[][];
-  memo: number[][]; // memo[r][c] = longest increasing path starting at (r,c); 0 = not filled
+  memo: number[][]; // memo[r]![c] = longest increasing path starting at (r,c); 0 = not filled
   active: [number, number] | null; // cell DFS currently sits on
   stack: [number, number][]; // active recursion path (the increasing chain being explored)
   neighbor: [number, number] | null; // neighbor being inspected this step
@@ -39,7 +39,7 @@ const cellKey = (r: number, c: number) => r * 1000 + c;
 
 function record({ matrix }: LipInput): Frame<LipState>[] {
   const m = matrix.length;
-  const n = matrix[0].length;
+  const n = matrix[0]!.length;
   const memo: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
   const dirs: [number, number][] = [
     [0, 1],
@@ -51,11 +51,11 @@ function record({ matrix }: LipInput): Frame<LipState>[] {
   let best = 0;
   let start: [number, number] | null = null;
 
-  const { emit, frames } = createRecorder<LipState>(() => ({
+  const { emit, frames } = createPrepRecorder<LipState>(() => ({
     matrix,
     memo: memo.map((row) => row.slice()),
     active: null,
-    stack: stack.map((p) => [p[0], p[1]] as [number, number]),
+    stack: stack.map((p) => [p[0]!, p[1]!] as [number, number]),
     neighbor: null,
     start,
     best,
@@ -71,20 +71,20 @@ function record({ matrix }: LipInput): Frame<LipState>[] {
   );
 
   const dfs = (r: number, c: number): number => {
-    if (memo[r][c] > 0) {
+    if (memo[r]![c]! > 0) {
       emit(
         'MEMO_HIT',
-        `memo[${r}][${c}]=${memo[r][c]}`,
-        `Cell (${r},${c}) value ${matrix[r][c]} was already solved: dfs returns its cached length ${memo[r][c]} without re-exploring. This caching is what keeps the algorithm O(m·n).`,
+        `memo[${r}]![${c}]=${memo[r]![c]}`,
+        `Cell (${r},${c}) value ${matrix[r]![c]} was already solved: dfs returns its cached length ${memo[r]![c]} without re-exploring. This caching is what keeps the algorithm O(m·n).`,
         { active: [r, c] },
       );
-      return memo[r][c];
+      return memo[r]![c]!;
     }
 
     stack.push([r, c]);
     emit(
       'VISIT',
-      `(${r},${c})=${matrix[r][c]}`,
+      `(${r},${c})=${matrix[r]![c]}`,
       `Enter dfs(${r},${c}). The chain starts at least length 1 (the cell itself), so mx = 1. Now look at each strictly-larger neighbor to extend the path.`,
       { active: [r, c] },
     );
@@ -94,11 +94,11 @@ function record({ matrix }: LipInput): Frame<LipState>[] {
       const nr = r + dr;
       const nc = c + dc;
       if (nr >= 0 && nr < m && nc >= 0 && nc < n) {
-        if (matrix[nr][nc] > matrix[r][c]) {
+        if (matrix[nr]![nc]! > matrix[r]![c]!) {
           emit(
             'EXPLORE',
             `→ (${nr},${nc})`,
-            `Neighbor (${nr},${nc})=${matrix[nr][nc]} is greater than ${matrix[r][c]}, so the path can step there. Recurse to find the longest path starting at (${nr},${nc}), then add 1 for the step from (${r},${c}).`,
+            `Neighbor (${nr},${nc})=${matrix[nr]![nc]} is greater than ${matrix[r]![c]}, so the path can step there. Recurse to find the longest path starting at (${nr},${nc}), then add 1 for the step from (${r},${c}).`,
             { active: [r, c], neighbor: [nr, nc] },
           );
           const v = 1 + dfs(nr, nc);
@@ -115,17 +115,17 @@ function record({ matrix }: LipInput): Frame<LipState>[] {
           emit(
             'BLOCK',
             `(${nr},${nc}) not >`,
-            `Neighbor (${nr},${nc})=${matrix[nr][nc]} is not strictly greater than ${matrix[r][c]}, so the path cannot increase in that direction. Skip it.`,
+            `Neighbor (${nr},${nc})=${matrix[nr]![nc]} is not strictly greater than ${matrix[r]![c]}, so the path cannot increase in that direction. Skip it.`,
             { active: [r, c], neighbor: [nr, nc] },
           );
         }
       }
     }
 
-    memo[r][c] = mx;
+    memo[r]![c] = mx;
     emit(
       'SET',
-      `memo[${r}][${c}]=${mx}`,
+      `memo[${r}]![${c}]=${mx}`,
       `All four directions checked. The longest increasing path starting at (${r},${c}) is ${mx}; store it in memo so any later visit reuses it. Return ${mx}.`,
       { active: [r, c] },
       'good',
@@ -140,7 +140,7 @@ function record({ matrix }: LipInput): Frame<LipState>[] {
       emit(
         'START',
         `start (${i},${j})`,
-        `Outer loop: try (${i},${j})=${matrix[i][j]} as a path start. Whatever dfs returns, keep the running maximum across all starting cells.`,
+        `Outer loop: try (${i},${j})=${matrix[i]![j]} as a path start. Whatever dfs returns, keep the running maximum across all starting cells.`,
         { active: [i, j] },
       );
       const v = dfs(i, j);
@@ -171,22 +171,22 @@ function View({ frame }: PluginViewProps<LipState>) {
   const s = frame.state;
   const stackSet = new Set(s.stack.map(([r, c]) => cellKey(r, c)));
   const cellTone = (r: number, c: number) => {
-    if (s.neighbor && s.neighbor[0] === r && s.neighbor[1] === c) return 'fill';
+    if (s.neighbor && s.neighbor[0]! === r && s.neighbor[1]! === c) return 'fill';
     if (stackSet.has(cellKey(r, c))) return 'path';
-    if (s.memo[r][c] > 0) return 'visited';
+    if (s.memo[r]![c]! > 0) return 'visited';
     return 'land';
   };
   const at = s.active;
   const nb = s.neighbor;
-  const chainItems = s.stack.map(([r, c]) => String(s.matrix[r][c]));
+  const chainItems = s.stack.map(([r, c]) => String(s.matrix[r]![c]));
   const rail = (
     <>
       <RailStack label="dfs stack" items={chainItems} />
       <RailGroup label="scan">
-        <RailStat k="cell" v={at ? `(${at[0]},${at[1]})` : '—'} tone="accent" />
-        <RailStat k="val" v={at ? s.matrix[at[0]][at[1]] : '—'} />
-        <RailStat k="memo" v={at && s.memo[at[0]][at[1]] > 0 ? s.memo[at[0]][at[1]] : '—'} />
-        <RailStat k="nbr" v={nb ? `(${nb[0]},${nb[1]})` : '—'} />
+        <RailStat k="cell" v={at ? `(${at[0]!},${at[1]!})` : '—'} tone="accent" />
+        <RailStat k="val" v={at ? s.matrix[at[0]!]![at[1]!] : '—'} />
+        <RailStat k="memo" v={at && s.memo[at[0]!]![at[1]!]! > 0 ? s.memo[at[0]!]![at[1]!] : '—'} />
+        <RailStat k="nbr" v={nb ? `(${nb[0]!},${nb[1]!})` : '—'} />
       </RailGroup>
       <RailResult
         label="best"
@@ -201,7 +201,7 @@ function View({ frame }: PluginViewProps<LipState>) {
         grid={s.matrix}
         cellTone={cellTone}
         active={s.active}
-        label={(r, c) => `${s.matrix[r][c]}${s.memo[r][c] > 0 ? `·${s.memo[r][c]}` : ''}`}
+        label={(r, c) => `${s.matrix[r]![c]}${s.memo[r]![c]! > 0 ? `·${s.memo[r]![c]}` : ''}`}
       />
     </VizStage>
   );
@@ -213,14 +213,14 @@ function Inspector({ frame }: InspectorProps<LipState>) {
   const at = s.active;
   return (
     <VarGrid>
-      <InspectorRow k="grid" v={`${s.matrix.length}×${s.matrix[0].length}`} />
-      <InspectorRow k="active cell" v={at ? `(${at[0]},${at[1]})` : '—'} />
-      <InspectorRow k="value" v={at ? s.matrix[at[0]][at[1]] : '—'} />
+      <InspectorRow k="grid" v={`${s.matrix.length}×${s.matrix[0]!.length}`} />
+      <InspectorRow k="active cell" v={at ? `(${at[0]!},${at[1]!})` : '—'} />
+      <InspectorRow k="value" v={at ? s.matrix[at[0]!]![at[1]!] : '—'} />
       <InspectorRow
-        k="memo[cell]"
-        v={at && s.memo[at[0]][at[1]] > 0 ? s.memo[at[0]][at[1]] : '—'}
+        k="memo[cell]!"
+        v={at && s.memo[at[0]!]![at[1]!]! > 0 ? s.memo[at[0]!]![at[1]!] : '—'}
       />
-      <InspectorRow k="neighbor" v={s.neighbor ? `(${s.neighbor[0]},${s.neighbor[1]})` : '—'} />
+      <InspectorRow k="neighbor" v={s.neighbor ? `(${s.neighbor[0]!},${s.neighbor[1]!})` : '—'} />
       <InspectorRow k="chain depth" v={s.stack.length} />
       <InspectorRow k="best" v={s.result ?? s.best} />
     </VarGrid>
@@ -229,7 +229,7 @@ function Inspector({ frame }: InspectorProps<LipState>) {
 
 function computeLip(matrix: number[][]): number {
   const m = matrix.length;
-  const n = matrix[0].length;
+  const n = matrix[0]!.length;
   const memo: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
   const dirs: [number, number][] = [
     [0, 1],
@@ -238,17 +238,17 @@ function computeLip(matrix: number[][]): number {
     [-1, 0],
   ];
   const dfs = (r: number, c: number): number => {
-    if (memo[r][c] > 0) return memo[r][c];
+    if (memo[r]![c]! > 0) return memo[r]![c]!;
     let mx = 1;
     for (const [dr, dc] of dirs) {
       const nr = r + dr;
       const nc = c + dc;
-      if (nr >= 0 && nr < m && nc >= 0 && nc < n && matrix[nr][nc] > matrix[r][c]) {
+      if (nr >= 0 && nr < m && nc >= 0 && nc < n && matrix[nr]![nc]! > matrix[r]![c]!) {
         const v = 1 + dfs(nr, nc);
         if (v > mx) mx = v;
       }
     }
-    memo[r][c] = mx;
+    memo[r]![c] = mx;
     return mx;
   };
   let res = 0;
@@ -333,7 +333,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'What does the `memo` field track in the visualization state?',
     choices: [
       {
-        label: 'memo[r][c] = longest increasing path — updated each frame',
+        label: 'memo[r]![c] = longest increasing path — updated each frame',
         correct: true,
       },
       {
@@ -347,7 +347,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The recorder keeps `memo` in sync: memo[r][c] = longest increasing path starting at (r,c); 0 = not filled',
+      'The recorder keeps `memo` in sync: memo[r]![c] = longest increasing path starting at (r,c); 0 = not filled',
   },
   {
     id: 'complexity',

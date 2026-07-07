@@ -135,7 +135,7 @@ export function GraphBoard() {
         {rows.map((row, ri) => (
           <div key={ri} className="flex items-center justify-center gap-3 min-[480px]:gap-8">
             {row.map((i) => {
-              const node = level.nodes[i];
+              const node = level.nodes[i]!;
               const isLocked = lockedSet.has(i);
               const isReady = !isLocked && readySet.has(i);
               return (

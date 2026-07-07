@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -41,7 +41,7 @@ function record({ n, moves }: TttInput): Frame<TttState>[] {
   let antiDiag = 0;
   let winner: number | null = null;
 
-  const { emit, frames } = createRecorder<TttState>(() => ({
+  const { emit, frames } = createPrepRecorder<TttState>(() => ({
     n,
     board: board.map((r) => r.slice()),
     rows: rows.slice(),
@@ -62,21 +62,21 @@ function record({ n, moves }: TttInput): Frame<TttState>[] {
 
   for (const { row, col, player } of moves) {
     const add = player === 2 ? -1 : 1;
-    board[row][col] = player;
-    rows[row] += add;
-    cols[col] += add;
+    board[row]![col] = player;
+    rows[row]! += add;
+    cols[col]! += add;
     if (row === col) diag += add;
     if (row + col === n - 1) antiDiag += add;
     const abs = (x: number) => (x < 0 ? -x : x);
     const w =
-      abs(rows[row]) === n || abs(cols[col]) === n || abs(diag) === n || abs(antiDiag) === n
+      abs(rows[row]!) === n || abs(cols[col]!) === n || abs(diag) === n || abs(antiDiag) === n
         ? player
         : 0;
     if (w) winner = w;
     emit(
       'MOVE',
       `P${player} @(${row},${col})${w ? ' win' : ''}`,
-      `Move(${row},${col}, player=${player}): rows[${row}]=${rows[row]}, cols[${col}]=${cols[col]}. ${w ? `Player ${w} wins!` : 'No winner yet.'}`,
+      `Move(${row},${col}, player=${player}): rows[${row}]!=${rows[row]!}, cols[${col}]!=${cols[col]!}. ${w ? `Player ${w} wins!` : 'No winner yet.'}`,
       { op: `(${row},${col}) P${player}`, winner: w || null },
       w ? 'good' : undefined,
     );

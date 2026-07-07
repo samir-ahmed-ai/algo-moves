@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -48,7 +48,7 @@ function record({ n: input }: ReverseInput): Frame<ReverseState>[] {
   let n = magnitude;
   let rev = 0;
 
-  const { emit, frames } = createRecorder<ReverseState>(() => ({
+  const { emit, frames } = createPrepRecorder<ReverseState>(() => ({
     original: input,
     neg,
     digits,

@@ -105,7 +105,7 @@ export function OneStrokeGame({
   /* Tile geography: seeded shuffle, stable per problem forever — never canonical. */
   const tiles = useMemo(() => {
     const shuffled = seededShuffle(pieces, mulberry32(hashString(storageKey)));
-    if (shuffled.length > 1 && shuffled.every((p, i) => p.id === pieces[i].id)) {
+    if (shuffled.length > 1 && shuffled.every((p, i) => p.id === pieces[i]?.id)) {
       shuffled.push(shuffled.shift() as CodePiece);
     }
     return shuffled;
@@ -271,7 +271,8 @@ export function OneStrokeGame({
     setClock(fmtClock((run.end ?? now) - run.start));
     if (!stepModeRef.current) {
       const line = liveLineEl.current;
-      const last = centerOf(run.capturedTiles[run.capturedTiles.length - 1]);
+      const lastTileId = run.capturedTiles[run.capturedTiles.length - 1];
+      const last = lastTileId ? centerOf(lastTileId) : null;
       const lp = livePt.current;
       if (line) {
         if (run.end === null && last && lp) {
@@ -339,7 +340,8 @@ export function OneStrokeGame({
     setAnnounce(`Stroke broken at ${reached} of ${n}. Start again from the first piece.`);
     schedule(() => setFx(null), 700);
     schedule(() => {
-      const first = tiles.find((t) => t.code === pieces[0].code);
+      const firstPiece = pieces[0];
+      const first = firstPiece ? tiles.find((t) => t.code === firstPiece.code) : undefined;
       if (first) flashTile(first.id, 'stroke-invite');
     }, 320);
   };
@@ -435,6 +437,7 @@ export function OneStrokeGame({
     const run = runRef.current;
     if (!run) return;
     const expected = pieces[run.captured.length];
+    if (!expected) return;
     /* Fairness on duplicates: capture by code equality — the expected id is
      * recorded, the entered tile lights, remaining slots stay reachable. */
     run.captured.push(expected.id);
@@ -490,7 +493,9 @@ export function OneStrokeGame({
       return;
     }
     if (runRef.current) return;
-    if (hit.code === pieces[0].code) {
+    const firstPiece = pieces[0];
+    if (!firstPiece) return;
+    if (hit.code === firstPiece.code) {
       try {
         gridRef.current?.setPointerCapture(e.pointerId);
       } catch {
@@ -499,7 +504,7 @@ export function OneStrokeGame({
       activePtr.current = e.pointerId;
       setFx(null);
       runRef.current = {
-        captured: [pieces[0].id],
+        captured: [firstPiece.id],
         capturedTiles: [hit.id],
         start: performance.now(),
         end: null,
@@ -533,6 +538,7 @@ export function OneStrokeGame({
     const hit = hitTile(pt);
     if (!hit || capturedSet.current.has(hit.id)) return; // re-crossing your own path is safe
     const expected = pieces[run.captured.length];
+    if (!expected) return;
     if (hit.code === expected.code) captureHit(hit);
     else shatter(hit);
   };
@@ -596,7 +602,6 @@ export function OneStrokeGame({
     setBests({ 1: num(s.bestT1), 2: num(s.bestT2), 3: num(s.bestT3), steps: num(s.bestSteps) });
     setUnlocked({ 2: s.t2 === true, 3: s.t3 === true });
     resetRun(1, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   /* --------------------------------- render --------------------------------- */
@@ -614,9 +619,23 @@ export function OneStrokeGame({
   const centers = capturedTiles
     .map(centerOf)
     .filter((c): c is { x: number; y: number } => c !== null);
-  const segments = centers
-    .slice(1)
-    .map((c, i) => ({ a: centers[i], b: c, key: capturedTiles[i + 1] }));
+  const segments = centers.slice(1).flatMap((c, i) => {
+    const a = centers[i];
+    const key = capturedTiles[i + 1];
+    return a && key ? [{ a, b: c, key }] : [];
+  });
+  const tierMeta = TIERS[tier - 1];
+  const unlockedTierMeta =
+    winInfo?.unlockedTier != null ? TIERS[winInfo.unlockedTier - 1] : undefined;
+  const winSecondary =
+    winInfo?.unlockedTier != null
+      ? {
+          secondaryLabel: `Try ${unlockedTierMeta?.name ?? 'next tier'}`,
+          onSecondary: () => resetRun(winInfo.unlockedTier as Tier),
+        }
+      : onContinue
+        ? { secondaryLabel: 'Continue', onSecondary: onContinue }
+        : {};
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
@@ -895,7 +914,7 @@ export function OneStrokeGame({
                       value: fmtClock(winInfo.ms),
                     },
                     { label: 'Broken strokes', value: String(winInfo.broken) },
-                    { label: 'Tier', value: TIERS[tier - 1].name },
+                    { label: 'Tier', value: tierMeta?.name ?? String(tier) },
                   ]}
                   badges={[{ icon: Sparkles, label: 'Flawless', earned: winInfo.perfect }]}
                   newBest={winInfo.newBest}
@@ -905,18 +924,7 @@ export function OneStrokeGame({
                       : 'Run it back'
                   }
                   onPrimary={() => resetRun()}
-                  secondaryLabel={
-                    winInfo.unlockedTier !== null
-                      ? `Try ${TIERS[winInfo.unlockedTier - 1].name}`
-                      : onContinue
-                        ? 'Continue'
-                        : undefined
-                  }
-                  onSecondary={
-                    winInfo.unlockedTier !== null
-                      ? () => resetRun(winInfo.unlockedTier as Tier)
-                      : onContinue
-                  }
+                  {...winSecondary}
                 />
               </div>
             </div>

@@ -38,13 +38,13 @@ function largestRect(h: number[]): { area: number; left: number; right: number; 
   let best = { area: 0, left: 0, right: 0, height: 0 };
   const ext = [...h, 0];
   for (let i = 0; i < ext.length; i++) {
-    while (stack.length > 0 && ext[stack[stack.length - 1]] > ext[i]) {
+    while (stack.length > 0 && ext[stack[stack.length - 1]!]! > ext[i]!) {
       const top = stack.pop() as number;
       const height = ext[top];
-      const left = stack.length > 0 ? stack[stack.length - 1] + 1 : 0;
+      const left = stack.length > 0 ? stack[stack.length - 1]! + 1 : 0;
       const right = i - 1;
-      const area = height * (right - left + 1);
-      if (area > best.area) best = { area, left, right, height };
+      const area = height! * (right - left + 1);
+      if (area > best.area) best = { area, left, right, height: height! };
     }
     stack.push(i);
   }
@@ -53,7 +53,7 @@ function largestRect(h: number[]): { area: number; left: number; right: number; 
 
 function record({ matrix }: MRInput): Frame<MRState>[] {
   const rows = matrix.length;
-  const cols = matrix[0].length;
+  const cols = matrix[0]!.length;
   const heights: number[][] = Array.from({ length: rows }, () => new Array<number>(cols).fill(-1));
   let answer = 0;
   let best: MRState['best'] = null;
@@ -78,20 +78,20 @@ function record({ matrix }: MRInput): Frame<MRState>[] {
 
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      const isOne = matrix[i][j] === '1';
-      const prev = i > 0 ? heights[i - 1][j] : 0;
-      heights[i][j] = isOne ? prev + 1 : 0;
+      const isOne = matrix[i]![j] === '1';
+      const prev = i > 0 ? heights[i - 1]![j] : 0;
+      heights[i]![j] = isOne ? prev! + 1 : 0;
       emit(
         isOne ? 'FILL' : 'ZERO',
-        `h[${i}][${j}]=${heights[i][j]}`,
+        `h[${i}][${j}]=${heights[i]![j]}`,
         isOne
-          ? `matrix[${i}][${j}] is '1', so the column of 1s grows: heights[${i}][${j}] = heights[${i - 1 < 0 ? 0 : i - 1}][${j}] (${prev}) + 1 = ${heights[i][j]}.`
+          ? `matrix[${i}][${j}] is '1', so the column of 1s grows: heights[${i}][${j}] = heights[${i - 1 < 0 ? 0 : i - 1}][${j}] (${prev}) + 1 = ${heights[i]![j]}.`
           : `matrix[${i}][${j}] is '0', so the column of 1s breaks here: heights[${i}][${j}] resets to 0.`,
         { cur: [i, j] },
       );
     }
     // After completing a row, evaluate its histogram.
-    const r = largestRect(heights[i]);
+    const r = largestRect(heights[i]!);
     if (r.area > answer) {
       answer = r.area;
       best = { row: i, left: r.left, right: r.right, height: r.height };
@@ -119,10 +119,11 @@ function View({ frame }: PluginViewProps<MRState>) {
   const cellTone = (r: number, c: number) => {
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
     if (s.done && inBest(r, c)) return 'path';
-    return s.heights[r][c] >= 0 ? 'visited' : '';
+    return s.heights[r]![c]! >= 0 ? 'visited' : '';
   };
-  const curCell = s.cur && s.heights[s.cur[0]][s.cur[1]] >= 0 ? s.heights[s.cur[0]][s.cur[1]] : '—';
-  const curMatrix = s.cur ? s.matrix[s.cur[0]][s.cur[1]] : '—';
+  const curCell =
+    s.cur && s.heights[s.cur[0]]![s.cur[1]]! >= 0 ? s.heights[s.cur[0]]![s.cur[1]] : '—';
+  const curMatrix = s.cur ? s.matrix[s.cur[0]]![s.cur[1]] : '—';
   const rail = (
     <>
       <RailGroup label="cell">
@@ -150,8 +151,9 @@ function View({ frame }: PluginViewProps<MRState>) {
 function Inspector({ frame }: InspectorProps<MRState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curCell = s.cur && s.heights[s.cur[0]][s.cur[1]] >= 0 ? s.heights[s.cur[0]][s.cur[1]] : '—';
-  const curMatrix = s.cur ? s.matrix[s.cur[0]][s.cur[1]] : '—';
+  const curCell =
+    s.cur && s.heights[s.cur[0]]![s.cur[1]]! >= 0 ? s.heights[s.cur[0]]![s.cur[1]] : '—';
+  const curMatrix = s.cur ? s.matrix[s.cur[0]]![s.cur[1]] : '—';
   return (
     <VarGrid>
       <InspectorRow k="grid" v={`${s.rows}×${s.cols}`} />

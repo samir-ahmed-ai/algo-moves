@@ -41,10 +41,10 @@ function buildAdj(bombs: [number, number, number][]): number[][] {
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       if (i === j) continue;
-      const dx = bombs[i][0] - bombs[j][0];
-      const dy = bombs[i][1] - bombs[j][1];
-      const r = bombs[i][2];
-      if (dx * dx + dy * dy <= r * r) adj[i].push(j);
+      const dx = bombs[i]![0] - bombs[j]![0];
+      const dy = bombs[i]![1] - bombs[j]![1];
+      const r = bombs[i]![2];
+      if (dx * dx + dy * dy <= r * r) adj[i]!.push(j);
     }
   }
   return adj;
@@ -84,7 +84,7 @@ function reachFrom(
     visited[u] = true;
     order.push(u);
     if (via) edges.push(via);
-    for (const v of adj[u]) {
+    for (const v of adj[u]!) {
       if (!visited[v]) dfs(v, [u, v]);
     }
   };
@@ -143,7 +143,7 @@ function record({ bombs }: DBInput): Frame<DBState>[] {
         : `Manually detonate bomb ${bestStart} to ignite the chain. Chain size is ${count}.`,
       { active: u, edge: via, count: count },
     );
-    for (const v of adj[u]) {
+    for (const v of adj[u]!) {
       if (!visited[v]) dfs(v, [u, v]);
     }
   };

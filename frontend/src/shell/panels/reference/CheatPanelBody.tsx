@@ -25,7 +25,7 @@ export function CheatPanelBody() {
         <article key={c.id} className="cheat-card">
           <div className="cheat-card__header">
             <h3>{c.title}</h3>
-            <Chip mono>{c.complexity.split('|')[0].trim()}</Chip>
+            <Chip mono>{c.complexity.split('|')[0]?.trim() ?? ''}</Chip>
           </div>
           <p className="cheat-card__idea">{c.idea}</p>
           <div className="cheat-card__signal">

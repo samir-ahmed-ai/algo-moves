@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -43,7 +43,7 @@ function record({ words }: PrefixScoresInput): Frame<PrefixScoresState>[] {
 
   const res: (number | null)[] = words.map(() => null);
 
-  const { emit, frames } = createRecorder<PrefixScoresState>(() => ({
+  const { emit, frames } = createPrepRecorder<PrefixScoresState>(() => ({
     words,
     phase: 'build',
     wi: null,
@@ -64,8 +64,8 @@ function record({ words }: PrefixScoresInput): Frame<PrefixScoresState>[] {
 
   // Phase 1 — build the trie, incrementing count on every node we pass through.
   for (let w = 0; w < words.length; w++) {
-    const word = words[w];
-    const chars = word.split('');
+    const word = words[w]!;
+    const chars = word!.split('');
     emit(
       'WORD',
       `insert "${word}"`,
@@ -74,27 +74,27 @@ function record({ words }: PrefixScoresInput): Frame<PrefixScoresState>[] {
     );
     let cur = 0; // root index
     for (let i = 0; i < chars.length; i++) {
-      const c = chars[i].charCodeAt(0) - 97;
+      const c = chars[i]!.charCodeAt(0) - 97;
       let created = false;
-      if (pool[cur].ch[c] === null) {
-        pool[cur].ch[c] = newNode();
+      if (pool[cur]!.ch[c]! === null) {
+        pool[cur]!.ch[c]! = newNode();
         created = true;
       }
-      cur = pool[cur].ch[c] as number;
-      pool[cur].count++;
+      cur = pool[cur]!.ch[c]! as number;
+      pool[cur]!.count++;
       emit(
         'PASS',
-        `count[${word.slice(0, i + 1)}]=${pool[cur].count}`,
-        `Walk to the node for prefix "${word.slice(0, i + 1)}"${created ? ' (newly created)' : ''} and bump its counter to ${pool[cur].count}. This counter tracks how many inserted words share that prefix.`,
-        { phase: 'build', wi: w, chars, ci: i, count: pool[cur].count },
+        `count[${word!.slice(0, i + 1)}]!=${pool[cur]!.count}`,
+        `Walk to the node for prefix "${word!.slice(0, i + 1)}"${created ? ' (newly created)' : ''} and bump its counter to ${pool[cur]!.count}. This counter tracks how many inserted words share that prefix.`,
+        { phase: 'build', wi: w, chars, ci: i, count: pool[cur]!.count },
       );
     }
   }
 
   // Phase 2 — for each word, re-walk and sum the count at each prefix node.
   for (let w = 0; w < words.length; w++) {
-    const word = words[w];
-    const chars = word.split('');
+    const word = words[w]!;
+    const chars = word!.split('');
     emit(
       'SCORE',
       `score "${word}"`,
@@ -104,22 +104,22 @@ function record({ words }: PrefixScoresInput): Frame<PrefixScoresState>[] {
     let cur = 0; // root index
     let running = 0;
     for (let i = 0; i < chars.length; i++) {
-      const c = chars[i].charCodeAt(0) - 97;
-      cur = pool[cur].ch[c] as number;
-      const nodeCount = pool[cur].count;
+      const c = chars[i]!.charCodeAt(0) - 97;
+      cur = pool[cur]!.ch[c]! as number;
+      const nodeCount = pool[cur]!.count;
       running += nodeCount;
       emit(
         'ADD',
         `+${nodeCount} → ${running}`,
-        `Prefix "${word.slice(0, i + 1)}" is shared by ${nodeCount} word${nodeCount === 1 ? '' : 's'}, so add ${nodeCount}. Running score for "${word}" is now ${running}.`,
+        `Prefix "${word!.slice(0, i + 1)}" is shared by ${nodeCount} word${nodeCount === 1 ? '' : 's'}, so add ${nodeCount}. Running score for "${word}" is now ${running}.`,
         { phase: 'score', wi: w, chars, ci: i, count: nodeCount, running, res: res.slice() },
       );
     }
-    res[w] = running;
+    res[w]! = running;
     emit(
       'RESULT',
-      `res[${w}]=${running}`,
-      `Finished "${word}": its prefix score is ${running}. Store res[${w}] = ${running}.`,
+      `res[${w}]!=${running}`,
+      `Finished "${word}": its prefix score is ${running}. Store res[${w}]! = ${running}.`,
       { phase: 'score', wi: w, chars, ci: chars.length - 1, running, res: res.slice() },
       'good',
     );
@@ -152,7 +152,7 @@ function View({ frame }: PluginViewProps<PrefixScoresState>) {
     if (i === s.ci) return 'found'; // current char
     return '';
   };
-  const wordLabel = s.wi !== null ? s.words[s.wi] : '';
+  const wordLabel = s.wi !== null ? s.words[s.wi]! : '';
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -161,7 +161,7 @@ function View({ frame }: PluginViewProps<PrefixScoresState>) {
         {s.phase === 'done' && 'Done · prefix scores computed'}
         {s.wi !== null && (
           <>
-            {' · '}word[{s.wi}] = <span className="font-mono text-ink">"{wordLabel}"</span>
+            {' · '}word[{s.wi}]! = <span className="font-mono text-ink">"{wordLabel}"</span>
           </>
         )}
       </div>
@@ -197,9 +197,9 @@ function View({ frame }: PluginViewProps<PrefixScoresState>) {
 function Inspector({ frame }: InspectorProps<PrefixScoresState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curWord = s.wi !== null ? s.words[s.wi] : '—';
+  const curWord = s.wi !== null ? s.words[s.wi]! : '—';
   const prefix =
-    s.wi !== null && s.ci !== null && s.ci >= 0 ? s.words[s.wi].slice(0, s.ci + 1) : '—';
+    s.wi !== null && s.ci !== null && s.ci >= 0 ? s.words[s.wi]!.slice(0, s.ci + 1) : '—';
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />

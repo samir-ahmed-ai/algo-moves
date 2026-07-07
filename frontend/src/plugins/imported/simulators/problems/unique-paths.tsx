@@ -59,7 +59,7 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
       if (i === 0 && j === 0) {
-        dp[i][j] = 1;
+        dp[i]![j] = 1;
         snap(
           'BASE',
           `dp[0][0]=1`,
@@ -67,7 +67,7 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
           [i, j],
         );
       } else if (i === 0) {
-        dp[i][j] = 1;
+        dp[i]![j] = 1;
         snap(
           'EDGE',
           `dp[0][${j}]=1`,
@@ -75,7 +75,7 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
           [i, j],
         );
       } else if (j === 0) {
-        dp[i][j] = 1;
+        dp[i]![j] = 1;
         snap(
           'EDGE',
           `dp[${i}][0]=1`,
@@ -83,13 +83,13 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
           [i, j],
         );
       } else {
-        const up = dp[i - 1][j];
-        const left = dp[i][j - 1];
-        dp[i][j] = up + left;
+        const up = dp[i - 1]![j];
+        const left = dp[i]![j - 1];
+        dp[i]![j] = up! + left!;
         snap(
           'FILL',
-          `dp[${i}][${j}]=${dp[i][j]}`,
-          `Reach (${i}, ${j}) from above (${i - 1}, ${j}) = ${up} or from the left (${i}, ${j - 1}) = ${left}: dp[${i}][${j}] = ${up} + ${left} = ${dp[i][j]}.`,
+          `dp[${i}][${j}]=${dp[i]![j]}`,
+          `Reach (${i}, ${j}) from above (${i - 1}, ${j}) = ${up} or from the left (${i}, ${j - 1}) = ${left}: dp[${i}][${j}] = ${up} + ${left} = ${dp[i]![j]}.`,
           [i, j],
         );
       }
@@ -98,8 +98,8 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
 
   snap(
     'DONE',
-    `${dp[m - 1][n - 1]} paths`,
-    `The grid is full. dp[${m - 1}][${n - 1}] = ${dp[m - 1][n - 1]}, so there are ${dp[m - 1][n - 1]} unique paths.`,
+    `${dp[m - 1]![n - 1]} paths`,
+    `The grid is full. dp[${m - 1}][${n - 1}] = ${dp[m - 1]![n - 1]}, so there are ${dp[m - 1]![n - 1]} unique paths.`,
     [m - 1, n - 1],
     'good',
   );
@@ -112,10 +112,13 @@ function View({ frame }: PluginViewProps<UPState>) {
   const cellTone = (r: number, c: number) => {
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
     if (r === s.m - 1 && c === s.n - 1) return 'path';
-    return s.dp[r][c] >= 0 ? 'visited' : '';
+    return s.dp[r]![c]! >= 0 ? 'visited' : '';
   };
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
-  const ans = s.dp[s.m - 1][s.n - 1] >= 0 ? s.dp[s.m - 1][s.n - 1] : undefined;
+  const cell = (r: number, c: number) => {
+    const v = s.dp[r]?.[c];
+    return r >= 0 && c >= 0 && v !== undefined && v >= 0 ? v : '—';
+  };
+  const ans = s.dp[s.m - 1]![s.n - 1]! >= 0 ? s.dp[s.m - 1]![s.n - 1] : undefined;
   const rail = (
     <>
       <RailGroup label="cell">
@@ -136,15 +139,18 @@ function View({ frame }: PluginViewProps<UPState>) {
 function Inspector({ frame }: InspectorProps<UPState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
-  const done = s.dp[s.m - 1][s.n - 1] >= 0;
+  const cell = (r: number, c: number) => {
+    const v = s.dp[r]?.[c];
+    return r >= 0 && c >= 0 && v !== undefined && v >= 0 ? v : '—';
+  };
+  const done = s.dp[s.m - 1]![s.n - 1]! >= 0;
   return (
     <VarGrid>
       <InspectorRow k="grid" v={`${s.m}×${s.n}`} />
       <InspectorRow k="cell" v={s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—'} />
       <InspectorRow k="from above" v={s.cur ? cell(s.cur[0] - 1, s.cur[1]) : '—'} />
       <InspectorRow k="from left" v={s.cur ? cell(s.cur[0], s.cur[1] - 1) : '—'} />
-      <InspectorRow k="answer" v={done ? `${s.dp[s.m - 1][s.n - 1]} paths` : '…filling'} />
+      <InspectorRow k="answer" v={done ? `${s.dp[s.m - 1]![s.n - 1]} paths` : '…filling'} />
     </VarGrid>
   );
 }
@@ -162,7 +168,7 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as UPState | undefined;
-    const v = s ? s.dp[s.m - 1][s.n - 1] : 0;
+    const v = s ? s.dp[s.m - 1]![s.n - 1] : 0;
     return { ok: true, label: `${v} paths` };
   },
 };

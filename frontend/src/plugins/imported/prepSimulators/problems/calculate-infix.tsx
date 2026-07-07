@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { cn } from '@/lib/utils/cn';
@@ -52,7 +52,7 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
   const ops: string[] = [];
   let lastApply: { a: number; b: number; op: string; result: number } | null = null;
 
-  const { emit, frames } = createRecorder<InfixState>(() => ({
+  const { emit, frames } = createPrepRecorder<InfixState>(() => ({
     exp,
     i: null,
     nums: nums.slice(),
@@ -84,15 +84,15 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
   const n = exp.length;
   let i = 0;
   while (i < n) {
-    const c = exp[i];
+    const c = exp[i]!;
     if (c === ' ') {
       i++;
       continue;
     }
-    if (c >= '0' && c <= '9') {
+    if (c! >= '0' && c! <= '9') {
       let val = 0;
       const start = i;
-      while (i < n && exp[i] >= '0' && exp[i] <= '9') {
+      while (i < n && exp[i]! >= '0' && exp[i]! <= '9') {
         val = val * 10 + (exp.charCodeAt(i) - 48);
         i++;
       }
@@ -107,12 +107,12 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
       continue;
     }
     // operator: flush all pending ops whose precedence is >= the current op
-    while (ops.length > 0 && opPrec(ops[ops.length - 1]) >= opPrec(c)) {
-      const top = ops[ops.length - 1];
+    while (ops.length > 0 && opPrec(ops[ops.length - 1]!) >= opPrec(c!)) {
+      const top = ops[ops.length - 1]!;
       emit(
         'APPLY',
         `${top}`,
-        `Operator '${c}' arrives. Top of the op stack '${top}' has precedence ${opPrec(top)} ≥ ${opPrec(c)}, so apply it first to the two top numbers.`,
+        `Operator '${c}' arrives. Top of the op stack '${top}' has precedence ${opPrec(top!)} ≥ ${opPrec(c!)}, so apply it first to the two top numbers.`,
         { i },
       );
       applyTop();
@@ -123,7 +123,7 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
         { i },
       );
     }
-    ops.push(c);
+    ops.push(c!);
     lastApply = null;
     emit(
       'PUSH_OP',
@@ -136,7 +136,7 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
 
   // flush any remaining operators
   while (ops.length > 0) {
-    const top = ops[ops.length - 1];
+    const top = ops[ops.length - 1]!;
     emit(
       'APPLY',
       `${top}`,
@@ -152,7 +152,7 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
     );
   }
 
-  const answer = nums.length > 0 ? nums[0] : 0;
+  const answer = nums.length > 0 ? nums[0]! : 0;
   emit(
     'DONE',
     `${answer}`,
@@ -218,14 +218,14 @@ function View({ frame }: PluginViewProps<InfixState>) {
 function Inspector({ frame }: InspectorProps<InfixState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const ch = s.i !== null && s.i < s.exp.length ? s.exp[s.i] : '—';
+  const ch = s.i !== null && s.i < s.exp.length ? s.exp[s.i]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
       <InspectorRow k="char" v={ch === ' ' ? '␣' : ch} />
-      <InspectorRow k="nums top" v={s.nums.length > 0 ? s.nums[s.nums.length - 1] : '—'} />
+      <InspectorRow k="nums top" v={s.nums.length > 0 ? s.nums[s.nums.length - 1]! : '—'} />
       <InspectorRow k="nums size" v={s.nums.length} />
-      <InspectorRow k="ops top" v={s.ops.length > 0 ? s.ops[s.ops.length - 1] : '—'} />
+      <InspectorRow k="ops top" v={s.ops.length > 0 ? s.ops[s.ops.length - 1]! : '—'} />
       <InspectorRow
         k="last apply"
         v={s.applyOp !== null ? `${s.applyA} ${s.applyOp} ${s.applyB} = ${s.applyResult}` : '—'}

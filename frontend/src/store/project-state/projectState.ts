@@ -15,18 +15,18 @@ export interface ProjectState {
   speed?: number;
 }
 
-function isShareState(value: unknown): value is ShareState {
-  return value != null && typeof value === 'object';
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function isShareState(value: unknown): value is ShareState {
+  return isRecord(value);
+}
+
 function isProjectState(value: unknown): value is ProjectState {
+  if (!isRecord(value)) return false;
   const candidate = value as Partial<ProjectState>;
   return (
-    !!candidate &&
     candidate.version === 1 &&
     isShareState(candidate.share) &&
     Array.isArray(candidate.nodes) &&
@@ -94,18 +94,17 @@ function normalizeEdges(edges: Edge[], nodes: Node[]): Edge[] {
 function normalizeProjectState(value: unknown): ProjectState | null {
   if (!isProjectState(value) || !isRecord(value.share)) return null;
   const nodes = normalizeNodes(value.nodes);
+  const removedPanels = compactStringList(value.removedPanels);
+  const removedEdges = compactStringList(value.removedEdges);
+  const speed = normalizeSpeed(value.speed);
   return {
     version: 1,
     share: value.share,
     nodes,
     edges: normalizeEdges(value.edges, nodes),
-    ...(compactStringList(value.removedPanels)
-      ? { removedPanels: compactStringList(value.removedPanels) }
-      : {}),
-    ...(compactStringList(value.removedEdges)
-      ? { removedEdges: compactStringList(value.removedEdges) }
-      : {}),
-    ...(normalizeSpeed(value.speed) ? { speed: normalizeSpeed(value.speed) } : {}),
+    ...(removedPanels ? { removedPanels } : {}),
+    ...(removedEdges ? { removedEdges } : {}),
+    ...(speed ? { speed } : {}),
   };
 }
 
@@ -129,16 +128,16 @@ export function filterKnownNodes(nodes: Node[]): Node[] {
   return nodes.filter((n) => {
     if (n.type === 'effect') {
       const effectId = (n.data as { effectId?: string })?.effectId;
-      return effectId != null && isKnownEffectId(effectId);
+      return typeof effectId === 'string' && isKnownEffectId(effectId);
     }
     if (n.type === 'panel') {
       const kind = (n.data as { kind?: string })?.kind;
+      if (typeof kind !== 'string') return false;
       return (
-        kind != null &&
-        (getPanelConfig(kind) != null ||
-          kind.startsWith('cases') ||
-          kind === 'quiz' ||
-          kind === 'simulate')
+        getPanelConfig(kind) != null ||
+        kind.startsWith('cases') ||
+        kind === 'quiz' ||
+        kind === 'simulate'
       );
     }
     return false;

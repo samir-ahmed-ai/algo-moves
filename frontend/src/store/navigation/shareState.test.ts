@@ -11,6 +11,10 @@ import {
   type ShareState,
 } from './shareState';
 
+function decodeShareFromUrl(url: string) {
+  return decodeShare(url.split('#s=')[1]!);
+}
+
 describe('shareState', () => {
   describe('encodeShare / decodeShare round-trip', () => {
     it('preserves all fields including room and sessionKind', () => {
@@ -77,14 +81,14 @@ describe('shareState', () => {
     it('builds a canvas URL when no itemId or trackId is given', () => {
       const url = buildWorkspaceEntryUrl({ theme: 'dark' });
       expect(url).toContain('/workspace#s=');
-      const decoded = decodeShare(url.split('#s=')[1]);
+      const decoded = decodeShareFromUrl(url);
       expect(decoded?.mode).toBe('visualize');
       expect(decoded?.focus).toBe('canvas');
     });
 
     it('builds a problem URL when itemId is given', () => {
       const url = buildWorkspaceEntryUrl({ itemId: 'two-sum', mode: 'play' });
-      const decoded = decodeShare(url.split('#s=')[1]);
+      const decoded = decodeShareFromUrl(url);
       expect(decoded?.item).toBe('two-sum');
       expect(decoded?.mode).toBe('play');
       expect(decoded?.focus).toBe('problem');
@@ -92,20 +96,20 @@ describe('shareState', () => {
 
     it('defaults problem mode to learn', () => {
       const url = buildWorkspaceEntryUrl({ itemId: 'two-sum' });
-      const decoded = decodeShare(url.split('#s=')[1]);
+      const decoded = decodeShareFromUrl(url);
       expect(decoded?.mode).toBe('learn');
     });
 
     it('includes manifest number as id for prep problems', () => {
       const url = buildWorkspaceEntryUrl({ itemId: 'prep-arrays-find-duplicate-and-missing' });
-      const decoded = decodeShare(url.split('#s=')[1]);
+      const decoded = decodeShareFromUrl(url);
       expect(decoded?.item).toBe('prep-arrays-find-duplicate-and-missing');
       expect(decoded?.id).toBe('1.6');
     });
 
     it('builds a track-browse URL when trackId is given', () => {
       const url = buildWorkspaceEntryUrl({ trackId: 'go' });
-      const decoded = decodeShare(url.split('#s=')[1]);
+      const decoded = decodeShareFromUrl(url);
       expect(decoded?.trackId).toBe('go');
       expect(decoded?.focus).toBe('problem');
       expect(decoded?.item).toBeUndefined();
@@ -163,7 +167,7 @@ describe('shareState', () => {
     it('embeds room in the share hash', () => {
       const url = buildInviteUrl({ mode: 'visualize', focus: 'canvas', theme: 'dark' }, 'WXYZ9999');
       expect(url).toContain('/workspace#s=');
-      const hashPart = url.split('#s=')[1];
+      const hashPart = url.split('#s=')[1]!;
       const decoded = decodeShare(hashPart);
       expect(decoded?.room).toBe('WXYZ9999');
       expect(decoded?.focus).toBe('canvas');
@@ -188,7 +192,7 @@ describe('shareState', () => {
         'ROOM1234',
         'tok_abc',
       );
-      const decoded = decodeShare(url.split('#s=')[1]);
+      const decoded = decodeShareFromUrl(url);
       expect(decoded?.room).toBe('ROOM1234');
       expect(decoded?.sessionKind).toBe('interview');
       expect(decoded?.variant).toBe('interview');
@@ -197,7 +201,7 @@ describe('shareState', () => {
 
     it('omits guestToken when not provided', () => {
       const url = buildInterviewInviteUrl({ mode: 'visualize', focus: 'canvas' }, 'ROOM1234');
-      const decoded = decodeShare(url.split('#s=')[1]);
+      const decoded = decodeShareFromUrl(url);
       expect(decoded?.variant).toBe('interview');
       expect(decoded && 'guestToken' in decoded).toBe(false);
     });

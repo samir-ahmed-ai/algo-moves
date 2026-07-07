@@ -38,10 +38,10 @@ function record({ n, edges, pos }: UFInput): Frame<UFState>[] {
   const adj: number[][] = Array.from({ length: n }, () => []);
   const w: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(-1));
   for (const [u, v, ww] of edges) {
-    adj[u].push(v);
-    adj[v].push(u);
-    w[u][v] = ww;
-    w[v][u] = ww;
+    adj[u]!.push(v);
+    adj[v]!.push(u);
+    w[u]![v] = ww;
+    w[v]![u] = ww;
   }
 
   const sortedEdges = edges.slice().sort((a, b) => a[2] - b[2]);
@@ -50,9 +50,9 @@ function record({ n, edges, pos }: UFInput): Frame<UFState>[] {
   const rank = new Array<number>(n).fill(0);
 
   const find = (x: number): number => {
-    while (parent[x] !== x) {
-      parent[x] = parent[parent[x]];
-      x = parent[x];
+    while (parent[x]! !== x) {
+      parent[x] = parent[parent[x]!]!;
+      x = parent[x]!;
     }
     return x;
   };
@@ -60,11 +60,11 @@ function record({ n, edges, pos }: UFInput): Frame<UFState>[] {
     const ra = find(a);
     const rb = find(b);
     if (ra === rb) return;
-    if (rank[ra] < rank[rb]) parent[ra] = rb;
-    else if (rank[ra] > rank[rb]) parent[rb] = ra;
+    if (rank[ra]! < rank[rb]!) parent[ra] = rb;
+    else if (rank[ra]! > rank[rb]!) parent[rb] = ra;
     else {
       parent[rb] = ra;
-      rank[ra]++;
+      rank[ra]!++;
     }
   };
 
@@ -82,7 +82,7 @@ function record({ n, edges, pos }: UFInput): Frame<UFState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         adj,
         pos,
@@ -107,7 +107,7 @@ function record({ n, edges, pos }: UFInput): Frame<UFState>[] {
   );
 
   for (let i = 0; i < sortedEdges.length && mst.length < n - 1; i++) {
-    const [u, v, ww] = sortedEdges[i];
+    const [u, v, ww] = sortedEdges[i]!;
     emit(
       'CONSIDER',
       `(${u},${v}) w=${ww}`,
@@ -162,7 +162,7 @@ function View({ frame }: PluginViewProps<UFState>) {
   for (let i = 0; i < n; i++) if (s.parent[i] === i) sets++;
   const considered = s.edgeIdx >= 0 ? Math.min(s.edgeIdx + 1, s.sortedEdges.length) : 0;
   const mstEdgeItems = s.mst.map((e) => ({
-    label: `${e[0]}–${e[1]} (${s.w[e[0]][e[1]]})`,
+    label: `${e[0]}–${e[1]} (${s.w[e[0]]![e[1]]})`,
     tone: 'good' as const,
   }));
   return (
@@ -188,7 +188,10 @@ function View({ frame }: PluginViewProps<UFState>) {
         nodeClass={() => 'team-0'}
         highlightEdge={s.currentEdge}
         edgeTone={s.status === 'reject' ? 'clash' : 'active'}
-        edgeLabel={(a, b) => (s.w[a][b] >= 0 ? s.w[a][b] : undefined)}
+        edgeLabel={(a, b) => {
+          const weight = s.w[a]?.[b];
+          return weight !== undefined && weight >= 0 ? weight : undefined;
+        }}
         height={264}
       />
     </VizStage>

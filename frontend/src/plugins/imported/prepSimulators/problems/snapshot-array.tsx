@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -33,7 +33,7 @@ function record({ length, ops }: SnapInput): Frame<SnapState>[] {
   const snaps: [number, number][][] = Array.from({ length }, () => [[0, 0]]);
   let sid = 0;
 
-  const { emit, frames } = createRecorder<SnapState>(() => ({
+  const { emit, frames } = createPrepRecorder<SnapState>(() => ({
     length,
     snaps: snaps.map((arr) => arr.map((x) => [...x] as [number, number])),
     sid,
@@ -51,16 +51,16 @@ function record({ length, ops }: SnapInput): Frame<SnapState>[] {
 
   for (const o of ops) {
     if (o.kind === 'set') {
-      const arr = snaps[o.index];
-      if (arr[arr.length - 1][0] === sid) {
-        arr[arr.length - 1][1] = o.val;
+      const arr = snaps[o.index]!;
+      if (arr![arr!.length - 1]![0] === sid) {
+        arr![arr!.length - 1]![1] = o.val;
       } else {
-        arr.push([sid, o.val]);
+        arr!.push([sid, o.val]);
       }
       emit(
         'SET',
         `[${o.index}]=${o.val}`,
-        `Set(${o.index}, ${o.val}) at snapId=${sid}: ${arr.length > 1 && arr[arr.length - 2][0] === sid ? 'update' : 'append'} history entry.`,
+        `Set(${o.index}, ${o.val}) at snapId=${sid}: ${arr!.length > 1 && arr![arr!.length - 2]![0] === sid ? 'update' : 'append'} history entry.`,
         {
           op: `set ${o.index}=${o.val}`,
           snaps: snaps.map((a) => a.map((x) => [...x] as [number, number])),
@@ -76,15 +76,15 @@ function record({ length, ops }: SnapInput): Frame<SnapState>[] {
         'good',
       );
     } else {
-      const arr = snaps[o.index];
+      const arr = snaps[o.index]!;
       let lo = 0;
-      let hi = arr.length;
+      let hi = arr!.length;
       while (lo < hi) {
         const mid = (lo + hi) >> 1;
-        if (arr[mid][0] <= o.snapId) lo = mid + 1;
+        if (arr![mid]![0] <= o.snapId) lo = mid + 1;
         else hi = mid;
       }
-      const val = arr[lo - 1][1];
+      const val = arr![lo - 1]![1];
       emit(
         'GET',
         `[${o.index}]=${val}`,

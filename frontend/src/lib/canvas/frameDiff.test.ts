@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Frame, Player } from '@/core';
-import { buildFrameContextValue, EMPTY_FRAME } from './frameDiff';
+import { buildFrameContextValue, diffFrameStates, EMPTY_FRAME } from './frameDiff';
 
 const player = { index: 0 } as Player;
 
@@ -18,5 +18,13 @@ describe('buildFrameContextValue', () => {
     ];
     const value = buildFrameContextValue(frames, { ...player, index: 1 }, frames[1]);
     expect(value.changedKeys).toEqual(['x']);
+  });
+
+  it('handles cyclic state values as changed instead of throwing', () => {
+    const prev: Record<string, unknown> = {};
+    prev.self = prev;
+    const cur: Record<string, unknown> = {};
+    cur.self = cur;
+    expect(diffFrameStates(prev, cur)).toEqual(['self']);
   });
 });

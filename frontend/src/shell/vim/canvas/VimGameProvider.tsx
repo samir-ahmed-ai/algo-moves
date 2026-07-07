@@ -151,7 +151,6 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
     if (parsed && parsed.levelId !== levelId) {
       writeVimHash({ levelId }, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

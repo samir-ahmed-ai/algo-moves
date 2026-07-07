@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -36,7 +36,7 @@ function record({ s }: AtoiInput): Frame<AtoiState>[] {
   let sign: 1 | -1 = 1;
   let result = 0;
 
-  const { emit, frames } = createRecorder<AtoiState>(() => ({
+  const { emit, frames } = createPrepRecorder<AtoiState>(() => ({
     chars,
     i: null,
     sign,
@@ -56,7 +56,7 @@ function record({ s }: AtoiInput): Frame<AtoiState>[] {
 
   let i = 0;
   // 1) Skip leading spaces.
-  while (i < n && chars[i] === ' ') {
+  while (i < n && chars[i]! === ' ') {
     emit(
       'SKIP',
       `space @${i}`,
@@ -80,7 +80,7 @@ function record({ s }: AtoiInput): Frame<AtoiState>[] {
   }
 
   // 2) Read an optional sign.
-  if (chars[i] === '-') {
+  if (chars[i]! === '-') {
     sign = -1;
     emit(
       'SIGN',
@@ -92,7 +92,7 @@ function record({ s }: AtoiInput): Frame<AtoiState>[] {
       },
     );
     i++;
-  } else if (chars[i] === '+') {
+  } else if (chars[i]! === '+') {
     emit(
       'SIGN',
       `sign=+1 @${i}`,
@@ -109,8 +109,8 @@ function record({ s }: AtoiInput): Frame<AtoiState>[] {
   }
 
   // 3) Consume digits with an overflow guard.
-  while (i < n && chars[i] >= '0' && chars[i] <= '9') {
-    const digit = chars[i].charCodeAt(0) - 48;
+  while (i < n && chars[i]! >= '0' && chars[i]! <= '9') {
+    const digit = chars[i]!.charCodeAt(0) - 48;
 
     if (sign === 1 && result > Math.floor((INT_MAX - digit) / 10)) {
       emit(
@@ -137,7 +137,7 @@ function record({ s }: AtoiInput): Frame<AtoiState>[] {
     emit(
       'DIGIT',
       `result=${sign * result}`,
-      `Character at index ${i} is '${chars[i]}' (digit ${digit}). result = result*10 + ${digit} = ${result}. With the sign applied that is ${sign * result}.`,
+      `Character at index ${i} is '${chars[i]!}' (digit ${digit}). result = result*10 + ${digit} = ${result}. With the sign applied that is ${sign * result}.`,
       { i, digit },
     );
     i++;
@@ -201,11 +201,11 @@ function View({ frame }: PluginViewProps<AtoiState>) {
 function Inspector({ frame }: InspectorProps<AtoiState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const ch = s.i !== null && s.i >= 0 && s.i < s.chars.length ? s.chars[s.i] : null;
+  const ch = s.i !== null && s.i >= 0 && s.i < s.chars.length ? s.chars[s.i]! : null;
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="s[i]" v={ch === null ? '—' : ch === ' ' ? '␣' : ch} />
+      <InspectorRow k="s[i]!" v={ch === null ? '—' : ch === ' ' ? '␣' : ch} />
       <InspectorRow k="sign" v={s.sign === -1 ? '−1' : '+1'} />
       <InspectorRow k="digit" v={s.digit ?? '—'} />
       <InspectorRow k="result (unsigned)" v={s.result} />

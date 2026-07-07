@@ -225,10 +225,10 @@ function Inner({
   }, []);
 
   const layoutOpts = useCallback(
-    () => ({
-      preset: mode === 'visualize' ? layoutPreset : undefined,
-      viewport: mode === 'visualize' ? viewportSize() : undefined,
-    }),
+    () =>
+      ({
+        ...(mode === 'visualize' ? { preset: layoutPreset, viewport: viewportSize() } : {}),
+      }) satisfies import('@/lib/canvas/layoutPrefs').LayoutVisualizeOptions,
     [mode, layoutPreset, viewportSize],
   );
 
@@ -237,10 +237,13 @@ function Inner({
   // only supplies the current per-mode removal/layout refs.
   const buildFor = useCallback(
     (m: CanvasMode, k: string): { nodes: PanelFlowNode[]; edges: Edge[] } => {
+      const removed = removedRef.current[k];
+      const removedEdges = removedEdgesRef.current[k];
+      const saved = layoutRef.current[k];
       const built = buildCanvasFrame(plugin, m, {
-        removed: removedRef.current[k],
-        removedEdges: removedEdgesRef.current[k],
-        saved: layoutRef.current[k],
+        ...(removed ? { removed } : {}),
+        ...(removedEdges ? { removedEdges } : {}),
+        ...(saved ? { saved } : {}),
         seedProblemCanvas: !standalone,
         seedInterviewCanvas: isInterviewCanvas,
         layoutOpts: layoutOpts(),
@@ -256,7 +259,6 @@ function Inner({
     [plugin, edgeOpts, dir, layoutOpts, standalone, isInterviewCanvas, item.id],
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initial = useMemo(() => buildFor(mode, key), []);
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
@@ -305,7 +307,15 @@ function Inner({
   // Real-time collaboration: publish/apply the shared document, mirror a
   // followed peer's viewport. Inert (no network) until a session is joined.
   const collab = useCanvasCollab();
-  useCanvasDocSync({ nodes, edges, setNodes, setEdges });
+  // Single source of truth for "may this client mutate the shared graph"
+  // (add/delete/connect). Gates every add surface + the ReactFlow mutation
+  // props so a locked-out or move-restricted guest cannot alter the board.
+  const canModifyCanvas = canMoveCanvasNodes({
+    role: collab.role,
+    session: collab.session,
+    isCollaborating: collab.isCollaborating,
+  });
+  useCanvasDocSync({ nodes, edges, setNodes, setEdges, canModifyCanvas });
   useCanvasFollow();
   useInterviewBoardPersistence();
   const onPanePointerMove = useCallback(
@@ -386,6 +396,7 @@ function Inner({
     mode,
     key,
     standalone,
+    canModifyCanvas,
     nodes,
     edges,
     setNodes,
@@ -573,8 +584,8 @@ function Inner({
   // --- xyflow guards / callbacks --------------------------------------------
   const onBeforeDelete = useCallback(
     async ({ nodes: del }: { nodes: Node[]; edges: Edge[] }) =>
-      !del.some((n) => (n.data as PanelNodeData | undefined)?.locked),
-    [],
+      canModifyCanvas && !del.some((n) => (n.data as PanelNodeData | undefined)?.locked),
+    [canModifyCanvas],
   );
 
   const onNodesDelete = useCallback(
@@ -657,15 +668,8 @@ function Inner({
                     paneClickDistance={4}
                     reconnectRadius={18}
                     proOptions={{ hideAttribution: true }}
-                    nodesConnectable={!lock}
-                    nodesDraggable={
-                      !lock &&
-                      canMoveCanvasNodes({
-                        role: collab.role,
-                        session: collab.session,
-                        isCollaborating: collab.isCollaborating,
-                      })
-                    }
+                    nodesConnectable={!lock && canModifyCanvas}
+                    nodesDraggable={!lock && canModifyCanvas}
                     elementsSelectable={!lock}
                     connectOnClick={false}
                     autoPanOnNodeDrag
@@ -681,7 +685,7 @@ function Inner({
                     zoomOnDoubleClick={false}
                     panOnScroll={scrollPan}
                     zoomOnScroll={!scrollPan}
-                    deleteKeyCode={['Delete', 'Backspace']}
+                    deleteKeyCode={canModifyCanvas ? ['Delete', 'Backspace'] : []}
                     snapToGrid={snap}
                     snapGrid={[16, 16]}
                     noDragClassName="nodrag"

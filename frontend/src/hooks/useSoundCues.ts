@@ -25,6 +25,5 @@ export function useSoundCues(enabled: boolean, frame: Frame | undefined) {
     } catch {
       // Web Audio unavailable — ignore
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moveType, moveTone, frame, enabled]);
 }

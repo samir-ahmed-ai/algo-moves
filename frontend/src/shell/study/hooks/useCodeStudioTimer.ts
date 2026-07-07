@@ -11,8 +11,8 @@ export function useCodeStudioTimer(itemId: string) {
 
   useEffect(() => {
     if (!timerRunning) return;
-    const t = setInterval(() => setTimerSec((s) => s + 1), 1000);
-    return () => clearInterval(t);
+    const t = window.setInterval(() => setTimerSec((s) => s + 1), 1000);
+    return () => window.clearInterval(t);
   }, [timerRunning]);
 
   useEffect(() => {
@@ -20,7 +20,10 @@ export function useCodeStudioTimer(itemId: string) {
     setTimerRunning(false);
   }, [itemId]);
 
-  const timerLabel = `${String(Math.floor(timerSec / 60)).padStart(2, '0')}:${String(timerSec % 60).padStart(2, '0')}`;
+  const safeTimerSec = Number.isFinite(timerSec) ? Math.max(0, Math.floor(timerSec)) : 0;
+  const timerLabel = `${String(Math.floor(safeTimerSec / 60)).padStart(2, '0')}:${String(
+    safeTimerSec % 60,
+  ).padStart(2, '0')}`;
 
   return { timerRunning, setTimerRunning, setTimerSec, timerLabel };
 }

@@ -158,7 +158,10 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
     sideLabel,
     onToggleSide: toggleSide,
     showSideToggle,
-    headerClassName: visualizeFlush ? 'border-b border-edge/60' : undefined,
+  };
+  const headerPropsForSlot = {
+    ...headerProps,
+    ...(visualizeFlush ? { headerClassName: 'border-b border-edge/60' } : {}),
   };
 
   return (
@@ -235,17 +238,17 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
             <PanelNodeBodySlot
               id={id}
               data={data}
-              headerProps={headerProps}
+              headerProps={headerPropsForSlot}
               headerDensity={headerDensity}
               flushBody={flushBody}
               vizCanvas={vizCanvas}
               boardCanvas={boardCanvas}
               narrowBody={narrowBody}
-              bodyCap={bodyCap}
+              {...(bodyCap != null ? { bodyCap } : {})}
               showBigO={showBigO}
               onBigOOpenChange={setShowBigO}
               collapsed={collapsed}
-              layoutHostMode={layoutHostMode}
+              {...(layoutHostMode ? { layoutHostMode } : {})}
             />
           )}
         </div>

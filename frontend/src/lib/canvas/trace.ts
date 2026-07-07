@@ -15,8 +15,8 @@ export type WorkflowNode = Node & { type?: string };
 
 /** Topological walk from sources through nodes in a component. */
 export function effectChainOrder(
-  nodeIds: Set<string>,
-  edges: Edge[],
+  nodeIds: ReadonlySet<string>,
+  edges: readonly Edge[],
   isEffect: (id: string) => boolean,
 ): string[] {
   const inComponent = (id: string) => nodeIds.has(id);
@@ -65,9 +65,9 @@ export function getEffectIdFromNode(node: WorkflowNode): string | null {
 /** Apply wired effect chain to base frames. Skips paused/stopped chains. */
 export function transformFramesForGraph(
   baseFrames: Frame[],
-  nodes: WorkflowNode[],
-  edges: Edge[],
-  chainRunStates?: Map<string, PanelRunState>,
+  nodes: readonly WorkflowNode[],
+  edges: readonly Edge[],
+  chainRunStates?: ReadonlyMap<string, PanelRunState>,
 ): Frame[] {
   if (baseFrames.length === 0) return baseFrames;
 
@@ -104,17 +104,18 @@ export function transformFramesForGraph(
   }
 
   if (lanes.length === 0) return baseFrames;
-  if (lanes.length === 1) return lanes[0];
+  if (lanes.length === 1) return lanes[0] ?? baseFrames;
   return stackFrames(lanes);
 }
 
 /** Parallel stack() — interleave multiple frame lanes (Strudel multi-source). */
-export function stackFrames(lanes: Frame[][]): Frame[] {
+export function stackFrames(lanes: readonly (readonly Frame[])[]): Frame[] {
   const max = Math.max(0, ...lanes.map((l) => l.length));
   const out: Frame[] = [];
   for (let i = 0; i < max; i++) {
     for (const lane of lanes) {
-      if (lane[i]) out.push(lane[i]);
+      const frame = lane[i];
+      if (frame) out.push(frame);
     }
   }
   return out.length ? out : lanes.flat();
@@ -122,10 +123,10 @@ export function stackFrames(lanes: Frame[][]): Frame[] {
 
 /** Human-readable trace string for all frames (Strudel PatternPanel analogue). */
 export function generateTrace(
-  frames: Frame[],
-  nodes: WorkflowNode[] = [],
-  edges: Edge[] = [],
-  options?: { chainPaused?: boolean },
+  frames: readonly Frame[],
+  nodes: readonly WorkflowNode[] = [],
+  edges: readonly Edge[] = [],
+  options?: Readonly<{ chainPaused?: boolean }>,
 ): string {
   const lines: string[] = [];
 
@@ -153,7 +154,7 @@ export function generateTrace(
 /** Trace snippet for a single panel at the current frame index. */
 export function traceOutputForPanel(
   panelKind: string,
-  frames: Frame[],
+  frames: readonly Frame[],
   frameIndex: number,
 ): string {
   const index =

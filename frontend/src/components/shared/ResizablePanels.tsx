@@ -1,13 +1,17 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { useResizeSplit, type ResizeDirection } from '@/hooks/useResizeSplit';
+import {
+  useResizeSplit,
+  type ResizeDirection,
+  type UseResizeSplitOptions,
+} from '@/hooks/useResizeSplit';
 
 export function ResizeHandle({
   direction,
   handleProps,
 }: {
-  direction: ResizeDirection;
-  handleProps: ReturnType<typeof useResizeSplit>['handleProps'];
+  readonly direction: ResizeDirection;
+  readonly handleProps: ReturnType<typeof useResizeSplit>['handleProps'];
 }) {
   const horizontal = direction === 'horizontal';
   return (
@@ -32,20 +36,20 @@ export function ResizeHandle({
 }
 
 export interface ResizablePanelsProps {
-  direction: ResizeDirection;
-  splitPct: number;
-  onSplitPctChange?: (pct: number) => void;
-  minPct?: number;
-  maxPct?: number;
-  defaultPct?: number;
-  first: ReactNode;
-  second: ReactNode;
-  className?: string;
-  firstClassName?: string;
+  readonly direction: ResizeDirection;
+  readonly splitPct: number;
+  readonly onSplitPctChange?: (pct: number) => void;
+  readonly minPct?: number;
+  readonly maxPct?: number;
+  readonly defaultPct?: number;
+  readonly first: ReactNode;
+  readonly second: ReactNode;
+  readonly className?: string;
+  readonly firstClassName?: string;
   /** When true, renders a static flex split without a drag handle. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
   /** Fixed pixel width for the first pane (overrides percentage split). */
-  firstWidthPx?: number;
+  readonly firstWidthPx?: number;
 }
 
 export function ResizablePanels({
@@ -62,17 +66,22 @@ export function ResizablePanels({
   disabled,
   firstWidthPx,
 }: ResizablePanelsProps) {
-  const { containerRef, splitPct, handleProps } = useResizeSplit({
+  const resizeSplitOptions: UseResizeSplitOptions = {
     direction,
     splitPct: splitPctProp,
-    onSplitPctChange,
-    minPct,
-    maxPct,
-    defaultPct,
-  });
+    ...(onSplitPctChange !== undefined ? { onSplitPctChange } : {}),
+    ...(minPct !== undefined ? { minPct } : {}),
+    ...(maxPct !== undefined ? { maxPct } : {}),
+    ...(defaultPct !== undefined ? { defaultPct } : {}),
+  };
+  const { containerRef, splitPct, handleProps } = useResizeSplit(resizeSplitOptions);
 
   const horizontal = direction === 'horizontal';
   const firstSize = disabled ? splitPctProp : splitPct;
+  const fixedFirstSize =
+    typeof firstWidthPx === 'number' && Number.isFinite(firstWidthPx)
+      ? Math.max(0, firstWidthPx)
+      : null;
 
   return (
     <div
@@ -91,10 +100,10 @@ export function ResizablePanels({
           firstClassName,
         )}
         style={
-          firstWidthPx != null
+          fixedFirstSize != null
             ? horizontal
-              ? { width: firstWidthPx }
-              : { height: firstWidthPx }
+              ? { width: fixedFirstSize }
+              : { height: fixedFirstSize }
             : horizontal
               ? { width: `${firstSize}%` }
               : { height: `${firstSize}%` }

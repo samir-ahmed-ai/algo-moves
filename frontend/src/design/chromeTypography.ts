@@ -14,5 +14,7 @@ export const chromeText = {
 /** Shared slim workspace / browse top bar shell. */
 export const chromeBar = {
   shell:
-    'chrome-bar-shell flex shrink-0 items-center gap-[var(--gap)] border-b border-edge bg-bg/90 px-[var(--hpad)] py-[var(--pad)] backdrop-blur-sm',
+    'chrome-bar-shell flex min-w-0 shrink-0 items-center gap-[var(--gap)] border-b border-edge bg-bg/90 px-[var(--hpad)] py-[var(--pad)] backdrop-blur-sm',
 } as const;
+
+export type ChromeTextScale = keyof typeof chromeText;

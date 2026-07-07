@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -50,7 +50,7 @@ function record({ x, n }: PowInput): Frame<PowState>[] {
     tmp = Math.floor(tmp / 2);
   }
 
-  const { emit, frames } = createRecorder<PowState>(() => ({
+  const { emit, frames } = createPrepRecorder<PowState>(() => ({
     x,
     n,
     negative,
@@ -81,7 +81,7 @@ function record({ x, n }: PowInput): Frame<PowState>[] {
   let curBase = base;
 
   for (let i = 0; i < bits.length; i++) {
-    const bit = bits[i];
+    const bit = bits[i]!;
     if (bit === '1') {
       const before = res;
       res = res * curBase;
@@ -138,7 +138,7 @@ function View({ frame }: PluginViewProps<PowState>) {
   const tone = (display: number) => {
     const lsb = lsbIndexAt(display);
     if (s.i === lsb) return 'match';
-    return msbFirst[display] === '1' ? 'found' : '';
+    return msbFirst[display]! === '1' ? 'found' : '';
   };
   return (
     <div className="board-area">
@@ -172,14 +172,14 @@ function View({ frame }: PluginViewProps<PowState>) {
 function Inspector({ frame }: InspectorProps<PowState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curBit = s.i !== null && s.i >= 0 && s.i < s.bits.length ? s.bits[s.i] : '—';
+  const curBit = s.i !== null && s.i >= 0 && s.i < s.bits.length ? s.bits[s.i]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="x" v={s.x} />
       <InspectorRow k="n" v={s.n} />
       <InspectorRow k="negative" v={s.negative ? 'yes (1/x)' : 'no'} />
       <InspectorRow k="bit i" v={s.i ?? '—'} />
-      <InspectorRow k="bits[i]" v={curBit} />
+      <InspectorRow k="bits[i]!" v={curBit} />
       <InspectorRow k="base" v={round(s.base)} />
       <InspectorRow k="res" v={round(s.res)} />
     </VarGrid>

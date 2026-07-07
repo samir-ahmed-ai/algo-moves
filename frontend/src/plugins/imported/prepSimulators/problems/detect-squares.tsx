@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -24,13 +24,13 @@ interface SqState {
   done: boolean;
 }
 
-const key = (p: [number, number]) => `${p[0]},${p[1]}`;
+const key = (p: [number, number]) => `${p[0]!},${p[1]!}`;
 
 function record({ ops }: SqInput): Frame<SqState>[] {
   const counts: Record<string, number> = {};
   const pts: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<SqState>(() => ({
+  const { emit, frames } = createPrepRecorder<SqState>(() => ({
     points: pts.map((p) => [...p] as [number, number]),
     counts: { ...counts },
     op: '',
@@ -41,7 +41,7 @@ function record({ ops }: SqInput): Frame<SqState>[] {
   emit(
     'INIT',
     'empty',
-    `Detect Squares: store point counts. Count(q) sums cnt[p1]×cnt[p2] for diagonal pairs forming axis-aligned squares with q.`,
+    `Detect Squares: store point counts. Count(q) sums cnt[p1]!×cnt[p2]! for diagonal pairs forming axis-aligned squares with q.`,
     {},
   );
 
@@ -49,13 +49,13 @@ function record({ ops }: SqInput): Frame<SqState>[] {
     if (o.kind === 'add') {
       const p = o.point;
       const k = key(p);
-      counts[k] = (counts[k] ?? 0) + 1;
+      counts[k]! = (counts[k]! ?? 0) + 1;
       pts.push(p);
       emit(
         'ADD',
         key(p),
-        `Add(${p[0]},${p[1]}): count at point → ${counts[k]}. Total stored points: ${pts.length}.`,
-        { op: `add (${p[0]},${p[1]})` },
+        `Add(${p[0]!},${p[1]!}): count at point → ${counts[k]!}. Total stored points: ${pts.length}.`,
+        { op: `add (${p[0]!},${p[1]!})` },
       );
     } else {
       const [qx, qy] = o.point;
@@ -63,12 +63,12 @@ function record({ ops }: SqInput): Frame<SqState>[] {
       for (const p of pts) {
         const [px, py] = p;
         if (px === qx || Math.abs(px - qx) !== Math.abs(py - qy)) continue;
-        res += (counts[key([px, qy])] ?? 0) * (counts[key([qx, py])] ?? 0);
+        res += (counts[key([px, qy]!)] ?? 0) * (counts[key([qx, py]!)] ?? 0);
       }
       emit(
         'COUNT',
         `(${qx},${qy}) → ${res}`,
-        `Count(${qx},${qy}): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]×cnt[qx,py] = ${res}.`,
+        `Count(${qx},${qy}): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]!×cnt[qx,py]! = ${res}.`,
         { op: `count (${qx},${qy})`, result: res },
         'good',
       );
@@ -160,7 +160,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Count(,): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]×cnt[qx,py] = .',
+      'Count(,): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]!×cnt[qx,py]! = .',
   },
   {
     id: 'state',
@@ -202,7 +202,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Count(,): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]×cnt[qx,py] = .',
+      'Count(,): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]!×cnt[qx,py]! = .',
   },
 ];
 export const simulator: ProblemSimulator = {

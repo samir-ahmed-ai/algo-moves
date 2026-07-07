@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,7 +32,7 @@ function record({ tasks, n }: TaskSchedulerInput): Frame<TaskSchedulerState>[] {
   const freq = new Map<string, number>();
   let maxF = 0;
 
-  const { emit, frames } = createRecorder<TaskSchedulerState>(() => ({
+  const { emit, frames } = createPrepRecorder<TaskSchedulerState>(() => ({
     tasks,
     n,
     i: null,
@@ -53,13 +53,13 @@ function record({ tasks, n }: TaskSchedulerInput): Frame<TaskSchedulerState>[] {
 
   // Phase 1: count frequencies, track the running max.
   for (let i = 0; i < tasks.length; i++) {
-    const t = tasks[i];
-    freq.set(t, (freq.get(t) ?? 0) + 1);
-    const f = freq.get(t)!;
+    const t = tasks[i]!;
+    freq.set(t!, (freq.get(t!) ?? 0) + 1);
+    const f = freq.get(t!)!;
     if (f > maxF) maxF = f;
     emit(
       'COUNT',
-      `freq[${t}]=${f}`,
+      `freq[${t}]!=${f}`,
       `Count task '${t}' at index ${i}: its frequency is now ${f}. The highest frequency seen so far is maxF = ${maxF}.`,
       { i, maxF },
     );

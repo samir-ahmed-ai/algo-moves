@@ -9,7 +9,7 @@ import {
 } from 'react';
 import type { Edge } from '@xyflow/react';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
-import { useCanvasHistoryStore } from '@/store/canvas';
+import { useCanvasHistoryStore, type CanvasHistorySnapshot } from '@/store/canvas';
 import { styleSig, type PanelNodeStyle } from '../nodes/panelStyle';
 
 /**
@@ -37,7 +37,7 @@ export function useCanvasHistory({
   const redoStore = useCanvasHistoryStore((s) => s.redo);
   const resetStore = useCanvasHistoryStore((s) => s.reset);
 
-  const historyRef = useRef<{ nodes: PanelFlowNode[]; edges: Edge[] }[]>([]);
+  const historyRef = useRef<CanvasHistorySnapshot[]>([]);
   const histIdxRef = useRef(-1);
 
   const syncRefs = useCallback(() => {
@@ -74,14 +74,13 @@ export function useCanvasHistory({
       syncRefs();
       bumpHist((v) => v + 1);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes, edges, historyKey]);
 
   const restore = useCallback(
-    (snap: { nodes: PanelFlowNode[]; edges: Edge[] } | null) => {
+    (snap: CanvasHistorySnapshot | null) => {
       if (!snap) return;
       applyingRef.current = true;
-      setNodes(snap.nodes.map((n) => ({ ...n })));
+      setNodes(snap.nodes.map((n) => ({ ...n, position: { ...n.position } })));
       setEdges(snap.edges.map((e) => ({ ...e })));
       syncRefs();
       bumpHist((v) => v + 1);

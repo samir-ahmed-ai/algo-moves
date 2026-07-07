@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -28,7 +28,7 @@ interface GuessState {
 
 function matchCount(a: string, b: string): number {
   let c = 0;
-  for (let i = 0; i < a.length; i++) if (a[i] === b[i]) c++;
+  for (let i = 0; i < a.length; i++) if (a[i]! === b[i]!) c++;
   return c;
 }
 
@@ -36,7 +36,7 @@ function record({ secret, words }: GuessInput): Frame<GuessState>[] {
   let cands = [...words];
   let found = false;
 
-  const { emit, frames } = createRecorder<GuessState>(() => ({
+  const { emit, frames } = createPrepRecorder<GuessState>(() => ({
     secret,
     cands: cands.slice(),
     guess: '',
@@ -50,19 +50,19 @@ function record({ secret, words }: GuessInput): Frame<GuessState>[] {
   emit(
     'INIT',
     `${words.length} words`,
-    `Guess the Word: filter candidates by match count with each guess. Master returns positions where guess[i]==secret[i].`,
+    `Guess the Word: filter candidates by match count with each guess. Master returns positions where guess[i]!==secret[i]!.`,
     {},
   );
 
   for (let round = 0; round < 10 && cands.length > 0; round++) {
-    const guess = cands[0];
-    const m = matchCount(guess, secret);
-    if (m === guess.length) {
+    const guess = cands[0]!;
+    const m = matchCount(guess!, secret);
+    if (m === guess!.length) {
       found = true;
       emit(
         'WIN',
-        guess,
-        `Guess "${guess}": ${m}/${guess.length} matches → secret found!`,
+        guess!,
+        `Guess "${guess}": ${m}/${guess!.length} matches → secret found!`,
         { guess, matches: m, round: round + 1, found: true, op: guess },
         'good',
       );
@@ -74,7 +74,7 @@ function record({ secret, words }: GuessInput): Frame<GuessState>[] {
       `Round ${round + 1}: guess "${guess}", master returns ${m} match(es). Filter words with same overlap.`,
       { guess, matches: m, round: round + 1, op: guess },
     );
-    cands = cands.filter((w) => w !== guess && matchCount(w, guess) === m);
+    cands = cands.filter((w) => w !== guess && matchCount(w, guess!) === m);
     emit(
       'FILTER',
       `${cands.length} left`,
@@ -183,7 +183,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Guess the Word: filter candidates by match count with each guess. Master returns positions where guess[i]==secret[i].',
+      'Guess the Word: filter candidates by match count with each guess. Master returns positions where guess[i]!==secret[i]!.',
   },
   {
     id: 'key-step',

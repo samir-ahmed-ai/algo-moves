@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ interface ShortestWayState {
 }
 
 function record({ source, target }: ShortestWayInput): Frame<ShortestWayState>[] {
-  const { emit, frames } = createRecorder<ShortestWayState>(() => ({
+  const { emit, frames } = createPrepRecorder<ShortestWayState>(() => ({
     source,
     target,
     i: null,
@@ -57,16 +57,16 @@ function record({ source, target }: ShortestWayInput): Frame<ShortestWayState>[]
     emit(
       'PASS',
       `pass ${res}`,
-      `Start subsequence #${res}. Sweep source from the left, advancing through target for every character that matches in order. j is at ${j} ("${target[j]}").`,
+      `Start subsequence #${res}. Sweep source from the left, advancing through target for every character that matches in order. j is at ${j} ("${target[j]!}").`,
       { j, res, passStart: prev, i: null },
     );
 
     for (let i = 0; i < source.length && j < target.length; i++) {
-      if (source[i] === target[j]) {
+      if (source[i]! === target[j]!) {
         emit(
           'MATCH',
-          `source[${i}]='${source[i]}'`,
-          `source[${i}] = '${source[i]}' matches target[${j}] = '${target[j]}'. Consume it: advance j to ${j + 1}. That target character is now formed by this subsequence.`,
+          `source[${i}]!='${source[i]!}'`,
+          `source[${i}]! = '${source[i]!}' matches target[${j}]! = '${target[j]!}'. Consume it: advance j to ${j + 1}. That target character is now formed by this subsequence.`,
           { i, j, res, passStart: prev, matchedInPass: true },
           'good',
         );
@@ -74,8 +74,8 @@ function record({ source, target }: ShortestWayInput): Frame<ShortestWayState>[]
       } else {
         emit(
           'SKIP',
-          `source[${i}]='${source[i]}'`,
-          `source[${i}] = '${source[i]}' does not equal target[${j}] = '${target[j]}'. Skip this source character and keep scanning; j stays at ${j}.`,
+          `source[${i}]!='${source[i]!}'`,
+          `source[${i}]! = '${source[i]!}' does not equal target[${j}]! = '${target[j]!}'. Skip this source character and keep scanning; j stays at ${j}.`,
           { i, j, res, passStart: prev, matchedInPass: j > prev },
         );
       }
@@ -85,7 +85,7 @@ function record({ source, target }: ShortestWayInput): Frame<ShortestWayState>[]
       emit(
         'FAIL',
         'no progress',
-        `A whole sweep of source matched no new target character (j stayed at ${prev}). target[${prev}] = '${target[prev]}' never appears in source, so target can never be formed. Return -1.`,
+        `A whole sweep of source matched no new target character (j stayed at ${prev}). target[${prev}]! = '${target[prev]!}' never appears in source, so target can never be formed. Return -1.`,
         { j, res, passStart: prev, matchedInPass: false, answer: -1, done: true },
         'bad',
       );
@@ -95,7 +95,7 @@ function record({ source, target }: ShortestWayInput): Frame<ShortestWayState>[]
     emit(
       'ENDPASS',
       `res=${res}`,
-      `Subsequence #${res} finished, having formed target[${prev}..${j - 1}]. ${
+      `Subsequence #${res} finished, having formed target[${prev}..${j - 1}]!. ${
         j < target.length
           ? `Still need "${target.slice(j)}", so start another pass.`
           : 'All of target is now formed.'
@@ -171,16 +171,16 @@ function View({ frame }: PluginViewProps<ShortestWayState>) {
 function Inspector({ frame }: InspectorProps<ShortestWayState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const sourceCh = s.i !== null ? s.source[s.i] : '—';
-  const targetCh = s.j !== null && s.j < s.target.length ? s.target[s.j] : '—';
+  const sourceCh = s.i !== null ? s.source[s.i]! : '—';
+  const targetCh = s.j !== null && s.j < s.target.length ? s.target[s.j]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="source" v={`"${s.source}"`} />
       <InspectorRow k="target" v={`"${s.target}"`} />
       <InspectorRow k="i (source)" v={s.i ?? '—'} />
-      <InspectorRow k="source[i]" v={sourceCh} />
+      <InspectorRow k="source[i]!" v={sourceCh} />
       <InspectorRow k="j (target)" v={s.j ?? '—'} />
-      <InspectorRow k="target[j]" v={targetCh} />
+      <InspectorRow k="target[j]!" v={targetCh} />
       <InspectorRow k="res (subseq)" v={s.res} />
       <InspectorRow
         k="answer"

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -30,7 +30,7 @@ interface LoggerState {
 function record({ ops }: LoggerInput): Frame<LoggerState>[] {
   const logs: Record<string, number> = {};
 
-  const { emit, frames } = createRecorder<LoggerState>(() => ({
+  const { emit, frames } = createPrepRecorder<LoggerState>(() => ({
     logs: { ...logs },
     op: '',
     allowed: null,
@@ -46,7 +46,7 @@ function record({ ops }: LoggerInput): Frame<LoggerState>[] {
   );
 
   for (const { ts, msg } of ops) {
-    const last = logs[msg];
+    const last = logs[msg]!;
     if (last !== undefined && ts < last + 10) {
       emit(
         'BLOCK',
@@ -56,11 +56,11 @@ function record({ ops }: LoggerInput): Frame<LoggerState>[] {
         'bad',
       );
     } else {
-      logs[msg] = ts;
+      logs[msg]! = ts;
       emit(
         'PRINT',
         `print @${ts}`,
-        `ts=${ts}, msg="${msg}": ${last === undefined ? 'first time' : `last was ${last}, gap ≥ 10`} → print and store logs["${msg}"]=${ts}.`,
+        `ts=${ts}, msg="${msg}": ${last === undefined ? 'first time' : `last was ${last}, gap ≥ 10`} → print and store logs["${msg}"]!=${ts}.`,
         { op: `@${ts} "${msg}"`, allowed: true, lastMsg: msg },
         'good',
       );
@@ -79,7 +79,7 @@ function record({ ops }: LoggerInput): Frame<LoggerState>[] {
 
 function View({ frame }: PluginViewProps<LoggerState>) {
   const s = frame.state;
-  const entries = Object.entries(s.logs).sort((a, b) => a[1] - b[1]);
+  const entries = Object.entries(s.logs).sort((a, b) => a[1]! - b[1]!);
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>

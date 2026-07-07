@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -56,7 +56,7 @@ function record({ x, y }: HammingInput): Frame<HammingState>[] {
   let count = 0;
   const noXor: string[] = new Array<string>(width).fill('·');
 
-  const { emit, frames } = createRecorder<HammingState>(() => ({
+  const { emit, frames } = createPrepRecorder<HammingState>(() => ({
     x,
     y,
     width,
@@ -92,8 +92,8 @@ function record({ x, y }: HammingInput): Frame<HammingState>[] {
       differs ? 'DIFF' : 'SAME',
       differs ? `bit ${b}: 1` : `bit ${b}: 0`,
       differs
-        ? `Bit position ${b}: x has ${xBits[col]}, y has ${yBits[col]} — they differ, so xor's bit is 1. This position adds to the distance.`
-        : `Bit position ${b}: x and y both have ${xBits[col]} — they match, so xor's bit is 0 and this position adds nothing.`,
+        ? `Bit position ${b}: x has ${xBits[col]!}, y has ${yBits[col]!} — they differ, so xor's bit is 1. This position adds to the distance.`
+        : `Bit position ${b}: x and y both have ${xBits[col]!} — they match, so xor's bit is 0 and this position adds nothing.`,
       { xorBits, scanned: col },
       differs ? 'good' : undefined,
     );
@@ -135,7 +135,7 @@ function View({ frame }: PluginViewProps<HammingState>) {
   const yTone = () => '';
   const xorTone = (i: number) => {
     if (s.clearAt === i) return 'match';
-    if (s.xorBits[i] === '1') return s.scanned !== null && i > s.scanned ? '' : 'found';
+    if (s.xorBits[i]! === '1') return s.scanned !== null && i > s.scanned ? '' : 'found';
     return '';
   };
 

@@ -111,7 +111,14 @@ export function ProjectsPanelBody() {
                 <span className={cn('min-w-0 flex-1 text-ink', nodeTextWrap, nodeText.sm)}>
                   {n}
                 </span>
-                <Btn variant="ghost" size="xs" onClick={() => apply(projects[n])}>
+                <Btn
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => {
+                    const project = projects[n];
+                    if (project) apply(project);
+                  }}
+                >
                   Load
                 </Btn>
                 <button

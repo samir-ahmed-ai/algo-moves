@@ -26,8 +26,8 @@ describe('briefFor — full catalog', () => {
     for (const item of items) {
       const brief = briefFor(item, []);
       expect(brief.statements.length, item.id).toBe(2);
-      expect(brief.statements[0].trim().length, item.id).toBeGreaterThan(10);
-      expect(brief.statements[1].trim().length, item.id).toBeGreaterThan(10);
+      expect(brief.statements[0]!.trim().length, item.id).toBeGreaterThan(10);
+      expect(brief.statements[1]!.trim().length, item.id).toBeGreaterThan(10);
       expect(brief.statements[0], item.id).not.toBe(brief.statements[1]);
       expect(brief.cases.length, item.id).toBeGreaterThanOrEqual(1);
 
@@ -76,7 +76,7 @@ describe('statementsFor — spot checks', () => {
     const item = catalog.getItem('number-of-islands');
     expect(item).toBeDefined();
     const brief = briefFor(item!, []);
-    expect(brief.statements[0].length).toBeGreaterThan(10);
+    expect(brief.statements[0]!.length).toBeGreaterThan(10);
     expect(brief.statements[1]).toMatch(/grid|island|visit|connected|dfs|flood/i);
     expect(brief.cases.some((c) => c.output)).toBe(true);
   });

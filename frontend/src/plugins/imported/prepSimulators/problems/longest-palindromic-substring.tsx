@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -20,7 +20,7 @@ interface LpsState {
   l: number | null; // left edge of the current expansion
   r: number | null; // right edge of the current expansion
   center: [number, number] | null; // the seed center [i, i] or [i, i+1]
-  matched: boolean | null; // did s[l] === s[r] on this compare?
+  matched: boolean | null; // did s[l]! === s[r]! on this compare?
   start: number; // start index of the best palindrome so far
   maxLen: number; // length of the best palindrome so far
   best: string; // the best palindrome string so far
@@ -33,7 +33,7 @@ function record({ s }: LpsInput): Frame<LpsState>[] {
   let start = 0;
   let maxLen = 0;
 
-  const { emit, frames } = createRecorder<LpsState>(() => ({
+  const { emit, frames } = createPrepRecorder<LpsState>(() => ({
     chars,
     l: null,
     r: null,
@@ -52,7 +52,7 @@ function record({ s }: LpsInput): Frame<LpsState>[] {
     {},
   );
 
-  // Faithful port of Go's expand(l, r): grow while s[l] === s[r], then update best.
+  // Faithful port of Go's expand(l, r): grow while s[l]! === s[r]!, then update best.
   const expand = (l0: number, r0: number, kind: 'odd' | 'even') => {
     const center: [number, number] = [l0, r0];
     let l = l0;
@@ -62,27 +62,27 @@ function record({ s }: LpsInput): Frame<LpsState>[] {
       emit(
         'CENTER',
         `odd @${l0}`,
-        `Odd-length center: seed both pointers at index ${l0} (the single character '${chars[l0]}'). Expand outward as long as s[l] === s[r].`,
+        `Odd-length center: seed both pointers at index ${l0} (the single character '${chars[l0]!}'). Expand outward as long as s[l]! === s[r]!.`,
         { l, r, center, matched: null },
       );
     } else {
       const between =
         r0 < n
-          ? `'${chars[l0]}' and '${chars[r0]}'`
+          ? `'${chars[l0]!}' and '${chars[r0]!}'`
           : `index ${l0} and index ${r0} (r is off the end)`;
       emit(
         'CENTER',
         `even @${l0},${r0}`,
-        `Even-length center: seed the gap between ${between}. Expand outward as long as s[l] === s[r].`,
+        `Even-length center: seed the gap between ${between}. Expand outward as long as s[l]! === s[r]!.`,
         { l, r, center, matched: null },
       );
     }
 
-    while (l >= 0 && r < n && chars[l] === chars[r]) {
+    while (l >= 0 && r < n && chars[l]! === chars[r]!) {
       emit(
         'MATCH',
-        `s[${l}]==s[${r}]`,
-        `s[${l}]='${chars[l]}' equals s[${r}]='${chars[r]}', so this window is still a palindrome. Step both pointers outward.`,
+        `s[${l}]!==s[${r}]!`,
+        `s[${l}]!='${chars[l]!}' equals s[${r}]!='${chars[r]!}', so this window is still a palindrome. Step both pointers outward.`,
         { l, r, center, matched: true },
         'good',
       );
@@ -104,8 +104,8 @@ function record({ s }: LpsInput): Frame<LpsState>[] {
     } else {
       emit(
         'STOP',
-        `s[${l}]!=s[${r}]`,
-        `s[${l}]='${chars[l]}' differs from s[${r}]='${chars[r]}', so expansion stops. The palindrome found is "${s.slice(spanStart, spanStart + spanLen)}" (length ${spanLen}).`,
+        `s[${l}]!=s[${r}]!`,
+        `s[${l}]!='${chars[l]!}' differs from s[${r}]!='${chars[r]!}', so expansion stops. The palindrome found is "${s.slice(spanStart, spanStart + spanLen)}" (length ${spanLen}).`,
         { l, r, center, matched: false },
         'bad',
       );
@@ -177,7 +177,7 @@ function View({ frame }: PluginViewProps<LpsState>) {
           <span>
             center ={' '}
             <span className="font-mono text-ink">
-              [{s.center[0]}, {s.center[1]}]
+              [{s.center[0]!}, {s.center[1]!}]
             </span>
           </span>
         ) : (
@@ -192,13 +192,13 @@ function Inspector({ frame }: InspectorProps<LpsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const ch = (i: number | null) =>
-    i !== null && i >= 0 && i < s.chars.length ? `'${s.chars[i]}'` : '—';
+    i !== null && i >= 0 && i < s.chars.length ? `'${s.chars[i]!}'` : '—';
   return (
     <VarGrid>
       <InspectorRow k="l" v={s.l ?? '—'} />
       <InspectorRow k="r" v={s.r ?? '—'} />
-      <InspectorRow k="s[l]" v={ch(s.l)} />
-      <InspectorRow k="s[r]" v={ch(s.r)} />
+      <InspectorRow k="s[l]!" v={ch(s.l)} />
+      <InspectorRow k="s[r]!" v={ch(s.r)} />
       <InspectorRow k="start" v={s.start} />
       <InspectorRow k="maxLen" v={s.maxLen} />
       <InspectorRow k="best" v={s.best ? `"${s.best}"` : '—'} />

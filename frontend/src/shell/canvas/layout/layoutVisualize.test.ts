@@ -38,6 +38,8 @@ describe('layoutVisualizeCanvas', () => {
   it('lays out nodes in a row when no workbench is present', () => {
     const laid = layoutVisualizeCanvas([panel('notes'), panel('whiteboard')]);
     expect(laid).toHaveLength(2);
-    expect(laid[1].position.x).toBeGreaterThan(laid[0].position.x);
+    const first = laid[0]!;
+    const second = laid[1]!;
+    expect(second.position.x).toBeGreaterThan(first.position.x);
   });
 });

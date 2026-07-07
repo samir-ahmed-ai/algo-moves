@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -30,7 +30,7 @@ function record({ paint }: PaintInput): Frame<PaintState>[] {
   const jump = new Array(maxR + 1).fill(0);
   const results: number[] = [];
 
-  const { emit, frames } = createRecorder<PaintState>(() => ({
+  const { emit, frames } = createPrepRecorder<PaintState>(() => ({
     maxR,
     jump: jump.slice(),
     results: results.slice(),
@@ -43,22 +43,22 @@ function record({ paint }: PaintInput): Frame<PaintState>[] {
   emit(
     'INIT',
     `${paint.length} days`,
-    `Amount of New Area Painted Each Day: jump[] skips already-painted segments. For each [l,r), walk with jump pointers — count only cells where jump[i]==0 (fresh paint).`,
+    `Amount of New Area Painted Each Day: jump[] skips already-painted segments. For each [l,r), walk with jump pointers — count only cells where jump[i]!==0 (fresh paint).`,
     {},
   );
 
   for (let day = 0; day < paint.length; day++) {
-    const [l, r] = paint[day];
+    const [l, r] = paint[day]!;
     let cnt = 0;
     let i = l;
     while (i < r) {
-      if (jump[i] === 0) {
-        jump[i] = i + 1;
+      if (jump[i]! === 0) {
+        jump[i]! = i + 1;
         cnt++;
         i++;
       } else {
-        const next = jump[i];
-        jump[i] = r;
+        const next = jump[i]!;
+        jump[i]! = r;
         i = next;
       }
     }
@@ -66,7 +66,7 @@ function record({ paint }: PaintInput): Frame<PaintState>[] {
     emit(
       'PAINT',
       `day ${day + 1}: [${l},${r}) → ${cnt}`,
-      `Day ${day + 1}: paint [${l}, ${r}). Jump-pointer walk finds ${cnt} newly painted cell(s). Overlaps skip via jump[i]=r.`,
+      `Day ${day + 1}: paint [${l}, ${r}). Jump-pointer walk finds ${cnt} newly painted cell(s). Overlaps skip via jump[i]!=r.`,
       { day: day + 1, newCount: cnt, op: `[${l},${r}) → ${cnt}` },
       'good',
     );
@@ -105,7 +105,7 @@ function View({ frame }: PluginViewProps<PaintState>) {
             className={cn(
               'h-4 w-3 rounded-sm border',
               vizText.sm,
-              s.jump[i] > i ? 'border-accent bg-accentbg' : 'border-edge bg-surface2',
+              s.jump[i]! > i ? 'border-accent bg-accentbg' : 'border-edge bg-surface2',
             )}
             title={`${i}`}
           />
@@ -178,7 +178,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Amount of New Area Painted Each Day: jump[] skips already-painted segments. For each [l,r), walk with jump pointers — count only cells where jump[i]==0 (fresh paint).',
+      'Amount of New Area Painted Each Day: jump[] skips already-painted segments. For each [l,r), walk with jump pointers — count only cells where jump[i]!==0 (fresh paint).',
   },
   {
     id: 'key-step',
@@ -199,7 +199,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Day : paint [, ). Jump-pointer walk finds  newly painted cell(s). Overlaps skip via jump[i]=r.',
+      'Day : paint [, ). Jump-pointer walk finds  newly painted cell(s). Overlaps skip via jump[i]!=r.',
   },
   {
     id: 'state',
@@ -261,7 +261,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Day : paint [, ). Jump-pointer walk finds  newly painted cell(s). Overlaps skip via jump[i]=r.',
+      'Day : paint [, ). Jump-pointer walk finds  newly painted cell(s). Overlaps skip via jump[i]!=r.',
   },
 ];
 export const simulator: ProblemSimulator = {

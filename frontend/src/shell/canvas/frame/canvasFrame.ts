@@ -97,8 +97,8 @@ export function buildCanvasFrame(
 
   if (saved) {
     nodes = nodes.map((n) => {
-      if (!saved[n.id]) return n;
       const s = saved[n.id];
+      if (!s) return n;
       const kind = n.data.kind ?? n.id;
       const width =
         mode === 'visualize' && (kind === 'viz' || kind === 'workbench')
@@ -115,16 +115,14 @@ export function buildCanvasFrame(
               position: n.position,
               width,
               height,
-              parentId,
-              extent: parentId ? ('parent' as const) : undefined,
+              ...(parentId ? { parentId, extent: 'parent' as const } : {}),
             }
           : {
               ...n,
               position: s.position,
               width,
               height,
-              parentId,
-              extent: parentId ? ('parent' as const) : undefined,
+              ...(parentId ? { parentId, extent: 'parent' as const } : {}),
             };
       return {
         ...base,
@@ -137,7 +135,7 @@ export function buildCanvasFrame(
           ...(s.accent ? { accent: s.accent } : {}),
           ...(s.style ? { style: { ...n.data.style, ...s.style } } : {}),
         },
-      };
+      } as PanelFlowNode;
     });
   }
 

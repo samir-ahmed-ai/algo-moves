@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -27,7 +27,7 @@ function record({ content }: ReverseFileInput): Frame<ReverseFileState>[] {
   let i = 0;
   let j = bytes.length - 1;
 
-  const { emit, frames } = createRecorder<ReverseFileState>(() => ({
+  const { emit, frames } = createPrepRecorder<ReverseFileState>(() => ({
     bytes: bytes.slice(),
     i,
     j,
@@ -44,11 +44,11 @@ function record({ content }: ReverseFileInput): Frame<ReverseFileState>[] {
   while (i < j) {
     emit(
       'SWAP',
-      `'${bytes[i]}'↔'${bytes[j]}'`,
-      `Swap bytes at indices ${i} and ${j}: '${bytes[i]}' ↔ '${bytes[j]}', then move i++ and j--.`,
+      `'${bytes[i]!}'↔'${bytes[j]!}'`,
+      `Swap bytes at indices ${i} and ${j}: '${bytes[i]!}' ↔ '${bytes[j]!}', then move i++ and j--.`,
       { i, j },
     );
-    [bytes[i], bytes[j]] = [bytes[j], bytes[i]];
+    [bytes[i]!, bytes[j]!] = [bytes[j]!, bytes[i]!];
     i++;
     j--;
     emit(

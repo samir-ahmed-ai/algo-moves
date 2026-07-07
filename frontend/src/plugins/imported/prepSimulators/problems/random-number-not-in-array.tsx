@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -35,7 +35,7 @@ function record({ maxVal, blocked, k }: RandInput): Frame<RandState>[] {
   const uniq = [...blockedSet].sort((a, b) => a - b);
   const isBlocked = (x: number) => blockedSet.has(x);
 
-  const { emit, frames } = createRecorder<RandState>(() => ({
+  const { emit, frames } = createPrepRecorder<RandState>(() => ({
     maxVal,
     blocked,
     blockedSet: uniq,

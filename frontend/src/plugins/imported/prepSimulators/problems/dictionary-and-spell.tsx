@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -36,8 +36,8 @@ function buildTrie(words: string[]): TrieNode {
   for (const w of words) {
     let node = root;
     for (const ch of w) {
-      if (!node.children[ch]) node.children[ch] = { children: {}, word: false };
-      node = node.children[ch];
+      if (!node.children[ch]!) node.children[ch]! = { children: {}, word: false };
+      node = node.children[ch]!;
     }
     node.word = true;
   }
@@ -47,8 +47,8 @@ function buildTrie(words: string[]): TrieNode {
 function search(root: TrieNode, word: string): boolean {
   let node = root;
   for (const ch of word) {
-    if (!node.children[ch]) return false;
-    node = node.children[ch];
+    if (!node.children[ch]!) return false;
+    node = node.children[ch]!;
   }
   return node.word;
 }
@@ -56,8 +56,8 @@ function search(root: TrieNode, word: string): boolean {
 function suggest(root: TrieNode, prefix: string, limit: number): string[] {
   let node = root;
   for (const ch of prefix) {
-    if (!node.children[ch]) return [];
-    node = node.children[ch];
+    if (!node.children[ch]!) return [];
+    node = node.children[ch]!;
   }
   const out: string[] = [];
   const dfs = (n: TrieNode, path: string) => {
@@ -72,7 +72,7 @@ function suggest(root: TrieNode, prefix: string, limit: number): string[] {
 function record({ words, ops }: DictInput): Frame<DictState>[] {
   const root = buildTrie(words);
 
-  const { emit, frames } = createRecorder<DictState>(() => ({
+  const { emit, frames } = createPrepRecorder<DictState>(() => ({
     words: [...words],
     op: '',
     result: '',

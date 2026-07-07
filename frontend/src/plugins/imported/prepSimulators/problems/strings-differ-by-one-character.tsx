@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,9 +32,9 @@ function wildcard(word: string, col: number): string {
 }
 
 function record({ dict }: DifferInput): Frame<DifferState>[] {
-  const L = dict.length === 0 ? 0 : dict[0].length;
+  const L = dict.length === 0 ? 0 : dict[0]!.length;
 
-  const { emit, frames } = createRecorder<DifferState>(() => ({
+  const { emit, frames } = createPrepRecorder<DifferState>(() => ({
     dict,
     L,
     col: null,
@@ -75,14 +75,14 @@ function record({ dict }: DifferInput): Frame<DifferState>[] {
     );
 
     for (let w = 0; w < dict.length; w++) {
-      const p = wildcard(dict[w], col);
+      const p = wildcard(dict[w]!, col);
       const seenList = [...seen];
       if (seen.has(p)) {
         const owner = seenOwner.get(p)!;
         emit(
           'FOUND',
           `${p}`,
-          `Word ${w} ("${dict[w]}") makes key "${p}", which word ${owner} ("${dict[owner]}") already produced this column. They agree everywhere except column ${col}, so they differ by exactly one character. Answer: true.`,
+          `Word ${w} ("${dict[w]!}") makes key "${p}", which word ${owner} ("${dict[owner]!}") already produced this column. They agree everywhere except column ${col}, so they differ by exactly one character. Answer: true.`,
           {
             col,
             wordIdx: w,
@@ -99,7 +99,7 @@ function record({ dict }: DifferInput): Frame<DifferState>[] {
       emit(
         'STORE',
         `${p}`,
-        `Word ${w} ("${dict[w]}") blanks column ${col} to key "${p}". It is new for this column, so remember it and continue.`,
+        `Word ${w} ("${dict[w]!}") blanks column ${col} to key "${p}". It is new for this column, so remember it and continue.`,
         { col, wordIdx: w, pattern: p, seen: seenList },
       );
       seen.add(p);
@@ -119,7 +119,7 @@ function record({ dict }: DifferInput): Frame<DifferState>[] {
 
 function View({ frame }: PluginViewProps<DifferState>) {
   const s = frame.state;
-  const chars = s.wordIdx !== null ? s.dict[s.wordIdx].split('') : (s.dict[0] ?? '').split('');
+  const chars = s.wordIdx !== null ? s.dict[s.wordIdx]!.split('') : (s.dict[0]! ?? '').split('');
   const pointers: ArrayPointer[] = [];
   if (s.col !== null) pointers.push({ i: s.col, label: '*', tone: 'accent', place: 'above' });
   const tone = (i: number) => (s.col === i ? 'match' : '');
@@ -131,7 +131,7 @@ function View({ frame }: PluginViewProps<DifferState>) {
         {s.wordIdx !== null && (
           <>
             {' · '}word {s.wordIdx} ={' '}
-            <span className="font-mono text-ink">"{s.dict[s.wordIdx]}"</span>
+            <span className="font-mono text-ink">"{s.dict[s.wordIdx]!}"</span>
           </>
         )}
       </div>

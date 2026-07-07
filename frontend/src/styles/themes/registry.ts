@@ -30,7 +30,10 @@ export type BaseThemeId = (typeof BASE_THEME_IDS)[number];
 export type HybridThemeId = (typeof HYBRID_THEME_IDS)[number];
 export type ThemePreset = BaseThemeId | HybridThemeId;
 
-export const THEME_PRESETS: ThemePreset[] = [...BASE_THEME_IDS, ...HYBRID_THEME_IDS];
+export const THEME_PRESETS: readonly ThemePreset[] = Object.freeze([
+  ...BASE_THEME_IDS,
+  ...HYBRID_THEME_IDS,
+]);
 
 export const DEFAULT_THEME_PRESET: ThemePreset = 'mint-saas';
 const THEME_PRESET_SET = new Set<string>(THEME_PRESETS);
@@ -46,7 +49,7 @@ export type ThemePresetOption = ThemeMeta & {
   sourceAvailable: boolean;
 };
 
-const BASE_LABELS: Record<BaseThemeId, string> = {
+const BASE_LABELS: Readonly<Record<BaseThemeId, string>> = {
   'mint-saas': 'Mint SaaS',
   'sunset-warm': 'Sunset Warm',
   'violet-tech': 'Violet Tech',
@@ -61,7 +64,7 @@ const BASE_LABELS: Record<BaseThemeId, string> = {
   'pop-play': 'Pop Play',
 };
 
-const HYBRID_LABELS: Record<HybridThemeId, string> = {
+const HYBRID_LABELS: Readonly<Record<HybridThemeId, string>> = {
   'pastel-brutal': 'Pastel Brutal',
   'clay-sunset': 'Clay Sunset',
   'mono-tech': 'Mono Tech',
@@ -72,17 +75,19 @@ const HYBRID_LABELS: Record<HybridThemeId, string> = {
   'mauve-dream': 'Mauve Dream',
 };
 
-export const THEME_META: ThemeMeta[] = THEME_PRESETS.map((id) => ({
-  id,
-  label:
-    (BASE_LABELS as Record<string, string>)[id] ??
-    (HYBRID_LABELS as Record<string, string>)[id] ??
+export const THEME_META: readonly ThemeMeta[] = Object.freeze(
+  THEME_PRESETS.map((id) => ({
     id,
-  swatch: themeSources[id]?.swatch ?? 'oklch(0.5 0 0)',
-  kind: BASE_THEME_IDS.includes(id as BaseThemeId) ? 'base' : 'hybrid',
-}));
+    label:
+      (BASE_LABELS as Record<string, string>)[id] ??
+      (HYBRID_LABELS as Record<string, string>)[id] ??
+      id,
+    swatch: themeSources[id]?.swatch ?? 'oklch(0.5 0 0)',
+    kind: (BASE_THEME_IDS.includes(id as BaseThemeId) ? 'base' : 'hybrid') as 'base' | 'hybrid',
+  })),
+);
 
-export const THEME_META_BY_ID: Record<ThemePreset, ThemeMeta> = THEME_META.reduce(
+export const THEME_META_BY_ID: Readonly<Record<ThemePreset, ThemeMeta>> = THEME_META.reduce(
   (acc, meta) => {
     acc[meta.id] = meta;
     return acc;
@@ -90,10 +95,12 @@ export const THEME_META_BY_ID: Record<ThemePreset, ThemeMeta> = THEME_META.reduc
   {} as Record<ThemePreset, ThemeMeta>,
 );
 
-export const THEME_PRESET_OPTIONS: ThemePresetOption[] = THEME_META.map((meta) => ({
-  ...meta,
-  sourceAvailable: themeSources[meta.id] != null,
-}));
+export const THEME_PRESET_OPTIONS: readonly ThemePresetOption[] = Object.freeze(
+  THEME_META.map((meta) => ({
+    ...meta,
+    sourceAvailable: themeSources[meta.id] != null,
+  })),
+);
 
 export function getThemeMeta(value: unknown): ThemeMeta {
   return THEME_META_BY_ID[normalizeThemePreset(value)];
@@ -105,7 +112,7 @@ export function getThemeSource(value: unknown) {
 }
 
 /** Map legacy preset ids from share URLs to the nearest new preset. */
-const LEGACY_PRESET_MAP: Record<string, ThemePreset> = {
+const LEGACY_PRESET_MAP: Readonly<Record<string, ThemePreset>> = {
   classic: 'mint-saas',
   ocean: 'cosmic-lilac',
   forest: 'mint-saas',
@@ -119,7 +126,7 @@ export function normalizeThemePreset(value: unknown): ThemePreset {
     return id as ThemePreset;
   }
   if (id in LEGACY_PRESET_MAP) {
-    return LEGACY_PRESET_MAP[id];
+    return LEGACY_PRESET_MAP[id] ?? DEFAULT_THEME_PRESET;
   }
   return DEFAULT_THEME_PRESET;
 }

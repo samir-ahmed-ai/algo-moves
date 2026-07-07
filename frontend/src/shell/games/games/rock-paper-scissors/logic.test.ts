@@ -81,6 +81,6 @@ describe('rock-paper-scissors N-player scoring', () => {
   it('ranks a clear single winner first', () => {
     const places = matchPlacements({ x: 3, y: 1 });
     expect(places[0]).toEqual({ id: 'x', score: 3, placement: 1 });
-    expect(places[1].placement).toBe(2);
+    expect(places[1]!.placement).toBe(2);
   });
 });

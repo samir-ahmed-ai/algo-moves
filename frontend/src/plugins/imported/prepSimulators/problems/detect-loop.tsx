@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -49,7 +49,7 @@ function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
     return loopAt >= 0 ? loopAt : null;
   };
 
-  const { emit, frames } = createRecorder<DetectLoopState>(() => ({
+  const { emit, frames } = createPrepRecorder<DetectLoopState>(() => ({
     values,
     loopAt,
     slow: null,
@@ -92,7 +92,7 @@ function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
     emit(
       'STEP',
       `slow=${slow}, fast=${fast}`,
-      `Advance: slow steps once to value ${slow !== null ? values[slow] : '∅'} (index ${slow}), fast steps twice to value ${fast !== null ? values[fast] : '∅'} (index ${fast}). Check whether they now sit on the same node.`,
+      `Advance: slow steps once to value ${slow !== null ? values[slow]! : '∅'} (index ${slow}), fast steps twice to value ${fast !== null ? values[fast]! : '∅'} (index ${fast}). Check whether they now sit on the same node.`,
       { slow, fast, phase: 'race' },
     );
 
@@ -100,7 +100,7 @@ function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
       emit(
         'MEET',
         `meet@${slow}`,
-        `Slow and fast collide at index ${slow} (value ${slow !== null ? values[slow] : '∅'}) — that proves a loop exists. Now reset slow to the head and advance both by 1; they will meet again exactly at the loop entry.`,
+        `Slow and fast collide at index ${slow} (value ${slow !== null ? values[slow]! : '∅'}) — that proves a loop exists. Now reset slow to the head and advance both by 1; they will meet again exactly at the loop entry.`,
         { slow, fast, phase: 'reset', hasLoop: true },
         'good',
       );
@@ -128,7 +128,7 @@ function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
       emit(
         'ENTRY',
         `entry@${slow}`,
-        `slow and fast meet again at index ${slow} (value ${slow !== null ? values[slow] : '∅'}) — that is the start of the loop. Return this node.`,
+        `slow and fast meet again at index ${slow} (value ${slow !== null ? values[slow]! : '∅'}) — that is the start of the loop. Return this node.`,
         { slow, fast, phase: 'done', hasLoop: true, entry: slow, done: true },
         'good',
       );
@@ -160,7 +160,7 @@ function View({ frame }: PluginViewProps<DetectLoopState>) {
 
   const chainHint = s.values.map((v) => `${v}`).join(' → ');
   const loopTail =
-    s.loopAt >= 0 ? ` ↺ back to index ${s.loopAt} (value ${s.values[s.loopAt]})` : ' → ∅';
+    s.loopAt >= 0 ? ` ↺ back to index ${s.loopAt} (value ${s.values[s.loopAt]!})` : ' → ∅';
 
   return (
     <div className="board-area">
@@ -182,7 +182,7 @@ function View({ frame }: PluginViewProps<DetectLoopState>) {
       </div>
       {s.entry !== null && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → loop entry at index {s.entry} (value {s.values[s.entry]})
+          → loop entry at index {s.entry} (value {s.values[s.entry]!})
         </div>
       )}
       {s.done && s.hasLoop === false && (
@@ -195,7 +195,7 @@ function View({ frame }: PluginViewProps<DetectLoopState>) {
 function Inspector({ frame }: InspectorProps<DetectLoopState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const at = (i: number | null) => (i !== null ? `${i} (=${s.values[i]})` : '—');
+  const at = (i: number | null) => (i !== null ? `${i} (=${s.values[i]!})` : '—');
   return (
     <VarGrid>
       <InspectorRow k="len" v={s.values.length} />
@@ -337,7 +337,7 @@ export const simulator: ProblemSimulator = {
     const s = frames[frames.length - 1]?.state as DetectLoopState | undefined;
     if (!s) return { ok: false, label: 'no frames' };
     if (s.entry !== null) {
-      return { ok: true, label: `loop entry @ ${s.entry} (val ${s.values[s.entry]})` };
+      return { ok: true, label: `loop entry @ ${s.entry} (val ${s.values[s.entry]!})` };
     }
     return { ok: s.hasLoop === false, label: 'no loop' };
   },

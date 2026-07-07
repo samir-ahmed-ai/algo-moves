@@ -122,10 +122,9 @@ function unparentNode(
   const { slotIndex: _, ...restData } = child.data;
   return nodes.map((n) => {
     if (n.id !== childId) return n;
+    const { parentId: _parentId, extent: _extent, ...rest } = n;
     const next: PanelFlowNode = {
-      ...n,
-      parentId: undefined,
-      extent: undefined,
+      ...rest,
       position,
       data: restData,
     };
@@ -249,9 +248,10 @@ export function removeNodeFromSlot(nodes: PanelFlowNode[], childId: string): Pan
     if (n.id !== hostId) return n;
     const slots = hostSlots(n.data).map((id) => (id === childId ? null : id));
     const hasAny = slots.some(Boolean);
+    const { layoutSlots: _layoutSlots, ...restData } = n.data;
     return {
       ...n,
-      data: hasAny ? { ...n.data, layoutSlots: slots } : { ...n.data, layoutSlots: undefined },
+      data: hasAny ? { ...restData, layoutSlots: slots } : restData,
     };
   });
   return next;

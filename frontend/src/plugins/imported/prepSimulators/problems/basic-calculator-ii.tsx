@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -39,7 +39,7 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
   let num = 0;
   let op: Op = '+';
 
-  const { emit, frames } = createRecorder<CalcState>(() => ({
+  const { emit, frames } = createPrepRecorder<CalcState>(() => ({
     chars,
     i: null,
     num,
@@ -60,15 +60,15 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
   // Iterate one extra step (i === chars.length) to flush the last pending number,
   // exactly like the Go `for i := 0; i <= len(s); i++` loop.
   for (let i = 0; i <= chars.length; i++) {
-    const c = i < chars.length ? chars[i] : '';
+    const c = i < chars.length ? chars[i]! : '';
 
     if (i < chars.length && c === ' ') {
       emit('SKIP', 'space', `Index ${i} is a space — ignore it and keep scanning.`, { i });
       continue;
     }
 
-    if (i < chars.length && c >= '0' && c <= '9') {
-      num = num * 10 + (c.charCodeAt(0) - 48);
+    if (i < chars.length && c! >= '0' && c! <= '9') {
+      num = num * 10 + (c!.charCodeAt(0) - 48);
       emit(
         'DIGIT',
         `num=${num}`,
@@ -96,18 +96,18 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
         flushCaption = `Pending operator is '−', so push −${num} onto the stack as its own term.`;
         break;
       case '*': {
-        const top = stack[stack.length - 1];
-        const prod = top * num;
-        stack[stack.length - 1] = prod;
+        const top = stack[stack.length - 1]!;
+        const prod = top! * num;
+        stack[stack.length - 1]! = prod;
         applied = stack.length - 1;
         flushCaption = `Pending operator is '×', so fold into the top of the stack: ${top} × ${num} = ${prod}. Multiplication binds tighter, so it consumes the previous term.`;
         break;
       }
       case '/': {
-        const top = stack[stack.length - 1];
+        const top = stack[stack.length - 1]!;
         // Go integer division truncates toward zero.
-        const q = Math.trunc(top / num);
-        stack[stack.length - 1] = q;
+        const q = Math.trunc(top! / num);
+        stack[stack.length - 1]! = q;
         applied = stack.length - 1;
         flushCaption = `Pending operator is '÷', so fold into the top of the stack: trunc(${top} ÷ ${num}) = ${q}. Division binds tighter, so it consumes the previous term.`;
         break;
@@ -115,7 +115,7 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
     }
 
     const atEnd = i >= chars.length;
-    const nextOp: Op = atEnd ? op : isOp(c) ? c : op;
+    const nextOp: Op = atEnd ? op : isOp(c!) ? c : op;
     const where = atEnd ? 'End of expression' : `Operator '${c}' at index ${i}`;
 
     // Reset the number accumulator for the next term, and adopt the new operator.
@@ -180,7 +180,10 @@ function Inspector({ frame }: InspectorProps<CalcState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="char" v={s.i !== null && s.i < s.chars.length ? `'${s.chars[s.i]}'` : '—'} />
+      <InspectorRow
+        k="char"
+        v={s.i !== null && s.i < s.chars.length ? `'${s.chars[s.i]!}'` : '—'}
+      />
       <InspectorRow k="num" v={s.num} />
       <InspectorRow k="pending op" v={opGlyph} />
       <InspectorRow k="stack" v={`[${s.stack.join(', ')}]`} />

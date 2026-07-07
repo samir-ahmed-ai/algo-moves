@@ -46,7 +46,7 @@ function record({ values, cycleTo }: CycleInput): Frame<CycleState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         values,
         next: next.slice(),
@@ -77,8 +77,10 @@ function record({ values, cycleTo }: CycleInput): Frame<CycleState>[] {
       );
       break;
     }
-    slow = next[slow as number];
-    fast = next[next[fast] as number];
+    const slowNext = next[slow!];
+    slow = slowNext ?? null;
+    const fast1 = next[fast!];
+    fast = fast1 == null ? null : (next[fast1] ?? null);
     step += 1;
     if (slow === fast) {
       met = true;

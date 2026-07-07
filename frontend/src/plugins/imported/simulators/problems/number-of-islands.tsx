@@ -37,7 +37,7 @@ const DIRS = [
 
 function record({ grid }: IslandInput): Frame<IslandState>[] {
   const m = grid.length;
-  const n = grid[0].length;
+  const n = grid[0]!.length;
   const seen = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
   let count = 0;
 
@@ -66,7 +66,7 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
 
   for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
-      if (grid[r][c] === '1' && !seen[r][c]) {
+      if (grid[r]![c] === '1' && !seen[r]![c]) {
         count++;
         snap(
           'ISLAND',
@@ -76,7 +76,7 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
         );
         // iterative DFS flood fill
         const stack: [number, number][] = [[r, c]];
-        seen[r][c] = true;
+        seen[r]![c] = true;
         while (stack.length) {
           const [cr, cc] = stack.pop() as [number, number];
           snap(
@@ -86,15 +86,15 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
             [cr, cc],
           );
           for (const [dr, dc] of DIRS) {
-            const nr = cr + dr;
-            const nc = cc + dc;
-            if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] === '1' && !seen[nr][nc]) {
-              seen[nr][nc] = true;
+            const nr = cr + dr!;
+            const nc = cc + dc!;
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr]![nc] === '1' && !seen[nr]![nc]) {
+              seen[nr]![nc] = true;
               stack.push([nr, nc]);
             }
           }
         }
-      } else if (grid[r][c] === '0') {
+      } else if (grid[r]![c] === '0') {
         snap('WATER', `(${r},${c}) water`, `Cell (${r}, ${c}) is water — skip.`, [r, c]);
       }
     }
@@ -109,8 +109,8 @@ function View({ frame }: PluginViewProps<IslandState>) {
   const display = s.grid.map((row) => row.slice());
   const cellTone = (r: number, c: number) => {
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
-    if (s.seen[r][c]) return 'visited';
-    return s.grid[r][c] === '1' ? 'land' : 'water';
+    if (s.seen[r]![c]) return 'visited';
+    return s.grid[r]![c] === '1' ? 'land' : 'water';
   };
   return (
     <VizStage

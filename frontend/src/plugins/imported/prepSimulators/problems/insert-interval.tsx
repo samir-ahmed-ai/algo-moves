@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -37,18 +37,18 @@ interface InsertState {
   done: boolean;
 }
 
-const fmt = (iv: Interval) => `[${iv[0]},${iv[1]}]`;
+const fmt = (iv: Interval) => `[${iv[0]!},${iv[1]!}]`;
 
 function record({ ins, x }: InsertInput): Frame<InsertState>[] {
   const res: Interval[] = [];
   // local mutable copy of x so we never mutate the input tuple
-  let xs = x[0];
-  let xe = x[1];
+  let xs = x[0]!;
+  let xe = x[1]!;
 
-  const { emit, frames } = createRecorder<InsertState>(() => ({
+  const { emit, frames } = createPrepRecorder<InsertState>(() => ({
     ins: ins,
     x: [xs, xe],
-    res: res.map((r) => [r[0], r[1]] as Interval),
+    res: res.map((r) => [r[0]!, r[1]!] as Interval),
     i: null,
     phase: 'init',
     placedAt: null,
@@ -65,26 +65,26 @@ function record({ ins, x }: InsertInput): Frame<InsertState>[] {
   let i = 0;
 
   // Segment 1 — copy intervals that end before x starts (no overlap, left side).
-  while (i < ins.length && ins[i][1] < xs) {
-    res.push([ins[i][0], ins[i][1]]);
+  while (i < ins.length && ins[i]![1] < xs) {
+    res.push([ins[i]![0], ins[i]![1]]);
     emit(
       'BEFORE',
-      `copy ${fmt(ins[i])}`,
-      `ins[${i}] = ${fmt(ins[i])} ends at ${ins[i][1]}, which is below x.start = ${xs}, so it sits entirely to the left. Copy it straight into the result.`,
+      `copy ${fmt(ins[i]!)}`,
+      `ins[${i}]! = ${fmt(ins[i]!)} ends at ${ins[i]![1]}, which is below x.start = ${xs}, so it sits entirely to the left. Copy it straight into the result.`,
       { i: i, phase: 'before', placedAt: null },
     );
     i++;
   }
 
   // Segment 2 — absorb every interval that overlaps x, extending x's bounds.
-  while (i < ins.length && ins[i][0] <= xe) {
+  while (i < ins.length && ins[i]![0] <= xe) {
     const before: Interval = [xs, xe];
-    if (ins[i][0] < xs) xs = ins[i][0];
-    if (ins[i][1] > xe) xe = ins[i][1];
+    if (ins[i]![0] < xs) xs = ins[i]![0];
+    if (ins[i]![1] > xe) xe = ins[i]![1];
     emit(
       'MERGE',
-      `absorb ${fmt(ins[i])}`,
-      `ins[${i}] = ${fmt(ins[i])} starts at ${ins[i][0]} ≤ x.end = ${before[1]}, so it overlaps x. Absorb it: x grows from ${fmt(before)} to ${fmt([xs, xe])} by taking the min start and max end.`,
+      `absorb ${fmt(ins[i]!)}`,
+      `ins[${i}]! = ${fmt(ins[i]!)} starts at ${ins[i]![0]} ≤ x.end = ${before[1]!}, so it overlaps x. Absorb it: x grows from ${fmt(before)} to ${fmt([xs, xe])} by taking the min start and max end.`,
       { i: i, phase: 'merge', placedAt: null },
     );
     i++;
@@ -103,11 +103,11 @@ function record({ ins, x }: InsertInput): Frame<InsertState>[] {
 
   // Segment 3 — copy the remaining intervals (all to the right of x).
   while (i < ins.length) {
-    res.push([ins[i][0], ins[i][1]]);
+    res.push([ins[i]![0], ins[i]![1]]);
     emit(
       'AFTER',
-      `copy ${fmt(ins[i])}`,
-      `ins[${i}] = ${fmt(ins[i])} starts after x.end = ${xe}, so it belongs to the right segment. Copy it across unchanged.`,
+      `copy ${fmt(ins[i]!)}`,
+      `ins[${i}]! = ${fmt(ins[i]!)} starts after x.end = ${xe}, so it belongs to the right segment. Copy it across unchanged.`,
       { i: i, phase: 'after', placedAt: placed },
     );
     i++;
@@ -150,7 +150,7 @@ function View({ frame }: PluginViewProps<InsertState>) {
         <RailStat k="x" v={fmt(s.x)} tone="accent" />
         <RailStat k="phase" v={s.phase} />
         <RailStat k="i" v={s.i ?? '—'} />
-        <RailStat k="ins[i]" v={s.i !== null ? fmt(s.ins[s.i]) : '—'} />
+        <RailStat k="ins[i]!" v={s.i !== null ? fmt(s.ins[s.i]!) : '—'} />
       </RailGroup>
       {s.done && <RailResult label="result" value={s.res.map(fmt).join(' ')} tone="good" />}
     </>
@@ -188,7 +188,7 @@ function Inspector({ frame }: InspectorProps<InsertState>) {
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="x (merged)" v={fmt(s.x)} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="ins[i]" v={s.i !== null ? fmt(s.ins[s.i]) : '—'} />
+      <InspectorRow k="ins[i]!" v={s.i !== null ? fmt(s.ins[s.i]!) : '—'} />
       <InspectorRow k="result size" v={s.res.length} />
       <InspectorRow k="x placed at" v={s.placedAt ?? '…'} />
     </VarGrid>

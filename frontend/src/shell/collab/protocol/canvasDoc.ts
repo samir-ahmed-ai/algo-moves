@@ -99,9 +99,9 @@ export function diffNodes(prev: PanelFlowNode[], next: PanelFlowNode[]): EditOp[
         id: node.id,
         x: node.position.x,
         y: node.position.y,
-        width: node.width,
-        height: node.height,
-        parentId: node.parentId,
+        ...(node.width != null ? { width: node.width } : {}),
+        ...(node.height != null ? { height: node.height } : {}),
+        ...(node.parentId !== undefined ? { parentId: node.parentId } : {}),
       });
     }
     const beforeData = JSON.stringify(pickCollabData(before.data));
@@ -140,22 +140,21 @@ export function applyEditToNodes(op: EditOp, nodes: PanelFlowNode[]): PanelFlowN
     case 'node-remove':
       return nodes.filter((n) => n.id !== op.id);
     case 'node-move':
-      return nodes.map((n) =>
-        n.id === op.id
-          ? {
-              ...n,
-              position: { x: op.x, y: op.y },
-              ...(op.width != null ? { width: op.width } : {}),
-              ...(op.height != null ? { height: op.height } : {}),
-              ...(op.parentId !== undefined
-                ? {
-                    parentId: op.parentId,
-                    extent: op.parentId ? ('parent' as const) : undefined,
-                  }
-                : {}),
-            }
-          : n,
-      );
+      return nodes.map((n) => {
+        if (n.id !== op.id) return n;
+        const moved = {
+          ...n,
+          position: { x: op.x, y: op.y },
+          ...(op.width != null ? { width: op.width } : {}),
+          ...(op.height != null ? { height: op.height } : {}),
+        };
+        if (op.parentId === undefined) return moved as PanelFlowNode;
+        if (op.parentId) {
+          return { ...moved, parentId: op.parentId, extent: 'parent' as const } as PanelFlowNode;
+        }
+        const { parentId: _p, extent: _e, ...rest } = moved;
+        return rest as PanelFlowNode;
+      });
     case 'node-patch':
       return nodes.map((n) => (n.id === op.id ? { ...n, data: { ...n.data, ...op.data } } : n));
     default:
@@ -217,9 +216,9 @@ export function mergeRemoteNodes(local: PanelFlowNode[], remote: PanelFlowNode[]
     if (l.dragging) return l; // owner keeps control until drag-end
     return {
       ...r,
-      selected: l.selected,
+      ...(l.selected !== undefined ? { selected: l.selected } : {}),
       data: { ...r.data, ...preserveLocalData(l.data) },
-    };
+    } as PanelFlowNode;
   });
 }
 

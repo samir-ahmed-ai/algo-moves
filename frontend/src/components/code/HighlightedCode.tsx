@@ -25,9 +25,14 @@ export function HighlightedCode({
 
   useEffect(() => {
     let cancelled = false;
-    void highlightSnippetShiki(code, lang, { gutter }).then((node) => {
-      if (!cancelled) setContent(node);
-    });
+    setContent(highlightSnippetPlain(code, lang, { gutter }));
+    void highlightSnippetShiki(code, lang, { gutter })
+      .then((node) => {
+        if (!cancelled) setContent(node);
+      })
+      .catch(() => {
+        if (!cancelled) setContent(highlightSnippetPlain(code, lang, { gutter }));
+      });
     return () => {
       cancelled = true;
     };

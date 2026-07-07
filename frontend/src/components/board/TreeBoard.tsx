@@ -51,7 +51,10 @@ export function TreeBoard({
   const width = Math.max(1, counter) * gapX + pad * 2 - gapX + 2 * nodeRadius;
   const height = (maxDepth + 1) * gapY + pad;
 
-  const xy = (i: number): [number, number] => [pad + xIndex[i] * gapX, pad + depthOf(i) * gapY];
+  const xy = (i: number): [number, number] => [
+    pad + (xIndex[i] ?? 0) * gapX,
+    pad + depthOf(i) * gapY,
+  ];
 
   const edges: ReactElement[] = [];
   for (let i = 0; i < n; i++) {

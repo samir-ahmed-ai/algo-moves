@@ -15,11 +15,19 @@ export type RoomStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error' | '
 
 type RelayHandler = (data: unknown, fromId: string) => void;
 type StateHandler = (state: unknown) => void;
+type SeatRequest = 'player' | 'spectator';
+type ConnectTarget = Readonly<{
+  room: string;
+  name: string;
+  pid: string;
+  asSpectator: boolean;
+  capacity?: number;
+}>;
 
 /** How to join a room: watch instead of play, and how large a new room should be. */
 export interface ConnectOptions {
-  asSpectator?: boolean;
-  capacity?: number;
+  asSpectator?: boolean | undefined;
+  capacity?: number | undefined;
 }
 
 export interface GameRoomApi {
@@ -55,7 +63,7 @@ export interface GameRoomApi {
   /** Publish shared room state (survives late joins); updates locally too. Host only server-side. */
   publishState: (state: unknown) => void;
   /** Ask to switch between playing and spectating. */
-  requestSeat: (want: 'player' | 'spectator') => void;
+  requestSeat: (want: SeatRequest) => void;
   /** Subscribe to peer relay messages. Returns an unsubscribe fn. */
   subscribe: (fn: RelayHandler) => () => void;
   /** Subscribe to shared-state changes. Returns an unsubscribe fn. */
@@ -107,13 +115,7 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
   const wsRef = useRef<WebSocket | null>(null);
   const relayListeners = useRef(new Set<RelayHandler>());
   const stateListeners = useRef(new Set<StateHandler>());
-  const targetRef = useRef<{
-    room: string;
-    name: string;
-    pid: string;
-    asSpectator: boolean;
-    capacity?: number;
-  } | null>(null);
+  const targetRef = useRef<ConnectTarget | null>(null);
   const shouldReconnect = useRef(false);
   const retriesRef = useRef(0);
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -135,6 +137,12 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
     setSelf(null);
     setPlayers([]);
     setSpectators([]);
+  }, []);
+
+  const clearRetryTimer = useCallback(() => {
+    if (!retryTimer.current) return;
+    clearTimeout(retryTimer.current);
+    retryTimer.current = null;
   }, []);
 
   // Refs mirror the roster so the socket's message handler can re-bucket peers
@@ -282,18 +290,23 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
 
   const connect = useCallback(
     (roomCode: string, name: string, opts: ConnectOptions = {}) => {
-      if (retryTimer.current) clearTimeout(retryTimer.current);
-      const code = roomCode.toUpperCase();
+      clearRetryTimer();
+      const code = roomCode.trim().toUpperCase();
+      if (!code) {
+        setStatus('error');
+        setError('Enter a room code to join.');
+        return;
+      }
       // Stable per-room pid (see reclaimablePid): reconnects AND reloads
       // reclaim the same seat/role from the server.
       const pid = reclaimablePid(code);
       const target = {
         room: code,
-        name,
+        name: name.trim() || 'Player',
         pid,
         asSpectator: opts.asSpectator ?? false,
-        capacity: opts.capacity,
-      };
+        ...(opts.capacity ? { capacity: opts.capacity } : {}),
+      } satisfies ConnectTarget;
       targetRef.current = target;
       shouldReconnect.current = true;
       retriesRef.current = 0;
@@ -302,7 +315,7 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
       setRoom(code);
       openSocket(target);
     },
-    [openSocket],
+    [clearRetryTimer, openSocket],
   );
 
   const disconnect = useCallback(() => {
@@ -310,7 +323,7 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
     targetRef.current = null;
     pendingRelay.current = [];
     pendingState.current = null;
-    if (retryTimer.current) clearTimeout(retryTimer.current);
+    clearRetryTimer();
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -321,7 +334,7 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
     setCapacity(2);
     setSharedState(null);
     setError(null);
-  }, [clearRoster]);
+  }, [clearRetryTimer, clearRoster]);
 
   const send = useCallback((data: unknown) => {
     const ws = wsRef.current;
@@ -343,7 +356,7 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const requestSeat = useCallback((want: 'player' | 'spectator') => {
+  const requestSeat = useCallback((want: SeatRequest) => {
     const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ t: 'seat', d: { want } }));
@@ -368,11 +381,11 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     return () => {
       shouldReconnect.current = false;
-      if (retryTimer.current) clearTimeout(retryTimer.current);
+      clearRetryTimer();
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, []);
+  }, [clearRetryTimer]);
 
   const role = self?.role ?? null;
   const otherPlayers = useMemo(() => players.filter((p) => p.id !== self?.id), [players, self]);

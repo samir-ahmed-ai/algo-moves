@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -41,7 +41,7 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
 
   let cur = 0;
 
-  const { emit, frames } = createRecorder<ListToBstState>(() => ({
+  const { emit, frames } = createPrepRecorder<ListToBstState>(() => ({
     list,
     cur: cur < n ? cur : null,
     tree: tree.slice(),
@@ -96,10 +96,10 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
     build(l, m - 1, left);
 
     // Take the CURRENT list head as this node's value, then advance the cursor.
-    const nodeVal = list[cur];
-    tree[slot] = nodeVal;
-    status[slot] = 'active';
-    built.push(nodeVal);
+    const nodeVal = list[cur]!;
+    tree[slot]! = nodeVal;
+    status[slot]! = 'active';
+    built.push(nodeVal!);
     emit(
       'TAKE',
       `root=${nodeVal}`,
@@ -109,8 +109,8 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
     cur++;
     emit(
       'ADVANCE',
-      `cur→${cur < n ? list[cur] : 'end'}`,
-      `Advance the head cursor past ${nodeVal}. It now points at ${cur < n ? list[cur] : 'the end of the list'}, ready to feed the right subtree.`,
+      `cur→${cur < n ? list[cur]! : 'end'}`,
+      `Advance the head cursor past ${nodeVal}. It now points at ${cur < n ? list[cur]! : 'the end of the list'}, ready to feed the right subtree.`,
       { active: slot },
     );
 
@@ -125,7 +125,7 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
     }
     build(m + 1, r, right);
 
-    status[slot] = 'done';
+    status[slot]! = 'done';
     emit(
       'RETURN',
       `done ${nodeVal}`,
@@ -138,8 +138,8 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
 
   emit(
     'DONE',
-    `root=${tree[0]}`,
-    `The whole list has been consumed in order and the balanced BST is built. Its in-order traversal is exactly the original sorted list ${list.join(', ')}. Return the root ${tree[0]}.`,
+    `root=${tree[0]!}`,
+    `The whole list has been consumed in order and the balanced BST is built. Its in-order traversal is exactly the original sorted list ${list.join(', ')}. Return the root ${tree[0]!}.`,
     { done: true },
     'good',
   );
@@ -150,7 +150,7 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
 function View({ frame }: PluginViewProps<ListToBstState>) {
   const s = frame.state;
   const nodeClass = (i: number) => {
-    const st = s.status[i] ?? 'idle';
+    const st = s.status[i]! ?? 'idle';
     if (st === 'active') return 'team-1';
     if (st === 'done') return 'team-2';
     return 'team-0';
@@ -167,7 +167,7 @@ function View({ frame }: PluginViewProps<ListToBstState>) {
       </div>
       <div className={cn(vizText.sm, 'text-ink3')}>
         head cursor →{' '}
-        <span className="font-mono text-ink">{s.cur !== null ? s.list[s.cur] : 'end'}</span>
+        <span className="font-mono text-ink">{s.cur !== null ? s.list[s.cur]! : 'end'}</span>
       </div>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
       <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
@@ -186,13 +186,13 @@ function Inspector({ frame }: InspectorProps<ListToBstState>) {
   return (
     <VarGrid>
       <InspectorRow k="list length" v={s.list.length} />
-      <InspectorRow k="head cursor" v={s.cur !== null ? s.list[s.cur] : 'end'} />
+      <InspectorRow k="head cursor" v={s.cur !== null ? s.list[s.cur]! : 'end'} />
       <InspectorRow k="roots taken" v={s.built.length} />
       <InspectorRow
         k="active subtree"
-        v={s.active !== null && s.tree[s.active] != null ? s.tree[s.active] : '—'}
+        v={s.active !== null && s.tree[s.active]! != null ? s.tree[s.active]! : '—'}
       />
-      <InspectorRow k="root" v={s.tree[0] != null ? s.tree[0] : '…'} />
+      <InspectorRow k="root" v={s.tree[0]! != null ? s.tree[0]! : '…'} />
       <InspectorRow k="in-order" v={s.built.length ? s.built.join(',') : '…'} />
     </VarGrid>
   );
@@ -339,7 +339,7 @@ export const simulator: ProblemSimulator = {
     const s = frames[frames.length - 1]?.state as ListToBstState | undefined;
     if (!s || s.list.length === 0) return { ok: false, label: 'empty' };
     // The BST is correct iff its in-order traversal equals the original sorted list.
-    const ok = s.built.length === s.list.length && s.built.every((v, i) => v === s.list[i]);
-    return { ok, label: `root=${s.tree[0]}` };
+    const ok = s.built.length === s.list.length && s.built.every((v, i) => v === s.list[i]!);
+    return { ok, label: `root=${s.tree[0]!}` };
   },
 };

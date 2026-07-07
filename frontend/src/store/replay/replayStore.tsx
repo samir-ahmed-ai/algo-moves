@@ -5,14 +5,14 @@ import type { Frame } from '@/core/types';
 export interface ReplayState {
   trace: string;
   speed: number;
-  transformedFrames: Frame[];
+  transformedFrames: readonly Frame[];
   chainPaused: boolean;
 }
 
 interface ReplayStore extends ReplayState {
   setTrace: (t: string) => void;
   setSpeed: (s: number) => void;
-  setTransformedFrames: (f: Frame[]) => void;
+  setTransformedFrames: (f: readonly Frame[]) => void;
   setChainPaused: (p: boolean) => void;
 }
 
@@ -27,11 +27,11 @@ function normalizeReplaySpeed(speed: number): number {
   return Math.min(MAX_SPEED, Math.max(MIN_SPEED, speed));
 }
 
-function normalizeFrames(frames: Frame[]): Frame[] {
+function normalizeFrames(frames: readonly Frame[]): Frame[] {
   return Array.isArray(frames) ? frames.slice() : [];
 }
 
-export function ReplayStoreProvider({ children }: { children: ReactNode }) {
+export function ReplayStoreProvider({ children }: { children: ReactNode }): ReactNode {
   const [trace, setTraceState] = useState('');
   const [speed, setSpeedState] = useState(DEFAULT_SPEED);
   const [transformedFrames, setTransformedFramesState] = useState<Frame[]>([]);
@@ -45,7 +45,7 @@ export function ReplayStoreProvider({ children }: { children: ReactNode }) {
     setSpeedState(normalizeReplaySpeed(next));
   }, []);
 
-  const setTransformedFrames = useCallback((next: Frame[]) => {
+  const setTransformedFrames = useCallback((next: readonly Frame[]) => {
     setTransformedFramesState(normalizeFrames(next));
   }, []);
 
@@ -79,12 +79,12 @@ export function ReplayStoreProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export function useReplayStore() {
+export function useReplayStore(): ReplayStore {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error('useReplayStore must be used inside ReplayStoreProvider');
   return ctx;
 }
 
-export function useReplayStoreOptional() {
+export function useReplayStoreOptional(): ReplayStore | null {
   return useContext(Ctx);
 }

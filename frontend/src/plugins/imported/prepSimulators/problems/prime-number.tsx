@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,7 +19,7 @@ interface PrimeState {
   n: number;
   divisors: number[]; // candidate odd divisors 3, 5, 7 … up to sqrt(n)
   i: number | null; // index into divisors currently being tested
-  divisor: number | null; // divisors[i]
+  divisor: number | null; // divisors[i]!
   remainder: number | null; // n % divisor for the current test
   result: boolean | null; // final verdict once decided
   done: boolean;
@@ -32,7 +32,7 @@ function record({ n }: PrimeInput): Frame<PrimeState>[] {
   const divisors: number[] = [];
   for (let i = 3; i * i <= n; i += 2) divisors.push(i);
 
-  const { emit, frames } = createRecorder<PrimeState>(() => ({
+  const { emit, frames } = createPrepRecorder<PrimeState>(() => ({
     n,
     divisors,
     i: null,
@@ -85,12 +85,12 @@ function record({ n }: PrimeInput): Frame<PrimeState>[] {
 
   // Trial-divide by each odd candidate.
   for (let idx = 0; idx < divisors.length; idx++) {
-    const d = divisors[idx];
-    const rem = n % d;
+    const d = divisors[idx]!;
+    const rem = n % d!;
     emit(
       'TEST',
       `${n}%${d}=${rem}`,
-      `Try divisor ${d}: ${d}² = ${d * d} ≤ ${n}, so it is still in range. ${n} % ${d} = ${rem}. ${
+      `Try divisor ${d}: ${d}² = ${d! * d!} ≤ ${n}, so it is still in range. ${n} % ${d} = ${rem}. ${
         rem === 0
           ? `That's 0, so ${d} divides ${n}.`
           : `Not 0, so ${d} is not a factor — keep going.`
@@ -102,7 +102,7 @@ function record({ n }: PrimeInput): Frame<PrimeState>[] {
       emit(
         'COMPOSITE',
         `${d} | ${n}`,
-        `${n} = ${d} × ${n / d}, so ${n} has a divisor other than 1 and itself. ${n} is not prime.`,
+        `${n} = ${d} × ${n / d!}, so ${n} has a divisor other than 1 and itself. ${n} is not prime.`,
         { i: idx, divisor: d, remainder: 0, result: false, done: true },
         'bad',
       );

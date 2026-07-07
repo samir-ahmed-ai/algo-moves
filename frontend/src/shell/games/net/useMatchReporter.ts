@@ -10,8 +10,21 @@ export interface ReportedParticipant {
   peerId: string;
   /** 1 = winner; ties share a placement. */
   placement: number;
-  score?: number;
+  score?: number | undefined;
 }
+
+export type MatchReportOptions = Readonly<{
+  mode?: RoomMode | undefined;
+  metadata?: Record<string, unknown> | undefined;
+}>;
+
+export type MatchReporter = Readonly<{
+  isReporter: boolean;
+  report: (
+    participants: ReportedParticipant[],
+    opts?: MatchReportOptions | undefined,
+  ) => Promise<SubmitMatchResult | null>;
+}>;
 
 /**
  * Records a finished match via the game server (Postgres). Only the host reports —
@@ -20,22 +33,13 @@ export interface ReportedParticipant {
  * on the right accounts. A no-op (returns null) when the backend has no database
  * or the caller isn't the host.
  */
-export function useMatchReporter(gameId: string): {
-  isReporter: boolean;
-  report: (
-    participants: ReportedParticipant[],
-    opts?: { mode?: RoomMode; metadata?: Record<string, unknown> },
-  ) => Promise<SubmitMatchResult | null>;
-} {
+export function useMatchReporter(gameId: string): MatchReporter {
   const { role, room, players, sharedState, self } = useGameRoom();
   const { identities, reportResult } = useRoomComms();
   const isReporter = role === 'host';
 
   const report = useCallback(
-    async (
-      participants: ReportedParticipant[],
-      opts?: { mode?: RoomMode; metadata?: Record<string, unknown> },
-    ) => {
+    async (participants: ReportedParticipant[], opts?: MatchReportOptions | undefined) => {
       if (!isReporter) return null;
       // Feed the running session standings (works even without Postgres).
       reportResult(participants.filter((p) => p.placement === 1).map((p) => p.peerId));
@@ -70,7 +74,7 @@ export function useMatchReporter(gameId: string): {
         }
       }
 
-      return submitMatchResult({
+      const payload = {
         gameId,
         roomCode: room,
         mode,
@@ -80,8 +84,10 @@ export function useMatchReporter(gameId: string): {
           placement,
           score,
         })),
-        metadata: opts?.metadata,
-      });
+        ...(opts?.metadata ? { metadata: opts.metadata } : {}),
+      };
+
+      return submitMatchResult(payload);
     },
     [isReporter, gameId, room, players, identities, sharedState, reportResult, self],
   );

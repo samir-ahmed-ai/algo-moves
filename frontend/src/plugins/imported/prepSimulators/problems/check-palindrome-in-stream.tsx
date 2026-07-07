@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -29,7 +29,7 @@ function checkPalindromeInStream(chars: string[]): boolean {
   let ok = true;
   for (const ch of chars) {
     const n = back.length;
-    if (n > 0 && back[n - 1] === ch) {
+    if (n > 0 && back[n - 1]! === ch) {
       back.pop();
     } else {
       back.push(ch);
@@ -44,7 +44,7 @@ function record({ chars: raw }: PalStreamInput): Frame<PalStreamState>[] {
   const stack: string[] = [];
   let ok = true;
 
-  const { emit, frames } = createRecorder<PalStreamState>(() => ({
+  const { emit, frames } = createPrepRecorder<PalStreamState>(() => ({
     stream,
     idx: null,
     stack: stack.slice(),
@@ -62,9 +62,9 @@ function record({ chars: raw }: PalStreamInput): Frame<PalStreamState>[] {
   );
 
   for (let idx = 0; idx < stream.length; idx++) {
-    const ch = stream[idx];
+    const ch = stream[idx]!;
     const n = stack.length;
-    if (n > 0 && stack[n - 1] === ch) {
+    if (n > 0 && stack[n - 1]! === ch) {
       stack.pop();
       emit(
         'MATCH',
@@ -74,7 +74,7 @@ function record({ chars: raw }: PalStreamInput): Frame<PalStreamState>[] {
         'good',
       );
     } else {
-      stack.push(ch);
+      stack.push(ch!);
       ok = false;
       emit(
         'PUSH',
@@ -108,7 +108,7 @@ function View({ frame }: PluginViewProps<PalStreamState>) {
         stream
         {s.idx !== null && (
           <>
-            {' · '}at <span className="font-mono text-accent">{s.stream[s.idx]}</span>
+            {' · '}at <span className="font-mono text-accent">{s.stream[s.idx]!}</span>
             {s.matched ? ' (matched)' : ' (pushed)'}
           </>
         )}
@@ -168,7 +168,7 @@ function Inspector({ frame }: InspectorProps<PalStreamState>) {
     <VarGrid>
       <InspectorRow k="idx" v={s.idx ?? '—'} />
       <InspectorRow k="stack size" v={s.stack.length} />
-      <InspectorRow k="stack top" v={s.stack[s.stack.length - 1] ?? '—'} />
+      <InspectorRow k="stack top" v={s.stack[s.stack.length - 1]! ?? '—'} />
       <InspectorRow k="ok" v={s.ok ? 'true' : 'false'} />
       <InspectorRow k="result" v={s.result === null ? '…' : s.result ? 'palindrome' : 'no'} />
     </VarGrid>

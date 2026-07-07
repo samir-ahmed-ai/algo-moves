@@ -1,4 +1,4 @@
-import type { QuizQuestion } from '../../core/types';
+import type { QuizQuestion } from '@/core/types';
 
 export type QuizState = {
   index: number;
@@ -19,6 +19,7 @@ export function initialQuizState(): QuizState {
 }
 
 export function quizReducer(state: QuizState, action: QuizAction, total: number): QuizState {
+  const safeTotal = Number.isFinite(total) ? Math.max(0, Math.floor(total)) : 0;
   switch (action.type) {
     case 'PICK':
       if (state.picked !== null || state.done) return state;
@@ -28,7 +29,7 @@ export function quizReducer(state: QuizState, action: QuizAction, total: number)
         score: action.correct ? state.score + 1 : state.score,
       };
     case 'NEXT':
-      if (state.index >= total - 1) return { ...state, done: true, picked: null };
+      if (state.index >= safeTotal - 1) return { ...state, done: true, picked: null };
       return { ...state, index: state.index + 1, picked: null };
     case 'FINISH':
       return { ...state, done: true, picked: null };
@@ -40,12 +41,15 @@ export function quizReducer(state: QuizState, action: QuizAction, total: number)
 }
 
 export function quizAccuracy(score: number, total: number): number {
-  return total > 0 ? Math.round((score / total) * 100) : 0;
+  const safeScore = Number.isFinite(score) ? Math.max(0, score) : 0;
+  const safeTotal = Number.isFinite(total) ? Math.max(0, total) : 0;
+  return safeTotal > 0 ? Math.round((safeScore / safeTotal) * 100) : 0;
 }
 
 export function currentQuizQuestion(
   quiz: QuizQuestion[],
   state: QuizState,
 ): QuizQuestion | undefined {
-  return quiz[state.index];
+  const index = Number.isFinite(state.index) ? Math.max(0, Math.floor(state.index)) : 0;
+  return quiz[index];
 }

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -21,7 +21,7 @@ interface RansomState {
   magazine: string; // original magazine string (for display)
   cnt: [string, number][]; // remaining letters available, char -> count
   i: number | null; // index in the note currently being spent
-  cur: string | null; // note[i], the char we are trying to take
+  cur: string | null; // note[i]!, the char we are trying to take
   available: number | null; // remaining count of cur before this step
   result: boolean | null; // final verdict once known
   done: boolean;
@@ -31,7 +31,7 @@ function record({ note, magazine }: RansomInput): Frame<RansomState>[] {
   const noteChars = note.split('');
   const cnt = new Map<string, number>();
 
-  const { emit, frames } = createRecorder<RansomState>(() => ({
+  const { emit, frames } = createPrepRecorder<RansomState>(() => ({
     note: noteChars,
     magazine,
     cnt: [...cnt.entries()],
@@ -50,19 +50,19 @@ function record({ note, magazine }: RansomInput): Frame<RansomState>[] {
   );
 
   for (let k = 0; k < magazine.length; k++) {
-    const ch = magazine[k];
-    cnt.set(ch, (cnt.get(ch) ?? 0) + 1);
+    const ch = magazine[k]!;
+    cnt.set(ch!, (cnt.get(ch!) ?? 0) + 1);
     emit(
       'COUNT',
-      `${ch}:${cnt.get(ch)}`,
-      `Tally the magazine: letter '${ch}' now has count ${cnt.get(ch)}. This map is our pool of spendable letters.`,
+      `${ch}:${cnt.get(ch!)}`,
+      `Tally the magazine: letter '${ch}' now has count ${cnt.get(ch!)}. This map is our pool of spendable letters.`,
       {},
     );
   }
 
   for (let i = 0; i < noteChars.length; i++) {
-    const c = noteChars[i];
-    const have = cnt.get(c) ?? 0;
+    const c = noteChars[i]!;
+    const have = cnt.get(c!) ?? 0;
     emit(
       'CHECK',
       `need '${c}'`,
@@ -79,7 +79,7 @@ function record({ note, magazine }: RansomInput): Frame<RansomState>[] {
       );
       return frames;
     }
-    cnt.set(c, have - 1);
+    cnt.set(c!, have - 1);
     emit(
       'SPEND',
       `${c}:${have - 1}`,

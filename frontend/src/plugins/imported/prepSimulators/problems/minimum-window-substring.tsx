@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -38,7 +38,7 @@ interface MinWindowState {
 function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
   const chars = s.split('');
 
-  // freq[c] = how many of char c are still required by the window (mirrors Go's [128]int)
+  // freq[c]! = how many of char c are still required by the window (mirrors Go's [128]int)
   const freq = new Map<string, number>();
   for (const c of t) freq.set(c, (freq.get(c) ?? 0) + 1);
   const reqOf = (c: string) => freq.get(c) ?? 0;
@@ -52,7 +52,7 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
     minLen <= s.length ? [minStart, minStart + minLen - 1] : null;
   const bestText = () => (minLen <= s.length ? s.slice(minStart, minStart + minLen) : '');
 
-  const { emit, frames } = createRecorder<MinWindowState>(() => ({
+  const { emit, frames } = createPrepRecorder<MinWindowState>(() => ({
     s: chars,
     t,
     l: null,
@@ -83,16 +83,16 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
   }
 
   for (let r = 0; r < chars.length; r++) {
-    const cr = chars[r];
-    const wasNeeded = reqOf(cr) > 0;
+    const cr = chars[r]!;
+    const wasNeeded = reqOf(cr!) > 0;
     if (wasNeeded) need--;
-    freq.set(cr, reqOf(cr) - 1);
+    freq.set(cr!, reqOf(cr!) - 1);
     emit(
       'EXPAND',
       `r=${r} '${cr}'`,
       wasNeeded
         ? `Expand right to index ${r}: '${cr}' is a character t still needed, so consume it and drop need to ${need}.`
-        : `Expand right to index ${r}: '${cr}' is not needed (or already covered), so need stays ${need}. freq['${cr}'] goes negative, marking a surplus.`,
+        : `Expand right to index ${r}: '${cr}' is not needed (or already covered), so need stays ${need}. freq['${cr}']! goes negative, marking a surplus.`,
       { l, r, window: [l, r], need },
       wasNeeded && need === 0 ? 'good' : undefined,
     );
@@ -118,9 +118,9 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
         );
       }
 
-      const cl = chars[l];
-      freq.set(cl, reqOf(cl) + 1);
-      const nowMissing = reqOf(cl) > 0;
+      const cl = chars[l]!;
+      freq.set(cl!, reqOf(cl!) + 1);
+      const nowMissing = reqOf(cl!) > 0;
       if (nowMissing) need++;
       l++;
       emit(
@@ -155,7 +155,7 @@ function View({ frame }: PluginViewProps<MinWindowState>) {
   if (s.r !== null) pointers.push({ i: s.r, label: 'r', tone: 'accent', place: 'above' });
 
   const tone = (i: number) => {
-    if (s.best && i >= s.best[0] && i <= s.best[1]) return 'found';
+    if (s.best && i >= s.best[0]! && i <= s.best[1]!) return 'found';
     if (s.l !== null && (i === s.l || i === s.r)) return 'match';
     return '';
   };
@@ -186,7 +186,9 @@ function Inspector({ frame }: InspectorProps<MinWindowState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const winText =
-    s.window && s.window[0] <= s.window[1] ? s.s.slice(s.window[0], s.window[1] + 1).join('') : '—';
+    s.window && s.window[0]! <= s.window[1]!
+      ? s.s.slice(s.window[0]!, s.window[1]! + 1).join('')
+      : '—';
   return (
     <VarGrid>
       <InspectorRow k="t" v={`"${s.t}"`} />
@@ -212,17 +214,17 @@ function compute(input: MinWindowInput): string {
   let minStart = 0;
   let l = 0;
   for (let r = 0; r < s.length; r++) {
-    const cr = s[r];
-    if ((freq.get(cr) ?? 0) > 0) need--;
-    freq.set(cr, (freq.get(cr) ?? 0) - 1);
+    const cr = s[r]!;
+    if ((freq.get(cr!) ?? 0) > 0) need--;
+    freq.set(cr!, (freq.get(cr!) ?? 0) - 1);
     while (need === 0) {
       if (r - l + 1 < minLen) {
         minLen = r - l + 1;
         minStart = l;
       }
-      const cl = s[l];
-      freq.set(cl, (freq.get(cl) ?? 0) + 1);
-      if ((freq.get(cl) ?? 0) > 0) need++;
+      const cl = s[l]!;
+      freq.set(cl!, (freq.get(cl!) ?? 0) + 1);
+      if ((freq.get(cl!) ?? 0) > 0) need++;
       l++;
     }
   }
@@ -326,7 +328,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(m+n). O(1). Use a frequency array `[128]int` for `t`. Track `required` = total chars still needed; Expand right: if `freq[ch] > 0` before decrement → a needed char found, `',
+      'O(m+n). O(1). Use a frequency array `[128]int` for `t`. Track `required` = total chars still needed; Expand right: if `freq[ch]! > 0` before decrement → a needed char found, `',
   },
   {
     id: 'outcome',

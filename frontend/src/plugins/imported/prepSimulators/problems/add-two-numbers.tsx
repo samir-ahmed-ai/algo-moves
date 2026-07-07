@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { cn } from '@/lib/utils/cn';
@@ -30,14 +30,14 @@ interface AddTwoState {
 }
 
 function readDigit(list: number[], pos: number): number | null {
-  return pos < list.length ? list[pos] : null;
+  return pos < list.length ? list[pos]! : null;
 }
 
 function record({ l1, l2 }: AddTwoInput): Frame<AddTwoState>[] {
   const result: number[] = [];
   let carry = 0;
 
-  const { emit, frames } = createRecorder<AddTwoState>(() => ({
+  const { emit, frames } = createPrepRecorder<AddTwoState>(() => ({
     l1,
     l2,
     pos: null,
@@ -98,7 +98,7 @@ function record({ l1, l2 }: AddTwoInput): Frame<AddTwoState>[] {
 // Render a number stored least-significant-first as a human-readable value.
 function listToNumber(list: number[]): number {
   let value = 0;
-  for (let i = list.length - 1; i >= 0; i--) value = value * 10 + list[i];
+  for (let i = list.length - 1; i >= 0; i--) value = value * 10 + list[i]!;
   return value;
 }
 
@@ -159,8 +159,8 @@ function Inspector({ frame }: InspectorProps<AddTwoState>) {
   return (
     <VarGrid>
       <InspectorRow k="pos" v={s.pos ?? '—'} />
-      <InspectorRow k="l1[pos]" v={s.pos !== null && s.pos < s.l1.length ? s.l1[s.pos] : '0/—'} />
-      <InspectorRow k="l2[pos]" v={s.pos !== null && s.pos < s.l2.length ? s.l2[s.pos] : '0/—'} />
+      <InspectorRow k="l1[pos]!" v={s.pos !== null && s.pos < s.l1.length ? s.l1[s.pos]! : '0/—'} />
+      <InspectorRow k="l2[pos]!" v={s.pos !== null && s.pos < s.l2.length ? s.l2[s.pos]! : '0/—'} />
       <InspectorRow k="carry" v={s.carry} />
       <InspectorRow k="sum" v={s.sum ?? '—'} />
       <InspectorRow k="digit (sum%10)" v={s.digit ?? '—'} />

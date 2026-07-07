@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import { cn } from '@/lib/utils/cn';
@@ -22,13 +22,13 @@ interface PowerValueState {
   hi: number;
   k: number;
   values: number[]; // the integers, in current (partially sorted) order
-  powers: number[]; // Collatz power of values[i], aligned by index
+  powers: number[]; // Collatz power of values[i]!, aligned by index
   memo: [number, number][]; // memoized n -> power entries built so far
   // sort cursors (insertion sort)
   pos: number | null; // boundary: [0..pos) is sorted
   cursor: number | null; // index being compared/shifted during the inner loop
   inserted: number | null; // index where the key landed this pass
-  result: number | null; // values[k-1] once sorted
+  result: number | null; // values[k-1]! once sorted
   done: boolean;
 }
 
@@ -48,7 +48,7 @@ function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {
   for (let i = lo; i <= hi; i++) values.push(i);
   const powers = values.map((v) => power(v));
 
-  const { emit, frames } = createRecorder<PowerValueState>(() => ({
+  const { emit, frames } = createPrepRecorder<PowerValueState>(() => ({
     lo,
     hi,
     k,
@@ -82,8 +82,8 @@ function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {
     ai === bp ? av < bv : ai < bp;
 
   for (let i = 1; i < values.length; i++) {
-    const keyVal = values[i];
-    const keyPow = powers[i];
+    const keyVal = values[i]!;
+    const keyPow = powers[i]!;
     emit(
       'PICK',
       `key ${keyVal} (p=${keyPow})`,
@@ -92,28 +92,28 @@ function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {
     );
 
     let j = i - 1;
-    while (j >= 0 && less(keyPow, powers[j], keyVal, values[j])) {
+    while (j >= 0 && less(keyPow!, powers[j]!, keyVal!, values[j]!)) {
       emit(
         'SHIFT',
-        `${values[j]} > ${keyVal}`,
-        `${values[j]} has key (power ${powers[j]}, value ${values[j]}) which outranks the key (power ${keyPow}, value ${keyVal}), so shift ${values[j]} one slot right to make room.`,
+        `${values[j]!} > ${keyVal}`,
+        `${values[j]!} has key (power ${powers[j]!}, value ${values[j]!}) which outranks the key (power ${keyPow}, value ${keyVal}), so shift ${values[j]!} one slot right to make room.`,
         { pos: i, cursor: j },
       );
-      values[j + 1] = values[j];
-      powers[j + 1] = powers[j];
+      values[j + 1]! = values[j]!;
+      powers[j + 1]! = powers[j]!;
       j--;
     }
-    values[j + 1] = keyVal;
-    powers[j + 1] = keyPow;
+    values[j + 1]! = keyVal;
+    powers[j + 1]! = keyPow;
     emit(
       'INSERT',
       `place ${keyVal}@${j + 1}`,
-      `${j < 0 ? 'Reached the front' : `${values[j]} (power ${powers[j]}) ranks at or below the key`}, so drop ${keyVal} into slot ${j + 1}. The region [0..${i + 1}) is now sorted.`,
+      `${j < 0 ? 'Reached the front' : `${values[j]!} (power ${powers[j]!}) ranks at or below the key`}, so drop ${keyVal} into slot ${j + 1}. The region [0..${i + 1}) is now sorted.`,
       { pos: i + 1, cursor: null, inserted: j + 1 },
     );
   }
 
-  const result = values[k - 1];
+  const result = values[k - 1]!;
   emit(
     'DONE',
     `answer ${result}`,
@@ -148,7 +148,7 @@ function View({ frame }: PluginViewProps<PowerValueState>) {
       <ArrayBars
         values={s.powers}
         tone={tone}
-        label={(i) => s.values[i]}
+        label={(i) => s.values[i]!}
         max={Math.max(1, ...s.powers)}
       />
       <div className={cn(vizText.xs, 'text-ink3')}>
@@ -163,7 +163,7 @@ function Inspector({ frame }: InspectorProps<PowerValueState>) {
   const s = frame.state;
   const cur =
     s.cursor !== null && s.cursor >= 0 && s.cursor < s.values.length
-      ? `${s.values[s.cursor]} (p=${s.powers[s.cursor]})`
+      ? `${s.values[s.cursor]!} (p=${s.powers[s.cursor]!})`
       : '—';
   return (
     <VarGrid>

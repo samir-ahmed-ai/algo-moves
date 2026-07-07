@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ function record({ s }: MinRemoveInput): Frame<MinRemoveState>[] {
   const stack: number[] = [];
   const removed: number[] = [];
 
-  const { emit, frames } = createRecorder<MinRemoveState>(() => ({
+  const { emit, frames } = createPrepRecorder<MinRemoveState>(() => ({
     chars: buf.slice(),
     i: null,
     stack: stack.slice(),
@@ -46,7 +46,7 @@ function record({ s }: MinRemoveInput): Frame<MinRemoveState>[] {
   );
 
   for (let i = 0; i < buf.length; i++) {
-    const c = buf[i];
+    const c = buf[i]!;
     if (c === '(') {
       stack.push(i);
       emit(
@@ -57,7 +57,7 @@ function record({ s }: MinRemoveInput): Frame<MinRemoveState>[] {
       );
     } else if (c === ')') {
       if (stack.length > 0) {
-        const matched = stack[stack.length - 1];
+        const matched = stack[stack.length - 1]!;
         stack.pop();
         emit(
           'MATCH',
@@ -67,7 +67,7 @@ function record({ s }: MinRemoveInput): Frame<MinRemoveState>[] {
           'good',
         );
       } else {
-        buf[i] = '*';
+        buf[i]! = '*';
         removed.push(i);
         emit(
           'DROP',
@@ -88,7 +88,7 @@ function record({ s }: MinRemoveInput): Frame<MinRemoveState>[] {
   }
 
   for (const idx of stack) {
-    buf[idx] = '*';
+    buf[idx]! = '*';
     removed.push(idx);
     emit(
       'DROP',
@@ -116,7 +116,7 @@ function View({ frame }: PluginViewProps<MinRemoveState>) {
   const removedSet = new Set(s.removed);
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  const top = s.stack.length > 0 ? s.stack[s.stack.length - 1] : null;
+  const top = s.stack.length > 0 ? s.stack[s.stack.length - 1]! : null;
   if (top !== null) pointers.push({ i: top, label: 'top', tone: 'good', place: 'below' });
 
   const tone = (i: number) => {
@@ -148,11 +148,11 @@ function View({ frame }: PluginViewProps<MinRemoveState>) {
 function Inspector({ frame }: InspectorProps<MinRemoveState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null ? s.chars[s.i] : '—';
+  const cur = s.i !== null ? s.chars[s.i]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="char[i]" v={cur === '*' ? '(removed)' : cur} />
+      <InspectorRow k="char[i]!" v={cur === '*' ? '(removed)' : cur} />
       <InspectorRow k="stack" v={s.stack.length ? `[${s.stack.join(', ')}]` : '[]'} />
       <InspectorRow k="stack depth" v={s.stack.length} />
       <InspectorRow k="removed" v={s.removed.length} />

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -28,7 +28,7 @@ function addSpacesAroundParenthesesIn(s: string): string {
   let out = '';
   let prevSpace = true;
   for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
+    const ch = s[i]!;
     if (ch === '(' || ch === ')') {
       if (!prevSpace) out += ' ';
       out += ch + ' ';
@@ -49,7 +49,7 @@ function record({ s }: AddSpacesInput): Frame<AddSpacesState>[] {
   let out = '';
   let prevSpace = true;
 
-  const { emit, frames } = createRecorder<AddSpacesState>(() => ({
+  const { emit, frames } = createPrepRecorder<AddSpacesState>(() => ({
     chars,
     i: null,
     prevSpace,
@@ -66,7 +66,7 @@ function record({ s }: AddSpacesInput): Frame<AddSpacesState>[] {
   );
 
   for (let i = 0; i < chars.length; i++) {
-    const ch = chars[i];
+    const ch = chars[i]!;
     if (ch === '(' || ch === ')') {
       if (!prevSpace) {
         out += ' ';

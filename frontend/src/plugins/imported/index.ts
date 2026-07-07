@@ -15,7 +15,7 @@ export const importedCourses: CourseDef[] = (() => {
     byCourse.set(p.course, arr);
   }
   return [...byCourse.entries()].map(([course, problems]) => {
-    const courseId = `lib-${problems[0].category}`;
+    const courseId = `lib-${problems[0]!.category}`;
     const items: ItemDef[] = problems
       .slice()
       .sort((a, b) => Number(a.number) - Number(b.number))
@@ -32,7 +32,7 @@ export const importedCourses: CourseDef[] = (() => {
       id: courseId,
       title: course,
       summary: `${problems.length} reference solutions imported from your Go practice repo.`,
-      icon: problems[0].courseIcon,
+      icon: problems[0]!.courseIcon,
       topics,
     };
   });

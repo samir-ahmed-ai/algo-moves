@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -31,7 +31,7 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
   const leaves: number[] = [];
   const out: number[] = [];
 
-  const { emit, frames } = createRecorder<LeavesState>(() => ({
+  const { emit, frames } = createPrepRecorder<LeavesState>(() => ({
     tree,
     current: null,
     visited: [...visited],
@@ -40,7 +40,7 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
     done: false,
   }));
 
-  const has = (i: number) => i >= 0 && i < n && tree[i] != null;
+  const has = (i: number) => i >= 0 && i < n && tree[i]! != null;
   const leftOf = (i: number) => 2 * i + 1;
   const rightOf = (i: number) => 2 * i + 2;
 
@@ -53,7 +53,7 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
 
   const dfs = (i: number) => {
     if (!has(i)) return;
-    const val = tree[i];
+    const val = tree[i]!;
     const l = leftOf(i);
     const r = rightOf(i);
     const leaf = !has(l) && !has(r);
@@ -61,7 +61,7 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {
     emit(
       'VISIT',
       `node ${val}`,
-      `Visit node ${val}. Check its children: left is ${has(l) ? tree[l] : 'nil'}, right is ${has(r) ? tree[r] : 'nil'}.`,
+      `Visit node ${val}. Check its children: left is ${has(l) ? tree[l]! : 'nil'}, right is ${has(r) ? tree[r]! : 'nil'}.`,
       { current: i },
     );
 
@@ -130,7 +130,7 @@ function View({ frame }: PluginViewProps<LeavesState>) {
 function Inspector({ frame }: InspectorProps<LeavesState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
   return (
     <VarGrid>
       <InspectorRow k="current node" v={curVal ?? '—'} />

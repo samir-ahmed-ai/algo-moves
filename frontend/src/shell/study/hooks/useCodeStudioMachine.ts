@@ -90,8 +90,7 @@ export function useCodeStudioMachine({
         if (startTimer) setTimerRunning(true);
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [persistDraft, draftKey, itemId, active, scheduleTransition],
+    [persistDraft, itemId, active, scheduleTransition, setTimerRunning],
   );
 
   /** Animated, persisted jump to any phase (stepper navigation). Re-entering the
@@ -115,8 +114,16 @@ export function useCodeStudioMachine({
         setPhaseTransition(false);
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [phase, itemId, active, draftKey, persistDraft, scheduleTransition],
+    [
+      phaseLock,
+      phase,
+      itemId,
+      active,
+      persistDraft,
+      scheduleTransition,
+      setTimerRunning,
+      setTimerSec,
+    ],
   );
 
   /** Skip / continue to the next phase in the sequence. */
@@ -126,8 +133,7 @@ export function useCodeStudioMachine({
     if (target === phase) return;
     if (target === 'recall') enterRecall(false);
     else goToPhase(target);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, av, enterRecall, goToPhase]);
+  }, [phaseLock, phase, av, enterRecall, goToPhase]);
 
   const resetReassemble = useCallback(() => {
     clearReassembleProgress(itemId, active);
@@ -136,8 +142,7 @@ export function useCodeStudioMachine({
     setReassembleKey((k) => k + 1);
     setTimerRunning(false);
     setTimerSec(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemId, active]);
+  }, [itemId, active, setTimerRunning, setTimerSec]);
 
   const onReassembleComplete = useCallback(
     (_placed: CodePiece[], mistakes: number) => {

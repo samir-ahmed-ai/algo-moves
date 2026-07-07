@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -36,7 +36,7 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
   const ops: string[] = [];
   const out: string[] = [];
 
-  const { emit, frames } = createRecorder<InfixState>(() => ({
+  const { emit, frames } = createPrepRecorder<InfixState>(() => ({
     exp,
     tokens,
     i: null,
@@ -54,9 +54,9 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
   );
 
   for (let i = 0; i < tokens.length; i++) {
-    const c = tokens[i];
-    if (c >= '0' && c <= '9') {
-      out.push(c);
+    const c = tokens[i]!;
+    if (c! >= '0' && c! <= '9') {
+      out.push(c!);
       emit(
         'OPERAND',
         `out += ${c}`,
@@ -66,30 +66,30 @@ function record({ exp }: InfixInput): Frame<InfixState>[] {
       continue;
     }
     // c is an operator: pop while top has precedence >= prec(c).
-    while (ops.length > 0 && prec(ops[ops.length - 1]) >= prec(c)) {
-      const top = ops[ops.length - 1];
-      out.push(top);
+    while (ops.length > 0 && prec(ops[ops.length - 1]!) >= prec(c!)) {
+      const top = ops[ops.length - 1]!;
+      out.push(top!);
       ops.pop();
       emit(
         'POP',
         `pop ${top}`,
-        `Operator '${c}' has precedence ${prec(c)}. The stack top '${top}' has precedence ${prec(top)} (≥ ${prec(c)}), so pop '${top}' to the output before pushing '${c}'. Output: "${out.join('')}".`,
+        `Operator '${c}' has precedence ${prec(c!)}. The stack top '${top}' has precedence ${prec(top!)} (≥ ${prec(c!)}), so pop '${top}' to the output before pushing '${c}'. Output: "${out.join('')}".`,
         { i, ops: ops.slice(), out: out.slice() },
       );
     }
-    ops.push(c);
+    ops.push(c!);
     emit(
       'PUSH',
       `push ${c}`,
-      `Now push operator '${c}' (precedence ${prec(c)}) onto the stack — it waits there until a lower- or equal-precedence operator, or the end, forces it out. Stack: [${ops.join(' ')}].`,
+      `Now push operator '${c}' (precedence ${prec(c!)}) onto the stack — it waits there until a lower- or equal-precedence operator, or the end, forces it out. Stack: [${ops.join(' ')}].`,
       { i, ops: ops.slice() },
     );
   }
 
   // Flush remaining operators.
   while (ops.length > 0) {
-    const top = ops[ops.length - 1];
-    out.push(top);
+    const top = ops[ops.length - 1]!;
+    out.push(top!);
     ops.pop();
     emit(
       'FLUSH',
@@ -154,12 +154,12 @@ function View({ frame }: PluginViewProps<InfixState>) {
 function Inspector({ frame }: InspectorProps<InfixState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null ? s.tokens[s.i] : '—';
+  const cur = s.i !== null ? s.tokens[s.i]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="char c" v={cur} />
-      <InspectorRow k="prec(c)" v={s.i !== null ? prec(s.tokens[s.i]) : '—'} />
-      <InspectorRow k="stack top" v={s.ops.length ? s.ops[s.ops.length - 1] : '—'} />
+      <InspectorRow k="prec(c)" v={s.i !== null ? prec(s.tokens[s.i]!) : '—'} />
+      <InspectorRow k="stack top" v={s.ops.length ? s.ops[s.ops.length - 1]! : '—'} />
       <InspectorRow k="stack" v={s.ops.length ? `[${s.ops.join(' ')}]` : 'empty'} />
       <InspectorRow k="output" v={s.out.length ? s.out.join('') : '—'} />
       <InspectorRow k="result" v={s.result ?? (s.done ? '' : '…')} />

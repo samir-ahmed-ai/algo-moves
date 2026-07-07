@@ -8,11 +8,29 @@ import { apiServerHttpBase } from './config';
 
 let arcadeAvailable: boolean | null = null;
 
+type ArcadeFetchInit = RequestInit & { auth?: boolean | undefined };
+
+function apiUrl(path: string): string {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${apiServerHttpBase()}${normalizedPath}`;
+}
+
+async function readJson<T>(res: Response): Promise<T | null> {
+  return (await res.json().catch(() => null)) as T | null;
+}
+
+function makeLocalId(): string {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const buf = new Uint32Array(4);
+  crypto.getRandomValues(buf);
+  return Array.from(buf, (n) => n.toString(16).padStart(8, '0')).join('-');
+}
+
 /** Stable browser guest id used to derive a personal room code offline. */
 export function getOrCreateLocalGuestId(): string {
   const existing = readText(PLATFORM_STORAGE_KEYS.GUEST_ID);
   if (existing) return existing;
-  const id = crypto.randomUUID();
+  const id = makeLocalId();
   writeText(PLATFORM_STORAGE_KEYS.GUEST_ID, id);
   return id;
 }
@@ -44,7 +62,7 @@ export function setPersonalRoomCode(code: string): void {
 export async function isArcadeConfigured(): Promise<boolean> {
   if (arcadeAvailable !== null) return arcadeAvailable;
   try {
-    const res = await fetch(`${apiServerHttpBase()}/healthz`);
+    const res = await fetch(apiUrl('/healthz'));
     if (!res.ok) {
       arcadeAvailable = false;
       return false;
@@ -62,23 +80,22 @@ export function resetArcadeConfiguredCache(): void {
   arcadeAvailable = null;
 }
 
-export async function arcadeFetch<T>(
-  path: string,
-  init: RequestInit & { auth?: boolean } = {},
-): Promise<T | null> {
-  const headers = new Headers(init.headers);
+export async function arcadeFetch<T>(path: string, init: ArcadeFetchInit = {}): Promise<T | null> {
+  const { auth: _auth, ...requestInit } = init;
+  void _auth;
+  const headers = new Headers(requestInit.headers);
   if (!headers.has('Content-Type') && init.body) {
     headers.set('Content-Type', 'application/json');
   }
   try {
-    const res = await fetch(`${apiServerHttpBase()}${path}`, {
-      ...init,
+    const res = await fetch(apiUrl(path), {
+      ...requestInit,
       headers,
-      credentials: init.credentials ?? 'include',
+      credentials: requestInit.credentials ?? 'include',
     });
     if (!res.ok) return null;
     if (res.status === 204) return null;
-    return (await res.json()) as T;
+    return readJson<T>(res);
   } catch {
     return null;
   }
@@ -94,12 +111,12 @@ export async function arcadeAuthRequest<T>(
     headers.set('Content-Type', 'application/json');
   }
   try {
-    const res = await fetch(`${apiServerHttpBase()}${path}`, {
+    const res = await fetch(apiUrl(path), {
       ...init,
       headers,
       credentials: init.credentials ?? 'include',
     });
-    const body = (await res.json().catch(() => ({}))) as T & { error?: string };
+    const body = (await readJson<T & { error?: string }>(res)) ?? ({} as T & { error?: string });
     if (!res.ok) {
       return { ok: false, error: body.error ?? `Request failed (${res.status})` };
     }

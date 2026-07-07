@@ -71,7 +71,7 @@ function record({ nums }: PermInput): Frame<PermState>[] {
     for (let i = 0; i < nums.length; i++) {
       if (used[i]) continue;
       used[i] = true;
-      cur.push(nums[i]);
+      cur.push(nums[i]!);
       emit(
         'CHOOSE',
         `place ${nums[i]}`,

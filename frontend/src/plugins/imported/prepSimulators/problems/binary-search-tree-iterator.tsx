@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   InspectorRow,
@@ -42,10 +42,10 @@ function record({ tree }: BstInput): Frame<BstState>[] {
   const done: number[] = [];
   const output: number[] = [];
 
-  const val = (i: number): number => tree[i] as number;
-  const exists = (i: number): boolean => i >= 0 && i < tree.length && tree[i] != null;
+  const val = (i: number): number => tree[i]! as number;
+  const exists = (i: number): boolean => i >= 0 && i < tree.length && tree[i]! != null;
 
-  const { emit, frames } = createRecorder<BstState>(() => ({
+  const { emit, frames } = createPrepRecorder<BstState>(() => ({
     tree,
     stack: stack.slice(),
     active: null,
@@ -81,7 +81,7 @@ function record({ tree }: BstInput): Frame<BstState>[] {
       'SPINE_DONE',
       'left spine done',
       `Reached a null left child, so the left spine is fully on the stack. The stack top is now the next-smallest unvisited value.`,
-      { active: stack[stack.length - 1] ?? null },
+      { active: stack[stack.length - 1]! ?? null },
     );
   };
 
@@ -97,26 +97,26 @@ function record({ tree }: BstInput): Frame<BstState>[] {
 
   // Drive the iterator: HasNext() / Next() until the stack drains.
   while (stack.length > 0) {
-    const top = stack[stack.length - 1];
+    const top = stack[stack.length - 1]!;
     emit(
       'HASNEXT',
       'hasNext = true',
-      `HasNext(): the stack is non-empty, so there is another value to yield. The top of the stack, ${val(top)}, is the next smallest.`,
+      `HasNext(): the stack is non-empty, so there is another value to yield. The top of the stack, ${val(top!)}, is the next smallest.`,
       { active: top },
     );
     // Next(): pop top
     stack.pop();
-    done.push(top);
-    output.push(val(top));
+    done.push(top!);
+    output.push(val(top!));
     emit(
       'NEXT',
-      `yield ${val(top)}`,
-      `Next(): pop ${val(top)} and emit it — the in-order sequence so far is [${output.join(', ')}]. Now open its RIGHT subtree.`,
+      `yield ${val(top!)}`,
+      `Next(): pop ${val(top!)} and emit it — the in-order sequence so far is [${output.join(', ')}]. Now open its RIGHT subtree.`,
       { active: top },
       'good',
     );
     // pushLeft(top.Right)
-    pushLeft(R(top));
+    pushLeft(R(top!));
   }
 
   emit(
@@ -139,9 +139,9 @@ function View({ frame }: PluginViewProps<BstState>) {
     if (stackSet.has(i)) return 'team-1';
     return 'team-0';
   };
-  const stackLabels = s.stack.map((i) => String(s.tree[i] as number));
+  const stackLabels = s.stack.map((i) => String(s.tree[i]! as number));
   const outputLabels = s.output.map(String);
-  const topVal = s.stack.length > 0 ? String(s.tree[s.stack[s.stack.length - 1]] as number) : '—';
+  const topVal = s.stack.length > 0 ? String(s.tree[s.stack[s.stack.length - 1]!] as number) : '—';
   const rail = (
     <>
       <RailStack label="stack" items={stackLabels} topLabel="top" />
@@ -163,7 +163,7 @@ function View({ frame }: PluginViewProps<BstState>) {
 function Inspector({ frame }: InspectorProps<BstState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]] as number) : '—';
+  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]!] as number) : '—';
   return (
     <VarGrid>
       <InspectorRow k="stack depth" v={s.stack.length} />
@@ -303,7 +303,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as BstState | undefined;
     const sorted = s ? [...s.output].sort((a, b) => a - b) : [];
-    const ok = !!s && s.output.length > 0 && s.output.every((v, i) => v === sorted[i]);
+    const ok = !!s && s.output.length > 0 && s.output.every((v, i) => v === sorted[i]!);
     return { ok, label: s ? `[${s.output.join(', ')}]` : 'empty' };
   },
 };

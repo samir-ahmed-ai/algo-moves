@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -36,7 +36,7 @@ function record({ n }: IsOddInput): Frame<IsOddState>[] {
   const bits = toBits(n);
   const low = bits.length - 1;
 
-  const { emit, frames } = createRecorder<IsOddState>(() => ({
+  const { emit, frames } = createPrepRecorder<IsOddState>(() => ({
     n,
     bits,
     low,
@@ -62,8 +62,8 @@ function record({ n }: IsOddInput): Frame<IsOddState>[] {
 
   emit(
     'READ_LOW',
-    `bit0=${bits[low]}`,
-    `Look only at the lowest bit (index ${low}, the 1s place): it is ${bits[low]}. This is exactly what n & 1 isolates — it zeroes out every higher bit and keeps just this one.`,
+    `bit0=${bits[low]!}`,
+    `Look only at the lowest bit (index ${low}, the 1s place): it is ${bits[low]!}. This is exactly what n & 1 isolates — it zeroes out every higher bit and keeps just this one.`,
     { reading: true },
   );
 
@@ -129,7 +129,7 @@ function Inspector({ frame }: InspectorProps<IsOddState>) {
     <VarGrid>
       <InspectorRow k="n" v={s.n} />
       <InspectorRow k="binary" v={s.bits.join('')} />
-      <InspectorRow k="lowest bit" v={s.bits[s.low]} />
+      <InspectorRow k="lowest bit" v={s.bits[s.low]!} />
       <InspectorRow k="n & 1" v={s.masked === null ? '—' : s.masked} />
       <InspectorRow k="result" v={s.result === null ? '…' : s.result ? 'odd' : 'even'} />
     </VarGrid>

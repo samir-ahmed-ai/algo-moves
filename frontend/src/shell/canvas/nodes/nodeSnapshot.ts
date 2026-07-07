@@ -54,7 +54,7 @@ export function snapNodeLayout(n: PanelFlowNode): {
   if (height != null) entry.height = height;
   if (n.parentId?.trim()) entry.parentId = n.parentId.trim();
   if (data.layoutSlots?.some(Boolean)) entry.layoutSlots = [...data.layoutSlots];
-  if (Number.isInteger(data.slotIndex)) entry.slotIndex = data.slotIndex;
+  if (Number.isInteger(data.slotIndex)) entry.slotIndex = data.slotIndex as number;
   if (data.collapsed) entry.collapsed = true;
   if (data.locked) entry.locked = true;
   if (data.accent) entry.accent = data.accent;

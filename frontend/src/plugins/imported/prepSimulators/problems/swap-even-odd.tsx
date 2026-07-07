@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -27,7 +27,7 @@ function record({ s }: SwapInput): Frame<SwapState>[] {
   const chars = s.split('');
   const n = chars.length;
   const swapped = new Array<boolean>(n).fill(false);
-  const { emit, frames } = createRecorder<SwapState>(() => ({
+  const { emit, frames } = createPrepRecorder<SwapState>(() => ({
     chars: chars.slice(),
     i: null,
     j: null,
@@ -47,20 +47,20 @@ function record({ s }: SwapInput): Frame<SwapState>[] {
     emit(
       'PAIR',
       `i=${i}, j=${j}`,
-      `Look at the pair at indices ${i} and ${j}: '${chars[i]}' and '${chars[j]}'. These two neighbours will trade places.`,
+      `Look at the pair at indices ${i} and ${j}: '${chars[i]!}' and '${chars[j]!}'. These two neighbours will trade places.`,
       { i, j },
     );
 
-    const tmp = chars[i];
-    chars[i] = chars[j];
-    chars[j] = tmp;
-    swapped[i] = true;
-    swapped[j] = true;
+    const tmp = chars[i]!;
+    chars[i]! = chars[j]!;
+    chars[j]! = tmp;
+    swapped[i]! = true;
+    swapped[j]! = true;
 
     emit(
       'SWAP',
-      `${chars[i]}${chars[j]}`,
-      `Swap them: index ${i} and ${j} become '${chars[i]}' and '${chars[j]}'. Now advance i += 2 to the next pair.`,
+      `${chars[i]!}${chars[j]!}`,
+      `Swap them: index ${i} and ${j} become '${chars[i]!}' and '${chars[j]!}'. Now advance i += 2 to the next pair.`,
       { i, j },
       'good',
     );
@@ -71,7 +71,7 @@ function record({ s }: SwapInput): Frame<SwapState>[] {
     'DONE',
     `"${chars.join('')}"`,
     leftover
-      ? `No more full pairs — the odd-length string leaves the last character '${chars[n - 1]}' untouched. Result: "${chars.join('')}".`
+      ? `No more full pairs — the odd-length string leaves the last character '${chars[n - 1]!}' untouched. Result: "${chars.join('')}".`
       : `All adjacent pairs have been swapped. Result: "${chars.join('')}".`,
     { i: leftover ? n - 1 : null, done: true },
     'good',
@@ -91,7 +91,7 @@ function View({ frame }: PluginViewProps<SwapState>) {
   const inActivePair = (idx: number) => !s.done && (idx === s.i || idx === s.j);
   const tone = (idx: number) => {
     if (inActivePair(idx)) return 'match';
-    if (s.swapped[idx]) return 'found';
+    if (s.swapped[idx]!) return 'found';
     return '';
   };
 
@@ -119,8 +119,8 @@ function Inspector({ frame }: InspectorProps<SwapState>) {
       <InspectorRow k="length" v={s.chars.length} />
       <InspectorRow k="i" v={s.i ?? '—'} />
       <InspectorRow k="j (i+1)" v={s.j ?? '—'} />
-      <InspectorRow k="chars[i]" v={s.i !== null ? `'${s.chars[s.i]}'` : '—'} />
-      <InspectorRow k="chars[j]" v={s.j !== null ? `'${s.chars[s.j]}'` : '—'} />
+      <InspectorRow k="chars[i]!" v={s.i !== null ? `'${s.chars[s.i]!}'` : '—'} />
+      <InspectorRow k="chars[j]!" v={s.j !== null ? `'${s.chars[s.j]!}'` : '—'} />
       <InspectorRow k="indices swapped" v={swappedCount} />
       <InspectorRow k="current" v={`"${s.chars.join('')}"`} />
     </VarGrid>
@@ -230,7 +230,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). i+=2: swap b[i],b[i+1]',
+    explain: 'O(n). O(1). i+=2: swap b[i]!,b[i+1]!',
   },
   {
     id: 'outcome',

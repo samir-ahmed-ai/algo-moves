@@ -44,8 +44,8 @@ export interface ProblemPageProps {
   frames: Frame<any>[];
   player: Player;
   frame: Frame<any>;
-  onOpenPalette?: () => void;
-  onOpenHelp?: () => void;
+  onOpenPalette?: (() => void) | undefined;
+  onOpenHelp?: (() => void) | undefined;
 }
 
 export function ProblemPage({
@@ -159,7 +159,8 @@ function ProblemPageHeader() {
 
   const goSibling = (delta: number) => {
     const n = (idx + delta + list.length) % list.length;
-    openProblem(list[n].id);
+    const next = list[n];
+    if (next) openProblem(next.id);
   };
 
   return (

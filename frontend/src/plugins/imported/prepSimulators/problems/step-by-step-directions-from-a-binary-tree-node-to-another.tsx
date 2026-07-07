@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -45,7 +45,7 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
   let lcaLen: number | null = null;
   let answer: string | null = null;
 
-  const { emit, frames } = createRecorder<DirectionsState>(() => ({
+  const { emit, frames } = createPrepRecorder<DirectionsState>(() => ({
     tree,
     startValue,
     destValue,
@@ -73,9 +73,9 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
     const dirs: string[] = [];
     const nodes: number[] = [];
     const walk = (i: number): boolean => {
-      if (i >= tree.length || tree[i] == null) return false;
+      if (i >= tree.length || tree[i]! == null) return false;
       nodes.push(i);
-      const val = tree[i] as number;
+      const val = tree[i]! as number;
       if (val === startValue) {
         emit(
           'HIT-START',
@@ -94,7 +94,7 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
       );
       dirs.push('L');
       if (walk(2 * i + 1)) return true;
-      dirs[dirs.length - 1] = 'R';
+      dirs[dirs.length - 1]! = 'R';
       if (walk(2 * i + 2)) return true;
       dirs.pop();
       nodes.pop();
@@ -118,9 +118,9 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
     const dirs: string[] = [];
     const nodes: number[] = [];
     const walk = (i: number): boolean => {
-      if (i >= tree.length || tree[i] == null) return false;
+      if (i >= tree.length || tree[i]! == null) return false;
       nodes.push(i);
-      const val = tree[i] as number;
+      const val = tree[i]! as number;
       if (val === destValue) {
         emit(
           'HIT-DEST',
@@ -139,7 +139,7 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
       );
       dirs.push('L');
       if (walk(2 * i + 1)) return true;
-      dirs[dirs.length - 1] = 'R';
+      dirs[dirs.length - 1]! = 'R';
       if (walk(2 * i + 2)) return true;
       dirs.pop();
       nodes.pop();
@@ -160,14 +160,14 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
   // ---- Phase 3: strip the common prefix (walk both direction strings). ----
   phase = 'compare';
   let k = 0;
-  while (k < startDirs.length && k < destDirs.length && startDirs[k] === destDirs[k]) {
-    // startPathNodes[0] is the root; the k-th direction leads to node k+1 on the path.
-    const sharedNode = startPathNodes[k + 1];
+  while (k < startDirs.length && k < destDirs.length && startDirs[k]! === destDirs[k]!) {
+    // startPathNodes[0]! is the root; the k-th direction leads to node k+1 on the path.
+    const sharedNode = startPathNodes[k + 1]!;
     lcaLen = k + 1;
     emit(
       'PREFIX-MATCH',
-      `sp[${k}]==dp[${k}]=='${startDirs[k]}'`,
-      `Position ${k}: both paths turn '${startDirs[k]}', so they still share node ${tree[sharedNode]}. This turn is above the split — skip it and advance the prefix.`,
+      `sp[${k}]!==dp[${k}]!=='${startDirs[k]!}'`,
+      `Position ${k}: both paths turn '${startDirs[k]!}', so they still share node ${tree[sharedNode!]!}. This turn is above the split — skip it and advance the prefix.`,
       {
         phase: 'compare',
         current: sharedNode,
@@ -178,18 +178,18 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
     k++;
   }
 
-  const lcaNode = startPathNodes[k]; // node where the two paths diverge = LCA
+  const lcaNode = startPathNodes[k]!; // node where the two paths diverge = LCA
   lcaLen = k;
   const stopReason =
     k >= startDirs.length
       ? `the start path ran out (start is at/above the split)`
       : k >= destDirs.length
         ? `the dest path ran out (dest is at/above the split)`
-        : `sp[${k}]='${startDirs[k]}' differs from dp[${k}]='${destDirs[k]}'`;
+        : `sp[${k}]!='${startDirs[k]!}' differs from dp[${k}]!='${destDirs[k]!}'`;
   emit(
     'LCA',
-    `LCA=${tree[lcaNode]}`,
-    `The common prefix ends at length ${k} because ${stopReason}. Node ${tree[lcaNode]} is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch.`,
+    `LCA=${tree[lcaNode!]!}`,
+    `The common prefix ends at length ${k} because ${stopReason}. Node ${tree[lcaNode!]!} is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch.`,
     { phase: 'compare', current: lcaNode, lcaLen: k, found: startPathNodes.slice(0, k + 1) },
     'good',
   );
@@ -202,7 +202,7 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
   emit(
     'BUILD',
     ups ? `${ups.length}×U` : 'no U',
-    `The start path has ${startDirs.length - k} turn(s) below the LCA, so we climb up ${startDirs.length - k} time(s): "${ups || '(none)'}". That lands us on the LCA (node ${tree[lcaNode]}).`,
+    `The start path has ${startDirs.length - k} turn(s) below the LCA, so we climb up ${startDirs.length - k} time(s): "${ups || '(none)'}". That lands us on the LCA (node ${tree[lcaNode!]!}).`,
     {
       phase: 'done',
       current: lcaNode,
@@ -218,7 +218,7 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
     `Now descend along the dest branch by appending its leftover turns "${tail || '(none)'}". Final directions: "${answer || '(start == dest)'}". Time O(n) — two DFS passes visit each node once; Space O(n) — the path strings and recursion stack.`,
     {
       phase: 'done',
-      current: destPathNodes[destPathNodes.length - 1] ?? null,
+      current: destPathNodes[destPathNodes.length - 1]! ?? null,
       lcaLen: k,
       answer,
       found: destPathNodes,
@@ -232,9 +232,9 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
 
 function View({ frame }: PluginViewProps<DirectionsState>) {
   const s = frame.state;
-  const startIdx = s.startPathNodes[s.startPathNodes.length - 1];
-  const destIdx = s.destPathNodes[s.destPathNodes.length - 1];
-  const lcaIdx = s.lcaLen != null ? s.startPathNodes[s.lcaLen] : null;
+  const startIdx = s.startPathNodes[s.startPathNodes.length - 1]!;
+  const destIdx = s.destPathNodes[s.destPathNodes.length - 1]!;
+  const lcaIdx = s.lcaLen != null ? s.startPathNodes[s.lcaLen]! : null;
 
   const nodeClass = (i: number) => {
     if (s.done && (i === startIdx || i === destIdx)) return 'team-2';
@@ -245,7 +245,7 @@ function View({ frame }: PluginViewProps<DirectionsState>) {
     return 'team-0';
   };
 
-  const lcaVal = lcaIdx != null && lcaIdx < s.tree.length ? s.tree[lcaIdx] : null;
+  const lcaVal = lcaIdx != null && lcaIdx < s.tree.length ? s.tree[lcaIdx]! : null;
 
   return (
     <div className="board-area">
@@ -273,9 +273,9 @@ function View({ frame }: PluginViewProps<DirectionsState>) {
 function Inspector({ frame }: InspectorProps<DirectionsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current != null && s.current < s.tree.length ? s.tree[s.current] : null;
-  const lcaIdx = s.lcaLen != null ? s.startPathNodes[s.lcaLen] : null;
-  const lcaVal = lcaIdx != null && lcaIdx < s.tree.length ? s.tree[lcaIdx] : null;
+  const curVal = s.current != null && s.current < s.tree.length ? s.tree[s.current]! : null;
+  const lcaIdx = s.lcaLen != null ? s.startPathNodes[s.lcaLen]! : null;
+  const lcaVal = lcaIdx != null && lcaIdx < s.tree.length ? s.tree[lcaIdx]! : null;
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />

@@ -1,12 +1,19 @@
-# Algo Moves — Future ideas
+# Algo Moves Future Ideas
 
-Shipped features (problem library, simulators, Code Studio, quiz UX, mobile deck, share URLs, plugin CLI, author docs) are documented in [`README.md`](README.md) and [`docs/quiz-and-code-studio.md`](docs/quiz-and-code-studio.md).
+Shipped features (problem library, simulators, Code Studio, quiz UX, mobile
+deck, share URLs, plugin CLI, and author docs) are documented in
+[`README.md`](../README.md) and
+[`quiz-and-code-studio.md`](quiz-and-code-studio.md).
 
 ---
 
 ## Backlog hygiene
 
-Use this file for product ideas only. Implementation contracts live in [`docs/architecture.md`](architecture.md), visual release checks live in [`docs/visual-qa-checklist.md`](visual-qa-checklist.md), and quiz/Code Studio standards live in [`docs/quiz-and-code-studio.md`](quiz-and-code-studio.md).
+Use this file for product ideas only. Implementation contracts live in
+[`architecture.md`](architecture.md), visual release checks live in
+[`visual-qa-checklist.md`](visual-qa-checklist.md), and quiz/Code Studio
+standards live in
+[`quiz-and-code-studio.md`](quiz-and-code-studio.md).
 
 Before promoting an item into active work:
 
@@ -15,7 +22,7 @@ Before promoting an item into active work:
 - Define the acceptance check in one sentence.
 - Add or update the smallest relevant guardrail when the feature creates a repeatable quality risk.
 
-## Near-term polish themes
+## Active polish themes
 
 - **Design-system consistency** — keep typography, spacing, canvas dimensions, and theme values on shared tokens.
 - **Generated-content trust** — make import/generation scripts deterministic, validated, and paired with stale-output checks.

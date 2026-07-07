@@ -9,9 +9,13 @@ const LazyExcalidraw = lazy(async () => {
 });
 
 type Collaborator = {
-  pointer?: { x: number; y: number; tool: 'pointer' | 'laser' };
-  username?: string;
-  color?: { background: string; stroke: string };
+  readonly pointer?: {
+    readonly x: number;
+    readonly y: number;
+    readonly tool: 'pointer' | 'laser';
+  };
+  readonly username?: string;
+  readonly color?: { readonly background: string; readonly stroke: string };
 };
 
 type ExcalidrawAPI = {
@@ -26,19 +30,22 @@ type ExcalidrawAPI = {
 };
 
 export interface ExcalidrawWrapperProps {
-  className?: string;
-  dark?: boolean;
-  readOnly?: boolean;
-  isCollaborating?: boolean;
-  initialData?: WhiteboardPayload;
+  readonly className?: string;
+  readonly dark?: boolean;
+  readonly readOnly?: boolean;
+  readonly isCollaborating?: boolean;
+  readonly initialData?: WhiteboardPayload;
   /** Monotonic revision — bump to trigger a remote updateScene. */
-  remoteRev?: number;
+  readonly remoteRev?: number;
   /** Apply the remote scroll/zoom (follow-me). Off by default so remote element
    * edits never yank a viewer's own pan. */
-  applyRemoteViewport?: boolean;
-  collaborators?: Map<string, Collaborator>;
-  onChange?: (payload: WhiteboardPayload) => void;
-  onPointerUpdate?: (payload: { pointer: { x: number; y: number }; button: 'up' | 'down' }) => void;
+  readonly applyRemoteViewport?: boolean;
+  readonly collaborators?: Map<string, Collaborator>;
+  readonly onChange?: (payload: WhiteboardPayload) => void;
+  readonly onPointerUpdate?: (payload: {
+    readonly pointer: { readonly x: number; readonly y: number };
+    readonly button: 'up' | 'down';
+  }) => void;
 }
 
 const UI_OPTIONS: ComponentProps<typeof LazyExcalidraw>['UIOptions'] = {
@@ -56,6 +63,14 @@ const UI_OPTIONS: ComponentProps<typeof LazyExcalidraw>['UIOptions'] = {
 };
 
 const DEBOUNCE_MS = 150;
+
+function afterNextFrame(fn: () => void): void {
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(fn);
+    return;
+  }
+  setTimeout(fn, 0);
+}
 
 export function ExcalidrawWrapper({
   className,
@@ -111,7 +126,7 @@ export function ExcalidrawWrapper({
       elements: initialData.elements as unknown[],
       appState,
     });
-    requestAnimationFrame(() => {
+    afterNextFrame(() => {
       applyingRemote.current = false;
     });
   }, [remoteRev, initialData, applyRemoteViewport]);
@@ -182,7 +197,7 @@ export function ExcalidrawWrapper({
           initialData={initialScene}
           onChange={handleChange as never}
           onPointerUpdate={onPointerUpdate as never}
-          UIOptions={UI_OPTIONS}
+          {...(UI_OPTIONS ? { UIOptions: UI_OPTIONS } : {})}
         />
       </Suspense>
     </div>

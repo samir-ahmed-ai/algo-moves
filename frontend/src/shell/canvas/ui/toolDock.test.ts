@@ -120,9 +120,9 @@ describe('buildToolDockSections', () => {
   it('groups kinds into Boards/Code/Notes/Panels and appends Effects', () => {
     const sections = buildToolDockSections(kinds, effects);
     expect(sections.map((s) => s.label)).toEqual(['Boards', 'Code', 'Notes', 'Panels', 'Effects']);
-    expect(sections[0].items[0].id).toBe('whiteboard');
-    expect(sections[3].items[0].id).toBe('viz');
-    expect(sections[4].items[0]).toMatchObject({ id: 'fast', type: 'effect', multi: true });
+    expect(sections[0]!.items[0]!.id).toBe('whiteboard');
+    expect(sections[3]!.items[0]!.id).toBe('viz');
+    expect(sections[4]!.items[0]!).toMatchObject({ id: 'fast', type: 'effect', multi: true });
   });
 
   it('marks multi-instance kinds', () => {

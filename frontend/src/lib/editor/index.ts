@@ -1,9 +1,12 @@
+// Editor setup and chrome.
+export * from './editorSetup';
+export * from './editorTheme';
+export * from './recallEditorTheme';
+export * from './languageExtension';
+export * from './splitLayout';
+
+// Source formatting and read-only highlighting.
 export * from './codeFold';
 export * from './styleFormat';
 export * from './codeFormat';
-export * from './editorSetup';
-export * from './editorTheme';
-export * from './languageExtension';
 export * from './highlightSnippet';
-export * from './splitLayout';
-export * from './recallEditorTheme';

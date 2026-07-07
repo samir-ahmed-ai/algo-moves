@@ -49,7 +49,7 @@ function key(r: number, c: number): string {
 
 function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
   const m = board.length;
-  const n = board[0].length;
+  const n = board[0]!.length;
   const onPath = new Set<string>();
   const path: [number, number][] = [];
   let found = false;
@@ -99,7 +99,7 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
       );
       return false;
     }
-    const ch = board[r][c];
+    const ch = board[r]![c];
     const need = word[idx];
     if (ch !== need) {
       snap(
@@ -153,11 +153,11 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
   let answer = false;
   outer: for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
-      if (board[r][c] === word[0]) {
+      if (board[r]![c] === word[0]) {
         snap(
           'TRY',
           `start (${r},${c})`,
-          `Try starting the search at (${r}, ${c}) — its letter '${board[r][c]}' matches the first letter '${word[0]}'.`,
+          `Try starting the search at (${r}, ${c}) — its letter '${board[r]![c]}' matches the first letter '${word[0]}'.`,
           [r, c],
         );
       }

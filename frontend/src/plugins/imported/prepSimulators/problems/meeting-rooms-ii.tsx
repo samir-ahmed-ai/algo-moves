@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -38,8 +38,8 @@ interface MeetingRoomsState {
 
 function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {
   const n = intervals.length;
-  const starts = intervals.map((v) => v[0]);
-  const ends = intervals.map((v) => v[1]);
+  const starts = intervals.map((v) => v[0]!);
+  const ends = intervals.map((v) => v[1]!);
 
   let i: number | null = null;
   let endIdx = 0;
@@ -47,7 +47,7 @@ function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {
   let peak = 0;
   let decision: 'need' | 'reuse' | null = null;
 
-  const { emit, frames } = createRecorder<MeetingRoomsState>(() => ({
+  const { emit, frames } = createPrepRecorder<MeetingRoomsState>(() => ({
     intervals: intervals,
     starts: starts.slice(),
     ends: ends.slice(),
@@ -77,14 +77,14 @@ function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {
 
   for (let k = 0; k < n; k++) {
     i = k;
-    if (starts[k] < ends[endIdx]) {
+    if (starts[k]! < ends[endIdx]!) {
       rooms++;
       decision = 'need';
       if (rooms > peak) peak = rooms;
       emit(
         'NEED',
         `rooms=${rooms}`,
-        `Meeting starting at ${starts[k]} begins before the earliest end ${ends[endIdx]} (${starts[k]} < ${ends[endIdx]}), so no room has freed up yet — allocate a new room. rooms = ${rooms}.`,
+        `Meeting starting at ${starts[k]!} begins before the earliest end ${ends[endIdx]!} (${starts[k]!} < ${ends[endIdx]!}), so no room has freed up yet — allocate a new room. rooms = ${rooms}.`,
         {},
       );
     } else {
@@ -93,7 +93,7 @@ function record({ intervals }: MeetingRoomsInput): Frame<MeetingRoomsState>[] {
       emit(
         'REUSE',
         `reuse`,
-        `Meeting starting at ${starts[k]} begins at or after the earliest end ${ends[endIdx - 1]} (${starts[k]} ≥ ${ends[endIdx - 1]}), so that meeting has finished — reuse its room. Advance endIdx to ${endIdx}; rooms stays ${rooms}.`,
+        `Meeting starting at ${starts[k]!} begins at or after the earliest end ${ends[endIdx - 1]!} (${starts[k]!} ≥ ${ends[endIdx - 1]!}), so that meeting has finished — reuse its room. Advance endIdx to ${endIdx}; rooms stays ${rooms}.`,
         {},
       );
     }
@@ -130,14 +130,14 @@ function View({ frame }: PluginViewProps<MeetingRoomsState>) {
     endPointers.push({ i: s.endIdx, label: 'endIdx', tone: 'warn', place: 'below' });
   const endTone = (k: number) => (k < s.endIdx ? 'dead' : k === s.endIdx ? 'mid' : '');
 
-  const curStart = s.i !== null ? s.starts[s.i] : '—';
-  const curEnd = s.endIdx < s.ends.length ? s.ends[s.endIdx] : '—';
+  const curStart = s.i !== null ? s.starts[s.i]! : '—';
+  const curEnd = s.endIdx < s.ends.length ? s.ends[s.endIdx]! : '—';
 
   const rail = (
     <>
       <RailGroup label="scan">
-        <RailStat k="starts[i]" v={curStart} tone="accent" />
-        <RailStat k="ends[endIdx]" v={curEnd} tone="warn" />
+        <RailStat k="starts[i]!" v={curStart} tone="accent" />
+        <RailStat k="ends[endIdx]!" v={curEnd} tone="warn" />
         <RailStat k="decision" v={s.decision ?? '—'} />
       </RailGroup>
       <RailGroup label="rooms">
@@ -174,14 +174,14 @@ function View({ frame }: PluginViewProps<MeetingRoomsState>) {
 function Inspector({ frame }: InspectorProps<MeetingRoomsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curStart = s.i !== null ? s.starts[s.i] : '—';
-  const curEnd = s.endIdx < s.ends.length ? s.ends[s.endIdx] : '—';
+  const curStart = s.i !== null ? s.starts[s.i]! : '—';
+  const curEnd = s.endIdx < s.ends.length ? s.ends[s.endIdx]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="meetings (n)" v={s.intervals.length} />
-      <InspectorRow k="starts[i]" v={curStart} />
+      <InspectorRow k="starts[i]!" v={curStart} />
       <InspectorRow k="endIdx" v={s.endIdx} />
-      <InspectorRow k="ends[endIdx]" v={curEnd} />
+      <InspectorRow k="ends[endIdx]!" v={curEnd} />
       <InspectorRow k="decision" v={s.decision ?? '—'} />
       <InspectorRow k="rooms now" v={s.rooms} />
       <InspectorRow k="answer (peak)" v={s.done ? s.peak : '…'} />
@@ -294,7 +294,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n log n). O(n). Separate starts and ends, sort each independently; Sweep through starts: if `starts[i] < ends[endIdx]`, a new room is needed; else reuse a room (`endIdx++`)',
+      'O(n log n). O(n). Separate starts and ends, sort each independently; Sweep through starts: if `starts[i]! < ends[endIdx]!`, a new room is needed; else reuse a room (`endIdx++`)',
   },
   {
     id: 'outcome',

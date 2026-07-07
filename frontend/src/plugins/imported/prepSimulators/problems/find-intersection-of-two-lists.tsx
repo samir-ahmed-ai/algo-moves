@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -80,22 +80,22 @@ function buildChain(input: IntersectInput): {
   const nextInOrder = new Map<number, number | null>();
   const link = (order: number[]) => {
     for (let i = 0; i < order.length; i++) {
-      nextInOrder.set(order[i], i + 1 < order.length ? order[i + 1] : null);
+      nextInOrder.set(order[i]!, i + 1 < order.length ? (order[i + 1]! ?? null) : null);
     }
   };
   link(orderA);
   link(orderB);
 
-  const headA = orderA.length ? orderA[0] : null;
-  const headB = orderB.length ? orderB[0] : null;
+  const headA = orderA.length ? orderA[0]! : null;
+  const headB = orderB.length ? orderB[0]! : null;
   const nextOf = (idx: number) => nextInOrder.get(idx) ?? null;
-  const junctionStart = sharedIdx.length ? sharedIdx[0] : -1;
+  const junctionStart = sharedIdx.length ? sharedIdx[0]! : -1;
   return { cells, headA, headB, nextOf, junctionStart, lenA };
 }
 
 function record(input: IntersectInput): Frame<IntersectState>[] {
   const { cells, headA, headB, nextOf, junctionStart, lenA } = buildChain(input);
-  const { emit, frames } = createRecorder<IntersectState>(() => ({
+  const { emit, frames } = createPrepRecorder<IntersectState>(() => ({
     cells,
     lenA,
     junctionStart,
@@ -106,8 +106,8 @@ function record(input: IntersectInput): Frame<IntersectState>[] {
     done: false,
   }));
 
-  const idAt = (idx: number | null): number | null => (idx === null ? null : cells[idx].id);
-  const label = (idx: number | null) => (idx === null ? 'nil' : `node ${cells[idx].val}`);
+  const idAt = (idx: number | null): number | null => (idx === null ? null : cells[idx]!.id);
+  const label = (idx: number | null) => (idx === null ? 'nil' : `node ${cells[idx]!.val}`);
 
   // Mirror the Go guard: if either list is empty there is no intersection.
   if (headA === null || headB === null) {
@@ -180,8 +180,8 @@ function record(input: IntersectInput): Frame<IntersectState>[] {
   if (resultId !== null) {
     emit(
       'FOUND',
-      `node ${cells[pa as number].val}`,
-      `pa == pb at the shared node ${cells[pa as number].val} — that is the intersection where both lists merge. Return it.`,
+      `node ${cells[pa as number]!.val}`,
+      `pa == pb at the shared node ${cells[pa as number]!.val} — that is the intersection where both lists merge. Return it.`,
       { pa, pb, steps, resultId, done: true },
       'good',
     );
@@ -214,7 +214,7 @@ function View({ frame }: PluginViewProps<IntersectState>) {
   if (s.pb !== null) pointers.push({ i: s.pb, label: 'pb', tone: 'warn', place: 'below' });
 
   const tone = (i: number) => {
-    if (s.resultId !== null && s.cells[i].id === s.resultId) return 'found';
+    if (s.resultId !== null && s.cells[i]!.id === s.resultId) return 'found';
     if (s.junctionStart >= 0 && i >= s.junctionStart && i < s.lenA) return 'in-window';
     return '';
   };
@@ -263,14 +263,14 @@ function View({ frame }: PluginViewProps<IntersectState>) {
 function Inspector({ frame }: InspectorProps<IntersectState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const at = (idx: number | null) => (idx === null ? 'nil' : String(s.cells[idx].val));
+  const at = (idx: number | null) => (idx === null ? 'nil' : String(s.cells[idx]!.val));
   return (
     <VarGrid>
       <InspectorRow k="pa" v={at(s.pa)} />
       <InspectorRow k="pb" v={at(s.pb)} />
       <InspectorRow
         k="pa == pb"
-        v={s.pa !== null && s.pb !== null && s.cells[s.pa].id === s.cells[s.pb].id ? 'yes' : 'no'}
+        v={s.pa !== null && s.pb !== null && s.cells[s.pa]!.id === s.cells[s.pb]!.id ? 'yes' : 'no'}
       />
       <InspectorRow k="hops" v={s.steps} />
       <InspectorRow

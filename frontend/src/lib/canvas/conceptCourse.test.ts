@@ -9,6 +9,7 @@ describe('isConceptCourse', () => {
   it('recognises Go and OpenRTB concept courses', () => {
     expect(isConceptCourse({ courseId: 'go-senior' })).toBe(true);
     expect(isConceptCourse({ courseId: 'openrtb-eng' })).toBe(true);
+    expect(isConceptCourse({ courseId: ' Go-Senior ' })).toBe(true);
   });
 
   it('returns false for algorithm problem courses', () => {

@@ -44,7 +44,7 @@ function record({ n }: QueensInput): Frame<QueensState>[] {
     tone?: 'good',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         n,
         queens: queens.slice(),
@@ -59,7 +59,7 @@ function record({ n }: QueensInput): Frame<QueensState>[] {
 
   const safe = (row: number, col: number): boolean => {
     for (let r = 0; r < row; r++) {
-      const c = queens[r];
+      const c = queens[r]!;
       if (c === col) return false;
       if (Math.abs(c - col) === Math.abs(r - row)) return false;
     }
@@ -127,7 +127,7 @@ function record({ n }: QueensInput): Frame<QueensState>[] {
     }
 
     if (row > 0) {
-      const removed = queens[row - 1];
+      const removed = queens[row - 1]!;
       queens[row] = -1;
       backtracks++;
       emit(
@@ -177,7 +177,9 @@ function View({ frame, onSelectNode }: PluginViewProps<QueensState>) {
         }}
         active={s.tryCell}
         cellSize={40}
-        onCellClick={onSelectNode ? (r, c) => onSelectNode(r * s.n + c) : undefined}
+        {...(onSelectNode
+          ? { onCellClick: (r: number, c: number) => onSelectNode(r * s.n + c) }
+          : {})}
       />
     </VizStage>
   );

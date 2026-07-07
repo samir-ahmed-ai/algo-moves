@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,7 +19,7 @@ interface NgeState {
   n: number;
   digits: string[]; // current arrangement of digits (mutated over time)
   i: number | null; // pivot index (first descent from the right)
-  j: number | null; // index of the smallest digit > digits[i] to the right
+  j: number | null; // index of the smallest digit > digits[i]! to the right
   scanA: number | null; // pointer scanning left for the pivot
   scanB: number | null; // pointer scanning right for the swap partner
   loR: number | null; // suffix-reversal left pointer
@@ -35,7 +35,7 @@ function record({ n }: NgeInput): Frame<NgeState>[] {
   const s = String(n).split('');
   const k = s.length;
 
-  const { emit, frames } = createRecorder<NgeState>(() => ({
+  const { emit, frames } = createPrepRecorder<NgeState>(() => ({
     n,
     digits: s.slice(),
     i: null,
@@ -56,13 +56,13 @@ function record({ n }: NgeInput): Frame<NgeState>[] {
     {},
   );
 
-  // Step 1: find pivot i — the first index (from the right) where s[i] < s[i+1].
+  // Step 1: find pivot i — the first index (from the right) where s[i]! < s[i+1]!.
   let i = k - 2;
-  while (i >= 0 && s[i] >= s[i + 1]) {
+  while (i >= 0 && s[i]! >= s[i + 1]!) {
     emit(
       'SCAN_PIVOT',
-      `s[${i}]=${s[i]} ≥ s[${i + 1}]=${s[i + 1]}`,
-      `Scan from the right looking for the pivot: the first digit that is smaller than the one after it. digits[${i}]=${s[i]} is not less than digits[${i + 1}]=${s[i + 1]}, so keep moving left.`,
+      `s[${i}]!=${s[i]!} ≥ s[${i + 1}]!=${s[i + 1]!}`,
+      `Scan from the right looking for the pivot: the first digit that is smaller than the one after it. digits[${i}]!=${s[i]!} is not less than digits[${i + 1}]!=${s[i + 1]!}, so keep moving left.`,
       { scanA: i },
     );
     i--;
@@ -81,18 +81,18 @@ function record({ n }: NgeInput): Frame<NgeState>[] {
 
   emit(
     'PIVOT',
-    `i=${i} (${s[i]})`,
-    `Found the pivot at index ${i} (digit ${s[i]}): everything to its right is descending, so digits[${i}] is the one we must increase to get the next-larger number.`,
+    `i=${i} (${s[i]!})`,
+    `Found the pivot at index ${i} (digit ${s[i]!}): everything to its right is descending, so digits[${i}]! is the one we must increase to get the next-larger number.`,
     { i },
   );
 
-  // Step 2: find j — rightmost digit strictly greater than s[i].
+  // Step 2: find j — rightmost digit strictly greater than s[i]!.
   let j = k - 1;
-  while (s[j] <= s[i]) {
+  while (s[j]! <= s[i]!) {
     emit(
       'SCAN_SWAP',
-      `s[${j}]=${s[j]} ≤ s[${i}]=${s[i]}`,
-      `Scan the descending suffix from the right for the smallest digit still greater than the pivot ${s[i]}. digits[${j}]=${s[j]} is not greater than ${s[i]}, so move left.`,
+      `s[${j}]!=${s[j]!} ≤ s[${i}]!=${s[i]!}`,
+      `Scan the descending suffix from the right for the smallest digit still greater than the pivot ${s[i]!}. digits[${j}]!=${s[j]!} is not greater than ${s[i]!}, so move left.`,
       { i, scanB: j },
     );
     j--;
@@ -100,19 +100,19 @@ function record({ n }: NgeInput): Frame<NgeState>[] {
 
   emit(
     'FIND_SWAP',
-    `j=${j} (${s[j]})`,
-    `digits[${j}]=${s[j]} is the smallest digit in the suffix that still exceeds the pivot ${s[i]}. Swapping it in makes the number just barely larger.`,
+    `j=${j} (${s[j]!})`,
+    `digits[${j}]!=${s[j]!} is the smallest digit in the suffix that still exceeds the pivot ${s[i]!}. Swapping it in makes the number just barely larger.`,
     { i, j },
   );
 
   // Step 3: swap pivot with j.
-  const tmp = s[i];
-  s[i] = s[j];
-  s[j] = tmp;
+  const tmp = s[i]!;
+  s[i]! = s[j]!;
+  s[j]! = tmp;
   emit(
     'SWAP',
-    `swap ${s[j]}↔${s[i]}`,
-    `Swap the pivot with digits[${j}]: now index ${i} holds ${s[i]}. The prefix is fixed at the smallest possible increase; the suffix is still descending (largest).`,
+    `swap ${s[j]!}↔${s[i]!}`,
+    `Swap the pivot with digits[${j}]!: now index ${i} holds ${s[i]!}. The prefix is fixed at the smallest possible increase; the suffix is still descending (largest).`,
     { i, j },
   );
 
@@ -128,13 +128,13 @@ function record({ n }: NgeInput): Frame<NgeState>[] {
     );
   }
   while (l < r) {
-    const t = s[l];
-    s[l] = s[r];
-    s[r] = t;
+    const t = s[l]!;
+    s[l]! = s[r]!;
+    s[r]! = t;
     emit(
       'REVERSE_SWAP',
       `swap idx ${l}↔${r}`,
-      `Reversing the suffix: exchange digits[${l}]=${s[r]} and digits[${r}]=${s[l]} (shown after the swap). Move both pointers inward.`,
+      `Reversing the suffix: exchange digits[${l}]!=${s[r]!} and digits[${r}]!=${s[l]!} (shown after the swap). Move both pointers inward.`,
       { loR: l, hiR: r },
     );
     l++;
@@ -210,15 +210,15 @@ function Inspector({ frame }: InspectorProps<NgeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const at = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.digits.length ? s.digits[idx] : '—';
+    idx !== null && idx >= 0 && idx < s.digits.length ? s.digits[idx]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="n" v={s.n} />
       <InspectorRow k="digits" v={s.digits.join('')} />
       <InspectorRow k="pivot i" v={s.i ?? '—'} />
-      <InspectorRow k="digits[i]" v={at(s.i)} />
+      <InspectorRow k="digits[i]!" v={at(s.i)} />
       <InspectorRow k="swap j" v={s.j ?? '—'} />
-      <InspectorRow k="digits[j]" v={at(s.j)} />
+      <InspectorRow k="digits[j]!" v={at(s.j)} />
       <InspectorRow k="result" v={s.result !== null ? s.result : s.done ? 'none' : '…'} />
     </VarGrid>
   );

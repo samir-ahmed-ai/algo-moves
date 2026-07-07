@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -41,9 +41,9 @@ function record({ tree, p, q }: LcaInput): Frame<LcaState>[] {
   const visitedA: number[] = [];
   const visitedB: number[] = [];
 
-  const valAt = (i: number | null) => (i !== null && tree[i] != null ? (tree[i] as number) : '·');
+  const valAt = (i: number | null) => (i !== null && tree[i]! != null ? (tree[i]! as number) : '·');
 
-  const { emit, frames } = createRecorder<LcaState>(() => ({
+  const { emit, frames } = createPrepRecorder<LcaState>(() => ({
     tree,
     p,
     q,
@@ -160,7 +160,7 @@ function View({ frame }: PluginViewProps<LcaState>) {
   // Ring the meeting node when found, otherwise pointer a's node.
   const active = s.answer !== null ? s.answer : s.a;
   const valAt = (i: number | null) =>
-    i !== null && s.tree[i] != null ? (s.tree[i] as number) : 'null';
+    i !== null && s.tree[i]! != null ? (s.tree[i]! as number) : 'null';
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -188,7 +188,7 @@ function Inspector({ frame }: InspectorProps<LcaState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const valAt = (i: number | null) =>
-    i !== null && s.tree[i] != null ? (s.tree[i] as number) : 'null';
+    i !== null && s.tree[i]! != null ? (s.tree[i]! as number) : 'null';
   return (
     <VarGrid>
       <InspectorRow k="p" v={valAt(s.p)} />
@@ -354,7 +354,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as LcaState | undefined;
     if (!s || s.answer === null) return { ok: false, label: 'no LCA' };
-    const v = s.tree[s.answer];
+    const v = s.tree[s.answer]!;
     return { ok: true, label: `LCA = ${v == null ? '?' : v}` };
   },
 };

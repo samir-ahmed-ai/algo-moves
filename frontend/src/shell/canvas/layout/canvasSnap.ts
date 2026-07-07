@@ -84,6 +84,7 @@ export function applyCanvasSnap(
 
   const target = regionRect(region, visible);
   const node = sel[0];
+  if (!node) return nodes;
   const kind = node.data.kind ?? node.id;
   const width = capWidth(kind, target.width);
   const height = target.height;

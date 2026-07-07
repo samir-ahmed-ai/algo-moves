@@ -35,7 +35,7 @@ interface MissState {
 function record({ nums }: MissInput): Frame<MissState>[] {
   const raw = nums.slice();
   const values = nums.slice().sort((a, b) => a - b);
-  const base = values[0];
+  const base = values[0]!;
   let lo = 0;
   let hi = values.length - 1;
   let result: number | null = null;
@@ -67,14 +67,14 @@ function record({ nums }: MissInput): Frame<MissState>[] {
 
   while (lo <= hi) {
     const mid = lo + ((hi - lo) >> 1);
-    const expected = base + mid;
+    const expected = base! + mid;
     emit(
       'MID',
       `mid=${mid} exp=${expected}`,
       `Middle of the live window: mid=${mid}. Expected base+mid = ${base}+${mid} = ${expected}; actual values[${mid}] = ${values[mid]}.`,
       { mid: mid },
     );
-    if (mid > 0 && values[mid - 1] === base + mid - 1 && values[mid] !== expected) {
+    if (mid > 0 && values[mid - 1] === base! + mid - 1 && values[mid] !== expected) {
       result = expected;
       emitDone(
         'GAP',
@@ -104,7 +104,7 @@ function record({ nums }: MissInput): Frame<MissState>[] {
     }
   }
 
-  result = base + lo;
+  result = base! + lo;
   emitDone(
     'DONE',
     `missing ${result}`,

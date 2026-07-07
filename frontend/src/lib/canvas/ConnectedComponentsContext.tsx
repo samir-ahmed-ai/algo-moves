@@ -3,9 +3,9 @@ import type { Edge } from '@xyflow/react';
 import { componentIndexMap, findConnectedComponents } from './connectedComponents';
 
 interface ConnectedComponentsCtx {
-  components: string[][];
-  indexOf: (nodeId: string) => number;
-  sameComponent: (a: string, b: string) => boolean;
+  readonly components: readonly (readonly string[])[];
+  readonly indexOf: (nodeId: string) => number;
+  readonly sameComponent: (a: string, b: string) => boolean;
 }
 
 const Ctx = createContext<ConnectedComponentsCtx | null>(null);
@@ -19,10 +19,10 @@ export function ConnectedComponentsProvider({
   edges,
   children,
 }: {
-  nodeIds: string[];
-  edges: Edge[];
-  children: ReactNode;
-}) {
+  readonly nodeIds: readonly string[];
+  readonly edges: readonly Edge[];
+  readonly children: ReactNode;
+}): ReactNode {
   const value = useMemo(() => {
     const components = findConnectedComponents(nodeIds, edges);
     const indexMap = componentIndexMap(components);
@@ -40,7 +40,7 @@ export function ConnectedComponentsProvider({
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export function useConnectedComponents() {
+export function useConnectedComponents(): ConnectedComponentsCtx {
   const ctx = useContext(Ctx);
   if (!ctx)
     throw new Error('useConnectedComponents must be used inside ConnectedComponentsProvider');
@@ -48,6 +48,6 @@ export function useConnectedComponents() {
 }
 
 /** Safe hook — returns null when outside provider. */
-export function useConnectedComponentsOptional() {
+export function useConnectedComponentsOptional(): ConnectedComponentsCtx | null {
   return useContext(Ctx);
 }

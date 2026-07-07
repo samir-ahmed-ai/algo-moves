@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -30,7 +30,7 @@ function record({ n, logs }: ExclInput): Frame<ExclState>[] {
   const stack: number[] = [];
   let prev = 0;
 
-  const { emit, frames } = createRecorder<ExclState>(() => ({
+  const { emit, frames } = createPrepRecorder<ExclState>(() => ({
     n,
     res: res.slice(),
     stack: stack.slice(),
@@ -49,22 +49,22 @@ function record({ n, logs }: ExclInput): Frame<ExclState>[] {
 
   for (const log of logs) {
     const parts = log.split(':');
-    const id = parseInt(parts[0], 10);
-    const ts = parseInt(parts[2], 10);
-    if (parts[1] === 'start') {
+    const id = parseInt(parts[0]!, 10);
+    const ts = parseInt(parts[2]!, 10);
+    if (parts[1]! === 'start') {
       if (stack.length > 0) {
-        res[stack[stack.length - 1]] += ts - prev;
+        res[stack[stack.length - 1]!] += ts - prev;
       }
       stack.push(id);
       prev = ts;
       emit(
         'START',
         `fn ${id} @${ts}`,
-        `"${log}": pause current fn ${stack.length > 1 ? stack[stack.length - 2] : '—'}, push ${id}, prev=${ts}.`,
+        `"${log}": pause current fn ${stack.length > 1 ? stack[stack.length - 2]! : '—'}, push ${id}, prev=${ts}.`,
         { op: `start ${id}`, log, stack: stack.slice(), prev, res: res.slice() },
       );
     } else {
-      res[stack[stack.length - 1]] += ts - prev + 1;
+      res[stack[stack.length - 1]!] += ts - prev + 1;
       stack.pop();
       prev = ts + 1;
       emit(

@@ -23,7 +23,7 @@ export type ShapeKey =
   | 'generic';
 
 /** Per-shape fallback glyph — used when a problem has no bespoke glyph by id. */
-export const SHAPE_GLYPHS: Record<ShapeKey, string> = {
+export const SHAPE_GLYPHS: Readonly<Record<ShapeKey, string>> = {
   graph:
     '<circle cx="11" cy="15" r="3.2"/><circle cx="31" cy="10" r="3.2"/><circle cx="38" cy="28" r="3.2"/><circle cx="17" cy="36" r="3.2"/><circle cx="24" cy="23" r="2.6" fill="var(--accent)" stroke="none"/><path d="M13.6 13.4 28.4 11M13 17.6 16 33M19.4 35 35.4 29.4M14 16.6 21.6 22M33.6 11.8 26.2 21"/>',
   array:
@@ -42,7 +42,7 @@ export const SHAPE_GLYPHS: Record<ShapeKey, string> = {
     '<rect x="11" y="7" width="26" height="34" rx="3"/><path d="M16 16h16M16 22h16M16 28h11"/><circle cx="31" cy="31" r="6" stroke="var(--accent)"/><path d="M35.4 35.4 39.5 39.5" stroke="var(--accent)"/>',
 };
 
-const COURSE_SHAPE: Record<string, ShapeKey> = {
+const COURSE_SHAPE: Readonly<Record<string, ShapeKey>> = {
   graphs: 'graph',
   trees: 'tree',
   heaps: 'heap',
@@ -59,7 +59,7 @@ const COURSE_SHAPE: Record<string, ShapeKey> = {
   'prep-math': 'array',
 };
 
-export const SHAPE_KEYS = Object.keys(SHAPE_GLYPHS) as ShapeKey[];
+export const SHAPE_KEYS = Object.freeze(Object.keys(SHAPE_GLYPHS) as ShapeKey[]);
 
 function normalizedId(id: string | undefined): string | undefined {
   const trimmed = id?.trim();
@@ -99,7 +99,7 @@ export function shapeFor(item: Item): ShapeKey {
     has('string')
   )
     return 'array';
-  return COURSE_SHAPE[item.courseId.trim()] ?? 'generic';
+  return COURSE_SHAPE[item.courseId.trim().toLowerCase()] ?? 'generic';
 }
 
 /** Bespoke glyph by id (item then plugin), falling back to the per-shape glyph. */
@@ -109,6 +109,7 @@ export function glyphFor(item: Item): string {
   return (
     (itemId ? PROBLEM_GLYPHS[itemId] : undefined) ??
     (pluginId ? PROBLEM_GLYPHS[pluginId] : undefined) ??
-    SHAPE_GLYPHS[shapeFor(item)]
+    SHAPE_GLYPHS[shapeFor(item)] ??
+    SHAPE_GLYPHS.generic
   );
 }

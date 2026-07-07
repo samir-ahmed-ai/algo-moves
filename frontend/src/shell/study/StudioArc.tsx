@@ -16,13 +16,13 @@ export interface StudioArcProps {
   stages: { id: StudioGroupId; label: string }[];
   active: StudioTab;
   onGo: (id: string) => void;
-  variants?: Array<{ lang?: string }>;
-  activeVariant?: number;
-  onSetVariant?: (index: number) => void;
-  compact?: boolean;
+  variants?: ReadonlyArray<{ lang?: string | undefined }> | undefined;
+  activeVariant?: number | undefined;
+  onSetVariant?: ((index: number) => void) | undefined;
+  compact?: boolean | undefined;
   /** Drop the row chrome (border/background) — for embedding in a floating pill. */
-  bare?: boolean;
-  className?: string;
+  bare?: boolean | undefined;
+  className?: string | undefined;
 }
 
 /**

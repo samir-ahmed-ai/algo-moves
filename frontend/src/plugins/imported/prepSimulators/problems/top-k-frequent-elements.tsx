@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -55,7 +55,7 @@ function record({ nums, k }: TopKInput): Frame<TopKState>[] {
   const collected: number[] = [];
   const result: number[] = [];
 
-  const { emit, frames } = createRecorder<TopKState>(() => ({
+  const { emit, frames } = createPrepRecorder<TopKState>(() => ({
     nums,
     k,
     elements: order,
@@ -78,28 +78,28 @@ function record({ nums, k }: TopKInput): Frame<TopKState>[] {
   for (let idx = 0; idx < order.length; idx++) {
     emit(
       'COUNT',
-      `freq[${order[idx]}]=${counts[idx]}`,
-      `Counting pass: value ${order[idx]} appears ${counts[idx]} time${counts[idx] === 1 ? '' : 's'} in the array. Each bar's height is that element's frequency.`,
+      `freq[${order[idx]!}]=${counts[idx]!}`,
+      `Counting pass: value ${order[idx]!} appears ${counts[idx]!} time${counts[idx]! === 1 ? '' : 's'} in the array. Each bar's height is that element's frequency.`,
       { active: idx },
     );
   }
 
-  // Phase 2: bucket sort by frequency. buckets[f] = elements with frequency f.
+  // Phase 2: bucket sort by frequency. buckets[f]! = elements with frequency f.
   const buckets: number[][] = Array.from({ length: nums.length + 1 }, () => []);
   for (let idx = 0; idx < order.length; idx++) {
-    buckets[counts[idx]].push(order[idx]);
+    buckets[counts[idx]!]!.push(order[idx]!);
   }
   emit(
     'BUCKETS',
     `0..${nums.length}`,
-    `Bucket sort: place each element into buckets[freq], where the index is its frequency. There are at most n+1 = ${nums.length + 1} buckets, so this is O(n) — no comparison sort needed.`,
+    `Bucket sort: place each element into buckets[freq]!, where the index is its frequency. There are at most n+1 = ${nums.length + 1} buckets, so this is O(n) — no comparison sort needed.`,
     {},
   );
 
   // Phase 3: walk buckets from highest frequency down, collecting up to k.
   for (let f = buckets.length - 1; f >= 0 && result.length < k; f--) {
-    if (buckets[f].length === 0) continue;
-    for (const num of buckets[f]) {
+    if (buckets[f]!.length === 0) continue;
+    for (const num of buckets[f]!) {
       const idx = indexOfEl.get(num) ?? -1;
       collected.push(idx);
       result.push(num);
@@ -154,7 +154,7 @@ function View({ frame }: PluginViewProps<TopKState>) {
       <ArrayBars
         values={s.counts}
         tone={tone}
-        label={(i) => s.elements[i]}
+        label={(i) => s.elements[i]!}
         max={Math.max(1, ...s.counts)}
       />
     </VizStage>
@@ -164,8 +164,8 @@ function View({ frame }: PluginViewProps<TopKState>) {
 function Inspector({ frame }: InspectorProps<TopKState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const el = s.active !== null && s.active >= 0 ? s.elements[s.active] : null;
-  const cnt = s.active !== null && s.active >= 0 ? s.counts[s.active] : null;
+  const el = s.active !== null && s.active >= 0 ? s.elements[s.active]! : null;
+  const cnt = s.active !== null && s.active >= 0 ? s.counts[s.active]! : null;
   return (
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
@@ -187,10 +187,10 @@ function computeAnswer(nums: number[], k: number): number[] {
     freq.set(num, (freq.get(num) ?? 0) + 1);
   }
   const buckets: number[][] = Array.from({ length: nums.length + 1 }, () => []);
-  for (const num of order) buckets[freq.get(num) ?? 0].push(num);
+  for (const num of order) buckets[freq.get(num) ?? 0]!.push(num);
   const res: number[] = [];
   for (let f = buckets.length - 1; f >= 0 && res.length < k; f--) {
-    for (const num of buckets[f]) {
+    for (const num of buckets[f]!) {
       res.push(num);
       if (res.length === k) return res;
     }
@@ -221,7 +221,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Count frequencies with a map, then use **bucket sort**: `buckets[freq]` holds elements with that frequency',
+      'Count frequencies with a map, then use **bucket sort**: `buckets[freq]!` holds elements with that frequency',
   },
   {
     id: 'init',
@@ -263,7 +263,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Bucket sort: place each element into buckets[freq], where the index is its frequency. There are at most n+1 =  buckets, so this is O(n) — no comparison sort needed.',
+      'Bucket sort: place each element into buckets[freq]!, where the index is its frequency. There are at most n+1 =  buckets, so this is O(n) — no comparison sort needed.',
   },
   {
     id: 'state',
@@ -305,7 +305,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n). O(n). Count frequencies with a map, then use **bucket sort**: `buckets[freq]` holds elements with that frequency; Iterate buckets from highest to lowest, collect unti',
+      'O(n). O(n). Count frequencies with a map, then use **bucket sort**: `buckets[freq]!` holds elements with that frequency; Iterate buckets from highest to lowest, collect unti',
   },
   {
     id: 'outcome',
@@ -343,7 +343,7 @@ export const simulator: ProblemSimulator = {
     if (!s) return { ok: false, label: 'no frames' };
     const expected = computeAnswer(s.nums, s.k);
     const got = s.result;
-    const ok = got.length === expected.length && got.every((v, i) => v === expected[i]);
+    const ok = got.length === expected.length && got.every((v, i) => v === expected[i]!);
     return { ok, label: `[${got.join(',')}]` };
   },
 };

@@ -34,7 +34,7 @@ interface MSState {
 
 function record({ matrix }: MSInput): Frame<MSState>[] {
   const m = matrix.length;
-  const n = matrix[0].length;
+  const n = matrix[0]!.length;
   const dp: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(-1));
   let best = 0;
   let bestCell: [number, number] | null = null;
@@ -59,8 +59,8 @@ function record({ matrix }: MSInput): Frame<MSState>[] {
 
   for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
-      if (matrix[r][c] !== '1') {
-        dp[r][c] = 0;
+      if (matrix[r]![c] !== '1') {
+        dp[r]![c] = 0;
         emit(
           'ZERO',
           `dp[${r}][${c}]=0`,
@@ -70,15 +70,15 @@ function record({ matrix }: MSInput): Frame<MSState>[] {
         continue;
       }
       if (r === 0 || c === 0) {
-        dp[r][c] = 1;
+        dp[r]![c] = 1;
         const why =
           r === 0 && c === 0
             ? `it is the corner`
             : r === 0
               ? `it is in the top row`
               : `it is in the left column`;
-        if (dp[r][c] > best) {
-          best = dp[r][c];
+        if (dp[r]![c]! > best) {
+          best! = dp[r]![c]!;
           bestCell = [r, c];
         }
         emit(
@@ -89,11 +89,11 @@ function record({ matrix }: MSInput): Frame<MSState>[] {
         );
         continue;
       }
-      const up = dp[r - 1][c];
-      const left = dp[r][c - 1];
-      const diag = dp[r - 1][c - 1];
-      const side = Math.min(up, left, diag) + 1;
-      dp[r][c] = side;
+      const up = dp[r - 1]![c];
+      const left = dp[r]![c - 1];
+      const diag = dp[r - 1]![c - 1];
+      const side = Math.min(up!, left!, diag!) + 1;
+      dp[r]![c] = side;
       if (side > best) {
         best = side;
         bestCell = [r, c];
@@ -101,7 +101,7 @@ function record({ matrix }: MSInput): Frame<MSState>[] {
       emit(
         'FILL',
         `dp[${r}][${c}]=${side}`,
-        `Cell (${r}, ${c}) holds '1'. A square ending here is limited by its three neighbours: up (${r - 1}, ${c}) = ${up}, left (${r}, ${c - 1}) = ${left}, diagonal (${r - 1}, ${c - 1}) = ${diag}. Take min(${up}, ${left}, ${diag}) + 1 = ${Math.min(up, left, diag)} + 1 = ${side}.`,
+        `Cell (${r}, ${c}) holds '1'. A square ending here is limited by its three neighbours: up (${r - 1}, ${c}) = ${up}, left (${r}, ${c - 1}) = ${left}, diagonal (${r - 1}, ${c - 1}) = ${diag}. Take min(${up}, ${left}, ${diag}) + 1 = ${Math.min(up!, left!, diag!)} + 1 = ${side}.`,
         { cur: [r, c] },
       );
     }
@@ -124,15 +124,18 @@ function View({ frame }: PluginViewProps<MSState>) {
   const cellTone = (r: number, c: number) => {
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
     if (s.bestCell && s.bestCell[0] === r && s.bestCell[1] === c) return 'path';
-    return s.dp[r][c] >= 0 ? 'visited' : '';
+    return s.dp[r]![c]! >= 0 ? 'visited' : '';
   };
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
+  const cell = (r: number, c: number) => {
+    const v = s.dp[r]?.[c];
+    return r >= 0 && c >= 0 && v !== undefined && v >= 0 ? v : '—';
+  };
   const area = s.best * s.best;
   const rail = (
     <>
       <RailGroup label="cell">
         <RailStat k="pos" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} tone="accent" />
-        <RailStat k="val" v={s.cur ? `'${s.matrix[s.cur[0]][s.cur[1]]}'` : '—'} />
+        <RailStat k="val" v={s.cur ? `'${s.matrix[s.cur[0]]![s.cur[1]]}'` : '—'} />
         <RailStat k="up" v={s.cur ? cell(s.cur[0] - 1, s.cur[1]) : '—'} />
         <RailStat k="left" v={s.cur ? cell(s.cur[0], s.cur[1] - 1) : '—'} />
         <RailStat k="diag" v={s.cur ? cell(s.cur[0] - 1, s.cur[1] - 1) : '—'} />
@@ -153,12 +156,15 @@ function View({ frame }: PluginViewProps<MSState>) {
 function Inspector({ frame }: InspectorProps<MSState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && s.dp[r]?.[c] >= 0 ? s.dp[r][c] : '—');
+  const cell = (r: number, c: number) => {
+    const v = s.dp[r]?.[c];
+    return r >= 0 && c >= 0 && v !== undefined && v >= 0 ? v : '—';
+  };
   return (
     <VarGrid>
       <InspectorRow k="matrix" v={`${s.m}×${s.n}`} />
       <InspectorRow k="cell" v={s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—'} />
-      <InspectorRow k="value here" v={s.cur ? `'${s.matrix[s.cur[0]][s.cur[1]]}'` : '—'} />
+      <InspectorRow k="value here" v={s.cur ? `'${s.matrix[s.cur[0]]![s.cur[1]]}'` : '—'} />
       <InspectorRow k="up" v={s.cur ? cell(s.cur[0] - 1, s.cur[1]) : '—'} />
       <InspectorRow k="left" v={s.cur ? cell(s.cur[0], s.cur[1] - 1) : '—'} />
       <InspectorRow k="diagonal" v={s.cur ? cell(s.cur[0] - 1, s.cur[1] - 1) : '—'} />

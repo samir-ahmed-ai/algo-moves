@@ -135,29 +135,33 @@ export function buildInterviewCommands(
       },
     });
   }
-  commands.push(
-    {
-      id: 'interview:timer',
-      label: interview.timerRunning ? 'Pause timer' : 'Start timer',
-      hint: 'interview',
-      keywords: ['clock', 'countdown', 'stopwatch'],
-      run: () => interview.toggleTimer(),
-    },
-    {
-      id: 'interview:timer-reset',
-      label: 'Reset timer',
-      hint: 'interview',
-      keywords: ['clock', 'countdown', 'restart'],
-      run: () => interview.resetTimer(),
-    },
-    {
-      id: 'interview:lock',
-      label: interview.locked ? 'Unlock board' : 'Lock board',
-      hint: 'interview',
-      keywords: ['freeze', 'read only', 'candidate'],
-      run: () => interview.toggleLock(),
-    },
-  );
+  // Timer/lock mutate host-authoritative runtime — only the host in a live
+  // session may drive them, and only then are they shown.
+  if (interview.hasSession && interview.isHost) {
+    commands.push(
+      {
+        id: 'interview:timer',
+        label: interview.timerRunning ? 'Pause timer' : 'Start timer',
+        hint: 'interview',
+        keywords: ['clock', 'countdown', 'stopwatch'],
+        run: () => interview.toggleTimer(),
+      },
+      {
+        id: 'interview:timer-reset',
+        label: 'Reset timer',
+        hint: 'interview',
+        keywords: ['clock', 'countdown', 'restart'],
+        run: () => interview.resetTimer(),
+      },
+      {
+        id: 'interview:lock',
+        label: interview.locked ? 'Unlock board' : 'Lock board',
+        hint: 'interview',
+        keywords: ['freeze', 'read only', 'candidate'],
+        run: () => interview.toggleLock(),
+      },
+    );
+  }
   if (interview.hasSession && interview.isHost) {
     commands.push({
       id: 'interview:end',
@@ -283,12 +287,13 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
         keywords: ['copy url', 'permalink'],
         run: () => {
           const canvasFocus = mode === 'visualize' && !problemFocused;
+          const pluginNumber = getPluginMeta(activeItemId)?.number;
           const url = buildShareUrl(
             canvasFocus
               ? { mode, focus: 'canvas', theme, palette, themePreset, dir }
               : {
                   item: activeItemId,
-                  id: getPluginMeta(activeItemId)?.number,
+                  ...(pluginNumber !== undefined ? { id: pluginNumber } : {}),
                   ...(inputId ? { input: inputId } : {}),
                   mode,
                   focus: 'problem',

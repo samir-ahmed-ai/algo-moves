@@ -74,8 +74,8 @@ function record({ adj, pos, query }: DegInput): Frame<DegState>[] {
       `Move to vertex ${v}. Walk each of its incident edges, adding one to its degree per edge.`,
       { current: v, edge: null, answer: null },
     );
-    for (const u of adj[v]) {
-      degrees[v] += 1;
+    for (const u of adj[v]!) {
+      degrees[v]! += 1;
       emit(
         'EDGE',
         `${v}-${u}`,
@@ -83,8 +83,8 @@ function record({ adj, pos, query }: DegInput): Frame<DegState>[] {
         { current: v, edge: [v, u], answer: null },
       );
     }
-    if (degrees[v] > bestDegree) {
-      bestDegree = degrees[v];
+    if (degrees[v]! > bestDegree) {
+      bestDegree! = degrees[v]!;
       bestVertex = v;
     }
     emit(
@@ -95,12 +95,12 @@ function record({ adj, pos, query }: DegInput): Frame<DegState>[] {
     );
   }
 
-  const answer = degrees[query];
+  const answer = degrees[query]!;
   emit(
     'DONE',
     `deg(${query})=${answer}`,
     `All degrees counted. The queried vertex ${query} has degree ${answer} (the highest-degree vertex overall is ${bestVertex} with degree ${bestDegree}).`,
-    { current: query, edge: null, answer: answer, done: true },
+    { current: query, edge: null, answer, done: true },
     'good',
   );
   return frames;

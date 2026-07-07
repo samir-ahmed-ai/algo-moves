@@ -43,7 +43,7 @@ const ARROW = ['↑', '→', '↓', '←'];
 
 function record({ room, start }: RobotInput): Frame<RobotState>[] {
   const m = room.length;
-  const n = room[0].length;
+  const n = room[0]!.length;
   const cleaned = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
   // Robot's true position/facing in the room — the algorithm only knows relative moves.
   let pos: [number, number] = [start[0], start[1]];
@@ -64,9 +64,9 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
     dir = (dir + 1) % 4;
   };
   const move = (): boolean => {
-    const nr = pos[0] + DIRS[dir][0];
-    const nc = pos[1] + DIRS[dir][1];
-    if (nr < 0 || nr >= m || nc < 0 || nc >= n || room[nr][nc] === 0) return false;
+    const nr = pos[0] + DIRS[dir]![0];
+    const nc = pos[1] + DIRS[dir]![1];
+    if (nr < 0 || nr >= m || nc < 0 || nc >= n || room[nr]![nc] === 0) return false;
     pos = [nr, nc];
     return true;
   };
@@ -83,7 +83,7 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
 
   const dfs = (r: number, c: number, d: number) => {
     vis.add(`${r},${c}`);
-    cleaned[r][c] = true;
+    cleaned[r]![c] = true;
     count++;
     emit(
       'CLEAN',
@@ -94,8 +94,8 @@ function record({ room, start }: RobotInput): Frame<RobotState>[] {
 
     for (let i = 0; i < 4; i++) {
       const nd = (d + i) % 4;
-      const nr = r + DIRS[nd][0];
-      const nc = c + DIRS[nd][1];
+      const nr = r + DIRS[nd]![0];
+      const nc = c + DIRS[nd]![1];
       const key = `${nr},${nc}`;
       if (!vis.has(key)) {
         // Aim the robot at direction nd, then probe with a real move.
@@ -150,14 +150,14 @@ function View({ frame }: PluginViewProps<RobotState>) {
   const s = frame.state;
   const cellTone = (r: number, c: number) => {
     if (s.pos[0] === r && s.pos[1] === c) return 'active';
-    if (s.room[r][c] === 0) return 'water';
-    if (s.cleaned[r][c]) return 'visited';
+    if (s.room[r]![c] === 0) return 'water';
+    if (s.cleaned[r]![c]) return 'visited';
     return 'land';
   };
   const label = (r: number, c: number) => {
-    if (s.pos[0] === r && s.pos[1] === c) return ARROW[s.dir];
-    if (s.room[r][c] === 0) return '▧';
-    return s.cleaned[r][c] ? '·' : '';
+    if (s.pos[0] === r && s.pos[1] === c) return ARROW[s.dir] ?? '';
+    if (s.room[r]![c] === 0) return '▧';
+    return s.cleaned[r]![c] ? '·' : '';
   };
   const rail = (
     <>
@@ -171,7 +171,7 @@ function View({ frame }: PluginViewProps<RobotState>) {
   );
   return (
     <VizStage rail={rail}>
-      <GridBoard grid={s.room} cellTone={cellTone} label={label} active={s.pos} cellSize={44} />
+      <GridBoard grid={s.room} cellTone={cellTone} label={label!} active={s.pos} cellSize={44} />
     </VizStage>
   );
 }

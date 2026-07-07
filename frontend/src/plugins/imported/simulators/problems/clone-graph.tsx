@@ -68,7 +68,7 @@ function record({ adj, pos }: CGInput): Frame<CGState>[] {
     color[v] = 1;
     cloned += 1;
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (color[nb] === 0) {
         emit(
           'DESCEND',

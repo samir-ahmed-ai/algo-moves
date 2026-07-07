@@ -22,24 +22,39 @@ export { orbitArcFraction, orbitPoint, truncateOrbitText } from './orbitArc';
 
 const MAX_TICKS = 72;
 
+function positiveInt(value: number, fallback: number): number {
+  return Number.isFinite(value) && value > 0 ? Math.max(1, Math.round(value)) : fallback;
+}
+
+function clampFrameIndex(index: number, total: number): number {
+  if (total <= 0) return 0;
+  return Number.isFinite(index) ? Math.min(total - 1, Math.max(0, Math.round(index))) : 0;
+}
+
 /** Arc parameter for frame i of total. */
 export function orbitT(i: number, total: number): number {
-  if (total <= 1) return 0.5;
-  return ORBIT_T_MIN + (i / (total - 1)) * (ORBIT_T_MAX - ORBIT_T_MIN);
+  const frameTotal = positiveInt(total, 1);
+  if (frameTotal <= 1) return 0.5;
+  const frameIndex = clampFrameIndex(i, frameTotal);
+  return ORBIT_T_MIN + (frameIndex / (frameTotal - 1)) * (ORBIT_T_MAX - ORBIT_T_MIN);
 }
 
 /** Decimated tick indices for long runs; always keeps the last frame. */
 export function orbitTickIndices(total: number, maxTicks = MAX_TICKS): number[] {
-  if (total <= maxTicks) return Array.from({ length: total }, (_, i) => i);
-  const step = Math.ceil(total / maxTicks);
+  const frameTotal = positiveInt(total, 0);
+  const tickLimit = positiveInt(maxTicks, MAX_TICKS);
+  if (frameTotal === 0) return [];
+  if (frameTotal <= tickLimit) return Array.from({ length: frameTotal }, (_, i) => i);
+  const step = Math.ceil(frameTotal / tickLimit);
   const out: number[] = [];
-  for (let i = 0; i < total; i += step) out.push(i);
-  if (out[out.length - 1] !== total - 1) out.push(total - 1);
+  for (let i = 0; i < frameTotal; i += step) out.push(i);
+  if (out[out.length - 1] !== frameTotal - 1) out.push(frameTotal - 1);
   return out;
 }
 
 /** Invert x(t) (monotonic) — maps a click/drag x back to the arc parameter. */
 export function orbitTFromX(x: number): number {
+  if (!Number.isFinite(x)) return 0.5;
   let lo = 0;
   let hi = 1;
   for (let k = 0; k < 24; k++) {
@@ -60,18 +75,19 @@ export function MoveOrbit({
   onSeek,
   className,
 }: {
-  frames: Frame[];
-  index: number;
-  onSeek?: (i: number) => void;
-  className?: string;
+  readonly frames: readonly Frame[];
+  readonly index: number;
+  readonly onSeek?: (i: number) => void;
+  readonly className?: string;
 }) {
   const pathId = `orbit-${useId().replace(/[^a-zA-Z0-9-]/g, '')}`;
   const svgRef = useRef<SVGSVGElement>(null);
   const total = frames.length;
   if (total <= 1) return null;
 
-  const cur = frameText(frames[index]);
-  const tCur = orbitT(index, total);
+  const activeIndex = clampFrameIndex(index, total);
+  const cur = frameText(frames[activeIndex]);
+  const tCur = orbitT(activeIndex, total);
   const curPt = orbitPoint(tCur);
   const ticks = orbitTickIndices(total);
 
@@ -90,17 +106,17 @@ export function MoveOrbit({
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
     const t = orbitTFromX(p.x);
     const frac = Math.min(1, Math.max(0, (t - ORBIT_T_MIN) / (ORBIT_T_MAX - ORBIT_T_MIN)));
-    onSeek(Math.round(frac * (total - 1)));
+    onSeek(clampFrameIndex(Math.round(frac * (total - 1)), total));
   };
 
   return (
     <svg
       ref={svgRef}
       className={cn('move-orbit', className)}
-      data-progress={index / Math.max(total - 1, 1)}
+      data-progress={activeIndex / Math.max(total - 1, 1)}
       viewBox={ORBIT_VIEWBOX}
       role="group"
-      aria-label={`step ${index + 1} of ${total}`}
+      aria-label={`Step ${activeIndex + 1} of ${total}`}
     >
       <path id={pathId} d={ORBIT_PATH_D} className="move-orbit-track" pathLength={1} />
       <path
@@ -129,6 +145,8 @@ export function MoveOrbit({
       )}
       {ticks.map((i) => {
         const p = orbitPoint(orbitT(i, total));
+        const frame = frames[i];
+        if (!frame) return null;
         return (
           <circle
             key={i}
@@ -137,13 +155,13 @@ export function MoveOrbit({
             r={1.6}
             className={cn(
               'move-orbit-tick',
-              i < index && 'move-orbit-tick--past',
-              i === index && 'move-orbit-tick--current',
-              i > index && 'move-orbit-tick--future',
+              i < activeIndex && 'move-orbit-tick--past',
+              i === activeIndex && 'move-orbit-tick--current',
+              i > activeIndex && 'move-orbit-tick--future',
             )}
-            style={{ fill: toneFill(frames[i]) }}
+            style={{ fill: toneFill(frame) }}
           >
-            <title>{`${i + 1}/${total}${frameText(frames[i]) ? ` — ${frameText(frames[i])}` : ''}`}</title>
+            <title>{`${i + 1}/${total}${frameText(frame) ? ` — ${frameText(frame)}` : ''}`}</title>
           </circle>
         );
       })}

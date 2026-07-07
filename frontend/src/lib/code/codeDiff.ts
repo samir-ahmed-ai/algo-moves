@@ -8,7 +8,7 @@ export function normLine(line: string): string {
 export function linesWithoutTrailingBlanks(source: string): string[] {
   const lines = source.split('\n');
   let end = lines.length;
-  while (end > 0 && normLine(lines[end - 1]) === '') end--;
+  while (end > 0 && normLine(lines[end - 1] ?? '') === '') end--;
   return lines.slice(0, end);
 }
 
@@ -108,8 +108,8 @@ export function computeRecallProgress(reference: string, draft: string): RecallP
   const lastIdx = draftLines.length - 1;
   const completedLines = Array.from({ length: Math.min(lastIdx, total) }, (_, i) => i + 1);
 
-  const lastDraftNorm = normLine(draftLines[lastIdx]);
-  const refLineForLast = lastIdx < total ? normLine(refLines[lastIdx]) : '';
+  const lastDraftNorm = normLine(draftLines[lastIdx] ?? '');
+  const refLineForLast = lastIdx < total ? normLine(refLines[lastIdx] ?? '') : '';
   const lastLineComplete =
     lastIdx < total && lastDraftNorm.length > 0 && lastDraftNorm === refLineForLast;
 

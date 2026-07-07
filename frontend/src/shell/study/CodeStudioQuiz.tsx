@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Check, Lightbulb, RotateCcw, X } from 'lucide-react';
-import type { QuizQuestion } from '../../core/types';
+import type { QuizQuestion } from '@/core/types';
 import type { QuizProgress } from '@/store/user-prefs';
-import { QuizChoiceLabel } from '../../components/shared/QuizChoiceLabel';
+import { QuizChoiceLabel } from '@/components/shared/QuizChoiceLabel';
 import { cn } from '@/lib/utils/cn';
 import { QUIZ_WRONG_MS } from '@/lib/quiz';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
@@ -21,7 +21,7 @@ export interface CodeStudioQuizProps {
   /** Fired once when the learner leaves the quiz for the next phase. */
   onContinue: (score: number) => void;
   /** Optional relay for interview/collab — host sees guest quiz answers. */
-  onAnswer?: (questionId: string, answer: string, correct: boolean) => void;
+  onAnswer?: ((questionId: string, answer: string, correct: boolean) => void) | undefined;
 }
 
 function scoreMessage(score: number, total: number): string {
@@ -30,6 +30,16 @@ function scoreMessage(score: number, total: number): string {
   if (pct >= 0.75) return 'Strong grasp. Lock it in by building the code next.';
   if (pct >= 0.5) return 'Decent intuition — the build phase will sharpen the gaps.';
   return 'Worth a rewatch of the walkthrough, then build it to cement it.';
+}
+
+function clampQuestionIndex(index: number | undefined, total: number): number {
+  if (!Number.isFinite(index)) return 0;
+  const max = Math.max(total - 1, 0);
+  return Math.min(Math.max(0, Math.floor(index ?? 0)), max);
+}
+
+function clampScore(score: number | undefined): number {
+  return Number.isFinite(score) ? Math.max(0, Math.floor(score ?? 0)) : 0;
 }
 
 /** SVG progress ring for the results screen. */
@@ -81,12 +91,15 @@ export function CodeStudioQuiz({
 }: CodeStudioQuizProps) {
   const isMobile = useIsMobile();
   const total = quiz.length;
-  const [i, setI] = useState(() => Math.min(initial?.index ?? 0, Math.max(total - 1, 0)));
-  const [score, setScore] = useState(() => initial?.score ?? 0);
+  const canRestoreAnswered = initial?.shuffleSeed !== undefined;
+  const [i, setI] = useState(() => clampQuestionIndex(initial?.index, total));
+  const [score, setScore] = useState(() => clampScore(initial?.score));
   const [done, setDone] = useState(() => initial?.done ?? false);
-  const [picked, setPicked] = useState<number | null>(() => initial?.answered ?? null);
+  const [picked, setPicked] = useState<number | null>(() =>
+    canRestoreAnswered ? (initial?.answered ?? null) : null,
+  );
   const [marks, setMarks] = useState<boolean[]>([]);
-  const [shuffleSeed, setShuffleSeed] = useState(() => newQuizRunSeed());
+  const [shuffleSeed, setShuffleSeed] = useState(() => initial?.shuffleSeed ?? newQuizRunSeed());
   const rootRef = useRef<HTMLDivElement>(null);
 
   const rawQ = quiz[i];
@@ -100,15 +113,17 @@ export function CodeStudioQuiz({
 
   const persist = useCallback(
     (next: Partial<QuizProgress>) => {
-      onProgress({ index: i, score, done, answered: picked, ...next });
+      onProgress({ index: i, score, done, answered: picked, shuffleSeed, ...next });
     },
-    [i, score, done, picked, onProgress],
+    [i, score, done, picked, shuffleSeed, onProgress],
   );
 
   const pick = useCallback(
     (idx: number) => {
       if (answered || done || !q) return;
-      const isC = !!q.choices[idx]?.correct;
+      const choice = q.choices[idx];
+      if (!choice) return;
+      const isC = choice.correct === true;
       setPicked(idx);
       setMarks((m) => {
         const copy = m.slice();
@@ -116,18 +131,16 @@ export function CodeStudioQuiz({
         return copy;
       });
       recordAttempt(itemId, isC);
-      const choiceLabel = q.choices[idx]?.label ?? String(idx);
-      const questionId = q.id ?? `q-${i}`;
-      onAnswer?.(questionId, choiceLabel, isC);
+      onAnswer?.(q.id, choice.label, isC);
       if (isC) {
         const ns = score + 1;
         setScore(ns);
-        persist({ score: ns, answered: idx });
+        persist({ score: ns, answered: idx, shuffleSeed });
       } else {
-        persist({ answered: idx });
+        persist({ answered: idx, shuffleSeed });
       }
     },
-    [answered, done, q, i, score, persist, itemId, onAnswer],
+    [answered, done, q, score, persist, itemId, onAnswer, shuffleSeed],
   );
 
   const advance = useCallback(() => {
@@ -139,17 +152,18 @@ export function CodeStudioQuiz({
     const ni = i + 1;
     setI(ni);
     setPicked(null);
-    persist({ index: ni, answered: null });
-  }, [last, i, persist]);
+    persist({ index: ni, answered: null, shuffleSeed });
+  }, [last, i, persist, shuffleSeed]);
 
   const restart = useCallback(() => {
+    const nextSeed = newQuizRunSeed();
     setI(0);
     setScore(0);
     setDone(false);
     setPicked(null);
     setMarks([]);
-    setShuffleSeed(newQuizRunSeed());
-    onProgress({ index: 0, score: 0, done: false, answered: null });
+    setShuffleSeed(nextSeed);
+    onProgress({ index: 0, score: 0, done: false, answered: null, shuffleSeed: nextSeed });
   }, [onProgress]);
 
   const afterAnswer = useCallback(() => {

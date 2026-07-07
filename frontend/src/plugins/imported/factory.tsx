@@ -178,12 +178,16 @@ function mergePractice(
   bundle: PracticeBundle | undefined,
 ): PracticeBundle | undefined {
   if (!simPractice && !bundle) return undefined;
-  return {
-    quiz: bundle?.quiz ?? simPractice?.quiz,
-    codePieces: bundle?.codePieces ?? simPractice?.codePieces,
-    cases: bundle?.cases ?? simPractice?.cases,
-    simulateQuestion: bundle?.simulateQuestion ?? simPractice?.simulateQuestion,
-  };
+  const quiz = bundle?.quiz ?? simPractice?.quiz;
+  const codePieces = bundle?.codePieces ?? simPractice?.codePieces;
+  const cases = bundle?.cases ?? simPractice?.cases;
+  const simulateQuestion = bundle?.simulateQuestion ?? simPractice?.simulateQuestion;
+  const out: PracticeBundle = {};
+  if (quiz !== undefined) out.quiz = quiz;
+  if (codePieces !== undefined) out.codePieces = codePieces;
+  if (cases !== undefined) out.cases = cases;
+  if (simulateQuestion !== undefined) out.simulateQuestion = simulateQuestion;
+  return out;
 }
 
 function ManifestNotesPanel({ p }: { p: ImportedProblem }) {
@@ -215,8 +219,8 @@ export function makeImportedPlugin(p: ImportedProblem): ProblemPlugin<any, any> 
     number: p.number,
     difficulty: p.difficulty,
     tags: p.tags,
-    source: p.leetcode || undefined,
     summary: p.pattern || p.visual || `${p.categoryTitle} problem.`,
+    ...(p.leetcode ? { source: p.leetcode } : {}),
   };
   const code = { text: p.code, lang: 'go', file: 'solution.go' };
   const extraCode = p.variants.map((v) => ({

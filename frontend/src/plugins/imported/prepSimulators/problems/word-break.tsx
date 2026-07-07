@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,10 +19,10 @@ interface WordBreakInput {
 interface WordBreakState {
   s: string;
   wordDict: string[];
-  dp: boolean[]; // dp[i] = prefix s[0:i] is fully segmentable; dp has length s.length + 1
-  i: number | null; // current end index we are trying to reach (prefix s[0:i])
+  dp: boolean[]; // dp[i]! = prefix s[0:i]! is fully segmentable; dp has length s.length + 1
+  i: number | null; // current end index we are trying to reach (prefix s[0:i]!)
   j: number | null; // current cut point being tested
-  piece: string | null; // s[j:i], the substring we look up in the dictionary
+  piece: string | null; // s[j:i]!, the substring we look up in the dictionary
   pieceInDict: boolean | null; // whether `piece` is a dictionary word
   done: boolean;
 }
@@ -32,7 +32,7 @@ function record({ s, wordDict }: WordBreakInput): Frame<WordBreakState>[] {
   const n = s.length;
   const dp = new Array<boolean>(n + 1).fill(false);
 
-  const { emit, frames } = createRecorder<WordBreakState>(() => ({
+  const { emit, frames } = createPrepRecorder<WordBreakState>(() => ({
     s,
     wordDict,
     dp: dp.slice(),
@@ -46,15 +46,15 @@ function record({ s, wordDict }: WordBreakInput): Frame<WordBreakState>[] {
   emit(
     'INIT',
     `dict={${wordDict.join(',')}}`,
-    `Word Break: can "${s}" be cut into a sequence of dictionary words? dp[i] means the prefix s[0:i] is fully segmentable. We fill dp left to right in O(n²) time and O(n) space.`,
+    `Word Break: can "${s}" be cut into a sequence of dictionary words? dp[i]! means the prefix s[0:i]! is fully segmentable. We fill dp left to right in O(n²) time and O(n) space.`,
     {},
   );
 
-  dp[0] = true;
+  dp[0]! = true;
   emit(
     'BASE',
-    'dp[0]=true',
-    `Base case: the empty prefix is trivially segmentable, so dp[0] = true. Every cut point j starts from this anchor.`,
+    'dp[0]!=true',
+    `Base case: the empty prefix is trivially segmentable, so dp[0]! = true. Every cut point j starts from this anchor.`,
     { i: 0 },
   );
 
@@ -62,46 +62,46 @@ function record({ s, wordDict }: WordBreakInput): Frame<WordBreakState>[] {
     emit(
       'REACH',
       `reach i=${i}`,
-      `Now decide dp[${i}] — is the prefix "${s.slice(0, i)}" segmentable? Try every cut j < ${i}: the prefix works if s[0:j] is already segmentable AND the tail s[j:${i}] is a dictionary word.`,
+      `Now decide dp[${i}]! — is the prefix "${s.slice(0, i)}" segmentable? Try every cut j < ${i}: the prefix works if s[0:j]! is already segmentable AND the tail s[j:${i}]! is a dictionary word.`,
       { i },
     );
     for (let j = 0; j < i; j++) {
       const piece = s.slice(j, i);
       const inDict = words.has(piece);
-      const dpj = dp[j];
+      const dpj = dp[j]!;
       emit(
         'CUT',
         `j=${j} "${piece}"`,
-        `Cut at j=${j}: dp[${j}] is ${dpj ? 'true' : 'false'} and s[${j}:${i}] = "${piece}" ${inDict ? 'is' : 'is not'} in the dictionary. dp[${j}] && dict["${piece}"] = ${dpj && inDict ? 'true' : 'false'}.`,
+        `Cut at j=${j}: dp[${j}]! is ${dpj ? 'true' : 'false'} and s[${j}:${i}]! = "${piece}" ${inDict ? 'is' : 'is not'} in the dictionary. dp[${j}]! && dict["${piece}"]! = ${dpj && inDict ? 'true' : 'false'}.`,
         { i, j, piece, pieceInDict: inDict },
       );
       if (dpj && inDict) {
-        dp[i] = true;
+        dp[i]! = true;
         emit(
           'SET',
-          `dp[${i}]=true`,
-          `Match! The prefix s[0:${j}] is segmentable and "${piece}" is a word, so "${s.slice(0, i)}" is segmentable too. Set dp[${i}] = true and stop scanning cuts for i=${i}.`,
+          `dp[${i}]!=true`,
+          `Match! The prefix s[0:${j}]! is segmentable and "${piece}" is a word, so "${s.slice(0, i)}" is segmentable too. Set dp[${i}]! = true and stop scanning cuts for i=${i}.`,
           { i, j, piece, pieceInDict: inDict },
           'good',
         );
         break;
       }
     }
-    if (!dp[i]) {
+    if (!dp[i]!) {
       emit(
         'NONE',
-        `dp[${i}]=false`,
-        `No cut worked for i=${i}: the prefix "${s.slice(0, i)}" cannot be split into dictionary words. dp[${i}] stays false.`,
+        `dp[${i}]!=false`,
+        `No cut worked for i=${i}: the prefix "${s.slice(0, i)}" cannot be split into dictionary words. dp[${i}]! stays false.`,
         { i },
       );
     }
   }
 
-  const answer = dp[n];
+  const answer = dp[n]!;
   emit(
     'DONE',
     answer ? 'segmentable' : 'not segmentable',
-    `The table is complete. dp[${n}] = ${answer}, so "${s}" ${answer ? 'can' : 'cannot'} be broken into dictionary words.`,
+    `The table is complete. dp[${n}]! = ${answer}, so "${s}" ${answer ? 'can' : 'cannot'} be broken into dictionary words.`,
     { i: n, done: true },
     answer ? 'good' : 'bad',
   );
@@ -120,20 +120,20 @@ function View({ frame }: PluginViewProps<WordBreakState>) {
   // frontier already proven true.
   const tone = (idx: number) => {
     if (s.j !== null && s.i !== null && idx >= s.j && idx < s.i) return 'match';
-    if (s.dp[idx]) return 'found';
+    if (s.dp[idx]!) return 'found';
     return '';
   };
   const window: [number, number] | null =
     s.j !== null && s.i !== null && s.i - 1 >= s.j ? [s.j, s.i - 1] : null;
   const dpLabels = s.dp.map((v) => (v ? 'T' : 'F'));
-  const dpTone = (idx: number) => (s.i === idx ? 'found' : s.dp[idx] ? 'match' : '');
+  const dpTone = (idx: number) => (s.i === idx ? 'found' : s.dp[idx]! ? 'match' : '');
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         dict = <span className="font-mono text-ink">{'{' + s.wordDict.join(', ') + '}'}</span>
         {s.piece !== null && !s.done && (
           <>
-            {' · '}s[j:i] ={' '}
+            {' · '}s[j:i]! ={' '}
             <span className={cn('font-mono', s.pieceInDict ? 'text-good' : 'text-ink')}>
               "{s.piece}"
             </span>
@@ -147,11 +147,11 @@ function View({ frame }: PluginViewProps<WordBreakState>) {
         <div
           className={cn(
             'mt-1 font-mono',
-            s.dp[s.s.length] ? 'text-good' : 'text-bad',
+            s.dp[s.s.length]! ? 'text-good' : 'text-bad',
             vizText.base,
           )}
         >
-          → {s.dp[s.s.length] ? 'true' : 'false'}
+          → {s.dp[s.s.length]! ? 'true' : 'false'}
         </div>
       )}
     </div>
@@ -167,18 +167,18 @@ function Inspector({ frame }: InspectorProps<WordBreakState>) {
       <InspectorRow k="s" v={s.s} />
       <InspectorRow k="i (prefix end)" v={s.i ?? '—'} />
       <InspectorRow k="j (cut)" v={s.j ?? '—'} />
-      <InspectorRow k="s[j:i]" v={s.piece !== null ? `"${s.piece}"` : '—'} />
+      <InspectorRow k="s[j:i]!" v={s.piece !== null ? `"${s.piece}"` : '—'} />
       <InspectorRow
-        k="dp[j] && dict"
+        k="dp[j]! && dict"
         v={
           s.pieceInDict === null
             ? '—'
-            : s.pieceInDict && s.j !== null && s.dp[s.j]
+            : s.pieceInDict && s.j !== null && s.dp[s.j]!
               ? 'true'
               : 'false'
         }
       />
-      <InspectorRow k="answer" v={known ? (s.dp[s.s.length] ? 'true' : 'false') : '…filling'} />
+      <InspectorRow k="answer" v={known ? (s.dp[s.s.length]! ? 'true' : 'false') : '…filling'} />
     </VarGrid>
   );
 }
@@ -205,14 +205,14 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Index Map — different approach',
       },
     ],
-    explain: 'dp[i] true if some cut j leaves dp[j] reachable and s[j:i] is a word',
+    explain: 'dp[i]! true if some cut j leaves dp[j]! reachable and s[j:i]! is a word',
   },
   {
     id: 'init',
     prompt: 'At the start of a run (Word break), what strategy is established?',
     choices: [
       {
-        label: 'dp[i] true if some cut j — described in INIT caption',
+        label: 'dp[i]! true if some cut j — described in INIT caption',
         correct: true,
       },
       {
@@ -226,14 +226,14 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Word Break: can "" be cut into a sequence of dictionary words? dp[i] means the prefix s[0:i] is fully segmentable. We fill dp left to right in O(n²) time and O(n) space.',
+      'Word Break: can "" be cut into a sequence of dictionary words? dp[i]! means the prefix s[0:i]! is fully segmentable. We fill dp left to right in O(n²) time and O(n) space.',
   },
   {
     id: 'key-step',
     prompt: 'On the "SET" step (dp[]=true), what happens?',
     choices: [
       {
-        label: 'Match! The prefix s[0:] is segmentable — this move caption',
+        label: 'Match! The prefix s[0:]! is segmentable — this move caption',
         correct: true,
       },
       {
@@ -247,14 +247,14 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Match! The prefix s[0:] is segmentable and "" is a word, so "" is segmentable too. Set dp[] = true and stop scanning cuts for i=.',
+      'Match! The prefix s[0:]! is segmentable and "" is a word, so "" is segmentable too. Set dp[] = true and stop scanning cuts for i=.',
   },
   {
     id: 'state',
     prompt: 'What does the `dp` field track in the visualization state?',
     choices: [
       {
-        label: 'dp[i] = prefix s[0:i] — updated each frame',
+        label: 'dp[i]! = prefix s[0:i]! — updated each frame',
         correct: true,
       },
       {
@@ -268,7 +268,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The recorder keeps `dp` in sync: dp[i] = prefix s[0:i] is fully segmentable; dp has length s.length + 1',
+      'The recorder keeps `dp` in sync: dp[i]! = prefix s[0:i]! is fully segmentable; dp has length s.length + 1',
   },
   {
     id: 'complexity',
@@ -288,7 +288,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O( time, O(words) space — wrong order of growth',
       },
     ],
-    explain: 'O(n^2). O(n). dp[0]=true; dp[i]|=dp[j] && dict[s[j:i]]',
+    explain: 'O(n^2). O(n). dp[0]!=true; dp[i]!|=dp[j]! && dict[s[j:i]!]',
   },
   {
     id: 'outcome',
@@ -331,7 +331,7 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as WordBreakState | undefined;
-    const ok = s ? s.dp[s.s.length] : false;
+    const ok = s ? s.dp[s.s.length]! : false;
     return { ok, label: ok ? 'segmentable' : 'not segmentable' };
   },
 };

@@ -228,7 +228,7 @@ export function RecallToolbar({
   blind: boolean;
   setBlind: Dispatch<SetStateAction<boolean>>;
   peek: boolean;
-  setPeek: (v: boolean) => void;
+  setPeek: Dispatch<SetStateAction<boolean>>;
   persistDraft: (v: string) => void;
   timerRunning: boolean;
   setTimerRunning: Dispatch<SetStateAction<boolean>>;
@@ -245,6 +245,11 @@ export function RecallToolbar({
   foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
   lang?: string;
 }) {
+  const safeScorePct =
+    typeof scorePct === 'number' && Number.isFinite(scorePct)
+      ? Math.max(0, Math.min(100, Math.round(scorePct)))
+      : undefined;
+
   return (
     <div
       className={cn(
@@ -275,9 +280,10 @@ export function RecallToolbar({
         <ToolbarGroupBtn
           active={peek}
           title="Hold to peek at reference"
-          onMouseDown={() => setPeek(true)}
-          onMouseUp={() => setPeek(false)}
-          onMouseLeave={() => setPeek(false)}
+          onPointerDown={() => setPeek(true)}
+          onPointerUp={() => setPeek(false)}
+          onPointerCancel={() => setPeek(false)}
+          onPointerLeave={() => setPeek(false)}
         >
           <ScanEye className="h-3 w-3" />
         </ToolbarGroupBtn>
@@ -334,17 +340,17 @@ export function RecallToolbar({
         persistDraft={persistDraft}
         editorPrefs={editorPrefs}
         setEditorPrefs={setEditorPrefs}
-        compact={compact}
-        draftViewRef={draftViewRef}
-        formatBothRef={formatBothRef}
-        foldBothRef={foldBothRef}
-        lang={lang}
+        {...(compact !== undefined ? { compact } : {})}
+        {...(draftViewRef ? { draftViewRef } : {})}
+        {...(formatBothRef ? { formatBothRef } : {})}
+        {...(foldBothRef ? { foldBothRef } : {})}
+        {...(lang ? { lang } : {})}
       />
 
       <div className="flex-1" />
-      {scorePct !== undefined && (
-        <Chip tone={scorePct >= 80 ? 'good' : scorePct >= 50 ? 'accent' : 'muted'} mono>
-          {compact ? `${scorePct}%` : `${scorePct}% match`}
+      {safeScorePct !== undefined && (
+        <Chip tone={safeScorePct >= 80 ? 'good' : safeScorePct >= 50 ? 'accent' : 'muted'} mono>
+          {compact ? `${safeScorePct}%` : `${safeScorePct}% match`}
         </Chip>
       )}
       {trailing}

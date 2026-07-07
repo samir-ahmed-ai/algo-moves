@@ -75,7 +75,7 @@ function record({ intervals }: FriInput): Frame<FriState>[] {
 
   for (let p = 0; p < n; p++) {
     cur = p;
-    key = intervals[p][1];
+    key = intervals[p]![1];
     lo = 0;
     hi = n - 1;
     mid = null;
@@ -83,14 +83,14 @@ function record({ intervals }: FriInput): Frame<FriState>[] {
     emit(
       'INTERVAL',
       `interval ${p} → end ${key}`,
-      `Interval ${p} = [${intervals[p][0]}, ${intervals[p][1]}]. Binary-search the sorted starts for the smallest start ≥ ${key} (its end).`,
+      `Interval ${p} = [${intervals[p]![0]}, ${intervals[p]![1]}]. Binary-search the sorted starts for the smallest start ≥ ${key} (its end).`,
       {},
     );
 
     while (lo <= hi) {
       mid = (lo + hi) >> 1;
       emit('MID', `mid=${mid}`, `Look at the middle start: starts[${mid}] = ${starts[mid]}.`, {});
-      if (starts[mid] >= key) {
+      if (starts[mid]! >= key) {
         res = mid;
         hi = mid - 1;
         emit(
@@ -120,7 +120,7 @@ function record({ intervals }: FriInput): Frame<FriState>[] {
         {},
       );
     } else {
-      answers[p] = origIdx[res];
+      answers[p]! = origIdx[res]!;
       emit(
         'PICK',
         `interval ${p} → ${origIdx[res]}`,
@@ -158,7 +158,7 @@ function View({ frame }: PluginViewProps<FriState>) {
   };
   const header =
     s.cur >= 0
-      ? `interval ${s.cur} = [${s.intervals[s.cur][0]}, ${s.intervals[s.cur][1]}] · need start ≥ ${s.key}`
+      ? `interval ${s.cur} = [${s.intervals[s.cur]![0]}, ${s.intervals[s.cur]![1]}] · need start ≥ ${s.key}`
       : 'sorted starts (labelled by original interval index)';
 
   const answeredItems = s.answers
@@ -170,7 +170,7 @@ function View({ frame }: PluginViewProps<FriState>) {
       <RailGroup label="binary search">
         <RailStat
           k="interval"
-          v={s.cur >= 0 ? `[${s.intervals[s.cur][0]},${s.intervals[s.cur][1]}]` : '—'}
+          v={s.cur >= 0 ? `[${s.intervals[s.cur]![0]},${s.intervals[s.cur]![1]}]` : '—'}
         />
         <RailStat k="end" v={s.cur >= 0 ? s.key : '—'} tone="accent" />
         <RailStat k="lo" v={s.lo} />
@@ -208,7 +208,7 @@ function Inspector({ frame }: InspectorProps<FriState>) {
     <VarGrid>
       <InspectorRow
         k="interval"
-        v={s.cur >= 0 ? `[${s.intervals[s.cur][0]}, ${s.intervals[s.cur][1]}]` : '—'}
+        v={s.cur >= 0 ? `[${s.intervals[s.cur]![0]}, ${s.intervals[s.cur]![1]}]` : '—'}
       />
       <InspectorRow k="end (key)" v={s.cur >= 0 ? s.key : '—'} />
       <InspectorRow k="lo" v={s.lo} />

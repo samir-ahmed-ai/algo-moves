@@ -6,27 +6,37 @@ import {
 } from './quizLabelRules';
 
 const DETAIL_MAX = 60;
+const CODE_HEADLINE_PATTERN = /^[\w\s.+\-*/()%[\]{}<>=!&|?:]+$/;
+const CODE_SYMBOL_PATTERN = /[()[\]{}.=+\-*/%<>!&|?:]/;
+const CODE_WORD_PATTERN =
+  /^(?:i|j|k|lo|hi|mid|left|right|curr|prev|next|node|root|head|tail|null|true|false)$/i;
+
+export interface ParsedQuizChoiceLabel {
+  headline: string;
+  detail?: string;
+}
 
 /** Split "headline — detail" without breaking formulas like `(i - 1) / 2`. */
-export function parseQuizChoiceLabel(label: string): { headline: string; detail?: string } {
+export function parseQuizChoiceLabel(label: string): ParsedQuizChoiceLabel {
   const trimmed = label.trim();
   const match = trimmed.match(/^(.+?)\s+[—–]\s+(.+)$/);
   if (!match) return { headline: trimmed };
 
-  const headline = match[1].trim();
-  let detail = match[2].trim();
+  const headline = match[1]!.trim();
+  let detail = match[2]!.trim();
   if (detail.length > DETAIL_MAX) detail = `${detail.slice(0, DETAIL_MAX - 1)}…`;
   return { headline, detail };
 }
 
 export function isComplexityHeadline(s: string): boolean {
-  return /^O\([^)]+\)/.test(s.trim());
+  return /^O\([^)]+\)$/.test(s.trim());
 }
 
 export function isCodeHeadline(s: string): boolean {
   const t = s.trim();
   if (isComplexityHeadline(t)) return false;
-  return /^[\d(][\d\s+\-*/()%[\].]*$/.test(t) || /^[a-z_][\w.+\-]*(\([^)]*\))?$/i.test(t);
+  if (!CODE_HEADLINE_PATTERN.test(t)) return false;
+  return CODE_SYMBOL_PATTERN.test(t) || CODE_WORD_PATTERN.test(t);
 }
 
 export interface LabelQualityIssue {

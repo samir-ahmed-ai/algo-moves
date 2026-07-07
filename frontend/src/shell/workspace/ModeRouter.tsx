@@ -146,7 +146,9 @@ function renderRuntimeErrorFallback(props: ModeRouterProps) {
   const recovery = resolveRuntimeErrorRecovery({
     customInput: props.customInput,
     inputId: props.inputId,
-    firstInputId: props.plugin?.inputs[0]?.id,
+    ...(props.plugin?.inputs[0]?.id !== undefined
+      ? { firstInputId: props.plugin.inputs[0].id }
+      : {}),
   });
 
   if (recovery === 'reset-custom-input') {

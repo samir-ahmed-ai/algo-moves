@@ -7,10 +7,17 @@ import { shuffleSeeded } from './shuffleSeeded';
  *
  * Shared by the predict-the-move and complexity practice panels.
  */
-export function buildShuffledChoices<T>(answer: T, pool: T[], round: number, distractors = 3): T[] {
+export function buildShuffledChoices<T>(
+  answer: T,
+  pool: readonly T[],
+  round: number,
+  distractors = 3,
+): T[] {
+  const safeRound = Number.isFinite(round) ? Math.trunc(round) : 0;
+  const limit = Number.isFinite(distractors) ? Math.max(0, Math.floor(distractors)) : 0;
   const distract = shuffleSeeded(
     pool.filter((p) => p !== answer),
-    round,
-  ).slice(0, distractors);
-  return shuffleSeeded([answer, ...distract], round + 1);
+    safeRound,
+  ).slice(0, limit);
+  return shuffleSeeded([answer, ...distract], safeRound + 1);
 }

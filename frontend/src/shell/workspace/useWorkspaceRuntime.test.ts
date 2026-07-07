@@ -4,7 +4,7 @@ import { recordWorkspaceFrames, resolveWorkspaceRuntimeItem } from './useWorkspa
 
 describe('resolveWorkspaceRuntimeItem', () => {
   it('returns the requested catalog item when it exists', () => {
-    const item = catalog.items.find((candidate) => candidate.pluginId) ?? catalog.items[0];
+    const item = catalog.items.find((candidate) => candidate.pluginId) ?? catalog.items[0]!;
     expect(resolveWorkspaceRuntimeItem(item.id)).toBe(item);
   });
 

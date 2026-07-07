@@ -219,7 +219,8 @@ export function WouldYouRather() {
     const sorted = [...players].sort(
       (a, b) => (state.scores[b.id] ?? 0) - (state.scores[a.id] ?? 0),
     );
-    const topScore = state.scores[sorted[0]?.id] ?? 0;
+    const topId = sorted[0]?.id;
+    const topScore = topId ? (state.scores[topId] ?? 0) : 0;
     void report(
       sorted.map((p) => ({
         peerId: p.id,

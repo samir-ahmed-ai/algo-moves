@@ -1,6 +1,6 @@
 /** Shared quiz label quality rules used by quizChoiceFormat and integrity tests. */
 
-export const GENERIC_DETAILS = new Set([
+export const GENERIC_DETAILS: ReadonlySet<string> = new Set([
   'plausible distractor',
   'typical bound here',
   'typical for this pattern',
@@ -17,8 +17,10 @@ export const COMMA_BEFORE_DASH = /,\s*—/;
 export const MIDWORD_ELLIPSIS = /\w…/;
 
 export function truncateAtWord(s: string, max: number): string {
+  const limit = Number.isFinite(max) ? Math.max(0, Math.floor(max)) : 0;
+  if (limit === 0) return '';
   const t = s.trim();
-  if (t.length <= max) return t;
-  const cut = t.lastIndexOf(' ', max - 1);
-  return (cut > 8 ? t.slice(0, cut) : t.slice(0, max)).trim();
+  if (t.length <= limit) return t;
+  const cut = t.lastIndexOf(' ', limit - 1);
+  return (cut > 8 ? t.slice(0, cut) : t.slice(0, limit)).trim();
 }

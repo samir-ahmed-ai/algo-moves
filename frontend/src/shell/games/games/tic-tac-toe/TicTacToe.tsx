@@ -295,8 +295,12 @@ export function TicTacToe() {
       )}
 
       <div className="relative">
-        <GameArena accent="#0ea5e9" className="p-2">
-          <div className="grid grid-cols-3 gap-1.5" role="grid" aria-label="tic-tac-toe board">
+        <GameArena accent="#0ea5e9" className="p-3">
+          <div
+            className="grid grid-cols-3 gap-2 rounded-[1.35rem] bg-slate-950/5 p-2 shadow-inner dark:bg-white/5"
+            role="grid"
+            aria-label="tic-tac-toe board"
+          >
             {board.map((cell, i) => (
               <Cell
                 key={i}
@@ -355,7 +359,7 @@ function WinningStroke({
         y1={a.y}
         x2={b.x}
         y2={b.y}
-        stroke="var(--good)"
+        stroke="#10b981"
         strokeWidth={2.4}
         strokeLinecap="round"
         vectorEffect="non-scaling-stroke"
@@ -399,21 +403,28 @@ function Cell({
       onClick={onClick}
       aria-label={mark ? `cell ${mark}` : 'empty cell'}
       className={cn(
-        'flex aspect-square items-center justify-center rounded-[var(--radius)] border-2 transition-all',
+        'flex aspect-square items-center justify-center rounded-[1.1rem] border transition-all shadow-sm backdrop-blur',
         'touch-manipulation active:scale-[0.97] disabled:pointer-events-none',
         highlighted
-          ? 'border-good/60 bg-good/10'
+          ? 'border-emerald-300/55 bg-emerald-100/85 shadow-[0_14px_34px_rgba(5,150,105,0.16)] dark:border-emerald-300/20 dark:bg-emerald-300/10'
           : mark
-            ? 'border-edge2 bg-panel2'
-            : 'border-edge bg-panel hover:border-edge2 hover:bg-panel2',
+            ? 'border-white/60 bg-white/76 dark:border-white/10 dark:bg-white/5'
+            : 'border-white/60 bg-white/56 hover:-translate-y-0.5 hover:border-cyan-300/45 hover:bg-white dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/10',
       )}
     >
       <span
         className="flex h-2/3 w-2/3 items-center justify-center"
         style={animate ? { animation: 'ttt-pop 0.22s cubic-bezier(0.34,1.56,0.64,1)' } : undefined}
       >
-        {mark === 'X' && <X className="h-full w-full text-accent" strokeWidth={2.5} />}
-        {mark === 'O' && <Circle className="h-[90%] w-[90%] text-ink" strokeWidth={2.5} />}
+        {mark === 'X' && (
+          <X className="h-full w-full text-cyan-700 dark:text-cyan-200" strokeWidth={2.7} />
+        )}
+        {mark === 'O' && (
+          <Circle
+            className="h-[90%] w-[90%] text-slate-800 dark:text-slate-100"
+            strokeWidth={2.7}
+          />
+        )}
       </span>
       <style>
         {'@keyframes ttt-pop{from{transform:scale(0.2);opacity:0}to{transform:scale(1);opacity:1}}'}
@@ -443,13 +454,15 @@ function Scoreboard({
 }) {
   const peerMark: Mark = myMark === 'X' ? 'O' : 'X';
   return (
-    <div className="flex items-stretch justify-center gap-2 text-center">
+    <div className="flex items-stretch justify-center gap-2 rounded-[1.5rem] border border-white/60 bg-white/72 p-3 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
       <Tally name={me} mark={myMark} score={myScore} accent={!isSpectator} />
       <div className="flex flex-col items-center justify-center px-1">
-        <div className="font-mono text-[length:var(--fs-2xs)] uppercase tracking-wide text-ink3">
+        <div className="font-mono text-[length:var(--fs-2xs)] font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">
           {drawsLabel}
         </div>
-        <div className="font-mono text-lg font-bold tabular-nums text-ink2">{draws}</div>
+        <div className="font-mono text-lg font-black tabular-nums text-slate-700 dark:text-slate-200">
+          {draws}
+        </div>
       </div>
       <Tally name={peer} mark={peerMark} score={peerScore} />
     </div>
@@ -471,14 +484,14 @@ function Tally({
     <div className="min-w-0 flex-1">
       <div className="flex items-center justify-center gap-1.5">
         <Avatar seed={name} name={name} size={20} />
-        <div className="truncate text-xs font-semibold text-ink">
-          {name} <span className="text-ink3">({mark})</span>
+        <div className="truncate text-xs font-bold text-slate-800 dark:text-slate-100">
+          {name} <span className="text-slate-400">({mark})</span>
         </div>
       </div>
       <div
         className={cn(
-          'font-mono text-xl font-bold tabular-nums',
-          accent ? 'text-accent' : 'text-ink2',
+          'font-mono text-xl font-black tabular-nums',
+          accent ? 'text-cyan-700 dark:text-cyan-200' : 'text-slate-700 dark:text-slate-200',
         )}
       >
         {score}

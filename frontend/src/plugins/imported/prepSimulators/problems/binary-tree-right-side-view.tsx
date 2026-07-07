@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -39,7 +39,7 @@ function record({ tree }: RightViewInput): Frame<RightViewState>[] {
   const taken: number[] = [];
   const res: number[] = [];
 
-  const { emit, frames } = createRecorder<RightViewState>(() => ({
+  const { emit, frames } = createPrepRecorder<RightViewState>(() => ({
     tree,
     current: null,
     depth: null,
@@ -56,9 +56,9 @@ function record({ tree }: RightViewInput): Frame<RightViewState>[] {
   );
 
   const dfs = (i: number, depth: number) => {
-    if (i >= tree.length || tree[i] == null) return; // null node → nothing to see
+    if (i >= tree.length || tree[i]! == null) return; // null node → nothing to see
     visited.push(i);
-    const val = tree[i] as number;
+    const val = tree[i]! as number;
 
     if (depth === res.length) {
       // First node encountered at this depth → it is the rightmost visible one.
@@ -76,7 +76,7 @@ function record({ tree }: RightViewInput): Frame<RightViewState>[] {
       emit(
         'VISIT',
         `depth ${depth}, hidden`,
-        `Node ${val} sits at depth ${depth}, but we already saw a node at that depth (${res[depth]}), which was further right. ${val} is hidden behind it — visit but do not record.`,
+        `Node ${val} sits at depth ${depth}, but we already saw a node at that depth (${res[depth]!}), which was further right. ${val} is hidden behind it — visit but do not record.`,
         { current: i, depth },
       );
     }
@@ -106,7 +106,7 @@ function View({ frame }: PluginViewProps<RightViewState>) {
     if (s.visited.includes(i)) return 'team-2';
     return 'team-0';
   };
-  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
   const rail = (
     <>
       <RailGroup label="scan">
@@ -127,7 +127,7 @@ function View({ frame }: PluginViewProps<RightViewState>) {
 function Inspector({ frame }: InspectorProps<RightViewState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
   return (
     <VarGrid>
       <InspectorRow k="current node" v={curVal ?? '—'} />

@@ -59,7 +59,7 @@ describe('mergeBraceOnlyPieces', () => {
     const before = joinPieces(pieces);
     const merged = mergeBraceOnlyPieces(pieces);
     expect(merged).toHaveLength(1);
-    expect(merged[0].code).toBe('\treturn cur\n}');
+    expect(merged[0]!.code).toBe('\treturn cur\n}');
     expect(joinPieces(merged)).toBe(before);
   });
 
@@ -85,8 +85,8 @@ describe('splitCodeIntoPieces', () => {
   it('does not emit package main as the first block', () => {
     const pieces = splitCodeIntoPieces(amountPainted);
     expect(pieces).not.toBeNull();
-    expect(pieces![0].code.trim().startsWith('package main')).toBe(false);
-    expect(pieces![0].code.trim().startsWith('func ')).toBe(true);
+    expect(pieces![0]!.code.trim().startsWith('package main')).toBe(false);
+    expect(pieces![0]!.code.trim().startsWith('func ')).toBe(true);
   });
 
   it('reassembles to the full source via assembleDraft', () => {
@@ -108,7 +108,7 @@ describe('stripPreamblePieces', () => {
     ];
     const stripped = stripPreamblePieces(pieces);
     expect(stripped).toHaveLength(1);
-    expect(stripped[0].code.trim().startsWith('func f()')).toBe(true);
+    expect(stripped[0]!.code.trim().startsWith('func f()')).toBe(true);
     expect(assembleDraft('package main\nfunc f() int {\n\treturn 1\n}', stripped).trimEnd()).toBe(
       'package main\nfunc f() int {\n\treturn 1\n}'.trimEnd(),
     );
@@ -143,8 +143,8 @@ describe('resolveCodePieces', () => {
     ];
     const resolved = resolveCodePieces(source, curated);
     expect(resolved).not.toBeNull();
-    expect(isPreambleOnlyPiece(resolved![0].code)).toBe(false);
-    expect(resolved![0].code.startsWith('func f()')).toBe(true);
+    expect(isPreambleOnlyPiece(resolved![0]!.code)).toBe(false);
+    expect(resolved![0]!.code.startsWith('func f()')).toBe(true);
     expect(assembleDraft(source, resolved!).trimEnd()).toBe(source.trimEnd());
     expect(resolved!.length).toBe(3);
   });

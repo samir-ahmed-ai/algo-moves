@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ interface RemoveDupState {
 function record({ nums }: RemoveDupInput): Frame<RemoveDupState>[] {
   const n = nums.length;
   const arr = nums.slice();
-  const { emit, frames } = createRecorder<RemoveDupState>(() => ({
+  const { emit, frames } = createPrepRecorder<RemoveDupState>(() => ({
     nums: arr.slice(),
     n,
     w: 1,
@@ -69,17 +69,17 @@ function record({ nums }: RemoveDupInput): Frame<RemoveDupState>[] {
   for (let i = 1; i < n; i++) {
     emit(
       'COMPARE',
-      `nums[${i}] vs nums[${i - 1}]`,
-      `Read index ${i}: compare nums[${i}] = ${arr[i]} with the previous value nums[${i - 1}] = ${arr[i - 1]}. If they differ it is a new unique value; if equal it is a duplicate to skip.`,
+      `nums[${i}]! vs nums[${i - 1}]!`,
+      `Read index ${i}: compare nums[${i}]! = ${arr[i]!} with the previous value nums[${i - 1}]! = ${arr[i - 1]!}. If they differ it is a new unique value; if equal it is a duplicate to skip.`,
       { w, i, prev: i - 1, kept: null },
     );
 
-    if (arr[i] !== arr[i - 1]) {
-      arr[w] = arr[i];
+    if (arr[i]! !== arr[i - 1]!) {
+      arr[w]! = arr[i]!;
       emit(
         'WRITE',
-        `nums[${w}]=${arr[i]}`,
-        `${arr[i]} differs from ${arr[i - 1]}, so it is unique. Write it to nums[${w}] and advance the write pointer to ${w + 1}. The prefix nums[0..${w}] now holds the distinct values so far.`,
+        `nums[${w}]!=${arr[i]!}`,
+        `${arr[i]!} differs from ${arr[i - 1]!}, so it is unique. Write it to nums[${w}]! and advance the write pointer to ${w + 1}. The prefix nums[0..${w}]! now holds the distinct values so far.`,
         { w, i, prev: i - 1, kept: true },
         'good',
       );
@@ -87,8 +87,8 @@ function record({ nums }: RemoveDupInput): Frame<RemoveDupState>[] {
     } else {
       emit(
         'SKIP',
-        `dup ${arr[i]}`,
-        `nums[${i}] = ${arr[i]} equals nums[${i - 1}] = ${arr[i - 1]}, so it is a duplicate. Leave the write pointer at ${w} and move the read pointer on — nothing is written.`,
+        `dup ${arr[i]!}`,
+        `nums[${i}]! = ${arr[i]!} equals nums[${i - 1}]! = ${arr[i - 1]!}, so it is a duplicate. Leave the write pointer at ${w} and move the read pointer on — nothing is written.`,
         { w, i, prev: i - 1, kept: false },
         'bad',
       );
@@ -98,7 +98,7 @@ function record({ nums }: RemoveDupInput): Frame<RemoveDupState>[] {
   emit(
     'DONE',
     `length ${w}`,
-    `The scan is finished. The write pointer ended at ${w}, so there are ${w} unique values occupying nums[0..${w - 1}]. Return ${w} as the new length.`,
+    `The scan is finished. The write pointer ended at ${w}, so there are ${w} unique values occupying nums[0..${w - 1}]!. Return ${w} as the new length.`,
     { w, i: null, prev: null, length: w, done: true },
     'good',
   );
@@ -152,8 +152,8 @@ function Inspector({ frame }: InspectorProps<RemoveDupState>) {
     <VarGrid>
       <InspectorRow k="n (orig length)" v={s.n} />
       <InspectorRow k="i (read)" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
-      <InspectorRow k="nums[i−1]" v={s.prev !== null ? s.nums[s.prev] : '—'} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
+      <InspectorRow k="nums[i−1]!" v={s.prev !== null ? s.nums[s.prev]! : '—'} />
       <InspectorRow k="w (write)" v={s.w} />
       <InspectorRow
         k="last step"
@@ -228,7 +228,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      ' differs from , so it is unique. Write it to nums[] and advance the write pointer to . The prefix nums[0..] now holds the distinct values so far.',
+      ' differs from , so it is unique. Write it to nums[] and advance the write pointer to . The prefix nums[0..]! now holds the distinct values so far.',
   },
   {
     id: 'state',
@@ -269,7 +269,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(log n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). if nums[i]!=nums[i-1]: nums[w]=nums[i], w++',
+    explain: 'O(n). O(1). if nums[i]!=nums[i-1]!: nums[w]!=nums[i]!, w++',
   },
   {
     id: 'outcome',
@@ -290,7 +290,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'The scan is finished. The write pointer ended at , so there are  unique values occupying nums[0..]. Return  as the new length.',
+      'The scan is finished. The write pointer ended at , so there are  unique values occupying nums[0..]!. Return  as the new length.',
   },
 ];
 export const simulator: ProblemSimulator = {

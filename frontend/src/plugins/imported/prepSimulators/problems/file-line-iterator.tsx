@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -28,7 +28,7 @@ function record({ content }: FileLineInput): Frame<FileLineState>[] {
   const output: string[] = [];
   let lineIdx = -1;
 
-  const { emit, frames } = createRecorder<FileLineState>(() => ({
+  const { emit, frames } = createPrepRecorder<FileLineState>(() => ({
     lines,
     lineIdx: lineIdx >= 0 ? lineIdx : null,
     current: null,
@@ -51,14 +51,14 @@ function record({ content }: FileLineInput): Frame<FileLineState>[] {
       'HASNEXT',
       'Scan() = true',
       `\`hasNext()\`: \`scanner.Scan()\` succeeds — there is another line at index ${lineIdx}.`,
-      { lineIdx, hasNext, current: lines[lineIdx] },
+      { lineIdx, hasNext, current: lines[lineIdx]! },
     );
-    output.push(lines[lineIdx]);
+    output.push(lines[lineIdx]!);
     emit(
       'NEXT',
       `line ${lineIdx + 1}`,
-      `\`next()\` returns \`scanner.Text()\` = "${lines[lineIdx]}". Yielded lines so far: [${output.map((l) => `"${l}"`).join(', ')}].`,
-      { lineIdx, current: lines[lineIdx], hasNext: lineIdx + 1 < lines.length },
+      `\`next()\` returns \`scanner.Text()\` = "${lines[lineIdx]!}". Yielded lines so far: [${output.map((l) => `"${l}"`).join(', ')}].`,
+      { lineIdx, current: lines[lineIdx]!, hasNext: lineIdx + 1 < lines.length },
       'good',
     );
   }

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -32,18 +32,18 @@ function addRange(intervals: [number, number][], left: number, right: number): [
   const merged: [number, number][] = [];
   let i = 0;
   const n = intervals.length;
-  while (i < n && intervals[i][1] < left) {
-    merged.push(intervals[i]);
+  while (i < n && intervals[i]![1] < left) {
+    merged.push(intervals[i]!);
     i++;
   }
-  while (i < n && intervals[i][0] <= right) {
-    left = Math.min(left, intervals[i][0]);
-    right = Math.max(right, intervals[i][1]);
+  while (i < n && intervals[i]![0] <= right) {
+    left = Math.min(left, intervals[i]![0]);
+    right = Math.max(right, intervals[i]![1]);
     i++;
   }
   merged.push([left, right]);
   while (i < n) {
-    merged.push(intervals[i]);
+    merged.push(intervals[i]!);
     i++;
   }
   return merged;
@@ -54,10 +54,10 @@ function queryRange(intervals: [number, number][], left: number, right: number):
   let hi = intervals.length;
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    if (intervals[mid][1] <= left) lo = mid + 1;
+    if (intervals[mid]![1] <= left) lo = mid + 1;
     else hi = mid;
   }
-  return lo < intervals.length && intervals[lo][0] <= left && intervals[lo][1] >= right;
+  return lo < intervals.length && intervals[lo]![0] <= left && intervals[lo]![1] >= right;
 }
 
 function removeRange(
@@ -67,11 +67,11 @@ function removeRange(
 ): [number, number][] {
   const result: [number, number][] = [];
   for (const iv of intervals) {
-    if (iv[1] <= left || iv[0] >= right) {
+    if (iv[1]! <= left || iv[0]! >= right) {
       result.push(iv);
     } else {
-      if (iv[0] < left) result.push([iv[0], left]);
-      if (iv[1] > right) result.push([right, iv[1]]);
+      if (iv[0]! < left) result.push([iv[0]!, left]);
+      if (iv[1]! > right) result.push([right, iv[1]!]);
     }
   }
   return result;
@@ -80,7 +80,7 @@ function removeRange(
 function record({ ops }: RangeInput): Frame<RangeState>[] {
   let intervals: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<RangeState>(() => ({
+  const { emit, frames } = createPrepRecorder<RangeState>(() => ({
     intervals: intervals.map((x) => [...x] as [number, number]),
     op: '',
     left: null,
@@ -102,7 +102,7 @@ function record({ ops }: RangeInput): Frame<RangeState>[] {
       emit(
         'ADD',
         `[${o.left},${o.right}]`,
-        `AddRange(${o.left},${o.right}): merge into sorted intervals → [${intervals.map((x) => `[${x[0]},${x[1]}]`).join(', ')}].`,
+        `AddRange(${o.left},${o.right}): merge into sorted intervals → [${intervals.map((x) => `[${x[0]!},${x[1]!}]`).join(', ')}].`,
         {
           op: `add [${o.left},${o.right}]`,
           left: o.left,
@@ -130,7 +130,7 @@ function record({ ops }: RangeInput): Frame<RangeState>[] {
       emit(
         'REMOVE',
         `[${o.left},${o.right}]`,
-        `RemoveRange(${o.left},${o.right}): carve hole → [${intervals.map((x) => `[${x[0]},${x[1]}]`).join(', ')}].`,
+        `RemoveRange(${o.left},${o.right}): carve hole → [${intervals.map((x) => `[${x[0]!},${x[1]!}]`).join(', ')}].`,
         {
           op: `remove [${o.left},${o.right}]`,
           left: o.left,

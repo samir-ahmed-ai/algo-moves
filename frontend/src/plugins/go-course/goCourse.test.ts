@@ -64,7 +64,7 @@ describe('go-course content integrity', () => {
   it('builds one plugin per concept and one catalog course', () => {
     expect(goCoursePlugins.length).toBe(concepts.length);
     expect(goCourses.length).toBe(1);
-    expect(goCourses[0].topics.length).toBe(GO_TOPICS.length);
+    expect(goCourses[0]!.topics.length).toBe(GO_TOPICS.length);
   });
 });
 

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,7 +32,7 @@ function record({ s }: LongestUniqueInput): Frame<LongestUniqueState>[] {
   let l = 0;
   let best = 0;
 
-  const { emit, frames } = createRecorder<LongestUniqueState>(() => ({
+  const { emit, frames } = createPrepRecorder<LongestUniqueState>(() => ({
     chars,
     l,
     r: null,
@@ -51,8 +51,8 @@ function record({ s }: LongestUniqueInput): Frame<LongestUniqueState>[] {
   );
 
   for (let r = 0; r < chars.length; r++) {
-    const c = chars[r];
-    const idx = last.has(c) ? last.get(c)! : undefined;
+    const c = chars[r]!;
+    const idx = last.has(c!) ? last.get(c!)! : undefined;
     let jumped: number | null = null;
 
     if (idx !== undefined && idx >= l) {
@@ -73,7 +73,7 @@ function record({ s }: LongestUniqueInput): Frame<LongestUniqueState>[] {
       );
     }
 
-    last.set(c, r);
+    last.set(c!, r);
     const windowLen = r - l + 1;
     const improved = windowLen > best;
     if (improved) best = windowLen;
@@ -81,8 +81,8 @@ function record({ s }: LongestUniqueInput): Frame<LongestUniqueState>[] {
       improved ? 'BEST' : 'RECORD',
       improved ? `best=${best}` : `len=${windowLen}`,
       improved
-        ? `Record last['${c}'] = ${r}. The window [${l}..${r}] has length ${windowLen}, which beats the previous best, so best = ${windowLen}.`
-        : `Record last['${c}'] = ${r}. The window [${l}..${r}] has length ${windowLen}, which does not beat the current best of ${best}.`,
+        ? `Record last['${c}']! = ${r}. The window [${l}..${r}] has length ${windowLen}, which beats the previous best, so best = ${windowLen}.`
+        : `Record last['${c}']! = ${r}. The window [${l}..${r}] has length ${windowLen}, which does not beat the current best of ${best}.`,
       { r, windowLen, l, best },
       improved ? 'good' : undefined,
     );
@@ -108,7 +108,7 @@ function View({ frame }: PluginViewProps<LongestUniqueState>) {
   const win: [number, number] | null = s.r !== null && s.r >= s.l ? [s.l, s.r] : null;
   const tone = (i: number) => {
     if (s.jumped !== null && i === s.jumped) return 'dead';
-    if (win && i >= win[0] && i <= win[1]) return 'in-window';
+    if (win && i >= win[0]! && i <= win[1]!) return 'in-window';
     return '';
   };
   const lenLabel = s.windowLen !== null ? s.windowLen : s.r === null ? '—' : '…';
@@ -136,12 +136,12 @@ function View({ frame }: PluginViewProps<LongestUniqueState>) {
 function Inspector({ frame }: InspectorProps<LongestUniqueState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.r !== null && s.r >= 0 && s.r < s.chars.length ? s.chars[s.r] : '—';
+  const cur = s.r !== null && s.r >= 0 && s.r < s.chars.length ? s.chars[s.r]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="l (left)" v={s.l} />
       <InspectorRow k="r (right)" v={s.r ?? '—'} />
-      <InspectorRow k="char[r]" v={cur} />
+      <InspectorRow k="char[r]!" v={cur} />
       <InspectorRow k="window len" v={s.windowLen ?? '—'} />
       <InspectorRow k="map size" v={s.last.length} />
       <InspectorRow k="best" v={s.best} />
@@ -253,7 +253,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). last[c]>=l -> l=last[c]+1; track r-l+1',
+    explain: 'O(n). O(1). last[c]!>=l -> l=last[c]!+1; track r-l+1',
   },
   {
     id: 'outcome',

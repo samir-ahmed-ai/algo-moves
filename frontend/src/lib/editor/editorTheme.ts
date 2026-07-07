@@ -24,7 +24,7 @@ const VSCODE_DARK = {
   operator: '#d4d4d4',
   meta: '#569cd6',
   invalid: '#f44747',
-};
+} as const;
 
 const VSCODE_LIGHT = {
   bg: '#ffffff',
@@ -46,7 +46,10 @@ const VSCODE_LIGHT = {
   operator: '#000000',
   meta: '#0000ff',
   invalid: '#cd3131',
-};
+} as const;
+
+const EDITOR_FONT_STACK =
+  'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
 
 function buildSyntaxHighlight(isDark: boolean): HighlightStyle {
   const p = isDark ? VSCODE_DARK : VSCODE_LIGHT;
@@ -87,8 +90,7 @@ export function buildEditorTheme(isDark: boolean): Extension[] {
         boxShadow: `0 0 0 1px ${p.selection}, 0 18px 42px rgba(0, 0, 0, ${isDark ? '0.24' : '0.1'})`,
       },
       '.cm-scroller': {
-        fontFamily:
-          'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+        fontFamily: EDITOR_FONT_STACK,
         lineHeight: 'var(--editor-line-height, 1.55)',
       },
       '.cm-line': {

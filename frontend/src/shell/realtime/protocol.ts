@@ -44,12 +44,57 @@ export function isPlayerRole(role: Role | null | undefined): boolean {
   return role === 'host' || role === 'guest' || role === 'player';
 }
 
+function isObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object';
+}
+
+function isRole(value: unknown): value is Role {
+  return value === 'host' || value === 'guest' || value === 'player' || value === 'spectator';
+}
+
+function isPeer(value: unknown): value is Peer {
+  return (
+    isObject(value) &&
+    typeof value.id === 'string' &&
+    typeof value.name === 'string' &&
+    isRole(value.role)
+  );
+}
+
+function isPeerArray(value: unknown): value is Peer[] {
+  return Array.isArray(value) && value.every(isPeer);
+}
+
+function isServerMessage(value: unknown): value is ServerMessage {
+  if (!isObject(value)) return false;
+  switch (value.t) {
+    case 'welcome':
+      return (
+        isPeer(value.self) &&
+        isPeerArray(value.players) &&
+        isPeerArray(value.spectators) &&
+        typeof value.capacity === 'number' &&
+        Number.isFinite(value.capacity)
+      );
+    case 'peer-join':
+    case 'peer-leave':
+    case 'role-change':
+      return isPeer(value.peer);
+    case 'relay':
+      return typeof value.from === 'string';
+    case 'state':
+      return true;
+    case 'error':
+      return typeof value.msg === 'string';
+    default:
+      return false;
+  }
+}
+
 export function parseServerMessage(raw: string): ServerMessage | null {
   try {
-    const msg = JSON.parse(raw) as ServerMessage;
-    if (msg && typeof msg === 'object' && typeof (msg as { t?: unknown }).t === 'string') {
-      return msg;
-    }
+    const msg = JSON.parse(raw);
+    if (isServerMessage(msg)) return msg;
   } catch {
     /* ignore malformed frames */
   }

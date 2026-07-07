@@ -18,6 +18,10 @@ export interface SrsData {
   cards: Record<string, SrsCard>;
 }
 
+interface StoredSrsData {
+  cards: Record<string, unknown>;
+}
+
 const KEY = STORAGE_KEYS.SRS_DECK;
 const scheduler = fsrs();
 
@@ -26,8 +30,12 @@ function normalizeProblemId(problemId: string): string | null {
   return id || null;
 }
 
-function nonNegativeInt(value: number): number {
-  return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+function nonNegativeInt(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function validDate(value: unknown): Date {
@@ -35,38 +43,42 @@ function validDate(value: unknown): Date {
   return Number.isFinite(date.getTime()) ? date : new Date();
 }
 
-function isSrsData(value: unknown): value is SrsData {
-  const c = value as Partial<SrsData>;
-  return !!c && typeof c === 'object' && !!c.cards && typeof c.cards === 'object';
+function isSrsData(value: unknown): value is StoredSrsData {
+  return isRecord(value) && isRecord(value.cards);
+}
+
+function hydrateFsrsCard(value: unknown): Card | undefined {
+  if (!isRecord(value)) return undefined;
+  const card = value as unknown as Card;
+  return {
+    ...card,
+    due: validDate(card.due),
+    ...(card.last_review ? { last_review: validDate(card.last_review) } : {}),
+  };
 }
 
 /** Rehydrate Date fields after JSON parse. */
-function hydrateCard(card: SrsCard, fallbackId: string): SrsCard {
-  const problemId = normalizeProblemId(card.problemId) ?? fallbackId;
+function hydrateCard(value: unknown, fallbackId: string): SrsCard | null {
+  if (!isRecord(value)) return null;
+  const card = value as Partial<SrsCard>;
+  const problemId = normalizeProblemId(card.problemId ?? '') ?? fallbackId;
   const base: SrsCard = {
-    ...card,
     problemId,
-    due: Number.isFinite(card.due) ? card.due : Date.now(),
+    due: typeof card.due === 'number' && Number.isFinite(card.due) ? card.due : Date.now(),
     intervalDays: nonNegativeInt(card.intervalDays),
     reps: nonNegativeInt(card.reps),
   };
-  if (!card.fsrs) return base;
-  return {
-    ...base,
-    fsrs: {
-      ...card.fsrs,
-      due: validDate(card.fsrs.due),
-      last_review: card.fsrs.last_review ? validDate(card.fsrs.last_review) : undefined,
-    },
-  };
+  const fsrsCard = hydrateFsrsCard(card.fsrs);
+  return fsrsCard ? { ...base, fsrs: fsrsCard } : base;
 }
 
 function load(): SrsData {
-  const raw = readStorageJson(KEY, { cards: {} }, isSrsData);
+  const raw = readStorageJson<StoredSrsData>(KEY, { cards: {} }, isSrsData);
   const cards: Record<string, SrsCard> = {};
-  for (const [id, card] of Object.entries(raw.cards)) {
+  for (const [id, value] of Object.entries(raw.cards)) {
     const key = normalizeProblemId(id);
-    if (key) cards[key] = hydrateCard(card, key);
+    const card = key ? hydrateCard(value, key) : null;
+    if (key && card) cards[key] = card;
   }
   return { cards };
 }

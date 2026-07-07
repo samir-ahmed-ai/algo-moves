@@ -1,6 +1,9 @@
 import { useSyncExternalStore } from 'react';
 import { writeStorageJson } from '@/store/persistence/storage';
 
+type StoreListener = () => void;
+type StoreSaver<T> = (value: T) => void;
+
 export interface SyncStore<T> {
   /** Current value (synchronous). */
   get(): T;
@@ -29,10 +32,10 @@ export interface SyncStore<T> {
 export function createSyncStore<T>(
   key: string,
   load: () => T,
-  save: (value: T) => void = (value) => writeStorageJson(key, value),
+  save: StoreSaver<T> = (value) => writeStorageJson(key, value),
 ): SyncStore<T> {
   let data = load();
-  const listeners = new Set<() => void>();
+  const listeners = new Set<StoreListener>();
 
   const notify = (): void => {
     for (const listener of listeners) {
@@ -56,7 +59,7 @@ export function createSyncStore<T>(
     notify();
   };
   const update = (recipe: (prev: T) => T): void => set(recipe(data));
-  const subscribe = (listener: () => void): (() => void) => {
+  const subscribe = (listener: StoreListener): (() => void) => {
     listeners.add(listener);
     return () => {
       listeners.delete(listener);

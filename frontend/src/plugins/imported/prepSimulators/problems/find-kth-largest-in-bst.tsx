@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,7 +32,7 @@ function record({ tree, k }: KthLargestInput): Frame<KthLargestState>[] {
   let kLeft = k;
   let ans: number | null = null;
 
-  const { emit, frames } = createRecorder<KthLargestState>(() => ({
+  const { emit, frames } = createPrepRecorder<KthLargestState>(() => ({
     tree,
     k,
     kLeft,
@@ -51,11 +51,11 @@ function record({ tree, k }: KthLargestInput): Frame<KthLargestState>[] {
 
   // Reverse in-order DFS, mirroring the Go solution's mutating `k`.
   const dfs = (i: number): void => {
-    if (i >= tree.length || tree[i] == null || kLeft === 0) return;
+    if (i >= tree.length || tree[i]! == null || kLeft === 0) return;
 
     const right = 2 * i + 2;
     const left = 2 * i + 1;
-    const val = tree[i] as number;
+    const val = tree[i]! as number;
 
     emit(
       'DESCEND',
@@ -125,7 +125,7 @@ function View({ frame }: PluginViewProps<KthLargestState>) {
     if (s.done && s.active === i) return 'team-1';
     return 'team-0';
   };
-  const descending = s.visited.map((i) => s.tree[i] as number);
+  const descending = s.visited.map((i) => s.tree[i]! as number);
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -154,7 +154,7 @@ function Inspector({ frame }: InspectorProps<KthLargestState>) {
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="k remaining" v={s.kLeft} />
-      <InspectorRow k="node" v={s.active !== null ? (s.tree[s.active] ?? '—') : '—'} />
+      <InspectorRow k="node" v={s.active !== null ? (s.tree[s.active]! ?? '—') : '—'} />
       <InspectorRow k="counted" v={s.visited.length} />
       <InspectorRow k="answer" v={s.ans ?? (s.done ? 'none' : '…')} />
     </VarGrid>

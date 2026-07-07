@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,8 +32,8 @@ interface IsSquareState {
   d1: number | null; // first distance (candidate "side")
   d2: number | null; // second distance (candidate "diagonal")
   counts: [number, number][]; // value -> occurrences across the 6 distances
-  sideOk: boolean | null; // counts[d1] === 4
-  diagOk: boolean | null; // counts[d2] === 2
+  sideOk: boolean | null; // counts[d1]! === 4
+  diagOk: boolean | null; // counts[d2]! === 2
   distinctOk: boolean | null; // d1 !== d2
   result: boolean | null;
   done: boolean;
@@ -58,7 +58,7 @@ function sqDist(a: Pt, b: Pt): number {
 function record({ points }: IsSquareInput): Frame<IsSquareState>[] {
   const dists: DistEntry[] = [];
 
-  const { emit, frames } = createRecorder<IsSquareState>(() => ({
+  const { emit, frames } = createPrepRecorder<IsSquareState>(() => ({
     points,
     dists: dists.map((e) => ({ ...e })),
     active: null,
@@ -72,7 +72,7 @@ function record({ points }: IsSquareInput): Frame<IsSquareState>[] {
     done: false,
   }));
 
-  const fmtPts = points.map((p, i) => `${PT_NAME[i]}(${p.x},${p.y})`).join(' ');
+  const fmtPts = points.map((p, i) => `${PT_NAME[i]!}(${p.x},${p.y})`).join(' ');
   emit(
     'INIT',
     '4 points',
@@ -82,14 +82,14 @@ function record({ points }: IsSquareInput): Frame<IsSquareState>[] {
 
   // Compute d1 = dist(p1, p2) first; if it is 0, two points coincide → not a square.
   {
-    const [a, b] = PAIR_INDICES[0];
-    const d = sqDist(points[a], points[b]);
-    dists.push({ pair: `${PT_NAME[a]}·${PT_NAME[b]}`, d });
+    const [a, b] = PAIR_INDICES[0]!;
+    const d = sqDist(points[a]!, points[b]!);
+    dists.push({ pair: `${PT_NAME[a]!}·${PT_NAME[b]!}`, d });
     if (d === 0) {
       emit(
         'DEGENERATE',
         `d1=0`,
-        `The very first distance d1 = dist(${PT_NAME[a]}, ${PT_NAME[b]}) = 0, so ${PT_NAME[a]} and ${PT_NAME[b]} are the same point. A square cannot have coincident vertices, so we return false immediately.`,
+        `The very first distance d1 = dist(${PT_NAME[a]!}, ${PT_NAME[b]!}) = 0, so ${PT_NAME[a]!} and ${PT_NAME[b]!} are the same point. A square cannot have coincident vertices, so we return false immediately.`,
         { dists: dists.map((e) => ({ ...e })), active: 0, d1: 0, result: false, done: true },
         'bad',
       );
@@ -98,27 +98,27 @@ function record({ points }: IsSquareInput): Frame<IsSquareState>[] {
     emit(
       'DIST',
       `d1=${d}`,
-      `d1 = dist(${PT_NAME[a]}, ${PT_NAME[b]}) = ${d}. This first non-zero distance is our reference "side" candidate — in a valid square it should appear exactly 4 times among the 6 distances.`,
+      `d1 = dist(${PT_NAME[a]!}, ${PT_NAME[b]!}) = ${d}. This first non-zero distance is our reference "side" candidate — in a valid square it should appear exactly 4 times among the 6 distances.`,
       { dists: dists.map((e) => ({ ...e })), active: 0, d1: d },
     );
   }
 
-  const d1 = dists[0].d;
+  const d1 = dists[0]!.d;
 
   // Compute the remaining 5 distances.
   for (let k = 1; k < PAIR_INDICES.length; k++) {
-    const [a, b] = PAIR_INDICES[k];
-    const d = sqDist(points[a], points[b]);
-    dists.push({ pair: `${PT_NAME[a]}·${PT_NAME[b]}`, d });
+    const [a, b] = PAIR_INDICES[k]!;
+    const d = sqDist(points[a]!, points[b]!);
+    dists.push({ pair: `${PT_NAME[a]!}·${PT_NAME[b]!}`, d });
     emit(
       'DIST',
       `d${k + 1}=${d}`,
-      `d${k + 1} = dist(${PT_NAME[a]}, ${PT_NAME[b]}) = ${d}. Append it to the list of pairwise squared distances; later we tally how many times each value occurs.`,
+      `d${k + 1} = dist(${PT_NAME[a]!}, ${PT_NAME[b]!}) = ${d}. Append it to the list of pairwise squared distances; later we tally how many times each value occurs.`,
       { dists: dists.map((e) => ({ ...e })), active: k, d1 },
     );
   }
 
-  const d2 = dists[1].d; // candidate "diagonal" = dist(p1, p3)
+  const d2 = dists[1]!.d; // candidate "diagonal" = dist(p1, p3)
 
   // Tally counts across all 6 distances.
   const countMap = new Map<number, number>();
@@ -135,11 +135,11 @@ function record({ points }: IsSquareInput): Frame<IsSquareState>[] {
     { dists: dists.map((e) => ({ ...e })), d1, d2, counts },
   );
 
-  // Three checks, mirroring `counts[d1]==4 && counts[d2]==2 && d1!=d2`.
+  // Three checks, mirroring `counts[d1]!==4 && counts[d2]!==2 && d1!=d2`.
   const sideOk = (countMap.get(d1) ?? 0) === 4;
   emit(
     'CHECK',
-    `counts[${d1}]=${countMap.get(d1) ?? 0}`,
+    `counts[${d1}]!=${countMap.get(d1) ?? 0}`,
     `Check 1 — sides: d1 = ${d1} must occur exactly 4 times (the four edges). It occurs ${
       countMap.get(d1) ?? 0
     } time(s), so this check is ${sideOk ? 'satisfied' : 'NOT satisfied'}.`,
@@ -150,7 +150,7 @@ function record({ points }: IsSquareInput): Frame<IsSquareState>[] {
   const diagOk = (countMap.get(d2) ?? 0) === 2;
   emit(
     'CHECK',
-    `counts[${d2}]=${countMap.get(d2) ?? 0}`,
+    `counts[${d2}]!=${countMap.get(d2) ?? 0}`,
     `Check 2 — diagonals: d2 = ${d2} must occur exactly 2 times (the two diagonals). It occurs ${
       countMap.get(d2) ?? 0
     } time(s), so this check is ${diagOk ? 'satisfied' : 'NOT satisfied'}.`,
@@ -201,7 +201,7 @@ function View({ frame }: PluginViewProps<IsSquareState>) {
     pointers.push({ i: s.active, label: 'now', tone: 'accent', place: 'above' });
 
   const tone = (i: number) => {
-    const e = s.dists[i];
+    const e = s.dists[i]!;
     if (!e) return '';
     if (s.distinctOk !== null) {
       // verdict phase: green for the matched side/diagonal values
@@ -359,7 +359,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n log n) time, O(1) space — wrong order of growth',
       },
     ],
-    explain: 'O(1). O(1). 6 pairwise dists; counts[side]==4 && counts[diag]==2 && side!=diag',
+    explain: 'O(1). O(1). 6 pairwise dists; counts[side]!==4 && counts[diag]!==2 && side!=diag',
   },
   {
     id: 'outcome',

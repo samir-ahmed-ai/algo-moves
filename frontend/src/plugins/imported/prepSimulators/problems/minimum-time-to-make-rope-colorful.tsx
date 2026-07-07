@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,11 +30,11 @@ interface RopeState {
 
 function record({ colors, neededTime }: RopeInput): Frame<RopeState>[] {
   let cost = 0;
-  let mx = neededTime[0];
-  let sum = neededTime[0];
+  let mx = neededTime[0]!;
+  let sum = neededTime[0]!;
   let groupStart = 0;
 
-  const { emit, frames } = createRecorder<RopeState>(() => ({
+  const { emit, frames } = createPrepRecorder<RopeState>(() => ({
     colors,
     neededTime,
     i: null,
@@ -56,48 +56,48 @@ function record({ colors, neededTime }: RopeInput): Frame<RopeState>[] {
   emit(
     'GROUP',
     `sum=${sum} max=${mx}`,
-    `Start the first group at index 0 with colour '${colors[0]}'. Track the running cost sum (=${sum}) and the largest single cost max (=${mx}) inside this group.`,
+    `Start the first group at index 0 with colour '${colors[0]!}'. Track the running cost sum (=${sum}) and the largest single cost max (=${mx}) inside this group.`,
     { i: 0, groupStart: 0 },
   );
 
   for (let i = 1; i < colors.length; i++) {
-    if (colors[i] === colors[i - 1]) {
-      sum += neededTime[i];
-      const newMax = neededTime[i] > mx;
-      if (neededTime[i] > mx) mx = neededTime[i];
+    if (colors[i]! === colors[i - 1]!) {
+      sum! += neededTime[i]!;
+      const newMax = neededTime[i]! > mx!;
+      if (neededTime[i]! > mx!) mx = neededTime[i]!;
       emit(
         'EXTEND',
         `sum=${sum} max=${mx}`,
-        `Balloon ${i} is colour '${colors[i]}', same as balloon ${i - 1}. It joins the group: sum += ${neededTime[i]} → ${sum}. ${
+        `Balloon ${i} is colour '${colors[i]!}', same as balloon ${i - 1}. It joins the group: sum += ${neededTime[i]!} → ${sum}. ${
           newMax
-            ? `Its cost ${neededTime[i]} is the new max in this group.`
-            : `Max stays ${mx} (${neededTime[i]} ≤ ${mx}).`
+            ? `Its cost ${neededTime[i]!} is the new max in this group.`
+            : `Max stays ${mx} (${neededTime[i]!} ≤ ${mx}).`
         }`,
         { i, prev: i - 1 },
       );
     } else {
-      const paid = sum - mx;
+      const paid = sum! - mx!;
       cost += paid;
       emit(
         'CLOSE',
         `+${paid} cost=${cost}`,
-        `Balloon ${i} is colour '${colors[i]}', different from '${colors[i - 1]}'. The previous group closes: keep the costliest (max=${mx}) and remove the rest, paying sum − max = ${sum} − ${mx} = ${paid}. Running answer = ${cost}.`,
+        `Balloon ${i} is colour '${colors[i]!}', different from '${colors[i - 1]!}'. The previous group closes: keep the costliest (max=${mx}) and remove the rest, paying sum − max = ${sum} − ${mx} = ${paid}. Running answer = ${cost}.`,
         { i, prev: i - 1 },
         paid > 0 ? 'good' : undefined,
       );
-      sum = neededTime[i];
-      mx = neededTime[i];
+      sum = neededTime[i]!;
+      mx = neededTime[i]!;
       groupStart = i;
       emit(
         'GROUP',
         `sum=${sum} max=${mx}`,
-        `Open a new group at index ${i} with colour '${colors[i]}'. Reset sum = ${sum} and max = ${mx}.`,
+        `Open a new group at index ${i} with colour '${colors[i]!}'. Reset sum = ${sum} and max = ${mx}.`,
         { i, groupStart: i },
       );
     }
   }
 
-  const paidLast = sum - mx;
+  const paidLast = sum! - mx!;
   cost += paidLast;
   emit(
     'CLOSE',
@@ -124,7 +124,7 @@ function View({ frame }: PluginViewProps<RopeState>) {
       ? 'found'
       : s.i === idx
         ? 'match'
-        : win && idx >= win[0] && idx <= win[1]
+        : win && idx >= win[0]! && idx <= win[1]!
           ? 'in-window'
           : '';
   return (
@@ -150,7 +150,7 @@ function Inspector({ frame }: InspectorProps<RopeState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="colors[i]" v={s.i !== null ? s.colors[s.i] : '—'} />
+      <InspectorRow k="colors[i]!" v={s.i !== null ? s.colors[s.i]! : '—'} />
       <InspectorRow k="group start" v={s.groupStart ?? '—'} />
       <InspectorRow k="group sum" v={s.sum} />
       <InspectorRow k="group max" v={s.mx} />
@@ -165,19 +165,19 @@ export const title = 'Minimum Time to Make Rope Colorful';
 function computeMinCost(colors: string, neededTime: number[]): number {
   if (colors.length === 0) return 0;
   let cost = 0;
-  let mx = neededTime[0];
-  let sum = neededTime[0];
+  let mx = neededTime[0]!;
+  let sum = neededTime[0]!;
   for (let i = 1; i < colors.length; i++) {
-    if (colors[i] === colors[i - 1]) {
-      sum += neededTime[i];
-      if (neededTime[i] > mx) mx = neededTime[i];
+    if (colors[i]! === colors[i - 1]!) {
+      sum! += neededTime[i]!;
+      if (neededTime[i]! > mx!) mx = neededTime[i]!;
     } else {
-      cost += sum - mx;
-      sum = neededTime[i];
-      mx = neededTime[i];
+      cost += sum! - mx!;
+      sum = neededTime[i]!;
+      mx = neededTime[i]!;
     }
   }
-  cost += sum - mx;
+  cost += sum! - mx!;
   return cost;
 }
 

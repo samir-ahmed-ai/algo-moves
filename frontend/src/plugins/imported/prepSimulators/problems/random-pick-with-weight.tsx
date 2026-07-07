@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -28,11 +28,11 @@ interface PickWState {
 function record({ weights, targets }: PickWInput): Frame<PickWState>[] {
   const prefix: number[] = [];
   for (let i = 0; i < weights.length; i++) {
-    prefix.push(i === 0 ? weights[0] : prefix[i - 1] + weights[i]);
+    prefix.push(i === 0 ? weights[0]! : prefix[i - 1]! + weights[i]!);
   }
-  const total = prefix[prefix.length - 1];
+  const total = prefix[prefix.length - 1]!;
 
-  const { emit, frames } = createRecorder<PickWState>(() => ({
+  const { emit, frames } = createPrepRecorder<PickWState>(() => ({
     weights: [...weights],
     prefix: prefix.slice(),
     target: 0,
@@ -49,19 +49,19 @@ function record({ weights, targets }: PickWInput): Frame<PickWState>[] {
   );
 
   for (let t = 0; t < targets.length; t++) {
-    const target = targets[t];
+    const target = targets[t]!;
     let lo = 0;
     let hi = prefix.length;
     while (lo < hi) {
       const mid = (lo + hi) >> 1;
-      if (prefix[mid] < target) lo = mid + 1;
+      if (prefix[mid]! < target!) lo = mid + 1;
       else hi = mid;
     }
     const picked = lo;
     emit(
       'PICK',
       `target=${target} → ${picked}`,
-      `PickIndex(): target=${target} in [1,${total}]. Binary search prefix → index ${picked} (weight ${weights[picked]}).`,
+      `PickIndex(): target=${target} in [1,${total}]. Binary search prefix → index ${picked} (weight ${weights[picked]!}).`,
       { target, picked, op: `pick → ${picked}` },
       'good',
     );
@@ -73,7 +73,7 @@ function record({ weights, targets }: PickWInput): Frame<PickWState>[] {
 
 function View({ frame }: PluginViewProps<PickWState>) {
   const s = frame.state;
-  const total = s.prefix[s.prefix.length - 1] ?? 0;
+  const total = s.prefix[s.prefix.length - 1]! ?? 0;
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -93,7 +93,7 @@ function View({ frame }: PluginViewProps<PickWState>) {
           >
             <span>i={i}</span>
             <span>w={w}</span>
-            <span>prefix={s.prefix[i]}</span>
+            <span>prefix={s.prefix[i]!}</span>
           </div>
         ))}
       </div>

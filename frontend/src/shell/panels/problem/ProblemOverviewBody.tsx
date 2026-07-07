@@ -20,14 +20,14 @@ export function ProblemOverviewBody({
   nextAllLabel,
   onNextAll,
 }: {
-  nextLabel?: string;
-  onNext?: () => void;
-  nextAllLabel?: string;
-  onNextAll?: () => void;
+  nextLabel?: string | undefined;
+  onNext?: (() => void) | undefined;
+  nextAllLabel?: string | undefined;
+  onNextAll?: (() => void) | undefined;
 } = {}) {
   const isMobile = useIsMobile();
   const [inspectorOpen, setInspectorOpen] = useState(false);
-  const [inspTab, setInspTab] = useState(INSPECTOR_TABS[0].id);
+  const [inspTab, setInspTab] = useState(INSPECTOR_TABS[0]?.id ?? 'bigo');
   const selectInsp = (id: string) => {
     if (inspectorOpen && id === inspTab) {
       setInspectorOpen(false);

@@ -15,14 +15,26 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { nodeText, RADIUS_CTRL } from '@/design/typography';
 
 /** Uppercase field/section label. */
-export function Label({ children, className }: { children: ReactNode; className?: string }) {
+export function Label({
+  children,
+  className,
+}: {
+  readonly children: ReactNode;
+  readonly className?: string;
+}): ReactNode {
   return (
     <span className={cn(nodeText.label, 'shared-label text-ink3', className)}>{children}</span>
   );
 }
 
 /** Muted one-line helper copy. */
-export function Hint({ children, className }: { children: ReactNode; className?: string }) {
+export function Hint({
+  children,
+  className,
+}: {
+  readonly children: ReactNode;
+  readonly className?: string;
+}): ReactNode {
   return (
     <p className={cn(nodeText.sm, 'shared-hint leading-snug text-ink3', className)}>{children}</p>
   );
@@ -31,9 +43,8 @@ export function Hint({ children, className }: { children: ReactNode; className?:
 type BtnVariant = 'primary' | 'good' | 'ghost' | 'quiet' | 'danger';
 type BtnSize = 'xs' | 'sm';
 
-const BTN_VARIANT: Record<
-  BtnVariant,
-  NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
+const BTN_VARIANT: Readonly<
+  Record<BtnVariant, NonNullable<Parameters<typeof buttonVariants>[0]>['variant']>
 > = {
   primary: 'primary',
   good: 'good',
@@ -42,7 +53,9 @@ const BTN_VARIANT: Record<
   danger: 'danger',
 };
 
-const BTN_SIZE: Record<BtnSize, NonNullable<Parameters<typeof buttonVariants>[0]>['size']> = {
+const BTN_SIZE: Readonly<
+  Record<BtnSize, NonNullable<Parameters<typeof buttonVariants>[0]>['size']>
+> = {
   xs: 'xs',
   sm: 'sm',
 };
@@ -56,10 +69,10 @@ export function Btn({
   className,
   ...rest
 }: {
-  variant?: BtnVariant;
-  size?: BtnSize;
-  icon?: ReactNode;
-} & ButtonHTMLAttributes<HTMLButtonElement>) {
+  readonly variant?: BtnVariant;
+  readonly size?: BtnSize;
+  readonly icon?: ReactNode;
+} & ButtonHTMLAttributes<HTMLButtonElement>): ReactNode {
   return (
     <Button
       {...rest}
@@ -81,12 +94,12 @@ export function Field({
   dense,
   className,
 }: {
-  label?: string;
-  hint?: string;
-  children: ReactNode;
-  dense?: boolean;
-  className?: string;
-}) {
+  readonly label?: string;
+  readonly hint?: string;
+  readonly children: ReactNode;
+  readonly dense?: boolean;
+  readonly className?: string;
+}): ReactNode {
   return (
     <label
       className={cn(
@@ -111,7 +124,7 @@ export function Field({
 /** Shared input class (used by TextInput/TextArea and canvas SearchInput). */
 export const INPUT_CLS = `shared-input nodrag w-full border border-edge bg-panel2 px-2 py-1.5 ${nodeText.sm} text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent ${RADIUS_CTRL}`;
 
-export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
+export function TextInput(props: InputHTMLAttributes<HTMLInputElement>): ReactNode {
   return (
     <input
       {...props}
@@ -121,7 +134,7 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
-export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>): ReactNode {
   return (
     <textarea
       {...props}

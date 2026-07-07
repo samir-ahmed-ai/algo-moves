@@ -141,7 +141,6 @@ export function BacktrackGameProvider({ children }: { children: ReactNode }) {
     if (parsed && parsed.levelId !== levelId) {
       writeDojoHash({ gameId: BACKTRACK_GAME_ID, levelId }, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const row = activeRow(state);

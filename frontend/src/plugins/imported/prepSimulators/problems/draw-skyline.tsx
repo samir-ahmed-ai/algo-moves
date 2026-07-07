@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -36,8 +36,8 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
   // Build start/end events: start=-h, end=+h (so within an x, starts sort first).
   const events: SkyEvent[] = [];
   for (const b of buildings) {
-    events.push({ x: b[0], signedHeight: -b[2] });
-    events.push({ x: b[1], signedHeight: b[2] });
+    events.push({ x: b[0]!, signedHeight: -b[2]! });
+    events.push({ x: b[1]!, signedHeight: b[2]! });
   }
   events.sort((a, c) => (a.x !== c.x ? a.x - c.x : a.signedHeight - c.signedHeight));
 
@@ -45,15 +45,16 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
   let currMax = 0;
   const result: [number, number][] = [];
 
-  const snapHeights = (): [number, number][] => [...heights.entries()].sort((a, c) => c[0] - a[0]);
+  const snapHeights = (): [number, number][] =>
+    [...heights.entries()].sort((a, c) => c[0]! - a[0]!);
 
-  const { emit, frames } = createRecorder<SkylineState>(() => ({
+  const { emit, frames } = createPrepRecorder<SkylineState>(() => ({
     events,
     cur: null,
     heights: snapHeights(),
     currMax,
     newMax: null,
-    result: result.map((p) => [p[0], p[1]]),
+    result: result.map((p) => [p[0]!, p[1]!]),
     done: false,
   }));
 
@@ -65,14 +66,14 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
   );
 
   for (let k = 0; k < events.length; k++) {
-    const ev = events[k];
-    const h = Math.abs(ev.signedHeight);
-    if (ev.signedHeight < 0) {
+    const ev = events[k]!;
+    const h = Math.abs(ev!.signedHeight);
+    if (ev!.signedHeight < 0) {
       heights.set(h, (heights.get(h) ?? 0) + 1);
       emit(
         'ENTER',
-        `+${h} @x=${ev.x}`,
-        `Event at x=${ev.x} is a building START of height ${h} (signed −${h}). Add ${h} to the active multiset, so the count of height ${h} becomes ${heights.get(h)}.`,
+        `+${h} @x=${ev!.x}`,
+        `Event at x=${ev!.x} is a building START of height ${h} (signed −${h}). Add ${h} to the active multiset, so the count of height ${h} becomes ${heights.get(h)}.`,
         { cur: k },
       );
     } else {
@@ -81,8 +82,8 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
       else heights.set(h, c);
       emit(
         'LEAVE',
-        `-${h} @x=${ev.x}`,
-        `Event at x=${ev.x} is a building END of height ${h} (signed +${h}). Remove one ${h} from the active multiset${c <= 0 ? `, dropping height ${h} entirely` : `, leaving count ${c}`}.`,
+        `-${h} @x=${ev!.x}`,
+        `Event at x=${ev!.x} is a building END of height ${h} (signed +${h}). Remove one ${h} from the active multiset${c <= 0 ? `, dropping height ${h} entirely` : `, leaving count ${c}`}.`,
         { cur: k },
       );
     }
@@ -92,13 +93,13 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
     for (const hv of heights.keys()) if (hv > newMax) newMax = hv;
 
     if (newMax !== currMax) {
-      result.push([ev.x, newMax]);
+      result.push([ev!.x, newMax]);
       const prev = currMax;
       currMax = newMax;
       emit(
         'EMIT',
-        `(${ev.x},${newMax})`,
-        `The tallest active height changed from ${prev} to ${newMax}, so the skyline turns here: emit key-point (${ev.x}, ${newMax}). This marks where the visible roofline steps up or down.`,
+        `(${ev!.x},${newMax})`,
+        `The tallest active height changed from ${prev} to ${newMax}, so the skyline turns here: emit key-point (${ev!.x}, ${newMax}). This marks where the visible roofline steps up or down.`,
         { cur: k, newMax, currMax },
         'good',
       );
@@ -106,7 +107,7 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
       emit(
         'SAME',
         `max stays ${newMax}`,
-        `After updating the multiset the tallest active height is still ${newMax} — the visible roofline did not change at x=${ev.x}, so no key-point is emitted.`,
+        `After updating the multiset the tallest active height is still ${newMax} — the visible roofline did not change at x=${ev!.x}, so no key-point is emitted.`,
         { cur: k, newMax },
       );
     }
@@ -115,7 +116,7 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
   emit(
     'DONE',
     `${result.length} points`,
-    `All events processed. The skyline is the ${result.length} emitted key-points: ${result.map((p) => `(${p[0]},${p[1]})`).join(' ')}. Time O(n^2) — a full max-scan of the active set per event; Space O(n) for the events and multiset.`,
+    `All events processed. The skyline is the ${result.length} emitted key-points: ${result.map((p) => `(${p[0]!},${p[1]!})`).join(' ')}. Time O(n^2) — a full max-scan of the active set per event; Space O(n) for the events and multiset.`,
     { done: true, newMax: currMax },
     'good',
   );
@@ -132,11 +133,11 @@ function View({ frame }: PluginViewProps<SkylineState>) {
   const values = s.events.map(eventLabel);
   const pointers: ArrayPointer[] = [];
   if (s.cur !== null) {
-    const ev = s.events[s.cur];
+    const ev = s.events[s.cur]!;
     pointers.push({
       i: s.cur,
-      label: ev.signedHeight < 0 ? 'start' : 'end',
-      tone: ev.signedHeight < 0 ? 'good' : 'warn',
+      label: ev!.signedHeight < 0 ? 'start' : 'end',
+      tone: ev!.signedHeight < 0 ? 'good' : 'warn',
       place: 'above',
     });
   }
@@ -165,7 +166,7 @@ function View({ frame }: PluginViewProps<SkylineState>) {
       <div
         className={cn('mt-1 font-mono', vizText.sm, s.result.length ? 'text-good' : 'text-ink3')}
       >
-        skyline → {s.result.length ? s.result.map((p) => `(${p[0]},${p[1]})`).join(' ') : '·'}
+        skyline → {s.result.length ? s.result.map((p) => `(${p[0]!},${p[1]!})`).join(' ') : '·'}
       </div>
     </div>
   );
@@ -174,7 +175,7 @@ function View({ frame }: PluginViewProps<SkylineState>) {
 function Inspector({ frame }: InspectorProps<SkylineState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const ev = s.cur !== null ? s.events[s.cur] : null;
+  const ev = s.cur !== null ? s.events[s.cur]! : null;
   return (
     <VarGrid>
       <InspectorRow k="events" v={s.events.length} />
@@ -347,7 +348,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as SkylineState | undefined;
     if (!s) return { ok: false, label: 'no result' };
-    const pts = s.result.map((p) => `(${p[0]},${p[1]})`).join(' ');
+    const pts = s.result.map((p) => `(${p[0]!},${p[1]!})`).join(' ');
     return { ok: s.result.length > 0, label: pts || 'flat' };
   },
 };

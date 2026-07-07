@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -24,7 +24,7 @@ interface WordCountState {
   chars: string[]; // current target word split into characters
   mask: number | null; // full bitmask of the current target word
   ci: number | null; // index of the character we try to remove
-  probe: number | null; // mask with chars[ci] removed (mask ^ bit)
+  probe: number | null; // mask with chars[ci]! removed (mask ^ bit)
   hit: boolean; // did this probe land in the start set?
   matched: boolean[]; // per-target-word: did it become obtainable?
   count: number; // running count of obtainable target words
@@ -49,7 +49,7 @@ function record({ startWords, targetWords }: WordCountInput): Frame<WordCountSta
   const matched = new Array<boolean>(targetWords.length).fill(false);
   let count = 0;
 
-  const { emit, frames } = createRecorder<WordCountState>(() => ({
+  const { emit, frames } = createPrepRecorder<WordCountState>(() => ({
     startWords,
     targetWords,
     startMasks,
@@ -72,9 +72,9 @@ function record({ startWords, targetWords }: WordCountInput): Frame<WordCountSta
   );
 
   for (let ti = 0; ti < targetWords.length; ti++) {
-    const w = targetWords[ti];
-    const chars = w.split('');
-    const mask = toBitmask(w);
+    const w = targetWords[ti]!;
+    const chars = w!.split('');
+    const mask = toBitmask(w!);
     emit(
       'TARGET',
       `"${w}"`,
@@ -84,21 +84,21 @@ function record({ startWords, targetWords }: WordCountInput): Frame<WordCountSta
 
     let found = false;
     for (let ci = 0; ci < chars.length; ci++) {
-      const bit = 1 << (chars[ci].charCodeAt(0) - 97);
+      const bit = 1 << (chars[ci]!.charCodeAt(0) - 97);
       const probe = mask ^ bit;
       const hit = set.has(probe);
       emit(
         hit ? 'MATCH' : 'PROBE',
-        hit ? `drop '${chars[ci]}' ✓` : `drop '${chars[ci]}'`,
+        hit ? `drop '${chars[ci]!}' ✓` : `drop '${chars[ci]!}'`,
         hit
-          ? `Removing '${chars[ci]}' gives mask {${maskToLetters(probe)}}, which IS a start word. So "${w}" can be built by adding '${chars[ci]}' — count it and stop scanning this word.`
-          : `Removing '${chars[ci]}' gives mask {${maskToLetters(probe)}}, not in the start set. Keep trying other letters.`,
+          ? `Removing '${chars[ci]!}' gives mask {${maskToLetters(probe)}}, which IS a start word. So "${w}" can be built by adding '${chars[ci]!}' — count it and stop scanning this word.`
+          : `Removing '${chars[ci]!}' gives mask {${maskToLetters(probe)}}, not in the start set. Keep trying other letters.`,
         { ti, chars, mask, ci, probe, hit },
         hit ? 'good' : undefined,
       );
       if (hit) {
         found = true;
-        matched[ti] = true;
+        matched[ti]! = true;
         count++;
         break;
       }
@@ -158,7 +158,7 @@ function View({ frame }: PluginViewProps<WordCountState>) {
       <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
         target{s.ti !== null ? ` ${s.ti + 1}/${s.targetWords.length}` : ''}:{' '}
         <span className="font-mono text-ink">
-          {s.ti !== null ? `"${s.targetWords[s.ti]}"` : '—'}
+          {s.ti !== null ? `"${s.targetWords[s.ti]!}"` : '—'}
         </span>
       </div>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
@@ -182,8 +182,11 @@ function Inspector({ frame }: InspectorProps<WordCountState>) {
       <InspectorRow k="start words" v={s.startWords.length} />
       <InspectorRow k="target words" v={s.targetWords.length} />
       <InspectorRow k="ti (target idx)" v={s.ti ?? '—'} />
-      <InspectorRow k="target" v={s.ti !== null ? `"${s.targetWords[s.ti]}"` : '—'} />
-      <InspectorRow k="drop char" v={s.ci !== null && s.chars[s.ci] ? `'${s.chars[s.ci]}'` : '—'} />
+      <InspectorRow k="target" v={s.ti !== null ? `"${s.targetWords[s.ti]!}"` : '—'} />
+      <InspectorRow
+        k="drop char"
+        v={s.ci !== null && s.chars[s.ci]! ? `'${s.chars[s.ci]!}'` : '—'}
+      />
       <InspectorRow k="probe in set?" v={s.ci === null ? '—' : s.hit ? 'yes' : 'no'} />
       <InspectorRow k="count" v={s.count} />
     </VarGrid>
@@ -325,12 +328,12 @@ export const simulator: ProblemSimulator = {
   inputs: [
     {
       id: 'cw1',
-      label: 'start[ant,act,tack] → 2',
+      label: 'start[ant,act,tack]! → 2',
       value: { startWords: ['ant', 'act', 'tack'], targetWords: ['tack', 'act', 'acti'] },
     },
     {
       id: 'cw2',
-      label: 'start[ab,a] → 1',
+      label: 'start[ab,a]! → 1',
       value: { startWords: ['ab', 'a'], targetWords: ['abc', 'abcd'] },
     },
   ] satisfies SampleInput<WordCountInput>[],

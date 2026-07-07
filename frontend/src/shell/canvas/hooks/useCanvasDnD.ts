@@ -143,7 +143,7 @@ export function useCanvasDnD({
       setNodes((nds) => [...nds, insertion.node]);
       if (insertion.newEdges.length) setEdges((eds) => [...eds, ...insertion.newEdges]);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [
       plugin,
       mode,

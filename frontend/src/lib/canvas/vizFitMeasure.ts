@@ -67,28 +67,29 @@ function measureIntrinsic(el: HTMLElement): { w: number; h: number } {
     : [];
   const mainPrevMaxWidths = mains.map((m) => m.style.maxWidth);
 
-  el.style.width = 'max-content';
-  el.style.height = 'max-content';
-  el.style.maxWidth = 'none';
-  for (const main of mains) main.style.maxWidth = 'none';
+  try {
+    el.style.width = 'max-content';
+    el.style.height = 'max-content';
+    el.style.maxWidth = 'none';
+    for (const main of mains) main.style.maxWidth = 'none';
 
-  // scrollWidth truncates fractional layout widths, so a max-content measure
-  // lands up to 1px short of the true intrinsic size. Laying the board out at
-  // that truncated width makes any exact-fit flex line (e.g. a stat strip as
-  // the widest child) wrap by a sub-pixel. Concede the pixel — but keep 0 as
-  // the "layout not ready" sentinel the retry guards key on.
-  const sw = el.scrollWidth;
-  const w = sw === 0 ? 0 : sw + 1;
-  const h = el.scrollHeight;
-
-  el.style.width = prevWidth;
-  el.style.height = prevHeight;
-  el.style.maxWidth = prevMaxWidth;
-  mains.forEach((main, i) => {
-    main.style.maxWidth = mainPrevMaxWidths[i] ?? '';
-  });
-
-  return { w, h };
+    // scrollWidth truncates fractional layout widths, so a max-content measure
+    // lands up to 1px short of the true intrinsic size. Laying the board out at
+    // that truncated width makes any exact-fit flex line (e.g. a stat strip as
+    // the widest child) wrap by a sub-pixel. Concede the pixel — but keep 0 as
+    // the "layout not ready" sentinel the retry guards key on.
+    const sw = el.scrollWidth;
+    const w = sw === 0 ? 0 : sw + 1;
+    const h = el.scrollHeight;
+    return { w, h };
+  } finally {
+    el.style.width = prevWidth;
+    el.style.height = prevHeight;
+    el.style.maxWidth = prevMaxWidth;
+    mains.forEach((main, i) => {
+      main.style.maxWidth = mainPrevMaxWidths[i] ?? '';
+    });
+  }
 }
 
 /** Stage width + main animation height (rail must not inflate vertical footprint). */

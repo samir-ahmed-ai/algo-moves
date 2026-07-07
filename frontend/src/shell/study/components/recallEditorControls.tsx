@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { alignSelection, autoSelectAndIndent, formatDocument } from '@/lib/editor/codeFormat';
 import { collapseSections, expandSections } from '@/lib/editor/codeFold';
-import { recallLineHeightLabel } from '@/lib/editor/recallEditorTheme';
+import { cycleRecallLineHeight, recallLineHeightLabel } from '@/lib/editor/recallEditorTheme';
 import type { PanelHeaderMenuItem } from '@/shell/canvas';
 import type { EditorPrefs } from '@/store/user-prefs';
 
@@ -113,12 +113,7 @@ export function recallEditorMenuItems(
       icon: <AlignVerticalSpaceAround className={MENU_ICON_CLASS} />,
       onClick: () =>
         setEditorPrefs({
-          lineHeight:
-            editorPrefs.lineHeight === 'compact'
-              ? 'normal'
-              : editorPrefs.lineHeight === 'normal'
-                ? 'relaxed'
-                : 'compact',
+          lineHeight: cycleRecallLineHeight(editorPrefs.lineHeight),
         }),
     },
     {

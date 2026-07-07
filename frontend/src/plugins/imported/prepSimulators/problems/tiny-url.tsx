@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   VizStage,
@@ -38,11 +38,11 @@ interface TinyState {
 const DIGITS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 function encodeID(id: number): string {
-  if (id === 0) return DIGITS[0];
+  if (id === 0) return DIGITS[0]!;
   const out: string[] = [];
   let n = id;
   while (n > 0) {
-    out.push(DIGITS[n % 62]);
+    out.push(DIGITS[n % 62]!);
     n = Math.floor(n / 62);
   }
   return out.reverse().join('');
@@ -53,7 +53,7 @@ function record({ host, ops }: TinyInput): Frame<TinyState>[] {
   const toLong: Record<string, string> = {};
   let nextID = 0;
 
-  const { emit, frames } = createRecorder<TinyState>(() => ({
+  const { emit, frames } = createPrepRecorder<TinyState>(() => ({
     host,
     toShort: { ...toShort },
     toLong: { ...toLong },
@@ -72,8 +72,8 @@ function record({ host, ops }: TinyInput): Frame<TinyState>[] {
 
   for (const o of ops) {
     if (o.kind === 'encode') {
-      if (toLong[o.url]) {
-        const short = toLong[o.url];
+      if (toLong[o.url]!) {
+        const short = toLong[o.url]!;
         emit(
           'ENCODE',
           'cache hit',
@@ -86,8 +86,8 @@ function record({ host, ops }: TinyInput): Frame<TinyState>[] {
       nextID++;
       const code = encodeID(nextID);
       const short = `${host}/${code}`;
-      toShort[short] = o.url;
-      toLong[o.url] = short;
+      toShort[short]! = o.url;
+      toLong[o.url]! = short;
       emit(
         'ENCODE',
         `id ${nextID}`,
@@ -96,7 +96,7 @@ function record({ host, ops }: TinyInput): Frame<TinyState>[] {
         'good',
       );
     } else {
-      const long = toShort[o.short];
+      const long = toShort[o.short]!;
       if (!long) {
         emit(
           'DECODE',

@@ -9,6 +9,10 @@ function sessionStorageSafe(): Storage | null {
   }
 }
 
+function normalizeDraftKey(draftKey: string): string {
+  return draftKey.trim();
+}
+
 /** Set before a normal reload so the next page load may restore drafts from localStorage. */
 export function markDraftSoftReloadExpected(): void {
   try {
@@ -30,8 +34,8 @@ function consumeDraftSoftReload(): boolean {
 }
 
 function isNavigationReload(): boolean {
-  if (typeof performance === 'undefined') return false;
-  const nav = performance.getEntriesByType('navigation')[0] as
+  if (typeof globalThis.performance === 'undefined') return false;
+  const nav = globalThis.performance.getEntriesByType('navigation')[0] as
     PerformanceNavigationTiming | undefined;
   return nav?.type === 'reload';
 }
@@ -56,7 +60,7 @@ function shouldRestoreDraftOnPageLoad(): boolean {
 
 /** Load a saved attempt. SPA item switches always restore; full reload respects soft vs hard refresh. */
 export function loadPersistedDraft(draftKey: string, opts?: { itemSwitch?: boolean }): string {
-  const key = draftKey.trim();
+  const key = normalizeDraftKey(draftKey);
   if (!key) return '';
   const allowRestore = opts?.itemSwitch || shouldRestoreDraftOnPageLoad();
   if (!allowRestore) {
@@ -68,7 +72,7 @@ export function loadPersistedDraft(draftKey: string, opts?: { itemSwitch?: boole
 
 /** Persist the current attempt to localStorage. Empty string removes the key. */
 export function savePersistedDraft(draftKey: string, value: string): void {
-  const key = draftKey.trim();
+  const key = normalizeDraftKey(draftKey);
   if (!key) return;
   if (value === '') {
     removeStorageValue(key);
@@ -79,6 +83,6 @@ export function savePersistedDraft(draftKey: string, value: string): void {
 
 /** Remove a saved attempt from localStorage. */
 export function clearPersistedDraft(draftKey: string): void {
-  const key = draftKey.trim();
+  const key = normalizeDraftKey(draftKey);
   if (key) removeStorageValue(key);
 }

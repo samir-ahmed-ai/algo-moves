@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ function record({ nums: input }: ZerosInput): Frame<ZerosState>[] {
   const nums = input.slice();
   let w = 0;
 
-  const { emit, frames } = createRecorder<ZerosState>(() => ({
+  const { emit, frames } = createPrepRecorder<ZerosState>(() => ({
     nums: nums.slice(),
     i: null,
     w,
@@ -48,17 +48,17 @@ function record({ nums: input }: ZerosInput): Frame<ZerosState>[] {
 
   // Pass 1: rake non-zeros to the front using the write pointer w.
   for (let i = 0; i < nums.length; i++) {
-    const v = nums[i];
+    const v = nums[i]!;
     if (v !== 0) {
       const movedInPlace = i === w;
-      nums[w] = v;
+      nums[w]! = v;
       const next = w + 1;
       emit(
         'KEEP',
-        movedInPlace ? `keep ${v}` : `nums[${w}]=${v}`,
+        movedInPlace ? `keep ${v}` : `nums[${w}]!=${v}`,
         movedInPlace
-          ? `nums[${i}] = ${v} is non-zero and w already points here (${i}=${w}), so it stays put. Advance w to ${next}.`
-          : `nums[${i}] = ${v} is non-zero, so copy it into slot w=${w}. Now nums[${w}]=${v}. Advance w to ${next}.`,
+          ? `nums[${i}]! = ${v} is non-zero and w already points here (${i}=${w}), so it stays put. Advance w to ${next}.`
+          : `nums[${i}]! = ${v} is non-zero, so copy it into slot w=${w}. Now nums[${w}]!=${v}. Advance w to ${next}.`,
         { i, w, phase: 'rake', rakedUpTo: next },
       );
       w = next;
@@ -66,7 +66,7 @@ function record({ nums: input }: ZerosInput): Frame<ZerosState>[] {
       emit(
         'SKIP',
         `skip 0 @${i}`,
-        `nums[${i}] = 0, so the read pointer skips it — w stays at ${w}. This zero's slot will be overwritten later (or back-filled at the end).`,
+        `nums[${i}]! = 0, so the read pointer skips it — w stays at ${w}. This zero's slot will be overwritten later (or back-filled at the end).`,
         { i, w, phase: 'rake', rakedUpTo: w },
       );
     }
@@ -81,11 +81,11 @@ function record({ nums: input }: ZerosInput): Frame<ZerosState>[] {
 
   // Pass 2: zero-fill the tail from w to the end.
   for (let i = w; i < nums.length; i++) {
-    nums[i] = 0;
+    nums[i]! = 0;
     emit(
       'FILL',
-      `nums[${i}]=0`,
-      `Back-fill the tail: set nums[${i}] = 0. Everything from w=${w} to the end becomes zero.`,
+      `nums[${i}]!=0`,
+      `Back-fill the tail: set nums[${i}]! = 0. Everything from w=${w} to the end becomes zero.`,
       { i, w, phase: 'fill', rakedUpTo: w },
     );
   }
@@ -114,7 +114,7 @@ function View({ frame }: PluginViewProps<ZerosState>) {
     });
 
   const tone = (idx: number) => {
-    if (s.done) return s.nums[idx] === 0 ? 'dead' : 'found';
+    if (s.done) return s.nums[idx]! === 0 ? 'dead' : 'found';
     if (s.phase === 'fill') {
       if (idx < s.w) return 'match'; // finalized non-zeros
       if (s.i !== null && idx === s.i) return 'found'; // just zeroed
@@ -122,7 +122,7 @@ function View({ frame }: PluginViewProps<ZerosState>) {
     }
     // rake phase
     if (idx < s.rakedUpTo) return 'match'; // raked non-zeros so far
-    if (s.i !== null && idx === s.i) return s.nums[idx] === 0 ? 'dead' : 'found';
+    if (s.i !== null && idx === s.i) return s.nums[idx]! === 0 ? 'dead' : 'found';
     return '';
   };
 
@@ -150,7 +150,7 @@ function Inspector({ frame }: InspectorProps<ZerosState>) {
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="i (read)" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
       <InspectorRow k="w (write)" v={s.w} />
       <InspectorRow k="non-zeros placed" v={s.rakedUpTo} />
       <InspectorRow k="array" v={`[${s.nums.join(', ')}]`} />
@@ -263,7 +263,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(log n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). if v!=0: nums[w]=v,w++; then zero-fill from w',
+    explain: 'O(n). O(1). if v!=0: nums[w]!=v,w++; then zero-fill from w',
   },
   {
     id: 'outcome',

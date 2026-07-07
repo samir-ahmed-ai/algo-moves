@@ -29,8 +29,8 @@ func jumpGame(nums []int) bool {
   it('does not emit package main as the first block', () => {
     const pieces = prepCodePieces(jumpGame);
     expect(pieces).not.toBeNull();
-    expect(pieces![0].code.trim().startsWith('package main')).toBe(false);
-    expect(pieces![0].code.trim().startsWith('func jumpGame')).toBe(true);
+    expect(pieces![0]!.code.trim().startsWith('package main')).toBe(false);
+    expect(pieces![0]!.code.trim().startsWith('func jumpGame')).toBe(true);
   });
 
   it('returns null for trivial one-liners', () => {

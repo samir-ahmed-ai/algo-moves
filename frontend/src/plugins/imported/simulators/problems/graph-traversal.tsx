@@ -74,7 +74,7 @@ function record({ adj, pos }: GTInput): Frame<GTState>[] {
       { active: v },
     );
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (color[nb] === 0) {
         color[nb] = 2;
         queue.push(nb);

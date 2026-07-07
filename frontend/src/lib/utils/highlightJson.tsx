@@ -1,7 +1,21 @@
 import type { ReactNode } from 'react';
 
-type Token = { text: string; className?: string };
+type Token = Readonly<{ text: string; className?: string }>;
 type Frame = 'object' | 'array';
+
+function isWhitespace(ch: string | undefined): boolean {
+  return ch !== undefined && /\s/.test(ch);
+}
+
+function isLiteralBoundary(ch: string | undefined): boolean {
+  return ch === undefined || !/[A-Za-z0-9_$-]/.test(ch);
+}
+
+function literalAt(src: string, i: number, literal: string): { text: string; end: number } | null {
+  if (!src.startsWith(literal, i)) return null;
+  const end = i + literal.length;
+  return isLiteralBoundary(src[end]) ? { text: literal, end } : null;
+}
 
 function readString(src: string, i: number): { text: string; end: number } {
   let j = i + 1;
@@ -21,15 +35,35 @@ function readString(src: string, i: number): { text: string; end: number } {
 
 function peekNonWs(src: string, i: number): string | undefined {
   let j = i;
-  while (j < src.length && /\s/.test(src[j])) j++;
+  while (j < src.length && isWhitespace(src[j])) j++;
   return src[j];
 }
 
 function readLiteral(src: string, i: number): { text: string; end: number } | null {
-  if (src.startsWith('false', i)) return { text: 'false', end: i + 5 };
-  if (src.startsWith('true', i)) return { text: 'true', end: i + 4 };
-  if (src.startsWith('null', i)) return { text: 'null', end: i + 4 };
-  return null;
+  return literalAt(src, i, 'false') ?? literalAt(src, i, 'true') ?? literalAt(src, i, 'null');
+}
+
+function closeFrame(stack: Frame[], ch: string): void {
+  const expected = ch === '}' ? 'object' : 'array';
+  if (stack[stack.length - 1] === expected) stack.pop();
+}
+
+function isNumberStart(src: string, i: number): boolean {
+  const ch = src[i];
+  if (ch === undefined) return false;
+  if (ch === '-') return /[0-9]/.test(src[i + 1] ?? '');
+  return /[0-9]/.test(ch);
+}
+
+function isNumberBody(ch: string | undefined): boolean {
+  return ch !== undefined && /[0-9.eE+-]/.test(ch);
+}
+
+function readNumber(src: string, i: number): { text: string; end: number } | null {
+  if (!isNumberStart(src, i)) return null;
+  let j = i + 1;
+  while (isNumberBody(src[j])) j++;
+  return { text: src.slice(i, j), end: j };
 }
 
 /** Static syntax-colored markup for pretty-printed JSON. */
@@ -46,9 +80,9 @@ export function highlightJson(json: string): ReactNode {
 
   while (i < source.length) {
     const ch = source[i];
-    if (/\s/.test(ch)) {
+    if (isWhitespace(ch)) {
       let j = i + 1;
-      while (j < source.length && /\s/.test(source[j])) j++;
+      while (j < source.length && isWhitespace(source[j])) j++;
       tokens.push({ text: source.slice(i, j) });
       i = j;
       continue;
@@ -70,11 +104,10 @@ export function highlightJson(json: string): ReactNode {
       continue;
     }
 
-    if (/[-0-9]/.test(ch)) {
-      let j = i + 1;
-      while (j < source.length && /[0-9.eE+-]/.test(source[j])) j++;
-      tokens.push({ text: source.slice(i, j), className: 'hl-json-num' });
-      i = j;
+    const num = readNumber(source, i);
+    if (num) {
+      tokens.push({ text: num.text, className: 'hl-json-num' });
+      i = num.end;
       continue;
     }
 
@@ -82,13 +115,35 @@ export function highlightJson(json: string): ReactNode {
       tokens.push({ text: ch, className: 'hl-json-punct' });
       if (ch === '{') stack.push('object');
       else if (ch === '[') stack.push('array');
-      else if (ch === '}' || ch === ']') stack.pop();
+      else if (ch === '}' || ch === ']') closeFrame(stack, ch);
       i++;
       continue;
     }
 
-    tokens.push({ text: ch });
-    i++;
+    let j = i + 1;
+    while (j < source.length) {
+      const lit = readLiteral(source, j);
+      if (lit) break;
+      const num = readNumber(source, j);
+      if (num) break;
+      const next = source[j];
+      if (
+        next === '"' ||
+        next === '{' ||
+        next === '[' ||
+        next === '}' ||
+        next === ']' ||
+        next === ',' ||
+        next === ':' ||
+        isWhitespace(next)
+      ) {
+        break;
+      }
+      j++;
+    }
+    tokens.push({ text: source.slice(i, j) });
+    i = j;
+    continue;
   }
 
   return tokens.map((t, idx) => (

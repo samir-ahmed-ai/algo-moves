@@ -89,14 +89,14 @@ function record({ s }: DecodeInput): Frame<DecodeState>[] {
 
     // Single-digit transition: s[i-1] forms a valid 1..9 letter on its own.
     if (cur !== '0') {
-      ways += dp[i - 1];
+      ways += dp[i - 1]!;
       parts.push(`take '${cur}' alone → dp[${i - 1}] (=${dp[i - 1]})`);
     }
 
     // Two-digit transition: s[i-2..i-1] forms 10..26.
     const two = Number(prevCh) * 10 + Number(cur);
     if (two >= 10 && two <= 26) {
-      ways += dp[i - 2];
+      ways += dp[i - 2]!;
       parts.push(`pair "${prevCh}${cur}" (=${two}) → dp[${i - 2}] (=${dp[i - 2]})`);
     }
 
@@ -192,6 +192,6 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = (frames[frames.length - 1]?.state as DecodeState) ?? null;
     const v = s ? s.dp[s.s.length] : 0;
-    return v > 0 ? { ok: true, label: `${v} ways` } : { ok: false, label: '0 ways' };
+    return v! > 0 ? { ok: true, label: `${v} ways` } : { ok: false, label: '0 ways' };
   },
 };

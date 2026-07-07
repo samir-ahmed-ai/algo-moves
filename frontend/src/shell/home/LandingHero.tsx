@@ -1,4 +1,5 @@
-import { type ComponentType, type CSSProperties } from 'react';
+import { type CSSProperties } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import {
   ArrowRight,
   BookMarked,
@@ -130,7 +131,7 @@ function HeroReplayPanel({ count, firstTitle }: { count: number; firstTitle: str
 
 interface ModeCard {
   id: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   title: string;
   desc: string;
   c1: string;

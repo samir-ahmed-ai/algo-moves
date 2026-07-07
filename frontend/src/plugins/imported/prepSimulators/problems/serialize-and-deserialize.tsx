@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -34,7 +34,7 @@ interface SerdeState {
 const NIL = -1;
 
 function record({ tree }: SerdeInput): Frame<SerdeState>[] {
-  const { emit, frames } = createRecorder<SerdeState>(() => ({
+  const { emit, frames } = createPrepRecorder<SerdeState>(() => ({
     tree,
     phase: 'serialize',
     parts: [],
@@ -57,7 +57,7 @@ function record({ tree }: SerdeInput): Frame<SerdeState>[] {
   const parts: string[] = [];
   const visited: number[] = [];
   // queue holds level-order indices; NIL represents a nil child dequeued as "#".
-  let queue: number[] = tree.length > 0 && tree[0] != null ? [0] : [];
+  let queue: number[] = tree.length > 0 && tree[0]! != null ? [0] : [];
 
   if (queue.length === 0) {
     emit(
@@ -78,10 +78,10 @@ function record({ tree }: SerdeInput): Frame<SerdeState>[] {
   );
 
   while (queue.length > 0) {
-    const idx = queue[0];
+    const idx = queue[0]!;
     queue = queue.slice(1);
 
-    if (idx === NIL || tree[idx] == null) {
+    if (idx === NIL || tree[idx!]! == null) {
       parts.push('#');
       emit(
         'NIL',
@@ -92,13 +92,13 @@ function record({ tree }: SerdeInput): Frame<SerdeState>[] {
       continue;
     }
 
-    const val = tree[idx] as number;
+    const val = tree[idx!]! as number;
     parts.push(String(val));
-    visited.push(idx);
-    const left = 2 * idx + 1;
-    const right = 2 * idx + 2;
-    const leftIdx = left < tree.length && tree[left] != null ? left : NIL;
-    const rightIdx = right < tree.length && tree[right] != null ? right : NIL;
+    visited.push(idx!);
+    const left = 2 * idx! + 1;
+    const right = 2 * idx! + 2;
+    const leftIdx = left < tree.length && tree[left]! != null ? left : NIL;
+    const rightIdx = right < tree.length && tree[right]! != null ? right : NIL;
     queue = [...queue, leftIdx, rightIdx];
     emit(
       'VISIT',
@@ -125,11 +125,11 @@ function record({ tree }: SerdeInput): Frame<SerdeState>[] {
 
   // Recursive preorder build writing into a level-order `built` array at slot `slot`.
   const build = (slot: number): void => {
-    if (cursor >= vals.length || vals[cursor] === '#') {
+    if (cursor >= vals.length || vals[cursor]! === '#') {
       emit(
         'READ-NIL',
         `tok "#"`,
-        `Read token "${vals[cursor] ?? '∅'}" at position ${cursor}: it is a nil, so this slot stays empty and we return.`,
+        `Read token "${vals[cursor]! ?? '∅'}" at position ${cursor}: it is a nil, so this slot stays empty and we return.`,
         {
           phase: 'deserialize',
           parts: parts.slice(),
@@ -142,15 +142,15 @@ function record({ tree }: SerdeInput): Frame<SerdeState>[] {
       cursor++;
       return;
     }
-    const v = Number(vals[cursor]);
+    const v = Number(vals[cursor]!);
     // grow `built` to fit slot
     while (built.length <= slot) built.push(null);
-    built[slot] = v;
+    built[slot]! = v;
     builtVisited.push(slot);
     emit(
       'BUILD',
       `node ${v}`,
-      `Read token "${vals[cursor]}" at position ${cursor}: create node ${v}, then recurse to build its left subtree, then its right subtree (preorder).`,
+      `Read token "${vals[cursor]!}" at position ${cursor}: create node ${v}, then recurse to build its left subtree, then its right subtree (preorder).`,
       {
         phase: 'deserialize',
         parts: parts.slice(),
@@ -241,21 +241,21 @@ export const title = 'Serialize and deserialize';
 
 // Re-run the Go pipeline standalone to compute the true verdict answer.
 function serializeBFS(tree: (number | null)[]): string {
-  if (tree.length === 0 || tree[0] == null) return '';
+  if (tree.length === 0 || tree[0]! == null) return '';
   const parts: string[] = [];
   let queue: number[] = [0];
   while (queue.length > 0) {
-    const idx = queue[0];
+    const idx = queue[0]!;
     queue = queue.slice(1);
-    if (idx === NIL || tree[idx] == null) {
+    if (idx === NIL || tree[idx!]! == null) {
       parts.push('#');
       continue;
     }
-    parts.push(String(tree[idx] as number));
-    const left = 2 * idx + 1;
-    const right = 2 * idx + 2;
-    queue.push(left < tree.length && tree[left] != null ? left : NIL);
-    queue.push(right < tree.length && tree[right] != null ? right : NIL);
+    parts.push(String(tree[idx!]! as number));
+    const left = 2 * idx! + 1;
+    const right = 2 * idx! + 2;
+    queue.push(left < tree.length && tree[left]! != null ? left : NIL);
+    queue.push(right < tree.length && tree[right]! != null ? right : NIL);
   }
   return parts.join(',');
 }

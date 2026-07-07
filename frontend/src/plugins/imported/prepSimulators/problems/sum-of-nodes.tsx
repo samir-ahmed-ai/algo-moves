@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ function record({ tree }: SumOfNodesInput): Frame<SumOfNodesState>[] {
   const visited: number[] = [];
   let total = 0;
 
-  const { emit, frames } = createRecorder<SumOfNodesState>(() => ({
+  const { emit, frames } = createPrepRecorder<SumOfNodesState>(() => ({
     tree,
     current: null,
     visited: visited.slice(),
@@ -42,12 +42,12 @@ function record({ tree }: SumOfNodesInput): Frame<SumOfNodesState>[] {
     'INIT',
     'start DFS',
     `Sum of Nodes: total the value of every node. DFS the tree so each node returns node.val + sum(left) + sum(right); a missing (nil) child contributes 0. Start at the root.`,
-    { current: tree.length > 0 && tree[0] != null ? 0 : null },
+    { current: tree.length > 0 && tree[0]! != null ? 0 : null },
   );
 
   // Faithful re-implementation of the Go sumOfNodes(root) -> int.
   const dfs = (i: number): number => {
-    if (i >= tree.length || tree[i] == null) {
+    if (i >= tree.length || tree[i]! == null) {
       emit(
         'NIL',
         'nil -> 0',
@@ -56,7 +56,7 @@ function record({ tree }: SumOfNodesInput): Frame<SumOfNodesState>[] {
       );
       return 0;
     }
-    const val = tree[i] as number;
+    const val = tree[i]! as number;
 
     emit(
       'VISIT',
@@ -115,7 +115,7 @@ function View({ frame }: PluginViewProps<SumOfNodesState>) {
     if (s.visited.includes(i)) return 'team-2';
     return 'team-0';
   };
-  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -134,7 +134,7 @@ function View({ frame }: PluginViewProps<SumOfNodesState>) {
 function Inspector({ frame }: InspectorProps<SumOfNodesState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current !== null ? s.tree[s.current] : null;
+  const curVal = s.current !== null ? s.tree[s.current]! : null;
   const nodeCount = s.tree.filter((v) => v != null).length;
   return (
     <VarGrid>

@@ -1,5 +1,11 @@
 import { useContext } from 'react';
-import type { CodeStudioContextValue } from './codeStudioContextStore';
+import type {
+  CodeStudioContentContextValue,
+  CodeStudioContextValue,
+  CodeStudioDraftContextValue,
+  CodeStudioEditorContextValue,
+  CodeStudioPhaseContextValue,
+} from './codeStudioContextStore';
 import {
   CodeStudioContentContext,
   CodeStudioDraftContext,
@@ -9,25 +15,25 @@ import {
 
 const MISSING = 'CodeStudio components must be used within CodeStudioProvider';
 
-export function useCodeStudioContent() {
+export function useCodeStudioContent(): CodeStudioContentContextValue {
   const ctx = useContext(CodeStudioContentContext);
   if (!ctx) throw new Error(MISSING);
   return ctx;
 }
 
-export function useCodeStudioPhase() {
+export function useCodeStudioPhase(): CodeStudioPhaseContextValue {
   const ctx = useContext(CodeStudioPhaseContext);
   if (!ctx) throw new Error(MISSING);
   return ctx;
 }
 
-export function useCodeStudioDraft() {
+export function useCodeStudioDraft(): CodeStudioDraftContextValue {
   const ctx = useContext(CodeStudioDraftContext);
   if (!ctx) throw new Error(MISSING);
   return ctx;
 }
 
-export function useCodeStudioEditor() {
+export function useCodeStudioEditor(): CodeStudioEditorContextValue {
   const ctx = useContext(CodeStudioEditorContext);
   if (!ctx) throw new Error(MISSING);
   return ctx;

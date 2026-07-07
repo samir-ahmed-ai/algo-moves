@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -27,7 +27,7 @@ interface TrapState {
   l: number; // left pointer
   r: number; // right pointer
   w: number | null; // current width r - l
-  h: number | null; // current min(height[l], height[r])
+  h: number | null; // current min(height[l]!, height[r]!)
   area: number | null; // current candidate area w * h
   best: number; // best area so far
   bestPair: [number, number] | null; // [l, r] that produced best
@@ -42,7 +42,7 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
   let l = 0;
   let r = height.length - 1;
 
-  const { emit, frames } = createRecorder<TrapState>(() => ({
+  const { emit, frames } = createPrepRecorder<TrapState>(() => ({
     height,
     l: 0,
     r: height.length - 1,
@@ -50,7 +50,7 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
     h: null,
     area: null,
     best,
-    bestPair: bestPair ? [bestPair[0], bestPair[1]] : null,
+    bestPair: bestPair ? [bestPair[0]!, bestPair[1]!] : null,
     improved: false,
     moved: null,
     done: false,
@@ -59,13 +59,13 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
   emit(
     'INIT',
     `n=${height.length}`,
-    `Container With Most Water: treat each value as a vertical line. The water a pair (l, r) holds is width (r − l) times the shorter line min(height[l], height[r]). Start with the widest pair and walk the two pointers inward.`,
+    `Container With Most Water: treat each value as a vertical line. The water a pair (l, r) holds is width (r − l) times the shorter line min(height[l]!, height[r]!). Start with the widest pair and walk the two pointers inward.`,
     { l, r },
   );
 
   while (l < r) {
     const w = r - l;
-    const h = Math.min(height[l], height[r]);
+    const h = Math.min(height[l]!, height[r]!);
     const area = w * h;
     const improved = area > best;
     if (improved) {
@@ -75,16 +75,25 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
     emit(
       'MEASURE',
       `area=${area}`,
-      `Lines at l=${l} (${height[l]}) and r=${r} (${height[r]}): width = ${r} − ${l} = ${w}, height is the shorter line min(${height[l]}, ${height[r]}) = ${h}, so area = ${w} × ${h} = ${area}.${improved ? ` That beats the previous best (${best === area ? area : best}) — new best = ${area}.` : ` Best stays ${best}.`}`,
-      { l, r, w, h, area, best, bestPair: bestPair ? [bestPair[0], bestPair[1]] : null, improved },
+      `Lines at l=${l} (${height[l]!}) and r=${r} (${height[r]!}): width = ${r} − ${l} = ${w}, height is the shorter line min(${height[l]!}, ${height[r]!}) = ${h}, so area = ${w} × ${h} = ${area}.${improved ? ` That beats the previous best (${best === area ? area : best}) — new best = ${area}.` : ` Best stays ${best}.`}`,
+      {
+        l,
+        r,
+        w,
+        h,
+        area,
+        best,
+        bestPair: bestPair ? [bestPair[0]!, bestPair[1]!] : null,
+        improved,
+      },
       improved ? 'good' : undefined,
     );
 
-    if (height[l] < height[r]) {
+    if (height[l]! < height[r]!) {
       emit(
         'MOVE',
         `l→${l + 1}`,
-        `The left line (${height[l]}) is shorter than the right (${height[r]}). The shorter line caps the area, so moving it is the only way to possibly gain — advance l to ${l + 1}.`,
+        `The left line (${height[l]!}) is shorter than the right (${height[r]!}). The shorter line caps the area, so moving it is the only way to possibly gain — advance l to ${l + 1}.`,
         { l, r, w, h, area, moved: 'l' },
       );
       l++;
@@ -92,7 +101,7 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
       emit(
         'MOVE',
         `r→${r - 1}`,
-        `The right line (${height[r]}) is at most the left (${height[l]}), so it caps the area. Move the shorter (right) pointer inward — advance r to ${r - 1}.`,
+        `The right line (${height[r]!}) is at most the left (${height[l]!}), so it caps the area. Move the shorter (right) pointer inward — advance r to ${r - 1}.`,
         { l, r, w, h, area, moved: 'r' },
       );
       r--;
@@ -102,8 +111,8 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
   emit(
     'DONE',
     `best=${best}`,
-    `The pointers met, so every meaningfully-wide pair has been considered. The most water any container holds is ${best}${bestPair ? `, from lines at indices ${bestPair[0]} and ${bestPair[1]}` : ''}.`,
-    { l, r, best, bestPair: bestPair ? [bestPair[0], bestPair[1]] : null, done: true },
+    `The pointers met, so every meaningfully-wide pair has been considered. The most water any container holds is ${best}${bestPair ? `, from lines at indices ${bestPair[0]!} and ${bestPair[1]!}` : ''}.`,
+    { l, r, best, bestPair: bestPair ? [bestPair[0]!, bestPair[1]!] : null, done: true },
     'good',
   );
 
@@ -119,7 +128,7 @@ function View({ frame }: PluginViewProps<TrapState>) {
     pointers.push({ i: s.r, label: 'r', tone: 'accent', place: 'above' });
   const inWindow = !s.done && s.l < s.r;
   const tone = (i: number) => {
-    if (s.bestPair && (i === s.bestPair[0] || i === s.bestPair[1])) return 'found';
+    if (s.bestPair && (i === s.bestPair[0]! || i === s.bestPair[1]!)) return 'found';
     if (!s.done && (i === s.l || i === s.r)) return 'match';
     return '';
   };
@@ -139,7 +148,7 @@ function View({ frame }: PluginViewProps<TrapState>) {
         value={
           s.best === 0
             ? '—'
-            : `${s.best}${s.bestPair ? ` @ [${s.bestPair[0]},${s.bestPair[1]}]` : ''}`
+            : `${s.best}${s.bestPair ? ` @ [${s.bestPair[0]!},${s.bestPair[1]!}]` : ''}`
         }
         tone={s.done ? 'good' : 'accent'}
       />
@@ -165,8 +174,8 @@ function Inspector({ frame }: InspectorProps<TrapState>) {
     <VarGrid>
       <InspectorRow k="l" v={s.done ? '—' : s.l} />
       <InspectorRow k="r" v={s.done ? '—' : s.r} />
-      <InspectorRow k="height[l]" v={!s.done && inBounds(s.l) ? s.height[s.l] : '—'} />
-      <InspectorRow k="height[r]" v={!s.done && inBounds(s.r) ? s.height[s.r] : '—'} />
+      <InspectorRow k="height[l]!" v={!s.done && inBounds(s.l) ? s.height[s.l]! : '—'} />
+      <InspectorRow k="height[r]!" v={!s.done && inBounds(s.r) ? s.height[s.r]! : '—'} />
       <InspectorRow k="width (r−l)" v={s.w ?? '—'} />
       <InspectorRow k="height (min)" v={s.h ?? '—'} />
       <InspectorRow k="area (w×h)" v={s.area ?? '—'} />
@@ -219,7 +228,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Container With Most Water: treat each value as a vertical line. The water a pair (l, r) holds is width (r − l) times the shorter line min(height[l], height[r]). Start with the widest pair and walk the two pointers inward.',
+      'Container With Most Water: treat each value as a vertical line. The water a pair (l, r) holds is width (r − l) times the shorter line min(height[l]!, height[r]!). Start with the widest pair and walk the two pointers inward.',
   },
   {
     id: 'key-step',
@@ -280,7 +289,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(1). area=(r-l)*min(h[l],h[r]); move shorter side',
+    explain: 'O(n). O(1). area=(r-l)*min(h[l]!,h[r]!); move shorter side',
   },
   {
     id: 'outcome',

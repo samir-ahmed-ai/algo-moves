@@ -53,9 +53,9 @@ function record({ beginWord, endWord, wordList }: WLInput): Frame<WLState>[] {
   const adj: number[][] = Array.from({ length: n }, () => []);
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      if (oneOff(labels[i], labels[j])) {
-        adj[i].push(j);
-        adj[j].push(i);
+      if (oneOff(labels[i]!, labels[j]!)) {
+        adj[i]!.push(j);
+        adj[j]!.push(i);
       }
     }
   }
@@ -107,7 +107,7 @@ function record({ beginWord, endWord, wordList }: WLInput): Frame<WLState>[] {
     );
 
     if (v === target) {
-      answer = dist[v];
+      answer! = dist[v]!;
       emit(
         'FOUND',
         `reached "${endWord}"`,
@@ -119,10 +119,10 @@ function record({ beginWord, endWord, wordList }: WLInput): Frame<WLState>[] {
       break;
     }
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (color[nb] === 0) {
         color[nb] = 2;
-        dist[nb] = dist[v] + 1;
+        dist[nb] = dist[v]! + 1;
         queue.push(nb);
         emit(
           'ENQUEUE',
@@ -166,7 +166,7 @@ function View({ frame }: PluginViewProps<WLState>) {
       </RailGroup>
       <RailStack
         label="queue"
-        items={s.queue.map((n) => s.labels[n])}
+        items={s.queue.map((n) => s.labels[n] ?? '')}
         topLabel="front"
         highlightEnd="bottom"
       />
@@ -181,7 +181,7 @@ function View({ frame }: PluginViewProps<WLState>) {
         adj={s.adj}
         pos={s.pos}
         nodeClass={(node) => `team-${s.color[node]}`}
-        label={(n) => s.labels[n]}
+        label={(n) => s.labels[n]!}
         activeNode={s.active}
         height={260}
       />

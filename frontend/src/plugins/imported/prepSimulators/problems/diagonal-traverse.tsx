@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -35,7 +35,7 @@ interface DiagonalState {
 
 function record({ mat }: DiagonalInput): Frame<DiagonalState>[] {
   const m = mat.length;
-  const n = mat[0].length;
+  const n = mat[0]!.length;
   const res: number[] = [];
   const visited: boolean[][] = mat.map((row) => row.map(() => false));
 
@@ -46,7 +46,7 @@ function record({ mat }: DiagonalInput): Frame<DiagonalState>[] {
   const cloneVisited = () => visited.map((row) => row.slice());
   const dirName = (d: 1 | -1) => (d === 1 ? 'up-right ↗' : 'down-left ↙');
 
-  const { emit, frames } = createRecorder<DiagonalState>(() => ({
+  const { emit, frames } = createPrepRecorder<DiagonalState>(() => ({
     mat: mat,
     r: r,
     c: c,
@@ -65,12 +65,12 @@ function record({ mat }: DiagonalInput): Frame<DiagonalState>[] {
 
   for (let i = 0; i < m * n; i++) {
     // Append current cell.
-    res.push(mat[r][c]);
-    visited[r][c] = true;
+    res.push(mat[r]![c]!);
+    visited[r]![c] = true;
     emit(
       'VISIT',
-      `take ${mat[r][c]}`,
-      `Read mat[${r}][${c}] = ${mat[r][c]} and append it to the output (now length ${res.length}). Current direction is ${dirName(dir)}.`,
+      `take ${mat[r]![c]}`,
+      `Read mat[${r}]![${c}] = ${mat[r]![c]} and append it to the output (now length ${res.length}). Current direction is ${dirName(dir)}.`,
       {},
     );
 
@@ -188,7 +188,7 @@ function Inspector({ frame }: InspectorProps<DiagonalState>) {
     <VarGrid>
       <InspectorRow k="r,c" v={`(${s.r}, ${s.c})`} />
       <InspectorRow k="dir" v={s.dir === 1 ? 'up-right ↗' : 'down-left ↙'} />
-      <InspectorRow k="mat[r][c]" v={s.mat[s.r]?.[s.c] ?? '—'} />
+      <InspectorRow k="mat[r]![c]" v={s.mat[s.r]?.[s.c] ?? '—'} />
       <InspectorRow k="collected" v={s.res.length} />
       <InspectorRow k="result" v={s.done ? `[${s.res.join(', ')}]` : '…'} />
     </VarGrid>

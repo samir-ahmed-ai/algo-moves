@@ -30,8 +30,8 @@ export async function bootstrapHostInterviewSession(
   writeShareToUrl({ ...share, room: roomCode, sessionKind: 'interview' });
   return {
     sessionMeta: interviewSession(problemId, DEFAULT_INTERVIEW_SETTINGS, {
-      sessionId: created?.id,
-      guestToken: created?.guestToken,
+      ...(created?.id !== undefined ? { sessionId: created.id } : {}),
+      ...(created?.guestToken !== undefined ? { guestToken: created.guestToken } : {}),
     }),
     backendDegraded: !created?.id,
   };
@@ -41,7 +41,6 @@ export function buildResumeInterviewSession(row: InterviewSummary): SessionMeta 
   const runtime: InterviewRuntime = { ...defaultInterviewRuntime(), locked: row.canvasLocked };
   return interviewSession('', DEFAULT_INTERVIEW_SETTINGS, {
     sessionId: row.id,
-    guestToken: undefined,
     runtime,
   });
 }
@@ -53,5 +52,7 @@ export function persistInterviewHostRoom(roomCode: string): void {
 }
 
 export function buildJoinInterviewSession(problemId: string, guestToken?: string): SessionMeta {
-  return interviewSession(problemId, DEFAULT_INTERVIEW_SETTINGS, { guestToken });
+  return interviewSession(problemId, DEFAULT_INTERVIEW_SETTINGS, {
+    ...(guestToken !== undefined ? { guestToken } : {}),
+  });
 }

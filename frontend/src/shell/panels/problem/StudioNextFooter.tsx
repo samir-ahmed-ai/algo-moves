@@ -13,11 +13,11 @@ export function StudioNextFooter({
   className,
 }: {
   arcRail?: ReactNode;
-  nextLabel?: string;
-  onNext?: () => void;
-  nextAllLabel?: string;
-  onNextAll?: () => void;
-  className?: string;
+  nextLabel?: string | undefined;
+  onNext?: (() => void) | undefined;
+  nextAllLabel?: string | undefined;
+  onNextAll?: (() => void) | undefined;
+  className?: string | undefined;
 }) {
   const hasNext = !!(nextLabel && onNext);
   const hasNextAll = !!(nextAllLabel && onNextAll);

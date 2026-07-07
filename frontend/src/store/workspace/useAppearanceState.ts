@@ -10,12 +10,13 @@ import {
   type Tweaks,
   type WorkspaceDefaults,
 } from './workspace';
+import type { WorkspaceAppearanceCtx } from './workspaceContextTypes';
 
 /** Theme, palette, density and display tweaks, plus the document-element sync effects. */
 export function useAppearanceState(
   shared: ShareState | null,
   savedDefaults: Partial<WorkspaceDefaults>,
-) {
+): WorkspaceAppearanceCtx {
   const [theme, setTheme] = useState<Theme>(shared?.theme === 'light' ? 'light' : 'dark');
   const [density, setDensity] = useState<Density>(normalizeDensity(savedDefaults.density));
   const [palette, setPalette] = useState<Palette>(shared?.palette === 'cb' ? 'cb' : 'default');

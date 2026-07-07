@@ -67,8 +67,11 @@ export function maxHeapPush(heap: number[], v: number): number[] {
   let i = h.length - 1;
   while (i > 0) {
     const p = Math.floor((i - 1) / 2);
-    if (h[p] >= h[i]) break;
-    [h[p], h[i]] = [h[i], h[p]];
+    const parent = h[p];
+    const child = h[i];
+    if (parent === undefined || child === undefined || parent >= child) break;
+    h[p] = child;
+    h[i] = parent;
     i = p;
   }
   return h;
@@ -77,7 +80,7 @@ export function maxHeapPush(heap: number[], v: number): number[] {
 /** Max-heap pop root. Returns [newHeap, popped]. */
 export function maxHeapPop(heap: number[]): [number[], number] {
   if (heap.length === 0) return [[], 0];
-  const top = heap[0];
+  const top = heap[0]!;
   if (heap.length === 1) return [[], top];
   const h = [...heap];
   const last = h.pop()!;
@@ -87,10 +90,17 @@ export function maxHeapPop(heap: number[]): [number[], number] {
     const l = 2 * i + 1;
     const r = 2 * i + 2;
     let largest = i;
-    if (l < h.length && h[l] > h[largest]) largest = l;
-    if (r < h.length && h[r] > h[largest]) largest = r;
+    const left = h[l];
+    const right = h[r];
+    const largestVal = h[largest];
+    if (left !== undefined && largestVal !== undefined && left > largestVal) largest = l;
+    if (right !== undefined && h[largest] !== undefined && right > h[largest]!) largest = r;
     if (largest === i) break;
-    [h[i], h[largest]] = [h[largest], h[i]];
+    const current = h[i];
+    const swapVal = h[largest];
+    if (current === undefined || swapVal === undefined) break;
+    h[i] = swapVal;
+    h[largest] = current;
     i = largest;
   }
   return [h, top];
@@ -102,8 +112,11 @@ export function minHeapPushGeneric<T>(heap: T[], item: T, compare: (a: T, b: T) 
   let i = h.length - 1;
   while (i > 0) {
     const p = Math.floor((i - 1) / 2);
-    if (compare(h[p], h[i]) <= 0) break;
-    [h[p], h[i]] = [h[i], h[p]];
+    const parent = h[p];
+    const child = h[i];
+    if (parent === undefined || child === undefined || compare(parent, child) <= 0) break;
+    h[p] = child;
+    h[i] = parent;
     i = p;
   }
   return h;
@@ -111,7 +124,7 @@ export function minHeapPushGeneric<T>(heap: T[], item: T, compare: (a: T, b: T) 
 
 /** Min-heap pop root for comparable items. Caller must ensure heap is non-empty. */
 export function minHeapPopGeneric<T>(heap: T[], compare: (a: T, b: T) => number): [T[], T] {
-  const top = heap[0];
+  const top = heap[0]!;
   if (heap.length === 1) return [[], top];
   const h = [...heap];
   const last = h.pop()!;
@@ -121,10 +134,19 @@ export function minHeapPopGeneric<T>(heap: T[], compare: (a: T, b: T) => number)
     const l = 2 * i + 1;
     const r = 2 * i + 2;
     let smallest = i;
-    if (l < h.length && compare(h[l], h[smallest]) < 0) smallest = l;
-    if (r < h.length && compare(h[r], h[smallest]) < 0) smallest = r;
+    const left = h[l];
+    const right = h[r];
+    const smallestVal = h[smallest];
+    if (left !== undefined && smallestVal !== undefined && compare(left, smallestVal) < 0)
+      smallest = l;
+    if (right !== undefined && h[smallest] !== undefined && compare(right, h[smallest]!) < 0)
+      smallest = r;
     if (smallest === i) break;
-    [h[i], h[smallest]] = [h[smallest], h[i]];
+    const current = h[i];
+    const swapVal = h[smallest];
+    if (current === undefined || swapVal === undefined) break;
+    h[i] = swapVal;
+    h[smallest] = current;
     i = smallest;
   }
   return [h, top];
@@ -145,6 +167,8 @@ export function minHeapPop(heap: number[]): [number[], number] {
 
 export function medianFromHeaps(low: number[], high: number[]): number {
   if (low.length === 0 && high.length === 0) return 0;
-  if (low.length > high.length) return low[0];
-  return (low[0] + high[0]) / 2;
+  if (low.length > high.length) return low[0]!;
+  if (low.length === 0) return high[0]!;
+  if (high.length === 0) return low[0]!;
+  return (low[0]! + high[0]!) / 2;
 }

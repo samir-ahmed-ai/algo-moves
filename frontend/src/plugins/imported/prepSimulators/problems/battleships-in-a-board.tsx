@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -32,12 +32,12 @@ function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {
   const rows = board.length;
   const cols = board[0]?.length ?? 0;
 
-  const { emit, frames } = createRecorder<BattleshipsState>(() => ({
+  const { emit, frames } = createPrepRecorder<BattleshipsState>(() => ({
     board,
     i: null,
     j: null,
     count,
-    counted: counted.map((c): [number, number] => [c[0], c[1]]),
+    counted: counted.map((c): [number, number] => [c[0]!, c[1]!]),
     isShip: false,
     isCorner: false,
     done: false,
@@ -52,7 +52,7 @@ function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {
 
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      const ship = board[i][j] === 'X';
+      const ship = board[i]![j] === 'X';
       if (!ship) {
         emit(
           'WATER',
@@ -62,8 +62,8 @@ function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {
         );
         continue;
       }
-      const up = i === 0 || board[i - 1][j] !== 'X';
-      const left = j === 0 || board[i][j - 1] !== 'X';
+      const up = i === 0 || board[i - 1]![j] !== 'X';
+      const left = j === 0 || board[i]![j - 1] !== 'X';
       if (up && left) {
         count++;
         counted.push([i, j]);
@@ -105,7 +105,7 @@ function View({ frame }: PluginViewProps<BattleshipsState>) {
   const active: [number, number] | null = s.i !== null && s.j !== null ? [s.i, s.j] : null;
   const cellTone = (r: number, c: number) => {
     if (isCounted(r, c)) return 'path'; // top-left corners that were counted
-    if (s.board[r][c] === 'X') return 'land'; // ship body (not a corner)
+    if (s.board[r]![c] === 'X') return 'land'; // ship body (not a corner)
     return 'water';
   };
   return (
@@ -116,7 +116,7 @@ function View({ frame }: PluginViewProps<BattleshipsState>) {
           <>
             {' · '}at (
             <span className="font-mono text-ink">
-              {active[0]}, {active[1]}
+              {active[0]!}, {active[1]!}
             </span>
             )
           </>
@@ -140,7 +140,7 @@ function View({ frame }: PluginViewProps<BattleshipsState>) {
 function Inspector({ frame }: InspectorProps<BattleshipsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = s.i !== null && s.j !== null ? s.board[s.i][s.j] : null;
+  const cell = s.i !== null && s.j !== null ? s.board[s.i]![s.j] : null;
   return (
     <VarGrid>
       <InspectorRow k="cell (i,j)" v={s.i !== null && s.j !== null ? `(${s.i}, ${s.j})` : '—'} />

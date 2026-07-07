@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, type PointerEvent, type RefObject } from 'react';
 import type { CodePiece } from '@/lib/code';
 
 const DRAG_THRESHOLD = 8;
@@ -21,7 +21,7 @@ export function useTrayPointerDrag({
   setDragOver,
 }: {
   variant: 'default' | 'mobile';
-  assembledRef: React.RefObject<HTMLDivElement | null>;
+  assembledRef: RefObject<HTMLDivElement | null>;
   onPlace: (piece: CodePiece, index: number) => void;
   setDragOver: (over: boolean) => void;
 }) {
@@ -51,7 +51,7 @@ export function useTrayPointerDrag({
   }, []);
 
   const onTrayPointerMove = useCallback(
-    (e: React.PointerEvent) => {
+    (e: PointerEvent) => {
       const drag = pointerDragRef.current;
       if (!drag || e.pointerId !== drag.pointerId) return;
 
@@ -85,7 +85,7 @@ export function useTrayPointerDrag({
   );
 
   const finishTrayPointer = useCallback(
-    (e: React.PointerEvent, piece: CodePiece, index: number) => {
+    (e: PointerEvent, piece: CodePiece, index: number) => {
       const drag = pointerDragRef.current;
       if (!drag || e.pointerId !== drag.pointerId) return;
 
@@ -109,7 +109,7 @@ export function useTrayPointerDrag({
   );
 
   const onTrayPointerDown = useCallback(
-    (e: React.PointerEvent, piece: CodePiece, index: number) => {
+    (e: PointerEvent, piece: CodePiece, index: number) => {
       if (variant !== 'mobile' || e.button !== 0) return;
       const target = e.currentTarget as HTMLElement;
       pointerDragRef.current = {

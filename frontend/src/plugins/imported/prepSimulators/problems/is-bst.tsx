@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,7 +33,7 @@ function record({ tree }: IsBstInput): Frame<IsBstState>[] {
   const visited: number[] = [];
   let failed: number | null = null;
 
-  const { emit, frames } = createRecorder<IsBstState>(() => ({
+  const { emit, frames } = createPrepRecorder<IsBstState>(() => ({
     tree,
     cur: null,
     lo: INF,
@@ -57,8 +57,8 @@ function record({ tree }: IsBstInput): Frame<IsBstState>[] {
   // passes *TreeNode bounds, an empty slot never contributes a bound, matching
   // our level-order layout where null children are simply skipped.
   const valid = (i: number, lo: number | null, hi: number | null): boolean => {
-    if (i >= tree.length || tree[i] === null) return true;
-    const val = tree[i] as number;
+    if (i >= tree.length || tree[i]! === null) return true;
+    const val = tree[i]! as number;
 
     emit(
       'VISIT',
@@ -137,9 +137,9 @@ function View({ frame }: PluginViewProps<IsBstState>) {
         <span className="font-mono text-ink">
           ({bound(s.lo)}, {bound(s.hi)})
         </span>
-        {s.cur !== null && s.tree[s.cur] !== null && !s.done && (
+        {s.cur !== null && s.tree[s.cur]! !== null && !s.done && (
           <>
-            {' · '}node = <span className="font-mono text-ink">{s.tree[s.cur]}</span>
+            {' · '}node = <span className="font-mono text-ink">{s.tree[s.cur]!}</span>
           </>
         )}
       </div>
@@ -156,7 +156,7 @@ function View({ frame }: PluginViewProps<IsBstState>) {
 function Inspector({ frame }: InspectorProps<IsBstState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.cur !== null ? s.tree[s.cur] : null;
+  const curVal = s.cur !== null ? s.tree[s.cur]! : null;
   return (
     <VarGrid>
       <InspectorRow k="node" v={curVal ?? '—'} />

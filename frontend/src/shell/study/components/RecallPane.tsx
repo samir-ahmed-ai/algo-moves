@@ -51,7 +51,7 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
     >
       <RecallToolbar
         className="border-b border-edge px-2"
-        showTitle={showTitle}
+        {...(showTitle !== undefined ? { showTitle } : {})}
         blind={blind}
         setBlind={setBlind}
         peek={peek}
@@ -67,12 +67,12 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
         draftViewRef={draftViewRef}
         formatBothRef={formatBothRef}
         foldBothRef={foldBothRef}
-        lang={code?.lang}
+        {...(code?.lang !== undefined ? { lang: code.lang } : {})}
       />
       <RecallEditorShell
         reference={reference}
         draft={draft}
-        lang={code?.lang}
+        {...(code?.lang !== undefined ? { lang: code.lang } : {})}
         dark={theme === 'dark'}
         themeKey={themePreset}
         editorPrefs={editorPrefs}

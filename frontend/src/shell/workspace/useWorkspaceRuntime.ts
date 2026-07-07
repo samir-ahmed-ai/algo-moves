@@ -9,7 +9,9 @@ export interface WorkspaceFrameResult {
 }
 
 export function resolveWorkspaceRuntimeItem(activeItemId: string): Item {
-  return catalog.getItem(activeItemId) ?? catalog.items[0];
+  const item = catalog.getItem(activeItemId) ?? catalog.items[0];
+  if (!item) throw new Error('Catalog has no items');
+  return item;
 }
 
 export function recordWorkspaceFrames(

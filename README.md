@@ -1,14 +1,14 @@
 # Algo Moves
 
-**Live demo:** deploy frontend + backend on [Railway](#deploying-to-railway) (no GitHub Pages).
+**Visual algorithm mastery for interviews.**
 
-**Step through algorithms like a chess transcript.**
+Step through algorithms like a chess transcript: watch the move, predict the next one, rebuild the code, and repeat until the pattern sticks.
 
-*Learn the way AI learns — test yourself, get feedback, repeat until it sticks.*
+Algo Moves is a plugin-driven learning environment for coding interview prep. Each problem replays as a sequence of **moves** — state snapshots with captions — that you can scrub, play, quiz, rebuild, and drill. The shell knows nothing about any specific algorithm; every problem is a self-contained **plugin**.
 
-Plugin-driven visual learning environment for coding interview prep. Each problem replays as a sequence of **moves** — state snapshots with captions — that you can scrub, play, and study. The shell (canvas, player, move log, Code Studio, mobile deck) knows nothing about any specific algorithm; every problem is a self-contained **plugin**.
+The library includes ~400 problems from [LeetCode](https://leetcode.com/), [HackerRank](https://www.hackerrank.com/), and original exercises, plus a real-time Games Arcade for lightweight multiplayer practice.
 
-~400 problems from [LeetCode](https://leetcode.com/), [HackerRank](https://www.hackerrank.com/), and original exercises — each replayed as a scrubbable sequence of **moves** with Code Studio, quizzes, and a mobile drill deck.
+**Deploy:** run the frontend and backend together on [Railway](#deploying-to-railway). GitHub Pages is not supported for the realtime app.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)

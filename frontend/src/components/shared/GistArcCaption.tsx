@@ -9,20 +9,21 @@ export function GistArcCaption({
   secondary,
   className,
 }: {
-  primary: string;
-  secondary?: string;
-  className?: string;
+  readonly primary: string;
+  readonly secondary?: string;
+  readonly className?: string;
 }) {
   const pathId = `gist-arc-${useId().replace(/[^a-zA-Z0-9-]/g, '')}`;
   const cur = primary.trim();
   const side = secondary?.trim() ?? '';
+  const label = [cur, side].filter(Boolean).join(' - ') || 'Gist caption';
 
   return (
     <svg
       className={cn('move-orbit gist-arc-caption', className)}
       viewBox={ORBIT_VIEWBOX}
       role="group"
-      aria-label={primary}
+      aria-label={label}
     >
       <path
         id={pathId}

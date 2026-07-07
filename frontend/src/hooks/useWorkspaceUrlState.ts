@@ -62,7 +62,6 @@ export function useWorkspaceUrlState(
         : null;
     setInputId(fromUrl ?? plugin.inputs[0]?.id ?? '');
     setCustomInput(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plugin?.meta.id, activeItemId]);
 
   // Hydrate full project from ?state= URL (lz-string) when present — once per page load.
@@ -105,7 +104,6 @@ export function useWorkspaceUrlState(
     canvasAppliedRef.current = true;
     const t = window.setTimeout(() => canvasProject.applyProjectState(project), 100);
     return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasProject]);
 
   // Persist problem, example, mode, and theme in the URL so refresh reopens the same view.
@@ -115,16 +113,16 @@ export function useWorkspaceUrlState(
 
     const preserved = readShareFromUrl();
     const roomFields = {
-      room: preserved?.room,
-      sessionKind: preserved?.sessionKind,
-      guestToken: preserved?.guestToken,
+      ...(preserved?.room ? { room: preserved.room } : {}),
+      ...(preserved?.sessionKind ? { sessionKind: preserved.sessionKind } : {}),
+      ...(preserved?.guestToken ? { guestToken: preserved.guestToken } : {}),
     };
 
     if (mode === 'visualize' && !problemFocused) {
       writeShareToUrl({
         mode,
         focus: 'canvas',
-        variant: canvasVariant === 'interview' ? 'interview' : undefined,
+        ...(canvasVariant === 'interview' ? { variant: 'interview' as const } : {}),
         theme,
         palette,
         themePreset,
@@ -137,8 +135,8 @@ export function useWorkspaceUrlState(
     if (!activeItemId) return;
     writeShareToUrl({
       item: activeItemId,
-      id: plugin?.meta.number,
-      input: inputId || undefined,
+      ...(plugin?.meta.number ? { id: plugin.meta.number } : {}),
+      ...(inputId ? { input: inputId } : {}),
       mode,
       focus: 'problem',
       theme,

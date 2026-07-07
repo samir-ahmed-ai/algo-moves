@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -28,7 +28,7 @@ interface TrapState {
 }
 
 function record({ height }: TrapInput): Frame<TrapState>[] {
-  const { emit, frames } = createRecorder<TrapState>(() => ({
+  const { emit, frames } = createPrepRecorder<TrapState>(() => ({
     height,
     l: null,
     r: null,
@@ -53,8 +53,8 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
 
   let l = 0;
   let r = height.length - 1;
-  let leftMax = height[l];
-  let rightMax = height[r];
+  let leftMax = height[l]!;
+  let rightMax = height[r]!;
   let ans = 0;
 
   emit(
@@ -65,46 +65,46 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
   );
 
   while (l < r) {
-    if (leftMax < rightMax) {
+    if (leftMax! < rightMax!) {
       l++;
-      if (height[l] > leftMax) {
+      if (height[l]! > leftMax!) {
         const prev = leftMax;
-        leftMax = height[l];
+        leftMax = height[l]!;
         emit(
           'WALL-L',
           `leftMax→${leftMax}`,
-          `leftMax (${prev}) < rightMax (${rightMax}), so advance the left pointer to ${l}. height[${l}] = ${height[l]} is a new tallest-left wall, so it traps no water itself — raise leftMax to ${leftMax}.`,
+          `leftMax (${prev}) < rightMax (${rightMax}), so advance the left pointer to ${l}. height[${l}]! = ${height[l]!} is a new tallest-left wall, so it traps no water itself — raise leftMax to ${leftMax}.`,
           { l, r, leftMax, rightMax, moved: 'l', added: 0, ans },
         );
       } else {
-        const add = leftMax - height[l];
+        const add = leftMax! - height[l]!;
         ans += add;
         emit(
           'FILL-L',
           `+${add} (=${ans})`,
-          `leftMax (${leftMax}) < rightMax (${rightMax}), so advance the left pointer to ${l}. height[${l}] = ${height[l]} sits below leftMax, so it traps leftMax − height[${l}] = ${leftMax} − ${height[l]} = ${add} units. Total = ${ans}.`,
+          `leftMax (${leftMax}) < rightMax (${rightMax}), so advance the left pointer to ${l}. height[${l}]! = ${height[l]!} sits below leftMax, so it traps leftMax − height[${l}]! = ${leftMax} − ${height[l]!} = ${add} units. Total = ${ans}.`,
           { l, r, leftMax, rightMax, moved: 'l', added: add, ans },
           add > 0 ? 'good' : undefined,
         );
       }
     } else {
       r--;
-      if (height[r] > rightMax) {
+      if (height[r]! > rightMax!) {
         const prev = rightMax;
-        rightMax = height[r];
+        rightMax = height[r]!;
         emit(
           'WALL-R',
           `rightMax→${rightMax}`,
-          `leftMax (${leftMax}) ≥ rightMax (${prev}), so advance the right pointer to ${r}. height[${r}] = ${height[r]} is a new tallest-right wall, so it traps no water itself — raise rightMax to ${rightMax}.`,
+          `leftMax (${leftMax}) ≥ rightMax (${prev}), so advance the right pointer to ${r}. height[${r}]! = ${height[r]!} is a new tallest-right wall, so it traps no water itself — raise rightMax to ${rightMax}.`,
           { l, r, leftMax, rightMax, moved: 'r', added: 0, ans },
         );
       } else {
-        const add = rightMax - height[r];
+        const add = rightMax! - height[r]!;
         ans += add;
         emit(
           'FILL-R',
           `+${add} (=${ans})`,
-          `leftMax (${leftMax}) ≥ rightMax (${rightMax}), so advance the right pointer to ${r}. height[${r}] = ${height[r]} sits below rightMax, so it traps rightMax − height[${r}] = ${rightMax} − ${height[r]} = ${add} units. Total = ${ans}.`,
+          `leftMax (${leftMax}) ≥ rightMax (${rightMax}), so advance the right pointer to ${r}. height[${r}]! = ${height[r]!} sits below rightMax, so it traps rightMax − height[${r}]! = ${rightMax} − ${height[r]!} = ${add} units. Total = ${ans}.`,
           { l, r, leftMax, rightMax, moved: 'r', added: add, ans },
           add > 0 ? 'good' : undefined,
         );
@@ -165,14 +165,14 @@ function View({ frame }: PluginViewProps<TrapState>) {
 function Inspector({ frame }: InspectorProps<TrapState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const hl = s.l !== null ? s.height[s.l] : null;
-  const hr = s.r !== null ? s.height[s.r] : null;
+  const hl = s.l !== null ? s.height[s.l]! : null;
+  const hr = s.r !== null ? s.height[s.r]! : null;
   return (
     <VarGrid>
       <InspectorRow k="l" v={s.l ?? '—'} />
       <InspectorRow k="r" v={s.r ?? '—'} />
-      <InspectorRow k="height[l]" v={hl ?? '—'} />
-      <InspectorRow k="height[r]" v={hr ?? '—'} />
+      <InspectorRow k="height[l]!" v={hl ?? '—'} />
+      <InspectorRow k="height[r]!" v={hr ?? '—'} />
       <InspectorRow k="leftMax" v={s.leftMax} />
       <InspectorRow k="rightMax" v={s.rightMax} />
       <InspectorRow k="trapped (this step)" v={s.added ?? '—'} />

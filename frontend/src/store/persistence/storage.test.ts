@@ -78,4 +78,13 @@ describe('storage', () => {
     removeStorageValue('remove-me');
     expect(readStorageText('remove-me', null)).toBeNull();
   });
+
+  it('treats blank keys as safe no-ops', () => {
+    writeStorageText('   ', 'ignored');
+    writeStorageJson('', { ignored: true });
+    removeStorageValue('   ');
+    expect(localStorage.length).toBe(0);
+    expect(readStorageText('   ', 'fallback')).toBe('fallback');
+    expect(readStorageJson('', { ok: true })).toEqual({ ok: true });
+  });
 });

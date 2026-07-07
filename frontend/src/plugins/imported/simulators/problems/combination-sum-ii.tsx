@@ -67,16 +67,16 @@ function record({ candidates, target }: CombSumInput): Frame<CombSumState>[] {
       );
       return;
     }
-    for (let i = idx; i < pool.length && remaining >= pool[i]; i++) {
+    for (let i = idx; i < pool.length && remaining >= pool[i]!; i++) {
       if (i > idx && pool[i] === pool[i - 1]) continue;
-      cur.push(pool[i]);
+      cur.push(pool[i]!);
       emit(
         'CHOOSE',
         `pick ${pool[i]}`,
-        `Pick pool[${i}] = ${pool[i]}; remaining ${remaining} - ${pool[i]} = ${remaining - pool[i]}. cur = ${fmt(cur)}.`,
-        { pick: i, remaining: remaining - pool[i] },
+        `Pick pool[${i}] = ${pool[i]}; remaining ${remaining} - ${pool[i]} = ${remaining - pool[i]!}. cur = ${fmt(cur)}.`,
+        { pick: i, remaining: remaining - pool[i]! },
       );
-      btCombSum(i + 1, remaining - pool[i]);
+      btCombSum(i + 1, remaining - pool[i]!);
       cur.pop();
       emit(
         'BACKTRACK',

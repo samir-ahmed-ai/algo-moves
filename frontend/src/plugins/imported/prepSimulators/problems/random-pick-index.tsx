@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -33,7 +33,7 @@ function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>
   let res = 0;
   let drawIdx = 0;
 
-  const { emit, frames } = createRecorder<PickIdxState>(() => ({
+  const { emit, frames } = createPrepRecorder<PickIdxState>(() => ({
     nums: [...nums],
     target,
     i: 0,
@@ -47,21 +47,21 @@ function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>
   emit(
     'INIT',
     `target=${target}`,
-    `Random Pick Index: reservoir sampling — for each nums[i]==target, cnt++; with prob 1/cnt replace res with i.`,
+    `Random Pick Index: reservoir sampling — for each nums[i]!==target, cnt++; with prob 1/cnt replace res with i.`,
     {},
   );
 
   for (let i = 0; i < nums.length; i++) {
-    if (nums[i] !== target) continue;
+    if (nums[i]! !== target) continue;
     cnt++;
-    const draw = draws[drawIdx] ?? 0;
+    const draw = draws[drawIdx]! ?? 0;
     drawIdx++;
     const replace = draw === 0;
     if (replace) res = i;
     emit(
       'HIT',
       `i=${i} cnt=${cnt}`,
-      `nums[${i}]=${target}: cnt→${cnt}. ${replace ? `draw=0 → res=${i}.` : `draw=${draw}≠0 → keep res=${res}.`}`,
+      `nums[${i}]!=${target}: cnt→${cnt}. ${replace ? `draw=0 → res=${i}.` : `draw=${draw}≠0 → keep res=${res}.`}`,
       { i, cnt, res, op: `@${i} cnt=${cnt}`, picked: replace ? i : null },
       replace ? 'good' : undefined,
     );
@@ -166,7 +166,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Random Pick Index: reservoir sampling — for each nums[i]==target, cnt++; with prob 1/cnt replace res with i.',
+      'Random Pick Index: reservoir sampling — for each nums[i]!==target, cnt++; with prob 1/cnt replace res with i.',
   },
   {
     id: 'key-step',

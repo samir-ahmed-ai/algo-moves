@@ -1,4 +1,4 @@
-import { defaultSession, type SessionMeta } from './types';
+import { collabSession, defaultSession, type SessionMeta } from './types';
 import type { CanvasMode } from '@/core';
 
 export interface SessionBridgeInput {
@@ -14,7 +14,7 @@ export function workspaceSessionMeta(input: SessionBridgeInput): SessionMeta {
     return input.collabSession;
   }
   if (input.mode === 'visualize' && !input.problemFocused) {
-    return { kind: 'collab' };
+    return collabSession();
   }
   return defaultSession('solo');
 }

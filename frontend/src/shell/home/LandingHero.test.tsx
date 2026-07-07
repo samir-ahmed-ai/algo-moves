@@ -14,6 +14,7 @@ describe('LandingHero CTAs', () => {
     const html = renderToStaticMarkup(
       <LandingHero
         problems={catalog.items.filter((i) => i.kind === 'problem').slice(0, 8)}
+        lastItem={undefined}
         firstProblem={firstProblem}
         progress={emptyProgress}
         isMobile={false}
@@ -54,6 +55,7 @@ describe('LandingHero CTAs', () => {
       <LandingHero
         problems={[lastItem]}
         lastItem={lastItem}
+        firstProblem={undefined}
         progress={emptyProgress}
         isMobile={false}
         onOpenItem={vi.fn()}

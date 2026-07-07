@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -43,7 +43,7 @@ function record({ minVal, maxVal, seed }: RandomNumberInput): Frame<RandomNumber
   let lo = minVal;
   let hi = maxVal;
 
-  const { emit, frames } = createRecorder<RandomNumberState>(() => ({
+  const { emit, frames } = createPrepRecorder<RandomNumberState>(() => ({
     lo,
     hi,
     span: null,

@@ -12,18 +12,28 @@ export const ORBIT_VIEWBOX = '0 4 1000 148';
 export const ORBIT_T_MIN = 0.06;
 export const ORBIT_T_MAX = 0.94;
 
+function finiteOr(value: number, fallback: number): number {
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function clampUnit(value: number): number {
+  return Math.min(1, Math.max(0, finiteOr(value, 0.5)));
+}
+
 /** Point on the quadratic arc at parameter t. */
 export function orbitPoint(t: number): { x: number; y: number } {
-  const u = 1 - t;
+  const tt = clampUnit(t);
+  const u = 1 - tt;
   return {
-    x: u * u * ORBIT_P0.x + 2 * u * t * ORBIT_P1.x + t * t * ORBIT_P2.x,
-    y: u * u * ORBIT_P0.y + 2 * u * t * ORBIT_P1.y + t * t * ORBIT_P2.y,
+    x: u * u * ORBIT_P0.x + 2 * u * tt * ORBIT_P1.x + tt * tt * ORBIT_P2.x,
+    y: u * u * ORBIT_P0.y + 2 * u * tt * ORBIT_P1.y + tt * tt * ORBIT_P2.y,
   };
 }
 
 export function truncateOrbitText(s: string, max: number): string {
   const t = s.trim();
-  return t.length <= max ? t : `${t.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+  const maxChars = Math.max(0, Math.round(finiteOr(max, 0)));
+  return t.length <= maxChars ? t : `${t.slice(0, Math.max(0, maxChars - 1)).trimEnd()}…`;
 }
 
 const ARC_SAMPLES = 96;
@@ -35,7 +45,8 @@ function arcLengths(): number[] {
   let prev = orbitPoint(0);
   for (let i = 1; i <= ARC_SAMPLES; i++) {
     const p = orbitPoint(i / ARC_SAMPLES);
-    lens.push(lens[i - 1] + Math.hypot(p.x - prev.x, p.y - prev.y));
+    const prevLen = lens[i - 1] ?? 0;
+    lens.push(prevLen + Math.hypot(p.x - prev.x, p.y - prev.y));
     prev = p;
   }
   arcTable = lens;
@@ -44,17 +55,23 @@ function arcLengths(): number[] {
 
 /** Total geometric length of the orbit arc in SVG user units. */
 export function orbitPathLength(): number {
-  return arcLengths()[ARC_SAMPLES];
+  return arcLengths()[ARC_SAMPLES] ?? 0;
 }
 
 /** Arc-length fraction at parameter t — dash progress must match tick positions. */
 export function orbitArcFraction(t: number): number {
   const lens = arcLengths();
-  const total = lens[ARC_SAMPLES];
-  const ft = Math.min(1, Math.max(0, t)) * ARC_SAMPLES;
+  const total = lens[ARC_SAMPLES] ?? 1;
+  const ft = clampUnit(t) * ARC_SAMPLES;
   const i = Math.floor(ft);
-  const partial =
-    i >= ARC_SAMPLES ? lens[ARC_SAMPLES] : lens[i] + (lens[i + 1] - lens[i]) * (ft - i);
+  let partial: number;
+  if (i >= ARC_SAMPLES) {
+    partial = lens[ARC_SAMPLES] ?? total;
+  } else {
+    const base = lens[i] ?? 0;
+    const next = lens[i + 1] ?? base;
+    partial = base + (next - base) * (ft - i);
+  }
   return partial / total;
 }
 
@@ -125,14 +142,19 @@ export function wrapOrbitLines(
   }
   if (!words.length) return [];
 
+  const firstWord = words[0];
+  if (!firstWord) return [];
+
   const lines: string[] = [];
-  let current = words[0];
+  let current = firstWord;
   for (let i = 1; i < words.length; i++) {
-    const candidate = `${current} ${words[i]}`;
+    const word = words[i];
+    if (!word) continue;
+    const candidate = `${current} ${word}`;
     if (measure(candidate) <= budget) current = candidate;
     else {
       lines.push(current);
-      current = words[i];
+      current = word;
     }
   }
   lines.push(current);

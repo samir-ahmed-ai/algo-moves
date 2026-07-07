@@ -3,7 +3,7 @@ import { ExcalidrawWrapper } from '@/components/shared/ExcalidrawWrapper';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 
-import { useSubDocSync, useCanvasCollabOptional, WhiteboardPayload } from '@/shell/canvas';
+import { useSubDocSync, useCanvasCollabOptional, type WhiteboardPayload } from '@/shell/canvas';
 export function WhiteboardPanelBody() {
   const sync = useSubDocSync('whiteboard');
   const payload = sync.payload as WhiteboardPayload;
@@ -46,7 +46,7 @@ export function WhiteboardPanelBody() {
         applyRemoteViewport={applyRemoteViewport}
         collaborators={collaborators}
         onChange={(next) => sync.setPayload(next)}
-        onPointerUpdate={sync.onPointerUpdate}
+        {...(sync.onPointerUpdate !== undefined ? { onPointerUpdate: sync.onPointerUpdate } : {})}
       />
     </div>
   );

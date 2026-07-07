@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -35,12 +35,12 @@ function toBits(v: number): number[] {
 
 // index of the highest set bit in the fixed-width bits[] (MSB first), or null.
 function highestSetIndex(bits: number[]): number | null {
-  for (let i = 0; i < bits.length; i++) if (bits[i] === 1) return i;
+  for (let i = 0; i < bits.length; i++) if (bits[i]! === 1) return i;
   return null;
 }
 
 function record({ n }: LogTwoInput): Frame<LogTwoState>[] {
-  const { emit, frames } = createRecorder<LogTwoState>(() => ({
+  const { emit, frames } = createPrepRecorder<LogTwoState>(() => ({
     original: n,
     bits: toBits(Math.max(n, 0)),
     current: n,
@@ -112,7 +112,7 @@ function View({ frame }: PluginViewProps<LogTwoState>) {
   }
   const tone = (i: number) => {
     if (s.msb !== null && i === s.msb) return s.done ? 'found' : 'match';
-    return s.bits[i] === 1 ? 'in-window' : '';
+    return s.bits[i]! === 1 ? 'in-window' : '';
   };
 
   return (

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -38,7 +38,7 @@ interface IntersectState {
 function record({ a, b }: IntersectInput): Frame<IntersectState>[] {
   const out: number[] = [];
 
-  const { emit, frames } = createRecorder<IntersectState>(() => ({
+  const { emit, frames } = createPrepRecorder<IntersectState>(() => ({
     a: a,
     b: b,
     out: out.slice(),
@@ -59,30 +59,30 @@ function record({ a, b }: IntersectInput): Frame<IntersectState>[] {
   let i = 0;
   let j = 0;
   while (i < a.length && j < b.length) {
-    if (a[i] === b[j]) {
+    if (a[i]! === b[j]!) {
       emit(
         'MATCH',
-        `a[${i}]=b[${j}]=${a[i]}`,
-        `a[${i}] = b[${j}] = ${a[i]} — equal values, so this element is in both arrays. Append ${a[i]} to the result and advance BOTH pointers.`,
+        `a[${i}]!=b[${j}]!=${a[i]!}`,
+        `a[${i}]! = b[${j}]! = ${a[i]!} — equal values, so this element is in both arrays. Append ${a[i]!} to the result and advance BOTH pointers.`,
         { i: i, j: j, takenA: i, takenB: j, done: false },
         'good',
       );
-      out.push(a[i]);
+      out.push(a[i]!);
       i++;
       j++;
-    } else if (a[i] < b[j]) {
+    } else if (a[i]! < b[j]!) {
       emit(
         'ADV_A',
-        `a[${i}]=${a[i]} < b[${j}]=${b[j]}`,
-        `a[${i}] = ${a[i]} is smaller than b[${j}] = ${b[j]}. The smaller value can never match anything further along in b, so advance i past it.`,
+        `a[${i}]!=${a[i]!} < b[${j}]!=${b[j]!}`,
+        `a[${i}]! = ${a[i]!} is smaller than b[${j}]! = ${b[j]!}. The smaller value can never match anything further along in b, so advance i past it.`,
         { i: i, j: j, takenA: null, takenB: null, done: false },
       );
       i++;
     } else {
       emit(
         'ADV_B',
-        `a[${i}]=${a[i]} > b[${j}]=${b[j]}`,
-        `b[${j}] = ${b[j]} is smaller than a[${i}] = ${a[i]}. The smaller value can never match anything further along in a, so advance j past it.`,
+        `a[${i}]!=${a[i]!} > b[${j}]!=${b[j]!}`,
+        `b[${j}]! = ${b[j]!} is smaller than a[${i}]! = ${a[i]!}. The smaller value can never match anything further along in a, so advance j past it.`,
         { i: i, j: j, takenA: null, takenB: null, done: false },
       );
       j++;
@@ -116,7 +116,7 @@ function View({ frame }: PluginViewProps<IntersectState>) {
     ptrsB.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
 
   const inOut = (vals: number[], idx: number, upto: number) =>
-    s.out.includes(vals[idx]) && idx <= upto;
+    s.out.includes(vals[idx]!) && idx <= upto;
 
   const toneA = (idx: number) => {
     if (s.takenA === idx) return 'found';
@@ -131,8 +131,8 @@ function View({ frame }: PluginViewProps<IntersectState>) {
     return '';
   };
 
-  const av = s.i !== null && s.i < s.a.length ? s.a[s.i] : '—';
-  const bv = s.j !== null && s.j < s.b.length ? s.b[s.j] : '—';
+  const av = s.i !== null && s.i < s.a.length ? s.a[s.i]! : '—';
+  const bv = s.j !== null && s.j < s.b.length ? s.b[s.j]! : '—';
 
   const rail = (
     <>
@@ -140,8 +140,8 @@ function View({ frame }: PluginViewProps<IntersectState>) {
       <RailGroup label="scan">
         <RailStat k="i" v={s.i ?? '—'} tone="accent" />
         <RailStat k="j" v={s.j ?? '—'} tone="warn" />
-        <RailStat k="a[i]" v={av} />
-        <RailStat k="b[j]" v={bv} />
+        <RailStat k="a[i]!" v={av} />
+        <RailStat k="b[j]!" v={bv} />
       </RailGroup>
       {s.done && (
         <RailResult
@@ -166,14 +166,14 @@ function View({ frame }: PluginViewProps<IntersectState>) {
 function Inspector({ frame }: InspectorProps<IntersectState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const av = s.i !== null && s.i < s.a.length ? s.a[s.i] : '—';
-  const bv = s.j !== null && s.j < s.b.length ? s.b[s.j] : '—';
+  const av = s.i !== null && s.i < s.a.length ? s.a[s.i]! : '—';
+  const bv = s.j !== null && s.j < s.b.length ? s.b[s.j]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
       <InspectorRow k="j" v={s.j ?? '—'} />
-      <InspectorRow k="a[i]" v={av} />
-      <InspectorRow k="b[j]" v={bv} />
+      <InspectorRow k="a[i]!" v={av} />
+      <InspectorRow k="b[j]!" v={bv} />
       <InspectorRow k="intersection" v={`[${s.out.join(', ')}]`} />
       <InspectorRow k="|∩|" v={s.out.length} />
     </VarGrid>

@@ -106,8 +106,8 @@ export function NumberDuel() {
         <Scoreboard
           meName={meName}
           peerName={peerName}
-          myCount={myCount}
-          peerCount={peerCount}
+          {...(myCount !== undefined ? { myCount } : {})}
+          {...(peerCount !== undefined ? { peerCount } : {})}
           myGuessing={!amKeeper && phase !== 'waitingKeeper' && phase !== 'setup'}
           peerGuessing={amKeeper && phase === 'watching'}
           round={round}
@@ -177,7 +177,7 @@ export function NumberDuel() {
       {phase === 'roundResult' && (
         <RoundRecap
           justGuessed={!amKeeper}
-          count={counts[round as 1 | 2]}
+          {...(counts[round as 1 | 2] !== undefined ? { count: counts[round as 1 | 2] } : {})}
           peerName={peerName}
           strings={strings}
         />
@@ -219,7 +219,11 @@ function Scoreboard({
 }) {
   return (
     <div className="flex items-center justify-center gap-3 rounded-[1.5rem] border border-white/60 bg-white/72 p-3 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-      <ScoreCell name={meName} count={myCount} active={myGuessing} />
+      <ScoreCell
+        name={meName}
+        {...(myCount !== undefined ? { count: myCount } : {})}
+        {...(myGuessing ? { active: myGuessing } : {})}
+      />
       <div className="flex flex-col items-center gap-0.5">
         <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[length:var(--fs-2xs)] font-black uppercase tracking-wide text-white dark:bg-white dark:text-slate-950">
           vs
@@ -228,7 +232,12 @@ function Scoreboard({
           {round}/{total}
         </span>
       </div>
-      <ScoreCell name={peerName} count={peerCount} active={peerGuessing} muted />
+      <ScoreCell
+        name={peerName}
+        {...(peerCount !== undefined ? { count: peerCount } : {})}
+        {...(peerGuessing ? { active: peerGuessing } : {})}
+        muted
+      />
     </div>
   );
 }
@@ -326,13 +335,15 @@ function GuessingArena({
   return (
     <GameArena accent="#6366f1">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+        <span className="text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {strings.yourGuess}
         </span>
         {!reduced ? (
           <CountdownRing progress={progress} size={36} tone={timerTone} label={String(remaining)} />
         ) : (
-          <span className="font-mono text-xs tabular-nums text-ink3">{remaining}s</span>
+          <span className="rounded-full bg-slate-950/5 px-2 py-1 font-mono text-xs font-black tabular-nums text-slate-500 dark:bg-white/10 dark:text-slate-400">
+            {remaining}s
+          </span>
         )}
       </div>
 
@@ -360,16 +371,16 @@ function HeatStrip({
   const style = HEAT_STYLE[attempt.heat];
   return (
     <div className="flex items-center gap-2">
-      <span className="shrink-0 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+      <span className="shrink-0 text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {strings.proximity}
       </span>
-      <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-panel2">
+      <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-950/10 shadow-inner dark:bg-white/10">
         <div
           className={cn('h-full rounded-full transition-[width] duration-300', style.bar)}
           style={{ width: `${Math.round(attempt.frac * 100)}%` }}
         />
       </div>
-      <span className={cn('shrink-0 text-xs font-bold', style.text)}>
+      <span className={cn('shrink-0 text-xs font-black', style.text)}>
         {strings.heat[attempt.heat]}
       </span>
     </div>
@@ -384,20 +395,20 @@ function RangeTrack({ attempts, dialed }: { attempts: Attempt[]; dialed?: number
   const marker = dialed != null ? ((clampNumber(dialed) - MIN_NUMBER) / span) * 100 : null;
   return (
     <div>
-      <div className="relative h-2 w-full rounded-full bg-panel2">
+      <div className="relative h-2.5 w-full rounded-full bg-slate-950/10 shadow-inner dark:bg-white/10">
         <div
-          className="absolute top-0 h-full rounded-full bg-accent/40 transition-all duration-300"
+          className="absolute top-0 h-full rounded-full bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-500 transition-all duration-300"
           style={{ left: `${left}%`, width: `${Math.max(width, 1.5)}%` }}
         />
         {marker != null && (
           <div
-            className="absolute top-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent"
+            className="absolute top-1/2 h-4 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-950 shadow-sm dark:bg-white"
             style={{ left: `${marker}%` }}
             aria-hidden
           />
         )}
       </div>
-      <div className="mt-0.5 flex justify-between font-mono text-[length:var(--fs-2xs)] tabular-nums text-ink3">
+      <div className="mt-1 flex justify-between font-mono text-[length:var(--fs-2xs)] font-black tabular-nums text-slate-500 dark:text-slate-400">
         <span>{min}</span>
         <span>{max}</span>
       </div>
@@ -418,7 +429,7 @@ function Dial({
   return (
     <div>
       {label ? (
-        <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+        <p className="mb-2 text-center text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {label}
         </p>
       ) : null}
@@ -426,18 +437,18 @@ function Dial({
         <button
           type="button"
           onClick={() => set(value - 1)}
-          className="grid h-9 w-9 place-items-center rounded-full border border-edge text-ink2 active:scale-95"
+          className="grid h-10 w-10 place-items-center rounded-full border border-white/60 bg-white/72 text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
           aria-label="minus one"
         >
           <Minus className="h-4 w-4" />
         </button>
-        <span className="min-w-[3ch] text-center font-mono text-4xl font-bold tabular-nums text-accent">
+        <span className="min-w-[3ch] rounded-[1.25rem] border border-indigo-300/35 bg-indigo-50/85 px-4 py-2 text-center font-mono text-5xl font-black tabular-nums text-indigo-700 shadow-sm dark:border-indigo-300/20 dark:bg-indigo-300/10 dark:text-indigo-100">
           {value}
         </span>
         <button
           type="button"
           onClick={() => set(value + 1)}
-          className="grid h-9 w-9 place-items-center rounded-full border border-edge text-ink2 active:scale-95"
+          className="grid h-10 w-10 place-items-center rounded-full border border-white/60 bg-white/72 text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
           aria-label="plus one"
         >
           <Plus className="h-4 w-4" />
@@ -449,7 +460,7 @@ function Dial({
         max={MAX_NUMBER}
         value={value}
         onChange={(e) => set(Number(e.target.value))}
-        className="game-range mt-2 w-full"
+        className="game-range mt-3 w-full accent-indigo-600"
         aria-label={label ?? 'number'}
       />
     </div>
@@ -466,20 +477,20 @@ function GuessLog({
   if (attempts.length === 0) return null;
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+      <span className="text-center text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {strings.guessCount(attempts.length)}
       </span>
       <div className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {attempts.map((a, i) => {
           const heatRing =
             a.result === 'correct'
-              ? 'border-good/50 bg-good/10 text-good'
+              ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
               : HEAT_STYLE[a.heat].ring;
           return (
             <span
               key={i}
               className={cn(
-                'inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-xs',
+                'inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-xs font-black shadow-sm',
                 heatRing,
               )}
             >
@@ -497,9 +508,9 @@ function GuessLog({
 
 function WaitState({ text }: { text: string }) {
   return (
-    <div className="flex flex-col items-center gap-2 py-6 text-center text-ink3">
-      <Loader2 className="h-5 w-5 animate-spin text-accent" />
-      <p className="max-w-xs text-xs">{text}</p>
+    <div className="flex flex-col items-center gap-2 rounded-[1.5rem] border border-white/60 bg-white/70 py-8 text-center text-slate-500 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+      <Loader2 className="h-5 w-5 animate-spin text-cyan-600 dark:text-cyan-200" />
+      <p className="max-w-xs text-xs font-semibold">{text}</p>
     </div>
   );
 }
@@ -516,11 +527,13 @@ function RoundRecap({
   strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-accent/40 bg-accentbg px-4 py-3 text-center">
-      <p className="text-base font-bold text-accent">
+    <div className="rounded-[1.5rem] border border-cyan-300/40 bg-cyan-50/85 px-4 py-4 text-center shadow-sm dark:border-cyan-300/20 dark:bg-cyan-300/10">
+      <p className="text-base font-black text-cyan-800 dark:text-cyan-100">
         {justGuessed ? strings.crackedIt(count ?? 0) : strings.peerNeeded(peerName, count ?? 0)}
       </p>
-      <p className="mt-0.5 text-xs text-ink2">{strings.swappingRoles}</p>
+      <p className="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+        {strings.swappingRoles}
+      </p>
     </div>
   );
 }
@@ -594,7 +607,7 @@ function SpectatorView({
           <Eye className="h-3.5 w-3.5" /> {strings.spectating}
         </TurnBadge>
         {snapshot ? (
-          <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
+          <span className="text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
             {strings.roundOf(snapshot.round, ND_TOTAL_ROUNDS)}
           </span>
         ) : null}
@@ -624,15 +637,24 @@ function SpectatorSeat({ name, sub, accent }: { name: string; sub: string; accen
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-1 rounded-[var(--radius)] border px-2 py-2 text-center',
-        accent ? 'border-accent/40 bg-accentbg' : 'border-edge bg-panel2',
+        'flex flex-col items-center gap-1 rounded-[1.25rem] border px-2 py-2 text-center shadow-sm',
+        accent
+          ? 'border-indigo-300/45 bg-indigo-50/85 dark:border-indigo-300/20 dark:bg-indigo-300/10'
+          : 'border-white/60 bg-white/70 dark:border-white/10 dark:bg-white/5',
       )}
     >
       <Avatar seed={name} name={name} size={28} />
-      <span className={cn('truncate text-xs font-semibold', accent ? 'text-accent' : 'text-ink')}>
+      <span
+        className={cn(
+          'truncate text-xs font-black',
+          accent ? 'text-indigo-700 dark:text-indigo-100' : 'text-slate-800 dark:text-slate-100',
+        )}
+      >
         {name}
       </span>
-      <span className="text-[length:var(--fs-2xs)] text-ink3">{sub}</span>
+      <span className="text-[length:var(--fs-2xs)] font-medium text-slate-500 dark:text-slate-400">
+        {sub}
+      </span>
     </div>
   );
 }

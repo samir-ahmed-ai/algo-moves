@@ -256,8 +256,8 @@ function CollabState({ children }: { children: ReactNode }) {
                   color: colorForRef.current(fromId),
                   x: op.x,
                   y: op.y,
-                  line: op.line,
                   at: Date.now(),
+                  ...(op.line != null ? { line: op.line } : {}),
                 },
               },
             }));
@@ -611,10 +611,11 @@ function CollabState({ children }: { children: ReactNode }) {
     setBannerDismissed(false);
     autoJoinRef.current = false;
 
-    // Strip room/sessionKind from URL so refresh doesn't re-join
+    // Strip every session-scoped field from the URL so a refresh doesn't
+    // re-join and the durable guest token isn't left behind in the address bar.
     const current = readShareFromUrl();
-    if (current?.room) {
-      const { room: _, sessionKind: __, ...rest } = current;
+    if (current?.room || current?.guestToken || current?.variant) {
+      const { room: _r, sessionKind: _s, guestToken: _g, variant: _v, ...rest } = current;
       writeShareToUrl(rest);
     }
   }, [disconnect]);
@@ -690,11 +691,11 @@ function CollabState({ children }: { children: ReactNode }) {
 
   const setHostFrameFollow = useCallback(
     (on: boolean) =>
-      patchRuntime((r) => ({
-        ...r,
-        hostFrameFollow: on,
-        playback: on ? r.playback : undefined,
-      })),
+      patchRuntime((r) => {
+        if (on) return { ...r, hostFrameFollow: true };
+        const { playback: _playback, ...rest } = { ...r, hostFrameFollow: false };
+        return rest;
+      }),
     [patchRuntime],
   );
 
@@ -707,8 +708,8 @@ function CollabState({ children }: { children: ReactNode }) {
       if (prev.kind !== 'interview') return prev;
       return {
         ...prev,
-        sessionId: p.sessionId ?? prev.sessionId,
-        guestToken: p.guestToken ?? prev.guestToken,
+        ...(p.sessionId !== undefined ? { sessionId: p.sessionId } : {}),
+        ...(p.guestToken !== undefined ? { guestToken: p.guestToken } : {}),
       };
     });
   }, []);
@@ -901,17 +902,20 @@ function patchPeer(
   color: string,
   patch: Partial<PeerPresence>,
 ): PeerPresence {
-  return {
+  const base: PeerPresence = {
     id,
     name,
     color,
     selection: prev?.selection ?? [],
     drags: prev?.drags ?? {},
-    cursor: prev?.cursor,
-    viewport: prev?.viewport,
-    ...patch,
     lastSeen: Date.now(),
   };
+  if (prev?.cursor) base.cursor = prev.cursor;
+  if (prev?.viewport) base.viewport = prev.viewport;
+  const next = { ...base, ...patch, lastSeen: Date.now() };
+  if (patch.cursor === undefined && 'cursor' in patch) delete next.cursor;
+  if (patch.viewport === undefined && 'viewport' in patch) delete next.viewport;
+  return next;
 }
 
 /**

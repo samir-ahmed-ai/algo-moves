@@ -12,13 +12,13 @@ export interface StudioViewPickerProps {
   avail: StudioTab[];
   active: StudioTab;
   onGo: (id: string) => void;
-  compact?: boolean;
-  variants?: Array<{ lang?: string }>;
-  activeVariant?: number;
-  onSetVariant?: (index: number) => void;
+  compact?: boolean | undefined;
+  variants?: ReadonlyArray<{ lang?: string | undefined }> | undefined;
+  activeVariant?: number | undefined;
+  onSetVariant?: ((index: number) => void) | undefined;
   /** Fixed trigger label/icon — used when the picker is an overflow ("More views"). */
-  triggerLabel?: string;
-  triggerIcon?: LucideIcon;
+  triggerLabel?: string | undefined;
+  triggerIcon?: LucideIcon | undefined;
 }
 
 const TAB_HINTS: Record<string, string> = {

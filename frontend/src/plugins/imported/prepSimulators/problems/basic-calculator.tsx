@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -38,10 +38,10 @@ function evaluate(s: string): number {
   let res = 0;
   let sign = 1;
   for (let i = 0; i < s.length; i++) {
-    const c = s[i];
-    if (c >= '0' && c <= '9') {
+    const c = s[i]!;
+    if (c! >= '0' && c! <= '9') {
       let num = 0;
-      while (i < s.length && s[i] >= '0' && s[i] <= '9') {
+      while (i < s.length && s[i]! >= '0' && s[i]! <= '9') {
         num = num * 10 + (s.charCodeAt(i) - 48);
         i++;
       }
@@ -69,7 +69,7 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
   let res = 0;
   let sign = 1;
 
-  const { emit, frames } = createRecorder<CalcState>(() => ({
+  const { emit, frames } = createPrepRecorder<CalcState>(() => ({
     s: s,
     res: res,
     sign: sign,
@@ -87,7 +87,7 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
   );
 
   for (let i = 0; i < s.length; i++) {
-    const c = s[i];
+    const c = s[i]!;
     if (c === ' ') {
       emit(
         'SKIP',
@@ -97,10 +97,10 @@ function record({ s }: CalcInput): Frame<CalcState>[] {
       );
       continue;
     }
-    if (c >= '0' && c <= '9') {
+    if (c! >= '0' && c! <= '9') {
       let num = 0;
       const start = i;
-      while (i < s.length && s[i] >= '0' && s[i] <= '9') {
+      while (i < s.length && s[i]! >= '0' && s[i]! <= '9') {
         num = num * 10 + (s.charCodeAt(i) - 48);
         i++;
       }
@@ -173,11 +173,12 @@ function View({ frame }: PluginViewProps<CalcState>) {
   const tone = (i: number) => (s.i === i ? 'match' : '');
 
   const stackPairs = s.stack.reduce<string[]>((acc, _v, idx) => {
-    if (idx % 2 === 0) acc.push(`res ${s.stack[idx]}, sign ${s.stack[idx + 1] > 0 ? '+1' : '−1'}`);
+    if (idx % 2 === 0)
+      acc.push(`res ${s.stack[idx]!}, sign ${s.stack[idx + 1]! > 0 ? '+1' : '−1'}`);
     return acc;
   }, []);
 
-  const cur = s.i !== null && s.i >= 0 && s.i < s.s.length ? s.s[s.i] : null;
+  const cur = s.i !== null && s.i >= 0 && s.i < s.s.length ? s.s[s.i]! : null;
 
   const rail = (
     <>
@@ -201,7 +202,7 @@ function View({ frame }: PluginViewProps<CalcState>) {
 function Inspector({ frame }: InspectorProps<CalcState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cur = s.i !== null && s.i >= 0 && s.i < s.s.length ? s.s[s.i] : '—';
+  const cur = s.i !== null && s.i >= 0 && s.i < s.s.length ? s.s[s.i]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="char (i)" v={cur === ' ' ? '␣' : cur} />

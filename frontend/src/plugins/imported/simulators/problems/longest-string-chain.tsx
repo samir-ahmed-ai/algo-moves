@@ -61,11 +61,11 @@ function record({ words }: ChainInput): Frame<ChainState>[] {
     let cur = 1; // a word alone is a chain of length 1
     let from: number | null = null;
     let pred: string | null = null;
-    for (let c = 0; c < w.length; c++) {
-      const p = w.slice(0, c) + w.slice(c + 1);
+    for (let c = 0; c < w!.length; c++) {
+      const p = w!.slice(0, c) + w!.slice(c + 1);
       const pi = indexOf.get(p);
-      if (pi !== undefined && pi < i && dp[pi] + 1 > cur) {
-        cur = dp[pi] + 1;
+      if (pi !== undefined && pi < i && dp[pi]! + 1 > cur) {
+        cur = dp[pi]! + 1;
         from = pi;
         pred = p;
       }

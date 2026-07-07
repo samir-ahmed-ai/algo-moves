@@ -48,7 +48,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         values: values.slice(),
         lo,
@@ -93,7 +93,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
       continue;
     }
 
-    const pivot = values[hi];
+    const pivot = values[hi]!;
     emit(
       'PIVOT',
       `pivot=${pivot}`,
@@ -108,19 +108,22 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
     let i = lo;
     for (let j = lo; j < hi; j++) {
       comparisons++;
+      const atJ = values[j]!;
       emit(
         'CMP',
-        `${values[j]} ? ${pivot}`,
-        `Scan index ${j}: is ${values[j]} < pivot ${pivot}?`,
+        `${atJ} ? ${pivot}`,
+        `Scan index ${j}: is ${atJ} < pivot ${pivot}?`,
         lo,
         hi,
         hi,
         i,
         j,
       );
-      if (values[j] < pivot) {
+      if (atJ < pivot) {
         if (i !== j) {
-          [values[i], values[j]] = [values[j], values[i]];
+          const atI = values[i]!;
+          values[i] = atJ;
+          values[j] = atI;
           swaps++;
         }
         emit(
@@ -138,7 +141,10 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
     }
 
     if (i !== hi) {
-      [values[i], values[hi]] = [values[hi], values[i]];
+      const atI = values[i]!;
+      const atHi = values[hi]!;
+      values[i] = atHi;
+      values[hi] = atI;
       swaps++;
     }
     sorted[i] = true;

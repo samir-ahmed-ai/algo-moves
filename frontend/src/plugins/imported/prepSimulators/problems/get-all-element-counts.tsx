@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -27,7 +27,7 @@ interface CountsState {
 function record({ a }: CountsInput): Frame<CountsState>[] {
   const counts = new Map<number, number>();
 
-  const { emit, frames } = createRecorder<CountsState>(() => ({
+  const { emit, frames } = createPrepRecorder<CountsState>(() => ({
     a,
     i: null,
     x: null,
@@ -39,24 +39,24 @@ function record({ a }: CountsInput): Frame<CountsState>[] {
   emit(
     'INIT',
     `n=${a.length}`,
-    `Get all element counts: walk the array once and tally every value into a hash map. counts[x]++ builds a frequency map of how many times each value appears. Time O(n), Space O(n).`,
+    `Get all element counts: walk the array once and tally every value into a hash map. counts[x]!++ builds a frequency map of how many times each value appears. Time O(n), Space O(n).`,
     {},
   );
 
   for (let i = 0; i < a.length; i++) {
-    const x = a[i];
-    const before = counts.get(x) ?? 0;
+    const x = a[i]!;
+    const before = counts.get(x!) ?? 0;
     emit(
       'SCAN',
       `x=${x}`,
-      `At index ${i} the value is ${x}. Its current count is ${before}${before === 0 ? ' (not seen yet, so it starts at 0)' : ''}. Increment it: counts[${x}]++.`,
+      `At index ${i} the value is ${x}. Its current count is ${before}${before === 0 ? ' (not seen yet, so it starts at 0)' : ''}. Increment it: counts[${x}]!++.`,
       { i, x },
     );
-    counts.set(x, before + 1);
+    counts.set(x!, before + 1);
     emit(
       'BUMP',
-      `counts[${x}]=${before + 1}`,
-      `counts[${x}] is now ${before + 1}. The map remembers every distinct value and how often it has appeared so far.`,
+      `counts[${x}]!=${before + 1}`,
+      `counts[${x}]! is now ${before + 1}. The map remembers every distinct value and how often it has appeared so far.`,
       { i, x, bumped: x },
     );
   }
@@ -85,7 +85,7 @@ function View({ frame }: PluginViewProps<CountsState>) {
             current value x = <span className="font-mono text-ink">{s.x}</span>
           </>
         ) : (
-          <>frequency map (counts[x]++)</>
+          <>frequency map (counts[x]!++)</>
         )}
       </div>
       <ArrayRow values={s.a} cellTone={tone} pointers={pointers} windowRange={null} />
@@ -96,7 +96,7 @@ function View({ frame }: PluginViewProps<CountsState>) {
       </div>
       {s.bumped !== null && !s.done && (
         <div className={cn('mt-1 font-mono text-accent', vizText.sm)}>
-          counts[{s.bumped}] = {s.counts.find(([v]) => v === s.bumped)?.[1] ?? 0}
+          counts[{s.bumped}]! = {s.counts.find(([v]) => v === s.bumped)?.[1] ?? 0}
         </div>
       )}
       {s.done && (
@@ -115,10 +115,10 @@ function Inspector({ frame }: InspectorProps<CountsState>) {
     <VarGrid>
       <InspectorRow k="n (length)" v={s.a.length} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="a[i] (x)" v={s.x ?? '—'} />
+      <InspectorRow k="a[i]! (x)" v={s.x ?? '—'} />
       <InspectorRow k="distinct keys" v={s.counts.length} />
       <InspectorRow
-        k="counts[x]"
+        k="counts[x]!"
         v={s.x !== null ? (s.counts.find(([v]) => v === s.x)?.[1] ?? 0) : '—'}
       />
     </VarGrid>
@@ -168,7 +168,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Get all element counts: walk the array once and tally every value into a hash map. counts[x]++ builds a frequency map of how many times each value appears. Time O(n), Space O(n).',
+      'Get all element counts: walk the array once and tally every value into a hash map. counts[x]!++ builds a frequency map of how many times each value appears. Time O(n), Space O(n).',
   },
   {
     id: 'key-step',
@@ -229,7 +229,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n³) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(n). counts[x]++',
+    explain: 'O(n). O(n). counts[x]!++',
   },
   {
     id: 'outcome',

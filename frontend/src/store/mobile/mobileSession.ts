@@ -28,9 +28,13 @@ function normalizeUpdatedAt(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 function normalizeMobileSession(value: unknown): MobileSession | null {
+  if (!isRecord(value)) return null;
   const candidate = value as Partial<MobileSession>;
-  if (!candidate || typeof candidate !== 'object') return null;
   const topicId = normalizeId(candidate.topicId);
   const updatedAt = normalizeUpdatedAt(candidate.updatedAt);
   if (!topicId || updatedAt === null) return null;
@@ -64,7 +68,8 @@ const store = createSyncStore<MobileSession | null>(KEY, readFresh);
 
 function syncCache(): MobileSession | null {
   const fresh = readFresh();
-  if (fresh?.updatedAt !== store.get()?.updatedAt || (fresh === null) !== (store.get() === null)) {
+  const current = store.get();
+  if (fresh?.updatedAt !== current?.updatedAt || (fresh === null) !== (current === null)) {
     store.set(fresh);
   }
   return fresh;
@@ -74,12 +79,12 @@ export function loadMobileSession(): MobileSession | null {
   return syncCache();
 }
 
-export function saveMobileSession(session: Omit<MobileSession, 'updatedAt'>) {
+export function saveMobileSession(session: Omit<MobileSession, 'updatedAt'>): void {
   const normalized = normalizeMobileSession({ ...session, updatedAt: Date.now() });
   if (normalized) store.set(normalized);
 }
 
-export function clearMobileSession() {
+export function clearMobileSession(): void {
   removeStorageValue(KEY);
   store.set(null);
 }

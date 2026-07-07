@@ -58,12 +58,12 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
   );
 
   // min-heap over [elevation, r, c]
-  const heap: [number, number, number][] = [[grid[0][0], 0, 0]];
-  vis[0][0] = true;
+  const heap: [number, number, number][] = [[grid[0]![0]!, 0, 0]];
+  vis[0]![0] = true;
   const popMin = (): [number, number, number] => {
     let best = 0;
-    for (let i = 1; i < heap.length; i++) if (heap[i][0] < heap[best][0]) best = i;
-    const v = heap[best];
+    for (let i = 1; i < heap.length; i++) if (heap[i]![0] < heap[best]![0]) best = i;
+    const v = heap[best]!;
     heap.splice(best, 1);
     return v;
   };
@@ -74,7 +74,7 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
   while (heap.length) {
     const [elev, r, c] = popMin();
     if (elev > res) res = elev;
-    reachTime[r][c] = res;
+    reachTime[r]![c] = res;
     const isTarget = r === n - 1 && c === n - 1;
     emit(
       isTarget ? 'TARGET' : 'SETTLE',
@@ -89,11 +89,11 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
       break;
     }
     for (const [dr, dc] of DIRS) {
-      const nr = r + dr;
-      const nc = c + dc;
-      if (nr >= 0 && nr < n && nc >= 0 && nc < n && !vis[nr][nc]) {
-        vis[nr][nc] = true;
-        heap.push([grid[nr][nc], nr, nc]);
+      const nr = r + dr!;
+      const nc = c + dc!;
+      if (nr >= 0 && nr < n && nc >= 0 && nc < n && !vis[nr]![nc]) {
+        vis[nr]![nc] = true;
+        heap.push([grid[nr]![nc]!, nr, nc]);
       }
     }
   }
@@ -112,19 +112,19 @@ function View({ frame }: PluginViewProps<SwimState>) {
   const s = frame.state;
   const n = s.grid.length;
   const display = s.grid.map((row, r) =>
-    row.map((_, c) => (s.reachTime[r][c] >= 0 ? s.reachTime[r][c] : '·')),
+    row.map((_, c) => (s.reachTime[r]![c]! >= 0 ? s.reachTime[r]![c]! : '·')),
   );
   const cellTone = (r: number, c: number) => {
     if (s.done && r === n - 1 && c === n - 1) return 'path';
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
-    if (s.reachTime[r][c] >= 0) return 'visited';
+    if (s.reachTime[r]![c]! >= 0) return 'visited';
     return '';
   };
   const rail = (
     <>
       <RailGroup label="scan">
         <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
-        <RailStat k="elev" v={s.cur ? s.grid[s.cur[0]][s.cur[1]] : '—'} />
+        <RailStat k="elev" v={s.cur ? s.grid[s.cur[0]]![s.cur[1]] : '—'} />
         <RailStat k="time" v={s.res} tone="accent" />
       </RailGroup>
       <RailResult
@@ -147,7 +147,7 @@ function Inspector({ frame }: InspectorProps<SwimState>) {
   return (
     <VarGrid>
       <InspectorRow k="cell" v={s.cur ? `(${s.cur[0]}, ${s.cur[1]})` : '—'} />
-      <InspectorRow k="elevation" v={s.cur ? s.grid[s.cur[0]][s.cur[1]] : '—'} />
+      <InspectorRow k="elevation" v={s.cur ? s.grid[s.cur[0]]![s.cur[1]] : '—'} />
       <InspectorRow k="time so far" v={s.res} />
       <InspectorRow k="answer" v={s.answer === null ? '—' : s.answer} />
     </VarGrid>

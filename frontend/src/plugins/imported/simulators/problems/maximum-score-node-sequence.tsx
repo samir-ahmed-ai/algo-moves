@@ -39,10 +39,10 @@ interface MSState {
 function insertTop3(top: number[], node: number, scores: number[]): number[] {
   const out = [...top, node];
   for (let i = out.length - 1; i > 0; i--) {
-    if (scores[out[i]] > scores[out[i - 1]]) {
+    if (scores[out[i]!]! > scores[out[i - 1]!]!) {
       const t = out[i];
-      out[i] = out[i - 1];
-      out[i - 1] = t;
+      out[i]! = out[i - 1]!;
+      out[i - 1]! = t!;
     }
   }
   return out.length > 3 ? out.slice(0, 3) : out;
@@ -70,8 +70,8 @@ function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
 
   const top3: number[][] = Array.from({ length: n }, () => []);
   for (const [u, v] of edges) {
-    top3[u] = insertTop3(top3[u], v, scores);
-    top3[v] = insertTop3(top3[v], u, scores);
+    top3[u] = insertTop3(top3[u]!, v, scores);
+    top3[v] = insertTop3(top3[v]!, u, scores);
   }
 
   let best = -1;
@@ -84,11 +84,11 @@ function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
       `Scan edge ${u}-${v} (scores ${scores[u]} and ${scores[v]}). Try each top-3 neighbour a of ${u} and b of ${v}, keeping all four distinct.`,
       { edge: [u, v], seq: [], best: best, bestSeq: bestSeq },
     );
-    for (const a of top3[u]) {
+    for (const a of top3[u]!) {
       if (a === v) continue;
-      for (const b of top3[v]) {
+      for (const b of top3[v]!) {
         if (b === u || b === a) continue;
-        const s = scores[a] + scores[u] + scores[v] + scores[b];
+        const s = scores[a]! + scores[u]! + scores[v]! + scores[b]!;
         const seq = [a, u, v, b];
         if (s > best) {
           best = s;
@@ -156,8 +156,8 @@ function View({ frame }: PluginViewProps<MSState>) {
         pos={s.pos}
         nodeClass={(node) => team(s, node)}
         label={(node) => `${node}:${s.scores[node]}`}
-        activeNode={s.seq.length === 4 ? s.seq[1] : null}
-        inspectNode={s.seq.length === 4 ? s.seq[2] : null}
+        activeNode={s.seq.length === 4 ? s.seq[1]! : null}
+        inspectNode={s.seq.length === 4 ? s.seq[2]! : null}
         highlightEdge={s.edge}
         height={260}
       />
@@ -181,8 +181,8 @@ function Inspector({ frame }: InspectorProps<MSState>) {
 function build(scores: number[], edgeList: [number, number][]): MSInput {
   const adj: number[][] = Array.from({ length: scores.length }, () => []);
   for (const [u, v] of edgeList) {
-    adj[u].push(v);
-    adj[v].push(u);
+    adj[u]!.push(v);
+    adj[v]!.push(u);
   }
   return { scores, edges: edgeList, adj, pos: circleLayout(scores.length) };
 }

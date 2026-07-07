@@ -62,8 +62,8 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
 
   const find = (x: number): number => {
     while (parent[x] !== x) {
-      parent[x] = parent[parent[x]];
-      x = parent[x];
+      parent[x]! = parent[parent[x]!]!;
+      x = parent[x]!;
     }
     return x;
   };
@@ -90,7 +90,7 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
 
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      const diffs = countDiffs(strs[i], strs[j]);
+      const diffs = countDiffs(strs[i]!, strs[j]!);
       const similar = diffs === 0 || diffs === 2;
       if (!similar) {
         // Skip non-similar pairs silently to keep the animation focused on unions.
@@ -105,21 +105,21 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
           `Compare "${strs[i]}" and "${strs[j]}": they differ in ${diffs} positions, so they are similar — but already in the same group, so the group count stays ${groups}.`,
           { pair: [i, j], diffs: diffs, united: false },
         );
-        adj[i].push(j);
-        adj[j].push(i);
+        adj[i]!.push(j);
+        adj[j]!.push(i);
         continue;
       }
       // Union by size.
-      adj[i].push(j);
-      adj[j].push(i);
+      adj[i]!.push(j);
+      adj[j]!.push(i);
       let big = ri;
       let small = rj;
-      if (size[big] < size[small]) {
+      if (size[big]! < size[small]!) {
         big = rj;
         small = ri;
       }
       parent[small] = big;
-      size[big] += size[small];
+      size[big]! += size[small]!;
       groups -= 1;
       emit(
         'UNION',
@@ -143,7 +143,7 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
 
 function colorOf(parent: number[], node: number): number {
   let r = node;
-  while (parent[r] !== r) r = parent[r];
+  while (parent[r] !== r) r = parent[r]!;
   return r % 3;
 }
 
@@ -165,7 +165,7 @@ function View({ frame }: PluginViewProps<SSGState>) {
         adj={s.adj}
         pos={s.pos}
         nodeClass={(node) => `team-${colorOf(s.parent, node)}`}
-        label={(node) => s.strs[node]}
+        label={(node) => s.strs[node]!}
         activeNode={s.pair ? s.pair[0] : null}
         inspectNode={s.pair ? s.pair[1] : null}
         highlightEdge={s.pair}

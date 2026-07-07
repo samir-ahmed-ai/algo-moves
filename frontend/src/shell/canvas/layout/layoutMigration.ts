@@ -74,9 +74,10 @@ export function migrateCodeLayoutEntry(entry: LayoutEntry): LayoutEntry {
   if (!scratch) return entry;
   const nodes = { ...entry.nodes };
   if (nodes.code) {
+    const mergedWidth = Math.max(nodes.code.width ?? 0, scratch.width ?? 0);
     nodes.code = {
       ...nodes.code,
-      width: Math.max(nodes.code.width ?? 0, scratch.width ?? 0) || nodes.code.width,
+      ...(mergedWidth > 0 ? { width: mergedWidth } : {}),
     };
   } else {
     nodes.code = scratch;
@@ -91,9 +92,10 @@ export function mergeLearnLayoutEntries(a: LayoutEntry, b?: LayoutEntry): Layout
   if (b) {
     for (const [id, saved] of Object.entries(b.nodes)) {
       if (id === 'code' && nodes.code) {
+        const mergedWidth = Math.max(nodes.code.width ?? 0, saved.width ?? 0);
         nodes.code = {
           ...nodes.code,
-          width: Math.max(nodes.code.width ?? 0, saved.width ?? 0) || saved.width,
+          ...(mergedWidth > 0 ? { width: mergedWidth } : {}),
         };
       } else if (id === 'code' || !nodes[id]) {
         nodes[id] = saved;

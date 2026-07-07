@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,7 +33,7 @@ interface DeleteNodeState {
 }
 
 function record({ list, target }: DeleteNodeInput): Frame<DeleteNodeState>[] {
-  const { emit, frames } = createRecorder<DeleteNodeState>(() => ({
+  const { emit, frames } = createPrepRecorder<DeleteNodeState>(() => ({
     chain: list.slice(),
     node: null,
     next: null,
@@ -50,23 +50,23 @@ function record({ list, target }: DeleteNodeInput): Frame<DeleteNodeState>[] {
   emit(
     'INIT',
     `delete node ${target}`,
-    `We are handed only a pointer to the node at index ${target} (value ${list[target]}) — we cannot see the head or the previous node. The trick: copy the next node's value over this one, then unlink the next node.`,
+    `We are handed only a pointer to the node at index ${target} (value ${list[target]!}) — we cannot see the head or the previous node. The trick: copy the next node's value over this one, then unlink the next node.`,
     { chain: chain.slice(), node },
   );
 
   emit(
     'INSPECT',
-    `next = ${list[next]}`,
-    `Look at node.Next (value ${list[next]}). Because we can overwrite this node's data, deleting "this" node really means making it impersonate its successor.`,
+    `next = ${list[next]!}`,
+    `Look at node.Next (value ${list[next]!}). Because we can overwrite this node's data, deleting "this" node really means making it impersonate its successor.`,
     { chain: chain.slice(), node, next },
   );
 
   // node.Val = node.Next.Val
-  chain[node] = list[next];
+  chain[node]! = list[next]!;
   emit(
     'COPY',
-    `node.Val = ${list[next]}`,
-    `Steal the successor's value: node.Val = node.Next.Val, so the node at index ${target} now holds ${list[next]}. The original value ${list[target]} is gone, but a duplicate of ${list[next]} now sits at two places.`,
+    `node.Val = ${list[next]!}`,
+    `Steal the successor's value: node.Val = node.Next.Val, so the node at index ${target} now holds ${list[next]!}. The original value ${list[target]!} is gone, but a duplicate of ${list[next]!} now sits at two places.`,
     { chain: chain.slice(), node, next, copied: true },
   );
 
@@ -75,7 +75,7 @@ function record({ list, target }: DeleteNodeInput): Frame<DeleteNodeState>[] {
   emit(
     'SKIP',
     `node.Next = node.Next.Next`,
-    `Now relink past the successor: node.Next = node.Next.Next. The duplicate node is unlinked, leaving exactly one copy of ${list[next]}. The list is one shorter and the target is effectively deleted.`,
+    `Now relink past the successor: node.Next = node.Next.Next. The duplicate node is unlinked, leaving exactly one copy of ${list[next]!}. The list is one shorter and the target is effectively deleted.`,
     { chain: chain.slice(), node, next: null, copied: true, removed: true, done: true },
     'good',
   );
@@ -127,12 +127,12 @@ function Inspector({ frame }: InspectorProps<DeleteNodeState>) {
       <InspectorRow k="node idx" v={s.node ?? '—'} />
       <InspectorRow
         k="node.Val"
-        v={s.node !== null && s.node < s.chain.length ? s.chain[s.node] : '—'}
+        v={s.node !== null && s.node < s.chain.length ? s.chain[s.node]! : '—'}
       />
       <InspectorRow k="next idx" v={s.next ?? '—'} />
       <InspectorRow
         k="next.Val"
-        v={s.next !== null && s.next < s.chain.length ? s.chain[s.next] : '—'}
+        v={s.next !== null && s.next < s.chain.length ? s.chain[s.next]! : '—'}
       />
       <InspectorRow k="copied" v={s.copied ? 'yes' : 'no'} />
       <InspectorRow k="list length" v={s.chain.length} />

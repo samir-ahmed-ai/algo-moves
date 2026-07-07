@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -24,11 +24,11 @@ interface MergeState {
   b: number[];
   m: number;
   n: number;
-  i: number | null; // tail pointer into a's real prefix (a[0..m-1])
+  i: number | null; // tail pointer into a's real prefix (a[0..m-1]!)
   j: number | null; // tail pointer into b
   k: number | null; // write pointer into a (from the back)
   filled: boolean[]; // which a-slots have been written this run
-  chose: 'a' | 'b' | null; // which source supplied a[k] this step
+  chose: 'a' | 'b' | null; // which source supplied a[k]! this step
   done: boolean;
 }
 
@@ -36,7 +36,7 @@ function record({ a, m, b, n }: MergeInput): Frame<MergeState>[] {
   const work = a.slice();
   const filled = new Array<boolean>(work.length).fill(false);
 
-  const { emit, frames } = createRecorder<MergeState>(() => ({
+  const { emit, frames } = createPrepRecorder<MergeState>(() => ({
     a: work.slice(),
     b,
     m,
@@ -61,19 +61,19 @@ function record({ a, m, b, n }: MergeInput): Frame<MergeState>[] {
   );
 
   while (j >= 0) {
-    if (i >= 0 && work[i] > b[j]) {
+    if (i >= 0 && work[i]! > b[j]!) {
       emit(
         'COMPARE',
-        `a[${i}]=${work[i]} > b[${j}]=${b[j]}`,
-        `a[${i}] = ${work[i]} is larger than b[${j}] = ${b[j]}, so a[${i}] is the biggest remaining value. It belongs at a[${k}].`,
+        `a[${i}]!=${work[i]!} > b[${j}]!=${b[j]!}`,
+        `a[${i}]! = ${work[i]!} is larger than b[${j}]! = ${b[j]!}, so a[${i}]! is the biggest remaining value. It belongs at a[${k}]!.`,
         { i, j, k, chose: 'a' },
       );
-      work[k] = work[i];
-      filled[k] = true;
+      work[k]! = work[i]!;
+      filled[k]! = true;
       emit(
         'WRITE',
-        `a[${k}]=${work[k]}`,
-        `Place ${work[k]} at a[${k}] and step i back to ${i - 1}.`,
+        `a[${k}]!=${work[k]!}`,
+        `Place ${work[k]!} at a[${k}]! and step i back to ${i - 1}.`,
         { i: i - 1, j, k, filled: filled.slice(), chose: 'a' },
       );
       i--;
@@ -81,19 +81,19 @@ function record({ a, m, b, n }: MergeInput): Frame<MergeState>[] {
       const reason =
         i < 0
           ? `a's prefix is exhausted (i < 0), so the rest of b just drops in.`
-          : `b[${j}] = ${b[j]} is at least a[${i}] = ${work[i]}, so b[${j}] is the biggest remaining value.`;
+          : `b[${j}]! = ${b[j]!} is at least a[${i}]! = ${work[i]!}, so b[${j}]! is the biggest remaining value.`;
       emit(
         'COMPARE',
-        i >= 0 ? `b[${j}]=${b[j]} ≥ a[${i}]=${work[i]}` : `b[${j}]=${b[j]} (a done)`,
-        `${reason} It belongs at a[${k}].`,
+        i >= 0 ? `b[${j}]!=${b[j]!} ≥ a[${i}]!=${work[i]!}` : `b[${j}]!=${b[j]!} (a done)`,
+        `${reason} It belongs at a[${k}]!.`,
         { i, j, k, chose: 'b' },
       );
-      work[k] = b[j];
-      filled[k] = true;
+      work[k]! = b[j]!;
+      filled[k]! = true;
       emit(
         'WRITE',
-        `a[${k}]=${work[k]}`,
-        `Place ${work[k]} at a[${k}] and step j back to ${j - 1}.`,
+        `a[${k}]!=${work[k]!}`,
+        `Place ${work[k]!} at a[${k}]! and step j back to ${j - 1}.`,
         { i, j: j - 1, k, filled: filled.slice(), chose: 'b' },
       );
       j--;
@@ -123,7 +123,7 @@ function View({ frame }: PluginViewProps<MergeState>) {
   const cellTone = (idx: number) => {
     if (s.done) return 'found';
     if (s.k === idx) return 'match';
-    if (s.filled[idx]) return 'in-window';
+    if (s.filled[idx]!) return 'in-window';
     return '';
   };
 
@@ -153,7 +153,7 @@ function View({ frame }: PluginViewProps<MergeState>) {
         <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
           took larger from{' '}
           <span className={s.chose === 'a' ? 'text-accent' : 'text-good'}>{s.chose}</span> → a[{s.k}
-          ]
+          ]!
         </div>
       )}
       {s.done && (
@@ -166,14 +166,14 @@ function View({ frame }: PluginViewProps<MergeState>) {
 function Inspector({ frame }: InspectorProps<MergeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const aiVal = s.i !== null && s.i >= 0 && s.i < s.a.length ? s.a[s.i] : '—';
-  const bjVal = s.j !== null && s.j >= 0 && s.j < s.b.length ? s.b[s.j] : '—';
+  const aiVal = s.i !== null && s.i >= 0 && s.i < s.a.length ? s.a[s.i]! : '—';
+  const bjVal = s.j !== null && s.j >= 0 && s.j < s.b.length ? s.b[s.j]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="i (a tail)" v={s.i ?? '—'} />
-      <InspectorRow k="a[i]" v={aiVal} />
+      <InspectorRow k="a[i]!" v={aiVal} />
       <InspectorRow k="j (b tail)" v={s.j ?? '—'} />
-      <InspectorRow k="b[j]" v={bjVal} />
+      <InspectorRow k="b[j]!" v={bjVal} />
       <InspectorRow k="k (write)" v={s.k ?? '—'} />
       <InspectorRow k="source" v={s.chose ?? '—'} />
       <InspectorRow k="result" v={s.done ? `[${s.a.join(', ')}]` : '…'} />
@@ -284,7 +284,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n²) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n+m). O(1). i,j,k from ends; place larger of a[i],b[j] at k--',
+    explain: 'O(n+m). O(1). i,j,k from ends; place larger of a[i]!,b[j]! at k--',
   },
   {
     id: 'outcome',
@@ -328,7 +328,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as MergeState | undefined;
     if (!s) return { ok: false, label: 'no result' };
-    const sorted = s.a.every((v, idx) => idx === 0 || s.a[idx - 1] <= v);
+    const sorted = s.a.every((v, idx) => idx === 0 || s.a[idx - 1]! <= v);
     return { ok: sorted, label: `[${s.a.join(', ')}]` };
   },
 };

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   type Frame,
   type InspectorProps,
@@ -37,7 +37,7 @@ function countEntries(node: DirNode): number {
 function record({ root }: CleanDirsInput): Frame<CleanDirsState>[] {
   const removed: string[] = [];
 
-  const { emit, frames } = createRecorder<CleanDirsState>(() => ({
+  const { emit, frames } = createPrepRecorder<CleanDirsState>(() => ({
     tree: root,
     path: [],
     activeDir: null,
@@ -157,7 +157,7 @@ function Inspector({ frame }: InspectorProps<CleanDirsState>) {
       <InspectorRow k="active dir" v={s.activeDir ?? '—'} />
       <InspectorRow k="remaining" v={s.remaining} />
       <InspectorRow k="removed count" v={s.removed.length} />
-      <InspectorRow k="last removed" v={s.removed[s.removed.length - 1] ?? '—'} />
+      <InspectorRow k="last removed" v={s.removed[s.removed.length - 1]! ?? '—'} />
     </VarGrid>
   );
 }

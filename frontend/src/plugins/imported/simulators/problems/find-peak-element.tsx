@@ -70,7 +70,7 @@ function record({ values }: PeakInput): Frame<PeakState>[] {
       `Middle of the live window: mid=${mid}, value ${values[mid]}. Compare with its right neighbour values[${mid + 1}] = ${values[mid + 1]}.`,
       { mid: mid },
     );
-    if (values[mid] > values[mid + 1]) {
+    if (values[mid]! > values[mid + 1]!) {
       for (let i = mid + 1; i <= hi; i++) dead[i] = true;
       hi = mid;
       emit(

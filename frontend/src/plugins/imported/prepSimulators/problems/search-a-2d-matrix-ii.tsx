@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -36,10 +36,10 @@ interface SearchState {
 
 function record({ matrix, target }: SearchInput): Frame<SearchState>[] {
   const m = matrix.length;
-  const n = matrix[0].length;
+  const n = matrix[0]!.length;
   const visited: [number, number][] = [];
 
-  const { emit, frames } = createRecorder<SearchState>(() => ({
+  const { emit, frames } = createPrepRecorder<SearchState>(() => ({
     matrix,
     target,
     r: null,
@@ -61,7 +61,7 @@ function record({ matrix, target }: SearchInput): Frame<SearchState>[] {
   );
 
   while (r < m && c >= 0) {
-    const v = matrix[r][c];
+    const v = matrix[r]![c];
     emit(
       'LOOK',
       `cell ${v}`,
@@ -74,7 +74,7 @@ function record({ matrix, target }: SearchInput): Frame<SearchState>[] {
       emit(
         'FOUND',
         `at ${r},${c}`,
-        `matrix[${r}][${c}] = ${v} equals the target ${target}. The value is in the matrix — return true.`,
+        `matrix[${r}]![${c}] = ${v} equals the target ${target}. The value is in the matrix — return true.`,
         { r, c, found: [r, c], result: true, done: true },
         'good',
       );
@@ -82,7 +82,7 @@ function record({ matrix, target }: SearchInput): Frame<SearchState>[] {
     }
 
     visited.push([r, c]);
-    if (v > target) {
+    if (v! > target) {
       const nc = c - 1;
       emit(
         'LEFT',
@@ -117,14 +117,14 @@ function View({ frame }: PluginViewProps<SearchState>) {
   const s = frame.state;
   const isVisited = (r: number, c: number) => s.visited.some(([rr, cc]) => rr === r && cc === c);
   const cellTone = (r: number, c: number) => {
-    if (s.found && s.found[0] === r && s.found[1] === c) return 'fill';
+    if (s.found && s.found[0]! === r && s.found[1]! === c) return 'fill';
     if (s.r === r && s.c === c && !s.done) return 'active';
     if (isVisited(r, c)) return 'path';
     return '';
   };
   const active: [number, number] | null =
     s.r !== null && s.c !== null && !s.done ? [s.r, s.c] : null;
-  const current = s.r !== null && s.c !== null ? s.matrix[s.r][s.c] : null;
+  const current = s.r !== null && s.c !== null ? s.matrix[s.r]![s.c] : null;
   const rail = (
     <>
       <RailGroup label="scan">
@@ -153,13 +153,13 @@ function View({ frame }: PluginViewProps<SearchState>) {
 function Inspector({ frame }: InspectorProps<SearchState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = s.r !== null && s.c !== null ? s.matrix[s.r][s.c] : '—';
+  const cell = s.r !== null && s.c !== null ? s.matrix[s.r]![s.c] : '—';
   return (
     <VarGrid>
       <InspectorRow k="target" v={s.target} />
       <InspectorRow k="r (row)" v={s.r ?? '—'} />
       <InspectorRow k="c (col)" v={s.c ?? '—'} />
-      <InspectorRow k="matrix[r][c]" v={cell} />
+      <InspectorRow k="matrix[r]![c]" v={cell} />
       <InspectorRow k="steps" v={s.visited.length} />
       <InspectorRow
         k="result"

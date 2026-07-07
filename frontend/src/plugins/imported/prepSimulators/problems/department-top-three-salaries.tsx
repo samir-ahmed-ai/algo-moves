@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -66,7 +66,7 @@ function denseRankSalaries(salaries: number[]): SalaryRank[] {
 function record({ employees, departments }: DeptTopThreeInput): Frame<DeptTopThreeState>[] {
   const results: ResultRow[] = [];
 
-  const { emit, frames } = createRecorder<DeptTopThreeState>(() => ({
+  const { emit, frames } = createPrepRecorder<DeptTopThreeState>(() => ({
     employees,
     departments,
     phase: 'init',
@@ -185,21 +185,21 @@ function record({ employees, departments }: DeptTopThreeInput): Frame<DeptTopThr
 
     const deptHighEarners: ResultRow[] = [];
     for (let i = 0; i < deptEmployees.length; i++) {
-      const emp = deptEmployees[i];
-      const hit = topSalariesSet.includes(emp.salary);
+      const emp = deptEmployees[i]!;
+      const hit = topSalariesSet.includes(emp!.salary);
       if (hit) {
         deptHighEarners.push({
           department: deptName,
-          employee: emp.name,
-          salary: emp.salary,
+          employee: emp!.name,
+          salary: emp!.salary,
         });
       }
       emit(
         hit ? 'INCLUDE' : 'SKIP',
-        hit ? `${emp.name} ${emp.salary}` : `skip ${emp.name}`,
+        hit ? `${emp!.name} ${emp!.salary}` : `skip ${emp!.name}`,
         hit
-          ? `Employee ${emp.name} earns ${emp.salary} — one of the top-${limit} salary tiers in "${deptName}". Include in the result.`
-          : `Employee ${emp.name} earns ${emp.salary}, which is not in the top-${limit} distinct tiers for "${deptName}". Skip.`,
+          ? `Employee ${emp!.name} earns ${emp!.salary} — one of the top-${limit} salary tiers in "${deptName}". Include in the result.`
+          : `Employee ${emp!.name} earns ${emp!.salary}, which is not in the top-${limit} distinct tiers for "${deptName}". Skip.`,
         {
           phase: 'collect',
           deptId: deptID,
@@ -278,7 +278,7 @@ function EmployeeTable({
   topSalarySet: number[];
 }) {
   const deptNames = new Map(departments.map((d) => [d.id, d.name]));
-  const activeEmp = empIdx !== null ? deptEmployees[empIdx] : null;
+  const activeEmp = empIdx !== null ? deptEmployees[empIdx]! : null;
 
   const rowTone = (emp: Employee) => {
     if (phase === 'collect' && activeEmp?.id === emp.id) return 'bg-accentbg text-accent';
@@ -287,8 +287,8 @@ function EmployeeTable({
         return 'text-good';
       }
       if (deptId === emp.departmentId && activeEmp && empIdx !== null) {
-        const cur = deptEmployees[empIdx];
-        if (emp.id === cur.id) return 'bg-accentbg text-accent';
+        const cur = deptEmployees[empIdx]!;
+        if (emp.id === cur!.id) return 'bg-accentbg text-accent';
       }
     }
     if (deptId !== null && emp.departmentId === deptId) return 'text-ink';
@@ -414,7 +414,7 @@ function View({ frame }: PluginViewProps<DeptTopThreeState>) {
 function Inspector({ frame }: InspectorProps<DeptTopThreeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const activeEmp = s.empIdx !== null ? s.deptEmployees[s.empIdx] : null;
+  const activeEmp = s.empIdx !== null ? s.deptEmployees[s.empIdx]! : null;
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />

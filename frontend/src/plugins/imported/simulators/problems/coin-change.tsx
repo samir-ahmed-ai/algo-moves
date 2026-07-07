@@ -76,8 +76,8 @@ function record({ coins, amount }: CoinInput): Frame<CoinState>[] {
     let bestFrom: number | null = null;
     let bestCoin: number | null = null;
     for (const c of coins) {
-      if (c <= a && dp[a - c] + 1 < best) {
-        best = dp[a - c] + 1;
+      if (c <= a && dp[a - c]! + 1 < best) {
+        best = dp[a - c]! + 1;
         bestFrom = a - c;
         bestCoin = c;
       }
@@ -99,14 +99,14 @@ function record({ coins, amount }: CoinInput): Frame<CoinState>[] {
   const answer = dp[amount] === INF ? -1 : dp[amount];
   snap(
     'DONE',
-    answer < 0 ? 'no solution' : `${answer} coins`,
-    answer < 0
+    answer! < 0 ? 'no solution' : `${answer} coins`,
+    answer! < 0
       ? `dp[${amount}] is still ∞: amount ${amount} can't be formed from {${coins.join(', ')}}, so the answer is -1.`
       : `The table is full. dp[${amount}] = ${answer}, so the fewest coins to make ${amount} is ${answer}.`,
     amount,
     null,
     null,
-    answer < 0 ? 'bad' : 'good',
+    answer! < 0 ? 'bad' : 'good',
   );
   return frames;
 }

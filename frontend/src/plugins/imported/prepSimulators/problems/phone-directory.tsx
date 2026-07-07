@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -41,7 +41,7 @@ function record({ ops }: PhoneInput): Frame<PhoneState>[] {
   const contacts: Record<string, string> = {};
   const root = emptyPhoneNode();
 
-  const { emit, frames } = createRecorder<PhoneState>(() => ({
+  const { emit, frames } = createPrepRecorder<PhoneState>(() => ({
     contacts: { ...contacts },
     suggestions: [],
     op: '',
@@ -59,11 +59,11 @@ function record({ ops }: PhoneInput): Frame<PhoneState>[] {
 
   for (const o of ops) {
     if (o.kind === 'add') {
-      contacts[o.number] = o.name;
+      contacts[o.number]! = o.name;
       let node = root;
       for (const ch of o.number) {
-        if (!node.children[ch]) node.children[ch] = emptyPhoneNode();
-        node = node.children[ch];
+        if (!node.children[ch]!) node.children[ch]! = emptyPhoneNode();
+        node = node.children[ch]!;
         node.names.push(o.name);
       }
       emit(
@@ -73,7 +73,7 @@ function record({ ops }: PhoneInput): Frame<PhoneState>[] {
         { op: `add ${o.number}`, contacts: { ...contacts } },
       );
     } else if (o.kind === 'lookup') {
-      const name = contacts[o.number];
+      const name = contacts[o.number]!;
       const found = name !== undefined;
       emit(
         found ? 'LOOKUP' : 'MISS',
@@ -85,7 +85,8 @@ function record({ ops }: PhoneInput): Frame<PhoneState>[] {
     } else {
       let node: PhoneNode | undefined = root;
       for (const ch of o.prefix) {
-        node = node?.children[ch];
+        const next: PhoneNode | undefined = node?.children[ch];
+        node = next;
         if (!node) break;
       }
       const suggestions = node ? [...node.names] : [];

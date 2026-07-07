@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, railItem } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -29,8 +29,8 @@ interface BooksInput {
 }
 
 interface BooksState {
-  costs: number[]; // bookList[i].cost — the row of values shown
-  ids: string[]; // bookList[i].id — labels under each cell
+  costs: number[]; // bookList[i]!.cost — the row of values shown
+  ids: string[]; // bookList[i]!.id — labels under each cell
   i: number | null; // index being processed in the active pass
   phase: 'count' | 'best' | 'collect' | 'done';
   count: [number, number][]; // costCount map entries: [cost, count]
@@ -49,7 +49,7 @@ function record({ books }: BooksInput): Frame<BooksState>[] {
   let bestCnt = 0;
   const result: string[] = [];
 
-  const { emit, frames } = createRecorder<BooksState>(() => ({
+  const { emit, frames } = createPrepRecorder<BooksState>(() => ({
     costs,
     ids,
     i: null,
@@ -71,12 +71,12 @@ function record({ books }: BooksInput): Frame<BooksState>[] {
 
   // Pass 1 — tally cost frequencies.
   for (let i = 0; i < books.length; i++) {
-    const c = costs[i];
-    costCount.set(c, (costCount.get(c) ?? 0) + 1);
+    const c = costs[i]!;
+    costCount.set(c!, (costCount.get(c!) ?? 0) + 1);
     emit(
       'COUNT',
-      `cost ${c} → ${costCount.get(c)}`,
-      `Pass 1, index ${i}: book ${ids[i]} costs ${c}. Bump costCount[${c}] to ${costCount.get(c)}.`,
+      `cost ${c} → ${costCount.get(c!)}`,
+      `Pass 1, index ${i}: book ${ids[i]!} costs ${c}. Bump costCount[${c}]! to ${costCount.get(c!)}.`,
       { phase: 'count', i },
     );
   }
@@ -107,14 +107,14 @@ function record({ books }: BooksInput): Frame<BooksState>[] {
 
   // Pass 3 — collect ids whose cost equals bestCost, in original order.
   for (let i = 0; i < books.length; i++) {
-    const hit = costs[i] === bestCost;
-    if (hit) result.push(ids[i]);
+    const hit = costs[i]! === bestCost;
+    if (hit) result.push(ids[i]!);
     emit(
       'COLLECT',
-      hit ? `take ${ids[i]}` : `skip ${ids[i]}`,
+      hit ? `take ${ids[i]!}` : `skip ${ids[i]!}`,
       hit
-        ? `Pass 3, index ${i}: book ${ids[i]} costs ${costs[i]} = best cost ${bestCost}. Add ${ids[i]} to the result.`
-        : `Pass 3, index ${i}: book ${ids[i]} costs ${costs[i]} ≠ best cost ${bestCost}. Skip it.`,
+        ? `Pass 3, index ${i}: book ${ids[i]!} costs ${costs[i]!} = best cost ${bestCost}. Add ${ids[i]!} to the result.`
+        : `Pass 3, index ${i}: book ${ids[i]!} costs ${costs[i]!} ≠ best cost ${bestCost}. Skip it.`,
       { phase: 'collect', i, bestCost, bestCnt },
       hit ? 'good' : undefined,
     );
@@ -139,7 +139,7 @@ function View({ frame }: PluginViewProps<BooksState>) {
   }
   const tone = (i: number) => {
     if (s.phase === 'collect' || s.phase === 'done') {
-      if (s.bestCost !== null && s.costs[i] === s.bestCost) {
+      if (s.bestCost !== null && s.costs[i]! === s.bestCost) {
         return s.phase === 'done' || (s.i !== null && i <= s.i) ? 'found' : 'in-window';
       }
     }
@@ -158,10 +158,9 @@ function View({ frame }: PluginViewProps<BooksState>) {
       </RailGroup>
       <RailStack
         label="costCount"
-        items={s.count.map(([c, n]) => ({
-          label: `${c}: ${n}`,
-          tone: s.consideredCost === c ? 'accent' : undefined,
-        }))}
+        items={s.count.map(([c, n]) =>
+          railItem(`${c}: ${n}`, s.consideredCost === c ? 'accent' : undefined),
+        )}
       />
       {(s.phase === 'collect' || s.phase === 'done') && (
         <RailStack label="result" items={s.result} />
@@ -176,7 +175,7 @@ function View({ frame }: PluginViewProps<BooksState>) {
         cellTone={tone}
         pointers={pointers}
         windowRange={null}
-        label={(i) => s.ids[i]}
+        label={(i) => s.ids[i]!}
       />
     </VizStage>
   );
@@ -189,7 +188,7 @@ function Inspector({ frame }: InspectorProps<BooksState>) {
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="cost[i]" v={s.i !== null ? s.costs[s.i] : '—'} />
+      <InspectorRow k="cost[i]!" v={s.i !== null ? s.costs[s.i]! : '—'} />
       <InspectorRow k="distinct costs" v={s.count.length} />
       <InspectorRow k="best cost" v={s.bestCost ?? '—'} />
       <InspectorRow k="best count" v={s.bestCnt} />
@@ -271,7 +270,7 @@ const practiceQuiz: QuizQuestion[] = [
     prompt: 'What does the `costs` field track in the visualization state?',
     choices: [
       {
-        label: 'bookList[i].cost — the row — updated each frame',
+        label: 'bookList[i]!.cost — the row — updated each frame',
         correct: true,
       },
       {
@@ -284,7 +283,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Failure error code — set once at end',
       },
     ],
-    explain: 'The recorder keeps `costs` in sync: bookList[i].cost — the row of values shown',
+    explain: 'The recorder keeps `costs` in sync: bookList[i]!.cost — the row of values shown',
   },
   {
     id: 'complexity',

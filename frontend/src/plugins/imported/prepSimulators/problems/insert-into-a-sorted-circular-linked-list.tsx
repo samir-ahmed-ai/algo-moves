@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ interface InsertState {
 }
 
 function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
-  const { emit, frames } = createRecorder<InsertState>(() => ({
+  const { emit, frames } = createPrepRecorder<InsertState>(() => ({
     chain: list,
     insertVal,
     prev: null,
@@ -73,11 +73,11 @@ function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
 
   // Mirror the Go `for {}` loop exactly.
   while (true) {
-    const pv = list[prev];
-    const cv = list[cur];
+    const pv = list[prev]!;
+    const cv = list[cur]!;
 
     // Case 1: normal sorted range — prev <= insertVal <= cur.
-    if (pv <= insertVal && insertVal <= cv) {
+    if (pv! <= insertVal && insertVal <= cv!) {
       emit(
         'CASE1',
         `${pv} ≤ ${insertVal} ≤ ${cv}`,
@@ -97,18 +97,18 @@ function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
     }
 
     // Case 2: wrap-around point — prev > cur is the max→min boundary.
-    if (pv > cv) {
+    if (pv! > cv!) {
       emit(
         'WRAP',
         `${pv} > ${cv}`,
         `prev=${pv} > cur=${cv}: this is the wrap-around point (largest value links back to smallest). A new max or new min belongs right here.`,
         { prev, cur, reason: 'wrap-around' },
       );
-      if (insertVal >= pv || insertVal <= cv) {
+      if (insertVal >= pv! || insertVal <= cv!) {
         emit(
           'CASE2',
-          `${insertVal} is new ${insertVal >= pv ? 'max' : 'min'}`,
-          `Case 2: ${insertVal} ${insertVal >= pv ? `≥ ${pv} (new maximum)` : `≤ ${cv} (new minimum)`}, so it belongs at the wrap boundary. Stop and splice it here.`,
+          `${insertVal} is new ${insertVal >= pv! ? 'max' : 'min'}`,
+          `Case 2: ${insertVal} ${insertVal >= pv! ? `≥ ${pv} (new maximum)` : `≤ ${cv} (new minimum)`}, so it belongs at the wrap boundary. Stop and splice it here.`,
           { prev, cur, reason: 'wrap-around' },
           'good',
         );
@@ -128,8 +128,8 @@ function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
     const nextCur = (cur + 1) % n;
     emit(
       'ADVANCE',
-      `prev→${list[cur]}, cur→${list[nextCur]}`,
-      `${insertVal} does not fit between ${pv} and ${cv}. Step forward: prev = ${list[cur]}, cur = ${list[nextCur]}.`,
+      `prev→${list[cur]!}, cur→${list[nextCur]!}`,
+      `${insertVal} does not fit between ${pv} and ${cv}. Step forward: prev = ${list[cur]!}, cur = ${list[nextCur]!}.`,
       { prev: cur, cur: nextCur, reason: '' },
     );
     prev = cur;
@@ -147,7 +147,7 @@ function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
       emit(
         'INSERT',
         `anywhere`,
-        `Splice the new node between ${list[prev]} and ${list[cur]}: prev.Next = node, node.Next = cur. With all values equal the order is unchanged.`,
+        `Splice the new node between ${list[prev]!} and ${list[cur]!}: prev.Next = node, node.Next = cur. With all values equal the order is unchanged.`,
         { chain, inserted: insertedAt, prev, cur, reason: 'full loop', done: true },
         'good',
       );
@@ -202,11 +202,11 @@ function Inspector({ frame }: InspectorProps<InsertState>) {
       <InspectorRow k="insertVal" v={s.insertVal} />
       <InspectorRow
         k="prev"
-        v={s.prev !== null && !s.done ? `${s.chain[s.prev]} (i=${s.prev})` : '—'}
+        v={s.prev !== null && !s.done ? `${s.chain[s.prev]!} (i=${s.prev})` : '—'}
       />
       <InspectorRow
         k="cur"
-        v={s.cur !== null && !s.done ? `${s.chain[s.cur]} (i=${s.cur})` : '—'}
+        v={s.cur !== null && !s.done ? `${s.chain[s.cur]!} (i=${s.cur})` : '—'}
       />
       <InspectorRow k="case" v={s.reason || '…'} />
       <InspectorRow k="len" v={s.chain.length} />

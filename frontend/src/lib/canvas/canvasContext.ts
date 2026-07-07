@@ -8,26 +8,26 @@ import type { InputFrameCounts } from './inputFrameCounts';
  * `static` changes when the problem/input changes; `frame` changes every step.
  */
 export interface CanvasStatic {
-  plugin: ProblemPlugin<any, any>;
-  item: Item;
-  inputId: string;
-  setInputId: (id: string) => void;
+  readonly plugin: ProblemPlugin<any, any>;
+  readonly item: Item;
+  readonly inputId: string;
+  readonly setInputId: (id: string) => void;
   /** User's custom input override (null = using the selected sample). */
-  customInput: unknown;
-  setCustomInput: (v: unknown) => void;
+  readonly customInput: unknown;
+  readonly setCustomInput: (v: unknown) => void;
   /** Memoized per-input frame counts — avoids re-running record() in panels. */
-  inputFrameCounts: InputFrameCounts;
+  readonly inputFrameCounts: InputFrameCounts;
   /** Viz selection (graph node index, array cell, etc.) scoped to the active canvas. */
-  selectedNode: number | null;
-  setSelectedNode: (n: number | null) => void;
+  readonly selectedNode: number | null;
+  readonly setSelectedNode: (n: number | null) => void;
 }
 
 export interface CanvasFrame {
-  frames: Frame<any>[];
-  player: Player;
-  frame: Frame<any>;
+  readonly frames: readonly Frame<any>[];
+  readonly player: Player;
+  readonly frame: Frame<any>;
   /** State keys that changed vs the previous frame (empty on frame 0). */
-  changedKeys: string[];
+  readonly changedKeys: readonly string[];
 }
 
 const StaticCtx = createContext<CanvasStatic | null>(null);

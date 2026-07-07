@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -37,13 +37,14 @@ interface DistState {
 // Children helpers over the level-order array.
 const left = (i: number) => 2 * i + 1;
 const right = (i: number) => 2 * i + 2;
-const exists = (tree: (number | null)[], i: number) => i >= 0 && i < tree.length && tree[i] != null;
-const val = (tree: (number | null)[], i: number) => (exists(tree, i) ? tree[i] : '·');
+const exists = (tree: (number | null)[], i: number) =>
+  i >= 0 && i < tree.length && tree[i]! != null;
+const val = (tree: (number | null)[], i: number) => (exists(tree, i) ? tree[i]! : '·');
 
 function record({ tree, p, q }: DistInput): Frame<DistState>[] {
   const visited: number[] = [];
 
-  const { emit, frames } = createRecorder<DistState>(() => ({
+  const { emit, frames } = createPrepRecorder<DistState>(() => ({
     tree,
     p,
     q,

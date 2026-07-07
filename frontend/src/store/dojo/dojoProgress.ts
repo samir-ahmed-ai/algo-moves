@@ -62,7 +62,7 @@ function normalizeProgress(value: unknown): DojoProgress {
   return { levels };
 }
 
-function normalizeLevelIds(levelIds: string[]): string[] {
+function normalizeLevelIds(levelIds: readonly string[]): string[] {
   const seen = new Set<string>();
   const ids: string[] = [];
   for (const rawId of levelIds) {
@@ -122,7 +122,7 @@ export function getDojoProgressStore(gameId: string): DojoProgressStore {
 
 /** A level is unlocked when it is first or its predecessor is complete. */
 export function isDojoLevelUnlocked(
-  levelIds: string[],
+  levelIds: readonly string[],
   index: number,
   progress: DojoProgress,
 ): boolean {
@@ -135,7 +135,7 @@ export function isDojoLevelUnlocked(
 
 /** First not-yet-completed level, falling back to the first level. */
 export function firstIncompleteDojoLevelId(
-  levelIds: string[],
+  levelIds: readonly string[],
   progress: DojoProgress,
 ): string | null {
   const ids = normalizeLevelIds(levelIds);
@@ -147,7 +147,7 @@ export function firstIncompleteDojoLevelId(
 }
 
 /** Completed-level count for a game. */
-export function dojoCompletedCount(levelIds: string[], progress: DojoProgress): number {
+export function dojoCompletedCount(levelIds: readonly string[], progress: DojoProgress): number {
   const normalized = normalizeProgress(progress);
   return normalizeLevelIds(levelIds).filter((id) => normalized.levels[id]?.completed).length;
 }

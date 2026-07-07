@@ -73,7 +73,7 @@ export function StudioSplitLayout({
           maxPct={conceptCourse ? OVERVIEW_PROBLEM_CONCEPT_MAX : OVERVIEW_PROBLEM_MAX}
           defaultPct={conceptCourse ? OVERVIEW_PROBLEM_CONCEPT_DEFAULT : OVERVIEW_PROBLEM_DEFAULT}
           disabled={collapsed}
-          firstWidthPx={collapsed ? PROBLEM_COLUMN_RAIL_W : undefined}
+          {...(collapsed ? { firstWidthPx: PROBLEM_COLUMN_RAIL_W } : {})}
           firstClassName="studio-problem-pane"
           className="min-h-0 flex-1"
           first={

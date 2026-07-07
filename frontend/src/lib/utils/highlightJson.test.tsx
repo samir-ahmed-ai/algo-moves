@@ -24,4 +24,11 @@ describe('highlightJson', () => {
     expect(html).not.toContain('hl-json-key');
     expect(html).toContain('MST 16');
   });
+
+  it('does not color literal prefixes or bare signs in malformed JSON-like text', () => {
+    const html = renderToStaticMarkup(<>{highlightJson('{"value": truex, "n": -}')}</>);
+    expect(html).not.toContain('hl-json-lit');
+    expect(html).not.toContain('hl-json-num');
+    expect(html).toContain('truex');
+  });
 });

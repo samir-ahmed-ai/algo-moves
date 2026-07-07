@@ -128,13 +128,16 @@ export function buildToolDockSections(
   kinds: { id: string; title: string }[],
   effects: { id: string; title: string }[],
 ): ToolDockSection[] {
-  const kindItem = (k: { id: string; title: string }): ToolDockItem => ({
-    id: k.id,
-    title: k.title,
-    hint: KIND_HINTS[k.id],
-    type: 'kind',
-    multi: isMultiInstancePanel(k.id),
-  });
+  const kindItem = (k: { id: string; title: string }): ToolDockItem => {
+    const hint = KIND_HINTS[k.id];
+    return {
+      id: k.id,
+      title: k.title,
+      type: 'kind',
+      multi: isMultiInstancePanel(k.id),
+      ...(hint ? { hint } : {}),
+    };
+  };
   const sections: ToolDockSection[] = KIND_SECTIONS.map((s) => ({
     id: s.id,
     label: s.label,

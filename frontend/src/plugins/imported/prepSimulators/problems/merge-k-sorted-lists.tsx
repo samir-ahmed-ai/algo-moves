@@ -8,7 +8,7 @@ import {
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -45,7 +45,7 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
   // Working pool of lists; each list is a plain value array (head first).
   let pool: number[][] = lists.map((l) => l.slice());
 
-  const { emit, frames } = createRecorder<MergeKState>(() => ({
+  const { emit, frames } = createPrepRecorder<MergeKState>(() => ({
     pool: pool.map((l) => l.slice()),
     round: 0,
     pairIdx: null,
@@ -90,22 +90,22 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
     );
 
     for (let i = 0; i < pool.length; i += 2) {
-      const aSrc = pool[i];
-      const bSrc = i + 1 < pool.length ? pool[i + 1] : null;
+      const aSrc = pool[i]!;
+      const bSrc = i + 1 < pool.length ? pool[i + 1]! : null;
 
       if (bSrc === null) {
         // Odd one out — carries over untouched (mergeTwo(a, nil) === a).
-        merged.push(aSrc.slice());
+        merged.push(aSrc!.slice());
         emit(
           'CARRY',
           `carry [${i}]`,
-          `List ${i} (${show(aSrc)}) has no partner this round, so it carries over to the next pool unchanged.`,
+          `List ${i} (${show(aSrc!)}) has no partner this round, so it carries over to the next pool unchanged.`,
           {
             round,
             pairIdx: [i, -1],
-            a: aSrc.slice(),
+            a: aSrc!.slice(),
             b: null,
-            out: aSrc.slice(),
+            out: aSrc!.slice(),
           },
         );
         continue;
@@ -113,8 +113,8 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
 
       // mergeTwo(a, b): two-pointer walk building one sorted chain.
       const out: number[] = [];
-      const a = aSrc.slice();
-      const b = bSrc.slice();
+      const a = aSrc!.slice();
+      const b = bSrc!.slice();
       let ai = 0;
       let bi = 0;
 
@@ -134,12 +134,12 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
       );
 
       while (ai < a.length && bi < b.length) {
-        if (a[ai] < b[bi]) {
-          out.push(a[ai]);
+        if (a[ai]! < b[bi]!) {
+          out.push(a[ai]!);
           emit(
             'TAKE_A',
-            `take ${a[ai]}`,
-            `Compare heads: a=${a[ai]} < b=${b[bi]}, so splice node ${a[ai]} from list A onto the chain and advance A.`,
+            `take ${a[ai]!}`,
+            `Compare heads: a=${a[ai]!} < b=${b[bi]!}, so splice node ${a[ai]!} from list A onto the chain and advance A.`,
             {
               round,
               pairIdx: [i, i + 1],
@@ -152,11 +152,11 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
           );
           ai += 1;
         } else {
-          out.push(b[bi]);
+          out.push(b[bi]!);
           emit(
             'TAKE_B',
-            `take ${b[bi]}`,
-            `Compare heads: a=${a[ai]} ≥ b=${b[bi]}, so splice node ${b[bi]} from list B onto the chain and advance B. (Ties take B, matching the Go else-branch.)`,
+            `take ${b[bi]!}`,
+            `Compare heads: a=${a[ai]!} ≥ b=${b[bi]!}, so splice node ${b[bi]!} from list B onto the chain and advance B. (Ties take B, matching the Go else-branch.)`,
             {
               round,
               pairIdx: [i, i + 1],
@@ -227,7 +227,7 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
     pool = merged;
   }
 
-  const answer = pool[0] ?? [];
+  const answer = pool[0]! ?? [];
   emit(
     'DONE',
     show(answer),
@@ -239,7 +239,7 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
 }
 
 function isSorted(xs: number[]): boolean {
-  for (let i = 1; i < xs.length; i++) if (xs[i - 1] > xs[i]) return false;
+  for (let i = 1; i < xs.length; i++) if (xs[i - 1]! > xs[i]!) return false;
   return true;
 }
 
@@ -247,12 +247,12 @@ function View({ frame }: PluginViewProps<MergeKState>) {
   const s = frame.state;
   const merging = s.pairIdx !== null && !s.done;
 
-  const headA = s.a && s.ai !== null && s.ai < s.a.length ? s.a[s.ai] : null;
-  const headB = s.b && s.bi !== null && s.bi < s.b.length ? s.b[s.bi] : null;
+  const headA = s.a && s.ai !== null && s.ai < s.a.length ? s.a[s.ai]! : null;
+  const headB = s.b && s.bi !== null && s.bi < s.b.length ? s.b[s.bi]! : null;
   const pair = s.pairIdx
-    ? s.pairIdx[1] >= 0
-      ? `${s.pairIdx[0]} & ${s.pairIdx[1]}`
-      : `${s.pairIdx[0]} (carry)`
+    ? s.pairIdx[1]! >= 0
+      ? `${s.pairIdx[0]!} & ${s.pairIdx[1]!}`
+      : `${s.pairIdx[0]!} (carry)`
     : '—';
 
   const rail = (
@@ -333,12 +333,12 @@ function Inspector({ frame }: InspectorProps<MergeKState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const pair = s.pairIdx
-    ? s.pairIdx[1] >= 0
-      ? `${s.pairIdx[0]} & ${s.pairIdx[1]}`
-      : `${s.pairIdx[0]} (carry)`
+    ? s.pairIdx[1]! >= 0
+      ? `${s.pairIdx[0]!} & ${s.pairIdx[1]!}`
+      : `${s.pairIdx[0]!} (carry)`
     : '—';
-  const headA = s.a && s.ai !== null && s.ai < s.a.length ? s.a[s.ai] : '—';
-  const headB = s.b && s.bi !== null && s.bi < s.b.length ? s.b[s.bi] : '—';
+  const headA = s.a && s.ai !== null && s.ai < s.a.length ? s.a[s.ai]! : '—';
+  const headB = s.b && s.bi !== null && s.bi < s.b.length ? s.b[s.bi]! : '—';
   return (
     <VarGrid>
       <InspectorRow k="round" v={s.round} />

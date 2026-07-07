@@ -30,7 +30,7 @@ function named(
     description: meta.description,
     mode,
     layoutPreset: meta.layoutPreset,
-    ensurePanels,
+    ...(ensurePanels !== undefined ? { ensurePanels } : {}),
   };
 }
 

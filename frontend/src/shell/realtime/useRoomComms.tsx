@@ -45,13 +45,13 @@ export interface Identity {
   name: string;
 }
 
-type PresenceMsg = { __arcade: 'presence'; ready: boolean; profileId: string | null };
+type PresenceMsg = Readonly<{ __arcade: 'presence'; ready: boolean; profileId: string | null }>;
 type ArcadeMsg =
-  | { __arcade: 'chat'; text: string; name: string }
-  | { __arcade: 'reaction'; emoji: string }
+  | Readonly<{ __arcade: 'chat'; text: string; name: string }>
+  | Readonly<{ __arcade: 'reaction'; emoji: string }>
   | PresenceMsg
-  | { __arcade: 'presence-request' }
-  | { __arcade: 'result'; winners: string[] };
+  | Readonly<{ __arcade: 'presence-request' }>
+  | Readonly<{ __arcade: 'result'; winners: string[] }>;
 
 const MAX_MESSAGES = 60;
 const REACTION_TTL = 2600;
@@ -62,6 +62,28 @@ const CONTROL_CHARS = /[\x00-\x1F\x7F]/g;
 function cleanChat(raw: string): string {
   const trimmed = raw.replace(CONTROL_CHARS, '').trim().slice(0, 240);
   return trimmed.replace(MASKED, (m) => m[0] + '*'.repeat(Math.max(1, m.length - 1)));
+}
+
+function cleanReaction(raw: string): string {
+  return raw.replace(CONTROL_CHARS, '').trim().slice(0, 16);
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object';
+}
+
+function isPresenceMsg(value: Record<string, unknown>): value is PresenceMsg {
+  return (
+    value.__arcade === 'presence' &&
+    typeof value.ready === 'boolean' &&
+    (value.profileId === null || typeof value.profileId === 'string')
+  );
+}
+
+function isResultMsg(
+  value: Record<string, unknown>,
+): value is Extract<ArcadeMsg, { __arcade: 'result' }> {
+  return value.__arcade === 'result' && Array.isArray(value.winners);
 }
 
 let seq = 0;
@@ -128,26 +150,33 @@ function useRoomCommsState(): RoomComms {
 
   useEffect(() => {
     return subscribe((data, fromId) => {
-      const msg = data as Partial<ArcadeMsg>;
-      if (!msg || typeof msg !== 'object' || !('__arcade' in msg)) return;
+      if (!isObject(data) || !('__arcade' in data)) return;
+      const msg = data;
       switch (msg.__arcade) {
-        case 'chat':
+        case 'chat': {
+          if (typeof msg.text !== 'string' || typeof msg.name !== 'string') return;
+          const text = cleanChat(msg.text);
+          if (!text) return;
+          const name = cleanChat(msg.name).slice(0, 32) || nameFor(fromId);
           setMessages((cur) =>
             [
               ...cur,
               {
                 id: uid(),
                 fromId,
-                name: (msg as { name: string }).name,
-                text: (msg as { text: string }).text,
+                name,
+                text,
                 at: Date.now(),
               },
             ].slice(-MAX_MESSAGES),
           );
           playCue('message');
           break;
+        }
         case 'reaction': {
-          const emoji = (msg as { emoji: string }).emoji;
+          if (typeof msg.emoji !== 'string') return;
+          const emoji = cleanReaction(msg.emoji);
+          if (!emoji) return;
           const id = uid();
           setReactions((cur) => [...cur, { id, fromId, emoji, at: Date.now() }]);
           playCue('reaction');
@@ -155,13 +184,15 @@ function useRoomCommsState(): RoomComms {
           break;
         }
         case 'result':
-          applyWinners((msg as { winners: string[] }).winners ?? []);
+          if (!isResultMsg(msg)) return;
+          applyWinners(msg.winners.filter((id): id is string => typeof id === 'string'));
           break;
         case 'presence':
-          setReadyMap((cur) => ({ ...cur, [fromId]: (msg as PresenceMsg).ready }));
+          if (!isPresenceMsg(msg)) return;
+          setReadyMap((cur) => ({ ...cur, [fromId]: msg.ready }));
           setIdentities((cur) => ({
             ...cur,
-            [fromId]: { profileId: (msg as PresenceMsg).profileId, name: nameFor(fromId) },
+            [fromId]: { profileId: msg.profileId, name: nameFor(fromId) },
           }));
           break;
         case 'presence-request':
@@ -181,7 +212,6 @@ function useRoomCommsState(): RoomComms {
     setIdentities((cur) => ({ ...cur, [self.id]: { profileId: userId, name: self.name } }));
     send({ __arcade: 'presence-request' } satisfies ArcadeMsg);
     send({ __arcade: 'presence', ready: selfReady.current, profileId: userId } satisfies ArcadeMsg);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rosterKey, self?.id, userId, send]);
 
   const sendChat = useCallback(

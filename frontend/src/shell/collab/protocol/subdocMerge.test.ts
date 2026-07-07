@@ -15,7 +15,7 @@ describe('subdocMerge', () => {
     const incoming = [{ id: 'a', type: 'rectangle', x: 10, y: 0, version: 2, versionNonce: 2 }];
     const merged = mergeWhiteboardElements(base, incoming);
     expect(merged).toHaveLength(1);
-    expect(merged[0].x).toBe(10);
+    expect(merged[0]!.x).toBe(10);
   });
 
   it('tombstones removed element ids', () => {

@@ -11,6 +11,7 @@ import {
   SplitSquareHorizontal,
   WrapText,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import {
   clampRecallFontSize,
   cycleRecallLineHeight,
@@ -24,6 +25,11 @@ import { chromeText } from '@/shell/chromeUi';
 import type { EditorPrefs } from '@/store/user-prefs';
 import { ToolbarGroup, ToolbarGroupBtn } from './ToolbarGroup';
 
+type RecallToggleKey = keyof Pick<
+  EditorPrefs,
+  'wrap' | 'mergeGutter' | 'mergeCollapse' | 'showLineNumbers' | 'highlightChanges'
+>;
+
 /** Font + diff editor controls below the merge view. */
 export function RecallEditorFooter({
   editorPrefs,
@@ -34,14 +40,7 @@ export function RecallEditorFooter({
   setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
   compact?: boolean;
 }) {
-  const toggle = (
-    key: keyof Pick<
-      EditorPrefs,
-      'wrap' | 'mergeGutter' | 'mergeCollapse' | 'showLineNumbers' | 'highlightChanges'
-    >,
-    icon: React.ReactNode,
-    title: string,
-  ) => (
+  const toggle = (key: RecallToggleKey, icon: ReactNode, title: string) => (
     <ToolbarGroupBtn
       key={key}
       active={editorPrefs[key]}

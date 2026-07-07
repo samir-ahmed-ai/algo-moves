@@ -1,12 +1,12 @@
-# Writing a `ProblemPlugin`
+# Writing a ProblemPlugin
 
 Every problem in Algo Moves is a **plugin**. The shell (canvas, modes, nodes, edges, inspector,
 metrics, code/copy) is 100% generic — it never hardcodes a problem. You implement the contract in
-`src/core/types.ts` (`ProblemPlugin`) and the shell renders it.
+`frontend/src/core/types.ts` (`ProblemPlugin`) and the shell renders it.
 
 Set `meta.source` to the canonical reference (LeetCode URL, `HackerRank`, or `Educational`).
 Imported progress problems carry a `leetcode` field in `imported/manifest.ts`; prep problems
-record links in their embedded notes. See [`ATTRIBUTIONS.md`](../../ATTRIBUTIONS.md)
+record links in their embedded notes. See [`ATTRIBUTIONS.md`](../../../ATTRIBUTIONS.md)
 for platform attribution policy.
 
 ## The contract
@@ -51,7 +51,10 @@ to shell built-ins. **Code Studio** reads the same `quiz` and `codePieces` for i
 
 The **Practice tab quiz** and **Code Studio quiz phase** share one data source (`plugin.quiz` / `practice.quiz`) but serve different UX: the tab is inline multiple-choice with immediate feedback; Code Studio runs the same questions as a gated phase before reassemble/recall. Edit `practice.ts` (or imported `practice/items/<id>.ts`) once — both surfaces stay in sync.
 
-**Quiz label format:** use `headline — short detail` on every choice (e.g. `O(n!) — branching narrows each deeper row`). See [`docs/quiz-and-code-studio.md`](../../docs/quiz-and-code-studio.md) for rendering, shuffle, restart-on-wrong, and integrity rules.
+**Quiz label format:** use `headline — short detail` on every choice (e.g.
+`O(n!) — branching narrows each deeper row`). See
+[`docs/quiz-and-code-studio.md`](../../../docs/quiz-and-code-studio.md) for
+rendering, shuffle, restart-on-wrong, and integrity rules.
 
 ## Shared teaching factories
 
@@ -86,8 +89,9 @@ To add a prep simulator: `npm run scaffold-prep-sim -- <slug-or-manifestId>`, im
 
 ## Quickstart
 
-`npm run new-problem -- two-sum "Two Sum"` scaffolds `index.tsx`, `cases.ts`, and `practice.ts`.
-`npm test` runs recorder + integrity tests and `check-orphans`.
+From `frontend/`, `npm run new-problem -- two-sum "Two Sum"` scaffolds
+`index.tsx`, `cases.ts`, and `practice.ts`.
+`npm test` runs recorder and integrity tests plus `check-orphans`.
 
 Scaffolders validate ids and option values, but generated code is still a starting point. Before registering
 a new plugin, replace placeholder summaries, tags, cases, quiz choices, and solution text with real teaching
@@ -106,10 +110,10 @@ wires: {
 
 ## Register it
 
-1. Append to `curatedPlugins` in `src/plugins/index.ts`
-2. Add `{ id: '…', kind: 'problem', pluginId: '…' }` in `src/content/courses.ts`
+1. Append to `curatedPlugins` in `frontend/src/plugins/index.ts`
+2. Add `{ id: '…', kind: 'problem', pluginId: '…' }` in `frontend/src/content/courses.ts`
 3. Run `npm run build-plugin-meta` to refresh the generated metadata index
-   (`src/plugins/_generated/`). The catalog, sidebar, search and registry read plugin
+   (`frontend/src/plugins/_generated/`). The catalog, sidebar, search, and registry read plugin
    metadata from there, so a new plugin will not appear or load until it is regenerated.
    `npm run check-plugin-meta` (part of `check:all`) fails if it is stale.
 
@@ -121,11 +125,11 @@ Generated files are downstream artifacts. Do not hand-edit these paths:
 
 | Artifact | Generator |
 |----------|-----------|
-| `imported/manifest.ts` | `npm run import-problems` |
-| `imported/prepManifest.ts` | `npm run import-prep` |
-| `_generated/pluginMeta.ts` | `npm run build-plugin-meta` |
-| `_generated/courses.ts` | `npm run build-plugin-meta` |
-| `../content/_generated/problemBriefs.ts` | `npm run build-problem-briefs` |
+| `frontend/src/plugins/imported/manifest.ts` | `npm run import-problems` |
+| `frontend/src/plugins/imported/prepManifest.ts` | `npm run import-prep` |
+| `frontend/src/plugins/_generated/pluginMeta.ts` | `npm run build-plugin-meta` |
+| `frontend/src/plugins/_generated/courses.ts` | `npm run build-plugin-meta` |
+| `frontend/src/content/_generated/problemBriefs.ts` | `npm run build-problem-briefs` |
 
 If plugin metadata, quiz text, prep data, or catalog placement changes, regenerate the paired artifact and run the matching `check:*` script before merge.
 

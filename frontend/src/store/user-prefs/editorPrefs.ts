@@ -31,7 +31,7 @@ export interface EditorPrefs {
 }
 
 const KEY = STORAGE_KEYS.EDITOR_PREFS;
-const DEFAULTS: EditorPrefs = {
+const DEFAULTS: Readonly<EditorPrefs> = {
   vim: false,
   wrap: false,
   splitPct: 50,
@@ -53,7 +53,7 @@ function numberPref(value: unknown, fallback: number): number {
 }
 
 function normalizePrefs(data: Partial<EditorPrefs> | null | undefined): EditorPrefs {
-  if (!data) return DEFAULTS;
+  if (!data) return { ...DEFAULTS };
   return {
     vim: booleanPref(data.vim, DEFAULTS.vim),
     wrap: booleanPref(data.wrap, DEFAULTS.wrap),
@@ -85,7 +85,7 @@ export function loadEditorPrefs(): EditorPrefs {
   return store.get();
 }
 
-export function saveEditorPrefs(next: EditorPrefs) {
+export function saveEditorPrefs(next: EditorPrefs): void {
   store.set(normalizePrefs(next));
 }
 

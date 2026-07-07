@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -43,7 +43,7 @@ function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {
   const snapshotGroups = (): GroupEntry[] =>
     [...groups.entries()].map(([key, words]) => ({ key, words: [...words] }));
 
-  const { emit, frames } = createRecorder<GroupAnagramsState>(() => ({
+  const { emit, frames } = createPrepRecorder<GroupAnagramsState>(() => ({
     strs,
     wi: null,
     word: '',
@@ -63,27 +63,27 @@ function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {
   );
 
   for (let wi = 0; wi < strs.length; wi++) {
-    const word = strs[wi];
+    const word = strs[wi]!;
 
     emit(
       'PICK',
       `word "${word}"`,
-      `Take word ${wi}: "${word}". Build its signature by sorting its ${word.length} letters, so every anagram of it collapses to the same key.`,
+      `Take word ${wi}: "${word}". Build its signature by sorting its ${word!.length} letters, so every anagram of it collapses to the same key.`,
       { wi, word, key: '' },
     );
 
     let partial = '';
-    for (let ci = 0; ci < word.length; ci++) {
-      partial += word[ci];
+    for (let ci = 0; ci < word!.length; ci++) {
+      partial += word![ci];
       emit(
         'COUNT',
-        `+${word[ci]}`,
-        `Fold letter "${word[ci]}" (index ${ci}) into the signature. Collecting all letters of "${word}" so we can sort them into a canonical key.`,
+        `+${word![ci]}`,
+        `Fold letter "${word![ci]}" (index ${ci}) into the signature. Collecting all letters of "${word}" so we can sort them into a canonical key.`,
         { wi, word, ci, key: partial },
       );
     }
 
-    const key = signature(word);
+    const key = signature(word!);
     const isNewGroup = !groups.has(key);
     emit(
       'KEY',
@@ -93,7 +93,7 @@ function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {
     );
 
     const bucket = groups.get(key) ?? [];
-    bucket.push(word);
+    bucket.push(word!);
     groups.set(key, bucket);
     emit(
       isNewGroup ? 'NEW_GROUP' : 'ADD',

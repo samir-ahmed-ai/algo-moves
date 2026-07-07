@@ -75,7 +75,7 @@ function record({ adj, pos, src, dest }: PPInput): Frame<PPState>[] {
       );
       return;
     }
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (!visited[nb]) {
         visited[nb] = true;
         path.push(nb);
@@ -147,7 +147,7 @@ function View({ frame }: PluginViewProps<PPState>) {
         pos={s.pos}
         directed
         nodeClass={(node) => `team-${nodeColor(s, node)}`}
-        activeNode={s.path.length ? s.path[s.path.length - 1] : null}
+        activeNode={s.path.length ? s.path[s.path.length - 1]! : null}
         highlightEdge={s.edge}
         height={260}
       />

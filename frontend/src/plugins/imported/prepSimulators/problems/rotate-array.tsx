@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -39,7 +39,7 @@ interface RotateState {
 function record({ nums: input, k: rawK }: RotateInput): Frame<RotateState>[] {
   const nums = input.slice();
   const n = nums.length;
-  const { emit, frames } = createRecorder<RotateState>(() => ({
+  const { emit, frames } = createPrepRecorder<RotateState>(() => ({
     nums: nums.slice(),
     k: rawK % (n || 1),
     rawK: rawK,
@@ -80,14 +80,14 @@ function record({ nums: input, k: rawK }: RotateInput): Frame<RotateState>[] {
     let l = lo;
     let r = hi;
     while (l < r) {
-      const a = nums[l];
-      const b = nums[r];
-      nums[l] = b;
-      nums[r] = a;
+      const a = nums[l]!;
+      const b = nums[r]!;
+      nums[l]! = b;
+      nums[r]! = a;
       emit(
         'SWAP',
         `swap ${l}↔${r}`,
-        `Swap nums[${l}] and nums[${r}]: ${a} and ${b} trade places, then move the left pointer right and the right pointer left.`,
+        `Swap nums[${l}]! and nums[${r}]!: ${a} and ${b} trade places, then move the left pointer right and the right pointer left.`,
         { phase: phase, seg: [lo, hi], l: l, r: r },
       );
       l++;
@@ -150,7 +150,7 @@ function View({ frame }: PluginViewProps<RotateState>) {
         <RailStat k="phase" v={phaseLabel(s.phase)} />
       </RailGroup>
       <RailGroup label="pointers">
-        <RailStat k="seg" v={s.seg ? `${s.seg[0]}..${s.seg[1]}` : '—'} />
+        <RailStat k="seg" v={s.seg ? `${s.seg[0]!}..${s.seg[1]!}` : '—'} />
         <RailStat k="l" v={s.l ?? '—'} tone={s.l !== null ? 'accent' : undefined} />
         <RailStat k="r" v={s.r ?? '—'} tone={s.r !== null ? 'warn' : undefined} />
       </RailGroup>
@@ -173,7 +173,7 @@ function Inspector({ frame }: InspectorProps<RotateState>) {
       <InspectorRow k="effective k" v={s.k} />
       <InspectorRow k="n" v={s.nums.length} />
       <InspectorRow k="phase" v={phaseLabel(s.phase)} />
-      <InspectorRow k="segment" v={s.seg ? `[${s.seg[0]}..${s.seg[1]}]` : '—'} />
+      <InspectorRow k="segment" v={s.seg ? `[${s.seg[0]!}..${s.seg[1]!}]` : '—'} />
       <InspectorRow k="l, r" v={s.l !== null && s.r !== null ? `${s.l}, ${s.r}` : '—'} />
       <InspectorRow k="array" v={`[${s.nums.join(',')}]`} />
     </VarGrid>

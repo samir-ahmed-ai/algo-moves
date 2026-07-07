@@ -4,14 +4,24 @@
  * Priority:
  *  1. `VITE_API_SERVER_URL` build-time env (primary)
  *  2. `VITE_GAMES_SERVER_URL` build-time env (legacy alias, one release)
- *  2. Same host as the frontend on port 8080 (LAN default)
+ *  3. Same host as the frontend on port 8080 (LAN default)
  */
+function configuredApiServerBase(): string | null {
+  return (
+    (
+      (import.meta.env.VITE_API_SERVER_URL as string | undefined) ??
+      (import.meta.env.VITE_GAMES_SERVER_URL as string | undefined)
+    )?.trim() || null
+  );
+}
+
+function trimTrailingSlash(value: string): string {
+  return value.replace(/\/+$/, '');
+}
+
 export function apiServerHttpBase(): string {
-  const raw = (
-    (import.meta.env.VITE_API_SERVER_URL as string | undefined) ??
-    (import.meta.env.VITE_GAMES_SERVER_URL as string | undefined)
-  )?.trim();
-  if (raw) return raw.replace(/\/+$/, '');
+  const raw = configuredApiServerBase();
+  if (raw) return trimTrailingSlash(raw);
   if (typeof location === 'undefined') return 'http://localhost:8080';
   const proto = location.protocol === 'https:' ? 'https:' : 'http:';
   return `${proto}//${location.hostname}:8080`;
@@ -21,9 +31,5 @@ export function apiServerHttpBase(): string {
 export const gameServerHttpBase = apiServerHttpBase;
 
 export function hasConfiguredApiServer(): boolean {
-  const raw = (
-    (import.meta.env.VITE_API_SERVER_URL as string | undefined) ??
-    (import.meta.env.VITE_GAMES_SERVER_URL as string | undefined)
-  )?.trim();
-  return Boolean(raw);
+  return configuredApiServerBase() !== null;
 }

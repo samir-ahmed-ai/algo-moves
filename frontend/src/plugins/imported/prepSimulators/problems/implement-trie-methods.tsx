@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, mergeState, type LoosePartial } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   InspectorRow,
@@ -30,8 +30,8 @@ interface TrieInput {
 }
 
 // The trie stored as a flat node list so NaryTreeBoard can draw it. Node 0 is
-// the root (empty label). `letter[i]` is the char on the incoming edge to node
-// i, `isEnd[i]` flags a completed word. children maps a letter to a node index
+// the root (empty label). `letter[i]!` is the char on the incoming edge to node
+// i, `isEnd[i]!` flags a completed word. children maps a letter to a node index
 // per node (Go's `children [26]*TrieNode`, but sparse here).
 interface TrieState {
   labels: string[]; // per-node display label (root = "•")
@@ -53,20 +53,23 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
   const isEnd: boolean[] = [false];
   const childMap: Record<string, number>[] = [{}];
 
-  const snapshot = (over: Partial<TrieState>): TrieState => ({
-    labels: labels.slice(),
-    children: drawKids.map((cs) => cs.slice()),
-    isEnd: isEnd.slice(),
-    active: null,
-    edge: null,
-    matched: [],
-    op: '',
-    result: null,
-    done: false,
-    ...over,
-  });
+  const snapshot = (over: LoosePartial<TrieState>): TrieState =>
+    mergeState(
+      {
+        labels: labels.slice(),
+        children: drawKids.map((cs) => cs.slice()),
+        isEnd: isEnd.slice(),
+        active: null,
+        edge: null,
+        matched: [],
+        op: '',
+        result: null,
+        done: false,
+      },
+      over,
+    );
 
-  const { emit, frames } = createRecorder<TrieState>(
+  const { emit, frames } = createPrepRecorder<TrieState>(
     () => ({
       ...snapshot({}),
     }),
@@ -92,15 +95,15 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
       { active: 0, matched: [0], op: `insert("${word}")` },
     );
     for (let i = 0; i < word.length; i++) {
-      const ch = word[i];
-      if (childMap[node][ch] === undefined) {
+      const ch = word[i]!;
+      if (childMap[node]![ch!] === undefined) {
         const created = labels.length;
-        labels.push(ch);
+        labels.push(ch!);
         drawKids.push([]);
         isEnd.push(false);
         childMap.push({});
-        childMap[node][ch] = created;
-        drawKids[node].push(created);
+        childMap[node]![ch!] = created;
+        drawKids[node]!.push(created);
         node = created;
         path.push(node);
         emit(
@@ -111,7 +114,7 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
           'good',
         );
       } else {
-        node = childMap[node][ch];
+        node = childMap[node]![ch!]!;
         path.push(node);
         emit(
           'WALK',
@@ -121,7 +124,7 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
         );
       }
     }
-    isEnd[node] = true;
+    isEnd[node]! = true;
     emit(
       'END',
       `isEnd("${word}")`,
@@ -135,8 +138,8 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
     let node = 0;
     const path = [0];
     for (let i = 0; i < word.length; i++) {
-      const ch = word[i];
-      const next = childMap[node][ch];
+      const ch = word[i]!;
+      const next = childMap[node]![ch!];
       if (next === undefined) {
         return { node, path, fell: true };
       }
@@ -161,8 +164,8 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
       { active: 0, matched: [0], op: label },
     );
     for (let i = 0; i < word.length; i++) {
-      const ch = word[i];
-      const next = childMap[node][ch];
+      const ch = word[i]!;
+      const next = childMap[node]![ch!];
       if (next === undefined) {
         emit(
           'MISS',
@@ -192,7 +195,7 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
       );
       return true;
     }
-    const ok = isEnd[node];
+    const ok = isEnd[node]!;
     emit(
       ok ? 'HIT' : 'MISS',
       ok ? 'true' : 'not isEnd',
@@ -210,12 +213,12 @@ function record({ ops }: TrieInput): Frame<TrieState>[] {
   }
 
   // Recompute the final op's result for the verdict/last frame.
-  const lastOp = ops[ops.length - 1];
+  const lastOp = ops[ops.length - 1]!;
   let finalResult: boolean | null = null;
   let finalLabel = 'trie built';
   if (lastOp && lastOp.kind !== 'insert') {
     const w = walk(lastOp.word);
-    finalResult = w.fell ? false : lastOp.kind === 'startsWith' ? true : isEnd[w.node];
+    finalResult! = w.fell ? false : lastOp.kind === 'startsWith' ? true : isEnd[w.node]!;
     finalLabel = `${lastOp.kind}("${lastOp.word}") = ${finalResult}`;
   }
 
@@ -234,15 +237,15 @@ function View({ frame }: PluginViewProps<TrieState>) {
   const s = frame.state;
   const matchedSet = new Set(s.matched);
   const boardNodes: NaryNode[] = s.labels.map((label, i) => ({
-    label: s.isEnd[i] ? `${label}•` : label,
-    children: s.children[i],
+    label: s.isEnd[i]! ? `${label}•` : label,
+    children: s.children[i]!,
   }));
   const nodeClass = (i: number) => {
     if (s.active === i) return 'team-1';
     if (matchedSet.has(i)) return 'team-2';
     return 'team-0';
   };
-  const curLabel = s.active !== null ? (s.active === 0 ? 'root' : s.labels[s.active]) : '—';
+  const curLabel = s.active !== null ? (s.active === 0 ? 'root' : s.labels[s.active]!) : '—';
   const rail = (
     <>
       <RailGroup label="op">
@@ -276,8 +279,11 @@ function Inspector({ frame }: InspectorProps<TrieState>) {
     <VarGrid>
       <InspectorRow k="operation" v={s.op || '—'} />
       <InspectorRow k="nodes" v={s.labels.length} />
-      <InspectorRow k="cursor node" v={cur !== null ? (cur === 0 ? 'root' : s.labels[cur]) : '—'} />
-      <InspectorRow k="isEnd(cursor)" v={cur !== null ? String(s.isEnd[cur]) : '—'} />
+      <InspectorRow
+        k="cursor node"
+        v={cur !== null ? (cur === 0 ? 'root' : s.labels[cur]!) : '—'}
+      />
+      <InspectorRow k="isEnd(cursor)" v={cur !== null ? String(s.isEnd[cur]!) : '—'} />
       <InspectorRow k="path length" v={s.matched.length ? s.matched.length - 1 : 0} />
       <InspectorRow k="result" v={s.result !== null ? String(s.result) : '…'} />
     </VarGrid>

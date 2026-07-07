@@ -37,8 +37,19 @@ export interface LayoutVisualizeOptions {
   viewport?: { width: number; height: number };
 }
 
-export type BgVariant = 'dots' | 'lines' | 'cross' | 'none';
+export const BG_VARIANTS = ['dots', 'lines', 'cross', 'none'] as const;
+export type BgVariant = (typeof BG_VARIANTS)[number];
 export type EdgePathType = 'smoothstep' | 'bezier' | 'step' | 'straight';
+
+export function isBgVariant(value: unknown): value is BgVariant {
+  return typeof value === 'string' && (BG_VARIANTS as readonly string[]).includes(value);
+}
+
+export function normalizeBgVariant(value: unknown, fallback: BgVariant = 'dots'): BgVariant {
+  if (typeof value !== 'string') return fallback;
+  const bg = value.trim().toLowerCase();
+  return isBgVariant(bg) ? bg : fallback;
+}
 
 export interface EdgeOpts {
   pathType: EdgePathType;

@@ -65,17 +65,17 @@ function record({ books, shelfWidth }: ShelfInput): Frame<ShelfState>[] {
     let bestFrom: number | null = null;
     // Pull books j..i onto one new shelf, scanning j from i down to 1.
     for (let j = i; j >= 1; j--) {
-      w += books[j - 1][0];
+      w += books[j - 1]![0];
       if (w > shelfWidth) break;
-      if (books[j - 1][1] > h) h = books[j - 1][1];
-      if (dp[j - 1] + h < best) {
-        best = dp[j - 1] + h;
+      if (books[j - 1]![1] > h) h = books[j - 1]![1];
+      if (dp[j - 1]! + h < best) {
+        best = dp[j - 1]! + h;
         bestFrom = j - 1;
       }
     }
     dp[i] = best;
     const start = (bestFrom as number) + 1; // first book index (1-based) on the last shelf
-    const shelfH = best - dp[bestFrom as number];
+    const shelfH = best - dp[bestFrom as number]!;
     emit(
       'FILL',
       `dp[${i}]=${best}`,
@@ -100,11 +100,11 @@ function View({ frame }: PluginViewProps<ShelfState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: 'from', tone: 'warn', place: 'below' });
-  const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] < INF ? 'match' : '');
+  const tone = (i: number) => (s.i === i ? 'found' : s.dp[i]! < INF ? 'match' : '');
   const n = s.books.length;
-  const done = s.dp[n] < INF;
+  const done = s.dp[n]! < INF;
   const cell = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
+    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx]! >= INF ? '∞' : s.dp[idx]) : '—';
   return (
     <VizStage
       rail={
@@ -132,9 +132,9 @@ function Inspector({ frame }: InspectorProps<ShelfState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const cell = (idx: number) =>
-    idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
+    idx >= 0 && idx < s.dp.length ? (s.dp[idx]! >= INF ? '∞' : s.dp[idx]) : '—';
   const n = s.books.length;
-  const done = s.dp[n] < INF;
+  const done = s.dp[n]! < INF;
   return (
     <VarGrid>
       <InspectorRow k="books" v={n} />

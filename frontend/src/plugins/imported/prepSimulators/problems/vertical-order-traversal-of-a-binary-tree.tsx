@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, railItem } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import {
@@ -59,10 +59,10 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
 
   const bucketEntries = (): [number, Pt[]][] =>
     [...cols.entries()]
-      .sort((a, b) => a[0] - b[0])
+      .sort((a, b) => a[0]! - b[0]!)
       .map(([c, pts]) => [c, pts.map((p) => ({ ...p }))]);
 
-  const { emit, frames } = createRecorder<VerticalState>(() => ({
+  const { emit, frames } = createPrepRecorder<VerticalState>(() => ({
     tree,
     visited: visited.slice(),
     current: null,
@@ -76,7 +76,7 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
     done: false,
   }));
 
-  if (tree.length === 0 || tree[0] == null) {
+  if (tree.length === 0 || tree[0]! == null) {
     emit(
       'DONE',
       'empty',
@@ -93,22 +93,22 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
   emit(
     'INIT',
     'root (0,0)',
-    `Vertical Order Traversal groups nodes by column. Root ${tree[0]} starts at (row 0, col 0). We BFS level by level: a left child is one row down and one column left (row+1, col−1); a right child is one row down and one column right (row+1, col+1). Each column also remembers the row so ties can be broken later by (row, value).`,
+    `Vertical Order Traversal groups nodes by column. Root ${tree[0]!} starts at (row 0, col 0). We BFS level by level: a left child is one row down and one column left (row+1, col−1); a right child is one row down and one column right (row+1, col+1). Each column also remembers the row so ties can be broken later by (row, value).`,
     { queue: [0] },
   );
 
   while (queue.length > 0) {
-    const i = queue[0];
+    const i = queue[0]!;
     queue = queue.slice(1);
-    const col = colByNode.get(i)!;
-    const row = rowByNode.get(i)!;
-    const val = tree[i] as number;
+    const col = colByNode.get(i!)!;
+    const row = rowByNode.get(i!)!;
+    const val = tree[i!]! as number;
 
     // Record this node's (row, val) into its column bucket.
     const bucket = cols.get(col) ?? [];
     bucket.push({ row, val });
     cols.set(col, bucket);
-    visited.push(i);
+    visited.push(i!);
 
     emit(
       'VISIT',
@@ -117,27 +117,27 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
       { current: i, currentCol: col },
     );
 
-    const left = 2 * i + 1;
-    const right = 2 * i + 2;
-    if (left < tree.length && tree[left] != null) {
+    const left = 2 * i! + 1;
+    const right = 2 * i! + 2;
+    if (left < tree.length && tree[left]! != null) {
       colByNode.set(left, col - 1);
       rowByNode.set(left, row + 1);
       queue = [...queue, left];
       emit(
         'ENQUEUE',
-        `${tree[left]}→(${row + 1},${col - 1})`,
-        `Node ${val} has a left child ${tree[left]}. A left child goes one row down and one column left, to (row ${row + 1}, col ${col - 1}). Enqueue it.`,
+        `${tree[left]!}→(${row + 1},${col - 1})`,
+        `Node ${val} has a left child ${tree[left]!}. A left child goes one row down and one column left, to (row ${row + 1}, col ${col - 1}). Enqueue it.`,
         { current: i, currentCol: col },
       );
     }
-    if (right < tree.length && tree[right] != null) {
+    if (right < tree.length && tree[right]! != null) {
       colByNode.set(right, col + 1);
       rowByNode.set(right, row + 1);
       queue = [...queue, right];
       emit(
         'ENQUEUE',
-        `${tree[right]}→(${row + 1},${col + 1})`,
-        `Node ${val} has a right child ${tree[right]}. A right child goes one row down and one column right, to (row ${row + 1}, col ${col + 1}). Enqueue it.`,
+        `${tree[right]!}→(${row + 1},${col + 1})`,
+        `Node ${val} has a right child ${tree[right]!}. A right child goes one row down and one column right, to (row ${row + 1}, col ${col + 1}). Enqueue it.`,
         { current: i, currentCol: col },
       );
     }
@@ -185,20 +185,22 @@ function View({ frame }: PluginViewProps<VerticalState>) {
 
   const queueItems = s.queue.map((i) => {
     const col = colMap.get(i) ?? '?';
-    return `${s.tree[i]} (c${col})`;
+    return `${s.tree[i]!} (c${col})`;
   });
 
-  const bucketItems = s.buckets.map(([c, pts]) => ({
-    label: `c${c}:[${pts.map((p) => p.val).join(',')}]`,
-    tone: s.sortingCol === c ? ('accent' as const) : undefined,
-  }));
+  const bucketItems = s.buckets.map(([c, pts]) =>
+    railItem(
+      `c${c}:[${pts.map((p) => p.val).join(',')}]`,
+      s.sortingCol === c ? 'accent' : undefined,
+    ),
+  );
 
   const resultLabel = s.result ? s.result.map((c) => `[${c.join(',')}]`).join(' ') : undefined;
 
   const rail = (
     <>
       <RailGroup label="scan">
-        <RailStat k="node" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} />
+        <RailStat k="node" v={s.current !== null ? (s.tree[s.current]! ?? '—') : '—'} />
         <RailStat
           k="col"
           v={s.currentCol ?? (s.sortingCol !== null ? `sort ${s.sortingCol}` : '—')}
@@ -223,7 +225,7 @@ function Inspector({ frame }: InspectorProps<VerticalState>) {
   const s = frame.state;
   return (
     <VarGrid>
-      <InspectorRow k="current" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} />
+      <InspectorRow k="current" v={s.current !== null ? (s.tree[s.current]! ?? '—') : '—'} />
       <InspectorRow k="current col" v={s.currentCol ?? '—'} />
       <InspectorRow k="sorting col" v={s.sortingCol ?? '—'} />
       <InspectorRow k="queue size" v={s.queue.length} />

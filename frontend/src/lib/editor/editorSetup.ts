@@ -44,7 +44,7 @@ export function coreEditorExtensions(
   opts?: { lineNumbers?: boolean; lang?: string },
 ): Extension[] {
   const showLineNumbers = opts?.lineNumbers !== false;
-  const lang = opts?.lang?.trim();
+  const lang = opts?.lang?.trim() || undefined;
   return [
     ...indentExtensionsForLang(lang),
     ...lineNumberExtensions(showLineNumbers),
@@ -85,7 +85,7 @@ let vimCommandsDefined = false;
 
 /** The recall draft auto-saves on every keystroke, so :w / :wq / :x are friendly no-ops
  *  (vim users' muscle memory doesn't hit "command not implemented"). Defined once, lazily. */
-function defineVimCommands() {
+function defineVimCommands(): void {
   if (vimCommandsDefined) return;
   vimCommandsDefined = true;
   Vim.defineEx('write', 'w', () => {});
@@ -112,7 +112,7 @@ export function studioEditorExtensions(opts: {
 }): Extension[] {
   return [
     ...vimExtensions(opts.vim),
-    ...coreEditorExtensions(opts.langExt, { lang: opts.lang }),
+    ...coreEditorExtensions(opts.langExt, opts.lang ? { lang: opts.lang } : undefined),
     ...wrapExtensions(opts.wrap),
   ];
 }

@@ -77,7 +77,7 @@ function record({ adj, pos }: SCInput): Frame<SCState>[] {
         `DFS reaches node ${v} and paints it team-${teamColor} as part of component #${components}.`,
         { active: v, inspect: null },
       );
-      for (const nb of adj[v]) {
+      for (const nb of adj[v]!) {
         if (color[nb] === 0) {
           color[nb] = teamColor;
           stack.push(nb);

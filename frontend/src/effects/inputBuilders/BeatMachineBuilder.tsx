@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { Btn, Field } from '@/components/shared/formControls';
 import { GridToggleButton } from '../components/GridToggleButton';
@@ -7,10 +7,18 @@ import { nodeText } from '@/design/typography';
 export interface BeatTrack {
   id: string;
   label: string;
-  steps: boolean[];
+  steps: readonly boolean[];
 }
 
-export function BeatMachineBuilder({ onApply }: { onApply: (tracks: BeatTrack[]) => void }) {
+function cloneTracks(tracks: readonly BeatTrack[]): BeatTrack[] {
+  return tracks.map((track) => ({ ...track, steps: [...track.steps] }));
+}
+
+export function BeatMachineBuilder({
+  onApply,
+}: {
+  readonly onApply: (tracks: BeatTrack[]) => void;
+}): ReactNode {
   const [tracks, setTracks] = useState<BeatTrack[]>([
     { id: 'a', label: 'Track A', steps: Array(8).fill(false) },
     { id: 'b', label: 'Track B', steps: Array(8).fill(false) },
@@ -33,12 +41,17 @@ export function BeatMachineBuilder({ onApply }: { onApply: (tracks: BeatTrack[])
               {track.label}
             </span>
             {track.steps.map((on, si) => (
-              <GridToggleButton key={si} active={on} onClick={() => toggle(ti, si)} />
+              <GridToggleButton
+                key={si}
+                active={on}
+                label={`${track.label} step ${si + 1}`}
+                onClick={() => toggle(ti, si)}
+              />
             ))}
           </div>
         ))}
       </Field>
-      <Btn variant="good" size="sm" onClick={() => onApply(tracks)}>
+      <Btn variant="good" size="sm" onClick={() => onApply(cloneTracks(tracks))}>
         Apply tracks
       </Btn>
     </div>

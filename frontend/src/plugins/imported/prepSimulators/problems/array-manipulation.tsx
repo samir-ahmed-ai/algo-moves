@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -35,7 +35,7 @@ interface ArrayManipulationState {
 function record({ n, queries }: ArrayManipulationInput): Frame<ArrayManipulationState>[] {
   const diff = new Array<number>(n + 2).fill(0);
 
-  const { emit, frames } = createRecorder<ArrayManipulationState>(() => ({
+  const { emit, frames } = createPrepRecorder<ArrayManipulationState>(() => ({
     n,
     queries,
     diff: diff.slice(),
@@ -52,19 +52,19 @@ function record({ n, queries }: ArrayManipulationInput): Frame<ArrayManipulation
   emit(
     'INIT',
     `n=${n}, ${queries.length} queries`,
-    `Array Manipulation: start with ${n} zeros, then apply ${queries.length} range-add queries [a,b,k] (each adds k to positions a..b). Instead of touching every cell per query, keep a difference array: diff[a] += k and diff[b+1] -= k mark only the two boundaries where the running total changes.`,
+    `Array Manipulation: start with ${n} zeros, then apply ${queries.length} range-add queries [a,b,k] (each adds k to positions a..b). Instead of touching every cell per query, keep a difference array: diff[a]! += k and diff[b+1]! -= k mark only the two boundaries where the running total changes.`,
     { phase: 'queries' },
   );
 
   // Phase 1 — fold every query into the difference array.
   for (let q = 0; q < queries.length; q++) {
-    const [a, b, k] = queries[q];
-    diff[a] += k;
-    diff[b + 1] -= k;
+    const [a, b, k] = queries[q]!;
+    diff[a]! += k;
+    diff[b + 1]! -= k;
     emit(
       'QUERY',
       `[${a},${b},+${k}]`,
-      `Query ${q + 1} = add ${k} to positions ${a}..${b}. We record diff[${a}] += ${k} (the value rises here) and diff[${b + 1}] -= ${k} (it falls right after position ${b}). Only two indices change, regardless of how wide the range is.`,
+      `Query ${q + 1} = add ${k} to positions ${a}..${b}. We record diff[${a}]! += ${k} (the value rises here) and diff[${b + 1}]! -= ${k} (it falls right after position ${b}). Only two indices change, regardless of how wide the range is.`,
       { phase: 'queries', qIdx: q, markA: a, markB: b + 1 },
     );
   }
@@ -80,15 +80,15 @@ function record({ n, queries }: ArrayManipulationInput): Frame<ArrayManipulation
   );
 
   for (let i = 1; i <= n; i++) {
-    cur += diff[i];
+    cur += diff[i]!;
     const improved = cur > res;
     if (improved) res = cur;
     emit(
       improved ? 'MAX' : 'STEP',
       `i=${i}, cur=${cur}, max=${res}`,
       improved
-        ? `Position ${i}: cur += diff[${i}] (=${diff[i]}) → value ${cur}. That beats the previous best, so the running maximum becomes ${res}.`
-        : `Position ${i}: cur += diff[${i}] (=${diff[i]}) → value ${cur}. The best so far is still ${res}.`,
+        ? `Position ${i}: cur += diff[${i}]! (=${diff[i]!}) → value ${cur}. That beats the previous best, so the running maximum becomes ${res}.`
+        : `Position ${i}: cur += diff[${i}]! (=${diff[i]!}) → value ${cur}. The best so far is still ${res}.`,
       { phase: 'sweep', i, cur, res },
       improved ? 'good' : undefined,
     );
@@ -184,13 +184,13 @@ function Inspector({ frame }: InspectorProps<ArrayManipulationState>) {
 function computeAnswer({ n, queries }: ArrayManipulationInput): number {
   const diff = new Array<number>(n + 2).fill(0);
   for (const [a, b, k] of queries) {
-    diff[a] += k;
-    diff[b + 1] -= k;
+    diff[a]! += k;
+    diff[b + 1]! -= k;
   }
   let cur = 0;
   let res = 0;
   for (let i = 1; i <= n; i++) {
-    cur += diff[i];
+    cur += diff[i]!;
     if (cur > res) res = cur;
   }
   return res;
@@ -216,7 +216,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Use a **difference array**: for each query `[a,b,k]`, do `diff[a] += k` and `diff[b+1] -= k`',
+      'Use a **difference array**: for each query `[a,b,k]`, do `diff[a]! += k` and `diff[b+1]! -= k`',
   },
   {
     id: 'init',
@@ -238,7 +238,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Array Manipulation: start with  zeros, then apply  range-add queries [a,b,k] (each adds k to positions a..b). Instead of touching every cell per query, keep a difference array: diff[a] += k and diff[b+1] -= k mark only the two boundaries where the running total changes.',
+      'Array Manipulation: start with  zeros, then apply  range-add queries [a,b,k] (each adds k to positions a..b). Instead of touching every cell per query, keep a difference array: diff[a]! += k and diff[b+1]! -= k mark only the two boundaries where the running total changes.',
   },
   {
     id: 'key-step',
@@ -301,7 +301,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n+m). O(n). Use a **difference array**: for each query `[a,b,k]`, do `diff[a] += k` and `diff[b+1] -= k`; Prefix sum of the difference array reconstructs the actual values',
+      'O(n+m). O(n). Use a **difference array**: for each query `[a,b,k]`, do `diff[a]! += k` and `diff[b+1]! -= k`; Prefix sum of the difference array reconstructs the actual values',
   },
   {
     id: 'outcome',

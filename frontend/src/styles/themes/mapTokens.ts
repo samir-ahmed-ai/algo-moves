@@ -1,5 +1,6 @@
 /** Source token set parsed from a theme CSS file (:root or .dark block). */
-export type SourceTokens = Record<string, string>;
+export type SourceTokenName = `--${string}`;
+export type SourceTokens = Partial<Record<SourceTokenName, string>>;
 
 /** algo-moves design tokens for one color mode. */
 export type AlgoTokens = {
@@ -81,7 +82,7 @@ export type ChromeTokens = Pick<
   | 'border-width'
 >;
 
-const COLOR_KEYS: (keyof ColorTokens)[] = [
+const COLOR_KEYS: readonly (keyof ColorTokens)[] = [
   'bg',
   'surface',
   'surface-2',
@@ -110,7 +111,7 @@ const COLOR_KEYS: (keyof ColorTokens)[] = [
   'bad-bg',
 ];
 
-const CHROME_KEYS: (keyof ChromeTokens)[] = [
+const CHROME_KEYS: readonly (keyof ChromeTokens)[] = [
   'radius',
   'sans',
   'mono',
@@ -152,15 +153,19 @@ export function parseThemeCss(css: string): { light: SourceTokens; dark: SourceT
   const darkMatch =
     css.match(/:root\.dark(?:\[[^\]]+\])?\s*\{([^}]*)\}/s) ?? css.match(/\.dark\s*\{([^}]*)\}/s);
 
-  const parseBlock = (block: string, out: SourceTokens) => {
+  const parseBlock = (block: string | undefined, out: SourceTokens): void => {
+    if (!block) return;
+
     for (const line of block.split('\n')) {
-      const m = line.match(/^\s*(--[\w-]+)\s*:\s*(.+?)\s*;?\s*$/);
-      if (m) out[m[1]] = normalizeCssTokenValue(m[2]);
+      const match = line.match(/^\s*(--[\w-]+)\s*:\s*(.+?)\s*;?\s*$/);
+      const key = match?.[1] as SourceTokenName | undefined;
+      const value = match?.[2];
+      if (key && value !== undefined) out[key] = normalizeCssTokenValue(value);
     }
   };
 
-  if (rootMatch) parseBlock(rootMatch[1], light);
-  if (darkMatch) parseBlock(darkMatch[1], dark);
+  parseBlock(rootMatch?.[1], light);
+  parseBlock(darkMatch?.[1], dark);
 
   return { light, dark };
 }

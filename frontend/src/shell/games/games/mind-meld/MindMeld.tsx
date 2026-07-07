@@ -80,7 +80,7 @@ function freshState(): MeldState {
 /** Picks for one round, ordered to match the player roster. */
 function roundPicks(state: MeldState, round: number, players: Peer[]): (MeldChoice | null)[] {
   const row = state.answers[round] ?? {};
-  return players.map((p) => (p.id in row ? row[p.id] : null));
+  return players.map((p) => (p.id in row ? (row[p.id] ?? null) : null));
 }
 
 export function MindMeld() {
@@ -154,7 +154,9 @@ export function MindMeld() {
 
   const myId = self?.id ?? '';
   const myPick: MeldChoice | null =
-    myId && myId in (state.answers[state.round] ?? {}) ? state.answers[state.round][myId] : null;
+    myId && myId in (state.answers[state.round] ?? {})
+      ? (state.answers[state.round]?.[myId] ?? null)
+      : null;
 
   // --- Host: open a fresh answer window whenever we enter the answer phase.
   useEffect(() => {
@@ -236,11 +238,14 @@ export function MindMeld() {
     for (let r = 0; r <= Math.min(state.round, total - 1); r++) {
       if (state.phase === 'answer' && r === state.round) continue; // not revealed yet
       const picks = roundPicks(state, r, players);
+      const first = picks[0];
+      const second = picks[1];
       if (
-        picks.length >= 2 &&
-        picks[0] !== null &&
-        picks[1] !== null &&
-        isMatch(picks[0], picks[1])
+        first !== null &&
+        first !== undefined &&
+        second !== null &&
+        second !== undefined &&
+        isMatch(first, second)
       )
         n++;
     }
@@ -353,13 +358,16 @@ export function MindMeld() {
             {strings.playAgain}
           </TouchButton>
         ) : (
-          <p className="text-center text-sm text-ink3">{strings.spectatorWaiting}</p>
+          <p className="rounded-2xl border border-white/60 bg-white/64 px-3 py-3 text-center text-sm font-semibold text-slate-500 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+            {strings.spectatorWaiting}
+          </p>
         )}
       </GameBody>
     );
   }
 
   const prompt = prompts[state.round];
+  if (!prompt) return null;
   const options: { choice: MeldChoice; label: string }[] = [
     { choice: 0, label: prompt.a },
     { choice: 1, label: prompt.b },
@@ -383,11 +391,13 @@ export function MindMeld() {
       />
 
       <GameArena accent="#8b5cf6">
-        <div className="text-center">
-          <p className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
+        <div className="rounded-[1.35rem] border border-violet-300/35 bg-gradient-to-br from-violet-50/95 via-white/78 to-cyan-50/75 p-4 text-center shadow-sm dark:border-violet-300/20 dark:from-violet-300/10 dark:via-white/5 dark:to-cyan-300/10">
+          <p className="text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.2em] text-violet-700 dark:text-violet-100">
             {prompt.q}
           </p>
-          <p className="mt-0.5 text-sm font-bold tracking-tight text-ink">{strings.thisOrThat}</p>
+          <p className="mt-1 text-base font-black tracking-tight text-slate-950 dark:text-white">
+            {strings.thisOrThat}
+          </p>
         </div>
 
         {showReveal ? (
@@ -401,7 +411,7 @@ export function MindMeld() {
           />
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center justify-between w-full px-0.5">
+            <div className="flex w-full items-center justify-between px-0.5">
               <CountdownRing
                 progress={timerProgress}
                 size={36}
@@ -428,9 +438,11 @@ export function MindMeld() {
                 {options.map((o) => (
                   <div
                     key={o.choice}
-                    className="flex min-h-16 select-none items-center justify-center rounded-xl border-2 border-edge bg-panel p-2 text-center"
+                    className="flex min-h-16 select-none items-center justify-center rounded-2xl border border-white/60 bg-white/70 p-3 text-center shadow-sm dark:border-white/10 dark:bg-white/5"
                   >
-                    <span className="text-xs font-bold leading-tight text-ink">{o.label}</span>
+                    <span className="text-xs font-black leading-tight text-slate-800 dark:text-slate-100">
+                      {o.label}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -443,7 +455,7 @@ export function MindMeld() {
                     disabled={myPick !== null}
                     onClick={() => answer(o.choice)}
                   >
-                    <span className="text-xs font-bold leading-tight">{o.label}</span>
+                    <span className="text-xs font-black leading-tight">{o.label}</span>
                   </ChoiceCard>
                 ))}
               </div>
@@ -495,7 +507,7 @@ function Progress({
       current={current}
       total={total}
       badge={
-        <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[length:var(--fs-2xs)] font-bold text-good">
+        <span className="rounded-full border border-emerald-300/40 bg-emerald-100/80 px-2 py-0.5 font-mono text-[length:var(--fs-2xs)] font-black text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100">
           {isGroup ? strings.syncPercentBadge(syncPercent) : strings.inSyncCount(matchedCount)}
         </span>
       }
@@ -526,13 +538,13 @@ function RevealGrid({
   // The plurality option (0 or 1); ties fall back to option a.
   const counts = picks.reduce(
     (acc, c) => {
-      if (c === 0) acc[0]++;
-      else if (c === 1) acc[1]++;
+      if (c === 0) acc[0] = (acc[0] ?? 0) + 1;
+      else if (c === 1) acc[1] = (acc[1] ?? 0) + 1;
       return acc;
     },
-    [0, 0],
+    [0, 0] as [number, number],
   );
-  const pluralityChoice: MeldChoice = counts[1] > counts[0] ? 1 : 0;
+  const pluralityChoice: MeldChoice = (counts[1] ?? 0) > (counts[0] ?? 0) ? 1 : 0;
   const twoPlayerMatch =
     !isGroup && picks.length >= 2 && picks[0] !== null && picks[0] === picks[1];
   const synced = isGroup ? agreement >= 0.75 : twoPlayerMatch;
@@ -561,7 +573,14 @@ function RevealGrid({
           );
         })}
       </div>
-      <p className={cn('text-center text-sm font-bold', synced ? 'text-good' : 'text-ink2')}>
+      <p
+        className={cn(
+          'rounded-2xl border px-3 py-2 text-center text-sm font-black shadow-sm',
+          synced
+            ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
+            : 'border-white/60 bg-white/70 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300',
+        )}
+      >
         {isGroup
           ? strings.groupInSync(Math.round(agreement * 100))
           : synced
@@ -594,15 +613,17 @@ function RevealCard({
         reduced ? undefined : { animation: `meldReveal 360ms both`, animationDelay: `${delayMs}ms` }
       }
       className={cn(
-        'flex flex-col items-center gap-1 rounded-xl border p-2 text-center transition-colors',
-        highlight ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
+        'flex flex-col items-center gap-1 rounded-2xl border p-3 text-center shadow-sm transition-colors',
+        highlight
+          ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
+          : 'border-white/60 bg-white/70 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200',
       )}
     >
       <Avatar seed={player.id} name={player.name} size={24} />
-      <span className="w-full truncate text-xs font-semibold uppercase tracking-wide opacity-80">
+      <span className="w-full truncate text-xs font-black uppercase tracking-wide opacity-80">
         {player.name}
       </span>
-      <span className="text-sm font-bold leading-tight">{text}</span>
+      <span className="text-sm font-black leading-tight">{text}</span>
       {/* Keyframes are inline so this game stays self-contained. */}
       <style>{`@keyframes meldReveal{from{opacity:0;transform:translateY(8px) scale(0.96)}to{opacity:1;transform:none}}`}</style>
     </div>
@@ -618,17 +639,22 @@ function HistoryList({
   strings: ReturnType<typeof getMindMeldStrings>;
 }) {
   return (
-    <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+    <div className="rounded-[1.35rem] border border-white/60 bg-white/72 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+      <p className="mb-2 text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {strings.historyTitle}
       </p>
       {history.length === 0 ? (
-        <p className="text-xs text-ink3">{strings.historyEmpty}</p>
+        <p className="rounded-2xl border border-dashed border-slate-300 bg-white/46 px-3 py-4 text-center text-xs font-semibold text-slate-500 dark:border-white/15 dark:bg-white/5 dark:text-slate-400">
+          {strings.historyEmpty}
+        </p>
       ) : (
         <ul className="flex flex-col gap-0.5">
           {history.map((h) => (
-            <li key={h.round} className="flex items-center gap-2 text-xs text-ink2">
-              <span className="text-good">✓</span>
+            <li
+              key={h.round}
+              className="flex items-center gap-2 rounded-2xl border border-white/60 bg-white/64 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+            >
+              <span className="font-black text-emerald-600 dark:text-emerald-200">✓</span>
               <span className="truncate">{h.label}</span>
             </li>
           ))}

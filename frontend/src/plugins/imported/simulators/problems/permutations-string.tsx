@@ -65,7 +65,7 @@ function record({ s }: StrPermInput): Frame<StrPermState>[] {
       return;
     }
     for (let i = low; i <= high; i++) {
-      [chars[low], chars[i]] = [chars[i], chars[low]];
+      [chars[low]!, chars[i]!] = [chars[i]!, chars[low]!];
       emit(
         'SWAP',
         `swap ${low}↔${i}`,
@@ -73,7 +73,7 @@ function record({ s }: StrPermInput): Frame<StrPermState>[] {
         { swap: [low, i], low: low, high: high },
       );
       bt(low + 1, high);
-      [chars[low], chars[i]] = [chars[i], chars[low]];
+      [chars[low]!, chars[i]!] = [chars[i]!, chars[low]!];
       emit(
         'UNDO',
         `undo ${low}↔${i}`,

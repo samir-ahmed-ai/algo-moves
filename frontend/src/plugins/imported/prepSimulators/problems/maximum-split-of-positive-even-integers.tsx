@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,7 +29,7 @@ function record({ finalSum }: SplitInput): Frame<SplitState>[] {
   const res: number[] = [];
   let sum = 0;
 
-  const { emit, frames } = createRecorder<SplitState>(() => ({
+  const { emit, frames } = createPrepRecorder<SplitState>(() => ({
     finalSum,
     res: res.slice(),
     cur: null,
@@ -96,7 +96,7 @@ function record({ finalSum }: SplitInput): Frame<SplitState>[] {
   );
 
   const remainder = finalSum - sum;
-  res[res.length - 1] += remainder;
+  res[res.length - 1]! += remainder;
   sum += remainder;
   emit(
     'PATCH',

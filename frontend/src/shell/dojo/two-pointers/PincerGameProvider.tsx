@@ -131,7 +131,6 @@ export function PincerGameProvider({ children }: { children: ReactNode }) {
     if (parsed && parsed.levelId !== levelId) {
       writeDojoHash({ gameId: PINCER_GAME_ID, levelId }, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const vals = level.values;
@@ -260,6 +259,13 @@ export function PincerGameProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
+      // While the intro card is up, Enter/Space activate its focused
+      // "Start level" button — never claimPair, which would burn an action.
+      if (showIntro && (key === 'Enter' || key === ' ')) {
+        setShowIntro(false);
+        return true;
+      }
+
       let handled = true;
       switch (key) {
         case 'l':
@@ -294,7 +300,7 @@ export function PincerGameProvider({ children }: { children: ReactNode }) {
       if (handled) setShowIntro(false);
       return handled;
     },
-    [claimPair, complete, declareNoPair, level.id, movePointer, resetLevel, selectLevel],
+    [claimPair, complete, declareNoPair, level.id, movePointer, resetLevel, selectLevel, showIntro],
   );
 
   const nextId = nextLevelId(level.id);

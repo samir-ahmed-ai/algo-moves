@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -43,7 +43,7 @@ function toBits(exp: number): string[] {
 function record({ base, exp }: PowerInput): Frame<PowerState>[] {
   const bits = toBits(Math.max(exp, 0));
 
-  const { emit, frames } = createRecorder<PowerState>(() => ({
+  const { emit, frames } = createPrepRecorder<PowerState>(() => ({
     origBase: base,
     origExp: exp,
     bits,
@@ -86,7 +86,7 @@ function record({ base, exp }: PowerInput): Frame<PowerState>[] {
       emit(
         'MULT',
         `res*=${curBase}`,
-        `Bit ${bits[idx]} at this position is 1, so this power of the base counts: result *= base → result = ${result} (base is ${curBase} = ${base}^${1 << (bits.length - 1 - idx)}).`,
+        `Bit ${bits[idx]!} at this position is 1, so this power of the base counts: result *= base → result = ${result} (base is ${curBase} = ${base}^${1 << (bits.length - 1 - idx)}).`,
         { i: idx, base: curBase, result, odd: true, multiplied: true },
         'good',
       );
@@ -94,7 +94,7 @@ function record({ base, exp }: PowerInput): Frame<PowerState>[] {
       emit(
         'SKIP',
         `bit 0`,
-        `Bit ${bits[idx]} at this position is 0, so this power of the base is skipped — result stays ${result}.`,
+        `Bit ${bits[idx]!} at this position is 0, so this power of the base is skipped — result stays ${result}.`,
         { i: idx, base: curBase, result, odd: false, multiplied: false },
       );
     }
@@ -168,7 +168,7 @@ function Inspector({ frame }: InspectorProps<PowerState>) {
     <VarGrid>
       <InspectorRow k="base^exp" v={`${s.origBase}^${s.origExp}`} />
       <InspectorRow k="bits (MSB→LSB)" v={s.bits.join('')} />
-      <InspectorRow k="current bit" v={s.i !== null ? s.bits[s.i] : '—'} />
+      <InspectorRow k="current bit" v={s.i !== null ? s.bits[s.i]! : '—'} />
       <InspectorRow k="base (squared)" v={s.base} />
       <InspectorRow k="result" v={s.result} />
       <InspectorRow k="answer" v={s.done ? s.result : '…'} />

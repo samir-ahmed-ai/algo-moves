@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,7 +30,7 @@ function record({ s }: StepsInput): Frame<StepsState>[] {
   let steps = 0;
   let carry = 0;
 
-  const { emit, frames } = createRecorder<StepsState>(() => ({
+  const { emit, frames } = createPrepRecorder<StepsState>(() => ({
     chars,
     i: null,
     bit: null,
@@ -48,7 +48,7 @@ function record({ s }: StepsInput): Frame<StepsState>[] {
   );
 
   for (let i = chars.length - 1; i > 0; i--) {
-    const bit = Number(chars[i]);
+    const bit = Number(chars[i]!);
     const val = bit + carry;
     if (val % 2 === 1) {
       steps += 2;
@@ -117,7 +117,7 @@ function Inspector({ frame }: InspectorProps<StepsState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="bit s[i]" v={s.bit ?? '—'} />
+      <InspectorRow k="bit s[i]!" v={s.bit ?? '—'} />
       <InspectorRow k="carry" v={s.carry} />
       <InspectorRow k="bit + carry" v={s.val ?? '—'} />
       <InspectorRow
@@ -133,7 +133,7 @@ function numSteps(s: string): number {
   let steps = 0;
   let carry = 0;
   for (let i = s.length - 1; i > 0; i--) {
-    const val = Number(s[i]) + carry;
+    const val = Number(s[i]!) + carry;
     if (val % 2 === 1) {
       steps += 2;
       carry = 1;

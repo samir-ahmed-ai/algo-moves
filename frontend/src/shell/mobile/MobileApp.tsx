@@ -46,7 +46,10 @@ function browseFromHash(): { trackId?: string; categoryId?: string } | null {
   const parsed = parseMobileHash(location.hash, location.pathname);
   if (!parsed || parsed.itemId) return null;
   if (parsed.trackId || parsed.categoryId) {
-    return { trackId: parsed.trackId, categoryId: parsed.categoryId };
+    return {
+      ...(parsed.trackId !== undefined ? { trackId: parsed.trackId } : {}),
+      ...(parsed.categoryId !== undefined ? { categoryId: parsed.categoryId } : {}),
+    };
   }
   return null;
 }
@@ -126,11 +129,18 @@ export function MobileApp() {
       const track = activeTrackId ?? 'interview-prep';
       setActiveTrackId(track);
       writeMobileHash(
-        { trackId: track, categoryId: catId, itemId: startItemId },
+        {
+          trackId: track,
+          categoryId: catId,
+          ...(startItemId !== undefined ? { itemId: startItemId } : {}),
+        },
         { replace: false },
       );
     } else {
-      writeMobileHash({ topicId: topic.id, itemId: startItemId }, { replace: false });
+      writeMobileHash(
+        { topicId: topic.id, ...(startItemId !== undefined ? { itemId: startItemId } : {}) },
+        { replace: false },
+      );
     }
     setTarget({
       topic,

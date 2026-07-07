@@ -65,8 +65,8 @@ function record({ s }: LVPInput): Frame<LVPState>[] {
     // s[i] === ')'
     if (i >= 1 && s[i - 1] === '(') {
       const prior = i >= 2 ? dp[i - 2] : 0;
-      dp[i] = prior + 2;
-      best = Math.max(best, dp[i]);
+      dp[i] = prior! + 2;
+      best = Math.max(best, dp[i]!);
       emit(
         'PAIR',
         `dp[${i}]=${dp[i]}`,
@@ -74,12 +74,12 @@ function record({ s }: LVPInput): Frame<LVPState>[] {
         { i: i, from: i >= 2 ? i - 2 : null },
       );
     } else {
-      const j = i - dp[i - 1] - 1; // index that would hold the matching '('
-      if (i >= 1 && dp[i - 1] > 0 && j >= 0 && s[j] === '(') {
+      const j = i - dp[i - 1]! - 1; // index that would hold the matching '('
+      if (i >= 1 && dp[i - 1]! > 0 && j >= 0 && s[j] === '(') {
         const inner = dp[i - 1];
         const outer = j >= 1 ? dp[j - 1] : 0;
-        dp[i] = inner + 2 + outer;
-        best = Math.max(best, dp[i]);
+        dp[i] = inner! + 2 + outer!;
+        best = Math.max(best, dp[i]!);
         emit(
           'NEST',
           `dp[${i}]=${dp[i]}`,
@@ -112,14 +112,14 @@ function record({ s }: LVPInput): Frame<LVPState>[] {
 
 function View({ frame }: PluginViewProps<LVPState>) {
   const s = frame.state;
-  const cells = s.dp.map((v, i) => (v < 0 ? s.s[i] : v));
+  const cells = s.dp.map((v, i) => (v < 0 ? s.s[i]! : v));
   const pointers: ArrayPointer[] = [];
   if (s.i !== null)
     pointers.push({ i: s.i, label: `i='${s.s[s.i]}'`, tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: 'pulls', tone: 'warn', place: 'below' });
-  const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] > 0 ? 'match' : '');
-  const dpI = s.i !== null && s.dp[s.i] >= 0 ? s.dp[s.i] : '—';
-  const dpFrom = s.from !== null && s.dp[s.from] >= 0 ? s.dp[s.from] : '—';
+  const tone = (i: number) => (s.i === i ? 'found' : s.dp[i]! > 0 ? 'match' : '');
+  const dpI = s.i !== null && s.dp[s.i]! >= 0 ? s.dp[s.i] : '—';
+  const dpFrom = s.from !== null && s.dp[s.from]! >= 0 ? s.dp[s.from] : '—';
   const rail = (
     <>
       <RailGroup label="scan">
@@ -145,7 +145,7 @@ function View({ frame }: PluginViewProps<LVPState>) {
         cellTone={tone}
         pointers={pointers}
         windowRange={null}
-        label={(i) => s.s[i]}
+        label={(i) => s.s[i]!}
       />
     </VizStage>
   );
@@ -154,7 +154,7 @@ function View({ frame }: PluginViewProps<LVPState>) {
 function Inspector({ frame }: InspectorProps<LVPState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = (i: number) => (i >= 0 && i < s.dp.length && s.dp[i] >= 0 ? s.dp[i] : '—');
+  const cell = (i: number) => (i >= 0 && i < s.dp.length && s.dp[i]! >= 0 ? s.dp[i] : '—');
   return (
     <VarGrid>
       <InspectorRow k="s" v={`"${s.s}"`} />

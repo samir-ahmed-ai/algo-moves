@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, type MutableRefObject } from 'react';
+import type { EditorView } from '@codemirror/view';
 import { SplitCodeEditor } from '@/components/code/SplitCodeEditor';
 import type { EditorPrefs } from '@/store/user-prefs';
 import { RecallEditorFooter } from './RecallEditorFooter';
@@ -31,11 +32,11 @@ export function RecallEditorShell({
   peek: boolean;
   onDraftChange: (value: string) => void;
   compact?: boolean;
-  draftViewRef?: React.MutableRefObject<import('@codemirror/view').EditorView | null>;
-  formatBothRef?: React.MutableRefObject<(() => void) | null>;
-  foldBothRef?: React.MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
+  draftViewRef?: MutableRefObject<EditorView | null>;
+  formatBothRef?: MutableRefObject<(() => void) | null>;
+  foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
 }) {
-  const localDraftRef = useRef<import('@codemirror/view').EditorView | null>(null);
+  const localDraftRef = useRef<EditorView | null>(null);
   const localFormatBothRef = useRef<(() => void) | null>(null);
   const localFoldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
   const viewRef = draftViewRef ?? localDraftRef;
@@ -47,9 +48,9 @@ export function RecallEditorShell({
       <SplitCodeEditor
         reference={reference}
         draft={draft}
-        lang={lang}
-        dark={dark}
-        themeKey={themeKey}
+        {...(lang ? { lang } : {})}
+        {...(dark !== undefined ? { dark } : {})}
+        {...(themeKey ? { themeKey } : {})}
         vim={editorPrefs.vim}
         wrap={editorPrefs.wrap}
         hideLeft={blind}
@@ -63,7 +64,7 @@ export function RecallEditorShell({
         showLineNumbers={editorPrefs.showLineNumbers}
         fontSize={editorPrefs.fontSize}
         lineHeight={editorPrefs.lineHeight}
-        compact={compact}
+        {...(compact !== undefined ? { compact } : {})}
         draftViewRef={viewRef}
         formatBothRef={formatRef}
         foldBothRef={foldRef}
@@ -71,7 +72,7 @@ export function RecallEditorShell({
       <RecallEditorFooter
         editorPrefs={editorPrefs}
         setEditorPrefs={setEditorPrefs}
-        compact={compact}
+        {...(compact !== undefined ? { compact } : {})}
       />
     </div>
   );

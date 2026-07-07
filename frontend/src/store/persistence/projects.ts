@@ -18,13 +18,13 @@ function projectName(name: string): string | null {
   return normalized || null;
 }
 
-export function saveProject(name: string, snapshot: ShareState) {
+export function saveProject(name: string, snapshot: ShareState): void {
   const key = projectName(name);
   if (!key) return;
   store.update((data) => ({ ...data, [key]: snapshot }));
 }
 
-export function deleteProject(name: string) {
+export function deleteProject(name: string): void {
   const key = projectName(name);
   if (!key) return;
   store.update((data) => {

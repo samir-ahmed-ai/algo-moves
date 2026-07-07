@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,9 +33,9 @@ function record({ tree }: DiameterInput): Frame<DiameterState>[] {
   let best = 0;
   let bestNode: number | null = null;
 
-  const has = (i: number) => i >= 0 && i < tree.length && tree[i] != null;
+  const has = (i: number) => i >= 0 && i < tree.length && tree[i]! != null;
 
-  const { emit, frames } = createRecorder<DiameterState>(() => ({
+  const { emit, frames } = createPrepRecorder<DiameterState>(() => ({
     tree,
     active: null,
     visited: visited.slice(),
@@ -59,8 +59,8 @@ function record({ tree }: DiameterInput): Frame<DiameterState>[] {
 
     emit(
       'ENTER',
-      `node ${tree[i]}`,
-      `Visit node ${tree[i]}. Before we can measure the path bending here, recurse into its children to get their heights (post-order — children first).`,
+      `node ${tree[i]!}`,
+      `Visit node ${tree[i]!}. Before we can measure the path bending here, recurse into its children to get their heights (post-order — children first).`,
       { active: i },
     );
 
@@ -76,7 +76,7 @@ function record({ tree }: DiameterInput): Frame<DiameterState>[] {
     emit(
       improved ? 'BEST' : 'COMBINE',
       `L+R=${through}`,
-      `At node ${tree[i]}: left height L = ${l}, right height R = ${r}. A path bending here spans L + R = ${through} edges. ${
+      `At node ${tree[i]!}: left height L = ${l}, right height R = ${r}. A path bending here spans L + R = ${through} edges. ${
         improved
           ? `That beats the old best, so best = ${best}.`
           : `That is not more than the current best ${best}, so best stays ${best}.`
@@ -90,7 +90,7 @@ function record({ tree }: DiameterInput): Frame<DiameterState>[] {
     emit(
       'RETURN',
       `h=${h}`,
-      `Node ${tree[i]} returns its own height to its parent: 1 + max(L, R) = 1 + max(${l}, ${r}) = ${h}. This is how tall the subtree rooted at ${tree[i]} is.`,
+      `Node ${tree[i]!} returns its own height to its parent: 1 + max(L, R) = 1 + max(${l}, ${r}) = ${h}. This is how tall the subtree rooted at ${tree[i]!} is.`,
       { active: i, l, r, best, height: h, bestNode },
     );
     return h;
@@ -102,7 +102,7 @@ function record({ tree }: DiameterInput): Frame<DiameterState>[] {
     'DONE',
     `diameter=${best}`,
     `Every node has been processed. The diameter is the largest L + R found: ${best} edge${best === 1 ? '' : 's'}${
-      bestNode !== null ? `, bending through node ${tree[bestNode]}` : ''
+      bestNode !== null ? `, bending through node ${tree[bestNode]!}` : ''
     }.`,
     { done: true, best, bestNode },
     'good',
@@ -143,7 +143,7 @@ function View({ frame }: PluginViewProps<DiameterState>) {
 function Inspector({ frame }: InspectorProps<DiameterState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const label = (i: number | null) => (i !== null && s.tree[i] != null ? s.tree[i] : '—');
+  const label = (i: number | null) => (i !== null && s.tree[i]! != null ? s.tree[i]! : '—');
   return (
     <VarGrid>
       <InspectorRow k="node" v={label(s.active)} />

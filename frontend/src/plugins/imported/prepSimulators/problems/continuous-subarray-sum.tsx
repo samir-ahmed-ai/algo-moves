@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -28,7 +28,7 @@ interface SubarrayState {
   nums: number[];
   k: number;
   i: number | null; // current index being scanned
-  num: number | null; // nums[i]
+  num: number | null; // nums[i]!
   prefix: number | null; // running prefix sum mod k (normalised to [0,k))
   prev: number | null; // earlier index that shared this remainder
   map: [number, number][]; // remainder -> first index it appeared at
@@ -41,7 +41,7 @@ function record({ nums, k }: SubarrayInput): Frame<SubarrayState>[] {
   const modMap = new Map<number, number>([[0, -1]]);
   let prefix = 0;
 
-  const { emit, frames } = createRecorder<SubarrayState>(() => ({
+  const { emit, frames } = createPrepRecorder<SubarrayState>(() => ({
     nums,
     k,
     i: null,
@@ -57,18 +57,18 @@ function record({ nums, k }: SubarrayInput): Frame<SubarrayState>[] {
   emit(
     'INIT',
     `k=${k}`,
-    `Continuous Subarray Sum: is there a subarray of length >= 2 whose sum is a multiple of ${k}? Key fact: sum(i+1..j) is a multiple of ${k} exactly when prefix[j] % ${k} == prefix[i] % ${k}. We seed the map with remainder 0 -> index -1 so a whole prefix that is itself a multiple counts.`,
+    `Continuous Subarray Sum: is there a subarray of length >= 2 whose sum is a multiple of ${k}? Key fact: sum(i+1..j) is a multiple of ${k} exactly when prefix[j]! % ${k} == prefix[i]! % ${k}. We seed the map with remainder 0 -> index -1 so a whole prefix that is itself a multiple counts.`,
     { prefix: 0 },
   );
 
   for (let i = 0; i < nums.length; i++) {
-    const num = nums[i];
-    prefix = (prefix + num) % k;
+    const num = nums[i]!;
+    prefix = (prefix + num!) % k;
     if (prefix < 0) prefix += k;
     emit(
       'SCAN',
       `prefix%${k}=${prefix}`,
-      `Add nums[${i}] = ${num} to the running sum and take it mod ${k}: remainder is ${prefix}. Have we seen this remainder before?`,
+      `Add nums[${i}]! = ${num} to the running sum and take it mod ${k}: remainder is ${prefix}. Have we seen this remainder before?`,
       { i, num, prefix },
     );
 
@@ -78,7 +78,7 @@ function record({ nums, k }: SubarrayInput): Frame<SubarrayState>[] {
         emit(
           'FOUND',
           `[${prev + 1}..${i}]`,
-          `Yes — remainder ${prefix} first appeared at index ${prev}, and ${i} − ${prev} = ${i - prev} >= 2. So nums[${prev + 1}..${i}] sums to a multiple of ${k}. Return true.`,
+          `Yes — remainder ${prefix} first appeared at index ${prev}, and ${i} − ${prev} = ${i - prev} >= 2. So nums[${prev + 1}..${i}]! sums to a multiple of ${k}. Return true.`,
           { i, num, prefix, prev, window: [prev + 1, i], result: true, done: true },
           'good',
         );
@@ -94,8 +94,8 @@ function record({ nums, k }: SubarrayInput): Frame<SubarrayState>[] {
       modMap.set(prefix, i);
       emit(
         'STORE',
-        `map[${prefix}]=${i}`,
-        `Remainder ${prefix} is new — record map[${prefix}] = ${i} as its first occurrence so a later match can form a subarray back to here.`,
+        `map[${prefix}]!=${i}`,
+        `Remainder ${prefix} is new — record map[${prefix}]! = ${i} as its first occurrence so a later match can form a subarray back to here.`,
         { i, num, prefix },
       );
     }
@@ -118,7 +118,7 @@ function View({ frame }: PluginViewProps<SubarrayState>) {
   if (s.prev !== null && s.prev >= 0)
     pointers.push({ i: s.prev, label: 'i', tone: 'good', place: 'below' });
   const tone = (i: number) => {
-    if (s.window && i >= s.window[0] && i <= s.window[1]) return 'found';
+    if (s.window && i >= s.window[0]! && i <= s.window[1]!) return 'found';
     return s.i === i ? 'match' : '';
   };
   const mapItems = s.map.map(([rem, idx]) => `${rem}:${idx}`);
@@ -159,7 +159,7 @@ function Inspector({ frame }: InspectorProps<SubarrayState>) {
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="j (index)" v={s.i ?? '—'} />
-      <InspectorRow k="nums[j]" v={s.num ?? '—'} />
+      <InspectorRow k="nums[j]!" v={s.num ?? '—'} />
       <InspectorRow k="prefix % k" v={s.prefix ?? '—'} />
       <InspectorRow k="first seen at" v={s.prev ?? '—'} />
       <InspectorRow k="map size" v={s.map.length} />
@@ -187,14 +187,15 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Difference Array + Prefix Sum — different approach',
       },
     ],
-    explain: '`prefix[j] - prefix[i]` is a multiple of `k` iff `prefix[j] % k == prefix[i] % k`',
+    explain:
+      '`prefix[j]! - prefix[i]!` is a multiple of `k` iff `prefix[j]! % k == prefix[i]! % k`',
   },
   {
     id: 'init',
     prompt: 'At the start of a run (Continuous Subarray Sum), what strategy is established?',
     choices: [
       {
-        label: '`prefix[j] - prefix[i]` is a multiple — described in INIT caption',
+        label: '`prefix[j]! - prefix[i]!` is a multiple — described in INIT caption',
         correct: true,
       },
       {
@@ -208,7 +209,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Continuous Subarray Sum: is there a subarray of length >= 2 whose sum is a multiple of ? Key fact: sum(i+1..j) is a multiple of  exactly when prefix[j] %  == prefix[i] % . We seed the map with remainder 0 -> index -1 so a whole prefix that is itself a multiple counts.',
+      'Continuous Subarray Sum: is there a subarray of length >= 2 whose sum is a multiple of ? Key fact: sum(i+1..j) is a multiple of  exactly when prefix[j]! %  == prefix[i]! % . We seed the map with remainder 0 -> index -1 so a whole prefix that is itself a multiple counts.',
   },
   {
     id: 'key-step',
@@ -270,7 +271,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n). O(min(n,k)). `prefix[j] - prefix[i]` is a multiple of `k` iff `prefix[j] % k == prefix[i] % k`; Store first occurrence index of each `prefix % k` in a map; seed `{0: -1}` fo',
+      'O(n). O(min(n,k)). `prefix[j]! - prefix[i]!` is a multiple of `k` iff `prefix[j]! % k == prefix[i]! % k`; Store first occurrence index of each `prefix % k` in a map; seed `{0: -1}` fo',
   },
   {
     id: 'outcome',

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -28,9 +28,9 @@ type Buckets = Record<string, WordCursor[]>;
 interface MatchState {
   s: string; // the source string, one char per array cell
   i: number | null; // current scan index into s
-  ch: string | null; // character s[i] we are handling
+  ch: string | null; // character s[i]! we are handling
   buckets: Buckets; // snapshot of every "next char" → waiting words
-  pulled: WordCursor[]; // cursors pulled out of bucket[ch] this step
+  pulled: WordCursor[]; // cursors pulled out of bucket[ch]! this step
   active: WordCursor | null; // the cursor being advanced right now
   matched: string[]; // words that completed (became subsequences)
   count: number; // matched.length — the running answer
@@ -41,7 +41,7 @@ interface MatchState {
 function snapshot(buckets: Buckets): Buckets {
   const out: Buckets = {};
   for (const key of Object.keys(buckets)) {
-    out[key] = buckets[key].map((c) => ({ word: c.word, idx: c.idx }));
+    out[key]! = buckets[key]!.map((c) => ({ word: c.word, idx: c.idx }));
   }
   return out;
 }
@@ -50,7 +50,7 @@ function record({ s, words }: MatchInput): Frame<MatchState>[] {
   const buckets: Buckets = {};
   const matched: string[] = [];
 
-  const { emit, frames } = createRecorder<MatchState>(() => ({
+  const { emit, frames } = createPrepRecorder<MatchState>(() => ({
     s,
     i: null,
     ch: null,
@@ -64,8 +64,8 @@ function record({ s, words }: MatchInput): Frame<MatchState>[] {
 
   // Seed each word into the bucket keyed by its first character.
   for (const w of words) {
-    const first = w[0];
-    (buckets[first] ??= []).push({ word: w, idx: 0 });
+    const first = w[0]!;
+    (buckets[first!]! ??= []).push({ word: w, idx: 0 });
   }
   emit(
     'INIT',
@@ -75,16 +75,17 @@ function record({ s, words }: MatchInput): Frame<MatchState>[] {
   );
 
   for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    const nodes = buckets[ch] ?? [];
+    const ch = s[i]!;
+    const key = ch!;
+    const nodes = buckets[key] ?? [];
     // Match the Go `delete(buckets, s[i])`: pull the whole bucket out.
-    delete buckets[ch];
+    delete buckets[key];
 
     if (nodes.length === 0) {
       emit(
         'SKIP',
         `'${ch}' empty`,
-        `s[${i}] = '${ch}'. No word is currently waiting on '${ch}', so nothing advances here — just move to the next character.`,
+        `s[${i}]! = '${ch}'. No word is currently waiting on '${ch}', so nothing advances here — just move to the next character.`,
         { i, ch, pulled: [] },
       );
       continue;
@@ -93,7 +94,7 @@ function record({ s, words }: MatchInput): Frame<MatchState>[] {
     emit(
       'PULL',
       `'${ch}' ×${nodes.length}`,
-      `s[${i}] = '${ch}'. Pull every word waiting on '${ch}' out of its bucket — ${nodes.length} word(s): ${nodes
+      `s[${i}]! = '${ch}'. Pull every word waiting on '${ch}' out of its bucket — ${nodes.length} word(s): ${nodes
         .map((c) => `"${c.word}"`)
         .join(', ')}. Each one gets to advance past its '${ch}'.`,
       { i, ch, pulled: nodes.map((c) => ({ word: c.word, idx: c.idx })) },
@@ -116,8 +117,8 @@ function record({ s, words }: MatchInput): Frame<MatchState>[] {
           'good',
         );
       } else {
-        const next = advanced.word[advanced.idx];
-        (buckets[next] ??= []).push(advanced);
+        const next = advanced.word[advanced.idx]!;
+        (buckets[next!]! ??= []).push(advanced);
         emit(
           'REBUCKET',
           `"${advanced.word}"→'${next}'`,
@@ -148,7 +149,7 @@ function record({ s, words }: MatchInput): Frame<MatchState>[] {
 function bucketEntries(buckets: Buckets): [string, WordCursor[]][] {
   return Object.keys(buckets)
     .sort()
-    .map((k) => [k, buckets[k]] as [string, WordCursor[]]);
+    .map((k) => [k, buckets[k]!] as [string, WordCursor[]]);
 }
 
 function View({ frame }: PluginViewProps<MatchState>) {
@@ -213,7 +214,7 @@ function Inspector({ frame }: InspectorProps<MatchState>) {
     <VarGrid>
       <InspectorRow k="s" v={`"${s.s}"`} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="s[i]" v={s.ch ? `'${s.ch}'` : '—'} />
+      <InspectorRow k="s[i]!" v={s.ch ? `'${s.ch}'` : '—'} />
       <InspectorRow k="pulled this step" v={s.pulled.length} />
       <InspectorRow k="active word" v={s.active ? `"${s.active.word}"` : '—'} />
       <InspectorRow k="words still waiting" v={waiting} />

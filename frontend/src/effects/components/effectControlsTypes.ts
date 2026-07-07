@@ -1,4 +1,6 @@
+export type EffectPatch = Record<string, unknown>;
+
 export interface EffectControlsProps {
-  data: Record<string, unknown>;
-  onChange: (patch: Record<string, unknown>) => void;
+  readonly data: Readonly<Record<string, unknown>>;
+  readonly onChange: (patch: EffectPatch) => void;
 }

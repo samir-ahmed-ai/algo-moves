@@ -9,7 +9,7 @@ export function getCanvasViewport(key: string): CanvasViewport | undefined {
 }
 
 /** Persist the camera for a canvas key without disturbing node layout. */
-export function saveCanvasViewport(key: string, viewport: CanvasViewport) {
+export function saveCanvasViewport(key: string, viewport: CanvasViewport): void {
   const normalizedKey = normalizeCanvasKey(key);
   const normalizedViewport = normalizeViewport(viewport);
   if (!normalizedKey || !normalizedViewport) return;
@@ -36,12 +36,12 @@ function normalizeViewport(viewport: CanvasViewport): CanvasViewport | null {
   };
 }
 
-function subscribe(listener: () => void) {
+function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
-function notify() {
+function notify(): void {
   listeners.forEach((listener) => listener());
 }
 

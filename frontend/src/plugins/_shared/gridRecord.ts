@@ -58,8 +58,10 @@ export function recordGridBfs(
   const dist = Array.from({ length: rows }, () => new Array(cols).fill(-1));
   const [sr, sc] = start;
   const queue: [number, number][] = [[sr, sc]];
-  visited[sr][sc] = true;
-  dist[sr][sc] = 0;
+  const startVisited = visited[sr];
+  const startDist = dist[sr];
+  if (startVisited) startVisited[sc] = true;
+  if (startDist) startDist[sc] = 0;
 
   const { emit, frames } = createGridRecorder(grid, { visited, dist, cur: [sr, sc] });
   emit('INIT', `start=(${sr},${sc})`, options.initCaption, { cur: [sr, sc], visited, dist });
@@ -73,7 +75,7 @@ export function recordGridBfs(
 
   while (queue.length > 0) {
     const [r, c] = queue.shift()!;
-    emit('VISIT', `(${r},${c})`, `Process cell (${r}, ${c}) with value ${grid[r][c]}.`, {
+    emit('VISIT', `(${r},${c})`, `Process cell (${r}, ${c}) with value ${grid[r]?.[c] ?? '?'}.`, {
       cur: [r, c],
       visited,
       dist,
@@ -82,12 +84,18 @@ export function recordGridBfs(
     for (const [dr, dc] of dirs) {
       const nr = r + dr;
       const nc = c + dc;
-      if (nr < 0 || nc < 0 || nr >= rows || nc >= cols || visited[nr][nc]) continue;
-      if (!options.passable(nr, nc, grid[nr][nc])) continue;
-      visited[nr][nc] = true;
-      dist[nr][nc] = dist[r][c] + 1;
+      const visitedRow = visited[nr];
+      const gridRow = grid[nr];
+      if (nr < 0 || nc < 0 || nr >= rows || nc >= cols || !visitedRow || visitedRow[nc]) continue;
+      const cellVal = gridRow?.[nc];
+      if (cellVal === undefined || !options.passable(nr, nc, cellVal)) continue;
+      visitedRow[nc] = true;
+      const distRow = dist[nr];
+      const srcDist = dist[r]?.[c];
+      if (distRow && srcDist !== undefined) distRow[nc] = srcDist + 1;
       queue.push([nr, nc]);
-      emit('ENQUEUE', `→(${nr},${nc})`, `Move to (${nr}, ${nc}), dist=${dist[nr][nc]}.`, {
+      const newDist = distRow?.[nc];
+      emit('ENQUEUE', `→(${nr},${nc})`, `Move to (${nr}, ${nc}), dist=${newDist ?? '?'}.`, {
         cur: [nr, nc],
         visited,
         dist,

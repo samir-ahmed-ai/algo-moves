@@ -82,9 +82,9 @@ function record({ values, target }: RotInput): Frame<RotState>[] {
       );
       return frames;
     }
-    if (values[lo] <= values[mid]) {
+    if (values[lo]! <= values[mid]!) {
       // left half [lo..mid] is sorted
-      if (values[lo] <= target && target < values[mid]) {
+      if (values[lo]! <= target && target < values[mid]!) {
         for (let i = mid; i <= hi; i++) dead[i] = true;
         hi = mid - 1;
         emit(
@@ -105,7 +105,7 @@ function record({ values, target }: RotInput): Frame<RotState>[] {
       }
     } else {
       // right half [mid..hi] is sorted
-      if (values[mid] < target && target <= values[hi]) {
+      if (values[mid]! < target && target <= values[hi]!) {
         for (let i = lo; i <= mid; i++) dead[i] = true;
         lo = mid + 1;
         emit(

@@ -1,6 +1,8 @@
 import type { Node } from '@xyflow/react';
 
 export type PanelCornerStyle = 'theme' | 'sharp' | 'soft' | 'round';
+export type PanelRunState = 'running' | 'paused' | 'stopped';
+export type PanelSubDocKind = 'whiteboard' | 'collab-code';
 
 export interface PanelNodeStyle {
   opacity?: number;
@@ -19,7 +21,7 @@ export interface PanelNodeData extends Record<string, unknown> {
   /** Per-node accent override picked from the toolbar. */
   accent?: string;
   /** Chain playback state (Strudel running/paused/stopped). */
-  runState?: 'running' | 'paused' | 'stopped';
+  runState?: PanelRunState;
   /** Locked panels cannot be dragged, resized, or removed. */
   locked?: boolean;
   /** When true, panel fills the snapped viewport height instead of auto-sizing to content. */
@@ -35,7 +37,7 @@ export interface PanelNodeData extends Record<string, unknown> {
   /** Persisted sub-document (whiteboard scene or shared editor) for solo/offline. */
   subDoc?: {
     nodeId: string;
-    kind: 'whiteboard' | 'collab-code';
+    kind: PanelSubDocKind;
     rev: number;
     payload: unknown;
   };

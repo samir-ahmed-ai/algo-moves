@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import {
   VizStage,
@@ -33,7 +33,7 @@ interface LogState {
 function parseLevel(line: string): string | null {
   const fields = line.trim().split(/\s+/);
   if (fields.length === 0) return null;
-  let level = fields[0].toUpperCase();
+  let level = fields[0]!.toUpperCase();
   if (level.endsWith(':')) level = level.slice(0, -1);
   return level;
 }
@@ -42,7 +42,7 @@ function record({ lines }: LogInput): Frame<LogState>[] {
   let total = 0;
   const byLevel: Record<string, number> = {};
 
-  const { emit, frames } = createRecorder<LogState>(() => ({
+  const { emit, frames } = createPrepRecorder<LogState>(() => ({
     total,
     byLevel: { ...byLevel },
     lastLine: '',
@@ -60,7 +60,7 @@ function record({ lines }: LogInput): Frame<LogState>[] {
   for (const line of lines) {
     total++;
     const level = parseLevel(line);
-    if (level) byLevel[level] = (byLevel[level] ?? 0) + 1;
+    if (level) byLevel[level]! = (byLevel[level]! ?? 0) + 1;
     emit(
       'INGEST',
       level ?? 'unknown',
@@ -83,7 +83,7 @@ function record({ lines }: LogInput): Frame<LogState>[] {
 
 function View({ frame }: PluginViewProps<LogState>) {
   const s = frame.state;
-  const entries = Object.entries(s.byLevel).sort((a, b) => b[1] - a[1]);
+  const entries = Object.entries(s.byLevel).sort((a, b) => b[1]! - a[1]!);
   const levelItems = entries.map(([level, count]) => `${level} → ${count}`);
   return (
     <VizStage
@@ -219,7 +219,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(log n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(lines). O(unique keys). Fields; level=upper(first); ByLevel[level]++',
+    explain: 'O(lines). O(unique keys). Fields; level=upper(first); ByLevel[level]!++',
   },
   {
     id: 'outcome',

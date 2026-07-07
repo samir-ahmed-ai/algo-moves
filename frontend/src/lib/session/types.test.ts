@@ -10,7 +10,7 @@ import {
   isRoomEnvelope,
 } from '@/shell/realtime/roomState';
 
-import { CanvasDoc } from '@/shell/canvas';
+import type { CanvasDoc } from '@/shell/canvas';
 const sampleDoc: CanvasDoc = {
   v: 1,
   rev: 1,

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -25,9 +25,9 @@ interface LcpState {
 }
 
 function record({ strs }: LcpInput): Frame<LcpState>[] {
-  const base = strs.length > 0 ? strs[0] : '';
+  const base = strs.length > 0 ? strs[0]! : '';
 
-  const { emit, frames } = createRecorder<LcpState>(() => ({
+  const { emit, frames } = createPrepRecorder<LcpState>(() => ({
     strs,
     col: null,
     row: null,
@@ -54,8 +54,8 @@ function record({ strs }: LcpInput): Frame<LcpState>[] {
     return frames;
   }
 
-  for (let i = 0; i < base.length; i++) {
-    const c = base[i];
+  for (let i = 0; i < base!.length; i++) {
+    const c = base![i];
     emit(
       'COLUMN',
       `col ${i} = '${c}'`,
@@ -64,23 +64,23 @@ function record({ strs }: LcpInput): Frame<LcpState>[] {
     );
 
     for (let j = 1; j < strs.length; j++) {
-      const w = strs[j];
-      if (i >= w.length) {
+      const w = strs[j]!;
+      if (i >= w!.length) {
         emit(
           'MISMATCH',
           `"${w}" too short`,
-          `Word ${j} ("${w}") has only ${w.length} character${w.length === 1 ? '' : 's'}, so it has nothing at index ${i}. The common prefix cannot extend past column ${i}. Answer = word0[:${i}] = "${base.slice(0, i)}".`,
-          { col: i, row: j, matched: i, result: base.slice(0, i), done: true },
+          `Word ${j} ("${w}") has only ${w!.length} character${w!.length === 1 ? '' : 's'}, so it has nothing at index ${i}. The common prefix cannot extend past column ${i}. Answer = word0[:${i}]! = "${base!.slice(0, i)}".`,
+          { col: i, row: j, matched: i, result: base!.slice(0, i), done: true },
           'bad',
         );
         return frames;
       }
-      if (w[i] !== c) {
+      if (w![i] !== c) {
         emit(
           'MISMATCH',
-          `'${w[i]}' ≠ '${c}'`,
-          `Word ${j} ("${w}") has '${w[i]}' at index ${i}, which differs from '${c}'. That breaks the prefix here. Answer = word0[:${i}] = "${base.slice(0, i)}".`,
-          { col: i, row: j, matched: i, result: base.slice(0, i), done: true },
+          `'${w![i]}' ≠ '${c}'`,
+          `Word ${j} ("${w}") has '${w![i]}' at index ${i}, which differs from '${c}'. That breaks the prefix here. Answer = word0[:${i}]! = "${base!.slice(0, i)}".`,
+          { col: i, row: j, matched: i, result: base!.slice(0, i), done: true },
           'bad',
         );
         return frames;
@@ -97,7 +97,7 @@ function record({ strs }: LcpInput): Frame<LcpState>[] {
     emit(
       'COLUMN_OK',
       `col ${i} common`,
-      `Every word shares '${c}' at column ${i}, so the prefix now includes '${c}'. Confirmed prefix so far: "${base.slice(0, i + 1)}".`,
+      `Every word shares '${c}' at column ${i}, so the prefix now includes '${c}'. Confirmed prefix so far: "${base!.slice(0, i + 1)}".`,
       { col: i, matched: i + 1 },
       'good',
     );
@@ -107,7 +107,7 @@ function record({ strs }: LcpInput): Frame<LcpState>[] {
     'DONE',
     `"${base}"`,
     `We consumed all of word 0 without any mismatch, so word 0 itself is a prefix of every word. The longest common prefix is "${base}".`,
-    { matched: base.length, result: base, done: true },
+    { matched: base!.length, result: base, done: true },
     'good',
   );
   return frames;
@@ -115,8 +115,8 @@ function record({ strs }: LcpInput): Frame<LcpState>[] {
 
 function View({ frame }: PluginViewProps<LcpState>) {
   const s = frame.state;
-  const base = s.strs.length > 0 ? s.strs[0] : '';
-  const baseChars = base.split('');
+  const base = s.strs.length > 0 ? s.strs[0]! : '';
+  const baseChars = base!.split('');
   const pointers: ArrayPointer[] = [];
   if (s.col !== null) pointers.push({ i: s.col, label: 'col', tone: 'accent', place: 'above' });
   const tone = (i: number) => {
@@ -179,7 +179,7 @@ function View({ frame }: PluginViewProps<LcpState>) {
 function Inspector({ frame }: InspectorProps<LcpState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const base = s.strs.length > 0 ? s.strs[0] : '';
+  const base = s.strs.length > 0 ? s.strs[0]! : '';
   return (
     <VarGrid>
       <InspectorRow k="words" v={s.strs.length} />
@@ -189,7 +189,7 @@ function Inspector({ frame }: InspectorProps<LcpState>) {
       <InspectorRow k="prefix length" v={s.matched} />
       <InspectorRow
         k="prefix"
-        v={s.result !== null ? `"${s.result}"` : `"${base.slice(0, s.matched)}"`}
+        v={s.result !== null ? `"${s.result}"` : `"${base!.slice(0, s.matched)}"`}
       />
     </VarGrid>
   );
@@ -259,7 +259,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Word  ("") has \'\' at index , which differs from \'\'. That breaks the prefix here. Answer = word0[:] = "".',
+      'Word  ("") has \'\' at index , which differs from \'\'. That breaks the prefix here. Answer = word0[:]! = "".',
   },
   {
     id: 'state',
@@ -299,7 +299,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n*m). O(1). for i in word0: any mismatch/short -> return word0[:i]',
+    explain: 'O(n*m). O(1). for i in word0: any mismatch/short -> return word0[:i]!',
   },
   {
     id: 'outcome',

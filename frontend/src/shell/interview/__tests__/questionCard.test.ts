@@ -9,7 +9,8 @@ describe('buildQuestionCardElements', () => {
       'technical',
     );
     expect(els).toHaveLength(2);
-    const [rect, text] = els;
+    const rect = els[0]!;
+    const text = els[1]!;
     expect(rect.type).toBe('rectangle');
     expect(text.type).toBe('text');
     // Grouped together so they drag as one.
@@ -28,7 +29,7 @@ describe('buildQuestionCardElements', () => {
   it('produces unique element ids on each call', () => {
     const a = buildQuestionCardElements('q', { x: 0, y: 0 });
     const b = buildQuestionCardElements('q', { x: 0, y: 0 });
-    expect(a[0].id).not.toBe(b[0].id);
-    expect(a[1].id).not.toBe(b[1].id);
+    expect(a[0]!.id).not.toBe(b[0]!.id);
+    expect(a[1]!.id).not.toBe(b[1]!.id);
   });
 });

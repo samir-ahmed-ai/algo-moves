@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import {
@@ -37,7 +37,7 @@ interface SparseState {
 
 function toPairs(nums: number[]): [number, number][] {
   const pairs: [number, number][] = [];
-  for (let i = 0; i < nums.length; i++) if (nums[i] !== 0) pairs.push([i, nums[i]]);
+  for (let i = 0; i < nums.length; i++) if (nums[i]! !== 0) pairs.push([i, nums[i]!]);
   return pairs;
 }
 
@@ -48,7 +48,7 @@ function record({ nums1, nums2 }: SparseInput): Frame<SparseState>[] {
   let j = 0;
   let acc = 0;
 
-  const { emit, frames } = createRecorder<SparseState>(() => ({
+  const { emit, frames } = createPrepRecorder<SparseState>(() => ({
     pairs1: [...pairs1],
     pairs2: [...pairs2],
     i,
@@ -67,8 +67,8 @@ function record({ nums1, nums2 }: SparseInput): Frame<SparseState>[] {
   );
 
   while (i < pairs1.length && j < pairs2.length) {
-    const [i1, v1] = pairs1[i];
-    const [i2, v2] = pairs2[j];
+    const [i1, v1] = pairs1[i]!;
+    const [i2, v2] = pairs2[j]!;
     if (i1 === i2) {
       const prod = v1 * v2;
       acc += prod;

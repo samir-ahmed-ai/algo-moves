@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -37,12 +37,12 @@ function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
   const queue: number[] = [];
   const maxDQ: number[] = [];
 
-  const { emit, frames } = createRecorder<QueueMaxState>(() => ({
+  const { emit, frames } = createPrepRecorder<QueueMaxState>(() => ({
     queue: queue.slice(),
     maxDQ: maxDQ.slice(),
     highlightQueueBack: false,
     poppedTail: null,
-    currentMax: maxDQ.length > 0 ? maxDQ[0] : null,
+    currentMax: maxDQ.length > 0 ? maxDQ[0]! : null,
     output: null,
     opLabel: '',
     done: false,
@@ -67,8 +67,8 @@ function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
         { opLabel: label, highlightQueueBack: true },
       );
 
-      while (maxDQ.length > 0 && maxDQ[maxDQ.length - 1] < val) {
-        const dropped = maxDQ[maxDQ.length - 1];
+      while (maxDQ.length > 0 && maxDQ[maxDQ.length - 1]! < val) {
+        const dropped = maxDQ[maxDQ.length - 1]!;
         maxDQ.pop();
         emit(
           'ENQ_DROP',
@@ -82,7 +82,7 @@ function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
       emit(
         'ENQ_DQ_PUSH',
         `maxDQ ← ${val}`,
-        `${label}: push ${val} onto the back of the max-deque. The deque stays non-increasing front-to-back, so maxDQ[0] = ${maxDQ[0]} is the current maximum.`,
+        `${label}: push ${val} onto the back of the max-deque. The deque stays non-increasing front-to-back, so maxDQ[0]! = ${maxDQ[0]!} is the current maximum.`,
         { opLabel: label },
       );
     } else if (op.kind === 'deq') {
@@ -97,7 +97,7 @@ function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
         );
         continue;
       }
-      const v = queue[0];
+      const v = queue[0]!;
       queue.shift();
       emit(
         'DEQ_POP',
@@ -106,25 +106,25 @@ function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
         { opLabel: label, output: v },
       );
 
-      if (maxDQ.length > 0 && maxDQ[0] === v) {
+      if (maxDQ.length > 0 && maxDQ[0]! === v) {
         maxDQ.shift();
         emit(
           'DEQ_DQ_POP',
           `drop front ${v}`,
-          `${label}: the removed value ${v} was also the front of the max-deque, so it leaves the deque too. The new front maxDQ[0] = ${maxDQ.length > 0 ? maxDQ[0] : '—'} becomes the max.`,
+          `${label}: the removed value ${v} was also the front of the max-deque, so it leaves the deque too. The new front maxDQ[0]! = ${maxDQ.length > 0 ? maxDQ[0]! : '—'} becomes the max.`,
           { opLabel: label, output: v },
         );
       } else {
         emit(
           'DEQ_KEEP',
           'max unchanged',
-          `${label}: ${v} was not the deque front (max = ${maxDQ.length > 0 ? maxDQ[0] : '—'}), so the max-deque is untouched.`,
+          `${label}: ${v} was not the deque front (max = ${maxDQ.length > 0 ? maxDQ[0]! : '—'}), so the max-deque is untouched.`,
           { opLabel: label, output: v },
         );
       }
     } else {
       const label = 'Max()';
-      const m = maxDQ.length > 0 ? maxDQ[0] : 0;
+      const m = maxDQ.length > 0 ? maxDQ[0]! : 0;
       emit(
         'MAX',
         `max = ${m}`,
@@ -135,7 +135,7 @@ function record({ ops }: QueueMaxInput): Frame<QueueMaxState>[] {
     }
   }
 
-  const finalMax = maxDQ.length > 0 ? maxDQ[0] : 0;
+  const finalMax = maxDQ.length > 0 ? maxDQ[0]! : 0;
   emit(
     'DONE',
     `max = ${finalMax}`,
@@ -169,7 +169,7 @@ function View({ frame }: PluginViewProps<QueueMaxState>) {
       <div className={cn('mt-1 font-mono', vizText.base, 'text-ink')}>
         max ={' '}
         <span className={s.maxDQ.length > 0 ? 'text-good' : 'text-ink3'}>
-          {s.maxDQ.length > 0 ? s.maxDQ[0] : '—'}
+          {s.maxDQ.length > 0 ? s.maxDQ[0]! : '—'}
         </span>
       </div>
 
@@ -189,9 +189,9 @@ function Inspector({ frame }: InspectorProps<QueueMaxState>) {
     <VarGrid>
       <InspectorRow k="operation" v={s.opLabel || '—'} />
       <InspectorRow k="queue" v={s.queue.length ? `[${s.queue.join(', ')}]` : 'empty'} />
-      <InspectorRow k="queue front" v={s.queue.length ? s.queue[0] : '—'} />
+      <InspectorRow k="queue front" v={s.queue.length ? s.queue[0]! : '—'} />
       <InspectorRow k="max-deque" v={s.maxDQ.length ? `[${s.maxDQ.join(', ')}]` : 'empty'} />
-      <InspectorRow k="max" v={s.maxDQ.length ? s.maxDQ[0] : '—'} />
+      <InspectorRow k="max" v={s.maxDQ.length ? s.maxDQ[0]! : '—'} />
       <InspectorRow k="returns" v={s.output ?? (s.done ? 'done' : '…')} />
     </VarGrid>
   );
@@ -343,7 +343,7 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as QueueMaxState | undefined;
-    const m = s && s.maxDQ.length > 0 ? s.maxDQ[0] : 0;
+    const m = s && s.maxDQ.length > 0 ? s.maxDQ[0]! : 0;
     return { ok: true, label: `final max = ${m}` };
   },
 };

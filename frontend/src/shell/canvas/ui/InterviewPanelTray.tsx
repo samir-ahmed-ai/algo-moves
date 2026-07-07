@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -122,16 +123,46 @@ export function InterviewPanelTray() {
   const totalItems = countToolDockItems(sections);
   const sessionActive = collab != null && collab.session.kind !== 'solo';
 
-  if (
-    !canvasAdd ||
-    !shouldShowToolDock({
+  const show =
+    !!canvasAdd &&
+    shouldShowToolDock({
       present,
       mode,
       hasItems: totalItems > 0,
       problemBound: problemFocused,
       sessionActive,
-    })
-  ) {
+    });
+
+  // Keep a saved (dragged) position on-screen: a viewport that shrank since the
+  // position was stored could otherwise strand the dock beyond the edge with no
+  // way to grab it back. Re-clamp on show and on resize.
+  useEffect(() => {
+    if (!show) return;
+    const reclamp = () => {
+      const el = dockRef.current;
+      const pos = prefsRef.current.pos;
+      if (!el || !pos) return;
+      const parentRect = (el.offsetParent as HTMLElement | null)?.getBoundingClientRect();
+      const clamped = clampDockPosition(
+        pos,
+        {
+          width: parentRect?.width ?? window.innerWidth,
+          height: parentRect?.height ?? window.innerHeight,
+        },
+        { width: el.offsetWidth, height: el.offsetHeight },
+      );
+      if (clamped.x !== pos.x || clamped.y !== pos.y) {
+        const next = { ...prefsRef.current, pos: clamped };
+        setPrefs(next);
+        writeToolDockPrefs(next);
+      }
+    };
+    reclamp();
+    window.addEventListener('resize', reclamp);
+    return () => window.removeEventListener('resize', reclamp);
+  }, [show]);
+
+  if (!show) {
     return null;
   }
 
@@ -295,7 +326,7 @@ export function InterviewPanelTray() {
                   disabled={lock.locked}
                   lockHint={lock.hint}
                   dndKey={canvasAdd.dndKey}
-                  effectDndKey={canvasAdd.effectDndKey}
+                  {...(canvasAdd.effectDndKey ? { effectDndKey: canvasAdd.effectDndKey } : {})}
                   onAdd={onAdd}
                 />
               ))}

@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { minHeapPopGeneric, minHeapPushGeneric } from '../../../_shared/dualHeapBoard';
 import {
   VizStage,
@@ -48,7 +48,7 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
   let heap: StreamItem[] = [];
   const out: number[] = [];
 
-  const { emit, frames } = createRecorder<MergeStreamsState>(() => ({
+  const { emit, frames } = createPrepRecorder<MergeStreamsState>(() => ({
     streams,
     cursors: cursors.slice(),
     heap: heap.slice(),
@@ -65,8 +65,8 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
   );
 
   for (let si = 0; si < streams.length; si++) {
-    if (streams[si].length > 0) {
-      const it: StreamItem = { val: streams[si][0], stream: si, idx: 0 };
+    if (streams[si]!.length > 0) {
+      const it: StreamItem = { val: streams[si]![0]!, stream: si, idx: 0 };
       heap = minHeapPushGeneric(heap, it, cmpStreamItem);
       emit('SEED', `s${si}→${it.val}`, `Seed heap with stream ${si}'s head: ${it.val}.`, {
         heap: heap.slice(),
@@ -86,11 +86,11 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
       { heap: heap.slice(), out: out.slice(), popped, cursors: cursors.slice() },
       'good',
     );
-    cursors[popped.stream] = popped.idx + 1;
+    cursors[popped.stream]! = popped.idx + 1;
     const next = popped.idx + 1;
-    if (next < streams[popped.stream].length) {
+    if (next < streams[popped.stream]!.length) {
       const nxt: StreamItem = {
-        val: streams[popped.stream][next],
+        val: streams[popped.stream]![next]!,
         stream: popped.stream,
         idx: next,
       };
@@ -149,9 +149,9 @@ function View({ frame }: PluginViewProps<MergeStreamsState>) {
               key={i}
               className={cn(
                 'mr-1',
-                i < s.cursors[si]
+                i < s.cursors[si]!
                   ? 'text-ink3 line-through'
-                  : i === s.cursors[si]
+                  : i === s.cursors[si]!
                     ? 'rounded bg-accentbg text-accent'
                     : 'text-ink',
               )}
@@ -338,7 +338,7 @@ export const simulator: ProblemSimulator = {
     const s = frames[frames.length - 1]?.state as MergeStreamsState | undefined;
     if (!s?.done) return { ok: false, label: 'incomplete' };
     const flat = s.streams.flat().sort((a, b) => a - b);
-    const ok = s.out.length === flat.length && s.out.every((v, i) => v === flat[i]);
+    const ok = s.out.length === flat.length && s.out.every((v, i) => v === flat[i]!);
     return { ok, label: `[${s.out.join(', ')}]` };
   },
 };

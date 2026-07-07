@@ -5,7 +5,10 @@ function normalizeId(id: string): string {
 }
 
 /** Undirected DFS — each component is a set of connected node ids. */
-export function findConnectedComponents(nodeIds: string[], edges: Edge[]): string[][] {
+export function findConnectedComponents(
+  nodeIds: readonly string[],
+  edges: readonly Edge[],
+): string[][] {
   const visited = new Set<string>();
   const components: string[][] = [];
   const ids = Array.from(new Set(nodeIds.map(normalizeId).filter(Boolean)));
@@ -35,7 +38,7 @@ function dfs(
   visited: Set<string>,
   component: string[],
   adj: Map<string, string[]>,
-) {
+): void {
   visited.add(nodeId);
   component.push(nodeId);
 
@@ -44,7 +47,7 @@ function dfs(
 }
 
 /** Map node id → component index for O(1) lookup. */
-export function componentIndexMap(components: string[][]): Map<string, number> {
+export function componentIndexMap(components: readonly (readonly string[])[]): Map<string, number> {
   const map = new Map<string, number>();
   components.forEach((comp, i) =>
     comp.forEach((id) => {

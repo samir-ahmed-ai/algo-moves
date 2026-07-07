@@ -1,7 +1,7 @@
 /** Deferred browse→canvas drop: pointer position applied once the problem canvas mounts. */
 export type PendingProblemDrop = {
-  itemId: string;
-  position: { x: number; y: number };
+  readonly itemId: string;
+  readonly position: Readonly<{ x: number; y: number }>;
 };
 
 let pending: PendingProblemDrop | null = null;
@@ -11,14 +11,17 @@ function normalizeItemId(itemId: string): string | null {
   return id ? id : null;
 }
 
-function normalizePosition(position: { x: number; y: number }): { x: number; y: number } {
+function normalizePosition(position: Readonly<{ x: number; y: number }>): { x: number; y: number } {
   return {
     x: Number.isFinite(position.x) ? position.x : 0,
     y: Number.isFinite(position.y) ? position.y : 0,
   };
 }
 
-export function setPendingProblemDrop(itemId: string, position: { x: number; y: number }): void {
+export function setPendingProblemDrop(
+  itemId: string,
+  position: Readonly<{ x: number; y: number }>,
+): void {
   const id = normalizeItemId(itemId);
   pending = id ? { itemId: id, position: normalizePosition(position) } : null;
 }

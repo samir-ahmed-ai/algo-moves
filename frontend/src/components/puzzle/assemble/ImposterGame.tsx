@@ -73,7 +73,10 @@ interface PlanRound {
 function buildRunPlan(pieces: CodePiece[], storageKey: string): PlanRound[] {
   const eligible = pieces
     .map((_, i) => i)
-    .filter((i) => blockKind(pieces[i]) !== 'close' && pieces[i].code.trim().length >= 8);
+    .filter((i) => {
+      const piece = pieces[i];
+      return piece && blockKind(piece) !== 'close' && piece.code.trim().length >= 8;
+    });
   const exclude = new Set(pieces.map((p) => p.code));
   const used = new Set<number>();
   const rounds: PlanRound[] = [];
@@ -84,9 +87,11 @@ function buildRunPlan(pieces: CodePiece[], storageKey: string): PlanRound[] {
     const order = [...seededShuffle(fresh, rand), ...seededShuffle(consumed, rand)];
     let made: PlanRound | null = null;
     for (const pieceIdx of order) {
+      const sourcePiece = pieces[pieceIdx];
+      if (!sourcePiece) continue;
       const seed = Math.floor(rand() * 4294967296);
       const siblings = pieces.filter((_, j) => j !== pieceIdx).map((p) => p.code);
-      const mutant = mutateCode(pieces[pieceIdx].code, seed, exclude, siblings);
+      const mutant = mutateCode(sourcePiece.code, seed, exclude, siblings);
       if (mutant) {
         made = { pieceIdx, mutant, originalFirst: rand() < 0.5 };
         break;
@@ -204,14 +209,22 @@ export function ImposterGame({
 
   const current = plan[round] ?? null;
   const mutantIdx = current?.pieceIdx ?? -1;
-  const mutantPiece = useMemo<CodePiece | null>(
-    () => (current ? { ...pieces[current.pieceIdx], code: current.mutant } : null),
-    [current, pieces],
-  );
+  const mutantPiece = useMemo<CodePiece | null>(() => {
+    if (!current) return null;
+    const source = pieces[current.pieceIdx];
+    if (!source) return null;
+    return { ...source, code: current.mutant };
+  }, [current, pieces]);
 
   /** The block as rendered — the mutant while the lie is still standing. */
   const displayPieceAt = useCallback(
-    (i: number): CodePiece => (i === mutantIdx && !healed && mutantPiece ? mutantPiece : pieces[i]),
+    (i: number): CodePiece => {
+      const base = pieces[i];
+      if (!base) {
+        throw new Error(`ImposterGame: missing piece at index ${i}`);
+      }
+      return i === mutantIdx && !healed && mutantPiece ? mutantPiece : base;
+    },
     [mutantIdx, healed, mutantPiece, pieces],
   );
 
@@ -221,7 +234,6 @@ export function ImposterGame({
       completedRef.current = true;
       onComplete?.({ mistakes: 0, ms: 0, perfect: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundTotal]);
 
   /* 45s soft ring — feeds the speed bonus only, never blocks play */
@@ -480,7 +492,9 @@ export function ImposterGame({
 
   const fixCards = useMemo(() => {
     if (!current) return null;
-    const d = diffTokens(pieces[current.pieceIdx].code, current.mutant);
+    const source = pieces[current.pieceIdx];
+    if (!source) return null;
+    const d = diffTokens(source.code, current.mutant);
     const orig = { isOriginal: true, tokens: d.a };
     const mut = { isOriginal: false, tokens: d.b };
     return current.originalFirst ? [orig, mut] : [mut, orig];
@@ -722,8 +736,7 @@ export function ImposterGame({
             newBest={summary.newBest}
             primaryLabel={end === 'win' ? `Play again — beat ${summary.best}` : 'Try again'}
             onPrimary={resetRun}
-            secondaryLabel={onContinue ? 'Continue' : undefined}
-            onSecondary={onContinue}
+            {...(onContinue ? { secondaryLabel: 'Continue', onSecondary: onContinue } : {})}
           />
         </div>
       )}

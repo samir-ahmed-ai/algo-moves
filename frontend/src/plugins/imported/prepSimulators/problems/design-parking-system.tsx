@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -30,7 +30,7 @@ const TYPE_LABELS = ['', 'big', 'medium', 'small'];
 function record({ big, medium, small, cars }: ParkingInput): Frame<ParkingState>[] {
   const slots: [number, number, number, number] = [0, big, medium, small];
 
-  const { emit, frames } = createRecorder<ParkingState>(() => ({
+  const { emit, frames } = createPrepRecorder<ParkingState>(() => ({
     slots: [...slots] as [number, number, number, number],
     op: '',
     carType: null,
@@ -41,18 +41,18 @@ function record({ big, medium, small, cars }: ParkingInput): Frame<ParkingState>
   emit(
     'INIT',
     `big=${big} med=${medium} sm=${small}`,
-    `Parking System: slots[1..3] track remaining big/medium/small spots. AddCar(type) decrements if available.`,
+    `Parking System: slots[1..3]! track remaining big/medium/small spots. AddCar(type) decrements if available.`,
     {},
   );
 
   for (const carType of cars) {
-    const label = TYPE_LABELS[carType] ?? `type${carType}`;
-    if (slots[carType] > 0) {
-      slots[carType]--;
+    const label = TYPE_LABELS[carType]! ?? `type${carType}`;
+    if (slots[carType]! > 0) {
+      slots[carType]!--;
       emit(
         'ADD',
         `${label} ok`,
-        `AddCar(${carType}=${label}): slot available (${slots[carType] + 1} → ${slots[carType]}) → return true.`,
+        `AddCar(${carType}=${label}): slot available (${slots[carType]! + 1} → ${slots[carType]!}) → return true.`,
         { op: `AddCar(${label})`, carType, allowed: true },
         'good',
       );
@@ -69,8 +69,8 @@ function record({ big, medium, small, cars }: ParkingInput): Frame<ParkingState>
 
   emit(
     'DONE',
-    `left ${slots[1]}/${slots[2]}/${slots[3]}`,
-    `Done. Remaining: big=${slots[1]}, medium=${slots[2]}, small=${slots[3]}.`,
+    `left ${slots[1]!}/${slots[2]!}/${slots[3]!}`,
+    `Done. Remaining: big=${slots[1]!}, medium=${slots[2]!}, small=${slots[3]!}.`,
     { op: 'done', done: true },
     'good',
   );
@@ -99,7 +99,7 @@ function View({ frame }: PluginViewProps<ParkingState>) {
               s.carType === i + 1 ? 'border-accent bg-accentbg' : 'border-edge',
             )}
           >
-            {label}: {s.slots[i + 1]}
+            {label}: {s.slots[i + 1]!}
           </div>
         ))}
       </div>
@@ -113,9 +113,9 @@ function Inspector({ frame }: InspectorProps<ParkingState>) {
   return (
     <VarGrid>
       <InspectorRow k="op" v={s.op || '—'} />
-      <InspectorRow k="big left" v={s.slots[1]} />
-      <InspectorRow k="medium left" v={s.slots[2]} />
-      <InspectorRow k="small left" v={s.slots[3]} />
+      <InspectorRow k="big left" v={s.slots[1]!} />
+      <InspectorRow k="medium left" v={s.slots[2]!} />
+      <InspectorRow k="small left" v={s.slots[3]!} />
       <InspectorRow k="result" v={s.allowed === null ? '—' : s.allowed ? 'true' : 'false'} />
     </VarGrid>
   );
@@ -164,7 +164,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Parking System: slots[1..3] track remaining big/medium/small spots. AddCar(type) decrements if available.',
+      'Parking System: slots[1..3]! track remaining big/medium/small spots. AddCar(type) decrements if available.',
   },
   {
     id: 'key-step',
@@ -243,7 +243,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as ParkingState | undefined;
     return s?.done
-      ? { ok: true, label: `${s.slots[1]}/${s.slots[2]}/${s.slots[3]} left` }
+      ? { ok: true, label: `${s.slots[1]!}/${s.slots[2]!}/${s.slots[3]!} left` }
       : { ok: false, label: 'incomplete' };
   },
 };

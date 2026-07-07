@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -47,7 +47,7 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
   const raw = timePoints.map(toMinutes);
   const mins = raw.slice().sort((a, b) => a - b);
 
-  const { emit, frames } = createRecorder<MtdState>(() => ({
+  const { emit, frames } = createPrepRecorder<MtdState>(() => ({
     timePoints,
     mins: mins.slice(),
     sorted: false,
@@ -75,24 +75,24 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
 
   // Wrap-around candidate: last time to first time across midnight.
   const last = mins.length - 1;
-  let best = 1440 - mins[last] + mins[0];
+  let best = 1440 - mins[last]! + mins[0]!;
   let bestPair: [number, number] = [last, 0];
   emit(
     'WRAP',
     `${best}m`,
-    `The wrap-around gap crosses midnight: from ${fmt(mins[last])} forward to ${fmt(mins[0])} is 1440 − ${mins[last]} + ${mins[0]} = ${best} min. Seed the best answer with this.`,
+    `The wrap-around gap crosses midnight: from ${fmt(mins[last]!)} forward to ${fmt(mins[0]!)} is 1440 − ${mins[last]!} + ${mins[0]!} = ${best} min. Seed the best answer with this.`,
     { mins: mins.slice(), sorted: true, i: last, prev: 0, wrap: true, best, bestPair },
   );
 
   for (let i = 1; i < mins.length; i++) {
-    const d = mins[i] - mins[i - 1];
+    const d = mins[i]! - mins[i - 1]!;
     if (d < best) {
       best = d;
       bestPair = [i - 1, i];
       emit(
         'FILL',
         `${d}m ✓`,
-        `Adjacent gap ${fmt(mins[i - 1])} → ${fmt(mins[i])} = ${mins[i]} − ${mins[i - 1]} = ${d} min. That beats the previous best, so the new minimum is ${best} min.`,
+        `Adjacent gap ${fmt(mins[i - 1]!)} → ${fmt(mins[i]!)} = ${mins[i]!} − ${mins[i - 1]!} = ${d} min. That beats the previous best, so the new minimum is ${best} min.`,
         { mins: mins.slice(), sorted: true, i, prev: i - 1, best, bestPair },
         'good',
       );
@@ -100,7 +100,7 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
       emit(
         'SCAN',
         `${d}m`,
-        `Adjacent gap ${fmt(mins[i - 1])} → ${fmt(mins[i])} = ${d} min. That is not smaller than the current best (${best} min), so the best stays put.`,
+        `Adjacent gap ${fmt(mins[i - 1]!)} → ${fmt(mins[i]!)} = ${d} min. That is not smaller than the current best (${best} min), so the best stays put.`,
         { mins: mins.slice(), sorted: true, i, prev: i - 1, best, bestPair },
       );
     }
@@ -116,8 +116,8 @@ function record({ timePoints }: MtdInput): Frame<MtdState>[] {
       best,
       bestPair,
       done: true,
-      i: bestPair[1],
-      prev: bestPair[0],
+      i: bestPair[1]!,
+      prev: bestPair[0]!,
     },
     'good',
   );
@@ -135,7 +135,7 @@ function View({ frame }: PluginViewProps<MtdState>) {
     pointers.push({ i: s.prev, label: s.wrap ? 'first' : 'i−1', tone: 'good', place: 'below' });
 
   const tone = (i: number) => {
-    if (s.done && s.bestPair && (i === s.bestPair[0] || i === s.bestPair[1])) return 'found';
+    if (s.done && s.bestPair && (i === s.bestPair[0]! || i === s.bestPair[1]!)) return 'found';
     if (s.i === i || s.prev === i) return 'match';
     return '';
   };
@@ -154,7 +154,7 @@ function View({ frame }: PluginViewProps<MtdState>) {
       {s.best !== null && s.bestPair && (
         <div className={cn('mt-1 font-mono', s.done ? 'text-good' : 'text-ink3', vizText.sm)}>
           {s.wrap && !s.done ? 'wrap-around: ' : 'best gap: '}
-          {fmt(s.mins[s.bestPair[0]])} ↔ {fmt(s.mins[s.bestPair[1]])} = {s.best}m
+          {fmt(s.mins[s.bestPair[0]!]!)} ↔ {fmt(s.mins[s.bestPair[1]!]!)} = {s.best}m
         </div>
       )}
     </div>
@@ -165,14 +165,14 @@ function Inspector({ frame }: InspectorProps<MtdState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const at = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.mins.length ? fmt(s.mins[idx]) : '—';
+    idx !== null && idx >= 0 && idx < s.mins.length ? fmt(s.mins[idx]!) : '—';
   return (
     <VarGrid>
       <InspectorRow k="n (times)" v={s.timePoints.length} />
       <InspectorRow k="sorted" v={s.sorted ? 'yes' : 'no'} />
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="times[i]" v={at(s.i)} />
-      <InspectorRow k="times[i−1]" v={at(s.prev)} />
+      <InspectorRow k="times[i]!" v={at(s.i)} />
+      <InspectorRow k="times[i−1]!" v={at(s.prev)} />
       <InspectorRow k="phase" v={s.wrap ? 'wrap-around' : s.done ? 'done' : 'adjacent'} />
       <InspectorRow k="best (min)" v={s.best ?? '—'} />
     </VarGrid>

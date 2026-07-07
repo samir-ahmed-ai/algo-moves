@@ -72,7 +72,7 @@ function record({ adj, pos }: CSInput): Frame<CSState>[] {
       { active: v, backEdge: null },
     );
 
-    for (const nb of adj[v]) {
+    for (const nb of adj[v]!) {
       if (color[nb] === 1) {
         cycle = true;
         emit(

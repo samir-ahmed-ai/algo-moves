@@ -56,12 +56,12 @@ describe('effect transforms', () => {
   it('fast samples frames', () => {
     const out = fastEffect.transformFrames(sampleFrames(), { factor: 2 });
     expect(out.length).toBeLessThan(sampleFrames().length);
-    expect(out[0].move.note).toBe('n0');
+    expect(out[0]!.move.note).toBe('n0');
   });
 
   it('reverse reverses order', () => {
     const out = reverseEffect.transformFrames(sampleFrames(), { enabled: true });
-    expect(out[0].move.note).toBe('n4');
+    expect(out[0]!.move.note).toBe('n4');
   });
 
   it('mask keeps first and last', () => {
@@ -71,7 +71,7 @@ describe('effect transforms', () => {
 
   it('applyEffect dispatches by id', () => {
     const out = applyEffect('reverse', sampleFrames(), { enabled: true });
-    expect(out[0].move.note).toBe('n4');
+    expect(out[0]!.move.note).toBe('n4');
   });
 });
 

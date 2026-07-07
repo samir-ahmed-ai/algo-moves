@@ -32,7 +32,7 @@ export function CodePieceOverview({ pieces, lang = 'go', wrap = false }: CodePie
             key={piece.id}
             className="code-overview-section"
             style={sectionStyle}
-            aria-label={`Section ${i + 1}: ${piece.role}`}
+            aria-label={`Section ${i + 1} of ${pieces.length}: ${piece.role}`}
           >
             <div className="code-overview-code">
               <span className="code-overview-index" aria-hidden>

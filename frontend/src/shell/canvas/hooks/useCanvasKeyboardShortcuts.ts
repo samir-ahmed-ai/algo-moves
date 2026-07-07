@@ -45,7 +45,7 @@ export function useCanvasKeyboardShortcuts({
           padding: FIT_PADDING,
           duration: FIT_VIEW_DURATION_MS,
           maxZoom: 1.0,
-          nodes: selected.length ? selected : undefined,
+          ...(selected.length ? { nodes: selected } : {}),
         });
         return;
       }

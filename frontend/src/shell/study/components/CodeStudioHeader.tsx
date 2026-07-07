@@ -67,7 +67,7 @@ function PhaseStepper({
               )}
             >
               <span aria-hidden className="code-studio-phase-glyph font-mono">
-                {done ? '✓' : STEP_GLYPH[idx]}
+                {done ? '✓' : (STEP_GLYPH[idx] ?? String(idx + 1))}
               </span>
               {PHASE_LABEL[p]}
             </button>
@@ -183,12 +183,10 @@ export function CodeStudioToolbar() {
               draftViewRef={draftViewRef}
               formatBothRef={formatBothRef}
               foldBothRef={foldBothRef}
-              lang={code?.lang}
-              trailing={
-                extras.length > 0 ? (
-                  <PanelHeaderMenu title="More actions" items={extras} />
-                ) : undefined
-              }
+              {...(code?.lang ? { lang: code.lang } : {})}
+              {...(extras.length > 0
+                ? { trailing: <PanelHeaderMenu title="More actions" items={extras} /> }
+                : {})}
             />
           </>
         ) : (
@@ -265,12 +263,10 @@ export function CodeStudioToolbar() {
             draftViewRef={draftViewRef}
             formatBothRef={formatBothRef}
             foldBothRef={foldBothRef}
-            lang={code?.lang}
-            trailing={
-              extras.length > 0 ? (
-                <PanelHeaderMenu title="More actions" items={extras} />
-              ) : undefined
-            }
+            {...(code?.lang ? { lang: code.lang } : {})}
+            {...(extras.length > 0
+              ? { trailing: <PanelHeaderMenu title="More actions" items={extras} /> }
+              : {})}
           />
         </>
       ) : (

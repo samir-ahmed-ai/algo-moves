@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,7 +32,7 @@ function record({ n: input }: PalinInput): Frame<PalinState>[] {
   let n = input;
   let rev = 0;
 
-  const { emit, frames } = createRecorder<PalinState>(() => ({
+  const { emit, frames } = createPrepRecorder<PalinState>(() => ({
     original: input,
     n,
     rev,

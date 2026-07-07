@@ -26,7 +26,7 @@ function ready(state: TopoPlayState): number[] {
 function runKahn(level: TopoLevel): TopoPlayState {
   let state = createPlayState(level);
   while (!isComplete(state) && !isStuck(state)) {
-    state = lockNode(state, ready(state)[0]);
+    state = lockNode(state, ready(state)[0]!);
   }
   return state;
 }
@@ -65,7 +65,7 @@ describe('toposort engine', () => {
     for (const level of LEVELS.filter((l) => !l.cyclic)) {
       const layers = layerOf(level.nodes, level.edges);
       for (const [from, to] of level.edges) {
-        expect(layers[from], `${level.id} edge ${from}->${to}`).toBeLessThan(layers[to]);
+        expect(layers[from], `${level.id} edge ${from}->${to}`).toBeLessThan(layers[to]!);
       }
     }
   });

@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   VizStage,
   RailGroup,
@@ -28,7 +28,7 @@ interface ShortestState {
   target: number;
   l: number; // left edge of the window
   r: number | null; // right edge just added (null before the scan)
-  sum: number; // running sum over nums[l..r]
+  sum: number; // running sum over nums[l..r]!
   best: number; // shortest window length found so far (0 = none yet)
   windowLen: number | null; // r-l+1 recorded on this step, if any
   done: boolean;
@@ -41,7 +41,7 @@ function record({ nums, target }: ShortestInput): Frame<ShortestState>[] {
   let l = 0;
   let best = INF;
 
-  const { emit, frames } = createRecorder<ShortestState>(() => ({
+  const { emit, frames } = createPrepRecorder<ShortestState>(() => ({
     nums,
     target,
     l: 0,
@@ -60,11 +60,11 @@ function record({ nums, target }: ShortestInput): Frame<ShortestState>[] {
   );
 
   for (let r = 0; r < nums.length; r++) {
-    sum += nums[r];
+    sum += nums[r]!;
     emit(
       'GROW',
-      `+nums[${r}]=${nums[r]}`,
-      `Grow the window: add nums[${r}] = ${nums[r]}. The window is [${l}..${r}] with sum ${sum}.`,
+      `+nums[${r}]!=${nums[r]!}`,
+      `Grow the window: add nums[${r}]! = ${nums[r]!}. The window is [${l}..${r}] with sum ${sum}.`,
       { l, r, sum, best: best === INF ? 0 : best },
     );
 
@@ -79,11 +79,11 @@ function record({ nums, target }: ShortestInput): Frame<ShortestState>[] {
           (isBetter
             ? `, the shortest so far — record best = ${windowLen}.`
             : `, not shorter than the current best (${best}).`) +
-          ` Now shrink from the left: drop nums[${l}] = ${nums[l]}.`,
+          ` Now shrink from the left: drop nums[${l}]! = ${nums[l]!}.`,
         { l, r, sum, best, windowLen },
         isBetter ? 'good' : undefined,
       );
-      sum -= nums[l];
+      sum -= nums[l]!;
       l++;
     }
   }
@@ -269,7 +269,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(n). sum>=target -> record r-l+1, sum-=nums[l], l++',
+    explain: 'O(n). O(n). sum>=target -> record r-l+1, sum-=nums[l]!, l++',
   },
   {
     id: 'outcome',

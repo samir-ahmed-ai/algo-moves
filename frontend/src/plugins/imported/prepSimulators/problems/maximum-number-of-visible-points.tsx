@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -37,20 +37,20 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
   let same = 0;
   const angles: number[] = [];
   for (const p of points) {
-    if (p[0] === location[0] && p[1] === location[1]) {
+    if (p[0]! === location[0]! && p[1]! === location[1]!) {
       same++;
     } else {
-      const a = (Math.atan2(p[1] - location[1], p[0] - location[0]) * 180) / Math.PI;
+      const a = (Math.atan2(p[1]! - location[1]!, p[0]! - location[0]!) * 180) / Math.PI;
       angles.push(a);
     }
   }
   angles.sort((x, y) => x - y);
   const base = angles.length;
-  for (let k = 0; k < base; k++) angles.push(angles[k] + 360);
+  for (let k = 0; k < base; k++) angles.push(angles[k]! + 360);
 
   const round1 = (x: number) => Math.round(x * 10) / 10;
 
-  const { emit, frames } = createRecorder<VisibleState>(() => ({
+  const { emit, frames } = createPrepRecorder<VisibleState>(() => ({
     angle,
     location,
     same,
@@ -66,7 +66,7 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
   emit(
     'INIT',
     `angle=${angle}, same=${same}`,
-    `Maximum Number of Visible Points: standing at [${location[0]}, ${location[1]}] we can rotate a wedge of ${angle}°. ${same} point(s) sit exactly on us and are always counted. The other ${base} point(s) become polar angles: ${angles.slice(0, base).map(round1).join('°, ')}°.`,
+    `Maximum Number of Visible Points: standing at [${location[0]!}, ${location[1]!}] we can rotate a wedge of ${angle}°. ${same} point(s) sit exactly on us and are always counted. The other ${base} point(s) become polar angles: ${angles.slice(0, base).map(round1).join('°, ')}°.`,
     { best: 0 },
   );
 
@@ -96,11 +96,11 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
 
   for (let i = 0; i < n; i++) {
     // Grow j while the window span stays within the viewing angle.
-    while (j < n && angles[j] - angles[i] <= limit) {
+    while (j < n && angles[j]! - angles[i]! <= limit) {
       emit(
         'GROW',
         `j→${j + 1}`,
-        `Left edge at cell ${i} (${round1(angles[i])}°). Cell ${j} is ${round1(angles[j])}°; span ${round1(angles[j] - angles[i])}° ≤ ${angle}°, so it fits — extend the window and advance j to ${j + 1}.`,
+        `Left edge at cell ${i} (${round1(angles[i]!)}°). Cell ${j} is ${round1(angles[j]!)}°; span ${round1(angles[j]! - angles[i]!)}° ≤ ${angle}°, so it fits — extend the window and advance j to ${j + 1}.`,
         { i, j: j + 1, best, bestRange },
       );
       j++;
@@ -132,8 +132,8 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
     `${answer} visible`,
     `Best wedge captured ${best} angled point(s); add the ${same} coincident one(s) for ${best} + ${same} = ${answer} visible points.`,
     {
-      i: bestRange ? bestRange[0] : null,
-      j: bestRange ? bestRange[1] + 1 : null,
+      i: bestRange ? bestRange[0]! : null,
+      j: bestRange ? bestRange[1]! + 1 : null,
       best,
       bestRange,
       answer,
@@ -158,7 +158,7 @@ function View({ frame }: PluginViewProps<VisibleState>) {
         ? [s.i, s.j - 1]
         : null;
   const tone = (idx: number) =>
-    s.done && s.bestRange && idx >= s.bestRange[0] && idx <= s.bestRange[1] ? 'found' : '';
+    s.done && s.bestRange && idx >= s.bestRange[0]! && idx <= s.bestRange[1]! ? 'found' : '';
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>

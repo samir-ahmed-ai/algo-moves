@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Keyboard, Lightbulb, RotateCcw, ScanEye } from 'lucide-react';
@@ -35,7 +35,7 @@ function BarIconButton({
   title: string;
   active?: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
@@ -103,14 +103,14 @@ export function ReassemblePane({
   } = useReassembleLogic({
     pieces,
     variant,
-    initialPlacedIds,
-    initialTrayIds,
     initialMistakes,
     onComplete,
-    onProgress,
     resetOnWrong,
     rootRef,
     assembledRef,
+    ...(initialPlacedIds ? { initialPlacedIds } : {}),
+    ...(initialTrayIds ? { initialTrayIds } : {}),
+    ...(onProgress ? { onProgress } : {}),
   });
 
   const { pointerGhost, onTrayPointerDown, onTrayPointerMove, finishTrayPointer, isDraggingPiece } =
@@ -124,7 +124,8 @@ export function ReassemblePane({
   useEffect(() => {
     if (!showCheatSheet) return;
     const onDoc = (e: MouseEvent) => {
-      if (cheatRef.current && !cheatRef.current.contains(e.target as Node)) {
+      const target = e.target;
+      if (target instanceof Node && cheatRef.current && !cheatRef.current.contains(target)) {
         setShowCheatSheet(false);
       }
     };
@@ -135,15 +136,24 @@ export function ReassemblePane({
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const renderTrayPiece = (p: CodePiece, i: number) => {
+    const optionLabel = `Block ${i + 1} of ${tray.length}: ${p.role}`;
     const shell = (
       <div
         role="option"
+        aria-label={optionLabel}
         aria-selected={selectedIdx === i}
         tabIndex={0}
+        title={optionLabel}
         onPointerDown={variant === 'mobile' ? (e) => onTrayPointerDown(e, p, i) : undefined}
         onPointerMove={variant === 'mobile' ? onTrayPointerMove : undefined}
         onPointerUp={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
         onPointerCancel={variant === 'mobile' ? (e) => finishTrayPointer(e, p, i) : undefined}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          setSelectedIdx(i);
+          tryPlace(p);
+        }}
         className={cn(
           'piece tray-piece nodrag',
           wrongId === p.id && 'shake-wrong',
@@ -189,7 +199,9 @@ export function ReassemblePane({
             {placed.length}/{pieces.length}
           </span>
         </div>
-        <span className="mistakes-pill">{mistakes} err</span>
+        <span className="mistakes-pill" title="Mistakes in this rebuild">
+          {mistakes} err
+        </span>
         <BarIconButton
           title={showOverview ? 'Hide blueprint (B)' : 'Show blueprint (B)'}
           active={showOverview}

@@ -48,7 +48,7 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
     tone?: 'good' | 'bad',
   ) =>
     frames.push({
-      move: { type, note, caption, tone },
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
       state: {
         values: values.slice(),
         heapSize,
@@ -70,30 +70,37 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
       let largest = i;
       if (left < size) {
         comparisons++;
+        const parentVal = values[largest]!;
+        const leftVal = values[left]!;
         emit(
           'SIFT',
-          `${values[largest]} ? L ${values[left]}`,
-          `Compare parent ${values[largest]} at index ${i} with its left child ${values[left]} at index ${left}.`,
+          `${parentVal} ? L ${leftVal}`,
+          `Compare parent ${parentVal} at index ${i} with its left child ${leftVal} at index ${left}.`,
           i,
           left,
           null,
         );
-        if (values[left] > values[largest]) largest = left;
+        if (leftVal > parentVal) largest = left;
       }
       if (right < size) {
         comparisons++;
+        const largestVal = values[largest]!;
+        const rightVal = values[right]!;
         emit(
           'SIFT',
-          `${values[largest]} ? R ${values[right]}`,
-          `Compare current largest ${values[largest]} at index ${largest} with the right child ${values[right]} at index ${right}.`,
+          `${largestVal} ? R ${rightVal}`,
+          `Compare current largest ${largestVal} at index ${largest} with the right child ${rightVal} at index ${right}.`,
           i,
           right,
           null,
         );
-        if (values[right] > values[largest]) largest = right;
+        if (rightVal > largestVal) largest = right;
       }
       if (largest === i) break;
-      [values[i], values[largest]] = [values[largest], values[i]];
+      const atI = values[i]!;
+      const atLargest = values[largest]!;
+      values[i] = atLargest;
+      values[largest] = atI;
       swaps++;
       emit(
         'SWAP',
@@ -139,7 +146,10 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
   );
 
   for (let end = n - 1; end > 0; end--) {
-    [values[0], values[end]] = [values[end], values[0]];
+    const root = values[0]!;
+    const tail = values[end]!;
+    values[0] = tail;
+    values[end] = root;
     swaps++;
     heapSize = end;
     sortedFrom = end;

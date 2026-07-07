@@ -44,7 +44,7 @@ function MessageRow() {
   if (!text && showHint) {
     tone = 'text-ink3';
     text = ready.length
-      ? `Ready now: ${ready.map((i) => level.nodes[i].key).join(', ')} — glowing notes have no prerequisites left.`
+      ? `Ready now: ${ready.map((i) => level.nodes[i]!.key).join(', ')} — glowing notes have no prerequisites left.`
       : 'Nothing has in-degree 0 right now.';
   }
   return (

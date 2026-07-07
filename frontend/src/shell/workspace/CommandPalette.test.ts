@@ -137,17 +137,12 @@ describe('buildInterviewCommands', () => {
     expect(buildInterviewCommands(null)).toEqual([]);
   });
 
-  it('offers start (but not invite/end) before a session exists', () => {
+  it('offers only start before a session exists (timer/lock are host-in-session only)', () => {
     const ids = buildInterviewCommands(controls()).map((command) => command.id);
-    expect(ids).toEqual([
-      'interview:start',
-      'interview:timer',
-      'interview:timer-reset',
-      'interview:lock',
-    ]);
+    expect(ids).toEqual(['interview:start']);
   });
 
-  it('offers invite and end to the host of a live session', () => {
+  it('offers invite, timer, lock and end to the host of a live session', () => {
     const ids = buildInterviewCommands(controls({ hasSession: true, isHost: true })).map(
       (command) => command.id,
     );
@@ -160,19 +155,21 @@ describe('buildInterviewCommands', () => {
     ]);
   });
 
-  it('hides host-only commands from guests', () => {
+  it('hides all host-only commands from guests in a session', () => {
     const ids = buildInterviewCommands(controls({ hasSession: true, isHost: false })).map(
       (command) => command.id,
     );
-    expect(ids).toEqual(['interview:timer', 'interview:timer-reset', 'interview:lock']);
+    expect(ids).toEqual([]);
   });
 
-  it('reflects timer and lock state in the labels', () => {
-    const idle = buildInterviewCommands(controls());
+  it('reflects timer and lock state in the labels (host in session)', () => {
+    const idle = buildInterviewCommands(controls({ hasSession: true, isHost: true }));
     expect(idle.find((command) => command.id === 'interview:timer')?.label).toBe('Start timer');
     expect(idle.find((command) => command.id === 'interview:lock')?.label).toBe('Lock board');
 
-    const busy = buildInterviewCommands(controls({ timerRunning: true, locked: true }));
+    const busy = buildInterviewCommands(
+      controls({ hasSession: true, isHost: true, timerRunning: true, locked: true }),
+    );
     expect(busy.find((command) => command.id === 'interview:timer')?.label).toBe('Pause timer');
     expect(busy.find((command) => command.id === 'interview:lock')?.label).toBe('Unlock board');
   });

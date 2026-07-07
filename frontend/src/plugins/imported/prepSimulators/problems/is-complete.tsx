@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -34,7 +34,7 @@ function record({ tree }: IsCompleteInput): Frame<IsCompleteState>[] {
   let queue: (number | null)[] = [];
   let end = false;
 
-  const { emit, frames } = createRecorder<IsCompleteState>(() => ({
+  const { emit, frames } = createPrepRecorder<IsCompleteState>(() => ({
     tree,
     queue: [...queue],
     visited: [...visited],
@@ -44,7 +44,7 @@ function record({ tree }: IsCompleteInput): Frame<IsCompleteState>[] {
     done: false,
   }));
 
-  if (tree.length === 0 || tree[0] == null) {
+  if (tree.length === 0 || tree[0]! == null) {
     emit(
       'DONE',
       'empty',
@@ -82,7 +82,7 @@ function record({ tree }: IsCompleteInput): Frame<IsCompleteState>[] {
       emit(
         'BREAK',
         'node after gap',
-        `We dequeued real node ${tree[node]} after already seeing a gap. A real node following a nil means an earlier level had a hole, so the tree is NOT complete. Return false.`,
+        `We dequeued real node ${tree[node]!} after already seeing a gap. A real node following a nil means an earlier level had a hole, so the tree is NOT complete. Return false.`,
         { current: node, end: true, result: false, done: true },
         'bad',
       );
@@ -93,16 +93,16 @@ function record({ tree }: IsCompleteInput): Frame<IsCompleteState>[] {
     visited.push(node);
     const left = 2 * node + 1;
     const right = 2 * node + 2;
-    const leftEntry = left < tree.length && tree[left] != null ? left : null;
-    const rightEntry = right < tree.length && tree[right] != null ? right : null;
+    const leftEntry = left < tree.length && tree[left]! != null ? left : null;
+    const rightEntry = right < tree.length && tree[right]! != null ? right : null;
     queue.push(leftEntry, rightEntry);
     emit(
       'VISIT',
-      `visit ${tree[node]}`,
-      `Dequeued real node ${tree[node]}. Enqueue its children: left ${
-        leftEntry != null ? `= ${tree[leftEntry]}` : 'is nil'
+      `visit ${tree[node]!}`,
+      `Dequeued real node ${tree[node]!}. Enqueue its children: left ${
+        leftEntry != null ? `= ${tree[leftEntry]!}` : 'is nil'
       } and right ${
-        rightEntry != null ? `= ${tree[rightEntry]}` : 'is nil'
+        rightEntry != null ? `= ${tree[rightEntry]!}` : 'is nil'
       }. Nil children stay in the queue as gap markers.`,
       { current: node, end: false },
     );
@@ -126,7 +126,7 @@ function nodeClassFor(s: IsCompleteState, i: number): string {
 
 function View({ frame }: PluginViewProps<IsCompleteState>) {
   const s = frame.state;
-  const queueLabel = s.queue.map((q) => (q == null ? 'nil' : String(s.tree[q]))).join(', ');
+  const queueLabel = s.queue.map((q) => (q == null ? 'nil' : String(s.tree[q]!))).join(', ');
   const verdictText = s.result === null ? '…' : s.result ? 'complete' : 'NOT complete';
   return (
     <div className="board-area">
@@ -154,7 +154,7 @@ function Inspector({ frame }: InspectorProps<IsCompleteState>) {
   const s = frame.state;
   return (
     <VarGrid>
-      <InspectorRow k="current node" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} />
+      <InspectorRow k="current node" v={s.current !== null ? (s.tree[s.current]! ?? '—') : '—'} />
       <InspectorRow k="visited" v={s.visited.length} />
       <InspectorRow k="queue size" v={s.queue.length} />
       <InspectorRow k="end flag" v={String(s.end)} />

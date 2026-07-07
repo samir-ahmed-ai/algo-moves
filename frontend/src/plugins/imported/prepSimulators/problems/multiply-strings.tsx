@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -25,7 +25,7 @@ interface MultiplyState {
   low: number | null; // i+j+1, where the ones digit lands
   high: number | null; // i+j, where the carry lands
   mul: number | null; // digit product
-  sum: number | null; // mul + pos[low]
+  sum: number | null; // mul + pos[low]!
   result: string | null; // final answer once known
   done: boolean;
 }
@@ -35,7 +35,7 @@ function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
   const n = num2.length;
   const pos = new Array<number>(m + n).fill(0);
 
-  const { emit, frames } = createRecorder<MultiplyState>(() => ({
+  const { emit, frames } = createPrepRecorder<MultiplyState>(() => ({
     num1,
     num2,
     pos: pos.slice(),
@@ -74,29 +74,29 @@ function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
       const mul = d1 * d2;
       const low = i + j + 1;
       const high = i + j;
-      const sum = mul + pos[low];
+      const sum = mul + pos[low]!;
 
       emit(
         'MUL',
         `${d1}×${d2}=${mul}`,
-        `Take num1[${i}]=${d1} and num2[${j}]=${d2}. Their product is ${d1}×${d2} = ${mul}. It contributes to slots ${high} (tens) and ${low} (ones) of pos.`,
+        `Take num1[${i}]!=${d1} and num2[${j}]!=${d2}. Their product is ${d1}×${d2} = ${mul}. It contributes to slots ${high} (tens) and ${low} (ones) of pos.`,
         { i, j, low, high, mul },
       );
 
       emit(
         'ADD',
         `sum=${sum}`,
-        `Add the product to whatever already sits in the ones slot pos[${low}]=${pos[low]}: sum = ${mul} + ${pos[low]} = ${sum}.`,
+        `Add the product to whatever already sits in the ones slot pos[${low}]!=${pos[low]!}: sum = ${mul} + ${pos[low]!} = ${sum}.`,
         { i, j, low, high, mul, sum },
       );
 
-      pos[low] = sum % 10;
-      pos[high] += Math.floor(sum / 10);
+      pos[low]! = sum % 10;
+      pos[high]! += Math.floor(sum / 10);
 
       emit(
         'WRITE',
-        `pos[${low}]=${sum % 10}`,
-        `Keep the ones digit here: pos[${low}] = ${sum} mod 10 = ${sum % 10}, and carry the tens up: pos[${high}] += ${Math.floor(sum / 10)}.`,
+        `pos[${low}]!=${sum % 10}`,
+        `Keep the ones digit here: pos[${low}]! = ${sum} mod 10 = ${sum % 10}, and carry the tens up: pos[${high}]! += ${Math.floor(sum / 10)}.`,
         { i, j, low, high, mul, sum },
       );
     }

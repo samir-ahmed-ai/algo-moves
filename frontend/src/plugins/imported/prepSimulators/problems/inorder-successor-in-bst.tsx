@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -38,9 +38,9 @@ interface SuccessorState {
 function inorderValues(tree: (number | null)[]): number[] {
   const out: number[] = [];
   const walk = (i: number) => {
-    if (i >= tree.length || tree[i] == null) return;
+    if (i >= tree.length || tree[i]! == null) return;
     walk(2 * i + 1);
-    out.push(tree[i] as number);
+    out.push(tree[i]! as number);
     walk(2 * i + 2);
   };
   walk(0);
@@ -51,7 +51,7 @@ function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
   const path: number[] = [];
   let res: number | null = null;
 
-  const { emit, frames } = createRecorder<SuccessorState>(() => ({
+  const { emit, frames } = createPrepRecorder<SuccessorState>(() => ({
     tree,
     p,
     cur: null,
@@ -68,8 +68,8 @@ function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
   );
 
   let cur = 0; // index into the level-order array (root)
-  while (cur < tree.length && tree[cur] != null) {
-    const curVal = tree[cur] as number;
+  while (cur < tree.length && tree[cur]! != null) {
+    const curVal = tree[cur]! as number;
     path.push(cur);
     if (p < curVal) {
       res = cur;
@@ -95,7 +95,7 @@ function record({ tree, p }: SuccessorInput): Frame<SuccessorState>[] {
 
   const seq = inorderValues(tree);
   if (res !== null) {
-    const ans = tree[res] as number;
+    const ans = tree[res]! as number;
     emit(
       'DONE',
       `succ=${ans}`,
@@ -124,8 +124,8 @@ function View({ frame }: PluginViewProps<SuccessorState>) {
     if (visited.has(i)) return 'team-2';
     return 'team-0';
   };
-  const resVal = s.res !== null ? (s.tree[s.res] as number) : null;
-  const curVal = s.cur !== null && s.tree[s.cur] != null ? (s.tree[s.cur] as number) : null;
+  const resVal = s.res !== null ? (s.tree[s.res]! as number) : null;
+  const curVal = s.cur !== null && s.tree[s.cur]! != null ? (s.tree[s.cur]! as number) : null;
   const rule = curVal !== null ? (s.p < curVal ? '← left' : '→ right') : '—';
   return (
     <VizStage
@@ -158,8 +158,8 @@ function View({ frame }: PluginViewProps<SuccessorState>) {
 function Inspector({ frame }: InspectorProps<SuccessorState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.cur !== null && s.tree[s.cur] != null ? (s.tree[s.cur] as number) : '—';
-  const resVal = s.res !== null ? (s.tree[s.res] as number) : s.done ? 'none' : '…';
+  const curVal = s.cur !== null && s.tree[s.cur]! != null ? (s.tree[s.cur]! as number) : '—';
+  const resVal = s.res !== null ? (s.tree[s.res]! as number) : s.done ? 'none' : '…';
   return (
     <VarGrid>
       <InspectorRow k="p" v={s.p} />
@@ -332,6 +332,6 @@ export const simulator: ProblemSimulator = {
     const s = frames[frames.length - 1]?.state as SuccessorState | undefined;
     if (!s) return { ok: false, label: 'no frames' };
     if (s.res === null) return { ok: false, label: 'no successor' };
-    return { ok: true, label: `successor = ${s.tree[s.res]}` };
+    return { ok: true, label: `successor = ${s.tree[s.res]!}` };
   },
 };

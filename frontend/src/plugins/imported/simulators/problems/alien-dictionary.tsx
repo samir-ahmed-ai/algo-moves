@@ -57,15 +57,15 @@ function record({ words }: ADInput): Frame<ADState>[] {
   for (let i = 0; i < words.length - 1; i++) {
     const a = words[i];
     const b = words[i + 1];
-    const m = Math.min(a.length, b.length);
+    const m = Math.min(a!.length, b!.length);
     for (let j = 0; j < m; j++) {
-      if (a[j] !== b[j]) {
-        const u = idx.get(a[j]) as number;
-        const v = idx.get(b[j]) as number;
-        if (!adj[u].includes(v)) {
-          adj[u].push(v);
-          indeg[v]++;
-          edges.push([a[j], b[j]]);
+      if (a![j] !== b![j]) {
+        const u = idx.get(a![j]!) as number;
+        const v = idx.get(b![j]!) as number;
+        if (!adj[u]!.includes(v)) {
+          adj[u]!.push(v);
+          indeg[v]!++;
+          edges.push([a![j]!, b![j]!]);
         }
         break;
       }
@@ -123,8 +123,8 @@ function record({ words }: ADInput): Frame<ADState>[] {
       { active: v },
     );
 
-    for (const nb of adj[v]) {
-      indeg[nb]--;
+    for (const nb of adj[v]!) {
+      indeg[nb]!--;
       if (indeg[nb] === 0) {
         color[nb] = 2;
         queue.push(nb);
@@ -167,9 +167,9 @@ function View({ frame }: PluginViewProps<ADState>) {
         label="queue"
         topLabel="front"
         highlightEnd="bottom"
-        items={s.queue.map((n) => s.labels[n])}
+        items={s.queue.map((n) => s.labels[n] ?? '')}
       />
-      <RailStack label="order" items={s.order.map((n) => s.labels[n])} />
+      <RailStack label="order" items={s.order.map((n) => s.labels[n] ?? '')} />
       <RailGroup label="active">
         <RailStat k="cur" v={s.active !== null ? s.labels[s.active] : '—'} tone="accent" />
       </RailGroup>
@@ -188,7 +188,7 @@ function View({ frame }: PluginViewProps<ADState>) {
         adj={s.adj}
         pos={s.pos}
         nodeClass={(node) => `team-${s.color[node]}`}
-        label={(n) => s.labels[n]}
+        label={(n) => s.labels[n]!}
         activeNode={s.active}
         directed
         height={260}

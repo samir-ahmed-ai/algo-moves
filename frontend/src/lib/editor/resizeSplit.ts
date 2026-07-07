@@ -2,7 +2,8 @@
 export function clampSplitPct(pct: number, min: number, max: number, fallback = min): number {
   const safeMin = Number.isFinite(min) ? min : 0;
   const safeMax = Number.isFinite(max) ? Math.max(safeMin, max) : safeMin;
-  const safePct = Number.isFinite(pct) ? pct : fallback;
+  const safeFallback = Number.isFinite(fallback) ? fallback : safeMin;
+  const safePct = Number.isFinite(pct) ? pct : safeFallback;
   return Math.min(safeMax, Math.max(safeMin, safePct));
 }
 

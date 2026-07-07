@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -33,7 +33,7 @@ function record({ size, stream }: MovingAvgInput): Frame<MovingAvgState>[] {
   const window: number[] = [];
   let sum = 0;
 
-  const { emit, frames } = createRecorder<MovingAvgState>(() => ({
+  const { emit, frames } = createPrepRecorder<MovingAvgState>(() => ({
     size,
     window: window.slice(),
     sum,
@@ -54,11 +54,11 @@ function record({ size, stream }: MovingAvgInput): Frame<MovingAvgState>[] {
   let lastAverage: number | null = null;
 
   for (let step = 1; step <= stream.length; step++) {
-    const val = stream[step - 1];
+    const val = stream[step - 1]!;
 
     // append val + add to running sum
-    window.push(val);
-    sum += val;
+    window.push(val!);
+    sum += val!;
     emit(
       'ADD',
       `+${val}`,

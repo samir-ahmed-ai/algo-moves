@@ -1,17 +1,27 @@
-import { cn } from '@/lib/utils/cn';
 import { Code2 } from 'lucide-react';
-
+import { cn } from '@/lib/utils/cn';
 import { nodeIconGlyph, nodeText, PanelHeaderAction, RADIUS_CTRL } from '@/shell/canvas';
+
+export interface CodeVariant {
+  text: string;
+  lang?: string | undefined;
+  file?: string | undefined;
+}
+
+function isCodeVariant(value: CodeVariant | undefined): value is CodeVariant {
+  return value !== undefined;
+}
+
+function languageLabel(lang?: string): string {
+  return (lang?.trim() || 'text').toUpperCase();
+}
+
 /** All language variants of a plugin's solution: the primary `code` plus `extraCode` (#71). */
 export function codeVariants(plugin: {
-  code?: { text: string; lang?: string; file?: string };
-  extraCode?: { text: string; lang?: string; file?: string }[];
-}) {
-  return [plugin.code, ...(plugin.extraCode ?? [])].filter(Boolean) as {
-    text: string;
-    lang?: string;
-    file?: string;
-  }[];
+  code?: CodeVariant;
+  extraCode?: CodeVariant[];
+}): CodeVariant[] {
+  return [plugin.code, ...(plugin.extraCode ?? [])].filter(isCodeVariant);
 }
 
 export function LangTabs({
@@ -19,7 +29,7 @@ export function LangTabs({
   active,
   onPick,
 }: {
-  variants: { lang?: string }[];
+  variants: readonly Pick<CodeVariant, 'lang'>[];
   active: number;
   onPick: (i: number) => void;
 }) {
@@ -28,7 +38,7 @@ export function LangTabs({
     <div className="language-tabs flex flex-wrap gap-1">
       {variants.map((v, i) => (
         <button
-          key={i}
+          key={`${v.lang ?? 'text'}-${i}`}
           type="button"
           onClick={() => onPick(i)}
           className={cn(
@@ -40,7 +50,7 @@ export function LangTabs({
           )}
           aria-pressed={i === active}
         >
-          {(v.lang ?? 'text').toUpperCase()}
+          {languageLabel(v.lang)}
         </button>
       ))}
     </div>
@@ -53,7 +63,7 @@ export function HeaderLangTabs({
   active,
   onPick,
 }: {
-  variants: { lang?: string; file?: string }[];
+  variants: readonly Pick<CodeVariant, 'lang' | 'file'>[];
   active: number;
   onPick: (i: number) => void;
 }) {
@@ -62,11 +72,11 @@ export function HeaderLangTabs({
     <>
       {variants.map((v, i) => (
         <PanelHeaderAction
-          key={i}
+          key={`${v.lang ?? 'text'}-${v.file ?? i}`}
           variant="toggle"
           active={i === active}
           onClick={() => onPick(i)}
-          title={`${(v.lang ?? 'text').toUpperCase()}${v.file ? ` · ${v.file}` : ''}`}
+          title={`${languageLabel(v.lang)}${v.file ? ` · ${v.file}` : ''}`}
         >
           <Code2 className={nodeIconGlyph} />
         </PanelHeaderAction>

@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -22,7 +22,7 @@ interface AddBinaryState {
   i: number | null; // current index into a (-1 = past the front)
   j: number | null; // current index into b (-1 = past the front)
   carry: number; // carry bit going into this column
-  sum: number | null; // carry + a[i] + b[j] for the current column
+  sum: number | null; // carry + a[i]! + b[j]! for the current column
   bit: number | null; // sum % 2, the digit we emit for this column
   result: string; // bits produced so far, already in final (left-to-right) order
   done: boolean;
@@ -34,7 +34,7 @@ const digitAt = (s: string, idx: number): number =>
 function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {
   const out: string[] = [];
 
-  const { emit, frames } = createRecorder<AddBinaryState>(() => ({
+  const { emit, frames } = createPrepRecorder<AddBinaryState>(() => ({
     a,
     b,
     i: null,
@@ -64,8 +64,8 @@ function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {
     const bit = sum % 2;
     const nextCarry = Math.floor(sum / 2);
 
-    const aLabel = i >= 0 ? `a[${i}]=${av}` : 'a exhausted → 0';
-    const bLabel = j >= 0 ? `b[${j}]=${bv}` : 'b exhausted → 0';
+    const aLabel = i >= 0 ? `a[${i}]!=${av}` : 'a exhausted → 0';
+    const bLabel = j >= 0 ? `b[${j}]!=${bv}` : 'b exhausted → 0';
     emit(
       'ADD',
       `sum ${carry}+${av}+${bv}=${sum}`,

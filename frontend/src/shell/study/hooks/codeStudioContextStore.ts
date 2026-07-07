@@ -1,21 +1,25 @@
-import { createContext, type MutableRefObject } from 'react';
+import { createContext, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type { EditorView } from '@codemirror/view';
 import type { QuizQuestion } from '@/core/types';
 import type { CodePiece } from '@/lib/code';
-import type { CodeStudioPhase, QuizProgress, loadReassembleProgress } from '@/store/user-prefs';
-import type { EditorPrefs } from '@/store/user-prefs';
+import type {
+  CodeStudioPhase,
+  EditorPrefs,
+  QuizProgress,
+  loadReassembleProgress,
+} from '@/store/user-prefs';
 import type { statFor } from '@/store/persistence';
 
 export interface CodeVariant {
   text: string;
-  lang?: string;
-  file?: string;
+  lang?: string | undefined;
+  file?: string | undefined;
 }
 
 export interface CodeStudioContentContextValue {
   variants: CodeVariant[];
   active: number;
-  setActive: (i: number) => void;
+  setActive: Dispatch<SetStateAction<number>>;
   code: CodeVariant | undefined;
   reference: string;
   timeLabel: string | undefined;
@@ -52,11 +56,11 @@ export interface CodeStudioDraftContextValue {
   draft: string;
   persistDraft: (v: string) => void;
   blind: boolean;
-  setBlind: (v: boolean | ((b: boolean) => boolean)) => void;
+  setBlind: Dispatch<SetStateAction<boolean>>;
   peek: boolean;
-  setPeek: (v: boolean) => void;
+  setPeek: Dispatch<SetStateAction<boolean>>;
   timerRunning: boolean;
-  setTimerRunning: (v: boolean | ((r: boolean) => boolean)) => void;
+  setTimerRunning: Dispatch<SetStateAction<boolean>>;
   timerLabel: string;
   score: number;
 }

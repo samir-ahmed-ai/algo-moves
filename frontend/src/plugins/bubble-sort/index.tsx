@@ -36,8 +36,11 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
         [j, j + 1],
         null,
       );
-      if (values[j] > values[j + 1]) {
-        [values[j], values[j + 1]] = [values[j + 1], values[j]];
+      const leftVal = values[j]!;
+      const rightVal = values[j + 1]!;
+      if (leftVal > rightVal) {
+        values[j] = rightVal;
+        values[j + 1] = leftVal;
         incSwap();
         didSwap = true;
         emit(

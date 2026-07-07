@@ -276,7 +276,7 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
       color: c.color,
       x: c.x,
       y: c.y,
-      line: c.line,
+      ...(c.line != null ? { line: c.line } : {}),
     }));
   }, [subDocCursors, nodeId]);
 
@@ -289,7 +289,7 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
     setLocked,
     dark: theme !== 'light',
     rev: revState,
-    onPointerUpdate: kind === 'whiteboard' ? onPointerUpdate : undefined,
+    ...(kind === 'whiteboard' ? { onPointerUpdate } : {}),
     remoteCursors,
   };
 }

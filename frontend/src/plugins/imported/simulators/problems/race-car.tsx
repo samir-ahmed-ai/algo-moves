@@ -67,7 +67,7 @@ function record({ target }: RaceInput): Frame<RaceState>[] {
       // then j extra accelerations the other way before reversing again.
       for (let j = 0; j < k; j++) {
         const rem = (1 << k) - 1 - ((1 << j) - 1);
-        const cand = k + j + 2 + dp[t - rem];
+        const cand = k + j + 2 + dp[t - rem]!;
         if (cand < best) {
           best = cand;
           bestFrom = t - rem;
@@ -83,7 +83,7 @@ function record({ target }: RaceInput): Frame<RaceState>[] {
       }
     } else {
       // Overshoot to 2^k - 1 with k accelerations, reverse once, solve the leftover.
-      const cand = k + 1 + dp[(1 << k) - 1 - t];
+      const cand = k + 1 + dp[(1 << k) - 1 - t]!;
       if (cand < best) {
         best = cand;
         bestFrom = (1 << k) - 1 - t;
@@ -118,10 +118,10 @@ function View({ frame }: PluginViewProps<RaceState>) {
   const pointers: ArrayPointer[] = [];
   if (s.t !== null) pointers.push({ i: s.t, label: 't', tone: 'accent', place: 'above' });
   if (s.from !== null) pointers.push({ i: s.from, label: 'reuses', tone: 'warn', place: 'below' });
-  const tone = (i: number) => (s.t === i ? 'found' : s.dp[i] < INF ? 'match' : '');
+  const tone = (i: number) => (s.t === i ? 'found' : s.dp[i]! < INF ? 'match' : '');
   const cell = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
-  const done = s.dp[s.target] < INF;
+    idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx]! >= INF ? '∞' : s.dp[idx]) : '—';
+  const done = s.dp[s.target]! < INF;
   const ans = done ? s.dp[s.target] : '…';
   const rail = (
     <>
@@ -145,8 +145,8 @@ function Inspector({ frame }: InspectorProps<RaceState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const cell = (idx: number) =>
-    idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
-  const done = s.dp[s.target] < INF;
+    idx >= 0 && idx < s.dp.length ? (s.dp[idx]! >= INF ? '∞' : s.dp[idx]) : '—';
+  const done = s.dp[s.target]! < INF;
   return (
     <VarGrid>
       <InspectorRow k="target" v={s.target} />

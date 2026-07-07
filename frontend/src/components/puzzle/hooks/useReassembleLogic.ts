@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { CodePiece } from '@/lib/code';
 import { shuffle } from '@/lib/utils/shuffle';
@@ -11,11 +11,41 @@ const WRONG_MS = 350;
 const PLACE_ENTER_MS = 220;
 export const MOBILE_WRAP_COLS = 22;
 
+function isCodePiece(value: CodePiece | undefined): value is CodePiece {
+  return Boolean(value);
+}
+
+function normalizeMistakes(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
+function piecesFromIds(all: CodePiece[], ids: string[] | undefined): CodePiece[] {
+  if (!ids?.length) return [];
+  const byId = new Map(all.map((p) => [p.id, p]));
+  const seen = new Set<string>();
+  const restored: CodePiece[] = [];
+  for (const id of ids) {
+    if (seen.has(id)) continue;
+    const piece = byId.get(id);
+    if (!piece) continue;
+    seen.add(id);
+    restored.push(piece);
+  }
+  return restored;
+}
+
 function orderTray(all: CodePiece[], placedIds: string[], trayIds: string[]): CodePiece[] {
   const byId = new Map(all.map((p) => [p.id, p]));
   const placedSet = new Set(placedIds);
-  const ordered = trayIds.map((id) => byId.get(id)).filter(Boolean) as CodePiece[];
-  const missing = all.filter((p) => !placedSet.has(p.id) && !trayIds.includes(p.id));
+  const traySet = new Set<string>();
+  const ordered = trayIds
+    .map((id) => {
+      if (traySet.has(id) || placedSet.has(id)) return undefined;
+      traySet.add(id);
+      return byId.get(id);
+    })
+    .filter(isCodePiece);
+  const missing = all.filter((p) => !placedSet.has(p.id) && !traySet.has(p.id));
   return [...ordered, ...missing];
 }
 
@@ -39,20 +69,16 @@ export function useReassembleLogic({
   onComplete: (placed: CodePiece[], mistakes: number) => void;
   onProgress?: (placedIds: string[], trayIds: string[], mistakes: number) => void;
   resetOnWrong?: boolean;
-  rootRef: React.RefObject<HTMLDivElement | null>;
-  assembledRef: React.RefObject<HTMLDivElement | null>;
+  rootRef: RefObject<HTMLDivElement | null>;
+  assembledRef: RefObject<HTMLDivElement | null>;
 }) {
-  const [placed, setPlaced] = useState<CodePiece[]>(() => {
-    if (!initialPlacedIds?.length) return [];
-    const byId = new Map(pieces.map((p) => [p.id, p]));
-    return initialPlacedIds.map((id) => byId.get(id)).filter(Boolean) as CodePiece[];
-  });
+  const [placed, setPlaced] = useState<CodePiece[]>(() => piecesFromIds(pieces, initialPlacedIds));
   const [tray, setTray] = useState<CodePiece[]>(() => {
     if (initialTrayIds?.length) return orderTray(pieces, initialPlacedIds ?? [], initialTrayIds);
     const placedSet = new Set(initialPlacedIds ?? []);
     return shuffle(pieces.filter((p) => !placedSet.has(p.id)));
   });
-  const [mistakes, setMistakes] = useState(initialMistakes);
+  const [mistakes, setMistakes] = useState(() => normalizeMistakes(initialMistakes));
   const [wrongId, setWrongId] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
@@ -62,6 +88,8 @@ export function useReassembleLogic({
   const [lastPlacedId, setLastPlacedId] = useState<string | null>(null);
   const [liveMessage, setLiveMessage] = useState('');
   const completedRef = useRef(false);
+  const lastPlacedTimerRef = useRef<number | null>(null);
+  const wrongTimerRef = useRef<number | null>(null);
   const mobileWrap = variant === 'mobile';
   const mobileTrayColumns = useMemo(
     () => (mobileWrap ? balanceTrayColumns(tray, 2, MOBILE_WRAP_COLS) : null),
@@ -84,6 +112,10 @@ export function useReassembleLogic({
   );
 
   const reset = useCallback(() => {
+    if (lastPlacedTimerRef.current !== null) window.clearTimeout(lastPlacedTimerRef.current);
+    if (wrongTimerRef.current !== null) window.clearTimeout(wrongTimerRef.current);
+    lastPlacedTimerRef.current = null;
+    wrongTimerRef.current = null;
     completedRef.current = false;
     setCompleting(false);
     const shuffled = shuffle(pieces);
@@ -111,7 +143,11 @@ export function useReassembleLogic({
         setShowHint(false);
         setSelectedIdx(null);
         setLastPlacedId(piece.id);
-        window.setTimeout(() => setLastPlacedId(null), PLACE_ENTER_MS);
+        if (lastPlacedTimerRef.current !== null) window.clearTimeout(lastPlacedTimerRef.current);
+        lastPlacedTimerRef.current = window.setTimeout(() => {
+          setLastPlacedId(null);
+          lastPlacedTimerRef.current = null;
+        }, PLACE_ENTER_MS);
         hapticSuccess();
         setLiveMessage(`Correct — block ${nextPlaced.length} of ${pieces.length}`);
         emitProgress(nextPlaced, nextTray, mistakes);
@@ -125,9 +161,11 @@ export function useReassembleLogic({
       setWrongId(piece.id);
       hapticError();
       setLiveMessage(resetOnWrong ? 'Wrong order — blocks cleared' : 'Wrong order — try again');
-      window.setTimeout(() => {
+      if (wrongTimerRef.current !== null) window.clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = window.setTimeout(() => {
         setWrongId(null);
         if (resetOnWrong) reset();
+        wrongTimerRef.current = null;
       }, WRONG_MS);
       return false;
     },
@@ -153,6 +191,14 @@ export function useReassembleLogic({
     const t = window.setTimeout(() => onComplete(placed, mistakes), FINISH_MS);
     return () => window.clearTimeout(t);
   }, [done, placed, mistakes, onComplete]);
+
+  useEffect(
+    () => () => {
+      if (lastPlacedTimerRef.current !== null) window.clearTimeout(lastPlacedTimerRef.current);
+      if (wrongTimerRef.current !== null) window.clearTimeout(wrongTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     const el = assembledRef.current;
@@ -194,9 +240,10 @@ export function useReassembleLogic({
         reset();
         return;
       }
-      if (e.key === 'Enter' && selectedIdx !== null && tray[selectedIdx]) {
+      const selectedPiece = selectedIdx !== null ? tray[selectedIdx] : undefined;
+      if (e.key === 'Enter' && selectedPiece) {
         e.preventDefault();
-        tryPlace(tray[selectedIdx]);
+        tryPlace(selectedPiece, selectedIdx ?? undefined);
         return;
       }
       const num = parseInt(e.key, 10);

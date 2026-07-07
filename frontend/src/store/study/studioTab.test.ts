@@ -25,4 +25,13 @@ describe('studioTab persistence', () => {
     expect(readStudioTab('two-sum')).toBe('quiz');
     expect(localStorage.getItem(`${STORAGE_KEYS.STUDIO_TAB}:two-sum`)).toBe('quiz');
   });
+
+  it('normalizes blank and padded tab ids', () => {
+    writeStudioTab(' two-sum ', ' quiz ');
+    expect(readStudioTab('two-sum')).toBe('quiz');
+
+    writeStudioTab('two-sum', '   ');
+    expect(readStudioTab('two-sum')).toBe('quiz');
+    expect(readStudioTab('   ')).toBeNull();
+  });
 });

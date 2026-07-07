@@ -33,4 +33,13 @@ describe('useCanvasHistoryStore', () => {
     expect(changed).toBe(false);
     expect(store.historyLength(key)).toBe(1);
   });
+
+  it('isolates snapshots from later node mutations', () => {
+    const store = useCanvasHistoryStore.getState();
+    const first = panelNode('a', 0);
+    store.record(key, 's0', [first], []);
+    first.position.x = 99;
+    store.record(key, 's1', [panelNode('a', 1)], []);
+    expect(store.undo(key)?.nodes[0]?.position.x).toBe(0);
+  });
 });

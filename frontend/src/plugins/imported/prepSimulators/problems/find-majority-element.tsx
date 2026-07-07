@@ -7,7 +7,7 @@ import {
 } from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   VarGrid,
@@ -28,7 +28,7 @@ interface MajorityState {
   cand: number | null; // current candidate
   count: number; // running vote tally for cand
   picked: boolean; // did this step adopt a new candidate (count was 0)?
-  matched: boolean | null; // did nums[i] match cand this step? null before any step
+  matched: boolean | null; // did nums[i]! match cand this step? null before any step
   done: boolean;
   result: number | null; // final majority candidate
 }
@@ -38,7 +38,7 @@ function record({ nums }: MajorityInput): Frame<MajorityState>[] {
   let cand = 0;
   let started = false;
 
-  const { emit, frames } = createRecorder<MajorityState>(() => ({
+  const { emit, frames } = createPrepRecorder<MajorityState>(() => ({
     nums,
     i: null,
     cand: started ? cand : null,
@@ -57,16 +57,16 @@ function record({ nums }: MajorityInput): Frame<MajorityState>[] {
   );
 
   for (let i = 0; i < nums.length; i++) {
-    const v = nums[i];
+    const v = nums[i]!;
     let picked = false;
     if (count === 0) {
-      cand = v;
+      cand! = v;
       started = true;
       picked = true;
       emit(
         'PICK',
         `cand=${v}`,
-        `The count hit 0, so the old candidate is fully cancelled. Adopt nums[${i}] = ${v} as the new candidate.`,
+        `The count hit 0, so the old candidate is fully cancelled. Adopt nums[${i}]! = ${v} as the new candidate.`,
         { i, cand: v, count, picked: true, matched: true },
       );
     }
@@ -75,7 +75,7 @@ function record({ nums }: MajorityInput): Frame<MajorityState>[] {
       emit(
         'VOTE_UP',
         `count=${count}`,
-        `nums[${i}] = ${v} matches the candidate ${cand}, so add one vote. count = ${count}.`,
+        `nums[${i}]! = ${v} matches the candidate ${cand}, so add one vote. count = ${count}.`,
         { i, cand, count, picked, matched: true },
         'good',
       );
@@ -84,7 +84,7 @@ function record({ nums }: MajorityInput): Frame<MajorityState>[] {
       emit(
         'VOTE_DOWN',
         `count=${count}`,
-        `nums[${i}] = ${v} disagrees with candidate ${cand}, so a rival cancels one vote. count = ${count}.`,
+        `nums[${i}]! = ${v} disagrees with candidate ${cand}, so a rival cancels one vote. count = ${count}.`,
         { i, cand, count, picked, matched: false },
         'bad',
       );
@@ -106,7 +106,7 @@ function View({ frame }: PluginViewProps<MajorityState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   const tone = (i: number) => {
-    if (s.done && s.result !== null && s.nums[i] === s.result) return 'found';
+    if (s.done && s.result !== null && s.nums[i]! === s.result) return 'found';
     if (s.i === i) return s.matched === false ? 'dead' : 'match';
     return '';
   };
@@ -114,8 +114,8 @@ function View({ frame }: PluginViewProps<MajorityState>) {
     s.i === null
       ? 'sweeping left → right'
       : s.matched === false
-        ? `rival: ${s.nums[s.i]} ≠ ${s.cand} → count−1`
-        : `support: ${s.nums[s.i]} = ${s.cand} → count+1`;
+        ? `rival: ${s.nums[s.i]!} ≠ ${s.cand} → count−1`
+        : `support: ${s.nums[s.i]!} = ${s.cand} → count+1`;
   return (
     <VizStage
       rail={
@@ -143,7 +143,7 @@ function Inspector({ frame }: InspectorProps<MajorityState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="nums[i]" v={s.i !== null ? s.nums[s.i] : '—'} />
+      <InspectorRow k="nums[i]!" v={s.i !== null ? s.nums[s.i]! : '—'} />
       <InspectorRow k="candidate" v={s.cand ?? '—'} />
       <InspectorRow k="count" v={s.count} />
       <InspectorRow k="this step" v={s.i === null ? '—' : s.matched ? '+1 support' : '−1 rival'} />

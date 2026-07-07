@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { cn } from '@/lib/utils/cn';
@@ -35,7 +35,7 @@ function record({ height }: RainInput): Frame<RainState>[] {
   let maxR = 0;
   let water = 0;
 
-  const { emit, frames } = createRecorder<RainState>(() => ({
+  const { emit, frames } = createPrepRecorder<RainState>(() => ({
     height,
     l,
     r,
@@ -58,48 +58,48 @@ function record({ height }: RainInput): Frame<RainState>[] {
   while (l < r) {
     emit(
       'COMPARE',
-      `h[${l}]=${height[l]} vs h[${r}]=${height[r]}`,
-      `Compare the two ends: height[${l}]=${height[l]} ${height[l] < height[r] ? '<' : '>='} height[${r}]=${height[r]}. The shorter wall steps first — its trapped water is capped by the max on its own side, so that side is safe to settle now.`,
+      `h[${l}]!=${height[l]!} vs h[${r}]!=${height[r]!}`,
+      `Compare the two ends: height[${l}]!=${height[l]!} ${height[l]! < height[r]! ? '<' : '>='} height[${r}]!=${height[r]!}. The shorter wall steps first — its trapped water is capped by the max on its own side, so that side is safe to settle now.`,
       {},
     );
 
-    if (height[l] < height[r]) {
-      if (height[l] >= maxL) {
-        maxL = height[l];
+    if (height[l]! < height[r]!) {
+      if (height[l]! >= maxL) {
+        maxL! = height[l]!;
         emit(
           'WALL_L',
           `maxL=${maxL}`,
-          `height[${l}]=${height[l]} is a new (or equal) tallest left wall, so no water sits on it. Raise maxL to ${maxL} and advance l.`,
+          `height[${l}]!=${height[l]!} is a new (or equal) tallest left wall, so no water sits on it. Raise maxL to ${maxL} and advance l.`,
           { side: 'L', maxL },
         );
       } else {
-        const add = maxL - height[l];
+        const add = maxL - height[l]!;
         water += add;
         emit(
           'WATER_L',
           `+${add} at ${l}`,
-          `height[${l}]=${height[l]} is below the left wall maxL=${maxL}, so water fills the gap: maxL − height[${l}] = ${maxL} − ${height[l]} = ${add}. Total water is now ${water}.`,
+          `height[${l}]!=${height[l]!} is below the left wall maxL=${maxL}, so water fills the gap: maxL − height[${l}]! = ${maxL} − ${height[l]!} = ${add}. Total water is now ${water}.`,
           { side: 'L', filled: l, added: add, water },
           'good',
         );
       }
       l++;
     } else {
-      if (height[r] >= maxR) {
-        maxR = height[r];
+      if (height[r]! >= maxR) {
+        maxR! = height[r]!;
         emit(
           'WALL_R',
           `maxR=${maxR}`,
-          `height[${r}]=${height[r]} is a new (or equal) tallest right wall, so no water sits on it. Raise maxR to ${maxR} and retreat r.`,
+          `height[${r}]!=${height[r]!} is a new (or equal) tallest right wall, so no water sits on it. Raise maxR to ${maxR} and retreat r.`,
           { side: 'R', maxR },
         );
       } else {
-        const add = maxR - height[r];
+        const add = maxR - height[r]!;
         water += add;
         emit(
           'WATER_R',
           `+${add} at ${r}`,
-          `height[${r}]=${height[r]} is below the right wall maxR=${maxR}, so water fills the gap: maxR − height[${r}] = ${maxR} − ${height[r]} = ${add}. Total water is now ${water}.`,
+          `height[${r}]!=${height[r]!} is below the right wall maxR=${maxR}, so water fills the gap: maxR − height[${r}]! = ${maxR} − ${height[r]!} = ${add}. Total water is now ${water}.`,
           { side: 'R', filled: r, added: add, water },
           'good',
         );
@@ -167,8 +167,11 @@ function Inspector({ frame }: InspectorProps<RainState>) {
     <VarGrid>
       <InspectorRow k="l" v={s.l ?? '—'} />
       <InspectorRow k="r" v={s.r ?? '—'} />
-      <InspectorRow k="height[l]" v={s.l !== null && s.l < s.height.length ? s.height[s.l] : '—'} />
-      <InspectorRow k="height[r]" v={s.r !== null && s.r >= 0 ? s.height[s.r] : '—'} />
+      <InspectorRow
+        k="height[l]!"
+        v={s.l !== null && s.l < s.height.length ? s.height[s.l]! : '—'}
+      />
+      <InspectorRow k="height[r]!" v={s.r !== null && s.r >= 0 ? s.height[s.r]! : '—'} />
       <InspectorRow k="maxL" v={s.maxL} />
       <InspectorRow k="maxR" v={s.maxR} />
       <InspectorRow k="water" v={s.water} />
@@ -281,7 +284,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n). O(1). Two pointers `l=0, r=n-1`, track `maxL` and `maxR`; If `height[l] < height[r]`: water at `l` is determined by `maxL` → process left side',
+      'O(n). O(1). Two pointers `l=0, r=n-1`, track `maxL` and `maxR`; If `height[l]! < height[r]!`: water at `l` is determined by `maxL` → process left side',
   },
   {
     id: 'outcome',

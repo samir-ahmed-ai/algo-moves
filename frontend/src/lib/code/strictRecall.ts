@@ -10,8 +10,8 @@ export function strictRecallDraft(reference: string, draft: string, resetTo = ''
   if (draftLines.length > refLines.length) return resetTo;
 
   for (let i = 0; i < draftLines.length; i++) {
-    const d = draftLines[i];
-    const r = refLines[i];
+    const d = draftLines[i] ?? '';
+    const r = refLines[i] ?? '';
     if (i < draftLines.length - 1) {
       if (d !== r) return resetTo;
     } else if (!r.startsWith(d)) {

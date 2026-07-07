@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -36,7 +36,7 @@ function record({ tree }: RecoverInput): Frame<RecoverState>[] {
   let prev: number | null = null;
   const visited: number[] = [];
 
-  const { emit, frames } = createRecorder<RecoverState>(() => ({
+  const { emit, frames } = createPrepRecorder<RecoverState>(() => ({
     tree: values.slice(),
     visited: visited.slice(),
     cur: null,
@@ -55,26 +55,26 @@ function record({ tree }: RecoverInput): Frame<RecoverState>[] {
   );
 
   const inorder = (i: number) => {
-    if (i >= n || values[i] == null) return;
+    if (i >= n || values[i]! == null) return;
     inorder(2 * i + 1);
 
     emit(
       'VISIT',
-      `node ${values[i]}`,
+      `node ${values[i]!}`,
       prev === null
-        ? `Visit node ${values[i]} in in-order position. It is the first value seen, so there is nothing before it to compare against yet.`
-        : `Visit node ${values[i]}. Compare it with the previous in-order value ${values[prev]}: a sorted BST needs ${values[prev]} < ${values[i]}.`,
+        ? `Visit node ${values[i]!} in in-order position. It is the first value seen, so there is nothing before it to compare against yet.`
+        : `Visit node ${values[i]!}. Compare it with the previous in-order value ${values[prev]!}: a sorted BST needs ${values[prev]!} < ${values[i]!}.`,
       { cur: i },
     );
 
-    if (prev !== null && (values[prev] as number) > (values[i] as number)) {
+    if (prev !== null && (values[prev]! as number) > (values[i]! as number)) {
       if (first === null) {
         first = prev;
         second = i;
         emit(
           'INVERSION',
-          `${values[prev]} > ${values[i]}`,
-          `Inversion found: ${values[prev]} > ${values[i]} breaks the sorted order. Flag prev (${values[prev]}) as the first misplaced node and, for now, node (${values[i]}) as the second.`,
+          `${values[prev]!} > ${values[i]!}`,
+          `Inversion found: ${values[prev]!} > ${values[i]!} breaks the sorted order. Flag prev (${values[prev]!}) as the first misplaced node and, for now, node (${values[i]!}) as the second.`,
           { cur: i, first, second },
           'bad',
         );
@@ -82,8 +82,8 @@ function record({ tree }: RecoverInput): Frame<RecoverState>[] {
         second = i;
         emit(
           'INVERSION',
-          `${values[prev]} > ${values[i]}`,
-          `Second inversion: ${values[prev]} > ${values[i]}. The swapped nodes were not adjacent in-order, so update second to this node (${values[i]}). Keep first as it was.`,
+          `${values[prev]!} > ${values[i]!}`,
+          `Second inversion: ${values[prev]!} > ${values[i]!}. The swapped nodes were not adjacent in-order, so update second to this node (${values[i]!}). Keep first as it was.`,
           { cur: i, first, second },
           'bad',
         );
@@ -100,17 +100,17 @@ function record({ tree }: RecoverInput): Frame<RecoverState>[] {
   if (first !== null && second !== null) {
     emit(
       'IDENTIFY',
-      `swap ${values[first]}↔${values[second]}`,
-      `Walk complete. The two misplaced nodes hold ${values[first]} and ${values[second]}. Exchanging their values restores the BST.`,
+      `swap ${values[first]!}↔${values[second]!}`,
+      `Walk complete. The two misplaced nodes hold ${values[first]!} and ${values[second]!}. Exchanging their values restores the BST.`,
       { cur: null, first, second },
     );
-    const tmp = values[first];
-    values[first] = values[second];
-    values[second] = tmp;
+    const tmp = values[first]!;
+    values[first]! = values[second]!;
+    values[second]! = tmp;
     emit(
       'SWAP',
       'BST recovered',
-      `Swapped the values: node that held ${values[second]} now holds ${values[first]}, and vice versa. The tree is a valid BST again.`,
+      `Swapped the values: node that held ${values[second]!} now holds ${values[first]!}, and vice versa. The tree is a valid BST again.`,
       { cur: null, first, second, swapped: true, done: true },
       'good',
     );
@@ -141,7 +141,7 @@ function View({ frame }: PluginViewProps<RecoverState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         in-order so far:{' '}
         <span className="font-mono text-ink">
-          {s.visited.length ? s.visited.map((i) => s.tree[i]).join(' ') : '·'}
+          {s.visited.length ? s.visited.map((i) => s.tree[i]!).join(' ') : '·'}
         </span>
       </div>
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.cur} />
@@ -149,7 +149,7 @@ function View({ frame }: PluginViewProps<RecoverState>) {
         {flagged.length === 2 ? (
           <span className={s.swapped ? 'text-good' : 'text-bad'}>
             {s.swapped ? '✓ swapped ' : 'swap '}
-            {s.tree[flagged[0]]} ↔ {s.tree[flagged[1]]}
+            {s.tree[flagged[0]!]} ↔ {s.tree[flagged[1]!]}
           </span>
         ) : (
           'no inversion yet'
@@ -162,7 +162,7 @@ function View({ frame }: PluginViewProps<RecoverState>) {
 function Inspector({ frame }: InspectorProps<RecoverState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const val = (i: number | null) => (i !== null && s.tree[i] != null ? s.tree[i] : '—');
+  const val = (i: number | null) => (i !== null && s.tree[i]! != null ? s.tree[i]! : '—');
   return (
     <VarGrid>
       <InspectorRow k="cur (node)" v={val(s.cur)} />
@@ -301,13 +301,13 @@ export const simulator: ProblemSimulator = {
     const n = s.tree.length;
     const order: number[] = [];
     const walk = (i: number) => {
-      if (i >= n || s.tree[i] == null) return;
+      if (i >= n || s.tree[i]! == null) return;
       walk(2 * i + 1);
-      order.push(s.tree[i] as number);
+      order.push(s.tree[i]! as number);
       walk(2 * i + 2);
     };
     walk(0);
-    const sorted = order.every((v, k) => k === 0 || order[k - 1] < v);
+    const sorted = order.every((v, k) => k === 0 || order[k - 1]! < v);
     return sorted
       ? { ok: true, label: `sorted: ${order.join(' ')}` }
       : { ok: false, label: 'still invalid' };

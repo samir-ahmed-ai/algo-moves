@@ -69,8 +69,8 @@ function Inspector({ frame }: InspectorProps<MedianStreamState>) {
     <VarGrid>
       <InspectorRow k="low size" v={s.low.length} />
       <InspectorRow k="high size" v={s.high.length} />
-      <InspectorRow k="low top" v={s.low[0] ?? '—'} />
-      <InspectorRow k="high top" v={s.high[0] ?? '—'} />
+      <InspectorRow k="low top" v={s.low[0]! ?? '—'} />
+      <InspectorRow k="high top" v={s.high[0]! ?? '—'} />
       <InspectorRow k="median" v={s.median ?? '—'} />
     </VarGrid>
   );

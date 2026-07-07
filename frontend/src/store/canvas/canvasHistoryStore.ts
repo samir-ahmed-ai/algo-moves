@@ -2,7 +2,10 @@ import { create } from 'zustand';
 import type { Edge } from '@xyflow/react';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 
-export type CanvasHistorySnapshot = { nodes: PanelFlowNode[]; edges: Edge[] };
+export type CanvasHistorySnapshot = {
+  readonly nodes: readonly PanelFlowNode[];
+  readonly edges: readonly Edge[];
+};
 
 type KeyStack = {
   history: CanvasHistorySnapshot[];
@@ -21,16 +24,33 @@ function normalizeHistoryKey(key: string): string | null {
   return next ? next : null;
 }
 
-function cloneSnapshot(snapshot: CanvasHistorySnapshot): CanvasHistorySnapshot {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function cloneSnapshot(snapshot: CanvasHistorySnapshot): { nodes: PanelFlowNode[]; edges: Edge[] } {
   return {
-    nodes: snapshot.nodes.map((node) => ({ ...node })),
-    edges: snapshot.edges.map((edge) => ({ ...edge })),
+    nodes: snapshot.nodes.map((node) => ({
+      ...node,
+      position: { ...node.position },
+      data: isRecord(node.data) ? { ...node.data } : node.data,
+    })),
+    edges: snapshot.edges.map((edge) => {
+      const cloned = { ...edge };
+      if (isRecord(edge.data)) cloned.data = { ...edge.data };
+      return cloned;
+    }),
   };
 }
 
 interface CanvasHistoryState {
   stacks: Record<string, KeyStack>;
-  record: (key: string, sig: string, nodes: PanelFlowNode[], edges: Edge[]) => boolean;
+  record: (
+    key: string,
+    sig: string,
+    nodes: readonly PanelFlowNode[],
+    edges: readonly Edge[],
+  ) => boolean;
   undo: (key: string) => CanvasHistorySnapshot | null;
   redo: (key: string) => CanvasHistorySnapshot | null;
   reset: (key: string, lastSig?: string) => void;
@@ -46,14 +66,15 @@ export const useCanvasHistoryStore = create<CanvasHistoryState>((set, get) => ({
   record(key, sig, nodes, edges) {
     const normalizedKey = normalizeHistoryKey(key);
     if (!normalizedKey) return false;
+    const normalizedSig = sig.trim();
     const stacks = { ...get().stacks };
     const stack = stacks[normalizedKey] ?? emptyStack();
-    if (sig === stack.lastSig) return false;
+    if (normalizedSig === stack.lastSig) return false;
     const snap = cloneSnapshot({ nodes, edges });
     const trimmed = stack.history.slice(0, stack.index + 1);
     trimmed.push(snap);
     if (trimmed.length > MAX_ENTRIES) trimmed.shift();
-    stacks[normalizedKey] = { history: trimmed, index: trimmed.length - 1, lastSig: sig };
+    stacks[normalizedKey] = { history: trimmed, index: trimmed.length - 1, lastSig: normalizedSig };
     set({ stacks });
     return true;
   },
@@ -90,7 +111,7 @@ export const useCanvasHistoryStore = create<CanvasHistoryState>((set, get) => ({
     const normalizedKey = normalizeHistoryKey(key);
     if (!normalizedKey) return;
     const stacks = { ...get().stacks };
-    stacks[normalizedKey] = { history: [], index: -1, lastSig };
+    stacks[normalizedKey] = { history: [], index: -1, lastSig: lastSig.trim() };
     set({ stacks });
   },
 

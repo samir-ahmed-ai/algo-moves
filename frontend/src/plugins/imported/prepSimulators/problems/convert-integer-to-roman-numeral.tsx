@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -33,7 +33,7 @@ function record({ num }: RomanInput): Frame<RomanState>[] {
   const original = num;
   let out = '';
 
-  const { emit, frames } = createRecorder<RomanState>(() => ({
+  const { emit, frames } = createPrepRecorder<RomanState>(() => ({
     original,
     num,
     values: VALUES,
@@ -52,8 +52,8 @@ function record({ num }: RomanInput): Frame<RomanState>[] {
   );
 
   for (let i = 0; i < VALUES.length; i++) {
-    const v = VALUES[i];
-    const sym = SYMBOLS[i];
+    const v = VALUES[i]!;
+    const sym = SYMBOLS[i]!;
     emit(
       'CONSIDER',
       `${sym}=${v}`,
@@ -61,13 +61,13 @@ function record({ num }: RomanInput): Frame<RomanState>[] {
       { i },
     );
 
-    while (num >= v) {
+    while (num >= v!) {
       out += sym;
-      num -= v;
+      num -= v!;
       emit(
         'EMIT',
         `+${sym} → ${num}`,
-        `${num + v} ≥ ${v}, so append ${sym} and subtract: ${num + v} − ${v} = ${num}. Result so far is "${out}".`,
+        `${num + v!} ≥ ${v}, so append ${sym} and subtract: ${num + v!} − ${v} = ${num}. Result so far is "${out}".`,
         { i, emitted: sym },
         'good',
       );
@@ -92,8 +92,8 @@ function record({ num }: RomanInput): Frame<RomanState>[] {
     }
   }
 
-  const last = frames[frames.length - 1];
-  if (!last.state.done) {
+  const last = frames[frames.length - 1]!;
+  if (!last!.state.done) {
     emit(
       'DONE',
       out || '(empty)',
@@ -125,7 +125,7 @@ function View({ frame }: PluginViewProps<RomanState>) {
         cellTone={tone}
         pointers={pointers}
         windowRange={null}
-        label={(i) => s.values[i]}
+        label={(i) => s.values[i]!}
       />
       <div className={cn(vizText.xs, 'text-ink3')}>row = symbol, label = its value</div>
       <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
@@ -143,8 +143,8 @@ function Inspector({ frame }: InspectorProps<RomanState>) {
       <InspectorRow k="num (input)" v={s.original} />
       <InspectorRow k="remaining" v={s.num} />
       <InspectorRow k="row i" v={s.i ?? '—'} />
-      <InspectorRow k="value" v={s.i !== null ? s.values[s.i] : '—'} />
-      <InspectorRow k="symbol" v={s.i !== null ? s.symbols[s.i] : '—'} />
+      <InspectorRow k="value" v={s.i !== null ? s.values[s.i]! : '—'} />
+      <InspectorRow k="symbol" v={s.i !== null ? s.symbols[s.i]! : '—'} />
       <InspectorRow k="result" v={s.out === '' ? '…' : s.out} />
     </VarGrid>
   );

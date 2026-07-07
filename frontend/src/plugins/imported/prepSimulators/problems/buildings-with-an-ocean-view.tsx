@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { QueueTape } from '../../../../components/board/QueueTape';
 import type { ProblemSimulator } from '../types';
@@ -20,7 +20,7 @@ interface BuildingsState {
   heights: number[];
   i: number | null; // current building under inspection (scanning right→left)
   maxH: number; // tallest building seen so far to the right
-  view: boolean[]; // view[k] = building k has an ocean view
+  view: boolean[]; // view[k]! = building k has an ocean view
   resRev: number[]; // indices collected so far, in reverse (right→left) order
   result: number[] | null; // final answer (left→right), only on the last frame
   done: boolean;
@@ -32,7 +32,7 @@ function record({ heights }: BuildingsInput): Frame<BuildingsState>[] {
   const resRev: number[] = [];
   let maxH = 0;
 
-  const { emit, frames } = createRecorder<BuildingsState>(() => ({
+  const { emit, frames } = createPrepRecorder<BuildingsState>(() => ({
     heights,
     i: null,
     maxH,
@@ -53,26 +53,26 @@ function record({ heights }: BuildingsInput): Frame<BuildingsState>[] {
     emit(
       'SCAN',
       `i=${i}, maxH=${maxH}`,
-      `Look at building ${i} (height ${heights[i]}). Compare it against maxH = ${maxH}, the tallest building anywhere to its right.`,
+      `Look at building ${i} (height ${heights[i]!}). Compare it against maxH = ${maxH}, the tallest building anywhere to its right.`,
       { i },
     );
-    if (heights[i] > maxH) {
-      view[i] = true;
+    if (heights[i]! > maxH) {
+      view[i]! = true;
       resRev.push(i);
       const prevMax = maxH;
-      maxH = heights[i];
+      maxH! = heights[i]!;
       emit(
         'VIEW',
         `+${i}`,
-        `${heights[i]} > ${prevMax}, so nothing to the right blocks building ${i} — it has an ocean view. Record index ${i} and raise maxH to ${maxH}.`,
+        `${heights[i]!} > ${prevMax}, so nothing to the right blocks building ${i} — it has an ocean view. Record index ${i} and raise maxH to ${maxH}.`,
         { i, view: view.slice(), resRev: resRev.slice() },
         'good',
       );
     } else {
       emit(
         'BLOCKED',
-        `${heights[i]}≤${maxH}`,
-        `${heights[i]} ≤ ${maxH}: a building of height ${maxH} to the right blocks the view, so building ${i} is skipped.`,
+        `${heights[i]!}≤${maxH}`,
+        `${heights[i]!} ≤ ${maxH}: a building of height ${maxH} to the right blocks the view, so building ${i} is skipped.`,
         { i },
         'bad',
       );
@@ -98,7 +98,7 @@ function View({ frame }: PluginViewProps<BuildingsState>) {
   const tone = (i: number) => {
     if (s.done && s.result?.includes(i)) return 'found';
     if (s.i === i) return 'match';
-    if (s.view[i]) return 'found';
+    if (s.view[i]!) return 'found';
     return '';
   };
   return (
@@ -126,7 +126,7 @@ function Inspector({ frame }: InspectorProps<BuildingsState>) {
   return (
     <VarGrid>
       <InspectorRow k="i" v={s.i ?? '—'} />
-      <InspectorRow k="heights[i]" v={s.i !== null ? s.heights[s.i] : '—'} />
+      <InspectorRow k="heights[i]!" v={s.i !== null ? s.heights[s.i]! : '—'} />
       <InspectorRow k="maxH" v={s.maxH} />
       <InspectorRow k="views so far" v={s.resRev.length} />
       <InspectorRow k="result" v={s.result ? `[${s.result.join(', ')}]` : s.done ? 'none' : '…'} />
@@ -156,7 +156,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'Stack with auxiliary min stack — different approach',
       },
     ],
-    explain: 'Scan right-to-left tracking `maxH`; if `heights[i] > maxH`, building `i` has a view',
+    explain: 'Scan right-to-left tracking `maxH`; if `heights[i]! > maxH`, building `i` has a view',
   },
   {
     id: 'init',
@@ -240,7 +240,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'O(n). O(n). Scan right-to-left tracking `maxH`; if `heights[i] > maxH`, building `i` has a view; Collect indices in reverse, then reverse the result at the end',
+      'O(n). O(n). Scan right-to-left tracking `maxH`; if `heights[i]! > maxH`, building `i` has a view; Collect indices in reverse, then reverse the result at the end',
   },
   {
     id: 'outcome',

@@ -6,7 +6,7 @@ import {
   type QuizQuestion,
 } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import {
   InspectorRow,
   RailGroup,
@@ -40,9 +40,9 @@ interface FlipTreeState {
  * subtree across unchanged.
  */
 function copySubtree(src: (number | null)[], dst: (number | null)[], from: number, to: number) {
-  if (from >= src.length || src[from] == null) return;
+  if (from >= src.length || src[from]! == null) return;
   ensure(dst, to);
-  dst[to] = src[from];
+  dst[to]! = src[from]!;
   // src left  (2*from+1) → dst left  (2*to+1)  — orientation preserved
   copySubtree(src, dst, 2 * from + 1, 2 * to + 1);
   // src right (2*from+2) → dst right (2*to+2)
@@ -58,7 +58,7 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
   const work: (number | null)[] = tree.slice();
   const swapped: number[] = [];
 
-  const { emit, frames } = createRecorder<FlipTreeState>(() => ({
+  const { emit, frames } = createPrepRecorder<FlipTreeState>(() => ({
     tree: work.slice(),
     current: null,
     swapped: swapped.slice(),
@@ -74,9 +74,9 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
   // Faithful recursion of flipTree: recurse into (already-in-place) children,
   // then swap this node's two subtrees in the working array.
   const flip = (i: number) => {
-    if (i >= work.length || work[i] == null) return; // root == nil → return nil
+    if (i >= work.length || work[i]! == null) return; // root == nil → return nil
 
-    const val = work[i];
+    const val = work[i]!;
     emit(
       'ENTER',
       `node ${val}`,
@@ -92,7 +92,7 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
     const left = 2 * i + 1;
     const right = 2 * i + 2;
     const hasChild =
-      (left < work.length && work[left] != null) || (right < work.length && work[right] != null);
+      (left < work.length && work[left]! != null) || (right < work.length && work[right]! != null);
 
     if (hasChild) {
       // Snapshot the two subtrees, then rebuild them mirrored in place.
@@ -136,7 +136,7 @@ function record({ tree }: FlipTreeInput): Frame<FlipTreeState>[] {
 
 /** Null out slot `i` and every descendant of it in the level-order array. */
 function clearSubtree(arr: (number | null)[], i: number) {
-  if (i >= arr.length || arr[i] == null) return;
+  if (i >= arr.length || arr[i]! == null) return;
   clearSubtree(arr, 2 * i + 1);
   clearSubtree(arr, 2 * i + 2);
   arr[i] = null;
@@ -149,7 +149,7 @@ function View({ frame }: PluginViewProps<FlipTreeState>) {
     if (s.swapped.includes(i)) return 'team-2';
     return 'team-0';
   };
-  const curVal = s.current !== null && s.current < s.tree.length ? s.tree[s.current] : null;
+  const curVal = s.current !== null && s.current < s.tree.length ? s.tree[s.current]! : null;
   return (
     <VizStage
       rail={
@@ -170,7 +170,7 @@ function View({ frame }: PluginViewProps<FlipTreeState>) {
 function Inspector({ frame }: InspectorProps<FlipTreeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const curVal = s.current !== null && s.current < s.tree.length ? s.tree[s.current] : null;
+  const curVal = s.current !== null && s.current < s.tree.length ? s.tree[s.current]! : null;
   const nodeCount = s.tree.filter((v) => v != null).length;
   return (
     <VarGrid>

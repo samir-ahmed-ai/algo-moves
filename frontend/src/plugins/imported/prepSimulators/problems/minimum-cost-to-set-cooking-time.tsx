@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder, mergeState, type LoosePartial } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import {
@@ -82,10 +82,13 @@ function record({
     done: false,
   };
 
-  const carry: Partial<CookingTimeState> = {};
+  const carry: LoosePartial<CookingTimeState> = {};
 
-  const { emit, frames } = createRecorder<CookingTimeState>(() => ({ ...base, ...carry }), {
-    merge: (b, partial) => ({ ...b, ...carry, ...partial }),
+  const { emit, frames } = createPrepRecorder<CookingTimeState>(() => ({ ...base }), {
+    merge: (b, partial) => {
+      Object.assign(carry, partial);
+      return mergeState(b, partial);
+    },
   });
 
   const m = Math.floor(targetSeconds / 60);
@@ -122,11 +125,11 @@ function record({
     let cost = 0;
     let pos = startAt;
     for (let k = 0; k < digits.length; k++) {
-      const d = digits[k];
+      const d = digits[k]!;
       if (d !== pos) {
         const from = pos;
         cost += moveCost;
-        pos = d;
+        pos! = d;
         emit(
           'MOVE',
           `move ${from}→${d} (+${moveCost})`,

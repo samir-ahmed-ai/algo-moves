@@ -48,7 +48,11 @@ export function recordScene(p: PrepProblem): Frame<PrepSceneState>[] {
     note: string,
     caption: string,
     tone?: 'good' | 'bad',
-  ) => frames.push({ move: { type, note, caption, tone }, state: { p, stageIdx, reveal } });
+  ) =>
+    frames.push({
+      move: { type, note, caption, ...(tone !== undefined ? { tone } : {}) },
+      state: { p, stageIdx, reveal },
+    });
 
   push(
     -1,
@@ -201,7 +205,7 @@ export function SceneInspector({ frame }: InspectorProps<PrepSceneState>) {
       <InspectorRow k="pattern" v={p.pattern || '—'} />
       <InspectorRow
         k="stage"
-        v={stage < 0 ? 'intro' : stage >= STAGES.length ? 'complexity' : STAGES[stage].label}
+        v={stage < 0 ? 'intro' : stage >= STAGES.length ? 'complexity' : STAGES[stage]!.label}
       />
       <InspectorRow k="time" v={p.time || '—'} />
       <InspectorRow k="space" v={p.space || '—'} />

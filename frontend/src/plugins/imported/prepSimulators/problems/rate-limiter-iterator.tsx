@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { QueueTape } from '../../../../components/board/QueueTape';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -38,7 +38,7 @@ function record({ source, rate, burst, stepSec }: RateLimitInput): Frame<RateLim
   let elapsed = 0;
   const output: number[] = [];
 
-  const { emit, frames } = createRecorder<RateLimitState>(() => ({
+  const { emit, frames } = createPrepRecorder<RateLimitState>(() => ({
     source,
     index,
     rate,
@@ -69,13 +69,13 @@ function record({ source, rate, burst, stepSec }: RateLimitInput): Frame<RateLim
 
     if (tokens >= 1) {
       tokens -= 1;
-      const val = source[index];
-      output.push(val);
+      const val = source[index]!;
+      output.push(val!);
       index++;
       emit(
         'YIELD',
         `→ ${val}`,
-        `tokens ≥ 1 — spend 1 token, yield source[${index - 1}] = ${val}. Remaining tokens = ${tokens.toFixed(1)}.`,
+        `tokens ≥ 1 — spend 1 token, yield source[${index - 1}]! = ${val}. Remaining tokens = ${tokens.toFixed(1)}.`,
         { index, tokens, output: output.slice() },
         'good',
       );

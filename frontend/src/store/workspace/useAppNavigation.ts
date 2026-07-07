@@ -8,6 +8,14 @@ import { resolveShareItemId, type ShareState } from '@/store/navigation/shareSta
 import { writeStorageText } from '@/store/persistence/storage';
 import type { AppRoute } from './workspace';
 import { LAST_ITEM_KEY } from './workspaceConstants';
+import type { WorkspaceNavigationCtx } from './workspaceContextTypes';
+
+type NavigationState = Omit<WorkspaceNavigationCtx, 'session'>;
+
+function cleanRouteParam(value: string | undefined): string | undefined {
+  const clean = typeof value === 'string' ? value.trim() : '';
+  return clean || undefined;
+}
 
 function isCanvasFocus(shared: ShareState | null): boolean {
   return shared?.focus === 'canvas';
@@ -46,7 +54,7 @@ export function resolveBackToBrowseTarget(
 }
 
 /** App route + active problem/browse selection + the enter-X navigators. */
-export function useAppNavigation(shared: ShareState | null) {
+export function useAppNavigation(shared: ShareState | null): NavigationState {
   const canvasFocus = isCanvasFocus(shared);
   const sharedItemId = resolveShareItemId(shared);
   const [mode, setMode] = useState<CanvasMode>(() =>
@@ -104,7 +112,9 @@ export function useAppNavigation(shared: ShareState | null) {
   }, []);
 
   const openProblem = useCallback((id: string) => {
-    setActiveItemId(id);
+    const itemId = cleanRouteParam(id);
+    if (!itemId) return;
+    setActiveItemId(itemId);
     setActiveTopicId(null);
     setMode('learn');
     setProblemFocused(true);
@@ -155,7 +165,9 @@ export function useAppNavigation(shared: ShareState | null) {
   );
 
   const enterProblemInMode = useCallback((id: string, problemMode: CanvasMode) => {
-    setActiveItemId(id);
+    const itemId = cleanRouteParam(id);
+    if (!itemId) return;
+    setActiveItemId(itemId);
     setActiveTopicId(null);
     setMode(problemMode);
     setProblemFocused(true);
@@ -163,10 +175,16 @@ export function useAppNavigation(shared: ShareState | null) {
   }, []);
 
   const enterMobile = useCallback((categoryId?: string, itemId?: string) => {
-    setActiveCategoryId(categoryId ?? null);
-    setActiveTopicId(categoryId ? `browse-${categoryId}` : null);
+    const cleanCategoryId = cleanRouteParam(categoryId);
+    const cleanItemId = cleanRouteParam(itemId);
+    setActiveCategoryId(cleanCategoryId ?? null);
+    setActiveTopicId(cleanCategoryId ? `browse-${cleanCategoryId}` : null);
     setRoute('mobile');
-    writeMobileHash(categoryId ? { categoryId, itemId } : null);
+    writeMobileHash(
+      cleanCategoryId
+        ? { categoryId: cleanCategoryId, ...(cleanItemId ? { itemId: cleanItemId } : {}) }
+        : null,
+    );
   }, []);
 
   const enterVim = useCallback((levelId?: string) => {
@@ -178,16 +196,19 @@ export function useAppNavigation(shared: ShareState | null) {
   const enterDojo = useCallback((gameId?: string, levelId?: string) => {
     setRoute('dojo');
     // Guard against non-string args (e.g. a MouseEvent from onClick={enterDojo}).
+    const cleanGameId = cleanRouteParam(gameId);
+    const cleanLevelId = cleanRouteParam(levelId);
     writeDojoHash(
-      typeof gameId === 'string' && gameId
-        ? { gameId, levelId: typeof levelId === 'string' && levelId ? levelId : undefined }
+      cleanGameId
+        ? { gameId: cleanGameId, ...(cleanLevelId ? { levelId: cleanLevelId } : {}) }
         : null,
     );
   }, []);
 
   const enterGames = useCallback((roomCode?: string) => {
+    const room = cleanRouteParam(roomCode);
     setRoute('games');
-    writeGamesHash(roomCode ? { room: roomCode } : null);
+    writeGamesHash(room ? { room } : null);
   }, []);
 
   const enterPlans = useCallback(() => {

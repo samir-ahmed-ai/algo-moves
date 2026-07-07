@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -34,7 +34,7 @@ function candidateCount(x: number): number {
 }
 
 function record({ x }: SqrtInput): Frame<SqrtState>[] {
-  const { emit, frames } = createRecorder<SqrtState>(() => ({
+  const { emit, frames } = createPrepRecorder<SqrtState>(() => ({
     x,
     lo: null,
     mid: null,

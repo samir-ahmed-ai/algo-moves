@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -18,7 +18,7 @@ interface KGroupInput {
 
 interface KGroupState {
   // Current order of the chain, including the leading dummy at index 0.
-  // chain[0] is always the dummy (shown as 'D').
+  // chain[0]! is always the dummy (shown as 'D').
   chain: (number | string)[];
   k: number;
   // Pointer indices into `chain` (or null when not applicable).
@@ -36,7 +36,7 @@ function record({ values, k }: KGroupInput): Frame<KGroupState>[] {
   // chain holds the live order of node values; index 0 is the dummy.
   const chain: (number | string)[] = [DUMMY, ...values];
 
-  const { emit, frames } = createRecorder<KGroupState>(() => ({
+  const { emit, frames } = createPrepRecorder<KGroupState>(() => ({
     chain: chain.slice(),
     k,
     groupPrev: null,
@@ -94,7 +94,7 @@ function record({ values, k }: KGroupInput): Frame<KGroupState>[] {
       { groupPrev, kth, groupNext },
     );
 
-    // Reverse the slice chain[groupPrev+1 .. kth] in place.
+    // Reverse the slice chain[groupPrev+1 .. kth]! in place.
     // Mirrors the Go pointer dance (prev,cur fingers) but on the array model:
     // after reversal the group's values are flipped and re-linked.
     const start = groupPrev + 1;
@@ -108,17 +108,17 @@ function record({ values, k }: KGroupInput): Frame<KGroupState>[] {
         `Reversing the group with the prev/cur finger dance: flip the order of the values at the two ends of the remaining slice (positions ${lo} and ${hi}).`,
         { groupPrev, kth, groupNext, cur: lo, prev: hi },
       );
-      const tmp = chain[lo];
-      chain[lo] = chain[hi];
-      chain[hi] = tmp;
+      const tmp = chain[lo]!;
+      chain[lo]! = chain[hi]!;
+      chain[hi]! = tmp;
       lo += 1;
       hi -= 1;
     }
 
     emit(
       'RELINK',
-      `head→${chain[start]}`,
-      `Group reversed. The anchor now points at the old kth node (value ${chain[start]}), and the old group head (value ${chain[end]}) becomes the anchor for the next group.`,
+      `head→${chain[start]!}`,
+      `Group reversed. The anchor now points at the old kth node (value ${chain[start]!}), and the old group head (value ${chain[end]!}) becomes the anchor for the next group.`,
       { groupPrev, kth, groupNext, prev: end },
     );
 
@@ -178,7 +178,7 @@ function Inspector({ frame }: InspectorProps<KGroupState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const at = (i: number | null) =>
-    i !== null && i >= 0 && i < s.chain.length ? `${s.chain[i]}@${i}` : '—';
+    i !== null && i >= 0 && i < s.chain.length ? `${s.chain[i]!}@${i}` : '—';
   return (
     <VarGrid>
       <InspectorRow k="k" v={s.k} />

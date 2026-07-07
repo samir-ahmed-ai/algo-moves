@@ -118,12 +118,14 @@ async function blockFor(item: Item): Promise<ProblemBlock | null> {
     cards.push({ kind: 'reassemble', key: `${item.id}:asm`, pieces });
   }
 
+  const pattern = patternFor(tags);
+
   return {
     item,
     plugin,
-    code,
+    ...(code !== undefined ? { code } : {}),
     tags,
-    pattern: patternFor(tags),
+    ...(pattern !== undefined ? { pattern } : {}),
     cards,
     quizCount: quiz.length,
   };

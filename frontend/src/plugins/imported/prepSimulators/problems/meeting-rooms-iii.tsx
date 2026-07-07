@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
@@ -38,13 +38,13 @@ function busyLess(a: BusyMeet, b: BusyMeet): boolean {
 }
 
 function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
-  const sorted = [...meetings].sort((a, b) => a[0] - b[0]);
+  const sorted = [...meetings].sort((a, b) => a[0]! - b[0]!);
   let avail: number[] = [];
   for (let i = 0; i < n; i++) avail.push(i);
   let busy: BusyMeet[] = [];
   const cnt = new Array(n).fill(0);
 
-  const { emit, frames } = createRecorder<MeetState>(() => ({
+  const { emit, frames } = createPrepRecorder<MeetState>(() => ({
     n,
     avail: avail.slice(),
     busy: busy.map((b) => ({ ...b })),
@@ -77,13 +77,13 @@ function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
 
     if (avail.length > 0) {
       const r = avail.shift()!;
-      cnt[r]++;
+      cnt[r]!++;
       busy.push({ end: e, room: r });
       busy.sort((a, b) => (busyLess(a, b) ? -1 : 1));
       emit(
         'BOOK',
         `room ${r}`,
-        `Meeting [${s},${e}]: free room ${r} available → assign, busy until ${e}. cnt[${r}]=${cnt[r]}.`,
+        `Meeting [${s},${e}]: free room ${r} available → assign, busy until ${e}. cnt[${r}]!=${cnt[r]!}.`,
         {
           meeting: m,
           assigned: r,
@@ -97,14 +97,14 @@ function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
     } else {
       busy.sort((a, b) => (busyLess(a, b) ? -1 : 1));
       const b = busy.shift()!;
-      cnt[b.room]++;
+      cnt[b.room]!++;
       const newEnd = b.end + (e - s);
       busy.push({ end: newEnd, room: b.room });
       busy.sort((a, b) => (busyLess(a, b) ? -1 : 1));
       emit(
         'DELAY',
         `room ${b.room}`,
-        `Meeting [${s},${e}]: all busy — reuse room ${b.room}, ends at ${newEnd}. cnt[${b.room}]=${cnt[b.room]}.`,
+        `Meeting [${s},${e}]: all busy — reuse room ${b.room}, ends at ${newEnd}. cnt[${b.room}]!=${cnt[b.room]!}.`,
         {
           meeting: m,
           assigned: b.room,
@@ -117,11 +117,11 @@ function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
   }
 
   let winner = 0;
-  for (let i = 1; i < n; i++) if (cnt[i] > cnt[winner]) winner = i;
+  for (let i = 1; i < n; i++) if (cnt[i]! > cnt[winner]!) winner = i;
   emit(
     'DONE',
     `room ${winner}`,
-    `Done. Room ${winner} held the most meetings (${cnt[winner]}). Counts: [${cnt.join(', ')}].`,
+    `Done. Room ${winner} held the most meetings (${cnt[winner]!}). Counts: [${cnt.join(', ')}].`,
     { op: 'done', winner, done: true },
     'good',
   );

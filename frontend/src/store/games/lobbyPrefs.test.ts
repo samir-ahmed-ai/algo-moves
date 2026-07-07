@@ -21,8 +21,15 @@ describe('lobbyPrefs persistence', () => {
   });
 
   it('persists trimmed player display name', () => {
-    writeLobbyPlayerName('  Ahmed  ');
-    expect(readLobbyPlayerName()).toBe('Ahmed');
-    expect(localStorage.getItem(STORAGE_KEYS.GAMES_NAME)).toBe('Ahmed');
+    writeLobbyPlayerName('  Ahmed   Player  ');
+    expect(readLobbyPlayerName()).toBe('Ahmed Player');
+    expect(localStorage.getItem(STORAGE_KEYS.GAMES_NAME)).toBe('Ahmed Player');
+  });
+
+  it('clears a saved player display name when the next value is blank', () => {
+    writeLobbyPlayerName('Ahmed');
+    writeLobbyPlayerName('   ');
+    expect(readLobbyPlayerName()).toBe('');
+    expect(localStorage.getItem(STORAGE_KEYS.GAMES_NAME)).toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 import { getPluginMeta } from '../core';
 import type { Course, CourseDef, Item, ItemDef, Topic } from './types';
 
-function uniqueIds(ids: string[]): string[] {
+function uniqueIds(ids: readonly string[]): string[] {
   return Array.from(new Set(ids.map((id) => id.trim()).filter(Boolean)));
 }
 
@@ -28,21 +28,22 @@ function hydrateItem(def: ItemDef, courseId: string, topicId: string): Item {
       if (!source && p.source) source = { label: 'Source', url: p.source };
     }
   }
+  const estimatedMinutes = normalizeEstimatedMinutes(def.estimatedMinutes);
 
   return {
     id: def.id,
     kind: def.kind,
-    pluginId: def.pluginId,
     title: title ?? def.id,
-    summary,
-    difficulty,
     tags: uniqueIds([...pluginTags, ...(def.tags ?? [])]),
-    source,
-    estimatedMinutes: normalizeEstimatedMinutes(def.estimatedMinutes),
     status: def.status ?? 'todo',
     prereqs: uniqueIds(def.prereqs ?? []),
     courseId,
     topicId,
+    ...(def.pluginId ? { pluginId: def.pluginId } : {}),
+    ...(summary ? { summary } : {}),
+    ...(difficulty ? { difficulty } : {}),
+    ...(source ? { source } : {}),
+    ...(estimatedMinutes !== undefined ? { estimatedMinutes } : {}),
   };
 }
 
@@ -61,15 +62,15 @@ export function buildCatalog(defs: CourseDef[]): Catalog {
   const courses: Course[] = defs.map((c) => ({
     id: c.id,
     title: c.title,
-    summary: c.summary,
-    icon: c.icon,
     topics: c.topics.map<Topic>((t) => ({
       id: t.id,
       title: t.title,
-      summary: t.summary,
       courseId: c.id,
       items: t.items.map((it) => hydrateItem(it, c.id, t.id)),
+      ...(t.summary ? { summary: t.summary } : {}),
     })),
+    ...(c.summary ? { summary: c.summary } : {}),
+    ...(c.icon ? { icon: c.icon } : {}),
   }));
 
   const topics = courses.flatMap((c) => c.topics);
@@ -88,17 +89,19 @@ export function buildCatalog(defs: CourseDef[]): Catalog {
     getTopic: (id) => topicIndex.get(id),
     breadcrumb: (itemId) => {
       const item = itemIndex.get(itemId);
+      const topic = item ? topicIndex.get(item.topicId) : undefined;
+      const course = item ? courseIndex.get(item.courseId) : undefined;
       return {
-        item,
-        topic: item ? topicIndex.get(item.topicId) : undefined,
-        course: item ? courseIndex.get(item.courseId) : undefined,
+        ...(item ? { item } : {}),
+        ...(topic ? { topic } : {}),
+        ...(course ? { course } : {}),
       };
     },
     adjacent: (itemId) => {
       const idx = itemPosition.get(itemId) ?? -1;
       return {
-        prev: idx > 0 ? items[idx - 1] : undefined,
-        next: idx >= 0 && idx < items.length - 1 ? items[idx + 1] : undefined,
+        ...(idx > 0 && items[idx - 1] ? { prev: items[idx - 1] } : {}),
+        ...(idx >= 0 && idx < items.length - 1 && items[idx + 1] ? { next: items[idx + 1] } : {}),
       };
     },
   };

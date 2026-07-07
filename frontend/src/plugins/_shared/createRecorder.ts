@@ -1,4 +1,4 @@
-import type { Frame, Tone } from '../../core/types';
+import type { Frame, Tone, Move } from '../../core/types';
 
 export interface Recorder<S> {
   /** Append a move frame; partial state merges over the recorder baseline. */
@@ -31,7 +31,9 @@ export function createRecorder<S>(
     tone?: Tone,
   ) => {
     base = merge(makeBaseState(), partial);
-    frames.push({ move: { type, note, caption, tone }, state: base });
+    const move: Move = { type, note, caption };
+    if (tone !== undefined) move.tone = tone;
+    frames.push({ move, state: base });
   };
 
   return {

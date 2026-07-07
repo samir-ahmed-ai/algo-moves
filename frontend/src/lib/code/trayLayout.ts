@@ -4,16 +4,17 @@ export function dedentForDisplay(code: string): string {
   const lines = code.split('\n');
   const nonempty = lines.filter((l) => l.trim().length > 0);
   if (nonempty.length === 0) return code;
-  const minIndent = Math.min(...nonempty.map((l) => l.match(/^(\s*)/)?.[1].length ?? 0));
+  const minIndent = Math.min(...nonempty.map((l) => (l.match(/^(\s*)/)?.[1] ?? '').length));
   if (minIndent <= 0) return code;
   return lines.map((l) => (l.trim().length > 0 ? l.slice(minIndent) : '')).join('\n');
 }
 
 /** Rough row count for masonry packing (includes wrapped long lines). */
 export function estimatePieceRows(code: string, wrapCols = 32): number {
+  const cols = Number.isFinite(wrapCols) ? Math.max(1, Math.floor(wrapCols)) : 32;
   return code
     .split('\n')
-    .reduce((rows, line) => rows + Math.max(1, Math.ceil(line.length / wrapCols)), 0);
+    .reduce((rows, line) => rows + Math.max(1, Math.ceil(line.length / cols)), 0);
 }
 
 export interface TrayLayoutItem {
@@ -27,8 +28,9 @@ export function balanceTrayColumns(
   columnCount = 2,
   wrapCols = 32,
 ): TrayLayoutItem[][] {
-  const cols: TrayLayoutItem[][] = Array.from({ length: columnCount }, () => []);
-  const heights = Array.from({ length: columnCount }, () => 0);
+  const safeColumnCount = Number.isFinite(columnCount) ? Math.max(1, Math.floor(columnCount)) : 1;
+  const cols: TrayLayoutItem[][] = Array.from({ length: safeColumnCount }, () => []);
+  const heights = Array.from({ length: safeColumnCount }, () => 0);
   if (pieces.length === 0) return cols;
 
   const ranked = pieces
@@ -37,11 +39,11 @@ export function balanceTrayColumns(
 
   for (const item of ranked) {
     let target = 0;
-    for (let c = 1; c < columnCount; c++) {
-      if (heights[c] < heights[target]) target = c;
+    for (let c = 1; c < safeColumnCount; c++) {
+      if (heights[c]! < heights[target]!) target = c;
     }
-    cols[target].push({ piece: item.piece, index: item.index });
-    heights[target] += item.rows;
+    cols[target]!.push({ piece: item.piece, index: item.index });
+    heights[target] = heights[target]! + item.rows;
   }
 
   return cols;

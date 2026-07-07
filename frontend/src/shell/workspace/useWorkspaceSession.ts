@@ -16,7 +16,7 @@ export function useWorkspaceSession(): SessionMeta {
       workspaceSessionMeta({
         mode,
         problemFocused,
-        collabSession: collab?.session,
+        ...(collab?.session !== undefined ? { collabSession: collab.session } : {}),
       }),
     [mode, problemFocused, collab?.session],
   );

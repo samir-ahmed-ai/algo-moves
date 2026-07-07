@@ -48,7 +48,7 @@ export function parseGamesHash(hash: string, pathname?: string): GamesHashTarget
 export function buildGamesUrl(room?: string): string {
   const base =
     typeof location === 'undefined'
-      ? ''
+      ? pagePath('games')
       : `${location.origin}${pagePath('games')}${location.search || ''}`;
   let hashBody = '';
   const roomCode = room?.trim().toUpperCase();
@@ -57,7 +57,10 @@ export function buildGamesUrl(room?: string): string {
 }
 
 /** Write the Games route without a full page reload. */
-export function writeGamesHash(target?: GamesHashTarget | null, opts?: { replace?: boolean }) {
+export function writeGamesHash(
+  target?: GamesHashTarget | null,
+  opts?: { replace?: boolean },
+): void {
   if (typeof location === 'undefined') return;
   let hashBody = '';
   const room = target?.room?.trim().toUpperCase();

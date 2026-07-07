@@ -63,7 +63,7 @@ function record({ n }: SquaresInput): Frame<SquaresState>[] {
     let bestFrom = i - 1;
     let bestSq = 1;
     for (let j = 1; j * j <= i; j++) {
-      const cand = dp[i - j * j] + 1;
+      const cand = dp[i - j * j]! + 1;
       if (cand < best) {
         best = cand;
         bestFrom = i - j * j;

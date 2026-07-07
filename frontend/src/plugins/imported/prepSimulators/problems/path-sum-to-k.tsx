@@ -5,7 +5,7 @@ import {
   type SampleInput,
   type QuizQuestion,
 } from '../../../../core/types';
-import { createRecorder } from '../../../_shared/createRecorder';
+import { createPrepRecorder } from '../strictHelpers';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -21,10 +21,10 @@ interface PathSumState {
   tree: (number | null)[];
   k: number;
   node: number | null; // index of the node being processed (null = between/after DFS)
-  visited: number[]; // node indices already entered (cnt[sum] added for these)
+  visited: number[]; // node indices already entered (cnt[sum]! added for these)
   sum: number | null; // running root-to-node prefix sum at this node
   need: number | null; // sum - k, the ancestor prefix we look up
-  hits: number; // how many matching prefixes cnt[need] contributed this step
+  hits: number; // how many matching prefixes cnt[need]! contributed this step
   cnt: [number, number][]; // prefix-sum -> occurrences on the current path
   ans: number;
   done: boolean;
@@ -35,7 +35,7 @@ function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {
   const visited: number[] = [];
   let ans = 0;
 
-  const { emit, frames } = createRecorder<PathSumState>(() => ({
+  const { emit, frames } = createPrepRecorder<PathSumState>(() => ({
     tree,
     k,
     node: null,
@@ -51,12 +51,12 @@ function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {
   emit(
     'INIT',
     `k=${k}`,
-    `Path sum to K: count downward root-to-descendant paths whose values sum to ${k}. We DFS once, tracking the running root-to-node prefix sum. cnt holds how many ancestor prefixes we have seen, seeded with cnt[0] = 1 for the empty prefix.`,
+    `Path sum to K: count downward root-to-descendant paths whose values sum to ${k}. We DFS once, tracking the running root-to-node prefix sum. cnt holds how many ancestor prefixes we have seen, seeded with cnt[0]! = 1 for the empty prefix.`,
     {},
   );
 
   const dfs = (i: number, parentSum: number) => {
-    if (i >= tree.length || tree[i] == null) return;
+    if (i >= tree.length || tree[i]! == null) return;
     const val = tree[i]!;
     const sum = parentSum + val;
     const need = sum - k;
@@ -76,8 +76,8 @@ function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {
 
     emit(
       'RECORD',
-      `cnt[${sum}]++`,
-      `Record this node's prefix sum: cnt[${sum}] is now ${cnt.get(sum)}. Then recurse into its children so deeper nodes can look back at this prefix.`,
+      `cnt[${sum}]!++`,
+      `Record this node's prefix sum: cnt[${sum}]! is now ${cnt.get(sum)}. Then recurse into its children so deeper nodes can look back at this prefix.`,
       { node: i, sum, need: null, hits: 0 },
     );
 
@@ -91,8 +91,8 @@ function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {
 
     emit(
       'UNDO',
-      `cnt[${sum}]--`,
-      `Both subtrees of node ${val} are done. Backtrack: remove this node's prefix (cnt[${sum}]--) so it can't be seen by unrelated branches. cnt[${sum}] is now ${cnt.get(sum) ?? 0}.`,
+      `cnt[${sum}]!--`,
+      `Both subtrees of node ${val} are done. Backtrack: remove this node's prefix (cnt[${sum}]!--) so it can't be seen by unrelated branches. cnt[${sum}]! is now ${cnt.get(sum) ?? 0}.`,
       { node: i, sum },
     );
   };
@@ -138,7 +138,7 @@ function View({ frame }: PluginViewProps<PathSumState>) {
         cnt {'{'}
         {s.cnt
           .slice()
-          .sort((a, b) => a[0] - b[0])
+          .sort((a, b) => a[0]! - b[0]!)
           .map(([v, c]) => `${v}:${c}`)
           .join(', ')}
         {'}'}
@@ -150,14 +150,14 @@ function View({ frame }: PluginViewProps<PathSumState>) {
 function Inspector({ frame }: InspectorProps<PathSumState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const val = s.node !== null ? s.tree[s.node] : null;
+  const val = s.node !== null ? s.tree[s.node]! : null;
   return (
     <VarGrid>
       <InspectorRow k="k" v={s.k} />
       <InspectorRow k="node value" v={val ?? '—'} />
       <InspectorRow k="sum (prefix)" v={s.sum ?? '—'} />
       <InspectorRow k="need (sum−k)" v={s.need ?? '—'} />
-      <InspectorRow k="cnt[need]" v={s.need !== null ? s.hits : '—'} />
+      <InspectorRow k="cnt[need]!" v={s.need !== null ? s.hits : '—'} />
       <InspectorRow k="ans" v={s.done ? `${s.ans} paths` : s.ans} />
     </VarGrid>
   );
@@ -206,7 +206,7 @@ const practiceQuiz: QuizQuestion[] = [
       },
     ],
     explain:
-      'Path sum to K: count downward root-to-descendant paths whose values sum to . We DFS once, tracking the running root-to-node prefix sum. cnt holds how many ancestor prefixes we have seen, seeded with cnt[0] = 1 for the empty prefix.',
+      'Path sum to K: count downward root-to-descendant paths whose values sum to . We DFS once, tracking the running root-to-node prefix sum. cnt holds how many ancestor prefixes we have seen, seeded with cnt[0]! = 1 for the empty prefix.',
   },
   {
     id: 'key-step',
@@ -268,7 +268,7 @@ const practiceQuiz: QuizQuestion[] = [
         label: 'O(n²) time, O(n) space — wrong order of growth',
       },
     ],
-    explain: 'O(n). O(n). cnt[0]=1; ans+=cnt[sum-k]; cnt[sum]++; undo on return',
+    explain: 'O(n). O(n). cnt[0]!=1; ans+=cnt[sum-k]!; cnt[sum]!++; undo on return',
   },
   {
     id: 'outcome',
