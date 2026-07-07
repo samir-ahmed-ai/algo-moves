@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { collabSession, defaultSession, interviewSession, isSessionMeta } from '@/lib/session';
+import { SUBDOC_TAG, isSubDocOp, type SubDocSnapshot } from '@/lib/session/subdocProtocol';
 import {
   buildCanvasRoomState,
+  buildRoomEnvelope,
   extractCanvasDoc,
   extractSessionMeta,
+  extractSubDocs,
   isRoomEnvelope,
 } from '@/shell/realtime/roomState';
 
@@ -40,5 +43,34 @@ describe('room shared envelope', () => {
     expect(extractCanvasDoc(envelope)).toEqual(sampleDoc);
     expect(extractSessionMeta(envelope)).toEqual(session);
     expect(extractCanvasDoc(sampleDoc)).toBeNull();
+  });
+
+  it('buildRoomEnvelope attaches content channels independently', () => {
+    const session = collabSession();
+    const notes: SubDocSnapshot = {
+      nodeId: 'notes',
+      kind: 'notes',
+      rev: 3,
+      payload: { text: 'shared' },
+    };
+    const subsOnly = buildRoomEnvelope(session, { subDocs: { notes } });
+    expect(isRoomEnvelope(subsOnly)).toBe(true);
+    expect(extractCanvasDoc(subsOnly)).toBeNull();
+    expect(extractSubDocs(subsOnly)).toEqual({ notes });
+
+    const full = buildRoomEnvelope(session, { canvas: sampleDoc, subDocs: { notes } });
+    expect(extractCanvasDoc(full)).toEqual(sampleDoc);
+    expect(extractSubDocs(full)).toEqual({ notes });
+
+    const sessionOnly = buildRoomEnvelope(session, { subDocs: {} });
+    expect(sessionOnly.subDocs).toBeUndefined();
+    expect(extractSubDocs(sessionOnly)).toEqual({});
+  });
+});
+
+describe('subdoc ops', () => {
+  it('recognizes the notes patch op', () => {
+    expect(isSubDocOp({ [SUBDOC_TAG]: 'patch-notes', nodeId: 'n', text: 'hi', rev: 1 })).toBe(true);
+    expect(isSubDocOp({ [SUBDOC_TAG]: 'patch-nope', nodeId: 'n' })).toBe(false);
   });
 });

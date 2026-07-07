@@ -4,8 +4,11 @@ import {
   encodeShare,
   decodeShare,
   buildInviteUrl,
+  buildInterviewInviteUrl,
   buildWorkspaceEntryUrl,
+  normalizeShareState,
   readRoomFromUrl,
+  type ShareState,
 } from './shareState';
 
 describe('shareState', () => {
@@ -22,6 +25,23 @@ describe('shareState', () => {
       const encoded = encodeShare(state);
       const decoded = decodeShare(encoded);
       expect(decoded).toEqual(state);
+    });
+
+    it('preserves variant and guestToken', () => {
+      const state: ShareState = {
+        mode: 'visualize',
+        focus: 'canvas',
+        variant: 'interview',
+        room: 'ROOM1234',
+        sessionKind: 'interview',
+        guestToken: 'tok_abc',
+      };
+      expect(decodeShare(encodeShare(state))).toEqual(state);
+    });
+
+    it('omits variant from the payload when unset', () => {
+      const decoded = decodeShare(encodeShare({ mode: 'visualize', focus: 'canvas' }));
+      expect(decoded && 'variant' in decoded).toBe(false);
     });
 
     it('preserves trackId', () => {
@@ -93,6 +113,21 @@ describe('shareState', () => {
     });
   });
 
+  describe('normalizeShareState', () => {
+    it('keeps the interview variant', () => {
+      expect(normalizeShareState({ focus: 'canvas', variant: 'interview' }).variant).toBe(
+        'interview',
+      );
+    });
+
+    it('drops unrecognized variant values', () => {
+      const messy = { focus: 'canvas', variant: 'wild' } as unknown as ShareState;
+      const normalized = normalizeShareState(messy);
+      expect('variant' in normalized).toBe(false);
+      expect(normalized.focus).toBe('canvas');
+    });
+  });
+
   describe('resolveShareItemId', () => {
     it('resolves from item slug', () => {
       expect(resolveShareItemId({ item: 'prep-arrays-find-duplicate-and-missing' })).toBe(
@@ -132,6 +167,39 @@ describe('shareState', () => {
       const decoded = decodeShare(hashPart);
       expect(decoded?.room).toBe('WXYZ9999');
       expect(decoded?.focus).toBe('canvas');
+    });
+  });
+
+  describe('buildInterviewInviteUrl', () => {
+    const original = globalThis.location;
+
+    beforeEach(() => {
+      // @ts-expect-error mocking location
+      globalThis.location = { origin: 'https://test.app', pathname: '/', hash: '', search: '' };
+    });
+
+    afterEach(() => {
+      globalThis.location = original;
+    });
+
+    it('embeds room, interview session kind, interview variant, and guest token', () => {
+      const url = buildInterviewInviteUrl(
+        { mode: 'visualize', focus: 'canvas', theme: 'dark' },
+        'ROOM1234',
+        'tok_abc',
+      );
+      const decoded = decodeShare(url.split('#s=')[1]);
+      expect(decoded?.room).toBe('ROOM1234');
+      expect(decoded?.sessionKind).toBe('interview');
+      expect(decoded?.variant).toBe('interview');
+      expect(decoded?.guestToken).toBe('tok_abc');
+    });
+
+    it('omits guestToken when not provided', () => {
+      const url = buildInterviewInviteUrl({ mode: 'visualize', focus: 'canvas' }, 'ROOM1234');
+      const decoded = decodeShare(url.split('#s=')[1]);
+      expect(decoded?.variant).toBe('interview');
+      expect(decoded && 'guestToken' in decoded).toBe(false);
     });
   });
 

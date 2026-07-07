@@ -14,6 +14,8 @@ import {
   type TrackId,
 } from './taxonomy';
 
+const collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
+
 export type { BrowseCategory, BrowseTrack, TrackId };
 export {
   browseTopicId,
@@ -25,6 +27,18 @@ export {
   getTracks,
   isBrowseTopicId,
 };
+
+function normalizeSearch(value: string | undefined): string {
+  return (value ?? '').trim().toLowerCase();
+}
+
+function itemMatchesQuery(item: Item, q: string): boolean {
+  return (
+    item.title.toLowerCase().includes(q) ||
+    item.summary?.toLowerCase().includes(q) === true ||
+    item.tags.some((tag) => tag.toLowerCase().includes(q))
+  );
+}
 
 /** Collect all drillable problems for a browse category, deduped and sorted. */
 export function getItemsForCategory(categoryId: string, catalog: Catalog): Item[] {
@@ -51,7 +65,7 @@ export function getItemsForCategory(categoryId: string, catalog: Catalog): Item[
     }
   }
 
-  return items.sort((a, b) => a.title.localeCompare(b.title));
+  return items.sort((a, b) => collator.compare(a.title, b.title));
 }
 
 /** Build a synthetic Topic for mobile deck / sidebar sibling navigation. */
@@ -100,14 +114,15 @@ export function searchBrowse(
   query: string,
   catalog: Catalog,
 ): { categories: BrowseCategory[]; items: Item[] } {
-  const q = query.trim().toLowerCase();
+  const q = normalizeSearch(query);
   if (!q) return { categories: getAllCategories(), items: [] };
 
   const categories = getAllCategories().filter(
     (c) =>
       c.title.toLowerCase().includes(q) ||
       c.summary?.toLowerCase().includes(q) ||
-      getItemsForCategory(c.id, catalog).some((it) => it.title.toLowerCase().includes(q)),
+      c.description?.toLowerCase().includes(q) ||
+      getItemsForCategory(c.id, catalog).some((it) => itemMatchesQuery(it, q)),
   );
 
   const itemSeen = new Set<string>();
@@ -115,17 +130,17 @@ export function searchBrowse(
   for (const cat of getAllCategories()) {
     for (const item of getItemsForCategory(cat.id, catalog)) {
       if (itemSeen.has(item.id)) continue;
-      if (item.title.toLowerCase().includes(q)) {
+      if (itemMatchesQuery(item, q)) {
         itemSeen.add(item.id);
         items.push(item);
       }
     }
   }
 
-  return { categories, items: items.sort((a, b) => a.title.localeCompare(b.title)) };
+  return { categories, items: items.sort((a, b) => collator.compare(a.title, b.title)) };
 }
 
-let itemToCategoryCache: Map<string, string> | null = null;
+let itemToCategoryCache: WeakMap<Catalog, Map<string, string>> | null = null;
 
 function buildItemCategoryIndex(catalog: Catalog): Map<string, string> {
   const map = new Map<string, string>();
@@ -139,8 +154,13 @@ function buildItemCategoryIndex(catalog: Catalog): Map<string, string> {
 
 /** Which browse category contains this item? */
 export function categoryIdForItem(itemId: string, catalog: Catalog): string | undefined {
-  if (!itemToCategoryCache) itemToCategoryCache = buildItemCategoryIndex(catalog);
-  return itemToCategoryCache.get(itemId);
+  itemToCategoryCache ??= new WeakMap<Catalog, Map<string, string>>();
+  let index = itemToCategoryCache.get(catalog);
+  if (!index) {
+    index = buildItemCategoryIndex(catalog);
+    itemToCategoryCache.set(catalog, index);
+  }
+  return index.get(itemId);
 }
 
 /** Full sibling list for in-problem navigation — category items if found, else catalog topic fallback. */

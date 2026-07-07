@@ -21,7 +21,10 @@ export function BadgesPanelBody() {
   });
   const earned = courses.filter((c) => c.done).length;
   return (
-    <section className="nodrag badges-panel" onPointerDown={() => focusPanel('badges')}>
+    <section
+      className="practice-panel practice-panel--badges nodrag badges-panel"
+      onPointerDown={() => focusPanel('badges')}
+    >
       <div className="badges-panel__hero">
         <div>
           <span className="badges-panel__eyebrow">credential board</span>

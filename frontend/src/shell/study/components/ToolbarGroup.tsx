@@ -15,7 +15,7 @@ export function ToolbarGroup({
   return (
     <div
       className={cn(
-        'inline-flex shrink-0 overflow-hidden rounded-md border border-edge bg-panel2/40 shadow-sm',
+        'toolbar-group inline-flex shrink-0 overflow-hidden rounded-md border border-edge bg-panel2/40 shadow-sm',
         className,
       )}
       title={title}
@@ -36,9 +36,11 @@ export function ToolbarGroupBtn({
     <button
       type="button"
       className={cn(
-        'nodrag inline-flex h-6 min-w-6 items-center justify-center gap-1 border-r border-edge px-1.5 transition-colors last:border-r-0',
+        'toolbar-group-btn nodrag inline-flex h-6 min-w-6 items-center justify-center gap-1 border-r border-edge px-1.5 transition-colors last:border-r-0',
         chromeText.xs,
-        active ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+        active
+          ? 'toolbar-group-btn--active bg-accentbg text-accent'
+          : 'toolbar-group-btn--idle text-ink2 hover:bg-panel2 hover:text-ink',
         className,
       )}
       {...rest}

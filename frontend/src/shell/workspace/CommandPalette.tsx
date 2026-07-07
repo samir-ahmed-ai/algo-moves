@@ -3,7 +3,7 @@ import { catalog, type Item } from '@/content';
 import { getPluginMeta } from '@/core';
 import { cn } from '@/lib/utils/cn';
 import { buildShareUrl } from '@/store/navigation';
-import { useWorkspace } from '@/store/workspace';
+import { useWorkspace, type CanvasInterviewControls } from '@/store/workspace';
 import { ChromeToken, chromeText } from '../chromeUi';
 import { readCommandPaletteRecentIds, recordCommandPaletteRecentId } from './commandPaletteHistory';
 
@@ -109,6 +109,67 @@ function compactKeywords(values: Array<string | undefined>): string[] {
   );
 }
 
+/** Interview session commands — only offered while canvas chrome publishes the controls. */
+export function buildInterviewCommands(
+  interview: CanvasInterviewControls | null,
+): CommandPaletteCommand[] {
+  if (!interview) return [];
+  const commands: CommandPaletteCommand[] = [];
+  if (!interview.hasSession) {
+    commands.push({
+      id: 'interview:start',
+      label: 'Start interview session',
+      hint: 'interview',
+      keywords: ['collab', 'room', 'host', 'whiteboard'],
+      run: () => interview.start(),
+    });
+  }
+  if (interview.hasSession && interview.isHost) {
+    commands.push({
+      id: 'interview:invite',
+      label: 'Copy interview invite link',
+      hint: 'interview',
+      keywords: ['guest', 'share', 'url', 'candidate'],
+      run: () => {
+        void interview.copyInvite();
+      },
+    });
+  }
+  commands.push(
+    {
+      id: 'interview:timer',
+      label: interview.timerRunning ? 'Pause timer' : 'Start timer',
+      hint: 'interview',
+      keywords: ['clock', 'countdown', 'stopwatch'],
+      run: () => interview.toggleTimer(),
+    },
+    {
+      id: 'interview:timer-reset',
+      label: 'Reset timer',
+      hint: 'interview',
+      keywords: ['clock', 'countdown', 'restart'],
+      run: () => interview.resetTimer(),
+    },
+    {
+      id: 'interview:lock',
+      label: interview.locked ? 'Unlock board' : 'Lock board',
+      hint: 'interview',
+      keywords: ['freeze', 'read only', 'candidate'],
+      run: () => interview.toggleLock(),
+    },
+  );
+  if (interview.hasSession && interview.isHost) {
+    commands.push({
+      id: 'interview:end',
+      label: 'End interview',
+      hint: 'interview',
+      keywords: ['leave', 'stop', 'session', 'finish'],
+      run: () => interview.end(),
+    });
+  }
+  return commands;
+}
+
 function parseCommandSelectionKey(key: string): CommandSelectionKey | null {
   return key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End' ? key : null;
 }
@@ -140,6 +201,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
   const {
     activeItemId,
     canvasAdd,
+    canvasInterview,
     dir,
     enterCanvas,
     mode,
@@ -254,10 +316,17 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
       keywords: [e.id],
       run: () => canvasAdd?.onAddEffect?.(e.id),
     }));
-    return [...actions, ...panelCmds, ...effectCmds, ...problemCmds];
+    return [
+      ...actions,
+      ...buildInterviewCommands(canvasInterview),
+      ...panelCmds,
+      ...effectCmds,
+      ...problemCmds,
+    ];
   }, [
     activeItemId,
     canvasAdd,
+    canvasInterview,
     dir,
     enterCanvas,
     inputId,
@@ -304,14 +373,14 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
 
   return (
     <div
-      className="absolute inset-0 z-50 grid place-items-start justify-items-center bg-black/40 pt-[12vh] backdrop-blur-sm"
+      className="command-palette-overlay absolute inset-0 z-50 grid place-items-start justify-items-center bg-black/40 pt-[12vh] backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-labelledby={titleId}
       aria-modal="true"
     >
       <div
-        className="w-[400px] max-w-[92vw] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-[var(--shadow-xl)]"
+        className="command-palette w-[400px] max-w-[92vw] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-[var(--shadow-xl)]"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id={titleId} className="sr-only">
@@ -339,7 +408,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
           }}
           placeholder="Search problems, panels, effects..."
           className={cn(
-            'w-full border-b border-edge bg-transparent px-[var(--hpad)] py-[var(--pad)] text-ink outline-none placeholder:text-ink3',
+            'command-palette__input w-full border-b border-edge bg-transparent px-[var(--hpad)] py-[var(--pad)] text-ink outline-none placeholder:text-ink3',
             chromeText.base,
           )}
           role="combobox"
@@ -356,12 +425,17 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
         </div>
         <div
           id={listboxId}
-          className="ws-scroll max-h-[50vh] overflow-auto py-0.5"
+          className="command-palette__list ws-scroll max-h-[50vh] overflow-auto py-0.5"
           role="listbox"
           aria-label="Commands"
         >
           {visibleCommands.length === 0 ? (
-            <div className={cn('px-[var(--hpad)] py-[var(--pad)] text-ink3', chromeText.base)}>
+            <div
+              className={cn(
+                'command-palette__empty px-[var(--hpad)] py-[var(--pad)] text-ink3',
+                chromeText.base,
+              )}
+            >
               No matches.
             </div>
           ) : (
@@ -369,7 +443,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
               <div key={section.id}>
                 <div
                   className={cn(
-                    'px-[var(--hpad)] pt-[var(--pad)] pb-[var(--gap)] text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.18em] text-ink3',
+                    'command-palette__section-label px-[var(--hpad)] pt-[var(--pad)] pb-[var(--gap)] text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.18em] text-ink3',
                     chromeText.base,
                   )}
                 >
@@ -389,8 +463,9 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
                       onClick={() => exec(command)}
                       className={cn(
                         'flex w-full min-h-[var(--row)] items-center justify-between gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left',
+                        'command-palette__option',
                         index === clampedSel
-                          ? 'bg-accentbg text-accent'
+                          ? 'command-palette__option--active bg-accentbg text-accent'
                           : 'text-ink2 hover:bg-panel2',
                       )}
                     >

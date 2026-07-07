@@ -30,7 +30,7 @@ export function PanelHeader({
   return (
     <header
       className={cn(
-        'flex shrink-0 select-none items-center justify-between gap-2',
+        'panel-header flex shrink-0 select-none items-center justify-between gap-2',
         HEADER_PAD[density],
         collapsed && 'py-0.5',
         locked && 'opacity-90',
@@ -46,7 +46,7 @@ export function PanelHeaderGrip({ density = 'compact' }: { density?: HeaderDensi
   return (
     <span
       className={cn(
-        'grid shrink-0 cursor-grab place-items-center text-ink3 active:cursor-grabbing',
+        'panel-header-grip grid shrink-0 cursor-grab place-items-center text-ink3 active:cursor-grabbing',
         density === 'spacious'
           ? 'h-[calc(var(--node-icon,1.125rem)*1.1)] w-[calc(var(--node-icon,1.125rem)*0.65)]'
           : 'h-[var(--node-icon,1.125rem)] w-[calc(var(--node-icon,1.125rem)*0.65)]',
@@ -68,14 +68,21 @@ export function PanelHeaderIcon({
   color,
   density = 'compact',
   children,
+  className,
 }: {
   color?: string;
   density?: HeaderDensity;
   children: ReactNode;
+  className?: string;
 }) {
   return (
     <span
-      className={cn(HEADER_ICON[density], color ? undefined : 'text-ink2')}
+      className={cn(
+        'panel-header-icon',
+        HEADER_ICON[density],
+        color ? undefined : 'text-ink2',
+        className,
+      )}
       style={color ? { color } : undefined}
     >
       {children}
@@ -95,7 +102,7 @@ export function PanelHeaderTitle({
   return (
     <span
       className={cn(
-        'min-w-0 flex-1 cursor-grab font-semibold text-ink active:cursor-grabbing',
+        'panel-header-title min-w-0 flex-1 cursor-grab font-semibold text-ink active:cursor-grabbing',
         nodeTextWrap,
         HEADER_TITLE[density],
         className,
@@ -118,7 +125,13 @@ export function PanelHeaderMeta({
   const metaSize =
     density === 'ultra' ? nodeText.xs : density === 'spacious' ? nodeText.sm : nodeText.sm;
   return (
-    <span className={cn('shrink-0 font-mono tabular-nums text-ink3', metaSize, className)}>
+    <span
+      className={cn(
+        'panel-header-meta shrink-0 font-mono tabular-nums text-ink3',
+        metaSize,
+        className,
+      )}
+    >
       {children}
     </span>
   );
@@ -133,7 +146,11 @@ export function PanelHeaderSub({
 }) {
   return (
     <div
-      className={cn('flex min-w-0 items-center gap-1 font-mono text-ink3', nodeText.sm, className)}
+      className={cn(
+        'panel-header-sub flex min-w-0 items-center gap-1 font-mono text-ink3',
+        nodeText.sm,
+        className,
+      )}
     >
       {children}
     </div>
@@ -149,7 +166,10 @@ export function PanelHeaderActions({
 }) {
   return (
     <div
-      className={cn('nodrag ml-auto flex shrink-0 cursor-default items-center gap-1', className)}
+      className={cn(
+        'panel-header-actions nodrag ml-auto flex shrink-0 cursor-default items-center gap-1',
+        className,
+      )}
     >
       {children}
     </div>

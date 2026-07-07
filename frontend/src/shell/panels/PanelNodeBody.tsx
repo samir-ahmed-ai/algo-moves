@@ -58,7 +58,7 @@ export function PanelNodeBody({
         <PanelNodeHeader
           {...headerProps}
           inlineToolbar={
-            <div className="nodrag flex min-w-0 flex-1 items-center gap-1">
+            <div className="panel-inline-toolbar panel-inline-toolbar--examples nodrag flex min-w-0 flex-1 items-center gap-1">
               <HeaderExamplesNav />
             </div>
           }
@@ -74,12 +74,12 @@ export function PanelNodeBody({
         <PanelNodeHeader
           {...headerProps}
           inlineToolbar={
-            <div className="nodrag flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
+            <div className="panel-inline-toolbar panel-inline-toolbar--code nodrag flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
               <CodeStudioToolbar />
             </div>
           }
         />
-        <div className="nowheel flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="panel-code-body nowheel flex min-h-0 flex-1 flex-col overflow-hidden">
           <CodeStudioBody />
         </div>
         <CodeStudioFooter />
@@ -93,7 +93,7 @@ export function PanelNodeBody({
         <PanelNodeHeader
           {...headerProps}
           inlineToolbar={
-            <div className="nodrag flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
+            <div className="panel-inline-toolbar panel-inline-toolbar--collab-code nodrag flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
               <CollabCodeStudioToolbar />
             </div>
           }
@@ -103,13 +103,13 @@ export function PanelNodeBody({
     );
   }
 
-  return (
+  const body = (
     <>
       <PanelNodeHeader
         {...headerProps}
         inlineToolbar={
           isProblem && !collapsed ? (
-            <div className="nodrag flex shrink-0 items-center gap-0.5">
+            <div className="panel-inline-toolbar panel-inline-toolbar--problem nodrag flex shrink-0 items-center gap-0.5">
               <HeaderExamplesNav />
             </div>
           ) : undefined
@@ -137,4 +137,10 @@ export function PanelNodeBody({
       )}
     </>
   );
+
+  if (data.kind === 'notes') {
+    return <SubDocSyncProvider kind="notes">{body}</SubDocSyncProvider>;
+  }
+
+  return body;
 }

@@ -4,8 +4,19 @@ import { layoutFixedWidth } from '../layout/layout';
 // Pure helpers for serializing/restoring a panel node's persisted position + width.
 // Extracted from CanvasStage to keep the persistence math testable and side-effect free.
 
+function finiteNumber(value: number | undefined): number | undefined {
+  return Number.isFinite(value) ? Math.round(value!) : undefined;
+}
+
+function safePosition(position: { x: number; y: number }): { x: number; y: number } {
+  return {
+    x: finiteNumber(position.x) ?? 0,
+    y: finiteNumber(position.y) ?? 0,
+  };
+}
+
 export function snapNodeWidth(n: PanelFlowNode): number | undefined {
-  return n.width ?? undefined;
+  return finiteNumber(n.width);
 }
 
 /** Persist position, size, and chrome state for session restore (#76). */
@@ -34,15 +45,16 @@ export function snapNodeLayout(n: PanelFlowNode): {
     locked?: boolean;
     accent?: string;
     style?: PanelNodeStyle;
-  } = { position: n.position };
+  } = { position: safePosition(n.position) };
   if (kind !== 'viz' && kind !== 'workbench') {
     const w = snapNodeWidth(n);
     if (w != null) entry.width = w;
   }
-  if (n.height != null) entry.height = n.height;
-  if (n.parentId) entry.parentId = n.parentId;
+  const height = finiteNumber(n.height);
+  if (height != null) entry.height = height;
+  if (n.parentId?.trim()) entry.parentId = n.parentId.trim();
   if (data.layoutSlots?.some(Boolean)) entry.layoutSlots = [...data.layoutSlots];
-  if (data.slotIndex != null) entry.slotIndex = data.slotIndex;
+  if (Number.isInteger(data.slotIndex)) entry.slotIndex = data.slotIndex;
   if (data.collapsed) entry.collapsed = true;
   if (data.locked) entry.locked = true;
   if (data.accent) entry.accent = data.accent;
@@ -55,7 +67,7 @@ export function restoreNodeWidth(
   savedWidth: number | undefined,
   layoutWidth: number | undefined,
 ): number | undefined {
-  const raw = savedWidth ?? layoutWidth;
+  const raw = finiteNumber(savedWidth) ?? finiteNumber(layoutWidth);
   const maxW = layoutFixedWidth(kind);
   if (raw == null) return raw;
   return maxW != null ? Math.min(raw, maxW) : raw;

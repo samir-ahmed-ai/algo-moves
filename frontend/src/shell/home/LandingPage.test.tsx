@@ -45,7 +45,22 @@ function mockWorkspace() {
     setTheme: vi.fn(),
     palette: 'default',
     setPalette: vi.fn(),
-    density: 'cozy',
+    density: 'compact',
+    setDensity: vi.fn(),
+    cycleDensity: vi.fn(),
+    themePreset: 'mint-saas',
+    setThemePreset: vi.fn(),
+    layoutPreset: 'TraceFocus',
+    setLayoutPreset: vi.fn(),
+    tweaks: {
+      moveLog: true,
+      caption: true,
+      controls: true,
+      animate: true,
+      narrate: false,
+      sound: false,
+    },
+    toggleTweak: vi.fn(),
     enterWorkspace,
     enterCanvas,
     enterProblemInMode,
@@ -58,7 +73,7 @@ function mockWorkspace() {
     enterPlans: vi.fn(),
     enterResumes: vi.fn(),
     enterCollabCanvas: vi.fn(),
-  } as ReturnType<typeof useWorkspace>);
+  } as unknown as ReturnType<typeof useWorkspace>);
 }
 
 describe('LandingPage navigation', () => {

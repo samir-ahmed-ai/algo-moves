@@ -43,14 +43,14 @@ export function RecallEditorShell({
   const foldRef = foldBothRef ?? localFoldBothRef;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="recall-editor-shell flex min-h-0 flex-1 flex-col overflow-hidden">
       <SplitCodeEditor
         reference={reference}
         draft={draft}
         lang={lang}
         dark={dark}
         themeKey={themeKey}
-        vim={true}
+        vim={editorPrefs.vim}
         wrap={editorPrefs.wrap}
         hideLeft={blind}
         peekLeft={peek}

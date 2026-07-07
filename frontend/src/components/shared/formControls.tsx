@@ -16,12 +16,16 @@ import { nodeText, RADIUS_CTRL } from '@/design/typography';
 
 /** Uppercase field/section label. */
 export function Label({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn(nodeText.label, 'text-ink3', className)}>{children}</span>;
+  return (
+    <span className={cn(nodeText.label, 'shared-label text-ink3', className)}>{children}</span>
+  );
 }
 
 /** Muted one-line helper copy. */
 export function Hint({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn(nodeText.sm, 'leading-snug text-ink3', className)}>{children}</p>;
+  return (
+    <p className={cn(nodeText.sm, 'shared-hint leading-snug text-ink3', className)}>{children}</p>
+  );
 }
 
 type BtnVariant = 'primary' | 'good' | 'ghost' | 'quiet' | 'danger';
@@ -57,8 +61,14 @@ export function Btn({
   icon?: ReactNode;
 } & ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <Button variant={BTN_VARIANT[variant]} size={BTN_SIZE[size]} className={className} {...rest}>
-      {icon}
+    <Button
+      {...rest}
+      type={rest.type ?? 'button'}
+      variant={BTN_VARIANT[variant]}
+      size={BTN_SIZE[size]}
+      className={cn('shared-btn', `shared-btn--${variant}`, `shared-btn--${size}`, className)}
+    >
+      {icon && <span className="shared-btn__icon">{icon}</span>}
       {children}
     </Button>
   );
@@ -78,30 +88,49 @@ export function Field({
   className?: string;
 }) {
   return (
-    <label className={cn('flex flex-col', dense ? 'gap-0.5' : 'gap-1', className)}>
+    <label
+      className={cn(
+        'shared-field flex flex-col',
+        dense ? 'shared-field--dense gap-0.5' : 'gap-1',
+        className,
+      )}
+    >
       {label && (
-        <Label className={dense ? '!text-[length:var(--node-fs-xs,12px)]' : undefined}>
+        <Label
+          className={cn('shared-field__label', dense && '!text-[length:var(--node-fs-xs,12px)]')}
+        >
           {label}
         </Label>
       )}
       {children}
-      {hint && <Hint>{hint}</Hint>}
+      {hint && <Hint className="shared-field__hint">{hint}</Hint>}
     </label>
   );
 }
 
 /** Shared input class (used by TextInput/TextArea and canvas SearchInput). */
-export const INPUT_CLS = `nodrag w-full border border-edge bg-panel2 px-2 py-1.5 ${nodeText.sm} text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent ${RADIUS_CTRL}`;
+export const INPUT_CLS = `shared-input nodrag w-full border border-edge bg-panel2 px-2 py-1.5 ${nodeText.sm} text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent ${RADIUS_CTRL}`;
 
 export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={cn(INPUT_CLS, props.className)} />;
+  return (
+    <input
+      {...props}
+      data-invalid={props['aria-invalid'] ? 'true' : undefined}
+      className={cn(INPUT_CLS, 'shared-text-input', props.className)}
+    />
+  );
 }
 
 export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}
-      className={cn(INPUT_CLS, 'min-h-[4.5rem] resize-none leading-relaxed', props.className)}
+      data-invalid={props['aria-invalid'] ? 'true' : undefined}
+      className={cn(
+        INPUT_CLS,
+        'shared-text-area min-h-[4.5rem] resize-none leading-relaxed',
+        props.className,
+      )}
     />
   );
 }

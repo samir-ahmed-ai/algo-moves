@@ -54,7 +54,7 @@ export function StudioSplitLayout({
 
   if (isMobile) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="studio-split-layout studio-split-layout--mobile flex min-h-0 flex-1 flex-col overflow-hidden">
         {problem}
         {second}
         {footer ? <StudioSplitFooter>{footer}</StudioSplitFooter> : null}
@@ -64,7 +64,7 @@ export function StudioSplitLayout({
 
   return (
     <ProblemColumnCollapseProvider onCollapse={() => setLayout({ problemCollapsed: true })}>
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="studio-split-layout studio-split-layout--desktop flex min-h-0 flex-1 flex-col overflow-hidden">
         <ResizablePanels
           direction="horizontal"
           splitPct={problemSplit}
@@ -107,8 +107,8 @@ export function StudioContentPanel({
   className?: string;
 }) {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2">
+    <div className="studio-content-panel flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="studio-content-panel__inner flex min-h-0 flex-1 flex-col overflow-hidden p-2">
         <div
           className={cn(
             'studio-content-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-edge bg-panel/85 shadow-[var(--shadow-sm)]',

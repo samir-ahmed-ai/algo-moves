@@ -21,6 +21,8 @@ type ExcalidrawAPI = {
     collaborators?: Map<string, Collaborator>;
   }) => void;
   getSceneElements: () => readonly unknown[];
+  /** Registers binary blobs (pasted/inserted images) so image elements render. */
+  addFiles?: (files: unknown[]) => void;
 };
 
 export interface ExcalidrawWrapperProps {
@@ -49,7 +51,7 @@ const UI_OPTIONS: ComponentProps<typeof LazyExcalidraw>['UIOptions'] = {
     toggleTheme: false,
   },
   tools: {
-    image: false,
+    image: true,
   },
 };
 
@@ -103,6 +105,8 @@ export function ExcalidrawWrapper({
       if (scrollY !== undefined) appState.scrollY = scrollY;
       if (zoom !== undefined) appState.zoom = zoom;
     }
+    const files = Object.values(initialData.files ?? {});
+    if (files.length) apiRef.current.addFiles?.(files);
     apiRef.current.updateScene({
       elements: initialData.elements as unknown[],
       appState,
@@ -153,10 +157,15 @@ export function ExcalidrawWrapper({
   };
 
   return (
-    <div className={cn('nowheel nodrag h-full min-h-[280px] w-full', className)}>
+    <div
+      className={cn(
+        'whiteboard-canvas-shell nowheel nodrag h-full min-h-[280px] w-full',
+        className,
+      )}
+    >
       <Suspense
         fallback={
-          <div className="flex h-full min-h-[280px] items-center justify-center text-ink3 text-sm">
+          <div className="whiteboard-loading-state flex h-full min-h-[280px] items-center justify-center text-ink3 text-sm">
             Loading whiteboard…
           </div>
         }

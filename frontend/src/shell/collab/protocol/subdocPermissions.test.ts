@@ -36,6 +36,50 @@ describe('subdocPermissions', () => {
     ).toBe(false);
   });
 
+  it('lets interview guests edit shared notes by default', () => {
+    expect(
+      canEditSubDoc(
+        {
+          role: 'guest',
+          session: { kind: 'interview', interview: { hideHints: true, hideSolutions: true } },
+          isCollaborating: true,
+        },
+        'notes',
+      ),
+    ).toBe(true);
+  });
+
+  it('locks notes for guests when the board lock is on', () => {
+    expect(
+      canEditSubDoc(
+        {
+          role: 'guest',
+          session: {
+            kind: 'interview',
+            interview: { hideHints: true, hideSolutions: true },
+            interviewRuntime: {
+              timer: { durationMs: 0, running: false, endsAt: null, remainingMs: 0 },
+              locked: true,
+              hostFollow: false,
+              hostFrameFollow: false,
+            },
+          },
+          isCollaborating: true,
+        },
+        'notes',
+      ),
+    ).toBe(false);
+  });
+
+  it('blocks spectators from notes', () => {
+    expect(
+      canEditSubDoc(
+        { role: 'spectator', session: { kind: 'collab' }, isCollaborating: true },
+        'notes',
+      ),
+    ).toBe(false);
+  });
+
   it('defaults guest node moves to false in interview', () => {
     expect(
       canMoveCanvasNodes({

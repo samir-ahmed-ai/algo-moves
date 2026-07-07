@@ -115,16 +115,16 @@ export function CourseTree({
   const allOpen = open.tracks.length >= visibleTracks.length && visibleTracks.length > 0;
 
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div className={cn('course-tree flex flex-col gap-2', className)}>
       {showBulkToggle && (
-        <div className="flex justify-end">
+        <div className="course-tree__toolbar flex justify-end">
           <button
             type="button"
             onClick={() =>
               allOpen ? setOpenTracks([]) : setOpenTracks(visibleTracks.map((t) => t.id))
             }
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-2 py-1 text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
+              'course-tree__bulk-toggle inline-flex items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-2 py-1 text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
               chromeText.xs,
             )}
           >
@@ -142,7 +142,7 @@ export function CourseTree({
         type="multiple"
         value={open.tracks}
         onValueChange={setOpenTracks}
-        className="flex flex-col gap-2"
+        className="course-tree__tracks flex flex-col gap-2"
       >
         {visibleTracks.map((track) => {
           const categories = getCategoriesForTrack(track.id).filter(
@@ -158,27 +158,34 @@ export function CourseTree({
             <Accordion.Item
               key={track.id}
               value={track.id}
-              className="overflow-hidden rounded-lg border border-edge bg-panel/60 shadow-[var(--shadow-sm)]"
+              className="course-tree__track overflow-hidden rounded-lg border border-edge bg-panel/60 shadow-[var(--shadow-sm)]"
             >
               <Accordion.Header className="flex items-center">
                 <Accordion.Trigger
-                  className="group/course flex min-w-0 flex-1 items-center gap-3 border-l-[3px] px-3 py-2.5 text-left transition-colors hover:bg-panel2"
+                  className="course-tree__track-trigger group/course flex min-w-0 flex-1 items-center gap-3 border-l-[3px] px-3 py-2.5 text-left transition-colors hover:bg-panel2"
                   style={{ borderLeftColor: color.c1 }}
                 >
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-ink3 transition-transform duration-200 group-data-[state=open]/course:rotate-90" />
+                  <ChevronRight className="course-tree__chevron h-3.5 w-3.5 shrink-0 text-ink3 transition-transform duration-200 group-data-[state=open]/course:rotate-90" />
                   <span
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-white shadow-[var(--shadow-sm)] [&>svg]:h-4 [&>svg]:w-4"
+                    className="course-tree__track-icon grid h-8 w-8 shrink-0 place-items-center rounded-md text-white shadow-[var(--shadow-sm)] [&>svg]:h-4 [&>svg]:w-4"
                     style={{ background: `linear-gradient(135deg, ${color.c1}, ${color.c2})` }}
                   >
                     <Icon strokeWidth={1.6} />
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold text-ink">{track.title}</span>
-                    <span className={cn('block truncate text-ink3', chromeText.sm)}>
+                  <span className="course-tree__track-copy min-w-0 flex-1">
+                    <span className="course-tree__track-title block truncate font-semibold text-ink">
+                      {track.title}
+                    </span>
+                    <span
+                      className={cn(
+                        'course-tree__track-summary block truncate text-ink3',
+                        chromeText.sm,
+                      )}
+                    >
                       {track.summary}
                     </span>
                   </span>
-                  <span className="hidden w-24 shrink-0 sm:block">
+                  <span className="course-tree__track-meter hidden w-24 shrink-0 sm:block">
                     <Meter
                       value={trackMastered}
                       max={Math.max(trackTotal, 1)}
@@ -186,12 +193,20 @@ export function CourseTree({
                       height={4}
                     />
                   </span>
-                  <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.xs)}>
+                  <span
+                    className={cn(
+                      'course-tree__track-count shrink-0 font-mono tabular-nums text-ink3',
+                      chromeText.xs,
+                    )}
+                  >
                     {trackMastered}/{trackTotal}
                   </span>
                 </Accordion.Trigger>
                 {trackAccessory && (
-                  <span className="shrink-0 pr-2" onClick={(e) => e.stopPropagation()}>
+                  <span
+                    className="course-tree__track-accessory shrink-0 pr-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {trackAccessory(track.id)}
                   </span>
                 )}
@@ -199,7 +214,7 @@ export function CourseTree({
 
               <Accordion.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                 <div
-                  className="border-l-[3px] pl-1"
+                  className="course-tree__track-body border-l-[3px] pl-1"
                   style={{
                     borderLeftColor: `color-mix(in srgb, ${color.c1} 40%, transparent)`,
                   }}
@@ -213,14 +228,14 @@ export function CourseTree({
                         <Accordion.Item
                           key={cat.id}
                           value={cat.id}
-                          className="border-b border-edge/60 last:border-0"
+                          className="course-tree__category border-b border-edge/60 last:border-0"
                         >
                           <Accordion.Header className="flex items-center">
-                            <Accordion.Trigger className="group/sub flex min-w-0 flex-1 items-center gap-2 py-2 pl-2 pr-2 text-left transition-colors hover:bg-panel2">
-                              <ChevronRight className="h-3 w-3 shrink-0 text-ink3 transition-transform duration-200 group-data-[state=open]/sub:rotate-90" />
+                            <Accordion.Trigger className="course-tree__category-trigger group/sub flex min-w-0 flex-1 items-center gap-2 py-2 pl-2 pr-2 text-left transition-colors hover:bg-panel2">
+                              <ChevronRight className="course-tree__chevron h-3 w-3 shrink-0 text-ink3 transition-transform duration-200 group-data-[state=open]/sub:rotate-90" />
                               <span
                                 className={cn(
-                                  'min-w-0 flex-1 truncate font-medium text-ink2',
+                                  'course-tree__category-title min-w-0 flex-1 truncate font-medium text-ink2',
                                   chromeText.sm,
                                 )}
                               >
@@ -228,7 +243,7 @@ export function CourseTree({
                               </span>
                               <span
                                 className={cn(
-                                  'shrink-0 font-mono tabular-nums text-ink3',
+                                  'course-tree__category-count shrink-0 font-mono tabular-nums text-ink3',
                                   chromeText.xs,
                                 )}
                               >
@@ -236,12 +251,14 @@ export function CourseTree({
                               </span>
                             </Accordion.Trigger>
                             {subtopicAccessory && (
-                              <span className="shrink-0 pr-2">{subtopicAccessory(cat.id)}</span>
+                              <span className="course-tree__category-accessory shrink-0 pr-2">
+                                {subtopicAccessory(cat.id)}
+                              </span>
                             )}
                           </Accordion.Header>
 
                           <Accordion.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                            <ul className="pb-1">
+                            <ul className="course-tree__problems pb-1">
                               {items.map((it) => (
                                 <ProblemRow
                                   key={it.id}
@@ -285,18 +302,21 @@ function ProblemRow({
   accessory?: (item: Item, categoryId: string) => ReactNode;
 }) {
   return (
-    <li className="group/row flex items-center gap-2 pl-4 pr-2">
+    <li className="course-tree__problem group/row flex items-center gap-2 pl-4 pr-2">
       <button
         type="button"
         onClick={() => onProblem(item, categoryId)}
         title={item.title}
-        className="flex min-w-0 flex-1 items-start gap-2.5 py-1.5 text-left"
+        className="course-tree__problem-button flex min-w-0 flex-1 items-start gap-2.5 py-1.5 text-left"
       >
-        <ProblemGlyph item={item} className="mt-0.5 h-5 w-5 shrink-0 text-ink3" />
+        <ProblemGlyph
+          item={item}
+          className="course-tree__problem-glyph mt-0.5 h-5 w-5 shrink-0 text-ink3"
+        />
         <span className="min-w-0 flex-1">
           <span
             className={cn(
-              'flex items-center gap-1.5 truncate text-ink2 group-hover/row:text-ink',
+              'course-tree__problem-title flex items-center gap-1.5 truncate text-ink2 group-hover/row:text-ink',
               chromeText.sm,
             )}
           >
@@ -304,7 +324,12 @@ function ProblemRow({
             {mastered && <Check className="h-3.5 w-3.5 shrink-0 text-good" />}
           </span>
           {showSummary && item.summary && (
-            <span className={cn('mt-0.5 block line-clamp-2 leading-snug text-ink3', chromeText.xs)}>
+            <span
+              className={cn(
+                'course-tree__problem-summary mt-0.5 block line-clamp-2 leading-snug text-ink3',
+                chromeText.xs,
+              )}
+            >
               {item.summary}
             </span>
           )}

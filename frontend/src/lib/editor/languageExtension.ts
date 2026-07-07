@@ -6,7 +6,7 @@ import { python } from '@codemirror/lang-python';
 
 /** Map a plugin's language id to a CodeMirror language extension (extend as plugins need). */
 export function languageExtension(lang?: string): LanguageSupport | null {
-  switch ((lang ?? '').toLowerCase()) {
+  switch ((lang ?? '').trim().toLowerCase()) {
     case 'go':
       return go();
     case 'js':

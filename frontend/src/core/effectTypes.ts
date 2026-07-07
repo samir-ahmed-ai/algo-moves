@@ -11,6 +11,17 @@ export interface EffectPlugin<D = unknown> {
 
 export type InputBuilderKind = 'pad' | 'beat' | 'arpeggiator' | 'polyrhythm' | 'custom';
 
+function normalizeEffectMeta(meta: EffectPlugin['meta']): EffectPlugin['meta'] {
+  return {
+    ...meta,
+    id: meta.id.trim(),
+    title: meta.title.trim() || meta.id.trim(),
+  };
+}
+
 export function defineEffect<D>(effect: EffectPlugin<D>): EffectPlugin<D> {
-  return effect;
+  return {
+    ...effect,
+    meta: normalizeEffectMeta(effect.meta),
+  };
 }

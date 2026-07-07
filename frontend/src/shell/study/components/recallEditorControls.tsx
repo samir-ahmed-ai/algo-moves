@@ -10,6 +10,7 @@ import {
   Highlighter,
   Minimize2,
   SplitSquareHorizontal,
+  SquareTerminal,
   TextQuote,
   WrapText,
 } from 'lucide-react';
@@ -20,6 +21,8 @@ import type { PanelHeaderMenuItem } from '@/shell/canvas';
 import type { EditorPrefs } from '@/store/user-prefs';
 
 export type RecallEditorMenuItem = PanelHeaderMenuItem & { active?: boolean };
+
+const MENU_ICON_CLASS = 'recall-menu-icon h-3.5 w-3.5';
 
 /** Overflow menu entries for merge diff editor toggles (shared by RecallPane + CodeStudio header). */
 export function recallEditorMenuItems(
@@ -32,8 +35,14 @@ export function recallEditorMenuItems(
 ): RecallEditorMenuItem[] {
   return [
     {
+      label: editorPrefs.vim ? 'Disable Vim keybindings' : 'Enable Vim keybindings',
+      icon: <SquareTerminal className={MENU_ICON_CLASS} />,
+      active: editorPrefs.vim,
+      onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
+    },
+    {
       label: 'Format both panes (spacing + braces)',
-      icon: <TextQuote className="h-3.5 w-3.5" />,
+      icon: <TextQuote className={MENU_ICON_CLASS} />,
       onClick: () => {
         if (formatBoth) formatBoth();
         else if (draftView) formatDocument(draftView);
@@ -41,7 +50,7 @@ export function recallEditorMenuItems(
     },
     {
       label: 'Collapse sections',
-      icon: <ChevronsDownUp className="h-3.5 w-3.5" />,
+      icon: <ChevronsDownUp className={MENU_ICON_CLASS} />,
       onClick: () => {
         if (foldBoth) foldBoth.collapse();
         else if (draftView) collapseSections(draftView, lang);
@@ -49,7 +58,7 @@ export function recallEditorMenuItems(
     },
     {
       label: 'Expand all sections',
-      icon: <ChevronsUpDown className="h-3.5 w-3.5" />,
+      icon: <ChevronsUpDown className={MENU_ICON_CLASS} />,
       onClick: () => {
         if (foldBoth) foldBoth.expand();
         else if (draftView) expandSections(draftView);
@@ -57,51 +66,51 @@ export function recallEditorMenuItems(
     },
     {
       label: 'Auto-select and indent',
-      icon: <AlignVerticalSpaceAround className="h-3.5 w-3.5" />,
+      icon: <AlignVerticalSpaceAround className={MENU_ICON_CLASS} />,
       onClick: () => {
         if (draftView) autoSelectAndIndent(draftView);
       },
     },
     {
       label: 'Align selection on =',
-      icon: <AlignCenterHorizontal className="h-3.5 w-3.5" />,
+      icon: <AlignCenterHorizontal className={MENU_ICON_CLASS} />,
       onClick: () => {
         if (draftView) alignSelection(draftView);
       },
     },
     {
       label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
-      icon: <WrapText className="h-3.5 w-3.5" />,
+      icon: <WrapText className={MENU_ICON_CLASS} />,
       active: editorPrefs.wrap,
       onClick: () => setEditorPrefs({ wrap: !editorPrefs.wrap }),
     },
     {
       label: editorPrefs.highlightChanges ? 'Hide change highlights' : 'Show change highlights',
-      icon: <Highlighter className="h-3.5 w-3.5" />,
+      icon: <Highlighter className={MENU_ICON_CLASS} />,
       active: editorPrefs.highlightChanges,
       onClick: () => setEditorPrefs({ highlightChanges: !editorPrefs.highlightChanges }),
     },
     {
       label: editorPrefs.mergeGutter ? 'Hide change gutter' : 'Show change gutter',
-      icon: <Columns2 className="h-3.5 w-3.5" />,
+      icon: <Columns2 className={MENU_ICON_CLASS} />,
       active: editorPrefs.mergeGutter,
       onClick: () => setEditorPrefs({ mergeGutter: !editorPrefs.mergeGutter }),
     },
     {
       label: editorPrefs.mergeCollapse ? 'Show all lines' : 'Collapse unchanged',
-      icon: <ChevronsDownUp className="h-3.5 w-3.5" />,
+      icon: <ChevronsDownUp className={MENU_ICON_CLASS} />,
       active: editorPrefs.mergeCollapse,
       onClick: () => setEditorPrefs({ mergeCollapse: !editorPrefs.mergeCollapse }),
     },
     {
       label: editorPrefs.showLineNumbers ? 'Hide line numbers' : 'Show line numbers',
-      icon: <Hash className="h-3.5 w-3.5" />,
+      icon: <Hash className={MENU_ICON_CLASS} />,
       active: editorPrefs.showLineNumbers,
       onClick: () => setEditorPrefs({ showLineNumbers: !editorPrefs.showLineNumbers }),
     },
     {
       label: `Line height: ${recallLineHeightLabel(editorPrefs.lineHeight)}`,
-      icon: <AlignVerticalSpaceAround className="h-3.5 w-3.5" />,
+      icon: <AlignVerticalSpaceAround className={MENU_ICON_CLASS} />,
       onClick: () =>
         setEditorPrefs({
           lineHeight:
@@ -114,13 +123,13 @@ export function recallEditorMenuItems(
     },
     {
       label: 'Reset split to 50/50',
-      icon: <SplitSquareHorizontal className="h-3.5 w-3.5" />,
+      icon: <SplitSquareHorizontal className={MENU_ICON_CLASS} />,
       onClick: () => setEditorPrefs({ splitPct: 50 }),
     },
     {
       label:
         editorPrefs.recallCompact !== false ? 'Spacious editor chrome' : 'Compact editor chrome',
-      icon: <Minimize2 className="h-3.5 w-3.5" />,
+      icon: <Minimize2 className={MENU_ICON_CLASS} />,
       active: editorPrefs.recallCompact !== false,
       onClick: () =>
         setEditorPrefs({ recallCompact: editorPrefs.recallCompact !== false ? false : true }),

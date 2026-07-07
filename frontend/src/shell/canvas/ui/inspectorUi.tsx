@@ -22,10 +22,15 @@ export function InsSection({
   className?: string;
 }) {
   return (
-    <section className={cn('flex flex-col gap-1', className)}>
+    <section className={cn('ins-section flex flex-col gap-1', className)}>
       {title && (
-        <div className="flex min-h-[16px] items-center justify-between">
-          <span className={cn('font-semibold uppercase tracking-wide text-ink3', chromeText.xs)}>
+        <div className="ins-section__head flex min-h-[16px] items-center justify-between">
+          <span
+            className={cn(
+              'ins-section__title font-semibold uppercase tracking-wide text-ink3',
+              chromeText.xs,
+            )}
+          >
             {title}
           </span>
           {right}
@@ -40,7 +45,7 @@ export function InsSection({
 export function InsGrid({ children, cols = 2 }: { children: ReactNode; cols?: number }) {
   return (
     <div
-      className="grid gap-1.5"
+      className="ins-grid grid gap-1.5"
       style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
     >
       {children}
@@ -78,17 +83,17 @@ export function InsField({
     <label
       title={title}
       className={cn(
-        'flex h-[26px] items-center gap-1 border bg-panel2 px-1.5 transition-colors',
+        'ins-field flex h-[26px] items-center gap-1 border bg-panel2 px-1.5 transition-colors',
         RADIUS_CTRL,
         readOnly
-          ? 'border-transparent opacity-70'
+          ? 'ins-field--readonly border-transparent opacity-70'
           : 'border-transparent hover:border-edge2 focus-within:border-accent',
       )}
     >
       {icon != null && (
         <span
           className={cn(
-            'grid h-3.5 w-3.5 shrink-0 place-items-center text-ink3 [&>svg]:h-3 [&>svg]:w-3',
+            'ins-field__icon grid h-3.5 w-3.5 shrink-0 place-items-center text-ink3 [&>svg]:h-3 [&>svg]:w-3',
             chromeText.xs,
           )}
         >
@@ -110,13 +115,15 @@ export function InsField({
             : undefined
         }
         className={cn(
-          'nodrag w-full min-w-0 bg-transparent text-ink outline-none tabular-nums',
+          'ins-field__input nodrag w-full min-w-0 bg-transparent text-ink outline-none tabular-nums',
           chromeText.sm,
           readOnly && 'cursor-default',
         )}
       />
       {unit != null && (
-        <span className={cn('shrink-0 select-none text-ink3', chromeText.xs)}>{unit}</span>
+        <span className={cn('ins-field__unit shrink-0 select-none text-ink3', chromeText.xs)}>
+          {unit}
+        </span>
       )}
     </label>
   );
@@ -137,7 +144,7 @@ export function InsSelect<T extends string>({
   return (
     <div
       className={cn(
-        'flex h-[26px] items-center border border-transparent bg-panel2 transition-colors',
+        'ins-select flex h-[26px] items-center border border-transparent bg-panel2 transition-colors',
         RADIUS_CTRL,
         !disabled && 'hover:border-edge2 focus-within:border-accent',
         disabled && 'opacity-70',
@@ -148,7 +155,7 @@ export function InsSelect<T extends string>({
         disabled={disabled}
         onChange={(e) => onChange(e.target.value as T)}
         className={cn(
-          'nodrag w-full cursor-pointer bg-transparent px-1.5 text-ink outline-none',
+          'ins-select__input nodrag w-full cursor-pointer bg-transparent px-1.5 text-ink outline-none',
           chromeText.sm,
         )}
       >
@@ -165,9 +172,9 @@ export function InsSelect<T extends string>({
 /** A flat label-left / control-right row. */
 export function InsRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <span className={cn('shrink-0 text-ink3', chromeText.xs)}>{label}</span>
-      <div className="flex min-w-0 items-center gap-1">{children}</div>
+    <div className="ins-row flex items-center justify-between gap-2">
+      <span className={cn('ins-row__label shrink-0 text-ink3', chromeText.xs)}>{label}</span>
+      <div className="ins-row__controls flex min-w-0 items-center gap-1">{children}</div>
     </div>
   );
 }

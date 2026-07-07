@@ -16,12 +16,16 @@ export function WatchPanelBody() {
     );
   }
   return (
-    <ControlsAccordion title="Watch" className="border-t-0" right={<Pill>{keys.length}</Pill>}>
-      <div className="flex flex-col gap-2">
+    <ControlsAccordion
+      title="Watch"
+      className="reference-panel reference-panel--watch border-t-0"
+      right={<Pill>{keys.length}</Pill>}
+    >
+      <div className="reference-panel__stack flex flex-col gap-2">
         {keys.map((k) => {
           const series = frames.map((f) => (f.state as Record<string, number>)[k] ?? 0);
           return (
-            <div key={k} className="flex flex-col gap-0.5">
+            <div key={k} className="watch-row flex flex-col gap-0.5">
               <Stat k={k} v={series[player.index]} tone="accent" />
               <Spark series={series} index={player.index} />
             </div>

@@ -39,7 +39,7 @@ export function JsonBlock({
   );
 
   if (variant === 'panel') {
-    return <div className="overflow-hidden">{pre}</div>;
+    return <div className="json-block-shell overflow-hidden">{pre}</div>;
   }
 
   return pre;

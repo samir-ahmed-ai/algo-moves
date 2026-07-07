@@ -2,15 +2,26 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { Edge } from '@xyflow/react';
 import { useGameRoom } from '@/shell/realtime';
 import { usePublishState } from '@/shell/realtime';
-import { buildSessionRoomState } from '@/shell/realtime/roomState';
+import {
+  buildRoomEnvelope,
+  buildSessionRoomState,
+  extractCanvasDoc,
+  type RoomSharedEnvelope,
+} from '@/shell/realtime/roomState';
 import { useCanvasCollab } from '../CanvasCollabProvider';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
+import type { CanvasDoc } from '../protocol/collabProtocol';
 import { docSignature, mergeRemoteNodes } from '../protocol/canvasDoc';
-import { type SubDocKind, type SubDocPayload } from '../protocol/subdocProtocol';
+import { subDocSignature, type SubDocKind, type SubDocPayload } from '../protocol/subdocProtocol';
 import { snapshotFromPayload } from '../protocol/subdocMerge';
 import { observeCanvasDoc, writeCanvasDoc } from '../yjs/yjsCanvasBinding';
 import { useYjsCollab } from '../yjs/YjsCollabContext';
-import { useYjsForCanvasGraph } from '../yjs/yjsConfig';
+import { useYjsForCanvasGraph, useYjsForSubdocs } from '../yjs/yjsConfig';
+
+/** Trailing debounce for relay-fallback content publishes (20 msg/s room budget). */
+const CONTENT_PUBLISH_MS = 300;
+
+const SUBDOC_KINDS = new Set<string>(['whiteboard', 'collab-code', 'notes']);
 
 type SetNodes = (u: PanelFlowNode[] | ((prev: PanelFlowNode[]) => PanelFlowNode[])) => void;
 type SetEdges = (u: Edge[] | ((prev: Edge[]) => Edge[])) => void;
@@ -22,11 +33,23 @@ interface DocSyncArgs {
   setEdges: SetEdges;
 }
 
-/** Binds the live canvas document to Yjs/Hocuspocus; session metadata uses the room relay. */
+/**
+ * Binds the live canvas document to Yjs/Hocuspocus when that transport is on.
+ * On the relay-only fallback (no Yjs) the host publishes the full room state
+ * (session + canvas + subDocs) so guests still receive content changes.
+ */
 export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncArgs): void {
-  const { role, isCollaborating, session, comments, setComments, broadcastSelection, setSubDocs } =
-    useCanvasCollab();
-  const { publishState } = useGameRoom();
+  const {
+    role,
+    isCollaborating,
+    session,
+    comments,
+    setComments,
+    broadcastSelection,
+    subDocs,
+    setSubDocs,
+  } = useCanvasCollab();
+  const { publishState, sharedState } = useGameRoom();
   const { doc: yjsDoc, mode: yjsMode } = useYjsCollab();
   const yjsTransport = useYjsForCanvasGraph();
 
@@ -41,16 +64,19 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
   edgesRef.current = edges;
   const commentsRef = useRef(comments);
   commentsRef.current = comments;
+  const subDocsRef = useRef(subDocs);
+  subDocsRef.current = subDocs;
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
 
   useEffect(() => {
     if (!isHost || !isCollaborating || seededSubDocs.current) return;
     seededSubDocs.current = true;
     const initial: Record<string, ReturnType<typeof snapshotFromPayload>> = {};
-    const subDocKinds = new Set(['whiteboard', 'collab-code']);
     for (const n of nodesRef.current) {
       const kind = n.data?.kind;
       const sub = n.data?.subDoc;
-      if (kind && subDocKinds.has(kind) && sub?.payload) {
+      if (kind && SUBDOC_KINDS.has(kind) && sub?.payload) {
         initial[n.id] = snapshotFromPayload(
           n.id,
           kind as SubDocKind,
@@ -75,9 +101,73 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
     '|',
   );
 
+  // Content channels that must ride the relay envelope because Yjs is off.
+  const relayCanvas = !useYjsForCanvasGraph();
+  const relaySubdocs = !useYjsForSubdocs();
+  const relayContent = relayCanvas || relaySubdocs;
+
+  const canvasRevRef = useRef(0);
+  const buildEnvelope = (): RoomSharedEnvelope => {
+    if (!relayContent) return buildSessionRoomState(sessionRef.current);
+    const canvas: CanvasDoc | undefined = relayCanvas
+      ? {
+          v: 1,
+          rev: ++canvasRevRef.current,
+          nodes: nodesRef.current,
+          edges: edgesRef.current,
+          removedPanels: [],
+          removedEdges: [],
+          comments: commentsRef.current,
+        }
+      : undefined;
+    return buildRoomEnvelope(sessionRef.current, {
+      canvas,
+      subDocs: relaySubdocs ? subDocsRef.current : undefined,
+    });
+  };
+  const publishRef = useRef(() => {});
+  publishRef.current = () => publishState(buildEnvelope());
+
+  // Session metadata (timer/lock/follow) publishes immediately; in relay
+  // fallback the envelope always carries content too so late joiners replay it.
   usePublishState(isHost && isCollaborating, [sessionPublishKey], () => {
-    publishState(buildSessionRoomState(session));
+    publishRef.current();
   });
+
+  // Content changes (canvas graph, sub-docs) publish debounced on the fallback.
+  const contentSig = useMemo(() => {
+    if (!relayContent) return '';
+    const canvasSig = relayCanvas ? docSignature(nodes, edges, comments) : '';
+    const subSig = relaySubdocs ? subDocSignature(subDocs) : '';
+    return `${canvasSig}~${subSig}`;
+  }, [relayContent, relayCanvas, relaySubdocs, nodes, edges, comments, subDocs]);
+
+  useEffect(() => {
+    if (!isHost || !isCollaborating || !relayContent) return;
+    const t = setTimeout(() => publishRef.current(), CONTENT_PUBLISH_MS);
+    return () => clearTimeout(t);
+  }, [contentSig, isHost, isCollaborating, relayContent]);
+
+  // Guest side of the fallback: mirror the host's canvas doc from the envelope.
+  const appliedCanvasRev = useRef(0);
+  useEffect(() => {
+    if (!isCollaborating) {
+      appliedCanvasRev.current = 0;
+      canvasRevRef.current = 0;
+    }
+  }, [isCollaborating]);
+
+  useEffect(() => {
+    if (isHost || !isCollaborating || !relayCanvas) return;
+    const remote = extractCanvasDoc(sharedState);
+    if (!remote || remote.rev <= appliedCanvasRev.current) return;
+    appliedCanvasRev.current = remote.rev;
+    const merged = mergeRemoteNodes(nodesRef.current, remote.nodes);
+    prevNodes.current = merged;
+    setNodes(merged);
+    setEdges(remote.edges);
+    setComments(remote.comments);
+  }, [sharedState, isHost, isCollaborating, relayCanvas, setNodes, setEdges, setComments]);
 
   useEffect(() => {
     if (!yjsTransport || yjsMode !== 'transport' || !yjsDoc || !isCollaborating) return;

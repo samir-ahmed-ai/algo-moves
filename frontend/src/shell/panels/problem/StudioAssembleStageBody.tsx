@@ -49,7 +49,9 @@ export function StudioAssembleStageBody({
       }
       second={
         <StudioContentPanel>
-          <AssembleModes />
+          <div className="studio-assemble-stage-body flex min-h-0 flex-1 flex-col">
+            <AssembleModes />
+          </div>
         </StudioContentPanel>
       }
     />

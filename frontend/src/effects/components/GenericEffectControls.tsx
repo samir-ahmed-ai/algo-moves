@@ -26,14 +26,17 @@ export function GenericEffectControls({
   if (keys.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="effect-controls effect-controls--generic flex flex-col gap-2">
       {keys.map((key) => {
         const sample = defaults[key];
         const value = (data[key] ?? sample) as unknown;
 
         if (typeof sample === 'boolean') {
           return (
-            <label key={key} className="nodrag flex cursor-pointer items-center gap-2 text-ink2">
+            <label
+              key={key}
+              className="effect-toggle-row nodrag flex cursor-pointer items-center gap-2 text-ink2"
+            >
               <input
                 type="checkbox"
                 checked={Boolean(value)}
@@ -53,14 +56,14 @@ export function GenericEffectControls({
             <Field key={key} label={fieldLabel(key)}>
               {useRange ? (
                 <>
-                  <span className={nodeText.sm}>×{n}</span>
+                  <span className={`effect-value-pill ${nodeText.sm}`}>×{n}</span>
                   <input
                     type="range"
                     min={min}
                     max={max}
                     value={n}
                     onChange={(e) => onChange({ [key]: Number(e.target.value) })}
-                    className="nodrag w-full"
+                    className="effect-range nodrag w-full"
                   />
                 </>
               ) : (
@@ -70,7 +73,7 @@ export function GenericEffectControls({
                   max={max}
                   value={n}
                   onChange={(e) => onChange({ [key]: Number(e.target.value) })}
-                  className="nodrag w-full rounded border border-edge bg-panel2 px-2 py-1"
+                  className="effect-number nodrag w-full rounded border border-edge bg-panel2 px-2 py-1"
                 />
               )}
             </Field>

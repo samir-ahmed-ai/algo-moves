@@ -22,7 +22,7 @@ export function DraggableTrayPiece({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(className, isDragging && 'tray-piece-dragging')}
+      className={cn('draggable-tray-piece', className, isDragging && 'tray-piece-dragging')}
       {...listeners}
       {...attributes}
     >

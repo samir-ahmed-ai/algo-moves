@@ -9,10 +9,14 @@ export function MobileTransportSheet({ open, onClose }: { open: boolean; onClose
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30 md:hidden" onClick={onClose} aria-hidden />
+      <div
+        className="mobile-transport-sheet__backdrop fixed inset-0 z-40 bg-black/30 md:hidden"
+        onClick={onClose}
+        aria-hidden
+      />
       <div
         className={cn(
-          'fixed inset-x-0 bottom-0 z-50 border-t border-edge bg-panel p-3 shadow-theme-lg md:hidden',
+          'mobile-transport-sheet fixed inset-x-0 bottom-0 z-50 border-t border-edge bg-panel p-3 shadow-theme-lg md:hidden',
           'animate-in slide-in-from-bottom duration-200',
         )}
       >

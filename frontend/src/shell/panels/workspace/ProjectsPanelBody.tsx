@@ -72,8 +72,8 @@ export function ProjectsPanelBody() {
   };
 
   return (
-    <div className="nodrag flex flex-col gap-2.5">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="workspace-panel workspace-panel--projects nodrag flex flex-col gap-2.5">
+      <div className="workspace-panel-actions flex flex-wrap items-center gap-2">
         <ShareUrlPopover state={projectState} dense />
         <SaveProjectDialog state={projectState} />
       </div>
@@ -81,7 +81,7 @@ export function ProjectsPanelBody() {
         label="New workspace"
         hint="Captures problem · mode · theme · canvas when on visualize"
       >
-        <div className="flex gap-1.5">
+        <div className="workspace-save-row flex gap-1.5">
           <TextInput
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -102,11 +102,11 @@ export function ProjectsPanelBody() {
         />
       ) : (
         <Section title="Saved" right={<Pill>{names.length}</Pill>}>
-          <div className="flex flex-col">
+          <div className="workspace-project-list flex flex-col">
             {names.map((n) => (
               <Row
                 key={n}
-                className="justify-between gap-1.5 border-t border-edge py-1.5 first:border-t-0"
+                className="workspace-project-row justify-between gap-1.5 border-t border-edge py-1.5 first:border-t-0"
               >
                 <span className={cn('min-w-0 flex-1 text-ink', nodeTextWrap, nodeText.sm)}>
                   {n}

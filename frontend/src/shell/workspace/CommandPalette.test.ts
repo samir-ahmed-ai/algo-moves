@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { CanvasInterviewControls } from '@/store/workspace';
 import {
   buildCommandPaletteSections,
+  buildInterviewCommands,
   buildOpenProblemCommand,
   filterCommands,
   resolveCommandSelection,
@@ -110,6 +112,90 @@ describe('resolveCommandSelection', () => {
 
   it('stays at zero for an empty command list', () => {
     expect(resolveCommandSelection(4, 0, 'ArrowDown')).toBe(0);
+  });
+});
+
+describe('buildInterviewCommands', () => {
+  function controls(overrides: Partial<CanvasInterviewControls> = {}): CanvasInterviewControls {
+    return {
+      hasSession: false,
+      isHost: false,
+      sessionActive: false,
+      timerRunning: false,
+      locked: false,
+      start: vi.fn(),
+      copyInvite: vi.fn(),
+      toggleTimer: vi.fn(),
+      resetTimer: vi.fn(),
+      toggleLock: vi.fn(),
+      end: vi.fn(),
+      ...overrides,
+    };
+  }
+
+  it('returns no commands when the interview contract is absent', () => {
+    expect(buildInterviewCommands(null)).toEqual([]);
+  });
+
+  it('offers start (but not invite/end) before a session exists', () => {
+    const ids = buildInterviewCommands(controls()).map((command) => command.id);
+    expect(ids).toEqual([
+      'interview:start',
+      'interview:timer',
+      'interview:timer-reset',
+      'interview:lock',
+    ]);
+  });
+
+  it('offers invite and end to the host of a live session', () => {
+    const ids = buildInterviewCommands(controls({ hasSession: true, isHost: true })).map(
+      (command) => command.id,
+    );
+    expect(ids).toEqual([
+      'interview:invite',
+      'interview:timer',
+      'interview:timer-reset',
+      'interview:lock',
+      'interview:end',
+    ]);
+  });
+
+  it('hides host-only commands from guests', () => {
+    const ids = buildInterviewCommands(controls({ hasSession: true, isHost: false })).map(
+      (command) => command.id,
+    );
+    expect(ids).toEqual(['interview:timer', 'interview:timer-reset', 'interview:lock']);
+  });
+
+  it('reflects timer and lock state in the labels', () => {
+    const idle = buildInterviewCommands(controls());
+    expect(idle.find((command) => command.id === 'interview:timer')?.label).toBe('Start timer');
+    expect(idle.find((command) => command.id === 'interview:lock')?.label).toBe('Lock board');
+
+    const busy = buildInterviewCommands(controls({ timerRunning: true, locked: true }));
+    expect(busy.find((command) => command.id === 'interview:timer')?.label).toBe('Pause timer');
+    expect(busy.find((command) => command.id === 'interview:lock')?.label).toBe('Unlock board');
+  });
+
+  it('wires each command to its control callback', () => {
+    const api = controls({ hasSession: true, isHost: true });
+    const byId = new Map(buildInterviewCommands(api).map((command) => [command.id, command]));
+    byId.get('interview:invite')?.run();
+    byId.get('interview:timer')?.run();
+    byId.get('interview:timer-reset')?.run();
+    byId.get('interview:lock')?.run();
+    byId.get('interview:end')?.run();
+    expect(api.copyInvite).toHaveBeenCalledTimes(1);
+    expect(api.toggleTimer).toHaveBeenCalledTimes(1);
+    expect(api.resetTimer).toHaveBeenCalledTimes(1);
+    expect(api.toggleLock).toHaveBeenCalledTimes(1);
+    expect(api.end).toHaveBeenCalledTimes(1);
+
+    const fresh = controls();
+    buildInterviewCommands(fresh)
+      .find((command) => command.id === 'interview:start')
+      ?.run();
+    expect(fresh.start).toHaveBeenCalledTimes(1);
   });
 });
 

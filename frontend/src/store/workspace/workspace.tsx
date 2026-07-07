@@ -33,7 +33,8 @@ export type Theme = 'dark' | 'light';
 export type Density = 'compact' | 'ultra' | 'spacious';
 export type Palette = 'default' | 'cb';
 /** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, the two-player games arcade, or the interview prep plans hub. */
-export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim' | 'games' | 'plans' | 'resumes';
+export type AppRoute =
+  'home' | 'workspace' | 'mobile' | 'vim' | 'dojo' | 'games' | 'plans' | 'resumes';
 export type { ThemePreset, LayoutPreset, CanvasSnapRegion };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 
@@ -69,6 +70,21 @@ export interface CanvasProjectApi {
     layoutPreset: LayoutPreset;
     ensurePanels?: string[];
   }) => void;
+}
+
+/** Interview session controls registered by canvas chrome while the interview canvas is active. */
+export interface CanvasInterviewControls {
+  hasSession: boolean;
+  isHost: boolean;
+  sessionActive: boolean;
+  timerRunning: boolean;
+  locked: boolean;
+  start: () => void;
+  copyInvite: () => void | Promise<void>;
+  toggleTimer: () => void;
+  resetTimer: () => void;
+  toggleLock: () => void;
+  end: () => void;
 }
 
 /** Optional add-panel API registered by CanvasStage while visualize mode is active. */

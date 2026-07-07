@@ -15,6 +15,12 @@ function leadingIndent(line: string): string {
   return line.slice(0, line.length - line.trimStart().length);
 }
 
+function normalizeLineNo(lineNo: number, max: number): number | null {
+  if (!Number.isFinite(lineNo)) return null;
+  const normalized = Math.trunc(lineNo);
+  return normalized >= 1 && normalized <= max ? normalized : null;
+}
+
 function isTopLevelLine(line: string): boolean {
   const t = line.trim();
   return t.length > 0 && leadingIndent(line) === '';
@@ -44,19 +50,21 @@ export function sectionFoldRange(
   lineNo: number,
   lang?: string,
 ): SectionFoldRange | null {
+  const startLineNo = normalizeLineNo(lineNo, state.doc.lines);
+  if (startLineNo == null) return null;
   const style = styleLangFromId(lang);
 
   if (style === 'python') {
-    return pythonSectionFoldRange(state, lineNo);
+    return pythonSectionFoldRange(state, startLineNo);
   }
 
-  let openLine = lineNo;
+  let openLine = startLineNo;
   let openPos = -1;
   while (openLine <= state.doc.lines) {
     const line = state.doc.line(openLine);
     openPos = line.text.indexOf('{');
     if (openPos !== -1) break;
-    if (openLine > lineNo) return null;
+    if (openLine > startLineNo) return null;
     openLine++;
   }
 
@@ -85,9 +93,11 @@ export function sectionFoldRange(
 }
 
 function pythonSectionFoldRange(state: EditorState, defLineNo: number): SectionFoldRange | null {
-  if (defLineNo >= state.doc.lines) return null;
+  const safeDefLineNo = normalizeLineNo(defLineNo, state.doc.lines);
+  if (safeDefLineNo == null) return null;
+  if (safeDefLineNo >= state.doc.lines) return null;
 
-  const bodyLineNo = defLineNo + 1;
+  const bodyLineNo = safeDefLineNo + 1;
   if (bodyLineNo > state.doc.lines) return null;
   const bodyLine = state.doc.line(bodyLineNo);
   const bodyIndent = leadingIndent(bodyLine.text);

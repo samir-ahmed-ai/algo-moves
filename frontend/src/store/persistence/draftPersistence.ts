@@ -1,10 +1,18 @@
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { readStorageText, removeStorageValue, writeStorageText } from './storage';
 
+function sessionStorageSafe(): Storage | null {
+  try {
+    return globalThis.sessionStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** Set before a normal reload so the next page load may restore drafts from localStorage. */
 export function markDraftSoftReloadExpected(): void {
   try {
-    sessionStorage.setItem(STORAGE_KEYS.DRAFT_SOFT_RELOAD, '1');
+    sessionStorageSafe()?.setItem(STORAGE_KEYS.DRAFT_SOFT_RELOAD, '1');
   } catch {
     // ignore
   }
@@ -12,8 +20,9 @@ export function markDraftSoftReloadExpected(): void {
 
 function consumeDraftSoftReload(): boolean {
   try {
-    const flag = sessionStorage.getItem(STORAGE_KEYS.DRAFT_SOFT_RELOAD);
-    sessionStorage.removeItem(STORAGE_KEYS.DRAFT_SOFT_RELOAD);
+    const storage = sessionStorageSafe();
+    const flag = storage?.getItem(STORAGE_KEYS.DRAFT_SOFT_RELOAD);
+    storage?.removeItem(STORAGE_KEYS.DRAFT_SOFT_RELOAD);
     return flag === '1';
   } catch {
     return false;
@@ -47,24 +56,29 @@ function shouldRestoreDraftOnPageLoad(): boolean {
 
 /** Load a saved attempt. SPA item switches always restore; full reload respects soft vs hard refresh. */
 export function loadPersistedDraft(draftKey: string, opts?: { itemSwitch?: boolean }): string {
+  const key = draftKey.trim();
+  if (!key) return '';
   const allowRestore = opts?.itemSwitch || shouldRestoreDraftOnPageLoad();
   if (!allowRestore) {
-    removeStorageValue(draftKey);
+    removeStorageValue(key);
     return '';
   }
-  return readStorageText(draftKey, '') ?? '';
+  return readStorageText(key, '') ?? '';
 }
 
 /** Persist the current attempt to localStorage. Empty string removes the key. */
 export function savePersistedDraft(draftKey: string, value: string): void {
+  const key = draftKey.trim();
+  if (!key) return;
   if (value === '') {
-    removeStorageValue(draftKey);
+    removeStorageValue(key);
   } else {
-    writeStorageText(draftKey, value);
+    writeStorageText(key, value);
   }
 }
 
 /** Remove a saved attempt from localStorage. */
 export function clearPersistedDraft(draftKey: string): void {
-  removeStorageValue(draftKey);
+  const key = draftKey.trim();
+  if (key) removeStorageValue(key);
 }

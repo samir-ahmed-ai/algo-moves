@@ -117,7 +117,7 @@ export function PredictPanelBody() {
   };
 
   return (
-    <section className="nodrag predict-panel">
+    <section className="practice-panel practice-panel--predict nodrag predict-panel">
       <div className="predict-panel__header">
         <div className="min-w-0">
           <Label>decision drill</Label>

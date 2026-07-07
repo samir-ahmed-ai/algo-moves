@@ -17,3 +17,4 @@ export {
   type SessionRole,
 } from './types';
 export { workspaceSessionMeta, type SessionBridgeInput } from './workspaceBridge';
+export * from './subdocProtocol';

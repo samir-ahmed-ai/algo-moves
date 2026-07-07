@@ -39,7 +39,12 @@ export function NodePropertiesBody() {
 
   if (!node) {
     return (
-      <p className={cn('px-[var(--hpad)] leading-snug text-ink3', chromeText.sm)}>
+      <p
+        className={cn(
+          'node-properties-empty px-[var(--hpad)] leading-snug text-ink3',
+          chromeText.sm,
+        )}
+      >
         Select a panel on the canvas to edit its size, opacity, corners, and colours.
       </p>
     );
@@ -93,16 +98,25 @@ export function NodePropertiesBody() {
   };
 
   return (
-    <div className="flex flex-col gap-3 px-[var(--hpad)] pb-1">
-      <div className="flex items-center gap-1.5">
+    <div className="node-properties flex flex-col gap-3 px-[var(--hpad)] pb-1">
+      <div className="node-properties__head flex items-center gap-1.5">
         <span
-          className="h-2 w-2 shrink-0 rounded-full"
+          className="node-properties__accent h-2 w-2 shrink-0 rounded-full"
           style={{ background: style.stroke ?? data.accent ?? 'var(--accent)' }}
         />
-        <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>
+        <span
+          className={cn(
+            'node-properties__title min-w-0 flex-1 truncate font-medium text-ink',
+            chromeText.sm,
+          )}
+        >
           {data.title || kind}
         </span>
-        {data.locked && <span className={cn('shrink-0 text-ink3', chromeText.xs)}>locked</span>}
+        {data.locked && (
+          <span className={cn('node-properties__locked shrink-0 text-ink3', chromeText.xs)}>
+            locked
+          </span>
+        )}
       </div>
 
       <InsSection title="Dimensions">
@@ -157,13 +171,13 @@ export function NodePropertiesBody() {
           value={opacity}
           disabled={readOnly}
           onChange={(e) => patch({ opacity: Number(e.target.value) })}
-          className="nodrag mt-0.5 w-full accent-[var(--accent)]"
+          className="node-properties__range nodrag mt-0.5 w-full accent-[var(--accent)]"
           aria-label="Opacity"
         />
       </InsSection>
 
       <InsSection title="Stroke">
-        <div className="flex flex-wrap gap-1">
+        <div className="node-properties__swatches flex flex-wrap gap-1">
           {ACCENTS.map((c) => {
             const active = style.stroke === c;
             return (
@@ -175,7 +189,7 @@ export function NodePropertiesBody() {
                 aria-label="stroke colour"
                 onClick={() => patch({ stroke: active ? undefined : c })}
                 className={cn(
-                  'nodrag h-4 w-4 rounded-full ring-1 transition-transform hover:scale-110 disabled:opacity-40',
+                  'node-properties__swatch nodrag h-4 w-4 rounded-full ring-1 transition-transform hover:scale-110 disabled:opacity-40',
                   active ? 'ring-2 ring-accent' : 'ring-edge',
                 )}
                 style={{ background: c }}
@@ -186,7 +200,7 @@ export function NodePropertiesBody() {
       </InsSection>
 
       <InsSection title="Fill">
-        <div className="flex flex-wrap gap-1">
+        <div className="node-properties__fills flex flex-wrap gap-1">
           {FILL_SWATCHES.map((f) => {
             const active = (style.fill ?? undefined) === f.v;
             return (
@@ -198,8 +212,9 @@ export function NodePropertiesBody() {
                 className={cn(
                   `border px-1.5 py-0.5 font-medium transition-colors ${RADIUS_CTRL}`,
                   chromeText.xs,
+                  'node-properties__fill',
                   active
-                    ? 'border-accent bg-accentbg text-accent'
+                    ? 'node-properties__fill--active border-accent bg-accentbg text-accent'
                     : 'border-edge text-ink2 hover:text-ink',
                 )}
               >

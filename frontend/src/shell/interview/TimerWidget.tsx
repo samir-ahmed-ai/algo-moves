@@ -55,6 +55,7 @@ export function TimerWidget() {
     <span
       className={cn(
         'inline-flex items-center gap-1.5 border px-2.5 py-1 font-medium tabular-nums',
+        'interview-timer-pill',
         RADIUS_CTRL,
         chromeText.sm,
         danger
@@ -80,20 +81,68 @@ export function TimerWidget() {
     }
   };
 
+  const inlineBtn =
+    'interview-timer__inline grid h-7 w-7 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-40';
+  const canResume = timer.remainingMs > 0 || timer.durationMs > 0;
+
   return (
-    <div ref={rootRef} className="relative">
-      <button type="button" aria-label="Session timer" onClick={() => setOpen((v) => !v)}>
+    <div ref={rootRef} className="interview-timer relative flex items-center gap-0.5">
+      <button
+        type="button"
+        aria-label="Session timer"
+        title="Timer — pick a duration"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
         {pill}
       </button>
+      {hasTimer ? (
+        <>
+          {timer.running ? (
+            <button
+              type="button"
+              title="Pause timer"
+              aria-label="Pause timer"
+              onClick={pauseTimer}
+              className={inlineBtn}
+            >
+              <Pause className="h-3.5 w-3.5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              title="Resume timer"
+              aria-label="Resume timer"
+              onClick={resumeTimer}
+              disabled={!canResume}
+              className={inlineBtn}
+            >
+              <Play className="h-3.5 w-3.5" />
+            </button>
+          )}
+          <button
+            type="button"
+            title="Reset timer"
+            aria-label="Reset timer"
+            onClick={resetTimer}
+            className={inlineBtn}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+        </>
+      ) : null}
       {open ? (
         <div
           className={cn(
             'absolute right-0 top-full z-20 mt-1 flex w-60 flex-col gap-2 border border-edge bg-panel p-3 shadow-lg',
+            'interview-timer__panel',
             RADIUS_SHELL,
           )}
         >
-          <p className={cn('font-medium text-ink3', chromeText.xs)}>Set duration</p>
-          <div className="grid grid-cols-3 gap-1.5">
+          <p className={cn('interview-timer__label font-medium text-ink3', chromeText.xs)}>
+            Set duration
+          </p>
+          <div className="interview-timer__presets grid grid-cols-3 gap-1.5">
             {PRESET_MINUTES.map((m) => (
               <button
                 key={m}
@@ -101,6 +150,7 @@ export function TimerWidget() {
                 onClick={() => startTimer(m * 60_000)}
                 className={cn(
                   'border border-edge bg-panel2 py-1 font-medium text-ink2 transition-colors hover:border-accent hover:text-accent',
+                  'interview-timer__preset',
                   RADIUS_CTRL,
                   chromeText.sm,
                 )}
@@ -109,7 +159,7 @@ export function TimerWidget() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="interview-timer__custom flex items-center gap-1.5">
             <input
               type="number"
               min={1}
@@ -122,6 +172,7 @@ export function TimerWidget() {
               }}
               className={cn(
                 'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+                'interview-timer__input',
                 RADIUS_CTRL,
                 chromeText.sm,
               )}
@@ -132,6 +183,7 @@ export function TimerWidget() {
               disabled={!(Number(custom) > 0)}
               className={cn(
                 'bg-accent px-2.5 py-1 font-medium text-white disabled:opacity-40',
+                'interview-timer__start',
                 RADIUS_CTRL,
                 chromeText.sm,
               )}
@@ -140,7 +192,7 @@ export function TimerWidget() {
             </button>
           </div>
           {hasTimer ? (
-            <div className="flex gap-1.5">
+            <div className="interview-timer__actions flex gap-1.5">
               {timer.running ? (
                 <button
                   type="button"

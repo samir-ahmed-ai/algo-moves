@@ -197,8 +197,11 @@ export function useCanvasLifecycle({
     setEdges(built.edges);
     const id = requestAnimationFrame(() => fitCanvas());
     return () => cancelAnimationFrame(id);
+    // `key` matters for the standalone canvas: switching the plain canvas into
+    // the interview variant changes only the key (plugin/mode stay fixed) and
+    // must rebuild so the interview board seeds.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pluginId, mode]);
+  }, [pluginId, mode, key]);
 
   useEffect(() => {
     saveCanvasPrefs({ edgeOpts, bg });

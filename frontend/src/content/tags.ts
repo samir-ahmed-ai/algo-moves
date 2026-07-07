@@ -42,6 +42,24 @@ const TAGS: Record<string, Tag> = {
   'cycle-detection': { id: 'cycle-detection', label: 'Cycle detection', kind: 'skill' },
 };
 
+export const ALL_TAGS = Object.values(TAGS);
+
+function formatUnknownTagLabel(id: string): string {
+  const words = id
+    .trim()
+    .split(/[-_\s]+/)
+    .filter(Boolean);
+  if (words.length === 0) return 'Tag';
+  return words
+    .map((word) =>
+      word.length <= 3 && word === word.toLowerCase()
+        ? word.toUpperCase()
+        : word.charAt(0).toUpperCase() + word.slice(1),
+    )
+    .join(' ');
+}
+
 export function getTag(id: string): Tag {
-  return TAGS[id] ?? { id, label: id, kind: 'meta' };
+  const key = id.trim();
+  return TAGS[key] ?? { id: key || 'unknown', label: formatUnknownTagLabel(key), kind: 'meta' };
 }

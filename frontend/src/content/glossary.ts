@@ -99,3 +99,11 @@ export const GLOSSARY: GlossaryTerm[] = [
     tags: ['queue', 'stack'],
   },
 ];
+
+export function glossaryForTags(tags: string[]): GlossaryTerm[] {
+  const active = new Set(tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean));
+  if (active.size === 0) return GLOSSARY;
+  return GLOSSARY.filter(
+    (term) => term.tags?.some((tag) => active.has(tag.trim().toLowerCase())) ?? false,
+  );
+}

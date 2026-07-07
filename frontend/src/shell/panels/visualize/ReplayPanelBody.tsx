@@ -17,9 +17,12 @@ export function ReplayContent({ columns = 2 }: { columns?: number }) {
     );
   }
   return (
-    <div className="flex flex-col gap-2">
+    <div className="viz-replay-content flex flex-col gap-2">
       {tweaks.caption && (
-        <div className={`caption ${frame.move.tone ?? 'default'}`} style={{ marginTop: 0 }}>
+        <div
+          className={`caption viz-caption ${frame.move.tone ?? 'default'}`}
+          style={{ marginTop: 0 }}
+        >
           {frame.move.caption}
         </div>
       )}
@@ -40,7 +43,7 @@ export function ReplayContent({ columns = 2 }: { columns?: number }) {
 export function ReplayPanelBody() {
   const { mode } = useWorkspace();
   return (
-    <div className="flex flex-col gap-2">
+    <div className="viz-replay-panel flex flex-col gap-2">
       <ReplayContent columns={2} />
       {mode !== 'visualize' && (
         <ControlsAccordion>

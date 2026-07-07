@@ -24,6 +24,7 @@ export function useWorkspaceUrlState(
     setThemePreset,
     setDir,
     canvasProject,
+    canvasVariant,
     mode,
     theme,
     palette,
@@ -108,7 +109,7 @@ export function useWorkspaceUrlState(
   }, [canvasProject]);
 
   // Persist problem, example, mode, and theme in the URL so refresh reopens the same view.
-  // Preserve room/sessionKind so invite links survive hash rewrites.
+  // Preserve room/sessionKind/guestToken so invite links survive hash rewrites.
   useEffect(() => {
     if (pendingProjectHydration.current && !shareHydratedRef.current) return;
 
@@ -116,12 +117,14 @@ export function useWorkspaceUrlState(
     const roomFields = {
       room: preserved?.room,
       sessionKind: preserved?.sessionKind,
+      guestToken: preserved?.guestToken,
     };
 
     if (mode === 'visualize' && !problemFocused) {
       writeShareToUrl({
         mode,
         focus: 'canvas',
+        variant: canvasVariant === 'interview' ? 'interview' : undefined,
         theme,
         palette,
         themePreset,
@@ -153,6 +156,7 @@ export function useWorkspaceUrlState(
     themePreset,
     dir,
     problemFocused,
+    canvasVariant,
     plugin?.meta.number,
   ]);
 

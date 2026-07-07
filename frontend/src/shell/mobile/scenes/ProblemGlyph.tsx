@@ -24,7 +24,7 @@ export function ProblemGlyph({
   return (
     <svg
       viewBox="0 0 48 48"
-      className={cn(float && 'mobile-glyph-float', className)}
+      className={cn('problem-glyph', float && 'mobile-glyph-float problem-glyph--float', className)}
       style={style}
       fill="none"
       stroke="currentColor"

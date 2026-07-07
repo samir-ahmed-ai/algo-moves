@@ -16,7 +16,7 @@ export function CheatPanelBody() {
     );
   }
   return (
-    <div className="cheat-panel">
+    <div className="reference-panel reference-panel--cheat cheat-panel">
       <div className="cheat-panel__head">
         <span>quick reference</span>
         <strong>{item.title}</strong>

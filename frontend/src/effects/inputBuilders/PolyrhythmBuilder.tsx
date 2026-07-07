@@ -16,11 +16,11 @@ export function PolyrhythmBuilder({ onApply }: { onApply: (layers: number[][]) =
   };
 
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="input-builder input-builder--polyrhythm nodrag flex flex-col gap-2">
       <Field label="3-layer constraints">
         {layers.map((layer, li) => (
-          <div key={li} className="mb-1 flex gap-1">
-            <span className="w-6 text-xs text-ink3">L{li + 1}</span>
+          <div key={li} className="input-builder-layer-row mb-1 flex gap-1">
+            <span className="input-builder-layer-label w-6 text-xs text-ink3">L{li + 1}</span>
             {layer.map((v, si) => (
               <GridToggleButton key={si} active={!!v} onClick={() => toggle(li, si)} />
             ))}

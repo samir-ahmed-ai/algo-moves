@@ -340,7 +340,10 @@ export function SplitCodeEditor({
           Your attempt
         </div>
       </div>
-      <div ref={containerRef} className="relative min-h-0 flex-1 overflow-hidden">
+      <div
+        ref={containerRef}
+        className="recall-split-editor__body relative min-h-0 flex-1 overflow-hidden"
+      >
         <div
           ref={hostRef}
           className={cn('cm-merge-diff-host nodrag h-full min-h-0', compact && 'cm-merge-compact')}
@@ -348,7 +351,7 @@ export function SplitCodeEditor({
         {showLeft && (
           <div
             {...handleProps}
-            className="nodrag group absolute top-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize items-stretch justify-center"
+            className="recall-split-editor__handle nodrag group absolute top-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize items-stretch justify-center"
             style={{ left: `${splitPct}%` }}
           >
             <div className="split-handle h-full w-px bg-edge transition-colors hover:bg-accent" />

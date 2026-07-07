@@ -20,8 +20,8 @@ export function ChromeLabel({
       style={style}
       className={cx(
         chromeText.sm,
-        'font-medium uppercase tracking-wide leading-[var(--lh-tight,1.25)] text-ink3',
-        mono && 'font-mono normal-case tracking-normal tabular-nums',
+        'chrome-label font-medium uppercase tracking-wide leading-[var(--lh-tight,1.25)] text-ink3',
+        mono && 'chrome-label--mono font-mono normal-case tracking-normal tabular-nums',
         className,
       )}
     >

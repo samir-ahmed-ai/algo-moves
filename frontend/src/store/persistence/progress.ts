@@ -27,6 +27,28 @@ export interface ProgressData {
 const KEY = STORAGE_KEYS.PROGRESS;
 const EMPTY: ProblemStat = { attempts: 0, correct: 0, streak: 0, bestStreak: 0, mastered: false };
 
+function normalizeProblemId(problemId: string): string | null {
+  const id = problemId.trim();
+  return id || null;
+}
+
+function nonNegativeInt(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+}
+
+function normalizeStat(stat: ProblemStat): ProblemStat {
+  const attempts = nonNegativeInt(stat.attempts);
+  const correct = Math.min(nonNegativeInt(stat.correct), attempts);
+  const streak = nonNegativeInt(stat.streak);
+  return {
+    attempts,
+    correct,
+    streak,
+    bestStreak: Math.max(nonNegativeInt(stat.bestStreak), streak),
+    mastered: Boolean(stat.mastered),
+  };
+}
+
 function isProblemStat(value: unknown): value is ProblemStat {
   const candidate = value as Partial<ProblemStat>;
   return (
@@ -70,7 +92,15 @@ function readMistakeSeq(mistakes: Mistake[]): number {
 }
 
 function load(): ProgressData {
-  return readStorageJson(KEY, { stats: {}, mistakes: [] }, isProgressData);
+  const data = readStorageJson(KEY, { stats: {}, mistakes: [] }, isProgressData);
+  return {
+    stats: Object.fromEntries(
+      Object.entries(data.stats)
+        .map(([id, stat]) => [normalizeProblemId(id), normalizeStat(stat)] as const)
+        .filter((entry): entry is readonly [string, ProblemStat] => entry[0] != null),
+    ),
+    mistakes: data.mistakes.filter((m) => normalizeProblemId(m.problemId)),
+  };
 }
 
 const store = createSyncStore<ProgressData>(KEY, load);
@@ -78,8 +108,10 @@ const store = createSyncStore<ProgressData>(KEY, load);
 let mistakeSeq = readMistakeSeq(store.get().mistakes);
 
 export function recordAttempt(problemId: string, correct: boolean) {
+  const id = normalizeProblemId(problemId);
+  if (!id) return;
   store.update((data) => {
-    const prev = data.stats[problemId] ?? EMPTY;
+    const prev = data.stats[id] ?? EMPTY;
     const streak = correct ? prev.streak + 1 : 0;
     const stat: ProblemStat = {
       attempts: prev.attempts + 1,
@@ -88,19 +120,23 @@ export function recordAttempt(problemId: string, correct: boolean) {
       bestStreak: Math.max(prev.bestStreak, streak),
       mastered: prev.mastered || streak >= 3,
     };
-    return { ...data, stats: { ...data.stats, [problemId]: stat } };
+    return { ...data, stats: { ...data.stats, [id]: stat } };
   });
 }
 
 export function setMastered(problemId: string, mastered: boolean) {
+  const id = normalizeProblemId(problemId);
+  if (!id) return;
   store.update((data) => {
-    const prev = data.stats[problemId] ?? EMPTY;
-    return { ...data, stats: { ...data.stats, [problemId]: { ...prev, mastered } } };
+    const prev = data.stats[id] ?? EMPTY;
+    return { ...data, stats: { ...data.stats, [id]: { ...prev, mastered } } };
   });
 }
 
 export function logMistake(m: Omit<Mistake, 'id'>) {
-  const entry: Mistake = { ...m, id: `m${mistakeSeq++}` };
+  const problemId = normalizeProblemId(m.problemId);
+  if (!problemId) return;
+  const entry: Mistake = { ...m, problemId, id: `m${mistakeSeq++}` };
   // keep the most recent 50
   store.update((data) => ({ ...data, mistakes: [entry, ...data.mistakes].slice(0, 50) }));
 }
@@ -118,5 +154,6 @@ export function useProgress(): ProgressData {
 }
 
 export function statFor(d: ProgressData, problemId: string): ProblemStat {
-  return d.stats[problemId] ?? EMPTY;
+  const id = normalizeProblemId(problemId);
+  return id ? (d.stats[id] ?? EMPTY) : EMPTY;
 }

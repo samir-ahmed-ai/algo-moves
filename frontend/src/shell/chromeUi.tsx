@@ -20,7 +20,14 @@ export function ChromeHint({
   mono?: boolean;
 }) {
   return (
-    <span className={cn(chromeText.sm, 'text-ink3', mono && 'font-mono tabular-nums', className)}>
+    <span
+      className={cn(
+        chromeText.sm,
+        'chrome-hint text-ink3',
+        mono && 'font-mono tabular-nums',
+        className,
+      )}
+    >
       {children}
     </span>
   );
@@ -40,7 +47,7 @@ export function ChromeKbd({
     <kbd
       className={cn(
         chromeText.xs,
-        'inline-flex shrink-0 items-center rounded border border-edge bg-panel2 px-1 py-px text-ink3',
+        'chrome-kbd inline-flex shrink-0 items-center rounded border border-edge bg-panel2 px-1 py-px text-ink3',
         mono && 'font-mono tabular-nums',
         className,
       )}
@@ -56,7 +63,7 @@ export function ChromeToken({ children, className }: { children: ReactNode; clas
     <span
       className={cn(
         chromeText.xs,
-        'inline-flex shrink-0 items-center rounded border border-edge bg-panel2 px-1 py-px font-medium uppercase tracking-wide text-ink3',
+        'chrome-token inline-flex shrink-0 items-center rounded border border-edge bg-panel2 px-1 py-px font-medium uppercase tracking-wide text-ink3',
         className,
       )}
     >

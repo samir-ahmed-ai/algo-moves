@@ -14,8 +14,11 @@ const edgeTypes = { orbit: OrbitEdge };
 
 function VimDojoFlow() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { grid } = useVimGame();
+  const { grid, level, newKeys } = useVimGame();
   useVimKeyboard();
+
+  const hintKeys = newKeys.length ? newKeys : level.allowed.slice(0, 8);
+  const hintLabel = `${newKeys.length ? 'New' : 'Keys'}: ${hintKeys.join(' ')}`;
 
   const { nodes, edges, onNodesChange, onEdgesChange, cellSize } = useStudioLayout(
     grid,
@@ -52,7 +55,7 @@ function VimDojoFlow() {
           </Panel>
           <Panel position="bottom-center" className="!mb-3 max-[767px]:hidden">
             <p className="vim-key-hint rounded-md border border-edge/60 bg-panel/70 px-2 py-1 text-[length:var(--fs-2xs)] text-ink3 backdrop-blur">
-              Keys: h j k l w b · Esc reset · r retry
+              {hintLabel} · Esc reset · r retry · ? hint
             </p>
           </Panel>
         </ReactFlow>

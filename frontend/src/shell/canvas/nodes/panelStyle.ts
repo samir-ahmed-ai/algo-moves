@@ -15,16 +15,17 @@ export function panelBorderRadius(corners?: PanelCornerStyle): string {
 
 export function panelOpacity(style?: PanelNodeStyle): number {
   const v = style?.opacity;
-  if (v == null) return 1;
+  if (v == null || !Number.isFinite(v)) return 1;
   return Math.min(1, Math.max(0.2, v / 100));
 }
 
 export function panelStroke(style: PanelNodeStyle | undefined, accent: string): string {
-  return style?.stroke ?? accent;
+  const stroke = style?.stroke?.trim();
+  return stroke || accent;
 }
 
 export function panelFill(style?: PanelNodeStyle): string | undefined {
-  const fill = style?.fill;
+  const fill = style?.fill?.trim();
   return fill && fill !== 'transparent' ? fill : fill === 'transparent' ? 'transparent' : undefined;
 }
 
@@ -40,7 +41,13 @@ export function patchPanelStyle(
     PanelNodeStyle[keyof PanelNodeStyle],
   ][]) {
     if (v === undefined) delete next[k];
-    else next[k] = v as never;
+    else if (k === 'opacity' && typeof v === 'number')
+      next[k] = Math.max(20, Math.min(100, v)) as never;
+    else if ((k === 'fill' || k === 'stroke') && typeof v === 'string') {
+      const trimmed = v.trim();
+      if (trimmed) next[k] = trimmed as never;
+      else delete next[k];
+    } else next[k] = v as never;
   }
   return Object.keys(next).length ? next : undefined;
 }

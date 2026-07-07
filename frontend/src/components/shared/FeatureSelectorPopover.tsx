@@ -182,7 +182,7 @@ export function FeatureSelectorPopover({
     triggerAriaLabel ?? (menu && triggerLabel ? triggerLabel : compact ? panelTitle : undefined);
 
   return (
-    <div className={cn('relative shrink-0', className)}>
+    <div className={cn('feature-selector relative shrink-0', className)}>
       <button
         ref={anchorRef}
         type="button"
@@ -191,6 +191,7 @@ export function FeatureSelectorPopover({
         aria-label={ariaLabel}
         onClick={() => setOpen((v) => !v)}
         className={cn(
+          'feature-selector__trigger',
           triggerClassName ?? DEFAULT_TRIGGER,
           !triggerClassName && open && 'border-accent/40 bg-panel2',
           !triggerClassName && (compact ? 'h-7 w-7 justify-center' : 'px-2 py-1'),
@@ -233,9 +234,9 @@ export function FeatureSelectorPopover({
             role="listbox"
             aria-label={panelTitle}
             style={panelStyle}
-            className="fixed z-[200] animate-auth-popover-in rounded-md border border-edge bg-panel shadow-[var(--shadow-lg)]"
+            className="feature-selector-panel fixed z-[200] animate-auth-popover-in rounded-md border border-edge bg-panel shadow-[var(--shadow-lg)]"
           >
-            <div className="border-b border-edge px-2.5 py-1.5">
+            <div className="feature-selector-panel__header border-b border-edge px-2.5 py-1.5">
               <p className={cn('min-w-0 truncate', chromeText.xs)}>
                 <span className="font-semibold uppercase tracking-[0.08em] text-ink">
                   {panelTitle}
@@ -251,13 +252,13 @@ export function FeatureSelectorPopover({
               </p>
             </div>
 
-            <div className="p-1.5">
+            <div className="feature-selector-panel__groups p-1.5">
               {groups.map((group, gi) => (
-                <div key={gi} className={gi > 0 ? 'mt-1.5' : ''}>
+                <div key={gi} className={cn('feature-selector-group', gi > 0 && 'mt-1.5')}>
                   {group.label && (
                     <ChromeLabel className="mb-0.5 px-0.5">{group.label}</ChromeLabel>
                   )}
-                  <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="feature-selector-group__items flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {group.options.map((opt) => {
                       const isSelected = opt.id === value;
                       const isHovered = hovered === opt.id;
@@ -273,22 +274,26 @@ export function FeatureSelectorPopover({
                           onMouseLeave={() => setHovered(null)}
                           className={cn(
                             'relative flex w-[min(6.5rem,32vw)] shrink-0 flex-col items-center gap-1 rounded-md border p-2 text-center transition-[colors,transform,box-shadow] duration-150',
+                            'feature-selector-card',
                             isSelected
-                              ? tone.cardActive
+                              ? cn('feature-selector-card--selected', tone.cardActive)
                               : isHovered
-                                ? tone.cardHover
-                                : tone.cardRest,
+                                ? cn('feature-selector-card--hovered', tone.cardHover)
+                                : cn('feature-selector-card--rest', tone.cardRest),
                             isHovered && !isSelected && 'scale-[1.02]',
                           )}
                         >
                           {isSelected && (
                             <Check
-                              className={cn('absolute right-1 top-1 h-2.5 w-2.5', tone.check)}
+                              className={cn(
+                                'feature-selector-card__check absolute right-1 top-1 h-2.5 w-2.5',
+                                tone.check,
+                              )}
                             />
                           )}
                           <span
                             className={cn(
-                              'grid h-7 w-7 place-items-center rounded-md border border-dashed [&>svg]:h-3.5 [&>svg]:w-3.5',
+                              'feature-selector-card__icon grid h-7 w-7 place-items-center rounded-md border border-dashed [&>svg]:h-3.5 [&>svg]:w-3.5',
                               isSelected ? tone.iconActive : tone.iconRest,
                             )}
                           >
@@ -319,11 +324,11 @@ export function FeatureSelectorPopover({
             </div>
 
             {highlighted && highlightedTone && (
-              <div className="border-t border-edge px-2.5 py-1.5">
+              <div className="feature-selector-panel__detail border-t border-edge px-2.5 py-1.5">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span
                     className={cn(
-                      'grid h-5 w-5 shrink-0 place-items-center rounded border border-dashed [&>svg]:h-3 [&>svg]:w-3',
+                      'feature-selector-detail__icon grid h-5 w-5 shrink-0 place-items-center rounded border border-dashed [&>svg]:h-3 [&>svg]:w-3',
                       highlightedTone.iconRest,
                     )}
                   >
@@ -341,7 +346,7 @@ export function FeatureSelectorPopover({
                   {highlighted.detailBadge && (
                     <span
                       className={cn(
-                        'shrink-0 rounded border border-edge bg-panel2 px-1 py-px font-mono text-[10px] text-ink3',
+                        'feature-selector-detail__badge shrink-0 rounded border border-edge bg-panel2 px-1 py-px font-mono text-[10px] text-ink3',
                       )}
                     >
                       {highlighted.detailBadge}
@@ -371,7 +376,7 @@ export function ToolbarSegment({
   return (
     <div
       className={cn(
-        'flex items-center',
+        'toolbar-segment flex items-center',
         '[&_button]:rounded-none [&>*:first-child_button]:rounded-l-md [&>*:last-child_button]:rounded-r-md',
         '[&>*:not(:first-child)_button]:-ml-px',
         className,

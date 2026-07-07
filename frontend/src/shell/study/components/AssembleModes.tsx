@@ -57,7 +57,7 @@ export function AssembleModes() {
 
   if (!pieces || !reference) {
     return (
-      <div className="grid min-h-0 flex-1 place-items-center p-6">
+      <div className="assemble-mode-empty grid min-h-0 flex-1 place-items-center p-6">
         <EmptyState
           icon={<Puzzle className="h-4 w-4" />}
           title="Nothing to assemble"
@@ -68,7 +68,7 @@ export function AssembleModes() {
   }
 
   return (
-    <div className="assemble-mode-shell flex min-h-0 flex-1 flex-col">
+    <div className="study-assemble-shell assemble-mode-shell flex min-h-0 flex-1 flex-col">
       <div className="assemble-mode-toolbar ws-scroll flex shrink-0 items-center gap-2 overflow-x-auto border-b border-edge px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <MiniTabs value={mode} options={MODES} onChange={setMode} />
       </div>

@@ -16,6 +16,7 @@ import {
   nextLevelId,
   firstIncompleteLevelId,
   markLevelComplete,
+  newMotionsForLevel,
   readVimProgress,
   parseVimHash,
   writeVimHash,
@@ -26,6 +27,7 @@ import {
   motionAllowed,
   type Pos,
   type InputMachine,
+  type VimMotionKind,
   type VimProgress,
   type VimLevel,
   type MazeGrid,
@@ -57,6 +59,8 @@ export interface VimGameContextValue {
   shake: boolean;
   complete: boolean;
   showHint: boolean;
+  showIntro: boolean;
+  newKeys: VimMotionKind[];
   nextId: string | null;
   completedCount: number;
   lastMotionOk: boolean;
@@ -65,6 +69,7 @@ export interface VimGameContextValue {
   selectLevel: (id: string) => void;
   resetLevel: (keepHint?: boolean) => void;
   toggleHint: () => void;
+  dismissIntro: () => void;
   recordKeyPress: (label: string) => void;
   handleKey: (key: string) => void;
   mazeFocusRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -91,6 +96,7 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
   const [shake, setShake] = useState(false);
   const [complete, setComplete] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const [lastMotionOk, setLastMotionOk] = useState(false);
   const [prevKey, setPrevKey] = useState<string | null>(null);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
@@ -131,10 +137,22 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
   );
 
   const toggleHint = useCallback(() => setShowHint((h) => !h), []);
+  const dismissIntro = useCallback(() => setShowIntro(false), []);
 
   useEffect(() => {
     resetLevel();
+    setShowIntro(true);
   }, [levelId, resetLevel]);
+
+  // Normalize corrupt or missing deep links to the resolved level.
+  useEffect(() => {
+    if (typeof location === 'undefined') return;
+    const parsed = parseVimHash(location.hash, location.pathname);
+    if (parsed && parsed.levelId !== levelId) {
+      writeVimHash({ levelId }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     mazeFocusRef.current?.focus();
@@ -153,6 +171,20 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
 
   const handleKey = useCallback(
     (key: string) => {
+      setShowIntro(false);
+
+      if (complete) {
+        if (key === 'Enter') {
+          const next = nextLevelId(level.id);
+          if (next) selectLevel(next);
+          return;
+        }
+        if (key === 'r' || key === 'Escape') resetLevel();
+        return;
+      }
+
+      if (key === 'Enter') return;
+
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
         setMessage('Use h j k l');
         setError(true);
@@ -160,7 +192,11 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const action = processKey(inputMachine, key);
+      // 'gg' arrives as one composite key from the touch pad.
+      const action =
+        key === 'gg'
+          ? processKey({ countStr: inputMachine.countStr, pending: 'g' }, 'g')
+          : processKey(inputMachine, key);
 
       if (action.type === 'hint') {
         toggleHint();
@@ -199,7 +235,7 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
         setInputMachine(createInputMachine());
 
         if (!motionAllowed(action.motion.kind, level.allowed)) {
-          setMessage('Not unlocked');
+          setMessage(`${action.display} unlocks in a later level`);
           setError(true);
           setShake(true);
           setLastMotionOk(false);
@@ -228,10 +264,21 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
         setTimeout(() => setLastMotionOk(false), 400);
       }
     },
-    [cursor, grid, inputMachine, level.allowed, resetLevel, toggleHint],
+    [
+      complete,
+      cursor,
+      grid,
+      inputMachine,
+      level.allowed,
+      level.id,
+      resetLevel,
+      selectLevel,
+      toggleHint,
+    ],
   );
 
   const nextId = nextLevelId(level.id);
+  const newKeys = useMemo(() => newMotionsForLevel(level), [level]);
   const completedCount = VIM_LEVEL_IDS.filter((id) => progress.levels[id]?.completed).length;
 
   const value = useMemo<VimGameContextValue>(
@@ -250,6 +297,8 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
       shake,
       complete,
       showHint,
+      showIntro,
+      newKeys,
       nextId,
       completedCount,
       lastMotionOk,
@@ -258,6 +307,7 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
       selectLevel,
       resetLevel,
       toggleHint,
+      dismissIntro,
       recordKeyPress,
       handleKey,
       mazeFocusRef,
@@ -277,6 +327,8 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
       shake,
       complete,
       showHint,
+      showIntro,
+      newKeys,
       nextId,
       completedCount,
       lastMotionOk,
@@ -285,6 +337,7 @@ export function VimGameProvider({ children }: { children: ReactNode }) {
       selectLevel,
       resetLevel,
       toggleHint,
+      dismissIntro,
       recordKeyPress,
       handleKey,
     ],

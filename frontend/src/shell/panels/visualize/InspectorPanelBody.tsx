@@ -29,7 +29,7 @@ export function InspectorPaneContent() {
 export function InspectorPanelBody() {
   const { selectedNode } = useCanvasStatic();
   return (
-    <div className="flex flex-col">
+    <div className="viz-inspector-panel flex flex-col">
       <ControlsAccordion
         title="Inspector"
         className="border-t-0"

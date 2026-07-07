@@ -33,7 +33,7 @@ function ReplayBadge() {
 
 function ReplayBody() {
   return (
-    <div className="px-[var(--hpad)]">
+    <div className="canvas-widget-body canvas-widget-body--replay px-[var(--hpad)]">
       <ReplayContent columns={2} />
     </div>
   );
@@ -46,7 +46,7 @@ function InspectorBadge() {
 
 function InspectorBody() {
   return (
-    <div className="px-[var(--hpad)]">
+    <div className="canvas-widget-body canvas-widget-body--inspector px-[var(--hpad)]">
       <InspectorPaneContent />
     </div>
   );
@@ -59,7 +59,7 @@ function MetricsBadge() {
 
 function MetricsBodyWrap() {
   return (
-    <div className="px-[var(--hpad)]">
+    <div className="canvas-widget-body canvas-widget-body--metrics px-[var(--hpad)]">
       <MetricsBody />
     </div>
   );
@@ -90,7 +90,7 @@ function AppearanceBody() {
   const { theme, setTheme, density, cycleDensity, palette, setPalette } = useWorkspace();
   const { item } = useCanvasStatic();
   return (
-    <div className="flex flex-wrap gap-0.5 px-[var(--hpad)]">
+    <div className="canvas-widget-body canvas-widget-body--appearance flex flex-wrap gap-0.5 px-[var(--hpad)]">
       <HudBtn
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
@@ -119,22 +119,38 @@ function AboutBody() {
   const { setSettingsOpen } = useWorkspace();
   return (
     <div
-      className={cn('flex flex-col gap-1.5 px-[var(--hpad)] leading-snug text-ink2', chromeText.sm)}
+      className={cn(
+        'canvas-widget-body canvas-widget-body--about flex flex-col gap-1.5 px-[var(--hpad)] leading-snug text-ink2',
+        chromeText.sm,
+      )}
     >
-      <p className={cn('font-medium text-ink', chromeText.sm)}>{item.title}</p>
-      {item.summary && <p className={cn('text-ink3', chromeText.sm)}>{item.summary}</p>}
+      <p className={cn('canvas-widget-about__title font-medium text-ink', chromeText.sm)}>
+        {item.title}
+      </p>
+      {item.summary && (
+        <p className={cn('canvas-widget-about__summary text-ink3', chromeText.sm)}>
+          {item.summary}
+        </p>
+      )}
       <button
         type="button"
         onClick={() => setSettingsOpen(true)}
         className={cn(
           `inline-flex items-center gap-1 border border-edge px-1.5 py-1 text-ink2 transition-colors hover:border-accent hover:text-accent ${RADIUS_CTRL}`,
+          'canvas-widget-about__settings',
           chromeText.sm,
         )}
       >
         <Settings className="h-2.5 w-2.5" />
         Settings
       </button>
-      <div className={cn('flex flex-col gap-0.5', chromeText.sm, 'text-ink3')}>
+      <div
+        className={cn(
+          'canvas-widget-about__tips flex flex-col gap-0.5',
+          chromeText.sm,
+          'text-ink3',
+        )}
+      >
         <span>· Drag a panel by its header; resize from its edges.</span>
         <span>· Shift-drag to box-select; Delete removes the selection.</span>
         <span>· Trash a panel; re-add it from the left sidebar.</span>
@@ -148,6 +164,7 @@ function AboutBody() {
           rel="noreferrer"
           className={cn(
             'inline-flex items-center gap-1 text-accent hover:underline',
+            'canvas-widget-about__source',
             chromeText.sm,
           )}
         >

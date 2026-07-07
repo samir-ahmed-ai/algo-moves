@@ -34,10 +34,10 @@ export function CopyPanelBody() {
   };
 
   return (
-    <div className="source-panel-shell flex min-h-0 flex-col gap-2">
+    <div className="code-panel code-panel--copy source-panel-shell flex min-h-0 flex-col gap-2">
       <div className="source-panel-toolbar flex items-center gap-2 rounded-lg border border-edge bg-panel2/40 px-2 py-1.5">
         <LangTabs variants={variants} active={active} onPick={setActive} />
-        <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-edge bg-panel/70 px-2 py-1 font-mono text-[length:var(--fs-2xs)] text-ink2">
+        <span className="source-file-pill inline-flex min-w-0 items-center gap-1.5 rounded-md border border-edge bg-panel/70 px-2 py-1 font-mono text-[length:var(--fs-2xs)] text-ink2">
           <Code2 className="h-3.5 w-3.5 shrink-0 text-accent" />
           <span className="truncate">{file}</span>
         </span>

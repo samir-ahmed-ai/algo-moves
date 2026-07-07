@@ -8,7 +8,7 @@ function InfoParagraphs({ lines }: { lines: string[] }) {
   return (
     <>
       {lines.map((line) => (
-        <p key={line} className={cn('leading-relaxed text-ink2', nodeText.sm)}>
+        <p key={line} className={cn('problem-brief-copy leading-relaxed text-ink2', nodeText.sm)}>
           {line}
         </p>
       ))}
@@ -38,18 +38,18 @@ function CaseIo({ c }: { c: ProblemBriefCase }) {
 export function InfoCases({ cases }: { cases: ProblemBriefCase[] }) {
   if (cases.length === 0) return null;
   return (
-    <div className="mt-1.5 space-y-1">
+    <div className="problem-brief-cases mt-1.5 space-y-1">
       {cases.map((c, i) => (
         <div
           key={c.label}
-          className="overflow-hidden rounded-md border border-edge/60 bg-panel2/40 px-1.5 pb-1"
+          className="problem-brief-case overflow-hidden rounded-md border border-edge/60 bg-panel2/40 px-1.5 pb-1"
         >
           <ControlsAccordion
             title={c.label}
             defaultOpen
             className="border-t-0"
             right={
-              <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-accent/15 text-[length:var(--fs-2xs)] font-bold tabular-nums text-accent">
+              <span className="problem-brief-case-index grid h-4 w-4 shrink-0 place-items-center rounded-full bg-accent/15 text-[length:var(--fs-2xs)] font-bold tabular-nums text-accent">
                 {i + 1}
               </span>
             }
@@ -78,7 +78,7 @@ export function ProblemBriefBody({
 }) {
   if (statements.length === 0 && cases.length === 0) return null;
   return (
-    <div className="space-y-1">
+    <div className="problem-brief space-y-1">
       {statements.length > 0 && <InfoParagraphs lines={statements} />}
       <InfoCases cases={cases} />
     </div>

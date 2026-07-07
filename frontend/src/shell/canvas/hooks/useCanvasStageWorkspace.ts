@@ -10,7 +10,6 @@ import {
 } from 'react';
 import type { Edge, Node } from '@xyflow/react';
 import type { CanvasMode, Player, ProblemPlugin } from '@/core';
-import { createPanelByType } from '@/core/panelRegistry';
 import type { Item } from '@/content';
 import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
 import type { ShareState } from '@/store/navigation';
@@ -23,6 +22,7 @@ import { applyAlign, applyDistribute, type AlignKind } from '../layout/align';
 import {
   edgesForKind,
   FIT_PADDING_FOCUS,
+  isMultiInstancePanel,
   kindTitle,
   modeNodeIds,
   nextPracticePanel,
@@ -37,10 +37,8 @@ import {
 } from '../layout/layout';
 import type { RightSidebarTab } from '@/store/workspace/workspace';
 import { FIT_VIEW_DURATION_MS } from '../ui/canvasTokens';
-import { DND_KEY } from './useCanvasDnD';
+import { DND_KEY, insertionForKind } from './useCanvasDnD';
 import type { Saved } from './useCanvasLayoutPersistence';
-
-const MULTI_INSTANCE_PANELS = new Set(['whiteboard', 'collab-code']);
 
 export type UseCanvasStageWorkspaceOptions = {
   plugin: ProblemPlugin<any, any>;
@@ -208,33 +206,34 @@ export function useCanvasStageWorkspace({
     const present = new Set(nodes.map((n) => n.id));
     const ids = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
     return ids
-      .filter((id) => MULTI_INSTANCE_PANELS.has(id) || !present.has(id))
+      .filter((id) => isMultiInstancePanel(id) || !present.has(id))
       .map((id) => ({ id, title: kindTitle(plugin, id) }));
   }, [nodes, plugin, mode, standalone]);
 
   const addKind = useCallback(
     (kind: string) => {
-      if (!kind) return;
-      if (!MULTI_INSTANCE_PANELS.has(kind) && nodesRef.current.some((n) => n.id === kind)) return;
-      removedRef.current[key]?.delete(kind);
       const r = wrapperRef.current?.getBoundingClientRect();
       const center = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: 240, y: 240 };
       const position = screenToFlowPosition(center);
-      const node = MULTI_INSTANCE_PANELS.has(kind)
-        ? (createPanelByType(kind, position) as PanelFlowNode)
-        : nodeForKind(plugin, kind, position);
-      const present = new Set([...nodesRef.current.map((n) => n.id), node.id]);
-      const newEdges = styleEdges(edgesForKind(plugin, mode, kind, present), edgeOpts).filter(
-        (ne) => !edges.some((ee) => ee.id === ne.id),
-      );
-      setNodes((nds) => [...nds, node]);
-      if (newEdges.length) setEdges((eds) => [...eds, ...newEdges]);
+      const insertion = insertionForKind({
+        plugin,
+        mode,
+        kind,
+        position,
+        nodes: nodesRef.current,
+        edges,
+        edgeOpts,
+      });
+      if (!insertion) return;
+      removedRef.current[key]?.delete(kind);
+      setNodes((nds) => [...nds, insertion.node]);
+      if (insertion.newEdges.length) setEdges((eds) => [...eds, ...insertion.newEdges]);
       requestAnimationFrame(() =>
         requestAnimationFrame(() =>
           fitView({
             padding: FIT_PADDING_FOCUS,
             duration: FIT_VIEW_DURATION_MS,
-            nodes: [{ id: node.id }],
+            nodes: [{ id: insertion.node.id }],
           }),
         ),
       );

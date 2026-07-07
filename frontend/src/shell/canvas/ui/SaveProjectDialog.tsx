@@ -21,35 +21,41 @@ export function SaveProjectDialog({ state }: { state: ProjectState | null }) {
         type="button"
         onClick={() => setOpen(true)}
         title="Save project"
-        className="flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-ink2 hover:bg-panel2"
+        aria-haspopup="dialog"
+        className="project-action-btn save-project-trigger flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-ink2 hover:bg-panel2"
       >
         <Download className="h-3.5 w-3.5" />
         <span className={chromeText.sm}>Save</span>
       </button>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-lg border border-edge bg-panel p-4 shadow-theme-lg">
-            <h3 className={chromeText.base}>Save project</h3>
-            <label className="mt-3 block text-ink3">
+        <div className="project-dialog-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div
+            className="project-dialog w-full max-w-sm rounded-lg border border-edge bg-panel p-4 shadow-theme-lg"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Save project"
+          >
+            <h3 className={`project-dialog__title ${chromeText.base}`}>Save project</h3>
+            <label className="project-dialog__label mt-3 block text-ink3">
               <span className={chromeText.sm}>Filename</span>
               <input
                 value={filename}
                 onChange={(e) => setFilename(e.target.value)}
-                className="mt-1 w-full rounded border border-edge bg-panel2 px-2 py-1.5"
+                className="project-dialog__input mt-1 w-full rounded border border-edge bg-panel2 px-2 py-1.5"
               />
             </label>
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="project-dialog__actions mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded border border-edge px-3 py-1"
+                className="project-dialog__cancel rounded border border-edge px-3 py-1"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={save}
-                className="rounded bg-accent px-3 py-1 text-white"
+                className="project-dialog__primary rounded bg-accent px-3 py-1 text-white"
               >
                 Download JSON
               </button>

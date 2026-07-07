@@ -143,17 +143,19 @@ export function VizFitBox({
 
   return (
     <div
+      data-layout={layoutMode}
       ref={selfRef}
       className={cn(
-        'relative flex items-center justify-center overflow-hidden',
+        'viz-fit-box relative flex items-center justify-center overflow-hidden',
         hug ? 'viz-board-col--hug shrink-0' : 'min-h-0 flex-1',
+        hug ? 'viz-fit-box--hug' : 'viz-fit-box--fill',
         animReady && 'viz-fit-anim-size',
         className,
       )}
       style={hugSize}
     >
       <div
-        className={cn(animReady && 'viz-fit-anim-size')}
+        className={cn('viz-fit-box__stage', animReady && 'viz-fit-anim-size')}
         style={{
           width: layout.w || undefined,
           height: layout.h || undefined,
@@ -163,7 +165,7 @@ export function VizFitBox({
       >
         <div
           ref={contentRef}
-          className={cn(animReady && 'viz-fit-anim-scale')}
+          className={cn('viz-fit-box__content', animReady && 'viz-fit-anim-scale')}
           style={{
             width: scaled ? layout.nw : undefined,
             height: scaled ? layout.nh : undefined,
@@ -183,22 +185,31 @@ export function MiniTabs<T extends string>({
   value,
   options,
   onChange,
+  label = 'Options',
 }: {
   value: T;
   options: { v: T; label: ReactNode }[];
   onChange: (v: T) => void;
+  label?: string;
 }) {
   return (
-    <div className="nodrag inline-flex items-center gap-0.5 rounded-lg bg-panel2 p-0.5">
+    <div
+      role="tablist"
+      aria-label={label}
+      className="mini-tabs nodrag inline-flex items-center gap-0.5 rounded-lg bg-panel2 p-0.5"
+    >
       {options.map((o) => (
         <button
           key={o.v}
           type="button"
+          role="tab"
+          aria-selected={value === o.v}
           onClick={() => onChange(o.v)}
           className={cn(
             cn(RADIUS_CTRL, 'px-2 py-1 font-medium transition-colors', nodeText.sm),
+            'mini-tabs__button',
             value === o.v
-              ? 'bg-panel text-ink shadow-[var(--shadow-sm)]'
+              ? 'mini-tabs__button--active bg-panel text-ink shadow-[var(--shadow-sm)]'
               : 'text-ink3 hover:text-ink',
           )}
         >

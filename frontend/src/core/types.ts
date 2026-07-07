@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 
 export type Tone = 'default' | 'good' | 'bad';
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 export interface Move {
   type: string;
@@ -28,7 +29,7 @@ export interface PluginMeta {
   title: string;
   /** Problem number from the manifest, e.g. "1.6". */
   number?: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: Difficulty;
   tags: string[];
   source?: string;
   summary: string;

@@ -13,14 +13,23 @@ const store = createSyncStore<Record<string, ShareState>>(KEY, () =>
   readStorageJson<Record<string, ShareState>>(KEY, {}),
 );
 
+function projectName(name: string): string | null {
+  const normalized = name.trim();
+  return normalized || null;
+}
+
 export function saveProject(name: string, snapshot: ShareState) {
-  store.update((data) => ({ ...data, [name]: snapshot }));
+  const key = projectName(name);
+  if (!key) return;
+  store.update((data) => ({ ...data, [key]: snapshot }));
 }
 
 export function deleteProject(name: string) {
+  const key = projectName(name);
+  if (!key) return;
   store.update((data) => {
     const next = { ...data };
-    delete next[name];
+    delete next[key];
     return next;
   });
 }

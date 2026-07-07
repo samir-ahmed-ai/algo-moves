@@ -3,7 +3,7 @@
 export type StyleLang = 'go' | 'js' | 'python' | 'java' | 'default';
 
 export function styleLangFromId(lang?: string): StyleLang {
-  const id = (lang ?? '').toLowerCase();
+  const id = (lang ?? '').trim().toLowerCase();
   if (id === 'go') return 'go';
   if (id === 'js' || id === 'javascript' || id === 'ts' || id === 'typescript') return 'js';
   if (id === 'py' || id === 'python') return 'python';
@@ -42,6 +42,14 @@ function protectLiterals(line: string): { bare: string; slots: string[] } {
 function restoreLiterals(bare: string, slots: string[]): string {
   // eslint-disable-next-line no-control-regex -- placeholder tokens use NUL delimiters
   return bare.replace(/\x00(\d+)\x00/g, (_, i) => slots[Number(i)] ?? '');
+}
+
+function sourceLines(source: string): string[] {
+  return source.replace(/\r\n?/g, '\n').replace(/\n+$/, '').split('\n');
+}
+
+function safeIndentUnit(unit: string): string {
+  return unit === '\t' ? '\t' : unit || '  ';
 }
 
 // ─── Spacing rules ──────────────────────────────────────────────────────────
@@ -275,8 +283,9 @@ function expandInlineBracesStable(source: string, unit: string): string {
  */
 function expandInlineBraces(source: string, unit: string): string {
   const out: string[] = [];
+  const indentUnit = safeIndentUnit(unit);
 
-  for (const raw of source.replace(/\n+$/, '').split('\n')) {
+  for (const raw of sourceLines(source)) {
     const trimmed = raw.trim();
     if (!trimmed) {
       out.push('');
@@ -315,7 +324,7 @@ function expandInlineBraces(source: string, unit: string): string {
     // Split: head {, body lines, }
     out.push(`${indent}${headRestored.trimEnd()} {`);
 
-    const inner = unit;
+    const inner = indentUnit;
     if (tailRestored.endsWith('}')) {
       // Inline block with closing: split body on `;`
       const body = tailRestored.slice(0, -1).trim();
@@ -351,11 +360,12 @@ function expandInlineBraces(source: string, unit: string): string {
  * inside strings from corrupting the depth counter.
  */
 export function braceFormat(source: string, unit: string): string {
-  const makeIndent = (d: number) => (unit === '\t' ? '\t'.repeat(d) : unit.repeat(d));
+  const indentUnit = safeIndentUnit(unit);
+  const makeIndent = (d: number) => (indentUnit === '\t' ? '\t'.repeat(d) : indentUnit.repeat(d));
   let depth = 0;
   const out: string[] = [];
 
-  for (const raw of source.replace(/\n+$/, '').split('\n')) {
+  for (const raw of sourceLines(source)) {
     const trimmed = raw.trim();
     if (!trimmed) {
       out.push('');
@@ -388,7 +398,10 @@ export function braceFormat(source: string, unit: string): string {
 // ─── Trailing cleanup ───────────────────────────────────────────────────────
 
 function trimTrailingLines(text: string): string {
-  const lines = text.split('\n').map((l) => l.replace(/\s+$/, ''));
+  const lines = text
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map((l) => l.replace(/\s+$/, ''));
   let end = lines.length;
   while (end > 0 && lines[end - 1] === '') end--;
   return lines.slice(0, end).join('\n');
@@ -404,9 +417,7 @@ function trimTrailingLines(text: string): string {
 export function applySpacingOnly(source: string, lang?: string): string {
   const style = styleLangFromId(lang);
   return trimTrailingLines(
-    source
-      .replace(/\n+$/, '')
-      .split('\n')
+    sourceLines(source)
       .map((line) => formatLineSpacing(line, style))
       .join('\n'),
   );
@@ -425,18 +436,14 @@ export function formatCompleteSource(source: string, lang?: string): string {
   // Python: only normalize spacing, never touch indentation
   if (style === 'python') {
     return trimTrailingLines(
-      source
-        .replace(/\n+$/, '')
-        .split('\n')
+      sourceLines(source)
         .map((line) => formatLineSpacing(line, style))
         .join('\n'),
     );
   }
 
   // 1. Normalize spacing on every line
-  const spaced = source
-    .replace(/\n+$/, '')
-    .split('\n')
+  const spaced = sourceLines(source)
     .map((line) => formatLineSpacing(line, style))
     .join('\n');
 

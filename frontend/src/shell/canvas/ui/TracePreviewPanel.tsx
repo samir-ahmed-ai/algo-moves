@@ -38,22 +38,22 @@ export function TracePreviewPanel() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-12 z-40 flex justify-end px-3 pb-1.5">
-      <div className="pointer-events-auto w-[min(50vw,560px)] overflow-hidden rounded-lg border border-edge bg-panel/95 shadow-[var(--shadow-xl)] backdrop-blur">
-        <header className="flex items-center gap-1.5 border-b border-edge px-2 py-1">
+    <div className="trace-preview pointer-events-none fixed inset-x-0 bottom-12 z-40 flex justify-end px-3 pb-1.5">
+      <div className="trace-preview__card pointer-events-auto w-[min(50vw,560px)] overflow-hidden rounded-lg border border-edge bg-panel/95 shadow-[var(--shadow-xl)] backdrop-blur">
+        <header className="trace-preview__header flex items-center gap-1.5 border-b border-edge px-2 py-1">
           <Label className="flex-1 truncate">{header}</Label>
           <button
             type="button"
             onClick={copy}
             title="Copy trace"
-            className="grid h-5 w-5 place-items-center rounded-md text-ink3 hover:bg-panel2 hover:text-ink"
+            className="trace-preview__action grid h-5 w-5 place-items-center rounded-md text-ink3 hover:bg-panel2 hover:text-ink"
           >
             {copied ? <Check className="h-3 w-3 text-good" /> : <Copy className="h-3 w-3" />}
           </button>
           <button
             type="button"
             onClick={() => setTracePreviewOpen(false)}
-            className="grid h-5 w-5 place-items-center rounded-md text-ink3 hover:bg-panel2 hover:text-ink"
+            className="trace-preview__action grid h-5 w-5 place-items-center rounded-md text-ink3 hover:bg-panel2 hover:text-ink"
             aria-label="Close trace preview"
           >
             <X className="h-3 w-3" />
@@ -61,7 +61,7 @@ export function TracePreviewPanel() {
         </header>
         <pre
           className={cn(
-            'ws-scroll max-h-[240px] overflow-auto p-2 font-mono leading-relaxed text-ink2',
+            'trace-preview__body ws-scroll max-h-[240px] overflow-auto p-2 font-mono leading-relaxed text-ink2',
             chromeText.sm,
           )}
         >

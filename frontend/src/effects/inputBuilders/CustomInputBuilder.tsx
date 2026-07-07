@@ -21,15 +21,15 @@ export function CustomInputBuilder({ onApply }: { onApply: (value: unknown) => v
   };
 
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="input-builder input-builder--custom nodrag flex flex-col gap-2">
       <Field label="Examples">
-        <div className="flex flex-wrap gap-1">
+        <div className="input-builder-preset-row flex flex-wrap gap-1">
           {EXAMPLES.map((ex) => (
             <button
               key={ex.label}
               type="button"
               onClick={() => setText(ex.json)}
-              className="rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2"
+              className="input-builder-preset rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2"
             >
               {ex.label}
             </button>
@@ -40,9 +40,9 @@ export function CustomInputBuilder({ onApply }: { onApply: (value: unknown) => v
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={5}
-        className="font-mono"
+        className="input-builder-json font-mono"
       />
-      {err && <span className="text-bad text-xs">{err}</span>}
+      {err && <span className="input-builder-error text-bad text-xs">{err}</span>}
       <Btn variant="good" size="sm" onClick={apply}>
         Apply JSON
       </Btn>

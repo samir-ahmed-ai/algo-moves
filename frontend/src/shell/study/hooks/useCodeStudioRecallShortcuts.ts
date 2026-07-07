@@ -4,6 +4,7 @@ import type { CodeStudioPhase, EditorPrefs } from '@/store/user-prefs';
 /**
  * Recall-phase keyboard shortcuts (window-level; editor shortcuts are in CodeMirror):
  *   ⌘/Ctrl + \              toggle blind mode
+ *   ⌘/Ctrl + Alt + V        toggle Vim keybindings
  *   ⌘/Ctrl + Shift + R      clear the draft editor
  *   ⌘/Ctrl + Shift + -/+    decrease/increase font size
  *
@@ -17,12 +18,14 @@ import type { CodeStudioPhase, EditorPrefs } from '@/store/user-prefs';
  */
 export function useCodeStudioRecallShortcuts({
   phase,
+  vim,
   persistDraft,
   setBlind,
   fontSize,
   setEditorPrefs,
 }: {
   phase: CodeStudioPhase;
+  vim: boolean;
   persistDraft: (v: string) => void;
   setBlind: Dispatch<SetStateAction<boolean>>;
   fontSize: EditorPrefs['fontSize'];
@@ -35,6 +38,11 @@ export function useCodeStudioRecallShortcuts({
       if (e.key === '\\') {
         e.preventDefault();
         setBlind((b) => !b);
+      }
+      // e.code (not e.key) so macOS ⌥ doesn't remap the character.
+      if (e.altKey && e.code === 'KeyV') {
+        e.preventDefault();
+        setEditorPrefs({ vim: !vim });
       }
       if (e.key === 'r' && e.shiftKey) {
         e.preventDefault();
@@ -51,5 +59,5 @@ export function useCodeStudioRecallShortcuts({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [phase, persistDraft, setBlind, fontSize, setEditorPrefs]);
+  }, [phase, vim, persistDraft, setBlind, fontSize, setEditorPrefs]);
 }

@@ -46,7 +46,9 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
   const foldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
 
   return (
-    <div className={cn('flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
+    <div
+      className={cn('recall-pane-shell flex min-h-0 flex-1 flex-col overflow-hidden', className)}
+    >
       <RecallToolbar
         className="border-b border-edge px-2"
         showTitle={showTitle}

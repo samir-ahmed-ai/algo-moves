@@ -2,10 +2,12 @@ import { MIN_VIEWPORT_HEIGHT } from '../ui/canvasTokens';
 import { getMeasuredHeight } from './measuredCache';
 import {
   NODE_W,
+  NODE_MIN_W,
   NODE_MAX_W,
   STRUDEL_NODE_W,
   LEGACY_STRUDEL_NODE_W,
   NODE_UI_SCALE,
+  clampNodeWidth,
 } from '@/design/nodeScale';
 
 export type NodeTier = 'narrow' | 'standard' | 'wide' | 'board';
@@ -14,7 +16,34 @@ export type PanelSize = { w: number; estH: number; cap?: number };
 
 // Node-scale constants are defined in @/design/nodeScale (a pure leaf);
 // re-exported here for this module's many consumers.
-export { NODE_W, NODE_MAX_W, STRUDEL_NODE_W, LEGACY_STRUDEL_NODE_W, NODE_UI_SCALE };
+export {
+  NODE_W,
+  NODE_MIN_W,
+  NODE_MAX_W,
+  STRUDEL_NODE_W,
+  LEGACY_STRUDEL_NODE_W,
+  NODE_UI_SCALE,
+  clampNodeWidth,
+};
+
+function normalizeKind(kind: string): string {
+  return kind.trim();
+}
+
+function finiteNumber(value: number | undefined, fallback: number): number {
+  return Number.isFinite(value) ? value! : fallback;
+}
+
+function normalizeWidth(value: number | undefined, fallback = DEFAULT_SIZE.w): number {
+  return Math.max(NODE_MIN_W, Math.round(finiteNumber(value, fallback)));
+}
+
+function normalizeSize(size: PanelSize): PanelSize {
+  const w = normalizeWidth(size.w);
+  const estH = Math.max(1, Math.round(finiteNumber(size.estH, DEFAULT_SIZE.estH)));
+  const cap = size.cap == null ? undefined : clampNodeWidth(size.cap);
+  return { w, estH, cap };
+}
 
 function scaleEstH(base: number): number {
   return Math.round(base * NODE_UI_SCALE);
@@ -111,41 +140,44 @@ const TIER_SCALE: Record<NodeTier, number> = {
 
 /** Dagre / align fallback before ResizeObserver sets the real height. */
 export function layoutEstimate(kind: string): PanelSize {
-  return SIZE[kind] ?? DEFAULT_SIZE;
+  return normalizeSize(SIZE[normalizeKind(kind)] ?? DEFAULT_SIZE);
 }
 
 /** Max body width for a kind; undefined = uncapped. */
 export function layoutCap(kind: string): number | undefined {
-  return (SIZE[kind] ?? DEFAULT_SIZE).cap;
+  return layoutEstimate(kind).cap;
 }
 
 /** Max node width cap for problem; undefined = no cap. */
 export function layoutFixedWidth(kind: string): number | undefined {
-  if (kind === 'problem') return NODE_MAX_W;
+  if (normalizeKind(kind) === 'problem') return NODE_MAX_W;
   return undefined;
 }
 
 /** Logical sizing tier for a panel kind. */
 export function nodeTier(kind: string): NodeTier {
-  return KIND_TIER[kind] ?? 'standard';
+  return KIND_TIER[normalizeKind(kind)] ?? 'standard';
 }
 
 /** Viewport-aware layout size — board panels can use available height hints. */
 export function layoutSize(kind: string, viewport?: { width: number; height: number }): PanelSize {
-  const base = layoutEstimate(kind);
-  const tier = nodeTier(kind);
+  const panelKind = normalizeKind(kind);
+  const base = layoutEstimate(panelKind);
+  const tier = nodeTier(panelKind);
   const scale = TIER_SCALE[tier];
-  const w = Math.round(base.w * scale);
-  const cap = base.cap != null ? Math.round(base.cap * scale) : base.cap;
+  const w = normalizeWidth(base.w * scale, base.w);
+  const cap = base.cap != null ? clampNodeWidth(Math.round(base.cap * scale)) : base.cap;
 
   if (tier === 'board' && viewport) {
-    const availH = Math.max(MIN_VIEWPORT_HEIGHT, viewport.height - 24);
-    const availW = Math.max(STRUDEL_NODE_W, viewport.width * 0.55);
-    if (kind === 'viz') {
+    const viewportW = finiteNumber(viewport.width, STRUDEL_NODE_W);
+    const viewportH = finiteNumber(viewport.height, MIN_VIEWPORT_HEIGHT);
+    const availH = Math.max(MIN_VIEWPORT_HEIGHT, viewportH - 24);
+    const availW = Math.max(STRUDEL_NODE_W, viewportW * 0.55);
+    if (panelKind === 'viz') {
       return { w: availW, estH: availH, cap };
     }
-    if (kind === 'workbench') {
-      return { w: Math.max(1400, viewport.width - 48), estH: availH, cap };
+    if (panelKind === 'workbench') {
+      return { w: Math.max(1400, viewportW - 48), estH: availH, cap };
     }
   }
 
@@ -154,15 +186,15 @@ export function layoutSize(kind: string, viewport?: { width: number; height: num
 
 /** Measured height when available, else estimate — for align / dagre helpers. */
 export function layoutHeight(kind: string, id?: string, measured?: number): number {
-  if (measured != null) return measured;
+  if (Number.isFinite(measured)) return Math.max(1, Math.round(measured!));
   if (id) {
     const cached = getMeasuredHeight(id);
-    if (cached != null) return cached;
+    if (Number.isFinite(cached)) return Math.max(1, Math.round(cached!));
   }
   return layoutEstimate(kind).estH;
 }
 
 /** Internal size lookup by panel id/kind key. */
 export function sizeOf(id: string): PanelSize {
-  return SIZE[id] ?? DEFAULT_SIZE;
+  return layoutEstimate(id);
 }

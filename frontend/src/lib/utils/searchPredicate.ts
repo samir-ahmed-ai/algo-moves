@@ -6,5 +6,5 @@
 export function matchesQuery(query: string, ...fields: (string | undefined)[]): boolean {
   const needle = query.trim().toLowerCase();
   if (!needle) return true;
-  return fields.some((f) => f?.toLowerCase().includes(needle));
+  return fields.some((f) => f?.trim().toLowerCase().includes(needle));
 }

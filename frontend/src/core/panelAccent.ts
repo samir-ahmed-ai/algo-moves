@@ -9,6 +9,7 @@ const KIND_ACCENT: Record<string, string> = {
   bookmarks: 'var(--accent)',
   editor: 'var(--team1-stroke)',
   copy: 'var(--good)',
+  scratch: 'var(--team2-stroke)',
   cases: 'var(--good)',
   code: 'var(--team2-stroke)',
   reassemble: 'var(--team2-stroke)',

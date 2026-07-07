@@ -80,12 +80,29 @@ export function buildEditorTheme(isDark: boolean): Extension[] {
       '&': {
         backgroundColor: p.bg,
         color: p.fg,
+        borderRadius: 'var(--radius)',
+        outline: 'none',
+      },
+      '&.cm-focused': {
+        boxShadow: `0 0 0 1px ${p.selection}, 0 18px 42px rgba(0, 0, 0, ${isDark ? '0.24' : '0.1'})`,
+      },
+      '.cm-scroller': {
+        fontFamily:
+          'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+        lineHeight: 'var(--editor-line-height, 1.55)',
+      },
+      '.cm-line': {
+        paddingLeft: '0.65rem',
+        paddingRight: '0.65rem',
       },
       '.cm-content': {
         caretColor: p.caret,
+        paddingTop: '0.65rem',
+        paddingBottom: '0.65rem',
       },
       '.cm-cursor, .cm-dropCursor': {
         borderLeftColor: p.caret,
+        borderLeftWidth: '2px',
       },
       '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': {
         backgroundColor: `${p.selection} !important`,
@@ -93,7 +110,8 @@ export function buildEditorTheme(isDark: boolean): Extension[] {
       '.cm-gutters': {
         backgroundColor: p.gutterBg,
         color: p.gutterFg,
-        borderRight: '0.5px solid var(--border)',
+        borderRight: '1px solid color-mix(in srgb, var(--border, #2b3340) 86%, transparent)',
+        paddingRight: '0.15rem',
       },
       '.cm-activeLineGutter': {
         backgroundColor: p.activeLine,
@@ -101,6 +119,27 @@ export function buildEditorTheme(isDark: boolean): Extension[] {
       },
       '.cm-activeLine': {
         backgroundColor: p.activeLine,
+      },
+      '.cm-selectionMatch': {
+        backgroundColor: `${p.selection}55`,
+        outline: `1px solid ${p.selection}`,
+      },
+      '.cm-matchingBracket': {
+        backgroundColor: `${p.selection}66`,
+        color: p.fg,
+        outline: `1px solid ${p.selection}`,
+      },
+      '.cm-nonmatchingBracket': {
+        backgroundColor: `${p.invalid}22`,
+        color: p.invalid,
+        outline: `1px solid ${p.invalid}`,
+      },
+      '.cm-foldPlaceholder': {
+        backgroundColor: p.activeLine,
+        border: `1px solid ${p.selection}`,
+        borderRadius: '999px',
+        color: p.gutterFg,
+        padding: '0 0.45rem',
       },
     },
     { dark: isDark },

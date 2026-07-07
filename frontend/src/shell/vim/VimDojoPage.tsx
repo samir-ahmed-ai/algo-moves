@@ -1,15 +1,18 @@
-import { Contrast, Home, Keyboard, Moon, Sun } from 'lucide-react';
+import { Contrast, Home, Keyboard, Moon, Sun, Swords } from 'lucide-react';
 import { FeatureSelectorPopover, ToolbarSegment } from '@/components/shared';
 import { useWorkspace } from '@/store/workspace';
 import { VIM_LEVEL_IDS } from './engine';
 import { VimLevelSidebar } from './ui/VimLevelSidebar';
 import { VimProgressSidebar } from './ui/VimProgressSidebar';
 import { VimMobileProgressStrip, VimMobileTopBar } from './ui/VimMobileChrome';
+import { LevelIntroCard } from './ui/LevelIntroCard';
+import { LevelCompleteCard } from './ui/LevelCompleteCard';
+import { VimTouchPad } from './ui/VimTouchPad';
 
 import { VimGameProvider, useVimGame } from './canvas/VimGameProvider';
 import { VimDojoCanvas } from './canvas/VimDojoCanvas';
 function FloatingChrome() {
-  const { theme, setTheme, palette, setPalette, goHome } = useWorkspace();
+  const { theme, setTheme, palette, setPalette, goHome, enterDojo } = useWorkspace();
   const { completedCount } = useVimGame();
 
   return (
@@ -21,6 +24,14 @@ function FloatingChrome() {
         className="vim-floating-home pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
       >
         <Home className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        title="Dojo Hub"
+        onClick={() => enterDojo()}
+        className="vim-floating-home pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
+      >
+        <Swords className="h-3.5 w-3.5" />
       </button>
       <div className="vim-floating-brand pointer-events-auto flex items-center gap-[var(--gap)] rounded-md border border-edge bg-panel/90 px-[var(--pad)] py-[var(--gap)] shadow-sm backdrop-blur">
         <span className="grid h-6 w-6 place-items-center rounded bg-accent text-white">
@@ -117,7 +128,10 @@ export function VimDojoPage() {
           <div className="relative min-h-0 flex-1">
             <VimDojoCanvas className="absolute inset-0" />
             <FloatingChrome />
+            <LevelIntroCard />
+            <LevelCompleteCard />
           </div>
+          <VimTouchPad />
           <VimMobileProgressStrip />
         </div>
         <VimProgressSidebar />

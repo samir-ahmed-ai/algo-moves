@@ -6,7 +6,11 @@ import type { Tone } from '../../../core/types';
  * slightly different tones inches apart.
  */
 export function moveToneChipClass(tone: Tone | undefined): string {
-  if (tone === 'good') return 'text-good border-good/50 bg-goodbg/30';
-  if (tone === 'bad') return 'text-bad border-bad/50 bg-badbg/30';
-  return 'text-ink3 border-edge/60 bg-panel2/70';
+  if (tone === 'good') {
+    return 'frame-tone-chip frame-tone-chip--good text-good border-good/50 bg-goodbg/30';
+  }
+  if (tone === 'bad') {
+    return 'frame-tone-chip frame-tone-chip--bad text-bad border-bad/50 bg-badbg/30';
+  }
+  return 'frame-tone-chip frame-tone-chip--neutral text-ink3 border-edge/60 bg-panel2/70';
 }

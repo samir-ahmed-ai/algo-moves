@@ -64,7 +64,7 @@ export function Mono({ children, indent = 0 }: { children: ReactNode; indent?: n
   return (
     <pre
       className={cn(
-        'overflow-x-auto whitespace-pre font-mono leading-relaxed text-ink',
+        'assemble-mono overflow-x-auto whitespace-pre font-mono leading-relaxed text-ink',
         nodeText.tight,
       )}
       style={indent ? { paddingLeft: `${indent * 14}px` } : undefined}
@@ -78,7 +78,7 @@ export function SolvedBanner({ label }: { label: string }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-2 rounded-md border border-good/60 bg-goodbg/50 px-2.5 py-1.5 text-good',
+        'assemble-solved-banner flex items-center gap-2 rounded-md border border-good/60 bg-goodbg/50 px-2.5 py-1.5 text-good',
         nodeText.tight,
       )}
     >
@@ -101,7 +101,7 @@ export function StepBtn({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="nodrag grid h-4 w-4 place-items-center rounded text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-30"
+      className="assemble-step-btn nodrag grid h-4 w-4 place-items-center rounded text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-30"
     >
       {dir === 'up' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
     </button>
@@ -160,10 +160,10 @@ export function OrderBoard({
   }, [solved, onSolved]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="assemble-order-board flex flex-col gap-2">
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-1">
+          <div className="assemble-order-list flex flex-col gap-1">
             {order.map((id, pos) => {
               const correct = correctIds[pos] === id;
               return (
@@ -171,13 +171,13 @@ export function OrderBoard({
                   key={id}
                   id={id}
                   className={cn(
-                    'flex items-stretch gap-1.5 rounded-md border transition-colors',
+                    'assemble-order-row flex items-stretch gap-1.5 rounded-md border transition-colors',
                     correct
-                      ? 'border-good/60 bg-goodbg/40'
-                      : 'border-edge bg-panel2/50 hover:border-accent/50',
+                      ? 'assemble-order-row--correct border-good/60 bg-goodbg/40'
+                      : 'assemble-order-row--idle border-edge bg-panel2/50 hover:border-accent/50',
                   )}
                 >
-                  <div className="flex shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-l-md border-r border-edge px-1 py-1">
+                  <div className="assemble-order-grip flex shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-l-md border-r border-edge px-1 py-1">
                     <StepBtn dir="up" disabled={pos === 0} onClick={() => move(id, -1)} />
                     <span className={cn('font-mono tabular-nums text-ink3', nodeText['2xs'])}>
                       {pos + 1}
@@ -188,10 +188,10 @@ export function OrderBoard({
                       onClick={() => move(id, 1)}
                     />
                   </div>
-                  <div className="min-w-0 flex-1 py-1.5 pr-2">
+                  <div className="assemble-order-content min-w-0 flex-1 py-1.5 pr-2">
                     {renderRow(id, { pos, correct })}
                   </div>
-                  <span className="grid w-5 shrink-0 place-items-center text-ink3">
+                  <span className="assemble-order-status grid w-5 shrink-0 place-items-center text-ink3">
                     {correct ? (
                       <Check className="h-3.5 w-3.5 text-good" />
                     ) : (
@@ -230,9 +230,12 @@ function PuzzleBlock({
   const meta = BLOCK_META[blockKind(piece)];
   const Icon = meta.icon;
   return (
-    <div className={cn('blk', meta.shape)} style={{ '--blk-stroke': meta.stroke } as CSSProperties}>
+    <div
+      className={cn('assemble-puzzle-block blk', meta.shape)}
+      style={{ '--blk-stroke': meta.stroke } as CSSProperties}
+    >
       <div className="blk-face">
-        <div className="mb-1 flex items-center gap-1.5">
+        <div className="assemble-puzzle-block__head mb-1 flex items-center gap-1.5">
           <GripVertical className="h-3 w-3 shrink-0" style={{ color: meta.stroke }} />
           <span
             className={cn('font-mono tabular-nums', nodeText['2xs'])}
@@ -312,10 +315,10 @@ export function BlocksMode() {
   const solved = correctCount === correctIds.length && correctIds.length > 0;
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="assemble-mode assemble-mode--blocks flex flex-col gap-2.5">
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
-          <div className="blk-board pt-1.5">
+          <div className="assemble-block-board blk-board pt-1.5">
             {order.map((id, pos) => {
               const correct = correctIds[pos] === id;
               return (
@@ -368,7 +371,7 @@ export function ScrambleMode() {
         return <Mono indent={l.indent}>{l.text}</Mono>;
       }}
       footer={({ solved, correctCount, total, reshuffle }) => (
-        <div className="flex flex-col gap-1.5">
+        <div className="assemble-mode-footer flex flex-col gap-1.5">
           <Meter value={correctCount} max={total} tone={solved ? 'good' : 'accent'} />
           {solved ? (
             <SolvedBanner label="Every line back in order." />
@@ -402,7 +405,10 @@ export function FirstLetterMode() {
     const correct = norm(`${tok} ${vals[i]}`) === norm(l.text);
     if (correct) done++;
     return (
-      <div key={i} className={cn('flex items-center gap-2 font-mono', nodeText.sm)}>
+      <div
+        key={i}
+        className={cn('assemble-first-letter-row flex items-center gap-2 font-mono', nodeText.sm)}
+      >
         <span style={{ paddingLeft: `${l.indent * 14}px` }} className="shrink-0 text-accent">
           {tok}
         </span>
@@ -411,8 +417,10 @@ export function FirstLetterMode() {
           onChange={(e) => setVals((v) => v.map((x, k) => (k === i ? e.target.value : x)))}
           placeholder={rest ? '·'.repeat(Math.min(rest.length, 18)) : '↵'}
           className={cn(
-            'nodrag min-w-0 flex-1 rounded border bg-panel2 px-1.5 py-0.5 outline-none',
-            correct ? 'border-good/60 text-good' : 'border-edge text-ink focus:border-accent',
+            'assemble-first-letter-input nodrag min-w-0 flex-1 rounded border bg-panel2 px-1.5 py-0.5 outline-none',
+            correct
+              ? 'assemble-first-letter-input--correct border-good/60 text-good'
+              : 'assemble-first-letter-input--idle border-edge text-ink focus:border-accent',
           )}
         />
         {correct && <Check className="h-3.5 w-3.5 shrink-0 text-good" />}
@@ -421,7 +429,7 @@ export function FirstLetterMode() {
   });
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="assemble-mode assemble-mode--first-letter flex flex-col gap-1.5">
       {rows}
       <div className="mt-1">
         <Meter value={done} max={lines.length} tone={done === lines.length ? 'good' : 'accent'} />
@@ -498,8 +506,8 @@ export function ClozeMode() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-1">
+    <div className="assemble-mode assemble-mode--cloze flex flex-col gap-2">
+      <div className="assemble-word-bank flex flex-wrap items-center gap-1">
         <Label>Word bank</Label>
         {bank.map((w) => (
           <Chip key={w} tone="muted" mono>
@@ -509,7 +517,7 @@ export function ClozeMode() {
       </div>
       <div
         className={cn(
-          'ws-scroll overflow-x-auto rounded-md border border-edge bg-panel2/40 p-2 font-mono leading-relaxed',
+          'assemble-cloze-code ws-scroll overflow-x-auto rounded-md border border-edge bg-panel2/40 p-2 font-mono leading-relaxed',
           nodeText.tight,
         )}
       >
@@ -528,7 +536,7 @@ export function ClozeMode() {
                   size={Math.max(s.answer.length, 2)}
                   spellCheck={false}
                   className={cn(
-                    'nodrag mx-0.5 rounded border bg-panel px-1 text-center outline-none',
+                    'assemble-cloze-input nodrag mx-0.5 rounded border bg-panel px-1 text-center outline-none',
                     vals[s.id] === s.answer
                       ? 'border-good/60 text-good'
                       : 'border-edge text-ink focus:border-accent',
@@ -572,8 +580,8 @@ export function BlanksMode() {
   const done = filled.filter(Boolean).length;
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row">
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+    <div className="assemble-mode assemble-mode--blanks flex flex-col gap-3 lg:flex-row">
+      <div className="assemble-blanks-skeleton flex min-w-0 flex-1 flex-col gap-1.5">
         <Label>Skeleton</Label>
         {resolved.map((p, i) => {
           const got = filled[i];
@@ -583,13 +591,13 @@ export function BlanksMode() {
               type="button"
               onClick={() => setSel(i)}
               className={cn(
-                'nodrag rounded-md border px-2 py-1.5 text-left transition-colors',
+                'assemble-blank-slot nodrag rounded-md border px-2 py-1.5 text-left transition-colors',
                 got
-                  ? 'border-good/60 bg-goodbg/40'
+                  ? 'assemble-blank-slot--filled border-good/60 bg-goodbg/40'
                   : sel === i
-                    ? 'border-accent bg-accentbg/50'
-                    : 'border-dashed border-edge bg-panel2/40 hover:border-accent/60',
-                wrong === i && 'animate-pulse border-bad bg-badbg/50',
+                    ? 'assemble-blank-slot--selected border-accent bg-accentbg/50'
+                    : 'assemble-blank-slot--empty border-dashed border-edge bg-panel2/40 hover:border-accent/60',
+                wrong === i && 'assemble-blank-slot--wrong animate-pulse border-bad bg-badbg/50',
               )}
             >
               <div className="mb-0.5 flex items-center gap-1.5">
@@ -612,7 +620,7 @@ export function BlanksMode() {
           tone={done === resolved.length ? 'good' : 'accent'}
         />
       </div>
-      <div className="flex w-full shrink-0 flex-col gap-1.5 lg:w-[44%]">
+      <div className="assemble-blanks-tray flex w-full shrink-0 flex-col gap-1.5 lg:w-[44%]">
         <Label>Blocks</Label>
         {tray.length === 0 ? (
           <SolvedBanner label="All blocks placed." />
@@ -622,7 +630,7 @@ export function BlanksMode() {
               key={p.id}
               type="button"
               onClick={() => place(p.id)}
-              className="nodrag rounded-md border border-edge bg-panel2/50 px-2 py-1.5 text-left transition-colors hover:border-accent"
+              className="assemble-tray-code-block nodrag rounded-md border border-edge bg-panel2/50 px-2 py-1.5 text-left transition-colors hover:border-accent"
             >
               <Mono>{p.code}</Mono>
             </button>
@@ -694,8 +702,8 @@ export function ParsonsMode() {
     sol.every((x, i) => x.id === correctIds[i] && x.indent === byId.get(x.id)!.indent);
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row">
-      <div className="flex w-full shrink-0 flex-col gap-1.5 lg:w-[42%]">
+    <div className="assemble-mode assemble-mode--parsons flex flex-col gap-3 lg:flex-row">
+      <div className="assemble-parsons-tray flex w-full shrink-0 flex-col gap-1.5 lg:w-[42%]">
         <Label>Lines</Label>
         {tray.length === 0 ? (
           <span className={cn('text-ink3', nodeText.xs)}>tray empty</span>
@@ -705,7 +713,7 @@ export function ParsonsMode() {
               key={id}
               type="button"
               onClick={() => toSol(id)}
-              className="nodrag flex items-center gap-2 rounded-md border border-edge bg-panel2/50 px-2 py-1.5 text-left transition-colors hover:border-accent"
+              className="assemble-parsons-line nodrag flex items-center gap-2 rounded-md border border-edge bg-panel2/50 px-2 py-1.5 text-left transition-colors hover:border-accent"
             >
               <ArrowRight className="h-3.5 w-3.5 shrink-0 text-ink3" />
               <Mono>{byId.get(id)!.text}</Mono>
@@ -713,12 +721,12 @@ export function ParsonsMode() {
           ))
         )}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="assemble-parsons-solution flex min-w-0 flex-1 flex-col gap-1.5">
         <Label>Your solution</Label>
         {sol.map((x, i) => (
           <div
             key={x.id}
-            className="flex items-center gap-1 rounded-md border border-edge bg-panel2/50 py-1 pr-1"
+            className="assemble-parsons-solution-row flex items-center gap-1 rounded-md border border-edge bg-panel2/50 py-1 pr-1"
           >
             <div className="flex flex-col">
               <StepBtn dir="up" disabled={i === 0} onClick={() => moveSol(i, -1)} />
@@ -767,12 +775,14 @@ export function AssembleGameHost({ id }: { id: string }) {
   const stats = useMemo(() => assembleGameStatsStore(scope), [scope]);
   if (!game) return null;
   return (
-    <game.Component
-      key={`${item.id}:${active}:${id}`}
-      pieces={pieces!}
-      lang={lang}
-      storageKey={scope}
-      stats={stats}
-    />
+    <div className="assemble-game-host flex min-h-0 flex-1 flex-col">
+      <game.Component
+        key={`${item.id}:${active}:${id}`}
+        pieces={pieces!}
+        lang={lang}
+        storageKey={scope}
+        stats={stats}
+      />
+    </div>
   );
 }

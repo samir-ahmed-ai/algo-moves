@@ -20,16 +20,19 @@ export function Pill({
 }) {
   const cls = active ? 'bg-accentbg text-accent' : TONE_CHIP[tone];
   const base = cx(
-    'inline-flex min-w-[1.4rem] items-center justify-center px-1.5 py-0.5 font-mono tabular-nums leading-none',
+    'design-pill inline-flex min-w-[1.4rem] items-center justify-center px-1.5 py-0.5 font-mono tabular-nums leading-none',
     nodeText.xs,
     RADIUS_CTRL,
+    `design-pill--${tone}`,
+    active && 'design-pill--active',
   );
   return onClick ? (
     <button
       type="button"
       onClick={onClick}
       title={title}
-      className={cx('nodrag transition-colors', base, cls, 'hover:opacity-80')}
+      aria-pressed={active}
+      className={cx('design-pill-button nodrag transition-colors', base, cls, 'hover:opacity-80')}
     >
       {children}
     </button>

@@ -5,28 +5,50 @@ import { useCanvasCollab } from '../CanvasCollabProvider';
 import {
   SUBDOC_TAG,
   emptyEditorPayload,
+  emptyNotesPayload,
   emptyWhiteboardPayload,
   type EditorPayload,
+  type NotesPayload,
   type SubDocKind,
+  type SubDocPayload,
   type WhiteboardPayload,
 } from '../protocol/subdocProtocol';
 import { diffWhiteboardElements, snapshotFromPayload } from '../protocol/subdocMerge';
 import { canEditSubDoc } from '../protocol/subdocPermissions';
 import { useYjsCollab } from '../yjs/YjsCollabContext';
 import { useYjsForSubdocs } from '../yjs/yjsConfig';
+import type * as Y from 'yjs';
 import {
   observeSubdocPanel,
   writeEditorSubdoc,
+  writeNotesSubdoc,
   writeWhiteboardSubdoc,
 } from '../yjs/yjsSubdocBinding';
 
-function defaultPayload(kind: SubDocKind): WhiteboardPayload | EditorPayload {
-  return kind === 'whiteboard' ? emptyWhiteboardPayload() : emptyEditorPayload();
+function defaultPayload(kind: SubDocKind): SubDocPayload {
+  if (kind === 'whiteboard') return emptyWhiteboardPayload();
+  if (kind === 'notes') return emptyNotesPayload();
+  return emptyEditorPayload();
 }
 
+function writeYjsSubdoc(
+  doc: Y.Doc,
+  nodeId: string,
+  kind: SubDocKind,
+  payload: SubDocPayload,
+  rev: number,
+): void {
+  if (kind === 'whiteboard') writeWhiteboardSubdoc(doc, nodeId, payload as WhiteboardPayload, rev);
+  else if (kind === 'notes') writeNotesSubdoc(doc, nodeId, payload as NotesPayload, rev);
+  else writeEditorSubdoc(doc, nodeId, payload as EditorPayload, rev);
+}
+
+/** Hover-cursor stream cadence (~11/s) — well inside the relay's 20 msg/s budget. */
+const CURSOR_EMIT_MS = 90;
+
 export interface SubDocSyncResult {
-  payload: WhiteboardPayload | EditorPayload;
-  setPayload: (next: WhiteboardPayload | EditorPayload) => void;
+  payload: SubDocPayload;
+  setPayload: (next: SubDocPayload) => void;
   readOnly: boolean;
   isLive: boolean;
   locked: boolean;
@@ -58,14 +80,12 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
   const nodeData = getNode(nodeId)?.data as
     { subDoc?: { kind: string; rev: number; payload: unknown } } | undefined;
   const persisted =
-    nodeData?.subDoc?.kind === kind
-      ? (nodeData.subDoc.payload as WhiteboardPayload | EditorPayload)
-      : undefined;
+    nodeData?.subDoc?.kind === kind ? (nodeData.subDoc.payload as SubDocPayload) : undefined;
 
   const remote = subDocs[nodeId];
   const remotePayload = remote?.kind === kind ? remote.payload : undefined;
 
-  const [local, setLocal] = useState<WhiteboardPayload | EditorPayload>(
+  const [local, setLocal] = useState<SubDocPayload>(
     () => remotePayload ?? persisted ?? defaultPayload(kind),
   );
   const [locked, setLockedState] = useState(
@@ -115,17 +135,19 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
   }, [persisted, isCollaborating]);
 
   const persistToNode = useCallback(
-    (payload: WhiteboardPayload | EditorPayload, rev: number) => {
+    (payload: SubDocPayload, rev: number) => {
       const snap = snapshotFromPayload(nodeId, kind, rev, payload);
       setNodes((nds) =>
-        nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, subDoc: snap } } : n)),
+        nds.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, subDoc: snap as typeof n.data.subDoc } } : n,
+        ),
       );
     },
     [nodeId, kind, setNodes],
   );
 
   const publishLocal = useCallback(
-    (next: WhiteboardPayload | EditorPayload) => {
+    (next: SubDocPayload) => {
       revRef.current += 1;
       const snap = snapshotFromPayload(nodeId, kind, revRef.current, next);
       persistToNode(next, revRef.current);
@@ -137,7 +159,7 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
   );
 
   const setPayload = useCallback(
-    (next: WhiteboardPayload | EditorPayload) => {
+    (next: SubDocPayload) => {
       if (!canEdit || locked || applyingRemote.current) return;
       setLocal(next);
 
@@ -149,11 +171,7 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
       if (isHost) {
         publishLocal(next);
         if (yjsSubdoc && yjsDoc) {
-          if (kind === 'whiteboard') {
-            writeWhiteboardSubdoc(yjsDoc, nodeId, next as WhiteboardPayload, revRef.current);
-          } else {
-            writeEditorSubdoc(yjsDoc, nodeId, next as EditorPayload, revRef.current);
-          }
+          writeYjsSubdoc(yjsDoc, nodeId, kind, next, revRef.current);
         }
         return;
       }
@@ -162,11 +180,7 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
       persistToNode(next, revRef.current);
 
       if (yjsSubdoc && yjsDoc) {
-        if (kind === 'whiteboard') {
-          writeWhiteboardSubdoc(yjsDoc, nodeId, next as WhiteboardPayload, revRef.current);
-        } else {
-          writeEditorSubdoc(yjsDoc, nodeId, next as EditorPayload, revRef.current);
-        }
+        writeYjsSubdoc(yjsDoc, nodeId, kind, next, revRef.current);
         return;
       }
 
@@ -185,6 +199,13 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
             rev: revRef.current,
           });
         }
+      } else if (kind === 'notes') {
+        emitSubDoc({
+          [SUBDOC_TAG]: 'patch-notes',
+          nodeId,
+          text: (next as NotesPayload).text,
+          rev: revRef.current,
+        });
       } else {
         const ed = next as EditorPayload;
         emitSubDoc({
@@ -227,9 +248,14 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
     [isHost, kind, local, publishLocal, yjsSubdoc, yjsDoc, nodeId],
   );
 
+  // Presence streams on hover as well as while drawing, throttled per panel.
+  const lastCursorEmit = useRef(0);
   const onPointerUpdate = useCallback(
     (payload: { pointer: { x: number; y: number }; button: 'up' | 'down' }) => {
-      if (!isCollaborating || payload.button === 'up') return;
+      if (!isCollaborating) return;
+      const now = Date.now();
+      if (now - lastCursorEmit.current < CURSOR_EMIT_MS) return;
+      lastCursorEmit.current = now;
       emitSubDoc({
         [SUBDOC_TAG]: 'cursor',
         nodeId,

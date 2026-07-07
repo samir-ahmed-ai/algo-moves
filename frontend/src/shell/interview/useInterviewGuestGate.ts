@@ -20,7 +20,7 @@ export interface InterviewGuestGate {
  * for non-interview links and once the local peer has joined.
  */
 export function useInterviewGuestGate(): InterviewGuestGate {
-  const { joinSession, isCollaborating } = useCanvasCollab();
+  const { joinSession, isCollaborating, status } = useCanvasCollab();
   const share = readShareFromUrl();
   const linkRoom = share?.room ?? null;
   const guestToken = share?.guestToken ?? null;
@@ -35,13 +35,17 @@ export function useInterviewGuestGate(): InterviewGuestGate {
   const [title, setTitle] = useState('Interview');
   const resolved = useRef(false);
 
-  // Host reload path: silently rejoin the room (relay re-seats seat-0 as host).
-  const rejoined = useRef(false);
+  // Host reload path: silently rejoin the room (the persisted per-room pid
+  // reclaims seat 0 from the relay). Status-gated rather than ref-latched:
+  // only an idle/closed socket may rejoin, so a connect already in flight
+  // (the host just started this session) is never raced by a second join,
+  // and StrictMode's mount→cleanup→mount cycle (which closes the first
+  // socket) retries instead of latching into a dead state.
   useEffect(() => {
-    if (!hostReturning || rejoined.current || isCollaborating || !linkRoom) return;
-    rejoined.current = true;
+    if (!hostReturning || isCollaborating || !linkRoom) return;
+    if (status !== 'idle' && status !== 'closed') return;
     joinSession(linkRoom);
-  }, [hostReturning, isCollaborating, linkRoom, joinSession]);
+  }, [hostReturning, isCollaborating, status, linkRoom, joinSession]);
 
   useEffect(() => {
     if (!isInterviewLink || hostReturning || resolved.current) return;

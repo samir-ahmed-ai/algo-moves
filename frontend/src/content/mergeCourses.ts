@@ -8,6 +8,8 @@ const MERGE_MAP: Record<string, string> = {
   'dynamic-programming': 'dynamic-programming',
 };
 
+const REFERENCE_TOPIC_TITLE = 'Reference problems';
+
 export const COURSE_ORDER = [
   'backtracking',
   'graphs',
@@ -20,6 +22,22 @@ export const COURSE_ORDER = [
   'greedy',
 ] as const;
 
+function normalizeId(id: string): string {
+  return id.trim();
+}
+
+function uniqueItems(items: ItemDef[]): ItemDef[] {
+  const seen = new Set<string>();
+  const out: ItemDef[] = [];
+  for (const item of items) {
+    const id = normalizeId(item.id);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push({ ...item, id });
+  }
+  return out;
+}
+
 /** Merge imported library topics into matching curated courses and enforce sidebar order. */
 export function mergeCourses(curated: CourseDef[], imported: CourseDef[]): CourseDef[] {
   const byId = new Map<string, CourseDef>(
@@ -27,7 +45,7 @@ export function mergeCourses(curated: CourseDef[], imported: CourseDef[]): Cours
   );
 
   for (const lib of imported) {
-    const category = lib.id.replace(/^lib-/, '');
+    const category = normalizeId(lib.id).replace(/^lib-/, '');
     const targetId = MERGE_MAP[category];
     if (!targetId) continue;
 
@@ -35,16 +53,23 @@ export function mergeCourses(curated: CourseDef[], imported: CourseDef[]): Cours
     if (!target) continue;
 
     // Merge imported items into one flat reference topic instead of difficulty buckets.
-    const importedItems: ItemDef[] = lib.topics.flatMap((t) => t.items);
+    const importedItems: ItemDef[] = uniqueItems(lib.topics.flatMap((t) => t.items));
     if (importedItems.length === 0) continue;
 
-    const refTopic: TopicDef = {
-      id: `${targetId}-reference`,
-      title: 'Reference problems',
-      summary: `${importedItems.length} imported reference solutions`,
-      items: importedItems,
-    };
-    target.topics.push(refTopic);
+    const refTopicId = `${targetId}-reference`;
+    const existing = target.topics.find((t) => t.id === refTopicId);
+    if (existing) {
+      existing.items = uniqueItems([...existing.items, ...importedItems]);
+      existing.summary = `${existing.items.length} imported reference solutions`;
+    } else {
+      const refTopic: TopicDef = {
+        id: refTopicId,
+        title: REFERENCE_TOPIC_TITLE,
+        summary: `${importedItems.length} imported reference solutions`,
+        items: importedItems,
+      };
+      target.topics.push(refTopic);
+    }
   }
 
   // COURSE_ORDER controls sort priority, not membership: list the known ids in

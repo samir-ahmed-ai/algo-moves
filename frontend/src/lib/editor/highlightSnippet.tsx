@@ -15,7 +15,7 @@ export function highlightSnippet(
   lang = 'go',
   opts?: { gutter?: boolean },
 ): ReactNode {
-  return highlightSnippetPlain(code, lang, opts);
+  return highlightSnippetPlain(code, lang.trim() || 'go', opts);
 }
 
 /** Async variant used by HighlightedCode once the lazy Shiki bundle is available. */

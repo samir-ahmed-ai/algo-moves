@@ -268,7 +268,7 @@ export function GistScene({
       <svg
         ref={ref}
         viewBox="0 0 320 200"
-        className={cn('mobile-gist-scene', className)}
+        className={cn('mobile-gist-scene mobile-gist-scene--bespoke', className)}
         style={style}
         fill="none"
         role="img"
@@ -284,7 +284,7 @@ export function GistScene({
     <svg
       ref={ref}
       viewBox="0 0 320 200"
-      className={cn('mobile-gist-scene', className)}
+      className={cn('mobile-gist-scene mobile-gist-scene--fallback', className)}
       style={style}
       fill="none"
       role="img"

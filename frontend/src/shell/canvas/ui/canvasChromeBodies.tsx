@@ -33,7 +33,7 @@ function Segmented<T extends string>({
   return (
     <div
       className={cn(
-        'grid gap-0.5 rounded-md bg-panel2 p-0.5',
+        'canvas-segmented grid gap-0.5 rounded-md bg-panel2 p-0.5',
         cols === 4 ? 'grid-cols-4' : 'grid-cols-2',
       )}
     >
@@ -45,8 +45,10 @@ function Segmented<T extends string>({
           className={cn(
             RADIUS_CTRL,
             chromeText.sm,
-            'px-1 py-0.5 font-medium transition-colors',
-            value === o.v ? 'bg-panel text-ink shadow-sm' : 'text-ink2 hover:text-ink',
+            'canvas-segmented__button px-1 py-0.5 font-medium transition-colors',
+            value === o.v
+              ? 'canvas-segmented__button--active bg-panel text-ink shadow-sm'
+              : 'text-ink2 hover:text-ink',
           )}
         >
           {o.label}
@@ -84,24 +86,24 @@ function ThemePicker({
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="theme-picker relative">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-1.5 rounded-md border border-edge bg-panel2 px-1.5 py-1 text-left transition-colors hover:border-accent"
+        className="theme-picker__trigger flex w-full items-center gap-1.5 rounded-md border border-edge bg-panel2 px-1.5 py-1 text-left transition-colors hover:border-accent"
       >
         <span
-          className="h-4 w-4 shrink-0 rounded-full border border-edge"
+          className="theme-picker__swatch h-4 w-4 shrink-0 rounded-full border border-edge"
           style={{ backgroundColor: current?.swatch }}
         />
         <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>
           {current?.label ?? value}
         </span>
-        <Palette className="h-3 w-3 shrink-0 text-ink3" />
+        <Palette className="theme-picker__icon h-3 w-3 shrink-0 text-ink3" />
       </button>
       {open && (
-        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-[280px] overflow-y-auto rounded-lg border border-edge bg-panel p-2 shadow-[var(--shadow-xl)]">
-          <div className="grid grid-cols-2 gap-1.5">
+        <div className="theme-picker__panel absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-[280px] overflow-y-auto rounded-lg border border-edge bg-panel p-2 shadow-[var(--shadow-xl)]">
+          <div className="theme-picker__grid grid grid-cols-2 gap-1.5">
             {THEME_META.map((t) => {
               const selected = t.id === value;
               return (
@@ -113,12 +115,14 @@ function ThemePicker({
                     setOpen(false);
                   }}
                   className={cn(
-                    `flex items-center gap-2 border px-2 py-1.5 text-left transition-all hover:scale-[1.02] ${RADIUS_CTRL}`,
-                    selected ? 'border-accent bg-accentbg' : 'border-edge hover:border-accent/50',
+                    `theme-picker__option flex items-center gap-2 border px-2 py-1.5 text-left transition-all hover:scale-[1.02] ${RADIUS_CTRL}`,
+                    selected
+                      ? 'theme-picker__option--active border-accent bg-accentbg'
+                      : 'border-edge hover:border-accent/50',
                   )}
                 >
                   <span
-                    className="h-6 w-6 shrink-0 rounded-full border border-edge"
+                    className="theme-picker__option-swatch h-6 w-6 shrink-0 rounded-full border border-edge"
                     style={{ backgroundColor: t.swatch }}
                   />
                   <span
@@ -144,8 +148,9 @@ export function CanvasPropsBody({ hud, compact }: { hud: CanvasHudProps; compact
   return (
     <div
       className={cn(
+        'canvas-props-body',
         compact
-          ? 'grid grid-cols-2 gap-x-2 gap-y-1 content-start px-[var(--hpad)]'
+          ? 'canvas-props-body--compact grid grid-cols-2 gap-x-2 gap-y-1 content-start px-[var(--hpad)]'
           : 'flex flex-col gap-1.5 px-[var(--hpad)]',
       )}
     >
@@ -232,7 +237,7 @@ export function CanvasActionsBody() {
   const { canvasProject, focusCanvas, toggleFocusCanvas, requestFitCanvas } = useWorkspace();
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-[var(--hpad)]">
+    <div className="canvas-actions-body flex flex-wrap items-center gap-0.5 px-[var(--hpad)]">
       {canvasProject && (
         <WorkflowPresetPopover
           onApply={(preset) => canvasProject.applyWorkflowPreset(preset)}
@@ -252,7 +257,7 @@ export function CanvasActionsBody() {
 export function PanelsBody() {
   const { tweaks, toggleTweak } = useWorkspace();
   return (
-    <div className="-mx-1 px-[var(--hpad)]">
+    <div className="panels-body -mx-1 px-[var(--hpad)]">
       {tweakMeta
         .filter((t) => CANVAS_TWEAKS.has(t.key))
         .map((t) => (

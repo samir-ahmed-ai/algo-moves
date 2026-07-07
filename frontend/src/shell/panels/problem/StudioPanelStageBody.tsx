@@ -51,7 +51,7 @@ export function StudioPanelStageBody({
       }
       second={
         <StudioContentPanel>
-          <div className="ws-scroll min-h-0 flex-1 overflow-auto p-3 sm:p-4">
+          <div className="studio-panel-stage-body ws-scroll min-h-0 flex-1 overflow-auto p-3 sm:p-4">
             <PanelBody kind={kind} />
           </div>
         </StudioContentPanel>

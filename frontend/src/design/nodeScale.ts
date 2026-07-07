@@ -6,6 +6,9 @@
  */
 export const NODE_W = 400;
 
+/** Minimum readable width for compact canvas nodes and legacy embed surfaces. */
+export const NODE_MIN_W = 320;
+
 /** Max resize width for the problem panel. */
 export const NODE_MAX_W = 600;
 
@@ -13,7 +16,12 @@ export const NODE_MAX_W = 600;
 export const STRUDEL_NODE_W = NODE_W;
 
 /** Legacy canvas node width (Tailwind `w-80`). */
-export const LEGACY_STRUDEL_NODE_W = 320;
+export const LEGACY_STRUDEL_NODE_W = NODE_MIN_W;
 
 /** Uniform UI scale for Strudel-sized narrow panels — typography, padding, estimates. */
 export const NODE_UI_SCALE = STRUDEL_NODE_W / LEGACY_STRUDEL_NODE_W;
+
+export function clampNodeWidth(width: number): number {
+  if (!Number.isFinite(width)) return NODE_W;
+  return Math.min(Math.max(Math.round(width), NODE_MIN_W), NODE_MAX_W);
+}

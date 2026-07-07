@@ -20,18 +20,23 @@ export function effectChainOrder(
   isEffect: (id: string) => boolean,
 ): string[] {
   const inComponent = (id: string) => nodeIds.has(id);
-  const subgraphEdges = edges.filter((e) => inComponent(e.source) && inComponent(e.target));
+  const subgraphEdges = edges.filter(
+    (e) => inComponent(e.source.trim()) && inComponent(e.target.trim()),
+  );
   const inCount = new Map<string, number>();
   for (const id of nodeIds) inCount.set(id, 0);
   for (const e of subgraphEdges) {
-    inCount.set(e.target, (inCount.get(e.target) ?? 0) + 1);
+    const target = e.target.trim();
+    inCount.set(target, (inCount.get(target) ?? 0) + 1);
   }
   const heads = [...nodeIds].filter((id) => (inCount.get(id) ?? 0) === 0);
   const ordered: string[] = [];
   const visited = new Set<string>();
   const next = new Map<string, string>();
   for (const e of subgraphEdges) {
-    if (!next.has(e.source)) next.set(e.source, e.target);
+    const source = e.source.trim();
+    const target = e.target.trim();
+    if (source && target && !next.has(source)) next.set(source, target);
   }
   for (const head of heads) {
     let cur: string | undefined = head;
@@ -53,7 +58,8 @@ export function isEffectFlowNode(node: WorkflowNode): node is Node<EffectNodeDat
 
 export function getEffectIdFromNode(node: WorkflowNode): string | null {
   if (!isEffectFlowNode(node)) return null;
-  return node.data?.effectId ?? null;
+  const effectId = node.data?.effectId?.trim();
+  return effectId || null;
 }
 
 /** Apply wired effect chain to base frames. Skips paused/stopped chains. */
@@ -90,7 +96,7 @@ export function transformFramesForGraph(
     for (const nodeId of order) {
       const node = nodeMap.get(nodeId);
       if (!node || !isEffectFlowNode(node)) continue;
-      const effectId = node.data.effectId;
+      const effectId = node.data.effectId.trim();
       if (!effectId) continue;
       lane = applyEffect(effectId, lane, node.data.effectData ?? {});
     }
@@ -150,10 +156,15 @@ export function traceOutputForPanel(
   frames: Frame[],
   frameIndex: number,
 ): string {
-  const f = frames[frameIndex];
-  if (!f) return `${panelKind}: (no frame)`;
+  const index =
+    frames.length > 0 && Number.isFinite(frameIndex)
+      ? Math.max(0, Math.min(Math.round(frameIndex), frames.length - 1))
+      : 0;
+  const f = frames[index];
+  const kind = panelKind.trim() || 'panel';
+  if (!f) return `${kind}: (no frame)`;
   return [
-    `${panelKind} @ step ${frameIndex + 1}/${frames.length}`,
+    `${kind} @ step ${index + 1}/${frames.length}`,
     `type: ${f.move.type}`,
     f.move.note ? `note: ${f.move.note}` : null,
     `caption: ${f.move.caption}`,

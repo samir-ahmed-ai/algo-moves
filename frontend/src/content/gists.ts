@@ -178,6 +178,11 @@ const SHAPE_GIST: Record<ShapeKey, string> = {
 
 const MAX_GIST = 120;
 
+function normalizedId(id: string | undefined): string | undefined {
+  const trimmed = id?.trim();
+  return trimmed || undefined;
+}
+
 function firstSentence(text: string): string {
   const trimmed = text.trim();
   if (!trimmed) return '';
@@ -191,9 +196,16 @@ function looksLikeAsk(sentence: string): boolean {
   return words.length >= 5 && sentence.length <= MAX_GIST;
 }
 
+export function curatedGistFor(item: Item): string | undefined {
+  const itemId = normalizedId(item.id);
+  const pluginId = normalizedId(item.pluginId);
+  return (
+    (itemId ? PROBLEM_GISTS[itemId] : undefined) ?? (pluginId ? PROBLEM_GISTS[pluginId] : undefined)
+  );
+}
+
 export function gistFor(item: Item): string {
-  const curated =
-    PROBLEM_GISTS[item.id] ?? (item.pluginId ? PROBLEM_GISTS[item.pluginId] : undefined);
+  const curated = curatedGistFor(item);
   if (curated) return curated;
 
   const sentence = firstSentence(item.summary ?? '');

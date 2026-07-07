@@ -17,7 +17,8 @@ export function initialBrowseFromHash(
   sharedItem?: string | null,
   pathname?: string,
 ): BrowseNavigationState {
-  if (sharedItem && catalog.getItem(sharedItem)) {
+  const itemId = sharedItem?.trim();
+  if (itemId && catalog.getItem(itemId)) {
     return { trackId: null, categoryId: null, topicId: null };
   }
   if (!isMobileHash(hash, pathname)) {

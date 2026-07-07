@@ -56,7 +56,7 @@ export function RecallEditorFooter({
   return (
     <div
       className={cn(
-        'nodrag flex shrink-0 flex-wrap items-center gap-1.5 border-t border-edge bg-panel2/60 px-2',
+        'recall-editor-footer nodrag flex shrink-0 flex-wrap items-center gap-1.5 border-t border-edge bg-panel2/60 px-2',
         compact ? 'min-h-7 py-0.5' : 'min-h-8 py-1',
       )}
     >

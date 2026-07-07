@@ -12,17 +12,17 @@ const PRESETS = [
 export function MaskEffectControls({ data, onChange }: EffectControlsProps) {
   const probability = (data.probability as number) ?? 0.5;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="effect-controls effect-controls--mask flex flex-col gap-2">
       <Field label="Keep probability">
-        <span className={nodeText.sm}>{Math.round(probability * 100)}%</span>
+        <span className={`effect-value-pill ${nodeText.sm}`}>{Math.round(probability * 100)}%</span>
       </Field>
-      <div className="flex flex-wrap gap-1">
+      <div className="effect-preset-row flex flex-wrap gap-1">
         {PRESETS.map((p) => (
           <button
             key={p.label}
             type="button"
             onClick={() => onChange({ probability: p.value })}
-            className="nodrag rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2"
+            className="effect-preset nodrag rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2"
           >
             {p.label}
           </button>

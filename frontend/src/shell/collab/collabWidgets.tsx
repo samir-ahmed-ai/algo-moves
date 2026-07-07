@@ -147,13 +147,14 @@ export function SessionBody() {
 
   if (!isCollaborating) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="collab-session collab-session--setup flex flex-col gap-2">
         <button
           type="button"
           onClick={start}
           disabled={busy}
           className={cn(
             'inline-flex items-center justify-center gap-1.5 bg-accent px-2.5 py-1.5 font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40',
+            'collab-session__primary',
             RADIUS_CTRL,
             chromeText.sm,
           )}
@@ -168,6 +169,7 @@ export function SessionBody() {
           title={canInterview ? undefined : 'Open a problem first'}
           className={cn(
             'inline-flex items-center justify-center gap-1.5 border border-edge bg-panel2 px-2.5 py-1.5 font-medium text-ink2 transition-colors hover:border-accent hover:text-accent disabled:opacity-40',
+            'collab-session__secondary',
             RADIUS_CTRL,
             chromeText.sm,
           )}
@@ -181,6 +183,7 @@ export function SessionBody() {
           disabled={boardBusy}
           className={cn(
             'inline-flex items-center justify-center gap-1.5 border border-accent/40 bg-accent/10 px-2.5 py-1.5 font-medium text-accent transition-colors hover:bg-accent/15 disabled:opacity-40',
+            'collab-session__board',
             RADIUS_CTRL,
             chromeText.sm,
           )}
@@ -188,11 +191,11 @@ export function SessionBody() {
           <LayoutTemplate className="h-3 w-3" />
           Start interview board
         </button>
-        <p className={cn('text-ink3', chromeText.xs)}>
+        <p className={cn('collab-session__hint text-ink3', chromeText.xs)}>
           Spawns whiteboard + collab code studio
           {canInterview ? ` for “${activeItem?.title ?? activeItemId}”.` : '.'}
         </p>
-        <div className="flex items-center gap-1.5">
+        <div className="collab-session__join flex items-center gap-1.5">
           <input
             value={code}
             onChange={(e) => setCode(e.target.value.slice(0, 12))}
@@ -202,6 +205,7 @@ export function SessionBody() {
             placeholder="Join code"
             className={cn(
               'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent',
+              'collab-session__input',
               RADIUS_CTRL,
               chromeText.sm,
             )}
@@ -212,6 +216,7 @@ export function SessionBody() {
             disabled={!code.trim()}
             className={cn(
               'shrink-0 bg-panel2 px-2.5 py-1.5 font-medium text-ink2 transition-colors hover:text-ink disabled:opacity-40',
+              'collab-session__join-button',
               RADIUS_CTRL,
               chromeText.sm,
             )}
@@ -226,11 +231,14 @@ export function SessionBody() {
   const live = 1 + players.length + peers.length;
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-1.5">
+    <div className="collab-session collab-session--live flex flex-col gap-2">
+      <div className="collab-session__room flex items-center gap-1.5">
         <span
           dir="ltr"
-          className={cn('flex-1 font-mono font-bold tracking-[0.2em] text-accent', chromeText.base)}
+          className={cn(
+            'collab-session__code flex-1 font-mono font-bold tracking-[0.2em] text-accent',
+            chromeText.base,
+          )}
         >
           {room}
         </span>
@@ -241,6 +249,7 @@ export function SessionBody() {
           aria-label="Copy code"
           className={cn(
             'grid h-6 w-6 place-items-center text-ink3 transition-colors hover:text-ink',
+            'collab-session__icon-button',
             RADIUS_CTRL,
           )}
         >
@@ -251,6 +260,7 @@ export function SessionBody() {
           onClick={leaveSession}
           className={cn(
             'inline-flex items-center gap-1 px-2 py-1 font-medium text-bad transition-colors hover:bg-badbg',
+            'collab-session__leave',
             RADIUS_CTRL,
             chromeText.xs,
           )}
@@ -264,6 +274,7 @@ export function SessionBody() {
           title="Copy invite link"
           className={cn(
             'inline-flex items-center gap-1 px-2 py-1 font-medium text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+            'collab-session__invite',
             RADIUS_CTRL,
             chromeText.xs,
           )}
@@ -276,6 +287,7 @@ export function SessionBody() {
           onClick={() => setShowQr((v) => !v)}
           className={cn(
             'inline-flex items-center gap-1 px-2 py-1 font-medium text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+            'collab-session__qr-toggle',
             RADIUS_CTRL,
             chromeText.xs,
           )}
@@ -288,6 +300,7 @@ export function SessionBody() {
         <div
           className={cn(
             'flex flex-col items-center gap-2 border border-edge bg-panel2 p-3',
+            'collab-session__qr',
             RADIUS_SHELL,
           )}
         >
@@ -304,7 +317,7 @@ export function SessionBody() {
         </div>
       ) : null}
 
-      <div className="flex items-center gap-1.5 text-ink3">
+      <div className="collab-session__live flex items-center gap-1.5 text-ink3">
         <Eye className="h-3 w-3" />
         <span className={chromeText.xs}>{live} live</span>
       </div>
@@ -315,7 +328,7 @@ export function SessionBody() {
         </Chip>
       ) : null}
 
-      <ul className="flex flex-col gap-0.5">
+      <ul className="collab-session__roster flex flex-col gap-0.5">
         {self ? <RosterRow name={self.name} role={self.role} isSelf /> : null}
         {players.map((p) => (
           <RosterRow key={p.id} name={p.name} role={p.role} />
@@ -350,16 +363,16 @@ function RosterRow({
   onFollow?: () => void;
 }) {
   return (
-    <li className={cn('flex items-center gap-1.5 px-1 py-1', chromeText.sm)}>
+    <li className={cn('collab-roster-row flex items-center gap-1.5 px-1 py-1', chromeText.sm)}>
       <span
-        className="h-2 w-2 shrink-0 rounded-full"
+        className="collab-roster-row__dot h-2 w-2 shrink-0 rounded-full"
         style={{ background: color ?? 'var(--accent)' }}
         aria-hidden
       />
       {role === 'host' ? (
         <Crown className="h-3 w-3 shrink-0 text-amber-500" aria-label="Host" />
       ) : null}
-      <span className="min-w-0 flex-1 truncate text-ink">{name}</span>
+      <span className="collab-roster-row__name min-w-0 flex-1 truncate text-ink">{name}</span>
       {isSelf ? <span className={cn('shrink-0 text-ink3', chromeText.xs)}>(you)</span> : null}
       {onFollow ? (
         <button
@@ -367,6 +380,7 @@ function RosterRow({
           onClick={onFollow}
           className={cn(
             'shrink-0 px-1.5 py-0.5 font-medium transition-colors',
+            'collab-roster-row__follow',
             RADIUS_CTRL,
             chromeText.xs,
             following ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
@@ -391,7 +405,7 @@ function SettingsToggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-2 py-0.5">
+    <label className="collab-settings-toggle flex cursor-pointer items-center justify-between gap-2 py-0.5">
       <span className={cn('text-ink2', chromeText.sm)}>{label}</span>
       <button
         type="button"
@@ -400,12 +414,14 @@ function SettingsToggle({
         onClick={() => onChange(!checked)}
         className={cn(
           'relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors',
+          'collab-settings-toggle__switch',
           checked ? 'bg-accent' : 'bg-edge',
         )}
       >
         <span
           className={cn(
             'inline-block h-3 w-3 rounded-full bg-white transition-transform',
+            'collab-settings-toggle__thumb',
             checked ? 'translate-x-3.5' : 'translate-x-0.5',
           )}
         />
@@ -420,7 +436,7 @@ function InterviewSettingsBody() {
   const s = session.interview;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="collab-interview-settings flex flex-col gap-1">
       <SettingsToggle
         label="Guest can draw on whiteboard"
         checked={s.guestCanEditBoard !== false}
@@ -436,7 +452,7 @@ function InterviewSettingsBody() {
         checked={s.guestCanMoveNodes === true}
         onChange={(v) => updateInterviewSettings({ guestCanMoveNodes: v })}
       />
-      <span className="my-0.5 h-px bg-edge" />
+      <span className="collab-interview-settings__divider my-0.5 h-px bg-edge" />
       <SettingsToggle
         label="Hide hints from candidate"
         checked={s.hideHints}
@@ -471,14 +487,14 @@ function ChatBody() {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="collab-chat-body flex flex-col gap-2">
       <ReactionBar onPick={sendReaction} />
 
       <ChatMessageLog
         messages={messages}
         selfId={self?.id}
         logRef={logRef}
-        className="max-h-48 min-h-[3rem] overflow-y-auto"
+        className="collab-chat-body__log max-h-48 min-h-[3rem] overflow-y-auto"
         textClassName={chromeText.sm}
         nameClassName={chromeText.sm}
       />
@@ -502,16 +518,21 @@ function CommentsBody() {
   const { setCenter } = useReactFlow();
 
   if (comments.length === 0) {
-    return <p className={cn('py-2 text-center text-ink3', chromeText.xs)}>No comments yet.</p>;
+    return (
+      <p className={cn('collab-empty py-2 text-center text-ink3', chromeText.xs)}>
+        No comments yet.
+      </p>
+    );
   }
 
   return (
-    <ul className="flex flex-col gap-1">
+    <ul className="collab-comments flex flex-col gap-1">
       {comments.map((c) => (
         <li
           key={c.id}
           className={cn(
             'flex flex-col gap-1 border border-edge bg-panel2/50 p-2',
+            'collab-comment-card',
             RADIUS_SHELL,
             c.resolved && 'opacity-60',
           )}
@@ -519,12 +540,12 @@ function CommentsBody() {
           <button
             type="button"
             onClick={() => setCenter(c.x, c.y, { zoom: 1, duration: 400 })}
-            className="flex flex-col gap-0.5 text-left"
+            className="collab-comment-card__summary flex flex-col gap-0.5 text-left"
           >
             <span className={cn('font-semibold text-ink2', chromeText.xs)}>{c.authorName}</span>
             <span className={cn('break-words text-ink', chromeText.sm)}>{c.text}</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="collab-comment-card__actions flex items-center gap-2">
             {c.replies.length > 0 ? (
               <span className={cn('inline-flex items-center gap-1 text-ink3', chromeText.xs)}>
                 <MessageCircle className="h-3 w-3" />
@@ -536,6 +557,7 @@ function CommentsBody() {
               onClick={() => resolveComment(c.id, !c.resolved)}
               className={cn(
                 'ms-auto inline-flex items-center gap-1 px-1.5 py-0.5 font-medium transition-colors',
+                'collab-comment-card__resolve',
                 RADIUS_CTRL,
                 chromeText.xs,
                 c.resolved
@@ -553,6 +575,7 @@ function CommentsBody() {
               aria-label="Delete comment"
               className={cn(
                 'grid h-6 w-6 place-items-center text-ink3 transition-colors hover:bg-badbg hover:text-bad',
+                'collab-comment-card__delete',
                 RADIUS_CTRL,
               )}
             >
@@ -571,15 +594,22 @@ function QuizLogBody() {
   const { hostQuizLog } = useCanvasCollab();
 
   if (hostQuizLog.length === 0) {
-    return <p className={cn('py-2 text-center text-ink3', chromeText.xs)}>No answers yet.</p>;
+    return (
+      <p className={cn('collab-empty py-2 text-center text-ink3', chromeText.xs)}>
+        No answers yet.
+      </p>
+    );
   }
 
   return (
-    <ul className="flex max-h-48 flex-col gap-1 overflow-y-auto">
+    <ul className="collab-quiz-log flex max-h-48 flex-col gap-1 overflow-y-auto">
       {[...hostQuizLog].reverse().map((entry, i) => (
         <li
           key={`${entry.at}-${entry.peerId}-${entry.questionId}-${i}`}
-          className={cn('border border-edge bg-panel2/50 px-2 py-1.5', RADIUS_SHELL)}
+          className={cn(
+            'collab-quiz-log__entry border border-edge bg-panel2/50 px-2 py-1.5',
+            RADIUS_SHELL,
+          )}
         >
           <div className={cn('flex items-center justify-between gap-2', chromeText.xs)}>
             <span className="truncate font-semibold text-ink2">{entry.peerName}</span>

@@ -25,17 +25,20 @@ export function LangTabs({
 }) {
   if (variants.length < 2) return null;
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="language-tabs flex flex-wrap gap-1">
       {variants.map((v, i) => (
         <button
           key={i}
           type="button"
           onClick={() => onPick(i)}
           className={cn(
-            `nodrag px-2 py-0.5 font-medium transition-colors ${RADIUS_CTRL}`,
+            `language-tab nodrag px-2 py-0.5 font-medium transition-colors ${RADIUS_CTRL}`,
             nodeText.sm,
-            i === active ? 'bg-accentbg text-accent' : 'text-ink3 hover:bg-panel2 hover:text-ink',
+            i === active
+              ? 'language-tab--active bg-accentbg text-accent'
+              : 'language-tab--idle text-ink3 hover:bg-panel2 hover:text-ink',
           )}
+          aria-pressed={i === active}
         >
           {(v.lang ?? 'text').toUpperCase()}
         </button>

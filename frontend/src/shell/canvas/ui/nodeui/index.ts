@@ -5,12 +5,24 @@
 export { Chip, EmptyState, Meter, Pill } from '@/design/components';
 export { difficultyTone, type UiTone } from '@/design/tone';
 export {
+  CANVAS_CHROME_MARGIN,
+  CANVAS_MARGIN,
+  FIT_VIEW_DURATION_MS,
+  MIN_VIEWPORT_HEIGHT,
+  NODE_MAX_W,
+  NODE_MIN_W,
+  NODE_UI_SCALE,
+  NODE_W,
   nodeText,
   nodeTextWrap,
   nodeIconGlyph,
   RADIUS_CTRL,
   RADIUS_SHELL,
-} from '@/design/typography';
+  clampCanvasInset,
+  clampNodeWidth,
+  vizPad,
+  vizText,
+} from '@/design/tokens';
 export {
   Label,
   Hint,

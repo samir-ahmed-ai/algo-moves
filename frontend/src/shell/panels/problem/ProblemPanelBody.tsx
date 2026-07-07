@@ -25,7 +25,7 @@ import { ProblemBriefBody } from './problemBriefBody';
 
 function StepBadge({ count }: { count: number }) {
   return (
-    <span className="ml-auto shrink-0 rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[length:var(--fs-2xs)] tabular-nums text-ink3">
+    <span className="problem-step-badge ml-auto shrink-0 rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[length:var(--fs-2xs)] tabular-nums text-ink3">
       {count > 0 ? `${count} step${count === 1 ? '' : 's'}` : '0'}
     </span>
   );
@@ -45,7 +45,11 @@ function ExamplePills({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="nodrag flex flex-wrap gap-1" role="radiogroup" aria-label="sample inputs">
+    <div
+      className="problem-example-pills nodrag flex flex-wrap gap-1"
+      role="radiogroup"
+      aria-label="sample inputs"
+    >
       {inputs.map((i) => {
         const on = i.id === inputId;
         const ops = inputFrameCount(inputFrameCounts, i.id);
@@ -57,10 +61,10 @@ function ExamplePills({
             aria-checked={on}
             onClick={() => onSelect(i.id)}
             className={cn(
-              'inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[length:var(--node-fs-xs,0.75rem)] transition-colors',
+              'problem-example-pill inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[length:var(--node-fs-xs,0.75rem)] transition-colors',
               on
-                ? 'border-accent bg-accentbg text-accent'
-                : 'border-edge bg-panel2/60 text-ink2 hover:bg-panel2 hover:text-ink',
+                ? 'problem-example-pill--active border-accent bg-accentbg text-accent'
+                : 'problem-example-pill--idle border-edge bg-panel2/60 text-ink2 hover:bg-panel2 hover:text-ink',
             )}
           >
             <span className={cn('min-w-0 truncate', nodeTextWrap)}>{i.label}</span>
@@ -96,7 +100,11 @@ function ExampleList({
   flash: boolean;
 }) {
   return (
-    <div className="nodrag flex flex-col" role="radiogroup" aria-label="sample inputs">
+    <div
+      className="problem-example-list nodrag flex flex-col"
+      role="radiogroup"
+      aria-label="sample inputs"
+    >
       {inputs.map((i, idx) => {
         const on = i.id === inputId;
         const ops = inputFrameCount(inputFrameCounts, i.id);
@@ -107,13 +115,14 @@ function ExampleList({
             onClick={() => onSelect(i.id)}
             className={cn(
               nodeText.base,
+              'problem-example-row',
               on ? 'ring-2 ring-accent/30' : 'text-ink2',
               on && flash && 'ring-2 ring-accent/50',
             )}
           >
             <span
               className={cn(
-                'grid size-[17px] shrink-0 place-items-center rounded-full border text-[length:var(--fs-2xs)] font-semibold',
+                'problem-example-index grid size-[17px] shrink-0 place-items-center rounded-full border text-[length:var(--fs-2xs)] font-semibold',
                 on ? 'border-accent bg-accent text-white' : 'border-edge bg-panel2/60 text-ink3',
               )}
             >
@@ -193,7 +202,7 @@ function ExampleInputPicker() {
   const usePills = inputs.length <= 4;
 
   return (
-    <div ref={pickerRef} tabIndex={0} className="outline-none">
+    <div ref={pickerRef} tabIndex={0} className="problem-example-picker outline-none">
       <Section
         title="Examples"
         bordered={false}
@@ -266,10 +275,10 @@ export function ProblemPanelBody() {
   const showHeaderDivider = hasOverview || hasProblemBrief || !inVisualize;
 
   return (
-    <div className="flex flex-col">
+    <div className="problem-panel flex flex-col">
       {!inVisualize && (
         <div
-          className="mb-2 rounded-md border border-edge bg-panel2/35 px-2.5 py-2"
+          className="problem-panel-hero mb-2 rounded-md border border-edge bg-panel2/35 px-2.5 py-2"
           style={{ borderLeftColor: item.difficulty ? TONE_BAR[tone] : 'transparent' }}
         >
           <div className="flex flex-wrap items-center gap-[var(--node-gap,6px)]">
@@ -291,7 +300,7 @@ export function ProblemPanelBody() {
             <p className={cn('leading-relaxed text-ink2', nodeText.sm)}>{item.summary}</p>
           )}
           {item.tags.length > 0 && (
-            <div className="mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
+            <div className="problem-tags mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
               {item.tags.map((t) => (
                 <NodeTagChip key={t} id={t} />
               ))}
@@ -309,7 +318,7 @@ export function ProblemPanelBody() {
         </ControlsAccordion>
       )}
       {!inVisualize && item.tags.length > 0 && (
-        <div className="mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
+        <div className="problem-tags mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
           {item.tags.map((t) => (
             <NodeTagChip key={t} id={t} />
           ))}
@@ -317,7 +326,7 @@ export function ProblemPanelBody() {
       )}
       {referenceCode && (
         <ControlsAccordion title="Reference code" defaultOpen className="mt-1.5">
-          <div className="overflow-hidden rounded-lg border border-edge bg-[var(--surface-2)]">
+          <div className="problem-reference-code overflow-hidden rounded-lg border border-edge bg-[var(--surface-2)]">
             <HighlightedCode
               code={referenceCode}
               lang={plugin.code?.lang ?? 'go'}
@@ -327,7 +336,12 @@ export function ProblemPanelBody() {
           </div>
         </ControlsAccordion>
       )}
-      <div className={cn(showHeaderDivider && 'mt-2 border-t border-edge pt-2')}>
+      <div
+        className={cn(
+          'problem-examples-shell',
+          showHeaderDivider && 'mt-2 border-t border-edge pt-2',
+        )}
+      >
         <ExampleInputPicker />
       </div>
     </div>

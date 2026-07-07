@@ -34,35 +34,36 @@ function readLiteral(src: string, i: number): { text: string; end: number } | nu
 
 /** Static syntax-colored markup for pretty-printed JSON. */
 export function highlightJson(json: string): ReactNode {
-  const trimmed = json.trim();
+  const source = String(json);
+  const trimmed = source.trim();
   if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
-    return json;
+    return source;
   }
 
   const tokens: Token[] = [];
   const stack: Frame[] = [];
   let i = 0;
 
-  while (i < json.length) {
-    const ch = json[i];
+  while (i < source.length) {
+    const ch = source[i];
     if (/\s/.test(ch)) {
       let j = i + 1;
-      while (j < json.length && /\s/.test(json[j])) j++;
-      tokens.push({ text: json.slice(i, j) });
+      while (j < source.length && /\s/.test(source[j])) j++;
+      tokens.push({ text: source.slice(i, j) });
       i = j;
       continue;
     }
 
     if (ch === '"') {
-      const { text, end } = readString(json, i);
+      const { text, end } = readString(source, i);
       const inObject = stack[stack.length - 1] === 'object';
-      const isKey = inObject && peekNonWs(json, end) === ':';
+      const isKey = inObject && peekNonWs(source, end) === ':';
       tokens.push({ text, className: isKey ? 'hl-json-key' : 'hl-json-str' });
       i = end;
       continue;
     }
 
-    const lit = readLiteral(json, i);
+    const lit = readLiteral(source, i);
     if (lit) {
       tokens.push({ text: lit.text, className: 'hl-json-lit' });
       i = lit.end;
@@ -71,8 +72,8 @@ export function highlightJson(json: string): ReactNode {
 
     if (/[-0-9]/.test(ch)) {
       let j = i + 1;
-      while (j < json.length && /[0-9.eE+-]/.test(json[j])) j++;
-      tokens.push({ text: json.slice(i, j), className: 'hl-json-num' });
+      while (j < source.length && /[0-9.eE+-]/.test(source[j])) j++;
+      tokens.push({ text: source.slice(i, j), className: 'hl-json-num' });
       i = j;
       continue;
     }

@@ -11,8 +11,20 @@ const BADGE_TONE: Record<VimBadgeTone, string> = {
   bad: 'border-bad/30 bg-bad-bg text-bad',
 };
 
-export function VimKbd({ children, className }: { children: ReactNode; className?: string }) {
-  return <kbd className={cn('vim-kbd', className)}>{children}</kbd>;
+export function VimKbd({
+  children,
+  className,
+  title,
+}: {
+  children: ReactNode;
+  className?: string;
+  title?: string;
+}) {
+  return (
+    <kbd className={cn('vim-kbd', className)} title={title}>
+      {children}
+    </kbd>
+  );
 }
 
 export function VimBadge({

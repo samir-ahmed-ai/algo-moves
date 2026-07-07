@@ -14,7 +14,7 @@ import {
 export function HeaderStep() {
   const { player } = useCanvasFrame();
   return (
-    <PanelHeaderMeta className="mr-0.5" aria-label="current step">
+    <PanelHeaderMeta className="panel-header-step mr-0.5" aria-label="current step">
       {player.index + 1}/{player.total}
     </PanelHeaderMeta>
   );
@@ -47,11 +47,14 @@ export function HeaderExamplesNav() {
 
   return (
     <>
-      <PanelHeaderMeta className="mr-0.5 max-w-[120px] truncate" aria-label="current example">
+      <PanelHeaderMeta
+        className="panel-header-example mr-0.5 max-w-[120px] truncate"
+        aria-label="current example"
+      >
         {idx + 1}/{inputs.length}
         {label ? ` · ${label}` : ''}
       </PanelHeaderMeta>
-      <PanelHeaderMeta className="mr-0.5 hidden max-w-[100px] truncate text-[length:var(--node-fs-2xs,0.5625rem)] text-ink3 md:inline-flex">
+      <PanelHeaderMeta className="panel-header-example panel-header-example--adjacent mr-0.5 hidden max-w-[100px] truncate text-[length:var(--node-fs-2xs,0.5625rem)] text-ink3 md:inline-flex">
         {prev ? `← ${prev.label}` : '← Start'}
       </PanelHeaderMeta>
       <PanelHeaderAction

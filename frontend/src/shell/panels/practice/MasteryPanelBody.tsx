@@ -35,8 +35,8 @@ export function MasteryPanelBody() {
   }, [s.mastered, advancePractice]);
 
   return (
-    <div className="nodrag flex flex-col gap-2">
-      <div className="flex items-center gap-2">
+    <div className="practice-panel practice-panel--mastery nodrag flex flex-col gap-2">
+      <div className="mastery-status-row flex items-center gap-2">
         <Trophy
           className="h-5 w-5"
           style={{ color: s.mastered ? 'var(--good)' : 'var(--text-3)' }}
@@ -53,7 +53,7 @@ export function MasteryPanelBody() {
         <Stat k="streak" v={s.streak} tone="accent" />
         <Stat k="best" v={s.bestStreak} />
       </StatGrid>
-      <div className="flex items-center justify-between">
+      <div className="mastery-target-row flex items-center justify-between">
         <Label>to master</Label>
         <StreakPips value={Math.min(s.streak, 3)} max={3} />
       </div>

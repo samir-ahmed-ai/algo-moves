@@ -48,16 +48,18 @@ export function PresenceBar() {
     <div
       className={cn(
         'inline-flex items-center gap-2 border border-edge bg-panel px-2.5 py-1',
+        'interview-presence-bar',
         RADIUS_CTRL,
       )}
     >
-      <span className="flex items-center">
+      <span className="interview-presence-bar__avatars flex items-center">
         {shown.map((s, i) => (
           <span
             key={s.id}
             title={s.name}
             className={cn(
               'relative grid h-6 w-6 place-items-center rounded-full border-2 border-panel font-semibold text-white',
+              'interview-presence-bar__avatar',
               chromeText.xs,
               i > 0 && '-ml-2',
             )}
@@ -74,8 +76,12 @@ export function PresenceBar() {
         ))}
         {overflow > 0 ? (
           <span
+            title={seats
+              .slice(MAX_AVATARS)
+              .map((s) => s.name)
+              .join(', ')}
             className={cn(
-              '-ml-2 grid h-6 w-6 place-items-center rounded-full border-2 border-panel bg-panel2 font-semibold text-ink2',
+              'interview-presence-bar__overflow -ml-2 grid h-6 w-6 place-items-center rounded-full border-2 border-panel bg-panel2 font-semibold text-ink2',
               chromeText.xs,
             )}
           >
@@ -83,7 +89,7 @@ export function PresenceBar() {
           </span>
         ) : null}
       </span>
-      <span className="flex items-center gap-1 text-ink3">
+      <span className="interview-presence-bar__status flex items-center gap-1 text-ink3">
         <span className={cn('h-1.5 w-1.5 rounded-full', dot)} aria-hidden />
         <span className={chromeText.xs}>{label}</span>
       </span>

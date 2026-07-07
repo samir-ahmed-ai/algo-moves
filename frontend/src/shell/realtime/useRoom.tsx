@@ -64,6 +64,25 @@ export interface GameRoomApi {
 
 const MAX_RETRIES = 5;
 
+/**
+ * One stable pid per room per tab, persisted so a page reload reclaims the
+ * exact seat/role from the relay (a reloading host stays host — the server
+ * evicts the stale connection for the same pid). sessionStorage keeps two
+ * tabs from stealing each other's seat.
+ */
+function reclaimablePid(room: string): string {
+  const key = `algomoves:room-pid:${room}`;
+  try {
+    const existing = sessionStorage.getItem(key);
+    if (existing) return existing;
+    const pid = makePlayerId();
+    sessionStorage.setItem(key, pid);
+    return pid;
+  } catch {
+    return makePlayerId();
+  }
+}
+
 const GameRoomContext = createContext<GameRoomApi | null>(null);
 
 /** Add or replace a peer in the roster, moving it to the list its role implies. */
@@ -265,9 +284,9 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
     (roomCode: string, name: string, opts: ConnectOptions = {}) => {
       if (retryTimer.current) clearTimeout(retryTimer.current);
       const code = roomCode.toUpperCase();
-      // One stable pid per join, reused by every reconnect attempt so the server
-      // hands us back the same seat/role.
-      const pid = makePlayerId();
+      // Stable per-room pid (see reclaimablePid): reconnects AND reloads
+      // reclaim the same seat/role from the server.
+      const pid = reclaimablePid(code);
       const target = {
         room: code,
         name,

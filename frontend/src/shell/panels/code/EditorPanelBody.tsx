@@ -104,21 +104,22 @@ export function EditorPanelBody() {
   };
 
   return (
-    <div className="nodrag flex flex-col gap-2.5">
+    <div className="code-panel code-panel--editor nodrag flex flex-col gap-2.5">
       {builders.length > 1 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="input-builder-tabs flex flex-wrap gap-1">
           {builders.map((b) => (
             <button
               key={b}
               type="button"
               onClick={() => setBuilderKind(b)}
               className={cn(
-                'rounded border px-1.5 py-0.5 capitalize',
+                'input-builder-tab rounded border px-1.5 py-0.5 capitalize',
                 builderKind === b
-                  ? 'border-accent bg-accentbg text-accent'
-                  : 'border-edge text-ink2',
+                  ? 'input-builder-tab--active border-accent bg-accentbg text-accent'
+                  : 'input-builder-tab--idle border-edge text-ink2',
                 nodeText.xs,
               )}
+              aria-pressed={builderKind === b}
             >
               {b}
             </button>
@@ -140,7 +141,7 @@ export function EditorPanelBody() {
           }}
         />
       </Field>
-      <div className="flex items-center justify-between gap-2">
+      <div className="input-editor-status-row flex items-center justify-between gap-2">
         <Hint>
           {hasFields
             ? 'Edit the input, then Run to replay your own case.'
@@ -168,7 +169,7 @@ export function EditorPanelBody() {
           </Field>
         ))}
       {hasFields && (
-        <div className="flex items-center gap-2">
+        <div className="input-editor-actions flex items-center gap-2">
           <Btn variant="good" size="sm" onClick={run} icon={<Play className={nodeIconGlyph} />}>
             Run
           </Btn>
@@ -181,7 +182,7 @@ export function EditorPanelBody() {
       )}
 
       <Section title="Import dataset (JSON)" collapsible defaultOpen={!hasFields}>
-        <div className="flex flex-col gap-1.5">
+        <div className="json-import-panel flex flex-col gap-1.5">
           <TextArea
             value={json}
             onChange={(e) => setJson(e.target.value)}
@@ -194,7 +195,7 @@ export function EditorPanelBody() {
               <span className="text-bad">{jsonErr}</span>
             </Hint>
           )}
-          <div className="flex gap-2">
+          <div className="json-import-actions flex gap-2">
             <Btn variant="primary" size="xs" onClick={importJson} disabled={!json.trim()}>
               Load JSON
             </Btn>

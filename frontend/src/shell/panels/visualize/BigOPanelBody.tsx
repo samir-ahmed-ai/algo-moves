@@ -11,13 +11,13 @@ export function BigOPanelBody() {
   }));
   const max = Math.max(...data.map((d) => d.ops), 1);
   return (
-    <div className="flex flex-col gap-2">
+    <div className="viz-analytics-panel viz-analytics-panel--bigo flex flex-col gap-2">
       <Hint>Total steps each example takes — order examples by size to read the growth curve.</Hint>
-      <div className="flex flex-col gap-1.5">
+      <div className="viz-analytics-list flex flex-col gap-1.5">
         {data.map((d) => {
           const cur = d.id === inputId;
           return (
-            <div key={d.id} className="flex flex-col gap-0.5">
+            <div key={d.id} className="viz-analytics-row flex flex-col gap-0.5">
               <Stat k={d.label} v={d.ops} tone={cur ? 'accent' : 'default'} />
               <Meter value={d.ops} max={max} tone={cur ? 'accent' : 'muted'} height={6} />
             </div>

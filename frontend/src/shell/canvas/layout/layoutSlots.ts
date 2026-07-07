@@ -10,6 +10,20 @@ export const SLOT_GAP = 4;
 
 export type SlotRect = { x: number; y: number; width: number; height: number };
 
+function finiteNumber(value: number, fallback = 0): number {
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function clampSlotIndex(slotIndex: number): number | null {
+  if (!Number.isFinite(slotIndex)) return null;
+  const index = Math.trunc(slotIndex);
+  return index >= 0 && index < LAYOUT_SLOT_COUNT ? index : null;
+}
+
+function safeSize(value: number | undefined, fallback: number): number {
+  return Math.max(0, finiteNumber(value ?? fallback, fallback));
+}
+
 export function emptyLayoutSlots(): (string | null)[] {
   return Array(LAYOUT_SLOT_COUNT).fill(null);
 }
@@ -21,13 +35,17 @@ export function slotRect(
   headerHeight: number,
   slotIndex: number,
 ): SlotRect {
-  const bodyH = Math.max(0, hostHeight - headerHeight);
-  const innerW = hostWidth - SLOT_PADDING * 2 - SLOT_GAP * (LAYOUT_COLS - 1);
-  const innerH = bodyH - SLOT_PADDING * 2 - SLOT_GAP * 2;
+  const index = clampSlotIndex(slotIndex) ?? 0;
+  const safeHostW = safeSize(hostWidth, HOST_MIN_WIDTH);
+  const safeHostH = safeSize(hostHeight, HOST_MIN_HEIGHT);
+  const safeHeaderH = safeSize(headerHeight, LAYOUT_HEADER_HEIGHT);
+  const bodyH = Math.max(0, safeHostH - safeHeaderH);
+  const innerW = Math.max(0, safeHostW - SLOT_PADDING * 2 - SLOT_GAP * (LAYOUT_COLS - 1));
+  const innerH = Math.max(0, bodyH - SLOT_PADDING * 2 - SLOT_GAP * 2);
   const cellW = innerW / LAYOUT_COLS;
   const cellH = innerH / LAYOUT_COLS;
-  const col = slotIndex % LAYOUT_COLS;
-  const row = Math.floor(slotIndex / LAYOUT_COLS);
+  const col = index % LAYOUT_COLS;
+  const row = Math.floor(index / LAYOUT_COLS);
   return {
     x: SLOT_PADDING + col * (cellW + SLOT_GAP),
     y: headerHeight + SLOT_PADDING + row * (cellH + SLOT_GAP),
@@ -116,8 +134,8 @@ function unparentNode(
 }
 
 function ensureHostSize(host: PanelFlowNode): PanelFlowNode {
-  const w = Math.max(host.width ?? 0, HOST_MIN_WIDTH);
-  const h = Math.max(host.height ?? 0, HOST_MIN_HEIGHT);
+  const w = Math.max(safeSize(host.width, HOST_MIN_WIDTH), HOST_MIN_WIDTH);
+  const h = Math.max(safeSize(host.height, HOST_MIN_HEIGHT), HOST_MIN_HEIGHT);
   if (w === host.width && h === host.height) return host;
   return { ...host, width: w, height: h };
 }
@@ -128,9 +146,11 @@ function applyChildToSlot(
   slotIndex: number,
   childId: string,
 ): PanelFlowNode[] {
-  const hostW = host.width ?? HOST_MIN_WIDTH;
-  const hostH = host.height ?? HOST_MIN_HEIGHT;
-  const rect = slotRect(hostW, hostH, LAYOUT_HEADER_HEIGHT, slotIndex);
+  const index = clampSlotIndex(slotIndex);
+  if (index == null) return nodes;
+  const hostW = safeSize(host.width, HOST_MIN_WIDTH);
+  const hostH = safeSize(host.height, HOST_MIN_HEIGHT);
+  const rect = slotRect(hostW, hostH, LAYOUT_HEADER_HEIGHT, index);
 
   return nodes.map((n) => {
     if (n.id === childId) {
@@ -142,7 +162,7 @@ function applyChildToSlot(
         position: { x: rect.x, y: rect.y },
         width: rect.width,
         height: rect.height,
-        data: { ...rest, slotIndex },
+        data: { ...rest, slotIndex: index },
       };
     }
     return n;
@@ -156,7 +176,8 @@ export function assignNodeToSlot(
   slotIndex: number,
   childId: string,
 ): PanelFlowNode[] {
-  if (slotIndex < 0 || slotIndex >= LAYOUT_SLOT_COUNT) return nodes;
+  const index = clampSlotIndex(slotIndex);
+  if (index == null) return nodes;
   const host = nodeById(nodes, hostId);
   const child = nodeById(nodes, childId);
   if (!host || !child) return nodes;
@@ -166,12 +187,12 @@ export function assignNodeToSlot(
   let next = clearChildFromAllSlots(nodes, childId);
 
   const slots = hostSlots(nodeById(next, hostId)!.data);
-  const prevOccupant = slots[slotIndex];
+  const prevOccupant = slots[index];
   if (prevOccupant && prevOccupant !== childId) {
     next = unparentNode(next, prevOccupant);
-    slots[slotIndex] = null;
+    slots[index] = null;
   }
-  slots[slotIndex] = childId;
+  slots[index] = childId;
 
   const hasAny = slots.some(Boolean);
   let hostNode = nodeById(next, hostId)!;
@@ -182,7 +203,7 @@ export function assignNodeToSlot(
   };
 
   next = next.map((n) => (n.id === hostId ? hostNode : n));
-  next = applyChildToSlot(next, hostNode, slotIndex, childId);
+  next = applyChildToSlot(next, hostNode, index, childId);
   return sortNodesParentFirst(next);
 }
 
@@ -275,6 +296,7 @@ export function findLayoutSlotAtPoint(
   clientY: number,
 ): { hostId: string; slotIndex: number } | null {
   if (typeof document === 'undefined') return null;
+  if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return null;
   const els =
     typeof document.elementsFromPoint === 'function'
       ? document.elementsFromPoint(clientX, clientY)
@@ -288,8 +310,8 @@ export function findLayoutSlotAtPoint(
     const hostId = hostEl.getAttribute('data-layout-host');
     const slotRaw = slotEl.getAttribute('data-layout-slot');
     if (!hostId || slotRaw == null) continue;
-    const slotIndex = Number(slotRaw);
-    if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= LAYOUT_SLOT_COUNT) continue;
+    const slotIndex = clampSlotIndex(Number(slotRaw));
+    if (slotIndex == null) continue;
     return { hostId, slotIndex };
   }
   return null;
@@ -297,8 +319,9 @@ export function findLayoutSlotAtPoint(
 
 /** Icon rect for slot preview in the 3×3 grid (12×12 viewBox). */
 export function slotIconRect(slotIndex: number): { x: number; y: number; w: number; h: number } {
-  const col = slotIndex % LAYOUT_COLS;
-  const row = Math.floor(slotIndex / LAYOUT_COLS);
+  const index = clampSlotIndex(slotIndex) ?? 0;
+  const col = index % LAYOUT_COLS;
+  const row = Math.floor(index / LAYOUT_COLS);
   const cell = 11 / LAYOUT_COLS;
   const pad = 0.5;
   const inner = cell - pad * 2;

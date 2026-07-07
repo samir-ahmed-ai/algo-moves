@@ -1,10 +1,10 @@
 /**
- * Sub-document collaboration payloads for whiteboard scenes and shared code
- * editors keyed by panel node id.
+ * Sub-document collaboration payloads for whiteboard scenes, shared code
+ * editors, and shared notes keyed by panel node id.
  */
 export const SUBDOC_TAG = '__subdoc' as const;
 
-export type SubDocKind = 'whiteboard' | 'collab-code';
+export type SubDocKind = 'whiteboard' | 'collab-code' | 'notes';
 
 export interface WhiteboardPayload {
   elements: WhiteboardElement[];
@@ -26,7 +26,11 @@ export interface EditorPayload {
   locked?: boolean;
 }
 
-export type SubDocPayload = WhiteboardPayload | EditorPayload;
+export interface NotesPayload {
+  text: string;
+}
+
+export type SubDocPayload = WhiteboardPayload | EditorPayload | NotesPayload;
 
 export interface SubDocSnapshot {
   nodeId: string;
@@ -56,6 +60,13 @@ export interface SubDocEditorPatchOp {
   rev: number;
 }
 
+export interface SubDocNotesPatchOp {
+  [SUBDOC_TAG]: 'patch-notes';
+  nodeId: string;
+  text: string;
+  rev: number;
+}
+
 export interface SubDocCursorOp {
   [SUBDOC_TAG]: 'cursor';
   nodeId: string;
@@ -67,14 +78,22 @@ export interface SubDocCursorOp {
 }
 
 export type SubDocOp =
-  SubDocSnapshotOp | SubDocWhiteboardPatchOp | SubDocEditorPatchOp | SubDocCursorOp;
+  | SubDocSnapshotOp
+  | SubDocWhiteboardPatchOp
+  | SubDocEditorPatchOp
+  | SubDocNotesPatchOp
+  | SubDocCursorOp;
 
 export function isSubDocOp(value: unknown): value is SubDocOp {
   const op = value as Partial<SubDocOp> | null;
   if (!op || op[SUBDOC_TAG] == null) return false;
   const tag = op[SUBDOC_TAG];
   return (
-    tag === 'snapshot' || tag === 'patch-whiteboard' || tag === 'patch-editor' || tag === 'cursor'
+    tag === 'snapshot' ||
+    tag === 'patch-whiteboard' ||
+    tag === 'patch-editor' ||
+    tag === 'patch-notes' ||
+    tag === 'cursor'
   );
 }
 
@@ -82,17 +101,30 @@ export function isSubDocEditOp(op: SubDocOp): op is Exclude<SubDocOp, SubDocCurs
   return op[SUBDOC_TAG] !== 'cursor';
 }
 
+function normalizeLanguage(language: string): string {
+  return language.trim() || 'javascript';
+}
+
+function normalizeRev(rev: number): number {
+  return Number.isFinite(rev) ? Math.max(0, Math.round(rev)) : 0;
+}
+
 export function emptyWhiteboardPayload(): WhiteboardPayload {
   return { elements: [], appState: {}, files: {} };
 }
 
 export function emptyEditorPayload(language = 'javascript'): EditorPayload {
-  return { text: '', language };
+  return { text: '', language: normalizeLanguage(language) };
+}
+
+export function emptyNotesPayload(): NotesPayload {
+  return { text: '' };
 }
 
 export function subDocSignature(docs: Record<string, SubDocSnapshot>): string {
   return Object.entries(docs)
+    .filter(([id]) => id.trim().length > 0)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([id, d]) => `${id}:${d.kind}:${d.rev}`)
+    .map(([id, d]) => `${id.trim()}:${d.kind}:${normalizeRev(d.rev)}`)
     .join('|');
 }

@@ -8,7 +8,7 @@ import { applySpacingOnly, formatCompleteSource } from './styleFormat';
 
 /** Tab for Go; two spaces for other studio languages. */
 export function indentExtensionsForLang(lang?: string): Extension[] {
-  const id = (lang ?? '').toLowerCase();
+  const id = (lang ?? '').trim().toLowerCase();
   if (id === 'go') {
     return [indentUnit.of('\t'), EditorState.tabSize.of(4)];
   }
@@ -45,7 +45,7 @@ function inferLangFromState(state: EditorState): string | undefined {
  *      re-running the full re-indent (which would undo step 2)
  */
 export function formatEditorText(state: EditorState, lang?: string): string {
-  const resolvedLang = lang ?? inferLangFromState(state);
+  const resolvedLang = (lang ?? inferLangFromState(state)).trim();
   const original = state.doc.toString();
 
   // Step 1 – brace-aware full format (always works, even on partial code)
@@ -54,17 +54,21 @@ export function formatEditorText(state: EditorState, lang?: string): string {
   // Step 2 – try the CM language service for more accurate indentation
   const langExt = languageExtension(resolvedLang);
   if (langExt) {
-    const tempState = EditorState.create({
-      doc: text,
-      extensions: [...indentExtensionsForLang(resolvedLang), langExt],
-    });
-    ensureSyntaxTree(tempState, tempState.doc.length, 5000);
-    const changes = indentRange(tempState, 0, tempState.doc.length);
-    const cmIndented = changes.apply(tempState.doc).toString();
+    try {
+      const tempState = EditorState.create({
+        doc: text,
+        extensions: [...indentExtensionsForLang(resolvedLang), langExt],
+      });
+      ensureSyntaxTree(tempState, tempState.doc.length, 5000);
+      const changes = indentRange(tempState, 0, tempState.doc.length);
+      const cmIndented = changes.apply(tempState.doc).toString();
 
-    // Accept CM result only when it actually changed leading whitespace
-    if (leadingIndentChanged(text, cmIndented)) {
-      text = cmIndented;
+      // Accept CM result only when it actually changed leading whitespace
+      if (leadingIndentChanged(text, cmIndented)) {
+        text = cmIndented;
+      }
+    } catch {
+      // Keep the deterministic fallback formatter.
     }
   }
 
@@ -89,9 +93,11 @@ export function formatSelectedText(
   to: number,
   lang?: string,
 ): { text: string; from: number; to: number } {
-  const resolvedLang = lang ?? inferLangFromState(state);
-  const fromLine = state.doc.lineAt(from);
-  const toLine = state.doc.lineAt(to);
+  const resolvedLang = (lang ?? inferLangFromState(state)).trim();
+  const safeFrom = Math.max(0, Math.min(from, state.doc.length));
+  const safeTo = Math.max(safeFrom, Math.min(to, state.doc.length));
+  const fromLine = state.doc.lineAt(safeFrom);
+  const toLine = state.doc.lineAt(safeTo);
   const sliceFrom = fromLine.from;
   const sliceTo = toLine.to;
   const fromLineNo = fromLine.number;
@@ -99,21 +105,25 @@ export function formatSelectedText(
 
   const langExt = languageExtension(resolvedLang);
   if (langExt) {
-    const tempState = EditorState.create({
-      doc: state.doc.toString(),
-      extensions: [...indentExtensionsForLang(resolvedLang), langExt],
-    });
-    ensureSyntaxTree(tempState, tempState.doc.length, 5000);
-    const changes = indentRange(tempState, sliceFrom, sliceTo);
-    const newDoc = changes.apply(tempState.doc);
-    const newFrom = newDoc.line(fromLineNo).from;
-    const newTo = newDoc.line(toLineNo).to;
-    const slice = newDoc.sliceString(newFrom, newTo);
-    return {
-      text: applySpacingOnly(slice, resolvedLang),
-      from: sliceFrom,
-      to: sliceTo,
-    };
+    try {
+      const tempState = EditorState.create({
+        doc: state.doc.toString(),
+        extensions: [...indentExtensionsForLang(resolvedLang), langExt],
+      });
+      ensureSyntaxTree(tempState, tempState.doc.length, 5000);
+      const changes = indentRange(tempState, sliceFrom, sliceTo);
+      const newDoc = changes.apply(tempState.doc);
+      const newFrom = newDoc.line(fromLineNo).from;
+      const newTo = newDoc.line(toLineNo).to;
+      const slice = newDoc.sliceString(newFrom, newTo);
+      return {
+        text: applySpacingOnly(slice, resolvedLang),
+        from: sliceFrom,
+        to: sliceTo,
+      };
+    } catch {
+      // Fall through to deterministic slice formatting.
+    }
   }
 
   const chunk = state.sliceDoc(sliceFrom, sliceTo);

@@ -26,11 +26,11 @@ export function WhiteboardPanelBody() {
   }, [sync.remoteCursors]);
 
   return (
-    <div className="relative flex h-full min-h-[320px] flex-col">
+    <div className="viz-whiteboard-panel relative flex h-full min-h-[320px] flex-col">
       {sync.isLive && (
         <span
           className={cn(
-            'pointer-events-none absolute right-2 top-2 z-10 rounded-md bg-good/15 px-1.5 py-0.5 font-medium text-good',
+            'viz-whiteboard-live pointer-events-none absolute right-2 top-2 z-10 rounded-md bg-good/15 px-1.5 py-0.5 font-medium text-good',
             chromeText.xs,
           )}
         >

@@ -10,7 +10,7 @@ export function MistakesPanelBody() {
   const mine = progress.mistakes.filter((m) => m.problemId === item.id);
   if (mine.length === 0) {
     return (
-      <div className="mistake-log-panel mistake-log-panel--empty">
+      <div className="practice-panel practice-panel--mistakes mistake-log-panel mistake-log-panel--empty">
         <EmptyState
           icon={<AlertTriangle className="h-5 w-5" />}
           title="No mistakes logged"
@@ -20,7 +20,7 @@ export function MistakesPanelBody() {
     );
   }
   return (
-    <section className="nodrag mistake-log-panel">
+    <section className="practice-panel practice-panel--mistakes nodrag mistake-log-panel">
       <div className="mistake-log-panel__head">
         <div>
           <span className="mistake-log-panel__eyebrow">review queue</span>

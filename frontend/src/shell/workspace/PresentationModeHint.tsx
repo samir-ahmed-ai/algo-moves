@@ -5,7 +5,7 @@ export function PresentationModeHint() {
   return (
     <div
       className={cn(
-        'pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-edge bg-panel/90 px-2 py-0.5 text-ink3 shadow backdrop-blur',
+        'presentation-mode-hint pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-edge bg-panel/90 px-2 py-0.5 text-ink3 shadow backdrop-blur',
         chromeText.sm,
       )}
       role="status"

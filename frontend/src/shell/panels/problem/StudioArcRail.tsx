@@ -12,11 +12,17 @@ interface Step {
   state: StepState;
 }
 
-function overviewSteps(view: OverviewView, hasRecall: boolean, nextLabel?: string): Step[] {
-  const steps: Step[] = [
-    { key: 'animate', label: 'Animate', state: view === 'animate' ? 'active' : 'done' },
-  ];
-  if (hasRecall) {
+function overviewSteps(
+  view: OverviewView,
+  canAnimate: boolean,
+  canRecall: boolean,
+  nextLabel?: string,
+): Step[] {
+  const steps: Step[] = [];
+  if (canAnimate) {
+    steps.push({ key: 'animate', label: 'Animate', state: view === 'animate' ? 'active' : 'done' });
+  }
+  if (canRecall) {
     steps.push({ key: 'recall', label: 'Recall', state: view === 'recall' ? 'active' : 'todo' });
   }
   if (nextLabel) {
@@ -43,20 +49,22 @@ export function StudioArcRail({
   availTabs,
   activeTabId,
   view,
-  hasRecall,
+  canAnimate,
+  canRecall,
   nextLabel,
   className,
 }: {
   availTabs?: StudioTab[];
   activeTabId?: string;
   view?: OverviewView;
-  hasRecall?: boolean;
+  canAnimate?: boolean;
+  canRecall?: boolean;
   nextLabel?: string;
   className?: string;
 }) {
   const steps =
     view !== undefined
-      ? overviewSteps(view, !!hasRecall, nextLabel)
+      ? overviewSteps(view, canAnimate !== false, !!canRecall, nextLabel)
       : availTabs && activeTabId
         ? canonicalSteps(availTabs, activeTabId)
         : [];
@@ -64,21 +72,25 @@ export function StudioArcRail({
   if (steps.length === 0) return null;
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-0.5', className)}>
+    <div className={cn('studio-arc-rail flex flex-wrap items-center gap-0.5', className)}>
       {steps.map((step, idx) => (
-        <span key={step.key} className="flex items-center gap-0.5">
+        <span key={step.key} className="studio-arc-rail__item flex items-center gap-0.5">
           {idx > 0 && (
-            <span className={cn('mx-0.5 text-ink3/50', chromeText.tight)} aria-hidden>
+            <span
+              className={cn('studio-arc-rail__sep mx-0.5 text-ink3/50', chromeText.tight)}
+              aria-hidden
+            >
               ›
             </span>
           )}
           <span
             className={cn(
-              'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium transition-colors',
+              'studio-arc-step inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium transition-colors',
               chromeText.xs,
-              step.state === 'active' && 'bg-accentbg text-accent ring-1 ring-accent/20',
-              step.state === 'done' && 'text-ink3',
-              step.state === 'todo' && 'text-ink3/50',
+              step.state === 'active' &&
+                'studio-arc-step--active bg-accentbg text-accent ring-1 ring-accent/20',
+              step.state === 'done' && 'studio-arc-step--done text-ink3',
+              step.state === 'todo' && 'studio-arc-step--todo text-ink3/50',
             )}
           >
             {step.state === 'done' && (

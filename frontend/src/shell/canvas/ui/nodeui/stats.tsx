@@ -31,11 +31,11 @@ export function Stat({
 }) {
   const flash = useFlash(typeof v === 'string' || typeof v === 'number' ? v : undefined);
   return (
-    <div className="flex items-center justify-between gap-3 py-[3px]">
-      <span className={cn(nodeText.sm, 'text-ink3')}>{k}</span>
+    <div className="node-stat flex items-center justify-between gap-3 py-[3px]">
+      <span className={cn(nodeText.sm, 'node-stat__key text-ink3')}>{k}</span>
       <span
         className={cn(
-          'rounded px-1 transition-colors duration-500',
+          'node-stat__value rounded px-1 transition-colors duration-500',
           nodeText.sm,
           mono && 'font-mono tabular-nums',
           TONE_TEXT[tone],
@@ -49,10 +49,11 @@ export function Stat({
 }
 
 export function StatGrid({ children, cols = 2 }: { children: ReactNode; cols?: number }) {
+  const safeCols = Number.isFinite(cols) ? Math.max(1, Math.round(cols)) : 2;
   return (
     <div
-      className="grid gap-x-4"
-      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+      className="node-stat-grid grid gap-x-4"
+      style={{ gridTemplateColumns: `repeat(${safeCols}, minmax(0, 1fr))` }}
     >
       {children}
     </div>
@@ -60,13 +61,19 @@ export function StatGrid({ children, cols = 2 }: { children: ReactNode; cols?: n
 }
 
 export function StreakPips({ value, max = 3 }: { value: number; max?: number }) {
+  const safeMax = Number.isFinite(max) ? Math.max(0, Math.round(max)) : 3;
+  const safeValue = Number.isFinite(value) ? Math.min(Math.max(0, Math.round(value)), safeMax) : 0;
   return (
-    <span className="inline-flex items-center gap-1">
-      {Array.from({ length: max }, (_, i) => (
+    <span
+      className="node-streak-pips inline-flex items-center gap-1"
+      aria-label={`${safeValue} of ${safeMax} streak`}
+    >
+      {Array.from({ length: safeMax }, (_, i) => (
         <span
           key={i}
-          className="h-1.5 w-1.5 rounded-full transition-colors"
-          style={{ background: i < value ? 'var(--good)' : 'var(--border-strong)' }}
+          className="node-streak-pips__pip h-1.5 w-1.5 rounded-full transition-colors"
+          data-active={i < safeValue ? 'true' : undefined}
+          style={{ background: i < safeValue ? 'var(--good)' : 'var(--border-strong)' }}
         />
       ))}
     </span>

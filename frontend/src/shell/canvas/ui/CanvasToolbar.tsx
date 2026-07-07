@@ -1,5 +1,17 @@
 import { useRef, useState } from 'react';
-import { Home, Lock, Magnet, Undo2, Redo2, Users, LayoutGrid, Plus, Sparkles } from 'lucide-react';
+import {
+  Home,
+  Lock,
+  Magnet,
+  Undo2,
+  Redo2,
+  Users,
+  LayoutGrid,
+  PanelRight,
+  Plus,
+  Sparkles,
+  UserCheck,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { nodeIcon } from '@/shell/panels';
@@ -14,13 +26,22 @@ interface CanvasToolbarProps {
   lock: boolean;
   onToggleLock: () => void;
   onTidy: () => void;
+  /** True on the standalone freeform canvas (enables the interview start CTA). */
+  standalone?: boolean;
 }
 
 /** Minimal floating toolbar for the standalone freeform canvas. */
-export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps) {
-  const { goHome, canvasHud, canvasAdd, present, mode } = useWorkspace();
+export function CanvasToolbar({
+  lock,
+  onToggleLock,
+  onTidy,
+  standalone = false,
+}: CanvasToolbarProps) {
+  const { goHome, canvasHud, canvasAdd, present, mode, canvasInterview, rightOpen, setRightOpen } =
+    useWorkspace();
   const [addOpen, setAddOpen] = useState(false);
   const [collabOpen, setCollabOpen] = useState(false);
+  const [pendingInvite, setPendingInvite] = useState(false);
   const addRef = useRef<HTMLDivElement>(null);
   const collabRef = useRef<HTMLDivElement>(null);
 
@@ -33,17 +54,40 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
   const showAdd = mode === 'visualize' && canvasAdd != null;
   const hasAddItems =
     (canvasAdd?.addableKinds.length ?? 0) > 0 || (canvasAdd?.addableEffects?.length ?? 0) > 0;
+  const showInterviewCta =
+    standalone && mode === 'visualize' && canvasInterview != null && !canvasInterview.hasSession;
 
   const btnClass =
-    'grid h-8 w-8 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink';
+    'canvas-toolbar__button grid h-8 w-8 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink';
 
   return (
     <div
       className={cn(
-        'nodrag absolute right-3 top-3 z-10 flex items-center gap-0.5 border border-edge bg-panel/95 p-1 shadow-[var(--shadow-lg)] backdrop-blur',
+        'canvas-toolbar nodrag absolute right-3 top-3 z-10 flex items-center gap-0.5 border border-edge bg-panel/95 p-1 shadow-[var(--shadow-lg)] backdrop-blur',
         RADIUS_SHELL,
       )}
     >
+      {showInterviewCta && canvasInterview && (
+        <>
+          <button
+            type="button"
+            title="Start an interview session — spins up a shared room and invite link"
+            disabled={pendingInvite}
+            onClick={() => {
+              setPendingInvite(true);
+              canvasInterview.start();
+            }}
+            className={cn(
+              'canvas-toolbar__interview inline-flex h-8 items-center gap-1.5 rounded-md bg-accent px-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60',
+              chromeText.sm,
+            )}
+          >
+            <UserCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Interview</span>
+          </button>
+          <span className="canvas-toolbar__divider mx-0.5 h-5 w-px bg-edge" aria-hidden />
+        </>
+      )}
       {showAdd && hasAddItems && (
         <div ref={addRef} className="relative">
           <button
@@ -52,14 +96,17 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
             aria-label="Add panel"
             aria-expanded={addOpen}
             onClick={() => setAddOpen((o) => !o)}
-            className={cn(btnClass, addOpen && 'bg-accentbg text-accent')}
+            className={cn(
+              btnClass,
+              addOpen && 'canvas-toolbar__button--active bg-accentbg text-accent',
+            )}
           >
             <Plus className="h-4 w-4" />
           </button>
           {addOpen && canvasAdd && (
             <div
               className={cn(
-                'absolute right-0 top-full z-20 mt-1 max-h-[min(320px,50vh)] w-44 overflow-y-auto border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
+                'canvas-toolbar__popover canvas-toolbar__popover--add absolute right-0 top-full z-20 mt-1 max-h-[min(320px,50vh)] w-44 overflow-y-auto border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
                 RADIUS_SHELL,
               )}
             >
@@ -72,7 +119,7 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
                     setAddOpen(false);
                   }}
                   className={cn(
-                    'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+                    'canvas-toolbar__popover-item flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
                     chromeText.sm,
                   )}
                 >
@@ -91,7 +138,7 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
                     setAddOpen(false);
                   }}
                   className={cn(
-                    'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
+                    'canvas-toolbar__popover-item flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-ink2 transition-colors hover:bg-panel2 hover:text-ink',
                     chromeText.sm,
                   )}
                 >
@@ -115,21 +162,28 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
       </button>
 
       <div ref={collabRef} className="relative">
-        <InterviewInvitePopover btnClass={btnClass} />
+        <InterviewInvitePopover
+          btnClass={btnClass}
+          autoOpen={pendingInvite}
+          onAutoOpenHandled={() => setPendingInvite(false)}
+        />
         <button
           type="button"
           title="Collaborate"
           aria-label="Collaborate"
           aria-expanded={collabOpen}
           onClick={() => setCollabOpen((o) => !o)}
-          className={cn(btnClass, collabOpen && 'bg-accentbg text-accent')}
+          className={cn(
+            btnClass,
+            collabOpen && 'canvas-toolbar__button--active bg-accentbg text-accent',
+          )}
         >
           <Users className="h-4 w-4" />
         </button>
         {collabOpen && (
           <div
             className={cn(
-              'absolute right-0 top-full z-20 mt-1 w-72 border border-edge bg-panel p-3 shadow-[var(--shadow-lg)]',
+              'canvas-toolbar__popover canvas-toolbar__popover--collab absolute right-0 top-full z-20 mt-1 w-72 border border-edge bg-panel p-3 shadow-[var(--shadow-lg)]',
               RADIUS_SHELL,
             )}
           >
@@ -138,7 +192,7 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
         )}
       </div>
 
-      <span className="mx-0.5 h-5 w-px bg-edge" aria-hidden />
+      <span className="canvas-toolbar__divider mx-0.5 h-5 w-px bg-edge" aria-hidden />
 
       <button
         type="button"
@@ -156,7 +210,7 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
         aria-label={snap ? 'Disable snap to grid' : 'Snap to grid'}
         aria-pressed={snap}
         onClick={() => setSnap(!snap)}
-        className={cn(btnClass, snap && 'bg-accentbg text-accent')}
+        className={cn(btnClass, snap && 'canvas-toolbar__button--active bg-accentbg text-accent')}
       >
         <Magnet className="h-4 w-4" />
       </button>
@@ -167,7 +221,7 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
         aria-label={lock ? 'Unlock canvas' : 'Lock canvas'}
         aria-pressed={lock}
         onClick={onToggleLock}
-        className={cn(btnClass, lock && 'bg-accentbg text-accent')}
+        className={cn(btnClass, lock && 'canvas-toolbar__button--active bg-accentbg text-accent')}
       >
         <Lock className="h-4 w-4" />
       </button>
@@ -181,7 +235,7 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
         />
       )}
 
-      <span className="mx-0.5 h-5 w-px bg-edge" aria-hidden />
+      <span className="canvas-toolbar__divider mx-0.5 h-5 w-px bg-edge" aria-hidden />
 
       <button
         type="button"
@@ -202,6 +256,22 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
         className={cn(btnClass, !tools.canRedo && 'opacity-40')}
       >
         <Redo2 className="h-4 w-4" />
+      </button>
+
+      <span className="canvas-toolbar__divider mx-0.5 h-5 w-px bg-edge" aria-hidden />
+
+      <button
+        type="button"
+        title={rightOpen ? 'Close sidebar' : 'Open sidebar'}
+        aria-label={rightOpen ? 'Close sidebar' : 'Open sidebar'}
+        aria-pressed={rightOpen}
+        onClick={() => setRightOpen(!rightOpen)}
+        className={cn(
+          btnClass,
+          rightOpen && 'canvas-toolbar__button--active bg-accentbg text-accent',
+        )}
+      >
+        <PanelRight className="h-4 w-4" />
       </button>
     </div>
   );

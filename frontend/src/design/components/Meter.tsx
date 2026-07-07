@@ -12,11 +12,21 @@ export function Meter({
   tone?: UiTone;
   height?: number;
 }) {
-  const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) * 100 : 0;
+  const safeMax = Number.isFinite(max) && max > 0 ? max : 1;
+  const safeValue = Number.isFinite(value) ? Math.max(0, Math.min(value, safeMax)) : 0;
+  const safeHeight = Number.isFinite(height) ? Math.max(2, height) : 6;
+  const pct = (safeValue / safeMax) * 100;
   return (
-    <div className="w-full overflow-hidden rounded-full bg-panel2" style={{ height }}>
+    <div
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={safeMax}
+      aria-valuenow={safeValue}
+      className="design-meter w-full overflow-hidden rounded-full bg-panel2"
+      style={{ height: safeHeight }}
+    >
       <div
-        className="h-full rounded-full transition-[width] duration-500 ease-out"
+        className={`design-meter__bar design-meter__bar--${tone} h-full rounded-full transition-[width] duration-500 ease-out`}
         style={{ width: `${pct}%`, background: TONE_BAR[tone] }}
       />
     </div>

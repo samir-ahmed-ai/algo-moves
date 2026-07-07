@@ -25,11 +25,13 @@ export function BeatMachineBuilder({ onApply }: { onApply: (tracks: BeatTrack[])
   };
 
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="input-builder input-builder--beat-machine nodrag flex flex-col gap-2">
       <Field label="Multi-track pattern">
         {tracks.map((track, ti) => (
-          <div key={track.id} className="mb-1 flex items-center gap-1">
-            <span className={cn('w-14 shrink-0 truncate', nodeText.xs)}>{track.label}</span>
+          <div key={track.id} className="input-builder-track-row mb-1 flex items-center gap-1">
+            <span className={cn('input-builder-track-label w-14 shrink-0 truncate', nodeText.xs)}>
+              {track.label}
+            </span>
             {track.steps.map((on, si) => (
               <GridToggleButton key={si} active={on} onClick={() => toggle(ti, si)} />
             ))}

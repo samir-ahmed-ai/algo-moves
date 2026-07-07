@@ -20,12 +20,16 @@ export function diffFrameStates(
   return changed;
 }
 
+function clampFrameIndex(index: number, frames: Frame[]): number {
+  if (frames.length === 0) return 0;
+  return Number.isFinite(index) ? Math.max(0, Math.min(Math.round(index), frames.length - 1)) : 0;
+}
+
 export function buildFrameContextValue(frames: Frame[], player: Player, frame: Frame | undefined) {
-  const resolved = frame ?? frames[0] ?? EMPTY_FRAME;
+  const index = clampFrameIndex(player.index, frames);
+  const resolved = frame ?? frames[index] ?? frames[0] ?? EMPTY_FRAME;
   const prevState =
-    player.index > 0
-      ? (frames[player.index - 1]?.state as Record<string, unknown> | undefined)
-      : undefined;
+    index > 0 ? (frames[index - 1]?.state as Record<string, unknown> | undefined) : undefined;
   const curState = resolved.state as Record<string, unknown> | undefined;
   return {
     frames,

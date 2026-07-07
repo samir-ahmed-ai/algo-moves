@@ -63,7 +63,7 @@ export function VizPanelBody({
         <MoveOrbit frames={frames} index={player.index} onSeek={player.goTo} />
       )}
       {inVisualize ? (
-        <div ref={vizMeasureRef} className="flex min-w-0 justify-center">
+        <div ref={vizMeasureRef} className="viz-panel-stage flex min-w-0 justify-center">
           <VizFitBox
             layout="hug"
             measureRef={vizMeasureRef}
@@ -74,23 +74,23 @@ export function VizPanelBody({
           </VizFitBox>
         </div>
       ) : conceptCourse ? (
-        <div className="viz-trace-panel flex min-h-0 flex-1 flex-col overflow-hidden rounded-[calc(var(--radius)-2px)] border border-edge/60 bg-panel2/30 p-2">
+        <div className="viz-trace-panel viz-panel-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-[calc(var(--radius)-2px)] border border-edge/60 bg-panel2/30 p-2">
           {viewEl}
         </div>
       ) : (
         <VizFitBox
           className={cn(
-            'viz-board-col viz-board-col--fit h-full min-h-0 flex-1 rounded-[calc(var(--radius)-2px)] border bg-panel2/30 transition-colors duration-200',
+            'viz-board-col viz-board-col--fit viz-panel-card h-full min-h-0 flex-1 rounded-[calc(var(--radius)-2px)] border bg-panel2/30 transition-colors duration-200',
             changedKeys.length > 0 ? 'border-accent/50 ring-1 ring-accent/20' : 'border-edge/60',
           )}
           remeasureKey={`${inputId}-${player.index}-${frame.move.type}`}
         >
           {changedKeys.length > 0 && (
-            <div className="mb-1 flex flex-wrap gap-1 px-1 pt-1">
+            <div className="viz-delta-strip mb-1 flex flex-wrap gap-1 px-1 pt-1">
               {changedKeys.map((k) => (
                 <span
                   key={k}
-                  className="rounded-full border border-accent/40 bg-accentbg/40 px-1.5 py-px font-mono text-[length:var(--fs-tight)] text-accent"
+                  className="viz-delta-chip rounded-full border border-accent/40 bg-accentbg/40 px-1.5 py-px font-mono text-[length:var(--fs-tight)] text-accent"
                 >
                   Δ {k}
                 </span>

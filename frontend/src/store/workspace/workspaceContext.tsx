@@ -6,6 +6,7 @@ import { workspaceSessionMeta } from '@/lib/session';
 import type {
   CanvasAddPanel,
   CanvasHudProps,
+  CanvasInterviewControls,
   CanvasProjectApi,
   LayoutDir,
   WorkspaceDefaults,
@@ -50,6 +51,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [canvasAdd, setCanvasAdd] = useState<CanvasAddPanel | null>(null);
   const [canvasProject, setCanvasProject] = useState<CanvasProjectApi | null>(null);
   const [canvasHud, setCanvasHud] = useState<CanvasHudProps | null>(null);
+  const [canvasInterview, setCanvasInterview] = useState<CanvasInterviewControls | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('appearance');
   const openSettings = useCallback((tab: SettingsTab = 'appearance') => {
@@ -70,6 +72,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setCanvasProject,
       canvasHud,
       setCanvasHud,
+      canvasInterview,
+      setCanvasInterview,
       settingsOpen,
       setSettingsOpen,
       settingsTab,
@@ -88,6 +92,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       canvasAdd,
       canvasProject,
       canvasHud,
+      canvasInterview,
       settingsOpen,
       settingsTab,
       openSettings,

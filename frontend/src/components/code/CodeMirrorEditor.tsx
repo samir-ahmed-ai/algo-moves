@@ -4,6 +4,7 @@ import { Decoration, EditorView } from '@codemirror/view';
 import { coreEditorExtensions, vimExtensions, wrapExtensions } from '@/lib/editor';
 import { buildEditorTheme } from '@/lib/editor';
 import { languageExtension } from '@/lib/editor';
+import { cn } from '@/lib/utils/cn';
 
 export interface CodeMirrorEditorProps {
   value: string;
@@ -35,6 +36,37 @@ function buildLineDecorations(state: EditorState, lines: Map<number, string>) {
   return builder.finish();
 }
 
+/**
+ * Vim status bar (@replit/codemirror-vim renders `.cm-vim-panel` + `.cm-vim-message`)
+ * styled as a themed status line under the editor. The block cursor gets an accent tint.
+ */
+const vimChromeStyles = {
+  '.cm-panels.cm-panels-bottom': {
+    borderTop: '0.5px solid var(--border)',
+    backgroundColor: 'var(--surface-2)',
+  },
+  '.cm-vim-panel': {
+    fontFamily: 'var(--mono)',
+    fontSize: 'var(--fs-2xs, 10px)',
+    lineHeight: '1.7',
+    padding: '1px 8px',
+    color: 'var(--text-2)',
+    backgroundColor: 'var(--surface-2)',
+  },
+  '.cm-vim-panel input': {
+    fontFamily: 'var(--mono)',
+    color: 'var(--text)',
+    caretColor: 'var(--accent)',
+    backgroundColor: 'transparent',
+    outline: 'none',
+  },
+  '.cm-vim-message': { color: 'var(--accent)' },
+  '.cm-vimCursorLayer .cm-cursor': {
+    backgroundColor: 'color-mix(in srgb, var(--accent) 45%, transparent)',
+    borderColor: 'transparent',
+  },
+};
+
 /** Shared editor chrome (font, gutters, diff/vim styling) — also reused by SplitCodeEditor's MergeView. */
 export const baseTheme = EditorView.theme({
   '&': {
@@ -61,13 +93,7 @@ export const baseTheme = EditorView.theme({
   '&.cm-focused': { outline: 'none' },
   '.cm-diff-changed': { backgroundColor: 'color-mix(in srgb, var(--good) 12%, transparent)' },
   '.cm-diff-missing': { backgroundColor: 'color-mix(in srgb, var(--ring) 10%, transparent)' },
-  '.cm-vimMode': {
-    fontFamily: 'var(--mono)',
-    fontSize: 'var(--fs-2xs, 9px)',
-    padding: '2px 6px',
-    color: 'var(--text-3)',
-    borderTop: '0.5px solid var(--border)',
-  },
+  ...vimChromeStyles,
 });
 
 /** MergeView-safe chrome — no fixed height/min-height; @codemirror/merge sizes editors and spacers from content. */
@@ -89,13 +115,7 @@ export const mergeEditorChrome = EditorView.theme({
     backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
   },
   '&.cm-focused': { outline: 'none' },
-  '.cm-vimMode': {
-    fontFamily: 'var(--mono)',
-    fontSize: 'var(--fs-2xs, 9px)',
-    padding: '2px 6px',
-    color: 'var(--text-3)',
-    borderTop: '0.5px solid var(--border)',
-  },
+  ...vimChromeStyles,
 });
 
 /**
@@ -226,5 +246,7 @@ export function CodeMirrorEditor({
     });
   }, [lineDecorations]);
 
-  return <div className={className ?? 'cm-host nodrag h-full min-h-0'} ref={host} />;
+  return (
+    <div className={cn('code-mirror-editor cm-host nodrag h-full min-h-0', className)} ref={host} />
+  );
 }

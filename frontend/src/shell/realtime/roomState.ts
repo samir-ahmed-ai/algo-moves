@@ -49,14 +49,23 @@ export function extractInterviewRuntime(value: unknown): InterviewRuntime | null
   return extractSessionMeta(value).interviewRuntime ?? null;
 }
 
+/** General builder — attach whichever content channels ride the relay envelope. */
+export function buildRoomEnvelope(
+  session: SessionMeta,
+  content: { canvas?: CanvasDoc; subDocs?: Record<string, SubDocSnapshot> } = {},
+): RoomSharedEnvelope {
+  const env: RoomSharedEnvelope = { v: ROOM_STATE_V, session };
+  if (content.canvas) env.canvas = content.canvas;
+  if (content.subDocs && Object.keys(content.subDocs).length > 0) env.subDocs = content.subDocs;
+  return env;
+}
+
 export function buildCanvasRoomState(
   session: SessionMeta,
   canvas: CanvasDoc,
   subDocs?: Record<string, SubDocSnapshot>,
 ): RoomSharedEnvelope {
-  const env: RoomSharedEnvelope = { v: ROOM_STATE_V, session, canvas };
-  if (subDocs && Object.keys(subDocs).length > 0) env.subDocs = subDocs;
-  return env;
+  return buildRoomEnvelope(session, { canvas, subDocs });
 }
 
 /** Session + interview metadata only — canvas/subDocs live in Yjs when transport is on. */

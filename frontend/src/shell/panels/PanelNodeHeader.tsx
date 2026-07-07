@@ -42,6 +42,7 @@ import type { PanelFlowNode, PanelNodeData } from './panelTypes';
 import { panelAccent, panelKindIcon } from './panelIcons';
 import { HeaderPlay, HeaderStep } from './PanelHeaderControls';
 import { PanelHeaderLayoutMenu } from '@/shell/canvas/ui/PanelHeaderLayoutMenu';
+import { cn } from '@/lib/utils/cn';
 
 /** Renders at most two header action buttons; dev-only warning if exceeded. */
 function HeaderActionSlots({ children }: { children: ReactNode }) {
@@ -215,14 +216,23 @@ export function PanelNodeHeader({
       collapsed={collapsed}
       locked={locked}
       density={density}
-      className={headerClassName}
+      className={cn(
+        'panel-node-header',
+        selected && 'panel-node-header--selected',
+        collapsed && 'panel-node-header--collapsed',
+        locked && 'panel-node-header--locked',
+        headerClassName,
+      )}
     >
       {!locked && mode !== 'visualize' && <PanelHeaderGrip density={density} />}
-      <PanelHeaderIcon density={density}>
+      <PanelHeaderIcon density={density} className="panel-node-header__icon">
         {panelKindIcon(data.kind) ?? <FileQuestion className={nodeIconGlyph} />}
       </PanelHeaderIcon>
 
-      <PanelHeaderTitle density={density} className={locked ? 'cursor-default' : undefined}>
+      <PanelHeaderTitle
+        density={density}
+        className={cn('panel-node-header__title', locked ? 'cursor-default' : undefined)}
+      >
         {data.title}
       </PanelHeaderTitle>
 
@@ -232,7 +242,7 @@ export function PanelNodeHeader({
 
       {inlineToolbar}
 
-      <PanelHeaderActions>
+      <PanelHeaderActions className="panel-node-header__actions">
         {collapsed ? (
           <HeaderActionSlots>
             <PanelHeaderAction variant="ghost" title="Restore panel" onClick={minimize}>

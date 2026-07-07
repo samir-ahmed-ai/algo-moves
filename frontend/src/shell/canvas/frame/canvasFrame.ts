@@ -69,13 +69,17 @@ export function buildCanvasFrame(
   const hasRemovedNodes = !!removed?.size;
   const canSeed = mode === 'visualize' && nodes.length === 0 && !hasSavedLayout && !hasRemovedNodes;
   const seededProblemCanvas = !!seedProblemCanvas && canSeed;
-  const seededInterviewCanvas = !seededProblemCanvas && !!seedInterviewCanvas && canSeed;
+  // The interview board seeds whenever the canvas would otherwise boot empty:
+  // seeded node ids are generated per session, so a stale saved layout or
+  // removal set can never materialize nodes and must not block the board.
+  const seededInterviewCanvas =
+    !seededProblemCanvas && !!seedInterviewCanvas && mode === 'visualize' && nodes.length === 0;
   if (seededProblemCanvas) {
     nodes = [nodeForKind(plugin, 'workbench', { x: 0, y: 0 })];
   } else if (seededInterviewCanvas) {
     nodes = buildInterviewBoardNodes({ includeNotes: true, includeProblem: false });
   }
-  if (removed?.size) nodes = nodes.filter((n) => !removed.has(n.id));
+  if (removed?.size && !seededInterviewCanvas) nodes = nodes.filter((n) => !removed.has(n.id));
   const present = new Set(nodes.map((n) => n.id));
   const rmEdges = removedEdges ?? new Set<string>();
   const raw = buildEdges(plugin, mode)

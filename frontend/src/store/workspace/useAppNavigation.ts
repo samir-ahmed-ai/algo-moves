@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { browseBreadcrumbForItem, catalog, getTrackById, type TrackId } from '@/content';
 import { normalizeCanvasMode, type CanvasMode } from '@/core';
 import { parsePageFromPathname, writeAppUrl } from '@/lib/navigation/appRoute';
-import { writeMobileHash, writeVimHash, writeGamesHash } from '@/lib/navigation';
+import { writeMobileHash, writeVimHash, writeDojoHash, writeGamesHash } from '@/lib/navigation';
 import { initialBrowseFromHash } from '@/store/navigation/browseNavigation';
 import { resolveShareItemId, type ShareState } from '@/store/navigation/shareState';
 import { writeStorageText } from '@/store/persistence/storage';
@@ -11,6 +11,14 @@ import { LAST_ITEM_KEY } from './workspaceConstants';
 
 function isCanvasFocus(shared: ShareState | null): boolean {
   return shared?.focus === 'canvas';
+}
+
+/** Whether the shared URL points at the interview-seeded standalone canvas. */
+export function initialCanvasVariant(shared: ShareState | null): 'plain' | 'interview' {
+  if (!isCanvasFocus(shared)) return 'plain';
+  return shared?.variant === 'interview' || shared?.sessionKind === 'interview'
+    ? 'interview'
+    : 'plain';
 }
 
 /** Where Back should land when leaving a focused problem view. */
@@ -61,7 +69,9 @@ export function useAppNavigation(shared: ShareState | null) {
     if (canvasFocus) return false;
     return !!sharedItemId;
   });
-  const [canvasVariant, setCanvasVariant] = useState<'plain' | 'interview'>('plain');
+  const [canvasVariant, setCanvasVariant] = useState<'plain' | 'interview'>(() =>
+    initialCanvasVariant(shared),
+  );
   const [route, setRoute] = useState<AppRoute>(() => {
     if (canvasFocus) return 'workspace';
     if (sharedItemId) return 'workspace';
@@ -70,6 +80,7 @@ export function useAppNavigation(shared: ShareState | null) {
       const page = parsePageFromPathname(location.pathname);
       if (page === 'mobile') return 'mobile';
       if (page === 'vim') return 'vim';
+      if (page === 'dojo') return 'dojo';
       if (page === 'games') return 'games';
       if (page === 'plans') return 'plans';
       if (page === 'resumes') return 'resumes';
@@ -160,7 +171,18 @@ export function useAppNavigation(shared: ShareState | null) {
 
   const enterVim = useCallback((levelId?: string) => {
     setRoute('vim');
-    writeVimHash(levelId ? { levelId } : null);
+    // Guard against non-string args (e.g. a MouseEvent from onClick={enterVim}).
+    writeVimHash(typeof levelId === 'string' && levelId ? { levelId } : null);
+  }, []);
+
+  const enterDojo = useCallback((gameId?: string, levelId?: string) => {
+    setRoute('dojo');
+    // Guard against non-string args (e.g. a MouseEvent from onClick={enterDojo}).
+    writeDojoHash(
+      typeof gameId === 'string' && gameId
+        ? { gameId, levelId: typeof levelId === 'string' && levelId ? levelId : undefined }
+        : null,
+    );
   }, []);
 
   const enterGames = useCallback((roomCode?: string) => {
@@ -209,6 +231,7 @@ export function useAppNavigation(shared: ShareState | null) {
     backToBrowse,
     enterMobile,
     enterVim,
+    enterDojo,
     enterGames,
     enterPlans,
     enterResumes,

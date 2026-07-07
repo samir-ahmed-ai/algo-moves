@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { snapshotFromPayload } from '@/shell/collab/protocol/subdocMerge';
 import {
   emptyWhiteboardPayload,
   type WhiteboardPayload,
 } from '@/shell/collab/protocol/subdocProtocol';
 import { useCanvasCollab } from '@/shell/collab/CanvasCollabProvider';
+import { useYjsCollab } from '@/shell/collab/yjs/YjsCollabContext';
+import { useYjsForSubdocs } from '@/shell/collab/yjs/yjsConfig';
+import { readYjsSubdocs } from '@/shell/collab/yjs/yjsSubdocBinding';
 import { buildQuestionCardElements } from './questionCard';
 
 interface SendToBoard {
@@ -19,15 +21,24 @@ interface SendToBoard {
 
 /**
  * Bridges the sidebar to the interview whiteboard node: locates the whiteboard
- * sub-doc and appends elements through the host-authoritative `setSubDocs` path
- * so guests receive them via the published envelope. Host-only.
+ * sub-doc and appends elements through `updateSubDocPayload`, which writes the
+ * live transport (Yjs map or host relay envelope) plus local React state so the
+ * host sees the card immediately. Host-only.
  */
 export function useSendToBoard(): SendToBoard {
-  const { isHost, isCollaborating, subDocs, setSubDocs } = useCanvasCollab();
+  const { isHost, isCollaborating, subDocs, updateSubDocPayload } = useCanvasCollab();
+  const { doc: yjsDoc } = useYjsCollab();
   const { getNodes } = useReactFlow();
 
   const findBoard = useCallback(() => {
-    // Prefer a live sub-doc; fall back to a node's persisted interior.
+    // Prefer the live Yjs map (carries guest strokes), then the React sub-doc,
+    // then a node's persisted interior.
+    if (useYjsForSubdocs() && yjsDoc) {
+      const live = Object.values(readYjsSubdocs(yjsDoc)).find((d) => d.kind === 'whiteboard');
+      if (live) {
+        return { nodeId: live.nodeId, rev: live.rev, payload: live.payload as WhiteboardPayload };
+      }
+    }
     const fromDocs = Object.entries(subDocs).find(([, d]) => d.kind === 'whiteboard');
     if (fromDocs) {
       return {
@@ -44,7 +55,7 @@ export function useSendToBoard(): SendToBoard {
       rev: sub?.rev ?? 0,
       payload: sub?.payload ?? emptyWhiteboardPayload(),
     };
-  }, [subDocs, getNodes]);
+  }, [subDocs, getNodes, yjsDoc]);
 
   const canSend = isHost && isCollaborating && !!findBoard();
 
@@ -54,21 +65,17 @@ export function useSendToBoard(): SendToBoard {
     (text: string, category?: string) => {
       const board = findBoard();
       if (!board || !isHost) return false;
-      // Stagger by the number of cards already on the board so they don't stack.
-      const n = board.payload.elements?.length ?? 0;
-      const at = { x: 80 + (n % 6) * 28, y: 80 + (n % 9) * 28 };
-      const cards = buildQuestionCardElements(text, at, category);
-      const nextPayload: WhiteboardPayload = {
-        ...board.payload,
-        elements: [...(board.payload.elements ?? []), ...cards],
-      };
-      setSubDocs((docs) => ({
-        ...docs,
-        [board.nodeId]: snapshotFromPayload(board.nodeId, 'whiteboard', board.rev + 1, nextPayload),
-      }));
+      updateSubDocPayload(board.nodeId, 'whiteboard', (prev) => {
+        const base = (prev as WhiteboardPayload | null) ?? board.payload;
+        // Stagger by the number of cards already on the board so they don't stack.
+        const n = base.elements?.length ?? 0;
+        const at = { x: 80 + (n % 6) * 28, y: 80 + (n % 9) * 28 };
+        const cards = buildQuestionCardElements(text, at, category);
+        return { ...base, elements: [...(base.elements ?? []), ...cards] };
+      });
       return true;
     },
-    [findBoard, isHost, subDocs, setSubDocs],
+    [findBoard, isHost, updateSubDocPayload],
   );
 
   return { canSend, readBoard, sendQuestion };

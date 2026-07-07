@@ -34,7 +34,7 @@ export function Transport() {
     if (bookmarked) player.removeBookmark(player.index);
     else player.setBookmark(player.index, frame.move.note);
   };
-  const btn = `nodrag grid ${CHROME_BTN} place-items-center p-1 text-ink2 transition-colors enabled:hover:bg-panel2 enabled:hover:text-ink disabled:opacity-30 ${RADIUS_CTRL}`;
+  const btn = `transport-icon-btn nodrag grid ${CHROME_BTN} place-items-center p-1 text-ink2 transition-colors enabled:hover:bg-panel2 enabled:hover:text-ink disabled:opacity-30 ${RADIUS_CTRL}`;
   const { loopStart, loopEnd } = player;
   const looping = loopStart !== null || loopEnd !== null;
 
@@ -49,8 +49,8 @@ export function Transport() {
   const scrubMax = Math.max(player.total - 1, 0);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-1">
+    <div className="transport-panel flex flex-col gap-2">
+      <div className="transport-primary-row flex items-center gap-1">
         <button
           onClick={player.prev}
           disabled={player.index === 0 || scrubMax === 0}
@@ -62,7 +62,7 @@ export function Transport() {
         <button
           onClick={player.toggleReverse}
           className={cn(
-            `nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors enabled:hover:bg-panel2 ${RADIUS_CTRL}`,
+            `transport-icon-btn nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors enabled:hover:bg-panel2 ${RADIUS_CTRL}`,
             player.reversed ? 'text-accent' : 'text-ink2 hover:text-ink',
           )}
           title={player.reversed ? 'playing backward' : 'play backward'}
@@ -73,7 +73,7 @@ export function Transport() {
         <button
           onClick={player.togglePlay}
           className={cn(
-            `nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors ${RADIUS_CTRL}`,
+            `transport-icon-btn transport-play-btn nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors ${RADIUS_CTRL}`,
             player.isPlaying ? 'text-ink3 hover:bg-panel2 hover:text-ink' : 'bg-accent text-ink',
           )}
           aria-label={player.isPlaying ? 'pause' : 'play'}
@@ -95,14 +95,14 @@ export function Transport() {
         <button onClick={player.reset} className={btn} aria-label="reset">
           <RotateCcw className={nodeIconGlyph} />
         </button>
-        <span className={cn('ml-1 font-mono text-ink3', nodeText.xs)}>
+        <span className={cn('transport-frame-count ml-1 font-mono text-ink3', nodeText.xs)}>
           {player.index + 1}/{player.total}
         </span>
         <div className="flex-1" />
         <button
           onClick={toggleBookmark}
           className={cn(
-            `nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors hover:bg-panel2 ${RADIUS_CTRL}`,
+            `transport-icon-btn nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors hover:bg-panel2 ${RADIUS_CTRL}`,
             bookmarked ? 'text-accent' : 'text-ink3',
           )}
           title={bookmarked ? 'remove bookmark' : 'bookmark this frame'}
@@ -117,7 +117,7 @@ export function Transport() {
         <button
           onClick={() => toggleTweak('narrate')}
           className={cn(
-            `nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors hover:bg-panel2 ${RADIUS_CTRL}`,
+            `transport-icon-btn nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors hover:bg-panel2 ${RADIUS_CTRL}`,
             tweaks.narrate ? 'text-accent' : 'text-ink3',
           )}
           title={tweaks.narrate ? 'mute narration' : 'narrate captions'}
@@ -132,7 +132,7 @@ export function Transport() {
         <button
           onClick={() => toggleTweak('moveLog')}
           className={cn(
-            `nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors hover:bg-panel2 ${RADIUS_CTRL}`,
+            `transport-icon-btn nodrag grid ${CHROME_BTN} place-items-center p-1 transition-colors hover:bg-panel2 ${RADIUS_CTRL}`,
             tweaks.moveLog ? 'text-accent' : 'text-ink3',
           )}
           title={tweaks.moveLog ? 'hide moves' : 'show moves'}
@@ -142,27 +142,29 @@ export function Transport() {
         </button>
       </div>
 
-      <div className="flex items-center gap-1.5 text-[length:var(--fs-tight)] text-ink3">
-        <span className={cn('shrink-0 rounded-full px-2 py-0.5', playBadge)}>
+      <div className="transport-status-row flex items-center gap-1.5 text-[length:var(--fs-tight)] text-ink3">
+        <span className={cn('transport-badge shrink-0 rounded-full px-2 py-0.5', playBadge)}>
           {player.isPlaying ? 'Playing' : 'Paused'}
         </span>
-        <span className={cn('shrink-0 rounded-full border px-2 py-0.5', frameToneClass)}>
+        <span
+          className={cn('transport-badge shrink-0 rounded-full border px-2 py-0.5', frameToneClass)}
+        >
           {frameType}
         </span>
         {looping && (
-          <span className="shrink-0 rounded-full border border-edge/70 bg-panel2 px-2 py-0.5 text-ink3">
+          <span className="transport-badge shrink-0 rounded-full border border-edge/70 bg-panel2 px-2 py-0.5 text-ink3">
             Loop {loopStart !== null ? `A:${loopStart + 1}` : 'A:—'} to{' '}
             {loopEnd !== null ? `B:${loopEnd + 1}` : 'B:—'}
           </span>
         )}
         <div className="flex-1" />
         {player.speed !== 1 && (
-          <span className="shrink-0 rounded-full border border-edge px-2 py-0.5 text-ink2">
+          <span className="transport-badge shrink-0 rounded-full border border-edge px-2 py-0.5 text-ink2">
             {player.speed}×
           </span>
         )}
         {bookmarked && (
-          <span className="shrink-0 rounded-full border border-accent bg-accentbg px-2 py-0.5 text-accent">
+          <span className="transport-badge shrink-0 rounded-full border border-accent bg-accentbg px-2 py-0.5 text-accent">
             Bookmarked
           </span>
         )}
@@ -175,17 +177,17 @@ export function Transport() {
         value={player.index}
         onChange={(e) => player.goTo(Number(e.target.value))}
         disabled={scrubMax === 0}
-        className="nodrag h-1.5 w-full cursor-pointer appearance-none rounded-full bg-panel2 accent-[var(--accent)] disabled:opacity-35"
+        className="transport-scrubber nodrag h-1.5 w-full cursor-pointer appearance-none rounded-full bg-panel2 accent-[var(--accent)] disabled:opacity-35"
         aria-label="scrubber"
       />
 
-      <div className="flex items-center gap-1.5">
+      <div className="transport-loop-row flex items-center gap-1.5">
         <Gauge className={cn(nodeIconGlyph, 'text-ink3')} />
         <select
           value={player.speed}
           onChange={(e) => player.setSpeed(Number(e.target.value))}
           className={cn(
-            `nodrag border border-edge bg-panel2 px-1 py-0.5 text-ink outline-none focus:border-accent ${RADIUS_CTRL}`,
+            `transport-speed-select nodrag border border-edge bg-panel2 px-1 py-0.5 text-ink outline-none focus:border-accent ${RADIUS_CTRL}`,
             nodeText.xs,
           )}
           aria-label="playback speed"
@@ -200,14 +202,20 @@ export function Transport() {
         <Repeat className={cn(nodeIconGlyph, looping ? 'text-accent' : 'text-ink3')} />
         <button
           onClick={setA}
-          className={cn(`nodrag px-1 py-0.5 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`, nodeText.xs)}
+          className={cn(
+            `transport-loop-btn nodrag px-1 py-0.5 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`,
+            nodeText.xs,
+          )}
           title="set loop start (A)"
         >
           A{loopStart !== null ? `:${loopStart + 1}` : ''}
         </button>
         <button
           onClick={setB}
-          className={cn(`nodrag px-1 py-0.5 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`, nodeText.xs)}
+          className={cn(
+            `transport-loop-btn nodrag px-1 py-0.5 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`,
+            nodeText.xs,
+          )}
           title="set loop end (B)"
         >
           B{loopEnd !== null ? `:${loopEnd + 1}` : ''}
@@ -215,7 +223,10 @@ export function Transport() {
         {looping && (
           <button
             onClick={player.clearLoop}
-            className={cn(`nodrag px-1 py-0.5 text-bad hover:bg-badbg ${RADIUS_CTRL}`, nodeText.xs)}
+            className={cn(
+              `transport-loop-btn nodrag px-1 py-0.5 text-bad hover:bg-badbg ${RADIUS_CTRL}`,
+              nodeText.xs,
+            )}
             title="clear loop"
           >
             ✕

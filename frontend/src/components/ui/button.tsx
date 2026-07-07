@@ -8,19 +8,19 @@ import { cn } from '@/lib/utils/cn';
 import { RADIUS_CTRL } from '@/design/typography';
 
 export const buttonVariants = cva(
-  'nodrag inline-flex items-center justify-center gap-1.5 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+  'ui-button nodrag inline-flex items-center justify-center gap-1.5 font-medium transition-[background-color,border-color,color,box-shadow,opacity,transform] disabled:cursor-not-allowed disabled:opacity-40',
   {
     variants: {
       variant: {
-        primary: 'bg-accent text-white hover:opacity-90',
-        good: 'bg-good text-white hover:opacity-90',
-        ghost: 'bg-panel2/50 text-ink2 hover:bg-panel2 hover:text-ink',
-        quiet: 'text-ink3 hover:bg-panel2 hover:text-ink',
-        danger: 'text-bad hover:bg-badbg',
+        primary: 'ui-button--primary bg-accent text-white hover:opacity-90',
+        good: 'ui-button--good bg-good text-white hover:opacity-90',
+        ghost: 'ui-button--ghost bg-panel2/50 text-ink2 hover:bg-panel2 hover:text-ink',
+        quiet: 'ui-button--quiet text-ink3 hover:bg-panel2 hover:text-ink',
+        danger: 'ui-button--danger text-bad hover:bg-badbg',
       },
       size: {
-        xs: 'px-2 py-1 text-[0.75rem]',
-        sm: 'px-2.5 py-1.5 text-[0.8125rem]',
+        xs: 'ui-button--xs px-2 py-1 text-[0.75rem]',
+        sm: 'ui-button--sm px-2.5 py-1.5 text-[0.8125rem]',
       },
     },
     defaultVariants: {
@@ -36,13 +36,21 @@ export interface ButtonProps
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, type, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
+    const resolvedVariant = variant ?? 'ghost';
+    const resolvedSize = size ?? 'sm';
     return (
       <Comp
         ref={ref}
-        type={asChild ? undefined : (props.type ?? 'button')}
-        className={cn(buttonVariants({ variant, size }), RADIUS_CTRL, className)}
+        type={asChild ? undefined : (type ?? 'button')}
+        data-variant={resolvedVariant}
+        data-size={resolvedSize}
+        className={cn(
+          buttonVariants({ variant: resolvedVariant, size: resolvedSize }),
+          RADIUS_CTRL,
+          className,
+        )}
         {...props}
       />
     );

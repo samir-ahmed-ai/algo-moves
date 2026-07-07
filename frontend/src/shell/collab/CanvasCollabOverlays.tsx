@@ -12,7 +12,7 @@ function PeerCursor({ peer }: { peer: PeerPresence }) {
   if (!peer.cursor) return null;
   return (
     <div
-      className="pointer-events-none absolute -translate-x-[2px] -translate-y-[2px] select-none"
+      className="peer-cursor pointer-events-none absolute -translate-x-[2px] -translate-y-[2px] select-none"
       style={{ left: peer.cursor.x, top: peer.cursor.y, zIndex: 40 }}
     >
       <svg width={18} height={18} viewBox="0 0 18 18" fill="none" style={{ display: 'block' }}>
@@ -26,7 +26,7 @@ function PeerCursor({ peer }: { peer: PeerPresence }) {
       </svg>
       <span
         className={cn(
-          'absolute left-3 top-3 whitespace-nowrap rounded px-1.5 py-0.5 font-medium text-white shadow-sm',
+          'peer-cursor__label absolute left-3 top-3 whitespace-nowrap rounded px-1.5 py-0.5 font-medium text-white shadow-sm',
           chromeText.tight,
         )}
         style={{ background: peer.color }}
@@ -48,7 +48,7 @@ function SelectionHalo({ nodeId, color }: { nodeId: string; color: string }) {
   if (!w || !h) return null;
   return (
     <div
-      className="pointer-events-none absolute rounded-[calc(var(--radius)+3px)]"
+      className="selection-halo pointer-events-none absolute rounded-[calc(var(--radius)+3px)]"
       style={{
         left: x - 3,
         top: y - 3,
@@ -66,7 +66,7 @@ function SelectionHalo({ nodeId, color }: { nodeId: string; color: string }) {
 function DragGhost({ x, y, color }: { x: number; y: number; color: string }) {
   return (
     <div
-      className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+      className="drag-ghost pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
       style={{
         left: x,
         top: y,
@@ -95,12 +95,13 @@ function CommentPin({ comment }: { comment: CanvasComment }) {
   };
 
   return (
-    <div className="absolute" style={{ left: comment.x, top: comment.y, zIndex: 50 }}>
+    <div className="comment-pin absolute" style={{ left: comment.x, top: comment.y, zIndex: 50 }}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
           'pointer-events-auto grid h-6 w-6 -translate-x-1/2 -translate-y-full place-items-center rounded-full rounded-bl-none border border-edge text-white shadow-[var(--shadow-md)] transition-transform hover:scale-110',
+          'comment-pin__trigger',
           comment.resolved && 'opacity-50',
         )}
         style={{ background: comment.resolved ? 'var(--ink3)' : 'var(--accent)' }}
@@ -113,11 +114,12 @@ function CommentPin({ comment }: { comment: CanvasComment }) {
         <div
           className={cn(
             'nowheel nodrag pointer-events-auto absolute left-2 top-1 w-64 overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-[var(--shadow-xl)]',
+            'comment-pin__popover',
             comment.resolved && 'opacity-80',
           )}
         >
-          <div className="flex flex-col gap-1.5 p-2.5">
-            <div className="flex items-baseline justify-between gap-2">
+          <div className="comment-pin__body flex flex-col gap-1.5 p-2.5">
+            <div className="comment-pin__head flex items-baseline justify-between gap-2">
               <span className={cn(chromeText.sm, 'font-semibold text-ink')}>
                 {comment.authorName}
               </span>
@@ -128,7 +130,7 @@ function CommentPin({ comment }: { comment: CanvasComment }) {
             <p className={cn(chromeText.sm, 'break-words text-ink2')}>{comment.text}</p>
 
             {comment.replies.length > 0 && (
-              <div className="mt-1 flex flex-col gap-1.5 border-t border-edge pt-1.5">
+              <div className="comment-pin__replies mt-1 flex flex-col gap-1.5 border-t border-edge pt-1.5">
                 {comment.replies.map((r) => (
                   <div key={r.id} className="flex flex-col gap-0.5">
                     <span className={cn(chromeText.tight, 'font-medium text-ink3')}>
@@ -141,7 +143,7 @@ function CommentPin({ comment }: { comment: CanvasComment }) {
             )}
           </div>
 
-          <div className="flex items-center gap-1 border-t border-edge bg-panel2 p-1.5">
+          <div className="comment-pin__reply flex items-center gap-1 border-t border-edge bg-panel2 p-1.5">
             <input
               value={reply}
               onChange={(e) => setReply(e.target.value)}
@@ -154,6 +156,7 @@ function CommentPin({ comment }: { comment: CanvasComment }) {
               placeholder="Reply…"
               className={cn(
                 'min-w-0 flex-1 border border-edge bg-panel px-1.5 py-1 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+                'comment-pin__input',
                 chromeText.sm,
                 RADIUS_CTRL,
               )}
@@ -164,6 +167,7 @@ function CommentPin({ comment }: { comment: CanvasComment }) {
               title="Send reply"
               className={cn(
                 'grid h-6 w-6 shrink-0 place-items-center text-ink3 transition-colors hover:text-accent',
+                'comment-pin__send',
                 RADIUS_CTRL,
               )}
             >
@@ -171,7 +175,7 @@ function CommentPin({ comment }: { comment: CanvasComment }) {
             </button>
           </div>
 
-          <div className="flex items-center justify-end gap-1 border-t border-edge px-1.5 py-1">
+          <div className="comment-pin__footer flex items-center justify-end gap-1 border-t border-edge px-1.5 py-1">
             <button
               type="button"
               onClick={() => resolveComment(comment.id, !comment.resolved)}

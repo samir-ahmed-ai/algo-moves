@@ -38,6 +38,7 @@ export function HighlightedCode({
       role="code"
       className={cn(
         'piece-code',
+        'highlighted-code',
         wrap && 'piece-code-wrap',
         gutter && 'piece-code-guttered',
         className,

@@ -79,7 +79,9 @@ export function OrbitFitText({
     <>
       <text ref={measureRef} className={className} visibility="hidden" aria-hidden="true" />
       <g
-        className={cn('move-orbit-caption', className)}
+        className={cn('move-orbit-caption', `move-orbit-caption--${slot}`, className)}
+        aria-label={text}
+        data-slot={slot}
         onClick={onClick}
         onPointerDown={onClick ? (e: ReactPointerEvent) => e.stopPropagation() : undefined}
       >

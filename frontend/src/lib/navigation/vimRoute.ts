@@ -7,9 +7,9 @@ export interface VimHashTarget {
 
 function decodeRoutePart(value: string): string {
   try {
-    return decodeURIComponent(value);
+    return decodeURIComponent(value).trim();
   } catch {
-    return value;
+    return value.trim();
   }
 }
 
@@ -34,9 +34,9 @@ export function parseVimHash(hash: string, pathname?: string): VimHashTarget | n
   const rest = vimRouteBody(hash, pathname);
   if (rest === null) return null;
   if (!rest) return {};
-  const parts = rest.split('/').filter(Boolean);
+  const parts = rest.split('/').map(decodeRoutePart).filter(Boolean);
   if (parts[0] === 'level' && parts[1]) {
-    return { levelId: decodeRoutePart(parts[1]) };
+    return { levelId: parts[1] };
   }
   return {};
 }
@@ -45,6 +45,7 @@ export function parseVimHash(hash: string, pathname?: string): VimHashTarget | n
 export function writeVimHash(target?: VimHashTarget | null, opts?: { replace?: boolean }) {
   if (typeof location === 'undefined') return;
   let hashBody = '';
-  if (target?.levelId) hashBody += `level/${encodeURIComponent(target.levelId)}`;
+  const levelId = target?.levelId?.trim();
+  if (levelId) hashBody += `level/${encodeURIComponent(levelId)}`;
   writeAppUrl('vim', hashBody, opts);
 }

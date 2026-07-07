@@ -22,6 +22,7 @@ import {
   difficultyTone,
   CanvasFrameProvider,
   CanvasStaticProvider,
+  useCanvasFrame,
   useCanvasStatic,
 } from '@/shell/canvas';
 import { ProblemPanelBody } from '@/shell/panels/problem/ProblemPanelBody';
@@ -102,10 +103,14 @@ export function ProblemPage({
 function ProblemPageShell() {
   const isMobile = useIsMobile();
   const { item } = useCanvasStatic();
+  const { player } = useCanvasFrame();
   const { reference } = useCodeStudioContent();
-  const hasRecall = !!reference;
-  const [view, setView] = useOverviewView(item.id);
-  const showViz = view === 'animate' || !hasRecall;
+  const hasAnimation = player.total > 1;
+  const hasSource = !!reference;
+  const [rawView, setView] = useOverviewView(item.id);
+  const view = hasAnimation ? (hasSource ? rawView : 'animate') : hasSource ? 'recall' : 'animate';
+  const canToggle = hasAnimation && hasSource;
+  const showViz = view === 'animate';
 
   return (
     <div className="flex h-full w-full flex-col bg-bg">
@@ -116,7 +121,7 @@ function ProblemPageShell() {
             className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
             view={view}
             onView={setView}
-            hasRecall={hasRecall}
+            canToggle={canToggle}
           >
             <ProblemPanelBody />
           </OverviewProblemColumn>

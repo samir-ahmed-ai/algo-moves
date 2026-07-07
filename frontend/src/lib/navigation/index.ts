@@ -7,3 +7,4 @@ export * from './appRoute';
 export * from './mobileRoute';
 export * from './vimRoute';
 export * from './gamesRoute';
+export * from './dojoRoute';

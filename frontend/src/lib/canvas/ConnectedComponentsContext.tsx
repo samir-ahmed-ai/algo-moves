@@ -10,6 +10,10 @@ interface ConnectedComponentsCtx {
 
 const Ctx = createContext<ConnectedComponentsCtx | null>(null);
 
+function normalizeId(id: string): string {
+  return id.trim();
+}
+
 export function ConnectedComponentsProvider({
   nodeIds,
   edges,
@@ -24,9 +28,12 @@ export function ConnectedComponentsProvider({
     const indexMap = componentIndexMap(components);
     return {
       components,
-      indexOf: (id: string) => indexMap.get(id) ?? -1,
-      sameComponent: (a: string, b: string) =>
-        indexMap.get(a) === indexMap.get(b) && indexMap.has(a),
+      indexOf: (id: string) => indexMap.get(normalizeId(id)) ?? -1,
+      sameComponent: (a: string, b: string) => {
+        const left = normalizeId(a);
+        const right = normalizeId(b);
+        return indexMap.get(left) === indexMap.get(right) && indexMap.has(left);
+      },
     };
   }, [nodeIds, edges]);
 

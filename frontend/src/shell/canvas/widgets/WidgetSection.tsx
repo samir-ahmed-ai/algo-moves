@@ -10,6 +10,7 @@ export function SectionBadge({ children }: { children: React.ReactNode }) {
     <span
       className={cn(
         'shrink-0 rounded-full bg-panel2 px-1 py-px font-mono tabular-nums text-ink3',
+        'canvas-widget-badge',
         chromeText.xs,
       )}
     >

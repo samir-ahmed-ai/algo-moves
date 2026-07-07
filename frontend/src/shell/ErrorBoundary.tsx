@@ -45,12 +45,12 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       if (this.props.fallback !== undefined) return this.props.fallback;
       return (
-        <div className="grid h-full min-h-[120px] w-full place-items-center p-6 text-center">
-          <div className="max-w-[40ch]">
-            <div className="text-sm font-medium text-ink2">
+        <div className="error-boundary grid h-full min-h-[120px] w-full place-items-center p-6 text-center">
+          <div className="error-boundary__card max-w-[40ch]">
+            <div className="error-boundary__title text-sm font-medium text-ink2">
               Something went wrong rendering this view.
             </div>
-            <div className="mt-1 break-words font-mono text-xs text-ink3">
+            <div className="error-boundary__message mt-1 break-words font-mono text-xs text-ink3">
               {this.state.error.message}
             </div>
           </div>

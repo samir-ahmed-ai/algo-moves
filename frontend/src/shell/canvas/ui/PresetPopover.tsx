@@ -33,15 +33,15 @@ export function PresetPopover({
   };
 
   return (
-    <div className="relative">
+    <div className="project-preset relative">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         title="Layout presets"
         className={cn(
           dense
-            ? 'flex w-full items-center gap-1.5 rounded-md border border-edge bg-panel2 px-1.5 py-1 text-left text-ink2 transition-colors hover:border-accent hover:text-accent'
-            : 'grid h-5 w-5 place-items-center rounded-md border border-edge bg-panel2 text-ink2 transition-colors hover:border-accent hover:text-accent',
+            ? 'project-action-btn project-preset__trigger flex w-full items-center gap-1.5 rounded-md border border-edge bg-panel2 px-1.5 py-1 text-left text-ink2 transition-colors hover:border-accent hover:text-accent'
+            : 'project-action-btn project-preset__trigger grid h-5 w-5 place-items-center rounded-md border border-edge bg-panel2 text-ink2 transition-colors hover:border-accent hover:text-accent',
           triggerClassName,
         )}
       >
@@ -51,7 +51,7 @@ export function PresetPopover({
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
-          <div className="absolute right-0 top-[calc(100%+6px)] z-50 w-[min(90vw,18rem)] rounded-lg border border-edge bg-panel p-2 shadow-[var(--shadow-xl)]">
+          <div className="project-popover project-preset__panel absolute right-0 top-[calc(100%+6px)] z-50 w-[min(90vw,18rem)] rounded-lg border border-edge bg-panel p-2 shadow-[var(--shadow-xl)]">
             <h4 className={cn('mb-0.5 font-semibold text-ink', chromeText.sm)}>Layout presets</h4>
             <p className={cn('mb-2 text-ink3', chromeText.sm)}>
               One-click canvas arrangements for different workflows.
@@ -64,9 +64,9 @@ export function PresetPopover({
                     key={id}
                     type="button"
                     onClick={() => apply(id)}
-                    className="flex items-start gap-1.5 rounded-md border border-edge p-1.5 text-left transition-colors hover:border-accent/50 hover:bg-panel2"
+                    className="project-preset__item flex items-start gap-1.5 rounded-md border border-edge p-1.5 text-left transition-colors hover:border-accent/50 hover:bg-panel2"
                   >
-                    <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-panel2 text-accent">
+                    <span className="project-preset__icon mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-panel2 text-accent">
                       {PRESET_ICONS[id]}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -87,7 +87,7 @@ export function PresetPopover({
             {applied && (
               <div
                 className={cn(
-                  'mt-2 flex items-center gap-1.5 rounded-md bg-accentbg px-2 py-1.5 text-accent',
+                  'project-preset__applied mt-2 flex items-center gap-1.5 rounded-md bg-accentbg px-2 py-1.5 text-accent',
                   chromeText.sm,
                 )}
               >

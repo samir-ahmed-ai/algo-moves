@@ -4,6 +4,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { ChromeLabel, chromeText } from '../chromeUi';
 import { useAnchoredPopover } from '@/hooks/useAnchoredPopover';
+import type { LucideIcon } from 'lucide-react';
 import { flatOrder, type StudioGroupId, type StudioTab } from './studioTabs';
 
 export interface StudioViewPickerProps {
@@ -15,6 +16,9 @@ export interface StudioViewPickerProps {
   variants?: Array<{ lang?: string }>;
   activeVariant?: number;
   onSetVariant?: (index: number) => void;
+  /** Fixed trigger label/icon — used when the picker is an overflow ("More views"). */
+  triggerLabel?: string;
+  triggerIcon?: LucideIcon;
 }
 
 const TAB_HINTS: Record<string, string> = {
@@ -51,6 +55,8 @@ export function StudioViewPicker({
   variants,
   activeVariant,
   onSetVariant,
+  triggerLabel,
+  triggerIcon,
 }: StudioViewPickerProps) {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -71,7 +77,8 @@ export function StudioViewPicker({
     panelWidth,
   );
 
-  const ActiveIcon = active.icon;
+  const TriggerIcon = triggerIcon ?? active.icon;
+  const triggerText = triggerLabel ?? active.label;
 
   const pick = (id: string) => {
     onGo(id);
@@ -93,7 +100,7 @@ export function StudioViewPicker({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={compact ? `${active.label} view` : undefined}
+        aria-label={compact ? `${triggerText} view` : undefined}
         onClick={() => setOpen((v) => !v)}
         className={cn(
           'flex items-center gap-1.5 rounded-md border border-edge bg-panel2/60 shadow-sm transition-colors hover:bg-panel2',
@@ -103,11 +110,11 @@ export function StudioViewPicker({
           open && 'border-accent/40 bg-panel2',
         )}
       >
-        <ActiveIcon className="h-4 w-4 shrink-0 text-accent" />
+        <TriggerIcon className="h-4 w-4 shrink-0 text-accent" />
         {!compact && (
           <>
             <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>
-              {active.label}
+              {triggerText}
             </span>
             <ChevronDown
               className={cn(

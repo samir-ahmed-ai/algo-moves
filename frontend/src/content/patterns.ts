@@ -205,11 +205,14 @@ const PATTERNS: Record<string, PatternCard> = {
   },
 };
 
+export const ALL_PATTERN_CARDS = Object.values(PATTERNS);
+
 export function patternsForTags(tags: string[]): PatternCard[] {
   const seen = new Set<string>();
   const out: PatternCard[] = [];
   for (const t of tags) {
-    const card = PATTERNS[t];
+    const key = t.trim().toLowerCase();
+    const card = PATTERNS[key];
     if (card && !seen.has(card.id)) {
       seen.add(card.id);
       out.push(card);

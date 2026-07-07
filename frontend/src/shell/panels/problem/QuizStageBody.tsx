@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
-import { flatOrder, type StudioTab } from '@/shell/study/studioTabs';
+import { ASSEMBLE_TAB_ID, flatOrder, type StudioTab } from '@/shell/study/studioTabs';
 import { studioTabAfter } from '@/shell/study/studioArcNav';
 import { ProblemPanelBody } from '@/shell/panels/problem/ProblemPanelBody';
 import { ProblemStatementColumn } from '@/shell/panels/problem/overviewColumns';
@@ -39,7 +39,7 @@ export function QuizStageBody({
   );
 
   const order = useMemo(() => flatOrder(availTabs), [availTabs]);
-  const nextAfterAssemble = useMemo(() => studioTabAfter(order, 'assemble'), [order]);
+  const nextAfterAssemble = useMemo(() => studioTabAfter(order, ASSEMBLE_TAB_ID), [order]);
 
   useEffect(() => {
     setStage(savedQuizProgress?.done && hasReassemble ? 'reassemble' : 'quiz');
@@ -52,7 +52,7 @@ export function QuizStageBody({
   const finishReassemble = useCallback(() => {
     markReassembleDone();
     // Reassemble already ran inline on the quiz tab — skip the assemble tab.
-    advancePractice('assemble');
+    advancePractice(ASSEMBLE_TAB_ID);
   }, [markReassembleDone, advancePractice]);
 
   const handleNextAll = useCallback(() => {
@@ -62,7 +62,7 @@ export function QuizStageBody({
 
   useStudioNextShortcut(stage === 'reassemble' ? finishReassemble : undefined, handleNextAll);
 
-  const arcTabId = stage === 'reassemble' ? 'assemble' : activeTabId;
+  const arcTabId = stage === 'reassemble' ? ASSEMBLE_TAB_ID : activeTabId;
 
   return (
     <StudioSplitLayout
@@ -129,7 +129,7 @@ function QuizContent({
 
   if (!quiz) {
     return (
-      <div className="grid min-h-0 flex-1 place-items-center p-6">
+      <div className="quiz-stage-empty grid min-h-0 flex-1 place-items-center p-6">
         <EmptyState
           icon={<GraduationCap className="h-4 w-4" />}
           title="No quiz"
@@ -144,7 +144,7 @@ function QuizContent({
   }
 
   return (
-    <div className="ws-scroll min-h-0 flex-1 overflow-auto p-3 sm:p-4">
+    <div className="quiz-stage-content ws-scroll min-h-0 flex-1 overflow-auto p-3 sm:p-4">
       <CodeStudioQuiz
         key={`quiz-${item.id}-${active}`}
         quiz={quiz}

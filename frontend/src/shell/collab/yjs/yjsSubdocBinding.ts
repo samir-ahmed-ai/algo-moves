@@ -7,6 +7,7 @@
 import * as Y from 'yjs';
 import type {
   EditorPayload,
+  NotesPayload,
   SubDocKind,
   SubDocSnapshot,
   WhiteboardElement,
@@ -55,6 +56,18 @@ function panelMap(doc: Y.Doc, nodeId: string, kind: SubDocKind): Y.Map<unknown> 
   return panel;
 }
 
+function setPanelText(panel: Y.Map<unknown>, next: string): void {
+  let text = panel.get('text') as Y.Text | undefined;
+  if (!text) {
+    text = new Y.Text();
+    panel.set('text', text);
+  }
+  if (text.toString() !== next) {
+    text.delete(0, text.length);
+    text.insert(0, next);
+  }
+}
+
 /** Seed one panel snapshot into Yjs. */
 export function seedSubdocPanel(doc: Y.Doc, snap: SubDocSnapshot): void {
   doc.transact(() => {
@@ -63,17 +76,11 @@ export function seedSubdocPanel(doc: Y.Doc, snap: SubDocSnapshot): void {
     panel.set('rev', snap.rev);
     if (snap.kind === 'collab-code') {
       const payload = snap.payload as EditorPayload;
-      let text = panel.get('text') as Y.Text | undefined;
-      if (!text) {
-        text = new Y.Text();
-        panel.set('text', text);
-      }
-      if (text.toString() !== payload.text) {
-        text.delete(0, text.length);
-        text.insert(0, payload.text);
-      }
+      setPanelText(panel, payload.text);
       panel.set('language', payload.language);
       if (payload.locked != null) panel.set('locked', payload.locked);
+    } else if (snap.kind === 'notes') {
+      setPanelText(panel, (snap.payload as NotesPayload).text);
     } else {
       const payload = snap.payload as WhiteboardPayload;
       let elements = panel.get('elements') as Y.Map<WhiteboardElement> | undefined;
@@ -102,6 +109,12 @@ function readSubdocPanelMap(nodeId: string, panel: Y.Map<unknown>): SubDocSnapsh
     const language = String(panel.get('language') ?? 'go');
     const locked = panel.get('locked') as boolean | undefined;
     const payload: EditorPayload = { text, language, ...(locked != null ? { locked } : {}) };
+    return snapshotFromPayload(nodeId, kind, rev, payload);
+  }
+
+  if (kind === 'notes') {
+    const text = (panel.get('text') as Y.Text | undefined)?.toString() ?? '';
+    const payload: NotesPayload = { text };
     return snapshotFromPayload(nodeId, kind, rev, payload);
   }
 
@@ -152,6 +165,19 @@ export function writeEditorSubdoc(
       text.delete(0, text.length);
       text.insert(0, payload.text);
     }
+  });
+}
+
+export function writeNotesSubdoc(
+  doc: Y.Doc,
+  nodeId: string,
+  payload: NotesPayload,
+  rev: number,
+): void {
+  doc.transact(() => {
+    const panel = panelMap(doc, nodeId, 'notes');
+    panel.set('rev', rev);
+    setPanelText(panel, payload.text);
   });
 }
 

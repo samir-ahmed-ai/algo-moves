@@ -14,7 +14,8 @@ export function ResizeHandle({
     <div
       {...handleProps}
       className={cn(
-        'nodrag shrink-0 group',
+        'resize-handle nodrag shrink-0 group',
+        horizontal ? 'resize-handle--horizontal' : 'resize-handle--vertical',
         horizontal
           ? 'flex w-2 cursor-col-resize items-stretch justify-center px-0.5'
           : 'flex h-2 cursor-row-resize items-center justify-center py-0.5',
@@ -77,13 +78,18 @@ export function ResizablePanels({
     <div
       ref={containerRef}
       className={cn(
-        'flex min-h-0 min-w-0 overflow-hidden',
+        'resizable-panels flex min-h-0 min-w-0 overflow-hidden',
         horizontal ? 'flex-row' : 'flex-col',
+        horizontal ? 'resizable-panels--horizontal' : 'resizable-panels--vertical',
+        disabled && 'resizable-panels--disabled',
         className,
       )}
     >
       <div
-        className={cn('flex min-h-0 min-w-0 flex-col overflow-hidden', firstClassName)}
+        className={cn(
+          'resizable-panel resizable-panel--first flex min-h-0 min-w-0 flex-col overflow-hidden',
+          firstClassName,
+        )}
         style={
           firstWidthPx != null
             ? horizontal
@@ -97,7 +103,9 @@ export function ResizablePanels({
         {first}
       </div>
       {!disabled && <ResizeHandle direction={direction} handleProps={handleProps} />}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{second}</div>
+      <div className="resizable-panel resizable-panel--second flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {second}
+      </div>
     </div>
   );
 }

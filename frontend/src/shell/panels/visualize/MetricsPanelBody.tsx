@@ -20,23 +20,23 @@ export function MetricsBody() {
   const tally = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   const maxCount = tally[0]?.[1] ?? 1;
   return (
-    <div className="flex flex-col">
+    <div className="viz-analytics-panel viz-analytics-panel--metrics flex flex-col">
       <StatGrid cols={2}>
         <Stat k="moves" v={frames.length} />
         <Stat k="step" v={`${player.index + 1} / ${frames.length}`} tone="accent" />
         <Stat k="move" v={frame.move.type.toLowerCase()} />
       </StatGrid>
       {verdict && (
-        <div className="flex items-center justify-between gap-3 py-[3px]">
+        <div className="viz-verdict-row flex items-center justify-between gap-3 py-[3px]">
           <Label>verdict</Label>
           <Chip tone={verdict.ok ? 'good' : 'bad'}>{verdict.label}</Chip>
         </div>
       )}
       {tally.length > 0 && (
         <ControlsAccordion title="Operations · to here" defaultOpen={false}>
-          <div className="flex flex-col gap-1">
+          <div className="viz-analytics-list flex flex-col gap-1">
             {tally.map(([t, c]) => (
-              <div key={t} className="flex flex-col gap-0.5">
+              <div key={t} className="viz-analytics-row flex flex-col gap-0.5">
                 <Stat k={t} v={c} tone="accent" />
                 <Meter value={c} max={maxCount} tone="accent" height={3} />
               </div>

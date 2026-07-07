@@ -64,7 +64,8 @@ export function ProblemSurfaceBar({
 }: ProblemSurfaceBarProps) {
   const { item } = useCanvasStatic();
   const isMobile = useIsMobile();
-  const { theme, setTheme, present, setPresent, activeItemId, openProblem } = useWorkspace();
+  const { theme, setTheme, present, setPresent, activeItemId, openProblem, backToBrowse } =
+    useWorkspace();
   const { isRunning, itemIds, runnerIndex, prevItem, nextItem } = usePlan();
   const browseCrumb = browseBreadcrumbForItem(item.id, catalog);
 
@@ -101,9 +102,17 @@ export function ProblemSurfaceBar({
           {item.title}
         </span>
         {!isMobile && browseCrumb.track && browseCrumb.category && (
-          <span className={cn('block truncate text-ink3', chromeText.xs)}>
+          <button
+            type="button"
+            onClick={backToBrowse}
+            title="Back to browse"
+            className={cn(
+              'block max-w-full truncate text-left text-ink3 transition-colors hover:text-accent',
+              chromeText.xs,
+            )}
+          >
             {browseCrumb.track.title} › {browseCrumb.category.title}
-          </span>
+          </button>
         )}
       </div>
       {afterTitle}
@@ -146,7 +155,7 @@ export function ProblemSurfaceBar({
         </div>
       )}
 
-      <ToolbarSegment className="hidden md:flex">
+      <ToolbarSegment className="hidden sm:flex">
         <FeatureSelectorPopover
           groups={SURFACE_THEME_GROUPS}
           value={theme}

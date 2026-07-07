@@ -10,7 +10,7 @@ export function CanvasFloatingHud() {
     <Controls
       position="bottom-left"
       showInteractive={false}
-      className="!bottom-[calc(var(--chrome-bottom,0px)+8px)] !left-2 !m-0"
+      className="canvas-floating-hud !bottom-[calc(var(--chrome-bottom,0px)+8px)] !left-2 !m-0"
     />
   );
 }

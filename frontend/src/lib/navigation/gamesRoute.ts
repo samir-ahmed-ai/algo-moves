@@ -8,9 +8,9 @@ export interface GamesHashTarget {
 
 function decodeRoutePart(value: string): string {
   try {
-    return decodeURIComponent(value);
+    return decodeURIComponent(value).trim();
   } catch {
-    return value;
+    return value.trim();
   }
 }
 
@@ -37,9 +37,9 @@ export function parseGamesHash(hash: string, pathname?: string): GamesHashTarget
   const rest = gamesRouteBody(hash, pathname);
   if (rest === null) return null;
   if (!rest) return {};
-  const parts = rest.split('/').filter(Boolean);
+  const parts = rest.split('/').map(decodeRoutePart).filter(Boolean);
   if (parts[0] === 'room' && parts[1]) {
-    return { room: decodeRoutePart(parts[1]).toUpperCase() };
+    return { room: parts[1].toUpperCase() };
   }
   return {};
 }
@@ -51,7 +51,8 @@ export function buildGamesUrl(room?: string): string {
       ? ''
       : `${location.origin}${pagePath('games')}${location.search || ''}`;
   let hashBody = '';
-  if (room) hashBody = `room/${encodeURIComponent(room.toUpperCase())}`;
+  const roomCode = room?.trim().toUpperCase();
+  if (roomCode) hashBody = `room/${encodeURIComponent(roomCode)}`;
   return hashBody ? `${base}#${hashBody}` : base;
 }
 
@@ -59,6 +60,7 @@ export function buildGamesUrl(room?: string): string {
 export function writeGamesHash(target?: GamesHashTarget | null, opts?: { replace?: boolean }) {
   if (typeof location === 'undefined') return;
   let hashBody = '';
-  if (target?.room) hashBody = `room/${encodeURIComponent(target.room.toUpperCase())}`;
+  const room = target?.room?.trim().toUpperCase();
+  if (room) hashBody = `room/${encodeURIComponent(room)}`;
   writeAppUrl('games', hashBody, opts);
 }

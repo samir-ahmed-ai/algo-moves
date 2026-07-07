@@ -24,7 +24,7 @@ export function EagleMark({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Algo Moves eagle mark"
       role="img"
-      className={cn('shrink-0', className)}
+      className={cn('eagle-mark shrink-0', className)}
     >
       <defs>
         {/* Background: teal gradient matching mint-saas accent */}

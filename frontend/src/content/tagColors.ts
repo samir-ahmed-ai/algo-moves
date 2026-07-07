@@ -7,3 +7,10 @@ export const TAG_KIND_COLOR: Record<TagKind, string> = {
   skill: 'var(--team2-stroke)',
   meta: 'var(--text-3)',
 };
+
+export const TAG_KIND_LABEL: Record<TagKind, string> = {
+  pattern: 'Pattern',
+  structure: 'Structure',
+  skill: 'Skill',
+  meta: 'Meta',
+};

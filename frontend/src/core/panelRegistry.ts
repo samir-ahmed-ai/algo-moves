@@ -27,6 +27,17 @@ export interface PanelConfigEntry {
   sidebarOnly?: boolean;
 }
 
+function normalizePanelId(id: string): string {
+  return id.trim();
+}
+
+function safePosition(position: { x: number; y: number }): { x: number; y: number } {
+  return {
+    x: Number.isFinite(position.x) ? position.x : 0,
+    y: Number.isFinite(position.y) ? position.y : 0,
+  };
+}
+
 function panelModeRole(p: PanelConfigEntry, mode: CanvasMode): 'builtin' | 'optional' | null {
   if (!p.modes.includes(mode)) return null;
   const flag = p.modeFlags?.[mode];
@@ -181,27 +192,30 @@ export const panelsConfig: PanelConfigEntry[] = [
 
 const byId = new Map<string, PanelConfigEntry>();
 for (const p of panelsConfig) {
-  if (byId.has(p.id)) {
+  const id = normalizePanelId(p.id);
+  if (!id) continue;
+  if (byId.has(id)) {
     if (import.meta.env.DEV) {
       console.warn(`[panelRegistry] Duplicate panel id "${p.id}" kept only first occurrence`);
     }
     continue;
   }
-  byId.set(p.id, p);
+  byId.set(id, p);
 }
 
 const panelConfigs = Array.from(byId.values());
 
 export function getPanelConfig(id: string): PanelConfigEntry | undefined {
-  return byId.get(id);
+  return byId.get(normalizePanelId(id));
 }
 
 export function panelTitle(id: string, fallback?: string): string {
-  return byId.get(id)?.title ?? fallback ?? id;
+  const panelId = normalizePanelId(id);
+  return byId.get(panelId)?.title ?? fallback ?? panelId;
 }
 
 export function panelCategory(id: string): PanelCategory {
-  return byId.get(id)?.category ?? 'Other';
+  return byId.get(normalizePanelId(id))?.category ?? 'Other';
 }
 
 export function modeBuiltins(mode: CanvasMode): string[] {
@@ -223,14 +237,15 @@ let panelCounter = 0;
 
 /** Factory for dynamically spawned panels (drag-from-sidebar). */
 export function createPanelByType(kind: string, position: { x: number; y: number }) {
+  const panelKind = normalizePanelId(kind) || 'panel';
   panelCounter += 1;
   return {
-    id: `${kind}-${panelCounter}-${Date.now().toString(36)}`,
+    id: `${panelKind}-${panelCounter}-${Date.now().toString(36)}`,
     type: 'panel' as const,
-    position,
+    position: safePosition(position),
     data: {
-      kind,
-      title: panelTitle(kind),
+      kind: panelKind,
+      title: panelTitle(panelKind),
       runState: 'paused' as const,
     },
   };

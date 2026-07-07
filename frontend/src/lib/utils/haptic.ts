@@ -1,8 +1,13 @@
 /** Light tap feedback on supported mobile browsers; no-op elsewhere. */
+function vibrate(ms: number): void {
+  if (typeof navigator === 'undefined') return;
+  navigator.vibrate?.(ms);
+}
+
 export function hapticSuccess(): void {
-  navigator.vibrate?.(10);
+  vibrate(10);
 }
 
 export function hapticError(): void {
-  navigator.vibrate?.(12);
+  vibrate(12);
 }

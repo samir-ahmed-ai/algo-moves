@@ -24,10 +24,19 @@ export function StudioNextFooter({
   if (!arcRail && !hasNext && !hasNextAll) return null;
 
   return (
-    <div className={cn('flex flex-wrap items-center justify-between gap-2', className)}>
-      {arcRail ? <div className="min-w-0 flex-1">{arcRail}</div> : <span />}
+    <div
+      className={cn(
+        'studio-next-footer flex flex-wrap items-center justify-between gap-2',
+        className,
+      )}
+    >
+      {arcRail ? (
+        <div className="studio-next-footer__rail min-w-0 flex-1">{arcRail}</div>
+      ) : (
+        <span />
+      )}
       {(hasNext || hasNextAll) && (
-        <div className="flex shrink-0 flex-wrap items-center gap-1">
+        <div className="studio-next-footer__actions flex shrink-0 flex-wrap items-center gap-1">
           {hasNextAll && (
             <Btn
               variant="ghost"

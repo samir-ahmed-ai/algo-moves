@@ -273,7 +273,7 @@ export function AuthPopover({
           : cn(
               'animate-auth-in',
               useSheetLayout
-                ? 'max-w-none rounded-t-[1.25rem] [padding-bottom:max(1.25rem,env(safe-area-inset-bottom))] sm:max-w-[22rem] sm:rounded-[1.25rem]'
+                ? 'auth-popover-panel--sheet max-w-none rounded-t-[1.25rem] [padding-bottom:max(1.25rem,env(safe-area-inset-bottom))] sm:max-w-[22rem] sm:rounded-[1.25rem]'
                 : 'rounded-[1.25rem]',
             ),
       )}
@@ -296,7 +296,10 @@ export function AuthPopover({
 
         <div className="auth-popover-panel__hero mb-3 flex flex-col items-center text-center">
           <BrandLogo className="auth-popover-panel__brand h-8 w-8 ring-2 ring-accent/15 ring-offset-2 ring-offset-bg" />
-          <h2 id={titleId} className="mt-2 text-base font-bold tracking-tight text-ink">
+          <h2
+            id={titleId}
+            className="auth-popover-panel__title mt-2 text-base font-bold tracking-tight text-ink"
+          >
             {tab === 'login' ? s.welcomeBack : s.createAccount}
           </h2>
           <p className="auth-popover-panel__subtitle mt-0.5 max-w-[16rem] text-[length:var(--fs-sm)] leading-snug text-ink3">
@@ -358,7 +361,7 @@ export function AuthPopover({
                 type="button"
                 tabIndex={-1}
                 onClick={() => setShowPassword((v) => !v)}
-                className="grid h-8 w-8 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+                className="auth-field__reveal grid h-8 w-8 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
                 aria-label={showPassword ? s.hidePassword : s.showPassword}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -481,7 +484,7 @@ function TabChip({
       onClick={onClick}
       className={cn(
         'auth-tab-chip relative z-[1] min-h-[var(--row)] rounded-lg text-sm font-semibold transition-colors duration-200',
-        active ? 'text-ink' : 'text-ink3 hover:text-ink2',
+        active ? 'auth-tab-chip--active text-ink' : 'text-ink3 hover:text-ink2',
       )}
     >
       {children}
@@ -497,18 +500,20 @@ function PasswordStrengthMeter({ strength }: { strength: 'weak' | 'fair' | 'stro
 
   return (
     <div className="auth-password-strength mt-1.5 space-y-1.5">
-      <div className="flex gap-1" aria-hidden>
+      <div className="auth-password-strength__bars flex gap-1" aria-hidden>
         {[0, 1, 2, 3].map((i) => (
           <span
             key={i}
             className={cn(
-              'h-1 flex-1 rounded-full transition-colors',
+              'auth-password-strength__bar h-1 flex-1 rounded-full transition-colors',
               i < bars ? tone : 'bg-edge/60',
             )}
           />
         ))}
       </div>
-      <p className="text-[length:var(--fs-tight)] text-ink3">{label}</p>
+      <p className="auth-password-strength__label text-[length:var(--fs-tight)] text-ink3">
+        {label}
+      </p>
     </div>
   );
 }
@@ -547,14 +552,14 @@ function AuthField({
   return (
     <div className="auth-field flex flex-col gap-1 text-start">
       <label
-        className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3"
+        className="auth-field__label text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3"
         htmlFor={id}
       >
         {label}
       </label>
       <div className="auth-field__control relative">
         {leading ? (
-          <div className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink3/80">
+          <div className="auth-field__leading pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink3/80">
             {leading}
           </div>
         ) : null}
@@ -578,11 +583,13 @@ function AuthField({
           )}
         />
         {trailing ? (
-          <div className="absolute inset-y-0 end-1 flex items-center">{trailing}</div>
+          <div className="auth-field__trailing absolute inset-y-0 end-1 flex items-center">
+            {trailing}
+          </div>
         ) : null}
       </div>
       {error ? (
-        <p id={id ? `${id}-error` : undefined} className="text-xs text-bad">
+        <p id={id ? `${id}-error` : undefined} className="auth-field__error text-xs text-bad">
           {error}
         </p>
       ) : null}
@@ -636,8 +643,12 @@ export function AuthUserMenu({
       className="auth-user-menu absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-popover-in rounded-xl border border-edge bg-panel p-1.5 shadow-theme-lg"
     >
       <div className="auth-user-menu__head border-b border-edge px-2.5 py-2">
-        <p className="truncate text-sm font-semibold text-ink">{profile.display_name}</p>
-        {profile.email ? <p className="truncate text-xs text-ink3">{profile.email}</p> : null}
+        <p className="auth-user-menu__name truncate text-sm font-semibold text-ink">
+          {profile.display_name}
+        </p>
+        {profile.email ? (
+          <p className="auth-user-menu__email truncate text-xs text-ink3">{profile.email}</p>
+        ) : null}
         {profile.is_admin ? (
           <span className="auth-user-menu__admin mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide text-accent">
             <Shield className="h-3 w-3" /> {s.admin}

@@ -34,7 +34,9 @@ import {
   LayoutPanelLeft,
 } from 'lucide-react';
 
-const PANEL_ICON = 'size-[var(--node-icon,1.125rem)]';
+const PANEL_ICON = 'panel-kind-icon size-[var(--node-icon,1.125rem)]';
+const PANEL_FALLBACK_ICON =
+  'panel-kind-icon panel-kind-icon--fallback size-[var(--node-icon,1.125rem)]';
 
 const ICON: Record<string, ReactNode> = {
   workbench: <LayoutPanelLeft className={PANEL_ICON} />,
@@ -47,6 +49,7 @@ const ICON: Record<string, ReactNode> = {
   bookmarks: <Bookmark className={PANEL_ICON} />,
   editor: <Pencil className={PANEL_ICON} />,
   copy: <Copy className={PANEL_ICON} />,
+  scratch: <PencilLine className={PANEL_ICON} />,
   cases: <ListChecks className={PANEL_ICON} />,
   code: <Columns2 className={PANEL_ICON} />,
   reassemble: <Puzzle className={PANEL_ICON} />,
@@ -77,10 +80,10 @@ export { panelAccent } from '@/core/panelAccent';
 
 /** The per-kind glyph, for chrome that lists nodes (e.g. the Add-panel menu). */
 export function nodeIcon(kind: string): ReactNode {
-  return ICON[kind] ?? <FileQuestion className={PANEL_ICON} />;
+  return ICON[kind] ?? <FileQuestion className={PANEL_FALLBACK_ICON} />;
 }
 
 /** Panel kind icon map — used by PanelNodeHeader. */
 export function panelKindIcon(kind: string): ReactNode {
-  return ICON[kind] ?? <FileQuestion className={PANEL_ICON} />;
+  return ICON[kind] ?? <FileQuestion className={PANEL_FALLBACK_ICON} />;
 }

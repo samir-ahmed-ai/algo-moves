@@ -82,29 +82,34 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
       <Accordion.Item
         key={track.id}
         value={track.id}
-        className="border-b border-edge last:border-0"
+        className="catalog-tree__track border-b border-edge last:border-0"
       >
         <Accordion.Header className="flex">
-          <Accordion.Trigger className="group/row flex w-full min-h-[var(--row)] items-center gap-1.5 pr-2 text-left transition-colors hover:bg-panel2">
-            <span className="grid h-6 w-5 shrink-0 place-items-center text-ink3">
+          <Accordion.Trigger className="catalog-tree__track-trigger group/row flex w-full min-h-[var(--row)] items-center gap-1.5 pr-2 text-left transition-colors hover:bg-panel2">
+            <span className="catalog-tree__chevron grid h-6 w-5 shrink-0 place-items-center text-ink3">
               <ChevronRight className="h-3 w-3 transition-transform duration-200 group-data-[state=open]/row:rotate-90" />
             </span>
-            <Icon className="h-3.5 w-3.5 shrink-0 opacity-80 text-ink2" />
+            <Icon className="catalog-tree__track-icon h-3.5 w-3.5 shrink-0 opacity-80 text-ink2" />
             <span
               className={cn(
-                'min-w-0 flex-1 truncate font-medium text-ink2 group-hover/row:text-ink',
+                'catalog-tree__track-title min-w-0 flex-1 truncate font-medium text-ink2 group-hover/row:text-ink',
                 chromeText.sm,
               )}
             >
               {track.title}
             </span>
-            <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.xs)}>
+            <span
+              className={cn(
+                'catalog-tree__count shrink-0 font-mono tabular-nums text-ink3',
+                chromeText.xs,
+              )}
+            >
               {categories.length}
             </span>
           </Accordion.Trigger>
         </Accordion.Header>
         <Accordion.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-          <div className="pb-1">
+          <div className="catalog-tree__categories pb-1">
             {categories.map((cat) => {
               const active = cat.id === openCategoryId;
               const count = getItemsForCategory(cat.id, catalog).length;
@@ -121,11 +126,19 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
                   title={`Open the ${cat.title} grid`}
                   className={cn(
                     'group/topic flex w-full min-h-[var(--row)] items-center gap-2 py-0 pl-[26px] pr-[var(--hpad)] text-left transition-colors',
-                    active ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                    'catalog-tree__category',
+                    active
+                      ? 'catalog-tree__category--active bg-accentbg text-accent'
+                      : 'text-ink2 hover:bg-panel2 hover:text-ink',
                   )}
                 >
                   <span className={cn('min-w-0 flex-1 truncate', chromeText.sm)}>{cat.title}</span>
-                  <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.xs)}>
+                  <span
+                    className={cn(
+                      'catalog-tree__category-count shrink-0 font-mono tabular-nums text-ink3',
+                      chromeText.xs,
+                    )}
+                  >
                     {count}
                   </span>
                   <LayoutGrid
@@ -153,7 +166,11 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
 
   if (searching) {
     return (
-      <Accordion.Root type="multiple" value={matchingTrackIds} className="py-1">
+      <Accordion.Root
+        type="multiple"
+        value={matchingTrackIds}
+        className="catalog-tree catalog-tree--searching py-1"
+      >
         {trackItems}
       </Accordion.Root>
     );
@@ -165,7 +182,7 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
       collapsible
       value={expandedTrackId}
       onValueChange={(v) => setExpandedTrackId(v as TrackId | '')}
-      className="py-1"
+      className="catalog-tree py-1"
     >
       {trackItems}
     </Accordion.Root>

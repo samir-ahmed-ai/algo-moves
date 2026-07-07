@@ -41,12 +41,12 @@ export function PadGridBuilder({
   }, [grid, onApply]);
 
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="input-builder input-builder--pad-grid nodrag flex flex-col gap-2">
       <Field label="Pad grid — click cells; Shift+click to multi-select">
-        <div className="overflow-x-auto">
-          <div className="inline-flex flex-col gap-0.5">
+        <div className="input-builder-grid-shell overflow-x-auto">
+          <div className="input-builder-pad-grid inline-flex flex-col gap-0.5">
             {grid.cells.map((row, ri) => (
-              <div key={ri} className="flex gap-0.5">
+              <div key={ri} className="input-builder-pad-row flex gap-0.5">
                 {row.map((on, ci) => {
                   const key = `${ri},${ci}`;
                   const grouped = grid.selected.has(key);
@@ -58,12 +58,13 @@ export function PadGridBuilder({
                       onClick={(e) => onCell(ri, ci, e.shiftKey)}
                       className={cn(
                         'h-6 w-6 rounded-sm border transition-colors',
+                        'input-builder-pad-cell',
                         nodeText['2xs'],
                         on
-                          ? 'border-accent bg-accent/30 text-ink'
-                          : 'border-edge bg-panel2 text-ink3',
-                        grouped && 'ring-1 ring-accent',
-                        playhead && 'ring-2 ring-good',
+                          ? 'input-builder-pad-cell--active border-accent bg-accent/30 text-ink'
+                          : 'input-builder-pad-cell--idle border-edge bg-panel2 text-ink3',
+                        grouped && 'input-builder-pad-cell--grouped ring-1 ring-accent',
+                        playhead && 'input-builder-pad-cell--playhead ring-2 ring-good',
                       )}
                     >
                       {on ? ri + 1 : ''}
@@ -72,13 +73,16 @@ export function PadGridBuilder({
                 })}
               </div>
             ))}
-            <div className="mt-1 flex gap-0.5">
+            <div className="input-builder-mod-row mt-1 flex gap-0.5">
               {Array.from({ length: grid.cols }, (_, ci) => (
                 <select
                   key={ci}
                   value={grid.columnModifiers[ci] ?? 'none'}
                   onChange={(e) => setColMod(ci, e.target.value as ColumnModifier)}
-                  className={cn('h-5 w-6 rounded border border-edge bg-panel2', nodeText['2xs'])}
+                  className={cn(
+                    'input-builder-mod-select h-5 w-6 rounded border border-edge bg-panel2',
+                    nodeText['2xs'],
+                  )}
                   title={`Column ${ci + 1} modifier`}
                 >
                   {MODIFIERS.map((m) => (
@@ -92,13 +96,14 @@ export function PadGridBuilder({
           </div>
         </div>
       </Field>
-      <div className="flex flex-wrap gap-1">
+      <div className="input-builder-preset-row flex flex-wrap gap-1">
         {EUCLIDEAN_PRESETS.map((p) => (
           <button
             key={p.label}
             type="button"
             className={cn(
               'rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2',
+              'input-builder-preset',
               nodeText.xs,
             )}
             onClick={() => setGrid(createPadGrid(p.steps, p.pulses))}

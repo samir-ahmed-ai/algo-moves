@@ -18,7 +18,7 @@ import {
 } from '@codemirror/language';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { EditorState, type Extension } from '@codemirror/state';
-import { vim } from '@replit/codemirror-vim';
+import { vim, Vim } from '@replit/codemirror-vim';
 import {
   crosshairCursor,
   drawSelection,
@@ -44,13 +44,14 @@ export function coreEditorExtensions(
   opts?: { lineNumbers?: boolean; lang?: string },
 ): Extension[] {
   const showLineNumbers = opts?.lineNumbers !== false;
+  const lang = opts?.lang?.trim();
   return [
-    ...indentExtensionsForLang(opts?.lang),
+    ...indentExtensionsForLang(lang),
     ...lineNumberExtensions(showLineNumbers),
     highlightSpecialChars(),
     history(),
     foldGutter({ openText: '▾', closedText: '▸' }),
-    ...sectionFoldExtensions(opts?.lang),
+    ...sectionFoldExtensions(lang),
     drawSelection(),
     dropCursor(),
     EditorState.allowMultipleSelections.of(true),
@@ -70,7 +71,7 @@ export function coreEditorExtensions(
       // Single-line fold at cursor; section collapse uses Mod-Alt-[ below (not foldKeymap — avoids Mac conflict).
       { key: 'Ctrl-Shift-[', run: foldCode },
       { key: 'Ctrl-Shift-]', run: unfoldCode },
-      ...sectionFoldBindings(opts?.lang),
+      ...sectionFoldBindings(lang),
       { key: 'Mod-[', run: indentLess },
       { key: 'Mod-]', run: indentMore },
       indentWithTab,
@@ -80,9 +81,23 @@ export function coreEditorExtensions(
   ];
 }
 
+let vimCommandsDefined = false;
+
+/** The recall draft auto-saves on every keystroke, so :w / :wq / :x are friendly no-ops
+ *  (vim users' muscle memory doesn't hit "command not implemented"). Defined once, lazily. */
+function defineVimCommands() {
+  if (vimCommandsDefined) return;
+  vimCommandsDefined = true;
+  Vim.defineEx('write', 'w', () => {});
+  Vim.defineEx('wq', 'wq', () => {});
+  Vim.defineEx('xit', 'x', () => {});
+}
+
 /** Vim must load before other keymaps. */
 export function vimExtensions(enabled: boolean): Extension[] {
-  return enabled ? [vim({ status: true })] : [];
+  if (!enabled) return [];
+  defineVimCommands();
+  return [vim({ status: true })];
 }
 
 export function wrapExtensions(enabled: boolean): Extension[] {

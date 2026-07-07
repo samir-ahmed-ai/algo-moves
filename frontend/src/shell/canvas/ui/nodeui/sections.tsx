@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { nodeText, nodeTextWrap, nodeIconGlyph } from '@/design/typography';
 import { Label } from '@/components/shared/formControls';
-import type { ReactNode } from 'react';
 
 export function Section({
   title,
@@ -21,16 +20,24 @@ export function Section({
   bordered?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const contentId = useId();
   const header = title || right;
   return (
-    <section className={cn(bordered && 'border-t border-edge first:border-t-0')}>
+    <section
+      className={cn(
+        'node-section',
+        bordered && 'node-section--bordered border-t border-edge first:border-t-0',
+      )}
+    >
       {header && (
-        <div className="flex items-center gap-1.5 py-1.5">
+        <div className="node-section__header flex items-center gap-1.5 py-1.5">
           {collapsible ? (
             <button
               type="button"
               onClick={() => setOpen((o) => !o)}
-              className="nodrag flex flex-1 items-center gap-1.5 text-left transition-colors hover:opacity-80"
+              aria-expanded={open}
+              aria-controls={contentId}
+              className="node-section__trigger nodrag flex flex-1 items-center gap-1.5 text-left transition-colors hover:opacity-80"
             >
               <ChevronDown
                 className={cn(
@@ -49,13 +56,20 @@ export function Section({
           {right}
         </div>
       )}
-      {(!collapsible || open) && <div className={cn(header && 'pb-1.5')}>{children}</div>}
+      {(!collapsible || open) && (
+        <div
+          id={collapsible ? contentId : undefined}
+          className={cn('node-section__body', header && 'pb-1.5')}
+        >
+          {children}
+        </div>
+      )}
     </section>
   );
 }
 
 export function Rule({ className }: { className?: string }) {
-  return <div className={cn('my-2 h-px bg-edge', className)} />;
+  return <div className={cn('node-rule my-2 h-px bg-edge', className)} />;
 }
 
 export function ControlsAccordion({
@@ -82,6 +96,7 @@ export function ControlsAccordion({
   fill?: boolean;
 }) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const contentId = useId();
   const open = controlledOpen ?? internalOpen;
   const toggle = () => {
     const next = !open;
@@ -90,14 +105,20 @@ export function ControlsAccordion({
   };
   return (
     <div
-      className={cn('border-t border-edge/60', fill && 'flex min-h-0 flex-1 flex-col', className)}
+      data-open={open ? 'true' : 'false'}
+      className={cn(
+        'node-controls-accordion border-t border-edge/60',
+        fill && 'node-controls-accordion--fill flex min-h-0 flex-1 flex-col',
+        className,
+      )}
     >
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
+        aria-controls={contentId}
         className={cn(
-          'nodrag flex w-full items-center gap-1 py-1 font-mono text-ink3 transition-colors hover:text-ink2',
+          'node-controls-accordion__trigger nodrag flex w-full items-center gap-1 py-1 font-mono text-ink3 transition-colors hover:text-ink2',
           nodeText.xs,
         )}
       >
@@ -120,8 +141,9 @@ export function ControlsAccordion({
       </button>
       {open && (
         <div
+          id={contentId}
           className={cn(
-            'flex flex-col gap-1 pb-1',
+            'node-controls-accordion__body flex flex-col gap-1 pb-1',
             fill && 'min-h-0 flex-1 overflow-hidden',
             bodyClassName,
           )}

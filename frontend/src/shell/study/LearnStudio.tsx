@@ -18,16 +18,16 @@ import { ProblemOverviewBody } from '@/shell/panels/problem/ProblemOverviewBody'
 import { QuizStageBody } from '@/shell/panels/problem/QuizStageBody';
 import { StudioAssembleStageBody } from '@/shell/panels/problem/StudioAssembleStageBody';
 import { StudioPanelStageBody } from '@/shell/panels/problem/StudioPanelStageBody';
-import { StudioViewPicker } from './StudioViewPicker';
+import { StudioArc } from './StudioArc';
 import { ProblemSurfaceBar } from './ProblemSurfaceBar';
-import { LibraryStatsBar } from './LibraryStatsBar';
 import { readStudioTab, writeStudioTab } from '@/store/study/studioTab';
 import {
+  arcTabs,
   flatOrder,
   isTabAvailable,
+  moreTabs,
   STUDIO_GROUPS,
   STUDIO_TABS,
-  type StudioGroupId,
   type StudioTab,
 } from './studioTabs';
 import { studioNextAllLabel } from './studioArcNav';
@@ -129,7 +129,12 @@ function StudioShell({
   onOpenHelp?: () => void;
 }) {
   const { hasQuiz, hasReassemble } = useCodeStudioPhase();
-  const { reference } = useCodeStudioContent();
+  const {
+    reference,
+    variants,
+    active: activeVariant,
+    setActive: setVariant,
+  } = useCodeStudioContent();
   const { item } = useCanvasStatic();
   const { present } = useWorkspace();
   const isMobile = useIsMobile();
@@ -142,6 +147,8 @@ function StudioShell({
     [hasQuiz, hasReassemble, reference],
   );
   const order = useMemo(() => flatOrder(avail), [avail]);
+  const arc = useMemo(() => arcTabs(avail), [avail]);
+  const more = useMemo(() => moreTabs(avail), [avail]);
   const stages = useMemo(
     () => STUDIO_GROUPS.filter((g) => avail.some((t) => t.group === g.id)),
     [avail],
@@ -202,18 +209,41 @@ function StudioShell({
   return (
     <CanvasActionsProvider value={studioActions}>
       <div className="learn-studio flex h-full w-full flex-col bg-bg">
-        {!present && (
-          <LearnTopBar
-            stages={stages}
-            avail={avail}
-            active={active}
-            isMobile={isMobile}
-            onGo={go}
-            onOpenPalette={onOpenPalette}
-            onOpenHelp={onOpenHelp}
-          />
+        {!present ? (
+          <>
+            <LearnTopBar onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
+            <StudioArc
+              arc={arc}
+              more={more}
+              order={order}
+              stages={stages}
+              active={active}
+              onGo={go}
+              variants={variants}
+              activeVariant={activeVariant}
+              onSetVariant={setVariant}
+              compact={isMobile}
+            />
+          </>
+        ) : (
+          // Present mode strips chrome; keep a faint, auto-revealing switcher so the
+          // presenter can still move through the arc without exiting the mode.
+          <div className="studio-present-switcher fixed bottom-3 right-3 z-40 rounded-full border border-edge bg-panel/90 opacity-30 shadow-[var(--shadow-lg)] backdrop-blur transition-opacity hover:opacity-100 focus-within:opacity-100">
+            <StudioArc
+              arc={arc}
+              more={more}
+              order={order}
+              stages={stages}
+              active={active}
+              onGo={go}
+              variants={variants}
+              activeVariant={activeVariant}
+              onSetVariant={setVariant}
+              compact
+              bare
+            />
+          </div>
         )}
-        {!present && !isMobile && active.render === 'overview' && <LibraryStatsBar />}
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <StageBody avail={avail} active={active} cont={cont} lastTab={lastTab} onGo={go} />
         </div>
@@ -225,41 +255,17 @@ function StudioShell({
 /* ------------------------------------------------------------------- top bar */
 
 function LearnTopBar({
-  stages,
-  avail,
-  active,
-  isMobile,
-  onGo,
   onOpenPalette,
   onOpenHelp,
 }: {
-  stages: { id: StudioGroupId; label: string }[];
-  avail: StudioTab[];
-  active: StudioTab;
-  isMobile: boolean;
-  onGo: (id: string) => void;
   onOpenPalette?: () => void;
   onOpenHelp?: () => void;
 }) {
-  const { variants, active: activeVariant, setActive } = useCodeStudioContent();
-
   return (
     <ProblemSurfaceBar
       onOpenPalette={onOpenPalette}
       onOpenHelp={onOpenHelp}
       badgeIcon={<GraduationCap className="h-4 w-4 text-accent" />}
-      afterTitle={
-        <StudioViewPicker
-          compact={isMobile}
-          stages={stages}
-          avail={avail}
-          active={active}
-          onGo={onGo}
-          variants={variants.length > 1 ? variants : undefined}
-          activeVariant={activeVariant}
-          onSetVariant={setActive}
-        />
-      }
       meta={null}
     />
   );

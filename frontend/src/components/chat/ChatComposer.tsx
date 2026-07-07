@@ -25,7 +25,7 @@ export function ChatComposer({
   buttonClassName,
 }: ChatComposerProps) {
   return (
-    <div className={cn('flex items-center gap-1.5', className)}>
+    <div className={cn('chat-composer flex items-center gap-1.5', className)}>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
@@ -35,6 +35,7 @@ export function ChatComposer({
         placeholder={placeholder}
         className={cn(
           'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1.5 text-sm text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent',
+          'chat-composer__input',
           inputClassName,
         )}
       />
@@ -44,6 +45,7 @@ export function ChatComposer({
         disabled={!value.trim()}
         className={cn(
           'grid h-8 w-8 shrink-0 place-items-center bg-accent text-white disabled:opacity-40',
+          'chat-composer__send',
           buttonClassName,
         )}
         aria-label={sendLabel}

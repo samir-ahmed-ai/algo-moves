@@ -55,14 +55,14 @@ export function CategoryBoard({
   } as const;
 
   return (
-    <div className="relative h-full overflow-auto p-[var(--pad)]">
+    <div className="category-board relative h-full overflow-auto p-[var(--pad)]">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.15]"
+        className="category-board__grid pointer-events-none absolute inset-0 opacity-[0.15]"
         style={gridStyle}
       />
 
-      <div className="relative">
+      <div className="category-board__content relative">
         <BrowseBreadcrumb
           trackId={trackId}
           categoryId={categoryId}
@@ -70,18 +70,23 @@ export function CategoryBoard({
           onBack={() => setActiveCategoryId(null)}
           trailing={
             total > 0 ? (
-              <div className="relative ml-auto flex shrink-0 items-center gap-2">
-                <div className="flex flex-col items-end gap-1">
-                  <div className="flex w-24 flex-col gap-0.5">
+              <div className="category-board__progress relative ml-auto flex shrink-0 items-center gap-2">
+                <div className="category-board__progress-copy flex flex-col items-end gap-1">
+                  <div className="category-board__meters flex w-24 flex-col gap-0.5">
                     <Meter value={mastered} max={total} tone="good" height={4} />
                     <Meter value={attempted} max={total} tone="accent" height={4} />
                   </div>
-                  <span className={cn('font-mono tabular-nums text-ink3', chromeText.sm)}>
+                  <span
+                    className={cn(
+                      'category-board__progress-text font-mono tabular-nums text-ink3',
+                      chromeText.sm,
+                    )}
+                  >
                     {mastered}/{total} mastered · {attempted} tried
                     {onStreak > 0 ? ` · ${onStreak} on streak` : ''}
                   </span>
                 </div>
-                <div className="hidden items-center gap-1 sm:flex">
+                <div className="category-board__difficulty hidden items-center gap-1 sm:flex">
                   {(['Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => {
                     const n = d === 'Easy' ? easy : d === 'Medium' ? med : hard;
                     if (n === 0) return null;
@@ -103,7 +108,7 @@ export function CategoryBoard({
         />
 
         {total === 0 ? (
-          <div className="grid h-[60vh] place-items-center">
+          <div className="category-board__empty grid h-[60vh] place-items-center">
             <EmptyState
               icon={<Boxes className="h-4 w-4" />}
               title="No problems on this sheet yet"
@@ -138,25 +143,27 @@ export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
   } as const;
 
   return (
-    <div className="relative h-full overflow-auto p-[var(--pad)]">
+    <div className="track-category-board relative h-full overflow-auto p-[var(--pad)]">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.15]"
+        className="track-category-board__grid pointer-events-none absolute inset-0 opacity-[0.15]"
         style={gridStyle}
       />
-      <div className="relative">
+      <div className="track-category-board__content relative">
         <BrowseBreadcrumb trackId={trackId} backTitle="Back to home" onBack={goHome} />
-        <div className="relative mb-3">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink3" />
+        <div className="track-category-board__search relative mb-3">
+          <Search className="track-category-board__search-icon pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink3" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search categories…"
-            className="w-full rounded-lg border border-edge bg-panel py-2 pl-9 pr-3 text-[length:var(--fs)] text-ink outline-none placeholder:text-ink3 focus:border-accent"
+            className="track-category-board__search-input w-full rounded-lg border border-edge bg-panel py-2 pl-9 pr-3 text-[length:var(--fs)] text-ink outline-none placeholder:text-ink3 focus:border-accent"
           />
         </div>
         {filteredCategories.length === 0 ? (
-          <p className="px-1 py-8 text-center text-sm text-ink3">No matching categories.</p>
+          <p className="track-category-board__empty px-1 py-8 text-center text-sm text-ink3">
+            No matching categories.
+          </p>
         ) : (
           <CategoryGrid
             categories={filteredCategories}

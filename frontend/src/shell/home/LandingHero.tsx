@@ -13,6 +13,7 @@ import {
   LayoutTemplate,
   Play,
   Smartphone,
+  Swords,
   TimerReset,
   Trophy,
 } from 'lucide-react';
@@ -222,6 +223,7 @@ export function LandingHero({
   onStartIn,
   onSwipe,
   onVim,
+  onDojo,
   onGames,
   onPlans,
   onResumes,
@@ -237,6 +239,7 @@ export function LandingHero({
   onStartIn: (mode: 'play' | 'visualize' | 'learn') => void;
   onSwipe: () => void;
   onVim: () => void;
+  onDojo: () => void;
   onGames: () => void;
   onPlans: () => void;
   onResumes: () => void;
@@ -327,7 +330,16 @@ export function LandingHero({
           desc: 'Keyboard drills',
           c1: '#ff4d94',
           c2: '#7c3aed',
-          onClick: onVim,
+          onClick: () => onVim(),
+        },
+        {
+          id: 'dojo',
+          icon: Swords,
+          title: 'Dojo Hub',
+          desc: 'Algorithm arcade',
+          c1: '#f59e0b',
+          c2: '#ef4444',
+          onClick: () => onDojo(),
         },
       ],
     },

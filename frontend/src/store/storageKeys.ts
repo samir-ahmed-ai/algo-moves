@@ -8,7 +8,11 @@
  */
 
 const NS = 'algo-moves';
-const k = (...parts: (string | number)[]): string => [NS, ...parts].join(':');
+const keyPart = (part: string | number): string => {
+  if (typeof part === 'number') return Number.isFinite(part) ? String(Math.round(part)) : '0';
+  return part.trim();
+};
+const k = (...parts: (string | number)[]): string => [NS, ...parts.map(keyPart)].join(':');
 
 export const STORAGE_KEYS = {
   // store / persistence
@@ -56,6 +60,10 @@ export const STORAGE_KEYS = {
 
   // shell / vim
   VIM_PROGRESS: k('vim-dojo'),
+
+  // shell / dojo
+  DOJO_PROGRESS: (gameId: string) => k('dojo', gameId),
+  DOJO_MUTED: k('dojo', 'muted'),
 
   // shell / interview
   INTERVIEW_HOST_ROOM: k('interview-host-room'),

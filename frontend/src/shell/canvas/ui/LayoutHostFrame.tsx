@@ -24,13 +24,16 @@ export function LayoutHostFrame({ hostId, slots }: { hostId: string; slots?: (st
   };
 
   return (
-    <div className="nodrag nowheel flex min-h-0 flex-1 flex-col p-2" data-layout-host={hostId}>
-      <p className={cn('mb-2 text-center text-ink3', nodeText.xs)}>
+    <div
+      className="layout-host-frame nodrag nowheel flex min-h-0 flex-1 flex-col p-2"
+      data-layout-host={hostId}
+    >
+      <p className={cn('layout-host-frame__hint mb-2 text-center text-ink3', nodeText.xs)}>
         {selectedPeerId
           ? 'Click a slot or drag a panel here'
           : 'Select another panel, then click or drag it into a slot'}
       </p>
-      <div className="grid min-h-0 flex-1 grid-cols-3 grid-rows-3 gap-1.5">
+      <div className="layout-host-frame__grid grid min-h-0 flex-1 grid-cols-3 grid-rows-3 gap-1.5">
         {Array.from({ length: LAYOUT_SLOT_COUNT }, (_, slotIndex) => {
           const childId = occupied[slotIndex];
           const child = childId ? getNode(childId) : null;
@@ -57,25 +60,33 @@ export function LayoutHostFrame({ hostId, slots }: { hostId: string; slots?: (st
                 assign(slotIndex);
               }}
               className={cn(
-                'flex min-h-[4.5rem] flex-col items-center justify-center gap-1 rounded-md border border-dashed transition-colors',
+                'layout-host-frame__slot flex min-h-[4.5rem] flex-col items-center justify-center gap-1 rounded-md border border-dashed transition-colors',
                 filled
-                  ? 'border-accent/50 bg-accentbg/20 text-accent hover:bg-accentbg/35'
+                  ? 'layout-host-frame__slot--filled border-accent/50 bg-accentbg/20 text-accent hover:bg-accentbg/35'
                   : 'border-edge/80 bg-panel2/40 text-ink3 hover:border-accent/40 hover:bg-panel2/70',
-                isDrop && 'border-accent bg-accentbg/50 ring-2 ring-accent/30',
+                isDrop &&
+                  'layout-host-frame__slot--drop border-accent bg-accentbg/50 ring-2 ring-accent/30',
                 !filled && !selectedPeerId && 'cursor-default opacity-60',
               )}
             >
               {filled ? (
                 <>
-                  <span className="grid h-4 w-4 place-items-center [&>*]:h-3.5 [&>*]:w-3.5">
+                  <span className="layout-host-frame__slot-icon grid h-4 w-4 place-items-center [&>*]:h-3.5 [&>*]:w-3.5">
                     {nodeIcon(kind)}
                   </span>
-                  <span className={cn('max-w-full truncate px-1', nodeText.xs)}>
+                  <span
+                    className={cn(
+                      'layout-host-frame__slot-title max-w-full truncate px-1',
+                      nodeText.xs,
+                    )}
+                  >
                     {title ?? kind}
                   </span>
                 </>
               ) : (
-                <span className={cn('text-ink3/70', nodeText.xs)}>{slotIndex + 1}</span>
+                <span className={cn('layout-host-frame__slot-index text-ink3/70', nodeText.xs)}>
+                  {slotIndex + 1}
+                </span>
               )}
             </button>
           );

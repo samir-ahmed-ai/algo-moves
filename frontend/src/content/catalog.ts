@@ -1,6 +1,15 @@
 import { getPluginMeta } from '../core';
 import type { Course, CourseDef, Item, ItemDef, Topic } from './types';
 
+function uniqueIds(ids: string[]): string[] {
+  return Array.from(new Set(ids.map((id) => id.trim()).filter(Boolean)));
+}
+
+function normalizeEstimatedMinutes(minutes: number | undefined): number | undefined {
+  if (!Number.isFinite(minutes)) return undefined;
+  return Math.max(1, Math.round(minutes));
+}
+
 /** Fill an item's metadata from its bound plugin, letting explicit fields win. */
 function hydrateItem(def: ItemDef, courseId: string, topicId: string): Item {
   let title = def.title;
@@ -27,11 +36,11 @@ function hydrateItem(def: ItemDef, courseId: string, topicId: string): Item {
     title: title ?? def.id,
     summary,
     difficulty,
-    tags: Array.from(new Set([...pluginTags, ...(def.tags ?? [])])),
+    tags: uniqueIds([...pluginTags, ...(def.tags ?? [])]),
     source,
-    estimatedMinutes: def.estimatedMinutes,
+    estimatedMinutes: normalizeEstimatedMinutes(def.estimatedMinutes),
     status: def.status ?? 'todo',
-    prereqs: def.prereqs ?? [],
+    prereqs: uniqueIds(def.prereqs ?? []),
     courseId,
     topicId,
   };
@@ -68,6 +77,7 @@ export function buildCatalog(defs: CourseDef[]): Catalog {
   const courseIndex = new Map(courses.map((c) => [c.id, c]));
   const topicIndex = new Map(topics.map((t) => [t.id, t]));
   const itemIndex = new Map(items.map((i) => [i.id, i]));
+  const itemPosition = new Map(items.map((i, idx) => [i.id, idx]));
 
   return {
     courses,
@@ -85,7 +95,7 @@ export function buildCatalog(defs: CourseDef[]): Catalog {
       };
     },
     adjacent: (itemId) => {
-      const idx = items.findIndex((i) => i.id === itemId);
+      const idx = itemPosition.get(itemId) ?? -1;
       return {
         prev: idx > 0 ? items[idx - 1] : undefined,
         next: idx >= 0 && idx < items.length - 1 ? items[idx + 1] : undefined,

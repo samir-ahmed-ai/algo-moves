@@ -31,7 +31,7 @@ export function AuthButton({
     return (
       <span
         className={cn(
-          'inline-grid place-items-center text-ink3',
+          'auth-button-loading inline-grid place-items-center text-ink3',
           isHeader ? 'h-8 w-8' : 'h-9 w-9',
           className,
         )}
@@ -46,7 +46,7 @@ export function AuthButton({
 
   if (signedIn) {
     return (
-      <div className={cn('relative', className)}>
+      <div className={cn('auth-button-wrap relative', className)}>
         <button
           ref={anchorRef}
           type="button"
@@ -54,9 +54,9 @@ export function AuthButton({
           aria-haspopup="menu"
           onClick={() => setMenuOpen((open) => !open)}
           className={cn(
-            'inline-flex items-center gap-2 border border-edge bg-panel2 px-2 text-ink3 transition-all hover:bg-panel hover:text-ink touch-manipulation',
+            'auth-button auth-button--user inline-flex items-center gap-2 border border-edge bg-panel2 px-2 text-ink3 transition-all hover:bg-panel hover:text-ink touch-manipulation',
             isHeader ? 'min-h-0 rounded-md py-1.5' : 'min-h-9 rounded-xl',
-            menuOpen && 'border-accent/40 ring-2 ring-accent/15',
+            menuOpen && 'auth-button--open border-accent/40 ring-2 ring-accent/15',
             compact || isHeader ? 'max-w-[8rem]' : 'max-w-[10rem]',
           )}
           title={profile.display_name}
@@ -87,14 +87,14 @@ export function AuthButton({
 
   return (
     <>
-      <div className={cn('relative flex items-center gap-1.5', className)}>
+      <div className={cn('auth-button-wrap relative flex items-center gap-1.5', className)}>
         {onOpenProfile ? (
           <button
             type="button"
             title={s.stats}
             aria-label={s.stats}
             onClick={onOpenProfile}
-            className="grid h-9 w-9 place-items-center rounded-xl border border-edge text-ink3 transition-colors hover:bg-panel2 hover:text-ink touch-manipulation"
+            className="auth-button auth-button--stats grid h-9 w-9 place-items-center rounded-xl border border-edge text-ink3 transition-colors hover:bg-panel2 hover:text-ink touch-manipulation"
           >
             {profile ? (
               <Avatar seed={profile.avatar_seed} name={profile.display_name} size={24} />
@@ -110,7 +110,7 @@ export function AuthButton({
           aria-haspopup="dialog"
           onClick={() => setAuthOpen((open) => !open)}
           className={cn(
-            'inline-flex items-center gap-1.5 text-white touch-manipulation bg-accent transition-all',
+            'auth-button auth-button--signin inline-flex items-center gap-1.5 text-white touch-manipulation bg-accent transition-all',
             isHeader
               ? 'shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-90 sm:gap-1.5 sm:px-3 sm:text-sm'
               : cn(
@@ -119,8 +119,10 @@ export function AuthButton({
                   'hover:opacity-95 active:scale-[0.98]',
                   compact ? 'px-2.5' : 'px-3.5',
                 ),
-            authOpen && !isHeader && 'ring-2 ring-accent/30 ring-offset-2 ring-offset-bg',
-            authOpen && isHeader && 'opacity-90',
+            authOpen &&
+              !isHeader &&
+              'auth-button--open ring-2 ring-accent/30 ring-offset-2 ring-offset-bg',
+            authOpen && isHeader && 'auth-button--open opacity-90',
           )}
         >
           <LogIn className="h-3.5 w-3.5 shrink-0 opacity-90" />

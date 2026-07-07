@@ -16,7 +16,7 @@ export function BookmarksPanelBody() {
   const entries = [...player.bookmarks.entries()].sort((a, b) => a[0] - b[0]);
   const marked = player.bookmarks.has(player.index);
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="workspace-panel workspace-panel--bookmarks nodrag flex flex-col gap-2">
       <Btn
         variant={marked ? 'ghost' : 'primary'}
         size="sm"
@@ -34,11 +34,11 @@ export function BookmarksPanelBody() {
         />
       ) : (
         <Section title="Bookmarks" bordered={false} right={<Pill>{entries.length}</Pill>}>
-          <div className="flex flex-col">
+          <div className="workspace-bookmark-list flex flex-col">
             {entries.map(([i, note]) => (
               <Row
                 key={i}
-                className="items-center gap-1.5 border-t border-edge border-l-transparent py-1.5 first:border-t-0"
+                className="workspace-bookmark-row items-center gap-1.5 border-t border-edge border-l-transparent py-1.5 first:border-t-0"
               >
                 <Pill
                   active={i === player.index}

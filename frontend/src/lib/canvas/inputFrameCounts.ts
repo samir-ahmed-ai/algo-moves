@@ -7,17 +7,26 @@ export type InputFrameCounts = ReadonlyMap<string, number>;
 export function computeInputFrameCounts<I, S>(plugin: ProblemPlugin<I, S>): InputFrameCounts {
   const counts = new Map<string, number>();
   for (const inp of plugin.inputs) {
-    counts.set(inp.id, plugin.record(inp.value).length);
+    const id = inp.id.trim();
+    if (!id) continue;
+    try {
+      counts.set(id, plugin.record(inp.value).length);
+    } catch {
+      counts.set(id, 0);
+    }
   }
   return counts;
 }
 
 /** Look up a single input's frame count; returns 0 when the id is unknown. */
 export function inputFrameCount(counts: InputFrameCounts, inputId: string): number {
-  return counts.get(inputId) ?? 0;
+  return counts.get(inputId.trim()) ?? 0;
 }
 
 /** Stable dependency key for memoizing frame counts when plugin identity changes. */
 export function inputFrameCountsKey(inputs: SampleInput<unknown>[]): string {
-  return inputs.map((i) => i.id).join('\0');
+  return inputs
+    .map((i) => i.id.trim())
+    .filter(Boolean)
+    .join('\0');
 }

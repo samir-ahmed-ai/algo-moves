@@ -59,9 +59,17 @@ const COURSE_SHAPE: Record<string, ShapeKey> = {
   'prep-math': 'array',
 };
 
+export const SHAPE_KEYS = Object.keys(SHAPE_GLYPHS) as ShapeKey[];
+
+function normalizedId(id: string | undefined): string | undefined {
+  const trimmed = id?.trim();
+  return trimmed || undefined;
+}
+
 /** Map a problem to one drawable shape — most-specific structure tag first, then pattern, then course. */
 export function shapeFor(item: Item): ShapeKey {
-  const has = (t: string) => item.tags.includes(t);
+  const tags = new Set(item.tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean));
+  const has = (t: string) => tags.has(t);
   if (has('linked-list')) return 'linkedList';
   if (has('heap') || has('priority-queue')) return 'heap';
   if (has('trie')) return 'tree';
@@ -91,14 +99,16 @@ export function shapeFor(item: Item): ShapeKey {
     has('string')
   )
     return 'array';
-  return COURSE_SHAPE[item.courseId] ?? 'generic';
+  return COURSE_SHAPE[item.courseId.trim()] ?? 'generic';
 }
 
 /** Bespoke glyph by id (item then plugin), falling back to the per-shape glyph. */
 export function glyphFor(item: Item): string {
+  const itemId = normalizedId(item.id);
+  const pluginId = normalizedId(item.pluginId);
   return (
-    PROBLEM_GLYPHS[item.id] ??
-    (item.pluginId ? PROBLEM_GLYPHS[item.pluginId] : undefined) ??
+    (itemId ? PROBLEM_GLYPHS[itemId] : undefined) ??
+    (pluginId ? PROBLEM_GLYPHS[pluginId] : undefined) ??
     SHAPE_GLYPHS[shapeFor(item)]
   );
 }

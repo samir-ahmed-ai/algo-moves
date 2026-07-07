@@ -8,7 +8,7 @@ export function NodeHeader({ children, className }: { children: ReactNode; class
   return (
     <header
       className={cn(
-        'flex items-center gap-[var(--node-gap,0.5rem)] border-b border-edge/40 px-[var(--node-px,0.75rem)] py-[var(--node-py,0.5625rem)]',
+        'legacy-node-header flex items-center gap-[var(--node-gap,0.5rem)] border-b border-edge/40 px-[var(--node-px,0.75rem)] py-[var(--node-py,0.5625rem)]',
         className,
       )}
     >
@@ -27,7 +27,7 @@ export function NodeHeaderTitle({
   return (
     <span
       className={cn(
-        'min-w-0 flex-1 font-semibold text-ink',
+        'legacy-node-header__title min-w-0 flex-1 font-semibold text-ink',
         nodeTextWrap,
         nodeText.title,
         className,
@@ -46,7 +46,12 @@ export function NodeHeaderActions({
   className?: string;
 }) {
   return (
-    <div className={cn('nodrag ml-auto flex shrink-0 items-center gap-1', className)}>
+    <div
+      className={cn(
+        'legacy-node-header__actions nodrag ml-auto flex shrink-0 items-center gap-1',
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -66,7 +71,7 @@ export function NodeHeaderAction({
       type="button"
       onClick={onClick}
       title={title}
-      className="nodrag grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] place-items-center rounded-[calc(var(--radius)-2px)] text-ink3 transition-colors hover:bg-panel2/80 hover:text-ink"
+      className="legacy-node-header__action nodrag grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] place-items-center rounded-[calc(var(--radius)-2px)] text-ink3 transition-colors hover:bg-panel2/80 hover:text-ink"
     >
       {children}
     </button>

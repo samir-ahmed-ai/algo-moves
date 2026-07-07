@@ -20,7 +20,7 @@ import { ExplorerSheet, type ExplorerFocus } from './ExplorerSheet';
 import { AuthButton } from '@/shell/auth';
 
 function MenuDivider() {
-  return <div className="my-1 border-t border-edge" role="separator" />;
+  return <div className="workspace-menu__divider my-1 border-t border-edge" role="separator" />;
 }
 
 function MenuRow({
@@ -43,10 +43,16 @@ function MenuRow({
       onClick={onClick}
       className={cn(
         'flex w-full min-h-[var(--row)] items-center gap-[var(--gap)] rounded-md px-2 py-[var(--gap)] text-left transition-colors hover:bg-panel2',
+        'workspace-menu__row',
         accent ? 'text-accent' : 'text-ink2 hover:text-ink',
       )}
     >
-      <span className={cn('grid h-4 w-4 shrink-0 place-items-center', accent && 'text-accent')}>
+      <span
+        className={cn(
+          'workspace-menu__row-icon grid h-4 w-4 shrink-0 place-items-center',
+          accent && 'text-accent',
+        )}
+      >
         {icon}
       </span>
       <span
@@ -59,7 +65,11 @@ function MenuRow({
         {label}
       </span>
       {shortcut ? (
-        <span className={cn('shrink-0 tabular-nums text-ink3', chromeText.xs)}>{shortcut}</span>
+        <span
+          className={cn('workspace-menu__shortcut shrink-0 tabular-nums text-ink3', chromeText.xs)}
+        >
+          {shortcut}
+        </span>
       ) : null}
     </button>
   );
@@ -132,7 +142,7 @@ export function WorkspaceMenuDropdown({
   };
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div ref={rootRef} className="workspace-menu-dropdown relative shrink-0">
       <button
         type="button"
         title="Menu"
@@ -142,8 +152,9 @@ export function WorkspaceMenuDropdown({
         onClick={() => setMenuOpen(!menuOpen)}
         className={cn(
           'grid place-items-center border border-edge bg-panel2 text-ink shadow-[var(--shadow-md)] transition-colors hover:bg-panel hover:text-ink',
+          'workspace-menu-dropdown__trigger',
           compact ? 'h-7 w-7 rounded-md' : cn('h-9 w-9', RADIUS_SHELL),
-          menuOpen && 'bg-panel text-ink',
+          menuOpen && 'workspace-menu-dropdown__trigger--open bg-panel text-ink',
         )}
       >
         <Menu className="h-4 w-4" />
@@ -155,6 +166,7 @@ export function WorkspaceMenuDropdown({
           aria-label="Workspace menu"
           className={cn(
             'absolute left-0 top-full z-30 mt-1.5 w-56 border border-edge bg-panel p-1.5 shadow-[var(--shadow-lg)]',
+            'workspace-menu-dropdown__panel',
             RADIUS_SHELL,
           )}
         >
@@ -223,11 +235,11 @@ export function WorkspaceMenuDropdown({
 
 export function WorkspaceMenu({ onOpenPalette, onOpenHelp }: WorkspaceMenuProps) {
   return (
-    <header className={cn('nodrag sticky top-0 z-20', chromeBar.shell)}>
+    <header className={cn('workspace-menu-bar nodrag sticky top-0 z-20', chromeBar.shell)}>
       <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
       <span
         className={cn(
-          'min-w-0 flex-1 truncate font-semibold text-ink max-lg:sr-only',
+          'workspace-menu-bar__title min-w-0 flex-1 truncate font-semibold text-ink max-lg:sr-only',
           chromeText.sm,
         )}
       >

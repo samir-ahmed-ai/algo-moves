@@ -1,8 +1,15 @@
 import { Check, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { LessonSection } from '../LessonSection';
+import { StarRating } from '../StarRating';
 import { VimBadge } from '../vimUi';
-import { VIM_LEVELS, VIM_LEVEL_IDS, chaptersFromLevels, isLevelUnlocked } from '../../engine';
+import {
+  VIM_LEVELS,
+  VIM_LEVEL_IDS,
+  chaptersFromLevels,
+  isLevelUnlocked,
+  starsForMoves,
+} from '../../engine';
 
 import { useVimGame } from '../../canvas/VimGameProvider';
 export function LevelPanelContent({ compact = false }: { compact?: boolean }) {
@@ -22,6 +29,7 @@ export function LevelPanelContent({ compact = false }: { compact?: boolean }) {
                 const idx = VIM_LEVEL_IDS.indexOf(l.id);
                 const unlocked = isLevelUnlocked(VIM_LEVEL_IDS, idx, progress);
                 const done = progress.levels[l.id]?.completed;
+                const best = progress.levels[l.id]?.bestMoves;
                 const active = l.id === levelId;
                 return (
                   <li key={l.id}>
@@ -45,6 +53,12 @@ export function LevelPanelContent({ compact = false }: { compact?: boolean }) {
                         <span className="h-2.5 w-2.5 shrink-0 rounded-full border border-edge" />
                       )}
                       <span className="truncate">{l.title}</span>
+                      {done && best != null ? (
+                        <StarRating
+                          stars={starsForMoves(best, l.parMoves)}
+                          className="ml-auto shrink-0"
+                        />
+                      ) : null}
                     </button>
                   </li>
                 );

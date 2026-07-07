@@ -220,6 +220,47 @@ export const VIM_LEVELS: VimLevel[] = [
 
 export const VIM_LEVEL_IDS = VIM_LEVELS.map((l) => l.id);
 
+/** Short student-facing description for each motion, used in intros and tooltips. */
+export const MOTION_HELP: Record<VimMotionKind, string> = {
+  h: 'move left',
+  j: 'move down',
+  k: 'move up',
+  l: 'move right',
+  w: 'next word start',
+  b: 'previous word start',
+  e: 'end of word',
+  '0': 'start of line',
+  $: 'end of line',
+  '^': 'first character of line',
+  f: 'find character →',
+  F: 'find character ←',
+  t: 'till before character →',
+  T: 'till after character ←',
+  gg: 'top of file',
+  G: 'bottom of file',
+  nG: 'go to line n',
+};
+
+/** Motions introduced by this level — allowed here but never allowed in an earlier level. */
+export function newMotionsForLevel(level: VimLevel): VimMotionKind[] {
+  const idx = VIM_LEVELS.findIndex((l) => l.id === level.id);
+  const seen = new Set<VimMotionKind>();
+  for (let i = 0; i < idx; i++) {
+    for (const kind of VIM_LEVELS[i]!.allowed) seen.add(kind);
+  }
+  return level.allowed.filter((kind) => !seen.has(kind));
+}
+
+export type VimStars = 1 | 2 | 3;
+
+/** Star rating for a completed level: 3 at or under par, 2 within 1.5× par, 1 otherwise. */
+export function starsForMoves(moves: number, parMoves?: number | null): VimStars {
+  if (parMoves == null) return 3;
+  if (moves <= parMoves) return 3;
+  if (moves <= Math.ceil(parMoves * 1.5)) return 2;
+  return 1;
+}
+
 export function getVimLevel(id: string): VimLevel | undefined {
   return VIM_LEVELS.find((l) => l.id === id);
 }

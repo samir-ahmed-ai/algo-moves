@@ -28,21 +28,21 @@ export function ArpeggiatorBuilder({ onApply }: { onApply: (values: number[]) =>
   };
 
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="input-builder input-builder--arpeggiator nodrag flex flex-col gap-2">
       <Field label="Range">
-        <div className="flex gap-2">
+        <div className="input-builder-range-row flex gap-2">
           <input
             type="number"
             value={start}
             onChange={(e) => setStart(Number(e.target.value))}
-            className="w-16 rounded border border-edge bg-panel2 px-1"
+            className="input-builder-number w-16 rounded border border-edge bg-panel2 px-1"
           />
           <span>→</span>
           <input
             type="number"
             value={end}
             onChange={(e) => setEnd(Number(e.target.value))}
-            className="w-16 rounded border border-edge bg-panel2 px-1"
+            className="input-builder-number w-16 rounded border border-edge bg-panel2 px-1"
           />
         </div>
       </Field>
@@ -50,7 +50,7 @@ export function ArpeggiatorBuilder({ onApply }: { onApply: (values: number[]) =>
         <select
           value={dir}
           onChange={(e) => setDir(e.target.value as typeof dir)}
-          className="w-full rounded border border-edge bg-panel2 px-2 py-1"
+          className="input-builder-select w-full rounded border border-edge bg-panel2 px-2 py-1"
         >
           {DIRECTIONS.map((d) => (
             <option key={d} value={d}>

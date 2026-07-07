@@ -22,6 +22,7 @@ export function LandingPage() {
     setProblemFocused,
     enterMobile,
     enterVim,
+    enterDojo,
     enterGames,
     enterPlans,
     enterResumes,
@@ -43,6 +44,7 @@ export function LandingPage() {
     if (id === 'swipe') enterMobile();
     else if (id === 'games') enterGames();
     else if (id === 'vim') enterVim();
+    else if (id === 'dojo') enterDojo();
     else if (id === 'plans') enterPlans();
     else if (id === 'resumes') enterResumes();
     else if (id === 'interview-canvas') enterCollabCanvas();
@@ -101,6 +103,7 @@ export function LandingPage() {
               onStartIn={startIn}
               onSwipe={enterMobile}
               onVim={enterVim}
+              onDojo={enterDojo}
               onGames={enterGames}
               onPlans={enterPlans}
               onResumes={enterResumes}

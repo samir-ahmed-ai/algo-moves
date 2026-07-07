@@ -51,16 +51,21 @@ export function MobileDrawer({
   children: ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[55] flex" role="dialog" aria-modal="true" aria-label={label}>
+    <div
+      className="mobile-drawer fixed inset-0 z-[55] flex"
+      role="dialog"
+      aria-modal="true"
+      aria-label={label}
+    >
       <button
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-black/50 backdrop-blur-[1px] mobile-drawer-fade"
+        className="mobile-drawer__backdrop absolute inset-0 cursor-default bg-black/50 backdrop-blur-[1px] mobile-drawer-fade"
       />
       <div
         className={cn(
-          'relative flex h-full max-w-[92vw] flex-col overflow-hidden bg-panel text-ink shadow-[var(--shadow-xl)]',
+          'mobile-drawer__panel relative flex h-full max-w-[92vw] flex-col overflow-hidden bg-panel text-ink shadow-[var(--shadow-xl)]',
           side === 'left'
             ? 'mr-auto border-r border-edge mobile-drawer-left'
             : 'ml-auto border-l border-edge mobile-drawer-right',
@@ -100,8 +105,9 @@ export function SidebarSection({
   return (
     <section
       className={cn(
-        'border-b border-edge last:border-b-0',
+        'sidebar-section border-b border-edge last:border-b-0',
         fill && open ? 'flex min-h-0 flex-1 flex-col' : 'shrink-0',
+        open && 'sidebar-section--open',
         bottom && 'flex flex-col-reverse',
       )}
     >
@@ -110,10 +116,12 @@ export function SidebarSection({
         onClick={onToggle}
         aria-expanded={open}
         className={cn(
-          'flex w-full shrink-0 items-center gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left text-ink3 transition-colors hover:text-ink2',
+          'sidebar-section__trigger flex w-full shrink-0 items-center gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left text-ink3 transition-colors hover:text-ink2',
         )}
       >
-        <span className="grid h-3 w-3 shrink-0 place-items-center text-ink3">{icon}</span>
+        <span className="sidebar-section__icon grid h-3 w-3 shrink-0 place-items-center text-ink3">
+          {icon}
+        </span>
         <ChromeLabel className={cn('min-w-0 flex-1 truncate normal-case', chromeText.xs)}>
           {title}
         </ChromeLabel>
@@ -122,6 +130,7 @@ export function SidebarSection({
             <span
               className={cn(
                 'shrink-0 rounded-full bg-panel2 px-1 py-px font-mono tabular-nums text-ink3',
+                'sidebar-section__badge',
                 chromeText.xs,
               )}
             >
@@ -131,13 +140,16 @@ export function SidebarSection({
             badge
           ))}
         <ChevronDown
-          className={cn('ml-auto h-3 w-3 shrink-0 transition-transform', !open && '-rotate-90')}
+          className={cn(
+            'sidebar-section__chevron ml-auto h-3 w-3 shrink-0 transition-transform',
+            !open && '-rotate-90',
+          )}
         />
       </button>
       {open && (
         <div
           className={cn(
-            'ws-scroll min-h-0 overflow-y-auto',
+            'sidebar-section__body ws-scroll min-h-0 overflow-y-auto',
             bottom ? 'pt-1' : 'pb-1',
             fill ? 'flex-1' : maxHeightClass,
           )}
@@ -166,8 +178,10 @@ export function SidebarTabBar<T extends string>({
           type="button"
           onClick={() => onTab(t.id)}
           className={cn(
-            'flex min-h-[var(--row)] flex-1 items-center justify-center gap-0.5 px-0.5 py-0 transition-colors',
-            active === t.id ? 'border-b-2 border-accent text-accent' : 'text-ink3 hover:text-ink2',
+            'sidebar-tab-bar__button flex min-h-[var(--row)] flex-1 items-center justify-center gap-0.5 px-0.5 py-0 transition-colors',
+            active === t.id
+              ? 'sidebar-tab-bar__button--active border-b-2 border-accent text-accent'
+              : 'text-ink3 hover:text-ink2',
           )}
         >
           {t.icon}
@@ -202,9 +216,9 @@ export function CollapsedRailButton({
       title={title}
       aria-label={ariaLabel}
       className={cn(
-        'relative grid place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
+        'collapsed-rail-button relative grid place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
         CHROME_BTN_MD,
-        active && 'bg-accentbg text-accent',
+        active && 'collapsed-rail-button--active bg-accentbg text-accent',
       )}
     >
       {children}

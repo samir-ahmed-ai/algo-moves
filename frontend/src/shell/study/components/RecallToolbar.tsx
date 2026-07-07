@@ -15,6 +15,7 @@ import {
   RotateCcw,
   ScanEye,
   Settings2,
+  SquareTerminal,
   TextQuote,
   Timer,
   AlignVerticalSpaceAround,
@@ -279,6 +280,19 @@ export function RecallToolbar({
           onMouseLeave={() => setPeek(false)}
         >
           <ScanEye className="h-3 w-3" />
+        </ToolbarGroupBtn>
+      </ToolbarGroup>
+
+      <ToolbarGroup title="Vim keybindings">
+        <ToolbarGroupBtn
+          active={editorPrefs.vim}
+          title={
+            editorPrefs.vim ? 'Vim mode on — modal editing (⌘⌥V)' : 'Enable Vim keybindings (⌘⌥V)'
+          }
+          onClick={() => setEditorPrefs({ vim: !editorPrefs.vim })}
+        >
+          <SquareTerminal className="h-3 w-3" />
+          <span className="font-semibold">Vim</span>
         </ToolbarGroupBtn>
       </ToolbarGroup>
 

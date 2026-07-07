@@ -35,7 +35,7 @@ function PhaseStepper({
   return (
     <div
       className={cn(
-        'nodrag flex h-6 shrink-0 items-center gap-0.5 rounded-md bg-panel2 p-0.5 font-medium',
+        'code-studio-phase-stepper nodrag flex h-6 shrink-0 items-center gap-0.5 rounded-md bg-panel2 p-0.5 font-medium',
         chromeText.sm,
       )}
     >
@@ -45,7 +45,7 @@ function PhaseStepper({
         return (
           <Fragment key={p}>
             {idx > 0 && (
-              <span className="text-ink3" aria-hidden>
+              <span className="code-studio-phase-separator text-ink3" aria-hidden>
                 →
               </span>
             )}
@@ -58,15 +58,15 @@ function PhaseStepper({
                 onJump(p);
               }}
               className={cn(
-                'flex h-6 items-center gap-1 rounded px-1.5 transition-colors',
+                'code-studio-phase-step flex h-6 items-center gap-1 rounded px-1.5 transition-colors',
                 active
-                  ? 'bg-accentbg text-accent'
+                  ? 'code-studio-phase-step--active bg-accentbg text-accent'
                   : done
-                    ? 'text-good hover:bg-panel'
-                    : 'text-ink3 hover:bg-panel hover:text-ink2',
+                    ? 'code-studio-phase-step--done text-good hover:bg-panel'
+                    : 'code-studio-phase-step--todo text-ink3 hover:bg-panel hover:text-ink2',
               )}
             >
-              <span aria-hidden className="font-mono">
+              <span aria-hidden className="code-studio-phase-glyph font-mono">
                 {done ? '✓' : STEP_GLYPH[idx]}
               </span>
               {PHASE_LABEL[p]}
@@ -79,7 +79,9 @@ function PhaseStepper({
 }
 
 function ToolbarDivider() {
-  return <span className="mx-0.5 h-4 w-px shrink-0 bg-edge" aria-hidden />;
+  return (
+    <span className="code-studio-toolbar-divider mx-0.5 h-4 w-px shrink-0 bg-edge" aria-hidden />
+  );
 }
 
 function recallExtrasOverflow({

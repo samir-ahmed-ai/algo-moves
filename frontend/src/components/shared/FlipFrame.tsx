@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
+import { cn } from '@/lib/utils/cn';
 
 /** Skip morphing on boards too dense for per-element animation to read. */
 const MAX_FLIP_ELS = 400;
@@ -126,7 +127,7 @@ export function FlipFrame({
   }, [frameKey, resetKey]);
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={cn('flip-frame', className)}>
       {children}
     </div>
   );

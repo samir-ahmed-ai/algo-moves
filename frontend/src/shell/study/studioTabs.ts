@@ -154,6 +154,13 @@ export const STUDIO_TABS: StudioTab[] = [
 
 export const STUDIO_TAB_PERSIST = STORAGE_KEYS.STUDIO_TAB;
 
+/**
+ * Tab id for the standalone Assemble stage. The Quiz stage runs reassemble inline and
+ * hands off past this tab, so both sites reference this constant instead of a bare
+ * string literal.
+ */
+export const ASSEMBLE_TAB_ID = 'assemble';
+
 export interface StudioAvailability {
   hasQuiz: boolean;
   hasPieces: boolean;
@@ -177,4 +184,25 @@ export const ARC_ORDER: string[] = STUDIO_TABS.map((t) => t.id);
 /** Available views in canonical order. */
 export function flatOrder(avail: StudioTab[]): StudioTab[] {
   return [...avail].sort((a, b) => ARC_ORDER.indexOf(a.id) - ARC_ORDER.indexOf(b.id));
+}
+
+/**
+ * The primary learning spine — the groups that form the core arc a learner walks
+ * (Overview → Quiz → Assemble → Source). Everything else (Practice / Reference /
+ * Progress) is reachable from a "More views" overflow, not the always-visible arc.
+ */
+export const ARC_GROUPS: StudioGroupId[] = ['start', 'build'];
+
+export function isArcTab(tab: StudioTab): boolean {
+  return ARC_GROUPS.includes(tab.group);
+}
+
+/** Available primary-arc tabs in canonical order. */
+export function arcTabs(avail: StudioTab[]): StudioTab[] {
+  return flatOrder(avail).filter(isArcTab);
+}
+
+/** Available secondary ("More views") tabs in canonical order. */
+export function moreTabs(avail: StudioTab[]): StudioTab[] {
+  return flatOrder(avail).filter((t) => !isArcTab(t));
 }

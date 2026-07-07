@@ -36,16 +36,21 @@ export interface BrowseTrack {
 /** Synthetic topic id prefix for mobile deck / browse scoping. */
 export const BROWSE_TOPIC_PREFIX = 'browse-';
 
+function normalizeId(id: string): string {
+  return id.trim();
+}
+
 export function browseTopicId(categoryId: string): string {
-  return `${BROWSE_TOPIC_PREFIX}${categoryId}`;
+  return `${BROWSE_TOPIC_PREFIX}${normalizeId(categoryId)}`;
 }
 
 export function isBrowseTopicId(topicId: string): boolean {
-  return topicId.startsWith(BROWSE_TOPIC_PREFIX);
+  return normalizeId(topicId).startsWith(BROWSE_TOPIC_PREFIX);
 }
 
 export function categoryIdFromBrowseTopic(topicId: string): string | undefined {
-  return isBrowseTopicId(topicId) ? topicId.slice(BROWSE_TOPIC_PREFIX.length) : undefined;
+  const normalized = normalizeId(topicId);
+  return isBrowseTopicId(normalized) ? normalized.slice(BROWSE_TOPIC_PREFIX.length) : undefined;
 }
 
 /* ---------------------------------------------------------------- categories */
@@ -246,7 +251,7 @@ const CATEGORIES: BrowseCategory[] = [
 const categoryById = new Map(CATEGORIES.map((c) => [c.id, c]));
 
 export function getCategoryById(id: string): BrowseCategory | undefined {
-  return categoryById.get(id);
+  return categoryById.get(normalizeId(id));
 }
 
 export function getAllCategories(): BrowseCategory[] {
@@ -339,11 +344,11 @@ export function getTracks(): BrowseTrack[] {
 }
 
 export function getTrackById(id: TrackId): BrowseTrack | undefined {
-  return trackById.get(id);
+  return trackById.get(normalizeId(id) as TrackId);
 }
 
 export function getCategoriesForTrack(trackId: TrackId): BrowseCategory[] {
-  const track = trackById.get(trackId);
+  const track = getTrackById(trackId);
   if (!track) return [];
   return track.categoryIds
     .map((id) => categoryById.get(id))
@@ -371,6 +376,13 @@ export const CATEGORY_UNLOCK_EDGES: ReadonlyArray<readonly [string, string]> = [
   ['dynamic-programming', 'design'],
 ] as const;
 
+const categoryPrereqsById = new Map<string, string[]>();
+for (const [from, to] of CATEGORY_UNLOCK_EDGES) {
+  const list = categoryPrereqsById.get(to) ?? [];
+  list.push(from);
+  categoryPrereqsById.set(to, list);
+}
+
 export interface UnlockGraphNode {
   id: string;
   prereqs: string[];
@@ -382,28 +394,23 @@ export function buildProblemUnlockGraph(
 ): Map<string, string[]> {
   const graph = new Map<string, string[]>();
   for (const item of items) {
-    graph.set(item.id, [...item.prereqs]);
+    const id = normalizeId(item.id);
+    graph.set(id, Array.from(new Set(item.prereqs.map(normalizeId).filter((p) => p && p !== id))));
   }
   return graph;
 }
 
 /** Category ids that must be explored before `categoryId` (transitive closure). */
 export function getCategoryPrerequisites(categoryId: string): string[] {
-  const preds = new Map<string, string[]>();
-  for (const [from, to] of CATEGORY_UNLOCK_EDGES) {
-    const list = preds.get(to) ?? [];
-    list.push(from);
-    preds.set(to, list);
-  }
   const seen = new Set<string>();
-  const stack = [...(preds.get(categoryId) ?? [])];
+  const stack = [...(categoryPrereqsById.get(normalizeId(categoryId)) ?? [])];
   const out: string[] = [];
   while (stack.length) {
     const id = stack.pop()!;
     if (seen.has(id)) continue;
     seen.add(id);
     out.push(id);
-    stack.push(...(preds.get(id) ?? []));
+    stack.push(...(categoryPrereqsById.get(id) ?? []));
   }
   return out;
 }
@@ -416,7 +423,7 @@ export function isItemUnlocked(
   graph: Map<string, string[]>,
   isMastered: MasteryLookup,
 ): boolean {
-  const prereqs = graph.get(itemId) ?? [];
+  const prereqs = graph.get(normalizeId(itemId)) ?? [];
   return prereqs.every((p) => isMastered(p));
 }
 
@@ -426,7 +433,7 @@ export function getUnmetPrerequisites(
   graph: Map<string, string[]>,
   isMastered: MasteryLookup,
 ): string[] {
-  return (graph.get(itemId) ?? []).filter((p) => !isMastered(p));
+  return (graph.get(normalizeId(itemId)) ?? []).filter((p) => !isMastered(p));
 }
 
 /** True when every problem in prerequisite categories is mastered. */

@@ -34,7 +34,7 @@ export function CollabCodeStudioToolbar() {
   };
 
   return (
-    <div className="nodrag flex min-w-0 flex-1 flex-wrap items-center gap-1">
+    <div className="collab-code-toolbar nodrag flex min-w-0 flex-1 flex-wrap items-center gap-1">
       {LANGS.map((l) => (
         <button
           key={l.id}
@@ -43,29 +43,35 @@ export function CollabCodeStudioToolbar() {
           onClick={() => sync.setPayload({ ...payload, language: l.id })}
           className={cn(
             'rounded-md px-1.5 py-0.5 font-medium transition-colors',
+            'collab-code-toolbar__lang',
             chromeText.xs,
-            payload.language === l.id ? 'bg-accent/15 text-accent' : 'text-ink3 hover:text-ink',
+            payload.language === l.id
+              ? 'collab-code-toolbar__lang--active bg-accent/15 text-accent'
+              : 'text-ink3 hover:text-ink',
           )}
         >
           {l.label}
         </button>
       ))}
-      <span className="mx-0.5 h-3 w-px bg-edge" aria-hidden />
+      <span className="collab-code-toolbar__divider mx-0.5 h-3 w-px bg-edge" aria-hidden />
       <button
         type="button"
         onClick={copy}
-        className="rounded-md p-1 text-ink3 transition-colors hover:text-ink"
+        className="collab-code-toolbar__action rounded-md p-1 text-ink3 transition-colors hover:text-ink"
         title="Copy"
       >
         <Copy className="h-3 w-3" />
       </button>
-      {copied && <span className={cn('text-good', chromeText.xs)}>Copied</span>}
+      {copied && (
+        <span className={cn('collab-code-toolbar__copied text-good', chromeText.xs)}>Copied</span>
+      )}
       {isHost && (
         <button
           type="button"
           onClick={() => sync.setLocked(!sync.locked)}
           className={cn(
             'rounded-md p-1 text-ink3 transition-colors hover:text-ink',
+            'collab-code-toolbar__action',
             sync.locked && 'text-bad',
           )}
           title={sync.locked ? 'Unlock editor' : 'Lock editor for candidates'}
@@ -74,7 +80,11 @@ export function CollabCodeStudioToolbar() {
         </button>
       )}
       {sync.isLive && (
-        <span className={cn('ml-auto font-medium text-good', chromeText.xs)}>Live</span>
+        <span
+          className={cn('collab-code-toolbar__live ml-auto font-medium text-good', chromeText.xs)}
+        >
+          Live
+        </span>
       )}
     </div>
   );
@@ -120,15 +130,16 @@ export function CollabCodeStudioBody() {
     .map((c) => ({ name: c.name, color: c.color, line: c.line! }));
 
   return (
-    <div className="nowheel flex min-h-[280px] flex-1 flex-col overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-1 px-1 pb-0.5">
+    <div className="collab-code-body nowheel flex min-h-[280px] flex-1 flex-col overflow-hidden">
+      <div className="collab-code-body__meta flex flex-wrap items-center justify-between gap-1 px-1 pb-0.5">
         {remoteCursorLines.length > 0 && (
-          <div className="flex items-center gap-1">
+          <div className="collab-code-body__cursors flex items-center gap-1">
             {remoteCursorLines.map((c) => (
               <span
                 key={c.name}
                 className={cn(
                   'inline-flex items-center gap-0.5 rounded-sm px-1 py-px',
+                  'collab-code-body__cursor',
                   chromeText.xs,
                 )}
                 style={{ backgroundColor: `${c.color}20`, color: c.color }}
@@ -143,8 +154,9 @@ export function CollabCodeStudioBody() {
           onClick={() => setWrap((v) => !v)}
           className={cn(
             'ml-auto rounded px-1.5 py-0.5 text-ink3 hover:text-ink',
+            'collab-code-body__wrap',
             chromeText.xs,
-            wrap && 'text-accent',
+            wrap && 'collab-code-body__wrap--active text-accent',
           )}
         >
           Wrap {wrap ? 'on' : 'off'}

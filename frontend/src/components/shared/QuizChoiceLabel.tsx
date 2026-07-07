@@ -34,16 +34,25 @@ export function QuizChoiceLabel({
   );
 
   if (!detail) {
-    return <span className={cn('quiz-choice-headline', headlineCls)}>{headline}</span>;
+    return (
+      <span
+        className={cn(
+          'quiz-choice-label quiz-choice-label--solo quiz-choice-headline',
+          headlineCls,
+        )}
+      >
+        {headline}
+      </span>
+    );
   }
 
   return (
-    <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+    <span className="quiz-choice-label inline-flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
       <span className={cn('quiz-choice-headline', headlineCls)}>{headline}</span>
       <span className="shrink-0 text-ink3/40" aria-hidden>
         —
       </span>
-      <span className={detailCls}>{detail}</span>
+      <span className={cn('quiz-choice-detail', detailCls)}>{detail}</span>
     </span>
   );
 }

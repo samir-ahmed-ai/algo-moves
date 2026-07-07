@@ -64,6 +64,15 @@ export const DEFAULT_INTERVIEW_SETTINGS: InterviewSettings = {
   hideSolutions: true,
 };
 
+function normalizedId(value: string | undefined): string | undefined {
+  const id = value?.trim();
+  return id || undefined;
+}
+
+function nonNegativeMs(value: number | undefined): number {
+  return Number.isFinite(value) ? Math.max(0, Math.round(value!)) : 0;
+}
+
 export const emptyTimerState = (): TimerState => ({
   durationMs: 0,
   running: false,
@@ -91,13 +100,28 @@ export function interviewSession(
   interview: InterviewSettings = DEFAULT_INTERVIEW_SETTINGS,
   opts: { sessionId?: string; guestToken?: string; runtime?: InterviewRuntime } = {},
 ): SessionMeta {
+  const activeProblemId = normalizedId(problemId);
+  const sessionId = normalizedId(opts.sessionId);
+  const guestToken = normalizedId(opts.guestToken);
+  const interviewRuntime = opts.runtime
+    ? {
+        ...opts.runtime,
+        timer: {
+          ...opts.runtime.timer,
+          durationMs: nonNegativeMs(opts.runtime.timer.durationMs),
+          remainingMs: nonNegativeMs(opts.runtime.timer.remainingMs),
+          endsAt:
+            opts.runtime.timer.endsAt == null ? null : nonNegativeMs(opts.runtime.timer.endsAt),
+        },
+      }
+    : defaultInterviewRuntime();
   return {
     kind: 'interview',
-    activeProblemId: problemId,
-    interview,
-    sessionId: opts.sessionId,
-    guestToken: opts.guestToken,
-    interviewRuntime: opts.runtime ?? defaultInterviewRuntime(),
+    ...(activeProblemId ? { activeProblemId } : {}),
+    interview: { ...DEFAULT_INTERVIEW_SETTINGS, ...interview },
+    ...(sessionId ? { sessionId } : {}),
+    ...(guestToken ? { guestToken } : {}),
+    interviewRuntime,
   };
 }
 

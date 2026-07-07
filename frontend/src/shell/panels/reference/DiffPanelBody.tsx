@@ -20,9 +20,9 @@ export function DiffPanelBody() {
     ? Object.keys(cur).filter((k) => JSON.stringify(cur[k]) !== JSON.stringify(prev[k]))
     : [];
   return (
-    <div className="flex flex-col">
+    <div className="reference-panel reference-panel--diff flex flex-col">
       <ControlsAccordion title="This step" className="border-t-0">
-        <div className={cn('font-mono leading-snug text-ink', nodeText.base)}>
+        <div className={cn('reference-step-note font-mono leading-snug text-ink', nodeText.base)}>
           {frames[i]?.move.note}
         </div>
       </ControlsAccordion>
@@ -40,10 +40,10 @@ export function DiffPanelBody() {
         />
       ) : (
         <ControlsAccordion title="Changed fields" right={<Pill>{changed.length}</Pill>}>
-          <div className="flex flex-col gap-1.5">
+          <div className="reference-panel__stack flex flex-col gap-1.5">
             {changed.map((k) => (
               <Banner key={k} tone="accent" label={k}>
-                <div className="flex flex-col gap-1.5">
+                <div className="reference-diff-pair flex flex-col gap-1.5">
                   <div>
                     <p className={cn('mb-0.5 text-bad', nodeText.xs)}>Before</p>
                     <JsonBlock value={prev![k]} size="xs" variant="nested" maxHeight="120px" />

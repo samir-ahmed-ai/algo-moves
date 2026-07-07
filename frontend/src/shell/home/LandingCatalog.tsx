@@ -22,7 +22,7 @@ export function LandingCatalogRail({ onVim }: { onVim: () => void }) {
     <div className="mt-auto hidden space-y-4 lg:block lg:pt-2">
       <button
         type="button"
-        onClick={onVim}
+        onClick={() => onVim()}
         aria-label="Open Vim Dojo"
         className="group flex w-full flex-col gap-3 rounded-lg border border-edge bg-panel/70 p-3 text-left shadow-[var(--shadow-sm)] transition-all hover:border-accent/50 hover:bg-panel"
       >

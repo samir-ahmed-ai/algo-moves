@@ -5,6 +5,7 @@ import { useVimGame } from '../VimGameProvider';
 
 const ACTION_KEYS = new Set([
   'Escape',
+  'Enter',
   'r',
   '?',
   'h',

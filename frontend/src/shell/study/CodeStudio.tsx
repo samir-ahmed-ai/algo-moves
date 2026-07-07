@@ -127,6 +127,7 @@ export function CodeStudioProvider({
 
   useCodeStudioRecallShortcuts({
     phase,
+    vim: editorPrefs.vim,
     persistDraft,
     setBlind,
     fontSize: editorPrefs.fontSize,
@@ -232,7 +233,9 @@ export function CodeStudioProvider({
 
   if (variants.length === 0) {
     return (
-      <p className={cn('px-3 py-2 text-ink3', chromeText.base)}>No source for this problem.</p>
+      <p className={cn('code-studio-empty px-3 py-2 text-ink3', chromeText.base)}>
+        No source for this problem.
+      </p>
     );
   }
 
@@ -273,11 +276,11 @@ export function CodeStudioBody() {
   const { onAnswer: relayQuizAnswer } = useQuizHostRelay(item.id);
 
   return (
-    <div className="relative flex min-h-[280px] flex-1 flex-col px-3 pb-2 pt-1.5">
+    <div className="code-studio-body relative flex min-h-[280px] flex-1 flex-col px-3 pb-2 pt-1.5">
       <div
         key={phase}
         className={cn(
-          'flex min-h-0 flex-1 flex-col overflow-hidden',
+          'code-studio-phase flex min-h-0 flex-1 flex-col overflow-hidden',
           phaseTransition ? 'code-studio-phase-exit' : 'code-studio-phase-enter',
         )}
       >
@@ -342,11 +345,16 @@ export function CodeStudioFooter() {
   const { phase } = useCodeStudioPhase();
 
   return (
-    <div className="nodrag flex shrink-0 flex-wrap items-center gap-2 border-t border-edge/60 px-2 py-1.5">
-      <span className={cn('text-ink3', chromeText.sm)}>{PHASE_HINT[phase]}</span>
+    <div className="code-studio-footer nodrag flex shrink-0 flex-wrap items-center gap-2 border-t border-edge/60 px-2 py-1.5">
+      <span className={cn('code-studio-footer__hint text-ink3', chromeText.sm)}>
+        {PHASE_HINT[phase]}
+      </span>
       {phase === 'recall' && (
         <span
-          className={cn('rounded-md bg-panel2 px-2 py-0.5 font-mono text-ink2', chromeText.sm)}
+          className={cn(
+            'code-studio-footer__pill rounded-md bg-panel2 px-2 py-0.5 font-mono text-ink2',
+            chromeText.sm,
+          )}
           title={`${score}% match`}
         >
           {score}% match
@@ -355,7 +363,7 @@ export function CodeStudioFooter() {
       {phase === 'recall' && timerRunning && (
         <span
           className={cn(
-            'rounded-md bg-panel2 px-2 py-0.5 font-mono tabular-nums text-ink2',
+            'code-studio-footer__pill rounded-md bg-panel2 px-2 py-0.5 font-mono tabular-nums text-ink2',
             chromeText.sm,
           )}
         >
@@ -363,7 +371,12 @@ export function CodeStudioFooter() {
         </span>
       )}
       {stat.streak > 0 && (
-        <span className={cn('rounded-md bg-goodbg px-2 py-0.5 text-good', chromeText.sm)}>
+        <span
+          className={cn(
+            'code-studio-footer__pill code-studio-footer__pill--good rounded-md bg-goodbg px-2 py-0.5 text-good',
+            chromeText.sm,
+          )}
+        >
           streak {stat.streak}
         </span>
       )}
@@ -371,7 +384,7 @@ export function CodeStudioFooter() {
       {timeLabel && (
         <span
           className={cn(
-            'rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink',
+            'code-studio-footer__pill rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink',
             chromeText.sm,
           )}
         >
@@ -381,7 +394,7 @@ export function CodeStudioFooter() {
       {spaceLabel && (
         <span
           className={cn(
-            'rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink',
+            'code-studio-footer__pill rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink',
             chromeText.sm,
           )}
         >
@@ -389,7 +402,9 @@ export function CodeStudioFooter() {
         </span>
       )}
       {!timeLabel && !spaceLabel && (
-        <span className={cn('text-ink3', chromeText.sm)}>No complexity in source</span>
+        <span className={cn('code-studio-footer__empty text-ink3', chromeText.sm)}>
+          No complexity in source
+        </span>
       )}
     </div>
   );

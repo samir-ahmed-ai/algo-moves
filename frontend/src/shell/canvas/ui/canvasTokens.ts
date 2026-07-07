@@ -1,13 +1,28 @@
 import { NODE_W } from '@/design/nodeScale';
-import { FIT_VIEW_DURATION_MS, MIN_VIEWPORT_HEIGHT, CANVAS_MARGIN } from '@/design/canvasMetrics';
+import {
+  CANVAS_CHROME_MARGIN,
+  FIT_VIEW_DURATION_MS,
+  MIN_VIEWPORT_HEIGHT,
+  CANVAS_MARGIN,
+  clampCanvasInset,
+} from '@/design/canvasMetrics';
 // Node width + viewport metrics are defined in the design leaf; re-exported so
 // existing `./canvasTokens` consumers keep working.
 export { NODE_W };
-export { FIT_VIEW_DURATION_MS, MIN_VIEWPORT_HEIGHT, CANVAS_MARGIN };
+export {
+  CANVAS_CHROME_MARGIN,
+  FIT_VIEW_DURATION_MS,
+  MIN_VIEWPORT_HEIGHT,
+  CANVAS_MARGIN,
+  clampCanvasInset,
+};
 
 /** Scale a spacing token from the standard node width (400px baseline). */
 export function scaleFromNodeWidth(nodeW: number, ratio: number, floor = 0): number {
-  return Math.max(floor, Math.round(nodeW * ratio));
+  const safeNodeW = Number.isFinite(nodeW) ? Math.max(0, nodeW) : NODE_W;
+  const safeRatio = Number.isFinite(ratio) ? ratio : 0;
+  const safeFloor = Number.isFinite(floor) ? floor : 0;
+  return Math.max(safeFloor, Math.round(safeNodeW * safeRatio));
 }
 
 /** Gap between stacked / row nodes — ~6% of node width. */
@@ -36,4 +51,4 @@ export const VIZ_WIRE_GAP = vizWireGap(NODE_W);
 
 /** Tailwind class shared by all canvas port handles. */
 export const HANDLE_DOT_CLASS =
-  'handle-dot !z-[1] !h-[var(--node-handle,18px)] !w-[var(--node-handle,18px)] !min-w-0 !rounded-full !border-2 !border-edge2 !bg-panel2';
+  'handle-dot canvas-handle-dot !z-[1] !h-[var(--node-handle,18px)] !w-[var(--node-handle,18px)] !min-w-0 !rounded-full !border-2 !border-edge2 !bg-panel2';

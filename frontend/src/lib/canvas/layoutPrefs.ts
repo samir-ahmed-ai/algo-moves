@@ -8,14 +8,27 @@
 export const LAYOUT_PRESETS = ['Full', 'TraceFocus', 'Minimal', 'Theater', 'Demo'] as const;
 export type LayoutPreset = (typeof LAYOUT_PRESETS)[number];
 
+const LAYOUT_PRESET_BY_KEY: Record<string, LayoutPreset> = {
+  full: 'Full',
+  tracefocus: 'TraceFocus',
+  'trace-focus': 'TraceFocus',
+  study: 'TraceFocus',
+  minimal: 'Minimal',
+  exam: 'Minimal',
+  theater: 'Theater',
+  theatre: 'Theater',
+  demo: 'Demo',
+};
+
+export function isLayoutPreset(value: unknown): value is LayoutPreset {
+  return typeof value === 'string' && (LAYOUT_PRESETS as readonly string[]).includes(value);
+}
+
 /** Legacy persisted preset name → current {@link LayoutPreset}. */
 export function normalizeLayoutPreset(value: unknown): LayoutPreset {
-  if (value === 'Study' || value === 'study') return 'TraceFocus';
-  if (value === 'exam') return 'Minimal';
-  if (value === 'demo') return 'Demo';
-  if (typeof value === 'string' && (LAYOUT_PRESETS as readonly string[]).includes(value)) {
-    return value as LayoutPreset;
-  }
+  if (isLayoutPreset(value)) return value;
+  if (typeof value === 'string')
+    return LAYOUT_PRESET_BY_KEY[value.trim().toLowerCase()] ?? 'TraceFocus';
   return 'TraceFocus';
 }
 
@@ -40,6 +53,21 @@ export const defaultEdgeOpts: EdgeOpts = {
   strokeWidth: 1.5,
   arrow: false,
 };
+
+export function normalizeEdgeOpts(value: Partial<EdgeOpts> | undefined): EdgeOpts {
+  const pathTypes: readonly EdgePathType[] = ['smoothstep', 'bezier', 'step', 'straight'];
+  const strokeWidth = Number.isFinite(value?.strokeWidth)
+    ? Math.max(0.5, Math.min(6, value!.strokeWidth!))
+    : defaultEdgeOpts.strokeWidth;
+  return {
+    pathType: pathTypes.includes(value?.pathType as EdgePathType)
+      ? (value!.pathType as EdgePathType)
+      : defaultEdgeOpts.pathType,
+    animated: typeof value?.animated === 'boolean' ? value.animated : defaultEdgeOpts.animated,
+    strokeWidth,
+    arrow: typeof value?.arrow === 'boolean' ? value.arrow : defaultEdgeOpts.arrow,
+  };
+}
 
 /** Node alignment directions for the canvas align/distribute tools. Pure type,
  * homed here so the store's CanvasToolsProps contract doesn't import shell. */

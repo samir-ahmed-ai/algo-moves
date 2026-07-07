@@ -52,22 +52,22 @@ describe('buildCanvasFrame', () => {
     expect(edges).toHaveLength(0);
   });
 
-  it('does not reseed the interview canvas once panels were removed', () => {
+  it('reseeds the interview canvas despite a stale removal set', () => {
     const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', {
       ...baseInput,
       seedInterviewCanvas: true,
       removed: new Set(['whiteboard']),
     });
-    expect(nodes).toHaveLength(0);
+    expect(nodes.map(kindOf)).toEqual(['whiteboard', 'notes', 'collab-code']);
   });
 
-  it('does not reseed the interview canvas when a saved layout exists', () => {
+  it('reseeds the interview canvas despite a stale saved layout (seeded ids never match)', () => {
     const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', {
       ...baseInput,
       seedInterviewCanvas: true,
       saved: { 'whiteboard-1': { position: { x: 10, y: 10 } } },
     });
-    expect(nodes).toHaveLength(0);
+    expect(nodes.map(kindOf)).toEqual(['whiteboard', 'notes', 'collab-code']);
   });
 
   it('prefers the problem seed over the interview seed when both are set', () => {

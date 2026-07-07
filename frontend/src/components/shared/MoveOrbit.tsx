@@ -97,6 +97,7 @@ export function MoveOrbit({
     <svg
       ref={svgRef}
       className={cn('move-orbit', className)}
+      data-progress={index / Math.max(total - 1, 1)}
       viewBox={ORBIT_VIEWBOX}
       role="group"
       aria-label={`step ${index + 1} of ${total}`}
@@ -134,7 +135,12 @@ export function MoveOrbit({
             cx={p.x}
             cy={p.y}
             r={1.6}
-            className="move-orbit-tick"
+            className={cn(
+              'move-orbit-tick',
+              i < index && 'move-orbit-tick--past',
+              i === index && 'move-orbit-tick--current',
+              i > index && 'move-orbit-tick--future',
+            )}
             style={{ fill: toneFill(frames[i]) }}
           >
             <title>{`${i + 1}/${total}${frameText(frames[i]) ? ` — ${frameText(frames[i])}` : ''}`}</title>

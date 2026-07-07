@@ -48,10 +48,13 @@ import {
 import {
   SUBDOC_TAG,
   emptyEditorPayload,
+  emptyNotesPayload,
   emptyWhiteboardPayload,
   isSubDocEditOp,
   isSubDocOp,
+  type SubDocKind,
   type SubDocOp,
+  type SubDocPayload,
   type SubDocSnapshot,
   type WhiteboardPayload,
   type EditorPayload,
@@ -61,10 +64,11 @@ import {
   applyWhiteboardPatch,
   snapshotFromPayload,
 } from './protocol/subdocMerge';
+import { readSubdocPanel, seedSubdocPanel } from './yjs/yjsSubdocBinding';
 import { extractSubDocs } from '@/shell/realtime/roomState';
 import { isQuizOp, toHostQuizEntry, type HostQuizEntry } from './protocol/quizProtocol';
 import { useYjsForCanvasGraph, useYjsForSubdocs } from './yjs/yjsConfig';
-import { YjsCollabProvider } from './yjs/YjsCollabContext';
+import { YjsCollabProvider, useYjsCollab } from './yjs/YjsCollabContext';
 import { useYjsCanvasCollab } from './yjs/useYjsCanvasCollab';
 import { SoloFallbackBanner } from './SoloFallbackBanner';
 
@@ -145,9 +149,18 @@ export interface CanvasCollabApi {
   /** Host-only: quiz answers relayed from guests during interview sessions. */
   hostQuizLog: HostQuizEntry[];
 
-  /** Shared panel interiors (whiteboard scenes, collab editors) keyed by node id. */
+  /** Shared panel interiors (whiteboard scenes, collab editors, notes) keyed by node id. */
   subDocs: Record<string, SubDocSnapshot>;
   setSubDocs: Dispatch<SetStateAction<Record<string, SubDocSnapshot>>>;
+  /**
+   * Write a sub-doc payload through whichever transport is live (Yjs map or
+   * relay envelope) AND local React state, so the writer sees it immediately.
+   */
+  updateSubDocPayload: (
+    nodeId: string,
+    kind: SubDocKind,
+    updater: (prev: SubDocPayload | null) => SubDocPayload,
+  ) => void;
   /** Ephemeral in-panel cursors keyed by node id → peer id. */
   subDocCursors: Record<
     string,
@@ -172,6 +185,7 @@ function CollabState({ children }: { children: ReactNode }) {
   const { status, room, role, self, players, send, subscribe, connect, disconnect, sharedState } =
     useGameRoom();
   const { profile } = useAuth();
+  const { doc: yjsDoc } = useYjsCollab();
 
   const [peerMap, setPeerMap] = useState<Record<string, PeerPresence>>({});
   const [followId, setFollowId] = useState<string | null>(null);
@@ -196,14 +210,17 @@ function CollabState({ children }: { children: ReactNode }) {
   const selfName = self?.name ?? profile?.display_name ?? 'You';
 
   // Guests mirror session metadata and sub-docs from the host envelope.
+  // `role` is null between socket-open and the welcome message — a host in that
+  // window must not be mirrored into a solo/guest session (it would wipe the
+  // interview meta it just set).
   useEffect(() => {
-    if (isHost || !isCollaborating) return;
+    if (isHost || !isCollaborating || role == null) return;
     setSessionMeta(extractSessionMeta(sharedState));
     const remoteSubDocs = extractSubDocs(sharedState);
     if (!useYjsForSubdocs() && Object.keys(remoteSubDocs).length > 0) {
       setSubDocs((prev) => ({ ...prev, ...remoteSubDocs }));
     }
-  }, [sharedState, isHost, isCollaborating]);
+  }, [sharedState, isHost, isCollaborating, role]);
 
   // Roster order → stable peer color assignment shared across clients.
   const colorForRef = useRef<(id: string) => string>(() => peerColor('', -1));
@@ -250,8 +267,14 @@ function CollabState({ children }: { children: ReactNode }) {
           if (useYjsForSubdocs()) return;
           // Gate: reject guest patches when interview settings deny edit
           const senderRole = players.find((p) => p.id === fromId)?.role ?? 'guest';
-          const patchKind =
-            op[SUBDOC_TAG] === 'patch-editor' ? ('collab-code' as const) : ('whiteboard' as const);
+          const patchKind: SubDocKind =
+            op[SUBDOC_TAG] === 'snapshot'
+              ? op.doc.kind
+              : op[SUBDOC_TAG] === 'patch-editor'
+                ? 'collab-code'
+                : op[SUBDOC_TAG] === 'patch-notes'
+                  ? 'notes'
+                  : 'whiteboard';
           if (
             !canEditSubDoc(
               {
@@ -272,10 +295,20 @@ function CollabState({ children }: { children: ReactNode }) {
               docs[nodeId] ??
               snapshotFromPayload(
                 nodeId,
-                op[SUBDOC_TAG] === 'patch-editor' ? 'collab-code' : 'whiteboard',
+                patchKind,
                 0,
-                op[SUBDOC_TAG] === 'patch-editor' ? emptyEditorPayload() : emptyWhiteboardPayload(),
+                patchKind === 'collab-code'
+                  ? emptyEditorPayload()
+                  : patchKind === 'notes'
+                    ? emptyNotesPayload()
+                    : emptyWhiteboardPayload(),
               );
+            if (op[SUBDOC_TAG] === 'patch-notes') {
+              return {
+                ...docs,
+                [nodeId]: snapshotFromPayload(nodeId, 'notes', op.rev, { text: op.text }),
+              };
+            }
             if (op[SUBDOC_TAG] === 'patch-whiteboard' && prev.kind === 'whiteboard') {
               return {
                 ...docs,
@@ -539,6 +572,31 @@ function CollabState({ children }: { children: ReactNode }) {
     [send, isCollaborating, role],
   );
 
+  const subDocsRef = useRef(subDocs);
+  subDocsRef.current = subDocs;
+
+  // Transport-agnostic sub-doc write: reads the freshest snapshot (live Yjs map
+  // when the Yjs transport is on, React state otherwise), applies the updater,
+  // then writes back through Yjs and/or local state. On the relay fallback the
+  // host's content publish (useCanvasDocSync) carries the new snapshot to guests.
+  const updateSubDocPayload = useCallback(
+    (nodeId: string, kind: SubDocKind, updater: (prev: SubDocPayload | null) => SubDocPayload) => {
+      const yjsLive = useYjsForSubdocs() && yjsDoc ? yjsDoc : null;
+      const live = yjsLive ? readSubdocPanel(yjsLive, nodeId) : null;
+      const held = subDocsRef.current[nodeId];
+      const prev = live?.kind === kind ? live : held?.kind === kind ? held : null;
+      const next = snapshotFromPayload(
+        nodeId,
+        kind,
+        (prev?.rev ?? 0) + 1,
+        updater(prev?.payload ?? null),
+      );
+      if (yjsLive) seedSubdocPanel(yjsLive, next);
+      setSubDocs((docs) => ({ ...docs, [nodeId]: next }));
+    },
+    [yjsDoc],
+  );
+
   const leaveSession = useCallback(() => {
     disconnect();
     setPeerMap({});
@@ -764,6 +822,7 @@ function CollabState({ children }: { children: ReactNode }) {
       hostQuizLog,
       subDocs,
       setSubDocs,
+      updateSubDocPayload,
       subDocCursors,
       emitSubDoc,
       emit,
@@ -808,37 +867,30 @@ function CollabState({ children }: { children: ReactNode }) {
       removeComment,
       hostQuizLog,
       subDocs,
+      updateSubDocPayload,
       emitSubDoc,
       emit,
     ],
   );
 
   return (
-    <YjsCollabBridge isCollaborating={isCollaborating} isHost={isHost}>
-      <CanvasCollabContext.Provider value={value}>
-        {children}
-        {backendDegraded && !bannerDismissed && sessionMeta.kind === 'interview' ? (
-          <SoloFallbackBanner
-            message="Interview is running without cloud persistence — durable guest invite links and session history are unavailable. LAN relay still works."
-            onDismiss={dismissBackendBanner}
-          />
-        ) : null}
-      </CanvasCollabContext.Provider>
-    </YjsCollabBridge>
+    <CanvasCollabContext.Provider value={value}>
+      {children}
+      {backendDegraded && !bannerDismissed && sessionMeta.kind === 'interview' ? (
+        <SoloFallbackBanner
+          message="Interview is running without cloud persistence — durable guest invite links and session history are unavailable. LAN relay still works."
+          onDismiss={dismissBackendBanner}
+        />
+      ) : null}
+    </CanvasCollabContext.Provider>
   );
 }
 
-function YjsCollabBridge({
-  children,
-  isCollaborating,
-  isHost,
-}: {
-  children: ReactNode;
-  isCollaborating: boolean;
-  isHost: boolean;
-}) {
-  const { room } = useGameRoom();
-  const yjs = useYjsCanvasCollab({ roomId: room, isCollaborating, isHost });
+/** Wraps CollabState so it (and everything below) can reach the live Y.Doc. */
+function YjsCollabBridge({ children }: { children: ReactNode }) {
+  const { status, room, role } = useGameRoom();
+  const isCollaborating = status === 'open' && room != null;
+  const yjs = useYjsCanvasCollab({ roomId: room, isCollaborating, isHost: role === 'host' });
   return <YjsCollabProvider value={yjs}>{children}</YjsCollabProvider>;
 }
 
@@ -872,7 +924,9 @@ export function CanvasCollabProvider({ children }: { children: ReactNode }) {
   return (
     <GameRoomProvider>
       <RoomCommsProvider>
-        <CollabState>{children}</CollabState>
+        <YjsCollabBridge>
+          <CollabState>{children}</CollabState>
+        </YjsCollabBridge>
       </RoomCommsProvider>
     </GameRoomProvider>
   );

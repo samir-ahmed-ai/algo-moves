@@ -1,6 +1,6 @@
 import type { Item } from './types';
 import type { SampleInput } from '../core/types';
-import { PROBLEM_GISTS, gistFor } from './gists';
+import { curatedGistFor, gistFor } from './gists';
 import { GENERATED_PROBLEM_BRIEFS } from './_generated/problemBriefs';
 import { formatJsonDisplay } from '@/lib/utils/formatJsonDisplay';
 
@@ -51,7 +51,7 @@ function ensurePeriod(s: string): string {
 }
 
 function gistForItem(item: Item): string | undefined {
-  return PROBLEM_GISTS[item.id] ?? (item.pluginId ? PROBLEM_GISTS[item.pluginId] : undefined);
+  return curatedGistFor(item);
 }
 
 function overrideForItem(item: Item): Partial<ProblemBrief> | undefined {
@@ -59,8 +59,14 @@ function overrideForItem(item: Item): Partial<ProblemBrief> | undefined {
 }
 
 function generatedForItem(item: Item) {
-  const id = item.pluginId ?? item.id;
+  const id = (item.pluginId ?? item.id).trim();
   return GENERATED_PROBLEM_BRIEFS[id];
+}
+
+function normalizeStatements(statements: ReadonlyArray<string>, item: Item): [string, string] {
+  const first = ensurePeriod(statements[0] ?? gistFor(item));
+  const second = ensurePeriod(statements[1] ?? fallbackSecond(item, first));
+  return [first, second];
 }
 
 /** Split a plugin meta summary into a second statement when it carries detail after ':' or '.'. */
@@ -111,12 +117,12 @@ function runtimeStatementsFor(item: Item): [string, string] {
 export function statementsFor(item: Item): [string, string] {
   const override = overrideForItem(item);
   if (override?.statements && override.statements.length >= 2) {
-    return [override.statements[0], override.statements[1]];
+    return normalizeStatements(override.statements, item);
   }
 
   const generated = generatedForItem(item);
   if (generated?.statements) {
-    return generated.statements;
+    return normalizeStatements(generated.statements, item);
   }
 
   return runtimeStatementsFor(item);
@@ -126,7 +132,7 @@ function casesFromInputs(inputs: SampleInput[]): ProblemBriefCase[] {
   return inputs.slice(0, 2).map((inp, i) => ({
     label: `Example ${i + 1}`,
     input:
-      inp.label.startsWith('[') || inp.label.includes('=')
+      inp.label.trim().startsWith('[') || inp.label.includes('=')
         ? inp.label
         : formatJsonDisplay(inp.value),
     note: inp.hint,

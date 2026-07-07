@@ -17,16 +17,16 @@ export function GuestNameGate() {
   if (gate.phase === 'inactive' || gate.phase === 'loading') return null;
 
   return (
-    <div className="absolute inset-0 z-[60] grid place-items-center bg-bg/70 backdrop-blur-sm">
+    <div className="guest-name-gate absolute inset-0 z-[60] grid place-items-center bg-bg/70 backdrop-blur-sm">
       <div
         className={cn(
-          'flex w-[min(92vw,340px)] flex-col gap-3 border border-edge bg-panel p-5 shadow-xl',
+          'guest-name-gate__card flex w-[min(92vw,340px)] flex-col gap-3 border border-edge bg-panel p-5 shadow-xl',
           RADIUS_SHELL,
         )}
       >
         {gate.phase === 'closed' ? (
           <>
-            <span className="inline-flex items-center gap-2 text-ink">
+            <span className="guest-name-gate__title-row inline-flex items-center gap-2 text-ink">
               <CalendarX className="h-5 w-5 text-bad" />
               <span className={cn('font-semibold', chromeText.base)}>Interview closed</span>
             </span>
@@ -36,7 +36,7 @@ export function GuestNameGate() {
           </>
         ) : (
           <>
-            <span className="inline-flex items-center gap-2 text-ink">
+            <span className="guest-name-gate__title-row inline-flex items-center gap-2 text-ink">
               <UserCheck className="h-5 w-5 text-accent" />
               <span className={cn('font-semibold', chromeText.base)}>Join “{gate.title}”</span>
             </span>
@@ -53,6 +53,7 @@ export function GuestNameGate() {
               placeholder="Your name"
               className={cn(
                 'border border-edge bg-panel2 px-2.5 py-2 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+                'guest-name-gate__input',
                 RADIUS_CTRL,
                 chromeText.sm,
               )}
@@ -62,6 +63,7 @@ export function GuestNameGate() {
               onClick={() => gate.submit(name.trim() || 'Guest')}
               className={cn(
                 'inline-flex items-center justify-center gap-1.5 bg-accent px-3 py-2 font-medium text-white transition-opacity hover:opacity-90',
+                'guest-name-gate__submit',
                 RADIUS_CTRL,
                 chromeText.sm,
               )}

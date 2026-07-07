@@ -7,6 +7,7 @@ import type {
   AppRoute,
   CanvasAddPanel,
   CanvasHudProps,
+  CanvasInterviewControls,
   CanvasProjectApi,
   Density,
   LayoutDir,
@@ -57,6 +58,8 @@ export interface WorkspaceChromeCtx {
   setCanvasProject: (v: CanvasProjectApi | null) => void;
   canvasHud: CanvasHudProps | null;
   setCanvasHud: (v: CanvasHudProps | null) => void;
+  canvasInterview: CanvasInterviewControls | null;
+  setCanvasInterview: (v: CanvasInterviewControls | null) => void;
   settingsOpen: boolean;
   setSettingsOpen: (b: boolean) => void;
   settingsTab: SettingsTab;
@@ -113,6 +116,8 @@ export interface WorkspaceNavigationCtx {
   enterMobile: (categoryId?: string, itemId?: string) => void;
   /** Enter the Vim Dojo maze trainer; pass a level id to open that level directly. */
   enterVim: (levelId?: string) => void;
+  /** Enter the algorithm Dojo Hub; pass a game id (and level id) to open a game directly. */
+  enterDojo: (gameId?: string, levelId?: string) => void;
   /** Enter the two-player games arcade; pass a room code to join that room directly. */
   enterGames: (roomCode?: string) => void;
   /** Enter the interview prep plans hub. */

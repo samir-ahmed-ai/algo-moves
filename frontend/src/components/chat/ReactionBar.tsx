@@ -20,7 +20,7 @@ export function ReactionBar({
   buttonClassName,
 }: ReactionBarProps) {
   return (
-    <div className={cn('flex items-center gap-0.5', className)}>
+    <div className={cn('reaction-bar flex items-center gap-0.5', className)}>
       {reactions.map((emoji) => (
         <button
           key={emoji}
@@ -28,6 +28,7 @@ export function ReactionBar({
           onClick={() => onPick(emoji)}
           className={cn(
             'grid h-6 w-6 place-items-center rounded-full text-sm transition-transform hover:scale-125 active:scale-95',
+            'reaction-bar__button',
             buttonClassName,
           )}
           aria-label={getLabel(emoji)}
@@ -59,7 +60,7 @@ export function ReactionPicker({ onPick, label, reactions = CHAT_REACTIONS }: Re
   return (
     <div
       ref={rootRef}
-      className="relative shrink-0"
+      className="reaction-picker relative shrink-0"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
@@ -68,6 +69,7 @@ export function ReactionPicker({ onPick, label, reactions = CHAT_REACTIONS }: Re
         onClick={() => setOpen((o) => !o)}
         className={cn(
           'grid h-8 w-8 place-items-center rounded-full border border-edge bg-panel text-ink3 transition-colors touch-manipulation',
+          'reaction-picker__trigger',
           'hover:border-accent/40 hover:bg-panel2 hover:text-accent',
           open && 'border-accent/50 bg-accentbg text-accent',
         )}
@@ -84,10 +86,11 @@ export function ReactionPicker({ onPick, label, reactions = CHAT_REACTIONS }: Re
             'absolute bottom-[calc(100%+6px)] left-0 z-50 w-[10.5rem]',
             'rounded-xl border border-edge/80 bg-panel/95 p-1 shadow-theme-lg backdrop-blur-sm',
             'animate-in fade-in slide-in-from-bottom-1 duration-150',
+            'reaction-picker__panel',
           )}
           role="menu"
         >
-          <div className="grid grid-cols-6 gap-px">
+          <div className="reaction-picker__grid grid grid-cols-6 gap-px">
             {reactions.map((emoji) => (
               <button
                 key={emoji}
@@ -97,6 +100,7 @@ export function ReactionPicker({ onPick, label, reactions = CHAT_REACTIONS }: Re
                 className={cn(
                   'grid h-7 w-7 place-items-center rounded-md text-[length:var(--fs-title)] leading-none transition-transform touch-manipulation',
                   'hover:scale-110 hover:bg-panel2 active:scale-95',
+                  'reaction-picker__emoji',
                 )}
                 aria-label={`${label}: ${emoji}`}
               >

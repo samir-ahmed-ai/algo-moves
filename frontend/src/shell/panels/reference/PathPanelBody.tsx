@@ -14,7 +14,7 @@ export function PathPanelBody() {
   const idx = items.findIndex((it) => it.id === item.id);
   const masteredCount = items.filter((it) => statFor(progress, it.id).mastered).length;
   return (
-    <section className="nodrag learning-path-panel">
+    <section className="reference-panel reference-panel--path nodrag learning-path-panel">
       <div className="learning-path-panel__hero">
         <div>
           <span className="learning-path-panel__eyebrow">learning path</span>

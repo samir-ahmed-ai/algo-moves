@@ -40,7 +40,7 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
   const tone = pct === 1 ? 'var(--good)' : pct >= 0.5 ? 'var(--accent)' : 'var(--bad)';
   return (
     <div
-      className="relative grid h-[84px] w-[84px] place-items-center"
+      className="quiz-score-ring relative grid h-[84px] w-[84px] place-items-center"
       role="img"
       aria-label={`Score ${score} out of ${total}`}
     >
@@ -227,7 +227,7 @@ export function CodeStudioQuiz({
       >
         {done ? (
           <div
-            className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-6 text-center"
+            className="code-studio-quiz-results flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-6 text-center"
             role="status"
             aria-live="polite"
           >
@@ -241,7 +241,7 @@ export function CodeStudioQuiz({
                 onClick={restart}
                 title="Retry quiz"
                 className={cn(
-                  'nodrag inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-ink2 transition-colors hover:border-accent hover:text-ink',
+                  'code-studio-quiz-results__retry nodrag inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-ink2 transition-colors hover:border-accent hover:text-ink',
                   chromeText.tight,
                 )}
               >
@@ -252,7 +252,7 @@ export function CodeStudioQuiz({
                 onClick={() => onContinue(score)}
                 title={`Continue to ${nextLabel}`}
                 className={cn(
-                  'nodrag inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 font-medium text-white transition-opacity hover:opacity-90',
+                  'code-studio-quiz-results__continue nodrag inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 font-medium text-white transition-opacity hover:opacity-90',
                   chromeText.tight,
                 )}
               >
@@ -263,8 +263,8 @@ export function CodeStudioQuiz({
           </div>
         ) : (
           <div className="quiz-question-card flex min-h-0 flex-1 flex-col gap-3 rounded-lg border border-edge bg-panel/80 p-3 shadow-[var(--shadow-sm)] sm:p-4">
-            <div className="flex items-center gap-2">
-              <div className="flex min-w-0 flex-1 gap-0.5">
+            <div className="quiz-question-card__progress flex items-center gap-2">
+              <div className="quiz-question-card__progress-bars flex min-w-0 flex-1 gap-0.5">
                 {quiz.map((_, idx) => {
                   const past = idx < i || (idx === i && answered);
                   const cls = past
@@ -277,17 +277,25 @@ export function CodeStudioQuiz({
                   return (
                     <span
                       key={idx}
-                      className={cn('h-1 flex-1 rounded-full transition-colors', cls)}
+                      className={cn(
+                        'quiz-question-card__progress-bar h-1 flex-1 rounded-full transition-colors',
+                        cls,
+                      )}
                     />
                   );
                 })}
               </div>
-              <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.sm)}>
+              <span
+                className={cn(
+                  'quiz-question-card__count shrink-0 font-mono tabular-nums text-ink3',
+                  chromeText.sm,
+                )}
+              >
                 {i + 1}/{total}
               </span>
               <span
                 className={cn(
-                  'shrink-0 rounded bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink2',
+                  'quiz-question-card__score shrink-0 rounded bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink2',
                   chromeText.sm,
                 )}
               >
@@ -295,7 +303,7 @@ export function CodeStudioQuiz({
               </span>
             </div>
 
-            <div className="rounded-lg border border-edge bg-panel2/35 px-3 py-2">
+            <div className="quiz-question-card__prompt rounded-lg border border-edge bg-panel2/35 px-3 py-2">
               <p
                 className={cn('font-semibold leading-snug text-ink', chromeText.base)}
                 id={`quiz-q-${i}`}
@@ -305,7 +313,7 @@ export function CodeStudioQuiz({
             </div>
 
             <div
-              className="flex flex-col gap-1.5"
+              className="quiz-question-card__choices flex flex-col gap-1.5"
               role="radiogroup"
               aria-labelledby={`quiz-q-${i}`}
             >
@@ -390,7 +398,7 @@ export function CodeStudioQuiz({
                   type="button"
                   onClick={afterAnswer}
                   className={cn(
-                    'nodrag mt-0.5 inline-flex w-fit items-center gap-0.5 self-end rounded-md bg-accent px-2.5 py-1 font-medium text-white transition-opacity hover:opacity-90',
+                    'quiz-explain__action nodrag mt-0.5 inline-flex w-fit items-center gap-0.5 self-end rounded-md bg-accent px-2.5 py-1 font-medium text-white transition-opacity hover:opacity-90',
                     chromeText.sm,
                   )}
                 >

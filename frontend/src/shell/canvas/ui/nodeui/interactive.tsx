@@ -14,18 +14,21 @@ export function SearchInput({
   placeholder?: string;
 }) {
   return (
-    <div className="relative">
+    <div className="node-search-input relative">
       <Search
         className={cn(
-          'pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink3',
+          'node-search-input__icon pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink3',
           nodeIconGlyph,
         )}
       />
       <input
+        type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={cn(INPUT_CLS, 'pl-7')}
+        aria-label={placeholder}
+        autoComplete="off"
+        className={cn(INPUT_CLS, 'node-search-input__field pl-7')}
       />
     </div>
   );
@@ -54,10 +57,12 @@ export function Option({
     <button
       type="button"
       disabled={disabled}
+      data-state={state}
       onClick={onClick}
       className={cn(
-        `nodrag w-full border px-2.5 py-1.5 text-left ${nodeText.sm} transition-colors ${RADIUS_CTRL}`,
+        `node-option nodrag w-full border px-2.5 py-1.5 text-left ${nodeText.sm} transition-colors ${RADIUS_CTRL}`,
         mono && 'font-mono',
+        `node-option--${state}`,
         cls,
       )}
     >
@@ -78,18 +83,27 @@ export function Row({
   children: ReactNode;
 }) {
   const cls = cn(
-    'flex items-center gap-[var(--node-gap,0.5rem)] border-l-2 px-[var(--node-px,0.75rem)] py-[calc(var(--node-py,0.5625rem)*0.75)] text-left transition-colors',
+    'node-row flex items-center gap-[var(--node-gap,0.5rem)] border-l-2 px-[var(--node-px,0.75rem)] py-[calc(var(--node-py,0.5625rem)*0.75)] text-left transition-colors',
     nodeText.sm,
-    active ? 'border-l-accent bg-accentbg/60 text-accent' : 'border-l-transparent text-ink2',
+    active
+      ? 'node-row--active border-l-accent bg-accentbg/60 text-accent'
+      : 'border-l-transparent text-ink2',
     onClick && !active && 'hover:bg-panel2 hover:text-ink',
     className,
   );
   return onClick ? (
-    <button type="button" onClick={onClick} className={cn('nodrag w-full', cls)}>
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn('nodrag w-full', cls)}
+    >
       {children}
     </button>
   ) : (
-    <div className={cls}>{children}</div>
+    <div data-active={active ? 'true' : undefined} className={cls}>
+      {children}
+    </div>
   );
 }
 
@@ -104,8 +118,9 @@ export function CheckRow({
 }) {
   return (
     <label
+      data-checked={checked ? 'true' : 'false'}
       className={cn(
-        'nodrag flex cursor-pointer items-center gap-2 px-1.5 py-1 text-ink2 transition-colors hover:bg-panel2',
+        'node-check-row nodrag flex cursor-pointer items-center gap-2 px-1.5 py-1 text-ink2 transition-colors hover:bg-panel2',
         nodeText.base,
         RADIUS_CTRL,
       )}
@@ -114,9 +129,13 @@ export function CheckRow({
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="size-[var(--node-icon-glyph)] accent-[var(--accent)]"
+        className="node-check-row__input size-[var(--node-icon-glyph)] accent-[var(--accent)]"
       />
-      <span className={cn('min-w-0 flex-1', checked && 'text-ink3 line-through')}>{children}</span>
+      <span
+        className={cn('node-check-row__label min-w-0 flex-1', checked && 'text-ink3 line-through')}
+      >
+        {children}
+      </span>
     </label>
   );
 }

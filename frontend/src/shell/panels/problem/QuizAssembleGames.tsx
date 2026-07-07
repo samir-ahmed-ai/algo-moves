@@ -33,16 +33,18 @@ export function QuizAssembleGames({ onWinContinue }: { onWinContinue?: () => voi
   if (!pieces) return null;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-edge px-3 py-2">
-        <span className="inline-flex items-center gap-1.5 text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3">
+    <div className="quiz-assemble-games flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="quiz-assemble-games__header flex shrink-0 flex-wrap items-center gap-2 border-b border-edge px-3 py-2">
+        <span className="quiz-assemble-games__title inline-flex items-center gap-1.5 text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3">
           <Puzzle className="h-3.5 w-3.5" />
           Rebuild it
         </span>
-        <MiniTabs value={mode} options={MODES} onChange={setMode} />
+        <div className="quiz-assemble-games__tabs">
+          <MiniTabs value={mode} options={MODES} onChange={setMode} />
+        </div>
       </div>
       {game ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
+        <div className="quiz-assemble-games__body flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
           <game.Component
             key={`${item.id}:${active}:${mode}`}
             pieces={pieces}
@@ -54,7 +56,7 @@ export function QuizAssembleGames({ onWinContinue }: { onWinContinue?: () => voi
           />
         </div>
       ) : (
-        <div className="practice mobile-reassemble flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
+        <div className="quiz-assemble-games__body practice mobile-reassemble flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
           <ReassemblePane
             key={reassembleKey}
             pieces={pieces}

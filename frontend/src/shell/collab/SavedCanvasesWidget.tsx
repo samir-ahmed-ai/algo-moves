@@ -88,7 +88,7 @@ function SavedCanvasesBody() {
 
   if (configured === null) {
     return (
-      <div className="flex items-center gap-2 p-3 text-ink3">
+      <div className="saved-canvases-loading flex items-center gap-2 p-3 text-ink3">
         <Loader2 className="h-3 w-3 animate-spin" />
         <span className={chromeText.sm}>Loading…</span>
       </div>
@@ -97,7 +97,7 @@ function SavedCanvasesBody() {
 
   if (!configured) {
     return (
-      <p className={cn('p-3 text-ink3', chromeText.sm)}>
+      <p className={cn('saved-canvases-unavailable p-3 text-ink3', chromeText.sm)}>
         Sign-in / server not available. Saved canvases are unavailable in this environment.
       </p>
     );
@@ -106,10 +106,12 @@ function SavedCanvasesBody() {
   const disabled = !canvasProject || busy;
 
   return (
-    <div className="flex flex-col gap-3 p-3">
-      <div className="flex flex-col gap-2">
-        <span className={cn('text-ink3', chromeText.xs)}>Save current canvas</span>
-        <div className="flex items-center gap-2">
+    <div className="saved-canvases flex flex-col gap-3 p-3">
+      <div className="saved-canvases__create flex flex-col gap-2">
+        <span className={cn('saved-canvases__label text-ink3', chromeText.xs)}>
+          Save current canvas
+        </span>
+        <div className="saved-canvases__create-row flex items-center gap-2">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -117,6 +119,7 @@ function SavedCanvasesBody() {
             disabled={disabled}
             className={cn(
               'min-w-0 flex-1 rounded border border-edge bg-panel2 px-2 py-1.5 text-ink',
+              'saved-canvases__input',
               chromeText.sm,
             )}
           />
@@ -125,7 +128,7 @@ function SavedCanvasesBody() {
             onClick={() => void save()}
             disabled={disabled}
             title="Save current canvas"
-            className="flex items-center gap-1 rounded-md bg-accent px-2 py-1.5 text-white disabled:opacity-50"
+            className="saved-canvases__save flex items-center gap-1 rounded-md bg-accent px-2 py-1.5 text-white disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             <span className={chromeText.sm}>Save</span>
@@ -133,25 +136,31 @@ function SavedCanvasesBody() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="saved-canvases__list flex flex-col gap-1">
         {items.length === 0 ? (
-          <p className={cn('text-ink3', chromeText.xs)}>No saved canvases yet.</p>
+          <p className={cn('saved-canvases__empty text-ink3', chromeText.xs)}>
+            No saved canvases yet.
+          </p>
         ) : (
           items.map((c) => (
             <div
               key={c.id}
-              className="flex items-center gap-2 rounded-md border border-edge bg-panel2 px-2 py-1.5"
+              className="saved-canvases__item flex items-center gap-2 rounded-md border border-edge bg-panel2 px-2 py-1.5"
             >
               <div className="min-w-0 flex-1">
-                <div className={cn('truncate text-ink', chromeText.sm)}>{c.title}</div>
-                <div className={cn('text-ink3', chromeText.xs)}>{relativeTime(c.updatedAt)}</div>
+                <div className={cn('saved-canvases__item-title truncate text-ink', chromeText.sm)}>
+                  {c.title}
+                </div>
+                <div className={cn('saved-canvases__item-time text-ink3', chromeText.xs)}>
+                  {relativeTime(c.updatedAt)}
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => void open(c.id)}
                 disabled={!canvasProject}
                 title="Open canvas"
-                className="flex items-center gap-1 rounded border border-edge px-1.5 py-1 text-ink2 hover:bg-panel disabled:opacity-50"
+                className="saved-canvases__open flex items-center gap-1 rounded border border-edge px-1.5 py-1 text-ink2 hover:bg-panel disabled:opacity-50"
               >
                 <FolderOpen className="h-3 w-3" />
                 <span className={chromeText.xs}>Open</span>
@@ -160,7 +169,7 @@ function SavedCanvasesBody() {
                 type="button"
                 onClick={() => void remove(c.id)}
                 title="Delete canvas"
-                className="flex items-center rounded border border-edge px-1.5 py-1 text-ink2 hover:bg-panel"
+                className="saved-canvases__delete flex items-center rounded border border-edge px-1.5 py-1 text-ink2 hover:bg-panel"
               >
                 <Trash2 className="h-3 w-3" />
               </button>

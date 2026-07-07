@@ -48,20 +48,29 @@ export function Avatar({
     return { cells, hue };
   }, [seed, name]);
 
+  const safeSize = Number.isFinite(size) ? Math.max(16, Math.round(size)) : 40;
   const bg = `hsl(${hue} 65% 92%)`;
   const fg = `hsl(${hue} 62% 42%)`;
 
   return (
     <span
-      className={cx('inline-block shrink-0 overflow-hidden rounded-full', className)}
+      className={cx('design-avatar inline-block shrink-0 overflow-hidden rounded-full', className)}
       style={{
-        width: size,
-        height: size,
+        width: safeSize,
+        height: safeSize,
         boxShadow: ring ? `0 0 0 2px ${ring}` : undefined,
       }}
-      aria-hidden
+      role={name ? 'img' : undefined}
+      aria-label={name ? `${name} avatar` : undefined}
+      aria-hidden={name ? undefined : true}
     >
-      <svg viewBox="0 0 5 5" width={size} height={size} style={{ display: 'block' }}>
+      <svg
+        className="design-avatar__svg"
+        viewBox="0 0 5 5"
+        width={safeSize}
+        height={safeSize}
+        style={{ display: 'block' }}
+      >
         <rect width="5" height="5" fill={bg} />
         {cells.map((c) => (
           <rect key={`${c.x}-${c.y}`} x={c.x} y={c.y} width="1.02" height="1.02" fill={fg} />

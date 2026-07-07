@@ -87,8 +87,9 @@ export function configureSoundPersistence(
   initialMuted: boolean,
   save: (muted: boolean) => void,
 ): void {
-  muted = initialMuted;
+  muted = Boolean(initialMuted);
   persistMuted = save;
+  listeners.forEach((fn) => fn(muted));
 }
 
 export function isSoundMuted(): boolean {
@@ -96,9 +97,11 @@ export function isSoundMuted(): boolean {
 }
 
 export function setSoundMuted(next: boolean): void {
-  muted = next;
-  persistMuted?.(next);
-  listeners.forEach((fn) => fn(next));
+  const value = Boolean(next);
+  if (muted === value) return;
+  muted = value;
+  persistMuted?.(value);
+  listeners.forEach((fn) => fn(value));
 }
 
 export function toggleSoundMuted(): void {
@@ -114,12 +117,14 @@ export function subscribeSoundMuted(fn: (muted: boolean) => void): () => void {
 /** Play a named cue. No-op when muted or Web Audio is unavailable. */
 export function playCue(cue: SoundCue): void {
   if (muted) return;
+  const notes = CUES[cue];
+  if (!notes) return;
   const audio = getAudioContext();
   if (!audio) return;
   try {
     if (audio.state === 'suspended') void audio.resume();
     const now = audio.currentTime;
-    for (const note of CUES[cue]) {
+    for (const note of notes) {
       const osc = audio.createOscillator();
       const gainNode = audio.createGain();
       osc.type = note.type ?? 'sine';

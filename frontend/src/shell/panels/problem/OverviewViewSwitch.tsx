@@ -6,20 +6,21 @@ export type OverviewView = 'animate' | 'recall';
 export function OverviewViewSwitch({
   view,
   onView,
-  hasRecall,
+  canToggle,
   className,
 }: {
   view: OverviewView;
   onView: (view: OverviewView) => void;
-  hasRecall: boolean;
+  /** Only meaningful when the problem has BOTH an animation and a source to recall. */
+  canToggle: boolean;
   className?: string;
 }) {
-  if (!hasRecall) return null;
+  if (!canToggle) return null;
 
   return (
     <div
       className={cn(
-        'flex items-center gap-0.5 rounded-md border border-edge bg-panel2/50 p-0.5',
+        'overview-view-switch flex items-center gap-0.5 rounded-md border border-edge bg-panel2/50 p-0.5',
         className,
       )}
     >
@@ -64,9 +65,10 @@ function TabBtn({
       className={cn(
         'flex flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--radius)-2px)] border px-2 py-1 text-xs font-medium transition-colors',
         active
-          ? 'border-accent/25 bg-accent text-white shadow-sm'
-          : 'border-transparent bg-transparent text-ink2 hover:bg-panel hover:text-ink',
+          ? 'overview-view-tab overview-view-tab--active border-accent/25 bg-accent text-white shadow-sm'
+          : 'overview-view-tab overview-view-tab--idle border-transparent bg-transparent text-ink2 hover:bg-panel hover:text-ink',
       )}
+      aria-pressed={active}
     >
       {icon}
       {children}

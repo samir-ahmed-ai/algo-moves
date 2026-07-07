@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
-import type { EditorPayload } from '../protocol/subdocProtocol';
+import type { EditorPayload, NotesPayload } from '../protocol/subdocProtocol';
 import { snapshotFromPayload } from '../protocol/subdocMerge';
 import {
   readSubdocPanel,
@@ -8,6 +8,7 @@ import {
   seedSubdocPanel,
   seedYjsSubdocs,
   writeEditorSubdoc,
+  writeNotesSubdoc,
 } from './yjsSubdocBinding';
 
 describe('yjsSubdocBinding', () => {
@@ -34,13 +35,35 @@ describe('yjsSubdocBinding', () => {
     expect(read?.rev).toBe(2);
   });
 
+  it('round-trips notes subdoc via seed and read', () => {
+    const doc = new Y.Doc();
+    const snap = snapshotFromPayload('notes-1', 'notes', 2, {
+      text: 'edge case: empty array',
+    } satisfies NotesPayload);
+    seedSubdocPanel(doc, snap);
+    const read = readSubdocPanel(doc, 'notes-1');
+    expect(read?.kind).toBe('notes');
+    expect((read?.payload as NotesPayload).text).toBe('edge case: empty array');
+    expect(read?.rev).toBe(2);
+  });
+
+  it('writeNotesSubdoc updates the shared text', () => {
+    const doc = new Y.Doc();
+    writeNotesSubdoc(doc, 'notes-2', { text: 'a' }, 1);
+    writeNotesSubdoc(doc, 'notes-2', { text: 'ab' }, 2);
+    const read = readSubdocPanel(doc, 'notes-2');
+    expect((read?.payload as NotesPayload).text).toBe('ab');
+    expect(read?.rev).toBe(2);
+  });
+
   it('seedYjsSubdocs hydrates multiple panels', () => {
     const doc = new Y.Doc();
     seedYjsSubdocs(doc, {
       a: snapshotFromPayload('a', 'collab-code', 1, { text: 'x', language: 'go' }),
       b: snapshotFromPayload('b', 'whiteboard', 1, { elements: [] }),
+      c: snapshotFromPayload('c', 'notes', 1, { text: 'n' }),
     });
     const all = readYjsSubdocs(doc);
-    expect(Object.keys(all).sort()).toEqual(['a', 'b']);
+    expect(Object.keys(all).sort()).toEqual(['a', 'b', 'c']);
   });
 });

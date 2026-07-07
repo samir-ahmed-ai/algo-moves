@@ -52,8 +52,12 @@ export function HudBtn({
       className={cn(
         HUD_BTN,
         CHROME_BTN,
+        'hud-btn',
         '[&_svg]:size-2.5',
         nodrag && 'nodrag',
+        variant === 'solid' ? 'hud-btn--solid' : 'hud-btn--soft',
+        active && 'hud-btn--active',
+        tone === 'play' && 'hud-btn--play',
         tone === 'play' && active && 'bg-good text-white',
         tone === 'play' && !active && 'text-ink2 hover:bg-panel2 hover:text-ink',
         !tone && variant === 'solid' && active && 'bg-accent text-white',
@@ -112,7 +116,10 @@ export function AlignDropdown({
       aria-label="Align and distribute"
       aria-expanded={open}
       onClick={() => setOpen((o) => !o)}
-      className={cn(triggerClassName, open && 'bg-accentbg text-accent')}
+      className={cn(
+        triggerClassName,
+        open && 'canvas-toolbar__button--active bg-accentbg text-accent',
+      )}
     >
       <AlignHorizontalDistributeCenter className="h-4 w-4" />
     </button>
@@ -123,16 +130,16 @@ export function AlignDropdown({
   );
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="align-dropdown relative">
       {trigger}
       {open && (
         <div
           className={cn(
-            'absolute right-0 top-full z-30 mt-1 border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
+            'align-dropdown__panel absolute right-0 top-full z-30 mt-1 border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
             RADIUS_SHELL,
           )}
         >
-          <div className="grid grid-cols-3 gap-0.5">
+          <div className="align-dropdown__grid grid grid-cols-3 gap-0.5">
             {ALIGN_BTNS.map((b) => (
               <button
                 key={b.kind}
@@ -140,7 +147,7 @@ export function AlignDropdown({
                 title={b.title}
                 aria-label={b.title}
                 onClick={() => pickAlign(b.kind)}
-                className={POP_BTN}
+                className={cn(POP_BTN, 'align-dropdown__button')}
               >
                 {b.icon}
               </button>
@@ -148,14 +155,14 @@ export function AlignDropdown({
           </div>
           {selCount >= 3 && (
             <>
-              <div className="my-0.5 h-px bg-edge" aria-hidden />
-              <div className="grid grid-cols-2 gap-0.5">
+              <div className="align-dropdown__divider my-0.5 h-px bg-edge" aria-hidden />
+              <div className="align-dropdown__grid align-dropdown__grid--distribute grid grid-cols-2 gap-0.5">
                 <button
                   type="button"
                   title="Distribute horizontally"
                   aria-label="Distribute horizontally"
                   onClick={() => pickDistribute('h')}
-                  className={POP_BTN}
+                  className={cn(POP_BTN, 'align-dropdown__button')}
                 >
                   <AlignHorizontalDistributeCenter />
                 </button>
@@ -164,7 +171,7 @@ export function AlignDropdown({
                   title="Distribute vertically"
                   aria-label="Distribute vertically"
                   onClick={() => pickDistribute('v')}
-                  className={POP_BTN}
+                  className={cn(POP_BTN, 'align-dropdown__button')}
                 >
                   <AlignVerticalDistributeCenter />
                 </button>
@@ -199,7 +206,7 @@ export function LaserPointer({ host }: { host: React.RefObject<HTMLElement | nul
   if (!pos) return null;
   return (
     <div
-      className="pointer-events-none absolute z-40 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full"
+      className="laser-pointer pointer-events-none absolute z-40 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full"
       style={{
         left: pos.x,
         top: pos.y,
@@ -232,7 +239,7 @@ export function ContextMenu({
 }) {
   return (
     <div
-      className="absolute inset-0 z-50"
+      className="context-menu-layer absolute inset-0 z-50"
       onClick={onClose}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -240,7 +247,7 @@ export function ContextMenu({
       }}
     >
       <div
-        className="absolute min-w-[168px] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/95 py-0.5 shadow-[var(--shadow-xl)] backdrop-blur"
+        className="context-menu absolute min-w-[168px] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/95 py-0.5 shadow-[var(--shadow-xl)] backdrop-blur"
         style={{ left: x, top: y }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -254,11 +261,14 @@ export function ContextMenu({
             }}
             className={cn(
               'flex w-full items-center gap-1.5 px-2.5 py-1 text-left transition-colors hover:bg-panel2',
+              'context-menu__item',
               it.danger ? 'text-bad' : 'text-ink2 hover:text-ink',
             )}
           >
             {it.icon && (
-              <span className="grid h-4 w-4 place-items-center text-ink3">{it.icon}</span>
+              <span className="context-menu__icon grid h-4 w-4 place-items-center text-ink3">
+                {it.icon}
+              </span>
             )}
             {it.label}
           </button>

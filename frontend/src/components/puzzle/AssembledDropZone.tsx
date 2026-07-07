@@ -24,7 +24,7 @@ export function AssembledDropZone({
       }}
       role="region"
       aria-label="Assembled code"
-      className={cn(className, (active || isOver) && 'assembled-drag-over')}
+      className={cn('assembled-drop-zone', className, (active || isOver) && 'assembled-drag-over')}
     >
       {children}
     </div>

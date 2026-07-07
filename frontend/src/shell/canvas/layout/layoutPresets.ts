@@ -37,12 +37,15 @@ export const NAMED_LAYOUT_PRESETS: Record<NamedLayoutPreset, LayoutPreset> = {
 
 /** Resolve a named or canonical preset string; returns null when unknown. */
 export function resolveNamedLayoutPreset(value: string): LayoutPreset | null {
-  const lower = value.toLowerCase();
+  const trimmed = value.trim();
+  const lower = trimmed.toLowerCase();
   if (lower in NAMED_LAYOUT_PRESETS) return NAMED_LAYOUT_PRESETS[lower as NamedLayoutPreset];
   if (
-    (['Full', 'TraceFocus', 'Minimal', 'Theater', 'Demo'] as const).includes(value as LayoutPreset)
+    (['Full', 'TraceFocus', 'Minimal', 'Theater', 'Demo'] as const).includes(
+      trimmed as LayoutPreset,
+    )
   ) {
-    return value as LayoutPreset;
+    return trimmed as LayoutPreset;
   }
   return null;
 }
@@ -128,12 +131,17 @@ export function presetRemoved(
 /** All node ids a mode knows about (default + optional + tabs) — used for ＋-menu/edges/removal. */
 export function modeNodeIds(plugin: ProblemPlugin<any, any>, mode: CanvasMode): string[] {
   const ids = [...MODE_BUILTINS[mode], ...MODE_OPTIONAL[mode], ...modeTabIds(plugin, mode)];
-  if (mode === 'visualize' || mode === 'play') return ids.filter((id) => !DOCK_ONLY_PANELS.has(id));
-  return ids;
+  const unique = Array.from(new Set(ids.map((id) => id.trim()).filter(Boolean)));
+  if (mode === 'visualize' || mode === 'play')
+    return unique.filter((id) => !DOCK_ONLY_PANELS.has(id));
+  return unique;
 }
 
 function modeTabIds(plugin: ProblemPlugin<any, any>, mode: CanvasMode): string[] {
-  return (plugin.tabs ?? []).filter((t) => tabInMode(t, mode) && !isSideTab(t)).map((t) => t.id);
+  return (plugin.tabs ?? [])
+    .filter((t) => tabInMode(t, mode) && !isSideTab(t))
+    .map((t) => t.id.trim())
+    .filter(Boolean);
 }
 
 function tabInMode(tab: { mode?: string }, mode: CanvasMode): boolean {
@@ -149,6 +157,13 @@ function isSideTab(tab: { mode?: string; side?: boolean }): boolean {
 
 /** Optional panels that work on the standalone canvas without a loaded problem plugin. */
 export const STANDALONE_ADDABLE_PANELS = ['notes', 'whiteboard', 'collab-code'] as const;
+
+/** Panel kinds allowed to exist multiple times on one canvas (spawned with unique ids). */
+export const MULTI_INSTANCE_PANELS: ReadonlySet<string> = new Set(['whiteboard', 'collab-code']);
+
+export function isMultiInstancePanel(kind: string): boolean {
+  return MULTI_INSTANCE_PANELS.has(kind.trim());
+}
 
 export function standaloneNodeIds(): string[] {
   return [...STANDALONE_ADDABLE_PANELS];

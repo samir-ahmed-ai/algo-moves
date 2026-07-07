@@ -109,7 +109,7 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 py-0.5">
+    <div className="interview-toggle flex items-center justify-between gap-2 py-0.5">
       <span className="min-w-0">
         <span className={cn('block text-ink2', chromeText.sm)}>{label}</span>
         {hint ? <span className={cn('block text-ink3', chromeText.xs)}>{hint}</span> : null}
@@ -121,12 +121,14 @@ function Toggle({
         onClick={() => onChange(!checked)}
         className={cn(
           'relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors',
+          'interview-toggle__switch',
           checked ? 'bg-accent' : 'bg-edge',
         )}
       >
         <span
           className={cn(
             'inline-block h-3 w-3 rounded-full bg-white transition-transform',
+            'interview-toggle__thumb',
             checked ? 'translate-x-3.5' : 'translate-x-0.5',
           )}
         />
@@ -235,16 +237,19 @@ function RoomControlsBody() {
   if (!isHost) return null;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="interview-room-controls flex flex-col gap-3">
       {/* Guest link */}
-      <div className="flex flex-col gap-1.5">
-        <span className={cn('font-medium text-ink3', chromeText.xs)}>Guest invite</span>
-        <div className="flex items-center gap-1.5">
+      <div className="interview-room-controls__section flex flex-col gap-1.5">
+        <span className={cn('interview-room-controls__label font-medium text-ink3', chromeText.xs)}>
+          Guest invite
+        </span>
+        <div className="interview-room-controls__invite flex items-center gap-1.5">
           <input
             readOnly
             value={inviteUrl}
             className={cn(
               'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1 text-ink3 outline-none',
+              'interview-room-controls__input',
               RADIUS_CTRL,
               chromeText.xs,
             )}
@@ -256,6 +261,7 @@ function RoomControlsBody() {
             aria-label="Copy invite link"
             className={cn(
               'grid h-7 w-7 shrink-0 place-items-center border border-edge bg-panel2 text-ink2 hover:text-ink',
+              'interview-room-controls__copy',
               RADIUS_CTRL,
             )}
           >
@@ -289,10 +295,10 @@ function RoomControlsBody() {
         ) : null}
       </div>
 
-      <span className="h-px bg-edge" />
+      <span className="interview-room-controls__divider h-px bg-edge" />
 
       {/* Room controls */}
-      <div className="flex flex-col gap-1">
+      <div className="interview-room-controls__section flex flex-col gap-1">
         <Toggle
           label={
             <span className="inline-flex items-center gap-1">
@@ -317,10 +323,10 @@ function RoomControlsBody() {
         />
       </div>
 
-      <span className="h-px bg-edge" />
+      <span className="interview-room-controls__divider h-px bg-edge" />
 
       {/* Export + lifecycle */}
-      <div className="flex items-center gap-1.5">
+      <div className="interview-room-controls__exports flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => doExport('svg')}
@@ -409,7 +415,7 @@ function QuestionsBody() {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="interview-questions flex flex-col gap-2">
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -417,16 +423,18 @@ function QuestionsBody() {
         rows={2}
         className={cn(
           'resize-none border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+          'interview-questions__textarea',
           RADIUS_CTRL,
           chromeText.sm,
         )}
       />
-      <div className="flex items-center gap-1.5">
+      <div className="interview-questions__composer flex items-center gap-1.5">
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as QuestionCategory)}
           className={cn(
             'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1 text-ink2 outline-none focus:border-accent',
+            'interview-questions__select',
             RADIUS_CTRL,
             chromeText.sm,
           )}
@@ -443,6 +451,7 @@ function QuestionsBody() {
           disabled={!text.trim()}
           className={cn(
             'inline-flex items-center gap-1 bg-accent px-2.5 py-1 font-medium text-white disabled:opacity-40',
+            'interview-questions__add',
             RADIUS_CTRL,
             chromeText.sm,
           )}
@@ -451,25 +460,27 @@ function QuestionsBody() {
         </button>
       </div>
       {questions.length === 0 ? (
-        <p className={cn('py-2 text-center text-ink3', chromeText.xs)}>
+        <p className={cn('interview-questions__empty py-2 text-center text-ink3', chromeText.xs)}>
           Prepare questions here, then send them to the board one at a time. The candidate only sees
           what you send.
         </p>
       ) : (
-        <ul className="flex flex-col gap-1.5">
+        <ul className="interview-questions__list flex flex-col gap-1.5">
           {questions.map((q) => (
             <li
               key={q.id}
               className={cn(
                 'flex flex-col gap-1.5 border p-2',
+                'interview-question-card',
                 RADIUS_SHELL,
                 q.asked ? 'border-good/40 bg-goodbg/40' : 'border-edge bg-panel2/50',
               )}
             >
-              <div className="flex items-center justify-between gap-2">
+              <div className="interview-question-card__head flex items-center justify-between gap-2">
                 <span
                   className={cn(
                     'rounded border border-edge px-1 py-0.5 capitalize text-ink3',
+                    'interview-question-card__category',
                     chromeText.xs,
                   )}
                 >
@@ -481,13 +492,19 @@ function QuestionsBody() {
                   aria-label="Delete question"
                   className={cn(
                     'grid h-6 w-6 place-items-center text-ink3 hover:bg-badbg hover:text-bad',
+                    'interview-question-card__delete',
                     RADIUS_CTRL,
                   )}
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
               </div>
-              <p className={cn('whitespace-pre-wrap break-words text-ink', chromeText.sm)}>
+              <p
+                className={cn(
+                  'interview-question-card__text whitespace-pre-wrap break-words text-ink',
+                  chromeText.sm,
+                )}
+              >
                 {q.text}
               </p>
               <button
@@ -496,6 +513,7 @@ function QuestionsBody() {
                 disabled={!canSend}
                 className={cn(
                   'inline-flex items-center justify-center gap-1.5 border border-edge bg-panel2 py-1 font-medium text-ink2 hover:text-ink disabled:opacity-40',
+                  'interview-question-card__send',
                   RADIUS_CTRL,
                   chromeText.sm,
                 )}
@@ -528,8 +546,8 @@ function NotesBody() {
   }, [sessionId]);
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <p className={cn('text-ink3', chromeText.xs)}>
+    <div className="interview-notes flex flex-col gap-1.5">
+      <p className={cn('interview-notes__hint text-ink3', chromeText.xs)}>
         Private — never shown to the candidate. Saves automatically.
       </p>
       <textarea
@@ -542,6 +560,7 @@ function NotesBody() {
         rows={6}
         className={cn(
           'resize-none border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+          'interview-notes__textarea',
           RADIUS_CTRL,
           chromeText.sm,
         )}
@@ -585,16 +604,25 @@ function RubricBody() {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className={cn('text-ink3', chromeText.xs)}>Private scorecard — saves automatically.</p>
+    <div className="interview-rubric flex flex-col gap-2">
+      <p className={cn('interview-rubric__hint text-ink3', chromeText.xs)}>
+        Private scorecard — saves automatically.
+      </p>
       {rubric.map((c) => (
         <div
           key={c.id}
-          className={cn('flex flex-col gap-1.5 border border-edge bg-panel2/50 p-2', RADIUS_SHELL)}
+          className={cn(
+            'interview-rubric-card flex flex-col gap-1.5 border border-edge bg-panel2/50 p-2',
+            RADIUS_SHELL,
+          )}
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className={cn('font-medium text-ink', chromeText.sm)}>{c.label}</span>
-            <span className="flex items-center gap-0.5">
+          <div className="interview-rubric-card__head flex items-center justify-between gap-2">
+            <span
+              className={cn('interview-rubric-card__label font-medium text-ink', chromeText.sm)}
+            >
+              {c.label}
+            </span>
+            <span className="interview-rubric-card__stars flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map((score) => (
                 <button
                   key={score}
@@ -611,6 +639,7 @@ function RubricBody() {
                   <Star
                     className={cn(
                       'h-4 w-4',
+                      'interview-rubric-card__star',
                       c.score >= score ? 'fill-amber-400 text-amber-400' : 'text-ink3/40',
                     )}
                   />
@@ -626,13 +655,14 @@ function RubricBody() {
             placeholder="Comment…"
             className={cn(
               'border border-edge bg-panel2 px-2 py-1 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+              'interview-rubric-card__comment',
               RADIUS_CTRL,
               chromeText.xs,
             )}
           />
         </div>
       ))}
-      <div className="flex items-center gap-1.5">
+      <div className="interview-rubric__add flex items-center gap-1.5">
         <input
           value={customLabel}
           onChange={(e) => setCustomLabel(e.target.value)}
@@ -642,6 +672,7 @@ function RubricBody() {
           placeholder="Add criterion…"
           className={cn(
             'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+            'interview-rubric__input',
             RADIUS_CTRL,
             chromeText.sm,
           )}
@@ -652,6 +683,7 @@ function RubricBody() {
           disabled={!customLabel.trim()}
           className={cn(
             'grid h-7 w-7 place-items-center border border-edge bg-panel2 text-ink2 hover:text-ink disabled:opacity-40',
+            'interview-rubric__add-button',
             RADIUS_CTRL,
           )}
           aria-label="Add criterion"
@@ -659,8 +691,10 @@ function RubricBody() {
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
-      <label className="flex flex-col gap-1">
-        <span className={cn('text-ink3', chromeText.xs)}>Overall recommendation</span>
+      <label className="interview-rubric__recommendation flex flex-col gap-1">
+        <span className={cn('interview-rubric__recommendation-label text-ink3', chromeText.xs)}>
+          Overall recommendation
+        </span>
         <select
           value={recommendation}
           onChange={(e) => {
@@ -670,6 +704,7 @@ function RubricBody() {
           }}
           className={cn(
             'border border-edge bg-panel2 px-2 py-1 text-ink2 outline-none focus:border-accent',
+            'interview-rubric__select',
             RADIUS_CTRL,
             chromeText.sm,
           )}

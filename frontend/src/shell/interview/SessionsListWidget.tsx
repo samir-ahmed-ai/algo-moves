@@ -112,7 +112,7 @@ function SessionsListBody() {
 
   if (configured === null) {
     return (
-      <div className="flex items-center gap-2 p-1 text-ink3">
+      <div className="interview-sessions-loading flex items-center gap-2 p-1 text-ink3">
         <Loader2 className="h-3 w-3 animate-spin" />
         <span className={chromeText.sm}>Loading…</span>
       </div>
@@ -120,16 +120,16 @@ function SessionsListBody() {
   }
   if (!configured) {
     return (
-      <p className={cn('p-1 text-ink3', chromeText.sm)}>
+      <p className={cn('interview-sessions-unavailable p-1 text-ink3', chromeText.sm)}>
         Server not available — past interviews are unavailable here.
       </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="interview-sessions flex flex-col gap-1">
       {items.length === 0 ? (
-        <p className={cn('py-2 text-center text-ink3', chromeText.xs)}>
+        <p className={cn('interview-sessions__empty py-2 text-center text-ink3', chromeText.xs)}>
           No interviews yet. Start one from the Session panel.
         </p>
       ) : (
@@ -138,12 +138,17 @@ function SessionsListBody() {
             key={s.id}
             className={cn(
               'flex items-center gap-2 border border-edge bg-panel2 px-2 py-1.5',
+              'interview-sessions__item',
               RADIUS_CTRL,
             )}
           >
             <span className="min-w-0 flex-1">
-              <span className={cn('block truncate text-ink', chromeText.sm)}>{s.title}</span>
-              <span className={cn('block text-ink3', chromeText.xs)}>
+              <span
+                className={cn('interview-sessions__title block truncate text-ink', chromeText.sm)}
+              >
+                {s.title}
+              </span>
+              <span className={cn('interview-sessions__meta block text-ink3', chromeText.xs)}>
                 {s.status === 'ended' ? 'Ended' : 'Active'} · {relativeTime(s.updatedAt)}
               </span>
             </span>
@@ -154,6 +159,7 @@ function SessionsListBody() {
               title={s.roomCode ? undefined : 'No room bound to this session'}
               className={cn(
                 'inline-flex items-center gap-1 border border-edge px-1.5 py-1 text-ink2 hover:bg-panel disabled:opacity-40',
+                'interview-sessions__resume',
                 RADIUS_CTRL,
                 chromeText.xs,
               )}

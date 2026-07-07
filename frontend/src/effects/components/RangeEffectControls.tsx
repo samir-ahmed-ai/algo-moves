@@ -12,7 +12,7 @@ export function RangeEffectControls({
   const factor = (data.factor as number) ?? 2;
   return (
     <Field label={label}>
-      <div className="flex items-center gap-2">
+      <div className="effect-controls effect-controls--range flex items-center gap-2">
         <input
           type="range"
           min={2}
@@ -20,9 +20,9 @@ export function RangeEffectControls({
           step={1}
           value={factor}
           onChange={(e) => onChange({ factor: Number(e.target.value) })}
-          className="nodrag flex-1"
+          className="effect-range nodrag flex-1"
         />
-        <span className={nodeText.sm}>
+        <span className={`effect-value-pill ${nodeText.sm}`}>
           {operator}
           {factor}
         </span>

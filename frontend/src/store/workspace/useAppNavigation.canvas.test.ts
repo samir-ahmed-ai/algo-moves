@@ -27,4 +27,39 @@ describe('useAppNavigation canvas variant', () => {
     act(() => result.current.enterCanvas());
     expect(result.current.canvasVariant).toBe('plain');
   });
+
+  it('boots into the interview variant from a canvas share with variant=interview', () => {
+    const { result } = renderHook(() =>
+      useAppNavigation({ mode: 'visualize', focus: 'canvas', variant: 'interview' }),
+    );
+    expect(result.current.canvasVariant).toBe('interview');
+    expect(result.current.route).toBe('workspace');
+    expect(result.current.mode).toBe('visualize');
+    expect(result.current.problemFocused).toBe(false);
+  });
+
+  it('boots into the interview variant from an interview invite (sessionKind hint)', () => {
+    const { result } = renderHook(() =>
+      useAppNavigation({
+        mode: 'visualize',
+        focus: 'canvas',
+        room: 'ROOM1234',
+        sessionKind: 'interview',
+        guestToken: 'tok_abc',
+      }),
+    );
+    expect(result.current.canvasVariant).toBe('interview');
+  });
+
+  it('stays plain for a canvas share without interview hints', () => {
+    const { result } = renderHook(() => useAppNavigation({ mode: 'visualize', focus: 'canvas' }));
+    expect(result.current.canvasVariant).toBe('plain');
+  });
+
+  it('ignores interview hints when focus is not canvas', () => {
+    const { result } = renderHook(() =>
+      useAppNavigation({ focus: 'problem', variant: 'interview', sessionKind: 'interview' }),
+    );
+    expect(result.current.canvasVariant).toBe('plain');
+  });
 });

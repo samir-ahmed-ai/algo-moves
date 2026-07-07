@@ -36,8 +36,8 @@ export function StatusPanelContent() {
           <VimBadge tone="accent">-- NORMAL --</VimBadge>
           {echo ? <VimKbd>{echo}</VimKbd> : null}
         </div>
-        {isMobile ? (
-          <p className="mt-3 text-base text-bad">Connect a keyboard to play</p>
+        {isMobile && !message ? (
+          <p className="mt-3 text-base text-ink3">Tap the key pad below to move</p>
         ) : message ? (
           <p className={cn('mt-3 text-base', nodeTextWrap, error ? 'text-bad' : 'text-good')}>
             {message}

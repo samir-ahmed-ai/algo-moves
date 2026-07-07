@@ -23,6 +23,8 @@ export interface ShareState {
   room?: string;
   /** Hint for session kind when joining via invite link. */
   sessionKind?: 'interview' | 'collab';
+  /** Standalone canvas layout variant — `interview` restores the interview board on load. */
+  variant?: 'interview';
   /** Public interview guest-invite token — resolves the room without a code. */
   guestToken?: string;
   /** Track id — restores the track-browse board when opening workspace from the landing page. */
@@ -41,11 +43,46 @@ export const LEGACY_ITEM_REDIRECTS: Record<string, string> = {
   subsets: 'subsets',
 };
 
+function cleanText(value: string | undefined): string | undefined {
+  const text = value?.trim();
+  return text || undefined;
+}
+
+function cleanUpper(value: string | undefined): string | undefined {
+  return cleanText(value)?.toUpperCase();
+}
+
 /** Resolve share state item id through legacy redirects (item ids unchanged; pluginIds migrated). */
 export function normalizeShareState(s: ShareState): ShareState {
-  if (!s.item) return s;
-  const next = LEGACY_ITEM_REDIRECTS[s.item] ?? s.item;
-  return next === s.item ? s : { ...s, item: next };
+  let out: ShareState = {
+    ...s,
+    item: cleanText(s.item),
+    id: cleanText(s.id),
+    input: cleanText(s.input),
+    mode: cleanText(s.mode),
+    theme: cleanText(s.theme),
+    palette: cleanText(s.palette),
+    themePreset: cleanText(s.themePreset),
+    dir: cleanText(s.dir),
+    room: cleanUpper(s.room),
+    guestToken: cleanText(s.guestToken),
+    trackId: cleanText(s.trackId),
+  };
+  if (out.variant !== undefined && out.variant !== 'interview') {
+    const { variant: _ignored, ...rest } = out;
+    out = rest;
+  }
+  if (
+    out.sessionKind !== undefined &&
+    out.sessionKind !== 'interview' &&
+    out.sessionKind !== 'collab'
+  ) {
+    const { sessionKind: _ignored, ...rest } = out;
+    out = rest;
+  }
+  if (!out.item) return out;
+  const next = LEGACY_ITEM_REDIRECTS[out.item] ?? out.item;
+  return next === out.item ? out : { ...out, item: next };
 }
 
 const itemIdByNumber = new Map<string, string>(
@@ -55,9 +92,10 @@ const itemIdByNumber = new Map<string, string>(
 /** Resolve the catalog item id from share state (`item` slug or manifest `id` number). */
 export function resolveShareItemId(shared: ShareState | null | undefined): string | undefined {
   if (!shared) return undefined;
-  if (shared.item && catalog.getItem(shared.item)) return shared.item;
-  if (shared.id) {
-    const itemId = itemIdByNumber.get(shared.id);
+  const normalized = normalizeShareState(shared);
+  if (normalized.item && catalog.getItem(normalized.item)) return normalized.item;
+  if (normalized.id) {
+    const itemId = itemIdByNumber.get(normalized.id);
     if (itemId && catalog.getItem(itemId)) return itemId;
   }
   return undefined;
@@ -75,7 +113,7 @@ function getHashParam(hash: string, key: string): string | null {
 
 export function encodeShare(s: ShareState): string {
   try {
-    return btoa(encodeURIComponent(JSON.stringify(s)))
+    return btoa(encodeURIComponent(JSON.stringify(normalizeShareState(s))))
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
@@ -85,13 +123,15 @@ export function encodeShare(s: ShareState): string {
 }
 
 export function decodeShare(raw: string): ShareState | null {
+  const encoded = raw.trim();
+  if (!encoded) return null;
   try {
-    const b64 = raw.replace(/-/g, '+').replace(/_/g, '/');
+    const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
     const pad = b64.length % 4 === 0 ? '' : '='.repeat(4 - (b64.length % 4));
-    return JSON.parse(decodeURIComponent(atob(b64 + pad))) as ShareState;
+    return normalizeShareState(JSON.parse(decodeURIComponent(atob(b64 + pad))) as ShareState);
   } catch {
     try {
-      return JSON.parse(decodeURIComponent(atob(raw))) as ShareState;
+      return normalizeShareState(JSON.parse(decodeURIComponent(atob(encoded))) as ShareState);
     } catch {
       return null;
     }
@@ -107,7 +147,8 @@ export function readShareFromUrl(): ShareState | null {
 }
 
 export function buildShareUrl(s: ShareState): string {
-  return `${location.origin}${buildAppUrl('workspace', `s=${encodeShare(s)}`)}`;
+  const origin = typeof location === 'undefined' ? '' : location.origin;
+  return `${origin}${buildAppUrl('workspace', `s=${encodeShare(s)}`)}`;
 }
 
 /**
@@ -127,12 +168,20 @@ export function buildWorkspaceEntryUrl(input: {
 }): string {
   const { theme, palette, themePreset, dir, itemId, mode, trackId } = input;
   const base = { theme, palette, themePreset, dir };
-  if (itemId) {
-    const id = getPluginMeta(itemId)?.number;
-    return buildShareUrl({ ...base, item: itemId, id, mode: mode ?? 'learn', focus: 'problem' });
+  const cleanItemId = cleanText(itemId);
+  const cleanTrackId = cleanText(trackId);
+  if (cleanItemId) {
+    const id = getPluginMeta(cleanItemId)?.number;
+    return buildShareUrl({
+      ...base,
+      item: cleanItemId,
+      id,
+      mode: cleanText(mode) ?? 'learn',
+      focus: 'problem',
+    });
   }
-  if (trackId) {
-    return buildShareUrl({ ...base, trackId, focus: 'problem' });
+  if (cleanTrackId) {
+    return buildShareUrl({ ...base, trackId: cleanTrackId, focus: 'problem' });
   }
   return buildShareUrl({ ...base, mode: 'visualize', focus: 'canvas' });
 }
@@ -141,24 +190,27 @@ export function buildWorkspaceEntryUrl(input: {
 export function buildInviteUrl(s: ShareState, room: string): string {
   const base = buildShareUrl({
     ...s,
-    room,
+    room: cleanUpper(room),
     focus: s.focus ?? 'canvas',
     mode: s.mode ?? 'visualize',
   });
   return base;
 }
 
-/** Guest-invite link for a durable interview: carries the room + public token. */
+/** Guest-invite link for a durable interview: carries the room + public token + interview variant. */
 export function buildInterviewInviteUrl(s: ShareState, room: string, guestToken?: string): string {
-  return buildInviteUrl({ ...s, sessionKind: 'interview', guestToken }, room);
+  return buildInviteUrl(
+    { ...s, sessionKind: 'interview', variant: 'interview', guestToken: cleanText(guestToken) },
+    room,
+  );
 }
 
 export function readRoomFromUrl(): string | null {
   if (typeof location === 'undefined') return null;
   const fromHash = getHashParam(location.hash, 'room');
-  if (fromHash) return fromHash.trim().toUpperCase();
+  if (fromHash) return cleanUpper(fromHash) ?? null;
   const share = readShareFromUrl();
-  return share?.room?.trim().toUpperCase() ?? null;
+  return cleanUpper(share?.room) ?? null;
 }
 
 export function readGuestTokenFromUrl(): string | null {

@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { CodePiece } from '@/lib/code';
 import { pieceGlyph, pieceRoleMeta } from '@/lib/code';
 import { dedentForDisplay } from '@/lib/code';
+import { cn } from '@/lib/utils/cn';
 import { HighlightedCode } from '../code/HighlightedCode';
 
 export interface CodePieceOverviewProps {
@@ -12,7 +13,11 @@ export interface CodePieceOverviewProps {
 
 export function CodePieceOverview({ pieces, lang = 'go', wrap = false }: CodePieceOverviewProps) {
   return (
-    <div className="code-overview" role="region" aria-label="Full solution overview">
+    <div
+      className={cn('code-overview', wrap && 'code-overview--wrap')}
+      role="region"
+      aria-label="Full solution overview"
+    >
       {pieces.map((piece, i) => {
         const meta = pieceRoleMeta(piece);
         const glyph = pieceGlyph(piece, meta.kind);

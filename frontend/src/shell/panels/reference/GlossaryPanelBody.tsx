@@ -23,7 +23,7 @@ export function GlossaryPanelBody() {
   const relevant = filtered.filter((t) => t.tags?.some((tag) => tagSet.has(tag)));
   const rest = filtered.filter((t) => !t.tags?.some((tag) => tagSet.has(tag)));
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="reference-panel reference-panel--glossary nodrag flex flex-col gap-2">
       <SearchInput value={q} onChange={setQ} placeholder="search terms…" />
       {filtered.length === 0 ? (
         <EmptyState
@@ -35,7 +35,7 @@ export function GlossaryPanelBody() {
         <>
           {relevant.length > 0 && (
             <ControlsAccordion title="This problem" className="border-t-0">
-              <div className="flex flex-col">
+              <div className="reference-panel__stack flex flex-col">
                 {relevant.map((t) => (
                   <DefRow key={t.term} term={t.term}>
                     {t.def}
@@ -45,7 +45,7 @@ export function GlossaryPanelBody() {
             </ControlsAccordion>
           )}
           <ControlsAccordion title="All terms" defaultOpen={!q}>
-            <div className="flex flex-col">
+            <div className="reference-panel__stack flex flex-col">
               {rest.map((t) => (
                 <DefRow key={t.term} term={t.term}>
                   {t.def}

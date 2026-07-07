@@ -24,7 +24,12 @@ export function GistArcCaption({
       role="group"
       aria-label={primary}
     >
-      <path id={pathId} d={ORBIT_PATH_D} className="move-orbit-track" pathLength={1} />
+      <path
+        id={pathId}
+        d={ORBIT_PATH_D}
+        className="gist-arc-caption__track move-orbit-track"
+        pathLength={1}
+      />
       {side && (
         <OrbitFitText
           text={side}

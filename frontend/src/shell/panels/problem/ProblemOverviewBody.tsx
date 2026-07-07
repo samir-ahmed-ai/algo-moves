@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { ProblemPanelBody } from './ProblemPanelBody';
 import { OverviewContentColumn, OverviewProblemColumn } from './overviewColumns';
+import { INSPECTOR_TABS, StudioInspectorRail, StudioPanelDock } from './StudioInspectorRail';
 import { StudioArcRail } from './StudioArcRail';
 import { StudioNextFooter } from './StudioNextFooter';
 import { StudioSplitLayout } from './studioSplitLayout';
@@ -25,17 +26,33 @@ export function ProblemOverviewBody({
   onNextAll?: () => void;
 } = {}) {
   const isMobile = useIsMobile();
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [inspTab, setInspTab] = useState(INSPECTOR_TABS[0].id);
+  const selectInsp = (id: string) => {
+    if (inspectorOpen && id === inspTab) {
+      setInspectorOpen(false);
+      return;
+    }
+    setInspTab(id);
+    setInspectorOpen(true);
+  };
   const { player } = useCanvasFrame();
   const { item } = useCanvasStatic();
   const { reference } = useCodeStudioContent();
-  const hasRecall = !!reference;
-  const [view, setView] = useOverviewView(item.id);
-  const showViz = view === 'animate' || !hasRecall;
+  const hasAnimation = player.total > 1;
+  const hasSource = !!reference;
+  const [rawView, setView] = useOverviewView(item.id);
+  // Clamp the persisted animate/recall pref to what this problem actually offers,
+  // so animation-less problems land on Recall instead of a dead, single-frame player.
+  const view = hasAnimation ? (hasSource ? rawView : 'animate') : hasSource ? 'recall' : 'animate';
+  const canToggle = hasAnimation && hasSource;
+  const showViz = view === 'animate';
 
-  const onRecallFirst = hasRecall && view === 'animate';
+  const onRecallFirst = canToggle && view === 'animate';
   const footerLabel = onRecallFirst ? 'Recall' : nextLabel;
   const handleFooterNext = onRecallFirst ? () => setView('recall') : onNext;
-  const showArcRail = hasRecall || !!nextLabel;
+  const overviewStepCount = (hasAnimation ? 1 : 0) + (hasSource ? 1 : 0) + (nextLabel ? 1 : 0);
+  const showArcRail = overviewStepCount >= 2;
 
   useStudioNextShortcut(handleFooterNext, onRecallFirst ? undefined : onNextAll);
 
@@ -43,7 +60,12 @@ export function ProblemOverviewBody({
     <StudioNextFooter
       arcRail={
         showArcRail ? (
-          <StudioArcRail view={view} hasRecall={hasRecall} nextLabel={nextLabel} />
+          <StudioArcRail
+            view={view}
+            canAnimate={hasAnimation}
+            canRecall={hasSource}
+            nextLabel={nextLabel}
+          />
         ) : undefined
       }
       nextLabel={footerLabel}
@@ -56,17 +78,17 @@ export function ProblemOverviewBody({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isEditableTarget(e.target)) return;
-      if (hasRecall && e.altKey && e.key === '1') {
+      if (canToggle && e.altKey && e.key === '1') {
         e.preventDefault();
         setView('animate');
         return;
       }
-      if (hasRecall && e.altKey && e.key === '2') {
+      if (canToggle && e.altKey && e.key === '2') {
         e.preventDefault();
         setView('recall');
         return;
       }
-      if (!showViz) return;
+      if (!showViz || !hasAnimation) return;
       switch (e.key) {
         case 'ArrowRight':
           e.preventDefault();
@@ -93,7 +115,8 @@ export function ProblemOverviewBody({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [
-    hasRecall,
+    canToggle,
+    hasAnimation,
     player.next,
     player.prev,
     player.togglePlay,
@@ -111,12 +134,34 @@ export function ProblemOverviewBody({
           className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
           view={view}
           onView={setView}
-          hasRecall={hasRecall}
+          canToggle={canToggle}
         >
           <ProblemPanelBody />
         </OverviewProblemColumn>
       }
-      second={<OverviewContentColumn showViz={showViz} />}
+      second={
+        isMobile ? (
+          <OverviewContentColumn showViz={showViz} />
+        ) : (
+          <div className="problem-overview-stage flex min-h-0 min-w-0 flex-1">
+            <OverviewContentColumn showViz={showViz} />
+            {inspectorOpen && (
+              <StudioInspectorRail
+                tabs={INSPECTOR_TABS}
+                activeId={inspTab}
+                onTab={setInspTab}
+                onClose={() => setInspectorOpen(false)}
+              />
+            )}
+            <StudioPanelDock
+              tabs={INSPECTOR_TABS}
+              inspectorOpen={inspectorOpen}
+              activeId={inspTab}
+              onSelect={selectInsp}
+            />
+          </div>
+        )
+      }
     />
   );
 }

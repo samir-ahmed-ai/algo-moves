@@ -16,10 +16,14 @@ export function GameHud({
   right?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-[44px] shrink-0 items-center gap-2 px-1">
-      <div className="flex min-w-0 flex-1 items-center gap-1.5">{left}</div>
-      {center && <div className="flex shrink-0 items-center gap-1.5">{center}</div>}
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 text-ink2">{right}</div>
+    <div className="game-hud flex min-h-[44px] shrink-0 items-center gap-2 px-1">
+      <div className="game-hud__left flex min-w-0 flex-1 items-center gap-1.5">{left}</div>
+      {center && (
+        <div className="game-hud__center flex shrink-0 items-center gap-1.5">{center}</div>
+      )}
+      <div className="game-hud__right flex min-w-0 flex-1 items-center justify-end gap-1.5 text-ink2">
+        {right}
+      </div>
     </div>
   );
 }
@@ -34,11 +38,11 @@ export function HudChip({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums',
-        tone === 'muted' && 'bg-panel2 text-ink2',
-        tone === 'accent' && 'bg-accentbg text-accent',
-        tone === 'good' && 'bg-goodbg text-good',
-        tone === 'bad' && 'bg-badbg text-bad',
+        'hud-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums',
+        tone === 'muted' && 'hud-chip--muted bg-panel2 text-ink2',
+        tone === 'accent' && 'hud-chip--accent bg-accentbg text-accent',
+        tone === 'good' && 'hud-chip--good bg-goodbg text-good',
+        tone === 'bad' && 'hud-chip--bad bg-badbg text-bad',
       )}
     >
       {children}
@@ -66,13 +70,29 @@ export function GameTimerRing({
   const low = frac < 0.25;
   return (
     <span
-      className="relative grid shrink-0 place-items-center"
+      className={cn(
+        'game-timer-ring relative grid shrink-0 place-items-center',
+        paused && 'game-timer-ring--paused',
+        low && 'game-timer-ring--low',
+      )}
       style={{ width: size, height: size }}
       aria-hidden
     >
-      <svg viewBox="0 0 40 40" className="absolute inset-0 h-full w-full -rotate-90">
-        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--border-strong)" strokeWidth="4" />
+      <svg
+        viewBox="0 0 40 40"
+        className="game-timer-ring__svg absolute inset-0 h-full w-full -rotate-90"
+      >
         <circle
+          className="game-timer-ring__track"
+          cx="20"
+          cy="20"
+          r={r}
+          fill="none"
+          stroke="var(--border-strong)"
+          strokeWidth="4"
+        />
+        <circle
+          className="game-timer-ring__progress"
           cx="20"
           cy="20"
           r={r}
@@ -87,7 +107,12 @@ export function GameTimerRing({
         />
       </svg>
       {remaining <= 2 && remaining > 0 && (
-        <span className={cn('text-[10px] font-bold tabular-nums', low ? 'text-bad' : 'text-ink')}>
+        <span
+          className={cn(
+            'game-timer-ring__label text-[10px] font-bold tabular-nums',
+            low ? 'text-bad' : 'text-ink',
+          )}
+        >
           {Math.ceil(remaining)}
         </span>
       )}
@@ -118,7 +143,7 @@ export function GameBlock({
   const Icon = meta.icon;
   return (
     <div
-      className={cn('blk', meta.shape, muted && 'asm-block-muted', className)}
+      className={cn('game-block blk', meta.shape, muted && 'asm-block-muted', className)}
       style={
         {
           '--blk-stroke':
@@ -128,12 +153,14 @@ export function GameBlock({
     >
       <div
         className={cn(
-          'blk-face',
+          'game-block__face blk-face',
           flash === 'good' && 'asm-flash-good',
           flash === 'bad' && 'asm-flash-bad',
         )}
       >
-        <div className={cn('flex items-center gap-1.5', compact ? 'mb-0.5' : 'mb-1')}>
+        <div
+          className={cn('game-block__head flex items-center gap-1.5', compact ? 'mb-0.5' : 'mb-1')}
+        >
           <Icon className="h-3 w-3 shrink-0" style={{ color: meta.text }} />
           <span
             className="text-[9px] font-semibold uppercase tracking-[0.1em]"
@@ -144,7 +171,7 @@ export function GameBlock({
           <span className="flex-1" />
           {trailing}
         </div>
-        <div className="ws-scroll overflow-x-auto" data-noswipe>
+        <div className="game-block__code ws-scroll overflow-x-auto" data-noswipe>
           <pre
             className={cn(
               'whitespace-pre font-mono leading-relaxed text-ink',
@@ -164,12 +191,12 @@ export function GhostSlot({ piece, lines }: { piece: CodePiece; lines: number })
   const meta = BLOCK_META[blockKind(piece)];
   return (
     <div
-      className="grid place-items-center rounded-md border-2 border-dashed border-accent/60 bg-accentbg/20"
+      className="game-ghost-slot grid place-items-center rounded-md border-2 border-dashed border-accent/60 bg-accentbg/20"
       style={{ minHeight: Math.max(44, 20 + lines * 18) }}
       aria-label={`Next: ${piece.role}`}
     >
       <span
-        className="font-mono text-[26px] leading-none opacity-20"
+        className="game-ghost-slot__glyph font-mono text-[26px] leading-none opacity-20"
         style={{ color: meta.text }}
         aria-hidden
       >
@@ -248,21 +275,23 @@ export function WinCard({
   }, []);
   return (
     <div
-      className="asm-sheet-in relative mx-auto w-full max-w-[360px] rounded-[var(--radius)] border border-edge bg-panel2 p-4 shadow-[var(--shadow-lg)]"
+      className="asm-win-card asm-sheet-in relative mx-auto w-full max-w-[360px] rounded-[var(--radius)] border border-edge bg-panel2 p-4 shadow-[var(--shadow-lg)]"
       data-noswipe
     >
       <ConfettiBurst count={newBest ? 26 : 14} />
-      <div className="text-center text-[15px] font-semibold tracking-tight text-ink">{title}</div>
+      <div className="asm-win-card__title text-center text-[15px] font-semibold tracking-tight text-ink">
+        {title}
+      </div>
       {newBest && (
-        <div className="mt-0.5 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+        <div className="asm-win-card__best mt-0.5 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
           New personal best
         </div>
       )}
-      <div className="mt-3 flex flex-col gap-1.5">
+      <div className="asm-win-card__stats mt-3 flex flex-col gap-1.5">
         {stats.map((s) => (
           <div
             key={s.label}
-            className="flex items-baseline justify-between rounded-lg bg-panel px-3 py-1.5"
+            className="asm-win-stat flex items-baseline justify-between rounded-lg bg-panel px-3 py-1.5"
           >
             <span className="text-[12px] text-ink3">{s.label}</span>
             <span className="text-[15px] font-semibold tabular-nums text-ink">{s.value}</span>
@@ -270,7 +299,7 @@ export function WinCard({
         ))}
       </div>
       {badges && badges.some((b) => b.earned) && (
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+        <div className="asm-win-card__badges mt-3 flex flex-wrap items-center justify-center gap-2">
           {badges
             .filter((b) => b.earned)
             .map((b, i) => {
@@ -288,11 +317,11 @@ export function WinCard({
             })}
         </div>
       )}
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="asm-win-card__actions mt-4 flex flex-col gap-2">
         <button
           type="button"
           onClick={onPrimary}
-          className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-5 text-[14px] font-semibold text-white"
+          className="asm-win-card__primary inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-5 text-[14px] font-semibold text-white"
         >
           {primaryLabel}
         </button>
@@ -300,7 +329,7 @@ export function WinCard({
           <button
             type="button"
             onClick={onSecondary}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-accentbg px-5 text-[13px] font-semibold text-accent"
+            className="asm-win-card__secondary inline-flex min-h-[44px] items-center justify-center rounded-full bg-accentbg px-5 text-[13px] font-semibold text-accent"
           >
             {secondaryLabel}
           </button>
@@ -322,15 +351,15 @@ export function MagnifierSheet({ piece, onClose }: { piece: CodePiece; onClose: 
   }, []);
   return (
     <div
-      className="absolute inset-0 z-30 flex items-center justify-center p-4"
+      className="asm-magnifier absolute inset-0 z-30 flex items-center justify-center p-4"
       onPointerDown={onClose}
       data-noswipe
     >
-      <div className="absolute inset-0 bg-bg/70" aria-hidden />
+      <div className="asm-magnifier__backdrop absolute inset-0 bg-bg/70" aria-hidden />
       <div
         ref={sheetRef}
         tabIndex={-1}
-        className="asm-sheet-in relative max-h-[70%] w-full max-w-[420px] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel2 shadow-[var(--shadow-lg)] outline-none"
+        className="asm-magnifier__sheet asm-sheet-in relative max-h-[70%] w-full max-w-[420px] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel2 shadow-[var(--shadow-lg)] outline-none"
         onPointerDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
@@ -342,22 +371,26 @@ export function MagnifierSheet({ piece, onClose }: { piece: CodePiece; onClose: 
         aria-modal="true"
         aria-label={`${piece.role} — full code`}
       >
-        <div className="flex items-center gap-1.5 border-b border-edge px-3 py-2">
-          <span className="font-mono text-[15px]" style={{ color: meta.text }} aria-hidden>
+        <div className="asm-magnifier__header flex items-center gap-1.5 border-b border-edge px-3 py-2">
+          <span
+            className="asm-magnifier__glyph font-mono text-[15px]"
+            style={{ color: meta.text }}
+            aria-hidden
+          >
             {meta.glyph}
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink3">
+          <span className="asm-magnifier__role text-[10px] font-semibold uppercase tracking-[0.1em] text-ink3">
             {piece.role}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="ml-auto inline-flex min-h-[44px] items-center rounded-full px-3 text-[11px] font-medium text-ink3 hover:bg-panel hover:text-ink"
+            className="asm-magnifier__close ml-auto inline-flex min-h-[44px] items-center rounded-full px-3 text-[11px] font-medium text-ink3 hover:bg-panel hover:text-ink"
           >
             Close
           </button>
         </div>
-        <div className="ws-scroll max-h-[52vh] overflow-auto p-3" data-noswipe>
+        <div className="asm-magnifier__body ws-scroll max-h-[52vh] overflow-auto p-3" data-noswipe>
           <pre
             className="whitespace-pre font-mono text-[13px] leading-relaxed text-ink"
             style={{ fontSize: '1.05em' }}

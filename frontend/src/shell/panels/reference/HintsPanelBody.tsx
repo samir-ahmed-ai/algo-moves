@@ -29,7 +29,7 @@ export function HintsPanelBody() {
     );
   }
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="reference-panel reference-panel--hints nodrag flex flex-col gap-2">
       <ControlsAccordion
         title="Hint ladder"
         className="border-t-0"
@@ -39,7 +39,7 @@ export function HintsPanelBody() {
           </div>
         }
       >
-        <div className="flex flex-col gap-2">
+        <div className="reference-panel__stack flex flex-col gap-2">
           {hints.slice(0, shown).map((h, i) => (
             <Banner key={i} tone="accent" label={`Hint ${i + 1}`}>
               {h}

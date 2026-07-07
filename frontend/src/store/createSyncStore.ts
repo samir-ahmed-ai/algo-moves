@@ -34,11 +34,26 @@ export function createSyncStore<T>(
   let data = load();
   const listeners = new Set<() => void>();
 
+  const notify = (): void => {
+    for (const listener of listeners) {
+      try {
+        listener();
+      } catch {
+        // keep other subscribers live
+      }
+    }
+  };
+
   const get = (): T => data;
   const set = (next: T): void => {
+    if (Object.is(data, next)) return;
     data = next;
-    save(next);
-    listeners.forEach((l) => l());
+    try {
+      save(next);
+    } catch {
+      // persistence failures should not break in-memory state
+    }
+    notify();
   };
   const update = (recipe: (prev: T) => T): void => set(recipe(data));
   const subscribe = (listener: () => void): (() => void) => {

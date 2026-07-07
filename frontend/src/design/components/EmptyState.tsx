@@ -14,14 +14,23 @@ export function EmptyState({
   hint?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 px-3 py-5 text-center">
+    <div className="design-empty-state flex flex-col items-center gap-1.5 px-3 py-5 text-center">
       {icon && (
-        <span className="grid size-[calc(var(--node-icon,1.125rem)*1.6)] place-items-center rounded-full bg-panel2 text-ink3 [&>*]:size-[var(--node-icon-glyph)]">
+        <span className="design-empty-state__icon grid size-[calc(var(--node-icon,1.125rem)*1.6)] place-items-center rounded-full bg-panel2 text-ink3 [&>*]:size-[var(--node-icon-glyph)]">
           {icon}
         </span>
       )}
-      <p className={cx(nodeText.sm, 'font-medium text-ink2')}>{title}</p>
-      {hint && <p className={cx('max-w-[34ch] leading-snug text-ink3', nodeText.sm)}>{hint}</p>}
+      <p className={cx(nodeText.sm, 'design-empty-state__title font-medium text-ink2')}>{title}</p>
+      {hint && (
+        <p
+          className={cx(
+            'design-empty-state__hint max-w-[34ch] leading-snug text-ink3',
+            nodeText.sm,
+          )}
+        >
+          {hint}
+        </p>
+      )}
     </div>
   );
 }

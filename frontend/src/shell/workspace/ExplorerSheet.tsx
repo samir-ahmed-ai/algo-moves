@@ -101,10 +101,10 @@ function AddItem({
       }}
       title={`Add ${title}`}
       aria-label={`Add ${title}`}
-      className="flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
+      className="explorer-add-item flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
     >
       <span
-        className="grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] shrink-0 place-items-center"
+        className="explorer-add-item__icon grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] shrink-0 place-items-center"
         style={{ color: panelAccent(kind) }}
       >
         {nodeIcon(kind)}
@@ -214,16 +214,16 @@ export function ExplorerSheet({
   const panel = (
     <div
       className={cn(
-        'flex max-h-[70vh] w-[280px] max-w-[86vw] flex-col overflow-hidden bg-panel text-ink shadow-[var(--shadow-lg)]',
+        'explorer-sheet flex max-h-[70vh] w-[280px] max-w-[86vw] flex-col overflow-hidden bg-panel text-ink shadow-[var(--shadow-lg)]',
         isMobile ? 'h-full max-h-none w-full max-w-none' : cn(RADIUS_SHELL, 'border border-edge'),
       )}
       role="dialog"
       aria-label="Explorer"
     >
-      <header className="flex shrink-0 items-center gap-1.5 border-b border-edge px-[var(--hpad)] py-1">
+      <header className="explorer-sheet__header flex shrink-0 items-center gap-1.5 border-b border-edge px-[var(--hpad)] py-1">
         <span
           className={cn(
-            'min-w-0 flex-1 truncate font-semibold leading-tight text-ink',
+            'explorer-sheet__title min-w-0 flex-1 truncate font-semibold leading-tight text-ink',
             chromeText.sm,
           )}
         >
@@ -234,14 +234,14 @@ export function ExplorerSheet({
           onClick={onClose}
           title="Close explorer"
           aria-label="Close explorer"
-          className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+          className="explorer-sheet__close grid h-5 w-5 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
         >
           <X className="h-3 w-3" />
         </button>
       </header>
 
-      <div className="relative shrink-0 border-b border-edge px-[var(--hpad)] py-1">
-        <Search className="pointer-events-none absolute left-[calc(var(--hpad)+8px)] top-1/2 h-3 w-3 -translate-y-1/2 text-ink3" />
+      <div className="explorer-sheet__search relative shrink-0 border-b border-edge px-[var(--hpad)] py-1">
+        <Search className="explorer-sheet__search-icon pointer-events-none absolute left-[calc(var(--hpad)+8px)] top-1/2 h-3 w-3 -translate-y-1/2 text-ink3" />
         <input
           type="search"
           value={sidebarSearch}
@@ -249,7 +249,7 @@ export function ExplorerSheet({
           placeholder="Search catalog, problems, panels…"
           aria-label="Search explorer"
           className={cn(
-            'w-full rounded-md border border-edge bg-panel2 py-0.5 pl-7 pr-2 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+            'explorer-sheet__search-input w-full rounded-md border border-edge bg-panel2 py-0.5 pl-7 pr-2 text-ink outline-none placeholder:text-ink3 focus:border-accent',
             chromeText.sm,
           )}
         />
@@ -274,7 +274,7 @@ export function ExplorerSheet({
               badge={
                 <span
                   className={cn(
-                    'shrink-0 rounded-full bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink3',
+                    'explorer-sheet__badge shrink-0 rounded-full bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink3',
                     chromeText.xs,
                   )}
                 >
@@ -291,7 +291,7 @@ export function ExplorerSheet({
                   No matching problems
                 </div>
               ) : (
-                <div className="flex flex-col gap-0.5 px-1">
+                <div className="explorer-sheet__problem-list flex flex-col gap-0.5 px-1">
                   {filteredProblems.map((it) => {
                     const active = it.id === activeItemId;
                     return (
@@ -302,13 +302,14 @@ export function ExplorerSheet({
                         title={it.title}
                         className={cn(
                           'flex w-full min-h-[var(--row)] items-center gap-2 rounded-md border-l-2 px-2 py-0 text-left transition-colors',
+                          'explorer-sheet__problem',
                           active
-                            ? 'border-l-accent bg-accentbg font-medium text-accent'
+                            ? 'explorer-sheet__problem--active border-l-accent bg-accentbg font-medium text-accent'
                             : 'border-l-transparent text-ink2 hover:bg-panel2 hover:text-ink',
                         )}
                       >
                         <span
-                          className="h-1.5 w-1.5 shrink-0 rounded-full"
+                          className="explorer-sheet__status-dot h-1.5 w-1.5 shrink-0 rounded-full"
                           style={{ background: STATUS_DOT[it.status] }}
                           title={it.status}
                         />
@@ -342,7 +343,7 @@ export function ExplorerSheet({
                   }}
                   title="Open the category grid"
                   className={cn(
-                    'mx-1 mt-1.5 flex min-h-[var(--row)] w-[calc(100%-8px)] items-center gap-1.5 rounded-md px-2 py-0 text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
+                    'explorer-sheet__category-grid mx-1 mt-1.5 flex min-h-[var(--row)] w-[calc(100%-8px)] items-center gap-1.5 rounded-md px-2 py-0 text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
                     chromeText.sm,
                   )}
                 >
@@ -363,10 +364,10 @@ export function ExplorerSheet({
                 maxHeightClass={SECTION_MAX.addPanel}
                 anchor="bottom"
               >
-                <div className="px-[var(--hpad)]">
+                <div className="explorer-sheet__add-body px-[var(--hpad)]">
                   {!currentTab && !searching ? (
-                    <div className="flex flex-col items-center gap-1.5 px-2 py-4 text-center">
-                      <span className="grid h-5 w-5 place-items-center rounded-full bg-panel2 text-ink3">
+                    <div className="explorer-sheet__empty flex flex-col items-center gap-1.5 px-2 py-4 text-center">
+                      <span className="explorer-sheet__empty-icon grid h-5 w-5 place-items-center rounded-full bg-panel2 text-ink3">
                         <LayoutGrid className="h-4 w-4" />
                       </span>
                       <p className={cn('font-medium text-ink2', chromeText.sm)}>
@@ -414,8 +415,9 @@ export function ExplorerSheet({
                             aria-pressed={i === tabIdx}
                             className={cn(
                               'flex max-w-full min-h-[var(--row)] items-center gap-1 rounded-md px-1.5 py-0 transition-colors',
+                              'explorer-sheet__tab',
                               i === tabIdx
-                                ? 'bg-accentbg text-accent'
+                                ? 'explorer-sheet__tab--active bg-accentbg text-accent'
                                 : 'text-ink2 hover:bg-panel2 hover:text-ink',
                             )}
                           >
@@ -424,7 +426,7 @@ export function ExplorerSheet({
                           </button>
                         ))}
                       </div>
-                      <div className="flex flex-col gap-0.5">
+                      <div className="explorer-sheet__add-list flex flex-col gap-0.5">
                         {(currentTab?.items ?? []).map((k) => (
                           <AddItem
                             key={k.id}
@@ -448,7 +450,7 @@ export function ExplorerSheet({
                   maxHeightClass={SECTION_MAX.addPanel}
                   anchor="bottom"
                 >
-                  <div className="flex flex-col gap-0.5 px-1">
+                  <div className="explorer-sheet__effects flex flex-col gap-0.5 px-1">
                     {canvasAdd.addableEffects.map((eff) => (
                       <button
                         key={eff.id}
@@ -460,7 +462,7 @@ export function ExplorerSheet({
                             e.dataTransfer.setData(canvasAdd.effectDndKey, eff.id);
                           e.dataTransfer.effectAllowed = 'move';
                         }}
-                        className="flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
+                        className="explorer-sheet__effect flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
                       >
                         <span className={cn('min-w-0 flex-1 truncate text-ink2', chromeText.sm)}>
                           {eff.title}

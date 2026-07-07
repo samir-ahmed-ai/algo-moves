@@ -2,7 +2,7 @@ export type FuncLineTone = 'hl-line-entry' | 'hl-line-func';
 
 /** Classify a line as main entry signature vs nested/helper func signature. */
 export function funcLineTone(trimmed: string, lang: string): FuncLineTone | null {
-  const l = lang.toLowerCase();
+  const l = lang.trim().toLowerCase();
   if (l === 'go') {
     if (/^func\s+\w+\s*\(/.test(trimmed)) return 'hl-line-entry';
     if (/\bfunc\s*\(/.test(trimmed)) return 'hl-line-func';
@@ -33,7 +33,10 @@ export function funcLineTone(trimmed: string, lang: string): FuncLineTone | null
 
 /** True when any line is a top-level function signature (for tray border styling). */
 export function pieceHasEntrySignature(code: string, lang: string): boolean {
-  return code.split('\n').some((line) => funcLineTone(line.trim(), lang) === 'hl-line-entry');
+  const normalizedLang = lang.trim();
+  return code
+    .split('\n')
+    .some((line) => funcLineTone(line.trim(), normalizedLang) === 'hl-line-entry');
 }
 
 export const ENTRY_SIG = /^(?:func\s+(\w+)|function\s+(\w+)|def\s+(\w+))([\s\S]*)$/;

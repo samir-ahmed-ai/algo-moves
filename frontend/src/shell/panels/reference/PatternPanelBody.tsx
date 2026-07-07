@@ -37,7 +37,7 @@ export function PatternPanelBody() {
     );
   }
   return (
-    <div className="pattern-panel">
+    <div className="reference-panel reference-panel--patterns pattern-panel">
       {cards.map((c, idx) => (
         <div key={c.id} className="pattern-card">
           <Section

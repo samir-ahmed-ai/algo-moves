@@ -110,7 +110,7 @@ export function Workspace() {
         !tweaks.animate && '[&_*]:!transition-none [&_*]:!animate-none',
       )}
     >
-      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col h-full">
+      <div className="shell-workspace__main relative flex min-h-0 min-w-0 flex-1 flex-col h-full">
         {/* Plan run-mode bar appears above the workspace menu when a run is active */}
         <PlanRunner />
 
@@ -120,7 +120,7 @@ export function Workspace() {
             onOpenHelp={() => setHelpOpen(true)}
           />
         )}
-        <div className="min-h-0 flex-1 overflow-hidden">
+        <div className="shell-workspace__stage min-h-0 flex-1 overflow-hidden">
           <ModeRouter
             activeTrackId={activeTrackId}
             activeCategoryId={activeCategoryId}

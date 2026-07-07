@@ -8,15 +8,63 @@ import {
 import type { Edge } from '@xyflow/react';
 import type { CanvasMode, ProblemPlugin } from '../../../core';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
+import { createPanelByType } from '@/core/panelRegistry';
 import { createEffectByType } from '../nodes/EffectNode';
 import { EFFECT_DND_KEY } from '../../../hooks/useDragAndDrop';
-import { edgesForKind, nodeForKind, styleEdges, type EdgeOpts } from '../layout/layout';
+import {
+  edgesForKind,
+  isMultiInstancePanel,
+  nodeForKind,
+  styleEdges,
+  type EdgeOpts,
+} from '../layout/layout';
 import { readProblemDrop } from '../nodes/problemDnD';
+import { sizeOf } from '../tokens';
 
 /** MIME type for dragging a removed panel back onto the canvas. */
 export const DND_KEY = 'application/algomove';
 
 export { PROBLEM_DND_KEY, readProblemDrop } from '../nodes/problemDnD';
+
+/**
+ * Node + edges to insert for an added kind — shared by the click path (addKind)
+ * and the drop path so multi-instance panels behave identically in both.
+ * Multi-instance kinds always spawn a fresh node (unique id); singleton kinds
+ * dedupe against the current nodes and return null when already present.
+ */
+export function insertionForKind({
+  plugin,
+  mode,
+  kind,
+  position,
+  nodes,
+  edges,
+  edgeOpts,
+}: {
+  plugin: ProblemPlugin<any, any>;
+  mode: CanvasMode;
+  kind: string;
+  position: { x: number; y: number };
+  nodes: { id: string }[];
+  edges: Edge[];
+  edgeOpts: EdgeOpts;
+}): { node: PanelFlowNode; newEdges: Edge[] } | null {
+  if (!kind) return null;
+  const multi = isMultiInstancePanel(kind);
+  if (!multi && nodes.some((n) => n.id === kind)) return null;
+  let node: PanelFlowNode;
+  if (multi) {
+    node = createPanelByType(kind, position) as PanelFlowNode;
+    node.width = sizeOf(kind).w;
+  } else {
+    node = nodeForKind(plugin, kind, position);
+  }
+  const present = new Set([...nodes.map((n) => n.id), node.id]);
+  const newEdges = styleEdges(edgesForKind(plugin, mode, kind, present), edgeOpts).filter(
+    (ne) => !edges.some((ee) => ee.id === ne.id),
+  );
+  return { node, newEdges };
+}
 
 /**
  * Canvas drag-and-drop, extracted from CanvasStage: drop a removed panel (or an
@@ -81,15 +129,19 @@ export function useCanvasDnD({
       }
 
       const kind = e.dataTransfer.getData(DND_KEY);
-      if (!kind || nodesRef.current.some((n) => n.id === kind)) return;
+      const insertion = insertionForKind({
+        plugin,
+        mode,
+        kind,
+        position,
+        nodes: nodesRef.current,
+        edges,
+        edgeOpts,
+      });
+      if (!insertion) return;
       removedRef.current[historyKey]?.delete(kind);
-      const node = nodeForKind(plugin, kind, position);
-      const present = new Set([...nodesRef.current.map((n) => n.id), kind]);
-      const newEdges = styleEdges(edgesForKind(plugin, mode, kind, present), edgeOpts).filter(
-        (ne) => !edges.some((ee) => ee.id === ne.id),
-      );
-      setNodes((nds) => [...nds, node]);
-      if (newEdges.length) setEdges((eds) => [...eds, ...newEdges]);
+      setNodes((nds) => [...nds, insertion.node]);
+      if (insertion.newEdges.length) setEdges((eds) => [...eds, ...insertion.newEdges]);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

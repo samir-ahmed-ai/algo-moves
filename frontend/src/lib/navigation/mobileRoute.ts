@@ -12,9 +12,9 @@ export interface MobileHashTarget {
 
 function decodeRoutePart(value: string): string {
   try {
-    return decodeURIComponent(value);
+    return decodeURIComponent(value).trim();
   } catch {
-    return value;
+    return value.trim();
   }
 }
 
@@ -40,22 +40,22 @@ export function parseMobileHash(hash: string, pathname?: string): MobileHashTarg
   const rest = mobileRouteBody(hash, pathname);
   if (rest === null) return null;
   if (!rest) return {};
-  const parts = rest.split('/').filter(Boolean);
+  const parts = rest.split('/').map(decodeRoutePart).filter(Boolean);
 
   if (parts[0] === 'track' && parts[1]) {
-    const target: MobileHashTarget = { trackId: decodeRoutePart(parts[1]) as TrackId };
+    const target: MobileHashTarget = { trackId: parts[1] as TrackId };
     if (parts[2] === 'category' && parts[3]) {
-      target.categoryId = decodeRoutePart(parts[3]);
-      if (parts[4] === 'item' && parts[5]) target.itemId = decodeRoutePart(parts[5]);
+      target.categoryId = parts[3];
+      if (parts[4] === 'item' && parts[5]) target.itemId = parts[5];
     }
     return target;
   }
 
   if (parts[0] === 'topic' && parts[1]) {
-    const topicId = decodeRoutePart(parts[1]);
+    const topicId = parts[1];
     const target: MobileHashTarget = { topicId };
     if (topicId.startsWith('browse-')) target.categoryId = topicId.slice('browse-'.length);
-    if (parts[2] === 'item' && parts[3]) target.itemId = decodeRoutePart(parts[3]);
+    if (parts[2] === 'item' && parts[3]) target.itemId = parts[3];
     return target;
   }
 
@@ -72,21 +72,23 @@ export function buildMobileModeUrl(): string {
 export function writeMobileHash(target?: MobileHashTarget | null, opts?: { replace?: boolean }) {
   if (typeof location === 'undefined') return;
   let hashBody = '';
-  const trackId = target?.trackId;
-  const categoryId = target?.categoryId;
+  const trackId = target?.trackId?.trim();
+  const categoryId = target?.categoryId?.trim();
+  const itemId = target?.itemId?.trim();
+  const topicId = target?.topicId?.trim();
   const defaultTrack: TrackId = 'interview-prep';
 
   if (trackId && categoryId) {
     hashBody += `track/${encodeURIComponent(trackId)}/category/${encodeURIComponent(categoryId)}`;
-    if (target.itemId) hashBody += `/item/${encodeURIComponent(target.itemId)}`;
+    if (itemId) hashBody += `/item/${encodeURIComponent(itemId)}`;
   } else if (categoryId) {
     hashBody += `track/${encodeURIComponent(trackId ?? defaultTrack)}/category/${encodeURIComponent(categoryId)}`;
-    if (target.itemId) hashBody += `/item/${encodeURIComponent(target.itemId)}`;
-  } else if (target?.trackId) {
-    hashBody += `track/${encodeURIComponent(target.trackId)}`;
-  } else if (target?.topicId) {
-    hashBody += `topic/${encodeURIComponent(target.topicId)}`;
-    if (target.itemId) hashBody += `/item/${encodeURIComponent(target.itemId)}`;
+    if (itemId) hashBody += `/item/${encodeURIComponent(itemId)}`;
+  } else if (target?.trackId?.trim()) {
+    hashBody += `track/${encodeURIComponent(target.trackId.trim())}`;
+  } else if (topicId) {
+    hashBody += `topic/${encodeURIComponent(topicId)}`;
+    if (itemId) hashBody += `/item/${encodeURIComponent(itemId)}`;
   }
   writeAppUrl('mobile', hashBody, opts);
 }

@@ -38,6 +38,7 @@ import {
   type MenuItem,
   CanvasFloatingHud,
   TracePreviewPanel,
+  UnifiedRightSidebar,
   FIT_VIEW_DURATION_MS,
 } from './ui';
 import {
@@ -78,6 +79,7 @@ import { CanvasCollabProvider, useCanvasCollab } from '@/shell/collab/CanvasColl
 import { useCanvasDocSync } from '@/shell/collab/sync/useCanvasDocSync';
 import { useCanvasFollow } from '@/shell/collab/sync/useCanvasFollow';
 import { InterviewHud, GuestNameGate } from '@/shell/interview';
+import { InterviewControlsBridge } from '@/shell/interview/InterviewControlsBridge';
 import { useInterviewBoardPersistence } from '@/shell/interview/useInterviewBoardPersistence';
 import { canMoveCanvasNodes } from '@/shell/collab/protocol/subdocPermissions';
 import { CanvasCollabOverlays, CommentLayer } from '@/shell/collab';
@@ -717,6 +719,7 @@ function Inner({
                         lock={lock}
                         onToggleLock={() => setLock((l) => !l)}
                         onTidy={reset}
+                        standalone={standalone}
                       />
                     )}
                     {!present && <InterviewHud />}
@@ -772,6 +775,7 @@ function Inner({
                 )}
               </div>
             </div>
+            {!present && mode === 'visualize' && <UnifiedRightSidebar />}
           </div>
         </CanvasActionsProvider>
       </CanvasFrameProvider>
@@ -782,6 +786,7 @@ function Inner({
 export function CanvasStage(props: CanvasStageProps) {
   return (
     <CanvasCollabProvider>
+      <InterviewControlsBridge />
       <ReactFlowProvider>
         <div className="h-full min-h-0 w-full">
           <Inner {...props} />
@@ -791,5 +796,5 @@ export function CanvasStage(props: CanvasStageProps) {
   );
 }
 
-/** Re-export kept for widget registry / saved-canvas flows (not mounted in standalone canvas). */
+/** Re-export kept for widget registry / saved-canvas flows. */
 export { UnifiedRightSidebar } from './ui/UnifiedRightSidebar';

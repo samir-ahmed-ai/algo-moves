@@ -15,10 +15,13 @@ export function GridToggleButton({
       type="button"
       onClick={onClick}
       className={cn(
-        'h-5 w-5 rounded-sm border',
-        active ? 'border-accent bg-accent/30' : 'border-edge bg-panel2',
+        'grid-toggle-button h-5 w-5 rounded-sm border',
+        active
+          ? 'grid-toggle-button--active border-accent bg-accent/30'
+          : 'grid-toggle-button--idle border-edge bg-panel2',
         className,
       )}
+      aria-pressed={active}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 import type { Move } from '../../core';
+import { cn } from '@/lib/utils/cn';
 
 export interface MoveLogProps {
   moves: Move[];
@@ -31,35 +32,23 @@ export function MoveLog({
   const wrapStyle: CSSProperties | undefined = cols
     ? { display: 'block', columnCount: columns, columnGap: '14px' }
     : undefined;
-  const lineStyle: CSSProperties | undefined = cols
-    ? { breakInside: 'avoid', display: 'flex' }
-    : undefined;
+  const lineStyle: CSSProperties | undefined = cols ? { breakInside: 'avoid' } : undefined;
 
   return (
-    <div className="move-log" role="list" style={wrapStyle}>
+    <div className={cn('move-log', cols && 'move-log--columns')} role="list" style={wrapStyle}>
       {moves.map((m, i) => {
         const cur = i === index;
-        const cls = [
-          'log-line nodrag',
-          cur ? 'cur' : '',
-          m.tone === 'bad' ? 'bad' : '',
-          m.tone === 'good' ? 'good' : '',
-        ]
-          .filter(Boolean)
-          .join(' ');
         const isBp = breakpoints?.has(i) ?? false;
         return (
-          <button
+          <div
             key={i}
-            ref={cur ? curRef : undefined}
-            className={cls}
+            className={cn('log-line-wrap', cur && 'log-line-wrap--current')}
             role="listitem"
             style={lineStyle}
-            onClick={() => onSelect(i)}
           >
             {onToggleBreakpoint && (
-              <span
-                role="button"
+              <button
+                type="button"
                 aria-label={isBp ? 'clear breakpoint' : 'set breakpoint'}
                 title={isBp ? 'clear breakpoint' : 'set breakpoint'}
                 onClick={(e) => {
@@ -73,10 +62,23 @@ export function MoveLog({
                 }}
               />
             )}
-            <span className="ln">{i + 1}</span>
-            <span className="nt">{m.note}</span>
-            {m.team ? <span className={`chip team-chip-${m.team}`}>{m.team}</span> : null}
-          </button>
+            <button
+              ref={cur ? curRef : undefined}
+              className={cn(
+                'log-line nodrag',
+                cur && 'cur',
+                m.tone === 'bad' && 'bad',
+                m.tone === 'good' && 'good',
+                isBp && 'has-breakpoint',
+              )}
+              aria-current={cur ? 'step' : undefined}
+              onClick={() => onSelect(i)}
+            >
+              <span className="ln">{i + 1}</span>
+              <span className="nt">{m.note}</span>
+              {m.team ? <span className={`chip team-chip-${m.team}`}>{m.team}</span> : null}
+            </button>
+          </div>
         );
       })}
     </div>

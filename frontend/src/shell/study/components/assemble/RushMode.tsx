@@ -51,7 +51,7 @@ export function RushMode() {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="assemble-mode assemble-mode--rush flex flex-col gap-2">
       <GameHud
         left={
           <HudChip tone={done ? 'good' : 'accent'}>

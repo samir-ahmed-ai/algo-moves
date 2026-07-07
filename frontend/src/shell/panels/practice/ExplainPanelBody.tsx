@@ -34,7 +34,7 @@ export function ExplainPanelBody() {
   }, [graded, advancePractice]);
 
   return (
-    <section className="nodrag worked-cases-panel">
+    <section className="practice-panel practice-panel--explain nodrag worked-cases-panel">
       <div className="worked-cases-brief">
         <span className="worked-cases-brief__eyebrow">worked case</span>
         <h3>Explain the invariant</h3>

@@ -89,7 +89,7 @@ function RightCollapsedRail({
 
   return (
     <div
-      className="unified-right-sidebar flex h-full shrink-0 flex-col items-center gap-px border-l border-edge bg-panel py-1"
+      className="unified-right-sidebar right-sidebar-rail flex h-full shrink-0 flex-col items-center gap-px border-l border-edge bg-panel py-1"
       style={{ width: SIDEBAR_RAIL_W }}
     >
       <button
@@ -271,24 +271,28 @@ export function UnifiedRightSidebar() {
   const panel = (
     <div
       className={cn(
-        'unified-right-sidebar flex h-full flex-col overflow-hidden bg-panel text-ink',
+        'unified-right-sidebar right-sidebar-panel flex h-full flex-col overflow-hidden bg-panel text-ink',
         isMobile ? 'w-full' : 'shrink-0 border-l border-edge',
       )}
       style={isMobile ? undefined : { width: wide ? SIDEBAR_WIDE_W : SIDEBAR_W }}
     >
-      <header className="flex shrink-0 items-center gap-[var(--gap)] border-b border-edge px-[var(--hpad)] py-[var(--gap)]">
+      <header className="right-sidebar-panel__header flex shrink-0 items-center gap-[var(--gap)] border-b border-edge px-[var(--hpad)] py-[var(--gap)]">
         <span
           className={cn(
-            'min-w-0 flex-1 truncate font-semibold leading-tight text-ink',
+            'right-sidebar-panel__title min-w-0 flex-1 truncate font-semibold leading-tight text-ink',
             chromeText.xs,
           )}
         >
           {TAB_LABELS[rightTab]}
         </span>
-        <Chip tone="accent" mono className={cn('!px-1 !py-px', chromeText.xs)}>
+        <Chip
+          tone="accent"
+          mono
+          className={cn('right-sidebar-panel__step !px-1 !py-px', chromeText.xs)}
+        >
           {stepLabel}
         </Chip>
-        <div className="hidden min-w-0 flex-1 items-center justify-end gap-0.5 sm:flex [&_svg]:size-3">
+        <div className="right-sidebar-panel__modes hidden min-w-0 flex-1 items-center justify-end gap-0.5 sm:flex [&_svg]:size-3">
           {MODES.map((m) => (
             <button
               key={m.id}
@@ -297,9 +301,9 @@ export function UnifiedRightSidebar() {
               title={m.label}
               className={cn(
                 chromeText.xs,
-                `flex min-h-[var(--row)] items-center justify-center gap-0.5 px-1 py-0 font-medium transition-colors ${RADIUS_CTRL}`,
+                `right-sidebar-panel__mode flex min-h-[var(--row)] items-center justify-center gap-0.5 px-1 py-0 font-medium transition-colors ${RADIUS_CTRL}`,
                 mode === m.id
-                  ? 'bg-accent text-white shadow-sm'
+                  ? 'right-sidebar-panel__mode--active bg-accent text-white shadow-sm'
                   : 'text-ink2 hover:bg-panel2 hover:text-ink',
               )}
             >
@@ -313,7 +317,7 @@ export function UnifiedRightSidebar() {
           onClick={() => setRightOpen(false)}
           title="Collapse sidebar"
           aria-label="Collapse sidebar"
-          className={`grid ${CHROME_BTN_MD} shrink-0 place-items-center text-ink3 transition-colors hover:bg-panel2 hover:text-ink ${RADIUS_CTRL}`}
+          className={`right-sidebar-panel__collapse grid ${CHROME_BTN_MD} shrink-0 place-items-center text-ink3 transition-colors hover:bg-panel2 hover:text-ink ${RADIUS_CTRL}`}
         >
           <PanelRightClose className="h-2.5 w-2.5" />
         </button>
@@ -321,9 +325,14 @@ export function UnifiedRightSidebar() {
 
       <SidebarTabBar tabs={sidebarTabs} active={rightTab} onTab={setRightTab} />
 
-      <div className={cn('ws-scroll min-h-0 flex-1 overflow-y-auto py-1', chromeText.sm)}>
+      <div
+        className={cn(
+          'right-sidebar-panel__body ws-scroll min-h-0 flex-1 overflow-y-auto py-1',
+          chromeText.sm,
+        )}
+      >
         {rightTab === 'analysis' && (
-          <div className="flex flex-col">
+          <div className="right-sidebar-panel__stack flex flex-col">
             {analysisWidgets.map((w) => (
               <WidgetSection key={w.id} widget={w} />
             ))}
@@ -347,7 +356,7 @@ export function UnifiedRightSidebar() {
         )}
 
         {rightTab === 'canvas' && canvasHud && (
-          <div className="flex flex-col gap-2 px-[var(--hpad)]">
+          <div className="right-sidebar-panel__canvas-tab flex flex-col gap-2 px-[var(--hpad)]">
             {!showGlobalTransport && (
               <section>
                 <p className={cn('mb-[var(--gap)] font-medium text-ink2', chromeText.xs)}>

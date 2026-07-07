@@ -4,15 +4,20 @@ function isPrimitiveJson(value: unknown): boolean {
   return value === null || typeof value !== 'object';
 }
 
+function stringifyPrimitive(value: unknown): string {
+  const serialized = JSON.stringify(value);
+  return serialized === undefined ? String(value) : serialized;
+}
+
 /** Compact single-line JSON for arrays and inline object values. */
 function formatCompact(value: unknown): string {
-  if (isPrimitiveJson(value)) return JSON.stringify(value);
+  if (isPrimitiveJson(value)) return stringifyPrimitive(value);
   if (Array.isArray(value)) {
     return `[${value.map(formatCompact).join(', ')}]`;
   }
   const entries = Object.entries(value as Record<string, unknown>);
   if (entries.length === 0) return '{}';
-  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}: ${formatCompact(v)}`).join(', ')}}`;
+  return `{${entries.map(([k, v]) => `${stringifyPrimitive(k)}: ${formatCompact(v)}`).join(', ')}}`;
 }
 
 function formatObject(obj: Record<string, unknown>, depth: number): string {
@@ -21,16 +26,16 @@ function formatObject(obj: Record<string, unknown>, depth: number): string {
   const pad = ' '.repeat(depth * INDENT);
   const inner = ' '.repeat((depth + 1) * INDENT);
   const lines = entries.map(
-    ([k, v]) => `${inner}${JSON.stringify(k)}: ${formatValue(v, depth + 1)}`,
+    ([k, v]) => `${inner}${stringifyPrimitive(k)}: ${formatValue(v, depth + 1)}`,
   );
   return `{\n${lines.join(',\n')}\n${pad}}`;
 }
 
 function formatValue(value: unknown, depth: number): string {
-  if (isPrimitiveJson(value)) return JSON.stringify(value);
+  if (isPrimitiveJson(value)) return stringifyPrimitive(value);
   if (Array.isArray(value)) {
     if (value.every(isPrimitiveJson)) {
-      return `[${value.map((v) => JSON.stringify(v)).join(', ')}]`;
+      return `[${value.map((v) => stringifyPrimitive(v)).join(', ')}]`;
     }
     const pad = ' '.repeat(depth * INDENT);
     const inner = ' '.repeat((depth + 1) * INDENT);

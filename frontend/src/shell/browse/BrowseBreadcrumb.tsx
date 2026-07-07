@@ -83,14 +83,14 @@ export function BrowseBreadcrumb({
   return (
     <div
       className={cn(
-        'relative mb-3 flex items-center gap-[var(--gap)] overflow-hidden rounded-lg border border-edge bg-panel px-[var(--hpad)] py-[var(--pad)]',
+        'browse-breadcrumb relative mb-3 flex items-center gap-[var(--gap)] overflow-hidden rounded-lg border border-edge bg-panel px-[var(--hpad)] py-[var(--pad)]',
         className,
       )}
       style={{ borderLeftWidth: 3, borderLeftColor: color.c1 }}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-lg opacity-[0.3] [mask-image:radial-gradient(120%_120%_at_0_0,black,transparent)]"
+        className="browse-breadcrumb__grid pointer-events-none absolute inset-0 rounded-lg opacity-[0.3] [mask-image:radial-gradient(120%_120%_at_0_0,black,transparent)]"
         style={gridStyle}
       />
 
@@ -99,26 +99,42 @@ export function BrowseBreadcrumb({
         onClick={onBack}
         aria-label={backTitle}
         title={backTitle}
-        className="relative grid h-9 w-9 shrink-0 place-items-center rounded-md border border-edge bg-panel2 text-ink2 transition-colors hover:bg-panel hover:text-ink"
+        className="browse-breadcrumb__back relative grid h-9 w-9 shrink-0 place-items-center rounded-md border border-edge bg-panel2 text-ink2 transition-colors hover:bg-panel hover:text-ink"
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
 
       <span
-        className="relative grid h-9 w-9 shrink-0 place-items-center rounded-md text-white shadow-[var(--shadow-sm)] [&>svg]:h-[18px] [&>svg]:w-[18px]"
+        className="browse-breadcrumb__icon relative grid h-9 w-9 shrink-0 place-items-center rounded-md text-white shadow-[var(--shadow-sm)] [&>svg]:h-[18px] [&>svg]:w-[18px]"
         style={{ background: `linear-gradient(135deg, ${color.c1}, ${color.c2})` }}
       >
         <Icon strokeWidth={1.6} />
       </span>
 
-      <div className="relative min-w-0 flex-1">
+      <div className="browse-breadcrumb__copy relative min-w-0 flex-1">
         <Label className="font-mono tracking-[0.12em]">{label}</Label>
-        <h2 className={cn('truncate font-medium text-ink', chromeText.base)}>{title}</h2>
+        <h2
+          className={cn('browse-breadcrumb__title truncate font-medium text-ink', chromeText.base)}
+        >
+          {title}
+        </h2>
         {summary && (
-          <p className={cn('mt-0.5 line-clamp-2 text-ink2', chromeText.tight)}>{summary}</p>
+          <p
+            className={cn(
+              'browse-breadcrumb__summary mt-0.5 line-clamp-2 text-ink2',
+              chromeText.tight,
+            )}
+          >
+            {summary}
+          </p>
         )}
         {description && (
-          <p className={cn('mt-1.5 max-w-3xl leading-relaxed text-ink2', chromeText.sm)}>
+          <p
+            className={cn(
+              'browse-breadcrumb__description mt-1.5 max-w-3xl leading-relaxed text-ink2',
+              chromeText.sm,
+            )}
+          >
             {description}
           </p>
         )}

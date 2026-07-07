@@ -14,6 +14,7 @@ export const RECALL_LINE_HEIGHTS: Record<RecallLineHeight, string> = {
 };
 
 export function clampRecallFontSize(size: number): number {
+  if (!Number.isFinite(size)) return RECALL_FONT_DEFAULT;
   return Math.min(RECALL_FONT_MAX, Math.max(RECALL_FONT_MIN, Math.round(size)));
 }
 
@@ -35,8 +36,9 @@ export function recallLineHeightLabel(value: RecallLineHeight): string {
 
 /** Live font size + line height for recall merge editors. */
 export function buildRecallFontTheme(fontSize: number, lineHeight: RecallLineHeight): Extension {
+  const safeLineHeight = isRecallLineHeight(lineHeight) ? lineHeight : 'normal';
   return EditorView.theme({
     '&': { fontSize: `${clampRecallFontSize(fontSize)}px` },
-    '.cm-scroller': { lineHeight: RECALL_LINE_HEIGHTS[lineHeight] },
+    '.cm-scroller': { lineHeight: RECALL_LINE_HEIGHTS[safeLineHeight] },
   });
 }

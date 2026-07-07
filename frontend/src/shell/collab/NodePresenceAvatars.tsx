@@ -22,7 +22,7 @@ export function NodePresenceAvatars({
 
   return (
     <span
-      className={cn('inline-flex items-center -space-x-1', className)}
+      className={cn('node-presence-avatars inline-flex items-center -space-x-1', className)}
       aria-label={`${here.length} collaborator(s) on this panel`}
     >
       {shown.map((p) => (
@@ -31,6 +31,7 @@ export function NodePresenceAvatars({
           title={p.name}
           className={cn(
             'inline-flex h-4 w-4 items-center justify-center rounded-full border border-panel font-semibold text-white',
+            'node-presence-avatars__avatar',
             chromeText.tight,
           )}
           style={{ background: p.color }}
@@ -39,7 +40,14 @@ export function NodePresenceAvatars({
         </span>
       ))}
       {extra > 0 ? (
-        <span className={cn('pl-1.5 font-medium text-ink3', chromeText.tight)}>+{extra}</span>
+        <span
+          className={cn(
+            'node-presence-avatars__extra pl-1.5 font-medium text-ink3',
+            chromeText.tight,
+          )}
+        >
+          +{extra}
+        </span>
       ) : null}
     </span>
   );

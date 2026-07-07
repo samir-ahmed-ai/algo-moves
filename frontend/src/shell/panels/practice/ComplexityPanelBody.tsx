@@ -29,9 +29,9 @@ export function ComplexityPanelBody() {
   const answered = picked !== null;
   const wrong = answered && picked !== formattedAnswer;
   return (
-    <div className="nodrag flex flex-col gap-2">
+    <div className="practice-panel practice-panel--complexity nodrag flex flex-col gap-2">
       <Section title={`Complexity of ${item.title}`} bordered={false}>
-        <div className="flex flex-col gap-1.5">
+        <div className="practice-choice-stack flex flex-col gap-1.5">
           {choices.map((c) => {
             const state = !answered
               ? 'idle'
@@ -55,7 +55,7 @@ export function ComplexityPanelBody() {
         </div>
       </Section>
       {answered && (
-        <div className="flex flex-col gap-2">
+        <div className="practice-feedback-card flex flex-col gap-2">
           <Hint>{cards.find((c) => c.complexity.includes(answer))?.complexity}</Hint>
           {wrong && (
             <p className="text-[length:var(--fs-xs)] text-bad">

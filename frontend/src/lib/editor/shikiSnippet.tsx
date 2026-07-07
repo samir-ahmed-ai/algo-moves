@@ -102,7 +102,7 @@ async function ensureLang(lang: BundledLanguage) {
 }
 
 function normalizeLang(lang: string): BundledLanguage | null {
-  return LANG_MAP[lang.toLowerCase()] ?? null;
+  return LANG_MAP[lang.trim().toLowerCase()] ?? null;
 }
 
 function plainLine(line: string): ReactNode {
@@ -141,6 +141,7 @@ export async function highlightSnippetShiki(
   opts?: { gutter?: boolean },
 ): Promise<ReactNode> {
   const shikiLang = normalizeLang(lang);
+  const safeLang = lang.trim() || 'go';
   const lines = code.split('\n');
 
   if (!shikiLang) {
@@ -156,11 +157,16 @@ export async function highlightSnippetShiki(
     ));
   }
 
-  const highlighter = await ensureLang(shikiLang);
+  let highlighter: Awaited<ReturnType<typeof ensureLang>>;
+  try {
+    highlighter = await ensureLang(shikiLang);
+  } catch {
+    return highlightSnippetPlain(code, safeLang, opts);
+  }
   const theme = 'github-dark';
 
   return lines.map((line, li) => {
-    const tone = funcLineTone(line.trim(), lang);
+    const tone = funcLineTone(line.trim(), safeLang);
     const lineClass = `piece-code-line${tone ? ` ${tone}` : ''}`;
 
     let body: ReactNode;
@@ -195,9 +201,10 @@ export function highlightSnippetPlain(
   lang = 'go',
   opts?: { gutter?: boolean },
 ): ReactNode {
+  const safeLang = lang.trim() || 'go';
   const lines = code.split('\n');
   return lines.map((line, li) => {
-    const tone = funcLineTone(line.trim(), lang);
+    const tone = funcLineTone(line.trim(), safeLang);
     const body = tone ? renderSignatureLine(line, tone, plainLine(line)) : plainLine(line);
     return (
       <div key={li} className={`piece-code-line${tone ? ` ${tone}` : ''}`}>

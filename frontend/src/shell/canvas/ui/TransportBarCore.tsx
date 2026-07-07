@@ -62,7 +62,7 @@ export function TransportBar({
         aria-label={player.isPlaying ? 'Pause playback' : 'Play playback'}
         aria-pressed={player.isPlaying}
         className={cn(
-          'nodrag grid place-items-center rounded-full bg-accent text-white shadow-sm transition-transform hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100',
+          'transport-bar__play nodrag grid place-items-center rounded-full bg-accent text-white shadow-sm transition-transform hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100',
           CHROME_BTN,
         )}
       >
@@ -89,7 +89,7 @@ export function TransportBar({
   const speedControl = (
     <label
       className={cn(
-        'nodrag flex px-0.5',
+        'transport-bar__speed nodrag flex px-0.5',
         vertical ? 'flex-col items-center gap-1' : 'items-center gap-0.5',
       )}
       title="Playback speed"
@@ -111,7 +111,7 @@ export function TransportBar({
         aria-valuetext={`${player.speed.toFixed(1)} times speed`}
         aria-label="Playback speed"
         className={cn(
-          'cursor-pointer accent-[var(--accent)]',
+          'transport-bar__range cursor-pointer accent-[var(--accent)]',
           vertical ? 'h-12 w-1 appearance-none rounded-full bg-panel2' : 'h-0.5',
           !vertical && (compact ? 'w-8' : 'w-10'),
         )}
@@ -120,7 +120,12 @@ export function TransportBar({
   );
 
   const stepCounter = (
-    <ChromeHint mono className="px-0.5 text-ink2" aria-live="polite" aria-atomic="true">
+    <ChromeHint
+      mono
+      className="transport-bar__counter px-0.5 text-ink2"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       {stepLabel}
     </ChromeHint>
   );
@@ -138,7 +143,7 @@ export function TransportBar({
       aria-valuenow={player.index}
       aria-valuetext={`Frame ${player.index + 1} of ${frames.length}`}
       className={cn(
-        'nodrag h-1 w-full cursor-pointer appearance-none rounded-full bg-panel2 accent-[var(--accent)]',
+        'transport-bar__scrubber nodrag h-1 w-full cursor-pointer appearance-none rounded-full bg-panel2 accent-[var(--accent)]',
         vertical ? 'mt-1' : '',
       )}
     />
@@ -172,7 +177,10 @@ export function TransportBar({
       <div
         role="toolbar"
         aria-label="Visualization transport"
-        className={cn('flex flex-col items-center gap-[var(--gap)] py-[var(--pad)]', className)}
+        className={cn(
+          'transport-bar transport-bar--vertical flex flex-col items-center gap-[var(--gap)] py-[var(--pad)]',
+          className,
+        )}
       >
         {transportBtns}
         <span className="my-[var(--gap)] h-px w-full bg-edge" aria-hidden />
@@ -191,7 +199,7 @@ export function TransportBar({
         role="toolbar"
         aria-label="Visualization transport"
         className={cn(
-          'flex w-full min-h-[var(--row)] flex-col gap-1 rounded-md border border-edge bg-panel/95 px-[var(--gap)] py-1',
+          'transport-bar transport-bar--compact flex w-full min-h-[var(--row)] flex-col gap-1 rounded-md border border-edge bg-panel/95 px-[var(--gap)] py-1',
           className,
         )}
       >
@@ -210,7 +218,7 @@ export function TransportBar({
       role="toolbar"
       aria-label="Visualization transport"
       className={cn(
-        'flex min-h-[var(--row)] flex-col gap-1 rounded-full border border-edge bg-panel/95 px-2 py-1 shadow-[var(--shadow-lg)] backdrop-blur',
+        'transport-bar flex min-h-[var(--row)] flex-col gap-1 rounded-full border border-edge bg-panel/95 px-2 py-1 shadow-[var(--shadow-lg)] backdrop-blur',
         className,
       )}
     >

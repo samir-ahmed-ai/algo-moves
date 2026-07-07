@@ -24,7 +24,7 @@ import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { PanelHeaderAction, RADIUS_SHELL, nodeIconGlyph, nodeText } from './nodeui';
 
 const CELL =
-  'grid h-8 w-8 place-items-center rounded-md border border-transparent text-ink3 transition-colors hover:border-edge hover:bg-panel2 hover:text-ink';
+  'layout-slot-menu__cell grid h-8 w-8 place-items-center rounded-md border border-transparent text-ink3 transition-colors hover:border-edge hover:bg-panel2 hover:text-ink';
 
 function SlotIcon({ slotIndex, filled }: { slotIndex: number; filled: boolean }) {
   const { x, y, w, h } = slotIconRect(slotIndex);
@@ -129,17 +129,24 @@ export function PanelHeaderLayoutMenu({
     open && pos ? (
       <div
         ref={popoverRef}
+        role="dialog"
+        aria-label="Layout slots"
         className={cn(
-          'fixed z-[200] w-[7.75rem] border border-edge bg-panel p-2 shadow-[var(--shadow-xl)] backdrop-blur-sm',
+          'layout-slot-menu fixed z-[200] w-[7.75rem] border border-edge bg-panel p-2 shadow-[var(--shadow-xl)] backdrop-blur-sm',
           RADIUS_SHELL,
         )}
         style={{ top: pos.top, left: Math.max(8, pos.left) }}
         data-layout-host={hostId}
       >
-        <p className={cn('mb-1.5 text-center leading-tight text-ink3', nodeText.xs)}>
+        <p
+          className={cn(
+            'layout-slot-menu__hint mb-1.5 text-center leading-tight text-ink3',
+            nodeText.xs,
+          )}
+        >
           {selectedPeerId ? 'Click slot' : 'Select panel'}
         </p>
-        <div className="grid grid-cols-3 gap-1">
+        <div className="layout-slot-menu__grid grid grid-cols-3 gap-1">
           {Array.from({ length: LAYOUT_SLOT_COUNT }, (_, slotIndex) => {
             const childId = occupied[slotIndex];
             const child = childId ? getNode(childId) : null;
@@ -153,12 +160,21 @@ export function PanelHeaderLayoutMenu({
                 data-layout-slot={slotIndex}
                 data-layout-host={hostId}
                 title={filled ? (title ?? childId) : `Slot ${slotIndex + 1}`}
+                aria-label={
+                  filled
+                    ? `Select ${title ?? childId} in slot ${slotIndex + 1}`
+                    : selectedPeerId
+                      ? `Move selected panel to slot ${slotIndex + 1}`
+                      : `Empty slot ${slotIndex + 1}`
+                }
                 onClick={() => pickSlot(slotIndex)}
                 className={cn(
                   CELL,
-                  filled && 'border-accent/40 bg-accentbg/25 text-accent',
-                  isDrop && 'border-accent bg-accentbg/50 ring-1 ring-accent/40',
-                  !filled && !selectedPeerId && 'opacity-50',
+                  filled &&
+                    'layout-slot-menu__cell--filled border-accent/40 bg-accentbg/25 text-accent',
+                  isDrop &&
+                    'layout-slot-menu__cell--drop border-accent bg-accentbg/50 ring-1 ring-accent/40',
+                  !filled && !selectedPeerId && 'layout-slot-menu__cell--idle opacity-50',
                 )}
               >
                 <SlotIcon slotIndex={slotIndex} filled={filled} />
@@ -170,7 +186,7 @@ export function PanelHeaderLayoutMenu({
     ) : null;
 
   return (
-    <div ref={anchorRef} className="relative">
+    <div ref={anchorRef} className="layout-slot-menu-anchor relative">
       <PanelHeaderAction
         variant="toggle"
         active={open || hasSlots || !!slots}
