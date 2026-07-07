@@ -2,6 +2,7 @@ node_modules
 dist
 dist-ssr
 .vite
+.node-localstorage*
 .git
 *.local
 .env
@@ -9,3 +10,4 @@ dist-ssr
 !.env.example
 tsconfig.tsbuildinfo
 tsconfig.node.tsbuildinfo
+vite.config.ts.timestamp-*.mjs

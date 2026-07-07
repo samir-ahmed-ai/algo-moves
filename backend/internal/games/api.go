@@ -187,7 +187,6 @@ func (h *Handler) HandleAchievementAction(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusNoContent)
 }
 
-
 func (h *Handler) HandleRooms(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	path := strings.TrimPrefix(r.URL.Path, "/api/rooms/")
@@ -329,7 +328,6 @@ func (h *Handler) HandleDailyScore(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-
 func (h *Handler) HandleGames(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		platform.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
@@ -343,7 +341,9 @@ func (h *Handler) HandleGames(w http.ResponseWriter, r *http.Request) {
 			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		if games == nil { games = []map[string]any{} }
+		if games == nil {
+			games = []map[string]any{}
+		}
 		platform.WriteJSON(w, http.StatusOK, games)
 		return
 	}

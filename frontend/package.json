@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "vite",
     "hocuspocus": "node scripts/hocuspocus-server.mjs",
-    "build": "npm run prebuild && tsc --noEmit && tsc -p tsconfig.node.json --noEmit && vite build",
+    "build": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit && vite build",
     "build:analyze": "ANALYZE=1 vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit --incremental false",
@@ -39,25 +39,25 @@
     "check:lighthouse-budget": "node scripts/lighthouse-budget.mjs",
     "check-simulators": "node scripts/check-simulators.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
-    "check:quiz-labels": "vitest run src/lib/quizChoiceFormat.test.ts src/plugins/integrity.test.ts",
-    "build-plugin-meta": "vite-node scripts/build-plugin-meta.mts",
-    "check-plugin-meta": "vite-node scripts/build-plugin-meta.mts -- --check",
-    "build-problem-briefs": "vite-node scripts/build-problem-briefs.mts",
-    "check-problem-briefs": "vite-node scripts/build-problem-briefs.mts -- --check",
-    "export-content-sql": "vite-node scripts/export-content-sql.mts",
-    "check-content-sql": "vite-node scripts/export-content-sql.mts -- --check",
+    "check:quiz-labels": "NODE_OPTIONS=--localstorage-file=.node-localstorage vitest run src/lib/quizChoiceFormat.test.ts src/plugins/integrity.test.ts",
+    "build-plugin-meta": "NODE_OPTIONS=--localstorage-file=.node-localstorage vite-node scripts/build-plugin-meta.mts",
+    "check-plugin-meta": "NODE_OPTIONS=--localstorage-file=.node-localstorage vite-node scripts/build-plugin-meta.mts -- --check",
+    "build-problem-briefs": "NODE_OPTIONS=--localstorage-file=.node-localstorage vite-node scripts/build-problem-briefs.mts",
+    "check-problem-briefs": "NODE_OPTIONS=--localstorage-file=.node-localstorage vite-node scripts/build-problem-briefs.mts -- --check",
+    "export-content-sql": "NODE_OPTIONS=--localstorage-file=.node-localstorage vite-node scripts/export-content-sql.mts",
+    "check-content-sql": "NODE_OPTIONS=--localstorage-file=.node-localstorage vite-node scripts/export-content-sql.mts -- --check",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "check:circular": "node scripts/check-circular.mjs",
     "check:lint": "eslint src",
     "check:knip": "knip --dependencies --files",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,mts,js}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,mts,js}\"",
-    "test:coverage": "vitest run --coverage",
-    "check:all": "run-p --print-label check:boundaries check:circular check-simulators check-prep-sim-coverage check-prep-quiz-coverage check-prep-sim-quality check-plugin-typography check-shell-typography check:lighthouse-budget check:tokens check:quiz-labels check-plugin-meta check-problem-briefs check-content-sql check:lint",
+    "test:coverage": "NODE_OPTIONS=--localstorage-file=.node-localstorage vitest run --coverage",
+    "check:all": "NODE_OPTIONS=--localstorage-file=.node-localstorage run-p --print-label check:boundaries check:circular check-simulators check-prep-sim-coverage check-prep-quiz-coverage check-prep-sim-quality check-plugin-typography check-shell-typography check:lighthouse-budget check:tokens check:quiz-labels check-plugin-meta check-problem-briefs check-content-sql check:lint",
     "draft-quiz-from-frames": "node scripts/draft-quiz-from-frames.mjs",
     "generate-pwa-icons": "node scripts/generate-pwa-icons.mjs",
     "prebuild": "npm run generate-pwa-icons",
-    "test": "vitest run && npm run check-orphans",
+    "test": "NODE_OPTIONS=--localstorage-file=.node-localstorage vitest run && npm run check-orphans",
     "prepare": "cd .. && husky"
   },
   "dependencies": {
@@ -114,6 +114,15 @@
       "prettier --write"
     ]
   },
+  "overrides": {
+    "@excalidraw/excalidraw": {
+      "nanoid": "^3.3.15"
+    },
+    "@excalidraw/mermaid-to-excalidraw": {
+      "nanoid": "^5.1.16"
+    },
+    "lodash-es": "^4.18.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@hocuspocus/server": "^3.4.4",
@@ -122,8 +131,8 @@
     "@types/lz-string": "^1.3.34",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "^2.1.8",
+    "@vitejs/plugin-react": "^6.0.3",
+    "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.39.1",
     "eslint-import-resolver-typescript": "^4.4.5",
@@ -143,9 +152,9 @@
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^5.4.10",
-    "vite-node": "^2.1.9",
+    "vite": "^8.1.3",
+    "vite-node": "^6.0.0",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.10"
   }
 }

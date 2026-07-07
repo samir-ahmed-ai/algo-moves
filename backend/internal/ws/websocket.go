@@ -78,28 +78,28 @@ func (c *Conn) RemoteAddr() net.Addr {
 	return &net.TCPAddr{}
 }
 
-func (c *Conn) readCtx() context.Context {
+func (c *Conn) readCtx() (context.Context, context.CancelFunc) {
 	if c.keepalive > 0 {
-		ctx, _ := context.WithTimeout(context.Background(), c.keepalive)
-		return ctx
+		return context.WithTimeout(context.Background(), c.keepalive)
 	}
-	return context.Background()
+	return context.Background(), func() {}
 }
 
-func (c *Conn) writeCtx() context.Context {
+func (c *Conn) writeCtx() (context.Context, context.CancelFunc) {
 	c.writeMu.Lock()
 	deadline := c.writeDeadline
 	c.writeMu.Unlock()
 	if !deadline.IsZero() {
-		ctx, _ := context.WithDeadline(context.Background(), deadline)
-		return ctx
+		return context.WithDeadline(context.Background(), deadline)
 	}
-	return context.Background()
+	return context.Background(), func() {}
 }
 
 // ReadMessage returns the next complete application message (text or binary).
 func (c *Conn) ReadMessage() (opcode byte, payload []byte, err error) {
-	typ, data, err := c.conn.Read(c.readCtx())
+	ctx, cancel := c.readCtx()
+	defer cancel()
+	typ, data, err := c.conn.Read(ctx)
 	if err != nil {
 		if websocket.CloseStatus(err) != -1 || errors.Is(err, context.DeadlineExceeded) {
 			return 0, nil, ErrClosed
@@ -121,12 +121,16 @@ func (c *Conn) ReadMessage() (opcode byte, payload []byte, err error) {
 
 // WriteText sends a UTF-8 text message.
 func (c *Conn) WriteText(s []byte) error {
-	return c.conn.Write(c.writeCtx(), websocket.MessageText, s)
+	ctx, cancel := c.writeCtx()
+	defer cancel()
+	return c.conn.Write(ctx, websocket.MessageText, s)
 }
 
 // Ping sends a ping control frame for keepalive.
 func (c *Conn) Ping() error {
-	return c.conn.Ping(c.writeCtx())
+	ctx, cancel := c.writeCtx()
+	defer cancel()
+	return c.conn.Ping(ctx)
 }
 
 // Close sends a close frame (best effort) and tears down the socket.

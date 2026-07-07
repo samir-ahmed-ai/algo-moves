@@ -283,11 +283,11 @@ func (s *Store) UpdateInterviewSession(ctx context.Context, id, ownerID string, 
 	row := s.pool.QueryRow(ctx, q, args...)
 	var (
 		sid, title, status, guestToken, notes, recommendation string
-		owner                                               pgtype.UUID
-		room                                                pgtype.Text
-		guestLinkEnabled, canvasLocked                      bool
-		canvas, questions, rubric                           []byte
-		createdAt, updatedAt, endedAt                       pgtype.Timestamptz
+		owner                                                 pgtype.UUID
+		room                                                  pgtype.Text
+		guestLinkEnabled, canvasLocked                        bool
+		canvas, questions, rubric                             []byte
+		createdAt, updatedAt, endedAt                         pgtype.Timestamptz
 	)
 	err := row.Scan(
 		&sid, &owner, &room, &title, &status, &guestToken,

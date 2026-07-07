@@ -1,4 +1,3 @@
-import { toPng } from 'html-to-image';
 import { pngBlobToGifBlob } from './gifSnapshot';
 
 export type SnapshotFormat = 'png' | 'gif';
@@ -26,6 +25,7 @@ export async function captureElementPng(
   element: HTMLElement,
   opts: Pick<SnapshotOptions, 'pixelRatio' | 'backgroundColor'> = {},
 ): Promise<Blob> {
+  const { toPng } = await import('html-to-image');
   const dataUrl = await toPng(element, {
     pixelRatio: opts.pixelRatio ?? 2,
     backgroundColor: opts.backgroundColor,

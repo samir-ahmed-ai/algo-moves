@@ -63,30 +63,30 @@ func jsonBytesToAny(b []byte) any {
 
 func gameStatToMap(s arcadedb.GameStat) map[string]any {
 	return map[string]any{
-		"profile_id":      pgUUIDString(s.ProfileID),
-		"game_id":         s.GameID,
-		"mmr":             s.Mmr,
-		"wins":            s.Wins,
-		"losses":          s.Losses,
-		"draws":           s.Draws,
-		"streak":          s.Streak,
-		"best_streak":     s.BestStreak,
-		"matches_played":  s.MatchesPlayed,
-		"updated_at":      pgTimestamptzRFC3339(s.UpdatedAt),
+		"profile_id":     pgUUIDString(s.ProfileID),
+		"game_id":        s.GameID,
+		"mmr":            s.Mmr,
+		"wins":           s.Wins,
+		"losses":         s.Losses,
+		"draws":          s.Draws,
+		"streak":         s.Streak,
+		"best_streak":    s.BestStreak,
+		"matches_played": s.MatchesPlayed,
+		"updated_at":     pgTimestamptzRFC3339(s.UpdatedAt),
 	}
 }
 
 func roomToMap(r arcadedb.Room) map[string]any {
 	return map[string]any{
-		"code":             r.Code,
-		"host_profile_id":  pgUUIDString(r.HostProfileID),
-		"title":            pgTextString(r.Title),
-		"game_id":          pgTextString(r.GameID),
-		"mode":             r.Mode,
-		"capacity":         r.Capacity,
-		"is_public":        r.IsPublic,
-		"created_at":       pgTimestamptzRFC3339(r.CreatedAt),
-		"last_active_at":   pgTimestamptzRFC3339(r.LastActiveAt),
+		"code":            r.Code,
+		"host_profile_id": pgUUIDString(r.HostProfileID),
+		"title":           pgTextString(r.Title),
+		"game_id":         pgTextString(r.GameID),
+		"mode":            r.Mode,
+		"capacity":        r.Capacity,
+		"is_public":       r.IsPublic,
+		"created_at":      pgTimestamptzRFC3339(r.CreatedAt),
+		"last_active_at":  pgTimestamptzRFC3339(r.LastActiveAt),
 	}
 }
 
@@ -146,15 +146,15 @@ func matchHistoryToMap(r arcadedb.MatchHistoryRow) map[string]any {
 
 func leaderboardGameToMap(r arcadedb.LeaderboardGameRow) map[string]any {
 	return map[string]any{
-		"rank":            r.Rank,
-		"profile_id":      pgUUIDString(r.ProfileID),
-		"display_name":    r.DisplayName,
-		"avatar_seed":     r.AvatarSeed,
-		"level":           pgInt4Int(r.Level),
-		"mmr":             r.Mmr,
-		"wins":            r.Wins,
-		"losses":          r.Losses,
-		"matches_played":  r.MatchesPlayed,
+		"rank":           r.Rank,
+		"profile_id":     pgUUIDString(r.ProfileID),
+		"display_name":   r.DisplayName,
+		"avatar_seed":    r.AvatarSeed,
+		"level":          pgInt4Int(r.Level),
+		"mmr":            r.Mmr,
+		"wins":           r.Wins,
+		"losses":         r.Losses,
+		"matches_played": r.MatchesPlayed,
 	}
 }
 

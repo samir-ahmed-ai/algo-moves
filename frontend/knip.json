@@ -1,14 +1,25 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": [
-    "src/main.tsx",
-    "scripts/**/*.{mjs,mts}",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "eslint.config.js"
-  ],
+  "entry": ["scripts/**/*.{mjs,mts}", "../.husky/pre-commit"],
   "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{mjs,mts}"],
-  "ignore": ["src/plugins/_generated/**", "src/content/_generated/**"],
-  "ignoreDependencies": ["@codemirror/theme-one-dark", "codemirror", "@types/lz-string"],
-  "ignoreBinaries": ["eslint", "prettier", "husky", "lint-staged"]
+  "ignore": [
+    "src/components/board/index.ts",
+    "src/components/code/index.ts",
+    "src/components/puzzle/index.ts",
+    "src/shell/collab/protocol/index.ts",
+    "src/shell/collab/sync/index.ts",
+    "src/shell/collab/yjs/index.ts",
+    "src/shell/mobile/deck/index.ts",
+    "src/shell/mobile/scenes/index.ts",
+    "src/shell/panels/code/index.ts",
+    "src/shell/panels/problem/index.ts",
+    "src/shell/panels/visualize/index.ts",
+    "src/shell/panels/workspace/index.ts"
+  ],
+  "ignoreDependencies": [
+    "@codemirror/theme-one-dark",
+    "codemirror",
+    "@types/lz-string",
+    "lint-staged"
+  ]
 }

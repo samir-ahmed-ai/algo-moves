@@ -43,8 +43,6 @@ type Profile struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
-
-
 // Canvas is a saved collaborative canvas document.
 type Canvas struct {
 	ID             string          `json:"id"`
@@ -60,7 +58,6 @@ type GuestSession struct {
 	SessionToken string  `json:"-"`
 	Profile      Profile `json:"profile"`
 }
-
 
 func newSessionToken() (string, error) {
 	b := make([]byte, 32)

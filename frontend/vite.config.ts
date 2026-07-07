@@ -79,8 +79,21 @@ export default defineConfig({
             if (has('/react') || has('/react-dom')) return 'react';
             if (has('@xyflow')) return 'xyflow';
             if (has('yjs') || has('hocuspocus') || has('lib0')) return 'yjs-collab';
+            if (has('/mermaid/node_modules/elkjs/')) return 'mermaid-elkjs';
+            if (has('/elkjs/')) return 'elkjs';
+            if (
+              has('/@codemirror/') ||
+              has('/codemirror/') ||
+              has('/@lezer/') ||
+              has('/@replit/codemirror-vim/')
+            )
+              return 'codemirror';
+            if (has('/@dnd-kit/')) return 'dnd-kit';
             return;
           }
+          if (has('/content/_generated/problemBriefs')) return 'content-problem-briefs';
+          if (has('/plugins/_generated/')) return 'plugins-generated-meta';
+          if (has('/styles/themes/sources/')) return 'theme-sources';
           const importedSim = normalized.match(
             /\/plugins\/imported\/simulators\/problems\/([^/]+)\.tsx$/,
           );
