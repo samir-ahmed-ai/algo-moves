@@ -4,7 +4,7 @@ import { getPluginMeta } from '@/core';
 import { cn } from '@/lib/utils/cn';
 import { buildShareUrl } from '@/store/navigation';
 import { useWorkspace } from '@/store/workspace';
-import { ChromeHint, chromeText } from '../chromeUi';
+import { ChromeToken, chromeText } from '../chromeUi';
 import { readCommandPaletteRecentIds, recordCommandPaletteRecentId } from './commandPaletteHistory';
 
 export interface CommandPaletteCommand {
@@ -313,7 +313,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
             }
           }}
           placeholder="Search problems, panels, effects..."
-          className={cn('w-full border-b border-edge bg-transparent px-3 py-2 text-ink outline-none placeholder:text-ink3', chromeText.base)}
+          className={cn('w-full border-b border-edge bg-transparent px-[var(--hpad)] py-[var(--pad)] text-ink outline-none placeholder:text-ink3', chromeText.base)}
           role="combobox"
           aria-autocomplete="list"
           aria-controls={listboxId}
@@ -328,11 +328,11 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
         </div>
         <div id={listboxId} className="ws-scroll max-h-[50vh] overflow-auto py-0.5" role="listbox" aria-label="Commands">
           {visibleCommands.length === 0 ? (
-            <div className={cn('px-3 py-2 text-ink3', chromeText.base)}>No matches.</div>
+            <div className={cn('px-[var(--hpad)] py-[var(--pad)] text-ink3', chromeText.base)}>No matches.</div>
           ) : (
             sections.map((section) => (
               <div key={section.id}>
-                <div className={cn('px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink3', chromeText.base)}>
+                <div className={cn('px-[var(--hpad)] pt-[var(--pad)] pb-[var(--gap)] text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.18em] text-ink3', chromeText.base)}>
                   {section.label}
                 </div>
                 {section.commands.map((command) => {
@@ -348,12 +348,12 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
                       onMouseEnter={() => setSel(index)}
                       onClick={() => exec(command)}
                       className={cn(
-                        'flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left',
+                        'flex w-full min-h-[var(--row)] items-center justify-between gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left',
                         index === clampedSel ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2',
                       )}
                     >
                       <span className="truncate">{command.label}</span>
-                      {command.hint && <ChromeHint className="shrink-0">{command.hint}</ChromeHint>}
+                      {command.hint && <ChromeToken className="shrink-0">{command.hint}</ChromeToken>}
                     </button>
                   );
                 })}

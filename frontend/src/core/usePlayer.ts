@@ -152,6 +152,8 @@ export function usePlayer(total: number): Player {
 
   const toggleReverse = useCallback(() => setReversed((r) => !r), []);
 
+  const clampSpeed = useCallback((s: number) => Math.max(0.25, Math.min(4, s)), []);
+
   return {
     index,
     total,
@@ -162,7 +164,7 @@ export function usePlayer(total: number): Player {
     togglePlay,
     goTo,
     speed,
-    setSpeed,
+    setSpeed: (s: number) => setSpeed(clampSpeed(s)),
     loopStart,
     loopEnd,
     setLoopStart,

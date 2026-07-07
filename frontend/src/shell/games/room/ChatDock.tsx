@@ -69,7 +69,7 @@ function ReactionPicker({
                 role="menuitem"
                 onClick={() => pick(emoji)}
                 className={cn(
-                  'grid h-7 w-7 place-items-center rounded-md text-[15px] leading-none transition-transform touch-manipulation',
+                  'grid h-7 w-7 place-items-center rounded-md text-[length:var(--fs-title)] leading-none transition-transform touch-manipulation',
                   'hover:scale-110 hover:bg-panel2 active:scale-95',
                 )}
                 aria-label={`${label}: ${emoji}`}
@@ -136,7 +136,7 @@ export function ChatDock() {
           <span className="flex-1" />
         )}
         {unread ? (
-          <span className="shrink-0 rounded-full bg-accent px-1.5 py-px text-[10px] font-bold leading-none text-white">
+          <span className="shrink-0 rounded-full bg-accent px-1.5 py-px text-[length:var(--fs-2xs)] font-bold leading-none text-white">
             {unreadCount}
           </span>
         ) : null}
@@ -150,7 +150,7 @@ export function ChatDock() {
             aria-live="polite"
           >
             {messages.length === 0 ? (
-              <p className="py-3 text-center text-[11px] text-ink3">{t.room.chatPlaceholder}</p>
+              <p className="py-3 text-center text-[length:var(--fs-tight)] text-ink3">{t.room.chatPlaceholder}</p>
             ) : (
               <ul className="flex flex-col gap-1">
                 {messages.map((m) => {
@@ -169,7 +169,7 @@ export function ChatDock() {
                         )}
                       >
                         {!isSelf ? (
-                          <span className="mb-px block text-[10px] font-semibold leading-none text-ink3">
+                          <span className="mb-px block text-[length:var(--fs-2xs)] font-semibold leading-none text-ink3">
                             {m.name}
                           </span>
                         ) : null}

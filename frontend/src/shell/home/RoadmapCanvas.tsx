@@ -238,7 +238,7 @@ const StopCard = forwardRef<
       onClick={primary.onClick}
       aria-label={primary.label}
       className={cn(
-        'roadmap-stop group relative w-full max-w-[148px] overflow-hidden rounded-xl border border-edge bg-panel/70 p-2 text-left shadow-[var(--shadow-sm)] backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] sm:max-w-[168px]',
+        'roadmap-stop group relative w-full max-w-[136px] overflow-hidden rounded-xl border border-edge bg-panel/70 p-1.5 text-left shadow-[var(--shadow-sm)] backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] sm:max-w-[152px]',
         side === 'left' ? 'ml-auto' : 'mr-auto',
       )}
       style={{ '--stop-c1': stop.c1, '--stop-c2': stop.c2, animationDelay: `${index * 90}ms` } as CSSProperties}
@@ -249,7 +249,7 @@ const StopCard = forwardRef<
         style={{ background: stop.c1 }}
       />
 
-      <div className="relative mb-1.5 h-14 w-full overflow-hidden rounded-lg border border-edge/70 sm:h-16">
+      <div className="relative mb-1 h-12 w-full overflow-hidden rounded-lg border border-edge/70 sm:h-14">
         <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-[1.05]">
           <StopArt kind={stop.kind} c1={stop.c1} c2={stop.c2} />
         </div>
@@ -261,7 +261,7 @@ const StopCard = forwardRef<
         </span>
       </div>
 
-      <h3 className="truncate text-center text-xs font-semibold tracking-tight text-ink sm:text-sm">
+      <h3 className="truncate text-center text-[length:var(--fs-tight)] font-semibold tracking-tight text-ink sm:text-xs">
         {stop.title}
       </h3>
     </button>
@@ -282,7 +282,7 @@ function StopRow({
   const side = index % 2 === 0 ? 'left' : 'right';
 
   return (
-    <div className="roadmap-row grid grid-cols-[minmax(0,1fr)_2rem_minmax(0,1fr)] items-center gap-x-1 py-1 sm:grid-cols-[minmax(0,1fr)_2.25rem_minmax(0,1fr)] sm:gap-x-1.5 sm:py-1.5">
+    <div className="roadmap-row grid grid-cols-[minmax(0,1fr)_2rem_minmax(0,1fr)] items-center gap-x-1 py-0.5 sm:grid-cols-[minmax(0,1fr)_2.25rem_minmax(0,1fr)] sm:gap-x-1 sm:py-1">
       <div className="min-w-0">
         {side === 'left' ? <StopCard ref={cardRef} stop={stop} index={index} side="left" /> : null}
       </div>
@@ -290,7 +290,7 @@ function StopRow({
       <div className="relative z-10 flex justify-center">
         <span
           ref={dotRef}
-          className="roadmap-dot relative grid h-7 w-7 place-items-center rounded-full border-2 border-bg font-mono text-[10px] font-semibold text-white shadow-[var(--shadow-sm)] sm:h-8 sm:w-8 sm:text-[11px]"
+          className="roadmap-dot relative grid h-7 w-7 place-items-center rounded-full border-2 border-bg font-mono text-[length:var(--fs-2xs)] font-semibold text-white shadow-[var(--shadow-sm)] sm:h-8 sm:w-8 sm:text-[length:var(--fs-tight)]"
           style={{
             background: `linear-gradient(135deg, ${stop.c1}, ${stop.c2})`,
             '--stop-c1': stop.c1,
@@ -410,7 +410,7 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
   };
 
   return (
-    <div ref={containerRef} className="relative mx-auto w-full px-2 pb-10 pt-3 sm:px-3 sm:pb-12 sm:pt-4">
+    <div ref={containerRef} className="relative mx-auto w-full px-2 pb-8 pt-2 sm:px-3 sm:pb-10 sm:pt-3">
       {layout.w > 0 && layout.spinePath ? (
         <svg
           className="pointer-events-none absolute inset-0"
@@ -472,7 +472,7 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
           </span>
         </div>
         <div className="flex min-w-0 items-center pl-1">
-          <span className="truncate rounded-full border border-edge bg-panel/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink2 backdrop-blur">
+          <span className="truncate rounded-full border border-edge bg-panel/70 px-1.5 py-px text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink2 backdrop-blur">
             The journey
           </span>
         </div>
@@ -506,7 +506,7 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
           </span>
         </div>
         <div className="flex min-w-0 items-center pl-1">
-          <span className="truncate rounded-full border border-edge bg-panel/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink2 backdrop-blur">
+          <span className="truncate rounded-full border border-edge bg-panel/70 px-1.5 py-px text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink2 backdrop-blur">
             Mastery
           </span>
         </div>

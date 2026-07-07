@@ -1,7 +1,8 @@
 import type { GameLocale } from '../../locale';
+import { getGameCommonStrings, type GameCommonStrings } from '../../locale/gameCommon';
 import type { HeatLevel } from './logic';
 
-export type NumberDuelStrings = {
+export type NumberDuelStrings = GameCommonStrings & {
   title: string;
   tagline: string;
   roundOf: (round: number, total: number) => string;
@@ -26,18 +27,15 @@ export type NumberDuelStrings = {
   peerWins: (name: string) => string;
   tie: string;
   matchSummary: (mine: number, peer: number, name: string) => string;
-  playAgain: string;
-  spectating: string;
   spectatorRound: (keeper: string, guesser: string) => string;
   spectatorSecretHidden: string;
   guessFeed: string;
-  you: string;
-  partner: string;
   heat: Record<HeatLevel, string>;
 };
 
 const STRINGS: Record<GameLocale, NumberDuelStrings> = {
   ar: {
+    ...getGameCommonStrings('ar'),
     title: 'مبارزة الأرقام',
     tagline: 'أخفِ رقماً بين ١ و١٠٠، ثم تسابقا لكشف رقم الخصم بأقل عدد من التخمينات.',
     roundOf: (round, total) => `الجولة ${round} من ${total}`,
@@ -62,13 +60,9 @@ const STRINGS: Record<GameLocale, NumberDuelStrings> = {
     peerWins: (name) => `${name} فاز`,
     tie: 'تعادل!',
     matchSummary: (mine, peer, name) => `أنت: ${mine} تخمينات · ${name}: ${peer} تخمينات`,
-    playAgain: 'العب مجدداً',
-    spectating: 'تشاهد',
     spectatorRound: (keeper, guesser) => `${keeper} يخفي · ${guesser} يخمّن`,
     spectatorSecretHidden: 'الرقم السري مخفي',
     guessFeed: 'سجل التخمينات',
-    you: 'أنت',
-    partner: 'الشريك',
     heat: {
       burning: 'ساخن جداً 🔥',
       hot: 'ساخن 🌶️',
@@ -78,6 +72,7 @@ const STRINGS: Record<GameLocale, NumberDuelStrings> = {
     },
   },
   en: {
+    ...getGameCommonStrings('en'),
     title: 'Number Duel',
     tagline: 'Hide a number 1–100, then race to crack each other’s in the fewest guesses.',
     roundOf: (round, total) => `Round ${round} of ${total}`,
@@ -102,13 +97,9 @@ const STRINGS: Record<GameLocale, NumberDuelStrings> = {
     peerWins: (name) => `${name} wins`,
     tie: 'It’s a tie!',
     matchSummary: (mine, peer, name) => `You: ${mine} guesses · ${name}: ${peer} guesses`,
-    playAgain: 'Play again',
-    spectating: 'Spectating',
     spectatorRound: (keeper, guesser) => `${keeper} hides · ${guesser} guesses`,
     spectatorSecretHidden: 'Secret hidden',
     guessFeed: 'Guess feed',
-    you: 'You',
-    partner: 'Partner',
     heat: {
       burning: 'Burning 🔥',
       hot: 'Hot 🌶️',

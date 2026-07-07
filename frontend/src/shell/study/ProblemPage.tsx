@@ -4,7 +4,7 @@ import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
 import { catalog, browseBreadcrumbForItem, getSiblingItems } from '../../content';
 import { cn } from '@/lib/utils/cn';
-import { computeInputFrameCounts } from '@/lib/canvas';
+import { computeInputFrameCounts, buildFrameContextValue } from '@/lib/canvas';
 import { useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';
@@ -64,7 +64,10 @@ export function ProblemPage({
     }),
     [plugin, item, inputId, setInputId, customInput, setCustomInput, inputFrameCounts, selectedNode],
   );
-  const frameValue = useMemo(() => ({ frames, player, frame }), [frames, player, frame]);
+  const frameValue = useMemo(
+    () => buildFrameContextValue(frames, player, frame),
+    [frames, player, frame],
+  );
 
   return (
     <CanvasStaticProvider value={staticValue}>

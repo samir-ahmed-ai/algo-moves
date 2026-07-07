@@ -30,7 +30,7 @@ export function LevelPanelContent({ compact = false }: { compact?: boolean }) {
                       disabled={!unlocked}
                       onClick={() => unlocked && selectLevel(l.id)}
                       className={cn(
-                        'flex w-full items-center gap-1.5 rounded-md px-1.5 py-0.5 text-left text-[11px] transition-colors',
+                        'flex w-full items-center gap-1.5 rounded-md px-1.5 py-0.5 text-left text-[length:var(--fs-tight)] transition-colors',
                         active
                           ? 'bg-accentbg font-medium text-ink ring-1 ring-accent/25'
                           : 'text-ink2 hover:bg-panel2',

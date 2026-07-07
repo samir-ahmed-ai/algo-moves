@@ -1,3 +1,4 @@
+import { NAMED_LAYOUT_PRESET_META, type NamedLayoutPreset } from '@/shell/canvas/layout/layoutPresets';
 import type { LayoutPreset } from '@/shell/canvas';
 import type { CanvasMode } from '../core';
 import { readStorageText, writeStorageText } from '@/store/persistence';
@@ -14,22 +15,21 @@ export interface WorkflowPresetAction {
   ensurePanels?: string[];
 }
 
+function named(id: NamedLayoutPreset, mode: CanvasMode, ensurePanels?: string[]): WorkflowPresetAction {
+  const meta = NAMED_LAYOUT_PRESET_META[id];
+  return {
+    id,
+    label: meta.label,
+    description: meta.description,
+    mode,
+    layoutPreset: meta.layoutPreset,
+    ensurePanels,
+  };
+}
+
 export const WORKFLOW_PRESET_ACTIONS: WorkflowPresetAction[] = [
-  {
-    id: 'trace',
-    label: 'Trace study',
-    description: 'Problem + viz + replay focus',
-    mode: 'visualize',
-    layoutPreset: 'TraceFocus',
-    ensurePanels: ['replay', 'inspector'],
-  },
-  {
-    id: 'exam',
-    label: 'Exam mode',
-    description: 'Minimal panels for timed practice',
-    mode: 'visualize',
-    layoutPreset: 'Minimal',
-  },
+  named('study', 'visualize', ['replay', 'inspector']),
+  named('exam', 'visualize'),
   {
     id: 'compare',
     label: 'Compare',
@@ -38,12 +38,14 @@ export const WORKFLOW_PRESET_ACTIONS: WorkflowPresetAction[] = [
     layoutPreset: 'Full',
     ensurePanels: ['diff'],
   },
+  named('demo', 'visualize'),
   {
-    id: 'demo',
-    label: 'Demo tour',
-    description: 'Theater layout + presentation',
+    id: 'reference',
+    label: 'Reference',
+    description: 'Pattern card + glossary + cheat sheet panels',
     mode: 'visualize',
-    layoutPreset: 'Demo',
+    layoutPreset: 'TraceFocus',
+    ensurePanels: ['pattern', 'glossary', 'cheatsheet'],
   },
   {
     id: 'interview',

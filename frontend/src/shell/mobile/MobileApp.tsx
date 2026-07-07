@@ -218,7 +218,7 @@ export function MobileApp() {
               </button>
               <div className="flex flex-1 items-center justify-center gap-1.5">
                 <BrandLogo size="sm" />
-                <span className="text-[14px] font-semibold tracking-tight">Algo Moves</span>
+                <span className="text-[length:var(--fs)] font-semibold tracking-tight">Algo Moves</span>
               </div>
               {ThemeBtn}
               <AuthButton compact />

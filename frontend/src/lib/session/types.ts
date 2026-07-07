@@ -22,6 +22,14 @@ export interface TimerState {
   remainingMs: number;
 }
 
+/** Host-driven viz playback position for classroom follow mode. */
+export interface PlaybackState {
+  /** Viz panel node id the host is driving. */
+  nodeId: string;
+  index: number;
+  playing: boolean;
+}
+
 /**
  * Live interview facilitation state the host owns and broadcasts. Rides inside
  * {@link SessionMeta.interviewRuntime} so guests mirror it for free via the
@@ -33,6 +41,10 @@ export interface InterviewRuntime {
   locked: boolean;
   /** "Follow me": guests mirror the host's viewport. */
   hostFollow: boolean;
+  /** Classroom mode: guests mirror the host scrubber on the active viz panel. */
+  hostFrameFollow: boolean;
+  /** Latest host playback position while {@link hostFrameFollow} is on. */
+  playback?: PlaybackState;
 }
 
 export interface SessionMeta {
@@ -63,6 +75,7 @@ export const defaultInterviewRuntime = (): InterviewRuntime => ({
   timer: emptyTimerState(),
   locked: false,
   hostFollow: false,
+  hostFrameFollow: false,
 });
 
 export function defaultSession(kind: SessionKind = 'solo'): SessionMeta {

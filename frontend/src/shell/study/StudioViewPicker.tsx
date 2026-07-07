@@ -79,7 +79,7 @@ export function StudioViewPicker({
   }, [open]);
 
   return (
-    <div className="relative shrink-0">
+    <div className="studio-stage-picker relative shrink-0">
       <button
         ref={anchorRef}
         type="button"

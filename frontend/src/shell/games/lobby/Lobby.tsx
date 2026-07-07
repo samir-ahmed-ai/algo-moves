@@ -295,7 +295,7 @@ function GamePreviewStrip() {
               >
                 <Glyph markup={game.glyph} className="h-5 w-5" />
               </span>
-              <span className="text-[10px] font-bold text-ink leading-tight text-center" style={{ maxWidth: 68 }}>
+              <span className="text-[length:var(--fs-2xs)] font-bold text-ink leading-tight text-center" style={{ maxWidth: 68 }}>
                 {game.title.length > 12 ? game.title.slice(0, 11) + '…' : game.title}
               </span>
               {game.category ? <CategoryBadge category={game.category} /> : null}

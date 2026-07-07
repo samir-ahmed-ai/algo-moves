@@ -85,8 +85,10 @@ export function Workspace() {
   return (
     <div
       data-density={density}
+      data-present={present || undefined}
       className={cn(
-        'relative flex h-full w-full overflow-hidden bg-bg',
+        'shell-workspace relative flex h-full w-full overflow-hidden bg-bg',
+        present && 'shell-workspace--present',
         !tweaks.animate && '[&_*]:!transition-none [&_*]:!animate-none',
       )}
     >

@@ -37,7 +37,7 @@ function formatInputPreview(value: unknown): string {
 
 function StepBadge({ count }: { count: number }) {
   return (
-    <span className="ml-auto shrink-0 rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[10px] tabular-nums text-ink3">
+    <span className="ml-auto shrink-0 rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[length:var(--fs-2xs)] tabular-nums text-ink3">
       {count > 0 ? `${count} step${count === 1 ? '' : 's'}` : '0'}
     </span>
   );
@@ -125,7 +125,7 @@ function ExampleList({
           >
             <span
               className={cn(
-                'grid size-[17px] shrink-0 place-items-center rounded-full border text-[10px] font-semibold',
+                'grid size-[17px] shrink-0 place-items-center rounded-full border text-[length:var(--fs-2xs)] font-semibold',
                 on ? 'border-accent bg-accent text-white' : 'border-edge bg-panel2/60 text-ink3',
               )}
             >
@@ -193,7 +193,7 @@ function ExampleInputPicker() {
         title="Examples"
         bordered={false}
         right={
-          <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-ink2">
+          <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[length:var(--fs-2xs)] font-semibold tabular-nums text-ink2">
             {activeIdx + 1} / {inputs.length}
           </span>
         }
@@ -247,28 +247,28 @@ export function ProblemPanelBody() {
 
   return (
     <div className="flex flex-col">
-      {(hasOverview || hasProblemBrief || !inVisualize) && (
-        <Section title={inVisualize ? 'Overview' : undefined} bordered={false}>
-          {!inVisualize && (
-            <div
-              className="mb-1.5 border-l-2 pl-2"
-              style={{ borderLeftColor: item.difficulty ? TONE_BAR[tone] : 'transparent' }}
-            >
-              <div className="flex flex-wrap items-center gap-[var(--node-gap,6px)]">
-                <span className={cn(nodeText.title, 'text-base font-bold leading-tight text-ink')}>
-                  {item.title}
-                </span>
-                {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
-              </div>
-            </div>
-          )}
-          {inVisualize && item.difficulty && (
-            <div className="mb-1.5">
+      {!inVisualize && (
+        <div
+          className="mb-1.5 border-l-2 pl-2"
+          style={{ borderLeftColor: item.difficulty ? TONE_BAR[tone] : 'transparent' }}
+        >
+          <div className="flex flex-wrap items-center gap-[var(--node-gap,6px)]">
+            <span className={cn(nodeText.title, 'text-base font-bold leading-tight text-ink')}>
+              {item.title}
+            </span>
+            {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
+          </div>
+        </div>
+      )}
+      {inVisualize && hasOverview && (
+        <ControlsAccordion title="Overview" defaultOpen={false} className="border-t-0">
+          {item.difficulty && (
+            <div className="mb-1">
               <Chip tone={tone}>{item.difficulty}</Chip>
             </div>
           )}
-          {hasProblemBrief && (
-            <ProblemBriefBody statements={problemBrief.statements} cases={problemBrief.cases} />
+          {item.summary && (
+            <p className={cn('leading-relaxed text-ink2', nodeText.sm)}>{item.summary}</p>
           )}
           {item.tags.length > 0 && (
             <div className="mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
@@ -277,7 +277,19 @@ export function ProblemPanelBody() {
               ))}
             </div>
           )}
-        </Section>
+        </ControlsAccordion>
+      )}
+      {hasProblemBrief && (
+        <ControlsAccordion title="Problem brief" defaultOpen={false} className={inVisualize ? undefined : 'border-t-0'}>
+          <ProblemBriefBody statements={problemBrief.statements} cases={problemBrief.cases} />
+        </ControlsAccordion>
+      )}
+      {!inVisualize && item.tags.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
+          {item.tags.map((t) => (
+            <NodeTagChip key={t} id={t} />
+          ))}
+        </div>
       )}
       {referenceCode && (
         <ControlsAccordion title="Reference code" defaultOpen className="mt-1.5">

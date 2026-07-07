@@ -28,6 +28,7 @@ export {
   useCanvasCollab,
   useCanvasCollabOptional,
 } from './collab/CanvasCollabProvider';
+export { NodePresenceAvatars } from './collab/NodePresenceAvatars';
 export { SubDocSyncProvider, useSubDocSyncContext } from './collab/sync/SubDocSyncProvider';
 export { useSubDocSync } from './collab/sync/useSubDocSync';
 export { useQuizHostRelay } from './collab/sync/useQuizHostRelay';
@@ -64,6 +65,9 @@ export {
   standaloneNodeIds,
   buildNodes,
   LAYOUT_PRESET_META,
+  NAMED_LAYOUT_PRESETS,
+  NAMED_LAYOUT_PRESET_META,
+  resolveNamedLayoutPreset,
   presetRemoved,
   nodeForKind,
   DEPRECATED_VISUALIZE_EDGES,

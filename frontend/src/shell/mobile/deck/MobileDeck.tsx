@@ -4,7 +4,9 @@ import { catalog, type Topic } from '../../../content';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { isEditableTarget } from '@/lib/utils/keyboard';
-import { buildDeck, type MobileDeck as MobileDeckModel } from './deckModel';
+import { type MobileDeck as MobileDeckModel } from './deckModel';
+import { useSpacedRepetitionDeck } from './useSpacedRepetitionDeck';
+import { scheduleReview } from '@/store/persistence/srs';
 import { clearMobileSession, loadMobileSession, saveMobileSession } from '../mobileSession';
 import { useSwipe } from './useSwipe';
 import { newQuizRunSeed } from '@/lib/quiz';
@@ -61,22 +63,8 @@ export function MobileDeck({
   headerRight?: ReactNode;
 }) {
   const { enterWorkspace } = useWorkspace();
-  // The topic's plugins load on demand (their group chunk); build the deck once ready.
-  const [deck, setDeck] = useState<MobileDeckModel>(() => ({ topic, blocks: [], totalQuiz: 0 }));
-  const [deckLoading, setDeckLoading] = useState(true);
-  useEffect(() => {
-    let cancelled = false;
-    setDeckLoading(true);
-    buildDeck(topic).then((d) => {
-      if (cancelled) return;
-      setDeck(d);
-      setDeckLoading(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [topic]);
-  const { blocks } = deck;
+  const { deck, loading: deckLoading } = useSpacedRepetitionDeck(topic);
+  const blocks = deck.blocks;
   const deckReady = !deckLoading && deck.topic === topic;
 
   const start = useMemo(
@@ -165,9 +153,10 @@ export function MobileDeck({
     setQuizAttempt((n) => n + 1);
   }, [blocks, pIdx]);
 
-  const onAnswered = useCallback((_correct: boolean) => {
-    // QuizCardView calls recordAttempt internally; hook kept for future session stats.
-  }, []);
+  const onAnswered = useCallback((correct: boolean) => {
+    const itemId = blocks[pIdx]?.item.id;
+    if (itemId) scheduleReview(itemId, correct);
+  }, [blocks, pIdx]);
 
   const restart = useCallback(() => {
     setDir(1);
@@ -212,7 +201,7 @@ export function MobileDeck({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-edge border-t-accent" />
-        <p className="text-[13px] text-ink3">Loading {topic.title}…</p>
+        <p className="text-[length:var(--fs-sm)] text-ink3">Loading {topic.title}…</p>
       </div>
     );
   }
@@ -221,8 +210,8 @@ export function MobileDeck({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
         <Layers className="h-10 w-10 text-ink3" />
-        <p className="text-[15px] font-medium text-ink2">No drillable problems here yet</p>
-        <button type="button" onClick={onExit} className="rounded-full bg-accent px-5 py-2.5 text-[14px] font-semibold text-white">
+        <p className="text-[length:var(--fs-title)] font-medium text-ink2">No drillable problems here yet</p>
+        <button type="button" onClick={onExit} className="rounded-full bg-accent px-5 py-2.5 text-[length:var(--fs)] font-semibold text-white">
           Back to categories
         </button>
       </div>
@@ -230,15 +219,15 @@ export function MobileDeck({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col" data-density="ultra">
       <div className="shrink-0 px-3 pt-2">
         <div className="flex items-center gap-2">
           <button type="button" onClick={onExit} className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink">
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[13px] font-semibold text-ink">{topic.title}</div>
-            <div className="text-[11px] text-ink3">
+            <div className="truncate text-[length:var(--fs-sm)] font-semibold text-ink">{topic.title}</div>
+            <div className="text-[length:var(--fs-tight)] text-ink3">
               {done ? 'Topic complete' : `Problem ${pIdx + 1} of ${blocks.length}`}
             </div>
           </div>

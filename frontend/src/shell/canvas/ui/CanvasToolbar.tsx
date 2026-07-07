@@ -18,6 +18,7 @@ import { chromeText } from '../../chromeUi';
 import { RADIUS_SHELL } from './nodeui';
 import { SessionBody } from '../collab/collabWidgets';
 import { AlignDropdown } from './CanvasTools';
+import { InterviewInvitePopover } from './InterviewInvitePopover';
 
 interface CanvasToolbarProps {
   lock: boolean;
@@ -116,6 +117,7 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
       </button>
 
       <div ref={collabRef} className="relative">
+        <InterviewInvitePopover btnClass={btnClass} />
         <button
           type="button"
           title="Collaborate"

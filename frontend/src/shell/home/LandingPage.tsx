@@ -71,14 +71,14 @@ function RailStat({ icon, value, label }: { icon: ReactNode; value: ReactNode; l
       </span>
       <div className="min-w-0">
         <div className="font-mono text-base font-semibold tabular-nums leading-none text-ink">{value}</div>
-        <div className="mt-1 truncate text-[10px] uppercase tracking-wide text-ink3">{label}</div>
+        <div className="mt-1 truncate text-[length:var(--fs-2xs)] uppercase tracking-wide text-ink3">{label}</div>
       </div>
     </div>
   );
 }
 
 const MODE_PILL =
-  'inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-2 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink';
+  'inline-flex shrink-0 items-center gap-1 rounded-md border border-edge bg-panel/60 px-2 py-1.5 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink';
 
 const HEADER_BTN_PRIMARY =
   'inline-flex shrink-0 items-center gap-1 rounded-md bg-accent px-2.5 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 sm:gap-1.5 sm:px-3 sm:text-sm';
@@ -381,7 +381,7 @@ export function LandingPage() {
         {/* ---------------------------------------------------------- left rail */}
         <aside className="relative border-b border-edge lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:[scrollbar-gutter:stable]">
           <div aria-hidden className="landing-hero-glow pointer-events-none absolute inset-0 opacity-60" />
-          <div className="relative flex min-h-full flex-col gap-4 px-4 py-5 sm:gap-5 sm:px-6 sm:py-6">
+          <div className="relative flex min-h-full flex-col gap-[var(--gap)] px-[var(--hpad)] py-[var(--pad)] sm:gap-2 sm:px-6 sm:py-4">
             {/* hero copy — two columns on desktop */}
             <div className="@container lg:grid lg:grid-cols-2 lg:items-end lg:gap-x-4">
               <div>
@@ -399,14 +399,14 @@ export function LandingPage() {
             </div>
 
             {/* primary CTAs + mode pills — two columns on desktop */}
-            <div className="hidden lg:grid lg:grid-cols-2 lg:items-start lg:gap-3">
-              <div className="flex flex-col gap-2">
+            <div className="hidden lg:grid lg:grid-cols-2 lg:items-start lg:gap-2">
+              <div className="flex flex-col gap-[var(--gap)]">
                 <button
                   type="button"
                   onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-accent px-3 py-2 font-medium text-white transition-opacity hover:opacity-90"
                 >
-                  <Play className="h-4 w-4" />
+                  <Play className="h-3.5 w-3.5" />
                   {lastItem
                     ? compactLabel('Resume learning', 'Resume', isMobile)
                     : compactLabel('Start learning', 'Start', isMobile)}
@@ -414,9 +414,9 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => browseTrack('interview-prep')}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-edge bg-panel/60 px-4 py-2.5 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-2 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
                 >
-                  <BookOpen className="h-4 w-4" />
+                  <BookOpen className="h-3.5 w-3.5" />
                   {compactLabel('Browse tracks', 'Browse', isMobile)}
                 </button>
               </div>
@@ -551,7 +551,7 @@ export function LandingPage() {
                     />
                   ) : null}
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+                    <p className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-accent">
                       {MAKER.role}
                     </p>
                     <p className="truncate text-sm font-semibold text-ink">{MAKER.name}</p>
@@ -579,14 +579,14 @@ export function LandingPage() {
             aria-hidden
             className="landing-hero-glow pointer-events-none absolute inset-x-0 top-0 h-72 opacity-50 sm:h-96"
           />
-          <div className="relative border-b border-edge px-4 pt-5 text-center sm:px-6 sm:pt-6">
+          <div className="relative border-b border-edge px-[var(--hpad)] pt-3 text-center sm:px-6 sm:pt-4">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
               The full system
             </p>
             <h2 className="mt-1 text-lg font-semibold tracking-tight text-ink sm:text-2xl">
               Follow the roadmap, move by move
             </h2>
-            <p className="mx-auto mt-1.5 max-w-sm pb-3 text-sm leading-relaxed text-ink2 sm:pb-4">
+            <p className="mx-auto mt-1 max-w-sm pb-2 text-sm leading-relaxed text-ink2 sm:pb-3">
               Every part of Algo Moves as one journey — from your first interview problem all the way
               to two-player games.
             </p>

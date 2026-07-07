@@ -33,3 +33,11 @@ describe('arcade messages', () => {
     expect(t.waitingReconnect('Alex')).toContain('reconnect');
   });
 });
+
+describe('game common strings', () => {
+  it('exports shared keys for en and ar', async () => {
+    const { getGameCommonStrings } = await import('../gameCommon');
+    expect(getGameCommonStrings('en').playAgain).toBe('Play again');
+    expect(getGameCommonStrings('ar').you).toBe('أنت');
+  });
+});

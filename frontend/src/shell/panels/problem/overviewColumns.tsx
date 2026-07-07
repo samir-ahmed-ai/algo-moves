@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { PanelLeftClose } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { VizPanelBody } from '../visualize/VizPanelBody';
 import { RecallPane } from '@/shell/study/components/RecallPane';
@@ -23,17 +23,17 @@ export function ProblemStatementColumn({
 
   return (
     <aside className={cn('ws-scroll h-full overflow-y-auto bg-panel/40', className)}>
-      <div className="flex h-full min-h-0 flex-col p-2">
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-edge bg-panel p-2.5 shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:rounded-t-[var(--radius)] before:bg-accent/60 before:content-[''] sm:p-3">
+      <div className="flex h-full min-h-0 flex-col p-[var(--pad)]">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-edge bg-panel p-[var(--pad)] shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:rounded-t-[var(--radius)] before:bg-accent/60 before:content-['']">
           {collapse && (
             <button
               type="button"
               onClick={collapse.onCollapse}
               title="Collapse problem statement (\)"
               aria-label="Collapse problem statement"
-              className="absolute right-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-md border border-edge bg-panel2 text-ink3 transition-colors hover:border-accent/40 hover:bg-panel2 hover:text-ink"
+              className="absolute right-[var(--gap)] top-[var(--gap)] z-10 grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel2 text-ink3 transition-colors hover:border-accent/40 hover:bg-panel2 hover:text-ink"
             >
-              <PanelLeftClose className="h-3.5 w-3.5" />
+              <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
             </button>
           )}
           <div className="min-h-0 flex-1 overflow-y-auto pt-1">{children}</div>

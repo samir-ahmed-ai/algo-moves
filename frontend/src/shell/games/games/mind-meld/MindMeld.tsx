@@ -357,7 +357,7 @@ export function MindMeld() {
 
       <GameArena accent="#8b5cf6">
         <div className="text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink3">{prompt.q}</p>
+          <p className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">{prompt.q}</p>
           <p className="mt-0.5 text-sm font-bold tracking-tight text-ink">{strings.thisOrThat}</p>
         </div>
 
@@ -466,7 +466,7 @@ function Progress({
       current={current}
       total={total}
       badge={
-        <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[10px] font-bold text-good">
+        <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[length:var(--fs-2xs)] font-bold text-good">
           {isGroup ? strings.syncPercentBadge(syncPercent) : strings.inSyncCount(matchedCount)}
         </span>
       }
@@ -579,7 +579,7 @@ function HistoryList({
 }) {
   return (
     <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-ink3">{strings.historyTitle}</p>
+      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.historyTitle}</p>
       {history.length === 0 ? (
         <p className="text-xs text-ink3">{strings.historyEmpty}</p>
       ) : (

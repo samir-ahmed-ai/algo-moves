@@ -5,7 +5,11 @@ import { readStorageJson } from '@/store/persistence/storage';
 import { workspaceSessionMeta } from '@/lib/session';
 import type { CanvasAddPanel, CanvasHudProps, CanvasProjectApi, LayoutDir, WorkspaceDefaults } from './workspace';
 import { DEFAULTS_KEY } from './workspaceConstants';
-import { WorkspaceContext } from './workspaceContextStore';
+import {
+  WorkspaceAppearanceContext,
+  WorkspaceChromeContext,
+  WorkspaceNavigationContext,
+} from './workspaceContextStore';
 import { useAppearanceState } from './useAppearanceState';
 import { useChromeState } from './useChromeState';
 import { useAppNavigation } from './useAppNavigation';
@@ -15,9 +19,8 @@ function loadDefaults(): Partial<WorkspaceDefaults> {
 }
 
 /**
- * Composes the three workspace state domains — appearance, chrome layout and app
- * navigation — plus the canvas-API registration slots into the single workspace
- * context. Each domain lives in its own hook; this provider is the integrator.
+ * Composes appearance, chrome, and navigation domains into three focused contexts.
+ * Each domain lives in its own hook; this provider is the integrator.
  */
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const savedDefaults = useRef(loadDefaults()).current;
@@ -37,7 +40,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     [nav.mode, nav.problemFocused],
   );
 
-  // Canvas registers its imperative API here so the shell chrome can drive it.
   const [canvasAdd, setCanvasAdd] = useState<CanvasAddPanel | null>(null);
   const [canvasProject, setCanvasProject] = useState<CanvasProjectApi | null>(null);
   const [canvasHud, setCanvasHud] = useState<CanvasHudProps | null>(null);
@@ -45,31 +47,54 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [tracePreviewOpen, setTracePreviewOpen] = useState(false);
   const [mobileTransportOpen, setMobileTransportOpen] = useState(false);
 
+  const appearanceValue = useMemo(() => appearance, [appearance]);
+
+  const chromeValue = useMemo(
+    () => ({
+      ...chrome,
+      canvasAdd,
+      setCanvasAdd,
+      canvasProject,
+      setCanvasProject,
+      canvasHud,
+      setCanvasHud,
+      settingsOpen,
+      setSettingsOpen,
+      tracePreviewOpen,
+      setTracePreviewOpen,
+      mobileTransportOpen,
+      setMobileTransportOpen,
+      fitCanvasSignal,
+      requestFitCanvas,
+      isMobile,
+    }),
+    [
+      chrome,
+      canvasAdd,
+      canvasProject,
+      canvasHud,
+      settingsOpen,
+      tracePreviewOpen,
+      mobileTransportOpen,
+      fitCanvasSignal,
+      requestFitCanvas,
+      isMobile,
+    ],
+  );
+
+  const navigationValue = useMemo(
+    () => ({
+      ...nav,
+      session,
+    }),
+    [nav, session],
+  );
+
   return (
-    <WorkspaceContext.Provider
-      value={{
-        ...appearance,
-        ...chrome,
-        ...nav,
-        session,
-        canvasAdd,
-        setCanvasAdd,
-        canvasProject,
-        setCanvasProject,
-        canvasHud,
-        setCanvasHud,
-        settingsOpen,
-        setSettingsOpen,
-        tracePreviewOpen,
-        setTracePreviewOpen,
-        mobileTransportOpen,
-        setMobileTransportOpen,
-        fitCanvasSignal,
-        requestFitCanvas,
-        isMobile,
-      }}
-    >
-      {children}
-    </WorkspaceContext.Provider>
+    <WorkspaceAppearanceContext.Provider value={appearanceValue}>
+      <WorkspaceChromeContext.Provider value={chromeValue}>
+        <WorkspaceNavigationContext.Provider value={navigationValue}>{children}</WorkspaceNavigationContext.Provider>
+      </WorkspaceChromeContext.Provider>
+    </WorkspaceAppearanceContext.Provider>
   );
 }

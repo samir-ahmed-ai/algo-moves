@@ -53,7 +53,7 @@ Every problem is a **move transcript** you can scrub, replay, and drill:
 | **Practice** | Wrong answer → full restart · shuffled choices · 3-streak mastery |
 | **Mobile deck** | Full-screen swipe deck for drilling a topic on the go (`#mobile`) |
 | **Vim Dojo** | Keyboard-only maze puzzles that teach Vim motions (`#vim`) |
-| **Games** | Real-time two-player games — Number Duel, RPS, Tic-Tac-Toe, Mind Meld, Reaction Duel (`#games`) |
+| **Games** | Real-time two-player games — Would You Rather, Number Duel, RPS, Tic-Tac-Toe, Mind Meld, Reaction Duel (`#games`) |
 | **Home** | Course catalog with progress meters, difficulty breakdown, and resume-last |
 
 ![Swipe mode mobile deck](frontend/public/assets/mobile-swipe-deck.svg)
@@ -206,7 +206,7 @@ Run from `frontend/` (or via `make` for common targets):
 | `preview` | Preview production build |
 | `typecheck` | `tsc --noEmit` |
 | `test` | Vitest + orphan plugin check |
-| `check:all` | Simulators, prep coverage, typography, tokens, quiz labels |
+| `check:all` | Simulators, prep coverage, typography, tokens, quiz labels, lighthouse budget |
 | `check:quiz-labels` | Quiz choice format + integrity label tests |
 | `draft-quiz-from-frames -- <id>` | Draft quiz from recorder captions |
 | `import-prep` | Regenerate `prepManifest.ts` |
@@ -218,6 +218,8 @@ Run from `frontend/` (or via `make` for common targets):
 | `new-effect -- <slug>` | Scaffold a canvas effect plugin |
 | `check-simulators` | Progress-library simulator integrity |
 | `check-plugin-typography` | Lint plugin UI for hardcoded font sizes |
+| `check-shell-typography` | Ban hardcoded px font sizes in shell |
+| `check:lighthouse-budget` | Static HTML/PWA/a11y budget guard |
 | `check:tokens` | Design-token guard |
 | `generate-themes` | Regenerate theme CSS from token source |
 

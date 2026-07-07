@@ -120,7 +120,7 @@ export function PanelNodeBody({
           style={!isViz && bodyCap ? { maxWidth: bodyCap } : undefined}
         >
           {isViz ? (
-            <VizPanelBody showBigO={showBigO} onBigOOpenChange={onBigOOpenChange} />
+            <VizPanelBody nodeId={headerProps.id} showBigO={showBigO} onBigOOpenChange={onBigOOpenChange} />
           ) : (
             <PanelBody kind={data.kind} />
           )}

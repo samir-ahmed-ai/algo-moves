@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GraduationCap } from 'lucide-react';
+import { useWorkspace } from '@/store/workspace';
 import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
-import { computeInputFrameCounts } from '@/lib/canvas';
+import { computeInputFrameCounts, buildFrameContextValue } from '@/lib/canvas';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import {
   EmptyState,
@@ -88,7 +89,10 @@ export function LearnStudio({
     }),
     [plugin, item, inputId, setInputId, customInput, setCustomInput, inputFrameCounts, selectedNode],
   );
-  const frameValue = useMemo(() => ({ frames, player, frame }), [frames, player, frame]);
+  const frameValue = useMemo(
+    () => buildFrameContextValue(frames, player, frame),
+    [frames, player, frame],
+  );
 
   return (
     <CanvasStaticProvider value={staticValue}>
@@ -126,6 +130,7 @@ function StudioShell({
   const { hasQuiz, hasReassemble } = useCodeStudioPhase();
   const { reference } = useCodeStudioContent();
   const { item } = useCanvasStatic();
+  const { present } = useWorkspace();
   const isMobile = useIsMobile();
 
   const avail = useMemo(
@@ -192,16 +197,18 @@ function StudioShell({
 
   return (
     <CanvasActionsProvider value={studioActions}>
-      <div className="flex h-full w-full flex-col bg-bg">
-        <LearnTopBar
-          stages={stages}
-          avail={avail}
-          active={active}
-          isMobile={isMobile}
-          onGo={go}
-          onOpenPalette={onOpenPalette}
-          onOpenHelp={onOpenHelp}
-        />
+      <div className="learn-studio flex h-full w-full flex-col bg-bg">
+        {!present && (
+          <LearnTopBar
+            stages={stages}
+            avail={avail}
+            active={active}
+            isMobile={isMobile}
+            onGo={go}
+            onOpenPalette={onOpenPalette}
+            onOpenHelp={onOpenHelp}
+          />
+        )}
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <StageBody avail={avail} active={active} cont={cont} lastTab={lastTab} onGo={go} />
         </div>

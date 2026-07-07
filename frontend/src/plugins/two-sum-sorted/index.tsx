@@ -1,6 +1,6 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
-import { verdictAlwaysOk } from '../_shared/verdictKit';
+import { verdictLastFrameTone, verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/board/ArrayRow';
@@ -145,10 +145,7 @@ export const twoSumSortedPlugin = definePlugin<TwoSumInput, TwoSumState>({
   record,
   View,
   Inspector,
-  verdict: (frames) => {
-    const ok = frames[frames.length - 1]?.move.tone !== 'bad';
-    return { ok, label: ok ? 'pair found' : 'no pair' };
-  },
+  verdict: verdictLastFrameTone('pair found', 'no pair'),
   code: { text: goSolution, lang: 'go', file: 'solution.go' },
   codePieces,
   quiz,

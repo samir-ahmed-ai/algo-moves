@@ -13,22 +13,22 @@ function FloatingChrome() {
   const { completedCount } = useVimGame();
 
   return (
-    <div className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-1.5 min-[960px]:left-[calc(210px+0.75rem)]">
+    <div className="pointer-events-none absolute left-[var(--hpad)] top-[var(--pad)] z-10 flex items-center gap-[var(--gap)] min-[960px]:left-[calc(210px+var(--hpad))]">
       <button
         type="button"
         title="Home"
         onClick={goHome}
-        className="pointer-events-auto grid h-8 w-8 place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
+        className="pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
       >
-        <Home className="h-4 w-4" />
+        <Home className="h-3.5 w-3.5" />
       </button>
-      <div className="pointer-events-auto flex items-center gap-1.5 rounded-md border border-edge bg-panel/90 px-2 py-1 shadow-sm backdrop-blur">
+      <div className="pointer-events-auto flex items-center gap-[var(--gap)] rounded-md border border-edge bg-panel/90 px-[var(--pad)] py-[var(--gap)] shadow-sm backdrop-blur">
         <span className="grid h-6 w-6 place-items-center rounded bg-accent text-white">
           <Keyboard className="h-3.5 w-3.5" />
         </span>
         <div className="min-w-0">
           <span className="text-sm font-semibold tracking-tight text-ink">Vim Dojo</span>
-          <p className="text-[10px] tabular-nums text-ink3">
+          <p className="text-[length:var(--fs-2xs)] tabular-nums text-ink3">
             {completedCount}/{VIM_LEVEL_IDS.length}
           </p>
         </div>

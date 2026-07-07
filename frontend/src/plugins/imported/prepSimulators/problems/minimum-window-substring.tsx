@@ -226,7 +226,10 @@ const practiceQuiz: QuizQuestion[] = [
       {
         label: "Sliding Window with freq array — fits this problem",
         correct: true
-      }
+      },
+      { label: "Binary search on answer — different approach" },
+      { label: "DFS on trie — different approach" },
+      { label: "Union-Find connectivity — different approach" },
     ],
     explain: "Use a frequency array `[128]int` for `t`. Track `required` = total chars still needed"
   },

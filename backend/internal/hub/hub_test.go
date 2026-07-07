@@ -373,6 +373,42 @@ func TestConcurrentJoinLeaveSameCodeReclaimsRoomCleanly(t *testing.T) {
 	}
 }
 
+func TestJoinWithRetriesStaleDeadRoomPointer(t *testing.T) {
+	h := New()
+	code := "STALE"
+
+	host := &rec{id: "host"}
+	if _, ok := h.JoinWith(code, host, "", JoinOptions{}); !ok {
+		t.Fatal("initial join failed")
+	}
+
+	stale := h.getRoom(code)
+	h.Leave(code, host)
+	if h.RoomCount() != 0 {
+		t.Fatalf("room count = %d, want 0 after host left", h.RoomCount())
+	}
+
+	joiner := &rec{id: "joiner"}
+	role, ok, retry := stale.join(joiner, "pid-joiner", false)
+	if !retry {
+		t.Fatal("stale.join should request retry when room is dead")
+	}
+	if ok {
+		t.Fatal("stale.join should not succeed on a dead room")
+	}
+	if role != "" {
+		t.Fatalf("stale.join role = %q, want empty", role)
+	}
+
+	role, ok = h.JoinWith(code, joiner, "pid-joiner", JoinOptions{})
+	if !ok || role != RoleHost {
+		t.Fatalf("JoinWith after stale retry = (%v,%v), want (host,true)", role, ok)
+	}
+	if joiner.lastOfType("welcome") == nil {
+		t.Fatal("joiner should receive welcome on the fresh room")
+	}
+}
+
 func TestFreshCodeIsUniqueAndClean(t *testing.T) {
 	h := New()
 	code := h.FreshCode()

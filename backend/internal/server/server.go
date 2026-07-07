@@ -139,12 +139,24 @@ func corsJSON(next http.HandlerFunc, allowed []string, limiter *ipRateLimiter, r
 }
 
 // corsAPI wraps the /api subtree so the static frontend can call arcade endpoints.
+// A general API rate limit applies to all routes; guest token lookups get a
+// stricter per-IP budget to slow enumeration.
 func corsAPI(allowed []string, next http.Handler) http.Handler {
+	apiLimit := newIPRateLimiter(120, time.Minute)
+	tokenLimit := newIPRateLimiter(30, time.Minute)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		rejected := !originAllowed(origin, allowed)
 		if rejected {
 			http.Error(w, "origin not allowed", http.StatusForbidden)
+			return
+		}
+		limiter := apiLimit
+		if strings.HasPrefix(r.URL.Path, "/api/interviews/token/") {
+			limiter = tokenLimit
+		}
+		if limiter != nil && !limiter.allow(clientIP(r)) {
+			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
 			return
 		}
 		setCORS(w, origin, allowed)

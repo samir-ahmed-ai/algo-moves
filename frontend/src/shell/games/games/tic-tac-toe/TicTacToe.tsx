@@ -443,7 +443,7 @@ function Scoreboard({
     <div className="flex items-stretch justify-center gap-2 text-center">
       <Tally name={me} mark={myMark} score={myScore} accent={!isSpectator} />
       <div className="flex flex-col items-center justify-center px-1">
-        <div className="font-mono text-[10px] uppercase tracking-wide text-ink3">{drawsLabel}</div>
+        <div className="font-mono text-[length:var(--fs-2xs)] uppercase tracking-wide text-ink3">{drawsLabel}</div>
         <div className="font-mono text-lg font-bold tabular-nums text-ink2">{draws}</div>
       </div>
       <Tally name={peer} mark={peerMark} score={peerScore} />

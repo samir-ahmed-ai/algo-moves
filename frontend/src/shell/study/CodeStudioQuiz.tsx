@@ -39,8 +39,8 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
   const c = 2 * Math.PI * r;
   const tone = pct === 1 ? 'var(--good)' : pct >= 0.5 ? 'var(--accent)' : 'var(--bad)';
   return (
-    <div className="relative grid h-[84px] w-[84px] place-items-center">
-      <svg viewBox="0 0 72 72" className="h-[84px] w-[84px] -rotate-90">
+    <div className="relative grid h-[84px] w-[84px] place-items-center" role="img" aria-label={`Score ${score} out of ${total}`}>
+      <svg viewBox="0 0 72 72" className="h-[84px] w-[84px] -rotate-90" aria-hidden>
         <circle cx="36" cy="36" r={r} fill="none" stroke="var(--surface-2)" strokeWidth="6" />
         <circle
           cx="36"
@@ -52,6 +52,7 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - pct)}
+          className="motion-reduce:transition-none"
           style={{ transition: 'stroke-dashoffset 0.6s ease' }}
         />
       </svg>
@@ -204,10 +205,11 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
       tabIndex={0}
       className="code-studio-quiz flex min-h-0 flex-1 flex-col py-1 outline-none"
       aria-label="Concept check quiz"
+      role="region"
     >
       <div key={done ? 'results' : `q-${i}`} className="code-studio-quiz-step flex min-h-0 flex-1 flex-col">
         {done ? (
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-6 text-center">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-6 text-center" role="status" aria-live="polite">
             <ScoreRing score={score} total={total} />
             <p className={cn('max-w-[280px] leading-snug text-ink2', chromeText.sm)}>{scoreMessage(score, total)}</p>
             <div className="flex shrink-0 flex-nowrap items-center gap-2">
@@ -254,9 +256,11 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
               </span>
             </div>
 
-            <p className={cn('font-medium leading-snug text-ink', chromeText.base)}>{q.prompt}</p>
+            <p className={cn('font-medium leading-snug text-ink', chromeText.base)} id={`quiz-q-${i}`}>
+              {q.prompt}
+            </p>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1" role="radiogroup" aria-labelledby={`quiz-q-${i}`}>
               {q.choices.map((c, idx) => {
                 const letter = String.fromCharCode(65 + idx);
                 let state: 'idle' | 'correct' | 'wrong' | 'dim' = 'idle';
@@ -269,6 +273,9 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
                   <button
                     key={idx}
                     type="button"
+                    role="radio"
+                    aria-checked={answered && idx === picked}
+                    aria-label={`Choice ${letter}: ${c.label}`}
                     onClick={() => pick(idx)}
                     disabled={answered}
                     className={cn(
@@ -312,6 +319,8 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
                   'quiz-explain flex flex-col gap-1.5 rounded-lg border-l-2 bg-panel2/50 px-2.5 py-1.5',
                   isCorrect ? 'border-good' : 'border-accent',
                 )}
+                role="status"
+                aria-live="polite"
               >
                 <div className={cn('flex items-center gap-1.5 font-semibold', chromeText.sm)}>
                   {isCorrect ? (

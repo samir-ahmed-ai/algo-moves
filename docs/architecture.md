@@ -43,11 +43,37 @@ flowchart TB
 
 ### Session model
 
-- **solo** — default; Learn / Play / Mobile
-- **collab** — freeform canvas with generic host/guest roles
-- **interview** — host shares a problem; candidate works; quiz answers relay to host (scaffold)
+Three session kinds live in `lib/session/types.ts` and ride the room envelope (`shell/realtime/roomState.ts`):
 
-Room shared state uses a v1 envelope (`shell/realtime/roomState.ts`) with `session` + `canvas` fields.
+| Kind | Default context | Roles | Durable backend |
+|------|-----------------|-------|-----------------|
+| **solo** | Learn / Play / Mobile | — | — |
+| **collab** | Freeform canvas | host / guest / spectator | optional canvas REST |
+| **interview** | Host + candidate on a shared problem | host / guest | interview REST (`/api/interviews`) |
+
+**Envelope fields**
+
+- `session` — {@link SessionMeta}: kind, optional `activeProblemId`, interview settings, `sessionId` / `guestToken` when Postgres backs the room
+- `canvas` — host-authoritative {@link CanvasDoc} (nodes, edges, comments)
+- `subDocs` — whiteboard / collab-code panel interiors
+
+**Interview runtime** (`session.interviewRuntime`, host-published)
+
+- `timer` — shared countdown (`durationMs`, `running`, `endsAt`)
+- `locked` — guests become view-only (board + sub-docs)
+- `hostFollow` — guests mirror the host viewport (pan/zoom)
+- `hostFrameFollow` — classroom mode: guests mirror the host scrubber on the active viz panel (`playback.nodeId` + `index`)
+- `playback` — latest host frame position while frame follow is on
+
+**Wire traffic**
+
+- Ephemeral presence (cursor, selection, viewport, drag) — relay frames tagged `__canvas`
+- Document edits — non-hosts send {@link EditOp}s; host folds and republishes the envelope
+- Quiz answers during interviews — {@link quizProtocol} relay to host log
+
+**Degradation**
+
+When the arcade backend has no Postgres, interview sessions still work over the WebSocket relay (`CanvasCollabProvider` shows a solo-fallback banner; guest invite tokens are unavailable).
 
 ## Shell (`frontend/src/shell/`)
 

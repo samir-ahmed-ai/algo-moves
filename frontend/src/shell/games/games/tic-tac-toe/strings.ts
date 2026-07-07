@@ -1,10 +1,9 @@
 import type { GameLocale } from '../../locale';
+import { getGameCommonStrings, type GameCommonStrings } from '../../locale/gameCommon';
 
-export type TicTacToeStrings = {
+export type TicTacToeStrings = GameCommonStrings & {
   title: string;
   tagline: string;
-  you: string;
-  partner: string;
   draws: string;
   /** Whose turn banner, e.g. "Your move · X". */
   yourMove: (mark: string) => string;
@@ -15,7 +14,6 @@ export type TicTacToeStrings = {
   /** Detail line under the result banner. */
   completesLine: (mark: string) => string;
   boardFull: string;
-  playAgain: string;
   /** Read-only spectator header. */
   watching: string;
   spectatorTurn: (name: string, mark: string) => string;
@@ -25,10 +23,9 @@ export type TicTacToeStrings = {
 
 const STRINGS: Record<GameLocale, TicTacToeStrings> = {
   ar: {
+    ...getGameCommonStrings('ar'),
     title: 'إكس أو',
     tagline: 'ثلاثة في صف — إكس يبدأ، وأو يرد.',
-    you: 'أنت',
-    partner: 'الخصم',
     draws: 'تعادل',
     yourMove: (mark) => `دورك · ${mark}`,
     peerMove: (name, mark) => `دور ${name} · ${mark}`,
@@ -37,16 +34,14 @@ const STRINGS: Record<GameLocale, TicTacToeStrings> = {
     draw: 'تعادل',
     completesLine: (mark) => `${mark} أكمل صفاً`,
     boardFull: 'امتلأت اللوحة — لا أحد جمع ثلاثة.',
-    playAgain: 'العب مجدداً',
     watching: 'مشاهدة',
     spectatorTurn: (name, mark) => `دور ${name} · ${mark}`,
     autoPlaced: 'انتهى الوقت — لعبة تلقائية',
   },
   en: {
+    ...getGameCommonStrings('en'),
     title: 'Tic-Tac-Toe',
     tagline: 'Three in a row — X moves first, O answers back.',
-    you: 'You',
-    partner: 'Rival',
     draws: 'draws',
     yourMove: (mark) => `Your move · ${mark}`,
     peerMove: (name, mark) => `${name}'s move · ${mark}`,
@@ -55,7 +50,6 @@ const STRINGS: Record<GameLocale, TicTacToeStrings> = {
     draw: "It's a draw",
     completesLine: (mark) => `${mark} completes a line`,
     boardFull: 'Board full — nobody got three.',
-    playAgain: 'Play again',
     watching: 'Watching',
     spectatorTurn: (name, mark) => `${name}'s move · ${mark}`,
     autoPlaced: 'Time up — auto-played',

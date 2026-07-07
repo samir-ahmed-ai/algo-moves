@@ -14,9 +14,9 @@ export function VimHeroPreview() {
     <div className="vim-hero-preview flex w-[7.5rem] shrink-0 overflow-hidden rounded-[var(--radius)] border border-edge/80 bg-panel/90 backdrop-blur-md sm:w-[8.5rem]">
       <div className="w-[3px] shrink-0 bg-accent" aria-hidden />
       <div className="min-w-0 flex-1 p-2">
-        <div className="mb-1 font-mono text-[8px] font-semibold text-accent">-- NORMAL --</div>
+        <div className="mb-1 font-mono text-[length:var(--fs-2xs)] font-semibold text-accent">-- NORMAL --</div>
         <div
-          className="grid gap-px font-mono text-[10px]"
+          className="grid gap-px font-mono text-[length:var(--fs-2xs)]"
           style={{ gridTemplateColumns: 'repeat(5, 1.25rem)' }}
           aria-hidden
         >
@@ -39,7 +39,7 @@ export function VimHeroPreview() {
         </div>
         <div className="mt-1.5 flex gap-1">
           {['h', 'j', 'k', 'l'].map((k) => (
-            <VimKbd key={k} className="px-1 text-[8px]">
+            <VimKbd key={k} className="px-1 text-[length:var(--fs-2xs)]">
               {k}
             </VimKbd>
           ))}

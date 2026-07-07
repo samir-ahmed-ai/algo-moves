@@ -38,7 +38,7 @@ export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; o
 
   if (!input || !frame) {
     return (
-      <div className="mobile-viz-empty grid flex-1 place-items-center px-4 text-center text-[13px] text-ink3">
+      <div className="mobile-viz-empty grid flex-1 place-items-center px-4 text-center text-[length:var(--fs-sm)] text-ink3">
         No sample input for this problem.
       </div>
     );
@@ -94,6 +94,19 @@ export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; o
             <SkipForward className="h-4 w-4" />
           </button>
           <div className="ml-auto flex items-center gap-1.5">
+            <label className="flex items-center gap-1 text-[length:var(--fs-tight)] text-ink3" title="Playback speed">
+              <span className="font-mono tabular-nums">{player.speed.toFixed(1)}×</span>
+              <input
+                type="range"
+                min={0.25}
+                max={4}
+                step={0.25}
+                value={player.speed}
+                onChange={(e) => player.setSpeed(Number(e.target.value))}
+                className="h-1 w-14 cursor-pointer accent-accent"
+                aria-label="Playback speed"
+              />
+            </label>
             <span
               className={cn(
                 'mobile-viz-chip',

@@ -54,7 +54,7 @@ function ProblemCard({
       aria-label={`Open ${item.title}, ${item.difficulty ?? 'unrated'}${isMastered ? ', mastered' : ''}`}
       style={{ animationDelay: delay }}
       className={cn(
-        'bp-note group relative flex min-h-[188px] flex-col items-center overflow-hidden rounded-lg border border-edge bg-panel pt-[3px] text-center transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
+        'bp-note group relative flex min-h-[160px] flex-col items-center overflow-hidden rounded-lg border border-edge bg-panel pt-[3px] text-center transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
         isMastered && 'border-good/40',
         isBuilding && inPlan && 'border-accent/60 ring-1 ring-accent/20',
       )}
@@ -117,7 +117,7 @@ function ProblemCard({
           <p className={cn('mt-1 line-clamp-2 leading-snug text-ink3', chromeText.sm)}>{item.summary}</p>
         )}
         {item.difficulty && (
-          <Chip tone={difficultyTone(item.difficulty)} mono className={cn('mt-1 !px-1.5 !py-0', chromeText.xs)}>
+          <Chip tone={difficultyTone(item.difficulty)} mono className={cn('mt-1 !px-1 !py-px', chromeText['2xs'])}>
             {item.difficulty}
           </Chip>
         )}
@@ -165,8 +165,8 @@ export function ProblemGrid({
   return (
     <div>
       {showFilters && (
-        <div className="mb-3 flex flex-wrap items-center gap-1.5">
-          <span className={cn('mr-1 text-ink3', chromeText.sm)}>Filter:</span>
+        <div className="mb-2 flex flex-wrap items-center gap-[var(--gap)]">
+          <span className={cn('mr-0.5 text-ink3', chromeText.sm)}>Filter:</span>
           {DIFFS.map((d) => {
             const active = diffFilter.has(d);
             const count = items.filter((it) => it.difficulty === d).length;
@@ -178,7 +178,7 @@ export function ProblemGrid({
                 onClick={() => toggleDiff(d)}
                 className={cn('transition-opacity', !active && diffFilter.size > 0 && 'opacity-40')}
               >
-                <Chip tone={difficultyTone(d)} mono className={cn('!px-2 !py-0.5 cursor-pointer', chromeText.sm)}>
+                <Chip tone={difficultyTone(d)} mono className={cn('!px-1.5 !py-px cursor-pointer', chromeText.xs)}>
                   {d} · {count}
                 </Chip>
               </button>
@@ -196,7 +196,7 @@ export function ProblemGrid({
         </div>
       )}
 
-      <div className="browse-problem-grid grid gap-2.5">
+      <div className="browse-problem-grid grid gap-[var(--gap)]">
         {filtered.map((item, i) => (
           <ProblemCard key={item.id} item={item} index={i} progress={progress} onOpen={onOpen} />
         ))}

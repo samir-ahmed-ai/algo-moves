@@ -302,7 +302,7 @@ export function RockPaperScissors() {
     <GameBody className="relative gap-2.5">
       <Confetti fire={fireConfetti} />
       <Scoreboard roster={roster} scores={scores} selfId={self?.id} taunts={taunts} />
-      <p className="text-center text-[10px] text-ink3">
+      <p className="text-center text-[length:var(--fs-2xs)] text-ink3">
         {isNPlayer ? strings.fieldOf(roster.length, NP_ROUNDS) : strings.bestOf(WIN_TARGET)}
         {' · '}
         {strings.roundLabel(round + 1, totalRounds)}
@@ -390,7 +390,7 @@ export function RockPaperScissors() {
             {CHOICES.map((c) => (
               <ChoiceCard key={c.id} selected={myPick === c.id} disabled={!!myPick} onClick={() => pick(c.id)}>
                 <span className="text-2xl leading-none">{c.emoji}</span>
-                <span className="text-[10px] font-semibold">{strings.choiceLabel[c.id]}</span>
+                <span className="text-[length:var(--fs-2xs)] font-semibold">{strings.choiceLabel[c.id]}</span>
               </ChoiceCard>
             ))}
           </div>
@@ -524,7 +524,7 @@ function Hand({
 function TauntBar({ taunts, onFling, label }: { taunts: string[]; onFling: (e: string) => void; label: string }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-ink3">{label}</span>
+      <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{label}</span>
       <div className="flex gap-1.5">
         {taunts.map((e) => (
           <button

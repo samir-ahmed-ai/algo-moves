@@ -20,7 +20,7 @@ export function SectionBadge({ children }: { children: React.ReactNode }) {
  */
 export function WidgetSection({ widget }: { widget: CanvasWidget }) {
   const visible = widget.useVisible ? widget.useVisible() : true;
-  const [open, setOpen] = useState(widget.defaultOpen ?? true);
+  const [open, setOpen] = useState(widget.defaultOpen ?? false);
   if (!visible) return null;
   const { Body, Badge } = widget;
   return (

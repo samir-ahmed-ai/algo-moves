@@ -26,6 +26,8 @@ export interface CanvasFrame {
   frames: Frame<any>[];
   player: Player;
   frame: Frame<any>;
+  /** State keys that changed vs the previous frame (empty on frame 0). */
+  changedKeys: string[];
 }
 
 const StaticCtx = createContext<CanvasStatic | null>(null);

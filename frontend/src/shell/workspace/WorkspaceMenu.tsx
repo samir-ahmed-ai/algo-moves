@@ -14,7 +14,7 @@ import { RADIUS_SHELL } from '@/shell/canvas';
 import { catalog, getSiblingItems } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
-import { chromeText } from '../chromeUi';
+import { chromeBar, chromeText } from '../chromeUi';
 import { usePopoverDismiss } from '../ui/usePopoverDismiss';
 import { ExplorerSheet, type ExplorerFocus } from './ExplorerSheet';
 import { AuthButton } from '@/shell/auth';
@@ -42,7 +42,7 @@ function MenuRow({
       role="menuitem"
       onClick={onClick}
       className={cn(
-        'flex w-full min-h-[var(--row)] items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition-colors hover:bg-panel2',
+        'flex w-full min-h-[var(--row)] items-center gap-[var(--gap)] rounded-md px-2 py-[var(--gap)] text-left transition-colors hover:bg-panel2',
         accent ? 'text-accent' : 'text-ink2 hover:text-ink',
       )}
     >
@@ -193,8 +193,11 @@ export function WorkspaceMenuDropdown({ onOpenPalette, onOpenHelp, compact }: Wo
 
 export function WorkspaceMenu({ onOpenPalette, onOpenHelp }: WorkspaceMenuProps) {
   return (
-    <header className="nodrag sticky top-0 z-20 flex shrink-0 items-center gap-2 border-b border-edge bg-bg/90 px-3 py-2 backdrop-blur-sm">
-      <WorkspaceMenuDropdown onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
+    <header className={cn('nodrag sticky top-0 z-20', chromeBar.shell)}>
+      <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
+      <span className={cn('min-w-0 flex-1 truncate font-semibold text-ink max-lg:sr-only', chromeText.sm)}>
+        Algo Moves
+      </span>
       <AuthButton compact />
     </header>
   );

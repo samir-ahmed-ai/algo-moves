@@ -112,7 +112,7 @@ function Toggle({ label, hint, checked, onChange }: { label: React.ReactNode; hi
 }
 
 function RoomControlsBody() {
-  const { session, room, isHost, setLocked, setHostFollow, setSessionIdentity } = useCanvasCollab();
+  const { session, room, isHost, setLocked, setHostFollow, setHostFrameFollow, setSessionIdentity } = useCanvasCollab();
   const { mode, theme, palette, themePreset, dir } = useWorkspace();
   const { readBoard, canSend } = useSendToBoard();
   const sessionId = session.sessionId;
@@ -253,6 +253,12 @@ function RoomControlsBody() {
           onChange={toggleLock}
         />
         <Toggle label="Follow me" hint="Candidate's view tracks yours" checked={!!runtime?.hostFollow} onChange={setHostFollow} />
+        <Toggle
+          label="Sync playback"
+          hint="Candidate's scrubber tracks yours on viz panels"
+          checked={!!runtime?.hostFrameFollow}
+          onChange={setHostFrameFollow}
+        />
       </div>
 
       <span className="h-px bg-edge" />

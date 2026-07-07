@@ -1,5 +1,5 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import { PanelLeft } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { SIDEBAR_RAIL_W } from '@/design/sidebarMetrics';
 
 export const PROBLEM_COLUMN_RAIL_W = SIDEBAR_RAIL_W;
@@ -28,7 +28,7 @@ export function useProblemColumnCollapse() {
 export function ProblemCollapsedRail({ onExpand }: { onExpand: () => void }) {
   return (
     <aside
-      className="flex h-full flex-col items-center gap-2 border-r border-edge bg-panel/40 py-2"
+      className="flex h-full flex-col items-center gap-[var(--gap)] border-r border-edge bg-panel/40 py-[var(--pad)]"
       style={{ width: PROBLEM_COLUMN_RAIL_W }}
     >
       <button
@@ -36,12 +36,12 @@ export function ProblemCollapsedRail({ onExpand }: { onExpand: () => void }) {
         onClick={onExpand}
         title="Show problem statement (\)"
         aria-label="Show problem statement"
-        className="grid h-7 w-7 place-items-center rounded-md border border-transparent text-ink3 transition-colors hover:border-edge hover:bg-panel2 hover:text-accent"
+        className="grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-transparent text-ink3 transition-colors hover:border-edge hover:bg-panel2 hover:text-accent"
       >
-        <PanelLeft className="h-3.5 w-3.5" />
+        <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
       </button>
       <span
-        className="select-none text-[10px] font-semibold uppercase tracking-wider text-ink3 [writing-mode:vertical-rl]"
+        className="select-none text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wider text-ink3 [writing-mode:vertical-rl]"
         aria-hidden
       >
         Problem

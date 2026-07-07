@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { Btn, Field } from '@/components/shared/formControls';
+import { GridToggleButton } from '../components/GridToggleButton';
 import { nodeText } from '@/design/typography';
 
 export interface BeatTrack {
@@ -30,12 +31,7 @@ export function BeatMachineBuilder({ onApply }: { onApply: (tracks: BeatTrack[])
           <div key={track.id} className="mb-1 flex items-center gap-1">
             <span className={cn('w-14 shrink-0 truncate', nodeText.xs)}>{track.label}</span>
             {track.steps.map((on, si) => (
-              <button
-                key={si}
-                type="button"
-                onClick={() => toggle(ti, si)}
-                className={`h-5 w-5 rounded-sm border ${on ? 'border-accent bg-accent/30' : 'border-edge bg-panel2'}`}
-              />
+              <GridToggleButton key={si} active={on} onClick={() => toggle(ti, si)} />
             ))}
           </div>
         ))}

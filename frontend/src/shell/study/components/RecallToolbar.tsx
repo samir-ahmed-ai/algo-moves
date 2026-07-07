@@ -227,7 +227,7 @@ export function RecallToolbar({
   return (
     <div
       className={cn(
-        'flex shrink-0 flex-nowrap items-center gap-1.5 overflow-x-auto bg-panel2/40',
+        'studio-recall-toolbar flex shrink-0 flex-nowrap items-center gap-1.5 overflow-x-auto bg-panel2/40',
         compact ? 'h-7' : 'h-8',
         className,
       )}

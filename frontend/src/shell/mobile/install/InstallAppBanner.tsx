@@ -11,16 +11,18 @@ function IosBanner({ onDismiss }: { onDismiss: () => void }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="border-b border-edge bg-accentbg px-3 py-2">
-      <div className="flex items-center gap-2">
+    <div className="border-b border-edge bg-accentbg px-[var(--hpad)] py-[var(--gap)]">
+      <div className="flex min-h-[var(--row)] items-center gap-[var(--gap)]">
         <Download className="h-3.5 w-3.5 shrink-0 text-accent" />
-        <span className="flex-1 text-xs font-medium text-ink">Install Algo Moves</span>
+        <span className="min-w-0 flex-1 truncate text-[length:var(--fs-tight)] font-medium text-ink">
+          Install Algo Moves
+        </span>
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="rounded px-2 py-0.5 text-[11px] font-medium text-accent hover:opacity-80"
+          className="shrink-0 rounded px-1.5 py-px text-[length:var(--fs-tight)] font-medium text-accent hover:opacity-80"
         >
-          How?
+          {expanded ? 'Hide' : 'How?'}
         </button>
         <button
           type="button"
@@ -32,7 +34,7 @@ function IosBanner({ onDismiss }: { onDismiss: () => void }) {
         </button>
       </div>
       {expanded && (
-        <ol className="mt-2 space-y-1 pl-1 text-[11px] leading-relaxed text-ink2">
+        <ol className="mt-[var(--gap)] space-y-[var(--gap)] pl-1 text-[length:var(--fs-tight)] leading-snug text-ink2">
           <li className="flex items-center gap-1.5">
             <span className="font-semibold text-ink">1.</span>
             Tap the
@@ -55,13 +57,18 @@ function IosBanner({ onDismiss }: { onDismiss: () => void }) {
 
 function AndroidBanner({ onInstall, onDismiss }: { onInstall: () => void; onDismiss: () => void }) {
   return (
-    <div className="flex items-center gap-2 border-b border-edge bg-accentbg px-3 py-2">
+    <div className="flex min-h-[var(--row)] items-center gap-[var(--gap)] border-b border-edge bg-accentbg px-[var(--hpad)] py-[var(--gap)]">
       <Download className="h-3.5 w-3.5 shrink-0 text-accent" />
-      <span className="flex-1 text-xs font-medium text-ink">Install Algo Moves on your home screen</span>
+      <span className="min-w-0 flex-1 truncate text-[length:var(--fs-tight)] font-medium text-ink sm:hidden">
+        Install app
+      </span>
+      <span className="hidden min-w-0 flex-1 truncate text-[length:var(--fs-tight)] font-medium text-ink sm:inline">
+        Install Algo Moves on your home screen
+      </span>
       <button
         type="button"
         onClick={onInstall}
-        className="shrink-0 rounded-md bg-accent px-2.5 py-1 text-[11px] font-semibold text-white hover:opacity-90"
+        className="shrink-0 rounded-md bg-accent px-2 py-px text-[length:var(--fs-tight)] font-semibold text-white hover:opacity-90"
       >
         Install
       </button>

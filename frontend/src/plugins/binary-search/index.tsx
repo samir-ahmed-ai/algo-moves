@@ -1,4 +1,5 @@
 import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
+import { verdictLastFrameTone } from '../_shared/verdictKit';
 import { ArrayRow, type ArrayPointer } from '../../components/board/ArrayRow';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
@@ -170,10 +171,7 @@ const inputs: SampleInput<BinInput>[] = [
   { id: 'first', label: 'find 2 · edge', value: { values: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 2 } },
 ];
 
-const verdict = (frames: Frame<BinState>[]) => {
-  const ok = frames[frames.length - 1]?.move.tone !== 'bad';
-  return { ok, label: ok ? 'found' : 'absent' };
-};
+const verdict = verdictLastFrameTone('found', 'absent');
 
 const casesIntro =
   'Binary search needs a sorted array. Each step compares the middle of the live [lo, hi] window and throws away the half that cannot hold the target, so the search space halves every comparison — O(log n).';

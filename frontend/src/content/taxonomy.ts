@@ -347,3 +347,91 @@ export function getCategoriesForTrack(trackId: TrackId): BrowseCategory[] {
     .map((id) => categoryById.get(id))
     .filter((c): c is BrowseCategory => c != null);
 }
+
+/* ---------------------------------------------------- prerequisite unlock graph */
+
+/** Directed edges: prerequisite category → dependent category within a track. */
+export const CATEGORY_UNLOCK_EDGES: ReadonlyArray<readonly [string, string]> = [
+  ['arrays', 'strings'],
+  ['strings', 'hash-maps'],
+  ['hash-maps', 'linked-lists'],
+  ['linked-lists', 'stacks-queues'],
+  ['stacks-queues', 'trees'],
+  ['trees', 'tries'],
+  ['tries', 'heaps'],
+  ['arrays', 'sliding-window'],
+  ['arrays', 'sorting'],
+  ['sorting', 'binary-search'],
+  ['binary-search', 'dynamic-programming'],
+  ['graphs', 'backtracking'],
+  ['backtracking', 'greedy'],
+  ['prefix-sum', 'intervals'],
+  ['dynamic-programming', 'design'],
+] as const;
+
+export interface UnlockGraphNode {
+  id: string;
+  prereqs: string[];
+}
+
+/** Build an item-id → prerequisite-item-ids adjacency list from catalog items. */
+export function buildProblemUnlockGraph(
+  items: ReadonlyArray<{ id: string; prereqs: string[] }>,
+): Map<string, string[]> {
+  const graph = new Map<string, string[]>();
+  for (const item of items) {
+    graph.set(item.id, [...item.prereqs]);
+  }
+  return graph;
+}
+
+/** Category ids that must be explored before `categoryId` (transitive closure). */
+export function getCategoryPrerequisites(categoryId: string): string[] {
+  const preds = new Map<string, string[]>();
+  for (const [from, to] of CATEGORY_UNLOCK_EDGES) {
+    const list = preds.get(to) ?? [];
+    list.push(from);
+    preds.set(to, list);
+  }
+  const seen = new Set<string>();
+  const stack = [...(preds.get(categoryId) ?? [])];
+  const out: string[] = [];
+  while (stack.length) {
+    const id = stack.pop()!;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+    stack.push(...(preds.get(id) ?? []));
+  }
+  return out;
+}
+
+export type MasteryLookup = (itemId: string) => boolean;
+
+/** True when every explicit item prereq is mastered (or there are none). */
+export function isItemUnlocked(itemId: string, graph: Map<string, string[]>, isMastered: MasteryLookup): boolean {
+  const prereqs = graph.get(itemId) ?? [];
+  return prereqs.every((p) => isMastered(p));
+}
+
+/** Item ids blocking unlock for `itemId`. */
+export function getUnmetPrerequisites(
+  itemId: string,
+  graph: Map<string, string[]>,
+  isMastered: MasteryLookup,
+): string[] {
+  return (graph.get(itemId) ?? []).filter((p) => !isMastered(p));
+}
+
+/** True when every problem in prerequisite categories is mastered. */
+export function isCategoryUnlocked(
+  categoryId: string,
+  itemsInCategory: (categoryId: string) => ReadonlyArray<{ id: string }>,
+  isMastered: MasteryLookup,
+): boolean {
+  for (const catId of getCategoryPrerequisites(categoryId)) {
+    const items = itemsInCategory(catId);
+    if (items.some((it) => !isMastered(it.id))) return false;
+  }
+  return true;
+}

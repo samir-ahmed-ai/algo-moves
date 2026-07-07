@@ -124,7 +124,7 @@ export function Transport() {
         </button>
       </div>
 
-      <div className="flex items-center gap-1.5 text-[11px] text-ink3">
+      <div className="flex items-center gap-1.5 text-[length:var(--fs-tight)] text-ink3">
         <span className={cn('shrink-0 rounded-full px-2 py-0.5', playBadge)}>{player.isPlaying ? 'Playing' : 'Paused'}</span>
         <span className={cn('shrink-0 rounded-full border px-2 py-0.5', frameToneClass)}>{frameType}</span>
         {looping && (

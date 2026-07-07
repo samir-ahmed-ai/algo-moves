@@ -110,7 +110,6 @@ html {
   --viz-cell: 1rem;
 }
 
-/* Chrome dimensions — defaults mirror src/shell/chrome.ts; Workspace updates --chrome-* at runtime */
 [data-density] {
   --node-fs: var(--fs);
   --node-fs-sm: var(--fs-sm);
@@ -123,6 +122,18 @@ html {
   --chrome-bottom: 0px;
   --chrome-top: 0px;
   --bottom-rail-h: 24px; /* BOTTOM_RAIL_H — transport clearance when visible */
+}
+
+/* Presentation / focus mode — maximises canvas and learn surfaces */
+.shell-workspace--present [data-sidebar-shell],
+.shell-workspace--present .plan-tray {
+  display: none;
+}
+.canvas-stage--present {
+  background: var(--bg);
+}
+.canvas-stage--present .react-flow__pane {
+  cursor: crosshair;
 }
 
 /* Mobile overlay drawers — sidebars slide over the canvas on phones. */
@@ -343,5 +354,5 @@ html {
 }
 
 .browse-problem-grid {
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 }

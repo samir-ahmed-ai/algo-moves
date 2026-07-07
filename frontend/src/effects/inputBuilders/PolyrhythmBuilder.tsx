@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Btn, Field } from '@/components/shared/formControls';
+import { GridToggleButton } from '../components/GridToggleButton';
 
 export function PolyrhythmBuilder({ onApply }: { onApply: (layers: number[][]) => void }) {
   const [layers, setLayers] = useState<number[][]>([
@@ -21,12 +22,7 @@ export function PolyrhythmBuilder({ onApply }: { onApply: (layers: number[][]) =
           <div key={li} className="mb-1 flex gap-1">
             <span className="w-6 text-xs text-ink3">L{li + 1}</span>
             {layer.map((v, si) => (
-              <button
-                key={si}
-                type="button"
-                onClick={() => toggle(li, si)}
-                className={`h-5 w-5 rounded-sm border ${v ? 'border-accent bg-accent/30' : 'border-edge bg-panel2'}`}
-              />
+              <GridToggleButton key={si} active={!!v} onClick={() => toggle(li, si)} />
             ))}
           </div>
         ))}

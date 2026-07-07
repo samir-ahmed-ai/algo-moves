@@ -42,7 +42,7 @@ export function ShareRoom({ room, hint, locale }: { room: string; hint?: string;
       >
         {copied ? t.shareRoom.linkCopied : t.shareRoom.copyLink}
       </TouchButton>
-      <p dir="ltr" className="flex items-center gap-1.5 break-all text-center text-[11px] text-ink3">
+      <p dir="ltr" className="flex items-center gap-1.5 break-all text-center text-[length:var(--fs-tight)] text-ink3">
         <LinkIcon className="h-3 w-3 shrink-0" />
         {url}
       </p>

@@ -22,7 +22,8 @@ function uniqueNonEmpty(values: string[]): string[] {
 }
 
 function pickDistractors(correct: string, pool: string[], count: number, seed: number): string[] {
-  const candidates = uniqueNonEmpty(pool).filter((v) => v !== correct);
+  const trimmed = correct.trim();
+  const candidates = uniqueNonEmpty(pool).filter((v) => v.trim() !== trimmed);
   return seededOrder(candidates, seed).slice(0, count);
 }
 
@@ -54,25 +55,26 @@ export function defaultPrepQuiz(p: PrepProblem, siblings: PrepProblem[] = PREP_D
   const topicPeers = siblings.filter((s) => s.topic === p.topic && s.id !== p.id);
   const coursePeers = siblings.filter((s) => s.course === p.course && s.id !== p.id);
 
-  const patternPool = uniqueNonEmpty([
-    ...topicPeers.map((s) => s.pattern),
-    ...coursePeers.map((s) => s.pattern),
-  ]);
-  const patternDistractors = pickDistractors(p.pattern, patternPool, 3, seed);
-  const patternChoices = buildChoices(p.pattern, patternDistractors, fmtPattern);
+  const questions: QuizQuestion[] = [];
 
-  const timePool = uniqueNonEmpty([...topicPeers.map((s) => s.time), ...COMPLEXITY_POOL]);
-  const timeDistractors = pickDistractors(p.time, timePool, 3, seed + 2);
-  const timeChoices = buildChoices(p.time || 'O(n)', timeDistractors, fmtTime);
-
-  const questions: QuizQuestion[] = [
-    {
+  if (p.pattern.trim()) {
+    const patternPool = uniqueNonEmpty([
+      ...topicPeers.map((s) => s.pattern),
+      ...coursePeers.map((s) => s.pattern),
+    ]);
+    const patternDistractors = pickDistractors(p.pattern, patternPool, 3, seed);
+    const patternChoices = buildChoices(p.pattern, patternDistractors, fmtPattern);
+    questions.push({
       id: `${p.id}:pattern`,
       prompt: `Which approach fits “${p.title}”?`,
       choices: patternChoices,
       explain: p.visual || p.pattern,
-    },
-  ];
+    });
+  }
+
+  const timePool = uniqueNonEmpty([...topicPeers.map((s) => s.time), ...COMPLEXITY_POOL]);
+  const timeDistractors = pickDistractors(p.time, timePool, 3, seed + 2);
+  const timeChoices = buildChoices(p.time || 'O(n)', timeDistractors, fmtTime);
 
   if (p.time) {
     questions.push({

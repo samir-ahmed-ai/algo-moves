@@ -16,13 +16,13 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { ChevronDown, GripVertical, MoreVertical, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { getTag } from '../../../content/tags';
 import { TAG_KIND_COLOR } from '../../../content/tagColors';
 import { cn } from '@/lib/utils/cn';
 import { TONE_TEXT, TONE_BANNER, TONE_LABEL, difficultyTone, type UiTone } from '@/design/tone';
-import { Chip, Meter, Pill } from '@/design/components';
-export { Chip, Meter, Pill, difficultyTone, type UiTone };
+import { Chip, EmptyState, Meter, Pill } from '@/design/components';
+export { Chip, EmptyState, Meter, Pill, difficultyTone, type UiTone };
 // Typography/radius tokens live in the design leaf; shared form primitives +
 // VizFitBox/MiniTabs in the components leaf. Imported for internal use and
 // re-exported below so `nodeui` stays the canvas-facing entry point.
@@ -38,7 +38,37 @@ export {
   type VizFitLayout,
 } from '@/lib/canvas/vizFitMeasure';
 
-export type HeaderDensity = 'compact' | 'ultra' | 'spacious';
+import {
+  PanelBody,
+  PanelHeader,
+  PanelHeaderActions,
+  PanelHeaderGrip,
+  PanelHeaderIcon,
+  PanelHeaderMeta,
+  PanelHeaderSub,
+  PanelHeaderTitle,
+  type HeaderDensity,
+} from './nodeHeader';
+import {
+  PanelHeaderAction,
+  PanelHeaderMenu,
+  type PanelHeaderActionVariant,
+  type PanelHeaderMenuItem,
+} from './nodeActions';
+
+export type { HeaderDensity, PanelHeaderActionVariant, PanelHeaderMenuItem };
+export {
+  PanelBody,
+  PanelHeader,
+  PanelHeaderAction,
+  PanelHeaderActions,
+  PanelHeaderGrip,
+  PanelHeaderIcon,
+  PanelHeaderMenu,
+  PanelHeaderMeta,
+  PanelHeaderSub,
+  PanelHeaderTitle,
+};
 
 // Re-export the moved design tokens + form primitives (see imports above).
 export { nodeText, nodeTextWrap, nodeIconGlyph, RADIUS_CTRL, RADIUS_SHELL };
@@ -225,23 +255,6 @@ export function SearchInput({
         placeholder={placeholder}
         className={cn(INPUT_CLS, 'pl-7')}
       />
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------- empty states */
-
-/** Designed empty / placeholder state — replaces bare gray sentences. */
-export function EmptyState({ icon, title, hint }: { icon?: ReactNode; title: string; hint?: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1.5 px-3 py-5 text-center">
-      {icon && (
-        <span className="grid size-[calc(var(--node-icon,1.125rem)*1.6)] place-items-center rounded-full bg-panel2 text-ink3 [&>*]:size-[var(--node-icon-glyph)]">
-          {icon}
-        </span>
-      )}
-      <p className={cn(nodeText.sm, 'font-medium text-ink2')}>{title}</p>
-      {hint && <p className={cn('max-w-[34ch] leading-snug text-ink3', nodeText.sm)}>{hint}</p>}
     </div>
   );
 }
@@ -436,265 +449,6 @@ export function Spark({ series, index }: { series: number[]; index: number }) {
 
 /* -------------------------------------------------------------- in-node tabs */
 
-/* ----------------------------------------------------------- panel headers */
-
-const HEADER_PAD: Record<HeaderDensity, string> = {
-  compact: 'px-0 py-[var(--node-py,0.5625rem)] gap-[var(--node-gap,0.5rem)]',
-  ultra: 'px-0 py-[var(--node-py,0.5625rem)] gap-[var(--node-gap,0.5rem)]',
-  spacious: 'px-0 py-[var(--node-py,0.5625rem)] gap-[var(--node-gap,0.5rem)]',
-};
-
-const HEADER_ICON: Record<HeaderDensity, string> = {
-  compact: 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,1.125rem)]',
-  ultra: 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,1.125rem)]',
-  spacious: 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)] shrink-0 place-items-center [&>*]:size-[var(--node-icon,1.125rem)]',
-};
-
-const HEADER_TITLE: Record<HeaderDensity, string> = {
-  compact: nodeText.title,
-  ultra: nodeText.title,
-  spacious: nodeText.title,
-};
-
-/** Shared shell for canvas panel node headers. */
-export function PanelHeader({
-  children,
-  collapsed,
-  locked,
-  density = 'compact',
-  className,
-}: {
-  children: ReactNode;
-  selected?: boolean;
-  collapsed?: boolean;
-  locked?: boolean;
-  density?: HeaderDensity;
-  className?: string;
-}) {
-  return (
-    <header
-      className={cn(
-        'flex shrink-0 select-none items-center justify-between gap-2',
-        HEADER_PAD[density],
-        collapsed && 'py-0.5',
-        locked && 'opacity-90',
-        className,
-      )}
-    >
-      {children}
-    </header>
-  );
-}
-
-/** Drag affordance — grab cursor only on grip + title zone. */
-export function PanelHeaderGrip({ density = 'compact' }: { density?: HeaderDensity }) {
-  return (
-    <span
-      className={cn(
-        'grid shrink-0 cursor-grab place-items-center text-ink3 active:cursor-grabbing',
-        density === 'spacious'
-          ? 'h-[calc(var(--node-icon,1.125rem)*1.1)] w-[calc(var(--node-icon,1.125rem)*0.65)]'
-          : 'h-[var(--node-icon,1.125rem)] w-[calc(var(--node-icon,1.125rem)*0.65)]',
-      )}
-      aria-hidden
-    >
-      <GripVertical
-        className={cn(
-          density === 'spacious'
-            ? 'h-[calc(var(--node-icon,1.125rem)*1.1)] w-[calc(var(--node-icon,1.125rem)*1.1)]'
-            : 'h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)]',
-        )}
-      />
-    </span>
-  );
-}
-
-export function PanelHeaderIcon({
-  color,
-  density = 'compact',
-  children,
-}: {
-  color?: string;
-  density?: HeaderDensity;
-  children: ReactNode;
-}) {
-  return (
-    <span
-      className={cn(HEADER_ICON[density], color ? undefined : 'text-ink2')}
-      style={color ? { color } : undefined}
-    >
-      {children}
-    </span>
-  );
-}
-
-export function PanelHeaderTitle({
-  children,
-  density = 'compact',
-  className,
-}: {
-  children: ReactNode;
-  density?: HeaderDensity;
-  className?: string;
-}) {
-  return (
-    <span
-      className={cn(
-        'min-w-0 flex-1 cursor-grab font-semibold text-ink active:cursor-grabbing',
-        nodeTextWrap,
-        HEADER_TITLE[density],
-        className,
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-/** Optional mono subtitle (step counter, meta). */
-export function PanelHeaderMeta({
-  children,
-  density = 'compact',
-  className,
-}: {
-  children: ReactNode;
-  density?: HeaderDensity;
-  className?: string;
-}) {
-  const metaSize =
-    density === 'ultra' ? nodeText.xs : density === 'spacious' ? nodeText.sm : nodeText.sm;
-  return (
-    <span className={cn('shrink-0 font-mono tabular-nums text-ink3', metaSize, className)}>{children}</span>
-  );
-}
-
-/** Second row under the title — caption strip for viz/replay. */
-export function PanelHeaderSub({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn('flex min-w-0 items-center gap-1 font-mono text-ink3', nodeText.sm, className)}>{children}</div>
-  );
-}
-
-export function PanelHeaderActions({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn('nodrag ml-auto flex shrink-0 cursor-default items-center gap-1', className)}>{children}</div>
-  );
-}
-
-export type PanelHeaderActionVariant = 'primary' | 'toggle' | 'ghost';
-
-export function PanelHeaderAction({
-  active,
-  title,
-  label,
-  disabled,
-  children,
-  className,
-  variant = 'ghost',
-  onClick,
-}: {
-  active?: boolean;
-  title: string;
-  label?: string;
-  disabled?: boolean;
-  children: ReactNode;
-  className?: string;
-  variant?: PanelHeaderActionVariant;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-      disabled={disabled}
-      title={title}
-      aria-label={title}
-      aria-pressed={active}
-      className={cn(
-        'nodrag place-items-center rounded-[calc(var(--radius)-2px)] p-[calc(var(--node-py,0.5625rem)*0.35)] transition-colors disabled:opacity-30',
-        label
-          ? cn(
-              'flex h-auto min-h-[calc(var(--node-icon,1.125rem)*1.1)] w-auto items-center gap-1 px-[calc(var(--node-px,0.75rem)*0.5)]',
-              nodeText.xs,
-            )
-          : 'grid h-[var(--node-icon,1.125rem)] w-[var(--node-icon,1.125rem)]',
-        variant === 'primary' &&
-          (active ? 'bg-accent text-ink' : 'text-ink3 hover:bg-panel2 hover:text-ink'),
-        variant === 'toggle' &&
-          (active ? 'text-accent hover:bg-panel2' : 'text-ink3 hover:bg-panel2 hover:text-ink'),
-        variant === 'ghost' && 'text-ink3 hover:bg-panel2/80 hover:text-ink',
-        className,
-      )}
-    >
-      {children}
-      {label ? <span className="max-w-[5.5rem] truncate">{label}</span> : null}
-    </button>
-  );
-}
-
-export type PanelHeaderMenuItem = {
-  label: string;
-  icon?: ReactNode;
-  onClick: () => void;
-  danger?: boolean;
-  disabled?: boolean;
-};
-
-/** Overflow menu for rare/destructive header actions. */
-export function PanelHeaderMenu({
-  items,
-  title = 'Panel actions',
-}: {
-  items: PanelHeaderMenuItem[];
-  title?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <PanelHeaderAction variant="toggle" active={open} title={title} onClick={() => setOpen((o) => !o)}>
-        <MoreVertical className={nodeIconGlyph} />
-      </PanelHeaderAction>
-      {open && (
-        <div className="absolute right-0 top-[calc(100%+4px)] z-50 min-w-[168px] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel py-1 shadow-[var(--shadow-xl)]">
-          {items.map((it) => (
-            <button
-              key={it.label}
-              type="button"
-              disabled={it.disabled}
-              onClick={() => {
-                if (it.disabled) return;
-                it.onClick();
-                setOpen(false);
-              }}
-              className={cn(
-                cn('flex w-full items-center gap-1.5 px-2 py-1 text-left transition-colors disabled:opacity-40', nodeText.sm),
-                it.danger ? 'text-bad hover:bg-badbg/40' : 'text-ink2 hover:bg-panel2 hover:text-ink',
-              )}
-            >
-              {it.icon && <span className="grid h-4 w-4 shrink-0 place-items-center text-ink3">{it.icon}</span>}
-              {it.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /** Strudel-style collapsible controls footer (mono label, chevron). */
 export function ControlsAccordion({
   children,
@@ -745,55 +499,6 @@ export function ControlsAccordion({
           {children}
         </div>
       )}
-    </div>
-  );
-}
-
-const BODY_PAD: Record<HeaderDensity, string> = {
-  compact: 'px-0 py-0',
-  ultra: 'px-0 py-0',
-  spacious: 'px-0 py-0',
-};
-
-const BODY_PAD_NARROW: Record<HeaderDensity, string> = {
-  compact: 'px-0 py-0',
-  ultra: 'px-0 py-0',
-  spacious: 'px-0 py-0',
-};
-
-/** Density-aware body wrapper for canvas panel nodes. */
-export function PanelBody({
-  children,
-  density = 'compact',
-  fill,
-  flush,
-  narrow,
-  className,
-  style,
-}: {
-  children: ReactNode;
-  density?: HeaderDensity;
-  fill?: boolean;
-  /** No inner card chrome — content sits flush in the outer shell (viz canvas). */
-  flush?: boolean;
-  /** Narrow-tier panels: lighter padding inside an already-padded shell. */
-  narrow?: boolean;
-  className?: string;
-  style?: CSSProperties;
-}) {
-  const pad = flush ? '' : narrow ? BODY_PAD_NARROW[density] : BODY_PAD[density];
-  return (
-    <div
-      className={cn(
-        'panel-node-body nowheel flex flex-col text-ink',
-        flush ? 'gap-0 rounded-none bg-transparent p-0' : cn('gap-[var(--node-gap,0.5rem)] rounded-[calc(var(--radius)-2px)] bg-panel'),
-        fill ? 'min-h-0 flex-1 overflow-hidden' : 'shrink-0 overflow-x-auto',
-        pad,
-        className,
-      )}
-      style={style}
-    >
-      {children}
     </div>
   );
 }

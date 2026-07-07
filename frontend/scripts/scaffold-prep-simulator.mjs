@@ -47,6 +47,7 @@ const pascal = entry.slug
 
 const template = `import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
+import { createRecorder } from '../../../_shared/createRecorder';
 import { cn } from '../../../../lib/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
@@ -60,20 +61,11 @@ interface ${pascal}State {
 }
 
 function record(_input: ${pascal}Input): Frame<${pascal}State>[] {
-  const frames: Frame<${pascal}State>[] = [];
-  frames.push({
-    move: {
-      type: 'INIT',
-      note: 'start',
-      caption: '${entry.title}: ${entry.visual || entry.pattern || 'step through the algorithm.'}',
-    },
-    state: { op: 'init', done: false },
-  });
-  frames.push({
-    move: { type: 'DONE', note: 'done', caption: 'Done.', tone: 'good' },
-    state: { op: 'done', done: true },
-  });
-  return frames;
+  const rec = createRecorder<${pascal}State>(() => ({ op: 'init', done: false }));
+  rec.emit('INIT', 'start', '${entry.title}: ${entry.visual || entry.pattern || 'step through the algorithm.'}');
+  rec.emit('STEP', 'work', 'Take one algorithmic step toward the answer.');
+  rec.emit('DONE', 'done', 'Done.', { op: 'done', done: true }, 'good');
+  return rec.frames;
 }
 
 function View({ frame }: PluginViewProps<${pascal}State>) {

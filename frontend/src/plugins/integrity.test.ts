@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadAllPlugins, getPluginMeta } from '../core/registry';
 import { PLUGIN_META } from './_generated/pluginMeta';
 import { GENERATED_PROBLEM_BRIEFS } from '@/content/_generated/problemBriefs';
-import { quizLabelIssues } from '@/lib/quiz';
+import { quizLabelIssues, quizCorrectnessIssues } from '@/lib/quiz';
 import { defaultPrepQuiz } from './imported/prepQuiz';
 import { PREP_DATA } from './imported/prepManifest';
 import { curatedCourses } from '../content/courses';
@@ -275,6 +275,113 @@ describe('defaultPrepQuiz labels', () => {
   }
   it('auto-generated prep quiz choices meet label quality rules', () => {
     expect(bad, bad.slice(0, 8).join('\n')).toEqual([]);
+  });
+});
+
+describe('quiz correctness', () => {
+  const bad: string[] = [];
+  for (const plugin of plugins) {
+    for (const q of plugin.quiz ?? []) {
+      for (const issue of quizCorrectnessIssues(q)) {
+        bad.push(`${plugin.meta.id} · ${q.id}: ${issue}`);
+      }
+    }
+  }
+  for (const p of PREP_DATA) {
+    if (pluginById.get(p.id)?.quiz?.length) continue;
+    for (const q of defaultPrepQuiz(p)) {
+      for (const issue of quizCorrectnessIssues(q)) {
+        bad.push(`${p.id} · ${q.id}: ${issue}`);
+      }
+    }
+  }
+  it('every quiz question has exactly one correct choice and unique labels', () => {
+    expect(bad, bad.slice(0, 12).join('\n')).toEqual([]);
+  });
+});
+
+function terminalFrameOk(frames: { move: { type: string; tone?: string } }[]): boolean {
+  const last = frames[frames.length - 1]?.move;
+  if (!last) return false;
+  const t = last.type.toUpperCase();
+  return t === 'DONE' || last.tone === 'good';
+}
+
+describe('prep simulator quality', () => {
+  const bad: string[] = [];
+  for (const plugin of plugins) {
+    if (!plugin.meta.id.startsWith('prep-')) continue;
+    for (const input of plugin.inputs) {
+      const frames = plugin.record(input.value);
+      const tag = `${plugin.meta.id} · "${input.label}"`;
+      if (frames.length === 0) {
+        bad.push(`${tag}: empty recording`);
+        continue;
+      }
+      const hasTerminal = terminalFrameOk(frames);
+      const hasVerdict = !!plugin.verdict?.(frames);
+      if (frames.length < 3 && !hasTerminal && !hasVerdict) {
+        bad.push(`${tag}: only ${frames.length} frame(s), no DONE/good or verdict`);
+      }
+      const v = plugin.verdict?.(frames);
+      if (v && (typeof v.ok !== 'boolean' || typeof v.label !== 'string')) {
+        bad.push(`${tag}: verdict shape invalid`);
+      }
+    }
+  }
+  it('prep simulators emit frames with terminal DONE or verdict', () => {
+    expect(bad, bad.slice(0, 12).join('\n')).toEqual([]);
+  });
+});
+
+function stateImpliesVerdictOk(state: Record<string, unknown> | undefined): boolean | null {
+  if (!state) return null;
+  if ('result' in state) {
+    const r = state.result;
+    if (r === null || r === undefined || r === false) return false;
+    if (Array.isArray(r)) return r.length > 0;
+    return true;
+  }
+  if (typeof state.done === 'boolean' && 'hit' in state) {
+    return state.done === true && state.hit !== null && state.hit !== undefined;
+  }
+  if (typeof state.found === 'boolean') return state.found;
+  return null;
+}
+
+/** Prep simulators whose final state exposes a checkable result field. */
+const VERDICT_SAMPLE_IDS = new Set([
+  'prep-arrays-two-sum',
+  'prep-arrays-find-duplicate-number',
+  'prep-linked-lists-detect-loop',
+  'prep-linked-lists-reverse-linked-list',
+  'prep-stacks-queues-validate-parentheses',
+  'prep-strings-min-window-substring',
+  'prep-strings-longest-substring-with-unique',
+  'prep-trees-binary-tree-maximum-path-sum',
+  'prep-intervals-merge-intervals',
+  'prep-hash-maps-find-top-k-frequent-elements',
+]);
+
+describe('verdict truthfulness sampling', () => {
+  const bad: string[] = [];
+  for (const plugin of plugins) {
+    if (!VERDICT_SAMPLE_IDS.has(plugin.meta.id)) continue;
+    for (const input of plugin.inputs) {
+      const frames = plugin.record(input.value);
+      const v = plugin.verdict?.(frames);
+      if (!v) {
+        bad.push(`${plugin.meta.id} · "${input.label}": missing verdict`);
+        continue;
+      }
+      const expected = stateImpliesVerdictOk(frames[frames.length - 1]?.state as Record<string, unknown>);
+      if (expected !== null && v.ok !== expected) {
+        bad.push(`${plugin.meta.id} · "${input.label}": verdict.ok=${v.ok} expected ${expected}`);
+      }
+    }
+  }
+  it('sampled prep simulators verdict.ok matches terminal state oracle', () => {
+    expect(bad, bad.join('\n')).toEqual([]);
   });
 });
 

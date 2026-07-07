@@ -41,7 +41,7 @@ export function ComplexityPanelBody() {
       {answered && (
         <div className="flex flex-col gap-2">
           <Hint>{cards.find((c) => c.complexity.includes(answer))?.complexity}</Hint>
-          {wrong && <p className="text-[12px] text-bad">Start over — pick the right complexity.</p>}
+          {wrong && <p className="text-[length:var(--fs-xs)] text-bad">Start over — pick the right complexity.</p>}
           <Btn
             variant="primary"
             size="sm"

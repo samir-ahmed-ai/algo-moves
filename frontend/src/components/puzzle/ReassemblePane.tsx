@@ -1,35 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Keyboard, Lightbulb, RotateCcw, ScanEye } from 'lucide-react';
 import type { CodePiece } from '@/lib/code';
 import { cn } from '@/lib/utils/cn';
-import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
-import { shuffle } from '@/lib/utils/shuffle';
-import { isEditableTarget } from '@/lib/utils/keyboard';
 import { pieceHasEntrySignature } from '@/lib/editor';
-import { balanceTrayColumns } from '@/lib/code';
 import { CodeBlueprintOverlay } from './CodeBlueprintOverlay';
 import { PuzzlePieceShell } from './PuzzlePieceShell';
-
-const FINISH_MS = 400;
-const WRONG_MS = 350;
-const DRAG_THRESHOLD = 8;
-const PLACE_ENTER_MS = 220;
-const MOBILE_WRAP_COLS = 22;
-
-function orderTray(all: CodePiece[], placedIds: string[], trayIds: string[]): CodePiece[] {
-  const byId = new Map(all.map((p) => [p.id, p]));
-  const placedSet = new Set(placedIds);
-  const ordered = trayIds.map((id) => byId.get(id)).filter(Boolean) as CodePiece[];
-  const missing = all.filter((p) => !placedSet.has(p.id) && !trayIds.includes(p.id));
-  return [...ordered, ...missing];
-}
-
-function isOverAssembled(clientX: number, clientY: number, assembledEl: HTMLElement | null): boolean {
-  if (!assembledEl) return false;
-  const r = assembledEl.getBoundingClientRect();
-  return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
-}
+import { useReassembleLogic } from './hooks/useReassembleLogic';
+import { useTrayPointerDrag } from './hooks/useTrayPointerDrag';
 
 export interface ReassemblePaneProps {
   pieces: CodePiece[];
@@ -88,185 +66,56 @@ export function ReassemblePane({
   resetOnWrong = false,
   className,
 }: ReassemblePaneProps) {
-  const [placed, setPlaced] = useState<CodePiece[]>(() => {
-    if (!initialPlacedIds?.length) return [];
-    const byId = new Map(pieces.map((p) => [p.id, p]));
-    return initialPlacedIds.map((id) => byId.get(id)).filter(Boolean) as CodePiece[];
-  });
-  const [tray, setTray] = useState<CodePiece[]>(() => {
-    if (initialTrayIds?.length) return orderTray(pieces, initialPlacedIds ?? [], initialTrayIds);
-    const placedSet = new Set(initialPlacedIds ?? []);
-    return shuffle(pieces.filter((p) => !placedSet.has(p.id)));
-  });
-  const [mistakes, setMistakes] = useState(initialMistakes);
-  const [wrongId, setWrongId] = useState<string | null>(null);
-  const [showHint, setShowHint] = useState(false);
-  const [showOverview, setShowOverview] = useState(false);
-  const [showCheatSheet, setShowCheatSheet] = useState(false);
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-  const [completing, setCompleting] = useState(false);
-  const [lastPlacedId, setLastPlacedId] = useState<string | null>(null);
-  const [liveMessage, setLiveMessage] = useState('');
-  const [pointerGhost, setPointerGhost] = useState<{ piece: CodePiece; x: number; y: number; width: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const assembledRef = useRef<HTMLDivElement>(null);
   const cheatRef = useRef<HTMLDivElement>(null);
-  const completedRef = useRef(false);
-  const pointerDragRef = useRef<{
-    piece: CodePiece;
-    startX: number;
-    startY: number;
-    active: boolean;
-    axis: 'x' | 'y' | null;
-    pointerId: number;
-    target: HTMLElement;
-    captured: boolean;
-    width: number;
-  } | null>(null);
-  const dragMovedRef = useRef(false);
-  const mobileWrap = variant === 'mobile';
-  const mobileTrayColumns = useMemo(
-    () => (mobileWrap ? balanceTrayColumns(tray, 2, MOBILE_WRAP_COLS) : null),
-    [mobileWrap, tray],
-  );
+  const [showCheatSheet, setShowCheatSheet] = useState(false);
 
-  const expected = pieces[placed.length];
-  const done = placed.length === pieces.length;
-  const progressPct = pieces.length > 0 ? (placed.length / pieces.length) * 100 : 0;
+  const {
+    placed,
+    tray,
+    mistakes,
+    wrongId,
+    showHint,
+    setShowHint,
+    showOverview,
+    setShowOverview,
+    selectedIdx,
+    setSelectedIdx,
+    dragOver,
+    setDragOver,
+    completing,
+    lastPlacedId,
+    liveMessage,
+    expected,
+    done,
+    progressPct,
+    mobileWrap,
+    mobileTrayColumns,
+    reset,
+    tryPlace,
+    onDragStart,
+    onDropAssembled,
+  } = useReassembleLogic({
+    pieces,
+    variant,
+    initialPlacedIds,
+    initialTrayIds,
+    initialMistakes,
+    onComplete,
+    onProgress,
+    resetOnWrong,
+    rootRef,
+    assembledRef,
+  });
 
-  const emitProgress = useCallback(
-    (nextPlaced: CodePiece[], nextTray: CodePiece[], nextMistakes: number) => {
-      onProgress?.(
-        nextPlaced.map((p) => p.id),
-        nextTray.map((p) => p.id),
-        nextMistakes,
-      );
-    },
-    [onProgress],
-  );
-
-  const reset = useCallback(() => {
-    completedRef.current = false;
-    setCompleting(false);
-    const shuffled = shuffle(pieces);
-    setPlaced([]);
-    setTray(shuffled);
-    setMistakes(0);
-    setWrongId(null);
-    setShowHint(false);
-    setShowOverview(false);
-    setSelectedIdx(null);
-    setLastPlacedId(null);
-    setLiveMessage('');
-    emitProgress([], shuffled, 0);
-  }, [pieces, emitProgress]);
-
-  const tryPlace = useCallback(
-    (piece: CodePiece, trayIndex?: number) => {
-      if (!expected || done || completing) return false;
-      if (trayIndex !== undefined) setSelectedIdx(trayIndex);
-      if (piece.id === expected.id) {
-        const nextPlaced = [...placed, piece];
-        const nextTray = tray.filter((x) => x.id !== piece.id);
-        setPlaced(nextPlaced);
-        setTray(nextTray);
-        setShowHint(false);
-        setSelectedIdx(null);
-        setLastPlacedId(piece.id);
-        window.setTimeout(() => setLastPlacedId(null), PLACE_ENTER_MS);
-        hapticSuccess();
-        setLiveMessage(`Correct — block ${nextPlaced.length} of ${pieces.length}`);
-        emitProgress(nextPlaced, nextTray, mistakes);
-        return true;
-      }
-      setMistakes((m) => {
-        const next = m + 1;
-        emitProgress(placed, tray, next);
-        return next;
-      });
-      setWrongId(piece.id);
-      hapticError();
-      setLiveMessage(resetOnWrong ? 'Wrong order — blocks cleared' : 'Wrong order — try again');
-      window.setTimeout(() => {
-        setWrongId(null);
-        if (resetOnWrong) reset();
-      }, WRONG_MS);
-      return false;
-    },
-    [expected, done, completing, placed, tray, mistakes, pieces.length, emitProgress, resetOnWrong, reset],
-  );
-
-  const clearPointerDrag = useCallback(() => {
-    pointerDragRef.current = null;
-    setPointerGhost(null);
-    setDragOver(false);
-  }, []);
-
-  useEffect(() => {
-    if (!done || completedRef.current) return;
-    setShowOverview(false);
-    completedRef.current = true;
-    setCompleting(true);
-    const t = window.setTimeout(() => onComplete(placed, mistakes), FINISH_MS);
-    return () => window.clearTimeout(t);
-  }, [done, placed, mistakes, onComplete]);
-
-  useEffect(() => {
-    const el = assembledRef.current;
-    if (!el || placed.length === 0) return;
-    requestAnimationFrame(() => {
-      el.scrollTop = el.scrollHeight;
+  const { pointerGhost, onTrayPointerDown, onTrayPointerMove, finishTrayPointer, isDraggingPiece } =
+    useTrayPointerDrag({
+      variant,
+      assembledRef,
+      onPlace: tryPlace,
+      setDragOver,
     });
-  }, [placed.length]);
-
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (isEditableTarget(e.target)) return;
-
-      if (showOverview && (e.key === 'Escape' || e.key === 'b' || e.key === 'B')) {
-        e.preventDefault();
-        setShowOverview(false);
-        return;
-      }
-
-      if ((e.key === 'b' || e.key === 'B') && !showOverview) {
-        e.preventDefault();
-        setShowOverview(true);
-        return;
-      }
-
-      if (done || completing) return;
-
-      if (e.key === 'h' || e.key === 'H') {
-        e.preventDefault();
-        setShowHint((h) => !h);
-        return;
-      }
-      if (e.key === 'r' || e.key === 'R') {
-        if (e.metaKey || e.ctrlKey) return;
-        e.preventDefault();
-        reset();
-        return;
-      }
-      if (e.key === 'Enter' && selectedIdx !== null && tray[selectedIdx]) {
-        e.preventDefault();
-        tryPlace(tray[selectedIdx]);
-        return;
-      }
-      const num = parseInt(e.key, 10);
-      if (variant !== 'mobile' && num >= 1 && num <= 9 && num <= tray.length) {
-        e.preventDefault();
-        setSelectedIdx(num - 1);
-      }
-    };
-
-    el.addEventListener('keydown', onKey);
-    return () => el.removeEventListener('keydown', onKey);
-  }, [done, completing, selectedIdx, tray, tryPlace, reset, variant, showOverview]);
 
   useEffect(() => {
     if (!showCheatSheet) return;
@@ -278,92 +127,6 @@ export function ReassemblePane({
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [showCheatSheet]);
-
-  const onTrayPointerMove = useCallback((e: React.PointerEvent) => {
-    const drag = pointerDragRef.current;
-    if (!drag || e.pointerId !== drag.pointerId) return;
-
-    const dx = e.clientX - drag.startX;
-    const dy = e.clientY - drag.startY;
-    if (Math.hypot(dx, dy) >= 4) dragMovedRef.current = true;
-
-    if (!drag.active) {
-      if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
-      // Vertical intent — release so the pane scroll container handles the pan.
-      if (Math.abs(dy) >= Math.abs(dx)) {
-        pointerDragRef.current = null;
-        return;
-      }
-      drag.axis = 'x';
-      drag.active = true;
-      dragMovedRef.current = true;
-      try {
-        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-        drag.captured = true;
-      } catch {
-        /* capture is best-effort */
-      }
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-    setPointerGhost({ piece: drag.piece, x: e.clientX, y: e.clientY, width: drag.width });
-    setDragOver(isOverAssembled(e.clientX, e.clientY, assembledRef.current));
-  }, []);
-
-  const finishTrayPointer = useCallback(
-    (e: React.PointerEvent, piece: CodePiece, index: number) => {
-      const drag = pointerDragRef.current;
-      if (!drag || e.pointerId !== drag.pointerId) return;
-
-      if (drag.active) {
-        if (isOverAssembled(e.clientX, e.clientY, assembledRef.current)) {
-          tryPlace(piece, index);
-        }
-      } else if (!dragMovedRef.current) {
-        tryPlace(piece, index);
-      }
-
-      try {
-        if (drag.captured) (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {
-        /* capture may already be released */
-      }
-      clearPointerDrag();
-    },
-    [tryPlace, clearPointerDrag],
-  );
-
-  const onDragStart = (e: React.DragEvent, piece: CodePiece) => {
-    e.dataTransfer.setData('text/plain', piece.id);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const onDropAssembled = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const id = e.dataTransfer.getData('text/plain');
-    const piece = tray.find((p) => p.id === id);
-    if (piece) tryPlace(piece);
-  };
-
-  const onTrayPointerDown = (e: React.PointerEvent, piece: CodePiece, index: number) => {
-    if (variant !== 'mobile' || e.button !== 0) return;
-    setSelectedIdx(index);
-    const target = e.currentTarget as HTMLElement;
-    pointerDragRef.current = {
-      piece,
-      startX: e.clientX,
-      startY: e.clientY,
-      active: false,
-      axis: null,
-      pointerId: e.pointerId,
-      target,
-      captured: false,
-      width: target.getBoundingClientRect().width,
-    };
-    dragMovedRef.current = false;
-  };
 
   const renderTrayPiece = (p: CodePiece, i: number) => (
     <div
@@ -381,7 +144,7 @@ export function ReassemblePane({
         'piece tray-piece nodrag',
         wrongId === p.id && 'shake-wrong',
         selectedIdx === i && 'tray-piece-selected',
-        pointerGhost?.piece.id === p.id && 'tray-piece-dragging',
+        isDraggingPiece(p.id) && 'tray-piece-dragging',
         pieceHasEntrySignature(p.code, lang) && 'tray-piece-signature-entry',
         !mobileWrap && tray.length % 2 === 1 && i === tray.length - 1 && 'tray-piece-span',
       )}

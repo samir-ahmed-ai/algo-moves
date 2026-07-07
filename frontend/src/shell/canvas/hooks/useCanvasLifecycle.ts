@@ -26,6 +26,8 @@ export type UseCanvasLifecycleOptions = {
   layoutRef: MutableRefObject<Record<string, Saved>>;
   removedRef: MutableRefObject<Record<string, Set<string>>>;
   removedEdgesRef: MutableRefObject<Record<string, Set<string>>>;
+  viewportRef: MutableRefObject<Record<string, { x: number; y: number; zoom: number }>>;
+  setViewport: (viewport: { x: number; y: number; zoom: number }, options?: { duration?: number }) => void;
   persist: () => void;
   buildFor: (m: CanvasMode, k: string) => { nodes: PanelFlowNode[]; edges: Edge[] };
   layoutOpts: () => LayoutVisualizeOptions;
@@ -58,6 +60,8 @@ export function useCanvasLifecycle({
   layoutRef,
   removedRef,
   removedEdgesRef,
+  viewportRef,
+  setViewport,
   persist,
   buildFor,
   layoutOpts,
@@ -101,9 +105,14 @@ export function useCanvasLifecycle({
   useEffect(() => {
     if (!nodesInitialized || didInitialFit.current) return;
     didInitialFit.current = true;
+    const saved = viewportRef.current[key];
+    if (saved) {
+      setViewport(saved, { duration: 0 });
+      return;
+    }
     const id = requestAnimationFrame(() => fitCanvas(0));
     return () => cancelAnimationFrame(id);
-  }, [nodesInitialized, fitCanvas]);
+  }, [nodesInitialized, fitCanvas, key, setViewport, viewportRef]);
 
   useEffect(() => {
     if (mode !== 'visualize') return;
@@ -192,7 +201,16 @@ export function useCanvasLifecycle({
     const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
     removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     persist();
-  }, [nodes, key, plugin, mode, persist, collab.isCollaborating, standalone]);
+  }, [nodes, key, plugin, mode, persist, collab.isCollaborating, standalone, layoutRef, removedRef]);
+
+  const persistViewport = useCallback(
+    (vp: { x: number; y: number; zoom: number }) => {
+      if (collab.isCollaborating) return;
+      viewportRef.current[key] = vp;
+      persist();
+    },
+    [collab.isCollaborating, key, persist, viewportRef],
+  );
 
   const restoreProblemStarterPanels = useCallback(() => {
     if (standalone || mode !== 'visualize') return;
@@ -296,5 +314,6 @@ export function useCanvasLifecycle({
     restoreProblemStarterPanels,
     suppressAutoRestoreForKey,
     reset,
+    persistViewport,
   };
 }

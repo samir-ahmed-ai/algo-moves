@@ -29,6 +29,8 @@ import {
   PanelHeaderMenu,
   PanelHeaderTitle,
   nodeIconGlyph,
+  useCanvasCollabOptional,
+  NodePresenceAvatars,
   type HeaderDensity,
   type PanelHeaderMenuItem,
 } from '@/shell/canvas';
@@ -88,6 +90,7 @@ export function PanelNodeHeader({
   const { frames, player } = useCanvasFrame();
   const { spawnConnectedPanel } = useCanvasActions();
   const { plugin } = useCanvasStatic();
+  const collab = useCanvasCollabOptional();
   const locked = !!data.locked;
   const isViz = data.kind === 'viz';
   const isWorkbench = data.kind === 'workbench';
@@ -210,6 +213,10 @@ export function PanelNodeHeader({
       <PanelHeaderTitle density={density} className={locked ? 'cursor-default' : undefined}>
         {data.title}
       </PanelHeaderTitle>
+
+      {collab?.isCollaborating && mode === 'visualize' ? (
+        <NodePresenceAvatars peers={collab.peers} nodeId={id} className="ms-1" />
+      ) : null}
 
       {inlineToolbar}
 

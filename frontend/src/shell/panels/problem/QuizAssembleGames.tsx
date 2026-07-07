@@ -33,7 +33,7 @@ export function QuizAssembleGames({ onWinContinue }: { onWinContinue?: () => voi
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-edge px-3 py-2">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink3">
+        <span className="inline-flex items-center gap-1.5 text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3">
           <Puzzle className="h-3.5 w-3.5" />
           Rebuild it
         </span>

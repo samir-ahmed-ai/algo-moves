@@ -7,3 +7,4 @@ export {
   localeFromSharedState,
   type GameLocale,
 } from './types';
+export { getGameCommonStrings, type GameCommonStrings } from './gameCommon';

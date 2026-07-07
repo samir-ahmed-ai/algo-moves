@@ -21,7 +21,7 @@ export function ProgressPanelContent({ compact = false }: { compact?: boolean })
             const done = levels.filter((l) => progress.levels[l.id]?.completed).length;
             return (
               <li key={chapterNum}>
-                <div className="mb-0.5 flex items-center justify-between text-[10px] text-ink2">
+                <div className="mb-0.5 flex items-center justify-between text-[length:var(--fs-2xs)] text-ink2">
                   <span className="truncate">{chapter}</span>
                   <span className="tabular-nums text-ink3">
                     {done}/{levels.length}

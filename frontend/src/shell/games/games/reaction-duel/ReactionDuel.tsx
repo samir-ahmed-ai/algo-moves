@@ -486,7 +486,7 @@ function TapZone({
         </span>
       ) : null}
       <span className="text-xl font-black tracking-tight sm:text-2xl">{heading}</span>
-      <span className="text-[10px] font-medium opacity-90">{sub}</span>
+      <span className="text-[length:var(--fs-2xs)] font-medium opacity-90">{sub}</span>
       <style>{TAP_ZONE_STYLES}</style>
     </button>
   );
@@ -611,7 +611,7 @@ function History({
   const ordered = [...results].sort((a, b) => a.round - b.round);
   return (
     <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-ink3">{strings.history}</p>
+      <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.history}</p>
       <div className="flex flex-col gap-1.5">
         {ordered.map((res) => {
           const rows = Object.entries(res.taps)

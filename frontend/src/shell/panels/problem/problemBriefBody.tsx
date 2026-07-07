@@ -21,7 +21,7 @@ export function InfoCases({ cases }: { cases: ProblemBriefCase[] }) {
       {cases.map((c, i) => (
         <div key={c.label} className="overflow-hidden rounded-md border border-edge/60 bg-panel2/40">
           <div className="flex items-center gap-2 border-b border-edge/40 bg-panel2/60 px-2 py-1">
-            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-accent/15 text-[10px] font-bold tabular-nums text-accent">
+            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-accent/15 text-[length:var(--fs-2xs)] font-bold tabular-nums text-accent">
               {i + 1}
             </span>
             <p className={cn('font-medium text-ink', nodeText.xs)}>{c.label}</p>

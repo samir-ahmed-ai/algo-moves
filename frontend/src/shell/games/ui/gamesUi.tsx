@@ -113,7 +113,7 @@ export function TurnBadge({ tone = 'wait', children }: { tone?: 'you' | 'peer' |
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ring-inset',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide ring-1 ring-inset',
         tone === 'you' && 'bg-accentbg text-accent ring-accent/25',
         tone === 'peer' && 'bg-panel2 text-ink2 ring-edge',
         tone === 'wait' && 'bg-panel2 text-ink3 ring-edge/60',
@@ -201,7 +201,7 @@ export function CategoryBadge({ category }: { category: 'couple' | 'party' }) {
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
+        'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold',
         category === 'couple' && 'bg-pink-500/10 text-pink-500',
         category === 'party' && 'bg-amber-500/10 text-amber-600',
       )}

@@ -108,11 +108,11 @@ export function SidebarSection({
         onClick={onToggle}
         aria-expanded={open}
         className={cn(
-          'flex w-full shrink-0 items-center gap-1 px-[var(--hpad)] py-0.5 text-left text-ink3 transition-colors hover:text-ink2',
+          'flex w-full shrink-0 items-center gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left text-ink3 transition-colors hover:text-ink2',
         )}
       >
         <span className="grid h-3 w-3 shrink-0 place-items-center text-ink3">{icon}</span>
-        <ChromeLabel className="min-w-0 flex-1 truncate normal-case">{title}</ChromeLabel>
+        <ChromeLabel className={cn('min-w-0 flex-1 truncate normal-case', chromeText.xs)}>{title}</ChromeLabel>
         {badge != null &&
           (typeof badge === 'string' || typeof badge === 'number' ? (
             <span className={cn('shrink-0 rounded-full bg-panel2 px-1 py-px font-mono tabular-nums text-ink3', chromeText.xs)}>

@@ -82,6 +82,32 @@
   }
 }
 
+/* Learn Studio density — stage picker, quiz chrome, recall toolbar spacing. */
+.learn-studio {
+  --studio-gap: var(--gap, 0.3125rem);
+  --studio-pad: var(--pad, 0.4375rem);
+  --studio-section: var(--section, 0.375rem);
+  --studio-row: var(--row, 1.875rem);
+}
+[data-density='ultra'] .learn-studio {
+  --studio-gap: var(--gap, 0.1875rem);
+  --studio-pad: var(--pad, 0.3125rem);
+  --studio-section: var(--section, 0.3125rem);
+  --studio-row: var(--row, 1.75rem);
+}
+.learn-studio .studio-stage-picker {
+  gap: var(--studio-gap);
+  padding: var(--studio-pad);
+}
+.learn-studio .studio-quiz-panel {
+  gap: var(--studio-gap);
+  padding-block: var(--studio-section);
+}
+.learn-studio .studio-recall-toolbar {
+  min-height: var(--studio-row);
+  padding-inline: var(--studio-pad);
+}
+
 /* ============================================================ Assemble blocks
  * Code pieces rendered as physical, interlocking puzzle blocks. A two-layer clip
  * (stroke layer + tinted face) gives a coloured outline that follows the puzzle

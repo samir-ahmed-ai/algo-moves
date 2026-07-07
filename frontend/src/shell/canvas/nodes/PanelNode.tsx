@@ -15,6 +15,7 @@ import { useConnectedComponentsOptional } from '@/lib/canvas';
 import { panelBorderRadius, panelFill, panelOpacity, panelStroke } from './panelStyle';
 import { useCanvasStatic } from '../CanvasContext';
 import { useFitContentSize } from '../hooks/useFitContentSize';
+import { useNodeInViewport } from '../hooks/useNodeInViewport';
 import { TransportBar } from '../ui/TransportBarCore';
 
 const CHAIN_TINTS = [
@@ -52,6 +53,8 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const layoutHostMode = mode === 'visualize' && (!!data.layoutHost || hasLayoutHost);
   const isSlottedChild = data.slotIndex != null && mode === 'visualize';
   const panelRef = useFitContentSize(id, kind, collapsed, !snapFill && !layoutHostMode && !isSlottedChild);
+  const inViewport = useNodeInViewport(id);
+  const renderHeavyBody = inViewport || selected || collapsed;
   const [showBigO, setShowBigO] = useState(false);
   const { setNodes } = useReactFlow();
   const cc = useConnectedComponentsOptional();
@@ -133,6 +136,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
     )}
     <div
       ref={panelRef}
+      data-panel-kind={kind}
       className={cn(
         'panel-node relative flex flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
         snapFill ? 'h-full min-h-0' : 'h-auto',
@@ -170,6 +174,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
       <div
         className={cn(
           'panel-node__body relative z-0 flex min-h-0 flex-col rounded-[inherit]',
+          !renderHeavyBody && 'panel-node__body--deferred',
           visualizeFlush
             ? 'gap-0 px-[var(--node-px,0.75rem)]'
             : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
@@ -180,21 +185,25 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
           !vizCanvas && !boardCanvas && !snapFill && !layoutHostMode && 'overflow-hidden',
         )}
       >
-        <PanelNodeBodySlot
-          id={id}
-          data={data}
-          headerProps={headerProps}
-          headerDensity={headerDensity}
-          flushBody={flushBody}
-          vizCanvas={vizCanvas}
-          boardCanvas={boardCanvas}
-          narrowBody={narrowBody}
-          bodyCap={bodyCap}
-          showBigO={showBigO}
-          onBigOOpenChange={setShowBigO}
-          collapsed={collapsed}
-          layoutHostMode={layoutHostMode}
-        />
+        {!renderHeavyBody ? (
+          <div className="min-h-[3rem] flex-1 rounded-[inherit] bg-panel2/20" aria-hidden />
+        ) : (
+          <PanelNodeBodySlot
+            id={id}
+            data={data}
+            headerProps={headerProps}
+            headerDensity={headerDensity}
+            flushBody={flushBody}
+            vizCanvas={vizCanvas}
+            boardCanvas={boardCanvas}
+            narrowBody={narrowBody}
+            bodyCap={bodyCap}
+            showBigO={showBigO}
+            onBigOOpenChange={setShowBigO}
+            collapsed={collapsed}
+            layoutHostMode={layoutHostMode}
+          />
+        )}
       </div>
 
       {vizCanvas ? (

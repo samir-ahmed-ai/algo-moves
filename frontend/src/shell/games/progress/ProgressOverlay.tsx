@@ -250,7 +250,7 @@ function ProfileTab() {
           </p>
           {profile?.email ? <p className="truncate text-xs text-ink3">{profile.email}</p> : null}
           {profile?.is_admin ? (
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent">
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide text-accent">
               <Shield className="h-3 w-3" /> Admin
             </span>
           ) : null}
@@ -393,7 +393,7 @@ function StatCell({ label, value, tone }: { label: string; value: number; tone: 
       >
         {value}
       </div>
-      <div className="text-[11px] uppercase tracking-wide text-ink3">{label}</div>
+      <div className="text-[length:var(--fs-tight)] uppercase tracking-wide text-ink3">{label}</div>
     </div>
   );
 }

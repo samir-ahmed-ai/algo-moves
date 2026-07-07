@@ -49,7 +49,7 @@ export function Roster({ compact = false }: { compact?: boolean }) {
               <Avatar key={s.id} seed={s.id} name={s.name} size={20} className="ring-1 ring-bg" />
             ))}
             {spectators.length > 6 ? (
-              <span className="grid h-5 w-5 place-items-center rounded-full bg-panel2 text-[10px] font-bold text-ink3">
+              <span className="grid h-5 w-5 place-items-center rounded-full bg-panel2 text-[length:var(--fs-2xs)] font-bold text-ink3">
                 +{spectators.length - 6}
               </span>
             ) : null}
@@ -96,7 +96,7 @@ function PlayerChip({
       <span className="flex items-center gap-1 text-sm font-medium text-ink">
         {isHost ? <Crown className="h-3.5 w-3.5 text-amber-500" aria-label={hostLabel} /> : null}
         <span className="max-w-[9rem] truncate">{peer.name}</span>
-        {isSelf ? <span className="text-[10px] font-semibold text-ink3">({youLabel})</span> : null}
+        {isSelf ? <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3">({youLabel})</span> : null}
         {isReady ? <Check className="h-3.5 w-3.5 text-good" /> : null}
       </span>
     </li>

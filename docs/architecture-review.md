@@ -291,3 +291,19 @@ Branch: `refactor/architecture-remediation`. Every commit verified with
   per-game useXGame (#35); plugin `createRecorder`/factory consolidation
   (#30/#31), `verdictLastFrameTone` (#50).
 
+### ✅ Phase 10 — docs, CI & world-class finish (Todos 91–100)
+
+- **ESLint flat config shipped** — `eslint.config.js` + `check:lint` in `check:all`
+  (Theme A guardrail; the review doc's "no ESLint" gap is closed).
+- **Module-boundary debt remains 0** — `check-boundaries.mjs` ratchet green.
+- **Shell typography + sim quality** in `check:all` (`check-shell-typography`,
+  `check-prep-sim-quality`).
+- **`check:lighthouse-budget`** — static HTML/PWA/transport a11y budget guard.
+- **Presentation mode** — canvas fullscreen hook, Learn bar hidden, minimap off.
+- **GIF snapshot export** — `@/lib/export` single-frame MVP on transport bar.
+- **Taxonomy unlock graph** — category edges + `buildProblemUnlockGraph` helpers.
+- **Reference workflow preset** — pattern / glossary / cheat sheet canvas panels.
+- **Visual QA checklist** — `docs/visual-qa-checklist.md`.
+- **CHANGELOG** — density-default migration notes (`CHANGELOG.md`).
+- **README** — six arcade games (Would You Rather included).
+

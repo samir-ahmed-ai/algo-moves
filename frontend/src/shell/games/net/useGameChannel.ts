@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useGameRoom } from './useGameRoom';
 
+export type GameChannelOptions<M> = {
+  /** Drop invalid relay frames at the channel boundary (dev logs in non-production). */
+  validate?: (value: unknown) => value is M;
+};
+
 /**
  * Typed relay channel for a single game. Subscribes to incoming peer messages
  * and returns a `send` function for outgoing ones. The handler is kept in a ref
@@ -11,13 +16,26 @@ import { useGameRoom } from './useGameRoom';
  */
 export function useGameChannel<M = unknown>(
   onMessage: (msg: M, fromId: string) => void,
+  options?: GameChannelOptions<M>,
 ): (msg: M) => void {
   const { send, subscribe } = useGameRoom();
   const handlerRef = useRef(onMessage);
   handlerRef.current = onMessage;
+  const validateRef = useRef(options?.validate);
+  validateRef.current = options?.validate;
 
   useEffect(
-    () => subscribe((data, fromId) => handlerRef.current(data as M, fromId)),
+    () =>
+      subscribe((data, fromId) => {
+        const validate = validateRef.current;
+        if (validate && !validate(data)) {
+          if (import.meta.env.DEV) {
+            console.warn('[useGameChannel] dropped invalid frame', data);
+          }
+          return;
+        }
+        handlerRef.current(data as M, fromId);
+      }),
     [subscribe],
   );
 

@@ -78,6 +78,7 @@ function Harness() {
           frames: [stubFrame],
           player: stubPlayer,
           frame: stubFrame,
+          changedKeys: [],
         }}
       >
         <CodeStudioProvider>

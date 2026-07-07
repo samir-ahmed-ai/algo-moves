@@ -23,6 +23,47 @@ export const MODE_OPTIONAL: Record<CanvasMode, string[]> = {
   learn: modeOptional('learn'),
 };
 
+/** User-facing named presets (backlog) mapped to canonical {@link LayoutPreset} ids. */
+export type NamedLayoutPreset = 'study' | 'exam' | 'demo';
+
+export const NAMED_LAYOUT_PRESETS: Record<NamedLayoutPreset, LayoutPreset> = {
+  study: 'TraceFocus',
+  exam: 'Minimal',
+  demo: 'Demo',
+};
+
+/** Resolve a named or canonical preset string; returns null when unknown. */
+export function resolveNamedLayoutPreset(value: string): LayoutPreset | null {
+  const lower = value.toLowerCase();
+  if (lower in NAMED_LAYOUT_PRESETS) return NAMED_LAYOUT_PRESETS[lower as NamedLayoutPreset];
+  if ((['Full', 'TraceFocus', 'Minimal', 'Theater', 'Demo'] as const).includes(value as LayoutPreset)) {
+    return value as LayoutPreset;
+  }
+  return null;
+}
+
+/** UI copy for named presets — used by workflow picker and onboarding. */
+export const NAMED_LAYOUT_PRESET_META: Record<
+  NamedLayoutPreset,
+  { label: string; description: string; layoutPreset: LayoutPreset }
+> = {
+  study: {
+    label: 'Study',
+    description: 'Core learn panels — workbench + practice',
+    layoutPreset: 'TraceFocus',
+  },
+  exam: {
+    label: 'Exam',
+    description: 'Minimal panels for timed practice',
+    layoutPreset: 'Minimal',
+  },
+  demo: {
+    label: 'Demo',
+    description: 'Theater layout + presentation hint',
+    layoutPreset: 'Demo',
+  },
+};
+
 /** UI copy for preset picker — icons stay in PresetPopover. */
 export const LAYOUT_PRESET_META: Record<
   LayoutPreset,

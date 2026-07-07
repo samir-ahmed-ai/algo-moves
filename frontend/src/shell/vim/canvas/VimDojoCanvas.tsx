@@ -58,7 +58,7 @@ function VimDojoFlow() {
             <KeyboardHud />
           </Panel>
           <Panel position="bottom-center" className="!mb-3">
-            <p className="rounded-md border border-edge/60 bg-panel/70 px-2 py-1 text-[10px] text-ink3 backdrop-blur">
+            <p className="rounded-md border border-edge/60 bg-panel/70 px-2 py-1 text-[length:var(--fs-2xs)] text-ink3 backdrop-blur">
               Pan: middle/right drag · Scroll: zoom · Keys: h j k l …
             </p>
           </Panel>

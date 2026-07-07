@@ -1,7 +1,7 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 
 /** Keys used by host-authoritative games under room shared state. */
-export const NESTED_GAME_STATE_KEYS = ['ttt', 'meld', 'wyr'] as const;
+export const NESTED_GAME_STATE_KEYS = ['ttt', 'meld', 'wyr', 'nduel'] as const;
 
 /** Read game state nested under a key in room shared state. */
 export function readNestedRoomState<T extends object>(

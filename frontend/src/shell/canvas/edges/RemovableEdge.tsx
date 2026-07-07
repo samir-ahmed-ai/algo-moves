@@ -83,7 +83,7 @@ export function RemovableEdge({
             <X size={12} />
           </button>
           {edgeLabel && (
-            <span className="rounded border border-edge bg-panel/90 px-1 py-px text-[10px] text-ink3 shadow-sm">
+            <span className="rounded border border-edge bg-panel/90 px-1 py-px text-[length:var(--fs-2xs)] text-ink3 shadow-sm">
               {edgeLabel}
             </span>
           )}

@@ -116,13 +116,13 @@ export function MobileBrowse({
           )}
           <ProblemGlyph item={it} className="mt-0.5 h-7 w-7 shrink-0 text-ink2" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[14px] font-medium text-ink">{it.title}</span>
+            <span className="block truncate text-[length:var(--fs)] font-medium text-ink">{it.title}</span>
             {it.summary && (
-              <span className="mt-0.5 block line-clamp-2 text-[12px] leading-snug text-ink3">{it.summary}</span>
+              <span className="mt-0.5 block line-clamp-2 text-[length:var(--fs-xs)] leading-snug text-ink3">{it.summary}</span>
             )}
           </span>
           {it.difficulty && (
-            <Chip tone={difficultyTone(it.difficulty)} mono className="!px-1.5 !py-0 shrink-0 text-[10px]">
+            <Chip tone={difficultyTone(it.difficulty)} mono className="!px-1.5 !py-0 shrink-0 text-[length:var(--fs-2xs)]">
               {it.difficulty}
             </Chip>
           )}
@@ -143,16 +143,16 @@ export function MobileBrowse({
         />
         <div className="relative">
           <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-ink">Swipe to master</h1>
-          <p className="mt-1 text-[12.5px] text-ink2">Pick a track, then a category — animate, quiz, rebuild.</p>
+          <p className="mt-1 text-[length:var(--fs-sm)] text-ink2">Pick a track, then a category — animate, quiz, rebuild.</p>
           {resumeTopic && resumeCategoryId && !activeCategoryId && (
             <button
               type="button"
               onClick={() => startDeck(resumeCategoryId, resume!.itemId)}
-              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-[14px] font-semibold text-white"
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-[length:var(--fs)] font-semibold text-white"
             >
               <Play className="h-4 w-4" />
               Continue {resumeTopic.title}
-              <span className="text-[12px] font-normal opacity-90">· problem {(resume!.pIdx ?? 0) + 1}</span>
+              <span className="text-[length:var(--fs-xs)] font-normal opacity-90">· problem {(resume!.pIdx ?? 0) + 1}</span>
             </button>
           )}
           <div className="mt-3 flex items-center gap-2">
@@ -162,7 +162,7 @@ export function MobileBrowse({
                 style={{ width: `${totals.total ? (totals.mastered / totals.total) * 100 : 0}%` }}
               />
             </div>
-            <span className="shrink-0 text-[12px] font-medium tabular-nums text-ink2">
+            <span className="shrink-0 text-[length:var(--fs-xs)] font-medium tabular-nums text-ink2">
               {totals.mastered}/{totals.total} mastered
             </span>
           </div>
@@ -177,7 +177,7 @@ export function MobileBrowse({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search problems or categories…"
-            className="w-full rounded-xl border border-edge bg-panel py-2.5 pl-9 pr-3 text-[14px] text-ink outline-none placeholder:text-ink3 focus:border-accent"
+            className="w-full rounded-xl border border-edge bg-panel py-2.5 pl-9 pr-3 text-[length:var(--fs)] text-ink outline-none placeholder:text-ink3 focus:border-accent"
           />
         </div>
       )}
@@ -199,7 +199,7 @@ export function MobileBrowse({
                 <div className="mb-3 flex items-center justify-between gap-2 px-1">
                   <div>
                     <h2 className="text-[16px] font-semibold text-ink">{cat?.title}</h2>
-                    <p className="text-[12px] text-ink3">
+                    <p className="text-[length:var(--fs-xs)] text-ink3">
                       {items.length} problems · {mastered} mastered
                     </p>
                   </div>
@@ -207,7 +207,7 @@ export function MobileBrowse({
                     <button
                       type="button"
                       onClick={() => startDeck(activeCategoryId)}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-[13px] font-semibold text-white"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-[length:var(--fs-sm)] font-semibold text-white"
                     >
                       <Play className="h-3.5 w-3.5" />
                       Start
@@ -227,7 +227,7 @@ export function MobileBrowse({
           <BrowseBreadcrumb trackId={activeTrackId} onBack={backFromTrack} />
           <div className="mb-3 px-1">
             <h2 className="text-[16px] font-semibold text-ink">{getTrackById(activeTrackId)?.title}</h2>
-            <p className="text-[12px] text-ink3">{getTrackById(activeTrackId)?.summary}</p>
+            <p className="text-[length:var(--fs-xs)] text-ink3">{getTrackById(activeTrackId)?.summary}</p>
           </div>
           {q && searchResults ? (
             <div className="flex flex-col gap-2">
@@ -239,10 +239,10 @@ export function MobileBrowse({
                     key={cat.id}
                     type="button"
                     onClick={() => pickCategory(cat.id)}
-                    className="rounded-xl border border-edge bg-panel px-3 py-2.5 text-left text-[14px] font-medium text-ink active:bg-panel2"
+                    className="rounded-xl border border-edge bg-panel px-3 py-2.5 text-left text-[length:var(--fs)] font-medium text-ink active:bg-panel2"
                   >
                     {cat.title}
-                    <span className="ml-2 text-[12px] text-ink3">{count}</span>
+                    <span className="ml-2 text-[length:var(--fs-xs)] text-ink3">{count}</span>
                   </button>
                 );
               })}
@@ -258,7 +258,7 @@ export function MobileBrowse({
             <div className="flex flex-col gap-4">
               {searchResults.categories.length > 0 && (
                 <section>
-                  <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-ink3">Categories</h2>
+                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">Categories</h2>
                   <div className="flex flex-col gap-2">
                     {searchResults.categories.map((cat) => (
                       <button
@@ -269,7 +269,7 @@ export function MobileBrowse({
                           if (track) setActiveTrackId('interview-prep');
                           pickCategory(cat.id);
                         }}
-                        className="rounded-xl border border-edge bg-panel px-3 py-2.5 text-left text-[14px] font-medium text-ink active:bg-panel2"
+                        className="rounded-xl border border-edge bg-panel px-3 py-2.5 text-left text-[length:var(--fs)] font-medium text-ink active:bg-panel2"
                       >
                         {cat.title}
                       </button>
@@ -279,7 +279,7 @@ export function MobileBrowse({
               )}
               {searchResults.items.length > 0 && (
                 <section>
-                  <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-ink3">Problems</h2>
+                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">Problems</h2>
                   <ul className="overflow-hidden rounded-2xl border border-edge bg-panel">
                     {searchResults.items.slice(0, 20).map((it) => {
                       const cat = searchResults.categories.find((c) =>
@@ -291,7 +291,7 @@ export function MobileBrowse({
                 </section>
               )}
               {searchResults.categories.length === 0 && searchResults.items.length === 0 && (
-                <p className="px-1 py-8 text-center text-[14px] text-ink3">No matches for “{query}”.</p>
+                <p className="px-1 py-8 text-center text-[length:var(--fs)] text-ink3">No matches for “{query}”.</p>
               )}
             </div>
           ) : (

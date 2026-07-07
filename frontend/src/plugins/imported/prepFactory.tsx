@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import { definePlugin, type InspectorProps, type ProblemPlugin } from '../../core/types';
 import { wireTeachingStack, codePiecesFromSource } from '../_shared/pluginKit';
 import { VarGrid, CollapsibleDetails } from '../_shared/vizKit';
+import { withInspectorNotes } from '../_shared/withInspectorNotes';
 import { prepCodePieces } from './prepCodePieces';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from './prepScene';
 import { resolvePrepSimulator } from './prepSimulators';
@@ -46,18 +47,10 @@ function withNotes(
   Inspector: ComponentType<InspectorProps<any>>,
   p: PrepProblem,
 ): ComponentType<InspectorProps<any>> {
-  if (!p.notes && !p.approaches) return Inspector;
-  return function InspectorWithNotes(props: InspectorProps<any>) {
-    return (
-      <>
-        <Inspector {...props} />
-        <VarGrid>
-          {p.notes && <CollapsibleDetails title="Notes (NOTES.md)" body={p.notes} />}
-          {p.approaches && <CollapsibleDetails title="Approaches" body={p.approaches} />}
-        </VarGrid>
-      </>
-    );
-  };
+  return withInspectorNotes(Inspector, [
+    ...(p.notes ? [{ title: 'Notes (NOTES.md)', body: p.notes }] : []),
+    ...(p.approaches ? [{ title: 'Approaches', body: p.approaches }] : []),
+  ]);
 }
 
 export function makePrepPlugin(p: PrepProblem): ProblemPlugin<any, any> {

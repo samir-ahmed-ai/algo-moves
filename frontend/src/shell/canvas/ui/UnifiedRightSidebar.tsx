@@ -191,9 +191,7 @@ export function UnifiedRightSidebar() {
   const collabWidgets = widgetsForTab('collab');
   const moreWidgets = widgetsForTab('more');
 
-  const anyPluginOpen = pluginTabs.some(
-    (t) => sidePanelTab === t.id || (!sidePanelTab && t.id === pluginTabs[0]?.id),
-  );
+  const anyPluginOpen = pluginTabs.some((t) => sidePanelTab === t.id);
   const wide = rightTab === 'analysis' && anyPluginOpen && hasPlugin;
 
   useEffect(() => {
@@ -252,8 +250,8 @@ export function UnifiedRightSidebar() {
       )}
       style={isMobile ? undefined : { width: wide ? SIDEBAR_WIDE_W : SIDEBAR_W }}
     >
-      <header className="flex shrink-0 items-center gap-1 border-b border-edge px-[var(--hpad)] py-0.5">
-        <span className={cn('min-w-0 flex-1 truncate font-semibold leading-tight text-ink', chromeText.sm)}>
+      <header className="flex shrink-0 items-center gap-[var(--gap)] border-b border-edge px-[var(--hpad)] py-[var(--gap)]">
+        <span className={cn('min-w-0 flex-1 truncate font-semibold leading-tight text-ink', chromeText.xs)}>
           {TAB_LABELS[rightTab]}
         </span>
         <Chip tone="accent" mono className={cn('!px-1 !py-px', chromeText.xs)}>
@@ -298,7 +296,7 @@ export function UnifiedRightSidebar() {
             ))}
 
             {pluginTabs.map((t) => {
-              const open = sidePanelTab === t.id || (!sidePanelTab && t.id === pluginTabs[0]?.id);
+              const open = sidePanelTab === t.id;
               return (
                 <SidebarSection
                   key={t.id}
@@ -319,23 +317,23 @@ export function UnifiedRightSidebar() {
           <div className="flex flex-col gap-2 px-[var(--hpad)]">
             {!showGlobalTransport && (
               <section>
-                <p className={cn('mb-1 font-medium text-ink2', chromeText.sm)}>Transport</p>
+                <p className={cn('mb-[var(--gap)] font-medium text-ink2', chromeText.xs)}>Transport</p>
                 <TransportBar compact />
               </section>
             )}
             <section>
-              <p className={cn('mb-1 flex items-center gap-1 font-medium text-ink2', chromeText.sm)}>
+              <p className={cn('mb-[var(--gap)] flex items-center gap-[var(--gap)] font-medium text-ink2', chromeText.xs)}>
                 <Sliders className="h-3 w-3" />
                 Properties
               </p>
               <CanvasPropsBody hud={canvasHud} compact />
             </section>
             <section>
-              <p className={cn('mb-1 font-medium text-ink2', chromeText.sm)}>Actions</p>
+              <p className={cn('mb-[var(--gap)] font-medium text-ink2', chromeText.xs)}>Actions</p>
               <CanvasActionsBody />
             </section>
             <section>
-              <p className={cn('mb-1 flex items-center gap-1 font-medium text-ink2', chromeText.sm)}>
+              <p className={cn('mb-[var(--gap)] flex items-center gap-[var(--gap)] font-medium text-ink2', chromeText.xs)}>
                 <SlidersHorizontal className="h-3 w-3" />
                 Panels
               </p>

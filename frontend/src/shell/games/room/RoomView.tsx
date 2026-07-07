@@ -141,7 +141,7 @@ function ReadyRoom({ game }: { game: GameDef }) {
 
       <SessionStandings />
 
-      <p className="text-[11px] text-ink3">{t.room.playersHere(playerCount, capacity)}</p>
+      <p className="text-[length:var(--fs-tight)] text-ink3">{t.room.playersHere(playerCount, capacity)}</p>
     </div>
   );
 }

@@ -438,7 +438,10 @@ const practiceQuiz: QuizQuestion[] = [
       {
         label: "Database — fits this problem",
         correct: true
-      }
+      },
+      { label: "Two pointers on sorted array — different approach" },
+      { label: "BFS shortest path — different approach" },
+      { label: "Backtracking combinations — different approach" },
     ],
     explain: "`DENSE_RANK() OVER (PARTITION BY departmentId ORDER BY salary DESC)` assigns rank without gaps for ties"
   },

@@ -37,7 +37,7 @@ function DiffChip({ item }: { item: Item }) {
   const tint = tintFor(item);
   return (
     <span
-      className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide"
+      className="inline-flex items-center rounded-full px-2.5 py-1 text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide"
       style={{ color: tint, background: 'color-mix(in srgb, ' + tint + ' 16%, transparent)' }}
     >
       {item.difficulty}
@@ -115,7 +115,7 @@ function TimerRing({
       {paused ? (
         <Play className="h-3.5 w-3.5" />
       ) : (
-        <span className="text-[12px] font-semibold tabular-nums text-ink">{Math.ceil(remaining)}</span>
+        <span className="text-[length:var(--fs-xs)] font-semibold tabular-nums text-ink">{Math.ceil(remaining)}</span>
       )}
     </button>
   );
@@ -187,7 +187,7 @@ export function GistCardView({
       <div className="flex shrink-0 items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {block.pattern && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+            <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">
               <Sparkles className="h-3 w-3" />
               {block.pattern}
             </span>
@@ -195,7 +195,7 @@ export function GistCardView({
           <DiffChip item={item} />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold tabular-nums text-ink3">
+          <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">
             {problemIndex + 1}/{problemCount}
           </span>
           <TimerRing remaining={remaining} total={GIST_SECONDS} paused={paused} onToggle={togglePause} />
@@ -214,7 +214,7 @@ export function GistCardView({
 
       {summary && (
         <div className="mobile-problem-context mt-3 shrink-0 rounded-2xl border border-edge bg-panel/80 px-3.5 py-2.5">
-          <p className="text-[12.5px] leading-relaxed text-ink2 line-clamp-3">{summary}</p>
+          <p className="text-[length:var(--fs-sm)] leading-relaxed text-ink2 line-clamp-3">{summary}</p>
         </div>
       )}
 
@@ -222,7 +222,7 @@ export function GistCardView({
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[15px] font-semibold text-white shadow-[var(--shadow-lg)]"
+          className="inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white shadow-[var(--shadow-lg)]"
           style={{ background: tint }}
         >
           Watch the algorithm
@@ -231,7 +231,7 @@ export function GistCardView({
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex items-center justify-center gap-1 self-center rounded-full px-4 py-1.5 text-[12px] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
+          className="inline-flex items-center justify-center gap-1 self-center rounded-full px-4 py-1.5 text-[length:var(--fs-xs)] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
         >
           Skip
           <ChevronRight className="h-3.5 w-3.5" />
@@ -265,9 +265,9 @@ export function AnimateCardView({
     <div className="mobile-card-shell mobile-animate-card flex flex-1 flex-col px-4 pt-3">
       <div className="shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold tabular-nums text-ink3">{problemIndex + 1}/{problemCount}</span>
+          <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">{problemIndex + 1}/{problemCount}</span>
           {block.pattern && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[10px] font-medium text-accent">
+            <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[length:var(--fs-2xs)] font-medium text-accent">
               <Sparkles className="h-3 w-3" />
               {block.pattern}
             </span>
@@ -278,7 +278,7 @@ export function AnimateCardView({
           <h2 className="min-w-0 flex-1 text-[17px] font-semibold tracking-tight text-ink">{item.title}</h2>
         </div>
         {summary && (
-          <p className="mt-0.5 text-[12px] leading-snug text-ink3 line-clamp-2">{summary}</p>
+          <p className="mt-0.5 text-[length:var(--fs-xs)] leading-snug text-ink3 line-clamp-2">{summary}</p>
         )}
       </div>
 
@@ -288,7 +288,7 @@ export function AnimateCardView({
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[15px] font-semibold text-white shadow-[var(--shadow-lg)]"
+          className="inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white shadow-[var(--shadow-lg)]"
           style={{ background: watched ? 'var(--good)' : tint }}
         >
           {watched ? (
@@ -307,7 +307,7 @@ export function AnimateCardView({
           <button
             type="button"
             onClick={onOpenStudio}
-            className="mb-1 inline-flex items-center justify-center gap-1.5 self-center rounded-full px-4 py-2 text-[13px] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
+            className="mb-1 inline-flex items-center justify-center gap-1.5 self-center rounded-full px-4 py-2 text-[length:var(--fs-sm)] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
           >
             <LayoutGrid className="h-3.5 w-3.5" />
             Open in studio
@@ -433,9 +433,9 @@ export function QuizCardView({
       {/* Header: title + summary + progress dots */}
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink3">{item.title}</span>
+          <span className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.16em] text-ink3">{item.title}</span>
           {summary && (
-            <p className="mt-0.5 text-[11.5px] leading-snug text-ink3 line-clamp-2">{summary}</p>
+            <p className="mt-0.5 text-[length:var(--fs-tight)] leading-snug text-ink3 line-clamp-2">{summary}</p>
           )}
         </div>
         <span
@@ -443,7 +443,7 @@ export function QuizCardView({
           aria-label={`Question ${card.qIndex} of ${card.qCount}`}
         >
           {quizAttempt > 0 && (
-            <span className="inline-flex items-center rounded-full bg-panel2 px-2 py-0.5 text-[10px] font-medium text-ink3">
+            <span className="inline-flex items-center rounded-full bg-panel2 px-2 py-0.5 text-[length:var(--fs-2xs)] font-medium text-ink3">
               Attempt {attempt}
             </span>
           )}
@@ -473,7 +473,7 @@ export function QuizCardView({
       {quizAttempt > 0 && !answered && (
         <div className="mt-3 flex items-start gap-2 rounded-xl border border-accentbg bg-accentbg/60 px-3 py-2">
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-          <p className="text-[12px] leading-snug text-accent">
+          <p className="text-[length:var(--fs-xs)] leading-snug text-accent">
             Re-read the explanation — the key insight is there.
           </p>
         </div>
@@ -507,7 +507,7 @@ export function QuizCardView({
             >
               <span
                 className={cn(
-                  'grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[13px] font-bold',
+                  'grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[length:var(--fs-sm)] font-bold',
                   showCorrect && 'bg-good text-white',
                   showWrong && 'bg-bad text-white',
                   !showCorrect && !showWrong && 'bg-panel2 text-ink2',
@@ -533,11 +533,11 @@ export function QuizCardView({
           role="status"
           aria-live="polite"
         >
-          <div className={cn('flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide', isCorrect ? 'text-good' : 'text-bad')}>
+          <div className={cn('flex items-center gap-1.5 text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide', isCorrect ? 'text-good' : 'text-bad')}>
             {isCorrect ? <Check className="h-3.5 w-3.5" /> : <Lightbulb className="h-3.5 w-3.5" />}
             {isCorrect ? 'Correct' : 'Start over — here’s why'}
           </div>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-ink2">{question.explain}</p>
+          <p className="mt-1 text-[length:var(--fs)] leading-relaxed text-ink2">{question.explain}</p>
         </div>
       )}
 
@@ -548,7 +548,7 @@ export function QuizCardView({
           type="button"
           onClick={goBack}
           disabled={!canPrev}
-          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-edge bg-panel px-4 py-2.5 text-[13px] font-medium text-ink2 transition-colors hover:text-ink disabled:opacity-35"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-edge bg-panel px-4 py-2.5 text-[length:var(--fs-sm)] font-medium text-ink2 transition-colors hover:text-ink disabled:opacity-35"
         >
           <ChevronLeft className="h-4 w-4" />
           Back
@@ -557,7 +557,7 @@ export function QuizCardView({
           type="button"
           onClick={answered && !isCorrect ? skipWait : leaveQuestion}
           disabled={!canNext && !(answered && !isCorrect)}
-          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-white disabled:opacity-35"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-accent px-4 py-2.5 text-[length:var(--fs-sm)] font-semibold text-white disabled:opacity-35"
         >
           {answered && !isCorrect ? 'Retry' : answered ? 'Next' : 'Skip'}
           <ChevronRight className="h-4 w-4" />
@@ -602,7 +602,7 @@ export function ReassembleCardView({
 
   const modePillClass = (on: boolean) =>
     cn(
-      'inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2 text-[10px] font-semibold transition-colors',
+      'inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2 text-[length:var(--fs-2xs)] font-semibold transition-colors',
       on ? 'bg-accentbg text-accent' : 'bg-panel2 text-ink3 hover:text-ink',
     );
 
@@ -611,9 +611,9 @@ export function ReassembleCardView({
       {/* Context header — label row carries the mode roll */}
       <div className="px-1">
         <div className="flex items-center gap-1.5">
-          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink3">Rebuild it</span>
+          <span className="shrink-0 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.16em] text-ink3">Rebuild it</span>
           {block.pattern && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">
               <Sparkles className="h-2.5 w-2.5" />
               {block.pattern}
             </span>
@@ -655,7 +655,7 @@ export function ReassembleCardView({
               <button
                 type="button"
                 onClick={onOpenStudio}
-                className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-panel2 px-2 text-[10px] font-medium text-ink3 hover:text-ink"
+                className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-panel2 px-2 text-[length:var(--fs-2xs)] font-medium text-ink3 hover:text-ink"
               >
                 <LayoutGrid className="h-3 w-3" />
                 Studio
@@ -678,20 +678,20 @@ export function ReassembleCardView({
             <button
               type="button"
               onClick={onSkip}
-              className="rounded-full px-2 py-1 text-[11px] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
+              className="rounded-full px-2 py-1 text-[length:var(--fs-tight)] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
             >
               Skip
             </button>
           </div>
         </div>
-        <div className="mt-0.5 truncate text-[15px] font-semibold text-ink">{item.title}</div>
+        <div className="mt-0.5 truncate text-[length:var(--fs-title)] font-semibold text-ink">{item.title}</div>
       </div>
 
       {/* Hint strip — shows the first code piece as a visual cue */}
       {showHint && hintPiece && (
         <div className="mt-2 shrink-0 rounded-xl border border-accentbg bg-accentbg/30 px-3 py-2" data-noswipe>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-accent">Hint — first block:</p>
-          <code className="block whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-ink2 opacity-80">
+          <p className="mb-1 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">Hint — first block:</p>
+          <code className="block whitespace-pre-wrap font-mono text-[length:var(--fs-tight)] leading-relaxed text-ink2 opacity-80">
             {hintPiece.code.trim()}
           </code>
         </div>
@@ -753,7 +753,7 @@ export function CompleteScreen({
         <Trophy className="h-9 w-9" />
       </div>
       <h2 className="relative mt-6 text-[22px] font-bold tracking-tight text-ink">Well done!</h2>
-      <p className="relative mt-1.5 text-[14px] text-ink2">
+      <p className="relative mt-1.5 text-[length:var(--fs)] text-ink2">
         You completed <span className="font-semibold text-ink">{topicTitle}</span>
       </p>
 
@@ -762,7 +762,7 @@ export function CompleteScreen({
           {problemCount != null && (
             <div className="flex flex-col items-center">
               <span className="text-[22px] font-bold tabular-nums text-ink">{problemCount}</span>
-              <span className="text-[11px] text-ink3">problems</span>
+              <span className="text-[length:var(--fs-tight)] text-ink3">problems</span>
             </div>
           )}
           {problemCount != null && totalQuiz != null && (
@@ -771,7 +771,7 @@ export function CompleteScreen({
           {totalQuiz != null && totalQuiz > 0 && (
             <div className="flex flex-col items-center">
               <span className="text-[22px] font-bold tabular-nums text-ink">{totalQuiz}</span>
-              <span className="text-[11px] text-ink3">quiz questions</span>
+              <span className="text-[length:var(--fs-tight)] text-ink3">quiz questions</span>
             </div>
           )}
         </div>
@@ -779,16 +779,16 @@ export function CompleteScreen({
 
       <div className="relative mt-8 flex w-full max-w-[280px] flex-col gap-2.5">
         {onNextCategory && (
-          <button type="button" onClick={onNextCategory} className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-[15px] font-semibold text-white">
+          <button type="button" onClick={onNextCategory} className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white">
             Next: {nextCategoryTitle}
             <ArrowRight className="h-4 w-4" />
           </button>
         )}
-        <button type="button" onClick={onRestart} className="inline-flex items-center justify-center gap-2 rounded-full border border-edge bg-panel px-5 py-2.5 text-[14px] font-medium text-ink2 hover:text-ink">
+        <button type="button" onClick={onRestart} className="inline-flex items-center justify-center gap-2 rounded-full border border-edge bg-panel px-5 py-2.5 text-[length:var(--fs)] font-medium text-ink2 hover:text-ink">
           <RotateCcw className="h-4 w-4" />
           Practice again
         </button>
-        <button type="button" onClick={onExit} className="inline-flex items-center justify-center rounded-full px-5 py-2 text-[13px] font-medium text-ink3 hover:text-ink">
+        <button type="button" onClick={onExit} className="inline-flex items-center justify-center rounded-full px-5 py-2 text-[length:var(--fs-sm)] font-medium text-ink3 hover:text-ink">
           Back to categories
         </button>
       </div>

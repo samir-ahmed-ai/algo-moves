@@ -16,18 +16,14 @@ import { cn } from '@/lib/utils/cn';
 import { shuffle } from '@/lib/utils/shuffle';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { ASSEMBLE_GAMES } from '@/components/puzzle/assemble';
-import { assembleGameStatsStore } from '@/shell/assembleGameStats';
+import { assembleGameStatsStore, maybeWriteRushBest, readRushBestSeconds } from '@/shell/assembleGameStats';
 import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText, useCanvasStatic } from '@/shell/canvas';
 import { useCodeStudioContent, useCodeStudioPhase } from '@/shell/study/hooks/useCodeStudio';
 import type { CodePiece } from '@/lib/code';
 import { blockKind, BLOCK_META } from '@/lib/code';
-import { readStorageText, writeStorageText } from '@/store/persistence';
-import { STORAGE_KEYS } from '@/store/storageKeys';
 import {
   assembleGameSeconds,
   createAssembleGameStats,
-  isBetterAssembleTime,
-  resolveAssembleBestSeconds,
   type AssembleGameStats,
 } from '@/components/puzzle/assemble/types';
 import { formatSecs } from '@/components/puzzle/assemble/gameShared';
@@ -377,16 +373,11 @@ function RushMode() {
   const byId = useMemo(() => new Map(resolved.map((p) => [p.id, p])), [resolved]);
   const correct = resolved.map((p) => p.id);
   const { item } = useCanvasStatic();
-  const bestScope = `${item.id}:${active}`;
-  const bestKey = STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', bestScope);
-  const legacyBestKey = STORAGE_KEYS.RUSH_BEST(item.id, active);
 
   const [runKey, setRunKey] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [done, setDone] = useState(false);
-  const [best, setBest] = useState<number | null>(() => {
-    return resolveAssembleBestSeconds(readStorageText(bestKey), readStorageText(legacyBestKey));
-  });
+  const [best, setBest] = useState<number | null>(() => readRushBestSeconds(item.id, active));
   const start = useRef(Date.now());
 
   useEffect(() => {
@@ -407,10 +398,8 @@ function RushMode() {
     const secs = assembleGameSeconds(stats);
     setDone(true);
     setElapsed(secs);
-    if (isBetterAssembleTime(secs, best)) {
+    if (maybeWriteRushBest(item.id, active, secs)) {
       setBest(secs);
-      writeStorageText(bestKey, String(secs));
-      writeStorageText(legacyBestKey, String(secs));
     }
     return stats;
   };

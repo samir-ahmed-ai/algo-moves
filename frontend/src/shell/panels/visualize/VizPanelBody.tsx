@@ -9,23 +9,27 @@ import { Transport } from '../shared/Transport';
 
 import { isConceptCourse } from '@/lib/canvas/conceptCourse';
 import { useCanvasFrame, useCanvasStatic, ControlsAccordion, nodeText, VizFitBox } from '@/shell/canvas';
+import { useCanvasFrameFollow } from '@/shell/canvas/collab/sync/useCanvasFrameFollow';
 
 /**
  * Stacked: the board renders at natural size on the top row, the Controls rail
  * below it. Replay / Inspector / Metrics live in the right sidebar Analysis tab.
  */
 export function VizPanelBody({
+  nodeId,
   showBigO,
   onBigOOpenChange,
   showTransport = true,
 }: {
+  nodeId?: string;
   showBigO?: boolean;
   onBigOOpenChange?: (open: boolean) => void;
   showTransport?: boolean;
 }) {
   const { plugin, inputId, selectedNode, setSelectedNode, item } = useCanvasStatic();
-  const { frames, frame, player } = useCanvasFrame();
+  const { frames, frame, player, changedKeys } = useCanvasFrame();
   const { mode } = useWorkspace();
+  useCanvasFrameFollow(nodeId ?? 'viz', !!nodeId && mode === 'visualize');
   const View = plugin.View;
   const inVisualize = mode === 'visualize';
   const conceptCourse = isConceptCourse(item);
@@ -75,9 +79,24 @@ export function VizPanelBody({
         </div>
       ) : (
         <VizFitBox
-          className="viz-board-col viz-board-col--fit h-full min-h-0 flex-1 rounded-[calc(var(--radius)-2px)] border border-edge/60 bg-panel2/30"
+          className={cn(
+            'viz-board-col viz-board-col--fit h-full min-h-0 flex-1 rounded-[calc(var(--radius)-2px)] border bg-panel2/30 transition-colors duration-200',
+            changedKeys.length > 0 ? 'border-accent/50 ring-1 ring-accent/20' : 'border-edge/60',
+          )}
           remeasureKey={`${inputId}-${player.index}-${frame.move.type}`}
         >
+          {changedKeys.length > 0 && (
+            <div className="mb-1 flex flex-wrap gap-1 px-1 pt-1">
+              {changedKeys.map((k) => (
+                <span
+                  key={k}
+                  className="rounded-full border border-accent/40 bg-accentbg/40 px-1.5 py-px font-mono text-[length:var(--fs-tight)] text-accent"
+                >
+                  Δ {k}
+                </span>
+              ))}
+            </div>
+          )}
           {viewEl}
         </VizFitBox>
       )}

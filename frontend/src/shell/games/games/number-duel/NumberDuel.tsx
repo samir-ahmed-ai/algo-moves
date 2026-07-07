@@ -1,9 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { ArrowDown, ArrowUp, Eye, Loader2, Lock, Minus, Plus } from 'lucide-react';
-import { getArcadeStrings, useGamesLocale } from '../../locale';
-import { useGameRoom } from '../../net/useGameRoom';
-import { useGameChannel } from '../../net/useGameChannel';
-import { useMatchReporter } from '../../net/useMatchReporter';
 import { GameBody, GameArena, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
@@ -14,31 +10,18 @@ import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import {
   clampNumber,
   decideWinner,
-  evaluateGuess,
   MAX_NUMBER,
   MIN_NUMBER,
   narrowedRange,
-  proximityBand,
-  proximityFraction,
-  type GuessResult,
   type HeatLevel,
 } from './logic';
-import { getNumberDuelStrings } from './strings';
-
-type Attempt = { value: number; result: GuessResult; heat: HeatLevel; frac: number };
-
-type Msg =
-  | { kind: 'ready' }
-  | { kind: 'guess'; value: number }
-  | { kind: 'feedback'; value: number; result: GuessResult; heat: HeatLevel; frac: number; count: number }
-  | { kind: 'snapshot'; round: number; keeperName: string; guesserName: string; attempts: Attempt[] }
-  | { kind: 'rematch' };
-
-type Phase = 'setup' | 'waitingKeeper' | 'watching' | 'guessing' | 'roundResult' | 'over';
-
-const TOTAL_ROUNDS = 2;
-const ROUND_RECAP_MS = 2600;
-const TURN_SECONDS = 25;
+import {
+  ND_TOTAL_ROUNDS,
+  ND_TURN_SECONDS,
+  useNumberDuelGame,
+  type Attempt,
+} from './useNumberDuelGame';
+import { useCountdown } from '../../engine';
 
 const HEAT_STYLE: Record<HeatLevel, { text: string; ring: string; bar: string }> = {
   burning: { text: 'text-bad', ring: 'border-bad/60 bg-bad/10 text-bad', bar: 'bg-bad' },
@@ -49,187 +32,40 @@ const HEAT_STYLE: Record<HeatLevel, { text: string; ring: string; bar: string }>
 };
 
 export function NumberDuel() {
-  const { locale } = useGamesLocale();
-  const strings = useMemo(() => getNumberDuelStrings(locale), [locale]);
-  const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
-  const { self, peer, players, connected, isSpectator } = useGameRoom();
-  const { report } = useMatchReporter('number-duel');
-  const reduced = usePrefersReducedMotion();
-
-  const amHost = self?.role === 'host';
-  const meName = self?.name ?? strings.you;
-  const peerName = peer?.name ?? strings.partner;
-
-  const [round, setRound] = useState(1);
-  const [phase, setPhase] = useState<Phase>(amHost ? 'setup' : 'waitingKeeper');
-  const [secret, setSecret] = useState<number | null>(null);
-  const [num, setNum] = useState(50);
-  const [attempts, setAttempts] = useState<Attempt[]>([]);
-  const [pending, setPending] = useState(false);
-  const [counts, setCounts] = useState<{ 1?: number; 2?: number }>({});
-  const [fireConfetti, setFireConfetti] = useState(false);
-
-  const amKeeper = round === 1 ? amHost : !amHost;
-  const keeperName = round === 1 ? (amHost ? meName : peerName) : amHost ? peerName : meName;
-  const guesserName = round === 1 ? (amHost ? peerName : meName) : amHost ? meName : peerName;
-
-  const myRound1 = amHost ? 2 : 1;
-  const peerRound1 = amHost ? 1 : 2;
-  const myCount = counts[myRound1 as 1 | 2];
-  const peerCount = counts[peerRound1 as 1 | 2];
-
-  const startRound = useCallback(
-    (r: number) => {
-      const keeper = r === 1 ? amHost : !amHost;
-      setRound(r);
-      setAttempts([]);
-      setSecret(null);
-      setNum(50);
-      setPending(false);
-      setFireConfetti(false);
-      setPhase(keeper ? 'setup' : 'waitingKeeper');
-    },
-    [amHost],
-  );
-
-  const resetMatch = useCallback(() => {
-    setCounts({});
-    startRound(1);
-  }, [startRound]);
-
-  const [spectate, setSpectate] = useState<{
-    round: number;
-    keeperName: string;
-    guesserName: string;
-    attempts: Attempt[];
-  } | null>(null);
-
-  const sendRef = useRef<(msg: Msg) => void>(() => {});
-
-  const send = useGameChannel<Msg>((msg) => {
-    switch (msg.kind) {
-      case 'ready':
-        if (!isSpectator && !amKeeper) {
-          setPhase('guessing');
-          playCue('go');
-        }
-        break;
-      case 'guess': {
-        if (isSpectator || !amKeeper || secret == null) return;
-        const result = evaluateGuess(secret, msg.value);
-        const heat = proximityBand(secret, msg.value);
-        const frac = proximityFraction(secret, msg.value);
-        const count = attempts.length + 1;
-        const attempt: Attempt = { value: msg.value, result, heat, frac };
-        const nextAttempts = [...attempts, attempt];
-        setAttempts(nextAttempts);
-        sendRef.current({ kind: 'feedback', value: msg.value, result, heat, frac, count });
-        sendRef.current({ kind: 'snapshot', round, keeperName, guesserName, attempts: nextAttempts });
-        if (result === 'correct') {
-          setCounts((c) => ({ ...c, [round]: count }));
-          setPhase('roundResult');
-        }
-        break;
-      }
-      case 'feedback': {
-        if (isSpectator || amKeeper) return;
-        setAttempts((a) => [...a, { value: msg.value, result: msg.result, heat: msg.heat, frac: msg.frac }]);
-        setPending(false);
-        if (msg.result === 'correct') {
-          setCounts((c) => ({ ...c, [round]: msg.count }));
-          setPhase('roundResult');
-        } else {
-          playCue(msg.heat === 'burning' || msg.heat === 'hot' ? 'select' : 'tick');
-        }
-        break;
-      }
-      case 'snapshot':
-        if (isSpectator) {
-          setSpectate({
-            round: msg.round,
-            keeperName: msg.keeperName,
-            guesserName: msg.guesserName,
-            attempts: msg.attempts,
-          });
-        }
-        break;
-      case 'rematch':
-        resetMatch();
-        setSpectate(null);
-        break;
-    }
-  });
-  sendRef.current = send;
-
-  useEffect(() => {
-    if (phase !== 'roundResult') return;
-    const t = setTimeout(() => {
-      if (round < TOTAL_ROUNDS) startRound(round + 1);
-      else setPhase('over');
-    }, ROUND_RECAP_MS);
-    return () => clearTimeout(t);
-  }, [phase, round, startRound]);
-
-  const lockSecret = () => {
-    const s = clampNumber(num);
-    setSecret(s);
-    setNum(50);
-    setPhase('watching');
-    playCue('select');
-    send({ kind: 'ready' });
-    send({ kind: 'snapshot', round, keeperName, guesserName, attempts: [] });
-  };
-
-  const submitGuess = useCallback(() => {
-    if (pending || phase !== 'guessing') return;
-    setPending(true);
-    playCue('click');
-    send({ kind: 'guess', value: clampNumber(num) });
-  }, [pending, phase, num, send]);
-
-  const rematch = () => {
-    resetMatch();
-    setSpectate(null);
-    send({ kind: 'rematch' });
-  };
-
-  const reportedRef = useRef(false);
-  useEffect(() => {
-    if (phase !== 'over' || reportedRef.current) return;
-    reportedRef.current = true;
-    const host = players.find((p) => p.role === 'host');
-    const guest = players.find((p) => p.role !== 'host');
-    const hostCount = counts[2] ?? 0;
-    const guestCount = counts[1] ?? 0;
-    const winner = decideWinner(hostCount, guestCount);
-    const roster = [];
-    if (host) {
-      roster.push({
-        peerId: host.id,
-        placement: winner === 'host' || winner === 'draw' ? 1 : 2,
-        score: hostCount,
-      });
-    }
-    if (guest) {
-      roster.push({
-        peerId: guest.id,
-        placement: winner === 'guest' || winner === 'draw' ? 1 : 2,
-        score: guestCount,
-      });
-    }
-    if (roster.length > 0) void report(roster);
-  }, [phase, players, counts, report]);
-
-  useEffect(() => {
-    if (phase !== 'over') reportedRef.current = false;
-  }, [phase]);
+  const vm = useNumberDuelGame();
+  const {
+    strings,
+    arcade,
+    connected,
+    isSpectator,
+    amHost,
+    amKeeper,
+    meName,
+    peerName,
+    round,
+    phase,
+    secret,
+    num,
+    setNum,
+    attempts,
+    pending,
+    counts,
+    fireConfetti,
+    setFireConfetti,
+    myCount,
+    peerCount,
+    lockSecret,
+    submitGuess,
+    rematch,
+    spectatorSnapshot,
+  } = vm;
 
   if (!connected && !isSpectator) {
     return <WaitingForPeer message={arcade.waitingReconnect(peerName)} />;
   }
 
   if (isSpectator) {
-    return <SpectatorView strings={strings} snapshot={spectate} />;
+    return <SpectatorView strings={strings} snapshot={spectatorSnapshot} />;
   }
 
   const showScoreboard = phase !== 'over';
@@ -248,14 +84,14 @@ export function NumberDuel() {
           myGuessing={!amKeeper && phase !== 'waitingKeeper' && phase !== 'setup'}
           peerGuessing={amKeeper && phase === 'watching'}
           round={round}
-          total={TOTAL_ROUNDS}
+          total={ND_TOTAL_ROUNDS}
         />
       ) : null}
 
       {showPhaseHeader ? (
         <PhaseHeader
           round={round}
-          total={TOTAL_ROUNDS}
+          total={ND_TOTAL_ROUNDS}
           amKeeper={amKeeper}
           peerName={peerName}
           phase={phase}
@@ -279,7 +115,7 @@ export function NumberDuel() {
       {phase === 'watching' && (
         <GameArena accent="#6366f1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-ink3">{strings.yourSecret}</span>
+            <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.yourSecret}</span>
             <span className="rounded-full border border-accent/40 bg-accentbg px-2.5 py-0.5 font-mono text-lg font-bold tabular-nums text-accent">
               {secret}
             </span>
@@ -298,7 +134,6 @@ export function NumberDuel() {
           pending={pending}
           attempts={attempts}
           strings={strings}
-          reduced={reduced}
         />
       )}
 
@@ -349,8 +184,8 @@ function Scoreboard({
     <div className="flex items-center justify-center gap-3 text-center">
       <ScoreCell name={meName} count={myCount} active={myGuessing} />
       <div className="flex flex-col items-center gap-0.5">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-ink3">vs</span>
-        <span className="font-mono text-[10px] tabular-nums text-ink3">
+        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">vs</span>
+        <span className="font-mono text-[length:var(--fs-2xs)] tabular-nums text-ink3">
           {round}/{total}
         </span>
       </div>
@@ -376,7 +211,7 @@ function ScoreCell({
       <div className={cn('font-mono text-2xl font-bold tabular-nums', muted ? 'text-ink3' : 'text-accent')}>
         {count ?? '—'}
       </div>
-      {active ? <span className="text-[10px] font-semibold uppercase tracking-wide text-accent">live</span> : null}
+      {active ? <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">live</span> : null}
     </div>
   );
 }
@@ -393,19 +228,19 @@ function PhaseHeader({
   total: number;
   amKeeper: boolean;
   peerName: string;
-  phase: Phase;
-  strings: ReturnType<typeof getNumberDuelStrings>;
+  phase: ReturnType<typeof useNumberDuelGame>['phase'];
+  strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
   if (phase === 'waitingKeeper') {
     return (
-      <span className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-ink3">
+      <span className="text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
         {strings.roundOf(round, total)}
       </span>
     );
   }
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink3">
+      <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
         {strings.roundOf(round, total)}
       </span>
       <TurnBadge tone={amKeeper ? 'peer' : 'you'}>
@@ -422,37 +257,20 @@ function GuessingArena({
   pending,
   attempts,
   strings,
-  reduced,
 }: {
   num: number;
   onChange: (n: number) => void;
   onSubmit: () => void;
   pending: boolean;
   attempts: Attempt[];
-  strings: ReturnType<typeof getNumberDuelStrings>;
-  reduced: boolean;
+  strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
-  const [remaining, setRemaining] = useState(TURN_SECONDS);
-  const submitRef = useRef(onSubmit);
-  submitRef.current = onSubmit;
-  const turnKey = attempts.length;
-
-  useEffect(() => {
-    setRemaining(TURN_SECONDS);
-    if (reduced) return;
-    const started = Date.now();
-    const id = setInterval(() => {
-      const left = TURN_SECONDS - Math.floor((Date.now() - started) / 1000);
-      if (left <= 0) {
-        setRemaining(0);
-        clearInterval(id);
-        submitRef.current();
-      } else {
-        setRemaining(left);
-      }
-    }, 250);
-    return () => clearInterval(id);
-  }, [turnKey, reduced]);
+  const reduced = usePrefersReducedMotion();
+  const { remaining, progress } = useCountdown(ND_TURN_SECONDS, {
+    resetKey: attempts.length,
+    skip: reduced,
+    onExpire: onSubmit,
+  });
 
   const last = attempts[attempts.length - 1] ?? null;
   const timerTone = remaining <= 5 ? 'bad' : remaining <= 12 ? 'accent' : 'good';
@@ -460,9 +278,9 @@ function GuessingArena({
   return (
     <GameArena accent="#6366f1">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-ink3">{strings.yourGuess}</span>
+        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.yourGuess}</span>
         {!reduced ? (
-          <CountdownRing progress={remaining / TURN_SECONDS} size={36} tone={timerTone} label={String(remaining)} />
+          <CountdownRing progress={progress} size={36} tone={timerTone} label={String(remaining)} />
         ) : (
           <span className="font-mono text-xs tabular-nums text-ink3">{remaining}s</span>
         )}
@@ -487,12 +305,12 @@ function HeatStrip({
   strings,
 }: {
   attempt: Attempt;
-  strings: ReturnType<typeof getNumberDuelStrings>;
+  strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
   const style = HEAT_STYLE[attempt.heat];
   return (
     <div className="flex items-center gap-2">
-      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-ink3">{strings.proximity}</span>
+      <span className="shrink-0 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.proximity}</span>
       <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-panel2">
         <div
           className={cn('h-full rounded-full transition-[width] duration-300', style.bar)}
@@ -525,7 +343,7 @@ function RangeTrack({ attempts, dialed }: { attempts: Attempt[]; dialed?: number
           />
         )}
       </div>
-      <div className="mt-0.5 flex justify-between font-mono text-[10px] tabular-nums text-ink3">
+      <div className="mt-0.5 flex justify-between font-mono text-[length:var(--fs-2xs)] tabular-nums text-ink3">
         <span>{min}</span>
         <span>{max}</span>
       </div>
@@ -546,7 +364,7 @@ function Dial({
   return (
     <div>
       {label ? (
-        <p className="mb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-ink3">{label}</p>
+        <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{label}</p>
       ) : null}
       <div className="flex items-center justify-center gap-3">
         <button
@@ -585,12 +403,12 @@ function GuessLog({
   strings,
 }: {
   attempts: Attempt[];
-  strings: ReturnType<typeof getNumberDuelStrings>;
+  strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
   if (attempts.length === 0) return null;
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-center text-[10px] font-semibold uppercase tracking-wide text-ink3">
+      <span className="text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
         {strings.guessCount(attempts.length)}
       </span>
       <div className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -634,7 +452,7 @@ function RoundRecap({
   justGuessed: boolean;
   count?: number;
   peerName: string;
-  strings: ReturnType<typeof getNumberDuelStrings>;
+  strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
   return (
     <div className="rounded-[var(--radius)] border border-accent/40 bg-accentbg px-4 py-3 text-center">
@@ -659,7 +477,7 @@ function Over({
   peerName: string;
   onRematch: () => void;
   onWinFlourish: () => void;
-  strings: ReturnType<typeof getNumberDuelStrings>;
+  strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
   const hostCount = counts[2] ?? 0;
   const guestCount = counts[1] ?? 0;
@@ -700,13 +518,8 @@ function SpectatorView({
   snapshot,
   strings,
 }: {
-  snapshot: {
-    round: number;
-    keeperName: string;
-    guesserName: string;
-    attempts: Attempt[];
-  } | null;
-  strings: ReturnType<typeof getNumberDuelStrings>;
+  snapshot: ReturnType<typeof useNumberDuelGame>['spectatorSnapshot'];
+  strings: ReturnType<typeof useNumberDuelGame>['strings'];
 }) {
   return (
     <GameBody className="gap-3">
@@ -715,8 +528,8 @@ function SpectatorView({
           <Eye className="h-3.5 w-3.5" /> {strings.spectating}
         </TurnBadge>
         {snapshot ? (
-          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink3">
-            {strings.roundOf(snapshot.round, TOTAL_ROUNDS)}
+          <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
+            {strings.roundOf(snapshot.round, ND_TOTAL_ROUNDS)}
           </span>
         ) : null}
       </div>
@@ -747,7 +560,7 @@ function SpectatorSeat({ name, sub, accent }: { name: string; sub: string; accen
     >
       <Avatar seed={name} name={name} size={28} />
       <span className={cn('truncate text-xs font-semibold', accent ? 'text-accent' : 'text-ink')}>{name}</span>
-      <span className="text-[10px] text-ink3">{sub}</span>
+      <span className="text-[length:var(--fs-2xs)] text-ink3">{sub}</span>
     </div>
   );
 }

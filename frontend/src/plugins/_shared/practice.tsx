@@ -13,12 +13,13 @@
  * register the returned components as `tabs`. Cycle-safe: depends only on
  * core/types + lib + the canvas actions context, never on the plugin registry.
  */
-import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState, type ComponentType } from 'react';
 import { Check, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { QuizChoiceLabel } from '../../components/shared/QuizChoiceLabel';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS, QUIZ_SHUFFLE_BY_DEFAULT } from '@/lib/quiz';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
+import { initialQuizState, quizAccuracy, quizReducer } from '@/lib/quiz/quizReducer';
 import { vizText } from './vizTokens';
 import { recordAttempt } from '@/store/persistence';
 import { useCanvasActions, useCanvasStatic } from '@/lib/canvas';
@@ -47,11 +48,13 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
   return function QuizPanel() {
     const { focusPanel, advancePractice } = useCanvasActions();
     const { item } = useCanvasStatic();
-    const [i, setI] = useState(0);
-    const [picked, setPicked] = useState<number | null>(null);
-    const [score, setScore] = useState(0);
-    const [done, setDone] = useState(false);
-    const [shuffleSeed, setShuffleSeed] = useState(() => newQuizRunSeed());
+    const [state, dispatch] = useReducer(
+      (s: ReturnType<typeof initialQuizState>, a: Parameters<typeof quizReducer>[1]) =>
+        quizReducer(s, a, quiz.length),
+      undefined,
+      () => ({ ...initialQuizState(), shuffleSeed: newQuizRunSeed() }),
+    );
+    const { index: i, picked, score, done, shuffleSeed } = state;
     const total = quiz.length;
 
     const rawQ = quiz[i];
@@ -63,30 +66,22 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
     const correct = answered && picked !== null && !!q?.choices[picked]?.correct;
     const last = i === quiz.length - 1;
 
-    const restartRun = () => {
-      setI(0);
-      setPicked(null);
-      setScore(0);
-      setDone(false);
-      setShuffleSeed(newQuizRunSeed());
-    };
+    const restartRun = () => dispatch({ type: 'RESTART', seed: newQuizRunSeed() });
 
     const pick = (idx: number) => {
       if (answered || !q) return;
       focusPanel(panelId);
-      setPicked(idx);
       const isC = !!q.choices[idx]?.correct;
+      dispatch({ type: 'PICK', index: idx, correct: isC });
       recordAttempt(item.id, isC);
-      if (isC) setScore((s) => s + 1);
     };
 
     const next = () => {
       if (last) {
-        setDone(true);
+        dispatch({ type: 'FINISH' });
         return;
       }
-      setI((n) => n + 1);
-      setPicked(null);
+      dispatch({ type: 'NEXT' });
     };
 
     const afterAnswer = () => {
@@ -97,11 +92,8 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
     useEffect(() => {
       if (picked === null || !q?.choices[picked]?.correct) return;
       const t = window.setTimeout(() => {
-        if (i === quiz.length - 1) setDone(true);
-        else {
-          setI((n) => n + 1);
-          setPicked(null);
-        }
+        if (i === quiz.length - 1) dispatch({ type: 'FINISH' });
+        else dispatch({ type: 'NEXT' });
       }, CORRECT_ADVANCE_MS);
       return () => window.clearTimeout(t);
     }, [picked, i, q?.choices]);
@@ -124,7 +116,7 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
 
     if (done || !q) {
       const perfect = score === quiz.length;
-      const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
+      const accuracy = quizAccuracy(score, total);
       return (
         <div className="flex flex-col items-center gap-1.5 py-1">
           <div className={cn('font-semibold leading-none tabular-nums text-ink', vizText.expr, vizText.mono)}>

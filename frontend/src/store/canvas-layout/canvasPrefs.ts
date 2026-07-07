@@ -1,5 +1,6 @@
 import { defaultEdgeOpts, type BgVariant, type EdgeOpts } from '@/lib/canvas/layoutPrefs';
-import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
+import { readStorageJson } from '@/store/persistence/storage';
+import { createSyncStore } from '@/store/createSyncStore';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 
 export interface CanvasPrefs {
@@ -19,7 +20,7 @@ interface StoredCanvasPrefs {
   bg?: BgVariant;
 }
 
-export function loadCanvasPrefs(): CanvasPrefs {
+function load(): CanvasPrefs {
   const raw = readStorageJson<StoredCanvasPrefs | CanvasPrefs | null>(KEY, null, (value): value is StoredCanvasPrefs | CanvasPrefs => {
     if (!value || typeof value !== 'object') return false;
     return typeof (value as StoredCanvasPrefs).bg === 'string' || !!(value as StoredCanvasPrefs).edgeOpts;
@@ -31,6 +32,16 @@ export function loadCanvasPrefs(): CanvasPrefs {
   };
 }
 
+const store = createSyncStore<CanvasPrefs>(KEY, load);
+
+export function loadCanvasPrefs(): CanvasPrefs {
+  return store.get();
+}
+
 export function saveCanvasPrefs(p: CanvasPrefs) {
-  writeStorageJson(KEY, p);
+  store.set(p);
+}
+
+export function useCanvasPrefs(): CanvasPrefs {
+  return store.use();
 }

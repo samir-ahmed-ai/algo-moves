@@ -1,19 +1,9 @@
 import { useCallback, useRef } from 'react';
-import { loadLayouts, saveLayouts, type LayoutEntry } from '@/store/canvas-layout';
+import { loadLayouts, saveLayouts, type LayoutEntry, type SavedNode } from '@/store/canvas-layout';
 import { migrateLayouts } from '../layout/layoutMigration';
 
 /** Persisted node positions/resizes per `${pluginId}:${mode}` key. */
-export type Saved = Record<
-  string,
-  {
-    position: { x: number; y: number };
-    width?: number;
-    height?: number;
-    parentId?: string;
-    layoutSlots?: (string | null)[];
-    slotIndex?: number;
-  }
->;
+export type Saved = SavedNode;
 
 /**
  * Per-(plugin, mode) canvas persistence, extracted from CanvasStage: dragged
@@ -34,22 +24,29 @@ export function useCanvasLayoutPersistence() {
     ),
   );
 
+  const viewportRef = useRef<Record<string, { x: number; y: number; zoom: number }>>({});
+  Object.entries(persisted.current).forEach(([k, v]) => {
+    if (v.viewport) viewportRef.current[k] = v.viewport;
+  });
+
   const persist = useCallback(() => {
     const out: Record<string, LayoutEntry> = {};
     const keys = new Set([
       ...Object.keys(layoutRef.current),
       ...Object.keys(removedRef.current),
       ...Object.keys(removedEdgesRef.current),
+      ...Object.keys(viewportRef.current),
     ]);
     for (const k of keys) {
       out[k] = {
         nodes: layoutRef.current[k] ?? {},
         removed: [...(removedRef.current[k] ?? [])],
         removedEdges: [...(removedEdgesRef.current[k] ?? [])],
+        ...(viewportRef.current[k] ? { viewport: viewportRef.current[k] } : {}),
       };
     }
     saveLayouts(out);
   }, []);
 
-  return { layoutRef, removedRef, removedEdgesRef, persist };
+  return { layoutRef, removedRef, removedEdgesRef, viewportRef, persist };
 }

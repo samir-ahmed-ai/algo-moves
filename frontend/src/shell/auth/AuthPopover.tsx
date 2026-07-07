@@ -281,22 +281,22 @@ export function AuthPopover({
     >
       <div aria-hidden className="auth-modal-glow pointer-events-none absolute inset-x-0 top-0 h-24" />
 
-      <div className="relative px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
+      <div className="relative px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5">
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="absolute end-3.5 top-3.5 grid h-8 w-8 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+          className="absolute end-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
           aria-label={s.close}
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
         </button>
 
-        <div className="mb-4 flex flex-col items-center text-center">
-          <BrandLogo className="h-9 w-9 ring-2 ring-accent/15 ring-offset-2 ring-offset-bg" />
-          <h2 id={titleId} className="mt-2.5 text-lg font-bold tracking-tight text-ink">
+        <div className="mb-3 flex flex-col items-center text-center">
+          <BrandLogo className="h-8 w-8 ring-2 ring-accent/15 ring-offset-2 ring-offset-bg" />
+          <h2 id={titleId} className="mt-2 text-base font-bold tracking-tight text-ink">
             {tab === 'login' ? s.welcomeBack : s.createAccount}
           </h2>
-          <p className="mt-1 max-w-[16rem] text-[13px] leading-snug text-ink3">
+          <p className="mt-0.5 max-w-[16rem] text-[length:var(--fs-sm)] leading-snug text-ink3">
             {tab === 'login' ? s.loginSubtitle : s.signupSubtitle}
           </p>
         </div>
@@ -304,7 +304,7 @@ export function AuthPopover({
         <AuthTabList tab={tab} onSwitch={switchTab} />
 
         <form
-          className="flex flex-col gap-3"
+          className="flex flex-col gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             void submit();
@@ -383,7 +383,7 @@ export function AuthPopover({
             type="submit"
             disabled={!canSubmit}
             className={cn(
-              'mt-0.5 inline-flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-semibold text-white',
+              'mt-0.5 inline-flex min-h-[calc(var(--row)*1.35)] w-full items-center justify-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white',
               'shadow-[0_1px_2px_hsl(0_0%_0%/0.12),0_4px_12px_hsl(var(--accent-h,220)_80%_40%/0.25)]',
               'transition-all hover:opacity-95 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
             )}
@@ -402,7 +402,7 @@ export function AuthPopover({
           </button>
         </form>
 
-        <div className="mt-4 border-t border-edge pt-4">
+        <div className="mt-3 border-t border-edge pt-3">
           <p className="text-center text-xs text-ink3">
             {tab === 'login' ? s.noAccount : s.hasAccount}{' '}
             <button
@@ -442,7 +442,7 @@ function AuthTabList({ tab, onSwitch }: { tab: AuthTab; onSwitch: (tab: AuthTab)
     <div
       role="tablist"
       aria-label="Account mode"
-      className="relative mb-4 grid grid-cols-2 rounded-xl border border-edge bg-panel2 p-1"
+      className="relative mb-3 grid grid-cols-2 rounded-xl border border-edge bg-panel2 p-[var(--gap)]"
     >
       <span
         aria-hidden
@@ -475,7 +475,7 @@ function TabChip({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        'relative z-[1] min-h-9 rounded-lg text-sm font-semibold transition-colors duration-200',
+        'relative z-[1] min-h-[var(--row)] rounded-lg text-sm font-semibold transition-colors duration-200',
         active ? 'text-ink' : 'text-ink3 hover:text-ink2',
       )}
     >
@@ -500,7 +500,7 @@ function PasswordStrengthMeter({ strength }: { strength: 'weak' | 'fair' | 'stro
           />
         ))}
       </div>
-      <p className="text-[11px] text-ink3">{label}</p>
+      <p className="text-[length:var(--fs-tight)] text-ink3">{label}</p>
     </div>
   );
 }
@@ -537,8 +537,8 @@ function AuthField({
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 text-start">
-      <label className="text-[11px] font-semibold uppercase tracking-wide text-ink3" htmlFor={id}>
+    <div className="flex flex-col gap-1 text-start">
+      <label className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3" htmlFor={id}>
         {label}
       </label>
       <div className="relative">
@@ -559,7 +559,7 @@ function AuthField({
           aria-invalid={invalid || undefined}
           aria-describedby={error && id ? `${id}-error` : undefined}
           className={cn(
-            'min-h-11 w-full rounded-xl border bg-panel text-sm text-ink outline-none transition-all',
+            'min-h-[calc(var(--row)*1.35)] w-full rounded-xl border bg-panel text-sm text-ink outline-none transition-all',
             'placeholder:text-ink3/70 focus:border-accent focus:ring-2 focus:ring-accent/20',
             leading ? 'ps-10' : 'px-3',
             trailing ? 'pe-11' : leading ? 'pe-3' : undefined,
@@ -626,7 +626,7 @@ export function AuthUserMenu({
         <p className="truncate text-sm font-semibold text-ink">{profile.display_name}</p>
         {profile.email ? <p className="truncate text-xs text-ink3">{profile.email}</p> : null}
         {profile.is_admin ? (
-          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent">
+          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide text-accent">
             <Shield className="h-3 w-3" /> {s.admin}
           </span>
         ) : null}

@@ -75,6 +75,26 @@ Server → client:
 `"guest"` (slot 1). A third connection to a full room gets `{"t":"error","msg":"room-full"}`
 and is closed.
 
+## Room invariants
+
+These rules are enforced in `internal/hub/room.go` and matter to every arcade game:
+
+- **Seat 0 is always the host.** The first player to claim slot 0 gets `role: "host"`.
+  Seat 1 keeps the historical `"guest"` name; seats 2–7 are `"player"`.
+- **Only the host may publish shared `state`.** Guests and spectators relay moves over
+  `relay`, but `setState` from a non-host is ignored — games mirror authoritative
+  snapshots from the host into room state for spectators and late joiners.
+- **Capacity is 2–8 player seats.** Rooms default to 2 seats; the creating client may
+  request up to 8. Extra joiners become spectators (up to 64), not rejected outright.
+- **Roles are seat-fixed, not promoted.** When the host disconnects, their seat frees
+  but stays slot 0 — a reconnect with the same `pid` reclaims host. No automatic
+  promotion of a guest to host.
+- **Pid reclaim beats lowest-free-seat.** Reconnecting with a stable `pid` always
+  returns to the same seat/role, evicting a stale connection still parked there.
+- **Empty rooms are deleted.** When the last connection leaves, the room is marked
+  `dead` and removed from the hub map so the code can be reused. A join that races
+  with that teardown retries against a fresh room (see `JoinWith`).
+
 ## Layout
 
 ```

@@ -1,4 +1,4 @@
-import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
+import type { PanelFlowNode, PanelNodeData, PanelNodeStyle } from '@/core/panelFlowTypes';
 import { layoutFixedWidth } from '../layout/layout';
 
 // Pure helpers for serializing/restoring a panel node's persisted position + width.
@@ -8,7 +8,7 @@ export function snapNodeWidth(n: PanelFlowNode): number | undefined {
   return n.width ?? undefined;
 }
 
-/** Persist position + width; viz width is layout-owned in visualize mode. */
+/** Persist position, size, and chrome state for session restore (#76). */
 export function snapNodeLayout(n: PanelFlowNode): {
   position: { x: number; y: number };
   width?: number;
@@ -16,8 +16,13 @@ export function snapNodeLayout(n: PanelFlowNode): {
   parentId?: string;
   layoutSlots?: (string | null)[];
   slotIndex?: number;
+  collapsed?: boolean;
+  locked?: boolean;
+  accent?: string;
+  style?: PanelNodeStyle;
 } {
-  const kind = (n.data as PanelNodeData | undefined)?.kind ?? n.id;
+  const data = n.data as PanelNodeData;
+  const kind = data?.kind ?? n.id;
   const entry: {
     position: { x: number; y: number };
     width?: number;
@@ -25,6 +30,10 @@ export function snapNodeLayout(n: PanelFlowNode): {
     parentId?: string;
     layoutSlots?: (string | null)[];
     slotIndex?: number;
+    collapsed?: boolean;
+    locked?: boolean;
+    accent?: string;
+    style?: PanelNodeStyle;
   } = { position: n.position };
   if (kind !== 'viz' && kind !== 'workbench') {
     const w = snapNodeWidth(n);
@@ -32,8 +41,12 @@ export function snapNodeLayout(n: PanelFlowNode): {
   }
   if (n.height != null) entry.height = n.height;
   if (n.parentId) entry.parentId = n.parentId;
-  if (n.data.layoutSlots?.some(Boolean)) entry.layoutSlots = [...n.data.layoutSlots];
-  if (n.data.slotIndex != null) entry.slotIndex = n.data.slotIndex;
+  if (data.layoutSlots?.some(Boolean)) entry.layoutSlots = [...data.layoutSlots];
+  if (data.slotIndex != null) entry.slotIndex = data.slotIndex;
+  if (data.collapsed) entry.collapsed = true;
+  if (data.locked) entry.locked = true;
+  if (data.accent) entry.accent = data.accent;
+  if (data.style && Object.keys(data.style).length > 0) entry.style = { ...data.style };
   return entry;
 }
 

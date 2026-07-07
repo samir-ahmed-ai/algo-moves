@@ -262,7 +262,7 @@ export function WouldYouRather() {
         current={state.round + 1}
         total={state.prompts.length}
         badge={
-          <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[10px] font-bold text-good">
+          <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[length:var(--fs-2xs)] font-bold text-good">
             {matchCount} matched
           </span>
         }
@@ -270,11 +270,11 @@ export function WouldYouRather() {
 
       <GameArena accent="#e879a0">
         <div className="rounded-lg bg-gradient-to-br from-pink-500/15 via-accent/10 to-purple-500/10 border border-pink-500/25 p-2.5 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-pink-500 mb-1">{s.wouldYouRather}</p>
+          <p className="text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-pink-500 mb-1">{s.wouldYouRather}</p>
           <p className="text-sm font-bold leading-snug text-ink">{prompt.a}</p>
           <div className="my-1.5 flex items-center gap-2">
             <div className="flex-1 h-px bg-edge" />
-            <span className="text-[10px] font-semibold text-ink3 px-1">{s.orLabel}</span>
+            <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3 px-1">{s.orLabel}</span>
             <div className="flex-1 h-px bg-edge" />
           </div>
           <p className="text-sm font-bold leading-snug text-ink">{prompt.b}</p>
@@ -558,7 +558,7 @@ function HeartMeter({ matched, total }: { matched: number; total: number }) {
           </span>
         ))}
       </div>
-      <p className="text-[10px] text-ink3 font-medium">{matched} / {total} matches</p>
+      <p className="text-[length:var(--fs-2xs)] text-ink3 font-medium">{matched} / {total} matches</p>
     </div>
   );
 }
@@ -567,7 +567,7 @@ function ScoreBoard({ players, scores }: { players: { id: string; name: string }
   const ranked = [...players].sort((a, b) => (scores[b.id] ?? 0) - (scores[a.id] ?? 0));
   return (
     <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-ink3">Score</p>
+      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-ink3">Score</p>
       <div className="flex flex-col gap-1.5">
         {ranked.map((p, i) => (
           <div key={p.id} className="flex items-center gap-2">

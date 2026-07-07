@@ -88,6 +88,7 @@ function wrapper({ children }: { children: ReactNode }) {
             frames: [stubFrame],
             player: stubPlayer,
             frame: stubFrame,
+            changedKeys: [],
           }}
         >
           <CodeStudioProvider>{children}</CodeStudioProvider>

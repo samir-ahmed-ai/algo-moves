@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -85,6 +86,28 @@ export default defineConfig({
           if (has('/plugins/go-course/')) return 'plugins-go-course-runtime';
           return;
         },
+      },
+    },
+  },
+  test: {
+    environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.{test,spec}.{ts,tsx}',
+        'src/**/__tests__/**',
+        'src/plugins/_generated/**',
+        'src/plugins/imported/manifest.ts',
+        'src/plugins/imported/prepManifest.ts',
+      ],
+      thresholds: {
+        lines: 35,
+        functions: 35,
+        branches: 30,
+        statements: 35,
       },
     },
   },

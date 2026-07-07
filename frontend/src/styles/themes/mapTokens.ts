@@ -114,68 +114,6 @@ const CHROME_KEYS: (keyof ChromeTokens)[] = [
   'border-width',
 ];
 
-function pick(src: SourceTokens, key: string, fallback = ''): string {
-  return src[key]?.trim() ?? fallback;
-}
-
-function mixBg(color: string, pct = 16): string {
-  return `color-mix(in srgb, ${color} ${pct}%, transparent)`;
-}
-
-/** Map shadcn-style CSS vars to algo-moves tokens. */
-export function mapSourceToAlgo(src: SourceTokens): AlgoTokens {
-  const primary = pick(src, '--primary');
-  const muted = pick(src, '--muted');
-  const mutedFg = pick(src, '--muted-foreground');
-  const destructive = pick(src, '--destructive');
-  const chart1 = pick(src, '--chart-1');
-  const chart2 = pick(src, '--chart-2');
-  const chart3 = pick(src, '--chart-3');
-  const chart4 = pick(src, '--chart-4');
-  const chart5 = pick(src, '--chart-5');
-  const border = pick(src, '--border');
-  const ring = pick(src, '--ring');
-
-  const isBrutal = border === 'oklch(0 0 0)' || border === 'oklch(1 0 0)';
-
-  return {
-    bg: pick(src, '--background'),
-    surface: pick(src, '--card'),
-    'surface-2': muted,
-    border,
-    'border-strong': ring || border,
-    text: pick(src, '--foreground'),
-    'text-2': mutedFg,
-    'text-3': `color-mix(in srgb, ${mutedFg || pick(src, '--foreground')} 65%, transparent)`,
-    accent: primary,
-    'accent-bg': mixBg(primary),
-    'team0-bg': `color-mix(in srgb, ${mutedFg || pick(src, '--foreground')} 18%, ${pick(src, '--card')})`,
-    'team0-stroke': border,
-    'team1-bg': mixBg(chart1, 22),
-    'team1-stroke': chart1,
-    'team1-text': chart2 || chart1,
-    'team2-bg': mixBg(chart3, 22),
-    'team2-stroke': chart3,
-    'team2-text': chart4 || chart3,
-    edge: border,
-    'edge-active': ring,
-    'edge-clash': destructive || chart4,
-    ring,
-    good: chart5 || chart1,
-    'good-bg': mixBg(chart5 || chart1, 22),
-    bad: destructive,
-    'bad-bg': mixBg(destructive, 22),
-    radius: pick(src, '--radius', '0.5rem'),
-    sans: pick(src, '--font-sans', 'system-ui, sans-serif'),
-    mono: pick(src, '--font-mono', 'ui-monospace, monospace'),
-    'shadow-sm': pick(src, '--shadow-sm', '0 1px 2px hsl(0 0% 0% / 0.1)'),
-    'shadow-md': pick(src, '--shadow-md', '0 2px 4px hsl(0 0% 0% / 0.12)'),
-    'shadow-lg': pick(src, '--shadow-lg', '0 4px 6px hsl(0 0% 0% / 0.15)'),
-    'shadow-xl': pick(src, '--shadow-xl', '0 8px 10px hsl(0 0% 0% / 0.18)'),
-    'border-width': isBrutal ? '2px' : '1px',
-  };
-}
-
 export function splitTokens(tokens: AlgoTokens): { colors: ColorTokens; chrome: ChromeTokens } {
   const colors = {} as ColorTokens;
   const chrome = {} as ChromeTokens;

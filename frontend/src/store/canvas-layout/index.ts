@@ -1,2 +1,2 @@
-export * from './layoutStore';
 export * from './canvasPrefs';
+export * from './layoutStore';

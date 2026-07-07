@@ -8,12 +8,12 @@ export function MotionsPanelContent() {
 
   return (
     <div className="min-w-0">
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-[var(--gap)]">
         {level.allowed.map((motion) => (
           <VimKbd key={motion}>{motion}</VimKbd>
         ))}
       </div>
-      <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-ink3">
+      <div className="mt-2 flex flex-wrap items-center gap-[var(--gap)] text-[length:var(--fs-tight)] text-ink3">
         <span>
           <VimKbd>Esc</VimKbd> reset · <VimKbd>r</VimKbd> retry
         </span>

@@ -43,6 +43,11 @@ export function CategoryBoard({
   const blurb = category?.summary;
   const total = flat.length;
   const mastered = flat.filter((it) => statFor(progress, it.id).mastered).length;
+  const attempted = flat.filter((it) => statFor(progress, it.id).attempts > 0).length;
+  const onStreak = flat.filter((it) => {
+    const s = statFor(progress, it.id);
+    return s.streak >= 1 && !s.mastered;
+  }).length;
   const easy = flat.filter((it) => it.difficulty === 'Easy').length;
   const med = flat.filter((it) => it.difficulty === 'Medium').length;
   const hard = flat.filter((it) => it.difficulty === 'Hard').length;
@@ -55,13 +60,13 @@ export function CategoryBoard({
   } as const;
 
   return (
-    <div className="relative h-full overflow-auto p-2 sm:p-3">
+    <div className="relative h-full overflow-auto p-[var(--pad)]">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.15]" style={gridStyle} />
 
       <div className="relative">
         <BrowseBreadcrumb trackId={trackId} categoryId={categoryId} onBack={() => setActiveCategoryId(null)} />
 
-        <div className="relative mb-3 flex items-center gap-2 overflow-hidden rounded-lg border border-edge bg-panel px-3 py-2">
+        <div className="relative mb-2 flex items-center gap-[var(--gap)] overflow-hidden rounded-lg border border-edge bg-panel px-[var(--hpad)] py-[var(--pad)]">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-lg opacity-[0.3] [mask-image:radial-gradient(120%_120%_at_0_0,black,transparent)]"
@@ -86,11 +91,13 @@ export function CategoryBoard({
           {total > 0 && (
             <div className="relative ml-auto flex shrink-0 items-center gap-2">
               <div className="flex flex-col items-end gap-1">
-                <div className="w-20">
-                  <Meter value={mastered} max={total} tone="good" height={6} />
+                <div className="flex w-24 flex-col gap-0.5">
+                  <Meter value={mastered} max={total} tone="good" height={4} />
+                  <Meter value={attempted} max={total} tone="accent" height={4} />
                 </div>
                 <span className={cn('font-mono tabular-nums text-ink3', chromeText.sm)}>
-                  {mastered}/{total} mastered
+                  {mastered}/{total} mastered · {attempted} tried
+                  {onStreak > 0 ? ` · ${onStreak} on streak` : ''}
                 </span>
               </div>
               <div className="hidden items-center gap-1 sm:flex">
@@ -98,7 +105,7 @@ export function CategoryBoard({
                   const n = d === 'Easy' ? easy : d === 'Medium' ? med : hard;
                   if (n === 0) return null;
                   return (
-                    <Chip key={d} tone={difficultyTone(d)} mono className={cn('!px-2 !py-0.5', chromeText.sm)}>
+                    <Chip key={d} tone={difficultyTone(d)} mono className={cn('!px-1.5 !py-px', chromeText.xs)}>
                       {d[0]}·{n}
                     </Chip>
                   );
@@ -145,11 +152,11 @@ export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
   } as const;
 
   return (
-    <div className="relative h-full overflow-auto p-2 sm:p-3">
+    <div className="relative h-full overflow-auto p-[var(--pad)]">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.15]" style={gridStyle} />
       <div className="relative">
         <BrowseBreadcrumb trackId={trackId} onBack={() => { setActiveTrackId(null); setProblemFocused(false); }} />
-        <div className="relative mb-3 overflow-hidden rounded-lg border border-edge bg-panel px-3 py-2">
+        <div className="relative mb-2 overflow-hidden rounded-lg border border-edge bg-panel px-[var(--hpad)] py-[var(--pad)]">
           <Label className="font-mono tracking-[0.12em]">PICK A CATEGORY</Label>
           <h2 className={cn('font-medium text-ink', chromeText.base)}>{track?.title ?? 'Browse'}</h2>
           {track?.summary && <p className={cn('mt-0.5 text-ink2', chromeText.tight)}>{track.summary}</p>}
@@ -160,7 +167,7 @@ export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search categories…"
-            className="w-full rounded-lg border border-edge bg-panel py-2 pl-9 pr-3 text-[14px] text-ink outline-none placeholder:text-ink3 focus:border-accent"
+            className="w-full rounded-lg border border-edge bg-panel py-2 pl-9 pr-3 text-[length:var(--fs)] text-ink outline-none placeholder:text-ink3 focus:border-accent"
           />
         </div>
         {filteredCategories.length === 0 ? (

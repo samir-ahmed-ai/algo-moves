@@ -1,3 +1,4 @@
+export * from './useCanvasPresentation';
 export * from './useCanvasDnD';
 export * from './useCanvasHistory';
 export * from './useCanvasKeyboardShortcuts';

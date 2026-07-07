@@ -10,6 +10,7 @@ export {
   defaultInterviewRuntime,
   type InterviewSettings,
   type InterviewRuntime,
+  type PlaybackState,
   type TimerState,
   type SessionKind,
   type SessionMeta,

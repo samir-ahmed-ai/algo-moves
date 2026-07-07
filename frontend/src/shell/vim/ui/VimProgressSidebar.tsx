@@ -5,7 +5,7 @@ export function VimProgressSidebar() {
   return (
     <aside className="vim-studio-sidebar vim-studio-sidebar--right hidden min-h-0 min-[960px]:flex">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center gap-2 border-b border-edge/40 px-3 py-2.5">
+        <header className="flex shrink-0 items-center gap-[var(--gap)] border-b border-edge/40 px-[var(--hpad)] py-[var(--pad)]">
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-panel2/80 text-good">
             <BarChart3 className="h-3.5 w-3.5" />
           </span>
@@ -13,7 +13,7 @@ export function VimProgressSidebar() {
             <span className="block truncate text-sm font-semibold text-ink">Progress</span>
           </div>
         </header>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-2.5 text-sm">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-[var(--hpad)] py-[var(--pad)] text-sm">
           <ProgressPanelContent />
         </div>
       </div>

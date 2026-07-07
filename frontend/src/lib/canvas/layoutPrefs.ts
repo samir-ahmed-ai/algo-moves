@@ -10,7 +10,9 @@ export type LayoutPreset = (typeof LAYOUT_PRESETS)[number];
 
 /** Legacy persisted preset name → current {@link LayoutPreset}. */
 export function normalizeLayoutPreset(value: unknown): LayoutPreset {
-  if (value === 'Study') return 'TraceFocus';
+  if (value === 'Study' || value === 'study') return 'TraceFocus';
+  if (value === 'exam') return 'Minimal';
+  if (value === 'demo') return 'Demo';
   if (typeof value === 'string' && (LAYOUT_PRESETS as readonly string[]).includes(value)) {
     return value as LayoutPreset;
   }

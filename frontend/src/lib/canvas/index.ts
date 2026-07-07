@@ -6,3 +6,4 @@ export * from './layoutPrefs';
 export * from './canvasContext';
 export * from './canvasActions';
 export * from './vizFitMeasure';
+export * from './frameDiff';

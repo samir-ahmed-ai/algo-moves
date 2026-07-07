@@ -44,6 +44,7 @@ export const STORAGE_KEYS = {
 
   // shell / mobile
   MOBILE_SESSION: k('mobile-session'),
+  SRS_DECK: k('srs-deck'),
   INSTALL_PROMPT_DISMISSED: k('install-prompt-dismissed'),
 
   // shell / home

@@ -14,6 +14,8 @@ import {
 } from '../layout/layout';
 import { restoreNodeWidth } from '../nodes/nodeSnapshot';
 
+import type { PanelNodeStyle } from '@/core/panelFlowTypes';
+
 /** Persisted per-node position + width (see useCanvasLayoutPersistence `Saved`). */
 export type SavedNodeLayout = Record<
   string,
@@ -24,6 +26,10 @@ export type SavedNodeLayout = Record<
     parentId?: string;
     layoutSlots?: (string | null)[];
     slotIndex?: number;
+    collapsed?: boolean;
+    locked?: boolean;
+    accent?: string;
+    style?: PanelNodeStyle;
   }
 >;
 
@@ -106,6 +112,10 @@ export function buildCanvasFrame(
           ...n.data,
           ...(layoutSlots?.some(Boolean) ? { layoutSlots } : {}),
           ...(slotIndex != null ? { slotIndex } : {}),
+          ...(s.collapsed ? { collapsed: true } : {}),
+          ...(s.locked ? { locked: true } : {}),
+          ...(s.accent ? { accent: s.accent } : {}),
+          ...(s.style ? { style: { ...n.data.style, ...s.style } } : {}),
         },
       };
     });

@@ -161,15 +161,15 @@ function GameChooserCard({
             <span className="flex flex-wrap items-center justify-center gap-1">
               {game.category ? <CategoryBadge category={game.category} /> : null}
               {!fits ? (
-                <span className="shrink-0 rounded-full border border-edge bg-panel2 px-1.5 py-0.5 text-[9px] font-semibold text-ink3">
+                <span className="shrink-0 rounded-full border border-edge bg-panel2 px-1.5 py-0.5 text-[length:var(--fs-2xs)] font-semibold text-ink3">
                   {t.picker.playerRange(cap.min, cap.max)}
                 </span>
               ) : null}
             </span>
-            <span className="line-clamp-2 text-[10px] leading-snug text-ink3">
+            <span className="line-clamp-2 text-[length:var(--fs-2xs)] leading-snug text-ink3">
               {fits ? meta.tagline : t.picker.needsPlayers(cap.min, cap.max)}
             </span>
-            <span className="mt-auto inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide text-ink3">
+            <span className="mt-auto inline-flex items-center gap-1 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
               <span>{game.minutes}</span>
               <span className="text-edge2">·</span>
               <span>{paceLabel}</span>
@@ -180,7 +180,7 @@ function GameChooserCard({
 
       {expanded ? (
         <div
-          className="-mt-1 rounded-b-2xl border border-t-0 bg-panel2 px-3 py-2.5 text-[11px] text-ink2 leading-relaxed"
+          className="-mt-1 rounded-b-2xl border border-t-0 bg-panel2 px-3 py-2.5 text-[length:var(--fs-tight)] text-ink2 leading-relaxed"
           style={{ borderColor: `${color}30` }}
         >
           <span className="font-bold text-ink">

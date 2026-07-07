@@ -16,7 +16,7 @@ import type {
   Tweaks,
 } from './workspace';
 
-export interface WorkspaceCtx {
+export interface WorkspaceAppearanceCtx {
   theme: Theme;
   setTheme: (t: Theme) => void;
   density: Density;
@@ -30,6 +30,9 @@ export interface WorkspaceCtx {
   setLayoutPreset: (p: LayoutPreset) => void;
   tweaks: Tweaks;
   toggleTweak: (k: keyof Tweaks) => void;
+}
+
+export interface WorkspaceChromeCtx {
   menuOpen: boolean;
   setMenuOpen: (b: boolean) => void;
   rightOpen: boolean;
@@ -42,12 +45,31 @@ export interface WorkspaceCtx {
   toggleFocusCanvas: () => void;
   dir: LayoutDir;
   setDir: (d: LayoutDir) => void;
-  mode: CanvasMode;
-  setMode: (m: CanvasMode) => void;
   sidePanelTab: string | null;
   setSidePanelTab: (id: string | null) => void;
   rightTab: RightSidebarTab;
   setRightTab: (tab: RightSidebarTab) => void;
+  canvasAdd: CanvasAddPanel | null;
+  setCanvasAdd: (v: CanvasAddPanel | null) => void;
+  canvasProject: CanvasProjectApi | null;
+  setCanvasProject: (v: CanvasProjectApi | null) => void;
+  canvasHud: CanvasHudProps | null;
+  setCanvasHud: (v: CanvasHudProps | null) => void;
+  settingsOpen: boolean;
+  setSettingsOpen: (b: boolean) => void;
+  tracePreviewOpen: boolean;
+  setTracePreviewOpen: (b: boolean) => void;
+  mobileTransportOpen: boolean;
+  setMobileTransportOpen: (b: boolean) => void;
+  fitCanvasSignal: number;
+  requestFitCanvas: () => void;
+  /** True on phone-sized viewports; chrome renders as overlay drawers. */
+  isMobile: boolean;
+}
+
+export interface WorkspaceNavigationCtx {
+  mode: CanvasMode;
+  setMode: (m: CanvasMode) => void;
   activeItemId: string;
   /** Low-level item id setter — prefer {@link openProblem} when opening a problem from UI. */
   setActiveItemId: (id: string) => void;
@@ -88,20 +110,6 @@ export interface WorkspaceCtx {
   enterGames: (roomCode?: string) => void;
   /** Enter the interview prep plans hub. */
   enterPlans: () => void;
-  canvasAdd: CanvasAddPanel | null;
-  setCanvasAdd: (v: CanvasAddPanel | null) => void;
-  canvasProject: CanvasProjectApi | null;
-  setCanvasProject: (v: CanvasProjectApi | null) => void;
-  canvasHud: CanvasHudProps | null;
-  setCanvasHud: (v: CanvasHudProps | null) => void;
-  settingsOpen: boolean;
-  setSettingsOpen: (b: boolean) => void;
-  tracePreviewOpen: boolean;
-  setTracePreviewOpen: (b: boolean) => void;
-  mobileTransportOpen: boolean;
-  setMobileTransportOpen: (b: boolean) => void;
-  fitCanvasSignal: number;
-  requestFitCanvas: () => void;
-  /** True on phone-sized viewports; chrome renders as overlay drawers. */
-  isMobile: boolean;
 }
+
+export type WorkspaceCtx = WorkspaceAppearanceCtx & WorkspaceChromeCtx & WorkspaceNavigationCtx;

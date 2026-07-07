@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils/cn';
-import { computeInputFrameCounts } from '@/lib/canvas';
+import { computeInputFrameCounts, buildFrameContextValue } from '@/lib/canvas';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { chromeText } from '../chromeUi';
 import { onReactFlowError } from './canvasFlowErrors';
@@ -29,6 +29,7 @@ import { usePlayer } from '../../core';
 import type { Item } from '../../content';
 import { useWorkspace } from '@/store/workspace';
 import { loadCanvasPrefs } from '@/store/canvas-layout';
+import { setPendingProblemDrop, consumePendingProblemDrop } from '@/store/canvas';
 import { ConnectedComponentsProvider } from '@/lib/canvas';
 import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { EFFECT_DND_KEY } from '../../hooks/useDragAndDrop';
@@ -77,12 +78,14 @@ import {
 } from './layout/layoutSlots';
 import { setLayoutDropTarget } from './layout/layoutDropState';
 import { buildCanvasFrame } from './frame';
+import { anchorFrameAtPointer } from './frame/framePlacement';
 import {
   useCanvasLayoutPersistence,
   useCanvasLifecycle,
   useCanvasKeyboardShortcuts,
   useCanvasDnD,
   DND_KEY,
+  useCanvasPresentation,
   useCanvasNodeMutations,
 } from './hooks';
 import { CanvasCollabProvider, useCanvasCollab } from './collab/CanvasCollabProvider';
@@ -216,11 +219,12 @@ function Inner({
   const [snap, setSnap] = useState(false);
 
   // Per-(plugin, mode) persistence: dragged positions/resizes + which panels were trash-removed.
-  const { layoutRef, removedRef, removedEdgesRef, persist } = useCanvasLayoutPersistence();
+  const { layoutRef, removedRef, removedEdgesRef, viewportRef, persist } = useCanvasLayoutPersistence();
 
-  const { fitView, screenToFlowPosition } = useReactFlow();
+  const { fitView, screenToFlowPosition, setCenter, setViewport } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
   const wrapperRef = useRef<HTMLDivElement>(null);
+  useCanvasPresentation(wrapperRef);
 
   const viewportSize = useCallback(() => {
     const r = wrapperRef.current?.getBoundingClientRect();
@@ -239,8 +243,8 @@ function Inner({
   // saved positions/sizes. Pure assembly lives in buildCanvasFrame; this wrapper
   // only supplies the current per-mode removal/layout refs.
   const buildFor = useCallback(
-    (m: CanvasMode, k: string): { nodes: PanelFlowNode[]; edges: Edge[] } =>
-      buildCanvasFrame(plugin, m, {
+    (m: CanvasMode, k: string): { nodes: PanelFlowNode[]; edges: Edge[] } => {
+      const built = buildCanvasFrame(plugin, m, {
         removed: removedRef.current[k],
         removedEdges: removedEdgesRef.current[k],
         saved: layoutRef.current[k],
@@ -248,8 +252,14 @@ function Inner({
         layoutOpts: layoutOpts(),
         dir,
         edgeOpts,
-      }),
-    [plugin, edgeOpts, dir, layoutOpts, standalone],
+      });
+      const anchor = !standalone ? consumePendingProblemDrop(item.id) : null;
+      if (anchor && m === 'visualize') {
+        return { ...built, nodes: anchorFrameAtPointer(built.nodes, anchor) };
+      }
+      return built;
+    },
+    [plugin, edgeOpts, dir, layoutOpts, standalone, item.id],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -334,6 +344,7 @@ function Inner({
     restoreProblemStarterPanels,
     suppressAutoRestoreForKey,
     reset,
+    persistViewport,
   } = useCanvasLifecycle({
     nodes,
     edges,
@@ -350,6 +361,8 @@ function Inner({
     layoutRef,
     removedRef,
     removedEdgesRef,
+    viewportRef,
+    setViewport,
     persist,
     buildFor,
     layoutOpts,
@@ -393,11 +406,12 @@ function Inner({
 
   // ---- drag a removed panel back onto the canvas ----
   const onProblemDrop = useCallback(
-    (itemId: string, _position: { x: number; y: number }) => {
-      // Scaffold: load problem in visualize mode; full frame placement at pointer is deferred.
+    (itemId: string, position: { x: number; y: number }) => {
+      setPendingProblemDrop(itemId, position);
       enterProblemInMode(itemId, 'visualize');
+      requestFitCanvas();
     },
-    [enterProblemInMode],
+    [enterProblemInMode, requestFitCanvas],
   );
 
   const { onDragOver, onDragLeave, onDrop } = useCanvasDnD({
@@ -598,6 +612,26 @@ function Inner({
     [fitView],
   );
 
+  const onMinimapClick = useCallback(
+    (_e: React.MouseEvent, position: { x: number; y: number }) => {
+      const selected = nodesRef.current.filter((n) => n.selected);
+      if (selected.length) {
+        fitView({ padding: FIT_PADDING_FOCUS, duration: FIT_VIEW_DURATION_MS, nodes: selected, maxZoom: 1.0 });
+        return;
+      }
+      setCenter(position.x, position.y, { duration: FIT_VIEW_DURATION_MS });
+    },
+    [fitView, setCenter],
+  );
+
+  const onMinimapNodeClick = useCallback(
+    (_e: React.MouseEvent, node: Node) => {
+      setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === node.id })));
+      focusNode(node.id);
+    },
+    [focusNode, setNodes],
+  );
+
   const onNodeDrag = useCallback<OnNodeDrag<PanelFlowNode>>(
     (e) => {
       if (lock || mode !== 'visualize') return;
@@ -780,7 +814,10 @@ function Inner({
     }),
     [plugin, item, inputId, setInputId, customInput, setCustomInput, inputFrameCounts, selectedNode],
   );
-  const frameValue = useMemo(() => ({ frames: displayFrames, player, frame }), [displayFrames, player, frame]);
+  const frameValue = useMemo(
+    () => buildFrameContextValue(displayFrames, player, frame),
+    [displayFrames, player, frame],
+  );
 
   const bgVariant =
     bg === 'lines' ? BackgroundVariant.Lines : bg === 'cross' ? BackgroundVariant.Cross : BackgroundVariant.Dots;
@@ -817,7 +854,7 @@ function Inner({
         <CanvasActionsProvider value={canvasActions}>
         <div className="flex h-full min-h-0 w-full">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div ref={wrapperRef} onPointerMove={onPanePointerMove} className={cn('relative min-h-0 flex-1 bg-bg', dragOver && 'ring-2 ring-inset ring-good/40')}>
+        <div ref={wrapperRef} onPointerMove={onPanePointerMove} data-present={present || undefined} className={cn('relative min-h-0 flex-1 bg-bg', present && 'canvas-stage--present', dragOver && 'ring-2 ring-inset ring-good/40')}>
           <ConnectedComponentsProvider nodeIds={nodes.map((n) => n.id)} edges={edges}>
           <ReactFlow
             style={{ width: '100%', height: '100%' }}
@@ -844,6 +881,7 @@ function Inner({
               setMenu(null);
               if (collab.isCollaborating) collab.broadcastViewport({ x: vp.x, y: vp.y, zoom: vp.zoom });
             }}
+            onMoveEnd={(_e, vp) => persistViewport(vp)}
             onNodesDelete={onNodesDelete}
             onEdgesDelete={onEdgesDelete}
             onBeforeDelete={onBeforeDelete}
@@ -889,6 +927,7 @@ function Inner({
             {bg !== 'none' && (
               <Background variant={bgVariant} gap={20} size={1} color="color-mix(in srgb, var(--text) 12%, transparent)" />
             )}
+            {!present && (
             <MiniMap
               pannable
               zoomable
@@ -899,7 +938,10 @@ function Inner({
               bgColor="color-mix(in srgb, var(--surface) 88%, transparent)"
               className="!bottom-[calc(var(--chrome-bottom,0px)+8px)] !right-2 !m-0 hidden overflow-hidden rounded-md border border-edge shadow-[var(--shadow-md)] lg:block"
               style={{ width: 132, height: 92 }}
+              onClick={onMinimapClick}
+              onNodeClick={onMinimapNodeClick}
             />
+            )}
             {!present && <CanvasFloatingHud />}
             {!present && <CanvasToolbar lock={lock} onToggleLock={() => setLock((l) => !l)} onTidy={reset} />}
             {!present && <InterviewHud />}
@@ -931,7 +973,7 @@ function Inner({
                   <button
                     type="button"
                     onClick={restoreProblemStarterPanels}
-                    className="pointer-events-auto rounded-full bg-accent px-3 py-1 text-[12px] font-semibold text-white"
+                    className="pointer-events-auto rounded-full bg-accent px-3 py-1 text-[length:var(--fs-xs)] font-semibold text-white"
                   >
                     Restore starter panels
                   </button>

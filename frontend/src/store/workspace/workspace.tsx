@@ -105,4 +105,9 @@ export const tweakMeta: { key: keyof Tweaks; label: string; hint: string }[] = [
 ];
 
 export { WorkspaceProvider } from './workspaceContext';
-export { useWorkspace } from './useWorkspace';
+export {
+  useWorkspace,
+  useWorkspaceAppearance,
+  useWorkspaceChrome,
+  useWorkspaceNavigation,
+} from './useWorkspace';

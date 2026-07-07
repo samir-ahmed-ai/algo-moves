@@ -64,6 +64,7 @@ import {
 } from './protocol/subdocMerge';
 import { extractSubDocs } from '@/shell/realtime/roomState';
 import { isQuizOp, toHostQuizEntry, type HostQuizEntry } from './protocol/quizProtocol';
+import { SoloFallbackBanner } from './SoloFallbackBanner';
 
 /** Live, ephemeral state for one remote collaborator. */
 export interface PeerPresence {
@@ -91,7 +92,7 @@ export interface CanvasCollabApi {
   session: SessionMeta;
   /** Mint a fresh room and host it. */
   startSession: (name?: string) => Promise<string | null>;
-  /** Host an interview room with a shared problem (scaffold). */
+  /** Host an interview room with a shared problem. */
   startInterviewSession: (problemId: string, name?: string) => Promise<string | null>;
   /** Join an existing room by code. */
   joinSession: (code: string, name?: string) => void;
@@ -112,6 +113,13 @@ export interface CanvasCollabApi {
   setLocked: (locked: boolean) => void;
   /** Toggle "follow me" — guests mirror the host viewport. */
   setHostFollow: (on: boolean) => void;
+  /** Classroom mode — guests mirror the host scrubber on viz panels. */
+  setHostFrameFollow: (on: boolean) => void;
+  /** Host-only: patch live interview runtime (timer/lock/follow/playback). */
+  patchInterviewRuntime: (reduce: (r: InterviewRuntime) => InterviewRuntime) => void;
+  /** True when interview cloud persistence is unavailable (relay-only fallback). */
+  backendDegraded: boolean;
+  dismissBackendBanner: () => void;
   /** Bind the live session to a durable REST session id / guest token. */
   setSessionIdentity: (p: { sessionId?: string; guestToken?: string }) => void;
 
@@ -168,6 +176,8 @@ function CollabState({ children }: { children: ReactNode }) {
   const [subDocCursors, setSubDocCursors] = useState<
     Record<string, Record<string, { name: string; color: string; x: number; y: number; line?: number; at: number }>>
   >({});
+  const [backendDegraded, setBackendDegraded] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const isHost = role === 'host';
   const isCollaborating = status === 'open' && room != null;
@@ -398,9 +408,9 @@ function CollabState({ children }: { children: ReactNode }) {
   }, [connect, selfName]);
 
   const startInterviewSession = useCallback(async (problemId: string, name?: string): Promise<string | null> => {
-    // Create the durable session first so we get a guest token + stable id.
-    // Degrades to an ad-hoc room (no durable features) when the backend has no DB.
     const created = await createInterviewSession('Untitled interview').catch(() => null);
+    setBackendDegraded(!created?.id);
+    setBannerDismissed(false);
     let code: string | null = null;
     try {
       code = await fetchNewRoomCode();
@@ -448,6 +458,16 @@ function CollabState({ children }: { children: ReactNode }) {
   const joinSession = useCallback((code: string, name?: string) => {
     const norm = normalizeRoomCode(code);
     if (norm.length < 4) return;
+    const share = readShareFromUrl();
+    if (share?.sessionKind === 'interview') {
+      setSessionMeta(
+        interviewSession(share.item ?? '', DEFAULT_INTERVIEW_SETTINGS, {
+          guestToken: share.guestToken,
+        }),
+      );
+    } else {
+      setSessionMeta(collabSession());
+    }
     connect(norm, name?.trim() || selfName, { capacity: 8 });
   }, [connect, selfName]);
 
@@ -482,6 +502,8 @@ function CollabState({ children }: { children: ReactNode }) {
     setSubDocCursors({});
     setSessionMeta(defaultSession('solo'));
     clearInterviewHost();
+    setBackendDegraded(false);
+    setBannerDismissed(false);
     autoJoinRef.current = false;
 
     // Strip room/sessionKind from URL so refresh doesn't re-join
@@ -554,6 +576,20 @@ function CollabState({ children }: { children: ReactNode }) {
     [patchRuntime],
   );
 
+  const setHostFrameFollow = useCallback(
+    (on: boolean) =>
+      patchRuntime((r) => ({
+        ...r,
+        hostFrameFollow: on,
+        playback: on ? r.playback : undefined,
+      })),
+    [patchRuntime],
+  );
+
+  const patchInterviewRuntime = patchRuntime;
+
+  const dismissBackendBanner = useCallback(() => setBannerDismissed(true), []);
+
   const setSessionIdentity = useCallback(
     (p: { sessionId?: string; guestToken?: string }) => {
       setSessionMeta((prev) => {
@@ -607,7 +643,9 @@ function CollabState({ children }: { children: ReactNode }) {
       session: sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
       updateInterviewSettings, resumeInterviewSession,
-      startTimer, pauseTimer, resumeTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
+      startTimer, pauseTimer, resumeTimer, resetTimer, setLocked, setHostFollow, setHostFrameFollow,
+      patchInterviewRuntime, setSessionIdentity,
+      backendDegraded, dismissBackendBanner,
       peers, followId, setFollowId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
@@ -623,7 +661,9 @@ function CollabState({ children }: { children: ReactNode }) {
       sessionMeta,
       startSession, startInterviewSession, joinSession, leaveSession,
       updateInterviewSettings, resumeInterviewSession,
-      startTimer, pauseTimer, resumeTimer, resetTimer, setLocked, setHostFollow, setSessionIdentity,
+      startTimer, pauseTimer, resumeTimer, resetTimer, setLocked, setHostFollow, setHostFrameFollow,
+      patchInterviewRuntime, setSessionIdentity,
+      backendDegraded, dismissBackendBanner,
       peers, followId,
       broadcastCursor, broadcastSelection, broadcastViewport, broadcastDrag,
       comments, addComment, replyComment, resolveComment, removeComment,
@@ -634,7 +674,17 @@ function CollabState({ children }: { children: ReactNode }) {
     ],
   );
 
-  return <CanvasCollabContext.Provider value={value}>{children}</CanvasCollabContext.Provider>;
+  return (
+    <CanvasCollabContext.Provider value={value}>
+      {children}
+      {backendDegraded && !bannerDismissed && sessionMeta.kind === 'interview' ? (
+        <SoloFallbackBanner
+          message="Interview is running without cloud persistence — durable guest invite links and session history are unavailable. LAN relay still works."
+          onDismiss={dismissBackendBanner}
+        />
+      ) : null}
+    </CanvasCollabContext.Provider>
+  );
 }
 
 function patchPeer(
