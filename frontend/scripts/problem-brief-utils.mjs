@@ -107,28 +107,3 @@ export function secondFromSummary(summary, first) {
   return undefined;
 }
 
-export function formatBriefInput(value) {
-  if (value == null) return '';
-  if (typeof value === 'string') {
-    const t = value.trim();
-    if (t.startsWith('{') || t.startsWith('[')) {
-      try {
-        return JSON.stringify(JSON.parse(t), null, 2);
-      } catch {
-        /* fall through */
-      }
-    }
-    return value;
-  }
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
-
-export function inputDisplayLabel(input) {
-  const label = input.label ?? '';
-  if (label.startsWith('[') || label.includes('=')) return label;
-  return formatBriefInput(input.value);
-}

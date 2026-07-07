@@ -7,15 +7,27 @@ describe('formatJsonDisplay', () => {
     expect(formatJsonDisplay(undefined)).toBe('');
   });
 
-  it('pretty-prints objects and arrays', () => {
+  it('pretty-prints objects with compact primitive arrays', () => {
     expect(formatJsonDisplay({ n: 5, edges: [[0, 1]] })).toBe(
-      '{\n  "n": 5,\n  "edges": [\n    [\n      0,\n      1\n    ]\n  ]\n}',
+      '{\n  "n": 5,\n  "edges": [\n    [0, 1]\n  ]\n}',
     );
-    expect(formatJsonDisplay([1, 2, 3])).toBe('[\n  1,\n  2,\n  3\n]');
+    expect(formatJsonDisplay([1, 2, 3])).toBe('[1, 2, 3]');
+  });
+
+  it('keeps array values on one line for primitive elements', () => {
+    expect(formatJsonDisplay({ tree: [4, 2, 6, 1, 3, 5, 7], order: 'preorder' })).toBe(
+      '{\n  "tree": [4, 2, 6, 1, 3, 5, 7],\n  "order": "preorder"\n}',
+    );
+  });
+
+  it('puts each composite array element on its own line without splitting inner values', () => {
+    expect(formatJsonDisplay({ edges: [[0, 1, 2], [0, 3, 6]] })).toBe(
+      '{\n  "edges": [\n    [0, 1, 2],\n    [0, 3, 6]\n  ]\n}',
+    );
   });
 
   it('pretty-prints compact JSON strings', () => {
-    expect(formatJsonDisplay('{"a":1,"b":[2,3]}')).toBe('{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}');
+    expect(formatJsonDisplay('{"a":1,"b":[2,3]}')).toBe('{\n  "a": 1,\n  "b": [2, 3]\n}');
   });
 
   it('returns non-JSON strings unchanged', () => {

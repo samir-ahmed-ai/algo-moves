@@ -186,10 +186,11 @@ Deploy the **frontend** and **game server** on [Railway](https://railway.com). P
    Or deploy individually:
 
    ```bash
-   # Upload the full repo; Root Directory per service is set in the dashboard.
+   # Upload the full monorepo; backend/frontend use Root Directory from step 2.
    railway up . --service backend --detach
-   railway up . --service hocuspocus --detach
    railway up . --service frontend --detach
+   # hocuspocus has no Root Directory — upload its folder as the snapshot root.
+   railway up services/hocuspocus --path-as-root --service hocuspocus --detach
    ```
 
 See [`backend/README.md`](backend/README.md) for endpoint and Docker details.

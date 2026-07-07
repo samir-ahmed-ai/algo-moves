@@ -20,7 +20,6 @@ export default defineConfig({
       // Keep the hand-crafted manifest.webmanifest in public/ rather than
       // having the plugin generate one — it already has all the right fields.
       manifest: false,
-      includeAssets: ['favicon.svg', 'assets/*.png'],
       workbox: {
         // Cache everything shipped in dist, including large lazy JS chunks.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],

@@ -143,6 +143,8 @@ function ExampleInputPicker() {
   const active = inputs.find((i) => i.id === inputId) ?? inputs[0];
   const previewValue = active?.value;
   const hasPreview = previewValue != null && previewValue !== '';
+  const description = active?.hint?.trim();
+  const hasDescription = !!description;
   const flash = useFlash(inputId);
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -165,11 +167,25 @@ function ExampleInputPicker() {
   }, [inputs, inputId, setInputId]);
 
   if (inputs.length <= 1) {
-    if (!hasPreview) return null;
+    if (!hasPreview && !hasDescription) return null;
     return (
-      <ControlsAccordion title="Input preview" defaultOpen bodyClassName="pt-1">
-        <JsonBlock value={previewValue} />
-      </ControlsAccordion>
+      <>
+        {hasDescription && (
+          <ControlsAccordion title="Example description" defaultOpen bodyClassName="pt-1">
+            <p className={cn('leading-relaxed text-ink2', nodeText.sm)}>{description}</p>
+          </ControlsAccordion>
+        )}
+        {hasPreview && (
+          <ControlsAccordion
+            title="Input preview"
+            defaultOpen={!hasDescription}
+            className={hasDescription ? 'border-t-0' : undefined}
+            bodyClassName="pt-1"
+          >
+            <JsonBlock value={previewValue} />
+          </ControlsAccordion>
+        )}
+      </>
     );
   }
 
@@ -181,6 +197,8 @@ function ExampleInputPicker() {
       <Section
         title="Examples"
         bordered={false}
+        collapsible
+        defaultOpen
         right={
           <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-[length:var(--fs-2xs)] font-semibold tabular-nums text-ink2">
             {activeIdx + 1} / {inputs.length}
@@ -205,11 +223,21 @@ function ExampleInputPicker() {
             flash={flash}
           />
         )}
+        {hasDescription && (
+          <ControlsAccordion
+            title="Example description"
+            defaultOpen
+            className="mt-1.5 border-t-0"
+            bodyClassName="pt-1"
+          >
+            <p className={cn('leading-relaxed text-ink2', nodeText.sm)}>{description}</p>
+          </ControlsAccordion>
+        )}
         {hasPreview && (
           <ControlsAccordion
             title="Input preview"
-            defaultOpen
-            className="mt-1.5 border-t-0"
+            defaultOpen={!hasDescription}
+            className={cn('border-t-0', (hasDescription || usePills || inputs.length > 4) && 'mt-1.5')}
             bodyClassName="pt-1"
           >
             <JsonBlock value={previewValue} />
@@ -269,7 +297,7 @@ export function ProblemPanelBody() {
         </ControlsAccordion>
       )}
       {hasProblemBrief && (
-        <ControlsAccordion title="Problem brief" defaultOpen={false} className={inVisualize ? undefined : 'border-t-0'}>
+        <ControlsAccordion title="Problem brief" defaultOpen className={inVisualize ? undefined : 'border-t-0'}>
           <ProblemBriefBody statements={problemBrief.statements} cases={problemBrief.cases} />
         </ControlsAccordion>
       )}

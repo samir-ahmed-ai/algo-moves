@@ -14,12 +14,14 @@ import { goCoursePlugins } from '@/plugins/go-course';
 import { openrtbPlugins } from '@/plugins/openrtb';
 import { PREP_DATA } from '@/plugins/imported/prepManifest';
 import { PROBLEM_GISTS } from '@/content/gists';
-import {
-  ensurePeriod,
-  titleToAsk,
-  secondFromSummary,
-  inputDisplayLabel,
-} from './problem-brief-utils.mjs';
+import { ensurePeriod, titleToAsk, secondFromSummary } from './problem-brief-utils.mjs';
+import { formatJsonDisplay } from '@/lib/utils/formatJsonDisplay';
+
+function inputDisplayLabel(input: SampleInput<unknown>): string {
+  const label = input.label ?? '';
+  if (label.startsWith('[') || label.includes('=')) return label;
+  return formatJsonDisplay(input.value);
+}
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', '_generated');
 

@@ -59,16 +59,18 @@ if [[ "$VARS_ONLY" == true ]]; then
   exit 0
 fi
 
-# Upload the full monorepo; each service's Root Directory (backend, frontend,
-# services/hocuspocus) is configured in the Railway dashboard. Do NOT use
-# --path-as-root here — that uploads only the subfolder as the snapshot root,
-# but Railway still chdirs into the configured Root Directory and fails with:
+# Upload the full monorepo; backend and frontend Root Directory are set in the
+# Railway dashboard (backend, frontend). Do NOT use --path-as-root for those —
+# that uploads only the subfolder as the snapshot root, but Railway still
+# chdirs into the configured Root Directory and fails with:
 #   lstat snapshot-target-unpack/frontend: no such file or directory
 echo "==> Deploying backend..."
 railway up "$ROOT" --service backend --detach -m "deploy backend"
 
 echo "==> Deploying hocuspocus..."
-railway up "$ROOT" --service hocuspocus --detach -m "deploy hocuspocus"
+# hocuspocus has no Root Directory in Railway (null); upload the service folder
+# as the snapshot root so railway.toml + Dockerfile are found at /.
+railway up "$ROOT/services/hocuspocus" --path-as-root --service hocuspocus --detach -m "deploy hocuspocus"
 
 echo "==> Deploying frontend..."
 railway up "$ROOT" --service frontend --detach -m "deploy frontend"
