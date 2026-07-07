@@ -43,7 +43,7 @@ export function TransportBar({
     await exportRunSnapshot(target, 'gif', {
       filename: `${slug}-step-${player.index + 1}`,
       backgroundColor:
-        getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || undefined,
+        getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#061615',
     });
   }, [item.title, player.index]);
 
@@ -62,7 +62,7 @@ export function TransportBar({
         aria-label={player.isPlaying ? 'Pause playback' : 'Play playback'}
         aria-pressed={player.isPlaying}
         className={cn(
-          'transport-bar__play nodrag grid place-items-center rounded-full bg-accent text-white shadow-sm transition-transform hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100',
+          'transport-bar__play nodrag grid place-items-center rounded-full bg-accent text-[var(--accent-contrast)] shadow-theme-sm transition hover:scale-105 hover:shadow-theme-md motion-reduce:transition-none motion-reduce:hover:scale-100',
           CHROME_BTN,
         )}
       >
@@ -199,7 +199,7 @@ export function TransportBar({
         role="toolbar"
         aria-label="Visualization transport"
         className={cn(
-          'transport-bar transport-bar--compact flex w-full min-h-[var(--row)] flex-col gap-1 rounded-md border border-edge bg-panel/95 px-[var(--gap)] py-1',
+          'transport-bar transport-bar--compact flex min-h-[var(--row)] w-full flex-col gap-1 rounded-2xl border border-edge bg-[var(--surface-glass)] px-[var(--gap)] py-1 shadow-theme-md backdrop-blur-xl',
           className,
         )}
       >
@@ -218,7 +218,7 @@ export function TransportBar({
       role="toolbar"
       aria-label="Visualization transport"
       className={cn(
-        'transport-bar flex min-h-[var(--row)] flex-col gap-1 rounded-full border border-edge bg-panel/95 px-2 py-1 shadow-[var(--shadow-lg)] backdrop-blur',
+        'transport-bar flex min-h-[var(--row)] flex-col gap-1 rounded-full border border-edge bg-[var(--surface-glass)] px-2 py-1 shadow-theme-lg backdrop-blur-xl',
         className,
       )}
     >

@@ -289,7 +289,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
               : {
                   item: activeItemId,
                   id: getPluginMeta(activeItemId)?.number,
-                  input: inputId || undefined,
+                  ...(inputId ? { input: inputId } : {}),
                   mode,
                   focus: 'problem',
                   theme,
@@ -358,7 +358,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
   const clampedSel = visibleCommands.length ? Math.min(sel, visibleCommands.length - 1) : 0;
   const activeCommand = visibleCommands[clampedSel];
   const optionId = (index: number) => `${listboxId}-option-${index}`;
-  const activeOptionId = activeCommand ? optionId(clampedSel) : undefined;
+  const activeOptionId = activeCommand ? optionId(clampedSel) : null;
   const exec = (command?: CommandPaletteCommand) => {
     if (!command) return;
     setRecentCommandIds(recordCommandPaletteRecentId(command.id));
@@ -373,14 +373,14 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
 
   return (
     <div
-      className="command-palette-overlay absolute inset-0 z-50 grid place-items-start justify-items-center bg-black/40 pt-[12vh] backdrop-blur-sm"
+      className="command-palette-overlay absolute inset-0 z-50 grid place-items-start justify-items-center bg-bg/70 pt-[12vh] backdrop-blur-md"
       onClick={onClose}
       role="dialog"
       aria-labelledby={titleId}
       aria-modal="true"
     >
       <div
-        className="command-palette w-[400px] max-w-[92vw] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-[var(--shadow-xl)]"
+        className="command-palette w-[440px] max-w-[92vw] overflow-hidden rounded-3xl border border-edge bg-[var(--surface-glass)] shadow-theme-xl ring-1 ring-accent/10 backdrop-blur-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id={titleId} className="sr-only">
@@ -415,7 +415,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-expanded="true"
-          aria-activedescendant={activeOptionId}
+          {...(activeOptionId ? { 'aria-activedescendant': activeOptionId } : {})}
           aria-label="Search commands"
         />
         <div className="sr-only" aria-live="polite">
@@ -432,11 +432,14 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
           {visibleCommands.length === 0 ? (
             <div
               className={cn(
-                'command-palette__empty px-[var(--hpad)] py-[var(--pad)] text-ink3',
+                'command-palette__empty px-[var(--hpad)] py-8 text-center text-ink3',
                 chromeText.base,
               )}
             >
-              No matches.
+              <div className="mx-auto mb-2 grid h-10 w-10 place-items-center rounded-2xl border border-edge bg-panel/70 text-ink3">
+                ?
+              </div>
+              No matching commands.
             </div>
           ) : (
             sections.map((section) => (
@@ -462,7 +465,7 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
                       onMouseEnter={() => setSel(index)}
                       onClick={() => exec(command)}
                       className={cn(
-                        'flex w-full min-h-[var(--row)] items-center justify-between gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left',
+                        'flex min-h-[var(--row)] w-full items-center justify-between gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left transition-colors',
                         'command-palette__option',
                         index === clampedSel
                           ? 'command-palette__option--active bg-accentbg text-accent'

@@ -85,6 +85,22 @@ describe('catalog ↔ registry integrity', () => {
   });
 });
 
+function normalizeTags(tags: unknown): string[] {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const tag of tags) {
+    const next = String(tag ?? '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+    if (!next || seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+  return out;
+}
+
 describe('generated plugin meta is in sync with implementations', () => {
   // Guards against editing a plugin's meta without re-running `npm run build-plugin-meta`.
   // The generated PLUGIN_META is a direct copy of each plugin's meta fields + group,
@@ -104,7 +120,7 @@ describe('generated plugin meta is in sync with implementations', () => {
       if (gen.summary !== p.meta.summary) drift.push(`${p.meta.id}: summary drift`);
       if ((gen.source ?? undefined) !== (p.meta.source ?? undefined))
         drift.push(`${p.meta.id}: source drift`);
-      if (JSON.stringify(gen.tags) !== JSON.stringify(p.meta.tags))
+      if (JSON.stringify(gen.tags) !== JSON.stringify(normalizeTags(p.meta.tags)))
         drift.push(`${p.meta.id}: tags drift`);
     }
     expect(drift, drift.join('\n')).toEqual([]);

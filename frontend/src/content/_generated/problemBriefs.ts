@@ -4339,13 +4339,13 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "[\"#  \",\"  c\",\"  #\"], \"abc\"",
+        "input": "[\"# \",\" c\",\" #\"], \"abc\"",
         "output": "true (placeable)",
         "note": "See Check If Word Can Be Placed In Crossword pattern."
       },
       {
         "label": "Example 2",
-        "input": "[\"# #\",\"   \",\"# #\"], \"ac\"",
+        "input": "[\"# #\",\" \",\"# #\"], \"ac\"",
         "note": "See Check If Word Can Be Placed In Crossword pattern."
       }
     ]

@@ -282,7 +282,9 @@ export function WouldYouRather() {
             {s.playAgain}
           </TouchButton>
         ) : (
-          <p className="text-center text-sm text-ink3">{s.spectatorWaiting}</p>
+          <p className="rounded-2xl border border-white/60 bg-white/64 px-3 py-3 text-center text-sm font-semibold text-slate-500 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+            {s.spectatorWaiting}
+          </p>
         )}
       </GameBody>
     );
@@ -299,26 +301,30 @@ export function WouldYouRather() {
         current={state.round + 1}
         total={state.prompts.length}
         badge={
-          <span className="rounded-full bg-goodbg px-2 py-0.5 font-mono text-[length:var(--fs-2xs)] font-bold text-good">
+          <span className="rounded-full border border-emerald-300/40 bg-emerald-100/80 px-2 py-0.5 font-mono text-[length:var(--fs-2xs)] font-black text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100">
             {matchCount} matched
           </span>
         }
       />
 
       <GameArena accent="#e879a0">
-        <div className="rounded-lg bg-gradient-to-br from-pink-500/15 via-accent/10 to-purple-500/10 border border-pink-500/25 p-2.5 text-center">
-          <p className="text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-pink-500 mb-1">
+        <div className="rounded-[1.35rem] border border-pink-300/35 bg-gradient-to-br from-pink-50/95 via-white/78 to-cyan-50/75 p-4 text-center shadow-sm dark:border-pink-300/20 dark:from-pink-300/10 dark:via-white/5 dark:to-cyan-300/10">
+          <p className="mb-2 text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.22em] text-pink-700 dark:text-pink-100">
             {s.wouldYouRather}
           </p>
-          <p className="text-sm font-bold leading-snug text-ink">{prompt.a}</p>
-          <div className="my-1.5 flex items-center gap-2">
-            <div className="flex-1 h-px bg-edge" />
-            <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3 px-1">
+          <p className="text-base font-black leading-snug text-slate-950 dark:text-white">
+            {prompt.a}
+          </p>
+          <div className="my-3 flex items-center gap-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-pink-300/70" />
+            <span className="rounded-full bg-white/80 px-2 py-0.5 text-[length:var(--fs-2xs)] font-black uppercase tracking-wide text-slate-500 shadow-sm dark:bg-white/10 dark:text-slate-300">
               {s.orLabel}
             </span>
-            <div className="flex-1 h-px bg-edge" />
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-cyan-300/70" />
           </div>
-          <p className="text-sm font-bold leading-snug text-ink">{prompt.b}</p>
+          <p className="text-base font-black leading-snug text-slate-950 dark:text-white">
+            {prompt.b}
+          </p>
         </div>
 
         {showReveal ? (
@@ -382,9 +388,11 @@ function CategoryPicker({
 
   if (!isHost) {
     return (
-      <div className="flex flex-col items-center gap-2 py-6 text-center">
-        <span className="text-3xl animate-bounce">🎲</span>
-        <p className="text-xs font-medium text-ink2">Host is choosing the vibe…</p>
+      <div className="flex flex-col items-center gap-3 rounded-[1.5rem] border border-white/60 bg-white/70 py-8 text-center shadow-sm dark:border-white/10 dark:bg-white/5">
+        <span className="animate-bounce text-3xl">🎲</span>
+        <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+          Host is choosing the vibe…
+        </p>
       </div>
     );
   }
@@ -392,8 +400,12 @@ function CategoryPicker({
   return (
     <div className="flex flex-col gap-2.5">
       <div className="text-center">
-        <h3 className="text-base font-bold text-ink">{s.chooseCategoriesTitle}</h3>
-        <p className="text-xs text-ink3 mt-0.5">{s.chooseCategoriesHint}</p>
+        <h3 className="text-lg font-black text-slate-950 dark:text-white">
+          {s.chooseCategoriesTitle}
+        </h3>
+        <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+          {s.chooseCategoriesHint}
+        </p>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {(Object.keys(CATEGORY_LABELS) as WyrCategory[]).map((cat) => {
@@ -405,14 +417,14 @@ function CategoryPicker({
               type="button"
               onClick={() => toggle(cat)}
               className={cn(
-                'flex flex-col items-center gap-1 rounded-xl border-2 p-2.5 text-center transition-all touch-manipulation active:scale-[0.97]',
+                'flex touch-manipulation flex-col items-center gap-1 rounded-2xl border p-3 text-center shadow-sm transition-all active:scale-[0.97]',
                 on
-                  ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_2px_var(--accent-bg),0_4px_14px_-4px_var(--accent)]'
-                  : 'border-edge bg-panel text-ink hover:border-pink-500/30 hover:bg-panel2',
+                  ? 'border-pink-300/45 bg-pink-50/90 text-pink-800 shadow-[0_14px_34px_rgba(219,39,119,0.14)] dark:border-pink-300/20 dark:bg-pink-300/10 dark:text-pink-100'
+                  : 'border-white/60 bg-white/72 text-slate-800 hover:-translate-y-0.5 hover:border-pink-300/35 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10',
               )}
             >
-              <span className="text-xl">{emoji}</span>
-              <span className="font-bold text-xs">{label}</span>
+              <span className="text-2xl">{emoji}</span>
+              <span className="text-xs font-black">{label}</span>
             </button>
           );
         })}
@@ -511,29 +523,31 @@ function OptionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex items-start gap-2 min-h-[3rem] w-full rounded-xl border-2 px-2.5 py-2 text-start transition-all touch-manipulation active:scale-[0.98] disabled:pointer-events-none',
+        'flex min-h-[3.75rem] w-full touch-manipulation items-start gap-3 rounded-2xl border px-3 py-3 text-start shadow-sm transition-all active:scale-[0.98] disabled:pointer-events-none',
         selected
-          ? 'border-accent bg-accentbg shadow-[0_0_0_2px_var(--accent-bg),0_4px_14px_-4px_var(--accent)]'
-          : 'border-edge bg-panel hover:border-pink-500/40 hover:bg-panel2',
+          ? 'border-pink-300/45 bg-pink-50/90 shadow-[0_14px_34px_rgba(219,39,119,0.14)] dark:border-pink-300/20 dark:bg-pink-300/10'
+          : 'border-white/60 bg-white/74 hover:-translate-y-0.5 hover:border-pink-300/35 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10',
         disabled && !selected && 'opacity-50',
       )}
     >
       <span
         className={cn(
-          'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold border-2',
-          selected ? 'border-accent bg-accent text-white' : 'border-edge2 text-ink3',
+          'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-black',
+          selected
+            ? 'border-pink-500 bg-pink-600 text-white shadow-sm'
+            : 'border-slate-300 bg-white/70 text-slate-500 dark:border-white/15 dark:bg-white/5 dark:text-slate-400',
         )}
       >
         {choice.toUpperCase()}
       </span>
       <span
         className={cn(
-          'flex-1 text-sm font-semibold leading-snug',
-          selected ? 'text-accent' : 'text-ink',
+          'flex-1 text-sm font-bold leading-snug',
+          selected ? 'text-pink-800 dark:text-pink-100' : 'text-slate-800 dark:text-slate-100',
         )}
       >
         {text}
-        {selected && <span className="ms-2 text-xs opacity-70">✓ Picked!</span>}
+        {selected ? <span className="ms-2 text-xs opacity-70">Picked</span> : null}
       </span>
     </button>
   );
@@ -559,8 +573,10 @@ function RevealPanel({
     <div className="flex flex-col gap-2">
       <div
         className={cn(
-          'text-center rounded-xl border-2 py-1.5 px-2.5 font-bold text-xs transition-all',
-          matched ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
+          'rounded-2xl border px-2.5 py-2 text-center text-xs font-black transition-all',
+          matched
+            ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
+            : 'border-white/60 bg-white/70 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300',
         )}
       >
         {matched ? s.matched : s.noMatch}
@@ -580,20 +596,22 @@ function RevealPanel({
                   : { animation: `wyrReveal 380ms both`, animationDelay: `${i * 100}ms` }
               }
               className={cn(
-                'flex flex-col items-center gap-1 rounded-xl border-2 p-2 text-center',
+                'flex flex-col items-center gap-1 rounded-2xl border p-2.5 text-center shadow-sm',
                 matched
-                  ? 'border-good/50 bg-goodbg text-good'
+                  ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
                   : onWinSide
-                    ? 'border-edge bg-panel2 text-ink2'
-                    : 'border-edge bg-panel text-ink3',
+                    ? 'border-white/60 bg-white/70 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200'
+                    : 'border-white/60 bg-white/44 text-slate-400 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-500',
               )}
             >
               <Avatar seed={p.id} name={p.name} size={26} />
-              <span className="text-xs font-bold uppercase tracking-wide opacity-70">{p.name}</span>
-              <span className="text-sm font-bold leading-snug">
+              <span className="text-xs font-black uppercase tracking-wide opacity-70">
+                {p.name}
+              </span>
+              <span className="text-sm font-black leading-snug">
                 {pick !== null ? `Option ${pick.toUpperCase()}` : '—'}
               </span>
-              <span className="text-xs opacity-80 leading-snug">{text}</span>
+              <span className="text-xs font-medium leading-snug opacity-80">{text}</span>
             </div>
           );
         })}
@@ -622,7 +640,7 @@ function HeartMeter({ matched, total }: { matched: number; total: number }) {
           </span>
         ))}
       </div>
-      <p className="text-[length:var(--fs-2xs)] text-ink3 font-medium">
+      <p className="text-[length:var(--fs-2xs)] font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">
         {matched} / {total} matches
       </p>
     </div>
@@ -638,17 +656,21 @@ function ScoreBoard({
 }) {
   const ranked = [...players].sort((a, b) => (scores[b.id] ?? 0) - (scores[a.id] ?? 0));
   return (
-    <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-ink3">
+    <div className="rounded-[1.35rem] border border-white/60 bg-white/72 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+      <p className="mb-2 text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         Score
       </p>
       <div className="flex flex-col gap-1.5">
         {ranked.map((p, i) => (
           <div key={p.id} className="flex items-center gap-2">
-            <span className="text-xs text-ink3 w-4 text-center">{i + 1}</span>
+            <span className="w-4 text-center text-xs font-black text-slate-400">{i + 1}</span>
             <Avatar seed={p.id} name={p.name} size={24} />
-            <span className="flex-1 text-xs font-semibold text-ink truncate">{p.name}</span>
-            <span className="font-bold tabular-nums text-accent text-sm">{scores[p.id] ?? 0}</span>
+            <span className="flex-1 truncate text-xs font-bold text-slate-800 dark:text-slate-100">
+              {p.name}
+            </span>
+            <span className="text-sm font-black tabular-nums text-cyan-700 dark:text-cyan-200">
+              {scores[p.id] ?? 0}
+            </span>
           </div>
         ))}
       </div>

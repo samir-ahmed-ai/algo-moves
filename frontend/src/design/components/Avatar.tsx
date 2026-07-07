@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 
 const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(' ');
 
@@ -28,6 +28,7 @@ export function Avatar({
   className?: string;
   ring?: string;
 }) {
+  const gradientId = `avatar-gradient-${useId().replace(/:/g, '')}`;
   const { cells, hue } = useMemo(() => {
     const h = hashSeed(seed || name || 'seed');
     const hue = h % 360;
@@ -49,16 +50,23 @@ export function Avatar({
   }, [seed, name]);
 
   const safeSize = Number.isFinite(size) ? Math.max(16, Math.round(size)) : 40;
-  const bg = `hsl(${hue} 65% 92%)`;
-  const fg = `hsl(${hue} 62% 42%)`;
+  const bg = `hsl(${hue} 78% 94%)`;
+  const bg2 = `hsl(${(hue + 42) % 360} 74% 88%)`;
+  const fg = `hsl(${hue} 68% 36%)`;
+  const glow = `hsl(${hue} 72% 50% / 0.22)`;
 
   return (
     <span
-      className={cx('design-avatar inline-block shrink-0 overflow-hidden rounded-full', className)}
+      className={cx(
+        'design-avatar inline-block shrink-0 overflow-hidden rounded-full align-middle',
+        className,
+      )}
       style={{
         width: safeSize,
         height: safeSize,
-        boxShadow: ring ? `0 0 0 2px ${ring}` : undefined,
+        boxShadow: ring
+          ? `0 0 0 2px ${ring}, 0 10px 24px ${glow}`
+          : `0 10px 24px ${glow}, inset 0 0 0 1px hsl(0 0% 100% / 0.72)`,
       }}
       role={name ? 'img' : undefined}
       aria-label={name ? `${name} avatar` : undefined}
@@ -71,9 +79,24 @@ export function Avatar({
         height={safeSize}
         style={{ display: 'block' }}
       >
-        <rect width="5" height="5" fill={bg} />
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor={bg} />
+            <stop offset="100%" stopColor={bg2} />
+          </linearGradient>
+        </defs>
+        <rect width="5" height="5" fill={`url(#${gradientId})`} />
+        <circle cx="1.1" cy="0.9" r="1.15" fill="white" opacity="0.32" />
         {cells.map((c) => (
-          <rect key={`${c.x}-${c.y}`} x={c.x} y={c.y} width="1.02" height="1.02" fill={fg} />
+          <rect
+            key={`${c.x}-${c.y}`}
+            x={c.x}
+            y={c.y}
+            width="1.02"
+            height="1.02"
+            rx="0.18"
+            fill={fg}
+          />
         ))}
       </svg>
     </span>

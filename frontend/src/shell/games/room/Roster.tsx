@@ -14,14 +14,17 @@ export function Roster({ compact = false }: { compact?: boolean }) {
   const { players, spectators, self } = useGameRoom();
   const { readyIds, reactions } = useRoomComms();
 
-  const latestReaction = (id: string) =>
-    reactions.filter((r) => r.fromId === id).slice(-1)[0]?.emoji;
+  const reactionsByPeer = useMemo(() => {
+    const latest = new Map<string, string>();
+    for (const reaction of reactions) latest.set(reaction.fromId, reaction.emoji);
+    return latest;
+  }, [reactions]);
 
   return (
     <div className={cn('game-roster flex flex-col gap-3', compact && 'game-roster--compact')}>
       <div>
         {!compact ? (
-          <p className="game-roster__label mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink3">
+          <p className="game-roster__label mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
             {t.room.players} · {players.length}
           </p>
         ) : null}
@@ -32,7 +35,7 @@ export function Roster({ compact = false }: { compact?: boolean }) {
               peer={p}
               isSelf={p.id === self?.id}
               isReady={readyIds.has(p.id)}
-              reaction={latestReaction(p.id)}
+              reaction={reactionsByPeer.get(p.id)}
               hostLabel={t.room.hostBadge}
               youLabel={t.room.youBadge}
               compact={compact}
@@ -42,15 +45,21 @@ export function Roster({ compact = false }: { compact?: boolean }) {
       </div>
 
       {spectators.length > 0 ? (
-        <div className="game-roster__spectators flex items-center gap-2 text-ink3">
+        <div className="game-roster__spectators flex items-center gap-2 rounded-2xl border border-white/60 bg-white/65 px-3 py-2 text-slate-500 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
           <Eye className="h-3.5 w-3.5" />
-          <span className="text-xs font-medium">{t.room.spectatorCount(spectators.length)}</span>
+          <span className="text-xs font-bold">{t.room.spectatorCount(spectators.length)}</span>
           <div className="flex -space-x-1.5">
             {spectators.slice(0, 6).map((s) => (
-              <Avatar key={s.id} seed={s.id} name={s.name} size={20} className="ring-1 ring-bg" />
+              <Avatar
+                key={s.id}
+                seed={s.id}
+                name={s.name}
+                size={20}
+                className="ring-2 ring-white dark:ring-slate-950"
+              />
             ))}
             {spectators.length > 6 ? (
-              <span className="grid h-5 w-5 place-items-center rounded-full bg-panel2 text-[length:var(--fs-2xs)] font-bold text-ink3">
+              <span className="grid h-5 w-5 place-items-center rounded-full bg-slate-950 text-[length:var(--fs-2xs)] font-black text-white dark:bg-white dark:text-slate-950">
                 +{spectators.length - 6}
               </span>
             ) : null}
@@ -73,7 +82,7 @@ function PlayerChip({
   peer: Peer;
   isSelf: boolean;
   isReady: boolean;
-  reaction?: string;
+  reaction: string | undefined;
   hostLabel: string;
   youLabel: string;
   compact: boolean;
@@ -82,25 +91,30 @@ function PlayerChip({
   return (
     <li
       className={cn(
-        'game-player-chip relative inline-flex items-center gap-2 rounded-full border py-1 ps-1 pe-3 transition-colors',
-        isReady ? 'border-good/50 bg-good/10' : 'border-edge bg-panel',
+        'game-player-chip relative inline-flex items-center gap-2 rounded-full border py-1 ps-1 pe-3 shadow-sm backdrop-blur transition',
+        isReady
+          ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-900 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
+          : 'border-white/60 bg-white/70 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200',
+        isSelf && 'ring-2 ring-cyan-300/35',
       )}
     >
       <span className="relative">
         <Avatar seed={peer.id} name={peer.name} size={compact ? 24 : 28} />
         {reaction ? (
-          <span className="absolute -right-1 -top-2 animate-bounce text-sm" aria-hidden>
+          <span className="absolute -right-1 -top-2 animate-bounce text-sm drop-shadow" aria-hidden>
             {reaction}
           </span>
         ) : null}
       </span>
-      <span className="flex items-center gap-1 text-sm font-medium text-ink">
+      <span className="flex items-center gap-1 text-sm font-bold">
         {isHost ? <Crown className="h-3.5 w-3.5 text-amber-500" aria-label={hostLabel} /> : null}
         <span className="max-w-[9rem] truncate">{peer.name}</span>
         {isSelf ? (
-          <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3">({youLabel})</span>
+          <span className="text-[length:var(--fs-2xs)] font-black text-cyan-700 dark:text-cyan-200">
+            ({youLabel})
+          </span>
         ) : null}
-        {isReady ? <Check className="h-3.5 w-3.5 text-good" /> : null}
+        {isReady ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-200" /> : null}
       </span>
     </li>
   );

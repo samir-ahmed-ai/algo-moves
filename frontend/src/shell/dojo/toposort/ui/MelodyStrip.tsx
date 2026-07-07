@@ -24,7 +24,7 @@ export function MelodyStrip() {
         ) : (
           <span
             key={slot}
-            className="grid h-7 w-8 place-items-center rounded-md border border-dashed border-edge text-[10px] tabular-nums text-ink3"
+            className="grid h-7 w-8 place-items-center rounded-md border border-dashed border-edge text-[length:var(--fs-2xs)] tabular-nums text-ink3"
           >
             {slot + 1}
           </span>

@@ -15,7 +15,6 @@ tsconfig.node.tsbuildinfo
 vite.config.js
 vite.config.d.ts
 vite.config.ts.timestamp-*.mjs
-frontend/.node-localstorage*
 
 # Go backend
 backend/bin/

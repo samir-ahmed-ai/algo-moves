@@ -53,4 +53,4 @@ jobs:
       - name: Verify sqlc generated code is up to date
         run: |
           sqlc generate
-          git diff --exit-code internal/arcade/arcadedb/
+          git diff --exit-code internal/platform/arcadedb/

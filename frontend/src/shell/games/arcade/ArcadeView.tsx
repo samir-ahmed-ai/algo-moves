@@ -60,21 +60,32 @@ export function ArcadeView() {
         onOpenProfile={() => setShowProgress(true)}
       />
 
-      <main className="mx-auto w-full max-w-2xl flex-1 min-h-0 px-3 py-3 sm:px-4 sm:py-4">
+      <main
+        aria-label={t.header.games}
+        className="relative isolate mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col px-3 py-3 sm:px-4 sm:py-4"
+      >
+        <div className="pointer-events-none absolute inset-x-6 top-1 h-24 rounded-full bg-cyan-400/10 blur-3xl dark:bg-cyan-300/15" />
+
         {reconnecting ? (
-          <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl border border-edge bg-panel2 px-3 py-2.5 text-sm text-ink3">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+          <div
+            className="relative z-10 mb-4 flex items-center justify-center gap-2 rounded-2xl border border-amber-300/30 bg-amber-100/80 px-3 py-2.5 text-sm font-semibold text-amber-950 shadow-lg shadow-amber-950/5 backdrop-blur dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100"
+            role="status"
+          >
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.75)]" />
             {t.header.reconnecting}
           </div>
         ) : null}
 
-        {!live ? (
-          <Lobby prefillRoom={prefillRoom} />
-        ) : (
-          <RoomCommsProvider>
-            <RoomView />
-          </RoomCommsProvider>
-        )}
+        <section className="relative z-10 min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-white/60 bg-white/72 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/58 dark:shadow-[0_24px_90px_rgba(0,0,0,0.36)]">
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
+          {!live ? (
+            <Lobby prefillRoom={prefillRoom} />
+          ) : (
+            <RoomCommsProvider>
+              <RoomView />
+            </RoomCommsProvider>
+          )}
+        </section>
       </main>
 
       {showProgress ? <ProgressOverlay onClose={() => setShowProgress(false)} /> : null}

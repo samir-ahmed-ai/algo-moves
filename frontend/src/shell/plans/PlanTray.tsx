@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 import {
   BookMarked,
   CheckCircle2,
@@ -97,20 +97,20 @@ function ItemRow({
   const label = item?.title ?? itemId;
 
   const handleDragStart = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    (e: DragEvent<HTMLDivElement>) => {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', String(index));
     },
     [index],
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   }, []);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
       if (!isNaN(fromIndex) && fromIndex !== index) onMove(fromIndex, index);
@@ -125,8 +125,8 @@ function ItemRow({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       className={cn(
-        'plan-tray-row group flex items-center gap-1.5 rounded-lg border border-transparent px-1.5 py-1.5 transition',
-        'hover:border-edge hover:bg-panel2',
+        'plan-tray-row group flex items-center gap-1.5 rounded-2xl border border-transparent px-1.5 py-1.5 transition',
+        'hover:border-edge hover:bg-panel2 hover:shadow-theme-sm',
         completed && 'opacity-60',
       )}
     >
@@ -135,7 +135,7 @@ function ItemRow({
       <button
         type="button"
         onClick={onToggle}
-        className="plan-tray-row__toggle shrink-0 text-ink3 transition hover:text-good"
+        className="plan-tray-row__toggle shrink-0 rounded-full text-ink3 transition hover:text-good"
         title={completed ? 'Mark incomplete' : 'Mark complete'}
       >
         {completed ? (
@@ -160,7 +160,7 @@ function ItemRow({
       <button
         type="button"
         onClick={onRemove}
-        className="plan-tray-row__remove shrink-0 rounded p-0.5 text-ink3 opacity-0 transition hover:text-red-500 group-hover:opacity-100"
+        className="plan-tray-row__remove shrink-0 rounded-full p-0.5 text-ink3 opacity-0 transition hover:bg-panel hover:text-red-500 group-hover:opacity-100"
         title="Remove from plan"
       >
         <X className="h-3 w-3" />
@@ -198,7 +198,8 @@ function TrayBody({
     await save();
     if (itemIds.length > 0) {
       startRun(0);
-      openProblem(itemIds[0]);
+      const firstItemId = itemIds[0];
+      if (firstItemId) openProblem(firstItemId);
     }
   }, [save, startRun, itemIds, openProblem]);
 
@@ -212,13 +213,15 @@ function TrayBody({
   return (
     <>
       {/* Header */}
-      <div className="plan-tray-head flex h-10 shrink-0 items-center gap-2 border-b border-edge px-3">
-        <BookMarked className="h-3.5 w-3.5 shrink-0 text-accent" />
+      <div className="plan-tray-head flex h-12 shrink-0 items-center gap-2 border-b border-edge bg-panel/40 px-3">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+          <BookMarked className="h-3.5 w-3.5" />
+        </span>
         <EditableTitle title={activePlan.title} onRename={renamePlan} />
         <button
           type="button"
           onClick={onCollapse}
-          className="plan-tray-head__close shrink-0 rounded p-1 text-ink3 transition hover:bg-panel2 hover:text-ink"
+          className="plan-tray-head__close shrink-0 rounded-full p-1 text-ink3 transition hover:bg-panel2 hover:text-ink"
           title="Close plan"
         >
           <CollapseIcon className="h-4 w-4" />
@@ -243,7 +246,7 @@ function TrayBody({
           <button
             type="button"
             onClick={save}
-            className="ml-auto text-accent hover:underline"
+            className="ml-auto rounded-full p-1 text-accent transition hover:bg-accentbg"
             title="Save now"
           >
             <CloudUpload className="h-3.5 w-3.5" />
@@ -289,7 +292,7 @@ function TrayBody({
           type="button"
           onClick={handleStartRun}
           disabled={itemIds.length === 0}
-          className="plan-tray-start flex w-full items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
+          className="plan-tray-start flex w-full items-center justify-center gap-1.5 rounded-full bg-accent py-2 text-sm font-semibold text-[var(--accent-contrast)] shadow-theme-sm transition hover:-translate-y-0.5 hover:opacity-90 hover:shadow-theme-md disabled:translate-y-0 disabled:opacity-40"
         >
           <Play className="h-3.5 w-3.5" />
           Start run
@@ -325,7 +328,7 @@ export function PlanTray() {
         )}
         <div
           className={cn(
-            'plan-tray-mobile fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-t border-edge bg-panel shadow-[0_-4px_24px_hsl(0_0%_0%/0.2)] transition-transform',
+            'plan-tray-mobile fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-3xl border-t border-edge bg-[var(--surface-glass)] shadow-theme-xl backdrop-blur-xl transition-transform',
             mobileOpen ? 'h-[70dvh] translate-y-0' : 'h-auto',
           )}
         >
@@ -350,7 +353,7 @@ export function PlanTray() {
               <button
                 type="button"
                 onClick={closePlan}
-                className="shrink-0 rounded p-1 text-ink3 hover:text-ink"
+                className="shrink-0 rounded-full p-1 text-ink3 hover:bg-panel2 hover:text-ink"
                 title="Close plan"
               >
                 <XCircle className="h-4 w-4" />
@@ -364,7 +367,7 @@ export function PlanTray() {
 
   // ── Desktop: docked right panel ──
   return (
-    <div className="plan-tray-desktop flex w-64 shrink-0 flex-col border-l border-edge bg-panel">
+    <div className="plan-tray-desktop flex w-64 shrink-0 flex-col border-l border-edge bg-[var(--surface-glass)] shadow-[-12px_0_40px_hsl(0_0%_0%_/_0.08)] backdrop-blur-xl">
       <TrayBody onCollapse={closePlan} collapseIcon={XCircle} />
     </div>
   );

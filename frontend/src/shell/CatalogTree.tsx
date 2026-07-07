@@ -82,14 +82,16 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
       <Accordion.Item
         key={track.id}
         value={track.id}
-        className="catalog-tree__track border-b border-edge last:border-0"
+        className="catalog-tree__track border-b border-edge/70 last:border-0"
       >
         <Accordion.Header className="flex">
-          <Accordion.Trigger className="catalog-tree__track-trigger group/row flex w-full min-h-[var(--row)] items-center gap-1.5 pr-2 text-left transition-colors hover:bg-panel2">
+          <Accordion.Trigger className="catalog-tree__track-trigger group/row mx-1 flex min-h-[var(--row)] w-[calc(100%-0.5rem)] items-center gap-1.5 rounded-2xl pr-2 text-left transition-colors hover:bg-panel2">
             <span className="catalog-tree__chevron grid h-6 w-5 shrink-0 place-items-center text-ink3">
               <ChevronRight className="h-3 w-3 transition-transform duration-200 group-data-[state=open]/row:rotate-90" />
             </span>
-            <Icon className="catalog-tree__track-icon h-3.5 w-3.5 shrink-0 opacity-80 text-ink2" />
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-xl bg-panel text-ink2 shadow-theme-sm">
+              <Icon className="catalog-tree__track-icon h-3.5 w-3.5 opacity-80" />
+            </span>
             <span
               className={cn(
                 'catalog-tree__track-title min-w-0 flex-1 truncate font-medium text-ink2 group-hover/row:text-ink',
@@ -125,7 +127,7 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
                   }}
                   title={`Open the ${cat.title} grid`}
                   className={cn(
-                    'group/topic flex w-full min-h-[var(--row)] items-center gap-2 py-0 pl-[26px] pr-[var(--hpad)] text-left transition-colors',
+                    'group/topic mx-1 flex min-h-[var(--row)] w-[calc(100%-0.5rem)] items-center gap-2 rounded-2xl py-0 pl-[26px] pr-[var(--hpad)] text-left transition-colors',
                     'catalog-tree__category',
                     active
                       ? 'catalog-tree__category--active bg-accentbg text-accent'
@@ -158,8 +160,13 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
 
   if (searching && filteredTracks.length === 0) {
     return (
-      <div className={cn('px-[var(--hpad)] py-2 leading-snug text-ink3', chromeText.sm)}>
-        No matching categories
+      <div
+        className={cn(
+          'mx-2 my-2 rounded-2xl border border-edge bg-panel/70 px-[var(--hpad)] py-4 text-center leading-snug text-ink3 shadow-theme-sm',
+          chromeText.sm,
+        )}
+      >
+        No matching categories.
       </div>
     );
   }

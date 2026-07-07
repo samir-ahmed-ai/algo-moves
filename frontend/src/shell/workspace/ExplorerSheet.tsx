@@ -101,7 +101,7 @@ function AddItem({
       }}
       title={`Add ${title}`}
       aria-label={`Add ${title}`}
-      className="explorer-add-item flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
+      className="explorer-add-item flex min-h-[var(--row)] w-full cursor-grab items-center gap-2 rounded-2xl border border-transparent px-2 py-0 text-left transition hover:border-edge hover:bg-panel2 hover:shadow-theme-sm active:cursor-grabbing"
     >
       <span
         className="explorer-add-item__icon grid h-[var(--node-icon,16px)] w-[var(--node-icon,16px)] shrink-0 place-items-center"
@@ -215,12 +215,20 @@ export function ExplorerSheet({
     <div
       className={cn(
         'explorer-sheet flex max-h-[70vh] w-[280px] max-w-[86vw] flex-col overflow-hidden bg-panel text-ink shadow-[var(--shadow-lg)]',
-        isMobile ? 'h-full max-h-none w-full max-w-none' : cn(RADIUS_SHELL, 'border border-edge'),
+        isMobile
+          ? 'h-full max-h-none w-full max-w-none bg-[var(--surface-glass)] backdrop-blur-xl'
+          : cn(
+              RADIUS_SHELL,
+              'border border-edge bg-[var(--surface-glass)] shadow-theme-xl ring-1 ring-accent/10 backdrop-blur-xl',
+            ),
       )}
       role="dialog"
       aria-label="Explorer"
     >
-      <header className="explorer-sheet__header flex shrink-0 items-center gap-1.5 border-b border-edge px-[var(--hpad)] py-1">
+      <header className="explorer-sheet__header flex shrink-0 items-center gap-2 border-b border-edge bg-panel/40 px-[var(--hpad)] py-2">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+          <Library className="h-3.5 w-3.5" />
+        </span>
         <span
           className={cn(
             'explorer-sheet__title min-w-0 flex-1 truncate font-semibold leading-tight text-ink',
@@ -234,13 +242,13 @@ export function ExplorerSheet({
           onClick={onClose}
           title="Close explorer"
           aria-label="Close explorer"
-          className="explorer-sheet__close grid h-5 w-5 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+          className="explorer-sheet__close grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
         >
-          <X className="h-3 w-3" />
+          <X className="h-3.5 w-3.5" />
         </button>
       </header>
 
-      <div className="explorer-sheet__search relative shrink-0 border-b border-edge px-[var(--hpad)] py-1">
+      <div className="explorer-sheet__search relative shrink-0 border-b border-edge bg-panel/20 px-[var(--hpad)] py-2">
         <Search className="explorer-sheet__search-icon pointer-events-none absolute left-[calc(var(--hpad)+8px)] top-1/2 h-3 w-3 -translate-y-1/2 text-ink3" />
         <input
           type="search"
@@ -249,7 +257,7 @@ export function ExplorerSheet({
           placeholder="Search catalog, problems, panels…"
           aria-label="Search explorer"
           className={cn(
-            'explorer-sheet__search-input w-full rounded-md border border-edge bg-panel2 py-0.5 pl-7 pr-2 text-ink outline-none placeholder:text-ink3 focus:border-accent',
+            'explorer-sheet__search-input w-full rounded-full border border-edge bg-panel2 py-1 pl-7 pr-2 text-ink outline-none placeholder:text-ink3 focus:border-accent',
             chromeText.sm,
           )}
         />
@@ -301,7 +309,7 @@ export function ExplorerSheet({
                         onClick={() => switchTo(it.id)}
                         title={it.title}
                         className={cn(
-                          'flex w-full min-h-[var(--row)] items-center gap-2 rounded-md border-l-2 px-2 py-0 text-left transition-colors',
+                          'flex min-h-[var(--row)] w-full items-center gap-2 rounded-2xl border-l-2 px-2 py-0 text-left transition-colors',
                           'explorer-sheet__problem',
                           active
                             ? 'explorer-sheet__problem--active border-l-accent bg-accentbg font-medium text-accent'
@@ -343,7 +351,7 @@ export function ExplorerSheet({
                   }}
                   title="Open the category grid"
                   className={cn(
-                    'explorer-sheet__category-grid mx-1 mt-1.5 flex min-h-[var(--row)] w-[calc(100%-8px)] items-center gap-1.5 rounded-md px-2 py-0 text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
+                    'explorer-sheet__category-grid mx-1 mt-1.5 flex min-h-[var(--row)] w-[calc(100%-8px)] items-center gap-1.5 rounded-2xl px-2 py-0 text-ink3 transition-colors hover:bg-panel2 hover:text-ink',
                     chromeText.sm,
                   )}
                 >
@@ -414,7 +422,7 @@ export function ExplorerSheet({
                             aria-label={t.key}
                             aria-pressed={i === tabIdx}
                             className={cn(
-                              'flex max-w-full min-h-[var(--row)] items-center gap-1 rounded-md px-1.5 py-0 transition-colors',
+                              'flex min-h-[var(--row)] max-w-full items-center gap-1 rounded-full px-1.5 py-0 transition-colors',
                               'explorer-sheet__tab',
                               i === tabIdx
                                 ? 'explorer-sheet__tab--active bg-accentbg text-accent'
@@ -462,7 +470,7 @@ export function ExplorerSheet({
                             e.dataTransfer.setData(canvasAdd.effectDndKey, eff.id);
                           e.dataTransfer.effectAllowed = 'move';
                         }}
-                        className="explorer-sheet__effect flex w-full min-h-[var(--row)] cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-0 text-left transition-colors hover:border-edge hover:bg-panel2 active:cursor-grabbing"
+                        className="explorer-sheet__effect flex min-h-[var(--row)] w-full cursor-grab items-center gap-2 rounded-2xl border border-transparent px-2 py-0 text-left transition hover:border-edge hover:bg-panel2 hover:shadow-theme-sm active:cursor-grabbing"
                       >
                         <span className={cn('min-w-0 flex-1 truncate text-ink2', chromeText.sm)}>
                           {eff.title}

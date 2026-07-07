@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import { X, Settings } from 'lucide-react';
 import {
   useWorkspace,
@@ -57,6 +57,7 @@ const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
 ];
 
 export function SettingsDialog() {
+  const titleId = useId();
   const ws = useWorkspace();
   const {
     settingsOpen,
@@ -99,31 +100,39 @@ export function SettingsDialog() {
 
   return (
     <div
-      className="settings-dialog-backdrop fixed inset-0 z-[60] grid place-items-center bg-black/40 backdrop-blur-sm"
+      className="settings-dialog-backdrop fixed inset-0 z-[60] grid place-items-center bg-bg/70 p-4 backdrop-blur-md"
       onClick={() => setSettingsOpen(false)}
       role="dialog"
-      aria-label="Settings"
+      aria-modal="true"
+      aria-labelledby={titleId}
     >
       <div
-        className="settings-dialog w-[420px] max-w-[92vw] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-[var(--shadow-xl)]"
+        className="settings-dialog w-[440px] max-w-[92vw] overflow-hidden rounded-3xl border border-edge bg-[var(--surface-glass)] shadow-theme-xl ring-1 ring-accent/10 backdrop-blur-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="settings-dialog__header flex items-center gap-1.5 border-b border-edge px-3 py-2">
-          <span className="settings-dialog__icon">
-            <Settings className="h-3.5 w-3.5 text-accent" />
+        <header className="settings-dialog__header flex items-center gap-2 border-b border-edge bg-panel/40 px-4 py-3">
+          <span className="settings-dialog__icon grid h-9 w-9 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+            <Settings className="h-4 w-4" />
           </span>
-          <h2 className={cn('flex-1 font-semibold text-ink', chromeText.base)}>Settings</h2>
+          <div className="min-w-0 flex-1">
+            <h2 id={titleId} className={cn('font-semibold text-ink', chromeText.base)}>
+              Settings
+            </h2>
+            <p className={cn('truncate text-ink3', chromeText.xs)}>
+              Tune appearance, profile, and workspace defaults.
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => setSettingsOpen(false)}
-            className={`settings-dialog__close grid h-5 w-5 place-items-center text-ink3 hover:bg-panel2 hover:text-ink ${RADIUS_CTRL}`}
+            className="settings-dialog__close grid h-8 w-8 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
             aria-label="Close settings"
           >
-            <X className="h-3 w-3" />
+            <X className="h-3.5 w-3.5" />
           </button>
         </header>
 
-        <div className="settings-dialog__tabs flex gap-1 border-b border-edge px-3 py-2">
+        <div className="settings-dialog__tabs flex gap-1 border-b border-edge bg-panel/20 px-3 py-2">
           {SETTINGS_TABS.map((tab) => (
             <button
               key={tab.id}
@@ -171,7 +180,7 @@ export function SettingsDialog() {
                         type="button"
                         onClick={() => setThemePreset(t.id as ThemePreset)}
                         className={cn(
-                          `flex items-center gap-1.5 border px-2 py-1 text-left${RADIUS_CTRL}`,
+                          `flex items-center gap-1.5 border px-2 py-1 text-left ${RADIUS_CTRL}`,
                           themePreset === t.id
                             ? 'border-accent bg-accentbg'
                             : 'border-edge hover:border-accent/40',
@@ -275,7 +284,7 @@ export function SettingsDialog() {
               type="button"
               onClick={persist}
               className={cn(
-                `settings-dialog__save bg-accent px-2.5 py-1 font-medium text-white hover:opacity-90 ${RADIUS_CTRL}`,
+                `settings-dialog__save bg-accent px-2.5 py-1 font-medium text-[var(--accent-contrast)] shadow-theme-sm hover:opacity-90 ${RADIUS_CTRL}`,
                 chromeText.sm,
               )}
             >

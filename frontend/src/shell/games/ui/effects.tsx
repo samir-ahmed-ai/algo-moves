@@ -7,12 +7,7 @@ import { usePrefersReducedMotion } from './hooks';
  * Uses the Web Animations API (so it needs no CSS keyframes) and is a no-op
  * when the user prefers reduced motion.
  */
-const CONFETTI_COLORS = [
-  'var(--accent)',
-  'var(--good)',
-  'var(--team1-stroke, #f59e0b)',
-  'var(--team2-stroke, #8b5cf6)',
-];
+const CONFETTI_COLORS = ['#0891b2', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
 
 export function Confetti({ fire, count = 28 }: { fire: boolean; count?: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -29,9 +24,9 @@ export function Confetti({ fire, count = 28 }: { fire: boolean; count?: number }
       const dist = 90 + Math.random() * 120;
       const dx = Math.cos(angle) * dist;
       const dy = Math.sin(angle) * dist - 40;
-      s.style.cssText = `position:absolute;left:50%;top:45%;width:8px;height:8px;border-radius:2px;background:${
+      s.style.cssText = `position:absolute;left:50%;top:45%;width:8px;height:10px;border-radius:999px;background:${
         CONFETTI_COLORS[i % CONFETTI_COLORS.length]
-      };will-change:transform,opacity;`;
+      };box-shadow:0 8px 18px rgba(15,23,42,0.18);will-change:transform,opacity;`;
       host.appendChild(s);
       pieces.push(s);
       s.animate(
@@ -89,14 +84,17 @@ export function CountdownRing({
   const clamped = Math.max(0, Math.min(1, progress));
   const color = tone === 'good' ? 'var(--good)' : tone === 'bad' ? 'var(--bad)' : 'var(--accent)';
   return (
-    <span className="relative inline-grid place-items-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+    <span
+      className="relative inline-grid place-items-center rounded-full bg-white/70 shadow-sm ring-1 ring-white/60 dark:bg-white/10 dark:ring-white/10"
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} className="-rotate-90 drop-shadow-sm">
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="var(--edge)"
+          stroke="rgba(148,163,184,0.28)"
           strokeWidth={stroke}
         />
         <circle
@@ -113,7 +111,9 @@ export function CountdownRing({
         />
       </svg>
       {label ? (
-        <span className="absolute text-xs font-bold tabular-nums text-ink">{label}</span>
+        <span className="absolute text-xs font-black tabular-nums text-slate-950 dark:text-white">
+          {label}
+        </span>
       ) : null}
     </span>
   );
@@ -129,9 +129,18 @@ export function ConnectionDot({
 }) {
   const tone =
     status === 'open'
-      ? 'bg-good'
+      ? 'bg-emerald-500 shadow-[0_0_16px_rgba(16,185,129,0.7)]'
       : status === 'connecting'
-        ? 'bg-amber-400 animate-pulse'
-        : 'bg-bad';
-  return <span className={cn('inline-block h-2 w-2 rounded-full', tone, className)} aria-hidden />;
+        ? 'animate-pulse bg-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.7)]'
+        : 'bg-red-500 shadow-[0_0_16px_rgba(239,68,68,0.55)]';
+  return (
+    <span
+      className={cn(
+        'inline-block h-2.5 w-2.5 rounded-full ring-2 ring-white/70 dark:ring-slate-950/80',
+        tone,
+        className,
+      )}
+      aria-hidden
+    />
+  );
 }

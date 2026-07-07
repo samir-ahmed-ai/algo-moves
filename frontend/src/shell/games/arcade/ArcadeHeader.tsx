@@ -1,4 +1,5 @@
-import { Home, LogOut, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Eye, Home, LogOut, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { AuthButton } from '@/shell/auth';
 import { ConnectionDot } from '../ui/effects';
@@ -54,20 +55,26 @@ export function ArcadeHeader({
   onOpenProfile: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-edge bg-bg/90 backdrop-blur-md [padding-top:env(safe-area-inset-top)]">
+    <header className="sticky top-0 z-20 border-b border-white/55 bg-white/74 shadow-[0_10px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl [padding-top:env(safe-area-inset-top)] dark:border-white/10 dark:bg-slate-950/70 dark:shadow-[0_14px_44px_rgba(0,0,0,0.24)]">
       <div className="mx-auto flex w-full max-w-2xl items-center gap-2 px-3 py-2.5 sm:px-4">
         <button
           type="button"
           title={labels.home}
+          aria-label={labels.home}
           onClick={onHome}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation sm:h-11 sm:w-11"
+          className="grid h-10 w-10 shrink-0 touch-manipulation place-items-center rounded-2xl border border-white/60 bg-white/70 text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white sm:h-11 sm:w-11"
         >
           <Home className="h-4 w-4" />
         </button>
 
-        <span className="min-w-0 flex-1 truncate font-extrabold tracking-tight bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent select-none">
-          {title}
-        </span>
+        <div className="min-w-0 flex-1 select-none">
+          <span className="block truncate text-[0.7rem] font-black uppercase tracking-[0.22em] text-cyan-600/80 dark:text-cyan-200/80">
+            Arena
+          </span>
+          <span className="block truncate bg-gradient-to-r from-slate-950 via-cyan-700 to-slate-950 bg-clip-text text-lg font-black leading-none tracking-tight text-transparent dark:from-white dark:via-cyan-200 dark:to-white">
+            {title}
+          </span>
+        </div>
 
         <div className="ms-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
           {room ? (
@@ -121,7 +128,7 @@ function IconButton({
   title: string;
   onClick: () => void;
   danger?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
@@ -130,8 +137,9 @@ function IconButton({
       aria-label={title}
       onClick={onClick}
       className={cn(
-        'grid h-10 w-10 place-items-center rounded-xl border border-edge text-ink3 hover:bg-panel2 hover:text-ink touch-manipulation transition-colors sm:h-11 sm:w-11',
-        danger && 'hover:border-bad/50 hover:text-bad',
+        'grid h-10 w-10 touch-manipulation place-items-center rounded-2xl border border-white/60 bg-white/65 text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white sm:h-11 sm:w-11',
+        danger &&
+          'hover:border-red-300/70 hover:bg-red-50 hover:text-red-700 dark:hover:border-red-400/30 dark:hover:bg-red-500/10 dark:hover:text-red-200',
       )}
     >
       {children}
@@ -158,21 +166,27 @@ function RoomPill({
   return (
     <span
       className={cn(
-        'inline-flex min-w-0 max-w-[8rem] shrink items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-bold sm:max-w-none',
+        'inline-flex min-w-0 max-w-[8rem] shrink items-center gap-1.5 rounded-2xl border px-2.5 py-1.5 font-mono text-xs font-black shadow-sm backdrop-blur sm:max-w-none',
         reconnecting
-          ? 'border-edge bg-panel2 text-ink3'
+          ? 'border-amber-300/40 bg-amber-100/80 text-amber-950 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100'
           : filled
-            ? 'border-good/40 bg-good/10 text-good'
-            : 'border-edge bg-panel2 text-ink2',
+            ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
+            : 'border-white/60 bg-white/65 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300',
       )}
     >
       <ConnectionDot status={open ? 'open' : reconnecting ? 'connecting' : 'closed'} />
       <span dir="ltr" className="hidden truncate sm:inline">
         {room}
       </span>
-      <span className="opacity-70">
+      <span className="inline-flex items-center gap-1 opacity-75">
         {players}/{capacity}
-        {spectators > 0 ? ` · 👁${spectators}` : ''}
+        {spectators > 0 ? (
+          <>
+            <span aria-hidden="true">·</span>
+            <Eye className="h-3 w-3" aria-hidden="true" />
+            {spectators}
+          </>
+        ) : null}
       </span>
     </span>
   );
@@ -196,7 +210,7 @@ function LanguageSelect({
       title={disabled ? labels.hostOnly : labels.label}
       aria-label={labels.label}
       onChange={(e) => onChange(e.target.value as GameLocale)}
-      className="h-10 min-w-[4.5rem] cursor-pointer rounded-xl border border-edge bg-panel px-2 text-sm font-bold text-ink outline-none hover:bg-panel2 focus:border-accent disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:min-w-[5.5rem]"
+      className="h-10 min-w-[4.5rem] cursor-pointer rounded-2xl border border-white/60 bg-white/65 px-2 text-sm font-black text-slate-700 shadow-sm outline-none transition hover:bg-white focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300/35 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 sm:h-11 sm:min-w-[5.5rem]"
     >
       <option value="ar">{labels.arabic}</option>
       <option value="en">{labels.english}</option>

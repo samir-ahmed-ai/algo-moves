@@ -5,12 +5,12 @@ export interface ChatComposerProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
-  placeholder?: string;
-  sendLabel?: string;
-  maxLength?: number;
-  className?: string;
-  inputClassName?: string;
-  buttonClassName?: string;
+  placeholder?: string | undefined;
+  sendLabel?: string | undefined;
+  maxLength?: number | undefined;
+  className?: string | undefined;
+  inputClassName?: string | undefined;
+  buttonClassName?: string | undefined;
 }
 
 export function ChatComposer({
@@ -34,7 +34,7 @@ export function ChatComposer({
         }}
         placeholder={placeholder}
         className={cn(
-          'min-w-0 flex-1 border border-edge bg-panel2 px-2 py-1.5 text-sm text-ink outline-none transition-colors placeholder:text-ink3 focus:border-accent',
+          'min-w-0 flex-1 border border-white/60 bg-white/76 px-3 py-2 text-sm font-medium text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300/25 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500',
           'chat-composer__input',
           inputClassName,
         )}
@@ -44,13 +44,13 @@ export function ChatComposer({
         onClick={onSubmit}
         disabled={!value.trim()}
         className={cn(
-          'grid h-8 w-8 shrink-0 place-items-center bg-accent text-white disabled:opacity-40',
+          'grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-950 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-40 dark:bg-white dark:text-slate-950 dark:hover:bg-cyan-50',
           'chat-composer__send',
           buttonClassName,
         )}
         aria-label={sendLabel}
       >
-        <Send className="h-3 w-3" />
+        <Send className="h-3.5 w-3.5" />
       </button>
     </div>
   );

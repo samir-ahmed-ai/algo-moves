@@ -31,25 +31,29 @@ import {
 import { useCountdown } from '../../engine';
 
 const HEAT_STYLE: Record<HeatLevel, { text: string; ring: string; bar: string }> = {
-  burning: { text: 'text-bad', ring: 'border-bad/60 bg-bad/10 text-bad', bar: 'bg-bad' },
+  burning: {
+    text: 'text-red-600 dark:text-red-200',
+    ring: 'border-red-300/45 bg-red-50/85 text-red-700 dark:border-red-400/25 dark:bg-red-500/10 dark:text-red-200',
+    bar: 'bg-red-500',
+  },
   hot: {
-    text: 'text-orange-500',
-    ring: 'border-orange-400/60 bg-orange-400/10 text-orange-500',
+    text: 'text-orange-600 dark:text-orange-200',
+    ring: 'border-orange-300/45 bg-orange-50/85 text-orange-700 dark:border-orange-300/20 dark:bg-orange-300/10 dark:text-orange-100',
     bar: 'bg-orange-500',
   },
   warm: {
-    text: 'text-amber-500',
-    ring: 'border-amber-400/60 bg-amber-400/10 text-amber-600',
+    text: 'text-amber-700 dark:text-amber-200',
+    ring: 'border-amber-300/45 bg-amber-50/85 text-amber-800 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100',
     bar: 'bg-amber-500',
   },
   cold: {
-    text: 'text-sky-500',
-    ring: 'border-sky-400/60 bg-sky-400/10 text-sky-500',
+    text: 'text-sky-600 dark:text-sky-200',
+    ring: 'border-sky-300/45 bg-sky-50/85 text-sky-700 dark:border-sky-300/20 dark:bg-sky-300/10 dark:text-sky-100',
     bar: 'bg-sky-500',
   },
   freezing: {
-    text: 'text-blue-500',
-    ring: 'border-blue-400/60 bg-blue-400/10 text-blue-500',
+    text: 'text-blue-600 dark:text-blue-200',
+    ring: 'border-blue-300/45 bg-blue-50/85 text-blue-700 dark:border-blue-300/20 dark:bg-blue-300/10 dark:text-blue-100',
     bar: 'bg-blue-500',
   },
 };
@@ -144,14 +148,14 @@ export function NumberDuel() {
       {phase === 'watching' && (
         <GameArena accent="#6366f1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+            <span className="text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
               {strings.yourSecret}
             </span>
-            <span className="rounded-full border border-accent/40 bg-accentbg px-2.5 py-0.5 font-mono text-lg font-bold tabular-nums text-accent">
+            <span className="rounded-full border border-indigo-300/45 bg-indigo-50/85 px-3 py-1 font-mono text-lg font-black tabular-nums text-indigo-700 shadow-sm dark:border-indigo-300/20 dark:bg-indigo-300/10 dark:text-indigo-100">
               {secret}
             </span>
           </div>
-          <p className="text-center text-xs text-ink2">
+          <p className="text-center text-xs font-semibold text-slate-600 dark:text-slate-300">
             {strings.peerIsGuessing(peerName, attempts.length)}
           </p>
           <RangeTrack attempts={attempts} />
@@ -214,13 +218,13 @@ function Scoreboard({
   total: number;
 }) {
   return (
-    <div className="flex items-center justify-center gap-3 text-center">
+    <div className="flex items-center justify-center gap-3 rounded-[1.5rem] border border-white/60 bg-white/72 p-3 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
       <ScoreCell name={meName} count={myCount} active={myGuessing} />
       <div className="flex flex-col items-center gap-0.5">
-        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+        <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[length:var(--fs-2xs)] font-black uppercase tracking-wide text-white dark:bg-white dark:text-slate-950">
           vs
         </span>
-        <span className="font-mono text-[length:var(--fs-2xs)] tabular-nums text-ink3">
+        <span className="font-mono text-[length:var(--fs-2xs)] font-black tabular-nums text-slate-500 dark:text-slate-400">
           {round}/{total}
         </span>
       </div>
@@ -242,17 +246,17 @@ function ScoreCell({
 }) {
   return (
     <div className="min-w-0 flex-1">
-      <div className="truncate text-xs font-semibold text-ink2">{name}</div>
+      <div className="truncate text-xs font-bold text-slate-600 dark:text-slate-300">{name}</div>
       <div
         className={cn(
-          'font-mono text-2xl font-bold tabular-nums',
-          muted ? 'text-ink3' : 'text-accent',
+          'font-mono text-2xl font-black tabular-nums',
+          muted ? 'text-slate-400' : 'text-cyan-700 dark:text-cyan-200',
         )}
       >
         {count ?? '—'}
       </div>
       {active ? (
-        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">
+        <span className="rounded-full border border-cyan-300/35 bg-cyan-50/85 px-2 py-0.5 text-[length:var(--fs-2xs)] font-black uppercase tracking-wide text-cyan-800 dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100">
           live
         </span>
       ) : null}
@@ -277,14 +281,14 @@ function PhaseHeader({
 }) {
   if (phase === 'waitingKeeper') {
     return (
-      <span className="text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
+      <span className="text-center text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {strings.roundOf(round, total)}
       </span>
     );
   }
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
-      <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
+      <span className="text-[length:var(--fs-2xs)] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {strings.roundOf(round, total)}
       </span>
       <TurnBadge tone={amKeeper ? 'peer' : 'you'}>
@@ -554,7 +558,6 @@ function Over({
     } else {
       playCue('draw');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

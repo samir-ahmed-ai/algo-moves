@@ -4407,7 +4407,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "runtime",
       "scheduler",
       "goroutines",
-      "GMP"
+      "gmp"
     ],
     "summary": "How Go's M:N scheduler multiplexes millions of goroutines onto OS threads.",
     "group": "go-course"
@@ -4560,7 +4560,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "tags": [
       "runtime",
       "memory",
-      "sync.Pool",
+      "sync.pool",
       "gc",
       "performance",
       "false-sharing"
@@ -4660,7 +4660,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "generics",
       "constraints",
       "comparable",
-      "cmp.Ordered",
+      "cmp.ordered",
       "tilde",
       "type-sets"
     ],
@@ -4701,9 +4701,9 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "tags": [
       "errors",
       "wrapping",
-      "errors.Is",
-      "errors.As",
-      "fmt.Errorf"
+      "errors.is",
+      "errors.as",
+      "fmt.errorf"
     ],
     "summary": "Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.",
     "group": "go-course"
@@ -4714,12 +4714,12 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Hard",
     "tags": [
       "errors",
-      "errors.Is",
-      "errors.As",
+      "errors.is",
+      "errors.as",
       "sentinel",
       "typed-errors",
-      "Unwrap",
-      "API-design"
+      "unwrap",
+      "api-design"
     ],
     "summary": "When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.",
     "group": "go-course"
@@ -4744,10 +4744,10 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Hard",
     "tags": [
       "errors",
-      "Unwrap",
-      "errors.Is",
-      "errors.As",
-      "errors.Join",
+      "unwrap",
+      "errors.is",
+      "errors.as",
+      "errors.join",
       "wrapping"
     ],
     "summary": "Build custom error types that participate correctly in Is/As chains and joined trees.",
@@ -4929,8 +4929,8 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "tags": [
       "testing",
       "subtests",
-      "t.Run",
-      "t.Cleanup",
+      "t.run",
+      "t.cleanup",
       "golden-files",
       "go-cmp"
     ],
@@ -5055,10 +5055,10 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Easy",
     "tags": [
       "ad-tech",
-      "DSP",
-      "SSP",
+      "dsp",
+      "ssp",
       "exchange",
-      "RTB",
+      "rtb",
       "programmatic"
     ],
     "summary": "Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.",
@@ -5069,11 +5069,11 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "The RTB Request-Response Flow",
     "difficulty": "Easy",
     "tags": [
-      "RTB",
+      "rtb",
       "bid-request",
       "bid-response",
       "latency",
-      "OpenRTB"
+      "openrtb"
     ],
     "summary": "Step-by-step journey from page load to impression served, with sub-100 ms timing.",
     "group": "openrtb"
@@ -5101,7 +5101,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "sellers.json",
       "schain",
       "supply-chain",
-      "IVT",
+      "ivt",
       "fraud"
     ],
     "summary": "IAB standards for authorised reseller disclosure and supply path transparency.",
@@ -5112,8 +5112,8 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "Top-Level BidRequest Object",
     "difficulty": "Medium",
     "tags": [
-      "BidRequest",
-      "OpenRTB",
+      "bidrequest",
+      "openrtb",
       "tmax",
       "imp",
       "at",
@@ -5133,7 +5133,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "native",
       "audio",
       "pmp",
-      "OpenRTB"
+      "openrtb"
     ],
     "summary": "The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.",
     "group": "openrtb"
@@ -5148,7 +5148,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "device",
       "user",
       "geo",
-      "OpenRTB",
+      "openrtb",
       "context"
     ],
     "summary": "Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.",
@@ -5159,12 +5159,12 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "OpenRTB 2.6 New Fields",
     "difficulty": "Hard",
     "tags": [
-      "OpenRTB-2.6",
+      "openrtb-2.6",
       "pod-bidding",
       "podid",
       "poddur",
       "plcmt",
-      "CTV",
+      "ctv",
       "channel"
     ],
     "summary": "Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.",
@@ -5175,9 +5175,9 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "BidResponse & SeatBid Objects",
     "difficulty": "Easy",
     "tags": [
-      "BidResponse",
-      "SeatBid",
-      "OpenRTB",
+      "bidresponse",
+      "seatbid",
+      "openrtb",
       "nbr",
       "cur"
     ],
@@ -5189,14 +5189,14 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "The Bid Object Deep Dive",
     "difficulty": "Medium",
     "tags": [
-      "Bid",
+      "bid",
       "adm",
       "nurl",
       "burl",
       "lurl",
       "crid",
       "adomain",
-      "OpenRTB"
+      "openrtb"
     ],
     "summary": "Every field of the OpenRTB Bid object and how exchanges and DSPs use them.",
     "group": "openrtb"
@@ -5208,7 +5208,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "tags": [
       "nurl",
       "burl",
-      "AUCTION_PRICE",
+      "auction_price",
       "macros",
       "clearing-price",
       "settlement"
@@ -5224,8 +5224,8 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "no-bid",
       "nbr",
       "timeout",
-      "HTTP-204",
-      "OpenRTB"
+      "http-204",
+      "openrtb"
     ],
     "summary": "HTTP 204 vs JSON no-bid, nbr reason codes, and graceful timeout behaviour.",
     "group": "openrtb"
@@ -5237,9 +5237,9 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "tags": [
       "net/http",
       "bidder",
-      "OpenRTB",
-      "JSON",
-      "HTTP-server"
+      "openrtb",
+      "json",
+      "http-server"
     ],
     "summary": "A minimal OpenRTB bidder: HTTP server, JSON decode, validate, encode response.",
     "group": "openrtb"
@@ -5251,7 +5251,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "tags": [
       "targeting",
       "bid-decision",
-      "CPM",
+      "cpm",
       "campaign",
       "audience",
       "floor"
@@ -5269,7 +5269,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "concurrency",
       "deadline",
       "tmax",
-      "RWMutex"
+      "rwmutex"
     ],
     "summary": "Using context.WithDeadline, goroutines, and safe shared state in a real bidder.",
     "group": "openrtb"
@@ -5282,9 +5282,9 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "benchmark",
       "pprof",
       "allocations",
-      "JSON",
+      "json",
       "performance",
-      "Go"
+      "go"
     ],
     "summary": "go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.",
     "group": "openrtb"
@@ -5298,8 +5298,8 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "goroutines",
       "exchange",
       "concurrency",
-      "DSP",
-      "OpenRTB"
+      "dsp",
+      "openrtb"
     ],
     "summary": "Sending a BidRequest to N DSPs concurrently and collecting responses within tmax.",
     "group": "openrtb"
@@ -5339,7 +5339,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Medium",
     "tags": [
       "floor",
-      "PMP",
+      "pmp",
       "deals",
       "preferred-deal",
       "programmatic-guaranteed",
@@ -5356,8 +5356,8 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "reverse-proxy",
       "httputil",
       "net/http",
-      "Director",
-      "ModifyResponse"
+      "director",
+      "modifyresponse"
     ],
     "summary": "Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.",
     "group": "openrtb"
@@ -5372,7 +5372,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "win-notice",
       "billing",
       "server-to-server",
-      "OpenRTB"
+      "openrtb"
     ],
     "summary": "Implementing exchange-side nurl + burl dispatch and DSP-side win/billing handlers.",
     "group": "openrtb"
@@ -5383,10 +5383,10 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Medium",
     "tags": [
       "adm",
-      "AUCTION_PRICE",
+      "auction_price",
       "macros",
       "markup",
-      "CDN",
+      "cdn",
       "creative"
     ],
     "summary": "Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.",
@@ -5397,9 +5397,9 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "CDN Creatives & Creative Auditing",
     "difficulty": "Easy",
     "tags": [
-      "CDN",
+      "cdn",
       "creative",
-      "IURL",
+      "iurl",
       "crid",
       "brand-safety",
       "audit"
@@ -5415,7 +5415,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "impression",
       "pixel",
       "tracking",
-      "HTTP-GET",
+      "http-get",
       "idempotent",
       "deduplication"
     ],
@@ -5430,7 +5430,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "click",
       "redirect",
       "tracking",
-      "HTTP-302",
+      "http-302",
       "deduplication",
       "attribution"
     ],
@@ -5443,11 +5443,11 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Medium",
     "tags": [
       "macros",
-      "AUCTION_PRICE",
+      "auction_price",
       "substitution",
       "tracking",
-      "OpenRTB",
-      "URL-encoding"
+      "openrtb",
+      "url-encoding"
     ],
     "summary": "All OpenRTB standard macros, their substitution context, and safe URL encoding.",
     "group": "openrtb"
@@ -5461,7 +5461,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "discrepancy",
       "billing",
       "impression-counting",
-      "IAS",
+      "ias",
       "fraud"
     ],
     "summary": "Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.",
@@ -5473,10 +5473,10 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Easy",
     "tags": [
       "banner",
-      "HTML",
-      "MRAID",
+      "html",
+      "mraid",
       "creative",
-      "SafeFrame",
+      "safeframe",
       "adm"
     ],
     "summary": "Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.",
@@ -5487,11 +5487,11 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "VAST Video Ad Serving Template",
     "difficulty": "Hard",
     "tags": [
-      "VAST",
+      "vast",
       "video",
-      "VPAID",
-      "InLine",
-      "Wrapper",
+      "vpaid",
+      "inline",
+      "wrapper",
       "tracking-events"
     ],
     "summary": "VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.",
@@ -5503,7 +5503,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Medium",
     "tags": [
       "native",
-      "OpenRTB-native",
+      "openrtb-native",
       "assets",
       "title",
       "image",
@@ -5523,7 +5523,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "budget",
       "rate-limiting",
       "atomic",
-      "Go"
+      "go"
     ],
     "summary": "Token-bucket algorithm for smooth budget pacing per advertiser per time window.",
     "group": "openrtb"
@@ -5534,9 +5534,9 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Hard",
     "tags": [
       "frequency-cap",
-      "Redis",
-      "INCR",
-      "EXPIRE",
+      "redis",
+      "incr",
+      "expire",
       "consistent-hashing",
       "user-tracking"
     ],
@@ -5548,7 +5548,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "Write-Behind Logging with Kafka",
     "difficulty": "Hard",
     "tags": [
-      "Kafka",
+      "kafka",
       "write-behind",
       "ring-buffer",
       "logging",
@@ -5563,13 +5563,13 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "title": "GDPR, TCF & Consent Strings",
     "difficulty": "Hard",
     "tags": [
-      "GDPR",
-      "TCF",
+      "gdpr",
+      "tcf",
       "consent",
-      "GPP",
+      "gpp",
       "us_privacy",
-      "CCPA",
-      "OpenRTB"
+      "ccpa",
+      "openrtb"
     ],
     "summary": "TCF 2.2 consent strings in BidRequest, GDPR enforcement in bidders, and GPP/CCPA.",
     "group": "openrtb"
@@ -5580,12 +5580,12 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "difficulty": "Hard",
     "tags": [
       "identity",
-      "IDFA",
-      "GAID",
-      "UID2",
+      "idfa",
+      "gaid",
+      "uid2",
       "cookieless",
       "eids",
-      "LiveRamp"
+      "liveramp"
     ],
     "summary": "Device IDs, cookie-sync, UID2, and identity in a cookieless world.",
     "group": "openrtb"
@@ -5598,7 +5598,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "system-design",
       "exchange",
       "scalability",
-      "OpenRTB",
+      "openrtb",
       "architecture",
       "capstone"
     ],

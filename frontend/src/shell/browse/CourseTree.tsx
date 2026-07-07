@@ -158,7 +158,7 @@ export function CourseTree({
             <Accordion.Item
               key={track.id}
               value={track.id}
-              className="course-tree__track overflow-hidden rounded-lg border border-edge bg-panel/60 shadow-[var(--shadow-sm)]"
+              className="course-tree__track overflow-hidden rounded-2xl border border-edge bg-panel/70 shadow-theme-sm transition-shadow hover:shadow-theme-md"
             >
               <Accordion.Header className="flex items-center">
                 <Accordion.Trigger
@@ -167,7 +167,7 @@ export function CourseTree({
                 >
                   <ChevronRight className="course-tree__chevron h-3.5 w-3.5 shrink-0 text-ink3 transition-transform duration-200 group-data-[state=open]/course:rotate-90" />
                   <span
-                    className="course-tree__track-icon grid h-8 w-8 shrink-0 place-items-center rounded-md text-white shadow-[var(--shadow-sm)] [&>svg]:h-4 [&>svg]:w-4"
+                    className="course-tree__track-icon grid h-8 w-8 shrink-0 place-items-center rounded-2xl text-white shadow-theme-sm [&>svg]:h-4 [&>svg]:w-4"
                     style={{ background: `linear-gradient(135deg, ${color.c1}, ${color.c2})` }}
                   >
                     <Icon strokeWidth={1.6} />
@@ -231,7 +231,7 @@ export function CourseTree({
                           className="course-tree__category border-b border-edge/60 last:border-0"
                         >
                           <Accordion.Header className="flex items-center">
-                            <Accordion.Trigger className="course-tree__category-trigger group/sub flex min-w-0 flex-1 items-center gap-2 py-2 pl-2 pr-2 text-left transition-colors hover:bg-panel2">
+                            <Accordion.Trigger className="course-tree__category-trigger group/sub flex min-w-0 flex-1 items-center gap-2 rounded-r-2xl py-2 pl-2 pr-2 text-left transition-colors hover:bg-panel2">
                               <ChevronRight className="course-tree__chevron h-3 w-3 shrink-0 text-ink3 transition-transform duration-200 group-data-[state=open]/sub:rotate-90" />
                               <span
                                 className={cn(
@@ -267,7 +267,7 @@ export function CourseTree({
                                   mastered={isMastered(it.id)}
                                   showSummary={showItemSummary}
                                   onProblem={onProblem}
-                                  accessory={problemAccessory}
+                                  {...(problemAccessory ? { accessory: problemAccessory } : {})}
                                 />
                               ))}
                             </ul>
@@ -302,7 +302,7 @@ function ProblemRow({
   accessory?: (item: Item, categoryId: string) => ReactNode;
 }) {
   return (
-    <li className="course-tree__problem group/row flex items-center gap-2 pl-4 pr-2">
+    <li className="course-tree__problem group/row flex items-center gap-2 rounded-r-2xl pl-4 pr-2 transition-colors hover:bg-panel/60">
       <button
         type="button"
         onClick={() => onProblem(item, categoryId)}
@@ -311,7 +311,7 @@ function ProblemRow({
       >
         <ProblemGlyph
           item={item}
-          className="course-tree__problem-glyph mt-0.5 h-5 w-5 shrink-0 text-ink3"
+          className="course-tree__problem-glyph mt-0.5 h-5 w-5 shrink-0 rounded-lg text-ink3"
         />
         <span className="min-w-0 flex-1">
           <span

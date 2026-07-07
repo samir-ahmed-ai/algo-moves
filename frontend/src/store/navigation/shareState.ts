@@ -80,6 +80,10 @@ export function normalizeShareState(s: ShareState): ShareState {
     const { sessionKind: _ignored, ...rest } = out;
     out = rest;
   }
+  if (!out.guestToken) {
+    const { guestToken: _ignored, ...rest } = out;
+    out = rest;
+  }
   if (!out.item) return out;
   const next = LEGACY_ITEM_REDIRECTS[out.item] ?? out.item;
   return next === out.item ? out : { ...out, item: next };

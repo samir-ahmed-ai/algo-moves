@@ -142,7 +142,7 @@ export function GistCardView({
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white shadow-[var(--shadow-lg)]"
+          className="inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[length:var(--fs-title)] font-semibold text-[var(--accent-contrast)] shadow-theme-md transition hover:-translate-y-0.5 hover:shadow-theme-lg"
           style={{ background: tint }}
         >
           Watch the algorithm
@@ -214,7 +214,7 @@ export function AnimateCardView({
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white shadow-[var(--shadow-lg)]"
+          className="inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[length:var(--fs-title)] font-semibold text-[var(--accent-contrast)] shadow-theme-md transition hover:-translate-y-0.5 hover:shadow-theme-lg"
           style={{ background: watched ? 'var(--good)' : tint }}
         >
           {watched ? (
@@ -418,7 +418,7 @@ export function QuizCardView({
       )}
 
       <div className="mt-4 flex items-start gap-2.5">
-        <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-accentbg text-accent">
+        <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
           <Brain className="h-4 w-4" />
         </span>
         <h2 className="text-[19px] font-semibold leading-snug tracking-tight text-ink">
@@ -444,8 +444,8 @@ export function QuizCardView({
               disabled={answered}
               onClick={() => choose(i)}
               className={cn(
-                'mobile-choice flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition-all',
-                !answered && 'border-edge bg-panel active:scale-[0.99]',
+                'mobile-choice flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-left shadow-theme-sm transition-all',
+                !answered && 'border-edge bg-panel/85 active:scale-[0.99]',
                 showCorrect && 'mobile-choice-correct border-good bg-goodbg',
                 showWrong && 'mobile-choice-wrong border-bad bg-badbg',
                 answered && !showCorrect && !showWrong && 'mobile-choice-dim border-edge/70',
@@ -505,14 +505,14 @@ export function QuizCardView({
       <div className="mt-auto" />
 
       <div
-        className="sticky bottom-0 -mx-5 flex shrink-0 items-center gap-2 border-t border-edge/60 bg-panel/95 px-5 py-3 backdrop-blur-sm"
+        className="sticky bottom-0 -mx-5 flex shrink-0 items-center gap-2 border-t border-edge/60 bg-[var(--surface-glass)] px-5 py-3 backdrop-blur-xl"
         data-noswipe
       >
         <button
           type="button"
           onClick={goBack}
           disabled={!canPrev}
-          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-edge bg-panel px-4 py-2.5 text-[length:var(--fs-sm)] font-medium text-ink2 transition-colors hover:text-ink disabled:opacity-35"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-edge bg-panel/80 px-4 py-2.5 text-[length:var(--fs-sm)] font-medium text-ink2 shadow-theme-sm transition hover:-translate-y-0.5 hover:text-ink hover:shadow-theme-md disabled:translate-y-0 disabled:opacity-35"
         >
           <ChevronLeft className="h-4 w-4" />
           Back
@@ -521,7 +521,7 @@ export function QuizCardView({
           type="button"
           onClick={answered && !isCorrect ? skipWait : leaveQuestion}
           disabled={!canNext && !(answered && !isCorrect)}
-          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-accent px-4 py-2.5 text-[length:var(--fs-sm)] font-semibold text-white disabled:opacity-35"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-accent px-4 py-2.5 text-[length:var(--fs-sm)] font-semibold text-[var(--accent-contrast)] shadow-theme-sm transition hover:-translate-y-0.5 hover:shadow-theme-md disabled:translate-y-0 disabled:opacity-35"
         >
           {answered && !isCorrect ? 'Retry' : answered ? 'Next' : 'Skip'}
           <ChevronRight className="h-4 w-4" />
@@ -719,7 +719,7 @@ export function CompleteScreen({
   return (
     <div className="mobile-card-shell relative flex flex-1 flex-col items-center justify-center px-6 text-center">
       <Confetti />
-      <div className="relative grid h-20 w-20 place-items-center rounded-full bg-accentbg text-accent">
+      <div className="relative grid h-20 w-20 place-items-center rounded-[2rem] bg-accent text-[var(--accent-contrast)] shadow-theme-lg">
         <Trophy className="h-9 w-9" />
       </div>
       <h2 className="relative mt-6 text-[22px] font-bold tracking-tight text-ink">Well done!</h2>
@@ -728,7 +728,7 @@ export function CompleteScreen({
       </p>
 
       {(problemCount != null || totalQuiz != null) && (
-        <div className="relative mt-4 flex items-center gap-3 rounded-2xl border border-edge bg-panel px-5 py-3">
+        <div className="relative mt-4 flex items-center gap-3 rounded-3xl border border-edge bg-panel/80 px-5 py-3 shadow-theme-sm">
           {problemCount != null && (
             <div className="flex flex-col items-center">
               <span className="text-[22px] font-bold tabular-nums text-ink">{problemCount}</span>
@@ -750,7 +750,7 @@ export function CompleteScreen({
           <button
             type="button"
             onClick={onNextCategory}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-[length:var(--fs-title)] font-semibold text-[var(--accent-contrast)] shadow-theme-sm transition hover:-translate-y-0.5 hover:shadow-theme-md"
           >
             Next: {nextCategoryTitle}
             <ArrowRight className="h-4 w-4" />

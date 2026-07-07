@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { Eye, EyeOff, KeyRound, Loader2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
@@ -10,6 +10,7 @@ import {
 } from '@/platform/api/profileIntegrationsApi';
 
 export function ProfileIntegrationsSection() {
+  const keyInputId = useId();
   const { isAnonymous, loading } = useAuth();
   const [status, setStatus] = useState<ProfileIntegrations | null>(null);
   const [fetching, setFetching] = useState(true);
@@ -33,7 +34,9 @@ export function ProfileIntegrationsSection() {
   if (loading || isAnonymous) {
     return (
       <div className="profile-integrations-empty">
-        <KeyRound className="h-5 w-5" />
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-panel2 text-ink3 shadow-theme-sm">
+          <KeyRound className="h-5 w-5" />
+        </span>
         <p className={cn('text-ink3', chromeText.sm)}>
           Sign in to manage your API keys and integrations.
         </p>
@@ -74,10 +77,13 @@ export function ProfileIntegrationsSection() {
   };
 
   return (
-    <div className="profile-integrations-card space-y-3">
+    <section
+      className="profile-integrations-card space-y-3 rounded-3xl border border-edge bg-panel/70 p-4 shadow-theme-sm"
+      aria-label="OpenAI API key integration"
+    >
       <div className="profile-integrations-card__head flex items-center gap-2">
-        <span className="profile-integrations-card__icon">
-          <KeyRound className="h-4 w-4 text-accent" />
+        <span className="profile-integrations-card__icon grid h-9 w-9 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+          <KeyRound className="h-4 w-4" />
         </span>
         <div>
           <span className="profile-integrations-card__eyebrow">secure integration</span>
@@ -98,8 +104,8 @@ export function ProfileIntegrationsSection() {
       </p>
 
       {fetching ? (
-        <div className="profile-integrations-loading">
-          <Loader2 className="h-5 w-5 animate-spin text-ink3" />
+        <div className="profile-integrations-loading flex items-center justify-center rounded-2xl border border-edge bg-panel/60 py-5">
+          <Loader2 className="h-5 w-5 animate-spin text-accent" />
         </div>
       ) : (
         <>
@@ -115,14 +121,18 @@ export function ProfileIntegrationsSection() {
           )}
 
           <div className="profile-integrations-input-wrap relative">
+            <label htmlFor={keyInputId} className="sr-only">
+              OpenAI API key
+            </label>
             <input
+              id={keyInputId}
               type={showKey ? 'text' : 'password'}
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
               placeholder={status?.openai.configured ? 'Enter new key to replace' : 'sk-...'}
               autoComplete="off"
               className={cn(
-                'profile-integrations-input w-full rounded-lg border border-edge bg-panel2 py-2 pl-3 pr-10 text-ink outline-none',
+                'profile-integrations-input w-full rounded-2xl border border-edge bg-panel2 py-2 pl-3 pr-10 text-ink outline-none',
                 'focus:border-accent/60 focus:ring-2 focus:ring-accent/15',
                 chromeText.sm,
               )}
@@ -130,7 +140,7 @@ export function ProfileIntegrationsSection() {
             <button
               type="button"
               onClick={() => setShowKey((v) => !v)}
-              className="profile-integrations-reveal absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink3 hover:text-ink"
+              className="profile-integrations-reveal absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink3 hover:bg-panel hover:text-ink"
               aria-label={showKey ? 'Hide API key' : 'Show API key'}
             >
               {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -143,7 +153,7 @@ export function ProfileIntegrationsSection() {
               onClick={save}
               disabled={busy}
               className={cn(
-                'profile-integrations-save flex-1 rounded-lg bg-accent px-3 py-2 font-medium text-white transition hover:opacity-90 disabled:opacity-50',
+                'profile-integrations-save flex-1 rounded-full bg-accent px-3 py-2 font-semibold text-[var(--accent-contrast)] shadow-theme-sm transition hover:-translate-y-0.5 hover:opacity-90 hover:shadow-theme-md disabled:translate-y-0 disabled:opacity-50',
                 chromeText.sm,
               )}
             >
@@ -155,7 +165,7 @@ export function ProfileIntegrationsSection() {
                 onClick={remove}
                 disabled={busy}
                 className={cn(
-                  'profile-integrations-remove inline-flex items-center gap-1 rounded-lg border border-edge bg-panel2 px-3 py-2 text-ink2 transition hover:border-bad/40 hover:text-bad disabled:opacity-50',
+                  'profile-integrations-remove inline-flex items-center gap-1 rounded-full border border-edge bg-panel2 px-3 py-2 text-ink2 shadow-theme-sm transition hover:border-bad/40 hover:text-bad disabled:opacity-50',
                   chromeText.sm,
                 )}
               >
@@ -170,6 +180,6 @@ export function ProfileIntegrationsSection() {
           )}
         </>
       )}
-    </div>
+    </section>
   );
 }

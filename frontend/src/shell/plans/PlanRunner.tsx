@@ -80,10 +80,15 @@ export function PlanRunner() {
   const pct = Math.round((completedCount / total) * 100);
 
   return (
-    <div className="plan-runner-bar flex h-12 shrink-0 items-center gap-3 border-b border-edge bg-panel px-4">
+    <div
+      className="plan-runner-bar flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-[var(--surface-glass)] px-4 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl"
+      aria-label="Active study plan run"
+    >
       {/* Plan badge */}
       <div className="plan-runner-bar__badge flex items-center gap-1.5 text-accent">
-        <BookMarked className="h-3.5 w-3.5 shrink-0" />
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+          <BookMarked className="h-3.5 w-3.5" />
+        </span>
         <span className={cn('hidden truncate max-w-[120px] font-semibold sm:block', chromeText.sm)}>
           {activePlan.title}
         </span>
@@ -96,8 +101,9 @@ export function PlanRunner() {
         type="button"
         onClick={handlePrev}
         disabled={runnerIndex === 0}
-        className="plan-runner-bar__nav grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink disabled:opacity-30"
+        className="plan-runner-bar__nav grid h-8 w-8 place-items-center rounded-full border border-edge bg-panel/60 text-ink3 shadow-theme-sm transition hover:-translate-y-0.5 hover:bg-panel2 hover:text-ink hover:shadow-theme-md disabled:translate-y-0 disabled:opacity-30"
         title="Previous problem (p)"
+        aria-label="Previous plan problem"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -117,8 +123,9 @@ export function PlanRunner() {
         type="button"
         onClick={handleNext}
         disabled={runnerIndex === total - 1}
-        className="plan-runner-bar__nav grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink disabled:opacity-30"
+        className="plan-runner-bar__nav grid h-8 w-8 place-items-center rounded-full border border-edge bg-panel/60 text-ink3 shadow-theme-sm transition hover:-translate-y-0.5 hover:bg-panel2 hover:text-ink hover:shadow-theme-md disabled:translate-y-0 disabled:opacity-30"
         title="Next problem (n)"
+        aria-label="Next plan problem"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
@@ -130,13 +137,14 @@ export function PlanRunner() {
         type="button"
         onClick={handleToggle}
         className={cn(
-          'flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition',
+          'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-theme-sm transition hover:-translate-y-0.5 hover:shadow-theme-md',
           'plan-runner-bar__complete',
           isCompleted
             ? 'border-good/40 bg-good/10 text-good hover:bg-good/20'
             : 'border-edge text-ink3 hover:border-accent/50 hover:bg-panel2 hover:text-ink',
         )}
         title={isCompleted ? 'Mark as not done (d)' : 'Mark as done (d)'}
+        aria-pressed={isCompleted}
       >
         {isCompleted ? (
           <CheckCircle2 className="h-3.5 w-3.5" />
@@ -163,8 +171,9 @@ export function PlanRunner() {
       <button
         type="button"
         onClick={stopRun}
-        className="plan-runner-bar__exit grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink"
+        className="plan-runner-bar__exit grid h-8 w-8 place-items-center rounded-full border border-edge bg-panel/60 text-ink3 shadow-theme-sm transition hover:-translate-y-0.5 hover:bg-panel2 hover:text-ink hover:shadow-theme-md"
         title="Exit run mode"
+        aria-label="Exit plan run mode"
       >
         <X className="h-4 w-4" />
       </button>

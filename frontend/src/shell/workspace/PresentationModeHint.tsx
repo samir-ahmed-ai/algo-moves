@@ -5,13 +5,20 @@ export function PresentationModeHint() {
   return (
     <div
       className={cn(
-        'presentation-mode-hint pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-edge bg-panel/90 px-2 py-0.5 text-ink3 shadow backdrop-blur',
+        'presentation-mode-hint pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-edge bg-[var(--surface-glass)] px-3 py-1.5 text-ink3 shadow-theme-lg ring-1 ring-accent/10 backdrop-blur-xl',
         chromeText.sm,
       )}
       role="status"
     >
-      Presentation mode - press <span className="font-mono text-ink2">Esc</span> or{' '}
-      <span className="font-mono text-ink2">F</span> to exit
+      Presentation mode · press{' '}
+      <kbd className="rounded-md border border-edge bg-panel2 px-1.5 py-0.5 font-mono text-ink">
+        Esc
+      </kbd>{' '}
+      or{' '}
+      <kbd className="rounded-md border border-edge bg-panel2 px-1.5 py-0.5 font-mono text-ink">
+        F
+      </kbd>{' '}
+      to exit
     </div>
   );
 }

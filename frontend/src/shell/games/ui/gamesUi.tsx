@@ -30,16 +30,19 @@ type TouchVariant = 'primary' | 'ghost' | 'good' | 'bad' | 'accentSoft';
 type TouchSize = 'md' | 'lg';
 
 const TOUCH_VARIANTS: Record<TouchVariant, string> = {
-  primary: 'bg-accent text-white border-transparent hover:opacity-90 active:opacity-80',
-  good: 'bg-good text-white border-transparent hover:opacity-90 active:opacity-80',
-  bad: 'bg-bad text-white border-transparent hover:opacity-90 active:opacity-80',
-  accentSoft: 'bg-accentbg text-accent border-accent/40 hover:border-accent',
-  ghost: 'bg-panel text-ink border-edge hover:bg-panel2 hover:border-edge2',
+  primary:
+    'border-transparent bg-slate-950 text-white shadow-[0_14px_34px_rgba(15,23,42,0.2)] hover:-translate-y-0.5 hover:bg-slate-800 active:bg-slate-950 dark:bg-white dark:text-slate-950 dark:hover:bg-cyan-50',
+  good: 'border-transparent bg-emerald-600 text-white shadow-[0_14px_34px_rgba(5,150,105,0.22)] hover:-translate-y-0.5 hover:bg-emerald-500 active:bg-emerald-700',
+  bad: 'border-transparent bg-red-600 text-white shadow-[0_14px_34px_rgba(220,38,38,0.22)] hover:-translate-y-0.5 hover:bg-red-500 active:bg-red-700',
+  accentSoft:
+    'border-cyan-300/40 bg-cyan-50/85 text-cyan-800 shadow-sm hover:-translate-y-0.5 hover:border-cyan-400 dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100',
+  ghost:
+    'border-white/60 bg-white/70 text-slate-700 shadow-sm hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 dark:hover:text-white',
 };
 
 const TOUCH_SIZES: Record<TouchSize, string> = {
-  md: 'min-h-10 px-4 py-2 text-sm gap-2 rounded-xl sm:min-h-10',
-  lg: 'min-h-12 px-5 py-3 text-base gap-2 rounded-xl sm:min-h-12',
+  md: 'min-h-10 px-4 py-2 text-sm gap-2 rounded-2xl sm:min-h-10',
+  lg: 'min-h-12 px-5 py-3 text-base gap-2 rounded-2xl sm:min-h-12',
 };
 
 /** A large, finger-friendly button. Defaults are sized for phones and iPads. */
@@ -64,7 +67,7 @@ export function TouchButton({
       type="button"
       disabled={disabled || busy}
       className={cn(
-        'inline-flex select-none items-center justify-center border font-bold tracking-tight transition-all',
+        'inline-flex select-none items-center justify-center border font-black tracking-tight transition-all',
         'touch-manipulation active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50',
         TOUCH_SIZES[size],
         TOUCH_VARIANTS[variant],
@@ -101,11 +104,11 @@ export function ChoiceCard({
       onClick={onClick}
       style={accent ? ({ '--accent': accent } as CSSProperties) : undefined}
       className={cn(
-        'flex select-none flex-col items-center justify-center gap-1 rounded-xl border-2 p-2.5 text-center min-h-[4.25rem]',
+        'flex min-h-[4.25rem] select-none flex-col items-center justify-center gap-1 rounded-2xl border p-2.5 text-center shadow-sm backdrop-blur',
         'transition-all touch-manipulation active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40',
         selected
-          ? 'border-accent bg-accentbg text-accent shadow-[0_0_0_2px_var(--accent-bg),0_4px_14px_-4px_var(--accent)]'
-          : 'border-edge bg-panel text-ink hover:border-accent/30 hover:bg-panel2',
+          ? 'border-cyan-300/50 bg-cyan-50/85 text-cyan-800 shadow-[0_0_0_2px_rgba(34,211,238,0.14),0_16px_34px_rgba(8,145,178,0.16)] dark:bg-cyan-300/10 dark:text-cyan-100'
+          : 'border-white/60 bg-white/72 text-slate-800 hover:-translate-y-0.5 hover:border-cyan-300/35 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10',
         className,
       )}
     >
@@ -125,10 +128,13 @@ export function TurnBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide ring-1 ring-inset',
-        tone === 'you' && 'bg-accentbg text-accent ring-accent/25',
-        tone === 'peer' && 'bg-panel2 text-ink2 ring-edge',
-        tone === 'wait' && 'bg-panel2 text-ink3 ring-edge/60',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[length:var(--fs-2xs)] font-black uppercase tracking-wide ring-1 ring-inset',
+        tone === 'you' &&
+          'bg-cyan-50/85 text-cyan-800 ring-cyan-300/35 dark:bg-cyan-300/10 dark:text-cyan-100 dark:ring-cyan-300/20',
+        tone === 'peer' &&
+          'bg-white/70 text-slate-700 ring-white/60 dark:bg-white/5 dark:text-slate-200 dark:ring-white/10',
+        tone === 'wait' &&
+          'bg-slate-950/5 text-slate-500 ring-slate-200 dark:bg-white/5 dark:text-slate-400 dark:ring-white/10',
       )}
     >
       {children}
@@ -149,15 +155,18 @@ export function ResultBanner({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-xl border p-3 text-center',
-        tone === 'win' && 'border-good/50 bg-goodbg text-good shadow-[0_4px_20px_-6px_var(--good)]',
-        tone === 'lose' && 'border-bad/50 bg-bad/10 text-bad',
-        tone === 'draw' && 'border-edge bg-panel2 text-ink2',
+        'relative overflow-hidden rounded-2xl border p-3 text-center shadow-sm backdrop-blur',
+        tone === 'win' &&
+          'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 shadow-[0_14px_38px_rgba(5,150,105,0.14)] dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100',
+        tone === 'lose' &&
+          'border-red-300/45 bg-red-50/85 text-red-700 dark:border-red-400/25 dark:bg-red-500/10 dark:text-red-200',
+        tone === 'draw' &&
+          'border-white/60 bg-white/70 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200',
       )}
     >
       {tone === 'win' && <ConfettiSparkle />}
-      <div className="relative text-base font-extrabold tracking-tight">{title}</div>
-      {detail ? <div className="relative mt-1 text-xs opacity-90">{detail}</div> : null}
+      <div className="relative text-base font-black tracking-tight">{title}</div>
+      {detail ? <div className="relative mt-1 text-xs font-medium opacity-90">{detail}</div> : null}
     </div>
   );
 }
@@ -165,9 +174,9 @@ export function ResultBanner({
 /** Shown inside a game while the peer is momentarily gone. */
 export function WaitingForPeer({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center gap-2 py-6 text-center text-ink3">
-      <Loader2 className="h-5 w-5 animate-spin text-accent" />
-      <p className="max-w-xs text-xs">{message}</p>
+    <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/60 bg-white/65 py-6 text-center text-slate-500 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+      <Loader2 className="h-5 w-5 animate-spin text-cyan-600 dark:text-cyan-200" />
+      <p className="max-w-xs text-xs font-semibold">{message}</p>
     </div>
   );
 }
@@ -192,14 +201,14 @@ export function GameArena({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2.5 rounded-xl border-2 bg-gradient-to-b from-panel/90 to-panel/50 p-3',
+        'flex flex-col gap-2.5 rounded-[1.5rem] border bg-gradient-to-b from-white/88 to-white/58 p-3 shadow-[0_18px_58px_rgba(15,23,42,0.1)] backdrop-blur dark:from-slate-950/76 dark:to-slate-900/56',
         className,
       )}
       style={
         accent
           ? ({
               borderColor: `${accent}44`,
-              boxShadow: `0 4px 24px -8px ${accent}33`,
+              boxShadow: `0 18px 58px -22px ${accent}`,
             } as CSSProperties)
           : undefined
       }
@@ -215,9 +224,11 @@ export function CategoryBadge({ category }: { category: 'couple' | 'party' }) {
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold',
-        category === 'couple' && 'bg-pink-500/10 text-pink-500',
-        category === 'party' && 'bg-amber-500/10 text-amber-600',
+        'inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[length:var(--fs-2xs)] font-black',
+        category === 'couple' &&
+          'border-pink-300/35 bg-pink-50/85 text-pink-700 dark:border-pink-300/20 dark:bg-pink-300/10 dark:text-pink-100',
+        category === 'party' &&
+          'border-amber-300/35 bg-amber-50/85 text-amber-800 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100',
       )}
     >
       {category === 'couple' ? t.picker.categoryCouple : t.picker.categoryParty}
@@ -238,7 +249,7 @@ export function RoundProgress({
   return (
     <div className="game-round-progress flex flex-col items-center gap-1.5">
       <div className="flex items-center gap-2">
-        <span className="game-round-progress__count font-mono text-xs font-semibold tabular-nums text-ink2">
+        <span className="game-round-progress__count rounded-full bg-slate-950/5 px-2 py-1 font-mono text-xs font-black tabular-nums text-slate-600 dark:bg-white/10 dark:text-slate-300">
           {current} / {total}
         </span>
         {badge}
@@ -248,8 +259,12 @@ export function RoundProgress({
           <span
             key={i}
             className={cn(
-              'h-1.5 w-1.5 rounded-full',
-              i < current - 1 ? 'bg-accent' : i === current - 1 ? 'bg-accent/60' : 'bg-edge2',
+              'h-1.5 w-4 rounded-full transition-colors',
+              i < current - 1
+                ? 'bg-cyan-600 dark:bg-cyan-300'
+                : i === current - 1
+                  ? 'bg-cyan-400/70'
+                  : 'bg-slate-300 dark:bg-white/15',
             )}
           />
         ))}
@@ -273,7 +288,7 @@ export function SwipeHint({ message }: { message: string }) {
   return (
     <div
       ref={ref}
-      className="game-swipe-hint flex items-center justify-center gap-2 text-xs text-ink3 py-1"
+      className="game-swipe-hint flex items-center justify-center gap-2 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400"
     >
       <span className="animate-[swipeArrow_1s_ease-in-out_infinite]">👆</span>
       <span>{message}</span>

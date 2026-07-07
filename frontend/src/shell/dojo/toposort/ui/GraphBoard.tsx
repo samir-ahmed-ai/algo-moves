@@ -177,7 +177,7 @@ export function GraphBoard() {
                   </span>
                   <span
                     className={cn(
-                      'absolute -right-1.5 -top-1.5 grid h-4 w-4 place-items-center rounded-full border text-[10px] font-semibold tabular-nums leading-none',
+                      'absolute -right-1.5 -top-1.5 grid h-4 w-4 place-items-center rounded-full border text-[length:var(--fs-2xs)] font-semibold tabular-nums leading-none',
                       isLocked && 'border-edge bg-panel2 text-ink3',
                       isReady && 'border-good bg-good text-white',
                       !isLocked && !isReady && 'border-edge bg-panel2 text-ink3',

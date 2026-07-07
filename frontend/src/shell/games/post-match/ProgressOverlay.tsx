@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { X, Trophy, User as UserIcon, Pencil, LogOut, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { getArcadeStrings, useGamesLocale } from '../locale';
@@ -55,17 +55,17 @@ export function ProgressOverlay({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="game-progress-backdrop fixed inset-0 z-40 flex justify-end bg-black/40 backdrop-blur-sm"
+      className="game-progress-backdrop fixed inset-0 z-40 flex justify-end bg-slate-950/52 backdrop-blur-md"
       onClick={onClose}
     >
       <div
-        className="game-progress-panel ws-scroll flex h-full w-full max-w-md flex-col overflow-y-auto border-s border-edge bg-bg shadow-[var(--shadow-xl)] [padding-top:env(safe-area-inset-top)]"
+        className="game-progress-panel ws-scroll flex h-full w-full max-w-md flex-col overflow-y-auto border-s border-white/15 bg-white/86 shadow-[0_30px_120px_rgba(2,6,23,0.38)] backdrop-blur-2xl [padding-top:env(safe-area-inset-top)] dark:bg-slate-950/88"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={t.profile.title}
       >
-        <header className="game-progress-panel__header sticky top-0 z-10 flex items-center gap-1 border-b border-edge bg-bg/90 px-3 py-2 backdrop-blur">
+        <header className="game-progress-panel__header sticky top-0 z-10 flex items-center gap-1 border-b border-white/60 bg-white/78 px-3 py-2 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/78">
           <TabButton
             active={tab === 'profile'}
             onClick={() => setTab('profile')}
@@ -84,7 +84,7 @@ export function ProgressOverlay({ onClose }: { onClose: () => void }) {
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="game-progress-panel__close ms-auto grid h-10 w-10 place-items-center rounded-md text-ink3 hover:bg-panel2 hover:text-ink"
+            className="game-progress-panel__close ms-auto grid h-10 w-10 place-items-center rounded-2xl text-slate-500 transition hover:bg-slate-950/5 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
             aria-label={t.header.close}
           >
             <X className="h-5 w-5" />
@@ -106,16 +106,18 @@ function TabButton({
 }: {
   active: boolean;
   onClick: () => void;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  icon: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'game-progress-tab inline-flex min-h-10 items-center gap-1.5 rounded-md px-3 text-sm font-semibold',
-        active ? 'bg-panel2 text-ink' : 'text-ink3 hover:text-ink',
+        'game-progress-tab inline-flex min-h-10 items-center gap-1.5 rounded-2xl px-3 text-sm font-black transition',
+        active
+          ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
+          : 'text-slate-500 hover:bg-slate-950/5 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white',
         active && 'is-active',
       )}
     >
@@ -174,7 +176,11 @@ function ProfileTab() {
     void load();
   }, [load]);
 
-  if (authLoading) return <p className="py-6 text-center text-sm text-ink3">…</p>;
+  if (authLoading) {
+    return (
+      <p className="py-6 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">…</p>
+    );
+  }
 
   if (!configured) {
     const displayName = localName || t.profile.guest;
@@ -184,20 +190,22 @@ function ProfileTab() {
 
     return (
       <div className="game-profile-tab flex flex-col gap-5">
-        <div className="game-profile-card flex items-center gap-3">
+        <div className="game-profile-card flex items-center gap-3 rounded-[1.75rem] border border-white/60 bg-white/72 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
           <Avatar seed={displayName} name={displayName} size={56} />
           <div className="min-w-0 flex-1">
-            <p className="text-lg font-bold text-ink">{displayName}</p>
-            <p className="text-xs text-ink3">{t.profile.signInHint}</p>
+            <p className="text-lg font-black text-slate-950 dark:text-white">{displayName}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              {t.profile.signInHint}
+            </p>
           </div>
         </div>
 
         <div className="game-progress-section">
-          <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+          <p className="game-progress-section__label mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
             {t.profile.stats}
           </p>
           {myRows.length === 0 ? (
-            <p className="text-sm text-ink3">{t.profile.noStats}</p>
+            <EmptyState>{t.profile.noStats}</EmptyState>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               <StatCell label={t.profile.wins} value={totalWins} tone="good" />
@@ -208,11 +216,11 @@ function ProfileTab() {
         </div>
 
         <div className="game-progress-section">
-          <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+          <p className="game-progress-section__label mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
             {t.profile.history}
           </p>
           {localHistory.length === 0 ? (
-            <p className="text-sm text-ink3">{t.profile.noHistory}</p>
+            <EmptyState>{t.profile.noHistory}</EmptyState>
           ) : (
             <ul className="flex flex-col gap-1">
               {localHistory.map((h) => {
@@ -221,12 +229,18 @@ function ProfileTab() {
                 return (
                   <li
                     key={h.id}
-                    className="game-history-row flex items-center justify-between text-sm"
+                    className="game-history-row flex items-center justify-between rounded-2xl border border-white/60 bg-white/64 px-3 py-2 text-sm shadow-sm dark:border-white/10 dark:bg-white/5"
                   >
-                    <span className="text-ink2">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">
                       {game ? localizedGameMeta(game, locale).title : h.gameId}
                     </span>
-                    <span className={won ? 'font-semibold text-good' : 'text-ink3'}>
+                    <span
+                      className={
+                        won
+                          ? 'font-black text-emerald-600 dark:text-emerald-200'
+                          : 'font-semibold text-slate-500 dark:text-slate-400'
+                      }
+                    >
                       {won ? t.profile.wins : t.profile.losses}
                     </span>
                   </li>
@@ -246,7 +260,7 @@ function ProfileTab() {
 
   return (
     <div className="game-profile-tab flex flex-col gap-5">
-      <div className="game-profile-card flex items-center gap-3">
+      <div className="game-profile-card flex items-center gap-3 rounded-[1.75rem] border border-white/60 bg-white/72 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
         <Avatar seed={profile?.avatar_seed ?? name} name={name} size={56} />
         <div className="min-w-0 flex-1">
           {editing ? (
@@ -254,7 +268,7 @@ function ProfileTab() {
               <input
                 value={nameDraft}
                 onChange={(e) => setNameDraft(e.target.value.slice(0, 24))}
-                className="min-h-9 flex-1 rounded-md border border-edge bg-panel px-2 text-sm text-ink outline-none focus:border-accent"
+                className="min-h-10 flex-1 rounded-2xl border border-white/60 bg-white/80 px-3 text-sm font-bold text-slate-950 shadow-sm outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300/25 dark:border-white/10 dark:bg-white/5 dark:text-white"
                 autoFocus
               />
               <TouchButton
@@ -275,18 +289,22 @@ function ProfileTab() {
                 setNameDraft(name);
                 setEditing(true);
               }}
-              className="group inline-flex items-center gap-1.5 text-lg font-bold text-ink"
+              className="group inline-flex items-center gap-1.5 text-lg font-black text-slate-950 dark:text-white"
             >
               {name}
-              <Pencil className="h-3.5 w-3.5 text-ink3 group-hover:text-ink" />
+              <Pencil className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-950 dark:group-hover:text-white" />
             </button>
           )}
-          <p className="text-xs text-ink3">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
             {t.profile.level(profile?.level ?? 1)} · {profile?.xp ?? 0} XP
           </p>
-          {profile?.email ? <p className="truncate text-xs text-ink3">{profile.email}</p> : null}
+          {profile?.email ? (
+            <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+              {profile.email}
+            </p>
+          ) : null}
           {profile?.is_admin ? (
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide text-accent">
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-cyan-300/35 bg-cyan-50/85 px-2 py-0.5 text-[length:var(--fs-2xs)] font-black uppercase tracking-wide text-cyan-800 dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100">
               <Shield className="h-3 w-3" /> Admin
             </span>
           ) : null}
@@ -295,8 +313,10 @@ function ProfileTab() {
 
       {/* Sign-in / upgrade for anonymous guests */}
       {isAnonymous ? (
-        <div className="game-progress-section rounded-[var(--radius)] border border-edge bg-panel/60 p-3">
-          <p className="text-sm text-ink3">{t.profile.guestHint}</p>
+        <div className="game-progress-section rounded-[1.5rem] border border-white/60 bg-white/72 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            {t.profile.guestHint}
+          </p>
           <button
             ref={authBtnRef}
             type="button"
@@ -304,8 +324,9 @@ function ProfileTab() {
             aria-haspopup="dialog"
             onClick={() => setAuthOpen((open) => !open)}
             className={cn(
-              'mt-3 inline-flex min-h-9 items-center rounded-xl bg-accent px-3 text-sm font-semibold text-white transition-all hover:opacity-90',
-              authOpen && 'ring-2 ring-accent/30 ring-offset-2 ring-offset-bg',
+              'mt-3 inline-flex min-h-9 items-center rounded-2xl bg-slate-950 px-3 text-sm font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-950',
+              authOpen &&
+                'ring-2 ring-cyan-300/35 ring-offset-2 ring-offset-white dark:ring-offset-slate-950',
             )}
           >
             {t.profile.signIn}
@@ -313,7 +334,7 @@ function ProfileTab() {
           <button
             type="button"
             onClick={() => void signOut()}
-            className="mt-3 ms-3 inline-flex min-h-9 items-center gap-1.5 text-xs text-ink3 hover:text-bad"
+            className="mt-3 ms-3 inline-flex min-h-9 items-center gap-1.5 text-xs font-bold text-slate-500 transition hover:text-red-600 dark:text-slate-400 dark:hover:text-red-200"
           >
             <LogOut className="h-3.5 w-3.5" /> {t.profile.signOut}
           </button>
@@ -328,7 +349,7 @@ function ProfileTab() {
         <button
           type="button"
           onClick={() => void signOut()}
-          className="inline-flex min-h-9 items-center gap-1.5 self-start text-xs text-ink3 hover:text-bad"
+          className="inline-flex min-h-9 items-center gap-1.5 self-start rounded-2xl px-2 text-xs font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-200"
         >
           <LogOut className="h-3.5 w-3.5" /> {t.profile.signOut}
         </button>
@@ -336,11 +357,11 @@ function ProfileTab() {
 
       {/* Aggregate stats */}
       <div className="game-progress-section">
-        <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+        <p className="game-progress-section__label mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {t.profile.stats}
         </p>
         {stats.length === 0 ? (
-          <p className="text-sm text-ink3">{t.profile.noStats}</p>
+          <EmptyState>{t.profile.noStats}</EmptyState>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             <StatCell label={t.profile.wins} value={totalWins} tone="good" />
@@ -357,12 +378,12 @@ function ProfileTab() {
             return (
               <li
                 key={s.game_id}
-                className="game-stat-row flex items-center justify-between rounded-md border border-edge bg-panel/50 px-3 py-2 text-sm"
+                className="game-stat-row flex items-center justify-between rounded-2xl border border-white/60 bg-white/64 px-3 py-2 text-sm shadow-sm dark:border-white/10 dark:bg-white/5"
               >
-                <span className="font-medium text-ink">
+                <span className="font-bold text-slate-800 dark:text-slate-100">
                   {game ? localizedGameMeta(game, locale).title : s.game_id}
                 </span>
-                <span className="text-ink3">
+                <span className="font-mono text-xs font-black text-slate-500 dark:text-slate-400">
                   {s.mmr} · {s.wins}-{s.losses}
                 </span>
               </li>
@@ -374,7 +395,7 @@ function ProfileTab() {
       {/* Achievements */}
       {achievements.length > 0 ? (
         <div className="game-progress-section">
-          <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+          <p className="game-progress-section__label mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
             {t.profile.achievements} · {t.profile.unlocked(unlocked.length, achievements.length)}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -385,10 +406,10 @@ function ProfileTab() {
                   key={a.id}
                   title={`${a.title} — ${a.description}`}
                   className={cn(
-                    'game-achievement-chip inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium',
+                    'game-achievement-chip inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold',
                     has
-                      ? 'border-good/50 bg-good/10 text-good'
-                      : 'border-edge bg-panel2 text-ink3 opacity-60',
+                      ? 'border-emerald-300/45 bg-emerald-100/80 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-100'
+                      : 'border-white/60 bg-white/64 text-slate-400 opacity-70 dark:border-white/10 dark:bg-white/5 dark:text-slate-500',
                     has && 'is-unlocked',
                   )}
                 >
@@ -402,11 +423,11 @@ function ProfileTab() {
 
       {/* Recent matches */}
       <div className="game-progress-section">
-        <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+        <p className="game-progress-section__label mb-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {t.profile.history}
         </p>
         {history.length === 0 ? (
-          <p className="text-sm text-ink3">{t.profile.noHistory}</p>
+          <EmptyState>{t.profile.noHistory}</EmptyState>
         ) : (
           <ul className="flex flex-col gap-1">
             {history.map((h) => {
@@ -415,12 +436,18 @@ function ProfileTab() {
               return (
                 <li
                   key={h.id}
-                  className="game-history-row flex items-center justify-between text-sm"
+                  className="game-history-row flex items-center justify-between rounded-2xl border border-white/60 bg-white/64 px-3 py-2 text-sm shadow-sm dark:border-white/10 dark:bg-white/5"
                 >
-                  <span className="text-ink2">
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">
                     {game ? localizedGameMeta(game, locale).title : h.match.game_id}
                   </span>
-                  <span className={won ? 'font-semibold text-good' : 'text-ink3'}>
+                  <span
+                    className={
+                      won
+                        ? 'font-black text-emerald-600 dark:text-emerald-200'
+                        : 'font-semibold text-slate-500 dark:text-slate-400'
+                    }
+                  >
                     {won ? t.profile.wins : t.profile.losses}
                   </span>
                 </li>
@@ -443,19 +470,29 @@ function StatCell({
   tone: 'good' | 'bad' | 'accent';
 }) {
   return (
-    <div className="game-stat-cell rounded-[var(--radius)] border border-edge bg-panel/60 p-3 text-center">
+    <div className="game-stat-cell rounded-[1.35rem] border border-white/60 bg-white/72 p-3 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
       <div
         className={cn(
-          'text-2xl font-bold tabular-nums',
-          tone === 'good' && 'text-good',
-          tone === 'bad' && 'text-bad',
-          tone === 'accent' && 'text-accent',
+          'text-2xl font-black tabular-nums',
+          tone === 'good' && 'text-emerald-600 dark:text-emerald-200',
+          tone === 'bad' && 'text-red-600 dark:text-red-200',
+          tone === 'accent' && 'text-cyan-700 dark:text-cyan-200',
         )}
       >
         {value}
       </div>
-      <div className="text-[length:var(--fs-tight)] uppercase tracking-wide text-ink3">{label}</div>
+      <div className="text-[length:var(--fs-tight)] font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        {label}
+      </div>
     </div>
+  );
+}
+
+function EmptyState({ children }: { children: ReactNode }) {
+  return (
+    <p className="rounded-2xl border border-dashed border-slate-300 bg-white/46 px-3 py-4 text-center text-sm font-semibold text-slate-500 dark:border-white/15 dark:bg-white/5 dark:text-slate-400">
+      {children}
+    </p>
   );
 }
 
@@ -514,19 +551,25 @@ function LeaderboardTab() {
     };
   }, [configured, period, gameId]);
 
-  if (authLoading) return <p className="py-6 text-center text-sm text-ink3">…</p>;
+  if (authLoading) {
+    return (
+      <p className="py-6 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">…</p>
+    );
+  }
 
   return (
     <div className="game-leaderboard-tab flex flex-col gap-3">
-      <div className="game-leaderboard-period flex gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1 text-sm">
+      <div className="game-leaderboard-period flex gap-1 rounded-2xl border border-white/60 bg-slate-950/5 p-1 text-sm shadow-inner dark:border-white/10 dark:bg-white/5">
         {(['all', 'week', 'today'] as Period[]).map((p) => (
           <button
             key={p}
             type="button"
             onClick={() => setPeriod(p)}
             className={cn(
-              'game-leaderboard-period__button min-h-9 flex-1 rounded-[calc(var(--radius)-2px)] font-semibold',
-              period === p ? 'bg-panel text-ink shadow-sm' : 'text-ink3',
+              'game-leaderboard-period__button min-h-9 flex-1 rounded-xl font-black transition',
+              period === p
+                ? 'bg-white text-slate-950 shadow-sm dark:bg-white dark:text-slate-950'
+                : 'text-slate-500 hover:bg-white/70 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white',
               period === p && 'is-active',
             )}
           >
@@ -551,24 +594,26 @@ function LeaderboardTab() {
       </div>
 
       {loading ? (
-        <p className="py-6 text-center text-sm text-ink3">…</p>
+        <p className="py-6 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">
+          …
+        </p>
       ) : rows.length === 0 ? (
-        <p className="py-6 text-center text-sm text-ink3">{t.leaderboard.empty}</p>
+        <EmptyState>{t.leaderboard.empty}</EmptyState>
       ) : (
         <ol className="game-leaderboard-list flex flex-col gap-1">
           {rows.map((r) => (
             <li
               key={r.profile_id}
-              className="game-leaderboard-row flex items-center gap-3 rounded-md border border-edge bg-panel/50 px-3 py-2"
+              className="game-leaderboard-row flex items-center gap-3 rounded-2xl border border-white/60 bg-white/64 px-3 py-2 shadow-sm dark:border-white/10 dark:bg-white/5"
             >
-              <span className="w-6 text-center text-sm font-bold tabular-nums text-ink3">
+              <span className="w-6 text-center text-sm font-black tabular-nums text-slate-400">
                 {r.rank}
               </span>
               <Avatar seed={r.avatar_seed ?? r.profile_id} name={r.display_name} size={28} />
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
+              <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-800 dark:text-slate-100">
                 {r.display_name}
               </span>
-              <span className="text-sm font-semibold tabular-nums text-accent">
+              <span className="text-sm font-black tabular-nums text-cyan-700 dark:text-cyan-200">
                 {configured ? (r.mmr ?? r.wins ?? r.xp ?? 0) : (r.wins ?? 0)}
               </span>
             </li>
@@ -586,17 +631,17 @@ function ScopeChip({
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'game-scope-chip rounded-full border px-3 py-1 text-xs font-medium',
+        'game-scope-chip rounded-full border px-3 py-1 text-xs font-bold transition',
         active
-          ? 'border-accent bg-accentbg text-accent'
-          : 'border-edge bg-panel text-ink3 hover:text-ink',
+          ? 'border-cyan-300/45 bg-cyan-50/85 text-cyan-800 shadow-sm dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100'
+          : 'border-white/60 bg-white/64 text-slate-500 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white',
         active && 'is-active',
       )}
     >

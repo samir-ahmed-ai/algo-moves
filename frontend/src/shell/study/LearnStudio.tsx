@@ -19,6 +19,7 @@ import { QuizStageBody } from '@/shell/panels/problem/QuizStageBody';
 import { StudioAssembleStageBody } from '@/shell/panels/problem/StudioAssembleStageBody';
 import { StudioPanelStageBody } from '@/shell/panels/problem/StudioPanelStageBody';
 import { StudioArc } from './StudioArc';
+import { LibraryStatsBar } from './LibraryStatsBar';
 import { ProblemSurfaceBar } from './ProblemSurfaceBar';
 import { readStudioTab, writeStudioTab } from '@/store/study/studioTab';
 import {
@@ -212,6 +213,7 @@ function StudioShell({
         {!present ? (
           <>
             <LearnTopBar onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
+            <LibraryStatsBar />
             <StudioArc
               arc={arc}
               more={more}
