@@ -58,10 +58,24 @@ export function ensurePeriod(s) {
   return /[.!?]$/.test(t) ? t : `${t}.`;
 }
 
+function cleanTitle(raw) {
+  return String(raw ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function wordsFromSlug(slug) {
+  return String(slug ?? '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function stripNumberPrefix(raw) {
-  const m = raw.match(/^(\d+(?:\.\d+)*)\s+(.+)$/);
+  const title = cleanTitle(raw);
+  const m = title.match(/^(\d+(?:\.\d+)*)\s+(.+)$/);
   if (m) return { number: m[1], title: m[2].trim() };
-  return { number: '', title: raw.trim() };
+  return { number: '', title };
 }
 
 /** Turn a prep title (and optional slug) into a one-line problem ask. */
@@ -72,8 +86,7 @@ export function titleToAsk(rawTitle, slug) {
     const capped = title.charAt(0).toUpperCase() + title.slice(1);
     if (capped.length >= 12) return ensurePeriod(capped);
     if (slug) {
-      const words = slug
-        .replace(/-/g, ' ')
+      const words = wordsFromSlug(slug)
         .replace(/^find\s+/i, '')
         .trim();
       if (words) return ensurePeriod(`${capped} in the ${words}.`);
@@ -81,29 +94,30 @@ export function titleToAsk(rawTitle, slug) {
     return ensurePeriod(capped);
   }
   if (slug) {
-    const words = slug.replace(/-/g, ' ');
+    const words = wordsFromSlug(slug);
     return ensurePeriod(`Find the ${words}.`);
   }
   return ensurePeriod(`Solve: ${title}.`);
 }
 
 export function secondFromSummary(summary, first) {
-  const trimmed = (summary ?? '').trim();
+  const trimmed = cleanTitle(summary);
+  const firstLine = cleanTitle(first);
   if (!trimmed || trimmed.length < 12) return undefined;
 
   const colonIdx = trimmed.indexOf(': ');
   if (colonIdx > 0 && colonIdx < trimmed.length - 3) {
     const second = trimmed.slice(colonIdx + 2).trim();
-    if (second.length >= 12 && !first.includes(second)) return ensurePeriod(second);
+    if (second.length >= 12 && !firstLine.includes(second)) return ensurePeriod(second);
   }
 
   const dotMatch = trimmed.match(/^[^.!?]+[.!?]\s+(.+)$/s);
   if (dotMatch?.[1]) {
     const second = dotMatch[1].trim();
-    if (second.length >= 12 && !first.includes(second)) return ensurePeriod(second);
+    if (second.length >= 12 && !firstLine.includes(second)) return ensurePeriod(second);
   }
 
-  if (trimmed.length >= 12 && trimmed !== first && !first.includes(trimmed)) {
+  if (trimmed.length >= 12 && trimmed !== firstLine && !firstLine.includes(trimmed)) {
     return ensurePeriod(trimmed);
   }
 

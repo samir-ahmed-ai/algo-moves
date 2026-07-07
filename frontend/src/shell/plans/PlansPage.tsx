@@ -245,7 +245,8 @@ export function PlansPage() {
       // If the plan already has items, start the run from the first one.
       if (loaded && loaded.items.length > 0) {
         plan.startRun(0);
-        openProblem(loaded.items[0].itemId);
+        const firstItem = loaded.items[0];
+        if (firstItem) openProblem(firstItem.itemId);
       } else {
         enterWorkspace();
       }
@@ -260,9 +261,17 @@ export function PlansPage() {
   }, []);
 
   return (
-    <div className="flex h-full flex-col bg-bg">
+    <div
+      className="relative isolate flex h-full flex-col overflow-hidden bg-bg"
+      data-surface="plans"
+      aria-label="Interview prep plans"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_16%_0%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_28rem),radial-gradient(circle_at_88%_18%,rgba(248,214,121,0.12),transparent_24rem)]"
+      />
       {/* Top bar */}
-      <header className="flex h-12 shrink-0 items-center gap-3 border-b border-edge px-4">
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-[var(--surface-glass)] px-4 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl">
         <button
           type="button"
           onClick={goHome}
@@ -272,16 +281,26 @@ export function PlansPage() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex items-center gap-2">
-          <BookMarked className="h-4 w-4 text-accent" />
-          <span className="font-semibold text-ink">Interview Prep Plans</span>
+          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+            <BookMarked className="h-4 w-4" />
+          </span>
+          <span>
+            <span className="block font-semibold leading-tight text-ink">Interview Prep Plans</span>
+            <span className="block text-[length:var(--fs-2xs)] font-medium uppercase tracking-[0.14em] text-ink3">
+              focused study queues
+            </span>
+          </span>
         </div>
       </header>
 
       {/* Body */}
       <main className="flex flex-1 flex-col overflow-auto">
         {loading ? (
-          <div className="flex flex-1 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-ink3" />
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+            <div className="grid h-14 w-14 place-items-center rounded-3xl border border-edge bg-panel/80 shadow-theme-md">
+              <Loader2 className="h-6 w-6 animate-spin text-accent" />
+            </div>
+            <p className="text-sm font-medium text-ink2">Loading your prep command center…</p>
           </div>
         ) : needsAuth ? (
           <SignInGate />
@@ -344,17 +363,23 @@ export function PlansPage() {
       {/* Delete confirmation overlay */}
       {deleteConfirm && (
         <div
-          className="product-confirm-backdrop fixed inset-0 z-50 flex items-center justify-center bg-bg/60 backdrop-blur-sm"
+          className="product-confirm-backdrop fixed inset-0 z-50 flex items-center justify-center bg-bg/70 p-4 backdrop-blur-md"
           onClick={() => setDeleteConfirm(null)}
+          role="presentation"
         >
           <div
-            className="product-confirm-modal w-full max-w-sm rounded-2xl border border-edge bg-panel p-6 shadow-xl"
+            className="product-confirm-modal w-full max-w-sm rounded-3xl border border-edge bg-panel/95 p-6 shadow-theme-xl"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-plan-title"
           >
             <div className="product-confirm-modal__icon">
               <Trash2 className="h-5 w-5" />
             </div>
-            <h3 className="mb-1 font-semibold text-ink">Delete plan?</h3>
+            <h3 id="delete-plan-title" className="mb-1 font-semibold text-ink">
+              Delete plan?
+            </h3>
             <p className={cn('mb-5 text-ink3', chromeText.sm)}>
               This will permanently delete the plan and all its saved problems.
             </p>
@@ -369,7 +394,7 @@ export function PlansPage() {
               <button
                 type="button"
                 onClick={() => handleDelete(deleteConfirm)}
-                className="product-confirm-modal__danger rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
+                className="product-confirm-modal__danger rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-red-600"
               >
                 Delete
               </button>

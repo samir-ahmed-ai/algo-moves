@@ -3,6 +3,8 @@ import type { Item, TrackId } from '../../content';
 import { CourseTree } from '../browse/CourseTree';
 
 type OpenMode = 'learn' | 'visualize';
+const ACCESSORY_BUTTON =
+  'grid shrink-0 place-items-center rounded-full border border-transparent bg-panel/40 text-ink3 opacity-75 shadow-theme-sm transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accentbg hover:text-accent hover:shadow-theme-md focus-visible:opacity-100 group-hover/row:opacity-100';
 
 export interface LandingCourseTreeProps {
   /** Open a problem in the workspace in the given mode. */
@@ -13,39 +15,45 @@ export interface LandingCourseTreeProps {
 
 export function LandingCourseTree({ onOpenProblem, onOpenTrack }: LandingCourseTreeProps) {
   return (
-    <CourseTree
-      className="px-[var(--hpad)] py-3 sm:px-4"
-      storageKey="algo.landing.courseTree"
-      showBulkToggle
-      onProblem={(item: Item) => onOpenProblem(item.id, 'learn')}
-      trackAccessory={(trackId) => (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenTrack(trackId as TrackId);
-          }}
-          aria-label="View all problems"
-          title="View all problems"
-          className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-ink3 opacity-70 transition-all hover:bg-panel2 hover:text-accent"
-        >
-          <LayoutGrid className="h-3.5 w-3.5" />
-        </button>
-      )}
-      problemAccessory={(item: Item) => (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenProblem(item.id, 'visualize');
-          }}
-          aria-label={`Visualize ${item.title}`}
-          title="Open in Visualize"
-          className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-ink3 opacity-70 transition-all hover:bg-panel2 hover:text-accent group-hover/row:opacity-100"
-        >
-          <Eye className="h-3.5 w-3.5" />
-        </button>
-      )}
-    />
+    <div className="relative">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-edge to-transparent"
+      />
+      <CourseTree
+        className="px-[var(--hpad)] py-4 sm:px-5"
+        storageKey="algo.landing.courseTree"
+        showBulkToggle
+        onProblem={(item: Item) => onOpenProblem(item.id, 'learn')}
+        trackAccessory={(trackId) => (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenTrack(trackId as TrackId);
+            }}
+            aria-label="View all problems in this track"
+            title="View all problems"
+            className={`${ACCESSORY_BUTTON} h-7 w-7`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+          </button>
+        )}
+        problemAccessory={(item: Item) => (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenProblem(item.id, 'visualize');
+            }}
+            aria-label={`Visualize ${item.title}`}
+            title="Open in Visualize"
+            className={`${ACCESSORY_BUTTON} h-6 w-6`}
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </button>
+        )}
+      />
+    </div>
   );
 }

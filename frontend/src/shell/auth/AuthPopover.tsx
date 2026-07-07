@@ -261,10 +261,10 @@ export function AuthPopover({
       role="dialog"
       aria-modal={useSheetLayout ? 'true' : 'false'}
       aria-labelledby={titleId}
-      aria-describedby={error ? errorId : undefined}
+      {...(error ? { 'aria-describedby': errorId } : {})}
       style={useAnchoredPopover && anchoredStyle ? anchoredStyle : undefined}
       className={cn(
-        'auth-popover-panel relative w-full max-w-[22rem] overflow-hidden border border-edge bg-bg shadow-theme-xl ring-1 ring-accent/10',
+        'auth-popover-panel relative w-full max-w-[22rem] overflow-hidden border border-edge bg-[var(--surface-glass)] shadow-theme-xl ring-1 ring-accent/10 backdrop-blur-xl',
         useAnchoredPopover
           ? cn(
               'fixed z-[60] animate-auth-popover-in rounded-[1.15rem]',
@@ -340,7 +340,7 @@ export function AuthPopover({
             autoComplete="email"
             required
             invalid={emailInvalid}
-            error={emailInvalid ? s.invalidEmail : undefined}
+            {...(emailInvalid ? { error: s.invalidEmail } : {})}
             leading={<Mail className="h-4 w-4" />}
           />
 
@@ -391,9 +391,8 @@ export function AuthPopover({
             type="submit"
             disabled={!canSubmit}
             className={cn(
-              'auth-popover-submit mt-0.5 inline-flex min-h-[calc(var(--row)*1.35)] w-full items-center justify-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white',
-              'shadow-[0_1px_2px_hsl(0_0%_0%/0.12),0_4px_12px_hsl(var(--accent-h,220)_80%_40%/0.25)]',
-              'transition-all hover:opacity-95 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
+              'auth-popover-submit mt-0.5 inline-flex min-h-[calc(var(--row)*1.35)] w-full items-center justify-center gap-1.5 rounded-full bg-accent px-3 text-sm font-semibold text-[var(--accent-contrast)] shadow-theme-sm',
+              'transition-all hover:-translate-y-0.5 hover:opacity-95 hover:shadow-theme-md active:scale-[0.98] disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-45',
             )}
           >
             {busy ? (
@@ -640,7 +639,7 @@ export function AuthUserMenu({
       ref={menuRef}
       role="menu"
       aria-label="Account menu"
-      className="auth-user-menu absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-popover-in rounded-xl border border-edge bg-panel p-1.5 shadow-theme-lg"
+      className="auth-user-menu absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-popover-in rounded-2xl border border-edge bg-[var(--surface-glass)] p-1.5 shadow-theme-xl backdrop-blur-xl"
     >
       <div className="auth-user-menu__head border-b border-edge px-2.5 py-2">
         <p className="auth-user-menu__name truncate text-sm font-semibold text-ink">
@@ -657,6 +656,7 @@ export function AuthUserMenu({
       </div>
       {onOpenProfile ? (
         <MenuRow
+          icon={<User className="h-3.5 w-3.5" />}
           onClick={() => {
             onOpenProfile();
             onClose();
@@ -667,12 +667,13 @@ export function AuthUserMenu({
       ) : null}
       <MenuRow
         danger
+        icon={<LogOut className="h-3.5 w-3.5" />}
         onClick={() => {
           void signOut();
           onClose();
         }}
       >
-        <LogOut className="h-3.5 w-3.5" /> {s.signOut}
+        {s.signOut}
       </MenuRow>
     </div>
   );
@@ -681,10 +682,12 @@ export function AuthUserMenu({
 function MenuRow({
   children,
   onClick,
+  icon,
   danger,
 }: {
   children: ReactNode;
   onClick: () => void;
+  icon?: ReactNode;
   danger?: boolean;
 }) {
   return (
@@ -693,10 +696,11 @@ function MenuRow({
       role="menuitem"
       onClick={onClick}
       className={cn(
-        'auth-user-menu__row flex w-full min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm transition-colors hover:bg-panel2',
+        'auth-user-menu__row flex min-h-9 w-full items-center gap-2 rounded-xl px-2.5 text-sm transition-colors hover:bg-panel2',
         danger ? 'text-bad' : 'text-ink2 hover:text-ink',
       )}
     >
+      {icon}
       {children}
     </button>
   );

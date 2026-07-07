@@ -17,8 +17,12 @@ import { PROBLEM_GISTS } from '@/content/gists';
 import { ensurePeriod, titleToAsk, secondFromSummary } from './problem-brief-utils.mjs';
 import { formatJsonDisplay } from '@/lib/utils/formatJsonDisplay';
 
+function cleanText(value: string | undefined): string {
+  return (value ?? '').replace(/\s+/g, ' ').trim();
+}
+
 function inputDisplayLabel(input: SampleInput<unknown>): string {
-  const label = input.label ?? '';
+  const label = cleanText(input.label);
   if (label.startsWith('[') || label.includes('=')) return label;
   return formatJsonDisplay(input.value);
 }
@@ -65,11 +69,10 @@ function gistForPlugin(
   meta: { title: string; summary: string; tags: string[] },
 ): string {
   const curated = PROBLEM_GISTS[id];
-  if (curated) return curated;
+  if (curated) return ensurePeriod(cleanText(curated));
 
   const sentence =
-    meta.summary
-      .trim()
+    cleanText(meta.summary)
       .match(/^.*?[.!?](\s|$)/)?.[0]
       ?.trim()
       .replace(/[.!?]+$/, '') ?? '';
@@ -77,7 +80,7 @@ function gistForPlugin(
     return `${sentence}.`;
   }
 
-  const tags = meta.tags;
+  const tags = meta.tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean);
   if (tags.some((t) => ['graph', 'bfs', 'dfs', 'union-find'].includes(t))) return SHAPE_GIST.graph;
   if (tags.includes('dp')) return SHAPE_GIST.dp;
   if (tags.includes('binary-search')) return SHAPE_GIST.binarySearch;
@@ -90,16 +93,15 @@ function gistForPlugin(
 }
 
 function insightForPlugin(
-  id: string,
   meta: { summary: string },
   first: string,
   prep?: (typeof PREP_DATA)[number],
 ): string {
-  if (prep?.visual) return ensurePeriod(prep.visual);
+  if (prep?.visual) return ensurePeriod(cleanText(prep.visual));
   const fromSummary = secondFromSummary(meta.summary, first);
   if (fromSummary) return fromSummary;
-  if (prep?.pattern) return ensurePeriod(`Core pattern: ${prep.pattern}`);
-  if (prep?.memorize) return ensurePeriod(prep.memorize);
+  if (prep?.pattern) return ensurePeriod(`Core pattern: ${cleanText(prep.pattern)}`);
+  if (prep?.memorize) return ensurePeriod(cleanText(prep.memorize));
   return 'Use the animation to watch how state evolves step by step.';
 }
 
@@ -108,9 +110,9 @@ function askForPlugin(
   meta: { title: string; summary: string; tags: string[] },
 ): string {
   const gist = PROBLEM_GISTS[id];
-  if (gist) return ensurePeriod(gist);
+  if (gist) return ensurePeriod(cleanText(gist));
   const prep = prepById.get(id);
-  if (prep?.ask?.trim()) return ensurePeriod(prep.ask);
+  if (prep?.ask?.trim()) return ensurePeriod(cleanText(prep.ask));
   if (prep) return titleToAsk(prep.title, prep.slug);
   return ensurePeriod(gistForPlugin(id, meta));
 }
@@ -121,7 +123,8 @@ function caseOutput(plugin: ProblemPlugin<any, any>, input: SampleInput<any>): s
     if (!frames.length) return undefined;
     const verdict = plugin.verdict?.(frames);
     if (!verdict?.ok || !verdict.label) return undefined;
-    return verdict.label.replace(/^→\s*/, '').trim();
+    const output = verdict.label.replace(/^→\s*/, '').trim();
+    return output || undefined;
   } catch {
     return undefined;
   }
@@ -131,14 +134,15 @@ function casesForPlugin(
   plugin: ProblemPlugin<any, any>,
   prep?: (typeof PREP_DATA)[number],
 ): BriefCase[] {
-  const defaultNote = prep?.visual ? ensurePeriod(prep.visual) : undefined;
+  const defaultNote = prep?.visual ? ensurePeriod(cleanText(prep.visual)) : undefined;
   return plugin.inputs.slice(0, 2).map((input, i) => {
     const output = caseOutput(plugin, input);
+    const note = cleanText(input.hint) || defaultNote;
     return {
       label: `Example ${i + 1}`,
       input: inputDisplayLabel(input),
       ...(output ? { output } : {}),
-      ...(input.hint || defaultNote ? { note: input.hint ?? defaultNote } : {}),
+      ...(note ? { note } : {}),
     };
   });
 }
@@ -152,7 +156,7 @@ function briefForPlugin(plugin: ProblemPlugin<any, any>): BriefEntry {
     tags: plugin.meta.tags,
   };
   const first = askForPlugin(id, meta);
-  const second = insightForPlugin(id, meta, first, prep);
+  const second = insightForPlugin(meta, first, prep);
   return {
     statements: [first, second],
     cases: casesForPlugin(plugin, prep),

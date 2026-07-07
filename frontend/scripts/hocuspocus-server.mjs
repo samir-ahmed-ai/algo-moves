@@ -7,7 +7,18 @@
  */
 import { Server } from '@hocuspocus/server';
 
-const port = Number(process.env.HOCUSPOCUS_PORT ?? 1234);
+const DEFAULT_PORT = 1234;
+
+function parsePort(value) {
+  const port = Number(value ?? DEFAULT_PORT);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    console.error(`[hocuspocus] invalid HOCUSPOCUS_PORT: ${value}`);
+    process.exit(1);
+  }
+  return port;
+}
+
+const port = parsePort(process.env.HOCUSPOCUS_PORT);
 
 const server = new Server({
   port,

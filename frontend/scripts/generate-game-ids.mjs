@@ -32,9 +32,30 @@ for (const chunk of insertMatch[1].split('\n')) {
   }
 }
 
-if (rows.length === 0) {
-  console.error('No game rows found in', sqlPath);
+function fail(message) {
+  console.error(`generate-game-ids: ${message}`);
   process.exit(1);
+}
+
+if (rows.length === 0) fail(`no game rows found in ${sqlPath}`);
+
+const seenIds = new Set();
+const seenSortOrders = new Set();
+for (const row of rows) {
+  if (!/^[a-z][a-z0-9-]*$/.test(row.id)) {
+    fail(`invalid game id "${row.id}"`);
+  }
+  if (!row.title.trim()) {
+    fail(`missing title for game id "${row.id}"`);
+  }
+  if (seenIds.has(row.id)) {
+    fail(`duplicate game id "${row.id}"`);
+  }
+  if (seenSortOrders.has(row.sortOrder)) {
+    fail(`duplicate sort order ${row.sortOrder}`);
+  }
+  seenIds.add(row.id);
+  seenSortOrders.add(row.sortOrder);
 }
 
 rows.sort((a, b) => a.sortOrder - b.sortOrder);

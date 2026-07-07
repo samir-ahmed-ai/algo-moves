@@ -8,17 +8,42 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
-const dryRun = args.includes('--dry-run');
-const positional = args.filter((a) => !a.startsWith('--'));
-const id = positional[0];
-const title = positional[1] ?? id;
-const catIdx = args.indexOf('--category');
-const category = catIdx >= 0 ? args[catIdx + 1] : 'time';
+const CATEGORIES = new Set(['time', 'drill', 'emphasis']);
+
+function parseArgs(argv) {
+  const positional = [];
+  const flags = { dryRun: false, category: 'time' };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--dry-run') {
+      flags.dryRun = true;
+    } else if (arg === '--category') {
+      flags.category = argv[++i] ?? '';
+    } else if (arg.startsWith('--')) {
+      console.error(`Unknown option: ${arg}`);
+      process.exit(1);
+    } else {
+      positional.push(arg);
+    }
+  }
+  return { ...flags, id: positional[0], title: positional[1] ?? positional[0] };
+}
+
+function tsString(value) {
+  return JSON.stringify(String(value));
+}
+
+const { dryRun, id, title, category } = parseArgs(args);
 
 if (!id || !/^[a-z][a-z0-9-]*$/.test(id)) {
   console.error(
     'Usage: npm run new-effect -- <kebab-id> "Title" [--category time|drill|emphasis] [--dry-run]',
   );
+  process.exit(1);
+}
+
+if (!CATEGORIES.has(category)) {
+  console.error('  --category must be one of time, drill, emphasis.');
   process.exit(1);
 }
 
@@ -33,7 +58,7 @@ export interface ${Pascal}Data {
 }
 
 export const ${varName} = defineEffect<${Pascal}Data>({
-  meta: { id: '${id}', title: '${title}', category: '${category}' },
+  meta: { id: ${tsString(id)}, title: ${tsString(title)}, category: ${tsString(category)} },
   defaultData: { amount: 1 },
   transformFrames: (frames: Frame[], data) => frames,
   traceSnippet: (data) => \`${id}(\${data.amount})\`,

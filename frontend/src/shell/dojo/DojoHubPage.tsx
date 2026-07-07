@@ -116,7 +116,10 @@ function DojoGameCard({
       type="button"
       disabled={soon}
       onClick={onOpen}
-      className={cn('dojo-card group text-left', soon && 'dojo-card--soon')}
+      className={cn(
+        'dojo-card group text-left shadow-theme-sm transition hover:-translate-y-0.5 hover:shadow-theme-md',
+        soon && 'dojo-card--soon',
+      )}
       aria-label={soon ? `${game.title} — coming soon` : `Open ${game.title}`}
     >
       <div className="flex items-start gap-3">
@@ -180,17 +183,21 @@ function DojoHubGrid() {
           <button
             type="button"
             title="Home"
+            aria-label="Return to landing page"
             onClick={goHome}
-            className="vim-floating-home grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
+            className="vim-floating-home grid h-9 w-9 shrink-0 place-items-center rounded-full border border-edge bg-[var(--surface-glass)] text-ink3 shadow-theme-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-panel2 hover:text-ink hover:shadow-theme-md"
           >
             <Home className="h-4 w-4" />
           </button>
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-white">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
             <Swords className="h-5 w-5" />
           </span>
           <div>
-            <h1 className="text-lg font-semibold tracking-tight text-ink">Dojo Hub</h1>
-            <p className="text-[length:var(--fs-2xs)] text-ink3">
+            <p className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-accent">
+              Algorithm arcade
+            </p>
+            <h1 className="text-xl font-semibold tracking-[-0.03em] text-ink">Dojo Hub</h1>
+            <p className="text-[length:var(--fs-xs)] text-ink3">
               Learn algorithms by playing them — one keyboard game per concept.
             </p>
           </div>
@@ -224,22 +231,34 @@ function DojoHubGrid() {
 export function DojoHubPage() {
   const { density } = useWorkspace();
   const target = useDojoTarget();
-  const GamePage = target.gameId ? GAME_PAGES[target.gameId] : undefined;
+  const gameId = target.gameId;
+  const GamePage = gameId ? GAME_PAGES[gameId] : undefined;
 
   // Normalize unknown game ids back to the hub grid.
   useEffect(() => {
-    if (target.gameId && !GAME_PAGES[target.gameId]) writeDojoHash(null, { replace: true });
-  }, [target.gameId]);
+    if (gameId && !GAME_PAGES[gameId]) writeDojoHash(null, { replace: true });
+  }, [gameId]);
 
   return (
     <div
       data-density={density}
-      className="vim-dojo-page relative flex h-full w-full flex-col overflow-hidden bg-bg"
+      data-surface="dojo-hub"
+      className="vim-dojo-page relative isolate flex h-full w-full flex-col overflow-hidden bg-bg"
+      aria-label="Algorithm Dojo Hub"
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_22%_0%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_28rem),radial-gradient(circle_at_92%_14%,rgba(248,214,121,0.12),transparent_24rem)]"
+      />
       {GamePage ? (
         <Suspense
           fallback={
-            <div className="grid flex-1 place-items-center text-sm text-ink3">Loading…</div>
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+              <div className="grid h-14 w-14 place-items-center rounded-3xl border border-edge bg-panel/80 shadow-theme-md">
+                <Swords className="h-6 w-6 text-accent" />
+              </div>
+              <p className="text-sm font-medium text-ink2">Loading dojo…</p>
+            </div>
           }
         >
           <GamePage />

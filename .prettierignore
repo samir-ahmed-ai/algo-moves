@@ -1,0 +1,15 @@
+node_modules
+dist
+build
+coverage
+.cache
+.turbo
+.vite
+
+frontend/dist
+frontend/coverage
+frontend/public/assets/*.png
+frontend/src/generated
+
+services/hocuspocus/node_modules
+

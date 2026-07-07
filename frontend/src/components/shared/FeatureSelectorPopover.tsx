@@ -126,7 +126,7 @@ function featureToneStyles(tone?: FeatureTone) {
 }
 
 const DEFAULT_TRIGGER =
-  'flex items-center gap-1.5 rounded-md border border-edge bg-panel2/60 shadow-sm transition-colors hover:bg-panel2';
+  'flex items-center gap-1.5 rounded-full border border-edge bg-[var(--surface-glass)] shadow-theme-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-panel2 hover:shadow-theme-md';
 
 /**
  * Combined button that expands to a portalled popover of selectable feature cards
@@ -188,7 +188,7 @@ export function FeatureSelectorPopover({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={ariaLabel}
+        {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
         onClick={() => setOpen((v) => !v)}
         className={cn(
           'feature-selector__trigger',
@@ -234,9 +234,9 @@ export function FeatureSelectorPopover({
             role="listbox"
             aria-label={panelTitle}
             style={panelStyle}
-            className="feature-selector-panel fixed z-[200] animate-auth-popover-in rounded-md border border-edge bg-panel shadow-[var(--shadow-lg)]"
+            className="feature-selector-panel fixed z-[200] animate-auth-popover-in overflow-hidden rounded-2xl border border-edge bg-[var(--surface-glass)] shadow-theme-xl ring-1 ring-accent/10 backdrop-blur-xl"
           >
-            <div className="feature-selector-panel__header border-b border-edge px-2.5 py-1.5">
+            <div className="feature-selector-panel__header border-b border-edge bg-panel/40 px-3 py-2">
               <p className={cn('min-w-0 truncate', chromeText.xs)}>
                 <span className="font-semibold uppercase tracking-[0.08em] text-ink">
                   {panelTitle}
@@ -274,6 +274,7 @@ export function FeatureSelectorPopover({
                           onMouseLeave={() => setHovered(null)}
                           className={cn(
                             'relative flex w-[min(6.5rem,32vw)] shrink-0 flex-col items-center gap-1 rounded-md border p-2 text-center transition-[colors,transform,box-shadow] duration-150',
+                            'focus-visible:-translate-y-0.5',
                             'feature-selector-card',
                             isSelected
                               ? cn('feature-selector-card--selected', tone.cardActive)
@@ -324,7 +325,7 @@ export function FeatureSelectorPopover({
             </div>
 
             {highlighted && highlightedTone && (
-              <div className="feature-selector-panel__detail border-t border-edge px-2.5 py-1.5">
+              <div className="feature-selector-panel__detail border-t border-edge bg-panel/40 px-3 py-2">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span
                     className={cn(
@@ -377,7 +378,7 @@ export function ToolbarSegment({
     <div
       className={cn(
         'toolbar-segment flex items-center',
-        '[&_button]:rounded-none [&>*:first-child_button]:rounded-l-md [&>*:last-child_button]:rounded-r-md',
+        '[&_button]:rounded-none [&>*:first-child_button]:rounded-l-full [&>*:last-child_button]:rounded-r-full',
         '[&>*:not(:first-child)_button]:-ml-px',
         className,
       )}

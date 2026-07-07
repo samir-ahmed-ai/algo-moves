@@ -73,7 +73,8 @@ export function Workspace() {
       return;
     }
     const n = (siblingIdx + delta + siblings.length) % siblings.length;
-    openProblem(siblings[n].id);
+    const target = siblings[n];
+    if (target) openProblem(target.id);
   };
 
   const canPrevNav = hasSiblingNav && (!isRunning || navIdx > 0);
@@ -92,8 +93,8 @@ export function Workspace() {
     hasSiblingNav,
     hasPrevProblemNav: canPrevNav,
     hasNextProblemNav: canNextNav,
-    onPrevProblem: canPrevNav ? () => goNav(-1) : undefined,
-    onNextProblem: canNextNav ? () => goNav(1) : undefined,
+    ...(canPrevNav ? { onPrevProblem: () => goNav(-1) } : {}),
+    ...(canNextNav ? { onNextProblem: () => goNav(1) } : {}),
   });
 
   // Text-to-speech narration + per-step sound cues.
@@ -103,14 +104,16 @@ export function Workspace() {
   return (
     <div
       data-density={density}
-      data-present={present || undefined}
+      data-present={present ? 'true' : 'false'}
+      data-surface="workspace"
+      aria-label="Algo Moves workspace"
       className={cn(
-        'shell-workspace relative flex h-full w-full overflow-hidden bg-bg',
+        'shell-workspace relative isolate flex h-full w-full overflow-hidden bg-bg [background:radial-gradient(circle_at_16%_0%,color-mix(in_srgb,var(--accent)_16%,transparent),transparent_28rem),radial-gradient(circle_at_90%_12%,rgba(248,214,121,0.08),transparent_24rem),var(--bg)]',
         present && 'shell-workspace--present',
         !tweaks.animate && '[&_*]:!transition-none [&_*]:!animate-none',
       )}
     >
-      <div className="shell-workspace__main relative flex min-h-0 min-w-0 flex-1 flex-col h-full">
+      <div className="shell-workspace__main relative flex h-full min-h-0 min-w-0 flex-1 flex-col">
         {/* Plan run-mode bar appears above the workspace menu when a run is active */}
         <PlanRunner />
 

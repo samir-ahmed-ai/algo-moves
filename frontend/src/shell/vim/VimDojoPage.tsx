@@ -20,21 +20,23 @@ function FloatingChrome() {
       <button
         type="button"
         title="Home"
+        aria-label="Return to landing page"
         onClick={goHome}
-        className="vim-floating-home pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
+        className="vim-floating-home pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-full border border-edge bg-[var(--surface-glass)] text-ink3 shadow-theme-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-panel2 hover:text-ink hover:shadow-theme-md"
       >
         <Home className="h-3.5 w-3.5" />
       </button>
       <button
         type="button"
         title="Dojo Hub"
+        aria-label="Open dojo hub"
         onClick={() => enterDojo()}
-        className="vim-floating-home pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
+        className="vim-floating-home pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-full border border-edge bg-[var(--surface-glass)] text-ink3 shadow-theme-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-panel2 hover:text-ink hover:shadow-theme-md"
       >
         <Swords className="h-3.5 w-3.5" />
       </button>
-      <div className="vim-floating-brand pointer-events-auto flex items-center gap-[var(--gap)] rounded-md border border-edge bg-panel/90 px-[var(--pad)] py-[var(--gap)] shadow-sm backdrop-blur">
-        <span className="grid h-6 w-6 place-items-center rounded bg-accent text-white">
+      <div className="vim-floating-brand pointer-events-auto flex items-center gap-[var(--gap)] rounded-2xl border border-edge bg-[var(--surface-glass)] px-[var(--pad)] py-[var(--gap)] shadow-theme-sm backdrop-blur-xl">
+        <span className="grid h-6 w-6 place-items-center rounded-xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
           <Keyboard className="h-3.5 w-3.5" />
         </span>
         <div className="min-w-0">
@@ -120,8 +122,14 @@ export function VimDojoPage() {
     <VimGameProvider>
       <div
         data-density={density}
-        className="vim-dojo-page relative flex h-full w-full flex-col overflow-hidden bg-bg min-[960px]:grid min-[960px]:grid-cols-[210px_1fr_210px]"
+        data-surface="vim-dojo"
+        className="vim-dojo-page relative isolate flex h-full w-full flex-col overflow-hidden bg-bg min-[960px]:grid min-[960px]:grid-cols-[210px_1fr_210px]"
+        aria-label="Vim Dojo keyboard practice"
       >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_srgb,var(--accent)_22%,transparent),transparent_28rem),radial-gradient(circle_at_90%_88%,rgba(248,214,121,0.12),transparent_24rem)]"
+        />
         <VimLevelSidebar />
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col min-[960px]:col-start-2 min-[960px]:row-start-1">
           <VimMobileTopBar />

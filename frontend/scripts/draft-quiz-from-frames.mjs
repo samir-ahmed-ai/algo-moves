@@ -13,63 +13,73 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const id = process.argv.find(
-  (a) => !a.startsWith('-') && a !== process.argv[0] && a !== process.argv[1],
-);
-const promote = process.argv.includes('--promote');
+
+function parseArgs(argv) {
+  const options = { id: '', promote: false };
+  for (const arg of argv) {
+    if (arg === '--promote') {
+      options.promote = true;
+    } else if (arg.startsWith('-')) {
+      console.error(`Unknown option: ${arg}`);
+      process.exit(1);
+    } else if (!options.id) {
+      options.id = arg.trim();
+    } else {
+      console.error(`Unexpected argument: ${arg}`);
+      process.exit(1);
+    }
+  }
+  return options;
+}
+
+const { id, promote } = parseArgs(process.argv.slice(2));
 
 if (!id) {
   console.error('Usage: node scripts/draft-quiz-from-frames.mjs <plugin-id> [--promote]');
   process.exit(1);
 }
 
-function findManifestEntry(manifestSrc, pluginId) {
-  const needle = `"id": "${pluginId}"`;
-  const idx = manifestSrc.indexOf(needle);
-  if (idx < 0) return null;
-  const slice = manifestSrc.slice(idx, idx + 1200);
-  const pick = (key) => {
-    const m = slice.match(new RegExp(`"${key}":\\s*"([^"]*)"`));
-    return m?.[1] ?? '';
-  };
+function defaultMeta(pluginId) {
   return {
-    title: pick('title'),
-    pattern: pick('pattern'),
-    time: pick('time'),
-    space: pick('space'),
-    difficulty: pick('difficulty'),
-    visual: pick('visual'),
+    title: pluginId,
+    pattern: '',
+    time: '',
+    space: '',
+    difficulty: 'Medium',
+    visual: '',
+  };
+}
+
+function parseManifestArray(manifestSrc, exportName) {
+  const match = manifestSrc.match(
+    new RegExp(`export const ${exportName}[^=]*=\\s*(\\[[\\s\\S]*?\\]);`),
+  );
+  return match ? JSON.parse(match[1]) : [];
+}
+
+function findManifestEntry(manifestSrc, exportName, pluginId) {
+  const entry = parseManifestArray(manifestSrc, exportName).find((item) => item?.id === pluginId);
+  if (!entry) return null;
+  return {
+    title: String(entry.title || pluginId).trim(),
+    pattern: String(entry.pattern || '').trim(),
+    time: String(entry.time || '').trim(),
+    space: String(entry.space || '').trim(),
+    difficulty: String(entry.difficulty || 'Medium').trim(),
+    visual: String(entry.visual || '').trim(),
   };
 }
 
 function loadMeta(pluginId) {
   if (pluginId.startsWith('imp-')) {
     const src = readFileSync(join(root, 'src/plugins/imported/manifest.ts'), 'utf8');
-    return (
-      findManifestEntry(src, pluginId) ?? {
-        title: pluginId,
-        pattern: '',
-        time: '',
-        space: '',
-        difficulty: 'Medium',
-        visual: '',
-      }
-    );
+    return findManifestEntry(src, 'IMPORTED_DATA', pluginId) ?? defaultMeta(pluginId);
   }
   if (pluginId.startsWith('prep-')) {
     const src = readFileSync(join(root, 'src/plugins/imported/prepManifest.ts'), 'utf8');
-    return (
-      findManifestEntry(src, pluginId) ?? {
-        title: pluginId,
-        pattern: '',
-        time: '',
-        space: '',
-        difficulty: 'Medium',
-        visual: '',
-      }
-    );
+    return findManifestEntry(src, 'PREP_DATA', pluginId) ?? defaultMeta(pluginId);
   }
-  return { title: pluginId, pattern: '', time: '', space: '', difficulty: 'Medium', visual: '' };
+  return defaultMeta(pluginId);
 }
 
 const meta = loadMeta(id);

@@ -113,7 +113,6 @@ const SHELL_FEATURES = [
   'resumes',
   'panels',
   'workspace',
-  'vim',
 ];
 
 const boundaryElements = [
@@ -216,13 +215,21 @@ function boundaryRuleToPolicy(rule) {
 
 const boundaryPolicies = boundaryElementRules.map(boundaryRuleToPolicy).filter(Boolean);
 
+const ESLINT_IGNORES = [
+  'dist/**',
+  'coverage/**',
+  'node_modules/**',
+  'src/**/_generated/**',
+  '**/*.generated.*',
+];
+
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/**/_generated/**', '**/*.generated.*'],
+    ignores: ESLINT_IGNORES,
   },
   {
     linterOptions: {
-      reportUnusedDisableDirectives: 'off',
+      reportUnusedDisableDirectives: 'warn',
     },
   },
   eslint.configs.recommended,

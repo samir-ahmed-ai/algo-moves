@@ -10,14 +10,19 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
+const fileCache = new Map();
 
 function read(rel) {
+  if (fileCache.has(rel)) return fileCache.get(rel);
   const path = join(root, rel);
   if (!existsSync(path)) {
     failures.push(`${rel}: missing`);
+    fileCache.set(rel, '');
     return '';
   }
-  return readFileSync(path, 'utf8');
+  const text = readFileSync(path, 'utf8');
+  fileCache.set(rel, text);
+  return text;
 }
 
 function requireMatch(rel, label, re) {
@@ -38,12 +43,39 @@ const manifestRaw = read(manifestPath);
 if (manifestRaw) {
   try {
     const manifest = JSON.parse(manifestRaw);
-    if (!manifest.name) failures.push(`${manifestPath}: missing name`);
-    if (!manifest.short_name) failures.push(`${manifestPath}: missing short_name`);
-    if (!manifest.start_url) failures.push(`${manifestPath}: missing start_url`);
-    if (!manifest.display) failures.push(`${manifestPath}: missing display`);
+    if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
+      failures.push(`${manifestPath}: root must be an object`);
+    }
+    if (typeof manifest.name !== 'string' || !manifest.name.trim()) {
+      failures.push(`${manifestPath}: missing name`);
+    }
+    if (typeof manifest.short_name !== 'string' || !manifest.short_name.trim()) {
+      failures.push(`${manifestPath}: missing short_name`);
+    }
+    if (typeof manifest.start_url !== 'string' || !manifest.start_url.trim()) {
+      failures.push(`${manifestPath}: missing start_url`);
+    }
+    if (typeof manifest.display !== 'string' || !manifest.display.trim()) {
+      failures.push(`${manifestPath}: missing display`);
+    }
     if (!Array.isArray(manifest.icons) || manifest.icons.length === 0) {
       failures.push(`${manifestPath}: missing icons`);
+    } else {
+      for (const [index, icon] of manifest.icons.entries()) {
+        if (!icon || typeof icon !== 'object' || Array.isArray(icon)) {
+          failures.push(`${manifestPath}: icons[${index}] must be an object`);
+          continue;
+        }
+        if (typeof icon.src !== 'string' || !icon.src.trim()) {
+          failures.push(`${manifestPath}: icons[${index}] missing src`);
+        }
+        if (typeof icon.sizes !== 'string' || !icon.sizes.trim()) {
+          failures.push(`${manifestPath}: icons[${index}] missing sizes`);
+        }
+        if (typeof icon.type !== 'string' || !icon.type.trim()) {
+          failures.push(`${manifestPath}: icons[${index}] missing type`);
+        }
+      }
     }
   } catch {
     failures.push(`${manifestPath}: invalid JSON`);

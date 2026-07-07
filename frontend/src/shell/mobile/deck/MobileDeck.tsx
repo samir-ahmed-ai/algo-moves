@@ -117,7 +117,12 @@ export function MobileDeck({
       return;
     }
     const itemId = blocks[pIdx]?.item.id;
-    saveMobileSession({ topicId: topic.id, itemId, pIdx, cIdx });
+    saveMobileSession({
+      topicId: topic.id,
+      ...(itemId !== undefined ? { itemId } : {}),
+      pIdx,
+      cIdx,
+    });
   }, [topic.id, pIdx, cIdx, done, blocks]);
 
   const advance = useCallback(() => {
@@ -225,24 +230,36 @@ export function MobileDeck({
 
   if (!deckReady) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-edge border-t-accent" />
-        <p className="text-[length:var(--fs-sm)] text-ink3">Loading {topic.title}…</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+        <div className="relative grid h-16 w-16 place-items-center rounded-3xl border border-edge bg-panel/80 shadow-theme-md">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-edge border-t-accent" />
+        </div>
+        <div>
+          <p className="text-[length:var(--fs-title)] font-semibold text-ink">Preparing deck</p>
+          <p className="mt-1 text-[length:var(--fs-sm)] text-ink3">Loading {topic.title}…</p>
+        </div>
       </div>
     );
   }
 
   if (blocks.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
-        <Layers className="h-10 w-10 text-ink3" />
-        <p className="text-[length:var(--fs-title)] font-medium text-ink2">
-          No drillable problems here yet
-        </p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+        <div className="grid h-16 w-16 place-items-center rounded-3xl border border-edge bg-panel/80 text-ink3 shadow-theme-md">
+          <Layers className="h-8 w-8" />
+        </div>
+        <div>
+          <p className="text-[length:var(--fs-title)] font-semibold text-ink">
+            No drillable problems here yet
+          </p>
+          <p className="mt-1 text-[length:var(--fs-sm)] text-ink3">
+            Pick another category to keep practicing.
+          </p>
+        </div>
         <button
           type="button"
           onClick={onExit}
-          className="rounded-full bg-accent px-5 py-2.5 text-[length:var(--fs)] font-semibold text-white"
+          className="rounded-full bg-accent px-5 py-2.5 text-[length:var(--fs)] font-semibold text-[var(--accent-contrast)] shadow-theme-sm"
         >
           Back to categories
         </button>
@@ -252,12 +269,13 @@ export function MobileDeck({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-density="ultra">
-      <div className="shrink-0 px-3 pt-2">
+      <div className="shrink-0 border-b border-edge bg-[var(--surface-glass)] px-3 py-2 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onExit}
             className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
+            aria-label="Back to categories"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -351,8 +369,12 @@ export function MobileDeck({
               problemCount={blocks.length}
               onRestart={restart}
               onExit={handleFinishExit}
-              onNextCategory={nextTopic ? () => onGoTopic(nextTopic.id) : undefined}
-              nextCategoryTitle={nextTopic?.title}
+              {...(nextTopic
+                ? {
+                    onNextCategory: () => onGoTopic(nextTopic.id),
+                    nextCategoryTitle: nextTopic.title,
+                  }
+                : {})}
             />
           ) : block && card?.kind === 'gist' ? (
             <GistCardView

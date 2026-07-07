@@ -10,6 +10,8 @@
   --text-3: #9a988e;
   --accent: #1d6fe0;
   --accent-bg: #e6f1fb;
+  --accent-contrast: #ffffff;
+  --focus: #ba7517;
 
   --team0-bg: #f1efe8;
   --team0-stroke: #b4b2a9;
@@ -32,6 +34,8 @@
 
   --radius: 0.625rem;
   --border-width: 1px;
+  --surface-glass: color-mix(in srgb, var(--surface) 88%, transparent);
+  --surface-elevated: color-mix(in srgb, var(--surface) 92%, var(--accent-bg));
   --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.1);
   --shadow-md: 0 2px 4px hsl(0 0% 0% / 0.12);
   --shadow-lg: 0 4px 6px hsl(0 0% 0% / 0.15);
@@ -40,8 +44,8 @@
   --node-shadow-hover: 0 2px 4px hsl(0 0% 0% / 0.08), 0 12px 32px hsl(0 0% 0% / 0.18);
   --node-shadow-selected: 0 4px 8px hsl(0 0% 0% / 0.1), 0 16px 40px hsl(0 0% 0% / 0.22);
   --node-icon-glyph: calc(var(--node-icon, 1.125rem) * 0.72);
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: 'DM Sans', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 
   /* Legacy aliases (Tailwind uses --text; some plugins reference these) */
   --ink: var(--text);
@@ -72,6 +76,8 @@
   --text-3: #76746b;
   --accent: #6fa8ec;
   --accent-bg: #15314f;
+  --accent-contrast: #061615;
+  --focus: #f8d679;
 
   --team0-bg: #34322d;
   --team0-stroke: #76746b;

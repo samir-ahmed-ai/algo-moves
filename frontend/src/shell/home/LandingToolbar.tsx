@@ -8,10 +8,10 @@ import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import type { Item } from '../../content/types';
 
 const HEADER_BTN_PRIMARY =
-  'inline-flex shrink-0 items-center gap-1 rounded-md bg-accent px-2.5 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 sm:gap-1.5 sm:px-3 sm:text-sm';
+  'inline-flex shrink-0 items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-xs font-semibold text-[var(--accent-contrast)] shadow-theme-sm transition hover:-translate-y-0.5 hover:shadow-theme-md sm:gap-1.5 sm:px-3 sm:text-sm';
 
 const HEADER_MODE_BTN =
-  'inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-ink2 transition-colors hover:bg-panel2 hover:text-ink sm:gap-1.5 sm:px-2.5 sm:text-sm';
+  'inline-flex shrink-0 items-center gap-1 rounded-full border border-transparent px-2 py-1.5 text-xs font-medium text-ink2 transition hover:border-edge hover:bg-panel2 hover:text-ink sm:gap-1.5 sm:px-2.5 sm:text-sm';
 
 export function LandingToolbar({
   lastItem,
@@ -26,8 +26,8 @@ export function LandingToolbar({
   setPalette,
   onOpenDevice,
 }: {
-  lastItem?: Item;
-  firstProblem?: Item;
+  lastItem: Item | undefined;
+  firstProblem: Item | undefined;
   onOpenItem: (id: string) => void;
   onStartIn: (mode: 'play' | 'visualize' | 'learn') => void;
   exploreId: string;
@@ -50,10 +50,20 @@ export function LandingToolbar({
   ] as const;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-edge bg-bg/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur">
+    <header
+      className="sticky top-0 z-30 border-b border-edge bg-[var(--surface-glass)] pt-[env(safe-area-inset-top,0px)] shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl"
+      aria-label="Landing navigation"
+    >
       <div className="flex items-center gap-2 px-4 py-2.5 sm:px-6">
         <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)] lg:h-9 lg:w-9" />
-        <span className="min-w-0 truncate text-sm font-semibold sm:text-base">Algo Moves</span>
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-semibold leading-tight sm:text-base">
+            Algo Moves
+          </span>
+          <span className="hidden truncate text-[length:var(--fs-2xs)] font-medium uppercase tracking-[0.14em] text-ink3 sm:block">
+            visual algorithm studio
+          </span>
+        </span>
         <div className="flex min-w-0 flex-1 items-center gap-2 lg:hidden">
           <button
             type="button"

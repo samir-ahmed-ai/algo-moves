@@ -7,25 +7,23 @@
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { walkFiles } from './lib/walkFiles.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const srcDir = join(root, 'src');
 const ENTRIES = ['src/main.tsx', 'src/main.ts'];
 const EXTS = ['.ts', '.tsx'];
 
-function walk(dir) {
-  const out = [];
-  for (const name of readdirSync(dir)) {
-    const p = join(dir, name);
-    if (statSync(p).isDirectory()) out.push(...walk(p));
-    else if (
-      EXTS.some((e) => p.endsWith(e)) &&
-      !p.endsWith('.d.ts') &&
-      !/\.test\.(t|j)sx?$/.test(p)
-    )
-      out.push(p);
-  }
-  return out;
+function rel(file) {
+  return relative(root, file).replace(/\\/g, '/');
+}
+
+function isSourceModule(_path, name) {
+  return (
+    EXTS.some((ext) => name.endsWith(ext)) &&
+    !name.endsWith('.d.ts') &&
+    !/\.test\.(t|j)sx?$/.test(name)
+  );
 }
 
 /** Resolve a relative or `@/`-aliased import specifier to an absolute file path (trying ext + /index). */
@@ -43,7 +41,7 @@ function resolveImport(fromFile, spec) {
   return candidates.find((c) => existsSync(c) && statSync(c).isFile()) ?? null;
 }
 
-const files = walk(srcDir);
+const files = walkFiles(srcDir, isSourceModule).sort();
 
 /** Resolve a Vite `import.meta.glob('./pat/*.tsx')` pattern to the matching files. */
 function resolveGlob(fromFile, pattern) {
@@ -122,13 +120,17 @@ while (queue.length) {
 
 const orphans = files
   .filter((f) => !reachable.has(f) && !isPureBarrel(f))
-  .map((f) => relative(root, f))
+  .map(rel)
   .sort();
 
 /** Plugin folders on disk must match registry imports in plugins/index.ts (#97). */
 const PLUGIN_SKIP = new Set(['imported', '_shared', '_generated']);
 const pluginsDir = join(srcDir, 'plugins');
 const indexPath = join(pluginsDir, 'index.ts');
+if (!existsSync(indexPath)) {
+  console.error('No plugin registry found (expected src/plugins/index.ts).');
+  process.exit(1);
+}
 const indexSrc = readFileSync(indexPath, 'utf8');
 const registeredPlugins = new Set();
 // Match both static `from './x'` and dynamic `import('./x')` (lazy group loaders).
@@ -136,7 +138,7 @@ for (const m of indexSrc.matchAll(/(?:from\s+|import\(\s*)['"]\.\/([^'"]+)['"]/g
   registeredPlugins.add(m[1]);
 }
 const folderOrphans = [];
-for (const name of readdirSync(pluginsDir)) {
+for (const name of readdirSync(pluginsDir).sort()) {
   const p = join(pluginsDir, name);
   if (!statSync(p).isDirectory() || PLUGIN_SKIP.has(name)) continue;
   if (!registeredPlugins.has(name)) folderOrphans.push(`src/plugins/${name}/`);

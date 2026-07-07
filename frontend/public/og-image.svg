@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Algo Moves social preview</title>
+  <desc id="desc">A branded Algo Moves preview card with algorithm path nodes and product copy.</desc>
+  <defs>
+    <linearGradient id="bg" x1="90" y1="20" x2="1110" y2="610" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#123b36" />
+      <stop offset="0.52" stop-color="#061615" />
+      <stop offset="1" stop-color="#0b2522" />
+    </linearGradient>
+    <linearGradient id="path" x1="174" y1="475" x2="1020" y2="132" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e5fff9" />
+      <stop offset="0.46" stop-color="#58d1c3" />
+      <stop offset="1" stop-color="#f8d679" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-35%" width="140%" height="170%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18" result="blur" />
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.227 0 0 0 0 0.604 0 0 0 0 0.561 0 0 0 0.55 0" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+      <path d="M56 0H0V56" fill="none" stroke="#e5fff9" stroke-opacity="0.06" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect width="1200" height="630" fill="url(#grid)" />
+  <circle cx="260" cy="76" r="210" fill="#3d9a8f" opacity="0.25" />
+  <circle cx="1004" cy="118" r="250" fill="#f8d679" opacity="0.12" />
+  <circle cx="1008" cy="528" r="230" fill="#58d1c3" opacity="0.12" />
+
+  <path d="M174 475C270 439 307 353 353 272C406 178 476 123 561 144C636 162 664 257 725 294C810 346 903 257 1020 132" fill="none" stroke="#1f5f57" stroke-width="36" stroke-linecap="round" opacity="0.34" />
+  <path d="M174 475C270 439 307 353 353 272C406 178 476 123 561 144C636 162 664 257 725 294C810 346 903 257 1020 132" fill="none" stroke="url(#path)" stroke-width="16" stroke-linecap="round" filter="url(#glow)" />
+
+  <g transform="translate(84 76)">
+    <rect width="88" height="88" rx="28" fill="#3d9a8f" />
+    <path d="M24 64L40 24C43 17 52 17 55 24L72 64M35 47H62" fill="none" stroke="#061615" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <g fill="#e5fff9" font-family="'DM Sans', 'Outfit', system-ui, sans-serif">
+    <text x="84" y="234" font-size="92" font-weight="700" letter-spacing="-5">Algo Moves</text>
+    <text x="88" y="306" font-size="34" font-weight="600" fill="#f8d679">See every algorithm move by move.</text>
+    <text x="88" y="376" font-size="30" fill="#c6e9e4">Animations, quizzes, swipe drills, and code practice for interview patterns.</text>
+  </g>
+
+  <g transform="translate(88 460)" font-family="'Space Mono', 'Geist Mono', monospace" font-size="20" font-weight="700">
+    <rect width="178" height="50" rx="25" fill="#e5fff9" fill-opacity="0.1" stroke="#e5fff9" stroke-opacity="0.16" />
+    <text x="28" y="33" fill="#e5fff9">400+ drills</text>
+    <rect x="198" width="178" height="50" rx="25" fill="#e5fff9" fill-opacity="0.1" stroke="#e5fff9" stroke-opacity="0.16" />
+    <text x="226" y="33" fill="#e5fff9">visual flow</text>
+    <rect x="396" width="198" height="50" rx="25" fill="#e5fff9" fill-opacity="0.1" stroke="#e5fff9" stroke-opacity="0.16" />
+    <text x="424" y="33" fill="#e5fff9">mobile ready</text>
+  </g>
+
+  <circle cx="174" cy="475" r="22" fill="#e5fff9" />
+  <circle cx="561" cy="144" r="20" fill="#f8d679" />
+  <circle cx="725" cy="294" r="20" fill="#58d1c3" />
+  <circle cx="1020" cy="132" r="22" fill="#e5fff9" />
+</svg>

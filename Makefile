@@ -104,6 +104,19 @@ typecheck: _require-node ## Run TypeScript without emitting
 test: _require-node ## Frontend unit tests (Vitest + orphan check)
 	$(NPM) test
 
+check-content: _require-node ## Content/quiz/prep simulator quality checks
+	$(NPM) run check:content
+
+check-design: _require-node ## Design-system typography/token/a11y checks
+	$(NPM) run check:design
+
+check-generated: _require-node ## Generated artifact drift checks
+	$(NPM) run check:generated
+
+check-architecture: _require-node ## Module-boundary and circular-dependency checks
+	$(NPM) run check:boundaries
+	$(NPM) run check:circular
+
 check: _require-node _require-go ## Full CI parity: frontend + backend tests and checks
 	$(NPM) test
 	$(NPM) run typecheck
@@ -186,7 +199,7 @@ _free-port:
 	kill -9 $$remaining 2>/dev/null || true
 
 .PHONY: help install start dev-all dev-collab hocuspocus-dev frontend frontend-dev dev backend backend-dev \
-        preview build typecheck test check backend-build backend-test \
+        preview build typecheck test check-content check-design check-generated check-architecture check backend-build backend-test \
         db-migrate content-seed railway-deploy railway-vars \
         clean backend-clean \
         _require-node _require-go _require-frontend-deps _free-dev-ports _free-port

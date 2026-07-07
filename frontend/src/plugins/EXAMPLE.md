@@ -80,7 +80,17 @@ Append to `src/plugins/index.ts` and add a course item in `src/content/courses.t
 
 ### 6. Integrity
 
-`npm test` runs `integrity.test.ts` — curated `pluginId`s must resolve, have glyphs, and expose quiz/cases tabs.
+Run the smallest relevant gates after registration:
+
+```bash
+npm run build-plugin-meta
+npm run build-problem-briefs
+npm run check-plugin-meta
+npm run check-problem-briefs
+npm run check:quiz-labels
+```
+
+`npm test` still runs Vitest plus orphan checks; `check:all` runs the full project guardrail suite.
 
 ---
 
@@ -120,8 +130,11 @@ Point `pluginId` at the imported id (e.g. `imp-44-word-search`) in `courses.ts`.
 ### 5. Verify
 
 ```bash
-npm test
-npm run check-orphans
+npm run build-plugin-meta
+npm run build-problem-briefs
+npm run check:content
+npm run check-plugin-meta
+npm run check-problem-briefs
 ```
 
 Draft quiz stubs (human review):
@@ -141,6 +154,7 @@ node scripts/draft-quiz-from-frames.mjs imp-44-word-search
 | Learn tabs | `wireTeachingStack` | factory auto-wires |
 | Registry | `curatedPlugins` in `plugins/index.ts` + `npm run build-plugin-meta` | manifest + factory + `npm run build-plugin-meta` |
 | Course link | `courses.ts` | `courses.ts` (`imp-*` id) |
-| Tests | `recorders.test.ts` behavioural checks | `integrity.test.ts` simulator + cases |
+| Generated briefs | `npm run build-problem-briefs` | `npm run build-problem-briefs` |
+| Tests | `recorders.test.ts` behavioural checks + `check:quiz-labels` | `check:content` simulator + quiz coverage |
 
 See also [`README.md`](./README.md) and `npm run new-problem --`.

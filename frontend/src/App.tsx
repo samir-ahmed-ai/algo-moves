@@ -13,6 +13,17 @@ import { PlansPage } from './shell/plans/PlansPage';
 import { ResumesPage } from './shell/resumes/ResumesPage';
 import { SettingsDialog } from '@/shell/canvas';
 
+const ROUTE_LABELS = {
+  home: 'Algo Moves landing page',
+  mobile: 'Mobile swipe practice',
+  vim: 'Vim dojo',
+  dojo: 'Practice dojo',
+  games: 'Algorithm games',
+  plans: 'Study plans',
+  resumes: 'Resume workspace',
+  canvas: 'Algorithm canvas workspace',
+} as const;
+
 function Shell() {
   const { route } = useWorkspace();
   if (route === 'mobile') return <MobileApp />;
@@ -24,18 +35,29 @@ function Shell() {
   return route === 'home' ? <LandingPage /> : <Workspace />;
 }
 
+function AppFrame() {
+  const { route } = useWorkspace();
+  const routeLabel = ROUTE_LABELS[route as keyof typeof ROUTE_LABELS] ?? 'Algorithm workspace';
+
+  return (
+    <div className="h-[100dvh] min-h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
+      <ErrorBoundary label="app">
+        <main aria-label={routeLabel} className="h-full min-w-0" data-route={route}>
+          <Shell />
+        </main>
+        <SettingsDialog />
+      </ErrorBoundary>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <WorkspaceProvider>
         <PlanProvider>
           <ReplayStoreProvider>
-            <div className="h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
-              <ErrorBoundary label="app">
-                <Shell />
-                <SettingsDialog />
-              </ErrorBoundary>
-            </div>
+            <AppFrame />
           </ReplayStoreProvider>
         </PlanProvider>
       </WorkspaceProvider>

@@ -29,8 +29,20 @@ export default {
         sans: ['var(--sans)'],
         mono: ['var(--mono)'],
       },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        'hero-xl': ['clamp(2.5rem, 8vw, 6.5rem)', { lineHeight: '0.9', letterSpacing: '-0.08em' }],
+      },
       borderRadius: {
         theme: 'var(--radius)',
+      },
+      backgroundImage: {
+        'app-grid':
+          'linear-gradient(90deg, color-mix(in srgb, var(--border) 20%, transparent) 0 1px, transparent 1px 56px), linear-gradient(0deg, color-mix(in srgb, var(--border) 16%, transparent) 0 1px, transparent 1px 56px)',
+        'brand-radial':
+          'radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--accent) 32%, transparent), transparent 30rem)',
+        'brand-surface':
+          'linear-gradient(135deg, color-mix(in srgb, var(--accent-bg) 52%, transparent), transparent 38%, color-mix(in srgb, var(--surface-2) 56%, transparent))',
       },
       boxShadow: {
         theme: 'var(--shadow-lg)',
@@ -38,6 +50,11 @@ export default {
         'theme-md': 'var(--shadow-md)',
         'theme-lg': 'var(--shadow-lg)',
         'theme-xl': 'var(--shadow-xl)',
+      },
+      transitionTimingFunction: {
+        productive: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        precise: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        soft: 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
       keyframes: {
         'accordion-down': {

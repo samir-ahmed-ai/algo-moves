@@ -3,7 +3,7 @@
 A tiny, dependency-free realtime backend that pairs two players into a **room**
 and relays messages between them. It powers the couch/long-distance two-player
 games in the frontend (Number Duel, Rock-Paper-Scissors, Tic-Tac-Toe, Mind Meld,
-Reaction Duel).
+Reaction Duel, Would You Rather).
 
 - **Stdlib WebSocket.** The WebSocket layer (RFC 6455) is implemented on the Go
   standard library; only Postgres persistence adds `pgx`.
@@ -13,6 +13,9 @@ Reaction Duel).
 - **Game-agnostic.** The server never decodes a game move. Each game speaks its
   own JSON over the `relay` channel; the server only forwards it to the peer and
   remembers the host's shared `state` so a late joiner catches up.
+- **Not the Yjs server.** Canvas CRDT collaboration runs through the separate
+  Hocuspocus service. This backend owns game rooms, arcade REST, interview REST,
+  content reads, saved canvases, and prep plans.
 
 ## Run it
 
@@ -128,6 +131,16 @@ internal/prep       prep plan CRUD
 
 Domain packages depend on `platform` only — not on each other. `arcade` is the single composition root consumed by `cmd/gameserver` and `internal/server`.
 
+## Generated seeds
+
+`internal/arcade/seeds/content_seed.sql` mirrors `../db/content_seed.sql` and is generated from the frontend catalog by:
+
+```bash
+cd ../frontend
+npm run export-content-sql
+```
+
+Do not hand-edit either seed file. Update catalog/plugin data or the exporter, regenerate, then deploy with `RUN_CONTENT_SEED=true`.
 
 See [`../db/README.md`](../db/README.md) for Railway Postgres setup.
 
@@ -166,7 +179,7 @@ The repo includes [`railway.toml`](railway.toml) and [`Dockerfile`](Dockerfile).
 
 | Variable | Purpose |
 | -------- | ------- |
-| `ALLOWED_ORIGINS` | Comma-separated browser origins, e.g. `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
+| `ALLOWED_ORIGINS` | Comma-separated browser origins, e.g. `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}`. Also switches session cookies to `SameSite=None; Secure` for cross-origin credentialed API calls. |
 | `DATABASE_URL` | Postgres connection string (reference Railway Postgres plugin) |
 | `RUN_MIGRATIONS` | `true` to apply schema + achievement seed on startup |
 | `RUN_CONTENT_SEED` | `true` to reload the learning catalog (`/api/content/*`) on startup |
@@ -185,7 +198,8 @@ railway up . --service backend --detach
 | Variable | Purpose |
 | -------- | ------- |
 | `PORT` | Listen port (default `:8080`) |
-| `ALLOWED_ORIGINS` | Comma-separated browser origins allowed for WebSocket upgrade and CORS. Empty = allow all (LAN dev). |
+| `ALLOWED_ORIGINS` | Comma-separated browser origins allowed for WebSocket upgrade and CORS. Empty = allow all (LAN dev). When set, session cookies use `SameSite=None; Secure` so the frontend can call the API from a different origin. |
+| `COOKIE_CROSS_SITE` | Optional override (`true`/`1`) to force cross-site cookie flags when `ALLOWED_ORIGINS` is unset. |
 | `DATABASE_URL` | Postgres URL for arcade persistence. Unset = realtime-only (no `/api`). |
 | `RUN_MIGRATIONS` | Apply embedded SQL migrations + achievement seed on startup (`true`/`1`). Set `false` to skip. |
 | `RUN_CONTENT_SEED` | Reload learning catalog from embedded `content_seed.sql` on startup (`true`/`1`). Requires content schema (run migrations first on fresh DB). Set `false` to skip. |

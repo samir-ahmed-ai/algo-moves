@@ -107,6 +107,10 @@ function slugify(s) {
     .slice(0, 60);
 }
 
+function compactIdPart(value, fallback) {
+  return slugify(String(value ?? '')) || fallback;
+}
+
 /** Strip a leading "1.8 " / "14.17 " numeric chapter prefix → { number, title }. */
 function splitNumberPrefix(raw) {
   const m = raw.match(/^(\d+(?:\.\d+)*)\s+(.+)$/);
@@ -238,7 +242,9 @@ for (const [topic, problems] of Object.entries(idx.topics ?? {})) {
     const { number, title } = splitNumberPrefix(p.title || p.slug);
     if (existingTitles.has(normTitle(title))) continue; // already imported via progress
 
-    const id = `prep-${topic}-${slugify(p.slug)}`;
+    const topicId = compactIdPart(topic, 'topic');
+    const slug = compactIdPart(p.slug, compactIdPart(title, 'problem'));
+    const id = `prep-${topicId}-${slug}`;
     if (seenIds.has(id)) {
       collisions.push(`${topic}/${p.slug} → ${id}`);
       continue;
@@ -252,8 +258,12 @@ for (const [topic, problems] of Object.entries(idx.topics ?? {})) {
     }
     const scene = sceneOverrides[`${topic}/${p.slug}`] || p.scene || '';
 
-    const variants = (p.variants ?? [])
-      .map((vf) => ({ file: vf.replace(/^variants\//, ''), text: readFileSafe(join(dir, vf)) }))
+    const variants = [...(p.variants ?? [])]
+      .sort()
+      .map((vf) => ({
+        file: vf.replace(/^variants\//, '').trim(),
+        text: readFileSafe(join(dir, vf)),
+      }))
       .filter((v) => v.text);
 
     out.push({
@@ -262,7 +272,7 @@ for (const [topic, problems] of Object.entries(idx.topics ?? {})) {
       topicTitle: meta.title,
       course: `${meta.title} · prep library`,
       courseIcon: meta.icon,
-      slug: p.slug,
+      slug,
       number,
       title,
       ask: titleToAsk(title, p.slug),

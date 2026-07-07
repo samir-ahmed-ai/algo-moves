@@ -38,7 +38,7 @@ function targetFromHash(): DeckTarget | null {
   const topic = resolveTopic(parsed);
   if (!topic) return null;
   if (parsed.itemId) return { topic, startItemId: parsed.itemId };
-  return null;
+  return { topic };
 }
 
 function browseFromHash(): { trackId?: string; categoryId?: string } | null {
@@ -132,7 +132,12 @@ export function MobileApp() {
     } else {
       writeMobileHash({ topicId: topic.id, itemId: startItemId }, { replace: false });
     }
-    setTarget({ topic, startItemId, initialPIdx, initialCIdx });
+    setTarget({
+      topic,
+      ...(startItemId !== undefined ? { startItemId } : {}),
+      ...(initialPIdx !== undefined ? { initialPIdx } : {}),
+      ...(initialCIdx !== undefined ? { initialCIdx } : {}),
+    });
   };
 
   const exitDeck = () => {
@@ -201,34 +206,48 @@ export function MobileApp() {
   return (
     <div
       data-density={density}
-      className="mobile-app-shell flex h-full w-full justify-center bg-bg text-ink"
+      data-surface="mobile"
+      className="mobile-app-shell relative isolate flex h-full w-full justify-center overflow-hidden bg-bg text-ink"
+      aria-label="Mobile swipe practice"
     >
-      <div className="mobile-frame relative flex h-full w-full max-w-[480px] flex-col overflow-hidden border-edge bg-bg sm:border-x">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_26rem),radial-gradient(circle_at_90%_86%,rgba(248,214,121,0.12),transparent_24rem)]"
+      />
+      <div className="mobile-frame relative flex h-full w-full max-w-[480px] flex-col overflow-hidden border-edge bg-[var(--surface-glass)] shadow-[0_0_80px_hsl(0_0%_0%_/_0.22)] backdrop-blur sm:border-x">
         {target ? (
           <MobileDeck
             key={`${target.topic.id}:${target.startItemId ?? ''}:${target.initialPIdx ?? ''}:${target.initialCIdx ?? ''}`}
             topic={target.topic}
-            startItemId={target.startItemId}
-            initialPIdx={target.initialPIdx}
-            initialCIdx={target.initialCIdx}
+            {...(target.startItemId !== undefined ? { startItemId: target.startItemId } : {})}
+            {...(target.initialPIdx !== undefined ? { initialPIdx: target.initialPIdx } : {})}
+            {...(target.initialCIdx !== undefined ? { initialCIdx: target.initialCIdx } : {})}
             onExit={exitDeck}
             onGoTopic={goTopic}
             headerRight={ThemeBtn}
           />
         ) : (
           <>
-            <header className="z-10 flex shrink-0 items-center gap-2 border-b border-edge bg-bg/90 px-3 py-2.5 backdrop-blur">
+            <header className="z-10 flex shrink-0 items-center gap-2 border-b border-edge bg-[var(--surface-glass)] px-3 py-2.5 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl">
               <button
                 type="button"
                 onClick={goHome}
                 className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
                 title="Home"
+                aria-label="Return to landing page"
               >
                 <Home className="h-4 w-4" />
               </button>
               <div className="flex flex-1 items-center justify-center gap-1.5">
                 <BrandLogo size="sm" />
-                <span className="text-[length:var(--fs)] font-semibold">Algo Moves</span>
+                <span className="min-w-0 text-center">
+                  <span className="block text-[length:var(--fs)] font-semibold leading-tight">
+                    Algo Moves
+                  </span>
+                  <span className="block text-[length:var(--fs-2xs)] font-medium uppercase tracking-[0.14em] text-ink3">
+                    swipe practice
+                  </span>
+                </span>
               </div>
               {ThemeBtn}
               <AuthButton compact />

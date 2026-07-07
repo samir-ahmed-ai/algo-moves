@@ -5,16 +5,28 @@
 > Every confirmed finding was independently re-checked against the cited `file:line` before inclusion.
 > Goals driving the review: **world-class · reuse (no duplication) · loosely coupled · separation of concerns enforced.**
 
+## How to read this document now
+
+This file preserves the original audit and remediation history. It is not the current architecture source of truth.
+
+Use these docs for current operating rules:
+
+- [`architecture.md`](architecture.md) — current layer contracts, generated-file ownership, and quality guardrails.
+- [`visual-qa-checklist.md`](visual-qa-checklist.md) — current visual release checklist.
+- [`quiz-and-code-studio.md`](quiz-and-code-studio.md) — current quiz and Code Studio authoring/persistence rules.
+
+Treat older findings below as **historical baseline evidence** unless the progress log still marks them incomplete. New work should update the guardrail or generator that prevents the same class of issue from returning.
+
 ## Verdict
 
-**Current grade: B / B+.** This is a healthy, well-factored codebase — the intended
+**Historical baseline grade: B / B+.** This was already a healthy, well-factored codebase — the intended
 Shell → Canvas → Plugins layering (see [architecture.md](architecture.md)) mostly holds, recent commits
 show active hook-extraction refactoring, generated data is properly separated from source, and the Go
 backend is idiomatic and well-tested. The verifiers *refuted 10 findings* precisely because many
 "smells" turned out to be deliberate, justified patterns (DI in CodeStudio, distinct FIT_PADDING values,
 structurally-different type guards).
 
-**What separates it from world-class** is not big rewrites — it's four systemic gaps:
+At the time of the audit, **what separated it from world-class** was not big rewrites — it was four systemic gaps:
 
 1. **No enforced module boundaries.** There is *no ESLint config at all*, so the layering is a
    convention, not a guarantee. A handful of upward imports have already leaked (`lib → store`,
@@ -300,4 +312,3 @@ The items below were tracked as incremental debt in the original audit; they are
 - **Visual QA checklist** — `docs/visual-qa-checklist.md`.
 - **CHANGELOG** — density-default migration notes (`CHANGELOG.md`).
 - **README** — six arcade games (Would You Rather included).
-

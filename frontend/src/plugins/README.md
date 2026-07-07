@@ -89,6 +89,10 @@ To add a prep simulator: `npm run scaffold-prep-sim -- <slug-or-manifestId>`, im
 `npm run new-problem -- two-sum "Two Sum"` scaffolds `index.tsx`, `cases.ts`, and `practice.ts`.
 `npm test` runs recorder + integrity tests and `check-orphans`.
 
+Scaffolders validate ids and option values, but generated code is still a starting point. Before registering
+a new plugin, replace placeholder summaries, tags, cases, quiz choices, and solution text with real teaching
+content.
+
 **Worked example:** [`EXAMPLE.md`](./EXAMPLE.md) — native binary search + imported word search end-to-end.
 
 ## Wires
@@ -110,6 +114,31 @@ wires: {
    `npm run check-plugin-meta` (part of `check:all`) fails if it is stale.
 
 Reference: `src/plugins/binary-search/` (hand-crafted) or any imported simulator under `imported/simulators/problems/`.
+
+## Generated content contract
+
+Generated files are downstream artifacts. Do not hand-edit these paths:
+
+| Artifact | Generator |
+|----------|-----------|
+| `imported/manifest.ts` | `npm run import-problems` |
+| `imported/prepManifest.ts` | `npm run import-prep` |
+| `_generated/pluginMeta.ts` | `npm run build-plugin-meta` |
+| `_generated/courses.ts` | `npm run build-plugin-meta` |
+| `../content/_generated/problemBriefs.ts` | `npm run build-problem-briefs` |
+
+If plugin metadata, quiz text, prep data, or catalog placement changes, regenerate the paired artifact and run the matching `check:*` script before merge.
+
+## Quality gates for plugin changes
+
+| Change | Minimum local gate |
+|--------|--------------------|
+| Native plugin or simulator UI | `npm run check-plugin-typography` |
+| Quiz labels or practice content | `npm run check:quiz-labels` |
+| Prep simulator coverage | `npm run check-prep-sim-coverage` |
+| Generated plugin/course metadata | `npm run check-plugin-meta` |
+| Generated problem briefs | `npm run check-problem-briefs` |
+| Full content quality sweep | `npm run check:content` |
 
 ## Viz kit (typography + layout)
 

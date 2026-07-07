@@ -95,11 +95,26 @@ Draft starter quizzes from recorder captions (human review required):
 npm run draft-quiz-from-frames imp-44-word-search
 ```
 
+Generated prep quizzes come from `frontend/scripts/generate-prep-practice-quiz.mjs`. The generator should only produce paste-ready labels that pass the same headline/detail rules as hand-authored quizzes.
+
 ---
 
 ## Code Studio — reassemble & highlighting
 
 Code Studio runs three gated phases: **quiz → reassemble → recall**. Reassemble shows shuffled [`CodePiece`](../src/lib/codePieces.ts) blocks the learner orders into a working solution.
+
+### Resume and persistence contract
+
+Code Studio progress is scoped by problem id and language index:
+
+| State | Store boundary | Contract |
+|-------|----------------|----------|
+| Phase | `frontend/src/store/user-prefs/codeStudioPhase.ts` | Saved phase must be one of `quiz`, `reassemble`, or `recall`, and must still exist for the current problem. |
+| Quiz progress | `frontend/src/store/user-prefs/codeStudioPhase.ts` | Index, score, and answered choice are non-negative integers; invalid persisted data falls back safely. |
+| Reassemble progress | `frontend/src/store/user-prefs/codeStudioPhase.ts` | Placed/tray ids are trimmed, unique strings; mistakes are non-negative integers. |
+| Editor prefs | `frontend/src/store/user-prefs/editorPrefs.ts` | Boolean prefs only accept real booleans; split/font values are finite and clamped. |
+
+If a problem loses quiz or reassemble content, resume should clamp to the first available phase rather than opening a dead tab.
 
 ### Syntax highlighting (read-only pieces)
 
@@ -152,3 +167,11 @@ export const quiz: QuizQuestion[] = [
 ```
 
 Wire via `wireTeachingStack({ practice: { quiz, … } })` — see [`src/plugins/README.md`](../src/plugins/README.md).
+
+## Authoring standards
+
+- Keep prompts concrete: ask what the recorder is doing now, what invariant is preserved, or why a complexity bound holds.
+- Keep answers visually scannable: one headline, one detail, no sentence-length choices.
+- Avoid generic distractors unless the detail names the specific wrong assumption.
+- Generated quiz drafts are starting points, not final curriculum; review against the simulator frames before merge.
+- If a generator changes quiz text, rerun the paired generator/check commands before shipping.

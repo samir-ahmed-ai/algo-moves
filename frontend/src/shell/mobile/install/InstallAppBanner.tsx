@@ -11,16 +11,27 @@ function IosBanner({ onDismiss }: { onDismiss: () => void }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="border-b border-edge bg-accentbg px-[var(--hpad)] py-[var(--gap)]">
+    <section
+      className="border-b border-edge bg-[var(--surface-elevated)] px-[var(--hpad)] py-[var(--gap)] shadow-[0_1px_0_color-mix(in_srgb,var(--border)_50%,transparent)]"
+      aria-label="Install Algo Moves"
+    >
       <div className="flex min-h-[var(--row)] items-center gap-[var(--gap)]">
-        <Download className="h-3.5 w-3.5 shrink-0 text-accent" />
-        <span className="min-w-0 flex-1 truncate text-[length:var(--fs-tight)] font-medium text-ink">
-          Install Algo Moves
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+          <Download className="h-4 w-4" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[length:var(--fs-tight)] font-semibold text-ink">
+            Install Algo Moves
+          </span>
+          <span className="block truncate text-[length:var(--fs-2xs)] text-ink3">
+            Practice from your home screen.
+          </span>
         </span>
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="shrink-0 rounded px-1.5 py-px text-[length:var(--fs-tight)] font-medium text-accent hover:opacity-80"
+          aria-expanded={expanded}
+          className="shrink-0 rounded-full border border-accent/30 bg-accentbg px-2 py-1 text-[length:var(--fs-tight)] font-semibold text-accent shadow-theme-sm hover:opacity-90"
         >
           {expanded ? 'Hide' : 'How?'}
         </button>
@@ -28,13 +39,13 @@ function IosBanner({ onDismiss }: { onDismiss: () => void }) {
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss install banner"
-          className="grid h-5 w-5 shrink-0 place-items-center rounded text-ink3 hover:text-ink"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
         >
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
       {expanded && (
-        <ol className="mt-[var(--gap)] space-y-[var(--gap)] pl-1 text-[length:var(--fs-tight)] leading-snug text-ink2">
+        <ol className="mt-2 space-y-1.5 rounded-2xl border border-edge bg-panel/70 p-3 text-[length:var(--fs-tight)] leading-snug text-ink2 shadow-theme-sm">
           <li className="flex items-center gap-1.5">
             <span className="font-semibold text-ink">1.</span>
             Tap the
@@ -51,24 +62,31 @@ function IosBanner({ onDismiss }: { onDismiss: () => void }) {
           </li>
         </ol>
       )}
-    </div>
+    </section>
   );
 }
 
 function AndroidBanner({ onInstall, onDismiss }: { onInstall: () => void; onDismiss: () => void }) {
   return (
-    <div className="flex min-h-[var(--row)] items-center gap-[var(--gap)] border-b border-edge bg-accentbg px-[var(--hpad)] py-[var(--gap)]">
-      <Download className="h-3.5 w-3.5 shrink-0 text-accent" />
-      <span className="min-w-0 flex-1 truncate text-[length:var(--fs-tight)] font-medium text-ink sm:hidden">
-        Install app
+    <section
+      className="flex min-h-[var(--row)] items-center gap-[var(--gap)] border-b border-edge bg-[var(--surface-elevated)] px-[var(--hpad)] py-[var(--gap)] shadow-[0_1px_0_color-mix(in_srgb,var(--border)_50%,transparent)]"
+      aria-label="Install Algo Moves"
+    >
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+        <Download className="h-4 w-4" />
       </span>
-      <span className="hidden min-w-0 flex-1 truncate text-[length:var(--fs-tight)] font-medium text-ink sm:inline">
-        Install Algo Moves on your home screen
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[length:var(--fs-tight)] font-semibold text-ink">
+          Install Algo Moves
+        </span>
+        <span className="block truncate text-[length:var(--fs-2xs)] text-ink3">
+          Faster swipe drills from your launcher.
+        </span>
       </span>
       <button
         type="button"
         onClick={onInstall}
-        className="shrink-0 rounded-md bg-accent px-2 py-px text-[length:var(--fs-tight)] font-semibold text-white hover:opacity-90"
+        className="shrink-0 rounded-full bg-accent px-3 py-1 text-[length:var(--fs-tight)] font-semibold text-[var(--accent-contrast)] shadow-theme-sm hover:opacity-90"
       >
         Install
       </button>
@@ -76,11 +94,11 @@ function AndroidBanner({ onInstall, onDismiss }: { onInstall: () => void; onDism
         type="button"
         onClick={onDismiss}
         aria-label="Dismiss install banner"
-        className="grid h-5 w-5 shrink-0 place-items-center rounded text-ink3 hover:text-ink"
+        className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
       >
         <X className="h-3.5 w-3.5" />
       </button>
-    </div>
+    </section>
   );
 }
 

@@ -1,34 +1,33 @@
 #!/usr/bin/env node
 /** Fail if any prep simulator lacks hand-authored practice.quiz content. */
-import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  collectPrepSimulatorIds,
+  missingPrepIds,
+  readPrepManifestIds,
+} from './lib/prepCoverage.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifestPath = join(root, 'src/plugins/imported/prepManifest.ts');
 const simDir = join(root, 'src/plugins/imported/prepSimulators/problems');
 
-const raw = readFileSync(manifestPath, 'utf8');
-const jsonMatch = raw.match(/export const PREP_DATA[^=]*=\s*(\[[\s\S]*\]);/);
-if (!jsonMatch) {
-  console.error('Could not parse prepManifest.ts');
+let ids;
+let withQuiz;
+try {
+  ids = readPrepManifestIds(manifestPath);
+  withQuiz = collectPrepSimulatorIds(
+    simDir,
+    (source) =>
+      /practice:\s*\{\s*quiz:\s*practiceQuiz\s*\}/.test(source) &&
+      /const practiceQuiz:/.test(source),
+  );
+} catch (error) {
+  console.error(`check-prep-quiz-coverage: ${error.message}`);
   process.exit(1);
 }
-const entries = JSON.parse(jsonMatch[1]);
-const ids = entries.map((e) => e.id);
 
-const withQuiz = new Set();
-for (const name of readdirSync(simDir)) {
-  if (!name.endsWith('.tsx')) continue;
-  const src = readFileSync(join(simDir, name), 'utf8');
-  const m = src.match(/manifestId\s*=\s*['"]([^'"]+)['"]/);
-  if (!m) continue;
-  if (/practice:\s*\{\s*quiz:\s*practiceQuiz\s*\}/.test(src) && /const practiceQuiz:/.test(src)) {
-    withQuiz.add(m[1]);
-  }
-}
-
-const missing = ids.filter((id) => !withQuiz.has(id));
+const missing = missingPrepIds(ids, withQuiz);
 if (missing.length) {
   console.error(`check-prep-quiz-coverage: ${missing.length} missing practice quiz:\n`);
   for (const id of missing.slice(0, 20)) console.error(`  ${id}`);

@@ -1,6 +1,10 @@
 /** Locate the algo/prep tree for import scripts (no hard-coded sibling repo name). */
 import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, normalize, resolve } from 'node:path';
+
+function cleanPath(value) {
+  return typeof value === 'string' && value.trim() ? resolve(value.trim()) : null;
+}
 
 function hasPrepIndex(dir) {
   return existsSync(join(dir, '_index.json'));
@@ -12,11 +16,12 @@ function hasAlgoTree(dir) {
 
 function siblingPrepCandidates(baseDir) {
   const found = [];
-  if (!existsSync(baseDir)) return found;
+  const base = cleanPath(baseDir);
+  if (!base || !existsSync(base)) return found;
   try {
-    for (const entry of readdirSync(baseDir, { withFileTypes: true })) {
+    for (const entry of readdirSync(base, { withFileTypes: true })) {
       if (!entry.isDirectory() || entry.name === 'node_modules') continue;
-      const candidate = join(baseDir, entry.name, 'algo', 'prep');
+      const candidate = join(base, entry.name, 'algo', 'prep');
       if (hasPrepIndex(candidate)) found.push(candidate);
     }
   } catch {
@@ -27,17 +32,30 @@ function siblingPrepCandidates(baseDir) {
 
 function siblingAlgoCandidates(baseDir) {
   const found = [];
-  if (!existsSync(baseDir)) return found;
+  const base = cleanPath(baseDir);
+  if (!base || !existsSync(base)) return found;
   try {
-    for (const entry of readdirSync(baseDir, { withFileTypes: true })) {
+    for (const entry of readdirSync(base, { withFileTypes: true })) {
       if (!entry.isDirectory() || entry.name === 'node_modules') continue;
-      const candidate = join(baseDir, entry.name, 'algo');
+      const candidate = join(base, entry.name, 'algo');
       if (hasAlgoTree(candidate)) found.push(candidate);
     }
   } catch {
     /* unreadable */
   }
   return found;
+}
+
+function uniqueCandidates(candidates) {
+  const seen = new Set();
+  const out = [];
+  for (const candidate of candidates) {
+    const key = normalize(candidate);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(candidate);
+  }
+  return out;
 }
 
 /**
@@ -50,23 +68,25 @@ function siblingAlgoCandidates(baseDir) {
  * 4. Any sibling repo under the workspace folder (e.g. ../Interview Prep copy/algo/prep)
  */
 export function resolvePrepRoot(frontendRoot, env = process.env) {
-  if (env.PREP_ROOT && hasPrepIndex(env.PREP_ROOT)) {
-    return { path: env.PREP_ROOT, via: 'PREP_ROOT' };
+  const prepRoot = cleanPath(env.PREP_ROOT);
+  if (prepRoot && hasPrepIndex(prepRoot)) {
+    return { path: prepRoot, via: 'PREP_ROOT' };
   }
 
-  if (env.ALGO_ROOT && hasPrepIndex(join(env.ALGO_ROOT, 'prep'))) {
-    return { path: join(env.ALGO_ROOT, 'prep'), via: 'ALGO_ROOT' };
+  const algoRoot = cleanPath(env.ALGO_ROOT);
+  if (algoRoot && hasPrepIndex(join(algoRoot, 'prep'))) {
+    return { path: join(algoRoot, 'prep'), via: 'ALGO_ROOT' };
   }
 
-  const repoRoot = join(frontendRoot, '..');
-  const workspaceRoot = join(frontendRoot, '../..');
+  const repoRoot = resolve(frontendRoot, '..');
+  const workspaceRoot = resolve(frontendRoot, '../..');
   const defaultPrep = join(repoRoot, 'algo', 'prep');
 
-  const ordered = [
+  const ordered = uniqueCandidates([
     defaultPrep,
     ...siblingPrepCandidates(workspaceRoot),
     ...siblingPrepCandidates(repoRoot),
-  ];
+  ]);
 
   for (const candidate of ordered) {
     if (hasPrepIndex(candidate)) {
@@ -84,24 +104,26 @@ export function resolvePrepRoot(frontendRoot, env = process.env) {
  * Same env vars as resolvePrepRoot; also scans sibling workspaces for algo/.
  */
 export function resolveAlgoRoot(frontendRoot, env = process.env) {
-  if (env.ALGO_ROOT && hasAlgoTree(env.ALGO_ROOT)) {
-    return { path: env.ALGO_ROOT, via: 'ALGO_ROOT' };
+  const algoRoot = cleanPath(env.ALGO_ROOT);
+  if (algoRoot && hasAlgoTree(algoRoot)) {
+    return { path: algoRoot, via: 'ALGO_ROOT' };
   }
 
-  if (env.PREP_ROOT) {
-    const algo = join(env.PREP_ROOT, '..');
+  const prepRoot = cleanPath(env.PREP_ROOT);
+  if (prepRoot) {
+    const algo = resolve(prepRoot, '..');
     if (hasAlgoTree(algo)) return { path: algo, via: 'PREP_ROOT/..' };
   }
 
-  const repoRoot = join(frontendRoot, '..');
-  const workspaceRoot = join(frontendRoot, '../..');
+  const repoRoot = resolve(frontendRoot, '..');
+  const workspaceRoot = resolve(frontendRoot, '../..');
   const defaultAlgo = join(repoRoot, 'algo');
 
-  const ordered = [
+  const ordered = uniqueCandidates([
     defaultAlgo,
     ...siblingAlgoCandidates(workspaceRoot),
     ...siblingAlgoCandidates(repoRoot),
-  ];
+  ]);
 
   for (const candidate of ordered) {
     if (hasAlgoTree(candidate)) {

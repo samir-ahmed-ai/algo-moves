@@ -3,8 +3,19 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { visualizer } from 'rollup-plugin-visualizer';
 
-const devPort =
-  Number((globalThis as { process?: { env?: { PORT?: string } } }).process?.env?.PORT) || 4321;
+const env =
+  (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
+const DEFAULT_DEV_PORT = 4321;
+const MAX_PORT = 65535;
+
+const parsePort = (value: string | undefined) => {
+  const port = Number(value);
+  return Number.isInteger(port) && port > 0 && port <= MAX_PORT ? port : DEFAULT_DEV_PORT;
+};
+
+const isEnabled = (value: string | undefined) => value === '1' || value === 'true';
+
+const devPort = parsePort(env.PORT);
 const alphaBucket = (name: string) => {
   const first = name[0]?.toLowerCase() ?? 'z';
   if (first <= 'f') return 'a-f';
@@ -13,7 +24,7 @@ const alphaBucket = (name: string) => {
   return 's-z';
 };
 
-const analyze = Boolean(process.env.ANALYZE);
+const analyze = isEnabled(env.ANALYZE);
 
 export default defineConfig({
   plugins: [
@@ -63,7 +74,16 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: devPort,
+    strictPort: false,
+    host: true,
+  },
   build: {
+    target: 'es2022',
+    cssCodeSplit: true,
+    sourcemap: false,
+    reportCompressedSize: true,
     // App-owned generated chunks are split below; the remaining large chunks are
     // lazy vendor payloads from Excalidraw/Mermaid internals.
     // Unrelated to layout breakpoints (e.g. sidebar tab bar uses compact labels below 900px).

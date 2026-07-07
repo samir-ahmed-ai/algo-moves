@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   FileText,
@@ -30,6 +30,10 @@ import {
 import { formatResumeAiError, isOpenAIKeyError } from './formatResumeAiError';
 
 type View = 'hub' | 'editor' | 'customizer' | 'directory';
+type DeleteTarget = {
+  id: string;
+  title: string;
+};
 
 function SignInGate() {
   return (
@@ -89,7 +93,7 @@ function UploadZone({
     onUploaded(res.resume);
   };
 
-  const onDrop = (e: React.DragEvent) => {
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
@@ -105,8 +109,8 @@ function UploadZone({
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
       className={cn(
-        'resume-upload-zone rounded-xl border-2 border-dashed p-8 text-center transition',
-        dragOver ? 'border-accent bg-accent/5' : 'border-edge bg-panel/50',
+        'resume-upload-zone rounded-3xl border-2 border-dashed p-8 text-center shadow-theme-sm transition',
+        dragOver ? 'border-accent bg-accentbg shadow-theme-md' : 'border-edge bg-panel/60',
       )}
     >
       <input
@@ -135,7 +139,7 @@ function UploadZone({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="resume-upload-zone__browse text-accent font-medium hover:underline"
+              className="resume-upload-zone__browse text-accent font-semibold hover:underline"
             >
               browse files
             </button>
@@ -174,7 +178,7 @@ function ResumeCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="resume-card rounded-xl border border-edge bg-panel p-4 flex flex-col gap-3">
+    <div className="resume-card flex flex-col gap-3 rounded-2xl border border-edge bg-panel/90 p-4 shadow-theme-sm transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-theme-md">
       <div className="resume-card__body">
         <p className="font-medium text-ink">{summary.title}</p>
         <p className={cn('text-ink3', chromeText.sm)}>{summary.originalFilename}</p>
@@ -187,7 +191,7 @@ function ResumeCard({
         <button
           type="button"
           onClick={onEdit}
-          className="resume-card__secondary flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 hover:border-accent/40 transition"
+          className="resume-card__secondary inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 transition hover:border-accent/40"
         >
           <Pencil className="h-3 w-3" />
           Edit
@@ -195,7 +199,7 @@ function ResumeCard({
         <button
           type="button"
           onClick={onCustomize}
-          className="resume-card__primary flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition"
+          className="resume-card__primary inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-[var(--accent-contrast)] shadow-theme-sm transition hover:opacity-90"
         >
           <Sparkles className="h-3 w-3" />
           Customize
@@ -203,7 +207,7 @@ function ResumeCard({
         <button
           type="button"
           onClick={onDelete}
-          className="resume-card__delete rounded-lg border border-edge bg-panel2 px-2 py-1.5 text-ink3 hover:text-bad hover:border-bad/40 transition"
+          className="resume-card__delete rounded-full border border-edge bg-panel2 px-2 py-1.5 text-ink3 transition hover:border-bad/40 hover:text-bad"
           aria-label="Delete resume"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -222,6 +226,7 @@ export function ResumesPage() {
   const [activeResume, setActiveResume] = useState<Resume | null>(null);
   const [fetching, setFetching] = useState(false);
   const [openaiConfigured, setOpenaiConfigured] = useState<boolean | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
   const needsAuth = !configured || isAnonymous;
 
@@ -266,10 +271,11 @@ export function ResumesPage() {
     setView(target);
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    await deleteResume(id);
-    setResumes((prev) => prev.filter((r) => r.id !== id));
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    await deleteResume(deleteTarget.id);
+    setResumes((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+    setDeleteTarget(null);
   };
 
   const headerTitle =
@@ -282,8 +288,16 @@ export function ResumesPage() {
           : 'Resume Template Creator';
 
   return (
-    <div className="flex h-full flex-col bg-bg">
-      <header className="flex h-12 shrink-0 items-center gap-3 border-b border-edge px-4">
+    <div
+      className="relative isolate flex h-full flex-col overflow-hidden bg-bg"
+      data-surface="resumes"
+      aria-label="Resume template creator"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_0%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_28rem),radial-gradient(circle_at_88%_18%,rgba(248,214,121,0.12),transparent_24rem)]"
+      />
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-[var(--surface-glass)] px-4 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl">
         <button
           type="button"
           onClick={() => {
@@ -298,8 +312,15 @@ export function ResumesPage() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-accent" />
-          <span className="font-semibold text-ink">{headerTitle}</span>
+          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
+            <FileText className="h-4 w-4" />
+          </span>
+          <span>
+            <span className="block font-semibold leading-tight text-ink">{headerTitle}</span>
+            <span className="block text-[length:var(--fs-2xs)] font-medium uppercase tracking-[0.14em] text-ink3">
+              targeted resume studio
+            </span>
+          </span>
         </div>
         {view === 'hub' && !needsAuth && !loading && (
           <button
@@ -314,8 +335,11 @@ export function ResumesPage() {
       </header>
 
       {loading ? (
-        <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-ink3" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+          <div className="grid h-14 w-14 place-items-center rounded-3xl border border-edge bg-panel/80 shadow-theme-md">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" />
+          </div>
+          <p className="text-sm font-medium text-ink2">Loading resume studio…</p>
         </div>
       ) : needsAuth ? (
         <SignInGate />
@@ -355,7 +379,7 @@ export function ResumesPage() {
       ) : view === 'customizer' && activeResume ? (
         <CustomizerStudio resume={activeResume} />
       ) : (
-        <div className="product-hub-shell flex-1 overflow-y-auto p-4 space-y-6 max-w-3xl mx-auto w-full">
+        <div className="product-hub-shell mx-auto w-full max-w-3xl flex-1 space-y-6 overflow-y-auto p-4">
           {openaiConfigured === false && (
             <div className="product-hub-notice flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
               <div className="flex items-start gap-2">
@@ -416,12 +440,53 @@ export function ResumesPage() {
                     summary={r}
                     onEdit={() => openResume(r, 'editor')}
                     onCustomize={() => openResume(r, 'customizer')}
-                    onDelete={() => handleDelete(r.id, r.title)}
+                    onDelete={() => setDeleteTarget({ id: r.id, title: r.title })}
                   />
                 ))}
               </div>
             )}
           </section>
+        </div>
+      )}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/70 p-4 backdrop-blur-md"
+          onClick={() => setDeleteTarget(null)}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl border border-edge bg-panel/95 p-6 shadow-theme-xl"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-resume-title"
+          >
+            <div className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-badbg text-bad">
+              <Trash2 className="h-5 w-5" />
+            </div>
+            <h3 id="delete-resume-title" className="mb-1 font-semibold text-ink">
+              Delete resume?
+            </h3>
+            <p className={cn('mb-5 text-ink3', chromeText.sm)}>
+              This will permanently delete “{deleteTarget.title}” and its saved mapping.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-xl border border-edge px-4 py-2 text-sm font-medium text-ink3 transition hover:bg-panel2"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 // Scaffold a prep simulator stub. Usage:
 //   npm run scaffold-prep-sim -- <manifestId-or-slug> [--force]
 // Reads prepManifest.ts for title/id and writes prepSimulators/problems/<slug>.tsx
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,9 +10,36 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifestPath = join(root, 'src/plugins/imported/prepManifest.ts');
 const outDir = join(root, 'src/plugins/imported/prepSimulators/problems');
 
-const args = process.argv.slice(2).filter((a) => a !== '--force');
-const force = process.argv.includes('--force');
-const query = args[0];
+function parseArgs(argv) {
+  const options = { force: false, query: '' };
+  for (const arg of argv) {
+    if (arg === '--force') {
+      options.force = true;
+    } else if (arg.startsWith('--')) {
+      console.error(`Unknown option: ${arg}`);
+      process.exit(1);
+    } else if (!options.query) {
+      options.query = arg.trim();
+    } else {
+      console.error(`Unexpected argument: ${arg}`);
+      process.exit(1);
+    }
+  }
+  return options;
+}
+
+function slugify(value) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function tsString(value) {
+  return JSON.stringify(String(value ?? ''));
+}
+
+const { force, query } = parseArgs(process.argv.slice(2));
 
 if (!query) {
   console.error('Usage: npm run scaffold-prep-sim -- <manifestId-or-slug> [--force]');
@@ -26,22 +53,36 @@ if (!jsonMatch) {
   process.exit(1);
 }
 const entries = JSON.parse(jsonMatch[1]);
-const entry = entries.find((e) => e.id === query || e.slug === query || e.id.endsWith(`-${query}`));
+const normalizedQuery = slugify(query);
+const entry = entries.find(
+  (e) =>
+    e.id === query ||
+    e.slug === query ||
+    slugify(e.slug) === normalizedQuery ||
+    e.id.endsWith(`-${normalizedQuery}`),
+);
 if (!entry) {
   console.error(`No prep manifest entry for "${query}"`);
   process.exit(1);
 }
 
-const outPath = join(outDir, `${entry.slug}.tsx`);
+const slug = slugify(entry.slug);
+if (!slug) {
+  console.error(`Prep manifest entry has no usable slug: ${entry.id}`);
+  process.exit(1);
+}
+
+const outPath = join(outDir, `${slug}.tsx`);
 if (existsSync(outPath) && !force) {
   console.error(`Already exists: ${outPath} (use --force to overwrite)`);
   process.exit(1);
 }
 
-const pascal = entry.slug
+const pascal = slug
   .split('-')
   .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
   .join('');
+const initCaption = `${entry.title}: ${entry.visual || entry.pattern || 'step through the algorithm.'}`;
 
 const template = `import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
@@ -60,7 +101,7 @@ interface ${pascal}State {
 
 function record(_input: ${pascal}Input): Frame<${pascal}State>[] {
   const rec = createRecorder<${pascal}State>(() => ({ op: 'init', done: false }));
-  rec.emit('INIT', 'start', '${entry.title}: ${entry.visual || entry.pattern || 'step through the algorithm.'}');
+  rec.emit('INIT', 'start', ${tsString(initCaption)});
   rec.emit('STEP', 'work', 'Take one algorithmic step toward the answer.');
   rec.emit('DONE', 'done', 'Done.', { op: 'done', done: true }, 'good');
   return rec.frames;
@@ -88,8 +129,8 @@ function Inspector({ frame }: InspectorProps<${pascal}State>) {
   );
 }
 
-export const manifestId = '${entry.id}';
-export const title = '${entry.title.replace(/'/g, "\\'")}';
+export const manifestId = ${tsString(entry.id)};
+export const title = ${tsString(entry.title)};
 
 export const simulator: ProblemSimulator = {
   inputs: [
@@ -105,6 +146,7 @@ export const simulator: ProblemSimulator = {
 };
 `;
 
+mkdirSync(outDir, { recursive: true });
 writeFileSync(outPath, template);
 console.log(`Wrote ${outPath}`);
 console.log(`  manifestId: ${entry.id}`);

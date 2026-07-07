@@ -13,12 +13,34 @@ cd "$ROOT"
 
 VARS_ONLY=false
 DEPLOY_ONLY=false
+usage() {
+  cat <<'EOF'
+Usage:
+  ./scripts/railway-deploy.sh          # set env vars + deploy all services
+  ./scripts/railway-deploy.sh --vars   # env vars only
+  ./scripts/railway-deploy.sh --deploy # deploy only
+EOF
+}
+
 for arg in "$@"; do
   case "$arg" in
     --vars) VARS_ONLY=true ;;
     --deploy) DEPLOY_ONLY=true ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown option: $arg" >&2; usage >&2; exit 1 ;;
   esac
 done
+
+if [[ "$VARS_ONLY" == true && "$DEPLOY_ONLY" == true ]]; then
+  echo "Choose only one of --vars or --deploy." >&2
+  usage >&2
+  exit 1
+fi
+
+command -v railway >/dev/null 2>&1 || {
+  echo "Railway CLI is required. Install it and run 'railway login' + 'railway link'." >&2
+  exit 1
+}
 
 echo "==> Railway project: $(railway status 2>/dev/null | awk '/^Project:/{print $2}' || echo 'unknown')"
 

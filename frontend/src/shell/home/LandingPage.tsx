@@ -69,8 +69,19 @@ export function LandingPage() {
   return (
     <div
       data-density={density}
-      className="ws-scroll landing-shell h-full w-full overflow-y-auto text-ink"
+      data-surface="landing"
+      className="ws-scroll landing-shell relative isolate h-full w-full overflow-y-auto text-ink"
     >
+      <a
+        href="#landing-roadmap"
+        className="sr-only fixed left-4 top-4 z-50 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-bg shadow-theme-md focus:not-sr-only"
+      >
+        Skip to roadmap
+      </a>
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_16%_8%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_28rem),radial-gradient(circle_at_88%_0%,rgba(248,214,121,0.12),transparent_26rem)]"
+      />
       <LandingToolbar
         lastItem={lastItem}
         firstProblem={firstProblem}
@@ -86,7 +97,10 @@ export function LandingPage() {
       />
 
       <div className="lg:grid lg:grid-cols-[minmax(440px,1fr)_minmax(280px,480px)]">
-        <aside className="landing-hero-panel relative border-b border-edge lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:[scrollbar-gutter:stable]">
+        <aside
+          aria-label="Algo Moves introduction and quick actions"
+          className="landing-hero-panel relative border-b border-edge lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:[scrollbar-gutter:stable]"
+        >
           <div
             aria-hidden
             className="landing-hero-glow pointer-events-none absolute inset-0 opacity-60"
@@ -113,7 +127,13 @@ export function LandingPage() {
           </div>
         </aside>
 
-        <LandingCatalogRoadmap onOpenProblem={openProblem} onOpenTrack={browseTrack} />
+        <section
+          id="landing-roadmap"
+          aria-label="Algorithm roadmap"
+          className="relative z-10 scroll-mt-4"
+        >
+          <LandingCatalogRoadmap onOpenProblem={openProblem} onOpenTrack={browseTrack} />
+        </section>
       </div>
     </div>
   );

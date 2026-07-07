@@ -9,16 +9,29 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readPrepManifestIds } from './lib/prepCoverage.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifestPath = join(root, 'src/plugins/imported/prepManifest.ts');
 const simDir = join(root, 'src/plugins/imported/prepSimulators/problems');
 
-const dryRun = process.argv.includes('--dry-run');
-const topicFilter = (() => {
-  const i = process.argv.indexOf('--topic');
-  return i >= 0 ? process.argv[i + 1] : null;
-})();
+function parseArgs(argv) {
+  const options = { dryRun: false, topic: null };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--dry-run') {
+      options.dryRun = true;
+    } else if (arg === '--topic') {
+      options.topic = argv[++i]?.trim() || null;
+      if (!options.topic) throw new Error('--topic requires a topic id');
+    } else {
+      throw new Error(`unknown option: ${arg}`);
+    }
+  }
+  return options;
+}
+
+const { dryRun, topic: topicFilter } = parseArgs(process.argv.slice(2));
 
 const COMPLEXITY_POOL = [
   'O(1)',
@@ -131,7 +144,8 @@ function parsePrepData() {
   const raw = readFileSync(manifestPath, 'utf8');
   const m = raw.match(/export const PREP_DATA[^=]*=\s*(\[[\s\S]*\]);/);
   if (!m) throw new Error('Could not parse prepManifest.ts');
-  return JSON.parse(m[1]);
+  const allowedIds = new Set(readPrepManifestIds(manifestPath));
+  return JSON.parse(m[1]).filter((entry) => allowedIds.has(entry.id));
 }
 
 function parseEmits(src) {

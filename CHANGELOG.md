@@ -6,6 +6,10 @@ All notable changes to Algo Moves are documented here.
 
 ### Changed
 
+- Quality checks are now grouped by intent across npm and Make targets: content, design, generated artifacts, architecture, and full project verification.
+- Generated content ownership is documented across the README, architecture notes, plugin docs, and database docs so hand-authored files and generated artifacts have clearer boundaries.
+- Deployment examples and Railway service notes now call out runtime ownership, environment setup, and service separation more directly.
+- Internal generators, importers, and validation scripts received cleanup for stricter argument handling, safer path normalization, and more predictable output ordering.
 - **Default density is now `compact`** for the workspace, canvas, and study surfaces. Previously the app defaulted to whatever was last saved in local storage; fresh installs and cleared prefs now start at compact spacing.
 - Mobile swipe deck (`#mobile`) continues to use **`ultra`** density for card chrome.
 - Landing and games surfaces keep user-selectable density (cycle via HUD or settings).

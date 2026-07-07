@@ -12,7 +12,7 @@
  * The seed is a single transaction that truncates the content tables and reloads
  * them, so re-running it always converges to exactly the current catalog.
  */
-import { writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import type { ProblemPlugin } from '@/core/types';
@@ -28,6 +28,40 @@ import { PREP_DATA } from '@/plugins/imported/prepManifest';
 const prepComplexity = new Map(
   PREP_DATA.map((p) => [p.id, { time: p.time ?? null, space: p.space ?? null }]),
 );
+
+function parseArgs(argv: string[]): { check: boolean } {
+  const options = { check: false };
+  for (const arg of argv) {
+    if (arg === '--check') options.check = true;
+    else {
+      console.error(`Unknown option: ${arg}`);
+      process.exit(1);
+    }
+  }
+  return options;
+}
+
+function cleanText(value: unknown): string {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeDifficulty(value: unknown): string {
+  return value === 'Easy' || value === 'Hard' ? value : 'Medium';
+}
+
+function compactStrings(values: readonly string[] | null | undefined): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of values ?? []) {
+    const next = cleanText(value).toLowerCase();
+    if (!next || seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+  return out;
+}
 
 type Family = 'DataStructures' | 'Algorithms' | 'Design' | 'Go' | 'Other';
 
@@ -84,10 +118,13 @@ const groupOf = (id: string): string =>
 // ---- SQL literal helpers (standard single-quote escaping; safe for any text) ----
 const q = (v: string | null | undefined): string =>
   v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`;
-const num = (n: number | null | undefined): string => (n == null ? 'null' : String(Math.trunc(n)));
+const num = (n: number | null | undefined): string =>
+  typeof n === 'number' && Number.isFinite(n) ? String(Math.trunc(n)) : 'null';
 const bool = (b: boolean): string => (b ? 'true' : 'false');
 const arr = (a: string[]): string =>
-  a.length ? `array[${a.map(q).join(',')}]::text[]` : `'{}'::text[]`;
+  compactStrings(a).length
+    ? `array[${compactStrings(a).map(q).join(',')}]::text[]`
+    : `'{}'::text[]`;
 const jsonb = (v: unknown): string => `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`;
 
 // ---- Collect problems from every plugin group (first registration wins) ----
@@ -139,29 +176,34 @@ const choiceRows: ChoiceRow[] = [];
 const tagSet = new Set<string>();
 const problemTagRows: { problemId: string; tagId: string }[] = [];
 const problemIds = new Set<string>();
+const problemTagIds = new Set<string>();
 
 for (const plugins of GROUPS) {
   for (const p of plugins) {
     const m = p.meta;
-    if (problemIds.has(m.id)) continue; // dedupe, mirroring the registry
-    problemIds.add(m.id);
+    const problemId = cleanText(m.id);
+    if (!problemId || problemIds.has(problemId)) continue; // dedupe, mirroring the registry
+    problemIds.add(problemId);
 
-    const cx = prepComplexity.get(m.id);
+    const cx = prepComplexity.get(problemId);
     problemRows.push({
-      id: m.id,
-      title: m.title,
-      difficulty: m.difficulty,
-      summary: m.summary ?? null,
-      source: m.source ?? null,
-      narrative: PROBLEM_STORY[m.id]?.narrative ?? null,
-      region: PROBLEM_STORY[m.id]?.regionId ?? null,
+      id: problemId,
+      title: cleanText(m.title) || problemId,
+      difficulty: normalizeDifficulty(m.difficulty),
+      summary: cleanText(m.summary) || null,
+      source: cleanText(m.source) || null,
+      narrative: PROBLEM_STORY[problemId]?.narrative ?? null,
+      region: PROBLEM_STORY[problemId]?.regionId ?? null,
       timeComplexity: cx?.time ?? null,
       spaceComplexity: cx?.space ?? null,
     });
 
-    for (const t of m.tags ?? []) {
+    for (const t of compactStrings(m.tags ?? [])) {
       tagSet.add(t);
-      problemTagRows.push({ problemId: m.id, tagId: t });
+      const key = `${problemId}::${t}`;
+      if (problemTagIds.has(key)) continue;
+      problemTagIds.add(key);
+      problemTagRows.push({ problemId, tagId: t });
     }
 
     const codes = [
@@ -171,21 +213,21 @@ for (const plugins of GROUPS) {
     const seenSol = new Set<string>();
     codes.forEach((c, i) => {
       const lang = c.lang ?? 'go';
-      let file = c.file ?? 'solution';
+      let file = cleanText(c.file) || 'solution';
       let key = `${lang}::${file}`;
       while (seenSol.has(key)) {
         file = `${file}~${i}`;
         key = `${lang}::${file}`;
       }
       seenSol.add(key);
-      solRows.push({ problemId: m.id, lang, file, code: c.text, primary: c.primary, sort: i });
+      solRows.push({ problemId, lang, file, code: c.text, primary: c.primary, sort: i });
     });
 
     (p.quiz ?? []).forEach((qq, qi) => {
-      const qid = `${m.id}::${qq.id}`;
+      const qid = `${problemId}::${cleanText(qq.id) || qi}`;
       quizQRows.push({
         id: qid,
-        problemId: m.id,
+        problemId,
         prompt: qq.prompt,
         explain: qq.explain ?? null,
         sort: qi,
@@ -238,7 +280,10 @@ const itemRows = catalog.items.map((it, i) => ({
   id: it.id,
   courseId: it.courseId,
   topicId: it.topicId,
-  problemId: it.pluginId && problemIds.has(it.pluginId) ? it.pluginId : null,
+  problemId:
+    cleanText(it.pluginId) && problemIds.has(cleanText(it.pluginId))
+      ? cleanText(it.pluginId)
+      : null,
   kind: it.kind,
   title: it.title ?? null,
   summary: it.summary ?? null,
@@ -365,7 +410,7 @@ const embedPath = join(
   'seeds',
   'content_seed.sql',
 );
-const check = process.argv.includes('--check');
+const { check } = parseArgs(process.argv.slice(2));
 const counts =
   `${courseRows.length} courses, ${storyRegionRows.length} story regions, ${topicRows.length} topics, ` +
   `${problemRows.length} problems, ${solRows.length} solutions, ${quizQRows.length} quiz questions, ` +
@@ -379,6 +424,8 @@ if (check) {
   }
   console.log(`✓ content seed up to date (${counts}).`);
 } else {
+  mkdirSync(dirname(outPath), { recursive: true });
+  mkdirSync(dirname(embedPath), { recursive: true });
   writeFileSync(outPath, sql);
   writeFileSync(embedPath, sql);
   console.log(

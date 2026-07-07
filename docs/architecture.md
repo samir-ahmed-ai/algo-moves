@@ -218,4 +218,30 @@ Prep library (271 problems) and progress library (91 problems) are generated int
 
 ## Generated files
 
-Do not hand-edit: `manifest.ts`, `migrated.ts`, `themes/index.css` — change generators in `frontend/scripts/` instead.
+Generated artifacts are downstream outputs. Do not hand-edit them; change the generator, then regenerate.
+
+| Generated artifact | Generator |
+|--------------------|-----------|
+| `frontend/src/plugins/imported/manifest.ts` | `frontend/scripts/import-problems.mjs` |
+| `frontend/src/plugins/imported/prepManifest.ts` | `frontend/scripts/import-prep.mjs` |
+| `frontend/src/plugins/_generated/pluginMeta.ts` | `frontend/scripts/build-plugin-meta.mts` |
+| `frontend/src/plugins/_generated/courses.ts` | `frontend/scripts/build-plugin-meta.mts` |
+| `frontend/src/content/_generated/problemBriefs.ts` | `frontend/scripts/build-problem-briefs.mts` |
+| `frontend/src/styles/themes/index.css` | `frontend/scripts/generate-themes.mjs` |
+| `frontend/src/styles/themes/sources/index.ts` | `frontend/scripts/generate-themes.mjs` |
+| `frontend/src/shell/games/_generated/gameIds.ts` | `frontend/scripts/generate-game-ids.mjs` |
+| `db/content_seed.sql` | `frontend/scripts/export-content-sql.mts` |
+| `backend/internal/arcade/seeds/content_seed.sql` | `frontend/scripts/export-content-sql.mts` |
+
+## Quality guardrails
+
+| Guard | Contract |
+|-------|----------|
+| `frontend/scripts/check-boundaries.mjs` | Enforces downward imports between design, lib, core, content, components, effects, store, plugins, and shell. |
+| `frontend/scripts/check-circular.mjs` | Fails when circular dependencies exceed the recorded ratchet. |
+| `frontend/scripts/check-orphans.mjs` | Fails when source modules or native plugin folders are unreachable from the app entry/registry. |
+| `frontend/scripts/check-tokens.mjs` | Keeps layout and typography literals in token files instead of random components. |
+| `frontend/scripts/check-shell-typography.mjs` | Keeps shell typography on semantic chrome tokens. |
+| `frontend/scripts/lint-plugin-typography.mjs` | Keeps plugin typography on vizKit/vizText tokens. |
+| `frontend/scripts/lighthouse-budget.mjs` | Checks static SEO, PWA, a11y, and lazy-load budget invariants. |
+| `frontend/scripts/check-prep-*.mjs` | Keeps prep simulators, quiz coverage, and recording quality complete. |

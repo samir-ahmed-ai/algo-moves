@@ -42,7 +42,7 @@ function MenuRow({
       role="menuitem"
       onClick={onClick}
       className={cn(
-        'flex w-full min-h-[var(--row)] items-center gap-[var(--gap)] rounded-md px-2 py-[var(--gap)] text-left transition-colors hover:bg-panel2',
+        'flex min-h-[var(--row)] w-full items-center gap-[var(--gap)] rounded-xl px-2 py-[var(--gap)] text-left transition-colors hover:bg-panel2',
         'workspace-menu__row',
         accent ? 'text-accent' : 'text-ink2 hover:text-ink',
       )}
@@ -151,9 +151,9 @@ export function WorkspaceMenuDropdown({
         aria-expanded={menuOpen}
         onClick={() => setMenuOpen(!menuOpen)}
         className={cn(
-          'grid place-items-center border border-edge bg-panel2 text-ink shadow-[var(--shadow-md)] transition-colors hover:bg-panel hover:text-ink',
+          'grid place-items-center border border-edge bg-[var(--surface-glass)] text-ink shadow-theme-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-panel hover:text-ink hover:shadow-theme-md',
           'workspace-menu-dropdown__trigger',
-          compact ? 'h-7 w-7 rounded-md' : cn('h-9 w-9', RADIUS_SHELL),
+          compact ? 'h-7 w-7 rounded-full' : cn('h-9 w-9 rounded-full', RADIUS_SHELL),
           menuOpen && 'workspace-menu-dropdown__trigger--open bg-panel text-ink',
         )}
       >
@@ -165,7 +165,7 @@ export function WorkspaceMenuDropdown({
           role="menu"
           aria-label="Workspace menu"
           className={cn(
-            'absolute left-0 top-full z-30 mt-1.5 w-56 border border-edge bg-panel p-1.5 shadow-[var(--shadow-lg)]',
+            'absolute left-0 top-full z-30 mt-1.5 w-56 overflow-hidden border border-edge bg-[var(--surface-glass)] p-1.5 shadow-theme-xl ring-1 ring-accent/10 backdrop-blur-xl',
             'workspace-menu-dropdown__panel',
             RADIUS_SHELL,
           )}
@@ -235,7 +235,13 @@ export function WorkspaceMenuDropdown({
 
 export function WorkspaceMenu({ onOpenPalette, onOpenHelp }: WorkspaceMenuProps) {
   return (
-    <header className={cn('workspace-menu-bar nodrag sticky top-0 z-20', chromeBar.shell)}>
+    <header
+      className={cn(
+        'workspace-menu-bar nodrag sticky top-0 z-20 border-b border-edge bg-[var(--surface-glass)] shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl',
+        chromeBar.shell,
+      )}
+      aria-label="Workspace controls"
+    >
       <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
       <span
         className={cn(

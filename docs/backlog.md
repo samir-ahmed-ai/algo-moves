@@ -4,6 +4,25 @@ Shipped features (problem library, simulators, Code Studio, quiz UX, mobile deck
 
 ---
 
+## Backlog hygiene
+
+Use this file for product ideas only. Implementation contracts live in [`docs/architecture.md`](architecture.md), visual release checks live in [`docs/visual-qa-checklist.md`](visual-qa-checklist.md), and quiz/Code Studio standards live in [`docs/quiz-and-code-studio.md`](quiz-and-code-studio.md).
+
+Before promoting an item into active work:
+
+- Confirm it is not already covered by an existing generator, guardrail, or store contract.
+- Name the primary surface: Study, Canvas, Mobile, Games, Interview, or Tooling.
+- Define the acceptance check in one sentence.
+- Add or update the smallest relevant guardrail when the feature creates a repeatable quality risk.
+
+## Near-term polish themes
+
+- **Design-system consistency** — keep typography, spacing, canvas dimensions, and theme values on shared tokens.
+- **Generated-content trust** — make import/generation scripts deterministic, validated, and paired with stale-output checks.
+- **Resume-state resilience** — normalize persisted IDs, phase state, viewport state, and user preferences before reuse.
+- **Mobile-first learning** — keep mobile deck, install banner, and thumb-access transport usable at 390x844.
+- **Accessible presentation** — preserve visible focus, role labels, and reduced-motion-safe presentation flows.
+
 ## Visualization & playback
 
 - Scrubber/timeline: drag a playhead across all frames

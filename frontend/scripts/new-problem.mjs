@@ -10,18 +10,43 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
-const dryRun = args.includes('--dry-run');
-const positional = args.filter((a) => !a.startsWith('--'));
-const id = positional[0];
-const title = positional[1] ?? id;
-const diffIdx = args.indexOf('--difficulty');
-const difficulty = diffIdx >= 0 ? args[diffIdx + 1] : 'Easy';
+const DIFFICULTIES = new Set(['Easy', 'Medium', 'Hard']);
+
+function parseArgs(argv) {
+  const positional = [];
+  const flags = { dryRun: false, difficulty: 'Easy' };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--dry-run') {
+      flags.dryRun = true;
+    } else if (arg === '--difficulty') {
+      flags.difficulty = argv[++i] ?? '';
+    } else if (arg.startsWith('--')) {
+      console.error(`Unknown option: ${arg}`);
+      process.exit(1);
+    } else {
+      positional.push(arg);
+    }
+  }
+  return { ...flags, id: positional[0], title: positional[1] ?? positional[0] };
+}
+
+function tsString(value) {
+  return JSON.stringify(String(value));
+}
+
+const { dryRun, id, title, difficulty } = parseArgs(args);
 
 if (!id || !/^[a-z][a-z0-9-]*$/.test(id)) {
   console.error(
     'Usage: npm run new-problem -- <kebab-id> "Title" [--difficulty Easy|Medium|Hard] [--dry-run]',
   );
   console.error('  <kebab-id> must be lower-kebab-case, e.g. "two-sum".');
+  process.exit(1);
+}
+
+if (!DIFFICULTIES.has(difficulty)) {
+  console.error('  --difficulty must be one of Easy, Medium, Hard.');
   process.exit(1);
 }
 
@@ -91,9 +116,9 @@ const teaching = wireTeachingStack({
 
 export const ${pluginVar} = definePlugin<${Pascal}Input, ${Pascal}State>({
   meta: {
-    id: '${id}',
-    title: '${title}',
-    difficulty: '${difficulty}',
+    id: ${tsString(id)},
+    title: ${tsString(title)},
+    difficulty: ${tsString(difficulty)},
     tags: [],
     summary: 'One-line description of the approach.',
   },
@@ -116,7 +141,7 @@ import type { CodePiece } from '../../lib/codePieces';
 export const quiz: QuizQuestion[] = [
   {
     id: 'technique',
-    prompt: 'What is the core technique in ${title}?',
+    prompt: ${tsString(`What is the core technique in ${title}?`)},
     choices: [
       { label: 'Follow the step-by-step invariant in the visualizer', correct: true },
       { label: 'Random search' },
@@ -132,7 +157,7 @@ export const codePieces: CodePiece[] = [];
 const casesTemplate = `import type { WorkedCase } from '../_shared/practice';
 import type { ${Pascal}Input } from './index';
 
-export const intro = 'Worked examples for ${title}.';
+export const intro = ${tsString(`Worked examples for ${title}.`)};
 
 export const goodCases: WorkedCase<${Pascal}Input>[] = [
   {
@@ -172,4 +197,6 @@ console.log(`  1. src/plugins/index.ts:`);
 console.log(`       import { ${pluginVar} } from './${id}';`);
 console.log(`       // add ${pluginVar} to the plugins array`);
 console.log(`  2. src/content/courses.ts:`);
-console.log(`       { id: '${id}', kind: 'problem', pluginId: '${id}', status: 'todo' }`);
+console.log(
+  `       { id: ${tsString(id)}, kind: 'problem', pluginId: ${tsString(id)}, status: 'todo' }`,
+);

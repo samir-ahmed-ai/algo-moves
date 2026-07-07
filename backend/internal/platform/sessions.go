@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/alexedwards/scs/postgresstore"
@@ -31,9 +33,25 @@ func newSessionManager(databaseURL string) (*scs.SessionManager, *sql.DB, error)
 	sm.IdleTimeout = 7 * 24 * time.Hour
 	sm.Cookie.Name = "algomoves_session"
 	sm.Cookie.HttpOnly = true
-	sm.Cookie.SameSite = http.SameSiteLaxMode
-	sm.Cookie.Secure = false
+	if crossSiteCookiesEnabled() {
+		// Frontend and API are on different origins in production (e.g. Railway
+		// public domains). SameSite=Lax blocks credentialed fetch() across sites.
+		sm.Cookie.SameSite = http.SameSiteNoneMode
+		sm.Cookie.Secure = true
+	} else {
+		sm.Cookie.SameSite = http.SameSiteLaxMode
+		sm.Cookie.Secure = false
+	}
 	return sm, db, nil
+}
+
+// crossSiteCookiesEnabled is true when the API is deployed behind HTTPS with an
+// explicit browser origin allowlist (ALLOWED_ORIGINS), requiring SameSite=None.
+func crossSiteCookiesEnabled() bool {
+	if EnvEnabled("COOKIE_CROSS_SITE") {
+		return true
+	}
+	return strings.TrimSpace(os.Getenv("ALLOWED_ORIGINS")) != ""
 }
 
 // SessionMiddleware loads SCS sessions from the session cookie.

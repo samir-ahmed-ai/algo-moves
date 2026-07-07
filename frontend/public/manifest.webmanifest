@@ -3,15 +3,60 @@
   "lang": "en",
   "dir": "ltr",
   "name": "Algo Moves",
-  "short_name": "Algo Moves",
-  "description": "Swipe through algorithm animations, quizzes, and code drills.",
+  "short_name": "Algo",
+  "description": "Step through algorithm animations, quizzes, and code drills until the patterns stick.",
   "categories": ["education", "productivity", "developer"],
   "start_url": "/mobile",
   "scope": "/",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
   "display": "standalone",
-  "background_color": "#0f1419",
+  "background_color": "#061615",
   "theme_color": "#3d9a8f",
   "orientation": "portrait-primary",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "shortcuts": [
+    {
+      "name": "Swipe Practice",
+      "short_name": "Swipe",
+      "description": "Open the mobile-first swipe deck.",
+      "url": "/mobile",
+      "icons": [
+        {
+          "src": "/assets/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Canvas Workspace",
+      "short_name": "Canvas",
+      "description": "Open the visual algorithm workspace.",
+      "url": "/canvas",
+      "icons": [
+        {
+          "src": "/assets/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Games",
+      "short_name": "Games",
+      "description": "Open the algorithm game library.",
+      "url": "/games",
+      "icons": [
+        {
+          "src": "/assets/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "/assets/favicon-192.png",

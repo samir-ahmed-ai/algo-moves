@@ -76,6 +76,10 @@ function slugify(s) {
     .slice(0, 48);
 }
 
+function compactIdPart(value, fallback) {
+  return slugify(String(value ?? '')) || fallback;
+}
+
 function normTag(raw) {
   const k = raw.trim().toLowerCase();
   if (!k) return null;
@@ -226,7 +230,7 @@ function emit(dir, code, meta, catKey, numPath, slugPath) {
   const fallbackTitle = titleFromNotes(notes) || cleanFolderSlug(leaf) || leaf;
   let parsed = parseSolution(code, fallbackTitle);
   const titleSlug = slugify(parsed.title) || cleanFolderSlug(leaf) || `p${number}`;
-  const id = `imp-${number}-${titleSlug}`;
+  const id = `imp-${compactIdPart(number, String(out.length))}-${compactIdPart(titleSlug, 'problem')}`;
   if (seen.has(id)) return;
   seen.add(id);
 
@@ -238,7 +242,7 @@ function emit(dir, code, meta, catKey, numPath, slugPath) {
   const approaches = readFileSafe(join(dir, 'APPROACHES.md'));
   const variants = [];
   if (isDir(join(dir, 'variants'))) {
-    for (const vf of readdirSync(join(dir, 'variants'))) {
+    for (const vf of readdirSync(join(dir, 'variants')).sort()) {
       if (vf.endsWith('.go'))
         variants.push({ file: vf, text: readFileSafe(join(dir, 'variants', vf)) });
     }
@@ -272,7 +276,10 @@ for (const catDir of readdirSync(PROGRESS).sort()) {
   if (!isDir(full)) continue;
   const catKey = catDir.replace(/^\d+-\s*/, '').trim();
   const meta = CATEGORY[catKey];
-  if (!meta) continue;
+  if (!meta) {
+    skipped.push(full);
+    continue;
+  }
   for (const child of readdirSync(full)
     .filter((d) => isDir(join(full, d)))
     .sort()) {

@@ -12,7 +12,7 @@
  */
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import type { ProblemPlugin } from '@/core/types';
 import type { CourseDef } from '@/content/types';
 import type { PluginGroup } from '@/plugins';
@@ -69,21 +69,57 @@ interface MetaEntry {
   group: PluginGroup;
 }
 
+function parseArgs(argv: string[]): { check: boolean } {
+  const options = { check: false };
+  for (const arg of argv) {
+    if (arg === '--check') options.check = true;
+    else {
+      console.error(`Unknown option: ${arg}`);
+      process.exit(1);
+    }
+  }
+  return options;
+}
+
+function cleanText(value: unknown): string {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeDifficulty(value: unknown): MetaEntry['difficulty'] {
+  return value === 'Easy' || value === 'Hard' ? value : 'Medium';
+}
+
+function normalizeTags(tags: unknown): string[] {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const tag of tags) {
+    const next = cleanText(tag).toLowerCase();
+    if (!next || seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+  return out;
+}
+
 const metas: MetaEntry[] = [];
 const seen = new Set<string>();
 for (const { group, plugins } of GROUP_ADAPTERS) {
   for (const p of plugins) {
     const m = p.meta;
-    if (seen.has(m.id)) continue; // first registration wins, mirroring the registry
-    seen.add(m.id);
+    const id = cleanText(m.id);
+    if (!id || seen.has(id)) continue; // first registration wins, mirroring the registry
+    seen.add(id);
     metas.push({
-      id: m.id,
-      title: m.title,
-      ...(m.number ? { number: m.number } : {}),
-      difficulty: m.difficulty,
-      tags: m.tags,
-      summary: m.summary,
-      ...(m.source ? { source: m.source } : {}),
+      id,
+      title: cleanText(m.title) || id,
+      ...(cleanText(m.number) ? { number: cleanText(m.number) } : {}),
+      difficulty: normalizeDifficulty(m.difficulty),
+      tags: normalizeTags(m.tags),
+      summary: cleanText(m.summary),
+      ...(cleanText(m.source) ? { source: cleanText(m.source) } : {}),
       group,
     });
   }
@@ -124,7 +160,7 @@ const targets: [string, string][] = [
   [join(outDir, 'courses.ts'), coursesFile],
 ];
 
-const check = process.argv.includes('--check');
+const { check } = parseArgs(process.argv.slice(2));
 let drift = false;
 for (const [path, content] of targets) {
   const current = existsSync(path) ? readFileSync(path, 'utf8') : null;
@@ -132,12 +168,12 @@ for (const [path, content] of targets) {
   if (check) {
     drift = true;
     console.error(
-      `✗ ${path.split('/').slice(-2).join('/')} is out of date — run \`npm run build-plugin-meta\`.`,
+      `✗ ${relative(outDir, path).replace(/\\/g, '/')} is out of date — run \`npm run build-plugin-meta\`.`,
     );
   } else {
     mkdirSync(outDir, { recursive: true });
     writeFileSync(path, content);
-    console.log(`✓ wrote ${path.split('/').slice(-2).join('/')}`);
+    console.log(`✓ wrote ${relative(outDir, path).replace(/\\/g, '/')}`);
   }
 }
 

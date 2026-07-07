@@ -4,6 +4,10 @@
 # Build-time variables (Dockerfile ARG):
 #   VITE_API_SERVER_URL  — https://${{backend.RAILWAY_PUBLIC_DOMAIN}}
 #   VITE_HOCUSPOCUS_URL  — wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}
+#
+# Paired service variables:
+#   backend.ALLOWED_ORIGINS                 — https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
+#   hocuspocus.HOCUSPOCUS_ALLOWED_ORIGINS  — https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
 
 [build]
 builder = "DOCKERFILE"

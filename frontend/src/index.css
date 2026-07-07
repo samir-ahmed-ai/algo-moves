@@ -19,12 +19,58 @@ body,
 }
 
 html {
+  background: #061615;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(61, 154, 143, 0.22), transparent 32rem),
+    radial-gradient(circle at 86% 12%, rgba(248, 214, 121, 0.12), transparent 28rem), #061615;
+  color: var(--text, #e5fff9);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-synthesis: none;
+}
+
+#root {
+  isolation: isolate;
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent, #3d9a8f) 42%, transparent);
+  color: var(--text, #e5fff9);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus, #f8d679);
+  outline-offset: 3px;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+img,
+picture,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
 }
 
 :root {

@@ -30,14 +30,17 @@ export function ProductAuthGate({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={`product-auth-gate product-auth-gate--${variant}`}>
-      <div className="product-auth-gate__glow product-auth-gate__glow--one" />
-      <div className="product-auth-gate__glow product-auth-gate__glow--two" />
-      <div className="product-auth-gate__card">
+    <section
+      className={`product-auth-gate product-auth-gate--${variant} relative isolate flex min-h-full items-center justify-center overflow-hidden px-4 py-10`}
+      aria-labelledby={`product-auth-gate-${variant}-title`}
+    >
+      <div className="product-auth-gate__glow product-auth-gate__glow--one" aria-hidden="true" />
+      <div className="product-auth-gate__glow product-auth-gate__glow--two" aria-hidden="true" />
+      <div className="product-auth-gate__card shadow-theme-xl">
         <div className="product-auth-gate__copy">
           <div className="product-auth-gate__icon">{icon}</div>
           <span className="product-auth-gate__eyebrow">{eyebrow}</span>
-          <h2>{title}</h2>
+          <h2 id={`product-auth-gate-${variant}-title`}>{title}</h2>
           <p className={cn('product-auth-gate__lede', chromeText.base)}>{lede}</p>
           <div className="product-auth-gate__features">
             {features.map((feature) => (
@@ -51,7 +54,7 @@ export function ProductAuthGate({
             ref={signInRef}
             type="button"
             onClick={() => setOpen(true)}
-            className="product-auth-gate__cta"
+            className="product-auth-gate__cta shadow-theme-sm transition hover:-translate-y-0.5 hover:shadow-theme-md"
           >
             <LogIn className="h-4 w-4" />
             Sign in to get started
@@ -62,6 +65,6 @@ export function ProductAuthGate({
         </div>
       </div>
       <AuthPopover open={open} onOpenChange={setOpen} anchorRef={signInRef} />
-    </div>
+    </section>
   );
 }

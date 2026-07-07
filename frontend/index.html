@@ -4,12 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="format-detection" content="telephone=no" />
     <meta name="theme-color" content="#3d9a8f" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#3d9a8f" media="(prefers-color-scheme: light)" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Algo Moves" />
+    <meta name="msapplication-TileColor" content="#123b36" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon.png" />
@@ -25,33 +28,113 @@
 
     <!-- Attributes used when the app is referenced/shared (Open Graph + Twitter) -->
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="Algo Moves" />
     <meta property="og:title" content="Algo Moves — see every algorithm move by move" />
     <meta
       property="og:description"
       content="Step through 400+ interview algorithms move by move. Test yourself, get feedback, repeat until it sticks — best in Swipe mode on mobile."
     />
-    <meta property="og:image" content="/assets/apple-touch-icon.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Algo Moves algorithm practice workspace preview" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Algo Moves — see every algorithm move by move" />
     <meta
       name="twitter:description"
       content="Step through 400+ interview algorithms move by move. Test yourself, get feedback, repeat until it sticks."
     />
-    <meta name="twitter:image" content="/assets/apple-touch-icon.png" />
+    <meta name="twitter:image" content="/og-image.svg" />
+    <meta name="twitter:image:alt" content="Algo Moves algorithm practice workspace preview" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Fira+Code:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@400;500;600&family=Open+Sans:wght@400;500;600&family=Outfit:wght@400;500;600&family=Oxanium:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&family=Quicksand:wght@400;500;600&family=Roboto:wght@400;500;600&family=Roboto+Mono:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Space+Mono:wght@400;700&family=Ubuntu+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <style>
+      :root {
+        color: #e5fff9;
+        background: #061615;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(61, 154, 143, 0.32), transparent 30rem),
+          radial-gradient(circle at 85% 15%, rgba(248, 214, 121, 0.18), transparent 26rem),
+          linear-gradient(135deg, #061615 0%, #0b2522 52%, #123b36 100%);
+      }
+
+      .boot-shell,
+      .noscript-shell {
+        box-sizing: border-box;
+        display: grid;
+        min-height: 100vh;
+        place-items: center;
+        padding: 2rem;
+        font-family: "DM Sans", system-ui, sans-serif;
+        color: #e5fff9;
+        text-align: center;
+      }
+
+      .boot-card,
+      .noscript-card {
+        width: min(100%, 30rem);
+        padding: 2rem;
+        border: 1px solid rgba(229, 255, 249, 0.16);
+        border-radius: 1.5rem;
+        background: rgba(6, 22, 21, 0.72);
+        box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(18px);
+      }
+
+      .boot-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        margin-bottom: 1rem;
+        border-radius: 1rem;
+        background: #3d9a8f;
+        color: #061615;
+        font: 700 1.25rem/1 "Space Mono", monospace;
+      }
+
+      .boot-card h1,
+      .noscript-card h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.5rem, 4vw, 2.25rem);
+        line-height: 1.05;
+      }
+
+      .boot-card p,
+      .noscript-card p {
+        margin: 0;
+        color: rgba(229, 255, 249, 0.74);
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main class="boot-shell" aria-label="Loading Algo Moves">
+        <section class="boot-card">
+          <span class="boot-mark" aria-hidden="true">AM</span>
+          <h1>Algo Moves</h1>
+          <p>Loading the interactive algorithm workspace.</p>
+        </section>
+      </main>
+    </div>
     <noscript>
-      <div style="max-width: 40rem; margin: 4rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif; color: #c9d1d9; text-align: center">
-        <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem">Algo Moves</h1>
+      <div class="noscript-shell">
+        <section class="noscript-card">
+        <h1>Algo Moves</h1>
         <p>Algo Moves is an interactive algorithm workspace and needs JavaScript enabled to run. Please enable JavaScript and reload.</p>
+        </section>
       </div>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

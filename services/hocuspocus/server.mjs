@@ -8,7 +8,18 @@ import { Logger } from '@hocuspocus/extension-logger';
 import { Server } from '@hocuspocus/server';
 import pg from 'pg';
 
-const port = Number(process.env.PORT ?? process.env.HOCUSPOCUS_PORT ?? 1234);
+const DEFAULT_PORT = 1234;
+
+function parsePort(value) {
+  const port = Number(value ?? DEFAULT_PORT);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    console.error(`[hocuspocus] invalid port: ${value}`);
+    process.exit(1);
+  }
+  return port;
+}
+
+const port = parsePort(process.env.PORT ?? process.env.HOCUSPOCUS_PORT);
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
@@ -29,6 +40,7 @@ const allowedOrigins = (process.env.HOCUSPOCUS_ALLOWED_ORIGINS ?? '')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
+const allowedOriginSet = new Set(allowedOrigins.map((origin) => origin.toLowerCase()));
 
 const server = new Server({
   port,
@@ -66,9 +78,9 @@ const server = new Server({
     }
   },
   async onConnect({ requestHeaders }) {
-    if (allowedOrigins.length === 0) return true;
-    const origin = requestHeaders.origin ?? '';
-    return allowedOrigins.some((o) => o.toLowerCase() === origin.toLowerCase());
+    if (allowedOriginSet.size === 0) return true;
+    const origin = (requestHeaders.origin ?? '').toLowerCase();
+    return allowedOriginSet.has(origin);
   },
 });
 

@@ -72,7 +72,7 @@ Built with React 18 · TypeScript 5 · Vite 5 · Tailwind · Radix UI · CodeMir
 | **Progress library** | 91 | `frontend/src/plugins/imported/manifest.ts` | Hand-built sims in `simulators/problems/` |
 | **Curated plugins** | 18 | Hand-authored (`binary-search`, six sorts, `n-queens`, `tree-traversals`, …) | Native `record()` + `View` in `frontend/src/plugins/<id>/` |
 
-Prep imports without a simulator yet fall back to the animated **Scene** view (`prepScene.tsx`).
+Generated manifests are downstream artifacts. Update the generator in `frontend/scripts/`, then regenerate; do not hand-edit `manifest.ts`, `prepManifest.ts`, `_generated/*`, or generated theme CSS.
 
 ---
 
@@ -200,6 +200,10 @@ See [`backend/README.md`](backend/README.md) for endpoint and Docker details.
 ```bash
 cd frontend
 npm run import-prep                              # regenerate prepManifest.ts
+npm run import-problems                          # regenerate progress manifest.ts
+npm run build-plugin-meta                        # refresh lightweight registry/course metadata
+npm run build-problem-briefs                     # refresh generated problem statements
+npm run export-content-sql                       # refresh db/backend content seed SQL
 npm run scaffold-prep-sim -- lru-cache           # stub a new prep simulator
 npm run check-prep-sim-coverage                  # fail if any prep id lacks a simulator
 npm run new-problem -- two-sum "Two Sum"         # scaffold a native plugin
@@ -234,6 +238,9 @@ Run from `frontend/` (or via `make` for common targets):
 | `check:lighthouse-budget` | Static HTML/PWA/a11y budget guard |
 | `check:tokens` | Design-token guard |
 | `generate-themes` | Regenerate theme CSS from token source |
+| `build-plugin-meta` | Regenerate lightweight plugin/course metadata |
+| `build-problem-briefs` | Regenerate problem statements and examples |
+| `export-content-sql` | Regenerate Postgres content seed SQL |
 
 ---
 
@@ -346,6 +353,7 @@ Or scaffold: `npm run new-problem -- <slug> "<Title>"`.
 | [**Quiz & Code Studio**](docs/quiz-and-code-studio.md) | Choice labels, shuffle/restart, syntax highlighting, reassemble |
 | [**Design tokens**](frontend/src/design/README.md) | Typography and layout token hierarchy |
 | [**Architecture**](docs/architecture.md) | Shell, plugins, canvas, and content pipeline |
+| [**Visual QA checklist**](docs/visual-qa-checklist.md) | Release checklist for density, themes, mobile, and presentation |
 | [**Backlog**](docs/backlog.md) | Future ideas — not yet built |
 | [**Attributions**](ATTRIBUTIONS.md) | LeetCode, HackerRank, and third-party notices |
 

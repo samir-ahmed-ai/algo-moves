@@ -73,7 +73,7 @@ function MoveByMoveAnimated({ className }: { className?: string }) {
   );
 }
 
-function HeroReplayPanel({ count, firstTitle }: { count: number; firstTitle?: string }) {
+function HeroReplayPanel({ count, firstTitle }: { count: number; firstTitle: string | undefined }) {
   return (
     <div
       className="landing-hero-replay overflow-hidden rounded-lg border border-edge bg-panel/75 p-3 shadow-[var(--shadow-md)]"
@@ -230,8 +230,8 @@ export function LandingHero({
   onInterviewCanvas,
 }: {
   problems: Item[];
-  lastItem?: Item;
-  firstProblem?: Item;
+  lastItem: Item | undefined;
+  firstProblem: Item | undefined;
   progress: ProgressData;
   isMobile: boolean;
   onOpenItem: (id: string) => void;
@@ -246,6 +246,11 @@ export function LandingHero({
   onInterviewCanvas: () => void;
 }) {
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
+  const heroProof = [
+    { value: `${problems.length}+`, label: 'visual drills' },
+    { value: '4 loops', label: 'watch, quiz, code, replay' },
+    { value: 'mobile', label: 'swipe-ready practice' },
+  ] as const;
 
   const modeGroups: ModeGroup[] = [
     {
@@ -350,17 +355,35 @@ export function LandingHero({
       <div className="@container grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(250px,0.86fr)] lg:items-stretch">
         <div className="flex min-w-0 flex-col justify-between gap-3">
           <div>
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-              Interview prep
-            </p>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-accent/30 bg-accentbg px-2.5 py-1 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-accent">
+                Visual interview prep
+              </span>
+              <span className="rounded-full border border-edge bg-panel/70 px-2.5 py-1 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
+                Built for recall
+              </span>
+            </div>
             <h1 className="hero-headline font-semibold leading-[1.08] text-ink">
-              Algorithms <MoveByMoveAnimated className="text-[0.72em] font-semibold" />
+              Train algorithms <MoveByMoveAnimated className="text-[0.72em] font-semibold" />
             </h1>
           </div>
           <p className="max-w-xl text-sm leading-relaxed text-ink2">
-            {problems.length}+ interview problems as step-through replays, quizzes, and drills that
-            keep state visible until the move clicks.
+            Turn abstract patterns into visible state changes, then lock them in with replays,
+            quizzes, code drills, and swipe practice.
           </p>
+          <div className="grid max-w-xl grid-cols-3 gap-2">
+            {heroProof.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-xl border border-edge bg-panel/60 px-3 py-2 shadow-[var(--shadow-sm)]"
+              >
+                <div className="font-mono text-sm font-semibold text-ink">{item.value}</div>
+                <div className="mt-0.5 truncate text-[length:var(--fs-2xs)] text-ink3">
+                  {item.label}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <HeroReplayPanel count={problems.length} firstTitle={firstProblem?.title} />
       </div>
