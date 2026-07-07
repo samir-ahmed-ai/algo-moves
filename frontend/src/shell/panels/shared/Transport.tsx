@@ -13,7 +13,13 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import { useCanvasFrame, nodeIconGlyph, nodeText, RADIUS_CTRL } from '@/shell/canvas';
+import {
+  useCanvasFrame,
+  useCanvasStatic,
+  nodeIconGlyph,
+  nodeText,
+  RADIUS_CTRL,
+} from '@/shell/canvas';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
@@ -23,7 +29,9 @@ const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 4];
 
 export function Transport() {
   const { player, frame } = useCanvasFrame();
+  const { plugin } = useCanvasStatic();
   const { tweaks, toggleTweak } = useWorkspace();
+  if (plugin.meta.static) return null;
   const bookmarked = player.bookmarks.has(player.index);
   const frameType = frame.move?.type ?? 'frame';
   const frameToneClass = moveToneChipClass(frame.move?.tone);

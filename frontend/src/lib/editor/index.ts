@@ -10,3 +10,4 @@ export * from './codeFold';
 export * from './styleFormat';
 export * from './codeFormat';
 export * from './highlightSnippet';
+export * from './refreshRecallMergeView';

@@ -12245,11 +12245,15 @@ func amountPainted(paint [][]int) []int {
 }
 ', true, 0),
   ('prep-design-design-in-memory-file-system', 'go', 'solution.go', 'package main
+
+// --- Scene ---
+// A filing cabinet whose drawers spawn on demand: slash-split paths walk a trie
+// of fsNodes; mkdir and writes create missing folders, reads only navigate.
+
 import (
 	"sort"
 	"strings"
 )
-
 
 type fsNode struct {
 	children map[string]*fsNode
@@ -12263,12 +12267,33 @@ func Constructor() FileSystem {
 	return FileSystem{&fsNode{children: map[string]*fsNode{}}}
 }
 
-func (fs *FileSystem) traverse(path string) *fsNode {
+func (fs *FileSystem) find(path string) (*fsNode, bool) {
+	cur := fs.root
+	if path == "/" {
+		return cur, true
+	}
+	for _, part := range strings.Split(path[1:], "/") {
+		if part == "" {
+			continue
+		}
+		child, ok := cur.children[part]
+		if !ok {
+			return nil, false
+		}
+		cur = child
+	}
+	return cur, true
+}
+
+func (fs *FileSystem) ensureDir(path string) *fsNode {
 	cur := fs.root
 	if path == "/" {
 		return cur
 	}
 	for _, part := range strings.Split(path[1:], "/") {
+		if part == "" {
+			continue
+		}
 		if _, ok := cur.children[part]; !ok {
 			cur.children[part] = &fsNode{children: map[string]*fsNode{}}
 		}
@@ -12278,9 +12303,13 @@ func (fs *FileSystem) traverse(path string) *fsNode {
 }
 
 func (fs *FileSystem) Ls(path string) []string {
-	node := fs.traverse(path)
+	node, ok := fs.find(path)
+	if !ok {
+		return nil
+	}
 	if node.isFile {
-		parts := strings.Split(path, "/")
+		clean := strings.TrimSuffix(path, "/")
+		parts := strings.Split(clean, "/")
 		return []string{parts[len(parts)-1]}
 	}
 	var res []string
@@ -12291,16 +12320,20 @@ func (fs *FileSystem) Ls(path string) []string {
 	return res
 }
 
-func (fs *FileSystem) Mkdir(path string) { fs.traverse(path) }
+func (fs *FileSystem) Mkdir(path string) { fs.ensureDir(path) }
 
 func (fs *FileSystem) AddContentToFile(filePath string, content string) {
-	node := fs.traverse(filePath)
+	node := fs.ensureDir(filePath)
 	node.isFile = true
 	node.content += content
 }
 
 func (fs *FileSystem) ReadContentFromFile(filePath string) string {
-	return fs.traverse(filePath).content
+	node, ok := fs.find(filePath)
+	if !ok {
+		return ""
+	}
+	return node.content
 }
 ', true, 0),
   ('prep-design-design-parking-system', 'go', 'solution.go', 'package main
@@ -37520,7 +37553,7 @@ insert into public.quiz_questions (id, problem_id, prompt, explain, sort_order) 
   ('prep-design-amount-of-new-area-painted-each-day::complexity', 'prep-design-amount-of-new-area-painted-each-day', 'What are the time and space complexities for "Amount of New Area Painted Each Day"?', 'O(total painted). O(max coordinate). Amount Of New Area Painted Each Day', 4),
   ('prep-design-amount-of-new-area-painted-each-day::outcome', 'prep-design-amount-of-new-area-painted-each-day', 'When the run completes, what does the final step convey?', 'Day : paint [, ). Jump-pointer walk finds  newly painted cell(s). Overlaps skip via jump[i]!=r.', 5),
   ('prep-design-design-in-memory-file-system::pattern', 'prep-design-design-in-memory-file-system', 'Which approach fits "Design In-Memory File System"?', 'See Design In Memory File System pattern', 0),
-  ('prep-design-design-in-memory-file-system::state', 'prep-design-design-in-memory-file-system', 'What does the `tree` field track in the visualization state?', 'The recorder snapshots `tree` on every emit so each frame shows the algorithm mid-step.', 1),
+  ('prep-design-design-in-memory-file-system::state', 'prep-design-design-in-memory-file-system', 'What does the `tree` field track in the visualization state?', 'The recorder snapshots `tree` on every emit so each frame shows the trie mid-step along the active path.', 1),
   ('prep-design-design-parking-system::pattern', 'prep-design-design-parking-system', 'Which approach fits "Design Parking System"?', 'See Design Parking System pattern', 0),
   ('prep-design-design-parking-system::init', 'prep-design-design-parking-system', 'At the start of a run (Design Parking System), what strategy is established?', 'Parking System: slots[1..3]! track remaining big/medium/small spots. AddCar(type) decrements if available.', 1),
   ('prep-design-design-parking-system::key-step', 'prep-design-design-parking-system', 'On the "REJECT" step ( full), what happens?', 'AddCar(=): no  spots left → return false.', 2),

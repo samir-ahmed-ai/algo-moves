@@ -39,6 +39,7 @@ export function VizPanelBody({
   const View = plugin.View;
   const inVisualize = mode === 'visualize';
   const conceptCourse = isConceptCourse(item);
+  const isStatic = !!plugin.meta.static;
   const vizMeasureRef = useRef<HTMLDivElement>(null);
 
   const viewInner = (
@@ -47,19 +48,20 @@ export function VizPanelBody({
     </ErrorBoundary>
   );
 
-  const viewEl = conceptCourse ? (
-    viewInner
-  ) : (
-    <FlipFrame frameKey={player.index} resetKey={`${plugin.meta.id}:${inputId}`}>
-      {viewInner}
-    </FlipFrame>
-  );
+  const viewEl =
+    conceptCourse || isStatic ? (
+      viewInner
+    ) : (
+      <FlipFrame frameKey={player.index} resetKey={`${plugin.meta.id}:${inputId}`}>
+        {viewInner}
+      </FlipFrame>
+    );
 
   return (
     <div
       className={cn('flex flex-col', nodeText.base, inVisualize ? 'gap-0' : 'h-full min-h-0 gap-2')}
     >
-      {!inVisualize && !conceptCourse && (
+      {!inVisualize && !conceptCourse && !isStatic && (
         <MoveOrbit frames={frames} index={player.index} onSeek={player.goTo} />
       )}
       {inVisualize ? (
@@ -112,7 +114,7 @@ export function VizPanelBody({
           </div>
         </ControlsAccordion>
       )}
-      {!inVisualize && showTransport && (
+      {!inVisualize && showTransport && !isStatic && (
         <ControlsAccordion>
           <Transport />
         </ControlsAccordion>

@@ -29,7 +29,7 @@ export function TransportBar({
   vertical?: boolean;
 }) {
   const { frames, player } = useCanvasFrame();
-  const { item } = useCanvasStatic();
+  const { item, plugin } = useCanvasStatic();
   const { setTracePreviewOpen } = useWorkspace();
   const stepLabel = frames.length ? `${player.index + 1}/${frames.length}` : '0/0';
 
@@ -46,6 +46,8 @@ export function TransportBar({
         getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#061615',
     });
   }, [item.title, player.index]);
+
+  if (plugin.meta.static) return null;
 
   const transportBtns = (
     <>

@@ -16,10 +16,12 @@ import {
   lineNumberExtensions,
   mergeFormatKeymap,
   mergeReferenceReadOnly,
+  refreshRecallMergeView,
   vimExtensions,
   wrapExtensions,
 } from '@/lib/editor';
 import { CODE_SPLIT_MAX, CODE_SPLIT_MIN } from '@/lib/editor/resizeSplit';
+import { buildRecallMergeReconfigure } from '@/lib/code/recallMergeDiff';
 import { cn } from '@/lib/utils/cn';
 import { mergeEditorChrome } from './CodeMirrorEditor';
 
@@ -138,6 +140,15 @@ export function SplitCodeEditor({
   const langRef = useRef(lang);
   langRef.current = lang;
 
+  const mergeOptionsRef = useRef({
+    highlightChanges,
+    mergeGutter,
+    mergeCollapse,
+  });
+  mergeOptionsRef.current = { highlightChanges, mergeGutter, mergeCollapse };
+
+  const refreshMerge = () => refreshRecallMergeView(mergeViewRef.current, mergeOptionsRef.current);
+
   const resizeSplitOptions: UseResizeSplitOptions = {
     direction: 'horizontal',
     splitPct: splitPctProp,
@@ -161,9 +172,11 @@ export function SplitCodeEditor({
     const view = new MergeView({
       parent: hostRef.current,
       orientation: 'a-b',
-      highlightChanges: highlightChangesRef.current,
-      gutter: mergeGutterRef.current,
-      ...(mergeCollapseRef.current ? { collapseUnchanged: { margin: 3, minSize: 4 } } : {}),
+      ...buildRecallMergeReconfigure({
+        highlightChanges: highlightChangesRef.current,
+        mergeGutter: mergeGutterRef.current,
+        mergeCollapse: mergeCollapseRef.current,
+      }),
       a: {
         doc: reference,
         extensions: [
@@ -190,7 +203,7 @@ export function SplitCodeEditor({
             if (u.docChanged) {
               onDraftChangeRef.current(u.state.doc.toString());
               if (!skipDraftSyncRef.current) {
-                queueMicrotask(() => mergeViewRef.current?.reconfigure({}));
+                queueMicrotask(refreshMerge);
               }
             }
           }),
@@ -209,7 +222,7 @@ export function SplitCodeEditor({
       });
       queueMicrotask(() => {
         skipDraftSyncRef.current = false;
-        view.reconfigure({});
+        refreshMerge();
       });
     };
     if (formatBothRef) formatBothRef.current = formatBothFnRef.current;
@@ -235,6 +248,7 @@ export function SplitCodeEditor({
     if (!view) return;
     if (reference !== view.state.doc.toString()) {
       view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: reference } });
+      queueMicrotask(refreshMerge);
     }
   }, [reference]);
 
@@ -244,6 +258,7 @@ export function SplitCodeEditor({
     const editorDraft = view.state.doc.toString();
     if (draft === editorDraft) return;
     view.dispatch({ changes: { from: 0, to: editorDraft.length, insert: draft } });
+    queueMicrotask(refreshMerge);
   }, [draft]);
 
   useEffect(() => {
@@ -271,18 +286,12 @@ export function SplitCodeEditor({
     const view = mergeViewRef.current;
     if (!view) return;
     applySplitLayout(view, splitPct, showLeft);
-    const t = window.setTimeout(() => view.reconfigure({}), 0);
+    const t = window.setTimeout(refreshMerge, 0);
     return () => window.clearTimeout(t);
   }, [splitPct, showLeft]);
 
   useEffect(() => {
-    const view = mergeViewRef.current;
-    if (!view) return;
-    view.reconfigure({
-      highlightChanges,
-      gutter: mergeGutter,
-      ...(mergeCollapse ? { collapseUnchanged: { margin: 3, minSize: 4 } } : {}),
-    });
+    refreshMerge();
   }, [mergeGutter, mergeCollapse, highlightChanges]);
 
   useEffect(() => {

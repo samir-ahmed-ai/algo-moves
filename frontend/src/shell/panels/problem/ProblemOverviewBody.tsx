@@ -5,7 +5,6 @@ import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { ProblemPanelBody } from './ProblemPanelBody';
 import { OverviewContentColumn, OverviewProblemColumn } from './overviewColumns';
 import { INSPECTOR_TABS, StudioInspectorRail, StudioPanelDock } from './StudioInspectorRail';
-import { StudioArcRail } from './StudioArcRail';
 import { StudioNextFooter } from './StudioNextFooter';
 import { StudioSplitLayout } from './studioSplitLayout';
 import { useOverviewView } from './useOverviewView';
@@ -51,23 +50,10 @@ export function ProblemOverviewBody({
   const onRecallFirst = canToggle && view === 'animate';
   const footerLabel = onRecallFirst ? 'Recall' : nextLabel;
   const handleFooterNext = onRecallFirst ? () => setView('recall') : onNext;
-  const overviewStepCount = (hasAnimation ? 1 : 0) + (hasSource ? 1 : 0) + (nextLabel ? 1 : 0);
-  const showArcRail = overviewStepCount >= 2;
-
   useStudioNextShortcut(handleFooterNext, onRecallFirst ? undefined : onNextAll);
 
   const footer = (
     <StudioNextFooter
-      arcRail={
-        showArcRail ? (
-          <StudioArcRail
-            view={view}
-            canAnimate={hasAnimation}
-            canRecall={hasSource}
-            nextLabel={nextLabel}
-          />
-        ) : undefined
-      }
       nextLabel={footerLabel}
       onNext={handleFooterNext}
       nextAllLabel={onRecallFirst ? undefined : nextAllLabel}

@@ -5,6 +5,8 @@ import { withInspectorNotes } from '../_shared/withInspectorNotes';
 import { prepCodePieces } from './prepCodePieces';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from './prepScene';
 import { resolvePrepSimulator } from './prepSimulators';
+import { DesignFlow } from './prepSimulators/designDiagrams/DesignFlow';
+import { getDesignDiagram } from './prepSimulators/designDiagrams/registry';
 import { defaultPrepQuiz } from './prepQuiz';
 import { PROBLEM_PORTS } from './languagePorts';
 import type { PrepProblem } from './prepTypes';
@@ -44,6 +46,27 @@ export function makePrepPlugin(p: PrepProblem): ProblemPlugin<any, any> {
   const fallbackQuiz = defaultPrepQuiz(p);
 
   const sim = resolvePrepSimulator(p.id);
+
+  const designSpec = p.topic === 'design' ? getDesignDiagram(p.id) : undefined;
+  if (designSpec) {
+    return definePlugin<any, any>({
+      meta: { ...meta, static: true },
+      inputs: [{ id: 'design', label: 'Design', value: null }],
+      record: () => [
+        {
+          move: { type: 'DESIGN', note: p.title, caption: designSpec.caption ?? '' },
+          state: {},
+        },
+      ],
+      View: () => <DesignFlow spec={designSpec} />,
+      Inspector: withNotes(SceneInspector, p),
+      verdict: () => ({ ok: true, label: p.difficulty.toLowerCase() }),
+      code,
+      extraCode,
+      quiz: sim?.practice?.quiz ?? fallbackQuiz,
+      codePieces: sim?.practice?.codePieces ?? codePieces,
+    });
+  }
 
   if (sim) {
     const verdict = sim.verdict ?? (() => ({ ok: true, label: p.difficulty.toLowerCase() }));

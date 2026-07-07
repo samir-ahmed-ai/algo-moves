@@ -33,6 +33,12 @@ export interface PluginMeta {
   tags: string[];
   source?: string;
   summary: string;
+  /**
+   * Static plugins render a single frame-independent view (e.g. a design flow
+   * diagram) with no meaningful timeline. Transport / playback controls are
+   * hidden and autoplay is skipped when this is set.
+   */
+  static?: boolean;
 }
 
 export interface PluginViewProps<S = unknown> {

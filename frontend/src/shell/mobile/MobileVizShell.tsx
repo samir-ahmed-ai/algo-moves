@@ -31,6 +31,7 @@ export function MobileVizShell({
 
   useEffect(() => {
     if (!hasFrames) return;
+    if (plugin.meta.static) return;
     if (baseFrames.length > 1 && !player.isPlaying) player.togglePlay();
   }, [plugin.meta.id]);
 
@@ -73,96 +74,98 @@ export function MobileVizShell({
         </VizFitBox>
       </div>
 
-      <div
-        className="mobile-viz-transport mt-2 shrink-0 rounded-2xl border border-edge bg-panel px-3 py-2"
-        data-noswipe
-      >
-        <div className="flex min-w-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={player.prev}
-            disabled={!hasFrames || !hasPrev}
-            className={btn}
-            aria-label="Previous step"
-          >
-            <SkipBack className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={player.togglePlay}
-            className={cn(
-              btn,
-              !player.isPlaying &&
-                'bg-accent text-white enabled:hover:bg-accent enabled:hover:text-white',
-            )}
-            aria-label={player.isPlaying ? 'Pause' : 'Play'}
-          >
-            {player.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </button>
-          <button
-            type="button"
-            onClick={player.next}
-            disabled={!hasFrames || !hasNext}
-            className={btn}
-            aria-label="Next step"
-          >
-            <SkipForward className="h-4 w-4" />
-          </button>
-          <div className="ml-auto flex items-center gap-1.5">
-            <label
-              className="flex items-center gap-1 text-[length:var(--fs-tight)] text-ink3"
-              title="Playback speed"
-            >
-              <span className="font-mono tabular-nums">{player.speed.toFixed(1)}×</span>
-              <input
-                type="range"
-                min={0.25}
-                max={4}
-                step={0.25}
-                value={player.speed}
-                onChange={(e) => player.setSpeed(Number(e.target.value))}
-                className="h-1 w-14 cursor-pointer accent-accent"
-                aria-label="Playback speed"
-              />
-            </label>
-            <span
-              className={cn(
-                'mobile-viz-chip',
-                isAtEnd ? 'text-good' : player.isPlaying ? 'text-accent' : 'text-ink3',
-              )}
-            >
-              {stepLabel}
-            </span>
+      {!plugin.meta.static && (
+        <div
+          className="mobile-viz-transport mt-2 shrink-0 rounded-2xl border border-edge bg-panel px-3 py-2"
+          data-noswipe
+        >
+          <div className="flex min-w-0 items-center gap-1">
             <button
               type="button"
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-panel2/80 text-ink3 transition-colors hover:bg-panel2"
-              onClick={player.reset}
-              aria-label="Replay from start"
+              onClick={player.prev}
+              disabled={!hasFrames || !hasPrev}
+              className={btn}
+              aria-label="Previous step"
             >
-              <RotateCcw className="h-3.5 w-3.5" />
+              <SkipBack className="h-4 w-4" />
             </button>
+            <button
+              type="button"
+              onClick={player.togglePlay}
+              className={cn(
+                btn,
+                !player.isPlaying &&
+                  'bg-accent text-white enabled:hover:bg-accent enabled:hover:text-white',
+              )}
+              aria-label={player.isPlaying ? 'Pause' : 'Play'}
+            >
+              {player.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={player.next}
+              disabled={!hasFrames || !hasNext}
+              className={btn}
+              aria-label="Next step"
+            >
+              <SkipForward className="h-4 w-4" />
+            </button>
+            <div className="ml-auto flex items-center gap-1.5">
+              <label
+                className="flex items-center gap-1 text-[length:var(--fs-tight)] text-ink3"
+                title="Playback speed"
+              >
+                <span className="font-mono tabular-nums">{player.speed.toFixed(1)}×</span>
+                <input
+                  type="range"
+                  min={0.25}
+                  max={4}
+                  step={0.25}
+                  value={player.speed}
+                  onChange={(e) => player.setSpeed(Number(e.target.value))}
+                  className="h-1 w-14 cursor-pointer accent-accent"
+                  aria-label="Playback speed"
+                />
+              </label>
+              <span
+                className={cn(
+                  'mobile-viz-chip',
+                  isAtEnd ? 'text-good' : player.isPlaying ? 'text-accent' : 'text-ink3',
+                )}
+              >
+                {stepLabel}
+              </span>
+              <button
+                type="button"
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-panel2/80 text-ink3 transition-colors hover:bg-panel2"
+                onClick={player.reset}
+                aria-label="Replay from start"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
+          <input
+            type="range"
+            min={0}
+            max={Math.max(0, player.total - 1)}
+            value={player.index}
+            onChange={(e) => player.goTo(Number(e.target.value))}
+            disabled={!hasFrames}
+            className="mobile-viz-slider nodrag mt-2 h-1 w-full cursor-pointer accent-accent"
+            aria-label="Replay step"
+          />
+          {anyCaption && (
+            <p
+              className="mobile-viz-caption mt-2"
+              key={`${player.index}-${frame?.move?.type ?? 'frame'}`}
+              title={caption || undefined}
+            >
+              {caption || '\u00a0'}
+            </p>
+          )}
         </div>
-        <input
-          type="range"
-          min={0}
-          max={Math.max(0, player.total - 1)}
-          value={player.index}
-          onChange={(e) => player.goTo(Number(e.target.value))}
-          disabled={!hasFrames}
-          className="mobile-viz-slider nodrag mt-2 h-1 w-full cursor-pointer accent-accent"
-          aria-label="Replay step"
-        />
-        {anyCaption && (
-          <p
-            className="mobile-viz-caption mt-2"
-            key={`${player.index}-${frame?.move?.type ?? 'frame'}`}
-            title={caption || undefined}
-          >
-            {caption || '\u00a0'}
-          </p>
-        )}
-      </div>
+      )}
     </div>
   );
 }
